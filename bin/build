@@ -1,0 +1,58 @@
+#!/usr/bin/env node
+
+var arguments = process.argv.splice(2);
+var manifestFile = arguments[0];
+var targetFile = arguments[1];
+var rootPath = arguments[2];
+var requiredFiles = arguments.splice(3);
+
+if (!manifestFile) {
+    console.error('No manifest file provided.');
+    return;
+}
+if (!targetFile) {
+    console.error('No target file provided.');
+    return;
+}
+if (!rootPath) {
+    console.error('No root path provided.');
+    return;
+}
+if (!requiredFiles.length > 0) {
+    console.error('No required file provided.');
+    return;
+}
+
+// Compression function
+var compressor = require('yuicompressor');
+var compressFunc = function (error, stdout, stderr) {
+    if (stdout) console.error('stdout: ' + stdout);
+    if (stderr) console.error('stderr: ' + stderr);
+    if (error) console.error('exec error: ' + error);
+    
+    // Compress file
+    compressor.compress(targetFile, {
+        charset: 'utf8', type: 'js'
+    }, function(err, data, extra) {
+        if (err) {
+            // An error occured
+            console.error(err);
+        } else {
+            // The compressed data.
+            console.log(data);
+        }
+        
+        // Warnings
+        if (extra) console.error(extra);
+    });
+};
+
+// jsbuild to combine files
+// -P option removes the Package system from JS.Class
+var exec = require('child_process').exec;
+var child = exec(
+    'jsbuild -m ' + manifestFile + ' -P -r ' + rootPath + ' ' + requiredFiles.join(' ') + ' > ' + targetFile,
+    compressFunc
+);
+
+

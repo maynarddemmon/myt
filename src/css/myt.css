@@ -1,0 +1,4 @@
+html,body{height:100%;margin:0px;padding:0px;border:0px none;}
+input,textarea{margin:0px;padding:1px;border:0px none;}
+select{margin:0px;}
+input,textarea,select{box-sizing:border-box;-moz-box-sizing:border-box;}

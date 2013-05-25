@@ -1,0 +1,63 @@
+<!doctype html><html><head>
+<title>Myt Framework Unit Tests : Runtime Src Loading</title>
+<link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.11.0.css"/>
+<script src="http://code.jquery.com/qunit/qunit-1.11.0.js"></script>
+<link rel="stylesheet" href="../css/myt.css"/>
+<script src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
+<script>var ROOT = '../js/';</script>
+<script src="../js/boilerplate.js"></script>
+<script src="../js/jsclass/min/loader-browser.js"></script>
+<script src="../js/myt/manifest.js"></script>
+</head>
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+
+<!-- FIXME: insert these divs as part of the tests themselves. -->
+<div id="appDiv" style="position:absolute;"></div>
+<div id="tooltipDiv" style="position:absolute;"></div>
+
+<script>
+    function loadScript(src, callback) {
+        // Prevent reloading the same script
+        if (!this._loadedScripts) this._loadedScripts = {};
+        if (this._loadedScripts[src]) {
+            console.warn("script already loaded for src", src);
+            return;
+        }
+        this._loadedScripts[src] = true;
+        
+        var s = document.createElement('script');
+        s.type = 'text/javascript';
+        s.src = src + '?cacheBust=' + (new Date()).getTime();
+        if (callback) {
+            var r = false;
+            s.onload = s.onreadystatechange = function() {
+                if (!r && (!this.readyState || this.readyState == 'complete')) {
+                    r = true; // Prevent refiring callback
+                    callback();
+                }
+            };
+        }
+        var t = document.getElementsByTagName('script')[0];
+        t.parentNode.insertBefore(s, t);
+    }
+    
+    JS.require('myt.all', function() {
+        // Run tests after source has been loaded
+        this.loadScript('tests/shim/test-BrowserDetect.js');
+        this.loadScript('tests/shim/test-JSON.js');
+        this.loadScript('tests/shim/test-Object.keys.js');
+        
+        this.loadScript('tests/util/test-Cookie.js');
+        this.loadScript('tests/util/test-Geometry.js');
+        
+        this.loadScript('tests/core/test-ClassSystem.js');
+        this.loadScript('tests/core/test-Node.js');
+        this.loadScript('tests/core/test-Node_placement.js');
+        this.loadScript('tests/core/test-Observable.js');
+        this.loadScript('tests/core/test-Observer.js');
+        this.loadScript('tests/core/test-ThresholdCounter.js');
+    });
+</script>
+</body></html>

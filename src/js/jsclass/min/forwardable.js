@@ -1,0 +1,2 @@
+(function(a){var b=(typeof exports==='object'),c=(typeof JS==='undefined')?require('./core'):JS;if(b)exports.JS=exports;a(c,b?exports:c)})(function(e,g){'use strict';var h=new e.Module('Forwardable',{defineDelegator:function(c,f,d,i){d=d||f;this.define(d,function(){var a=this[c],b=a[f];return(typeof b==='function')?b.apply(a,arguments):b},{_0:i!==false})},defineDelegators:function(){var a=e.array(arguments),b=a.shift(),c=a.length;while(c--)this.defineDelegator(b,a[c],a[c],false);this.resolve()}});g.Forwardable=h});
+//@ sourceMappingURL=forwardable.js.map

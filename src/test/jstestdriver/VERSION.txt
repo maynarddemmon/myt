@@ -1,0 +1,7 @@
+JsTestDriver v1.3.5
+
+equiv.js v1.0.2
+    Found at: http://code.google.com/p/js-test-driver/source/browse/JsTestDriver/contrib/qunit/src/equiv.js
+    
+QUnitAdapter.js
+    Found at: https://github.com/exnor/QUnit-to-JsTestDriver-adapter
