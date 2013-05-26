@@ -79,12 +79,6 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'base/Canvas.js').provides('myt.Canvas').requires('myt.View');
     file(MYT_COMPONENT_ROOT + 'base/Image.js' ).provides('myt.Image' ).requires('myt.ImageSupport');
     
-    // Component : Behavior
-    file(MYT_COMPONENT_ROOT + 'behavior/ActivateByKey.js').provides('myt.ActivateByKey').requires('myt.KeyObservable','myt.FocusObservable');
-    file(MYT_COMPONENT_ROOT + 'behavior/Disableable.js'  ).provides('myt.Disableable'  ).requires('myt');
-    file(MYT_COMPONENT_ROOT + 'behavior/Draggable.js'    ).provides('myt.Draggable'    ).requires('myt.global.mouse','myt.global.dragManager');
-    file(MYT_COMPONENT_ROOT + 'behavior/OverDown.js'     ).provides('myt.OverDown'     ).requires('myt.Disableable','myt.global.mouse','myt.MouseObservable');
-    
     // Component : Sizing
     file(MYT_COMPONENT_ROOT + 'sizing/SizeWidthToDom.js'    ).provides('myt.SizeWidthToDom'    ).requires('myt.View');
     file(MYT_COMPONENT_ROOT + 'sizing/SizeHeightToDom.js'   ).provides('myt.SizeHeightToDom'   ).requires('myt.View');
@@ -104,64 +98,19 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'util/Callback.js'    ).provides('myt.Callback'    ).requires('myt');
     file(MYT_COMPONENT_ROOT + 'util/StateMachine.js').provides('myt.StateMachine').requires('myt.Node');
     
-    // Component : Model
-    file(MYT_COMPONENT_ROOT + 'model/BooleanAttributeGroupMembership.js').provides('myt.BooleanAttributeGroupMembership').requires('myt.Node');
-    file(MYT_COMPONENT_ROOT + 'model/BooleanAttributeGroup.js'          ).provides('myt.BooleanAttributeGroup'          ).requires('myt.BooleanAttributeGroupMembership');
-    
     // Component : IO
     file(MYT_COMPONENT_ROOT + 'io/Ajax.js'  ).provides('myt.Ajax').requires('myt.Node');
     
     file(MYT_COMPONENT_ROOT + 'timer/Timer.js'          ).provides('myt.Timer'          ).requires('myt.Callback');
     file(MYT_COMPONENT_ROOT + 'timer/RepeatableTimer.js').provides('myt.RepeatableTimer').requires('myt.Timer');
     
-    file(MYT_COMPONENT_ROOT + 'button/ButtonMixin.js').provides('myt.ButtonMixin').requires('myt.OverDown','myt.ActivateByKey','myt.Disableable');
-    file(MYT_COMPONENT_ROOT + 'button/Button.js'     ).provides('myt.Button'     ).requires('myt.View','myt.ButtonMixin');
-    
-    file(MYT_COMPONENT_ROOT + 'panel/ThreePanel.js'          ).provides('myt.ThreePanel'          ).requires('myt.View','myt.Image','myt.ResizeLayout','myt.SizeToChildren');
-    file(MYT_COMPONENT_ROOT + 'panel/HorizontalThreePanel.js').provides('myt.HorizontalThreePanel').requires('myt.View','myt.Image','myt.ResizeLayout');
-    file(MYT_COMPONENT_ROOT + 'panel/VerticalThreePanel.js'  ).provides('myt.VerticalThreePanel'  ).requires('myt.View','myt.Image','myt.ResizeLayout');
-    file(MYT_COMPONENT_ROOT + 'panel/BaseMouseablePanel.js'  ).provides('myt.BaseMouseablePanel'  ).requires('myt.Disableable','myt.OverDown','myt.ActivateByKey');
-    file(MYT_COMPONENT_ROOT + 'panel/MouseableH3Panel.js'    ).provides('myt.MouseableH3Panel'    ).requires('myt.BaseMouseablePanel','myt.HorizontalThreePanel');
-    file(MYT_COMPONENT_ROOT + 'panel/MouseableV3Panel.js'    ).provides('myt.MouseableV3Panel'    ).requires('myt.BaseMouseablePanel','myt.VerticalThreePanel');
-    
-    file(MYT_COMPONENT_ROOT + 'imagebutton/BaseImageButton.js').provides('myt.BaseImageButton').requires('myt.MouseableH3Panel');
-    file(MYT_COMPONENT_ROOT + 'imagebutton/ImageButton.js'    ).provides('myt.ImageButton'    ).requires('myt.BaseImageButton','myt.TooltipMixin');
-    
-    file(MYT_COMPONENT_ROOT + 'tooltip/BaseTooltip.js' ).provides('myt.BaseTooltip' ).requires('myt.RootView');
-    file(MYT_COMPONENT_ROOT + 'tooltip/Tooltip.js'     ).provides('myt.Tooltip'     ).requires('myt.Canvas','myt.BaseTooltip');
-    file(MYT_COMPONENT_ROOT + 'tooltip/TooltipMixin.js').provides('myt.TooltipMixin').requires('myt.global','myt.Tooltip');
-    
-    file(MYT_COMPONENT_ROOT + 'drawingroutine/DrawingRoutine.js').provides('myt.DrawingRoutine').requires('myt');
-    
-    file(MYT_COMPONENT_ROOT + 'listview/AbstractListViewItem.js'      ).provides('myt.AbstractListViewItem'      ).requires('myt.Disableable','myt.OverDown','myt.View');
-    file(MYT_COMPONENT_ROOT + 'listview/AbstractListView.js'          ).provides('myt.AbstractListView'          ).requires('myt.AbstractListViewItem');
-    file(MYT_COMPONENT_ROOT + 'listview/SelectableAbstractListView.js').provides('myt.SelectableAbstractListView').requires('myt.AbstractListView');
-    file(MYT_COMPONENT_ROOT + 'listview/ListViewDisplayMixin.js'      ).provides('myt.ListViewDisplayMixin'      ).requires('myt.Canvas','myt.SizeToChildren','myt.SpacedLayout');
-    file(MYT_COMPONENT_ROOT + 'listview/simple/SimpleListViewItem.js' ).provides('myt.SimpleListViewItem'        ).requires('myt.AbstractListViewItem','myt.SizeToChildren');
-    file(MYT_COMPONENT_ROOT + 'listview/simple/SimpleListView.js'     ).provides('myt.SimpleListView'            ).requires('myt.ListViewDisplayMixin','myt.SelectableAbstractListView','myt.SimpleListViewItem');
-    
-    file(MYT_COMPONENT_ROOT + 'form/InputObservable.js'  ).provides('myt.InputObservable'  ).requires('myt.DomObservable');
-    file(MYT_COMPONENT_ROOT + 'form/Input.js'            ).provides('myt.Input'            ).requires('myt.View','myt.InputObservable','myt.Disableable');
-    file(MYT_COMPONENT_ROOT + 'form/BaseInputText.js'    ).provides('myt.BaseInputText'    ).requires('myt.Input','myt.TextSupport');
-    file(MYT_COMPONENT_ROOT + 'form/InputText.js'        ).provides('myt.InputText'        ).requires('myt.BaseInputText');
-    file(MYT_COMPONENT_ROOT + 'form/InputTextArea.js'    ).provides('myt.InputTextArea'    ).requires('myt.BaseInputText');
-    file(MYT_COMPONENT_ROOT + 'form/InputCheckbox.js'    ).provides('myt.InputCheckbox'    ).requires('myt.Input','myt.SizeToDom');
-    file(MYT_COMPONENT_ROOT + 'form/InputRadio.js'       ).provides('myt.InputRadio'       ).requires('myt.Input','myt.SizeToDom');
-    file(MYT_COMPONENT_ROOT + 'form/InputSelect.js'      ).provides('myt.InputSelect'      ).requires('myt.Input','myt.SizeToDom');
-    file(MYT_COMPONENT_ROOT + 'form/InputSelectOption.js').provides('myt.InputSelectOption').requires('myt.InputSelect');
-    
-    // TODO: remove
-    file(MYT_COMPONENT_ROOT + 'Window.js').provides('myt.Window').requires('myt.ImageSupport','myt.Draggable');
-    
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
         'myt.global.keys',
         'myt.Text', 'myt.Markup', 'myt.SizeWidthToDom', 'myt.SizeHeightToDom',
         'myt.Animator', 'myt.Callback', 'myt.RepeatableTimer', 
-        'myt.SimpleListView', 'myt.Tooltip', 'myt.Cookie', 'myt.ImageButton',
-        'myt.Draggable', 'myt.Button', 'myt.Window', 'myt.WrappingLayout',
+        'myt.Cookie', 'myt.WrappingLayout',
         'myt.SizeToWindowWidth', 'myt.SizeToWindowHeight',
-        'myt.TransformSupport', 'myt.InputRadio', 'myt.InputSelectOption', 'myt.InputText', 'myt.InputTextArea', 'myt.InputCheckbox',
-        'myt.BooleanAttributeGroup', 'myt.StateMachine', 'myt.URI', 'myt.Ajax'
+        'myt.TransformSupport', 'myt.StateMachine', 'myt.URI', 'myt.Ajax'
     );
 }});
