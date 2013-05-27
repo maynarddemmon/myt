@@ -1,0 +1,60 @@
+<!doctype html><html><head>
+<title>Myt Framework : Buttons Example</title>
+<link rel="stylesheet" href="../src/css/myt.css"/>
+<script src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
+<script src="../src/js/boilerplate.js"></script>
+<script src="../src/js/jsclass/min/loader-browser.js"></script>
+<script src="../src/js/myt/manifest.js"></script>
+</head><body>
+
+<div id="appDiv" style="position:absolute;"></div>
+
+<script>
+    JS.require('myt.all', function() {this.init();});
+    
+    function init() {
+        var appDiv = document.getElementById("appDiv");
+        var rootView = new myt.View(appDiv, {x:10, y:10, width:600, height:400, bgColor:'#cccccc'}, [myt.RootView]);
+        
+        var BtnClass = new JS.Class('BtnClass', myt.View, {
+            include: [myt.Button, {
+                doActivated: function() {
+                    console.log("activated", this.name);
+                },
+                drawDisabledState: function() {
+                    this.setBgColor('#999999');
+                },
+                drawHoverState: function() {
+                    this.setBgColor('#ff0000');
+                },
+                drawActiveState: function() {
+                    this.setBgColor('#990000');
+                },
+                drawReadyState: function() {
+                    this.setBgColor('#cc0000');
+                }
+            }]
+        });
+        
+        new myt.SpacedLayout(rootView, {axis:'x', spacing:2, inset:5});
+        
+        var btn1 = new BtnClass(rootView, {name:'one', width:50, height:20});
+        var btn2 = new BtnClass(rootView, {name:'two', width:50, height:20});
+        var btn3 = new BtnClass(rootView, {name:'three', width:50, height:20, disabled:true});
+        var btn4 = new BtnClass(rootView, {name:'four', width:50, height:20}, [
+            {
+                doMouseDown: function(event) {
+                    this.callSuper(event);
+                    this.setDisabled(true);
+                },
+                
+                doActivationKeyDown: function(key) {
+                    this.callSuper(key);
+                    this.setDisabled(true);
+                }
+            }
+        ]);
+        var btn5 = new BtnClass(rootView, {name:'five', width:50, height:20});
+    }
+</script>
+</body></html>

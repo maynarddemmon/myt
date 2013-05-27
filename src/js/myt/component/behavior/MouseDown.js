@@ -1,6 +1,7 @@
 /** Provides a 'mouseDown' attribute that tracks mouse up/down state.
     
-    Requires MouseOver, Disableable and MouseObservable super mixins.
+    Requires: myt.Activateable, myt.MouseOver, myt.Disableable and 
+        myt.MouseObservable super mixins.
     
     Attributes:
         mouseDown:boolean */
@@ -22,20 +23,23 @@ myt.MouseDown = new JS.Module('MouseDown', {
         if (this.mouseDown === v) return;
         this.mouseDown = v;
         // No event needed
-        if (this.inited) this.updateUI();
+        if (this.inited) {
+            if (this.isFocusable()) this.focus(true);
+            this.updateUI();
+        }
     },
     
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.MouseOver */
-    doMouseOver: function(e) {
-        this.callSuper(e);
+    doMouseOver: function(event) {
+        this.callSuper(event);
         if (this.mouseDown) this.detachFromDom(myt.global.mouse, 'doMouseUp', 'mouseup', true);
     },
     
     /** @overrides myt.MouseOver */
-    doMouseOut: function(e) {
-        this.callSuper(e);
+    doMouseOut: function(event) {
+        this.callSuper(event);
         if (!this.disabled && this.mouseDown) {
             this.attachToDom(myt.global.mouse, 'doMouseUp', 'mouseup', true);
         }
@@ -43,22 +47,25 @@ myt.MouseDown = new JS.Module('MouseDown', {
     
     /** Called when the mouse is down on this view. Subclasses must call super.
         @returns void */
-    doMouseDown: function(e) {
+    doMouseDown: function(event) {
         if (!this.disabled) this.setMouseDown(true);
     },
     
     /** Called when the mouse is up on this view. Subclasses must call super.
         @returns void */
-    doMouseUp: function(e) {
+    doMouseUp: function(event) {
         if (!this.mouseOver) this.detachFromDom(myt.global.mouse, 'doMouseUp', 'mouseup', true);
         
         if (!this.disabled && this.mouseDown) {
             this.setMouseDown(false);
-            if (this.mouseOver) this.doMouseUpInside(e);
+            if (this.mouseOver) this.doMouseUpInside(event);
         }
     },
     
-    /** Called when the mouse is up and we are still over the view.
+    /** Called when the mouse is up and we are still over the view. Executes
+        the 'doActivated' method by default.
         @returns void */
-    doMouseUpInside: function(e) {}
+    doMouseUpInside: function(event) {
+        this.doActivated();
+    }
 });

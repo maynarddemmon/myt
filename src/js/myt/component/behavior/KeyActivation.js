@@ -1,10 +1,15 @@
 /** This mixin provides keyboard handling to "activate" the component when a 
-    key is pressed down or up.
+    key is pressed down or up. By default, when a keyup event occurs for
+    an activation key and this view is not disabled, the 'doActivated' method
+    will get called.
+    
+    Requires: myt.Disableable, myt.KeyObservable and 
+        myt.FocusObservable super mixins.
     
     Attributes:
         activateKeyDown:number the keycode of the activation key that is
             currently down. This will be -1 when no key is down.
-    */
+*/
 myt.KeyActivation = new JS.Module('KeyActivation', {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
@@ -46,6 +51,8 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
     
     // Methods /////////////////////////////////////////////////////////////////
     __handleKeyDown: function(event) {
+        if (this.disabled) return;
+        
         if (this.activateKeyDown === -1) {
             var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
             var keys = this.activationKeys;
@@ -62,6 +69,8 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
     },
     
     __handleKeyPress: function(event) {
+        if (this.disabled) return;
+        
         var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
         if (this.activateKeyDown === keyCode) {
             var keys = this.activationKeys;
@@ -76,6 +85,8 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
     },
     
     __handleKeyUp: function(event) {
+        if (this.disabled) return;
+        
         var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
         if (this.activateKeyDown === keyCode) {
             var keys = this.activationKeys;
@@ -92,6 +103,8 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
     },
     
     __handleBlur: function(event) {
+        if (this.disabled) return;
+        
         if (this.activateKeyDown !== -1) {
             var keyThatWasDown = this.activateKeyDown;
             this.activateKeyDown = -1;
@@ -104,10 +117,13 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         @returns void */
     doActivationKeyDown: function(key) {},
     
-    /** Called when an activation key is release up.
+    /** Called when an activation key is release up. This executes the
+        'doActivated' method by default. 
         @param key:number the keycode that is up.
         @returns void */
-    doActivationKeyUp: function(key) {},
+    doActivationKeyUp: function(key) {
+        this.doActivated();
+    },
     
     /** Called when focus is lost while an activation key is down.
         @param key:number the keycode that is down.

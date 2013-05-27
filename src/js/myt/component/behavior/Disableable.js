@@ -20,6 +20,11 @@ myt.Disableable = new JS.Module('Disableable', {
         if (this.disabled === v) return;
         this.disabled = v;
         if (this.inited) this.fireNewEvent('disabled', v);
+        
+        // Give away focus if we become disabled and this instance is
+        // a FocusObservable
+        if (v && this.giveAwayFocus) this.giveAwayFocus();
+        
         this.doDisabled();
     },
     

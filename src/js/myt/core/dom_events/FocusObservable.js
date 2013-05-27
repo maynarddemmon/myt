@@ -52,15 +52,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
     
     /** @overrides myt.View */
     destroyBeforeOrphaning: function() {
-        // Try to select the next focusable element when we get destroyed.
-        if (this.focused) {
-            myt.global.focus.next();
-            
-            // If focus loops back around to ourself make sure we don't keep
-            // the focus.
-            if (this.focused) this.blur();
-        }
-        
+        this.giveAwayFocus();
         this.callSuper();
     },
     
@@ -111,6 +103,20 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** Gives the focus to the next focusable element or, if nothing else
+        is focusable, blurs away from this element.
+        @returns void */
+    giveAwayFocus: function() {
+        // Try to select the next focusable element when we get destroyed.
+        if (this.focused) {
+            myt.global.focus.next();
+            
+            // If focus loops back around to ourself make sure we don't keep
+            // the focus.
+            if (this.focused) this.blur();
+        }
+    },
+    
     /** Tests if this view is currently focusable.
         @returns boolean True if this view is visible, enabled and focusable,
             false otherwise. */
