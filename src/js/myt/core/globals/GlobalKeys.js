@@ -24,6 +24,7 @@
         pause/break       19
         caps lock         20
         escape            27
+        spacebar          32
         page up           33
         page down         34
         end               35

@@ -7,14 +7,26 @@
     
     Events:
         focused:object Fired when this view gets focus. The value is this view.
-        
+        focus:object Fired when this view gets focus. The value is a dom
+            focus event.
+        blur:object Fired when this view loses focus. The value is a dom
+            focus event.
+    
     Attributes:
         focused:boolean Indicates if this view has focus or not.
         focusable:boolean Indicates if this view can have focus or not.
         focusEmbellishment:boolean Indicates if the focus embellishment should
             be shown for this view or not when it has focus.
-    */
-// TODO: fire focus and blur events rather than a focused event.
+    
+    Virtual Methods:
+        getNextFocus() Implement this method to return the next view that 
+            should have focus. If null is returned or the method is not 
+            implemented, normal dom traversal will occur.
+        getPrevFocus() Implement this method to return the prev view that 
+            should have focus. If null is returned or the method is not 
+            implemented, normal dom traversal will occur.
+*/
+// TODO: fire focus and blur events rather than a focused event?
 myt.FocusObservable = new JS.Module('FocusObservable', {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
@@ -111,21 +123,19 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
     
     /** Calling this method will set focus onto this view if it is focusable.
         @param noScroll:boolean (optional) if true is provided no auto-scrolling
-            will occure when focus is set.
+            will occur when focus is set.
         @returns void */
     focus: function(noScroll) {
-        if (!this.isFocusable()) return;
-        
-        if (noScroll) {
-            // Record current scroll position
-            var x = window.scrollX, y = window.scrollY;
-            
-            this.domElement.focus();
-            
-            // Scroll back to original location.
-            window.scrollTo(x, y);
-        } else {
-            this.domElement.focus();
+        if (this.isFocusable()) {
+            if (noScroll) {
+                // Record current scroll position and then scroll back after
+                // doing focus since focus may adjust scroll position.
+                var x = window.scrollX, y = window.scrollY;
+                this.domElement.focus();
+                window.scrollTo(x, y);
+            } else {
+                this.domElement.focus();
+            }
         }
     },
     
@@ -180,11 +190,6 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
         // Mozilla and Webkit
         this.deStyle.outlineStyle = 'none';
     },
-    
-    /** Virtual API Methods: getNextFocus(), getPrevFocus();
-        Implement this method to return the next/prev view that should have 
-        focus. If null is returned or the method is not implemente, normal dom 
-        traversal will occur. */
     
     /** @overrides myt.DomObservable */
     createDomMethodRef: function(domObserver, methodName, type) {

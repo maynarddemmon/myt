@@ -32,7 +32,7 @@ JS.Packages(function() {with(this) {
     
     // Core : Model
     var MYT_MODEL_ROOT = MYT_CORE_ROOT + 'model/';
-    file(MYT_MODEL_ROOT + 'ThresholdCounter.js').provides('myt.ThresholdCounter').requires('myt.Destructible','myt.Observable');
+    file(MYT_MODEL_ROOT + 'ThresholdCounter.js').provides('myt.ThresholdCounter').requires('myt.AccessorSupport','myt.Destructible','myt.Observable');
     
     // Core : View
     var MYT_VIEW_ROOT = MYT_CORE_ROOT + 'view/';
@@ -79,6 +79,15 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'base/Canvas.js').provides('myt.Canvas').requires('myt.View');
     file(MYT_COMPONENT_ROOT + 'base/Image.js' ).provides('myt.Image' ).requires('myt.ImageSupport');
     
+    // Component : Behavior
+    file(MYT_COMPONENT_ROOT + 'behavior/KeyActivation.js'   ).provides('myt.KeyActivation'   ).requires('myt.KeyObservable','myt.FocusObservable');
+    file(MYT_COMPONENT_ROOT + 'behavior/UpdateableUI.js'    ).provides('myt.UpdateableUI'    ).requires('myt');
+    file(MYT_COMPONENT_ROOT + 'behavior/Disableable.js'     ).provides('myt.Disableable'     ).requires('myt.UpdateableUI');
+    file(MYT_COMPONENT_ROOT + 'behavior/Draggable.js'       ).provides('myt.Draggable'       ).requires('myt.global.mouse','myt.global.dragManager','myt.Geometry');
+    file(MYT_COMPONENT_ROOT + 'behavior/MouseOver.js'       ).provides('myt.MouseOver'       ).requires('myt.Disableable','myt.global.mouse','myt.MouseObservable');
+    file(MYT_COMPONENT_ROOT + 'behavior/MouseDown.js'       ).provides('myt.MouseDown'       ).requires('myt.MouseOver');
+    file(MYT_COMPONENT_ROOT + 'behavior/MouseOverAndDown.js').provides('myt.MouseOverAndDown').requires('myt.MouseDown');
+    
     // Component : Sizing
     file(MYT_COMPONENT_ROOT + 'sizing/SizeWidthToDom.js'    ).provides('myt.SizeWidthToDom'    ).requires('myt.View');
     file(MYT_COMPONENT_ROOT + 'sizing/SizeHeightToDom.js'   ).provides('myt.SizeHeightToDom'   ).requires('myt.View');
@@ -101,16 +110,17 @@ JS.Packages(function() {with(this) {
     // Component : IO
     file(MYT_COMPONENT_ROOT + 'io/Ajax.js'  ).provides('myt.Ajax').requires('myt.Node');
     
+    // Component : Timer
     file(MYT_COMPONENT_ROOT + 'timer/Timer.js'          ).provides('myt.Timer'          ).requires('myt.Callback');
     file(MYT_COMPONENT_ROOT + 'timer/RepeatableTimer.js').provides('myt.RepeatableTimer').requires('myt.Timer');
     
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
+        'myt.Cookie',
         'myt.global.keys',
         'myt.Text', 'myt.Markup', 'myt.SizeWidthToDom', 'myt.SizeHeightToDom',
-        'myt.Animator', 'myt.Callback', 'myt.RepeatableTimer', 
-        'myt.Cookie', 'myt.WrappingLayout',
-        'myt.SizeToWindowWidth', 'myt.SizeToWindowHeight',
-        'myt.TransformSupport', 'myt.StateMachine', 'myt.URI', 'myt.Ajax'
+        'myt.SizeToWindowWidth', 'myt.SizeToWindowHeight', 'myt.TransformSupport', 
+        'myt.Animator', 'myt.Callback', 'myt.RepeatableTimer', 'myt.StateMachine', 'myt.URI', 'myt.Ajax', 
+        'myt.Draggable', 'myt.WrappingLayout'
     );
 }});
