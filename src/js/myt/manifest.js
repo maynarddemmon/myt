@@ -119,6 +119,23 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'button/Button.js'      ).provides('myt.Button'      ).requires('myt.UpdateableUI','myt.MouseOverAndDown','myt.KeyActivation','myt.Disableable');
     file(MYT_COMPONENT_ROOT + 'button/SimpleButton.js').provides('myt.SimpleButton').requires('myt.View','myt.Button');
     
+    // Component : Panel
+    file(MYT_COMPONENT_ROOT + 'panel/ThreePanel.js'          ).provides('myt.ThreePanel'          ).requires('myt.View','myt.Image','myt.ResizeLayout','myt.SizeToChildren');
+    file(MYT_COMPONENT_ROOT + 'panel/HorizontalThreePanel.js').provides('myt.HorizontalThreePanel').requires('myt.View','myt.Image','myt.ResizeLayout');
+    file(MYT_COMPONENT_ROOT + 'panel/VerticalThreePanel.js'  ).provides('myt.VerticalThreePanel'  ).requires('myt.View','myt.Image','myt.ResizeLayout');
+    file(MYT_COMPONENT_ROOT + 'panel/BaseMouseablePanel.js'  ).provides('myt.BaseMouseablePanel'  ).requires('myt.Button');
+    file(MYT_COMPONENT_ROOT + 'panel/MouseableH3Panel.js'    ).provides('myt.MouseableH3Panel'    ).requires('myt.BaseMouseablePanel','myt.HorizontalThreePanel');
+    file(MYT_COMPONENT_ROOT + 'panel/MouseableV3Panel.js'    ).provides('myt.MouseableV3Panel'    ).requires('myt.BaseMouseablePanel','myt.VerticalThreePanel');
+    
+    // Component : Tooltip
+    file(MYT_COMPONENT_ROOT + 'tooltip/BaseTooltip.js' ).provides('myt.BaseTooltip' ).requires('myt.RootView');
+    file(MYT_COMPONENT_ROOT + 'tooltip/Tooltip.js'     ).provides('myt.Tooltip'     ).requires('myt.Canvas','myt.BaseTooltip');
+    file(MYT_COMPONENT_ROOT + 'tooltip/TooltipMixin.js').provides('myt.TooltipMixin').requires('myt.global','myt.Tooltip');
+    
+    // Component : Image Button
+    file(MYT_COMPONENT_ROOT + 'imagebutton/BaseImageButton.js').provides('myt.BaseImageButton').requires('myt.MouseableH3Panel');
+    file(MYT_COMPONENT_ROOT + 'imagebutton/ImageButton.js'    ).provides('myt.ImageButton'    ).requires('myt.BaseImageButton','myt.TooltipMixin');
+    
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
         'myt.Cookie',
@@ -126,6 +143,6 @@ JS.Packages(function() {with(this) {
         'myt.Text', 'myt.Markup', 'myt.SizeWidthToDom', 'myt.SizeHeightToDom',
         'myt.SizeToWindowWidth', 'myt.SizeToWindowHeight', 'myt.TransformSupport', 
         'myt.Animator', 'myt.Callback', 'myt.RepeatableTimer', 'myt.StateMachine', 'myt.URI', 'myt.Ajax', 
-        'myt.Draggable', 'myt.WrappingLayout', 'myt.ResizeLayout', 'myt.SimpleButton'
+        'myt.Draggable', 'myt.WrappingLayout', 'myt.ResizeLayout', 'myt.SimpleButton', 'myt.ImageButton', 'myt.ThreePanel'
     );
 }});
