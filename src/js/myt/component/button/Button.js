@@ -43,9 +43,7 @@ myt.Button = new JS.Module('Button', {
     updateUI: function() {
         if (this.disabled) {
             this.drawDisabledState();
-        } else if (this.activateKeyDown !== -1) {
-            this.drawActiveState();
-        } else if (this.mouseDown) {
+        } else if (this.activateKeyDown !== -1 || this.mouseDown) {
             this.drawActiveState();
         } else if (this.mouseOver) {
             this.drawHoverState();

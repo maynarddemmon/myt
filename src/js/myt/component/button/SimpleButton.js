@@ -5,32 +5,32 @@ myt.SimpleButton = new JS.Class('SimpleButton', myt.View, {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        this.downColor = 'transparent';
-        this.overColor = 'transparent';
-        this.normalColor = 'transparent';
+        this.activeColor = 'transparent';
+        this.hoverColor = 'transparent';
+        this.readyColor = 'transparent';
         
         this.callSuper(parent, attrs);
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setDownColor: function(v) {
-        if (this.downColor === v) return;
-        this.downColor = v;
+    setActiveColor: function(v) {
+        if (this.activeColor === v) return;
+        this.activeColor = v;
         // No event needed
         if (this.inited) this.updateUI();
     },
     
-    setOverColor: function(v) {
-        if (this.overColor === v) return;
-        this.overColor = v;
+    setHoverColor: function(v) {
+        if (this.hoverColor === v) return;
+        this.hoverColor = v;
         // No event needed
         if (this.inited) this.updateUI();
     },
     
-    setNormalColor: function(v) {
-        if (this.normalColor === v) return;
-        this.normalColor = v;
+    setReadyColor: function(v) {
+        if (this.readyColor === v) return;
+        this.readyColor = v;
         // No event needed
         if (this.inited) this.updateUI();
     },
@@ -40,24 +40,24 @@ myt.SimpleButton = new JS.Class('SimpleButton', myt.View, {
     /** @overrides myt.Button */
     drawDisabledState: function() {
         this.setOpacity(0.5);
-        this.setBgColor(this.normalColor);
+        this.setBgColor(this.readyColor);
     },
     
     /** @overrides myt.Button */
     drawHoverState: function() {
         this.setOpacity(1);
-        this.setBgColor(this.overColor);
+        this.setBgColor(this.hoverColor);
     },
     
     /** @overrides myt.Button */
     drawActiveState: function() {
         this.setOpacity(1);
-        this.setBgColor(this.downColor);
+        this.setBgColor(this.activeColor);
     },
     
     /** @overrides myt.Button */
     drawReadyState: function() {
         this.setOpacity(1);
-        this.setBgColor(this.normalColor);
+        this.setBgColor(this.readyColor);
     }
 });

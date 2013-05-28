@@ -41,20 +41,26 @@
         var btn1 = new BtnClass(rootView, {name:'one', width:50, height:20});
         var btn2 = new BtnClass(rootView, {name:'two', width:50, height:20});
         var btn3 = new BtnClass(rootView, {name:'three', width:50, height:20, disabled:true});
-        var btn4 = new BtnClass(rootView, {name:'four', width:50, height:20}, [
-            {
-                doMouseDown: function(event) {
-                    this.callSuper(event);
-                    this.setDisabled(true);
-                },
-                
-                doActivationKeyDown: function(key) {
-                    this.callSuper(key);
-                    this.setDisabled(true);
-                }
+        var btn4 = new BtnClass(rootView, {name:'four', width:50, height:20}, [{
+            doMouseDown: function(event) {
+                this.callSuper(event);
+                this.setDisabled(true);
+            },
+            
+            doActivationKeyDown: function(key) {
+                this.callSuper(key);
+                this.setDisabled(true);
             }
-        ]);
+        }]);
         var btn5 = new BtnClass(rootView, {name:'five', width:50, height:20});
+        
+        var btn6 = new myt.SimpleButton(rootView, {
+            name:'six', width:50, height:20, activeColor:'#990000', hoverColor:'#ff0000', readyColor:'#cc0000'
+        }, [{
+            doActivated: function() {
+                console.log("activated", this.name);
+            }
+        }]);
     }
 </script>
 </body></html>
