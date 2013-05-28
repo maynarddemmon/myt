@@ -8,6 +8,7 @@
 </head><body>
 
 <div id="appDiv" style="position:absolute;"></div>
+<div id="tooltipDiv" style="position:absolute;"></div>
 
 <script>
     JS.require('myt.all', function() {this.init();});
@@ -16,11 +17,13 @@
         var appDiv = document.getElementById("appDiv");
         var rootView = new myt.View(appDiv, {x:10, y:10, width:600, height:400, bgColor:'#cccccc'}, [myt.RootView]);
         
+        var ActivatedMixin = new JS.Module('ActivatedMixin', {
+            doActivated: function() {
+                console.log("activated", this.name);
+            }
+        });
         var BtnClass = new JS.Class('BtnClass', myt.View, {
-            include: [myt.Button, {
-                doActivated: function() {
-                    console.log("activated", this.name);
-                },
+            include: [myt.Button, ActivatedMixin, {
                 drawDisabledState: function() {
                     this.setBgColor('#999999');
                 },
@@ -56,11 +59,11 @@
         
         var btn6 = new myt.SimpleButton(rootView, {
             name:'six', width:50, height:20, activeColor:'#990000', hoverColor:'#ff0000', readyColor:'#cc0000'
-        }, [{
-            doActivated: function() {
-                console.log("activated", this.name);
-            }
-        }]);
+        }, [ActivatedMixin]);
+        
+        var btn7 = new myt.ImageButton(rootView, {name:'seven', text:'foo', tooltip:'here is a tip', shrinkToFit:true}, [ActivatedMixin]);
+        var btn8 = new myt.ImageButton(rootView, {name:'eight', text:'bar', shrinkToFit:true, disabled:true}, [ActivatedMixin]);
+        var btn9 = new myt.ImageButton(rootView, {name:'nine', text:'baz', shrinkToFit:true}, [ActivatedMixin]);
     }
 </script>
 </body></html>
