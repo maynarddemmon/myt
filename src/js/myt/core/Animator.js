@@ -44,6 +44,9 @@
             default value is false.
         paused:boolean Indicates if the animation is temporarily paused. The 
             default value is false.
+        callback:function A function that gets called when the animation
+            completes. A boolean value is passed into the function and will be
+            true if the animation completed successfully or false if not.
         __loopCount:number the loop currently being run.
         __progress:number the number of millis currently used during the
             current animation loop.
@@ -57,13 +60,11 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
     /** @overrides myt.Node */
     initNode: function(parent, attrs) {
         this.duration = 1000;
-        this.relative = false;
+        this.relative = this.reverse = false;
         this.repeat = 1;
-        this.reverse = false;
         this.easingFunction = myt.Animator.easingFunctions.linear;
         
-        this.running = false;
-        this.paused = false;
+        this.running = this.paused = false;
         
         this.callSuper(parent, attrs);
         
@@ -81,7 +82,6 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         
         if (!this.paused) {
             if (v) {
-                this.doStart();
                 this.attachTo(myt.global.idle, '__update', 'idle');
             } else {
                 this.__loopCount = this.reverse ? this.repeat - 1 : 0;
@@ -153,13 +153,38 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** Puts the animator back to an initial configured state. */
     reset: function() {
+        if (this.paused) {
+            this.__temporaryFrom = false;
+            this.__loopCount = this.reverse ? this.repeat - 1 : 0;
+            this.__progress = this.reverse ? this.duration : 0;
+        }
+        
         this.setRunning(false);
         this.setPaused(false);
     },
     
-    __update: function(e) {
-        this.__advance(e.value.delta);
+    /** Puts the animator back to a default unconfigured state. */
+    clear: function() {
+        this.to = this.from = this.attribute = this.callback = undefined;
+        this.duration = 1000;
+        this.relative = this.reverse = false;
+        this.repeat = 1;
+        this.easingFunction = myt.Animator.easingFunctions.linear;
+        
+        if (this.paused) {
+            this.__temporaryFrom = false;
+            this.__loopCount = this.reverse ? this.repeat - 1 : 0;
+            this.__progress = this.reverse ? this.duration : 0;
+        }
+        
+        this.setRunning(false);
+        this.setPaused(false);
+    },
+    
+    __update: function(idleEvent) {
+        this.__advance(idleEvent.value.delta);
     },
     
     __advance: function(timeDiff) {
@@ -202,13 +227,14 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         if (!target) {
             console.log("No target found for animator.", this);
             this.setRunning(false);
+            if (this.callback) this.callback.call(this, false);
             return;
         }
         
         var attr = this.attribute;
         if (this.from == null) {
             this.__temporaryFrom = true;
-            this.from = target.get(attr);
+            this.from = this.relative ? 0 : target.get(attr);
         }
         var from = this.from;
         var attrDiff = this.to - from;
@@ -225,15 +251,13 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         if (reverse) {
             if (0 > this.__loopCount && repeat > 0) {
                 this.setRunning(false);
-                this.doStop();
-                if (this.callback) this.callback.call(this);
+                if (this.callback) this.callback.call(this, true);
                 return;
             }
         } else {
             if (this.__loopCount === repeat) {
                 this.setRunning(false);
-                this.doStop();
-                if (this.callback) this.callback.call(this);
+                if (this.callback) this.callback.call(this, true);
                 return;
             }
         }
@@ -244,15 +268,7 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
             this.__progress = reverse ? duration : 0;
             this.__advance(remainderTime);
         }
-    },
-    
-    /** Called when the animation stops.
-        @returns void */
-    doStop: function() {},
-    
-    /** Called when the animation starts.
-        @returns void */
-    doStart: function() {}
+    }
 });
 
 

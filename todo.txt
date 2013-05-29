@@ -6,7 +6,6 @@ JS.Class
 
 Myt
 
-o animator group
 o form components: file, combobox using datalist element: http://www.quackit.com/html_5/tags/html_datalist_tag.cfm
 o native form components: checkbox, radio
 o modal views

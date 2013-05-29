@@ -13,6 +13,8 @@
         parent:Node the parent of this Node.
         name:string the name of this node. Used to reference this Node from
             its parent Node.
+        __animatorPool:array An array of myt.Animator objects used by the
+            'animate' method.
 */
 myt.Node = new JS.Class('Node', {
     include: [myt.AccessorSupport, myt.Destructible, myt.Observable, myt.Constrainable],
@@ -440,44 +442,49 @@ myt.Node = new JS.Class('Node', {
     // Animation
     /** Animates an attribute using the provided parameters.
         @param attribute:string the name of the attribute to animate
+        @param from:number the target value to animate from.
         @param to:number the target value to animate to.
         @returns void. */
-    animate: function(attribute, from, to, relative, callback, duration, reverse, repeat, easingFunction) {
+    animate: function(attribute, to, from, relative, callback, duration, reverse, repeat, easingFunction) {
         var anim = this.__getAnimator();
         
         anim.attribute = attribute;
         anim.setTo(to);
-        anim.setCallback(callback);
         anim.setFrom(from);
-        anim.duration = duration === undefined ? 1000 : duration;
-        anim.relative = relative === undefined ? false : relative;
-        anim.repeat = repeat === undefined ? 1 : repeat;
-        anim.setReverse(reverse === undefined ? false : reverse);
-        anim.setEasingFunction(easingFunction === undefined ? myt.Animator.easingFunctions.linear : easingFunction);
+        if (duration != null) anim.duration = duration;
+        if (relative != null) anim.relative = relative;
+        if (repeat != null) anim.repeat = repeat;
+        if (reverse != null) anim.setReverse(reverse);
+        if (easingFunction != null) anim.setEasingFunction(easingFunction);
+        
+        // Release the animation when it completes.
+        var releaseFunc = function(success) {
+            anim.parent.__releaseAnimator(anim);
+            if (callback) callback.call(anim, success);
+        };
+        anim.setCallback(releaseFunc);
         
         anim.setRunning(true);
     },
     
+    /** Get an animator from the "pool" or create a new one.
+        @returns myt.Animator. */
     __getAnimator: function() {
-        var anims = this.__animators;
+        var anims = this.__animatorPool;
         if (!anims) this._animators = anims = [];
-        var anim;
         if (anims.length > 0) {
-            anim = anims.pop();
+            return anims.pop();
         } else {
-            anim = new myt.Animator(this, {}, [{
-                doStop: function() {
-                    this.parent.__releaseAnimator(this);
-                }
-            }]);
+            return new myt.Animator(this);
         }
-        return anim;
     },
     
+    /** Puts an animator back in the "pool" and clears it.
+        @returns void */
     __releaseAnimator: function(anim) {
-        var anims = this.__animators;
+        var anims = this.__animatorPool;
         if (!anims) this._animators = anims = [];
-        anim.reset();
+        anim.clear();
         anims.push(anim);
     }
 });

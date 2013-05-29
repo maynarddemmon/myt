@@ -42,8 +42,8 @@
         new myt.SpacedLayout(rootView, {axis:'x', spacing:2, inset:5});
         
         var btn1 = new BtnClass(rootView, {name:'one', width:50, height:20});
-        var btn2 = new BtnClass(rootView, {name:'two', width:50, height:20});
-        var btn3 = new BtnClass(rootView, {name:'three', width:50, height:20, disabled:true});
+        var btn2 = new BtnClass(rootView, {name:'two', width:50, height:20, y:100});
+        var btn3 = new BtnClass(rootView, {name:'three', width:50, height:20, disabled:true, y:25});
         var btn4 = new BtnClass(rootView, {name:'four', width:50, height:20}, [{
             doMouseDown: function(event) {
                 this.callSuper(event);
@@ -66,7 +66,7 @@
         var btn9 = new myt.ImageButton(rootView, {name:'nine', text:'baz', shrinkToFit:true}, [ActivatedMixin]);
         
         // Do some simple animation
-        btn3.animate('y', btn3.y, 100, false, function() {btn3.animate('x', 0, 50, true);});
+        btn3.animate('y', 100, undefined, false, function(success) {btn3.animate('x', 52, undefined, true);});
     }
 </script>
 </body></html>
