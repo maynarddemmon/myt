@@ -32,7 +32,7 @@ myt.MouseOver = new JS.Module('MouseOver', {
         // No event needed
         
         // Smooth out over/out events by delaying until the next idle event.
-        if (!this.__attachedToOverIdle) {
+        if (this.inited && !this.__attachedToOverIdle) {
             this.__attachedToOverIdle = true;
             this.attachTo(myt.global.idle, '__doMouseOverOnIdle', 'idle');
         }

@@ -2,7 +2,8 @@
     from the mixins included by this mixin. This mixin resolves issues that 
     arise when the various mixins are used together.
     
-    By default Button instances are focusable. */
+    By default Button instances are focusable.
+    By default Button does not show the focusEmbellishment. */
 myt.Button = new JS.Module('Button', {
     include: [
         myt.Activateable, 
@@ -17,12 +18,23 @@ myt.Button = new JS.Module('Button', {
     /** @overrides */
     initNode: function(parent, attrs) {
         if (attrs.focusable === undefined) attrs.focusable = true;
+        if (attrs.focusEmbellishment === undefined) attrs.focusEmbellishment = false;
         
         this.callSuper(parent, attrs);
+        
+        // Update the UI when focus is gained.
+        this.attachToDom(this, 'updateUI', 'focus');
     },
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** Update the UI when focus is lost.
+        @overrides myt.KeyActivation. */
+    doDomBlur: function(event) {
+        this.callSuper(event);
+        this.updateUI();
+    },
+    
     /** @overrides myt.KeyActivation. */
     doActivationKeyDown: function(key) {
         this.updateUI();
@@ -34,18 +46,13 @@ myt.Button = new JS.Module('Button', {
         this.updateUI();
     },
     
-    /** @overrides myt.KeyActivation. */
-    doActivationKeyAborted: function(key) {
-        this.updateUI();
-    },
-    
     /** @overrides myt.UpdateableUI. */
     updateUI: function() {
         if (this.disabled) {
             this.drawDisabledState();
         } else if (this.activateKeyDown !== -1 || this.mouseDown) {
             this.drawActiveState();
-        } else if (this.mouseOver) {
+        } else if (this.mouseOver || this.focused) {
             this.drawHoverState();
         } else {
             this.drawReadyState();

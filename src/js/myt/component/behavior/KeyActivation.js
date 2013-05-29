@@ -32,7 +32,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         this.attachToDom(this, '__handleKeyDown', 'keydown');
         this.attachToDom(this, '__handleKeyPress', 'keypress');
         this.attachToDom(this, '__handleKeyUp', 'keyup');
-        this.attachToDom(this, '__handleBlur', 'blur');
+        this.attachToDom(this, 'doDomBlur', 'blur');
     },
     
     
@@ -102,7 +102,9 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         }
     },
     
-    __handleBlur: function(event) {
+    /** Called when a dom blur event occurs.
+        @returns void */
+    doDomBlur: function(event) {
         if (this.disabled) return;
         
         if (this.activateKeyDown !== -1) {

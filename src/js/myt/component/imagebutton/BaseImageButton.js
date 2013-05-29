@@ -8,7 +8,6 @@ myt.BaseImageButton = new JS.Class('BaseImageButton', myt.View, {
         this.imageRoot = myt.IMAGE_ROOT + 'component/imagebutton/rsrc/';
         
         if (attrs.focusable === undefined) attrs.focusable = true;
-        if (attrs.focusEmbellishment === undefined) attrs.focusEmbellishment = false;
         
         this.callSuper(parent, attrs);
     }
