@@ -3,7 +3,7 @@
     arise when the various mixins are used together.
     
     By default Button instances are focusable.
-    By default Button does not show the focusEmbellishment. */
+*/
 myt.Button = new JS.Module('Button', {
     include: [
         myt.Activateable, 
@@ -14,27 +14,22 @@ myt.Button = new JS.Module('Button', {
     ],
     
     
+    // Class Methods and Attributes ////////////////////////////////////////////
+    extend: {
+        DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE: '0px 0px 7px #666666'
+    },
+    
+    
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides */
     initNode: function(parent, attrs) {
         if (attrs.focusable === undefined) attrs.focusable = true;
-        if (attrs.focusEmbellishment === undefined) attrs.focusEmbellishment = false;
         
         this.callSuper(parent, attrs);
-        
-        // Update the UI when focus is gained.
-        this.attachToDom(this, 'updateUI', 'focus');
     },
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** Update the UI when focus is lost.
-        @overrides myt.KeyActivation. */
-    doDomBlur: function(event) {
-        this.callSuper(event);
-        this.updateUI();
-    },
-    
     /** @overrides myt.KeyActivation. */
     doActivationKeyDown: function(key) {
         this.updateUI();
@@ -52,7 +47,7 @@ myt.Button = new JS.Module('Button', {
             this.drawDisabledState();
         } else if (this.activateKeyDown !== -1 || this.mouseDown) {
             this.drawActiveState();
-        } else if (this.mouseOver || this.focused) {
+        } else if (this.mouseOver) {
             this.drawHoverState();
         } else {
             this.drawReadyState();
@@ -77,5 +72,17 @@ myt.Button = new JS.Module('Button', {
         mouse interactions this corresponds to the enabled state when the
         mouse is not over the component.
         @returns void */
-    drawReadyState: function() {}
+    drawReadyState: function() {},
+    
+    /** @overrides myt.FocusObservable */
+    showFocusEmbellishment: function() {
+        this.hideDefaultFocusEmbellishment();
+        this.setStyleProperty('boxShadow', myt.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
+    },
+    
+    /** @overrides myt.FocusObservable */
+    hideFocusEmbellishment: function() {
+        this.hideDefaultFocusEmbellishment();
+        this.setStyleProperty('boxShadow', 'none');
+    }
 });
