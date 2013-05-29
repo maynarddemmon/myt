@@ -41,7 +41,7 @@ myt.MouseObservable = new JS.Module('MouseObservable', {
     createDomMethodRef: function(domObserver, methodName, type) {
         if (myt.MouseObservable.MOUSE_EVENT_TYPES[type]) {
             var self = this;
-            return function(e) {
+            return function(domEvent) {
                 if (!domEvent) var domEvent = window.event;
                 
                 // Configure common mouse event.
