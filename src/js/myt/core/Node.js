@@ -441,21 +441,38 @@ myt.Node = new JS.Class('Node', {
     
     // Animation
     /** Animates an attribute using the provided parameters.
-        @param attribute:string the name of the attribute to animate
-        @param from:number the target value to animate from.
+        @param attribute:string/object the name of the attribute to animate. If
+            an object is provided it should be the only argument and its keys
+            should be the params of this method. This provides a more concise
+            way of passing in sparse optional parameters.
         @param to:number the target value to animate to.
+        @param from:number the target value to animate from. (optional)
+        @param relative:boolean (optional)
+        @param callback:function (optional)
+        @param duration:number (optional)
+        @param revers:boolean (optional)
+        @param repeat:number (optional)
+        @param easingFunction:function (optional)
         @returns void. */
     animate: function(attribute, to, from, relative, callback, duration, reverse, repeat, easingFunction) {
         var anim = this.__getAnimator();
         
-        anim.attribute = attribute;
-        anim.setTo(to);
-        anim.setFrom(from);
-        if (duration != null) anim.duration = duration;
-        if (relative != null) anim.relative = relative;
-        if (repeat != null) anim.repeat = repeat;
-        if (reverse != null) anim.setReverse(reverse);
-        if (easingFunction != null) anim.setEasingFunction(easingFunction);
+        if (typeof attribute === 'object') {
+            // Handle a single map argument if provided
+            callback = attribute.callback;
+            delete attribute.callback;
+            anim.callSetters(attribute);
+        } else {
+            // Handle individual arguments
+            anim.attribute = attribute;
+            anim.setTo(to);
+            anim.setFrom(from);
+            if (duration != null) anim.duration = duration;
+            if (relative != null) anim.relative = relative;
+            if (repeat != null) anim.repeat = repeat;
+            if (reverse != null) anim.setReverse(reverse);
+            if (easingFunction != null) anim.setEasingFunction(easingFunction);
+        }
         
         // Release the animation when it completes.
         var releaseFunc = function(success) {

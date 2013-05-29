@@ -39,7 +39,7 @@
             }]
         });
         
-        new myt.SpacedLayout(rootView, {axis:'x', spacing:2, inset:5});
+        var layout = new myt.SpacedLayout(rootView, {axis:'x', spacing:2, inset:5});
         
         var btn1 = new BtnClass(rootView, {name:'one', width:50, height:20});
         var btn2 = new BtnClass(rootView, {name:'two', width:50, height:20, y:100});
@@ -66,7 +66,14 @@
         var btn9 = new myt.ImageButton(rootView, {name:'nine', text:'baz', shrinkToFit:true}, [ActivatedMixin]);
         
         // Do some simple animation
-        btn3.animate('y', 100, undefined, false, function(success) {btn3.animate('x', 52, undefined, true);});
+        btn3.animate('y', 100, undefined, false, function(success) {btn3.animate({attribute:'x', to:52, relative:true});});
+        
+        layout.animate({
+            attribute:'spacing', 
+            to:25, 
+            callback:function(success) {layout.animate({attribute:'spacing', to:2, duration:250});}, 
+            duration:250
+        });
     }
 </script>
 </body></html>
