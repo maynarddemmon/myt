@@ -181,6 +181,13 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
         }
     },
     
+    /** A convienence method to set rounded corners on an element.
+        @param radius:number the radius of the corners.
+        @returns void */
+    setRoundedCorners: function(radius) {
+        this.setStyleProperty('borderRadius', radius + 'px');
+    },
+    
     /** Set an arbitrary css style on the dom element. */
     setStyleProperty: function(propertyName, value) {
         this.deStyle[propertyName] = value;
