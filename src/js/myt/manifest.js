@@ -136,6 +136,9 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'imagebutton/BaseImageButton.js').provides('myt.BaseImageButton').requires('myt.MouseableH3Panel');
     file(MYT_COMPONENT_ROOT + 'imagebutton/ImageButton.js'    ).provides('myt.ImageButton'    ).requires('myt.BaseImageButton','myt.TooltipMixin');
     
+    // Component : Drawing Method
+    file(MYT_COMPONENT_ROOT + 'drawingmethod/DrawingMethod.js').provides('myt.DrawingMethod').requires('myt');
+    
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
         'myt.Cookie',
@@ -143,6 +146,7 @@ JS.Packages(function() {with(this) {
         'myt.Text', 'myt.Markup', 'myt.SizeWidthToDom', 'myt.SizeHeightToDom',
         'myt.SizeToWindowWidth', 'myt.SizeToWindowHeight', 'myt.TransformSupport', 
         'myt.Animator', 'myt.Callback', 'myt.RepeatableTimer', 'myt.StateMachine', 'myt.URI', 'myt.Ajax', 
-        'myt.Draggable', 'myt.WrappingLayout', 'myt.ResizeLayout', 'myt.SimpleButton', 'myt.ImageButton', 'myt.ThreePanel'
+        'myt.Draggable', 'myt.WrappingLayout', 'myt.ResizeLayout', 'myt.SimpleButton', 'myt.ImageButton', 'myt.ThreePanel',
+        'myt.DrawingMethod'
     );
 }});
