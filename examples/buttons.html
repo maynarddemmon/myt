@@ -64,6 +64,9 @@
         var btn7 = new myt.ImageButton(rootView, {name:'seven', text:'foo', tooltip:'here is a tip', shrinkToFit:true}, [ActivatedMixin]);
         var btn8 = new myt.ImageButton(rootView, {name:'eight', text:'bar', shrinkToFit:true, disabled:true}, [ActivatedMixin]);
         var btn9 = new myt.ImageButton(rootView, {name:'nine', text:'baz', shrinkToFit:true}, [ActivatedMixin]);
+        
+        // Do some simple animation
+        btn3.animate('y', btn3.y, 100, false, function() {btn3.animate('x', 0, 50, true);});
     }
 </script>
 </body></html>

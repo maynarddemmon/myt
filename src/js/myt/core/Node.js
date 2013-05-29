@@ -435,5 +435,49 @@ myt.Node = new JS.Class('Node', {
         method to remove a subnode. Instead call removeSubnode or setParent.
         @param node:Node the subnode that was removed.
         @returns void */
-    subnodeRemoved: function(node) {}
+    subnodeRemoved: function(node) {},
+    
+    // Animation
+    /** Animates an attribute using the provided parameters.
+        @param attribute:string the name of the attribute to animate
+        @param to:number the target value to animate to.
+        @returns void. */
+    animate: function(attribute, from, to, relative, callback, duration, reverse, repeat, easingFunction) {
+        var anim = this.__getAnimator();
+        
+        anim.attribute = attribute;
+        anim.setTo(to);
+        anim.setCallback(callback);
+        anim.setFrom(from);
+        anim.duration = duration === undefined ? 1000 : duration;
+        anim.relative = relative === undefined ? false : relative;
+        anim.repeat = repeat === undefined ? 1 : repeat;
+        anim.setReverse(reverse === undefined ? false : reverse);
+        anim.setEasingFunction(easingFunction === undefined ? myt.Animator.easingFunctions.linear : easingFunction);
+        
+        anim.setRunning(true);
+    },
+    
+    __getAnimator: function() {
+        var anims = this.__animators;
+        if (!anims) this._animators = anims = [];
+        var anim;
+        if (anims.length > 0) {
+            anim = anims.pop();
+        } else {
+            anim = new myt.Animator(this, {}, [{
+                doStop: function() {
+                    this.parent.__releaseAnimator(this);
+                }
+            }]);
+        }
+        return anim;
+    },
+    
+    __releaseAnimator: function(anim) {
+        var anims = this.__animators;
+        if (!anims) this._animators = anims = [];
+        anim.reset();
+        anims.push(anim);
+    }
 });

@@ -81,6 +81,7 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         
         if (!this.paused) {
             if (v) {
+                this.doStart();
                 this.attachTo(myt.global.idle, '__update', 'idle');
             } else {
                 this.__loopCount = this.reverse ? this.repeat - 1 : 0;
@@ -143,6 +144,11 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         if (this.to === v) return;
         this.to = v;
         if (this.inited) this.fireNewEvent('to', v);
+    },
+    
+    /** Sets a callback function to run when the animation completes. */
+    setCallback: function(v) {
+        this.callback = v;
     },
     
     
@@ -219,11 +225,15 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         if (reverse) {
             if (0 > this.__loopCount && repeat > 0) {
                 this.setRunning(false);
+                this.doStop();
+                if (this.callback) this.callback.call(this);
                 return;
             }
         } else {
             if (this.__loopCount === repeat) {
                 this.setRunning(false);
+                this.doStop();
+                if (this.callback) this.callback.call(this);
                 return;
             }
         }
@@ -234,7 +244,15 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
             this.__progress = reverse ? duration : 0;
             this.__advance(remainderTime);
         }
-    }
+    },
+    
+    /** Called when the animation stops.
+        @returns void */
+    doStop: function() {},
+    
+    /** Called when the animation starts.
+        @returns void */
+    doStart: function() {}
 });
 
 
