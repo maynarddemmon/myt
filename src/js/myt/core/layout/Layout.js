@@ -279,6 +279,10 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
         svs.splice(targetIdx + 1, 0, sv);
     },
     
+    sortSubviews: function(sortFunc) {
+        this.subviews.sort(sortFunc);
+    },
+    
     /** If our parent adds a new subview we should add it. */
     __handleParentSubviewAddedEvent: function(event) {
         var v = event.value;

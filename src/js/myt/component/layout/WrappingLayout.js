@@ -157,6 +157,12 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
     
     /** @overrides myt.VariableLayout */
     doBeforeUpdate: function() {
+        // The number of lines layed out.
+        this.lineCount = 1;
+        
+        // The maximum size achieved by any line.
+        this.maxSize = 0;
+        
         // Track the maximum size of a line. Used to determine how much to
         // update linePos by when wrapping occurs.
         this.lineSize = 0;
@@ -180,6 +186,8 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
             value = this.targetValue; // Reset to inset.
             this.linePos += this.lineSize + this.lineSpacing;
             this.lineSize = otherSize;
+            
+            ++this.lineCount;
         } else if (otherSize > this.lineSize) {
             // Update line size if this subview is larger
             this.lineSize = otherSize;
@@ -187,6 +195,9 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
         
         sv[this.otherSetterName](this.linePos + (otherSize - sv[this.otherMeasureAttrBaseName])/2.0); // adj is for transform
         sv[setterName](value + (size - sv[this.measureAttrBaseName])/2.0); // adj is for transform
+        
+        // Track max size achieved during layout.
+        this.maxSize = Math.max(this.maxSize, value + size + this.outset);
         
         return value + size + this.spacing;
     },

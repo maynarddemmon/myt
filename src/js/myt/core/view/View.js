@@ -228,7 +228,7 @@ myt.View = new JS.Class('View', myt.Node, {
     },
     
     /** Sets the width of this view. */
-    setWidth: function(v) {
+    setWidth: function(v, supressEvent) {
         // Dom elements don't support negative width
         if (0 > v) v = 0;
         
@@ -238,12 +238,12 @@ myt.View = new JS.Class('View', myt.Node, {
         if (this.clip) this.__applyClipToDom();
         if (this.inited) {
             this.__updateBounds(v, this.height);
-            this.fireNewEvent('width', v);
+            if (!supressEvent) this.fireNewEvent('width', v);
         }
     },
     
     /** Sets the height of this view. */
-    setHeight: function(v) {
+    setHeight: function(v, supressEvent) {
         // Dom elements don't support negative height
         if (0 > v) v = 0;
         
@@ -253,7 +253,7 @@ myt.View = new JS.Class('View', myt.Node, {
         if (this.clip) this.__applyClipToDom();
         if (this.inited) {
             this.__updateBounds(this.width, v);
-            this.fireNewEvent('height', v);
+            if (!supressEvent) this.fireNewEvent('height', v);
         }
     },
     
@@ -576,6 +576,16 @@ myt.View = new JS.Class('View', myt.Node, {
             this.sendSubviewBehind(sv, existing);
             this.sendSubviewBehind(existing, sv);
         }
+    },
+    
+    sortSubviews: function(sortFunc) {
+        // Sort subviews
+        var svs = this.subviews;
+        svs.sort(sortFunc);
+        
+        // Rearrange dom to match new sort order.
+        var i = svs.length;
+        while (i) this.sendSubviewToBack(svs[--i]);
     },
     
     // Hit Testing //
