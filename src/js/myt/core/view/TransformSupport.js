@@ -37,10 +37,10 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
             
             if (!value || value.length === 0) return '';
             
-            var parts = value.split();
+            var parts = value.split(' ');
             var i = parts.length;
             while (i) {
-                if (parts[--i] === type) {
+                if (parts[--i].indexOf(type) === 0) {
                     parts.splice(i, 1);
                     break;
                 }
