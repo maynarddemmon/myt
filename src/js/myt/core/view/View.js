@@ -11,6 +11,32 @@ myt.View = new JS.Class('View', myt.Node, {
     ],
     
     
+    // Class Methods and Attributes ////////////////////////////////////////////
+    extend: {
+        /** Preserves focus during dom updates. Focus can get lost in webkit 
+            when an element is removed from the dom.
+            viewBeingRemoved:myt.View
+            wrapperFunc:function a function to execute that manipulates the
+                dom in some way.
+            @returns void */
+        retainFocusDuringDomUpdate: function(viewBeingRemoved, wrappedFunc) {
+            var restoreFocus;
+            var currentFocus = myt.global.focus.focusedView;
+            if (currentFocus && (currentFocus === viewBeingRemoved || currentFocus.isDescendantOf(viewBeingRemoved))) {
+                restoreFocus = currentFocus;
+                restoreFocus._ignoreFocus = true;
+            }
+            
+            wrappedFunc.call();
+            
+            if (restoreFocus) {
+                restoreFocus._ignoreFocus = false;
+                restoreFocus.focus(true);
+            }
+        }
+    },
+    
+    
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Node */
     initNode: function(parent, attrs) {
@@ -536,8 +562,9 @@ myt.View = new JS.Class('View', myt.Node, {
         if (sv.parent === this) {
             var de = this.domElement;
             if (sv.domElement !== de.lastChild) {
-                var removedElem = de.removeChild(sv.domElement);
-                if (removedElem) de.appendChild(removedElem);
+                myt.View.retainFocusDuringDomUpdate(sv, function() {
+                    de.appendChild(sv.domElement);
+                });
             }
         }
     },
@@ -549,8 +576,9 @@ myt.View = new JS.Class('View', myt.Node, {
         if (sv.parent === this) {
             var de = this.domElement;
             if (sv.domElement !== de.firstChild) {
-                var removedElem = de.removeChild(sv.domElement);
-                if (removedElem) de.insertBefore(removedElem, de.firstChild);
+                myt.View.retainFocusDuringDomUpdate(sv, function() {
+                    de.insertBefore(sv.domElement, de.firstChild);
+                });
             }
         }
     },
@@ -562,8 +590,9 @@ myt.View = new JS.Class('View', myt.Node, {
     sendSubviewBehind: function(sv, existing) {
         if (sv.parent === this && existing.parent === this) {
             var de = this.domElement;
-            var removedElem = de.removeChild(sv.domElement);
-            if (removedElem) de.insertBefore(removedElem, existing);
+            myt.View.retainFocusDuringDomUpdate(sv, function() {
+                de.insertBefore(sv.domElement, existing);
+            });
         }
     },
     
