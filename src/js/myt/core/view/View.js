@@ -114,6 +114,12 @@ myt.View = new JS.Class('View', myt.Node, {
         this.focusTrap = v;
     },
     
+    /** A boolean that prevents focus from traversing into this view or any
+        of its subviews. The default is false. */
+    setMaskFocus: function(v) {
+        this.maskFocus = v;
+    },
+    
     // Layout Attributes //
     /** A boolean that determines if this view should be included in layouts
         or not. */

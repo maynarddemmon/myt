@@ -124,6 +124,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
         if (!this.focusable) return false;
         if (this.disabled) return false;
         if (!this.isVisible()) return false;
+        if (this.searchAncestorsOrSelf(function(n) {return n.maskFocus === true;}) != null) return false;
         return true;
     },
     
