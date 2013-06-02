@@ -48,7 +48,10 @@ myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
     
     // Aliases: We use a wrapper rather than .alias since .alias doesn't
     // appear to carry over to subclasses.
-    setAxis: function(v) {this.setTargetAttrName(v);},
+    setAxis: function(v) {
+        this.setTargetAttrName(v);
+        this.axis = this.targetAttrName;
+    },
     
     
     // Methods /////////////////////////////////////////////////////////////////
