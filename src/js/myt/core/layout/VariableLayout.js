@@ -5,6 +5,7 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Node */
     initNode: function(parent, attrs) {
+        this.useOptimizations = true;
         this.collapseParent = this.reverse = false;
         
         this.callSuper(parent, attrs);
@@ -33,6 +34,10 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
         }
     },
     
+    setUseOptimizations: function(v) {
+        this.useOptimizations = v;
+    },
+    
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.ConstantLayout */
@@ -51,25 +56,27 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
         var len = svs.length;
         var i, sv, count = 0;
         
-        // OPTIMIZATION: Prevent dom reflow during layout by temporarily 
-        // removing the parent dom element.
-        var elem = this.parent.domElement;
-        var parentElem = elem.parentNode;
-        var nextSibling = elem.nextSibling;
-        
-        // Focus can get lost in webkit when an element is removed from the dom.
-        // TODO: make use of myt.View.retainFocusDuringDomUpdate
-        var restoreFocus;
-        if (parentElem) {
-            var currentFocus = myt.global.focus.focusedView;
-            if (currentFocus && currentFocus.isDescendantOf(this.parent)) {
-                restoreFocus = currentFocus;
-                restoreFocus._ignoreFocus = true;
-            }
+        if (this.useOptimizations) {
+            // OPTIMIZATION: Prevent dom reflow during layout by temporarily 
+            // removing the parent dom element.
+            var elem = this.parent.domElement;
+            var parentElem = elem.parentNode;
+            var nextSibling = elem.nextSibling;
             
-            parentElem.removeChild(elem);
+            // Focus can get lost in webkit when an element is removed from the dom.
+            // TODO: make use of myt.View.retainFocusDuringDomUpdate
+            var restoreFocus;
+            if (parentElem) {
+                var currentFocus = myt.global.focus.focusedView;
+                if (currentFocus && currentFocus.isDescendantOf(this.parent)) {
+                    restoreFocus = currentFocus;
+                    restoreFocus._ignoreFocus = true;
+                }
+                
+                parentElem.removeChild(elem);
+            }
+            // OPTIMIZATION: end
         }
-        // OPTIMIZATION: end
         
         if (this.reverse) {
             i = len;
@@ -86,16 +93,18 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
             }
         }
         
-        // OPTIMIZATION: Reinsert the parent dom element now that we've 
-        // finished updating
-        if (parentElem) {
-            parentElem.insertBefore(elem, nextSibling);
-            if (restoreFocus) {
-                restoreFocus._ignoreFocus = false;
-                restoreFocus.focus(true);
+        if (this.useOptimizations) {
+            // OPTIMIZATION: Reinsert the parent dom element now that we've 
+            // finished updating
+            if (parentElem) {
+                parentElem.insertBefore(elem, nextSibling);
+                if (restoreFocus) {
+                    restoreFocus._ignoreFocus = false;
+                    restoreFocus.focus(true);
+                }
             }
+            // OPTIMIZATION: end
         }
-        // OPTIMIZATION: end
         
         this.doAfterUpdate();
         

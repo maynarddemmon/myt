@@ -526,5 +526,9 @@ myt.Node = new JS.Class('Node', {
         if (!activeAnims) activeAnims = this.__activeAnims = [];
         
         return activeAnims.concat();
+    },
+    
+    doOnceOnIdle: function(methodName) {
+        this.attachTo(myt.global.idle, methodName, 'idle', true);
     }
 });
