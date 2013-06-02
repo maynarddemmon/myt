@@ -453,7 +453,7 @@ myt.Node = new JS.Class('Node', {
         @param revers:boolean (optional)
         @param repeat:number (optional)
         @param easingFunction:function (optional)
-        @returns void. */
+        @returns The Animator being run. */
     animate: function(attribute, to, from, relative, callback, duration, reverse, repeat, easingFunction) {
         var anim = this.__getAnimator();
         
@@ -482,6 +482,12 @@ myt.Node = new JS.Class('Node', {
         anim.setCallback(releaseFunc);
         
         anim.setRunning(true);
+        
+        var activeAnims = this.__activeAnims;
+        if (!activeAnims) activeAnims = this.__activeAnims = [];
+        activeAnims.push(anim);
+        
+        return anim;
     },
     
     /** Get an animator from the "pool" or create a new one.
@@ -499,9 +505,26 @@ myt.Node = new JS.Class('Node', {
     /** Puts an animator back in the "pool" and clears it.
         @returns void */
     __releaseAnimator: function(anim) {
+        var activeAnims = this.__activeAnims;
+        if (!activeAnims) activeAnims = this.__activeAnims = [];
+        var i = activeAnims.length;
+        while (i) {
+            if (activeAnims[--i] === anim) {
+                activeAnims.splice(i, 1);
+                break;
+            }
+        }
+        
         var anims = this.__animatorPool;
         if (!anims) this._animators = anims = [];
         anim.clear();
         anims.push(anim);
+    },
+    
+    getActiveAnimators: function() {
+        var activeAnims = this.__activeAnims;
+        if (!activeAnims) activeAnims = this.__activeAnims = [];
+        
+        return activeAnims.concat();
     }
 });
