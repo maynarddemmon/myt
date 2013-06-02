@@ -16,7 +16,7 @@ new JS.Singleton('GlobalWindowResize', {
     initialize: function() {
         // The common browser resize event that gets reused.
         this.RESIZE_EVENT = {
-            source:this, type:'resize', value:{w:undefined, h:undefined}
+            source:this, type:'resize', value:{w:this.getWidth(), h:this.getHeight()}
         };
         
         var self = this;
@@ -27,14 +27,16 @@ new JS.Singleton('GlobalWindowResize', {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    /** Gets the window's innerWidth. */
+    /** Gets the window's innerWidth.
+        @returns the current width of the window. */
     getWidth: function() {
         var retval = this._windowInnerWidth;
         if (retval === undefined) retval = this._windowInnerWidth = window.innerWidth;
         return retval;
     },
     
-    /** Gets the window's innerHeight. */
+    /** Gets the window's innerHeight.
+        @returns the current height of the window. */
     getHeight: function() {
         var retval = this._windowInnerHeight;
         if (retval === undefined) retval = this._windowInnerHeight = window.innerHeight;

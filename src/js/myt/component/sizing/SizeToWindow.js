@@ -1,4 +1,11 @@
-/** A mixin that sizes a RootView to the window width, height or both. */
+/** A mixin that sizes a RootView to the window width, height or both.
+    
+    Attributes:
+        minWidth:number the minimum width below which this view will not 
+            resize its width. Defaults to 0.
+        minWidth:number the minimum height below which this view will not
+            resize its height. Defaults to 0.
+*/
 myt.SizeToWindow = new JS.Module('SizeToWindow', {
     include: [myt.RootView],
     
@@ -6,6 +13,7 @@ myt.SizeToWindow = new JS.Module('SizeToWindow', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Node */
     initNode: function(parent, attrs) {
+        this.minWidth = this.minHeight = 0;
         if (attrs.resizeDimension === undefined) attrs.resizeDimension = 'both';
         
         this.attachTo(myt.global.windowResize, '__handleResize', 'resize');
@@ -17,10 +25,19 @@ myt.SizeToWindow = new JS.Module('SizeToWindow', {
     setResizeDimension: function(v) {
         if (this.resizeDimension === v) return;
         this.resizeDimension = v;
-        
-        var gwr = myt.global.windowResize;
-        if (v === 'width' || v === 'both') this.setWidth(gwr.getWidth());
-        if (v === 'height' || v === 'both') this.setHeight(gwr.getHeight());
+        this.__handleResize(myt.global.windowResize.RESIZE_EVENT);
+    },
+    
+    setMinWidth: function(v) {
+        if (this.minWidth === v) return;
+        this.minWidth = v;
+        this.__handleResize(myt.global.windowResize.RESIZE_EVENT);
+    },
+    
+    setMinHeight: function(v) {
+        if (this.minHeight === v) return;
+        this.minHeight = v;
+        this.__handleResize(myt.global.windowResize.RESIZE_EVENT);
     },
     
     
@@ -28,7 +45,7 @@ myt.SizeToWindow = new JS.Module('SizeToWindow', {
     __handleResize: function(event) {
         var v = event.value;
         var dim = this.resizeDimension;
-        if (dim === 'width' || dim === 'both') this.setWidth(v.w);
-        if (dim === 'height' || dim === 'both') this.setHeight(v.h);
+        if (dim === 'width' || dim === 'both') this.setWidth(Math.max(this.minWidth, v.w));
+        if (dim === 'height' || dim === 'both') this.setHeight(Math.max(this.minHeight, v.h));
     }
 });
