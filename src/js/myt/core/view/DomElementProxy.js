@@ -96,9 +96,11 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
                 if (eventType === 'HTMLEvents') {
                     domEvent.initEvent(eventName, opts.bubbles, opts.cancelable);
                 } else {
-                    domEvent.initMouseEvent(eventName, opts.bubbles, opts.cancelable, document.defaultView,
+                    domEvent.initMouseEvent(
+                        eventName, opts.bubbles, opts.cancelable, document.defaultView,
                         opts.button, opts.pointerX, opts.pointerY, opts.pointerX, opts.pointerY,
-                        opts.ctrlKey, opts.altKey, opts.shiftKey, opts.metaKey, opts.button, domEvent
+                        opts.ctrlKey, opts.altKey, opts.shiftKey, opts.metaKey, 
+                        opts.button, null
                     );
                 }
                 elem.dispatchEvent(domEvent);
