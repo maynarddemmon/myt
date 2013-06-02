@@ -153,8 +153,11 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** Puts the animator back to an initial configured state. */
-    reset: function() {
+    /** Puts the animator back to an initial configured state.
+        @param executeCallback:boolean (optional) if true the callback, if
+            it exists will be executed.
+        @returns void */
+    reset: function(executeCallback) {
         if (this.paused) {
             this.__temporaryFrom = false;
             this.__loopCount = this.reverse ? this.repeat - 1 : 0;
@@ -163,6 +166,10 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         
         this.setRunning(false);
         this.setPaused(false);
+        
+        if (executeCallback) {
+            if (this.callback) this.callback.call(this, false);
+        }
     },
     
     /** Puts the animator back to a default unconfigured state. */
