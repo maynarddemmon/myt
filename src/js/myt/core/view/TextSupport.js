@@ -5,7 +5,9 @@ myt.TextSupport = new JS.Module('TextSupport', {
     /** The text content to be displayed. */
     setText: function(v) {
         if (this.text === v) return;
-        this.domElement.textContent = this.text = v;
+        // Use innerHTML rather than textContent since this allows us to
+        // embed formatting markup.
+        this.domElement.innerHTML = this.text = v;
         if (this.inited) {
             this.fireNewEvent('text', v);
             this.sizeViewToDom();
