@@ -107,5 +107,64 @@ myt = {
             }
         }
         return scope;
+    },
+    
+    // Text Templating
+    /** Populates a text "template" with 1 or more arguments. The
+        template consists of a string with text interspersed with 
+        curly-braced indices. The arguments are replaced in order one at
+        a time into the template. For example:
+        
+            myt.fillTextTemplate("{0}/{2}/{1} hey {0}", 1, 2, 3) 
+            will return "1/3/2 hey 1".
+        
+        @param (first arg):string The template to use.
+        @param (remaining args):(coerced to string) The parameters for the
+            template.
+        @returns A populated string. */
+    fillTextTemplate: function() {
+        var params = Array.prototype.slice.call(arguments);
+        var template = params.shift();
+        
+        if (template == null) return '';
+        var i = params.length;
+        var param;
+        while (i) {
+            param = params[--i];
+            template = template.split("{" + i + "}").join(param == null ? '' : param);
+        }
+        return template;
+    },
+    
+    /** Generates the text for an "a href" html element that when clicked on
+        executes a provided callback method name. To resolve the callback
+        method name, an ancestor search is performed on the dom starting with
+        the link element. The first myt managed dom element encountered is
+        used as the scope for the method.
+        @param text:string the text to put inside the link.
+        @param callbackMethodName:string the name of the method to execute.
+        @returns void */
+    generateLink: function(text, callbackMethodName, attrs) {
+        var optAttrs = '';
+        if (attrs) {
+            for (var name in attrs) optAttrs += ' ' + name + '="' + attrs[name] + '"';
+        }
+        
+        var template = '<a href="#" onclick="myt._handleGeneratedLink(this, \'{1}\'); return false;"' + optAttrs + '>{0}</a>';
+        return this.fillTextTemplate(template, text, callbackMethodName);
+    },
+    
+    /** See myt.generateLink for documentation.
+        @returns void */
+    _handleGeneratedLink: function(elem, callbackMethodName) {
+        var model;
+        while (elem) {
+            model = elem.model;
+            if (model) {
+                model[callbackMethodName].call(model);
+                break;
+            }
+            elem = elem.parentNode;
+        }
     }
 };
