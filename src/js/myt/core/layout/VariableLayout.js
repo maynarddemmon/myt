@@ -58,6 +58,7 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
         var nextSibling = elem.nextSibling;
         
         // Focus can get lost in webkit when an element is removed from the dom.
+        // TODO: make use of myt.View.retainFocusDuringDomUpdate
         var restoreFocus;
         if (parentElem) {
             var currentFocus = myt.global.focus.focusedView;

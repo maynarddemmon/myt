@@ -56,8 +56,15 @@ myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
     
     // Aliases: We use a wrapper rather than .alias since .alias doesn't
     // appear to carry over to subclasses.
-    setAxis: function(v) {this.setTargetAttrName(v);},
-    setInset: function(v) {this.setTargetValue(v);},
+    setAxis: function(v) {
+        this.setTargetAttrName(v);
+        this.axis = this.targetAttrName;
+    },
+    
+    setInset: function(v) {
+        this.setTargetValue(v);
+        this.inset = this.targetValue;
+    },
     
     
     // Methods /////////////////////////////////////////////////////////////////
