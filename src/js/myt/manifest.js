@@ -139,14 +139,18 @@ JS.Packages(function() {with(this) {
     // Component : Drawing Method
     file(MYT_COMPONENT_ROOT + 'drawingmethod/DrawingMethod.js').provides('myt.DrawingMethod').requires('myt');
     
+    // Component : Model
+    file(MYT_COMPONENT_ROOT + 'model/BAGMembership.js').provides('myt.BAGMembership').requires('myt.Node');
+    file(MYT_COMPONENT_ROOT + 'model/BAG.js'          ).provides('myt.BAG'          ).requires('myt.BAGMembership');
+    
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
         'myt.Cookie',
         'myt.global.keys',
-        'myt.Text', 'myt.Markup', 'myt.SizeWidthToDom', 'myt.SizeHeightToDom',
+        'myt.Text', 'myt.Markup', 'myt.SizeWidthToDom', 'myt.SizeHeightToDom', 'myt.SizeToParent',
         'myt.SizeToWindowWidth', 'myt.SizeToWindowHeight', 'myt.TransformSupport', 
         'myt.Animator', 'myt.Callback', 'myt.RepeatableTimer', 'myt.StateMachine', 'myt.URI', 'myt.Ajax', 
-        'myt.Draggable', 'myt.WrappingLayout', 'myt.ResizeLayout', 'myt.SimpleButton', 'myt.ImageButton', 'myt.ThreePanel',
-        'myt.DrawingMethod'
+        'myt.Draggable', 'myt.WrappingLayout', 'myt.ResizeLayout', 'myt.AlignedLayout', 'myt.SimpleButton', 'myt.ImageButton', 'myt.ThreePanel',
+        'myt.DrawingMethod', 'myt.BAG'
     );
 }});
