@@ -33,6 +33,11 @@ myt.SizeWidthToDom = new JS.Module('SizeWidthToDom', {
             var bounds = this.domElement.getBoundingClientRect();
             var w = bounds.width;
             
+            // Bounding rect doesn't factor in scaling so we need to calculate
+            // this ourselves.
+            var scaling = myt.TransformSupport.getEffectiveScale(this);
+            w /= scaling.scaleX;
+            
             // Circumvent setter
             if (this.width !== w) {
                 this.width = w;

@@ -41,11 +41,16 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
         element would have occurred.
         @returns void */
     sizeViewToDom: function() {
-        var bounds;
+        var bounds, scaling;
         
         if (!this.__hasSetWidth) {
             if (!bounds) bounds = this.domElement.getBoundingClientRect();
             var w = bounds.width;
+            
+            // Bounding rect doesn't factor in scaling so we need to calculate
+            // this ourselves.
+            scaling = myt.TransformSupport.getEffectiveScale(this);
+            w /= scaling.scaleX;
             
             // Circumvent setter
             if (this.width !== w) {
@@ -59,6 +64,11 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
         if (!this.__hasSetHeight) {
             if (!bounds) bounds = this.domElement.getBoundingClientRect();
             var h = bounds.height;
+            
+            // Bounding rect doesn't factor in scaling so we need to calculate
+            // this ourselves.
+            if (!scaling) scaling = myt.TransformSupport.getEffectiveScale(this);
+            h /= scaling.scaleY;
             
             // Circumvent setter
             if (this.height !== h) {

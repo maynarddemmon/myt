@@ -72,6 +72,20 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
         /** Set vertical skew in degrees. */
         skewY: function(s, v) {
             this.setTransform(s, 'skewY', v + 'deg');
+        },
+        
+        /** Gets the total scaling being applied to an element. Walks up the
+            ancestor chain multiplying the scaleX and scaleY.
+            @param elem:myt.View the view to calculate scaling for.
+            @returns object containing 'scaleX' and 'scaleY' numbers. */
+        getEffectiveScale: function(elem) {
+            var scaleX = scaleY = 1;
+            while (elem) {
+                if (elem.scaleX != null) scaleX *= elem.scaleX;
+                if (elem.scaleY != null) scaleY *= elem.scaleY;
+                elem = elem.parent;
+            }
+            return {scaleX:scaleX, scaleY:scaleY};
         }
     },
     
