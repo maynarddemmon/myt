@@ -80,6 +80,18 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
     
     __doTransition: function() {
         var args = Array.prototype.slice.call(arguments);
+        
+        // Don't allow another transition if one is already in progress.
+        // Instead, defer them until after the current transition completes.
+        if (this.__transitionInProgress) {
+            var deferredTransitions = this.__deferredTransitions;
+            if (!deferredTransitions) deferredTransitions = this.__deferredTransitions = [];
+            deferredTransitions.unshift(args);
+            return;
+        } else {
+            this.__transitionInProgress = true;
+        }
+        
         var async = args.shift();
         var transition = args.shift();
         
@@ -87,7 +99,10 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
         if (this.__pendingTransition) return myt.StateMachine.PENDING;
         
         // Do not allow transition from the terminal states
-        if (this.isFinished()) return myt.StateMachine.NO_TRANSITION;
+        if (this.isFinished()) {
+            this.__transitionInProgress = false;
+            return myt.StateMachine.NO_TRANSITION;
+        }
         
         var to = this.map[this.current][transition];
         if (!to) to = this.map[myt.StateMachine.WILDCARD][transition];
@@ -97,6 +112,7 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
             this.__additionalArgs = args;
             return this.resumeTransition(async);
         } else {
+            this.__transitionInProgress = false;
             return myt.StateMachine.NO_TRANSITION;
         }
     },
@@ -117,6 +133,7 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
                 var result = this.doLeaveState(transition, current, to, args);
                 if (result === false) {
                     this.__resetTransitionProgress();
+                    this.__doDeferredTransitions();
                     return myt.StateMachine.CANCELLED;
                 } else if (result === myt.StateMachine.ASYNC || async === myt.StateMachine.ASYNC) {
                     this.__transitionStage = 'enterState';
@@ -124,6 +141,7 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
                     this.fireNewEvent('start', eventValue);
                     this.fireNewEvent('leave' + current, eventValue);
                     this.fireNewEvent('leave', eventValue);
+                    this.__doDeferredTransitions();
                     return myt.StateMachine.PENDING;
                 } else {
                     this.fireNewEvent('start' + transition, eventValue);
@@ -142,7 +160,19 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
                 if (this.isFinished()) this.fireNewEvent('finished', eventValue);
         }
         
+        this.__doDeferredTransitions();
         return myt.StateMachine.SUCCEEDED;
+    },
+    
+    __doDeferredTransitions: function() {
+        this.__transitionInProgress = false;
+        
+        var deferredTransitions = this.__deferredTransitions;
+        if (deferredTransitions) {
+            while(deferredTransitions.length > 0) {
+                this.__doTransition.apply(this, deferredTransitions.pop());
+            }
+        }
     },
     
     doLeaveState: function(transition, from, to, args) {
