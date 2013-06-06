@@ -521,6 +521,9 @@ myt.Node = new JS.Class('Node', {
         anims.push(anim);
     },
     
+    /** Gets an array of the currently running animators that were created
+        by calls to the animate method.
+        @returns an array of active animators. */
     getActiveAnimators: function() {
         var activeAnims = this.__activeAnims;
         if (!activeAnims) activeAnims = this.__activeAnims = [];
@@ -528,6 +531,11 @@ myt.Node = new JS.Class('Node', {
         return activeAnims.concat();
     },
     
+    // Timing and Delay
+    /** A convienence method to execute a method once on idle.
+        @param methodName:string the name of the method to execute on
+            this object.
+        @returns void */
     doOnceOnIdle: function(methodName) {
         this.attachTo(myt.global.idle, methodName, 'idle', true);
     }

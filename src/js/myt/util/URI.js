@@ -5,6 +5,9 @@
         (c) Steven Levithan <stevenlevithan.com>
         MIT License
         See: http://blog.stevenlevithan.com/archives/parseuri
+        
+    When more complex URI parsing is needed, perhaps try URI.js which can be
+    found at: http://medialize.github.io/URI.js/
 */
 myt.URI = new JS.Class('URI', {
     // Constructor /////////////////////////////////////////////////////////////
@@ -75,6 +78,21 @@ myt.URI = new JS.Class('URI', {
         }
         var s = parts.join('&');
         return s.length > 0 ? '?' + s : s;
+    },
+    
+    getQueryParam: function(name) {
+        return this.decodeQueryParam(this.queryPairs[name]);
+    },
+    
+    getPathParts: function(allowEmpties) {
+        var parts = this.path.split('/');
+        
+        if (!allowEmpties) {
+            var i = parts.length;
+            while (i) if (parts[--i].length === 0) parts.splice(i, 1);
+        }
+        
+        return parts;
     },
     
     toString: function() {
