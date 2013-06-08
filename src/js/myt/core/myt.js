@@ -166,5 +166,34 @@ myt = {
             }
             elem = elem.parentNode;
         }
+    },
+    
+    /** Dynamically load a script into the dom.
+        @param src:string the URL to the script file.
+        @param callback:function a callback when the script loads.
+        @returns void */
+    loadScript: function(src, callback) {
+        // Prevent reloading the same script
+        if (!this._loadedScripts) this._loadedScripts = {};
+        if (this._loadedScripts[src]) {
+            console.warn("script already loaded for src", src);
+            return;
+        }
+        this._loadedScripts[src] = true;
+        
+        var s = document.createElement('script');
+        s.type = 'text/javascript';
+        s.src = src + '?cacheBust=' + (new Date()).getTime();
+        if (callback) {
+            var r = false;
+            s.onload = s.onreadystatechange = function() {
+                if (!r && (!this.readyState || this.readyState == 'complete')) {
+                    r = true; // Prevent refiring callback
+                    callback();
+                }
+            };
+        }
+        var t = document.getElementsByTagName('script')[0];
+        t.parentNode.insertBefore(s, t);
     }
 };

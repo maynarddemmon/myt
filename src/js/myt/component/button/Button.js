@@ -3,6 +3,10 @@
     arise when the various mixins are used together.
     
     By default Button instances are focusable.
+    
+    Attributes:
+        __restoreCursor:string the cursor to restore to when no longer
+            disabled.
 */
 myt.Button = new JS.Module('Button', {
     include: [
