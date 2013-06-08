@@ -34,6 +34,6 @@ myt.Disableable = new JS.Module('Disableable', {
         super if they want the default behavior of calling 'updateUI'.
         @returns void */
     doDisabled: function() {
-        if (this.inited) this.updateUI();
+        if (this.inited && this.updateUI) this.updateUI();
     }
 });

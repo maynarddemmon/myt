@@ -24,6 +24,7 @@ myt.Button = new JS.Module('Button', {
     /** @overrides */
     initNode: function(parent, attrs) {
         if (attrs.focusable === undefined) attrs.focusable = true;
+        if (attrs.cursor === undefined) attrs.cursor = 'pointer';
         
         this.callSuper(parent, attrs);
     },
@@ -44,13 +45,23 @@ myt.Button = new JS.Module('Button', {
     /** @overrides myt.UpdateableUI. */
     updateUI: function() {
         if (this.disabled) {
+            this.__restoreCursor = this.cursor;
+            this.setCursor('not-allowed');
             this.drawDisabledState();
-        } else if (this.activateKeyDown !== -1 || this.mouseDown) {
-            this.drawActiveState();
-        } else if (this.mouseOver) {
-            this.drawHoverState();
         } else {
-            this.drawReadyState();
+            var rc = this.__restoreCursor;
+            if (rc) {
+                this.setCursor(this.__restoreCursor);
+                delete this.__restoreCursor;
+            }
+            
+            if (this.activateKeyDown !== -1 || this.mouseDown) {
+                this.drawActiveState();
+            } else if (this.mouseOver) {
+                this.drawHoverState();
+            } else {
+                this.drawReadyState();
+            }
         }
     },
     
