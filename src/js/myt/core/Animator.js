@@ -156,6 +156,26 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** A convienence method to set the callback to run when the animator
+        stops running. If a callback already exists the provided callback
+        will be executed after the existing one.
+        @param callback:function the function to run.
+        @param replace:boolean (optional) if true the existing callback will 
+            be replaced with the new callback.
+        @returns void */
+    next: function(callback, replace) {
+        var existingCallback = this.callback;
+        if (existingCallback && !replace) {
+            var anim = this;
+            this.setCallback(function(success) {
+                existingCallback.call(anim, success);
+                callback.call(anim, success);
+            });
+        } else {
+            this.setCallback(callback);
+        }
+    },
+    
     /** Puts the animator back to an initial configured state.
         @param executeCallback:boolean (optional) if true the callback, if
             it exists will be executed.

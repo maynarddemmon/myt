@@ -71,11 +71,10 @@
         btn3.animate('y', 100, undefined, false, function(success) {btn3.animate({attribute:'x', to:52, relative:true});});
         
         layout.animate({
-            attribute:'spacing', 
-            to:25, 
-            callback:function(success) {layout.animate({attribute:'spacing', to:2, duration:250});}, 
-            duration:250
-        });
+            attribute:'spacing', to:25, duration:250
+        }).next(
+            function(success) {layout.animate({attribute:'spacing', to:2, duration:250});}
+        );
     }
 </script>
 </body></html>

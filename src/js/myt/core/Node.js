@@ -479,11 +479,8 @@ myt.Node = new JS.Class('Node', {
         }
         
         // Release the animation when it completes.
-        var releaseFunc = function(success) {
-            animPool.putInstance(anim);
-            if (callback) callback.call(anim, success);
-        };
-        anim.setCallback(releaseFunc);
+        anim.next(function(success) {animPool.putInstance(anim);});
+        if (callback) anim.next(callback);
         
         anim.setRunning(true);
         return anim;
