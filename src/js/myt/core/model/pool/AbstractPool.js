@@ -63,7 +63,7 @@ myt.AbstractPool = new JS.Class('AbstractPool', {
         @param obj:object the object to be cleaned.
         @returns object the cleaned object. */
     cleanInstance: function(obj) {
-        if (obj instanceof JS.Class && obj.isA(myt.Reusable)) obj.clean();
+        if (typeof obj.isA === 'function' && obj.isA(myt.Reusable)) obj.clean();
         return obj;
     }
 });
