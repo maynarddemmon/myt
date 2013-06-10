@@ -21,8 +21,8 @@ JS.Packages(function() {with(this) {
     file(MYT_CORE_ROOT + 'myt.js'            ).provides('myt'                ).requires('BrowserDetect','console','JSON','Object.keys','JS.Class','JS.Module','JS.Singleton');
     file(MYT_CORE_ROOT + 'Destructible.js'   ).provides('myt.Destructible'   ).requires('myt');
     file(MYT_CORE_ROOT + 'AccessorSupport.js').provides('myt.AccessorSupport').requires('myt');
-    file(MYT_CORE_ROOT + 'Node.js'           ).provides('myt.Node'           ).requires('myt.AccessorSupport','myt.Destructible','myt.Constrainable');
-    file(MYT_CORE_ROOT + 'Animator.js'       ).provides('myt.Animator'       ).requires('myt.Node','myt.global.idle');
+    file(MYT_CORE_ROOT + 'Node.js'           ).provides('myt.Node'           ).requires('myt.AccessorSupport','myt.Destructible','myt.Constrainable','myt.TrackActivesPool');
+    file(MYT_CORE_ROOT + 'Animator.js'       ).provides('myt.Animator'       ).requires('myt.Node','myt.global.idle','myt.Reusable');
     
     // Core : Events
     var MYT_EVENTS_ROOT = MYT_CORE_ROOT + 'events/';
@@ -33,6 +33,11 @@ JS.Packages(function() {with(this) {
     // Core : Model
     var MYT_MODEL_ROOT = MYT_CORE_ROOT + 'model/';
     file(MYT_MODEL_ROOT + 'ThresholdCounter.js').provides('myt.ThresholdCounter').requires('myt.AccessorSupport','myt.Destructible','myt.Observable');
+    
+    file(MYT_MODEL_ROOT + 'pool/Reusable.js'        ).provides('myt.Reusable'        ).requires('myt');
+    file(MYT_MODEL_ROOT + 'pool/AbstractPool.js'    ).provides('myt.AbstractPool'    ).requires('myt.Destructible','myt.Reusable');
+    file(MYT_MODEL_ROOT + 'pool/SimplePool.js'      ).provides('myt.SimplePool'      ).requires('myt.AbstractPool');
+    file(MYT_MODEL_ROOT + 'pool/TrackActivesPool.js').provides('myt.TrackActivesPool').requires('myt.SimplePool');
     
     // Core : View
     var MYT_VIEW_ROOT = MYT_CORE_ROOT + 'view/';

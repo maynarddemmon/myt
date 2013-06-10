@@ -13,8 +13,7 @@
         parent:Node the parent of this Node.
         name:string the name of this node. Used to reference this Node from
             its parent Node.
-        __animatorPool:array An array of myt.Animator objects used by the
-            'animate' method.
+        __animPool:array An myt.TrackActivesPool used by the 'animate' method.
 */
 myt.Node = new JS.Class('Node', {
     include: [myt.AccessorSupport, myt.Destructible, myt.Observable, myt.Constrainable],
@@ -119,6 +118,8 @@ myt.Node = new JS.Class('Node', {
             var i = subs.length;
             while (i) subs[--i].destroy();
         }
+        
+        if (this.__animPool) this.__animPool.destroy();
         
         this.destroyBeforeOrphaning();
         if (this.parent) this.setParent(null);
@@ -455,7 +456,10 @@ myt.Node = new JS.Class('Node', {
         @param easingFunction:function (optional)
         @returns The Animator being run. */
     animate: function(attribute, to, from, relative, callback, duration, reverse, repeat, easingFunction) {
-        var anim = this.__getAnimator();
+        var animPool = this.__animPool;
+        if (!animPool) animPool = this.__animPool = new myt.TrackActivesPool(myt.Animator, this);
+        
+        var anim = animPool.getInstance();
         
         if (typeof attribute === 'object') {
             // Handle a single map argument if provided
@@ -476,59 +480,23 @@ myt.Node = new JS.Class('Node', {
         
         // Release the animation when it completes.
         var releaseFunc = function(success) {
-            anim.parent.__releaseAnimator(anim);
+            animPool.putInstance(anim);
             if (callback) callback.call(anim, success);
         };
         anim.setCallback(releaseFunc);
         
         anim.setRunning(true);
-        
-        var activeAnims = this.__activeAnims;
-        if (!activeAnims) activeAnims = this.__activeAnims = [];
-        activeAnims.push(anim);
-        
         return anim;
-    },
-    
-    /** Get an animator from the "pool" or create a new one.
-        @returns myt.Animator. */
-    __getAnimator: function() {
-        var anims = this.__animatorPool;
-        if (!anims) this._animators = anims = [];
-        if (anims.length > 0) {
-            return anims.pop();
-        } else {
-            return new myt.Animator(this);
-        }
-    },
-    
-    /** Puts an animator back in the "pool" and clears it.
-        @returns void */
-    __releaseAnimator: function(anim) {
-        var activeAnims = this.__activeAnims;
-        if (!activeAnims) activeAnims = this.__activeAnims = [];
-        var i = activeAnims.length;
-        while (i) {
-            if (activeAnims[--i] === anim) {
-                activeAnims.splice(i, 1);
-                break;
-            }
-        }
-        
-        var anims = this.__animatorPool;
-        if (!anims) this._animators = anims = [];
-        anim.clear();
-        anims.push(anim);
     },
     
     /** Gets an array of the currently running animators that were created
         by calls to the animate method.
         @returns an array of active animators. */
     getActiveAnimators: function() {
-        var activeAnims = this.__activeAnims;
-        if (!activeAnims) activeAnims = this.__activeAnims = [];
+        var animPool = this.__animPool;
+        if (!animPool) animPool = this.__animPool = new myt.TrackActivesPool(myt.Animator, this);
         
-        return activeAnims.concat();
+        return animPool.getActives();
     },
     
     // Timing and Delay

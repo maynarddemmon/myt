@@ -56,6 +56,9 @@
             to start the animation will behave the same.
 */
 myt.Animator = new JS.Class('Animator', myt.Node, {
+    include: [myt.Reusable],
+    
+    
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Node */
     initNode: function(parent, attrs) {
@@ -172,8 +175,8 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         }
     },
     
-    /** Puts the animator back to a default unconfigured state. */
-    clear: function() {
+    /** @overrides myt.Reusable */
+    clean: function() {
         this.to = this.from = this.attribute = this.callback = undefined;
         this.duration = 1000;
         this.relative = this.reverse = false;
