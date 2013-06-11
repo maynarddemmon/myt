@@ -81,7 +81,8 @@ myt.URI = new JS.Class('URI', {
     },
     
     getQueryParam: function(name) {
-        return this.decodeQueryParam(this.queryPairs[name]);
+        var v = this.queryPairs[name];
+        return v == null ? undefined : this.decodeQueryParam(v);
     },
     
     getPathParts: function(allowEmpties) {
