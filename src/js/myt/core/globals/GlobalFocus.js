@@ -108,9 +108,11 @@ new JS.Singleton('GlobalFocus', {
                 
                 // Get closest model for dom element
                 var m = null;
+                var fdModel;
                 while (fd) {
-                    if (fd.model) {
-                        m = fd.model;
+                    fdModel = fd.model;
+                    if (fdModel && fdModel instanceof myt.View) {
+                        m = fdModel;
                         break;
                     }
                     fd = fd.parentNode;
@@ -182,7 +184,7 @@ new JS.Singleton('GlobalFocus', {
             // Check that the element is focusable
             if (elem.nodeType === 1) {
                 model = elem.model;
-                if (model && model.isFocusable()) return model;
+                if (model && model instanceof myt.View && model.isFocusable()) return model;
                 
                 var nodeName = elem.nodeName;
                 if (nodeName === 'A' || nodeName === 'AREA') {
