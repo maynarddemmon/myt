@@ -51,7 +51,11 @@ myt.Timer = new JS.Class('Timer', {
             var self = this;
             this.setTimerId(setTimeout(function() {
                 self.setTimerId(undefined);
-                self.callback.execute();
+                if (self.callback.execute) {
+                    self.callback.execute();
+                } else {
+                    self.callback.call(this);
+                }
             }, delayInMillis));
         }
     },
