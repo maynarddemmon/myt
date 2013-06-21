@@ -20,10 +20,9 @@ new JS.Singleton('GlobalIdle', {
     initialize: function() {
         this.running = false;
         
-        var vendors = ['ms', 'moz', 'webkit', 'o'];
-        var vendor;
-        for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-            vendor = vendors[x];
+        var vendor, vendors = ['webkit','moz','ms','o'];
+        for (var i = 0; i < vendors.length && !window.requestAnimationFrame; ++i) {
+            vendor = vendors[i];
             window.requestAnimationFrame = window[vendor + 'RequestAnimationFrame'];
             window.cancelAnimationFrame = window[vendor + 'CancelAnimationFrame'] || window[vendor + 'CancelRequestAnimationFrame'];
         }
@@ -47,33 +46,33 @@ new JS.Singleton('GlobalIdle', {
         return retval;
     },
     
+    /** Start firing idle events.
+        @returns void */
     start: function() {
-        if (this.running) return;
-        
-        var self = this;
-        function doIdle(time) {
-            if (self.lastTime === -1) {
-                // Don't fire idle events for first browser "idle" event.
-                // Instead, use it to record lastTime so we will have a delta
-                // when we do fire idle events.
-                self.lastTime = time;
+        if (!this.running) {
+            var self = this;
+            function doFirstIdle(time) {
                 self.__timerId = window.requestAnimationFrame(doIdle);
-            } else {
+                self.lastTime = time;
+            };
+            function doIdle(time) {
                 self.__timerId = window.requestAnimationFrame(doIdle);
                 self.fireNewEvent('idle', {delta:time - self.lastTime, time:time});
                 self.lastTime = time;
-            }
-        };
-        
-        this.running = true;
-        this.lastTime = -1;
-        this.__timerId = window.requestAnimationFrame(doIdle);
+            };
+            
+            this.running = true;
+            this.lastTime = -1;
+            this.__timerId = window.requestAnimationFrame(doFirstIdle);
+        }
     },
     
+    /** Stop firing idle events.
+        @returns void */
     stop: function() {
-        if (!this.running) return;
-        
-        window.cancelAnimationFrame(this.__timerId);
-        this.running = false;
+        if (this.running) {
+            window.cancelAnimationFrame(this.__timerId);
+            this.running = false;
+        }
     }
 });
