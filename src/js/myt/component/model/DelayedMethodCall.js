@@ -3,7 +3,7 @@
     the method is executed. */
 myt.DelayedMethodCall = new JS.Class('DelayedMethodCall', {
     // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {        
+    extend: {
         /** Mixes DelayedMethodCall functionality onto the provided scope.
             @param scope:Observable|Class|Module the scope to mix onto.
             @param millis:number the time to delay the call by.
