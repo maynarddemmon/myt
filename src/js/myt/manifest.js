@@ -145,8 +145,9 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'drawingmethod/DrawingMethod.js').provides('myt.DrawingMethod').requires('myt');
     
     // Component : Model
-    file(MYT_COMPONENT_ROOT + 'model/BAGMembership.js').provides('myt.BAGMembership').requires('myt.Node');
-    file(MYT_COMPONENT_ROOT + 'model/BAG.js'          ).provides('myt.BAG'          ).requires('myt.BAGMembership');
+    file(MYT_COMPONENT_ROOT + 'model/BAGMembership.js'    ).provides('myt.BAGMembership'    ).requires('myt.Node');
+    file(MYT_COMPONENT_ROOT + 'model/BAG.js'              ).provides('myt.BAG'              ).requires('myt.BAGMembership');
+    file(MYT_COMPONENT_ROOT + 'model/DelayedMethodCall.js').provides('myt.DelayedMethodCall').requires('myt.AccessorSupport','myt.Timer');
     
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
@@ -156,6 +157,6 @@ JS.Packages(function() {with(this) {
         'myt.SizeToWindowWidth', 'myt.SizeToWindowHeight', 'myt.TransformSupport', 
         'myt.Animator', 'myt.Callback', 'myt.RepeatableTimer', 'myt.StateMachine', 'myt.URI', 'myt.Ajax', 
         'myt.Draggable', 'myt.WrappingLayout', 'myt.ResizeLayout', 'myt.AlignedLayout', 'myt.SimpleButton', 'myt.ImageButton', 'myt.ThreePanel',
-        'myt.DrawingMethod', 'myt.BAG'
+        'myt.DrawingMethod', 'myt.BAG','myt.DelayedMethodCall'
     );
 }});

@@ -21,11 +21,12 @@ myt.ThresholdCounter = new JS.Class('ThresholdCounter', {
                 attribute was 'locked' this would be 'lockedThreshold'.
             @returns boolean True if creation succeeded, false otherwise. */
         createThresholdCounter: function(scope, exceededAttrName, counterAttrName, thresholdAttrName) {
-            counterAttrName = counterAttrName || myt.AccessorSupport.generateName('counter', exceededAttrName);
-            thresholdAttrName = thresholdAttrName || myt.AccessorSupport.generateName('threshold', exceededAttrName);
+            var genNameFunc = myt.AccessorSupport.generateName;
+            counterAttrName = counterAttrName || genNameFunc('counter', exceededAttrName);
+            thresholdAttrName = thresholdAttrName || genNameFunc('threshold', exceededAttrName);
             
-            var incrName = myt.AccessorSupport.generateName(counterAttrName, 'increment');
-            var decrName = myt.AccessorSupport.generateName(counterAttrName, 'decrement');
+            var incrName = genNameFunc(counterAttrName, 'increment');
+            var decrName = genNameFunc(counterAttrName, 'decrement');
             var thresholdSetterName = myt.AccessorSupport.generateSetterName(thresholdAttrName);
             
             var isModuleOrClass = typeof scope === 'function' || scope instanceof JS.Module;
@@ -106,8 +107,9 @@ myt.ThresholdCounter = new JS.Class('ThresholdCounter', {
         initializeThresholdCounter: function(
             scope, initialValue, thresholdValue, exceededAttrName, counterAttrName, thresholdAttrName
         ) {
-            counterAttrName = counterAttrName || myt.AccessorSupport.generateName('counter', exceededAttrName);
-            thresholdAttrName = thresholdAttrName || myt.AccessorSupport.generateName('threshold', exceededAttrName);
+            var genNameFunc = myt.AccessorSupport.generateName;
+            counterAttrName = counterAttrName || genNameFunc('counter', exceededAttrName);
+            thresholdAttrName = thresholdAttrName || genNameFunc('threshold', exceededAttrName);
             
             scope[counterAttrName] = initialValue;
             scope[thresholdAttrName] = thresholdValue;
@@ -127,10 +129,11 @@ myt.ThresholdCounter = new JS.Class('ThresholdCounter', {
                 attribute was 'locked' this would be 'lockedCounter'.
             @returns boolean True if creation succeeded, false otherwise. */
         createFixedThresholdCounter: function(scope, thresholdValue, exceededAttrName, counterAttrName) {
-            counterAttrName = counterAttrName || myt.AccessorSupport.generateName('counter', exceededAttrName);
+            var genNameFunc = myt.AccessorSupport.generateName;
+            counterAttrName = counterAttrName || genNameFunc('counter', exceededAttrName);
             
-            var incrName = myt.AccessorSupport.generateName(counterAttrName, 'increment');
-            var decrName = myt.AccessorSupport.generateName(counterAttrName, 'decrement');
+            var incrName = genNameFunc(counterAttrName, 'increment');
+            var decrName = genNameFunc(counterAttrName, 'decrement');
             
             var isModuleOrClass = typeof scope === 'function' || scope instanceof JS.Module;
             

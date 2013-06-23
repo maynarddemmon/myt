@@ -1,10 +1,11 @@
-/** A utility class that will call a Callback after a specified time. */
+/** A utility class that will call a myt.Callback or function after a 
+    specified time. */
 myt.Timer = new JS.Class('Timer', {
     // Constructor /////////////////////////////////////////////////////////////
     /** Creates a new Timer. If a callback and delay are provided
         the timer is started.
-        @param callback:Callback the Callback to execute when the timer
-            completes.
+        @param callback:myt.Callback/function the callback to execute when the
+            timer completes.
         @param delayInMillis:Number the length of time to delay for. */
     initialize: function(callback, delayInMillis) {
         this.reset(callback, delayInMillis);
@@ -12,7 +13,7 @@ myt.Timer = new JS.Class('Timer', {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    /** The Callback to execute when the time completes. */
+    /** The myt.Callback or function to execute when the time completes. */
     setCallback: function(callback) {
         this.callback = callback;
     },
