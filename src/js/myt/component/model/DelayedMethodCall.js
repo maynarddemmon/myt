@@ -3,7 +3,13 @@
     the method is executed. */
 myt.DelayedMethodCall = new JS.Class('DelayedMethodCall', {
     // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
+    extend: {        
+        /** Mixes DelayedMethodCall functionality onto the provided scope.
+            @param scope:Observable|Class|Module the scope to mix onto.
+            @param millis:number the time to delay the call by.
+            @param methodName:string the name of the method to call after the
+                delay.
+            @returns boolean True if creation succeeded, false otherwise. */
         createDelayedMethodCall: function(scope, millis, methodName) {
             var genNameFunc = myt.AccessorSupport.generateName;
             var delayedMethodName = genNameFunc('delayed', methodName);
@@ -29,6 +35,9 @@ myt.DelayedMethodCall = new JS.Class('DelayedMethodCall', {
             // Define the "module".
             var mod = {};
             
+            /** Calls the method after a delay. Resets the delay timer if
+                this method is called again before the timer has finished.
+                @returns void */
             mod[delayedMethodName] = function() {
                 var callback = this[callbackName];
                 if (!callback) callback = this[callbackName] = new myt.Callback(methodName, this);
