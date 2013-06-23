@@ -55,7 +55,7 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
                 var layout, i = layouts.length;
                 while (i) {
                     layout = layouts[--i];
-                    delete layout.__deferredLayout;
+                    layout.__deferredLayout = false;
                     layout.update();
                 }
                 layouts.length = 0;

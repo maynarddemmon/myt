@@ -56,7 +56,7 @@ myt.Button = new JS.Module('Button', {
             var rc = this.__restoreCursor;
             if (rc) {
                 this.setCursor(this.__restoreCursor);
-                delete this.__restoreCursor;
+                this.__restoreCursor = null;
             }
             
             if (this.activateKeyDown !== -1 || this.mouseDown) {
