@@ -49,9 +49,11 @@ asyncTest("Two calls collapse into one.", 1, function() {
 });
 
 asyncTest("Ensure delay is long enough.", 1, function() {
+    var delay = 10;
     var TestClass = new JS.Class('TestClass', myt.Node, {
         doIt: function() {
-            ok((new Date()).getTime() - now > 100, "doIt method called.");
+            var delta = (new Date()).getTime() - now;
+            ok(delta >= delay, "doIt method called before expected delay: " +  delta + " < " +  delay);
             start();
         }
     });
@@ -59,7 +61,7 @@ asyncTest("Ensure delay is long enough.", 1, function() {
     var n = new TestClass();
     
     var now = (new Date()).getTime();
-    myt.DelayedMethodCall.createDelayedMethodCall(n, 100, 'doIt');
+    myt.DelayedMethodCall.createDelayedMethodCall(n, delay, 'doIt');
     
     n.doItDelayed();
 });

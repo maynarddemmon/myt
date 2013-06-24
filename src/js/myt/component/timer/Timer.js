@@ -50,14 +50,18 @@ myt.Timer = new JS.Class('Timer', {
     run: function(delayInMillis) {
         if (this.callback && delayInMillis >= 0) {
             var self = this;
-            this.setTimerId(setTimeout(function() {
+            var func = function() {
                 self.setTimerId(undefined);
                 if (self.callback.execute) {
                     self.callback.execute();
                 } else {
                     self.callback.call(this);
                 }
-            }, delayInMillis));
+            };
+            
+            this.setTimerId(
+                BrowserDetect.browser === 'Firefox' ? this.__setTimeout(func, delayInMillis) : setTimeout(func, delayInMillis)
+            );
         }
     },
     
@@ -65,5 +69,19 @@ myt.Timer = new JS.Class('Timer', {
         @returns boolean */
     isRunning: function() {
         return this.timerId !== undefined;
+    },
+    
+    /** Fix for firefox since that browser often executes setTimeout early. */
+    __setTimeout: function(f, t) {
+        var self = this;
+        var endTime = new Date().getTime() + t;
+        return setTimeout(function() {
+            var now = new Date().getTime();
+            if (now < endTime) {
+                self.setTimerId(self.__setTimeout(f, endTime - now));
+            } else {
+                f();
+            }
+        }, t);
     }
 });

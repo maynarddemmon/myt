@@ -2,27 +2,31 @@
 BrowserDetect = {
     init: function() {
         this.browser = this.searchString(this.dataBrowser) || "UNKNOWN";
-        this.version = this.searchVersion(navigator.userAgent)
-            || this.searchVersion(navigator.appVersion) || "UNKNOWN";
+        this.version = this.searchVersion(navigator.userAgent) || this.searchVersion(navigator.appVersion) || "UNKNOWN";
         this.OS = this.searchString(this.dataOS) || "UNKNOWN";
     },
+    
     searchString: function(data) {
-        for (var i=0;i<data.length;i++) {
-            var dataString = data[i].string;
-            var dataProp = data[i].prop;
-            this.versionSearchString = data[i].versionSearch || data[i].identity;
+        var dataItem;
+        for (var i = 0, len = data.length; i < len; ++i) {
+            dataItem = data[i];
+            var dataString = dataItem.string;
+            var dataProp = dataItem.prop;
+            this.versionSearchString = dataItem.versionSearch || dataItem.identity;
             if (dataString) {
-                if (dataString.indexOf(data[i].subString) != -1) return data[i].identity;
+                if (dataString.indexOf(dataItem.subString) !== -1) return dataItem.identity;
             } else if (dataProp) {
-                return data[i].identity;
+                return dataItem.identity;
             }
         }
     },
+    
     searchVersion: function(dataString) {
         var index = dataString.indexOf(this.versionSearchString);
         if (index == -1) return;
-        return parseFloat(dataString.substring(index+this.versionSearchString.length+1));
+        return parseFloat(dataString.substring(index + this.versionSearchString.length + 1));
     },
+    
     dataBrowser: [{
         string:navigator.userAgent,
         subString:"Chrome",
@@ -51,6 +55,7 @@ BrowserDetect = {
         identity:"Explorer",
         versionSearch:"MSIE"
     }],
+    
     dataOS: [{
         string:navigator.platform,
         subString:"Win",
