@@ -49,7 +49,7 @@ asyncTest("Two calls collapse into one.", 1, function() {
 });
 
 asyncTest("Ensure delay is long enough.", 1, function() {
-    var delay = 10;
+    var delay = 100;
     var TestClass = new JS.Class('TestClass', myt.Node, {
         doIt: function() {
             var delta = (new Date()).getTime() - now;
