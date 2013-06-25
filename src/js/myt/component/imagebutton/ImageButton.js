@@ -1,6 +1,7 @@
 /** A BaseImageButton with contents that consist of an icon and text. */
 myt.ImageButton = new JS.Class('ImageButton', myt.BaseImageButton, {
     include: [myt.MouseableH3Panel, myt.TooltipMixin],
+    // FIXME: is myt.MouseableH3Panel necessary since it is already in myt.BaseImageButton?
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
@@ -123,7 +124,7 @@ myt.ImageButton = new JS.Class('ImageButton', myt.BaseImageButton, {
         if (this.__updateContentPositionBlock) return;
         
         var tid = this.__updateContentPositionTimerId;
-        if (tid) clearTimeout(tid);
+        if (tid) clearTimeout(tid); // FIXME: do we need to reset or should we just abort?
         
         var self = this;
         this.__updateContentPositionTimerId = setTimeout(function() {

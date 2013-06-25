@@ -1,6 +1,12 @@
 /** Allows a view to act as a "root" for a view hierarchy. A "root" view is 
     backed by a dom element from the page rather than a dom element created 
-    by the view. */
+    by the view.
+    
+    Attributes:
+        keepDomElementWhenDestroyed:boolean Indicates the dom element backing 
+            this view must not be destroyed when this view is destroyed. 
+            Defaults to undefined which is equivalent to false.
+*/
 myt.RootView = new JS.Module('RootView', {
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
@@ -19,12 +25,16 @@ myt.RootView = new JS.Module('RootView', {
     /** @overrides myt.View */
     destroyAfterOrphaning: function() {
         myt.global.roots.removeRoot(this);
-        this.removeDomElement();
+        if (!this.keepDomElementWhenDestroyed) this.removeDomElement();
         this.callSuper();
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
+    setKeepDomElementWhenDestroyed: function(keepDomElementWhenDestroyed) {
+        this.keepDomElementWhenDestroyed = keepDomElementWhenDestroyed;
+    },
+    
     /** @overrides myt.Node */
     setParent: function(parent) {
         // RootView views don't have a parent.

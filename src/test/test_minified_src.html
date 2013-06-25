@@ -2,8 +2,13 @@
 <title>Myt Framework Unit Tests : Minified</title>
 <link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.12.0.css"/>
 <script src="http://code.jquery.com/qunit/qunit-1.12.0.js"></script>
+<script>window.QUnit || document.write('<script src="./qunit/qunit-1.12.0.js">\x3C/script><link rel="stylesheet" href="./qunit/qunit-1.12.0.css"/>');</script>
+
 <link rel="stylesheet" href="../css/myt.scss"/>
+
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.0/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="../js/jquery/jquery-1.10.0.min.js">\x3C/script>');</script>
+
 <script>var ROOT = '../js/';</script>
 <script src="../js/boilerplate.js"></script>
 <script src="../js/myt/myt.min.js"></script>
@@ -11,10 +16,6 @@
 <body>
 <div id="qunit"></div>
 <div id="qunit-fixture"></div>
-
-<!-- FIXME: insert these divs as part of the tests themselves. -->
-<div id="appDiv" style="position:absolute;"></div>
-<div id="tooltipDiv" style="position:absolute;"></div>
 
 <script src="tests/shim/test-BrowserDetect.js"></script>
 <script src="tests/shim/test-JSON.js"></script>
@@ -30,5 +31,7 @@
 <script src="tests/core/test-Observer.js"></script>
 <script src="tests/core/test-ThresholdCounter.js"></script>
 <script src="tests/core/test-DelayedMethodCall.js"></script>
+
+<script src="tests/core/test-View.js"></script>
 
 </body></html>

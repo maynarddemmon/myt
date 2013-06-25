@@ -356,7 +356,7 @@ myt.View = new JS.Class('View', myt.Node, {
         @returns void */
     __applyClipToDom: function() {
         var style = this.deStyle;
-        style.clip = this.clip ? 'rect(0px,' + style.width + ',' + style.height + ',0px)' : 'auto';
+        style.clip = this.clip ? 'rect(0px ' + style.width + ' ' + style.height + ' 0px)' : 'auto';
     },
     
     /** Updates the boundsWidth and boundsHeight attributes.
