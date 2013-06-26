@@ -47,6 +47,11 @@ myt.View = new JS.Class('View', myt.Node, {
         
         this.setDomElement(this.createOurDomElement(parent));
         
+        // Necessary since x and y of 0 won't update deStyle so this gets
+        // things initialized correctly. Without this RootViews will have
+        // an incorrect initial position for x or y of 0.
+        this.deStyle.left = this.deStyle.top = '0px';
+        
         this.callSuper(parent, attrs);
         
         // Set default bgcolor afterwards if still undefined. This allows 
@@ -356,7 +361,7 @@ myt.View = new JS.Class('View', myt.Node, {
         @returns void */
     __applyClipToDom: function() {
         var style = this.deStyle;
-        style.clip = this.clip ? 'rect(0px ' + style.width + ' ' + style.height + ' 0px)' : 'auto';
+        style.clip = this.clip ? 'rect(0px, ' + style.width + ', ' + style.height + ', 0px)' : 'auto';
     },
     
     /** Updates the boundsWidth and boundsHeight attributes.
