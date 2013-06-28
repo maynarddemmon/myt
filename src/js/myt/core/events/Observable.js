@@ -187,7 +187,11 @@ myt.Observable = new JS.Module('Observable', {
             
             // Stop firing the event if it was "consumed".
             try {
-                if (observer[methodName](event)) break;
+                if (typeof methodName === 'function') {
+                    if (methodName.call(observer, event)) break;
+                } else {
+                    if (observer[methodName](event)) break;
+                }
             } catch (err) {
                 console.error(err.stack || err.stacktrace);
             }
