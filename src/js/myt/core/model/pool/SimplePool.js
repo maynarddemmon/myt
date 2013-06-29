@@ -24,9 +24,12 @@ myt.SimplePool = new JS.Class('SimplePool', myt.AbstractPool, {
         Creates an instance of this.instanceClass and passes in 
         this.instanceParent as the first argument if it exists. */
     createInstance: function() {
+        // If we ever need full arguments with new, see:
+        // http://stackoverflow.com/questions/1606797/use-of-apply-with-new-operator-is-this-possible
         var parent = this.instanceParent;
         if (parent) {
-            return new this.instanceClass(parent);
+            var attrs = arguments[0];
+            return new this.instanceClass(parent, attrs);
         } else {
             return new this.instanceClass();
         }

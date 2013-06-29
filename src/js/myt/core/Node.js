@@ -459,7 +459,8 @@ myt.Node = new JS.Class('Node', {
         var animPool = this.__animPool;
         if (!animPool) animPool = this.__animPool = new myt.TrackActivesPool(myt.Animator, this);
         
-        var anim = animPool.getInstance();
+        // ignorePlacement ensures the animator is directly attached to this node
+        var anim = animPool.getInstance({ignorePlacement:true});
         
         if (typeof attribute === 'object') {
             // Handle a single map argument if provided
