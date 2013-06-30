@@ -1,42 +1,3 @@
-/**
- * JS.Class: Ruby-style JavaScript
- * http://jsclass.jcoglan.com
- * Copyright (c) 2007-2013 James Coglan and contributors
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- * 
- * Parts of the Software build on techniques from the following open-source
- * projects:
- * 
- * * The Prototype framework, (c) 2005-2010 Sam Stephenson (MIT license)
- * * Alex Arnell's Inheritance library, (c) 2006 Alex Arnell (MIT license)
- * * Base, (c) 2006-2010 Dean Edwards (MIT license)
- * 
- * The Software contains direct translations to JavaScript of these open-source
- * Ruby libraries:
- * 
- * * Ruby standard library modules, (c) Yukihiro Matsumoto and contributors (Ruby license)
- * * Test::Unit, (c) 2000-2003 Nathaniel Talbott (Ruby license)
- * * Context, (c) 2008 Jeremy McAnally (MIT license)
- * * EventMachine::Deferrable, (c) 2006-07 Francis Cianfrocca (Ruby license)
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
-
 var JS = (typeof this.JS === 'undefined') ? {} : this.JS;
 JS.Date = Date;
 
@@ -54,7 +15,6 @@ JS.Date = Date;
 
 })(function(global, exports) {
 'use strict';
-
 
 var Package = function(loader) {
   Package._index(this);
@@ -80,7 +40,7 @@ Package.log = function(message) {
 
 var resolve = function(filename) {
   if (/^https?:/.test(filename)) return filename;
-  var root = exports.WEB_ROOT;
+  var root = exports.ROOT;
   if (root) filename = (root + '/' + filename).replace(/\/+/g, '/');
   return filename;
 };
@@ -322,10 +282,12 @@ Package.when = function(eventTable, block, context) {
 //================================================================
 // Indexes for fast lookup by path and name, and assigning IDs
 
-Package._autoIncrement = 1;
-Package._indexByPath   = {};
-Package._indexByName   = {};
-Package._autoloaders   = [];
+var globalPackage = (global.JS || {}).Package || {};
+
+Package._autoIncrement = globalPackage._autoIncrement || 1;
+Package._indexByPath   = globalPackage._indexByPath   || {};
+Package._indexByName   = globalPackage._indexByName   || {};
+Package._autoloaders   = globalPackage._autoloaders   || [];
 
 Package._index = function(pkg) {
   pkg.id = this._autoIncrement;
@@ -420,7 +382,6 @@ Package._getObject = function(name, rootObject) {
   return cached.obj = object;
 };
 
-
 Package.CommonJSLoader = {
   usable: function() {
     return typeof require === 'function' &&
@@ -432,14 +393,11 @@ Package.CommonJSLoader = {
   },
 
   loadFile: function(path, fireCallbacks) {
-    var file;
+    var file, module;
 
     if (typeof process !== 'undefined') {
-      var cwd    = process.cwd(),
-          module = path.replace(/\.[^\.]+$/g, ''),
-          path   = require('path');
-
-      file = path.resolve(module);
+      module = path.replace(/\.[^\.]+$/g, '');
+      file   = require('path').resolve(module);
     }
     else if (typeof phantom !== 'undefined') {
       file = phantom.libraryPath.replace(/\/$/, '') + '/' +
@@ -453,7 +411,6 @@ Package.CommonJSLoader = {
     return module;
   }
 };
-
 
 Package.BrowserLoader = {
   HOST_REGEX: /^(https?\:)?\/\/[^\/]+/i,
@@ -551,7 +508,6 @@ Package.BrowserLoader = {
   _K: function() {}
 };
 
-
 Package.RhinoLoader = {
   usable: function() {
     return typeof java === 'object' &&
@@ -575,7 +531,6 @@ Package.RhinoLoader = {
   }
 };
 
-
 Package.ServerLoader = {
   usable: function() {
     return typeof Package._getObject('load') === 'function' &&
@@ -592,7 +547,6 @@ Package.ServerLoader = {
     fireCallbacks();
   }
 };
-
 
 Package.WshLoader = {
   usable: function() {
@@ -617,7 +571,6 @@ Package.WshLoader = {
     }
   }
 };
-
 
 Package.XULRunnerLoader = {
   jsloader:   '@mozilla.org/moz/jssubscript-loader;1',
@@ -653,7 +606,6 @@ Package.XULRunnerLoader = {
   }
 };
 
-
 var candidates = [  Package.XULRunnerLoader,
                     Package.RhinoLoader,
                     Package.BrowserLoader,
@@ -672,7 +624,6 @@ for (i = 0; i < n; i++) {
     break;
   }
 }
-
 
 var DSL = {
   __FILE__: function() {
@@ -725,7 +676,7 @@ exports.load = function(path, callback) {
       n    = args.files.length;
 
   var loadNext = function(index) {
-    if (index === n) return args.callback.call(args.context || null);
+    if (index === n) return args.callback.call(args.context);
     Package.loader.loadFile(args.files[index], function() {
       loadNext(index + 1);
     });
@@ -738,18 +689,16 @@ exports.require = function() {
 
   Package.when({complete: args.files}, function(objects) {
     if (!args.callback) return;
-    args.callback.apply(args.context || null, objects && objects.complete);
+    args.callback.apply(args.context, objects && objects.complete);
   });
 
   return this;
 };
 
-
 exports.Package  = Package;
 exports.Packages = exports.packages = packages;
 exports.DSL      = DSL;
 });
-
 
 (function() {
 
@@ -811,10 +760,6 @@ P.packages(function() { with(this) {
     module('console')       .provides('JS.Console')
                             .requires('JS.Module',
                                       'JS.Enumerable');
-
-    module('benchmark')     .provides('JS.Benchmark')
-                            .requires('JS.Module')
-                            .requires('JS.Console');
 
     module('comparable')    .provides('JS.Comparable')
                             .requires('JS.Module');
@@ -897,4 +842,3 @@ P.packages(function() { with(this) {
 }});
 
 })();
-

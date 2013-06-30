@@ -1,42 +1,3 @@
-/**
- * JS.Class: Ruby-style JavaScript
- * http://jsclass.jcoglan.com
- * Copyright (c) 2007-2013 James Coglan and contributors
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- * 
- * Parts of the Software build on techniques from the following open-source
- * projects:
- * 
- * * The Prototype framework, (c) 2005-2010 Sam Stephenson (MIT license)
- * * Alex Arnell's Inheritance library, (c) 2006 Alex Arnell (MIT license)
- * * Base, (c) 2006-2010 Dean Edwards (MIT license)
- * 
- * The Software contains direct translations to JavaScript of these open-source
- * Ruby libraries:
- * 
- * * Ruby standard library modules, (c) Yukihiro Matsumoto and contributors (Ruby license)
- * * Test::Unit, (c) 2000-2003 Nathaniel Talbott (Ruby license)
- * * Context, (c) 2008 Jeremy McAnally (MIT license)
- * * EventMachine::Deferrable, (c) 2006-07 Francis Cianfrocca (Ruby license)
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
-
 var JS = (typeof this.JS === 'undefined') ? {} : this.JS;
 
 (function(factory) {
@@ -53,7 +14,6 @@ var JS = (typeof this.JS === 'undefined') ? {} : this.JS;
 
 })(function(global, exports) {
 'use strict';
-
 
 var JS = {ENV: global};
 
@@ -135,7 +95,6 @@ JS.match = function(category, object) {
        : category.match(object);
 };
 
-
 JS.Method = JS.makeClass();
 
 JS.extend(JS.Method.prototype, {
@@ -202,7 +161,7 @@ JS.extend(JS.Method.prototype, {
           _own:   this.hasOwnProperty(keyword.name)
         };
         kwd = keyword.filter(method, environment, this, arguments);
-        kwd.__kwd__ = true;
+        if (kwd) kwd.__kwd__ = true;
         this[keyword.name] = kwd;
       }
       var returnValue = callable.apply(this, arguments),
@@ -243,9 +202,9 @@ JS.Method.create = function(module, name, callable) {
 };
 
 JS.Method.compile = function(method, environment) {
-  return method && method.compile
-       ? method.compile(environment)
-       : method;
+  return (method instanceof this)
+      ? method.compile(environment)
+      : method;
 };
 
 JS.Method.__listeners__ = [];
@@ -523,7 +482,6 @@ JS.extend(JS.Module.prototype, {
   }
 });
 
-
 JS.Kernel = new JS.Module('Kernel', {
   __eigen__: function() {
     if (this.__meta__) return this.__meta__;
@@ -569,7 +527,7 @@ JS.Kernel = new JS.Module('Kernel', {
   },
 
   tap: function(block, context) {
-    block.call(context || null, this);
+    block.call(context, this);
     return this;
   },
 
@@ -590,7 +548,6 @@ JS.Kernel = new JS.Module('Kernel', {
     return object.__hash__;
   };
 })();
-
 
 JS.Class = JS.makeClass(JS.Module);
 
@@ -638,7 +595,6 @@ JS.extend(JS.Class.prototype, {
   }
 });
 
-
 (function() {
   var methodsFromPrototype = function(klass) {
     var methods = {},
@@ -683,22 +639,27 @@ JS.extend(JS.Class.prototype, {
 
 JS.NotImplementedError = new JS.Class('NotImplementedError', Error);
 
-
 JS.Method.keyword('callSuper', function(method, env, receiver, args) {
   var methods    = env.lookup(method.name),
       stackIndex = methods.length - 1,
       params     = JS.array(args);
 
-  return function() {
+  if (stackIndex === 0) return undefined;
+
+  var _super = function() {
     var i = arguments.length;
     while (i--) params[i] = arguments[i];
 
     stackIndex -= 1;
+    if (stackIndex === 0) delete receiver.callSuper;
     var returnValue = methods[stackIndex].apply(receiver, params);
+    receiver.callSuper = _super;
     stackIndex += 1;
 
     return returnValue;
   };
+
+  return _super;
 });
 
 JS.Method.keyword('blockGiven', function(method, env, receiver, args) {
@@ -716,7 +677,6 @@ JS.Method.keyword('yieldWith', function(method, env, receiver, args) {
     return block[0].apply(block[1] || null, arguments);
   };
 });
-
 
 JS.Interface = new JS.Class('Interface', {
   initialize: function(methods) {
@@ -741,15 +701,12 @@ JS.Interface = new JS.Class('Interface', {
   }
 });
 
-
 JS.Singleton = new JS.Class('Singleton', {
   initialize: function(name, parent, methods) {
     return new (new JS.Class(name, parent, methods));
   }
 });
 
-
 JS.extend(exports, JS);
 if (global.JS) JS.extend(global.JS, JS);
 });
-

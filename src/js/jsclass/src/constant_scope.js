@@ -54,4 +54,3 @@ var ConstantScope = new JS.Module('ConstantScope', {
 
 exports.ConstantScope = ConstantScope;
 });
-

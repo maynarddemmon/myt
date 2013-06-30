@@ -192,4 +192,3 @@ StackTrace.addObserver(StackTrace.logger);
 
 exports.StackTrace = StackTrace;
 });
-

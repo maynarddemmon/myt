@@ -10,7 +10,6 @@
 })(function(JS, Enumerable, exports) {
 'use strict';
 
-
 var Console = new JS.Module('Console', {
   extend: {
     nameOf: function(object, root) {
@@ -106,7 +105,7 @@ var Console = new JS.Module('Console', {
 
     filterBacktrace: function(stack) {
       if (!stack) return stack;
-      stack = stack.replace(/^\S.*\n/gm, '');
+      stack = stack.replace(/^\S.*\n?/gm, '');
       var filter = this.adapter.backtraceFilter();
 
       return filter
@@ -172,7 +171,8 @@ var Console = new JS.Module('Console', {
         magenta:    '35m',
         cyan:       '36m',
         white:      '37m',
-        nocolor:    '39m'
+        nocolor:    '39m',
+        grey:       '90m'
       },
 
       background: {
@@ -225,7 +225,6 @@ var Console = new JS.Module('Console', {
     Console.adapter.puts(string);
   }
 });
-
 
 Console.extend({
   Base: new JS.Class({
@@ -316,7 +315,6 @@ Console.extend({
   })
 });
 
-
 Console.extend({
   Browser: new JS.Class(Console.Base, {
     backtraceFilter: function() {
@@ -345,7 +343,6 @@ Console.extend({
   })
 });
 
-
 Console.extend({
   BrowserColor: new JS.Class(Console.Browser, {
     COLORS: {
@@ -353,17 +350,17 @@ Console.extend({
     },
 
     __queue__: [],
-    __state__: {},
+    __state__: null,
 
     format: function(type, name) {
       name = name.replace(/^bg/, '');
 
-      var state = JS.extend({}, this.__state__),
+      var state = JS.extend({}, this.__state__ || {}),
           color = this.COLORS[name] || name,
           no    = /^no/.test(name);
 
       if (type === 'reset')
-        state = {};
+        state = null;
       else if (no)
         delete state[type];
       else if (type === 'weight')
@@ -377,9 +374,9 @@ Console.extend({
       else if (type === 'background')
         state.background = 'background-color: ' + color;
       else
-        state = null;
+        state = undefined;
 
-      if (state) {
+      if (state !== undefined) {
         this.__state__ = state;
         this.__queue__.push(state);
       }
@@ -392,10 +389,14 @@ Console.extend({
     puts: function(string) {
       this.print(string);
       var buffer = '', formats = [], item;
-      while (item = this.__queue__.shift()) {
+      while ((item = this.__queue__.shift()) !== undefined) {
         if (typeof item === 'string') {
-          buffer += '%c' + item;
-          formats.push(this._serialize(this.__state__));
+          if (this.__state__) {
+            buffer += '%c' + item;
+            formats.push(this._serialize(this.__state__));
+          } else {
+            buffer += item;
+          }
         } else {
           this.__state__ = item;
         }
@@ -410,7 +411,6 @@ Console.extend({
     }
   })
 });
-
 
 Console.extend({
   Node: new JS.Class(Console.Base, {
@@ -454,7 +454,6 @@ Console.extend({
   })
 });
 
-
 Console.extend({
   Phantom: new JS.Class(Console.Base, {
     echo: function(string) {
@@ -470,7 +469,6 @@ Console.extend({
     }
   })
 });
-
 
 Console.extend({
   Rhino: new JS.Class(Console.Base, {
@@ -511,7 +509,6 @@ Console.extend({
   })
 });
 
-
 Console.extend({
   Windows: new JS.Class(Console.Base, {
     coloring: function() {
@@ -528,7 +525,6 @@ Console.extend({
   })
 });
 
-
 Console.BROWSER = (typeof window !== 'undefined');
 Console.NODE    = (typeof process === 'object') && !Console.BROWSER;
 Console.PHANTOM = (typeof phantom !== 'undefined');
@@ -539,7 +535,7 @@ Console.WSH     = (typeof WScript !== 'undefined');
 var useColor = false, ua;
 if (Console.BROWSER) {
   ua = navigator.userAgent;
-  if (window.console && (/Firefox/.test(ua) || /Chrome/.test(ua)))
+  if (window.console && /Chrome/.test(ua))
     useColor = true;
 }
 
@@ -561,7 +557,5 @@ for (var type in Console.ESCAPE_CODES) {
 
 Console.extend(Console);
 
-
 exports.Console = Console;
 });
-

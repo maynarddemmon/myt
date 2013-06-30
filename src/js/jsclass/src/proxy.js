@@ -71,4 +71,3 @@ var Proxy = new JS.Module('Proxy', {
 
 exports.Proxy = Proxy;
 });
-

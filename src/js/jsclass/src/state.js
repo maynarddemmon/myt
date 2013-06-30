@@ -113,4 +113,3 @@ var State = new JS.Module('State', {
 
 exports.State = State;
 });
-

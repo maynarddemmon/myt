@@ -48,4 +48,3 @@ var Comparable = new JS.Module('Comparable', {
 
 exports.Comparable = Comparable;
 });
-

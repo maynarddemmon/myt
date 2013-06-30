@@ -18,7 +18,6 @@
 })(function(JS, Console, DOM, Enumerable, SortedSet, Range, Hash, MethodChain, Comparable, StackTrace, exports) {
 'use strict';
 
-
 var Test = new JS.Module('Test', {
   extend: {
     asyncTimeout: 5,
@@ -50,7 +49,6 @@ var Test = new JS.Module('Test', {
     Unit: new JS.Module({})
   }
 });
-
 
 Test.Unit.extend({
   Observable: new JS.Module({
@@ -96,7 +94,6 @@ Test.Unit.extend({
   })
 });
 
-
 Test.Unit.extend({
   AssertionFailedError: new JS.Class(Error, {
     initialize: function(message) {
@@ -112,7 +109,7 @@ Test.Unit.extend({
         message = null;
       }
       this.__wrapAssertion__(function() {
-        if (!block.call(context || null)) {
+        if (!block.call(context)) {
           message = this.buildMessage(message || 'assertBlock failed');
           throw new Test.Unit.AssertionFailedError(message);
         }
@@ -127,6 +124,13 @@ Test.Unit.extend({
       this.__wrapAssertion__(function() {
         this.assertBlock(this.buildMessage(message, '<?> is not true', bool),
                          function() { return bool });
+      });
+    },
+
+    assertNot: function(bool, message) {
+      this.__wrapAssertion__(function() {
+        this.assertBlock(this.buildMessage(message, '<?> is not false', bool),
+                         function() { return !bool });
       });
     },
 
@@ -344,7 +348,6 @@ Test.Unit.extend({
   })
 });
 
-
 Test.Unit.extend({
   AssertionMessage: new JS.Class({
     extend: {
@@ -410,7 +413,6 @@ Test.Unit.extend({
   })
 });
 
-
 Test.Unit.extend({
   Failure: new JS.Class({
     initialize: function(testCase, message) {
@@ -438,10 +440,12 @@ Test.Unit.extend({
   })
 });
 
-
 Test.Unit.extend({
   Error: new JS.Class({
     initialize: function(testCase, exception) {
+      if (typeof exception === 'string')
+        exception = new Error(exception);
+
       this._testCase  = testCase;
       this._exception = exception;
     },
@@ -466,7 +470,6 @@ Test.Unit.extend({
     }
   })
 });
-
 
 Test.Unit.extend({
   TestResult: new JS.Class({
@@ -537,7 +540,6 @@ Test.Unit.extend({
   })
 });
 
-
 Test.Unit.extend({
   TestSuite: new JS.Class({
     include: Enumerable,
@@ -573,10 +575,10 @@ Test.Unit.extend({
           i += 1;
           if (i === n) {
             looping = false;
-            return continuation && continuation.call(context || null);
+            return continuation && continuation.call(context);
           }
           pinged = false;
-          block.call(context || null, tests[i], ping);
+          block.call(context, tests[i], ping);
           if (!pinged) looping = false;
         };
 
@@ -595,38 +597,42 @@ Test.Unit.extend({
 
     run: function(result, continuation, callback, context) {
       if (this._metadata.fullName)
-        callback.call(context || null, this.klass.STARTED, this);
+        callback.call(context, this.klass.STARTED, this);
 
       this.forEach(function(test, resume) {
         test.run(result, resume, callback, context)
 
       }, function() {
         if (this._metadata.fullName)
-          callback.call(context || null, this.klass.FINISHED, this);
+          callback.call(context, this.klass.FINISHED, this);
 
-        continuation.call(context || null);
+        continuation.call(context);
 
       }, this);
     },
 
     size: function() {
+      if (this._size !== undefined) return this._size;
       var totalSize = 0, i = this._tests.length;
-      while (i--) {
-        totalSize += this._tests[i].size();
-      }
-      return totalSize;
+      while (i--) totalSize += this._tests[i].size();
+      return this._size = totalSize;
     },
 
     empty: function() {
       return this._tests.length === 0;
     },
 
-    metadata: function() {
-      return JS.extend({size: this.size()}, this._metadata);
+    metadata: function(root) {
+      var data = JS.extend({size: this.size()}, this._metadata);
+      if (root) {
+        delete data.fullName;
+        delete data.shortName;
+        delete data.context;
+      }
+      return data;
     }
   })
 });
-
 
 Test.Unit.extend({
   TestCase: new JS.Class({
@@ -646,6 +652,55 @@ Test.Unit.extend({
       inherited: function(klass) {
         if (!this.testCases) this.testCases = [];
         this.testCases.push(klass);
+      },
+
+      pushErrorCathcer: function(handler, push) {
+        if (!handler) return;
+        this.popErrorCathcer(false);
+
+        if (Console.NODE)
+          process.addListener('uncaughtException', handler);
+        else if (Console.BROWSER)
+          window.onerror = handler;
+
+        if (push !== false) this.handlers.push(handler);
+        return handler;
+      },
+
+      popErrorCathcer: function(pop) {
+        var handlers = this.handlers,
+            handler  = handlers[handlers.length - 1];
+
+        if (!handler) return;
+
+        if (Console.NODE)
+          process.removeListener('uncaughtException', handler);
+        else if (Console.BROWSER)
+          window.onerror = null;
+
+        if (pop !== false) {
+          handlers.pop();
+          this.pushErrorCathcer(handlers[handlers.length - 1], false);
+        }
+      },
+
+      processError: function(testCase, error) {
+        if (!error) return;
+
+        if (JS.isType(error, Test.Unit.AssertionFailedError))
+          testCase.addFailure(error.message);
+        else
+          testCase.addError(error);
+      },
+
+      runWithExceptionHandlers: function(testCase, _try, _catch, _finally) {
+        try {
+          _try.call(testCase);
+        } catch (e) {
+          if (_catch) _catch.call(testCase, e);
+        } finally {
+          if (_finally) _finally.call(testCase);
+        }
       },
 
       metadata: function() {
@@ -721,14 +776,20 @@ Test.Unit.extend({
     },
 
     run: function(result, continuation, callback, context) {
-      callback.call(context || null, this.klass.STARTED, this);
+      callback.call(context, this.klass.STARTED, this);
       this._result = result;
 
-      var teardown = function() {
-        this.exec('teardown', function() {
-          this.exec(function() { Test.Unit.mocking.verify() }, function() {
+      var teardown = function(error) {
+        this.klass.processError(this, error);
+
+        this.exec('teardown', function(error) {
+          this.klass.processError(this, error);
+
+          this.exec(function() { Test.Unit.mocking.verify() }, function(error) {
+            this.klass.processError(this, error);
+
             result.addRun();
-            callback.call(context || null, this.klass.FINISHED, this);
+            callback.call(context, this.klass.FINISHED, this);
             continuation();
           });
         });
@@ -755,94 +816,50 @@ Test.Unit.extend({
           self     = this;
 
       if (arity === 0)
-        return this._runWithExceptionHandlers(function() {
+        return this.klass.runWithExceptionHandlers(this, function() {
           callable.call(this);
           onSuccess.call(this);
-        }, this._processError(onError));
+        }, onError);
 
       var onUncaughtError = function(error) {
-        self.exec(function() {
-          failed = true;
-          this._removeErrorCatcher();
-          if (timeout) JS.ENV.clearTimeout(timeout);
-          throw error;
-        }, onSuccess, onError);
+        failed = true;
+        self.klass.popErrorCathcer();
+        if (timeout) JS.ENV.clearTimeout(timeout);
+        onError.call(self, error);
       };
-      this._addErrorCatcher(onUncaughtError);
+      this.klass.pushErrorCathcer(onUncaughtError);
 
-      this._runWithExceptionHandlers(function() {
-        callable.call(this, function(asyncBlock) {
+      this.klass.runWithExceptionHandlers(this, function() {
+        callable.call(this, function(asyncResult) {
           resumed = true;
-          self._removeErrorCatcher();
+          self.klass.popErrorCathcer();
           if (timeout) JS.ENV.clearTimeout(timeout);
-          if (!failed) self.exec(asyncBlock, onSuccess, onError);
+          if (failed) return;
+
+          if (typeof asyncResult === 'string') asyncResult = new Error(asyncResult);
+
+          if (typeof asyncResult === 'object')
+            onUncaughtError(asyncResult);
+          else if (typeof asyncResult === 'function')
+            self.exec(asyncResult, onSuccess, onError);
+          else
+            self.exec(null, onSuccess, onError);
         });
-      }, this._processError(onError));
+      }, onError);
 
-      if (!resumed && JS.ENV.setTimeout)
-        timeout = JS.ENV.setTimeout(function() {
-          self.exec(function() {
-            failed = true;
-            this._removeErrorCatcher();
-            throw new Error('Timed out after waiting ' + Test.asyncTimeout + ' seconds for test to resume');
-          }, onSuccess, onError);
-        }, Test.asyncTimeout * 1000);
+      if (resumed || !JS.ENV.setTimeout) return;
+
+      timeout = JS.ENV.setTimeout(function() {
+        failed = true;
+        self.klass.popErrorCathcer();
+        var message = 'Timed out after waiting ' + Test.asyncTimeout + ' seconds for test to resume';
+        onError.call(self, new Error(message));
+      }, Test.asyncTimeout * 1000);
     },
 
-    _addErrorCatcher: function(handler, push) {
-      if (!handler) return;
-      this._removeErrorCatcher(false);
+    setup: function() {},
 
-      if (Console.NODE)
-        process.addListener('uncaughtException', handler);
-      else if (Console.BROWSER)
-        window.onerror = handler;
-
-      if (push !== false) this.klass.handlers.push(handler);
-      return handler;
-    },
-
-    _removeErrorCatcher: function(pop) {
-      var handlers = this.klass.handlers,
-          handler  = handlers[handlers.length - 1];
-
-      if (!handler) return;
-
-      if (Console.NODE)
-        process.removeListener('uncaughtException', handler);
-      else if (Console.BROWSER)
-        window.onerror = null;
-
-      if (pop !== false) {
-        handlers.pop();
-        this._addErrorCatcher(handlers[handlers.length - 1], false);
-      }
-    },
-
-    _processError: function(doNext) {
-      return function(e) {
-        if (JS.isType(e, Test.Unit.AssertionFailedError))
-          this.addFailure(e.message);
-        else
-          this.addError(e);
-
-        if (doNext) doNext.call(this);
-      };
-    },
-
-    _runWithExceptionHandlers: function(_try, _catch, _finally) {
-      try {
-        _try.call(this);
-      } catch (e) {
-        if (_catch) _catch.call(this, e);
-      } finally {
-        if (_finally) _finally.call(this);
-      }
-    },
-
-    setup: function(resume) { resume() },
-
-    teardown: function(resume) { resume() },
+    teardown: function() {},
 
     defaultTest: function() {
       return this.flunk('No tests were specified');
@@ -877,34 +894,23 @@ Test.Unit.extend({
       return {
         fullName:   klassData.fullName + ' ' + shortName,
         shortName:  shortName,
-        context:    klassData.context.concat(klassData.shortName),
-        size:       this.size()
+        context:    klassData.context.concat(klassData.shortName)
       };
     }
   })
 });
 
-
 Test.UI.extend({
   Terminal: new JS.Class({
-    OPTIONS: {format: String, test: Array},
-    SHORTS:  {'f': '--format', 't': '--test'},
-
     getOptions: function() {
       var options = {},
           format  = Console.envvar('FORMAT'),
-          test    = Console.envvar('TEST'),
-          nopt;
+          test    = Console.envvar('TEST');
 
       if (Console.envvar('TAP')) options.format = 'tap';
 
       if (format) options.format = format;
       if (test)   options.test   = [test];
-
-      if (Console.NODE) {
-        try { nopt = require('nopt') } catch (e) {}
-        if (nopt) JS.extend(options, nopt(this.OPTIONS, this.SHORTS));
-      }
 
       delete options.argv;
       options.test = options.test || [];
@@ -923,7 +929,6 @@ Test.UI.extend({
     }
   })
 });
-
 
 Test.UI.extend({
   Browser: new JS.Class({
@@ -958,14 +963,15 @@ Test.UI.extend({
     getReporters: function(options) {
       var reporters = [],
           R         = Test.Reporters,
+          reg       = R._registry,
           browser   = new R.Browser(options),
           reporter;
 
       reporters.push(new R.Coverage());
       reporters.push(browser);
 
-      for (var name in R) {
-        reporter = R[name] && R[name].create && R[name].create(options, browser);
+      for (var name in reg) {
+        reporter = reg[name] && reg[name].create && reg[name].create(options, browser);
         if (reporter) reporters.push(reporter);
       }
 
@@ -973,7 +979,6 @@ Test.UI.extend({
     }
   })
 });
-
 
 Test.Reporters.extend({
   Error: new JS.Class({
@@ -1018,7 +1023,10 @@ Test.Reporters.extend({
       this.puts(index + ') ' + this.NAMES[fault.error.type] + ': ' + fault.test.fullName);
       this.reset();
       this.puts(fault.error.message);
-      if (fault.error.backtrace) this.puts(fault.error.backtrace);
+      if (fault.error.backtrace) {
+        this.grey();
+        this.puts(fault.error.backtrace);
+      }
       this.reset();
       this.puts('');
     },
@@ -1045,7 +1053,6 @@ Test.Reporters.extend({
 });
 
 Test.Reporters.register('error', Test.Reporters.Error);
-
 
 Test.Reporters.extend({
   Dot: new JS.Class(Test.Reporters.Error, {
@@ -1087,312 +1094,6 @@ Test.Reporters.extend({
 
 Test.Reporters.register('dot', Test.Reporters.Dot);
 
-
-Test.Reporters.extend({
-  Progress: new JS.Class(Test.Reporters.Dot, {
-    extend: {
-      CACHE_TIME: 1000
-    },
-
-    startSuite: function(event) {
-      if (!Console.coloring())
-        throw new Error('Cannot use the progress reporter; terminal formatting is not available');
-
-      this._tests  = [];
-      this._faults = [];
-      this._start  = event.timestamp;
-      this._size   = event.size;
-      this._pipe   = '|';
-      this._space  = ' ';
-      this._lines  = [''];
-
-      var n = 10;
-      while (n--) {
-        this._space = this._space + this._space;
-        this._pipe = this._pipe + this._pipe;
-      }
- 
-      this.puts('\n\n\n');
-      this.cursorHide();
-    },
-
-    startTest: function(event) {
-      this._tests.push(event);
-
-      var words = event.fullName.split(/\s+/),
-          width = this._getWidth() - 10,
-          lines = [],
-          line  = '';
-
-      while (words.length > 0) {
-        while (words[0] && line.length + words[0].length + 1 <= width)
-          line += words.shift() + ' ';
-
-        if (words[0]) {
-          lines.push(line);
-          line = '';
-        }
-      }
-      lines.push(line);
-
-      while (lines.length < this._lines.length) lines.push('');
-      this._nextLines = lines;
-      this._draw();
-    },
-
-    endTest: function(event) {},
-
-    addFault: function(event) {
-      this._faults.push(event);
-      this._draw();
-    },
-
-    endSuite: function(event) {
-      this._passed = event.passed;
-      this._draw();
-      this.cursorPrevLine(2);
-      this.cursorShow();
-      this.callSuper();
-    },
-
-    _draw: function() {
-      var cols     = this._getWidth(),
-          fraction = this._tests.length / this._size,
-          test     = this._tests[this._tests.length - 1],
-          blocks   = Math.floor(cols * fraction),
-          percent  = String(Math.floor(100 * fraction)),
-          line, i, n;
-
-      this.cursorPrevLine(2 + this._lines.length);
-      this.reset();
-      this.print('  ');
-
-      if (this._faults.length > 0)
-        this.red();
-      else if (this._passed)
-        this.green();
-      else
-        this.cyan();
-
-      this.bold();
-      this.puts(this._pipe.substr(0, blocks));
-      this.reset();
-
-      if (this._passed !== undefined) {
-        this.eraseScreenForward();
-        return this.puts('');
-      }
-
-      while (percent.length < 2) percent = ' ' + percent;
-      percent = '[' + percent + '%]';
-      this.cursorForward(2 + cols - percent.length);
-      this.puts(percent);
-      this.cursorPrevLine(1);
-
-      this._lines = this._nextLines;
-      for (i = 0, n = this._lines.length; i < n; i++) {
-        line = this._lines[i];
-        this.puts('  ' + line + this._space.substr(0, cols - line.length - 10));
-      }
-
-      this.puts('');
-    },
-
-    _getWidth: function() {
-      var time = new JS.Date().getTime();
-      if (this._width && time < this._cacheTime + this.klass.CACHE_TIME)
-        return this._width;
-
-      this._cacheTime = new JS.Date().getTime();
-      return this._width = Console.getDimensions()[0] - 8;
-    }
-  })
-});
-
-Test.Reporters.register('progress', Test.Reporters.Progress);
-
-
-Test.Reporters.extend({
-  Spec: new JS.Class(Test.Reporters.Dot, {
-    extend: {
-      TICK:   '\u2713',
-      CROSS:  '\u2717'
-    },
-
-    startSuite: function(event) {
-      this._faults = [];
-      this._start  = event.timestamp;
-      this._stack  = [];
-
-      this.puts('');
-    },
-
-    startContext: function(event) {
-      if (event.context === null) return;
-      this.puts(this._indent(this._stack.length) + event.shortName);
-      this._stack.push(event.shortName);
-    },
-
-    startTest: function(event) {
-      this._testPassed = true;
-    },
-
-    addFault: function(event) {
-      this._faults.push(event);
-      this._testPassed = false;
-    },
-
-    endTest: function(event) {
-      var indent = this._indent(this._stack.length),
-          color  = this._testPassed ? 'green' : 'red',
-          icon   = this._testPassed ? this.klass.TICK : this.klass.CROSS,
-          number = this._testPassed ? '' : ' (' + this._faults.length + ')';
-
-      this.consoleFormat(color);
-      this.puts(indent + icon + number + ' ' + event.shortName);
-      this.reset();
-    },
-
-    endContext: function(event) {
-      if (event.context === null) return;
-      this._stack.pop();
-    },
-
-    _indent: function(n) {
-      var indent = '';
-      while (n--) indent += '  ';
-      return indent;
-    }
-  })
-});
-
-Test.Reporters.register('spec', Test.Reporters.Spec);
-
-
-Test.Reporters.extend({
-  XML: new JS.Class({
-    include: Console,
-
-    startSuite: function(event) {
-      this._faults = [];
-      this._stack  = [];
-      this._suites = [];
-
-      this.puts('<?xml version="1.0" encoding="UTF-8" ?>');
-      this.puts('<testsuites>');
-    },
-
-    startContext: function(event) {
-      if (event.context === null) return;
-      if (this._stack.length === 0)
-        this._suites.push({
-          name: event.shortName,
-          cases:    [],
-          tests:    0,
-          failures: 0,
-          errors:   0,
-          start:    event.timestamp
-        });
-      this._stack.push(event.shortName);
-    },
-
-    startTest: function(event) {
-      this._suites[this._suites.length - 1].cases.push({
-        name:     event.context.slice(1).concat(event.shortName).join(' '),
-        start:    event.timestamp,
-        failures: []
-      });
-    },
-
-    addFault: function(event) {
-      var suite = this._suites[this._suites.length - 1],
-          test  = suite.cases[suite.cases.length - 1];
-
-      if (event.error.type === 'failure') {
-        suite.failures += 1;
-        test.failures.push({type: 'Failure', error: event.error});
-      } else if (event.error.type === 'error') {
-        suite.errors += 1;
-        test.failures.push({type: 'Error', error: event.error});
-      }
-    },
-
-    endTest: function(event) {
-      var suite = this._suites[this._suites.length - 1],
-          test  = suite.cases[suite.cases.length - 1];
-
-      test.time = (event.timestamp - test.start) / 1000;
-      delete test.start;
-    },
-
-    endContext: function(event) {
-      this._stack.pop();
-      if (this._stack.length > 0) return;
-      var suite = this._suites[this._suites.length - 1];
-      suite.time = (event.timestamp - suite.start) / 1000;
-      delete suite.start;
-
-      var test, failure, ending, i, j, m, n;
-
-      this.puts('    <testsuite name="' + this._xmlStr(suite.name) +
-                             '" tests="' + suite.cases.length +
-                             '" failures="' + suite.failures +
-                             '" errors="' + suite.errors +
-                             '" time="' + suite.time +
-                             '">');
-
-      for (i = 0, n = suite.cases.length; i < n; i++) {
-        test   = suite.cases[i];
-        ending = (test.failures.length === 0) ? ' />' : '>';
-        this.puts('        <testcase classname="' + this._xmlStr(suite.name) +
-                                  '" name="' + this._xmlStr(test.name) +
-                                  '" time="' + test.time +
-                                  '"' + ending);
-
-        for (j = 0, m = test.failures.length; j < m; j++) {
-          failure = test.failures[j];
-          ending  = failure.error.backtrace ? '>' : ' />';
-          this.puts('            <failure type="' + failure.type +
-                                       '" message="' + this._xmlStr(failure.error.message) +
-                                       '"' + ending);
-
-          if (failure.error.backtrace) {
-            this._printBacktrace(failure.error.backtrace);
-            this.puts('            </failure>');
-          }
-        }
-        if (test.failures.length > 0)
-          this.puts('        </testcase>');
-      }
-      this.puts('    </testsuite>');
-    },
-
-    update: function(event) {},
-
-    endSuite: function(event) {
-      this.puts('</testsuites>');
-    },
-
-    _xmlStr: function(string) {
-      return string.replace(/[\s\t\r\n]+/g, ' ')
-                   .replace(/</g, '&lt;')
-                   .replace(/>/g, '&gt;')
-                   .replace(/"/g, '&quot;');
-    },
-
-    _printBacktrace: function(backtrace) {
-      var lines = backtrace.replace(/^\s*|\s*$/g, '').split(/\s*[\r\n]+\s*/);
-      for (var i = 0, n = lines.length; i < n; i++) {
-        this.puts('                ' + this._xmlStr(lines[i]));
-      }
-    }
-  })
-});
-
-Test.Reporters.register('xml', Test.Reporters.XML);
-Test.Reporters.register('junit', Test.Reporters.XML);
-
-
 Test.Reporters.extend({
   JSON: new JS.Class({
     include: Console,
@@ -1405,12 +1106,12 @@ Test.Reporters.extend({
     extend: {
       create: function() {
         if (!JS.ENV.navigator) return;
-        if (/\bPhantomJS\b/.test(navigator.userAgent)) return new this();
+        if (Test.Reporters.Headless.UA.test(navigator.userAgent)) return new this();
       },
 
       Reader: new JS.Class({
         initialize: function(reporter) {
-          this._reporter = reporter;
+          this._reporter = new Test.Reporters.Composite([reporter]);
         },
 
         read: function(message) {
@@ -1447,7 +1148,6 @@ Test.Reporters.extend({
 })();
 
 Test.Reporters.register('json', Test.Reporters.JSON);
-
 
 Test.Reporters.extend({
   TAP: new JS.Class({
@@ -1510,186 +1210,6 @@ Test.Reporters.extend({
 
 Test.Reporters.register('tap', Test.Reporters.TAP);
 
-
-// http://rubydoc.info/github/rubyworks/tapout/file/TAP-YJ.md
-
-Test.Reporters.extend({
-  TAP_YJ: new JS.Class({
-    STATUSES: {
-      failure: 'fail',
-      error:   'error'
-    },
-
-    startSuite: function(event) {
-      this._write({
-        type:  'suite',
-        start: this._timestamp(),
-        count: event.size,
-        rev:   2
-      });
-      this._start = event.timestamp;
-    },
-
-    startContext: function(event) {
-      this._write({
-        type:  'case',
-        label: event.shortName,
-        level: event.context.length
-      });
-    },
-
-    startTest: function(event) {
-      this._faults = [];
-      this._status = null;
-    },
-
-    addFault: function(event) {
-      this._faults.push(event);
-      this._status = this._status || this.STATUSES[event.error.type];
-    },
-
-    endTest: function(event) {
-      var payload = {
-        type:   'test',
-        status: this._status || 'pass',
-        label:  event.shortName,
-        time:   this._ellapsedTime(event.timestamp)
-      };
-
-      var fault = this._faults[0];
-      if (fault)
-        payload.exception = {
-          message:   fault.error.message,
-          backtrace: fault.error.backtrace ? fault.error.backtrace.split('\n') : []
-        };
-
-      this._write(payload);
-    },
-
-    endContext: function(event) {},
-
-    update: function(event) {},
-
-    endSuite: function(event) {
-      this._write({
-        type: 'final',
-        time: this._ellapsedTime(event.timestamp),
-        counts: {
-          total: event.tests,
-          pass:  event.tests - event.failures - event.errors,
-          fail:  event.failures,
-          error: event.errors
-        }
-      });
-    },
-
-    _ellapsedTime: function(timestamp) {
-      return (timestamp - this._start) / 1000;
-    },
-
-    _write: function(object) {
-      Console.puts(this._serialize(object));
-    },
-
-    _timestamp: function() {
-      var date   = new JS.Date(),
-          year   = date.getFullYear(),
-          month  = this._pad(date.getMonth() + 1),
-          day    = this._pad(date.getDay()),
-          hour   = this._pad(date.getHours()),
-          minute = this._pad(date.getMinutes()),
-          second = this._pad(date.getSeconds());
-
-      return year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second;
-    },
-
-    _pad: function(value) {
-      var string = value.toString();
-      while (string.length < 2) string = '0' + string;
-      return string;
-    }
-  })
-});
-
-Test.Reporters.extend({
-  TAP_YAML: new JS.Class(Test.Reporters.TAP_YJ, {
-    _serialize: function(value, level) {
-      level = level || 0;
-
-      var out = '';
-      if (level === 0) out = '---';
-
-      if      (value instanceof Array)    out += this._array(value, level);
-      else if (typeof value === 'object') out += this._object(value, level);
-      else if (typeof value === 'string') out += this._string(value, level);
-      else if (typeof value === 'number') out += this._number(value, level);
-
-      return out;
-    },
-
-    _array: function(value, level) {
-      if (value.length === 0) return '[]';
-      var out = '', indent = this._indent(level);
-      for (var i = 0, n = value.length; i < n; i++) {
-        out += '\n' + indent + '- ' + this._serialize(value[i], level + 1);
-      }
-      return out;
-    },
-
-    _object: function(object, level) {
-      var out = '', indent = this._indent(level);
-      for (var key in object) {
-        if (!object.hasOwnProperty(key)) continue;
-        out += '\n' + indent + key + ': ' + this._serialize(object[key], level + 1);
-      }
-      return out;
-    },
-
-    _string: function(string, level) {
-      if (!/[\r\n]/.test(string))
-        return '"' + string.replace(/"/g, '\\"') + '"';
-
-      var lines  = string.split(/\r\n?|\n/),
-          out    = '|',
-          indent = this._indent(level);
-
-      for (var i = 0, n = lines.length; i < n; i++) {
-        out += '\n' + indent + lines[i];
-      }
-      return out;
-    },
-
-    _number: function(number, level) {
-      return number.toString();
-    },
-
-    _indent: function(level) {
-      var indent = '';
-      while (level--) indent += '  ';
-      return indent;
-    }
-  }),
-
-  TAP_JSON: new JS.Class(Test.Reporters.TAP_YJ, {
-    _serialize: function(value) {
-      return JS.ENV.JSON ? JSON.stringify(value) : '';
-    }
-  })
-});
-
-var R = Test.Reporters;
-
-R.register('tap/yaml', R.TAP_YAML);
-R.register('tap/y',    R.TAP_YAML);
-R.register('tap-yaml', R.TAP_YAML);
-R.register('tap-y',    R.TAP_YAML);
-
-R.register('tap/json', R.TAP_JSON);
-R.register('tap/j',    R.TAP_JSON);
-R.register('tap-json', R.TAP_JSON);
-R.register('tap-j',    R.TAP_JSON);
-
-
 Test.Reporters.extend({
   ExitStatus: new JS.Class({
     startSuite: function(event) {},
@@ -1712,12 +1232,16 @@ Test.Reporters.extend({
   })
 });
 
-
 // http://phantomjs.org/
+// http://slimerjs.org/
 
 Test.Reporters.extend({
-  PhantomJS: new JS.Class({
-    initialize: function(options, page) {
+  Headless: new JS.Class({
+    extend: {
+      UA: /\b(PhantomJS|SlimerJS)\b/
+    },
+
+    initialize: function(options) {
       this._options = options || {};
 
       var format = Console.envvar('FORMAT');
@@ -1727,19 +1251,26 @@ Test.Reporters.extend({
 
       var R        = Test.Reporters,
           Printer  = R.get(this._options.format) || R.Dot,
-          reporter = new R.Composite(),
-          bridge   = new R.JSON.Reader(reporter);
+          reporter = new R.Composite();
 
       reporter.addReporter(new Printer(options));
       reporter.addReporter(new R.ExitStatus());
 
-      page.onConsoleMessage = function(m) {
-        if (!bridge.read(m)) console.log(m);
+      this._reader = new R.JSON.Reader(reporter);
+    },
+
+    open: function(url) {
+      var page = (typeof WebPage === 'function') ? new WebPage() : require('webpage').create(),
+          self = this;
+
+      page.onConsoleMessage = function(message) {
+        if (!self._reader.read(message)) console.log(message);
       };
+      page.open(url);
+      return page;
     }
   })
 });
-
 
 Test.Reporters.extend({
   Browser: new JS.Class({
@@ -1864,10 +1395,8 @@ Test.Reporters.Browser.extend({
         });
         if (name) {
           self._toggle = li.p({className: self._type + '-name'}, name);
-          if (self._type === 'spec') {
-            self._runner = DOM.span({className: 'runner'}, 'Run');
-            self._toggle.insertBefore(self._runner, self._toggle.firstChild);
-          }
+          self._runner = DOM.span({className: 'runner'}, 'Run');
+          self._toggle.insertBefore(self._runner, self._toggle.firstChild);
         }
         self._ul = li.ul({className: 'children'});
       });
@@ -1940,348 +1469,81 @@ Test.Reporters.Browser.extend({
   })
 });
 
-
-// http://busterjs.org/
-
 Test.Reporters.extend({
-  Buster: new JS.Class({
+  Coverage: new JS.Class({
+    include: Console,
 
-    /*  Missing events:
-        See http://docs.busterjs.org/en/latest/modules/buster-test/runner/
-
-        - context:unsupported
-        - test:setUp
-        - test:async
-        - test:tearDown
-        - test:timeout
-        - test:deferred
-        - uncaughtException
-    */
-
-    extend: {
-      create: function(options) {
-        if (JS.ENV.buster) return new this(options);
-      }
-    },
-
-    startSuite: function(event) {
-      this._contexts = 0;
-      this._stack = [];
-      buster.emit('suite:start');
-    },
-
-    startContext: function(event) {
-      if (event.context === null) return;
-      this._contexts += 1;
-      buster.emit('context:start', {name: event.shortName});
-    },
-
-    startTest: function(event) {
-      this._testPassed = true;
-      buster.emit('test:start', {name: event.shortName});
-    },
-
-    addFault: function(event) {
-      if (!this._testPassed) return;
-      this._testPassed = false;
-
-      if (event.error.type === 'failure') {
-        buster.emit('test:failure', {
-          name: event.test.shortName,
-          error: {message: event.error.message}
-        });
-      }
-      else {
-        buster.emit('test:error', {
-          name: event.test.shortName,
-          error: {
-            message: event.error.message,
-            stack: event.error.backtrace
-          }
-        });
-      }
-    },
-
-    endTest: function(event) {
-      if (!this._testPassed) return;
-      buster.emit('test:success', {name: event.shortName});
-    },
-
-    endContext: function(event) {
-      if (event.context === null) return;
-      buster.emit('context:end', {name: event.fullName});
-    },
-
-    update: function(event) {},
-
-    endSuite: function(event) {
-      buster.emit('suite:end', {
-        ok:         event.passed,
-        contexts:   this._contexts,
-        tests:      event.tests,
-        assertions: event.assertions,
-        failures:   event.failures,
-        errors:     event.errors,
-        timeouts:   0                   // <- TODO
-      });
-    }
-  })
-});
-
-
-// https://github.com/karma-runner/karma
-
-Test.Reporters.extend({
-  Karma: new JS.Class({
-    extend: {
-      create: function(options) {
-        if (JS.ENV.__karma__) return new this(options);
-      }
-    },
-
-    initialize: function(options) {
-      this._karma  = JS.ENV.__karma__;
-      this._testId = 0;
-    },
-
-    startSuite: function(event) {
-      this._karma.info({total: event.size});
-    },
+    startSuite: function(event) {},
 
     startContext: function(event) {},
 
-    startTest: function(event) {
-      this._faults = [];
-      this._start  = event.timestamp;
-    },
+    startTest: function(event) {},
 
-    addFault: function(event) {
-      var message = event.error.message;
-      if (event.error.backtrace) message += '\n' + event.error.backtrace;
-      this._faults.push(message);
-    },
+    addFault: function(event) {},
 
-    endTest: function(event) {
-      this._karma.result({
-        id:          ++this._testId,
-        description: event.shortName,
-        suite:       event.context,
-        success:     this._faults.length === 0,
-        skipped:     0,
-        time:        event.timestamp - this._start,
-        log:         this._faults
-      });
-    },
+    endTest: function(event) {},
 
     endContext: function(event) {},
 
     update: function(event) {},
 
     endSuite: function(event) {
-      this._karma.complete();
+      var reports = Test.Unit.TestCase.reports;
+      for (var i = 0, n = reports.length; i < n; i++) {
+        this.reset();
+        this.puts('');
+        reports[i].report();
+      }
     }
   })
 });
 
-
-// https://github.com/modeset/teabag
-
 Test.Reporters.extend({
-  Teabag: new JS.Class({
-    extend: {
-      Spec: new JS.Class({
-        initialize: function(spec) {
-          this._spec           = spec;
-          this.fullDescription = spec.event.fullName;
-          this.description     = spec.event.shortName;
-          this.parent          = Test.Reporters.Teabag.Suite.find(spec.event.context);
-          this.link            = '?grep=' + encodeURIComponent(this.fullDescription);
-        },
+  Composite: new JS.Class({
+    initialize: function(reporters) {
+      this._reporters = reporters || [];
+      this._queue     = [];
+      this._pointer   = 0;
+    },
 
-        errors: function() {
-          var errors = [], faults = this._spec.faults;
+    addReporter: function(reporter) {
+      if (!reporter) return;
+      this._reporters.push(reporter);
+    },
 
-          for (var i = 0, n = faults.length; i < n; i++) {
-            errors.push(faults[i].error);
-          }
-          return errors;
-        },
+    removeReporter: function(reporter) {
+      var index = JS.indexOf(this._reporters, reporter);
+      if (index >= 0) this._reporters.splice(index, 1);
+    },
 
-        getParents: function() {
-          if (this._parents) return this._parents;
-          this._parents = [];
-          var context = this._spec.event.context;
-          for (var i = 1, n = context.length; i < n; i++) {
-            this._parents.push(Test.Reporters.Teabag.Suite.find(context.slice(0, i)));
-          }
-          return this._parents;
-        },
-
-        result: function() {
-          var status = 'passed';
-          if (this._spec.faults.length > 0) status = 'failed';
-          return {status: status, skipped: false};
+    flush: function() {
+      var queue = this._queue, method, event, i, n, fn;
+      while (queue[this._pointer] !== undefined) {
+        method = queue[this._pointer][0];
+        event =  queue[this._pointer][1];
+        for (i = 0, n = this._reporters.length; i < n; i++) {
+          fn = this._reporters[i][method];
+          if (fn) fn.call(this._reporters[i], event);
         }
-      }),
-
-      Suite: new JS.Class({
-        extend: {
-          _cache: {},
-
-          find: function(context) {
-            var key = context.join('~');
-            if (key === '') return null;
-            return this._cache[key] = this._cache[key] || {context: context};
-          }
-        },
-
-        initialize: function(suite) {
-          var context = suite.context;
-          this.fullDescription = context.join(' ');
-          this.description     = context[context.length - 1];
-          this.parent          = this.klass.find(context.slice(0, context.length - 1));
-          this.link            = '?grep=' + encodeURIComponent(this.fullDescription);
-        }
-      })
-    },
-
-    initialize: function(options, teabag) {
-      this._teabag = teabag;
-    },
-
-    startSuite: function(event) {
-      this._teabag.reportRunnerStarting({total: event.size});
-    },
-
-    startContext: function(event) {},
-
-    startTest: function(event) {
-      this._faults = [];
-      if (this._teabag.reportSpecStarting)
-        this._teabag.reportSpecStarting({event: event, faults: this._faults});
-    },
-
-    addFault: function(event) {
-      event.error.stack = event.error.backtrace;
-      this._faults.push(event);
-    },
-
-    endTest: function(event) {
-      this._teabag.reportSpecResults({event: event, faults: this._faults});
-    },
-
-    endContext: function(event) {},
-
-    update: function(event) {},
-
-    endSuite: function(event) {
-      this._teabag.reportRunnerResults();
+        this._pointer += 1;
+      }
     }
   })
 });
 
 (function() {
-  if (!JS.ENV.Teabag) return;
+  var methods = Test.Reporters.METHODS,
+      n       = methods.length;
 
-  Teabag.Reporters.HTML.prototype.envInfo = function() {
-    return 'jstest';
-  };
-
-  Teabag.Runner.prototype.setup = function() {
-    var options = {};
-    if (Teabag.params.grep) options.test = [Teabag.params.grep];
-
-    var teabag   = this.getReporter(),
-        reporter = new Test.Reporters.Teabag({}, new teabag());
-
-    Test.autorun(options, function(runner) {
-      runner.setReporter(reporter);
-    });
-  };
-
-  Teabag.Spec  = Test.Reporters.Teabag.Spec;
-  Teabag.Suite = Test.Reporters.Teabag.Suite;
+  while (n--)
+    (function(i) {
+      var method = methods[i];
+      Test.Reporters.Composite.define(method, function(event) {
+        this._queue[event.eventId] = [method, event];
+        this.flush();
+      });
+    })(n);
 })();
-
-
-// https://github.com/airportyh/testem
-
-Test.Reporters.extend({
-  Testem: new JS.Class({
-    extend: {
-      SCRIPT_URL: '/testem.js',
-
-      prepare: function(callback, context) {
-        if (!JS.ENV.location) return callback.call(context || null);
-
-        var hash = (location.hash || '').replace(/^#/, '');
-        if (hash !== 'testem') return callback.call(context || null);
-
-        JS.load(this.SCRIPT_URL, function() {
-          callback.call(context || null);
-        });
-      },
-
-      create: function(options) {
-        if (JS.ENV.Testem) return new this(options);
-      }
-    },
-
-    initialize: function() {
-      var self = this;
-      Testem.useCustomAdapter(function(socket) { self._socket = socket });
-    },
-
-    startSuite: function(event) {
-      this._results = [];
-      this._testId = 0;
-      this._socket.emit('tests-start');
-    },
-
-    startContext: function(event) {},
-
-    startTest: function(event) {
-      this._testPassed = true;
-      this._faults = [];
-    },
-
-    addFault: function(event) {
-      this._testPassed = false;
-      this._faults.push({
-        passed:     false,
-        message:    event.error.message,
-        stacktrace: event.error.backtrace
-      });
-    },
-
-    endTest: function(event) {
-      var result = {
-        passed: this._testPassed ? 1 : 0,
-        failed: this._testPassed ? 0 : 1,
-        total:  1,
-        id:     ++this._testId,
-        name:   event.fullName,
-        items:  this._faults
-      };
-      this._results.push(result);
-      this._socket.emit('test-result', result);
-    },
-
-    endContext: function(event) {},
-
-    update: function(event) {},
-
-    endSuite: function(event) {
-      this._socket.emit('all-test-results', {
-        passed: event.tests - event.failures - event.errors,
-        failed: event.failures,
-        total:  event.tests,
-        tests:  this._results
-      });
-    }
-  })
-});
-
 
 // https://github.com/jquery/testswarm
 
@@ -2327,72 +1589,7 @@ Test.Reporters.extend({
   })
 });
 
-
-Test.Reporters.extend({
-  Coverage: new JS.Class({
-    include: Console,
-
-    startSuite: function(event) {},
-
-    startContext: function(event) {},
-
-    startTest: function(event) {},
-
-    addFault: function(event) {},
-
-    endTest: function(event) {},
-
-    endContext: function(event) {},
-
-    update: function(event) {},
-
-    endSuite: function(event) {
-      var reports = Test.Unit.TestCase.reports;
-      for (var i = 0, n = reports.length; i < n; i++) {
-        this.reset();
-        this.puts('');
-        reports[i].report();
-      }
-    }
-  })
-});
-
-
-Test.Reporters.extend({
-  Composite: new JS.Class({
-    initialize: function(reporters) {
-      this._reporters = reporters || [];
-    },
-
-    addReporter: function(reporter) {
-      if (!reporter) return;
-      this._reporters.push(reporter);
-    },
-
-    removeReporter: function(reporter) {
-      var index = JS.indexOf(this._reporters, reporter);
-      if (index >= 0) this._reporters.splice(index, 1);
-    }
-  })
-});
-
-(function() {
-  var methods = Test.Reporters.METHODS,
-      n       = methods.length;
-
-  while (n--)
-    (function(i) {
-      var method = methods[i];
-      Test.Reporters.Composite.define(method, function(event) {
-        var fn;
-        for (var i = 0, n = this._reporters.length; i < n; i++) {
-          fn = this._reporters[i][method];
-          if (fn) fn.call(this._reporters[i], event);
-        }
-      });
-    })(n);
-})();
-
+Test.Reporters.register('testswarm', Test.Reporters.TestSwarm);
 
 Test.extend({
   Context: new JS.Module({
@@ -2437,7 +1634,6 @@ Test.Context.Context.alias({describe: 'context'});
 Test.extend({
   context:  Test.describe
 });
-
 
 Test.Context.LifeCycle = new JS.Module({
   extend: {
@@ -2496,28 +1692,21 @@ Test.Context.LifeCycle = new JS.Module({
   },
 
   setup: function(resume) {
-    var self = this;
-    this.callSuper(function() {
-      if (self.klass.before_should_callbacks[self._methodName])
-        self.klass.before_should_callbacks[self._methodName].call(self);
+    if (this.klass.before_should_callbacks[this._methodName])
+      this.klass.before_should_callbacks[this._methodName].call(this);
 
-      self.runCallbacks('before', 'each', resume);
-    });
+    this.runCallbacks('before', 'each', resume);
   },
 
   teardown: function(resume) {
-    var self = this;
-    this.callSuper(function() {
-      self.runCallbacks('after', 'each', resume);
-    });
+    this.runCallbacks('after', 'each', resume);
   },
 
   runCallbacks: function(callbackType, period, continuation) {
     var callbacks = this.klass.gatherCallbacks(callbackType, period);
 
     Test.Unit.TestSuite.forEach(callbacks, function(callback, resume) {
-      this.exec(callback, resume);
-
+      this.exec(callback, resume, continuation);
     }, continuation, this);
   },
 
@@ -2531,7 +1720,7 @@ Test.Context.LifeCycle = new JS.Module({
         return hash;
       }, this);
 
-      if (continuation) continuation.call(context || null, ivars);
+      if (continuation) continuation.call(context, ivars);
     });
   },
 
@@ -2557,7 +1746,6 @@ Test.Context.LifeCycle = new JS.Module({
     teardown: m('after')
   });
 })();
-
 
 Test.Context.extend({
   SharedBehavior: new JS.Class(JS.Module, {
@@ -2615,9 +1803,8 @@ Test.Unit.TestCase.extend({
   alias('use', ['uses', 'itShouldBehaveLike', 'behavesLike', 'usesExamplesFrom']);
 })();
 
-
 Test.Context.Test = new JS.Module({
-  test: function(name, opts, block) {
+  it: function(name, opts, block) {
     var testName = 'test: ' + name;
 
     if (JS.indexOf(this.instanceMethods(false), testName) >= 0)
@@ -2635,21 +1822,20 @@ Test.Context.Test = new JS.Module({
     this.define(testName, block, {_resolve: false});
   },
 
+  should: function() { return this.it.apply(this, arguments) },
+  test:   function() { return this.it.apply(this, arguments) },
+  tests:  function() { return this.it.apply(this, arguments) },
+
   beforeTest: function(name, block) {
-    this.test(name, {before: block}, function() {});
+    this.it(name, {before: block}, function() {});
   }
 });
 
 Test.Context.Test.alias({
-  it:     'test',
-  should: 'test',
-  tests:  'test',
-
   beforeIt:     'beforeTest',
   beforeShould: 'beforeTest',
   beforeTests:  'beforeTest'
 });
-
 
 (function() {
   var suite = Test.Unit.TestCase.suite;
@@ -2666,7 +1852,7 @@ Test.Context.Test.alias({
 Test.Unit.TestSuite.include({
   run: function(result, continuation, callback, context) {
     if (this._metadata.fullName)
-      callback.call(context || null, this.klass.STARTED, this);
+      callback.call(context, this.klass.STARTED, this);
 
     var withIvars = function(ivarsFromCallback) {
       this.forEach(function(test, resume) {
@@ -2678,9 +1864,9 @@ Test.Unit.TestSuite.include({
       }, function() {
         var afterCallbacks = function() {
           if (this._metadata.fullName)
-            callback.call(context || null, this.klass.FINISHED, this);
+            callback.call(context, this.klass.FINISHED, this);
 
-          continuation.call(context || null);
+          continuation.call(context);
         };
         if (ivarsFromCallback && first.runAllCallbacks)
           first.runAllCallbacks('after', afterCallbacks, this);
@@ -2698,7 +1884,6 @@ Test.Unit.TestSuite.include({
       withIvars.call(this, null);
   }
 });
-
 
 Test.extend({
   Mocking: new JS.Module({
@@ -2884,7 +2069,6 @@ Test.extend({
   })
 });
 
-
 Test.Mocking.extend({
   Parameters: new JS.Class({
     initialize: function(params, expected) {
@@ -3018,7 +2202,6 @@ Test.Mocking.extend({
   })
 });
 
-
 Test.Mocking.extend({
   Anything: new JS.Class({
     equals: function() { return true },
@@ -3107,7 +2290,6 @@ Test.Mocking.extend({
   })
 });
 
-
 Test.Mocking.Stub.include({
   given: function() {
     var matcher = new Test.Mocking.Parameters(arguments, this._expected);
@@ -3195,7 +2377,6 @@ Test.Mocking.extend({
 Test.Unit.TestCase.include(Test.Mocking.DSL);
 Test.Unit.mocking = Test.Mocking;
 
-
 Test.extend({
   AsyncSteps: new JS.Class(JS.Module, {
     define: function(name, method) {
@@ -3209,17 +2390,16 @@ Test.extend({
       klass.include(Test.AsyncSteps.Sync);
       if (!klass.includes(Test.Context)) return;
 
-      klass.after(function(resume) { this.sync(resume) });
-
       klass.extend({
-        after: function(period, block) {
-          if ((typeof period === 'function') || !block) {
-            block  = period;
-            period = 'each';
+        it: function(name, opts, block) {
+          if (typeof opts === 'function') {
+            block = opts;
+            opts  = {};
           }
-          this.callSuper(function(resume) {
-            this.sync(function() {
-              this.exec(block, resume);
+          this.callSuper(name, opts, function(resume) {
+            this.exec(block, function(error) {
+              Test.Unit.TestCase.processError(this, error);
+              this.sync(resume);
             });
           });
         }
@@ -3238,7 +2418,9 @@ Test.extend({
           setTimeout(this.method('__runNextStep__'), 1);
         },
 
-        __runNextStep__: function() {
+        __runNextStep__: function(error) {
+          if (error !== undefined) return this.addError(error);
+
           var step = this.__stepQueue__.shift(), n;
 
           if (!step) {
@@ -3261,7 +2443,8 @@ Test.extend({
           this.exec(block, function() {}, this.method('__endSteps__'));
         },
 
-        __endSteps__: function() {
+        __endSteps__: function(error) {
+          Test.Unit.TestCase.processError(this, error);
           this.__stepQueue__ = [];
           this.__runNextStep__();
         },
@@ -3284,7 +2467,6 @@ Test.extend({
     return new this.AsyncSteps(methods);
   }
 });
-
 
 Test.extend({
   FakeClock: new JS.Module({
@@ -3411,7 +2593,6 @@ Test.FakeClock.include({
   while (i--) Test.FakeClock.REAL[methods[i]] = JS.ENV[methods[i]];
 })();
 
-
 Test.extend({
   Coverage: new JS.Class({
     initialize: function(module) {
@@ -3531,7 +2712,7 @@ Test.extend({
 
     forEach: function(list, block, context) {
       for (var i = 0, n = list.length; i < n; i++) {
-        block.call(context || null, list[i], i);
+        block.call(context, list[i], i);
       }
     },
 
@@ -3549,24 +2730,24 @@ Test.extend({
   })
 });
 
-
 Test.extend({
   Runner: new JS.Class({
     initialize: function(settings) {
       this._settings = (typeof settings === 'string')
                      ? {format: settings}
                      : (settings || {});
+
+      this._ui = this.klass.getUI(this._settings);
     },
 
     run: function(callback, context) {
-      var ui = this.klass.getUI(this._settings);
       this.prepare(function() {
-        this.start(ui, callback, context);
+        this.start(callback, context);
       }, this);
     },
 
     prepare: function(callback, context) {
-      var R    = Test.Reporters,
+      var R    = Test.Reporters._registry,
           n    = 0,
           done = false;
 
@@ -3575,20 +2756,20 @@ Test.extend({
         n += 1;
         R[name].prepare(function() {
           n -= 1;
-          if (n === 0 && done) callback.call(context || null);
+          if (n === 0 && done) callback.call(context);
         });
       }
       done = true;
-      if (n === 0) callback.call(context || null);
+      if (n === 0) callback.call(context);
     },
 
-    start: function(ui, callback, context) {
-      var options   = JS.extend(ui.getOptions(), this._settings),
-          reporters = ui.getReporters(options),
+    start: function(callback, context) {
+      var options   = this.getOptions(),
+          reporters = this._ui.getReporters(options),
           suite     = this.getSuite(options);
 
       this.setReporter(new Test.Reporters.Composite(reporters));
-      if (callback) callback.call(context || null, this);
+      if (callback) callback.call(context, this);
 
       var testResult = new Test.Unit.TestResult(),
           TR         = Test.Unit.TestResult,
@@ -3621,7 +2802,7 @@ Test.extend({
       };
 
       this.klass.reportEventId = 0;
-      this._reporter.startSuite(this.klass.timestamp(suite.metadata()));
+      this._reporter.startSuite(this.klass.timestamp(suite.metadata(true)));
 
       suite.run(testResult, reportResult, reportEvent, this);
     },
@@ -3637,6 +2818,10 @@ Test.extend({
 
     setReporter: function(reporter) {
       this._reporter = reporter;
+    },
+
+    getOptions: function() {
+      return JS.extend(this._ui.getOptions(), this._settings);
     },
 
     getSuite: function(options) {
@@ -3697,7 +2882,5 @@ Test.extend({
   }
 });
 
-
 exports.Test = Test;
 });
-

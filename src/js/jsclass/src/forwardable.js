@@ -33,4 +33,3 @@ var Forwardable = new JS.Module('Forwardable', {
 
 exports.Forwardable = Forwardable;
 });
-

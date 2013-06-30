@@ -61,4 +61,3 @@ var Decorator = new JS.Class('Decorator', {
 
 exports.Decorator = Decorator;
 });
-

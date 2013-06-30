@@ -237,4 +237,3 @@ MethodChain.addMethods([
 
 exports.MethodChain = MethodChain;
 });
-

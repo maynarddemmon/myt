@@ -8,7 +8,6 @@
 })(function(JS, exports) {
 'use strict';
 
-
 var DOM = {
   ELEMENT_NODE:                   1,
   ATTRIBUTE_NODE:                 2,
@@ -45,7 +44,6 @@ var DOM = {
     node.className = node.className.replace(pattern, '');
   }
 };
-
 
 DOM.Builder = new JS.Class('DOM.Builder', {
   extend: {
@@ -113,7 +111,6 @@ DOM.Builder.addElements([
   'var', 'video', 'wbr'
 ]);
 
-
 DOM.Event = {
   _registry: [],
 
@@ -165,7 +162,5 @@ DOM.Event = {
 
 DOM.Event.on(DOM.ENV, 'unload', DOM.Event.detach, DOM.Event);
 
-
 exports.DOM = DOM;
 });
-
