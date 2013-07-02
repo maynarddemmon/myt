@@ -1,13 +1,27 @@
-/** A BaseImageButton with contents that consist of an icon and text. */
+/** A BaseImageButton with contents that consist of an icon and text.
+    
+    Attributes:
+        __updateContentPositionBlock:boolean Used in __updateContentPosition
+            and __updateContentPositionAfterDelay to prevent infinite loops.
+        text:string the text to display on the button.
+        iconUrl:string the url to an image to display in the button.
+        textY:number the y offset for the text.
+        iconY:number the y offset for the icon.
+        iconSpacing:number spacing between the icon and the text. Defaults
+            to 2.
+        shrinkToFit:boolean when true the button will be as narrow as possible
+            to fit the text, icon and panel end caps. When false the button 
+            will be as wide as the set width. Defaults to false.
+        textView:myt.Text a reference to the child text view.
+        iconView:myt.Image a reference to the child image view.
+*/
 myt.ImageButton = new JS.Class('ImageButton', myt.BaseImageButton, {
-    include: [myt.MouseableH3Panel, myt.TooltipMixin],
-    // FIXME: is myt.MouseableH3Panel necessary since it is already in myt.BaseImageButton?
+    include: [myt.TooltipMixin],
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        this.textY = 'middle';
-        this.iconY = 'middle';
+        this.textY = this.iconY = 'middle';
         this.iconSpacing = 2;
         
         if (attrs.shrinkToFit === undefined) attrs.shrinkToFit = false;
@@ -122,9 +136,7 @@ myt.ImageButton = new JS.Class('ImageButton', myt.BaseImageButton, {
         initialization. */
     __updateContentPosition: function(v) {
         if (this.__updateContentPositionBlock) return;
-        
-        var tid = this.__updateContentPositionTimerId;
-        if (tid) clearTimeout(tid); // FIXME: do we need to reset or should we just abort?
+        if (this.__updateContentPositionTimerId) return;
         
         var self = this;
         this.__updateContentPositionTimerId = setTimeout(function() {
@@ -133,19 +145,19 @@ myt.ImageButton = new JS.Class('ImageButton', myt.BaseImageButton, {
     },
     
     __updateContentPositionAfterDelay: function() {
+        if (this.destroyed) return;
+        
         this.__updateContentPositionTimerId = undefined;
         
         var firstWidth = this.first.width;
         var thirdWidth = this.third.width;
         
         var iconView = this.iconView;
-        var iconVisible = iconView.visible;
-        var iconWidth = iconVisible ? iconView.width : 0;
+        var iconWidth = iconView.visible ? iconView.width : 0;
         var iconSpacing = iconWidth > 0 ? this.iconSpacing : 0;
         
         var textView = this.textView;
-        var textVisible = textView.visible;
-        var textWidth = textVisible ? textView.width + 1 : 0; // Plus 1 adjusts for browser text quirkiness.
+        var textWidth = (textView.visible && this.text) ? textView.width + 1 : 0; // Plus 1 adjusts for browser text quirkiness.
         
         if (this.shrinkToFit) {
             var totalWidth = firstWidth;
