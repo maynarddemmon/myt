@@ -5,9 +5,7 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
         this.map = {};
         this.map[myt.StateMachine.WILDCARD] = {};
         
-        this.current = '';
-        this.initial = '';
-        this.terminal = '';
+        this.current = this.initial = this.terminal = '';
         this.__resetTransitionProgress();
         
         this.callSuper(parent, attrs);
@@ -38,8 +36,7 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
     },
     
     setTransitions: function(v) {
-        var i = v.length;
-        var data;
+        var i = v.length, data;
         while (i) {
             data = v[--i];
             this.addTransition(data.name, data.from, data.to);
@@ -57,8 +54,7 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
             from = from instanceof Array ? from : [from];
         }
         
-        var i = from.length;
-        var mapEntry;
+        var i = from.length, mapEntry;
         while (i) {
             mapEntry = map[from[--i]];
             if (!mapEntry) mapEntry = map[from[i]] = {};
@@ -92,8 +88,8 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
             this.__transitionInProgress = true;
         }
         
-        var async = args.shift();
-        var transition = args.shift();
+        var async = args.shift(),
+            transition = args.shift();
         
         // Invalid to start a transition if one is still pending.
         if (this.__pendingTransition) return myt.StateMachine.PENDING;
@@ -123,10 +119,10 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
         // Invalid to resume a transition if none is pending.
         if (!transition) return myt.StateMachine.INVALID;
         
-        var current = this.current;
-        var to = this.__transitionDestinationState;
-        var args = this.__additionalArgs;
-        var eventValue = {name:transition, from:current, to:to, args:args};
+        var current = this.current,
+            to = this.__transitionDestinationState,
+            args = this.__additionalArgs,
+            eventValue = {name:transition, from:current, to:to, args:args};
         
         switch (this.__transitionStage) {
             case 'leaveState':

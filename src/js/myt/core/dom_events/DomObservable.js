@@ -64,9 +64,7 @@ myt.DomObservable = new JS.Module('DomObservable', {
         if (!domObservers) return false;
         
         // Remove dom observer
-        var retval = false;
-        var domElement = this.domElement;
-        var i = domObservers.length;
+        var retval = false, domElement = this.domElement, i = domObservers.length;
         while (i) {
             i -= 4;
             if (domObserver === domObservers[i] && 

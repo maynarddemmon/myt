@@ -30,8 +30,8 @@ myt.SizeHeightToDom = new JS.Module('SizeHeightToDom', {
         @returns void */
     sizeViewToDom: function() {
         if (!this.__hasSetHeight) {
-            var bounds = this.domElement.getBoundingClientRect();
-            var h = bounds.height;
+            var bounds = this.domElement.getBoundingClientRect(),
+                h = bounds.height;
             
             // Bounding rect doesn't factor in scaling so we need to calculate
             // this ourselves.

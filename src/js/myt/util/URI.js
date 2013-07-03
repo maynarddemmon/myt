@@ -71,12 +71,11 @@ myt.URI = new JS.Class('URI', {
     },
     
     getQuery: function() {
-        var pairs = this.queryPairs;
-        var parts = [];
-        for (var key in pairs) {
+        var pairs = this.queryPairs, parts = [], key, s;
+        for (key in pairs) {
             parts.push(key + '=' + encodeURIComponent(pairs[key]));
         }
-        var s = parts.join('&');
+        s = parts.join('&');
         return s.length > 0 ? '?' + s : s;
     },
     
@@ -97,15 +96,14 @@ myt.URI = new JS.Class('URI', {
     },
     
     toString: function() {
-        var protocol = this.protocol;
-        var host = this.host;
-        var userInfo = this.userInfo;
-        var port = this.port;
-        var path = this.path;
-        var query = this.getQuery();
-        var anchor = this.anchor;
-        
-        var s = '';
+        var protocol = this.protocol,
+            host = this.host,
+            userInfo = this.userInfo,
+            port = this.port,
+            path = this.path,
+            query = this.getQuery(),
+            anchor = this.anchor,
+            s = '';
         
         if (protocol) s += protocol + '://';
         if (userInfo && host) s += userInfo + '@';

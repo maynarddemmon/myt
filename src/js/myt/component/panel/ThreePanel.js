@@ -60,9 +60,9 @@ myt.ThreePanel = new JS.Module('ThreePanel', {
             name:'third', imageUrl:this.thirdImageUrl, ignoreLayout:true
         });
         
-        var axis = this.axis;
-        var otherAxis = axis === 'x' ? 'y' : 'x';
-        var ignoreMixin = [myt.ThreePanel.IGNORE_FUNCTION_MIXIN];
+        var axis = this.axis,
+            otherAxis = axis === 'x' ? 'y' : 'x',
+            ignoreMixin = [myt.ThreePanel.IGNORE_FUNCTION_MIXIN];
         new myt.ResizeLayout(this, {name:'resizeLayout', axis:axis}, ignoreMixin);
         new myt.SizeToChildren(this, {name:'sizeToChildren', axis:otherAxis}, ignoreMixin);
         

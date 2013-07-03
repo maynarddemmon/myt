@@ -70,13 +70,9 @@ myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
     /** Determine the maximum subview width/height according to the axis.
         @overrides myt.VariableLayout */
     doBeforeUpdate: function() {
-        var measureAttrName = this.measureAttrName;
-        var value = 0;
-        var svs = this.subviews;
-        var len = svs.length;
-        var sv;
-        
-        var i = len;
+        var measureAttrName = this.measureAttrName,
+            value = 0,
+            svs = this.subviews, sv, i = svs.length;
         while(i) {
             sv = svs[--i];
             if (this.skipSubview(sv)) continue;

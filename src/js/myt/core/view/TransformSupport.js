@@ -32,13 +32,13 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
             @returns string: the new transform value after the removal has been
                 applied. */
         removeTransform: function(s, type) {
-            var key = this._styleKey;
-            var value = s[key];
+            var key = this._styleKey,
+                value = s[key];
             
             if (!value || value.length === 0) return '';
             
-            var parts = value.split(' ');
-            var i = parts.length;
+            var parts = value.split(' '),
+                i = parts.length;
             while (i) {
                 if (parts[--i].indexOf(type) === 0) {
                     parts.splice(i, 1);
@@ -79,7 +79,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
             @param elem:myt.View the view to calculate scaling for.
             @returns object containing 'scaleX' and 'scaleY' numbers. */
         getEffectiveScale: function(elem) {
-            var scaleX = scaleY = 1;
+            var scaleX = 1, scaleY = 1;
             while (elem) {
                 if (elem.scaleX != null) scaleX *= elem.scaleX;
                 if (elem.scaleY != null) scaleY *= elem.scaleY;

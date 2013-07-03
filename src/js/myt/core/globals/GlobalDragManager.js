@@ -44,12 +44,11 @@ new JS.Singleton('GlobalDragManager', {
     getViewUnderMouse: function(event) {
         var observersUnderMouse = [];
         
-        var domMouseEvent = event.value;
-        var mouseX = domMouseEvent.pageX;
-        var mouseY = domMouseEvent.pageY;
-        
-        var observers = this.getObservers('stopDrag');
-        var observer, prevObserver;
+        var domMouseEvent = event.value,
+            mouseX = domMouseEvent.pageX,
+            mouseY = domMouseEvent.pageY,
+            observers = this.getObservers('stopDrag'),
+            observer, prevObserver;
         for (var i = 0, len = observers.length; len > i; i += 2) {
             observer = observers[i + 1];
             if (observer.containsPoint(mouseX, mouseY)) {

@@ -67,18 +67,15 @@ myt.ResizeLayout = new JS.Class('SpacedLayout', myt.SpacedLayout, {
     /** @overrides myt.VariableLayout */
     doBeforeUpdate: function() {
         // Get size to fill
-        var measureAttrName = this.measureAttrName;
-        var measureAttrBaseName = this.measureAttrBaseName;
-        var remainder = this.parent[measureAttrBaseName];
+        var measureAttrName = this.measureAttrName,
+            measureAttrBaseName = this.measureAttrBaseName,
+            remainder = this.parent[measureAttrBaseName];
         
         // Calculate minimum required size
         remainder -= this.targetValue + this.outset;
         
-        var svs = this.subviews;
-        var i = svs.length;
-        var count = 0;
-        var resizeSum = 0;
-        var sv;
+        var svs = this.subviews, i = svs.length, sv;
+        var count = 0, resizeSum = 0;
         
         while(i) {
             sv = svs[--i];

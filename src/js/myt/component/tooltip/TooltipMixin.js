@@ -40,9 +40,9 @@ myt.TooltipMixin = new JS.Module('TooltipMixin', {
         if (isOver) {
             var tipText = this.__getTipText();;
             if (tipText) {
-                var ttv = this.__getTooltipView();
-                var tipAlign = this.tipAlign;
-                var tipValign = this.tipValign;
+                var ttv = this.__getTooltipView(),
+                    tipAlign = this.tipAlign,
+                    tipValign = this.tipValign;
                 ttv.setTooltip({
                     parent:this, 
                     text:tipText, 
@@ -62,8 +62,8 @@ myt.TooltipMixin = new JS.Module('TooltipMixin', {
         var tipClass = this.tipClass ? this.tipClass : myt.TooltipMixin.defaultTipClass;
         
         // Destroy tip if it's not the correct class.
-        var g = myt.global;
-        var ttv = g.tooltipView;
+        var g = myt.global,
+            ttv = g.tooltipView;
         if (ttv && !(ttv instanceof tipClass)) {
             g.unregister(ttv);
             ttv.destroy();

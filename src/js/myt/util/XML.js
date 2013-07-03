@@ -28,9 +28,7 @@ myt.XML = {
         if (document.implementation && document.implementation.createDocument) {
             return document.implementation.createDocument('', '', null);
         } else if (window.ActiveXObject) {
-            var msxml = this.MSXML;
-            var i = msxml.length;
-            var xmlDoc;
+            var msxml = this.MSXML, i = msxml.length;
             while (i) {
                 try {
                     return new ActiveXObject(msxml[--i]);

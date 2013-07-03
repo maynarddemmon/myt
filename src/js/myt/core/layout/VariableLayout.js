@@ -49,23 +49,22 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
         
         this.doBeforeUpdate();
         
-        var setterName = this.setterName;
-        var value = this.targetValue;
-        
-        var svs = this.subviews;
-        var len = svs.length;
-        var i, sv, count = 0;
+        var setterName = this.setterName,
+            value = this.targetValue,
+            svs = this.subviews,
+            len = svs.length,
+            i, sv, count = 0;
         
         if (this.useOptimizations) {
             // OPTIMIZATION: Prevent dom reflow during layout by temporarily 
             // removing the parent dom element.
-            var elem = this.parent.domElement;
-            var parentElem = elem.parentNode;
-            var nextSibling = elem.nextSibling;
+            var elem = this.parent.domElement,
+                parentElem = elem.parentNode,
+                nextSibling = elem.nextSibling,
+                restoreFocus;
             
             // Focus can get lost in webkit when an element is removed from the dom.
             // TODO: make use of myt.View.retainFocusDuringDomUpdate
-            var restoreFocus;
             if (parentElem) {
                 var currentFocus = myt.global.focus.focusedView;
                 if (currentFocus && currentFocus.isDescendantOf(this.parent)) {

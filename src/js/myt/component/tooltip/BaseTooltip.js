@@ -62,8 +62,7 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     
     /** Called when the tip will be hidden. */
     hideTip: function() {
-        var tt = this.tooltip;
-        var ttp = tt.parent;
+        var ttp = this.tooltip.parent;
         this.detachFromDom(ttp, 'hideTip', 'mousedown', true);
         this.detachFromDom(ttp, 'hideTip', 'mouseup', true);
         this.detachFromDom(myt.global.mouse, '__checkMouseMovement', 'mousemove', true);
@@ -76,7 +75,6 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     /** Called when the tip will be shown. */
     showTip: function() {
         var ttp = this.tooltip.parent;
-        
         this.attachToDom(ttp, 'hideTip', 'mousedown', true);
         this.attachToDom(ttp, 'hideTip', 'mouseup', true);
         

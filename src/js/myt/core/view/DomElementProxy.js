@@ -80,11 +80,11 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
                 for (var p in customOpts) opts[p] = customOpts[p];
             }
             
-            var eventType;
-            var eventMatchers = {
-                'HTMLEvents': /^(?:load|unload|abort|error|select|change|submit|reset|focus|blur|resize|scroll)$/,
-                'MouseEvents': /^(?:click|dblclick|mouse(?:down|up|over|move|out))$/
-            };
+            var eventType,
+                eventMatchers = {
+                    'HTMLEvents': /^(?:load|unload|abort|error|select|change|submit|reset|focus|blur|resize|scroll)$/,
+                    'MouseEvents': /^(?:click|dblclick|mouse(?:down|up|over|move|out))$/
+                };
             for (var name in eventMatchers) {
                 if (eventMatchers[name].test(eventName)) {eventType = name; break;}
             }
@@ -174,9 +174,9 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
     setCSSBorder: function(v) {
         this.CSSBorder = v;
         if (v) {
-            var size = v[0] || 0;
-            var type = v[1] || '';
-            var color = v[2] || '';
+            var size = v[0] || 0,
+                type = v[1] || '',
+                color = v[2] || '';
             this.deStyle.border = size + 'px' + ' ' + type + ' ' + color;
         } else {
             this.deStyle.border = '0px';

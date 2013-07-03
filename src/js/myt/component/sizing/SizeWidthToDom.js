@@ -30,8 +30,8 @@ myt.SizeWidthToDom = new JS.Module('SizeWidthToDom', {
         @returns void */
     sizeViewToDom: function() {
         if (!this.__hasSetWidth) {
-            var bounds = this.domElement.getBoundingClientRect();
-            var w = bounds.width;
+            var bounds = this.domElement.getBoundingClientRect(),
+                w = bounds.width;
             
             // Bounding rect doesn't factor in scaling so we need to calculate
             // this ourselves.

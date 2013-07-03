@@ -47,8 +47,7 @@ myt.DomObserver = new JS.Module('DomObserver', {
         
         // Remove all instances of this observer/methodName/type/capture 
         // from the observable
-        var retval = false;
-        var i = observables.length;
+        var retval = false, i = observables.length;
         while (i) {
             i -= 3;
             if (observable === observables[i + 2] && 
@@ -70,14 +69,14 @@ myt.DomObserver = new JS.Module('DomObserver', {
         @returns void */
     detachFromAllDomSources: function() {
         var observablesByType = this.__domSourcesByType;
-        if (!observablesByType) return;
-        
-        var observables, i;
-        for (var type in observablesByType) {
-            observables = observablesByType[type];
-            i = observables.length;
-            while (i) observables[--i].detachDomObserver(this, observables[--i], type, observables[--i])
-            observables.length = 0;
+        if (observablesByType) {
+            var observables, i;
+            for (var type in observablesByType) {
+                observables = observablesByType[type];
+                i = observables.length;
+                while (i) observables[--i].detachDomObserver(this, observables[--i], type, observables[--i])
+                observables.length = 0;
+            }
         }
     }
 });

@@ -137,8 +137,7 @@ myt.BAG = new JS.Class('BAG', {
     unregister: function(node) {
         if (!node) return;
         
-        var nodes = this._nodes;
-        var i = nodes.length;
+        var nodes = this._nodes, i = nodes.length;
         while (i) {
             if (node === nodes[--i]) {
                 nodes.splice(i, 1);
@@ -157,10 +156,9 @@ myt.BAG = new JS.Class('BAG', {
         @returns void */
     setTrue: function(node) {
         if (node && this.trueNode !== node && this.isRegistered(node)) {
-            var attrName = this.attrName;
-            var setterName = myt.AccessorSupport.generateSetterName(attrName);
-            var nodes = this._nodes;
-            var n, i = nodes.length;
+            var attrName = this.attrName,
+                setterName = myt.AccessorSupport.generateSetterName(attrName),
+                nodes = this._nodes, i = nodes.length, n;
             while (i) {
                 n = nodes[--i];
                 if (node === n) {
@@ -189,8 +187,7 @@ myt.BAG = new JS.Class('BAG', {
         @param node:myt.Node the node to test.
         @returns void */
     isRegistered: function(node) {
-        var nodes = this._nodes;
-        var i = nodes.length;
+        var nodes = this._nodes, i = nodes.length;
         while (i) {
             if (node === nodes[--i]) return true;
         }

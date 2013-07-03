@@ -63,11 +63,9 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
     /** @overrides myt.Node */
     initNode: function(parent, attrs) {
         this.duration = 1000;
-        this.relative = this.reverse = false;
+        this.relative = this.reverse = this.running = this.paused = false;
         this.repeat = 1;
         this.easingFunction = myt.Animator.easingFunctions.linear;
-        
-        this.running = this.paused = false;
         
         this.callSuper(parent, attrs);
         
@@ -223,8 +221,7 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         var reverse = this.reverse;
         if (reverse) timeDiff = timeDiff * -1;
         
-        var duration = this.duration;
-        var repeat = this.repeat;
+        var duration = this.duration, repeat = this.repeat;
         
         // Determine how much time to move forward by.
         var oldProgress = this.__progress;

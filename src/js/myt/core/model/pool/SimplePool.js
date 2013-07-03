@@ -22,14 +22,15 @@ myt.SimplePool = new JS.Class('SimplePool', myt.AbstractPool, {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.AbstractPool
         Creates an instance of this.instanceClass and passes in 
-        this.instanceParent as the first argument if it exists. */
+        this.instanceParent as the first argument if it exists.
+        @param arguments[0]:object (optional) the attrs to be passed to a
+            created myt.Node. */
     createInstance: function() {
         // If we ever need full arguments with new, see:
         // http://stackoverflow.com/questions/1606797/use-of-apply-with-new-operator-is-this-possible
         var parent = this.instanceParent;
         if (parent) {
-            var attrs = arguments[0];
-            return new this.instanceClass(parent, attrs);
+            return new this.instanceClass(parent, arguments[0]);
         } else {
             return new this.instanceClass();
         }

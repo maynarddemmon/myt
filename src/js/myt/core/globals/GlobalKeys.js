@@ -192,8 +192,8 @@ new JS.Singleton('GlobalKeys', {
     },
     
     _handleKeyDown: function(event) {
-        var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
-        var domEvent = event.value;
+        var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event),
+            domEvent = event.value;
         if (this._shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
         this._keysDown[keyCode] = true;
         
@@ -216,8 +216,8 @@ new JS.Singleton('GlobalKeys', {
     },
     
     _handleKeyUp: function(event) {
-        var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
-        var domEvent = event.value;
+        var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event),
+            domEvent = event.value;
         if (this._shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
         this._keysDown[keyCode] = false;
         this.fireNewEvent('keyup', keyCode);

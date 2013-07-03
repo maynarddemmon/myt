@@ -212,8 +212,7 @@ myt.Observer = new JS.Module('Observer', {
         if (!observables) return false;
         
         // Remove all instances of this observer/methodName/eventType from the observable
-        var retval = false;
-        var i = observables.length;
+        var retval = false, i = observables.length;
         while (i) {
             --i;
             if (observable === observables[i--] && methodName === observables[i]) {

@@ -47,25 +47,22 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.BaseTooltip. */
     showTip: function() {
-        var tt = this.tooltip;
-        var ttp = tt.parent;
+        var tt = this.tooltip,
+            ttp = tt.parent,
+            tipText = this._tipText;
         
         // Set tip text
-        var tipText = this._tipText;
-        
         if (tipText.text !== tt.text) tipText.setText(tt.text);
         
         // Get floating boundary
-        var gwr = myt.global.windowResize;
-        var bounds = {
-            x:0, y:0, width:gwr.getWidth(), height:gwr.getHeight()
-        };
-        var boundsXOffset = boundsYOffset = 0;
+        var gwr = myt.global.windowResize,
+            bounds = {x:0, y:0, width:gwr.getWidth(), height:gwr.getHeight()},
+            boundsXOffset = 0, boundsYOffset = 0;
         
         // Get position of parent
-        var parentPos = ttp.getPagePosition();
-        var tipX = parentPos.x;
-        var tipParentY = parentPos.y;
+        var parentPos = ttp.getPagePosition(),
+            tipX = parentPos.x,
+            tipParentY = parentPos.y;
         
         // Determine X position
         tipText.setWidth('auto');
@@ -97,11 +94,9 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
         }
         
         // Determine Y position
-        var tipHeight = 2*this.borderWidth + this.insetTop + this.insetBottom + tipText.height + this.pointerHeight;
-        var tipParentHeight = ttp.height;
-        
-        var pointerOnTop;
-        var tipY;
+        var tipHeight = 2*this.borderWidth + this.insetTop + this.insetBottom + tipText.height + this.pointerHeight,
+            tipParentHeight = ttp.height,
+            pointerOnTop, tipY;
         switch (tt.tipvalign) {
             case "below":
                 tipY = tipParentY + tipParentHeight;
@@ -139,16 +134,15 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
     },
     
     _redraw: function(pointerX, pointerOnTop) {
-        var tt = this.tooltip;
-        var tipText = this._tipText;
+        var tt = this.tooltip,
+            tipText = this._tipText;
         
         // Calculate bounds
-        var left = 0;
-        var right = this._tipWidth;
-        var top = pointerOnTop ? this.pointerHeight : 0;
-        var bottom = 2*this.borderWidth + this.insetTop + this.insetBottom + tipText.height + top;
-        
-        var canvas = this._bg;
+        var left = 0,
+            right = this._tipWidth,
+            top = pointerOnTop ? this.pointerHeight : 0,
+            bottom = 2*this.borderWidth + this.insetTop + this.insetBottom + tipText.height + top,
+            canvas = this._bg;
         canvas.clear();
         
         // Draw Shadow

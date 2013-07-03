@@ -25,14 +25,13 @@ myt.ConstantLayout = new JS.Class('ConstantLayout', myt.Layout, {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.Layout */
     update: function() {
-        if (!this.canUpdate()) return;
-        
-        var setterName = this.setterName;
-        var value = this.targetValue;
-        
-        var svs = this.subviews;
-        for (var i = 0, len = svs.length; len > i; ++i) {
-            svs[i][setterName](value);
+        if (this.canUpdate()) {
+            var setterName = this.setterName, 
+                value = this.targetValue, 
+                svs = this.subviews;
+            for (var i = 0, len = svs.length; len > i; ++i) {
+                svs[i][setterName](value);
+            }
         }
     }
 });

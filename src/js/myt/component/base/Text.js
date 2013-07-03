@@ -25,8 +25,8 @@ myt.Text = new JS.Class('Text', myt.View, {
         } else {
             // Temporarily set wrapping to 'nowrap', take measurement and
             // then restore wrapping.
-            var s = this.deStyle;
-            var oldValue = s.whiteSpace;
+            var s = this.deStyle,
+                oldValue = s.whiteSpace;
             s.whiteSpace = 'nowrap';
             var measuredWidth = this.domElement.getBoundingClientRect().width;
             s.whiteSpace = oldValue;

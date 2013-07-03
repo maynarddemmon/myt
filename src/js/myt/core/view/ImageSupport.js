@@ -112,16 +112,16 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
     __calculateNaturalSize: function() {
         var imgUrl = this.imageUrl;
         if (this.calculateNaturalSize && imgUrl) {
-            var sizeCache = myt.ImageSupport.SIZE_CACHE;
-            var cachedSize = sizeCache[imgUrl];
+            var sizeCache = myt.ImageSupport.SIZE_CACHE,
+                cachedSize = sizeCache[imgUrl];
             if (cachedSize) {
                 // Cache hit
                 this.setNaturalWidth(cachedSize.width);
                 this.setNaturalHeight(cachedSize.height);
             } else {
                 // Cache miss
-                var openQueryCache = myt.ImageSupport.OPEN_SIZE_QUERIES;
-                var openQuery = openQueryCache[imgUrl];
+                var openQueryCache = myt.ImageSupport.OPEN_SIZE_QUERIES,
+                    openQuery = openQueryCache[imgUrl];
                 if (!openQuery) {
                     // Lazy instantiate the open query array.
                     openQueryCache[imgUrl] = openQuery = [];
@@ -135,8 +135,7 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
                         // for a natural size.
                         var openQueries = openQueryCache[imgUrl];
                         if (openQueries) {
-                            var i = openQueries.length;
-                            var imageSupportInstance;
+                            var i = openQueries.length, imageSupportInstance;
                             while (i) {
                                 imageSupportInstance = openQueries[--i];
                                 imageSupportInstance.setNaturalWidth(w);

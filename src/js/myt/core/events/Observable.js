@@ -36,8 +36,7 @@ myt.Observable = new JS.Module('Observable', {
         if (!observers) return false;
         
         // Remove all instances of the observer and methodName combination.
-        var retval = false;
-        var i = observers.length;
+        var retval = false, i = observers.length;
         while (i) {
             // Ensures we decrement twice. First with --i, then with i-- since 
             // the part after && may not be executed.

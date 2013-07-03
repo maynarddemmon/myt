@@ -51,17 +51,16 @@ new JS.Singleton('GlobalWindowResize', {
     _handleEvent: function(domEvent) {
         if (!domEvent) domEvent = window.event;
         
-        var event = this.RESIZE_EVENT;
-        var target = domEvent.target;
-        var value = event.value;
-        
-        var isChanged = false;
-        var w = target.innerWidth;
+        var event = this.RESIZE_EVENT,
+            target = domEvent.target,
+            value = event.value,
+            isChanged = false,
+            w = target.innerWidth,
+            h = target.innerHeight;
         if (w !== value.w) {
             value.w = this._windowInnerWidth = w;
             isChanged = true;
         }
-        var h = target.innerHeight;
         if (h !== value.h) {
             value.h = this._windowInnerHeight = h;
             isChanged = true;

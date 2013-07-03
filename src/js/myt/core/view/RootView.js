@@ -64,9 +64,9 @@ myt.RootView = new JS.Module('RootView', {
     /** @overrides myt.View */
     sendBehind: function(otherRootView) {
         // Attempt to manipulate dom above root node.
-        var de = this.domElement;
-        var otherDe = otherRootView.domElement;
-        var parentNode = de.parentNode;
+        var de = this.domElement,
+            otherDe = otherRootView.domElement,
+            parentNode = de.parentNode;
         if (otherDe.parentNode !== parentNode) return;
         var removedElem = parentNode.removeChild(de);
         if (removedElem) parentNode.insertBefore(removedElem, otherDe);

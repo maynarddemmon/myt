@@ -13,8 +13,7 @@ myt.BAGMembership = new JS.Module('BAGMembership', {
     destroyAfterOrphaning: function() {
         this.callSuper();
         
-        var groups = this.__bags;
-        var group, i = groups.length;
+        var groups = this.__bags, i = groups.length, group;
         while (i) {
             group = groups[--i];
             this.removeFromBAG(group.attrName, group.groupId);
@@ -24,8 +23,7 @@ myt.BAGMembership = new JS.Module('BAGMembership', {
     
     // Methods /////////////////////////////////////////////////////////////////
     isRegisteredWithBAG: function(group) {
-        var groups = this.__bags;
-        var i = groups.length;
+        var groups = this.__bags, i = groups.length;
         while (i) {
             if (groups[--i] === group) return true;
         }
@@ -59,9 +57,7 @@ myt.BAGMembership = new JS.Module('BAGMembership', {
         var group = myt.BAG.getGroup(attrName, groupId);
         if (!this.isRegisteredWithBAG(group)) return;
         
-        var groups = this.__bags;
-        var g, i = groups.length;
-        var detach = true;
+        var groups = this.__bags, i = groups.length, g, detach = true;
         while (i) {
             g = groups[--i];
             if (g === group) {
@@ -79,10 +75,9 @@ myt.BAGMembership = new JS.Module('BAGMembership', {
     /** Called whenever an event for the attrName is fired.
         @returns void */
     __updateForBAG: function(event) {
-        var type = event.type;
-        var value = event.value;
-        var groups = this.__bags;
-        var group, i = groups.length;
+        var type = event.type,
+            value = event.value,
+            groups = this.__bags, i = groups.length, group;
         while (i) {
             group = groups[--i];
             if (group.attrName === type) {

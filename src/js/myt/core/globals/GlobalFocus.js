@@ -107,8 +107,7 @@ new JS.Singleton('GlobalFocus', {
                 startElem = fd;
                 
                 // Get closest model for dom element
-                var m = null;
-                var fdModel;
+                var m = null, fdModel;
                 while (fd) {
                     fdModel = fd.model;
                     if (fdModel && fdModel instanceof myt.View) {
@@ -130,9 +129,8 @@ new JS.Singleton('GlobalFocus', {
         }
         
         // Traverse
-        var elem = startElem;
-        var model, doTraversal, progElem;
-        var focusFuncName = isForward ? 'getNextFocus' : 'getPrevFocus';
+        var elem = startElem, model, doTraversal, progElem,
+            focusFuncName = isForward ? 'getNextFocus' : 'getPrevFocus';
         
         while (elem) {
             // Use programtic focus traversal if the model supports it.

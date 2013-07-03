@@ -54,9 +54,8 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         if (this.disabled) return;
         
         if (this.activateKeyDown === -1) {
-            var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
-            var keys = this.activationKeys;
-            var i = keys.length;
+            var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event),
+                keys = this.activationKeys, i = keys.length;
             while (i) {
                 if (keyCode === keys[--i]) {
                     this.activateKeyDown = keyCode;
@@ -73,8 +72,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         
         var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
         if (this.activateKeyDown === keyCode) {
-            var keys = this.activationKeys;
-            var i = keys.length;
+            var keys = this.activationKeys, i = keys.length;
             while (i) {
                 if (keyCode === keys[--i]) {
                     event.value.preventDefault();
@@ -89,8 +87,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         
         var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
         if (this.activateKeyDown === keyCode) {
-            var keys = this.activationKeys;
-            var i = keys.length;
+            var keys = this.activationKeys, i = keys.length;
             while (i) {
                 if (keyCode === keys[--i]) {
                     this.activateKeyDown = -1;

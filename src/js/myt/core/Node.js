@@ -242,8 +242,7 @@ myt.Node = new JS.Class('Node', {
         @returns the Node to place a subnode into. */
     determinePlacement: function(placement) {
         // Parse "active" placement and remaining placement.
-        var idx = placement.indexOf('.');
-        var remainder;
+        var idx = placement.indexOf('.'), remainder;
         if (idx !== -1) {
             remainder = placement.substring(idx + 1);
             placement = placement.substr(0, idx);

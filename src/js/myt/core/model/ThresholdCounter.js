@@ -25,11 +25,10 @@ myt.ThresholdCounter = new JS.Class('ThresholdCounter', {
             counterAttrName = counterAttrName || genNameFunc('counter', exceededAttrName);
             thresholdAttrName = thresholdAttrName || genNameFunc('threshold', exceededAttrName);
             
-            var incrName = genNameFunc(counterAttrName, 'increment');
-            var decrName = genNameFunc(counterAttrName, 'decrement');
-            var thresholdSetterName = myt.AccessorSupport.generateSetterName(thresholdAttrName);
-            
-            var isModuleOrClass = typeof scope === 'function' || scope instanceof JS.Module;
+            var incrName = genNameFunc(counterAttrName, 'increment'),
+                decrName = genNameFunc(counterAttrName, 'decrement'),
+                thresholdSetterName = myt.AccessorSupport.generateSetterName(thresholdAttrName),
+                isModuleOrClass = typeof scope === 'function' || scope instanceof JS.Module;
             
             // Prevent clobbering
             if ((isModuleOrClass ? scope.instanceMethod(incrName) : scope[incrName]) !== undefined) {
@@ -55,8 +54,8 @@ myt.ThresholdCounter = new JS.Class('ThresholdCounter', {
                 @returns void */
             mod[incrName] = function(amount) {
                 if (amount == null) amount = 1;
-                var curValue = this[counterAttrName];
-                var value = curValue + amount;
+                var curValue = this[counterAttrName],
+                    value = curValue + amount;
                 
                 // Counters must be non-negative.
                 if (0 > value) {
@@ -132,10 +131,9 @@ myt.ThresholdCounter = new JS.Class('ThresholdCounter', {
             var genNameFunc = myt.AccessorSupport.generateName;
             counterAttrName = counterAttrName || genNameFunc('counter', exceededAttrName);
             
-            var incrName = genNameFunc(counterAttrName, 'increment');
-            var decrName = genNameFunc(counterAttrName, 'decrement');
-            
-            var isModuleOrClass = typeof scope === 'function' || scope instanceof JS.Module;
+            var incrName = genNameFunc(counterAttrName, 'increment'),
+                decrName = genNameFunc(counterAttrName, 'decrement'),
+                isModuleOrClass = typeof scope === 'function' || scope instanceof JS.Module;
             
             // Prevent clobbering
             if ((isModuleOrClass ? scope.instanceMethod(incrName) : scope[incrName]) !== undefined) {

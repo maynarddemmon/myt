@@ -17,8 +17,7 @@ myt.KeyObservable = new JS.Module('KeyObservable', {
             @param event:event
             @returns number The keycode from the event. */
         getKeyCodeFromEvent: function(event) {
-            var domEvent = event.value;
-            var keyCode = domEvent.keyCode;
+            var domEvent = event.value, keyCode = domEvent.keyCode;
             if (keyCode) {
                 return keyCode;
             } else {

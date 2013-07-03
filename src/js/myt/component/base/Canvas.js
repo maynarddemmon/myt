@@ -89,12 +89,14 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
         add child views to a Canvas which is not directly supported in HTML.
         @overrides myt.View */
     sendSubviewToBack: function(sv) {
-        if (sv.parent !== this) return;
-        var de = this.domElement;
-        var firstChild = de.childNodes[1];
-        if (sv.domElement === firstChild) return;
-        var removedElem = de.removeChild(sv.domElement);
-        if (removedElem) de.insertBefore(removedElem, firstChild);
+        if (sv.parent === this) {
+            var de = this.domElement,
+                firstChild = de.childNodes[1];
+            if (sv.domElement !== firstChild) {
+                var removedElem = de.removeChild(sv.domElement);
+                if (removedElem) de.insertBefore(removedElem, firstChild);
+            }
+        }
     },
     
     /** Clears the drawing context. Anything currently drawn will be erased. */

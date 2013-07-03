@@ -12,9 +12,8 @@ myt.Draggable = new JS.Module('Draggable', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides */
     initNode: function(parent, attrs) {
-        this.isDraggable = false;
+        this.isDraggable = this.isDragging = false;
         this.distanceBeforeDrag = 2;
-        this.isDragging = false;
         
         if (attrs.isDraggable === undefined) attrs.isDraggable = true;
         
@@ -36,8 +35,7 @@ myt.Draggable = new JS.Module('Draggable', {
         }
         
         if (func) {
-            var dvs = this.getDragViews();
-            var i = dvs.length;
+            var dvs = this.getDragViews(), i = dvs.length;
             while(i) func.call(this, dvs[--i], '__doMouseDown', 'mousedown');
         }
     },
@@ -115,8 +113,9 @@ myt.Draggable = new JS.Module('Draggable', {
     /** Stop the drag. (see startDrag for more details)
         @returns void */
     stopDrag: function(event) {
-        myt.global.dragManager.stopDrag(event);
-        var gm = myt.global.mouse;
+        var g = myt.global;
+        g.dragManager.stopDrag(event);
+        var gm = g.mouse;
         this.detachFromDom(gm, '__doMouseUp', 'mouseup', true);
         this.detachFromDom(gm, '__updateDrag', 'mousemove', true);
         this.setIsDragging(false);

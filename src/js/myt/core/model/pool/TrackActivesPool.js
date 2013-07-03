@@ -36,8 +36,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
             return;
         }
         
-        var exists = false;
-        var i = actives.length;
+        var exists = false, i = actives.length;
         while (i) {
             if (actives[--i] === obj) {
                 actives.splice(i, 1);
@@ -58,7 +57,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
         @returns array */
     getActives: function() {
         var actives = this.__actives;
-        if (!actives) actives = this.__aactives = [];
+        if (!actives) actives = this.__actives = [];
         
         return actives.concat();
     }

@@ -82,8 +82,6 @@ myt.Constrainable = new JS.Module('Constrainable', {
         var constraints = this.__constraintsByMethodName;
         if (!constraints) return;
         
-        for (var methodName in constraints) {
-            this.releaseConstraint(methodName);
-        }
+        for (var methodName in constraints) this.releaseConstraint(methodName);
     }
 });

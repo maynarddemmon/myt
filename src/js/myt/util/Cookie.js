@@ -53,14 +53,15 @@ myt.Cookie = {
     read: function(key, options) {
         options = $.extend({}, this.defaults, options);
         
-        var decodeFunc = options.raw ? this._raw : this._decoded;
-        var useJson = options.json;
-        var cookies = document.cookie.split('; ');
-        var result = key ? undefined : {};
-        for (var i = 0, len = cookies.length; i < len; i++) {
-            var parts = cookies[i].split('=');
-            var name = decodeFunc(parts.shift());
-            var cookie = decodeFunc(parts.join('='));
+        var decodeFunc = options.raw ? this._raw : this._decoded,
+            useJson = options.json,
+            cookies = document.cookie.split('; '),
+            result = key ? undefined : {},
+            parts, name, cookie, i, len = cookies.length;
+        for (i = 0; i < len; i++) {
+            parts = cookies[i].split('=');
+            name = decodeFunc(parts.shift());
+            cookie = decodeFunc(parts.join('='));
             
             if (key && key === name) {
                 result = this._converted(cookie, useJson);

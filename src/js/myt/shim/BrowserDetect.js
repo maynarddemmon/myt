@@ -7,11 +7,11 @@ BrowserDetect = {
     },
     
     searchString: function(data) {
-        var dataItem;
+        var dataItem, dataString, dataProp;
         for (var i = 0, len = data.length; i < len; ++i) {
             dataItem = data[i];
-            var dataString = dataItem.string;
-            var dataProp = dataItem.prop;
+            dataString = dataItem.string;
+            dataProp = dataItem.prop;
             this.versionSearchString = dataItem.versionSearch || dataItem.identity;
             if (dataString) {
                 if (dataString.indexOf(dataItem.subString) !== -1) return dataItem.identity;

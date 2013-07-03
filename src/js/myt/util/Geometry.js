@@ -37,8 +37,7 @@ myt.Geometry = {
         @param y2:number the y position of the second point.
         @returns number the distance between the two points. */
     measureDistance: function(x1, y1, x2, y2) {
-        var diffX = x2 - x1;
-        var diffY = y2 - y1
-        return Math.sqrt((diffX * diffX) + (diffY * diffY));
+        var diffX = x2 - x1, diffY = y2 - y1
+        return Math.sqrt(diffX * diffX + diffY * diffY);
     }
 };

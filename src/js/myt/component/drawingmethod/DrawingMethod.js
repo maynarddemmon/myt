@@ -9,9 +9,8 @@ myt.DrawingMethod = new JS.Class('DrawingMethod', {
         /** Gets a DrawingMethod for the classname.
             @returns myt.DrawingMethod. */
         get: function(classname) {
-            var drawingMethods = this._drawingMethods;
-            
-            var drawingMethod = drawingMethods[classname];
+            var drawingMethods = this._drawingMethods,
+                drawingMethod = drawingMethods[classname];
             
             // Create the DrawingMethod if it wasn't found in the cache.
             if (!drawingMethod) {

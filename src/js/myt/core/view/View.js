@@ -20,8 +20,8 @@ myt.View = new JS.Class('View', myt.Node, {
                 dom in some way.
             @returns void */
         retainFocusDuringDomUpdate: function(viewBeingRemoved, wrappedFunc) {
-            var restoreFocus;
-            var currentFocus = myt.global.focus.focusedView;
+            var restoreFocus,
+                currentFocus = myt.global.focus.focusedView;
             if (currentFocus && (currentFocus === viewBeingRemoved || currentFocus.isDescendantOf(viewBeingRemoved))) {
                 restoreFocus = currentFocus;
                 restoreFocus._ignoreFocus = true;
@@ -618,13 +618,17 @@ myt.View = new JS.Class('View', myt.Node, {
         }
     },
     
+    /** Sorts the subviews array according to the provided sort function.
+        Also rearranges the dom elements so that focus navigation and z
+        ordering get updated.
+        @param sortFunc:function the sort function to sort the subviews with.
+        @returns void */
     sortSubviews: function(sortFunc) {
         // Sort subviews
-        var svs = this.subviews;
+        var svs = this.subviews, i = svs.length;
         svs.sort(sortFunc);
         
         // Rearrange dom to match new sort order.
-        var i = svs.length;
         while (i) this.sendSubviewToBack(svs[--i]);
     },
     

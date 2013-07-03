@@ -11,12 +11,11 @@ myt.DelayedMethodCall = new JS.Class('DelayedMethodCall', {
                 delay.
             @returns boolean True if creation succeeded, false otherwise. */
         createDelayedMethodCall: function(scope, millis, methodName) {
-            var genNameFunc = myt.AccessorSupport.generateName;
-            var delayedMethodName = genNameFunc('delayed', methodName);
-            var timerName = genNameFunc('timer', methodName);
-            var callbackName = genNameFunc('callback', methodName);
-            
-            var isModuleOrClass = typeof scope === 'function' || scope instanceof JS.Module;
+            var genNameFunc = myt.AccessorSupport.generateName,
+                delayedMethodName = genNameFunc('delayed', methodName),
+                timerName = genNameFunc('timer', methodName),
+                callbackName = genNameFunc('callback', methodName),
+                isModuleOrClass = typeof scope === 'function' || scope instanceof JS.Module;
             
             // Prevent clobbering
             if ((isModuleOrClass ? scope.instanceMethod(delayedMethodName) : scope[delayedMethodName]) !== undefined) {

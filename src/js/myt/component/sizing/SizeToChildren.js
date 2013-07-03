@@ -54,14 +54,13 @@ myt.SizeToChildren = new JS.Class('SizeToChildren', myt.Layout, {
         // Prevent inadvertent loops
         this.incrementLockedCounter();
         
-        var svs = this.subviews;
-        var i = svs.length;
-        var sv, xMax, yMax;
-        var p = this.parent;
+        var svs = this.subviews, i = svs.length, sv,
+            xMax, yMax,
+            p = this.parent,
+            axis = this.axis,
+            maxFunc = Math.max,
+            bw, bh;
         
-        var axis = this.axis;
-        var maxFunc = Math.max;
-        var bw, bh;
         if (axis === 'x') {
             xMax = 0;
             while(i) {

@@ -185,8 +185,8 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
     
     /** @overrides myt.ConstantLayout */
     updateSubview: function(count, sv, setterName, value) {
-        var size = sv[this.measureAttrName];
-        var otherSize = sv[this.otherMeasureAttrName];
+        var size = sv[this.measureAttrName],
+            otherSize = sv[this.otherMeasureAttrName];
         
         if (value + size > this.parentSizeLessOutset) {
             // Check for overflow

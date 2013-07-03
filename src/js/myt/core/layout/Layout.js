@@ -51,8 +51,8 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
             if (v) {
                 if (!myt.Layout.deferredLayouts) myt.Layout.deferredLayouts = [];
             } else {
-                var layouts = myt.Layout.deferredLayouts;
-                var layout, i = layouts.length;
+                var layouts = myt.Layout.deferredLayouts,
+                    layout, i = layouts.length;
                 while (i) {
                     layout = layouts[--i];
                     layout.__deferredLayout = false;
@@ -200,8 +200,8 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
         refreshing all the subview monitoring.
         @returns void */
     startMonitoringAllSubviews: function() {
-        var svs = this.subviews;
-        var i = svs.length;
+        var svs = this.subviews,
+            i = svs.length;
         while (i) this.startMonitoringSubview(svs[--i]);
     },
     
@@ -232,8 +232,8 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
         refreshing all the subview monitoring.
         @returns void */
     stopMonitoringAllSubviews: function() {
-        var svs = this.subviews;
-        var i = svs.length;
+        var svs = this.subviews,
+            i = svs.length;
         while (i) this.stopMonitoringSubview(svs[--i]);
     },
     

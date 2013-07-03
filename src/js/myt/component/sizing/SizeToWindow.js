@@ -43,8 +43,8 @@ myt.SizeToWindow = new JS.Module('SizeToWindow', {
     
     // Methods /////////////////////////////////////////////////////////////////
     __handleResize: function(event) {
-        var v = event.value;
-        var dim = this.resizeDimension;
+        var v = event.value,
+            dim = this.resizeDimension;
         if (dim === 'width' || dim === 'both') this.setWidth(Math.max(this.minWidth, v.w));
         if (dim === 'height' || dim === 'both') this.setHeight(Math.max(this.minHeight, v.h));
     }
