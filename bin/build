@@ -31,6 +31,7 @@ var compressFunc = function (error, stdout, stderr) {
     if (error) console.error('exec error: ' + error);
     
     // Compress file
+    console.error("COMPRESSING: " + targetFile);
     compressor.compress(targetFile, {
         charset: 'utf8', type: 'js'
     }, function(err, data, extra) {
@@ -50,9 +51,8 @@ var compressFunc = function (error, stdout, stderr) {
 // jsbuild to combine files
 // -P option removes the Package system from JS.Class
 var exec = require('child_process').exec;
-var child = exec(
-    'jsbuild -m ' + manifestFile + ' -P -r ' + rootPath + ' ' + requiredFiles.join(' ') + ' > ' + targetFile,
-    compressFunc
-);
+var cmd = 'jsbuild -m ' + manifestFile + ' -P -r ' + rootPath + ' ' + requiredFiles.join(' ') + ' > ' + targetFile;
+console.error("RUNNING: " + cmd);
+var child = exec(cmd, compressFunc);
 
 
