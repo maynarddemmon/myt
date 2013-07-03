@@ -1,7 +1,7 @@
 /** A BaseImageButton with contents that consist of an icon and text.
     
     Attributes:
-        __updateContentPositionBlock:boolean Used in __updateContentPosition
+        __updateContentPositionLoopBlock:boolean Used in __updateContentPosition
             and __updateContentPositionAfterDelay to prevent infinite loops.
         text:string the text to display on the button.
         iconUrl:string the url to an image to display in the button.
@@ -135,7 +135,7 @@ myt.ImageButton = new JS.Class('ImageButton', myt.BaseImageButton, {
     /** Use a timeout to greatly reduce the number of spurious updates during
         initialization. */
     __updateContentPosition: function(v) {
-        if (this.__updateContentPositionBlock) return;
+        if (this.__updateContentPositionLoopBlock) return;
         if (this.__updateContentPositionTimerId) return;
         
         var self = this;
@@ -149,36 +149,31 @@ myt.ImageButton = new JS.Class('ImageButton', myt.BaseImageButton, {
         
         this.__updateContentPositionTimerId = undefined;
         
-        var firstWidth = this.first.width;
-        var thirdWidth = this.third.width;
-        
-        var iconView = this.iconView;
-        var iconWidth = iconView.visible ? iconView.width : 0;
-        var iconSpacing = iconWidth > 0 ? this.iconSpacing : 0;
-        
-        var textView = this.textView;
-        var textWidth = (textView.visible && this.text) ? textView.width + 1 : 0; // Plus 1 adjusts for browser text quirkiness.
+        var firstWidth = this.first.width,
+            thirdWidth = this.third.width,
+            iconView = this.iconView,
+            textView = this.textView,
+            textViewVisible = textView.visible && this.text,
+            iconWidth = iconView.visible ? iconView.width : 0,
+            iconExtent = iconWidth + (textViewVisible && iconWidth > 0 ? this.iconSpacing : 0),
+            textWidth = textViewVisible ? textView.width : 0;
         
         if (this.shrinkToFit) {
             var totalWidth = firstWidth;
             iconView.setX(totalWidth);
-            totalWidth += iconWidth + iconSpacing;
+            totalWidth += iconExtent;
             textView.setX(totalWidth);
             totalWidth += textWidth + thirdWidth;
             
-            // Prevent this method from being called again when unnecessary.
-            // This is a side-effect of using the timeout.
-            this.__updateContentPositionBlock = true;
+            this.__updateContentPositionLoopBlock = true;
             this.setWidth(totalWidth);
-            this.__updateContentPositionBlock = false;
+            this.__updateContentPositionLoopBlock = false;
         } else {
-            var contentWidth = iconWidth + iconSpacing + textWidth;
-            var availableWidth = this.width - firstWidth - thirdWidth;
-            var extraWidth = availableWidth - contentWidth;
-            var leftPos = (extraWidth / 2) + firstWidth;
+            var extraWidth = this.width - firstWidth - iconExtent - textWidth - thirdWidth;
+            var leftPos = firstWidth + (extraWidth / 2);
             
             iconView.setX(leftPos);
-            textView.setX(leftPos + iconWidth + iconSpacing);
+            textView.setX(leftPos + iconExtent);
         }
     }
 });

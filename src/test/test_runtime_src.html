@@ -20,6 +20,8 @@
 
 <script>
     JS.require('myt.all', function() {
+        QUnit.config.reorder = false;
+        
         // Run tests after source has been loaded
         myt.loadScript('tests/shim/test-BrowserDetect.js');
         myt.loadScript('tests/shim/test-JSON.js');
