@@ -16,6 +16,22 @@
         stretched. The default is stretched(false).
 */
 myt.ThreePanel = new JS.Module('ThreePanel', {
+    // Class Methods and Attributes ////////////////////////////////////////////
+    extend: {
+        /** The common ignore function used in the myt.ResizeLayout and 
+            myt.SizeToChildren in all myt.ThreePanel, myt.HorizontalThreePanel 
+            and myt.VerticalThreePanel instances. */
+        IGNORE_FUNCTION_MIXIN: {
+            ignore: function(sv) {
+                switch (sv.name) {
+                    case 'first': case 'second': case 'third': return false;
+                    default: return true;
+                }
+            }
+        }
+    },
+    
+    
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
         if (attrs.axis === undefined) attrs.axis = 'x';
@@ -31,37 +47,24 @@ myt.ThreePanel = new JS.Module('ThreePanel', {
             name:'first', imageUrl:this.firstImageUrl, ignoreLayout:true
         });
         
-        new myt.Image(this, {
-            name:'second', layoutHint:1, imageUrl:this.secondImageUrl, ignoreLayout:true,
-            useNaturalSize:false, calculateNaturalSize:true,
+        var second = new myt.Image(this, {
+            name:'second', layoutHint:1, imageUrl:this.secondImageUrl, 
+            ignoreLayout:true, useNaturalSize:false, calculateNaturalSize:true,
         });
-        this.attachTo(this.second, '__updateSize', 'naturalWidth');
-        this.attachTo(this.second, '__updateSize', 'naturalHeight');
-        this.attachTo(this.second, '__updateImageSize', 'width');
-        this.attachTo(this.second, '__updateImageSize', 'height');
+        this.attachTo(second, '__updateSize', 'naturalWidth');
+        this.attachTo(second, '__updateSize', 'naturalHeight');
+        this.attachTo(second, '__updateImageSize', 'width');
+        this.attachTo(second, '__updateImageSize', 'height');
         
         new myt.Image(this, {
             name:'third', imageUrl:this.thirdImageUrl, ignoreLayout:true
         });
         
         var axis = this.axis;
-        var otherAxis = this.axis === 'x' ? 'y' : 'x';
-        new myt.ResizeLayout(this, {name:'resizeLayout', axis:axis}, [{
-            ignore: function(sv) {
-                switch (sv.name) {
-                    case 'first': case 'second': case 'third': return false;
-                    default: return true;
-                }
-            }
-        }]);
-        new myt.SizeToChildren(this, {name:'sizeToChildren', axis:otherAxis}, [{
-            ignore: function(sv) {
-                switch (sv.name) {
-                    case 'first': case 'second': case 'third': return false;
-                    default: return true;
-                }
-            }
-        }]);
+        var otherAxis = axis === 'x' ? 'y' : 'x';
+        var ignoreMixin = [myt.ThreePanel.IGNORE_FUNCTION_MIXIN];
+        new myt.ResizeLayout(this, {name:'resizeLayout', axis:axis}, ignoreMixin);
+        new myt.SizeToChildren(this, {name:'sizeToChildren', axis:otherAxis}, ignoreMixin);
         
         this.__updateRepeat();
         this.__updateSize();

@@ -17,37 +17,23 @@ myt.HorizontalThreePanel = new JS.Module('HorizontalThreePanel', {
             name:'first', imageUrl:this.firstImageUrl, ignoreLayout:true
         });
         
-        new myt.Image(this, {
-            name:'second', layoutHint:1, imageUrl:this.secondImageUrl, ignoreLayout:true,
-            useNaturalSize:false, calculateNaturalSize:true
+        var second = new myt.Image(this, {
+            name:'second', layoutHint:1, imageUrl:this.secondImageUrl, 
+            ignoreLayout:true, useNaturalSize:false, calculateNaturalSize:true
         });
-        this.attachTo(this.second, '__updateSize', 'naturalHeight');
-        this.attachTo(this.second, '__updateImageSize', 'width');
+        this.attachTo(second, '__updateSize', 'naturalHeight');
+        this.attachTo(second, '__updateImageSize', 'width');
         
         new myt.Image(this, {
             name:'third', imageUrl:this.thirdImageUrl, ignoreLayout:true
         });
         
-        new myt.ResizeLayout(this, {name:'resizeLayout'}, [{
-            ignore: function(sv) {
-                switch (sv.name) {
-                    case 'first': case 'second': case 'third': return false;
-                    default: return true;
-                }
-            }
-        }]);
-        new myt.SizeToChildren(this, {axis:'y'}, [{
-            ignore: function(sv) {
-                switch (sv.name) {
-                    case 'first': case 'second': case 'third': return false;
-                    default: return true;
-                }
-            }
-        }]);
+        var ignoreMixin = [myt.ThreePanel.IGNORE_FUNCTION_MIXIN];
+        new myt.ResizeLayout(this, {name:'resizeLayout'}, ignoreMixin);
+        new myt.SizeToChildren(this, {axis:'y'}, ignoreMixin);
         
         this.__updateRepeat();
         this.__updateSize();
-        this.__updateImageSize();
     },
     
     
