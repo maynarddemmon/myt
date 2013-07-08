@@ -218,10 +218,11 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
     __advance: function(timeDiff) {
         if (!this.running || this.paused) return;
         
-        var reverse = this.reverse;
+        var reverse = this.reverse, 
+            duration = this.duration, 
+            repeat = this.repeat, 
+            attr = this.attribute;
         if (reverse) timeDiff = timeDiff * -1;
-        
-        var duration = this.duration, repeat = this.repeat;
         
         // Determine how much time to move forward by.
         var oldProgress = this.__progress;
@@ -232,25 +233,18 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         if (this.__progress > duration) {
             remainderTime = this.__progress - duration;
             this.__progress = duration;
-            timeDiff -= remainderTime;
             
-            if (++this.__loopCount === repeat) {
-                remainderTime = 0;
-            }
+            if (++this.__loopCount === repeat) remainderTime = 0;
         } else if (0 > this.__progress) {
             // Reverse case
             remainderTime = -this.__progress;
             this.__progress = 0;
-            timeDiff += remainderTime;
             
-            if (0 > --this.__loopCount && repeat > 0) {
-                remainderTime = 0;
-            }
+            if (0 > --this.__loopCount && repeat > 0) remainderTime = 0;
         }
         
         // Apply to attribute
-        var target = this.target;
-        if (!target) target = this.parent;
+        var target = this.target ? this.target : this.parent;
         if (!target) {
             console.log("No target found for animator.", this);
             this.setRunning(false);
@@ -258,17 +252,16 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
             return;
         }
         
-        var attr = this.attribute;
         if (this.from == null) {
             this.__temporaryFrom = true;
             this.from = this.relative ? 0 : target.get(attr);
         }
-        var from = this.from;
-        var attrDiff = this.to - from;
-        var newValue = this.easingFunction(this.__progress, attrDiff, duration);
+        var from = this.from,
+            attrDiff = this.to - from,
+            newValue = this.easingFunction(this.__progress, attrDiff, duration);
         if (this.relative) {
-            var oldValue = this.easingFunction(oldProgress, attrDiff, duration);
-            var curValue = target.get(attr);
+            var oldValue = this.easingFunction(oldProgress, attrDiff, duration),
+                curValue = target.get(attr);
             target.set(attr, curValue + newValue - oldValue);
         } else {
             target.set(attr, from + newValue);
@@ -415,47 +408,41 @@ myt.Animator.easingFunctions = {
         return c/2 * (Math.sqrt(1 - (t-=2)*t) + 1);
     },
     easeInElastic: function (t, c, d) {
-        var s = 1.70158;
-        var p = 0;
-        var a = c;
+        var s = 1.70158, p = 0, a = c;
         if (t===0) return 0;
         if ((t/=d)===1) return c;
         if (!p) p = d*.3;
         if (a < Math.abs(c)) {
-            a = c;
-            var s = p/4;
+            //a = c;
+            s = p/4;
         } else {
-            var s = p/(2*Math.PI) * Math.asin (c/a);
+            s = p/(2*Math.PI) * Math.asin(c/a);
         }
         return -(a*Math.pow(2,10*(t-=1)) * Math.sin((t*d-s)*(2*Math.PI)/p));
     },
     easeOutElastic: function (t, c, d) {
-        var s = 1.70158;
-        var p = 0;
-        var a = c;
+        var s = 1.70158, p = 0, a = c;
         if (t===0) return 0;
         if ((t/=d)===1) return c;
         if (!p) p = d*.3;
         if (a < Math.abs(c)) {
-            a = c;
-            var s = p/4;
+            //a = c;
+            s = p/4;
         } else {
-            var s = p/(2*Math.PI) * Math.asin (c/a);
+            s = p/(2*Math.PI) * Math.asin(c/a);
         }
         return a*Math.pow(2,-10*t) * Math.sin((t*d-s)*(2*Math.PI)/p) + c;
     },
     easeInOutElastic: function (t, c, d) {
-        var s = 1.70158;
-        var p = 0;
-        var a = c;
+        var s = 1.70158, p = 0, a = c;
         if (t===0) return 0;
         if ((t/=d/2)===2) return c;
         if (!p) p = d*(.3*1.5);
         if (a < Math.abs(c)) {
-            a = c;
-            var s = p/4;
+            //a = c;
+            s = p/4;
         } else {
-            var s = p/(2*Math.PI) * Math.asin (c/a);
+            s = p/(2*Math.PI) * Math.asin(c/a);
         }
         if (t < 1) return -.5*(a*Math.pow(2,10*(t-=1)) * Math.sin((t*d-s)*(2*Math.PI)/p));
         return a*Math.pow(2,-10*(t-=1)) * Math.sin((t*d-s)*(2*Math.PI)/p)*.5 + c;
@@ -474,7 +461,7 @@ myt.Animator.easingFunctions = {
         return c/2*((t-=2)*t*(((s*=(1.525))+1)*t + s) + 2);
     },
     easeInBounce: function (t, c, d) {
-        return c - myt.Animator.easingFunctions.easeOutBounce (d-t, c, d);
+        return c - myt.Animator.easingFunctions.easeOutBounce(d-t, c, d);
     },
     easeOutBounce: function (t, c, d) {
         if ((t/=d) < (1/2.75)) {
@@ -488,7 +475,7 @@ myt.Animator.easingFunctions = {
         }
     },
     easeInOutBounce: function (t, c, d) {
-        if (t < d/2) return myt.Animator.easingFunctions.easeInBounce (t*2, c, d) * .5;
-        return myt.Animator.easingFunctions.easeOutBounce (t*2-d, c, d) * .5 + c*.5;
+        if (t < d/2) return myt.Animator.easingFunctions.easeInBounce(t*2, c, d) * .5;
+        return myt.Animator.easingFunctions.easeOutBounce(t*2-d, c, d) * .5 + c*.5;
     }
 };

@@ -197,6 +197,7 @@ new JS.Singleton('GlobalKeys', {
         if (this._shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
         this._keysDown[keyCode] = true;
         
+        // Check for 'tab' key and do focus traversal.
         if (keyCode === 9) {
             if (this.isShiftKeyDown()) {
                 myt.global.focus.prev(this.isAltKeyDown());

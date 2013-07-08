@@ -42,7 +42,7 @@ new JS.Singleton('GlobalRootViewRegistry', {
         @param r:RootView the RootView to remove.
         @returns void */
     removeRoot: function(r) {
-        var roots = this._roots, i = roots.length;
+        var roots = this._roots, i = roots.length, root;
         while(i) {
             root = roots[--i];
             if (root === r) {

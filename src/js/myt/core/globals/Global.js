@@ -27,12 +27,12 @@ myt.global = new JS.Singleton('Global', {
         event if the key exists.
         @returns void */
     unregister: function(key) {
-        if (!this.hasOwnProperty(key)) {
+        if (this.hasOwnProperty(key)) {
+            var v = this[key];
+            delete this[key];
+            this.fireNewEvent('unregister' + key, v);
+        } else {
             console.log("Warning: myt.global key not in use: ", key);
-            return;
         }
-        var v = this[key];
-        delete this[key];
-        this.fireNewEvent('unregister' + key, v);
     }
 });

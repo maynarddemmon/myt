@@ -123,12 +123,11 @@ myt = {
             template.
         @returns A populated string. */
     fillTextTemplate: function() {
-        var params = Array.prototype.slice.call(arguments);
-        var template = params.shift();
+        var params = Array.prototype.slice.call(arguments),
+            template = params.shift();
         
         if (template == null) return '';
-        var i = params.length;
-        var param;
+        var i = params.length, param;
         while (i) {
             param = params[--i];
             template = template.split("{" + i + "}").join(param == null ? '' : param);
