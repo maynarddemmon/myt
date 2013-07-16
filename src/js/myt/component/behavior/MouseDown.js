@@ -29,6 +29,14 @@ myt.MouseDown = new JS.Module('MouseDown', {
         }
     },
     
+    /** @overrides myt.Disableable */
+    setDisabled: function(v) {
+        // When disabled make sure mouseDown is not true.
+        if (this.mouseDown && v) this.setMouseDown(false);
+        
+        this.callSuper(v);
+    },
+    
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.MouseOver */

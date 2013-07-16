@@ -5,8 +5,7 @@
     By default Button instances are focusable.
     
     Attributes:
-        __restoreCursor:string the cursor to restore to when no longer
-            disabled.
+        __restoreCursor:string the cursor to restore to when no longer disabled.
 */
 myt.Button = new JS.Module('Button', {
     include: [
@@ -49,7 +48,9 @@ myt.Button = new JS.Module('Button', {
     /** @overrides myt.UpdateableUI. */
     updateUI: function() {
         if (this.disabled) {
-            this.__restoreCursor = this.cursor;
+            // Remember the cursor to change back to, but don't re-remember
+            // if we're already remembering one.
+            if (this.__restoreCursor == null) this.__restoreCursor = this.cursor;
             this.setCursor('not-allowed');
             this.drawDisabledState();
         } else {

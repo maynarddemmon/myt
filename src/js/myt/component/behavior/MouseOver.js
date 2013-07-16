@@ -38,6 +38,14 @@ myt.MouseOver = new JS.Module('MouseOver', {
         }
     },
     
+    /** @overrides myt.Disableable */
+    setDisabled: function(v) {
+        // When disabled make sure mouseOver is not true.
+        if (this.mouseOver && v) this.setMouseOver(false);
+        
+        this.callSuper(v);
+    },
+    
     
     // Methods /////////////////////////////////////////////////////////////////
     __doMouseOverOnIdle: function() {
