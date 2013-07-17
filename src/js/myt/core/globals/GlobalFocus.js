@@ -185,7 +185,7 @@ new JS.Singleton('GlobalFocus', {
                 if (model && model instanceof myt.View && model.isFocusable()) return model;
                 
                 var nodeName = elem.nodeName;
-                if (nodeName === 'A' || nodeName === 'AREA') {
+                if (nodeName === 'A' || nodeName === 'AREA' || nodeName === 'INPUT' || nodeName === 'TEXTAREA' || nodeName === 'SELECT') {
                     if (!isNaN(elem.tabIndex) && myt.DomElementProxy.isDomElementVisible(elem)) {
                         elem.focus();
                         this._focusedDom = elem;
