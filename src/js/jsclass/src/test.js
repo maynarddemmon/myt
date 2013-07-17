@@ -95,6 +95,14 @@ Test.Unit.extend({
 });
 
 Test.Unit.extend({
+  isFailure: function(error) {
+    var types = Test.ASSERTION_ERRORS, i = types.length;
+    while (i--) {
+      if (JS.isType(error, types[i])) return true;
+    }
+    return false;
+  },
+
   AssertionFailedError: new JS.Class(Error, {
     initialize: function(message) {
       this.message = message.toString();
@@ -313,7 +321,7 @@ Test.Unit.extend({
         try {
           block.call(context);
         } catch (e) {
-          if ((args.length === 0 && !JS.isType(e, Test.Unit.AssertionFailedError)) ||
+          if ((args.length === 0 && !Test.Unit.isFailure(e)) ||
               expected.any(function(type) { return JS.isType(e, type) }))
             this.assertBlock(this.buildMessage(message, 'Exception thrown:\n?', e), function() { return false });
           else
@@ -347,6 +355,13 @@ Test.Unit.extend({
     addAssertion: function() {}
   })
 });
+
+Test.extend({
+  ASSERTION_ERRORS: [Test.Unit.AssertionFailedError]
+});
+
+if (Console.NODE)
+  Test.ASSERTION_ERRORS.push(require('assert').AssertionError);
 
 Test.Unit.extend({
   AssertionMessage: new JS.Class({
@@ -687,7 +702,7 @@ Test.Unit.extend({
       processError: function(testCase, error) {
         if (!error) return;
 
-        if (JS.isType(error, Test.Unit.AssertionFailedError))
+        if (Test.Unit.isFailure(error))
           testCase.addFailure(error.message);
         else
           testCase.addError(error);
@@ -1160,7 +1175,7 @@ Test.Reporters.extend({
         if (JS.indexOf(parts, this.HOSTNAME) >= 0) return new this(options);
       }
     },
- 
+
     include: Console,
 
     startSuite: function(event) {
@@ -1659,22 +1674,26 @@ Test.Context.LifeCycle = new JS.Module({
     },
 
     ClassMethods: new JS.Module({
+      blockTransform: function(block) {
+        return block;
+      },
+
       before: function(period, block) {
-        if ((typeof period === 'function') || !block) {
+        if (block === undefined) {
           block  = period;
           period = 'each';
         }
 
-        this['before_' + (period + '_') + 'callbacks'].push(block);
+        this['before_' + (period + '_') + 'callbacks'].push(this.blockTransform(block));
       },
 
       after: function(period, block) {
-        if ((typeof period === 'function') || !block) {
+        if (block === undefined) {
           block  = period;
           period = 'each';
         }
 
-        this['after_' + (period + '_') + 'callbacks'].push(block);
+        this['after_' + (period + '_') + 'callbacks'].push(this.blockTransform(block));
       },
 
       gatherCallbacks: function(callbackType, period) {
@@ -1804,7 +1823,7 @@ Test.Unit.TestCase.extend({
 })();
 
 Test.Context.Test = new JS.Module({
-  it: function(name, opts, block) {
+  test: function(name, opts, block) {
     var testName = 'test: ' + name;
 
     if (JS.indexOf(this.instanceMethods(false), testName) >= 0)
@@ -1819,12 +1838,8 @@ Test.Context.Test = new JS.Module({
         this.before_should_callbacks[testName] = opts.before;
     }
 
-    this.define(testName, block, {_resolve: false});
+    this.define(testName, this.blockTransform(block), {_resolve: false});
   },
-
-  should: function() { return this.it.apply(this, arguments) },
-  test:   function() { return this.it.apply(this, arguments) },
-  tests:  function() { return this.it.apply(this, arguments) },
 
   beforeTest: function(name, block) {
     this.it(name, {before: block}, function() {});
@@ -1832,6 +1847,9 @@ Test.Context.Test = new JS.Module({
 });
 
 Test.Context.Test.alias({
+  it:           'test',
+  should:       'test',
+  tests:        'test',
   beforeIt:     'beforeTest',
   beforeShould: 'beforeTest',
   beforeTests:  'beforeTest'
@@ -2388,20 +2406,15 @@ Test.extend({
 
     included: function(klass) {
       klass.include(Test.AsyncSteps.Sync);
-      if (!klass.includes(Test.Context)) return;
+      if (!klass.blockTransform) return;
 
       klass.extend({
-        it: function(name, opts, block) {
-          if (typeof opts === 'function') {
-            block = opts;
-            opts  = {};
-          }
-          this.callSuper(name, opts, function(resume) {
+        blockTransform: function(block) {
+          return function(resume) {
             this.exec(block, function(error) {
-              Test.Unit.TestCase.processError(this, error);
-              this.sync(resume);
+              this.sync(function() { resume(error) });
             });
-          });
+          };
         }
       });
     },
@@ -2419,7 +2432,7 @@ Test.extend({
         },
 
         __runNextStep__: function(error) {
-          if (error !== undefined) return this.addError(error);
+          if (typeof error === 'object') return this.addError(error);
 
           var step = this.__stepQueue__.shift(), n;
 
