@@ -1,0 +1,200 @@
+<!doctype html><html><head>
+<title>Myt Framework : Native Input Elements Example</title>
+<link rel="stylesheet" href="../src/css/myt.scss"/>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.0/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="../js/jquery/jquery-1.10.0.min.js">\x3C/script>');</script>
+<script src="../src/js/boilerplate.js"></script>
+<script src="../src/js/jsclass/min/loader-browser.js"></script>
+<script src="../src/js/myt/manifest.js"></script>
+</head><body>
+
+<div id="appDiv" style="position:absolute;"></div>
+<div id="tooltipDiv" style="position:absolute;"></div>
+
+<script>
+    JS.require('myt.all', function() {this.init();});
+    
+    function init() {
+        var appDiv = document.getElementById("appDiv");
+        
+        var view4 = new myt.View(appDiv, {bgColor:'#eeeeee'}, [myt.SizeToWindowWidth]);
+        
+        var LocalFlowBtn = new JS.Class('LocalFlowBtn', myt.SimpleButton, {
+            include: [myt.TransformSupport],
+            
+            initNode: function(parent, attrs) {
+                attrs.readyColor = '#999999';
+                attrs.hoverColor = '#ff0000';
+                attrs.activeColor = '#990000';
+                attrs.cursor = 'pointer';
+                //attrs.rotation = 45;
+                
+                attrs.focusEmbellishment = true;
+                
+                this.callSuper(parent, attrs);
+                
+                this.attachToDom(this, '_handleKeyDown', 'keydown');
+                this.attachToDom(this, '_handleKeyPress', 'keypress');
+                this.attachToDom(this, '_handleKeyUp', 'keyup');
+                
+                this.attachToDom(this, '_handleMouseOver', 'mouseover');
+            },
+            
+            _handleMouseOver: function(e) {
+                this.simulateDomEvent('mousedown');
+                this.simulateDomEvent('mouseup');
+            },
+            
+            _handleKeyDown: function(e) {
+                console.log(e);
+            },
+            
+            _handleKeyPress: function(e) {
+                console.log(e);
+            },
+            
+            _handleKeyUp: function(e) {
+                console.log(e);
+            },
+            
+            doMouseUpInside: function(e) {
+                if (this.width > 200) {
+                    this.destroy();
+                } else {
+                    this.setWidth(2 * this.width);
+                    this.setHeight(2 * this.height);
+                    
+                    this.focus();
+                }
+            }/*,
+            
+            getNextFocus: function() {
+                if (myt.global.keys.isAltKeyDown()) {
+                    return this.parent;
+                }
+                return null;
+            },
+            getPrevFocus: function() {
+                return view4.clear;
+            }*/
+        });
+        
+        var LocalFlow = new JS.Class('LocalFlow', myt.View, {
+            initNode: function(parent, attrs) {
+                attrs.bgColor = '#cccccc';
+                
+                this.callSuper(parent, attrs);
+                
+                this.applyConstraint('_constrainWidth', [this.parent, 'width', this, 'x']);
+                
+                var size;
+                var lorem = '. abcdefghijklmnopqrstuvwxyz';
+                var markup = '<nobr>A link to <a href="http://www.google.com/">google</a>. This is some more text with another <a href="http://www.cp.net">link</a>.</nobr>';
+                var groupId = myt.InputRadio.getGroupId();
+                for (var i = 0; 15 > i; i++) {
+                    size = Math.round(Math.random() * 21) + 5;
+                    new myt.Text(this, {text:lorem.substr(0, size), bgColor:'#eeeeee', whiteSpace:'nowrap'});
+                    
+                    new myt.InputRadio(this, {optionValue:'foo ' + i, groupId:groupId}, [{
+                        doBeforeAdoption: function() {
+                            this.attachObserver(this, 'doValueChange', 'value');
+                            this.callSuper();
+                        },
+                        doValueChange: function(e) {
+                            if (e.value) {
+                                console.log("Radio checked: ", this.groupId, this.optionValue);
+                            } else {
+                                console.log("Radio unchecked", this.groupId, this.optionValue);
+                            }
+                        }
+                    }]);
+                    
+                    new myt.InputText(this, {
+                        width:100, bgColor:'#ffeeee', text:'foo bar baz', 
+                        textColor:'#990000', spellcheck:true, maxLength:25
+                    }, [{
+                        doBeforeAdoption: function() {
+                            this.attachObserver(this, 'doValueChange', 'value');
+                            this.callSuper();
+                        },
+                        doValueChange: function(e) {
+                            console.log("Value: ", e.value);
+                            if (e.value === 'pass') this.setInputType('password');
+                            if (e.value === 'text') this.setInputType('text');
+                        }
+                    }]);
+                    
+                    new myt.InputTextArea(this, {
+                        width:100, height:80, text:'Hey there! This is long enough.', 
+                        bgColor:'#ffffff', spellcheck:true
+                    }, [{
+                        doBeforeAdoption: function() {
+                            this.attachObserver(this, 'doValueChange', 'value');
+                            this.callSuper();
+                        },
+                        doValueChange: function(e) {
+                            console.log("Value: ", e.value);
+                        }
+                    }]);
+                    
+                    new myt.InputCheckbox(this, {checked:i%2===0}, [{
+                        doBeforeAdoption: function() {
+                            this.attachObserver(this, 'doValueChange', 'value');
+                            this.callSuper();
+                        },
+                        doValueChange: function(e) {
+                            console.log("Checkbox Value: ", e.value);
+                        }
+                    }]);
+                    
+                    new LocalFlowBtn(this, {width:size, height:size, focusable:i%2===0, disabled:i%4===0});
+                    
+                    var selectView = new myt.InputSelect(this, {width:100, size:i%6, multiple:i===5}, [{
+                        doBeforeAdoption: function() {
+                            this.attachObserver(this, 'doValueChange', 'value');
+                            this.callSuper();
+                        },
+                        doValueChange: function(e) {
+                            console.log("Select Value: ", e.value);
+                        }
+                    }]);
+                    
+                    for (var j = 0; 10 > j; j++) {
+                        new myt.InputSelectOption(selectView, {
+                            value:'bar ' + j, label:'Bar Baz ' + j,
+                            disabled:j%3===0
+                        });
+                    }
+                    selectView.toggleValue('bar 3');
+                    selectView.toggleValue('bar 4');
+                    selectView.toggleValue('bar 5');
+                }
+                
+                new myt.WrappingLayout(this, {name:'layout', axis:'x',
+                    inset:5, spacing:1, outset:5,
+                    lineInset:20, lineSpacing:1, lineOutset:20,
+                    collapseParent:true
+                });
+            },
+            
+            _constrainWidth: function() {
+                this.setWidth(this.parent.width - 2*this.x);
+            }
+        });
+        
+        new myt.SimpleButton(view4, {name:'clear', focusable:true, width:100, height:25, readyColor:'#666666', hoverColor:'#777777'}).extend({
+            doMouseUpInside: function(e) {
+                myt.global.focus.clear();
+            }
+        });
+        
+        for (var i = 0; 2 > i; i++) {
+            new LocalFlow(view4,{x:5, focusTrap:i%2===0});
+        }
+        
+        new myt.SpacedLayout(view4, {name:'layout', axis:'y',
+            inset:5, spacing:1, outset:5, collapseParent:true
+        });
+    }
+</script>
+</body></html>

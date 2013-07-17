@@ -153,6 +153,18 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'model/BAG.js'              ).provides('myt.BAG'              ).requires('myt.BAGMembership');
     file(MYT_COMPONENT_ROOT + 'model/DelayedMethodCall.js').provides('myt.DelayedMethodCall').requires('myt.AccessorSupport','myt.Timer');
     
+    // Component : Input
+    file(MYT_COMPONENT_ROOT + 'input/InputObservable.js'   ).provides('myt.InputObservable'   ).requires('myt.DomObservable');
+    file(MYT_COMPONENT_ROOT + 'input/NativeInputWrapper.js').provides('myt.NativeInputWrapper').requires('myt.View','myt.InputObservable','myt.Disableable');
+    file(MYT_COMPONENT_ROOT + 'input/BaseInputText.js'     ).provides('myt.BaseInputText'     ).requires('myt.NativeInputWrapper','myt.TextSupport');
+    file(MYT_COMPONENT_ROOT + 'input/InputText.js'         ).provides('myt.InputText'         ).requires('myt.BaseInputText');
+    file(MYT_COMPONENT_ROOT + 'input/InputTextArea.js'     ).provides('myt.InputTextArea'     ).requires('myt.BaseInputText');
+    file(MYT_COMPONENT_ROOT + 'input/InputCheckbox.js'     ).provides('myt.InputCheckbox'     ).requires('myt.NativeInputWrapper','myt.SizeToDom');
+    file(MYT_COMPONENT_ROOT + 'input/InputRadio.js'        ).provides('myt.InputRadio'        ).requires('myt.NativeInputWrapper','myt.SizeToDom');
+    file(MYT_COMPONENT_ROOT + 'input/InputSelect.js'       ).provides('myt.InputSelect'       ).requires('myt.NativeInputWrapper','myt.SizeToDom');
+    file(MYT_COMPONENT_ROOT + 'input/InputSelectOption.js' ).provides('myt.InputSelectOption' ).requires('myt.InputSelect');
+    
+    
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
         'myt.Cookie',
@@ -161,6 +173,7 @@ JS.Packages(function() {with(this) {
         'myt.SizeToWindowWidth', 'myt.SizeToWindowHeight', 'myt.TransformSupport', 
         'myt.Animator', 'myt.Callback', 'myt.RepeatableTimer', 'myt.StateMachine', 'myt.URI', 'myt.Ajax', 
         'myt.Draggable', 'myt.WrappingLayout', 'myt.ResizeLayout', 'myt.AlignedLayout', 'myt.SimpleButton', 'myt.ImageButton', 'myt.ThreePanel',
-        'myt.DrawingMethod', 'myt.BAG','myt.DelayedMethodCall'
+        'myt.DrawingMethod', 'myt.BAG', 'myt.DelayedMethodCall',
+        'myt.InputText', 'myt.InputTextArea', 'myt.InputCheckbox', 'myt.InputRadio', 'myt.InputSelectOption'
     );
 }});
