@@ -6,6 +6,10 @@
             the newly focused view.
     
     Attributes:
+        lastTraversalWasForward:boolean indicates if the last traversal was
+            in the forward direction or not. If false this implies the last
+            traversal was in the backward direction. This value is initalized
+            to true.
         focusedView:View the view that currently has focus.
         prevFocusedView:View the view that previously had focus.
         _focusedDom:DomElement holds the dom element that has focus when the
@@ -30,6 +34,8 @@ new JS.Singleton('GlobalFocus', {
     
     // Constructor /////////////////////////////////////////////////////////////
     initialize: function() {
+        this.lastTraversalWasForward = true;
+        
         myt.global.register('focus', this);
     },
     
@@ -95,11 +101,13 @@ new JS.Singleton('GlobalFocus', {
         @returns the new view to give focus to, or null if there is no view
             to focus on or an unmanaged dom element will receive focus. */
     _traverse: function(isForward, ignoreFocusTrap) {
+        this.lastTraversalWasForward = isForward;
+        
         // Get starting point for traversal
         var startElem, rootElem, focusTrap, f = this.focusedView;
         if (f) {
             startElem = f.domElement;
-            focusTrap = ignoreFocusTrap === true ? null : f.getFocusTrap();
+            focusTrap = f.getFocusTrap(ignoreFocusTrap);
             rootElem = focusTrap ? focusTrap.domElement : document.body;
         } else {
             var fd = this._focusedDom;
@@ -118,7 +126,7 @@ new JS.Singleton('GlobalFocus', {
                 }
                 
                 if (m) {
-                    focusTrap = ignoreFocusTrap === true ? null : m.getFocusTrap();
+                    focusTrap = m.getFocusTrap(ignoreFocusTrap);
                     rootElem = focusTrap ? focusTrap.domElement : document.body;
                 } else {
                     rootElem = document.body;

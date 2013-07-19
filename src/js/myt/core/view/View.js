@@ -119,6 +119,13 @@ myt.View = new JS.Class('View', myt.Node, {
         this.focusTrap = v;
     },
     
+    /** A boolean that determines if focus traversal can move above this view
+        or not. The default is false. This is the same as focusTrap except
+        it can't be ignored. */
+    setFocusCage: function(v) {
+        this.focusCage = v;
+    },
+    
     /** A boolean that prevents focus from traversing into this view or any
         of its subviews. The default is false. */
     setMaskFocus: function(v) {
@@ -393,12 +400,14 @@ myt.View = new JS.Class('View', myt.Node, {
         return true;
     },
     
-    /** Finds the youngest ancestor (or self) that is a focusTrap.
+    /** Finds the youngest ancestor (or self) that is a focusTrap or focusCage.
+        @param ignoreFocusTrap:boolean indicates focusTraps should be
+            ignored.
         @returns a View with focusTrap set to true or null if not found. */
-    getFocusTrap: function() {
+    getFocusTrap: function(ignoreFocusTrap) {
         var p = this;
         while (p) {
-            if (p.focusTrap) return p;
+            if (p.focusCage || (p.focusTrap && !ignoreFocusTrap)) return p;
             p = p.parent;
         }
         return null;

@@ -153,6 +153,10 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'model/BAG.js'              ).provides('myt.BAG'              ).requires('myt.BAGMembership');
     file(MYT_COMPONENT_ROOT + 'model/DelayedMethodCall.js').provides('myt.DelayedMethodCall').requires('myt.AccessorSupport','myt.Timer');
     
+    // Component : Floating Panel
+    file(MYT_COMPONENT_ROOT + 'floatingpanel/FloatingPanel.js'      ).provides('myt.FloatingPanel'      ).requires('myt.RootView');
+    file(MYT_COMPONENT_ROOT + 'floatingpanel/FloatingPanelAnchor.js').provides('myt.FloatingPanelAnchor').requires('myt.FloatingPanel');
+    
     // Component : Input
     file(MYT_COMPONENT_ROOT + 'input/InputObservable.js'   ).provides('myt.InputObservable'   ).requires('myt.DomObservable');
     file(MYT_COMPONENT_ROOT + 'input/NativeInputWrapper.js').provides('myt.NativeInputWrapper').requires('myt.View','myt.InputObservable','myt.Disableable');
@@ -174,6 +178,7 @@ JS.Packages(function() {with(this) {
         'myt.Animator', 'myt.Callback', 'myt.RepeatableTimer', 'myt.StateMachine', 'myt.URI', 'myt.Ajax', 
         'myt.Draggable', 'myt.WrappingLayout', 'myt.ResizeLayout', 'myt.AlignedLayout', 'myt.SimpleButton', 'myt.ImageButton', 'myt.ThreePanel',
         'myt.DrawingMethod', 'myt.BAG', 'myt.DelayedMethodCall',
+        'myt.FloatingPanelAnchor',
         'myt.InputText', 'myt.InputTextArea', 'myt.InputCheckbox', 'myt.InputRadio', 'myt.InputSelectOption'
     );
 }});

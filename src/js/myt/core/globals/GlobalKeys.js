@@ -199,15 +199,20 @@ new JS.Singleton('GlobalKeys', {
         
         // Check for 'tab' key and do focus traversal.
         if (keyCode === 9) {
+            var ift = this.ignoreFocusTrap();
             if (this.isShiftKeyDown()) {
-                myt.global.focus.prev(this.isAltKeyDown());
+                myt.global.focus.prev(ift);
             } else {
-                myt.global.focus.next(this.isAltKeyDown());
+                myt.global.focus.next(ift);
             }
         }
         
         this.fireNewEvent('keydown', keyCode);
         //console.log('global keydown', keyCode);
+    },
+    
+    ignoreFocusTrap: function() {
+        return this.isAltKeyDown();
     },
     
     _handleKeyPress: function(event) {

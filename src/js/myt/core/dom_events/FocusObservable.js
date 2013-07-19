@@ -151,12 +151,12 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
         this.domElement.blur();
     },
     
-    _doFocus: function(e) {
+    _doFocus: function(event) {
         this.setFocused(true);
         this.doFocus();
     },
     
-    _doBlur: function(e) {
+    _doBlur: function(event) {
         this.doBlur();
         this.setFocused(false);
     },

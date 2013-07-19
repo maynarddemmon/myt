@@ -342,6 +342,8 @@ myt.Node = new JS.Class('Node', {
         @param node:Node the node to check for.
         @returns boolean */
     isAncestorOf: function(node) {
+        if (!node) return false;
+        
         return node.isDescendantOf(this);
     },
     
