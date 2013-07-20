@@ -94,7 +94,7 @@ new JS.Singleton('GlobalFocus', {
         if (prev) prev.focus();
     },
     
-    /** Travers forward or backward from the currently focused view.
+    /** Traverse forward or backward from the currently focused view.
         @param isForward:boolean indicates forward or backward dom traversal.
         @param ignoreFocusTrap:boolean indicates if focus traps should be
             skipped over or not.
@@ -103,101 +103,89 @@ new JS.Singleton('GlobalFocus', {
     _traverse: function(isForward, ignoreFocusTrap) {
         this.lastTraversalWasForward = isForward;
         
-        // Get starting point for traversal
-        var startElem, rootElem, focusTrap, f = this.focusedView;
-        if (f) {
-            startElem = f.domElement;
-            focusTrap = f.getFocusTrap(ignoreFocusTrap);
-            rootElem = focusTrap ? focusTrap.domElement : document.body;
-        } else {
-            var fd = this._focusedDom;
-            if (fd) {
-                startElem = fd;
-                
-                // Get closest model for dom element
-                var m = null, fdModel;
-                while (fd) {
-                    fdModel = fd.model;
-                    if (fdModel && fdModel instanceof myt.View) {
-                        m = fdModel;
-                        break;
-                    }
-                    fd = fd.parentNode;
-                }
-                
-                if (m) {
-                    focusTrap = m.getFocusTrap(ignoreFocusTrap);
-                    rootElem = focusTrap ? focusTrap.domElement : document.body;
-                } else {
-                    rootElem = document.body;
-                }
-            } else {
-                startElem = rootElem = document.body;
+        // Determine root element and starting element for traversal.
+        var activeElem = document.activeElement, 
+            rootElem = document.body,
+            startElem = rootElem,
+            elem = startElem,
+            model, progModel,
+            focusFuncName = isForward ? 'getNextFocus' : 'getPrevFocus';
+        
+        if (activeElem) {
+            elem = startElem = activeElem;
+            model = startElem.model;
+            if (!model) model = this._findModelForDomElement(startElem);
+            if (model) {
+                var focusTrap = model.getFocusTrap(ignoreFocusTrap);
+                if (focusTrap) rootElem = focusTrap.domElement;
             }
         }
         
         // Traverse
-        var elem = startElem, model, doTraversal, progElem,
-            focusFuncName = isForward ? 'getNextFocus' : 'getPrevFocus';
-        
         while (elem) {
-            // Use programtic focus traversal if the model supports it.
-            doTraversal = true;
-            if (elem.model && elem.model[focusFuncName]) {
-                progElem = elem.model[focusFuncName]();
-                if (progElem && progElem.domElement !== elem) {
-                    elem = progElem.domElement;
-                    doTraversal = false;
-                }
-            }
-            
-            if (doTraversal) {
-                if (isForward) {
-                    if (elem.firstChild) {
-                        elem = elem.firstChild;
-                    } else if (elem === rootElem) {
-                        return startElem.model;
-                    } else if (elem.nextSibling) {
-                        elem = elem.nextSibling;
-                    } else {
-                        // Jump up and maybe over since we're at a local
-                        // deepest last child.
-                        while (elem) {
-                            elem = elem.parentNode;
-                            
-                            if (elem === rootElem) {
-                                break;
-                            } else if (elem.nextSibling) {
-                                elem = elem.nextSibling;
-                                break;
-                            }
+            if (elem.model && elem.model[focusFuncName] &&
+                (progModel = elem.model[focusFuncName]())
+            ) {
+                // Programatic traverse
+                elem = progModel.domElement;
+            } else if (isForward) {
+                // Dom traverse forward
+                if (elem.firstChild) {
+                    elem = elem.firstChild;
+                } else if (elem === rootElem) {
+                    return startElem.model; // TODO: why?
+                } else if (elem.nextSibling) {
+                    elem = elem.nextSibling;
+                } else {
+                    // Jump up and maybe over since we're at a local
+                    // deepest last child.
+                    while (elem) {
+                        elem = elem.parentNode;
+                        
+                        if (elem === rootElem) {
+                            break; // TODO: why?
+                        } else if (elem.nextSibling) {
+                            elem = elem.nextSibling;
+                            break;
                         }
                     }
+                }
+            } else {
+                // Dom traverse backward
+                if (elem === rootElem) {
+                    elem = this._getDeepestDescendant(rootElem);
+                } else if (elem.previousSibling) {
+                    elem = this._getDeepestDescendant(elem.previousSibling);
                 } else {
-                    if (elem === rootElem) {
-                        elem = this._getDeepestDescendant(rootElem);
-                    } else if (elem.previousSibling) {
-                        elem = this._getDeepestDescendant(elem.previousSibling);
-                    } else {
-                        elem = elem.parentNode;
-                    }
+                    elem = elem.parentNode;
                 }
             }
             
             // If we've looped back around return the starting element.
             if (elem === startElem) return startElem.model;
             
-            // Check that the element is focusable
+            // Check that the element is focusable and return it if it is.
             if (elem.nodeType === 1) {
                 model = elem.model;
-                if (model && model instanceof myt.View && model.isFocusable()) return model;
-                
-                var nodeName = elem.nodeName;
-                if (nodeName === 'A' || nodeName === 'AREA' || nodeName === 'INPUT' || nodeName === 'TEXTAREA' || nodeName === 'SELECT') {
-                    if (!isNaN(elem.tabIndex) && myt.DomElementProxy.isDomElementVisible(elem)) {
-                        elem.focus();
-                        this._focusedDom = elem;
-                        return null;
+                if (model && model instanceof myt.View) {
+                    if (model.isFocusable()) return model;
+                } else {
+                    var nodeName = elem.nodeName;
+                    if (nodeName === 'A' || nodeName === 'AREA' || 
+                        nodeName === 'INPUT' || nodeName === 'TEXTAREA' || 
+                        nodeName === 'SELECT'
+                    ) {
+                        if (!isNaN(elem.tabIndex) && myt.DomElementProxy.isDomElementVisible(elem)) {
+                            // Make sure the dom element isn't inside a maskFocus
+                            model = this._findModelForDomElement(elem);
+                            if (model && model.searchAncestorsOrSelf(function(n) {return n.maskFocus === true;})) {
+                                // Is a masked dom element so ignore.
+                            } else {
+                                elem.focus();
+                                this._focusedDom = elem;
+                                return null;
+                            }
+                        }
                     }
                 }
             }
@@ -206,17 +194,25 @@ new JS.Singleton('GlobalFocus', {
         return null;
     },
     
+    /** Finds the closest model for the provided dom element.
+        @param elem:domElement to element to start looking from.
+        @returns myt.View or null if not found. */
+    _findModelForDomElement: function(elem) {
+        var model;
+        while (elem) {
+            model = elem.model;
+            if (model && model instanceof myt.View) return model;
+            elem = elem.parentNode;
+        }
+        return null;
+    },
+    
     /** Gets the deepest dom element that is a descendant of the provided
         dom element or the element itself.
         @param elem:domElement The dom element to search downward from.
         @returns a dom element. */
     _getDeepestDescendant: function(elem) {
-        while (elem) {
-            if (elem.lastChild) {
-                elem = elem.lastChild;
-            } else {
-                return elem;
-            }
-        }
+        while (elem.lastChild) elem = elem.lastChild;
+        return elem;
     }
 });
