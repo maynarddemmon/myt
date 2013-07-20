@@ -173,9 +173,11 @@ new JS.Singleton('GlobalFocus', {
                     var nodeName = elem.nodeName;
                     if (nodeName === 'A' || nodeName === 'AREA' || 
                         nodeName === 'INPUT' || nodeName === 'TEXTAREA' || 
-                        nodeName === 'SELECT'
+                        nodeName === 'SELECT' || nodeName === 'BUTTON'
                     ) {
-                        if (!isNaN(elem.tabIndex) && myt.DomElementProxy.isDomElementVisible(elem)) {
+                        if (!elem.disabled && !isNaN(elem.tabIndex) && 
+                            myt.DomElementProxy.isDomElementVisible(elem)
+                        ) {
                             // Make sure the dom element isn't inside a maskFocus
                             model = this._findModelForDomElement(elem);
                             if (model && model.searchAncestorsOrSelf(function(n) {return n.maskFocus === true;})) {
