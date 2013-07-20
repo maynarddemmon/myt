@@ -194,5 +194,34 @@ myt = {
         }
         var t = document.getElementsByTagName('script')[0];
         t.parentNode.insertBefore(s, t);
+    },
+    
+    /** Used to wrap the first function with the second function. The first
+        function is exposed as this.callSuper within the wrapper function.
+        @param fn:function the function to wrap.
+        @param wrapperFn:function the wrapper function.
+        @returns a wrapped funcion. */
+    wrapFunction: function(fn, wrapperFn) {
+        var callSuper = function() {
+            return fn.apply(this, arguments);
+        }
+        
+        return function() {
+            // Store existing callSuper function so we can put it back later.
+            var oldSuper = this.callSuper;
+            
+            // Assign new callSuper and execute wrapperFn
+            this.callSuper = callSuper;
+            var retval = wrapperFn.apply(this, arguments);
+            
+            // Restore existing callSuper or delete new callSuper
+            if (oldSuper !== undefined) {
+                this.callSuper = oldSuper;
+            } else {
+                delete this.callSuper;
+            }
+            
+            return retval;
+        };
     }
 };
