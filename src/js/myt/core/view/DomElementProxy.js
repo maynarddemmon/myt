@@ -27,6 +27,9 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
             @param elem:DomElement the element to check visibility for.
             @returns boolean True if visible, false otherwise. */
         isDomElementVisible: function(elem) {
+            // Special Case: hidden input elements should be considered not visible.
+            if (elem.nodeName === 'INPUT' && elem.type === 'hidden') return false;
+            
             var style;
             while (elem) {
                 if (elem === document) return true;
