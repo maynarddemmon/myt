@@ -1,13 +1,24 @@
-/** A simple implementation of a button. */
+/** An myt.Button that makes use of activeColor, hoverColor and readyColor
+    attributes to fill the button.
+    
+    Attributes:
+        activeColor:string A color string such as '#ff0000' or 'transparent'.
+            Used when the button is in the active state. The default value 
+            is transparent.
+        hoverColor:string A color string such as '#ff0000' or 'transparent'.
+            Used when the button is in the hover state. The default value 
+            is transparent.
+        readyColor:string A color string such as '#ff0000' or 'transparent'.
+            Used when the button is in the ready or disabled state. The 
+            default value is transparent.
+*/
 myt.SimpleButton = new JS.Class('SimpleButton', myt.View, {
     include: [myt.Button],
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        this.activeColor = 'transparent';
-        this.hoverColor = 'transparent';
-        this.readyColor = 'transparent';
+        this.activeColor = this.hoverColor = this.readyColor = 'transparent';
         
         this.callSuper(parent, attrs);
     },
@@ -39,7 +50,7 @@ myt.SimpleButton = new JS.Class('SimpleButton', myt.View, {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.Button */
     drawDisabledState: function() {
-        this.setOpacity(0.5);
+        this.setOpacity(myt.Button.DEFAULT_DISABLED_OPACITY);
         this.setBgColor(this.readyColor);
     },
     

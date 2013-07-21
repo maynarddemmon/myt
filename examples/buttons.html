@@ -64,9 +64,9 @@
             name:'six', width:50, height:20, activeColor:'#990000', hoverColor:'#ff0000', readyColor:'#cc0000'
         }, [ActivatedMixin]);
         
-        var btn7 = new myt.ImageButton(rootView, {name:'seven', text:'foo', tooltip:'here is a tip', shrinkToFit:true}, [ActivatedMixin]);
-        var btn8 = new myt.ImageButton(rootView, {name:'eight', text:'bar', shrinkToFit:true, disabled:true}, [ActivatedMixin]);
-        var btn9 = new myt.ImageButton(rootView, {name:'nine', text:'baz', width:40}, [ActivatedMixin]);
+        var btn7 = new myt.PanelButton(rootView, {name:'seven', text:'foo', tooltip:'here is a tip', shrinkToFit:true}, [ActivatedMixin]);
+        var btn8 = new myt.PanelButton(rootView, {name:'eight', text:'bar', shrinkToFit:true, disabled:true}, [ActivatedMixin]);
+        var btn9 = new myt.PanelButton(rootView, {name:'nine', text:'baz', width:40}, [ActivatedMixin]);
         
         // Do some simple animation
         btn3.animate('y', 100, undefined, false, function(success) {btn3.animate({attribute:'x', to:52, relative:true});});

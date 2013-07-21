@@ -1,4 +1,4 @@
-/** A BaseImageButton with contents that consist of an icon and text.
+/** An myt.BasePanelButton with contents that consist of an icon and text.
     
     Attributes:
         __updateContentPositionLoopBlock:boolean Used in __updateContentPosition
@@ -15,7 +15,7 @@
         textView:myt.Text a reference to the child text view.
         iconView:myt.Image a reference to the child image view.
 */
-myt.ImageButton = new JS.Class('ImageButton', myt.BaseImageButton, {
+myt.PanelButton = new JS.Class('PanelButton', myt.BasePanelButton, {
     include: [myt.TooltipMixin],
     
     

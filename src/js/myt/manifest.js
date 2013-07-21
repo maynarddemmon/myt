@@ -142,11 +142,14 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'tooltip/TooltipMixin.js').provides('myt.TooltipMixin').requires('myt.global','myt.Tooltip');
     
     // Component : Image Button
-    file(MYT_COMPONENT_ROOT + 'imagebutton/BaseImageButton.js').provides('myt.BaseImageButton').requires('myt.MouseableH3Panel');
-    file(MYT_COMPONENT_ROOT + 'imagebutton/ImageButton.js'    ).provides('myt.ImageButton'    ).requires('myt.BaseImageButton','myt.TooltipMixin');
+    file(MYT_COMPONENT_ROOT + 'panelbutton/BasePanelButton.js').provides('myt.BasePanelButton').requires('myt.MouseableH3Panel');
+    file(MYT_COMPONENT_ROOT + 'panelbutton/PanelButton.js'    ).provides('myt.PanelButton'    ).requires('myt.BasePanelButton','myt.TooltipMixin');
     
     // Component : Drawing Method
     file(MYT_COMPONENT_ROOT + 'drawingmethod/DrawingMethod.js').provides('myt.DrawingMethod').requires('myt');
+
+    // Component : Draw Button
+    file(MYT_COMPONENT_ROOT + 'drawbutton/DrawButton.js').provides('myt.DrawButton').requires('myt.Button','myt.DrawingMethod');
     
     // Component : Model
     file(MYT_COMPONENT_ROOT + 'model/BAGMembership.js'    ).provides('myt.BAGMembership'    ).requires('myt.Node');
@@ -176,8 +179,8 @@ JS.Packages(function() {with(this) {
         'myt.Text', 'myt.Markup', 'myt.SizeWidthToDom', 'myt.SizeHeightToDom', 'myt.SizeToParent',
         'myt.SizeToWindowWidth', 'myt.SizeToWindowHeight', 'myt.TransformSupport', 
         'myt.Animator', 'myt.Callback', 'myt.RepeatableTimer', 'myt.StateMachine', 'myt.URI', 'myt.Ajax', 
-        'myt.Draggable', 'myt.WrappingLayout', 'myt.ResizeLayout', 'myt.AlignedLayout', 'myt.SimpleButton', 'myt.ImageButton', 'myt.ThreePanel',
-        'myt.DrawingMethod', 'myt.BAG', 'myt.DelayedMethodCall',
+        'myt.Draggable', 'myt.WrappingLayout', 'myt.ResizeLayout', 'myt.AlignedLayout', 'myt.ThreePanel',
+        'myt.DrawButton', 'myt.SimpleButton', 'myt.PanelButton', 'myt.BAG', 'myt.DelayedMethodCall',
         'myt.FloatingPanelAnchor',
         'myt.InputText', 'myt.InputTextArea', 'myt.InputCheckbox', 'myt.InputRadio', 'myt.InputSelectOption'
     );
