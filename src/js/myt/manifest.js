@@ -125,8 +125,9 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'timer/RepeatableTimer.js').provides('myt.RepeatableTimer').requires('myt.Timer');
     
     // Component : Button
-    file(MYT_COMPONENT_ROOT + 'button/Button.js'      ).provides('myt.Button'      ).requires('myt.UpdateableUI','myt.MouseOverAndDown','myt.KeyActivation','myt.Disableable');
-    file(MYT_COMPONENT_ROOT + 'button/SimpleButton.js').provides('myt.SimpleButton').requires('myt.View','myt.Button');
+    file(MYT_COMPONENT_ROOT + 'button/Button.js'               ).provides('myt.Button'               ).requires('myt.UpdateableUI','myt.MouseOverAndDown','myt.KeyActivation','myt.Disableable');
+    file(MYT_COMPONENT_ROOT + 'button/SimpleButton.js'         ).provides('myt.SimpleButton'         ).requires('myt.View','myt.Button');
+    file(MYT_COMPONENT_ROOT + 'button/IconTextButtonContent.js').provides('myt.IconTextButtonContent').requires('myt.Image','myt.Text');
     
     // Component : Panel
     file(MYT_COMPONENT_ROOT + 'panel/ThreePanel.js'          ).provides('myt.ThreePanel'          ).requires('myt.View','myt.Image','myt.ResizeLayout','myt.SizeToChildren');
@@ -141,9 +142,9 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'tooltip/Tooltip.js'     ).provides('myt.Tooltip'     ).requires('myt.Canvas','myt.BaseTooltip');
     file(MYT_COMPONENT_ROOT + 'tooltip/TooltipMixin.js').provides('myt.TooltipMixin').requires('myt.global','myt.Tooltip');
     
-    // Component : Image Button
-    file(MYT_COMPONENT_ROOT + 'panelbutton/BasePanelButton.js').provides('myt.BasePanelButton').requires('myt.MouseableH3Panel');
-    file(MYT_COMPONENT_ROOT + 'panelbutton/PanelButton.js'    ).provides('myt.PanelButton'    ).requires('myt.BasePanelButton','myt.TooltipMixin');
+    // Component : Panel Button
+    file(MYT_COMPONENT_ROOT + 'panelbutton/PanelButton.js'        ).provides('myt.PanelButton'        ).requires('myt.MouseableH3Panel');
+    file(MYT_COMPONENT_ROOT + 'panelbutton/IconTextPanelButton.js').provides('myt.IconTextPanelButton').requires('myt.PanelButton','myt.TooltipMixin','myt.IconTextButtonContent');
     
     // Component : Drawing Method
     file(MYT_COMPONENT_ROOT + 'drawingmethod/DrawingMethod.js').provides('myt.DrawingMethod').requires('myt');
@@ -180,7 +181,7 @@ JS.Packages(function() {with(this) {
         'myt.SizeToWindowWidth', 'myt.SizeToWindowHeight', 'myt.TransformSupport', 
         'myt.Animator', 'myt.Callback', 'myt.RepeatableTimer', 'myt.StateMachine', 'myt.URI', 'myt.Ajax', 
         'myt.Draggable', 'myt.WrappingLayout', 'myt.ResizeLayout', 'myt.AlignedLayout', 'myt.ThreePanel',
-        'myt.DrawButton', 'myt.SimpleButton', 'myt.PanelButton', 'myt.BAG', 'myt.DelayedMethodCall',
+        'myt.DrawButton', 'myt.SimpleButton', 'myt.IconTextPanelButton', 'myt.BAG', 'myt.DelayedMethodCall',
         'myt.FloatingPanelAnchor',
         'myt.InputText', 'myt.InputTextArea', 'myt.InputCheckbox', 'myt.InputRadio', 'myt.InputSelectOption'
     );
