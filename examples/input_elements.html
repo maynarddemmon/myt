@@ -1,0 +1,35 @@
+<!doctype html><html><head>
+<title>Myt Framework : Input Elements Example</title>
+<link rel="stylesheet" href="../src/css/myt.scss"/>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.0/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="../js/jquery/jquery-1.10.0.min.js">\x3C/script>');</script>
+<script src="../src/js/boilerplate.js"></script>
+<script src="../src/js/jsclass/min/loader-browser.js"></script>
+<script src="../src/js/myt/manifest.js"></script>
+</head><body>
+
+<div id="appDiv" style="position:absolute;"></div>
+<div id="tooltipDiv" style="position:absolute;"></div>
+
+<script>
+    JS.require('myt.all', function() {this.init();});
+    
+    function init() {
+        var appDiv = document.getElementById("appDiv");
+        var rootView = new myt.View(appDiv, {width:600, height:450, bgColor:'#eeeeee'}, [myt.RootView]);
+        
+        var attrs;
+        for (var i = 0; 500 > i; i++) {
+            attrs = {};
+            if (i % 5 == 0) attrs.disabled = true;
+            if (i % 4 == 0) attrs.checked = true;
+            new myt.Checkbox(rootView, attrs);
+        }
+        
+        new myt.WrappingLayout(rootView, {name:'layout', axis:'x',
+            inset:10, spacing:0, outset:5,
+            lineInset:10, lineSpacing:0,
+        });
+    }
+</script>
+</body></html>

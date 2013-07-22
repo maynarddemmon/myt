@@ -117,6 +117,11 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'util/Callback.js'    ).provides('myt.Callback'    ).requires('myt');
     file(MYT_COMPONENT_ROOT + 'util/StateMachine.js').provides('myt.StateMachine').requires('myt.Node');
     
+    // Component : Drawing
+    file(MYT_COMPONENT_ROOT + 'drawing/Color.js'      ).provides('myt.Color'      ).requires('myt');
+    file(MYT_COMPONENT_ROOT + 'drawing/Path.js'       ).provides('myt.Path'       ).requires('myt');
+    file(MYT_COMPONENT_ROOT + 'drawing/DrawingUtil.js').provides('myt.DrawingUtil').requires('myt.Color','myt.Path');
+    
     // Component : IO
     file(MYT_COMPONENT_ROOT + 'io/Ajax.js'  ).provides('myt.Ajax').requires('myt.Node');
     
@@ -147,10 +152,10 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'panelbutton/IconTextPanelButton.js').provides('myt.IconTextPanelButton').requires('myt.PanelButton','myt.TooltipMixin','myt.IconTextButtonContent');
     
     // Component : Drawing Method
-    file(MYT_COMPONENT_ROOT + 'drawingmethod/DrawingMethod.js').provides('myt.DrawingMethod').requires('myt');
+    file(MYT_COMPONENT_ROOT + 'drawingmethod/DrawingMethod.js').provides('myt.DrawingMethod').requires('myt','myt.DrawingUtil');
 
     // Component : Draw Button
-    file(MYT_COMPONENT_ROOT + 'drawbutton/DrawButton.js').provides('myt.DrawButton').requires('myt.Button','myt.DrawingMethod');
+    file(MYT_COMPONENT_ROOT + 'drawbutton/DrawButton.js').provides('myt.DrawButton').requires('myt.Canvas','myt.Button','myt.DrawingMethod');
     
     // Component : Model
     file(MYT_COMPONENT_ROOT + 'model/BAGMembership.js'    ).provides('myt.BAGMembership'    ).requires('myt.Node');
@@ -160,6 +165,10 @@ JS.Packages(function() {with(this) {
     // Component : Floating Panel
     file(MYT_COMPONENT_ROOT + 'floatingpanel/FloatingPanel.js'      ).provides('myt.FloatingPanel'      ).requires('myt.RootView');
     file(MYT_COMPONENT_ROOT + 'floatingpanel/FloatingPanelAnchor.js').provides('myt.FloatingPanelAnchor').requires('myt.FloatingPanel');
+    
+    // Component : Checkbox
+    file(MYT_COMPONENT_ROOT + 'checkbox/CheckboxDrawingMethod.js').provides('myt.CheckboxDrawingMethod').requires('myt.DrawingMethod');
+    file(MYT_COMPONENT_ROOT + 'checkbox/Checkbox.js'             ).provides('myt.Checkbox'             ).requires('myt.DrawButton','myt.CheckboxDrawingMethod');
     
     // Component : Input
     file(MYT_COMPONENT_ROOT + 'input/InputObservable.js'   ).provides('myt.InputObservable'   ).requires('myt.DomObservable');
@@ -183,6 +192,7 @@ JS.Packages(function() {with(this) {
         'myt.Draggable', 'myt.WrappingLayout', 'myt.ResizeLayout', 'myt.AlignedLayout', 'myt.ThreePanel',
         'myt.DrawButton', 'myt.SimpleButton', 'myt.IconTextPanelButton', 'myt.BAG', 'myt.DelayedMethodCall',
         'myt.FloatingPanelAnchor',
+        'myt.Checkbox',
         'myt.InputText', 'myt.InputTextArea', 'myt.InputCheckbox', 'myt.InputRadio', 'myt.InputSelectOption'
     );
 }});

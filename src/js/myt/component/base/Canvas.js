@@ -119,9 +119,9 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
     transform: function() {var ctx = this.__ctx; ctx.transform.apply(ctx, arguments);},
     setTransform: function() {var ctx = this.__ctx; ctx.setTransform.apply(ctx, arguments);},
     
-    createLinearGradient: function() {var ctx = this.__ctx; ctx.createLinearGradient.apply(ctx, arguments);},
-    createRadialGradient: function() {var ctx = this.__ctx; ctx.createRadialGradient.apply(ctx, arguments);},
-    createPattern: function() {var ctx = this.__ctx; ctx.createPattern.apply(ctx, arguments);},
+    createLinearGradient: function() {var ctx = this.__ctx; return ctx.createLinearGradient.apply(ctx, arguments);},
+    createRadialGradient: function() {var ctx = this.__ctx; return ctx.createRadialGradient.apply(ctx, arguments);},
+    createPattern: function() {var ctx = this.__ctx; return ctx.createPattern.apply(ctx, arguments);},
     
     clearRect: function() {var ctx = this.__ctx; ctx.clearRect.apply(ctx, arguments);},
     fillRect: function() {var ctx = this.__ctx; ctx.fillRect.apply(ctx, arguments);},
@@ -149,7 +149,7 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
     
     drawImage: function() {var ctx = this.__ctx; ctx.drawImage.apply(ctx, arguments);},
     createImageData: function() {var ctx = this.__ctx; ctx.createImageData.apply(ctx, arguments);},
-    getImageData: function() {var ctx = this.__ctx; ctx.getImageData.apply(ctx, arguments);},
+    getImageData: function() {var ctx = this.__ctx; return ctx.getImageData.apply(ctx, arguments);},
     putImageData: function() {var ctx = this.__ctx; ctx.putImageData.apply(ctx, arguments)}
 });
 

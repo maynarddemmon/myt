@@ -5,22 +5,16 @@
         drawingMethod:myt.DrawingMethod the instance to draw with. Obtained
             by resolving the drawingMethodClassname. This attribute should be
             treated as read only.
+        drawBounds:object the bounds for drawing within.
 */
 myt.DrawButton = new JS.Class('DrawButton', myt.Canvas, {
     include: [myt.Button],
     
     
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        DRAWING_CONFIG_DISABLED: {state:'disabled'},
-        DRAWING_CONFIG_HOVER: {state:'hover'},
-        DRAWING_CONFIG_ACTIVE: {state:'active'},
-        DRAWING_CONFIG_READY: {state:'ready'}
-    },
-    
-    
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
+        this.drawBounds = {x:0, y:0, w:0, h:0};
+        
         this.callSuper(parent, attrs);
     },
     
@@ -40,34 +34,52 @@ myt.DrawButton = new JS.Class('DrawButton', myt.Canvas, {
         if (this.inited) this.updateUI();
     },
     
+    /** Gets the bounds used by the DrawingMethod to draw within. By default
+        this returns the bounds of this view.
+        @returns an object with x, y, w and h properties. */
+    getDrawBounds: function() {
+        var bounds = this.drawBounds;
+        bounds.w = this.width;
+        bounds.h = this.height;
+        return bounds;
+    },
+    
+    getDrawConfig: function(state) {
+        return {state:state, focused:this.focused, bounds:this.getDrawBounds()};
+    },
+    
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.Button */
     drawDisabledState: function() {
         this.setOpacity(myt.Button.DEFAULT_DISABLED_OPACITY);
-        this._redraw(myt.DrawButton.DRAWING_CONFIG_DISABLED);
+        this.redraw('disabled');
     },
     
     /** @overrides myt.Button */
     drawHoverState: function() {
         this.setOpacity(1);
-        this._redraw(myt.DrawButton.DRAWING_CONFIG_HOVER);
+        this.redraw('hover');
     },
     
     /** @overrides myt.Button */
     drawActiveState: function() {
         this.setOpacity(1);
-        this._redraw(myt.DrawButton.DRAWING_CONFIG_ACTIVE);
+        this.redraw('active');
     },
     
     /** @overrides myt.Button */
     drawReadyState: function() {
         this.setOpacity(1);
-        this._redraw(myt.DrawButton.DRAWING_CONFIG_READY);
+        this.redraw('ready');
     },
     
-    _redraw: function(config) {
+    redraw: function(state) {
+        // Used if redrawing for focus changes
+        if (state === undefined) state = this._lastState;
+        this._lastState = state;
+        
         var dm = this.drawingMethod;
-        if (dm) dm.draw(this, config);
+        if (dm) dm.draw(this, this.getDrawConfig(state));
     }
 });

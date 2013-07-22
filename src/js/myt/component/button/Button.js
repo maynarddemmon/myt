@@ -46,6 +46,12 @@ myt.Button = new JS.Module('Button', {
         this.updateUI();
     },
     
+    /** @overrides myt.KeyActivation. */
+    doActivationKeyAborted: function(key) {
+        this.callSuper(key);
+        this.updateUI();
+    },
+    
     /** @overrides myt.UpdateableUI. */
     updateUI: function() {
         if (this.disabled) {
