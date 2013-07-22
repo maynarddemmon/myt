@@ -4,6 +4,17 @@ myt.CheckboxDrawingMethod = new JS.Class('CheckboxDrawingMethod', myt.DrawingMet
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.DrawingMethod */
     draw: function(canvas, config) {
+        // Setup default if not provided
+        if (config.borderSize === undefined) config.borderSize = 0.5;
+        if (config.checkmarkColor === undefined) config.checkmarkColor = '#666666';
+        if (config.borderColor === undefined) config.borderColor = '#333333';
+        if (config.shadowColor === undefined) config.shadowColor = 'rgba(0, 0, 0, 0.3)';
+        if (config.focusedShadowColor === undefined) config.focusedShadowColor = 'rgba(0, 0, 0, 0.5)';
+        if (config.shadowOffsetX === undefined) config.shadowOffsetX = 0;
+        if (config.shadowOffsetY === undefined) config.shadowOffsetY = 1;
+        if (config.shadowBlur === undefined) config.shadowBlur = 2;
+        if (config.radius === undefined) config.radius = 4;
+        
         var state = config.state,
             bounds = config.bounds,
             radius = config.radius,

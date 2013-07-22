@@ -1,45 +1,28 @@
-/** A mixin that adds an icon and text to the inside of a button.
+/** A mixin that adds a text element to the inside of a button.
     
     Attributes:
         __updateContentPositionLoopBlock:boolean Used in __updateContentPosition
             and __updateContentPositionAfterDelay to prevent infinite loops.
         text:string the text to display on the button.
-        iconUrl:string the url to an image to display in the button.
-        inset:number the left padding before the icon. Defaults to 0.
-        outset:number the right padding after the text/icon. Defaults to 0.
+        inset:number the left padding before the text. Defaults to 0.
+        outset:number the right padding after the text. Defaults to 0.
         textY:number the y offset for the text.
-        iconY:number the y offset for the icon.
-        iconSpacing:number spacing between the icon and the text. Defaults
-            to 2.
         shrinkToFit:boolean when true the button will be as narrow as possible
-            to fit the text, icon, inset and outset. When false the button 
+            to fit the text, inset and outset. When false the button 
             will be as wide as the set width. Defaults to false.
         textView:myt.Text a reference to the child text view.
-        iconView:myt.Image a reference to the child image view.
 */
-myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
+myt.TextButtonContent = new JS.Module('TextButtonContent', {
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        this.textY = this.iconY = 'middle';
-        this.iconSpacing = 2;
         this.inset = this.outset = 0;
         
         if (attrs.shrinkToFit === undefined) attrs.shrinkToFit = false;
         
-        this.callSuper(parent, attrs);
-    },
-    
-    doBeforeAdoption: function() {
-        this.callSuper();
+        // Use appropriate default based on mutliline text or not.
+        this.textY = attrs.shrinkToFit ? 'middle' : 0;
         
-        var attrs = {name:'iconView', imageUrl:this.iconUrl}
-        var iconY = this.iconY;
-        if (typeof iconY === 'string') {
-            attrs.valign = iconY;
-        } else {
-            attrs.y = iconY;
-        }
-        new myt.Image(this, attrs);
+        this.callSuper(parent, attrs);
     },
     
     doAfterAdoption: function() {
@@ -48,8 +31,8 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         // Setup the constraint after adoption since the textView won't have
         // been sized to the dom until it's added in.
         var attrs = {
-            name:'textView', whiteSpace:'nowrap', text:this.text, 
-            fontSize:'12px', fontWeight:'bold'
+            name:'textView', whiteSpace: this.shrinkToFit ? 'nowrap' : 'normal', 
+            text:this.text, fontSize:'12px', fontWeight:'bold'
         };
         var textY = this.textY;
         if (typeof textY === 'string') {
@@ -59,17 +42,22 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         }
         var textView = new myt.Text(this, attrs);
         
-        var iconView = this.iconView;
+        // Record original height
+        this.setOrigHeight(this.height);
+        
         this.applyConstraint('__updateContentPosition', [
             this, 'inset', this, 'outset',
-            this, 'width', this, 'shrinkToFit', this, 'iconSpacing',
-            iconView, 'width', iconView, 'visible',
+            this, 'width', this, 'shrinkToFit', this, 'multiline',
             textView, 'visible', textView, 'width'
         ]);
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
+    setOrigHeight: function(v) {
+        this.origHeight = v;
+    },
+    
     setInset: function(v) {
         // Adapt to event from syncTo
         if (typeof v === 'object') v = v.value;
@@ -100,38 +88,10 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
     setShrinkToFit: function(v) {
         if (this.shrinkToFit === v) return;
         this.shrinkToFit = v;
-        if (this.inited) this.fireNewEvent('shrinkToFit', v);
-    },
-    
-    /** The url for the iconView's image. */
-    setIconUrl: function(v) {
-        if (this.iconUrl === v) return;
-        this.iconUrl = v;
         if (this.inited) {
-            this.fireNewEvent('iconUrl', v);
-            this.iconView.setImageUrl(v);
+            if (this.textView) this.textView.setWhiteSpace(v ? 'nowrap' : 'normal');
+            this.fireNewEvent('shrinkToFit', v);
         }
-    },
-    
-    /** For fine tuning the y-position of the iconView. */
-    setIconY: function(v) {
-        if (this.iconY === v) return;
-        this.iconY = v;
-        if (this.inited) {
-            this.fireNewEvent('iconY', v);
-            if (typeof v === 'string') {
-                this.iconView.setValign(v);
-            } else {
-               this.iconView.setY(v);
-            }
-        }
-    },
-    
-    /** Spacing between the iconView and the textView. */
-    setIconSpacing: function(v) {
-        if (this.iconSpacing === v) return;
-        this.iconSpacing = v;
-        if (this.inited) this.fireNewEvent('iconSpacing', v);
     },
     
     /** For fine tuning the y-position of the textView. */
@@ -168,33 +128,25 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         
         this.__updateContentPositionTimerId = undefined;
         
-        var inset = this.inset,
-            outset = this.outset,
-            iconView = this.iconView,
-            textView = this.textView,
-            textViewVisible = textView.visible && this.text,
-            iconWidth = iconView.visible ? iconView.width : 0,
-            iconExtent = iconWidth + (textViewVisible && iconWidth > 0 ? this.iconSpacing : 0),
-            textWidth = textViewVisible ? textView.width : 0;
+        var inset = this.inset, outset = this.outset, textView = this.textView,
+            textViewVisible = textView.visible && this.text;
         
         if (this.shrinkToFit) {
-            var totalWidth = inset;
-            iconView.setX(totalWidth);
-            totalWidth += iconExtent;
-            textView.setX(totalWidth);
-            totalWidth += textWidth + outset;
+            textView.setX(inset);
             
             this.__updateContentPositionLoopBlock = true;
-            this.setWidth(totalWidth);
+            this.setWidth(inset + (textViewVisible ? textView.width : 0) + outset);
             this.__updateContentPositionLoopBlock = false;
             
-            this.updateUI();
+            this.setHeight(this.origHeight);
         } else {
-            var extraWidth = this.width - inset - iconExtent - textWidth - outset;
-            var leftPos = inset + (extraWidth / 2);
+            textView.setHeight('auto');
+            textView.setWidth(this.width - inset - outset);
+            textView.setX(inset);
             
-            iconView.setX(leftPos);
-            textView.setX(leftPos + iconExtent);
+            this.setHeight(textViewVisible ? textView.y + textView.height : this.origHeight);
         }
+        
+        this.updateUI();
     }
 });

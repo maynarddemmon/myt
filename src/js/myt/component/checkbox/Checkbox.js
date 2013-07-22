@@ -2,26 +2,24 @@
 myt.Checkbox = new JS.Class('Checkbox', myt.DrawButton, {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
+        /** The x location of the checkbox "icon". */
         DEFAULT_PAD_X:3,
+        /** The y location of the checkbox "icon". */
         DEFAULT_PAD_Y:4,
+        /** The width of the checkbox "icon". */
         DEFAULT_WIDTH:14,
+        /** The height of the checkbox "icon" */
         DEFAULT_HEIGHT:14
     },
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        var CB = myt.Checkbox;
-        if (attrs.width === undefined) {
-            attrs.width = CB.DEFAULT_WIDTH + 2 * CB.DEFAULT_PAD_X;
-        }
-        if (attrs.height === undefined) {
-            attrs.height = CB.DEFAULT_HEIGHT + 2 * CB.DEFAULT_PAD_Y;
-        }
+        if (attrs.width === undefined) attrs.width = this.getCheckboxExtentX();
+        if (attrs.height === undefined) attrs.height = this.getCheckboxExtentY();
         if (attrs.checked === undefined) attrs.checked = false;
         if (attrs.value === undefined) attrs.value = true;
         if (attrs.drawingMethodClassname === undefined) attrs.drawingMethodClassname = 'myt.CheckboxDrawingMethod';
-        
         if (attrs.focusEmbellishment === undefined) attrs.focusEmbellishment = false;
         
         this.callSuper(parent, attrs);
@@ -32,7 +30,7 @@ myt.Checkbox = new JS.Class('Checkbox', myt.DrawButton, {
     setFocused: function(v) {
         this.callSuper(v);
         
-        this.redraw();
+        if (this.inited) this.redraw();
     },
     
     setChecked: function(v) {
@@ -58,15 +56,6 @@ myt.Checkbox = new JS.Class('Checkbox', myt.DrawButton, {
     /** @overrides myt.DrawButton */
     getDrawConfig: function(state) {
         var config = this.callSuper(state);
-        config.borderSize = 0.5;
-        config.checkmarkColor = '#666666';
-        config.borderColor = '#333333';
-        config.shadowColor = 'rgba(0, 0, 0, 0.3)';
-        config.focusedShadowColor = 'rgba(0, 0, 0, 0.5)';
-        config.shadowOffsetX = 0;
-        config.shadowOffsetY = 1;
-        config.shadowBlur = 2;
-        config.radius = 4;
         config.checked = this.checked;
         
         switch (state) {
@@ -97,6 +86,21 @@ myt.Checkbox = new JS.Class('Checkbox', myt.DrawButton, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** Gets the horizontal size of the checkbox "icon" plus the padding
+        needed around it to display a shadow. */
+    getCheckboxExtentX: function() {
+        var CB = myt.Checkbox;
+        return CB.DEFAULT_WIDTH + 2 * CB.DEFAULT_PAD_X;
+    },
+    
+    /** Gets the vertical size of the checkbox "icon" plus the padding
+        needed around it to display a shadow. */
+    getCheckboxExtentY: function() {
+        var CB = myt.Checkbox;
+        return CB.DEFAULT_HEIGHT + 2 * CB.DEFAULT_PAD_Y;
+    },
+    
+    /** Toggle the checkbox when activated. */
     doActivated: function() {
         this.setChecked(!this.checked);
     }
