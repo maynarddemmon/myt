@@ -1,5 +1,5 @@
-/** Draws a checkbox into an myt.Canvas. */
-myt.CheckboxDrawingMethod = new JS.Class('CheckboxDrawingMethod', myt.DrawingMethod, {
+/** Draws a radio button into an myt.Canvas. */
+myt.RadioDrawingMethod = new JS.Class('RadioDrawingMethod', myt.DrawingMethod, {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.DrawingMethod */
     draw: function(canvas, config) {
@@ -12,11 +12,9 @@ myt.CheckboxDrawingMethod = new JS.Class('CheckboxDrawingMethod', myt.DrawingMet
         if (config.shadowOffsetX === undefined) config.shadowOffsetX = 0;
         if (config.shadowOffsetY === undefined) config.shadowOffsetY = 1;
         if (config.shadowBlur === undefined) config.shadowBlur = 2;
-        if (config.radius === undefined) config.radius = 4;
         
         var state = config.state,
             bounds = config.bounds,
-            radius = config.radius,
             x = bounds.x, y = bounds.y,
             w = bounds.w, h = bounds.h;
         
@@ -25,8 +23,12 @@ myt.CheckboxDrawingMethod = new JS.Class('CheckboxDrawingMethod', myt.DrawingMet
         if (w == 0 || h == 0) return;
         
         var inset = config.borderSize,
-            x2 = x + inset, y2 = y + inset,
-            w2 = w - 2*inset, h2 = h - 2*inset;
+            radius = w / 2,
+            twoPi = Math.PI * 2,
+            radius2 = radius - inset,
+            dotRadius = (radius2 / 2) - 1,
+            centerX = x + radius,
+            centerY = y + radius;
         
         // Border and shadow
         canvas.save();
@@ -35,15 +37,19 @@ myt.CheckboxDrawingMethod = new JS.Class('CheckboxDrawingMethod', myt.DrawingMet
         canvas.setShadowBlur(config.shadowBlur * (config.focused ? 2 : 1));
         canvas.setShadowColor(config.focused ? config.focusedShadowColor : config.shadowColor);
         
-        myt.DrawingUtil.drawRoundedRect(canvas, radius, 0, x, y, w, h);
+        canvas.beginPath();
+        canvas.arc(centerX, centerY, radius, 0, twoPi);
+        canvas.closePath();
         canvas.setFillStyle(config.borderColor);
         canvas.fill();
         canvas.restore();
         
         // Fill
-        myt.DrawingUtil.drawRoundedRect(canvas, radius - inset, 0, x2, y2, w2, h2);
+        canvas.beginPath();
+        canvas.arc(centerX, centerY, radius2, 0, twoPi);
+        canvas.closePath();
         var darkColor = (myt.Color.makeColorFromHexString(config.fillColor)).multiply(5/6);
-        var grd = canvas.createLinearGradient(x2, y2, x2, y2 + w2);
+        var grd = canvas.createLinearGradient(x, y, x, y + w);
         grd.addColorStop(0, config.fillColor);
         grd.addColorStop(1, darkColor.getHtmlHexString());
         canvas.setFillStyle(grd);
@@ -51,14 +57,9 @@ myt.CheckboxDrawingMethod = new JS.Class('CheckboxDrawingMethod', myt.DrawingMet
         
         // Checkmark
         if (config.checked) {
-            var path = new myt.Path([
-                x2 + 2, y2 + 1/2 * h2,
-                x2 + 1/2 * w2, y2 + h2 - 2,
-                x + w + 3, y,
-                x2 + 1/2 * w2, y2 + h2 - 6,
-                x2 + 5, y2 + 1/2 * h2 - 2
-            ]);
-            path.drawInto(canvas);
+            canvas.beginPath();
+            canvas.arc(centerX, centerY, dotRadius, 0, twoPi);
+            canvas.closePath();
             canvas.setFillStyle(config.checkmarkColor);
             canvas.fill();
         }

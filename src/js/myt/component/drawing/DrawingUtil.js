@@ -47,9 +47,9 @@ myt.DrawingUtil = {
             canvas.quadraticCurveTo(ileft, ibottom, ileft, ibottom - ir);
             
             canvas.lineTo(ileft, itop + ir);
-            
-            canvas.closePath();
         }
+        
+        canvas.closePath();
     },
     
     /** Draws a rounded rect with one or more flat corners.

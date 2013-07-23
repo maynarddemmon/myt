@@ -30,13 +30,17 @@ myt.BAGMembership = new JS.Module('BAGMembership', {
         return false;
     },
     
+    getBAG: function(attrName, groupId) {
+        return myt.BAG.getGroup(attrName, groupId);
+    },
+    
     /** Adds this node to the BAG for the groupId and
         attribute name.
         @param attrName:string
         @param groupId:string
         @returns void */
     addToBAG: function(attrName, groupId) {
-        var group = myt.BAG.getGroup(attrName, groupId);
+        var group = this.getBAG(attrName, groupId);
         if (this.isRegisteredWithBAG(group)) return;
         
         this.__bags.push(group);
@@ -54,7 +58,7 @@ myt.BAGMembership = new JS.Module('BAGMembership', {
         @param groupId:string
         @returns void */
     removeFromBAG: function(attrName, groupId) {
-        var group = myt.BAG.getGroup(attrName, groupId);
+        var group = this.getBAG(attrName, groupId);
         if (!this.isRegisteredWithBAG(group)) return;
         
         var groups = this.__bags, i = groups.length, g, detach = true;

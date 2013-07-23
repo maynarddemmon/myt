@@ -1,15 +1,6 @@
-/** A checkbox component with a text label. */
-myt.TextCheckbox = new JS.Class('TextCheckbox', myt.Checkbox, {
+/** A radio button component with a text label. */
+myt.TextRadio = new JS.Class('TextRadio', myt.Radio, {
     include: [myt.TextButtonContent, myt.TooltipMixin],
-    
-    
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        /** Padding on the left and right side of the text. */
-        DEFAULT_PAD_X:2,
-        /** Padding above the text when in multiline mode (shrinkToFit == false) */
-        DEFAULT_MULTILINE_PAD_Y:4,
-    },
     
     
     // Life Cycle //////////////////////////////////////////////////////////////

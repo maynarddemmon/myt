@@ -19,7 +19,7 @@
         var rootView = new myt.View(appDiv, {width:600, height:450, bgColor:'#eeeeee'}, [myt.RootView]);
         
         var attrs;
-        for (var i = 0; 200 > i; i++) {
+        for (var i = 0; 100 > i; i++) {
             attrs = {};
             if (i % 5 == 0) attrs.disabled = true;
             if (i % 3 == 0) attrs.checked = true;
@@ -33,6 +33,29 @@
                 attrs.width = 120;
             }
             new myt.TextCheckbox(rootView, attrs);
+        }
+        
+        for (i = 0; 100 > i; i++) {
+            attrs = {groupId:'foo', value:'v' + i};
+            if (i == 0 || i == 1) attrs.checked = true;
+            if (i % 2 == 0) attrs.groupId = 'bar';
+            if (i % 5 == 0) attrs.disabled = true;
+            if (i % 16 == 0) {
+                attrs.text = "Here is some text.";
+                attrs.shrinkToFit = true;
+            }
+            if (i % 32 == 0) {
+                attrs.shrinkToFit = false;
+                attrs.text = "Here is some text that will definitely wrap.";
+                attrs.width = 120;
+            }
+            new myt.TextRadio(rootView, attrs, [{
+                doActivated: function() {
+                    console.log("before", this.getGroupValue());
+                    this.callSuper();
+                    console.log("after", this.getGroupValue());
+                }
+            }]);
         }
         
         new myt.WrappingLayout(rootView, {name:'layout', axis:'x',
