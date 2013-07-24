@@ -26,8 +26,6 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
     },
     
     doAfterAdoption: function() {
-        this.callSuper();
-        
         // Setup the constraint after adoption since the textView won't have
         // been sized to the dom until it's added in.
         var attrs = {
@@ -50,6 +48,8 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
             this, 'width', this, 'shrinkToFit', this, 'multiline',
             textView, 'visible', textView, 'width'
         ]);
+        
+        this.callSuper();
     },
     
     

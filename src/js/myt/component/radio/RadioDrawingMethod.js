@@ -4,19 +4,13 @@ myt.RadioDrawingMethod = new JS.Class('RadioDrawingMethod', myt.DrawingMethod, {
     /** @overrides myt.DrawingMethod */
     draw: function(canvas, config) {
         // Setup default if not provided
-        if (config.borderSize === undefined) config.borderSize = 0.5;
-        if (config.checkmarkColor === undefined) config.checkmarkColor = '#666666';
-        if (config.borderColor === undefined) config.borderColor = '#333333';
         if (config.shadowColor === undefined) config.shadowColor = 'rgba(0, 0, 0, 0.3)';
         if (config.focusedShadowColor === undefined) config.focusedShadowColor = 'rgba(0, 0, 0, 0.5)';
         if (config.shadowOffsetX === undefined) config.shadowOffsetX = 0;
         if (config.shadowOffsetY === undefined) config.shadowOffsetY = 1;
         if (config.shadowBlur === undefined) config.shadowBlur = 2;
         
-        var state = config.state,
-            bounds = config.bounds,
-            x = bounds.x, y = bounds.y,
-            w = bounds.w, h = bounds.h;
+        var b = config.bounds, x = b.x, y = b.y, w = b.w, h = b.h;
         
         canvas.clear();
         
@@ -60,7 +54,7 @@ myt.RadioDrawingMethod = new JS.Class('RadioDrawingMethod', myt.DrawingMethod, {
             canvas.beginPath();
             canvas.arc(centerX, centerY, dotRadius, 0, twoPi);
             canvas.closePath();
-            canvas.setFillStyle(config.checkmarkColor);
+            canvas.setFillStyle(config.checkedColor);
             canvas.fill();
         }
     }

@@ -177,6 +177,12 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'radio/Radio.js'             ).provides('myt.Radio'             ).requires('myt.Checkbox','myt.RadioDrawingMethod','myt.BAG');
     file(MYT_COMPONENT_ROOT + 'radio/TextRadio.js'         ).provides('myt.TextRadio'         ).requires('myt.Radio','myt.TextButtonContent','myt.Tooltip');
     
+    // Component : Tab Slider
+    file(MYT_COMPONENT_ROOT + 'tabslider/TabSliderContainer.js'    ).provides('myt.TabSliderContainer'    ).requires('myt');
+    file(MYT_COMPONENT_ROOT + 'tabslider/TabSliderDrawingMethod.js').provides('myt.TabSliderDrawingMethod').requires('myt.DrawingMethod');
+    file(MYT_COMPONENT_ROOT + 'tabslider/TabSlider.js'             ).provides('myt.TabSlider'             ).requires('myt.Radio','myt.TabSliderDrawingMethod','myt.TabSliderContainer');
+    file(MYT_COMPONENT_ROOT + 'tabslider/TextTabSlider.js'         ).provides('myt.TextTabSlider'         ).requires('myt.TabSlider');
+    
     // Component : Input
     file(MYT_COMPONENT_ROOT + 'input/InputObservable.js'   ).provides('myt.InputObservable'   ).requires('myt.DomObservable');
     file(MYT_COMPONENT_ROOT + 'input/NativeInputWrapper.js').provides('myt.NativeInputWrapper').requires('myt.View','myt.InputObservable','myt.Disableable');
@@ -199,7 +205,7 @@ JS.Packages(function() {with(this) {
         'myt.Draggable', 'myt.WrappingLayout', 'myt.ResizeLayout', 'myt.AlignedLayout', 'myt.ThreePanel',
         'myt.DrawButton', 'myt.SimpleButton', 'myt.IconTextPanelButton', 'myt.DelayedMethodCall',
         'myt.FloatingPanelAnchor',
-        'myt.TextCheckbox','myt.TextRadio',
+        'myt.TextCheckbox','myt.TextRadio','myt.TextTabSlider',
         'myt.InputText', 'myt.InputTextArea', 'myt.InputCheckbox', 'myt.InputRadio', 'myt.InputSelectOption'
     );
 }});

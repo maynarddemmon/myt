@@ -43,8 +43,6 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
     },
     
     doAfterAdoption: function() {
-        this.callSuper();
-        
         // Setup the constraint after adoption since the textView won't have
         // been sized to the dom until it's added in.
         var attrs = {
@@ -66,6 +64,8 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
             iconView, 'width', iconView, 'visible',
             textView, 'visible', textView, 'width'
         ]);
+        
+        this.callSuper();
     },
     
     

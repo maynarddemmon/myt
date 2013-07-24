@@ -70,7 +70,8 @@ myt.View = new JS.Class('View', myt.Node, {
     },
     
     /** @overrides myt.Node 
-        Subclasses should call super if they don't call __updateBounds. */
+        Subclasses should call super if they don't call __updateBounds. The call
+        to super should probably occur at the end of the overridden method. */
     doAfterAdoption: function() {
         // Must be done after domElement is inserted so that calls to
         // getBoundingClientRect will work.

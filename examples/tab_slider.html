@@ -1,0 +1,62 @@
+<!doctype html><html><head>
+<title>Myt Framework : Tab Slider Example</title>
+<link rel="stylesheet" href="../src/css/myt.scss"/>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.0/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="../js/jquery/jquery-1.10.0.min.js">\x3C/script>');</script>
+<script src="../src/js/boilerplate.js"></script>
+<script src="../src/js/jsclass/min/loader-browser.js"></script>
+<script src="../src/js/myt/manifest.js"></script>
+</head><body>
+
+<div id="appDiv" style="position:absolute;"></div>
+<div id="tooltipDiv" style="position:absolute;"></div>
+
+<script>
+    JS.require('myt.all', function() {this.init();});
+    
+    function init() {
+        var appDiv = document.getElementById("appDiv");
+        var rootView = new myt.View(appDiv, {width:600, height:450, bgColor:'#ffffff'}, [myt.SizeToWindow]);
+        
+        var left = new myt.View(rootView, {
+            width:200, bgColor:'#eeeeee', percentOfParentHeight:100, groupId:'nav'
+        }, [myt.TabSliderContainer, myt.SizeToParent]);
+        
+        var attrs = {
+            buttonHeight:40,
+            fillColorChecked: '#0088cc',
+            fillColorHover: '#cccccc',
+            fillColorActive: '#ccddff',
+            fillColorReady: '#bbbbbb',
+            borderSize: 0,
+            text:'default text'
+        };
+        
+        var ts1 = new myt.TextTabSlider(left, attrs);
+        ts1.setText('foo bar');
+        new myt.View(ts1, {width:100, height:50, bgColor:'#ff0000'});
+        
+        var ts2 = new myt.TextTabSlider(left, attrs);
+        new myt.View(ts2, {width:100, height:150, bgColor:'#ffff00'});
+        
+        var ts3 = new myt.TextTabSlider(left, attrs);
+        new myt.View(ts3, {width:100, height:250, bgColor:'#ff00ff'});
+        
+        var ts4 = new myt.TextTabSlider(left, attrs);
+        ts4.setSelected(true);
+        new myt.View(ts4, {width:100, height:50, bgColor:'#ff0f0f'});
+        
+        var ts5 = new myt.TextTabSlider(left, attrs);
+        new myt.View(ts5, {width:100, height:350, bgColor:'#fff0f0'});
+        
+        var ts6 = new myt.TextTabSlider(left, attrs);
+        new myt.View(ts6, {width:100, height:150, bgColor:'#fff0f0'});
+        
+        var ts7 = new myt.TextTabSlider(left, attrs);
+        new myt.View(ts7, {width:100, height:150, bgColor:'#fff0f0'});
+        
+        var ts8 = new myt.TextTabSlider(left, attrs);
+        new myt.View(ts8, {width:100, height:350, bgColor:'#fff0f0'});
+    }
+</script>
+</body></html>
