@@ -1,10 +1,18 @@
 /** A mixin that allows myt.TabSliders to be added to a view. */
 myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
+    // Class Methods and Attributes ////////////////////////////////////////////
+    extend: {
+        DEFAULT_SPACING:1
+    },
+    
+    
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
         this._tabSliders = [];
         
         attrs.defaultPlacement = 'container';
+        
+        if (attrs.spacing === undefined) attrs.spacing = myt.TabSliderContainer.DEFAULT_SPACING;
         
         if (attrs.clip === undefined) attrs.clip = true;
         if (attrs.overflow === undefined) attrs.overflow = 'auto';
@@ -44,7 +52,7 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
                 this.callSuper(node);
             }
         }]);
-        new myt.SpacedLayout(container, {name:'layout', axis:'y', spacing:1, collapseParent:true});
+        new myt.SpacedLayout(container, {name:'layout', axis:'y', spacing:this.spacing, collapseParent:true});
         
         this.attachTo(this, 'updateLayout', 'height');
         
@@ -55,6 +63,12 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
     // Accessors ///////////////////////////////////////////////////////////////
     setGroupId: function(v) {
         this.groupId = v;
+    },
+    
+    setSpacing: function(v) {
+        if (this.spacing === v) return;
+        this.spacing = v;
+        if (this.layout) this.layout.setSpacing(v);
     },
     
     

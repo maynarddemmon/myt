@@ -2,7 +2,7 @@
 <title>Myt Framework : Tab Slider Example</title>
 <link rel="stylesheet" href="../src/css/myt.scss"/>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.0/jquery.min.js"></script>
-<script>window.jQuery || document.write('<script src="../js/jquery/jquery-1.10.0.min.js">\x3C/script>');</script>
+<script>window.jQuery || document.write('<script src="../src/js/jquery/jquery-1.10.0.min.js">\x3C/script>');</script>
 <script src="../src/js/boilerplate.js"></script>
 <script src="../src/js/jsclass/min/loader-browser.js"></script>
 <script src="../src/js/myt/manifest.js"></script>
@@ -18,6 +18,74 @@
         var appDiv = document.getElementById("appDiv");
         var rootView = new myt.View(appDiv, {width:600, height:450, bgColor:'#ffffff'}, [myt.SizeToWindow]);
         
+        // Tab : top
+        var top = new myt.View(rootView, {
+            x:210, height:30, bgColor:'#eeeeee', groupId:'topNav'
+        }, [myt.TabContainer]);
+        
+        var topTabAttrs = {
+            fillColorHover: '#cccccc',
+            fillColorReady: '#bbbbbb',
+            text:'tab text top',
+            shrinkToFit:true
+        };
+        
+        var tt1 = new myt.Tab(top, topTabAttrs);
+        var tt2 = new myt.Tab(top, topTabAttrs);
+        tt2.setChecked(true);
+        var tt3 = new myt.Tab(top, topTabAttrs);
+        
+        // Tab : bottom
+        var bottom = new myt.View(rootView, {
+            x:210, y:200, height:30, bgColor:'#eeeeee', groupId:'bottomNav', location:'bottom'
+        }, [myt.TabContainer]);
+        
+        var bottomTabAttrs = {
+            fillColorHover: '#cccccc',
+            fillColorReady: '#bbbbbb',
+            text:'tab text bot',
+            shrinkToFit:true
+        };
+        
+        var tb1 = new myt.Tab(bottom, bottomTabAttrs);
+        var tb2 = new myt.Tab(bottom, bottomTabAttrs);
+        tb2.setSelected(true);
+        var tb3 = new myt.Tab(bottom, bottomTabAttrs);
+        
+        // Tab : left
+        var left = new myt.View(rootView, {
+            x:210, y:60, width:100, bgColor:'#eeeeee', groupId:'bottomNav', location:'left'
+        }, [myt.TabContainer]);
+        
+        var leftTabAttrs = {
+            fillColorHover: '#cccccc',
+            fillColorReady: '#bbbbbb',
+            text:'tab text left',
+            shrinkToFit:true
+        };
+        
+        var tl1 = new myt.Tab(left, leftTabAttrs);
+        var tl2 = new myt.Tab(left, leftTabAttrs);
+        tl2.setDisabled(true);
+        var tl3 = new myt.Tab(left, leftTabAttrs);
+        
+        // Tab : right
+        var right = new myt.View(rootView, {
+            x:410, y:60, width:100, bgColor:'#eeeeee', groupId:'bottomNav', location:'right'
+        }, [myt.TabContainer]);
+        
+        var rightTabAttrs = {
+            fillColorHover: '#cccccc',
+            fillColorReady: '#bbbbbb',
+            text:'tab text right',
+            shrinkToFit:true
+        };
+        
+        var tr1 = new myt.Tab(right, rightTabAttrs);
+        var tr2 = new myt.Tab(right, rightTabAttrs);
+        var tr3 = new myt.Tab(right, rightTabAttrs);
+        
+        // TabSlider
         var left = new myt.View(rootView, {
             width:200, bgColor:'#eeeeee', percentOfParentHeight:100, groupId:'nav'
         }, [myt.TabSliderContainer, myt.SizeToParent]);
@@ -50,6 +118,7 @@
         new myt.View(ts5, {width:100, height:350, bgColor:'#fff0f0'});
         
         var ts6 = new myt.TextTabSlider(left, attrs);
+        ts6.setDisabled(true);
         new myt.View(ts6, {width:100, height:150, bgColor:'#fff0f0'});
         
         var ts7 = new myt.TextTabSlider(left, attrs);

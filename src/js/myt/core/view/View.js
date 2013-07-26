@@ -177,8 +177,10 @@ myt.View = new JS.Class('View', myt.Node, {
         if (this.align === v) return;
         if (this.inited) this.__teardownAlignConstraint();
         this.align = v;
-        if (this.inited) this.fireNewEvent('align', v);
-        this.__setupAlignConstraint();
+        if (this.inited) {
+            this.fireNewEvent('align', v);
+            this.__setupAlignConstraint();
+        }
     },
     
     __teardownAlignConstraint: function() {
@@ -223,8 +225,10 @@ myt.View = new JS.Class('View', myt.Node, {
         if (this.valign === v) return;
         if (this.inited) this.__teardownValignConstraint();
         this.valign = v;
-        if (this.inited) this.fireNewEvent('valign', v);
-        this.__setupValignConstraint();
+        if (this.inited) {
+            this.fireNewEvent('valign', v);
+            this.__setupValignConstraint();
+        }
     },
     
     __teardownValignConstraint: function() {

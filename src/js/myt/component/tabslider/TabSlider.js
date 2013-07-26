@@ -75,7 +75,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
             fillBorderColor:this.fillBorderColor,
             borderSize:this.borderSize
         }, [myt.SizeToParent, {
-            /** @overrides myt.Checkbox */
+            /** @overrides myt.CheckboxMixin */
             getDrawConfig: function(state) {
                 var config = this.callSuper(state);
                 if (this.focused && state !== 'active') config.fillColor = self.fillColorHover;
@@ -83,7 +83,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
                 return config;
             },
             
-            /** @overrides myt.Checkbox */
+            /** @overrides myt.CheckboxMixin */
             getDrawBounds: function() {
                 var bounds = this.drawBounds;
                 bounds.w = this.width;
@@ -98,6 +98,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
             }
         }]);
         this.syncTo(this.button, 'setSelected', 'checked');
+        this.syncTo(this.button, 'setDisabled', 'disabled');
         
         this.callSuper();
     },
@@ -155,6 +156,18 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
         
         // Sync the other direction if necessary.
         if (this.button && this.button.checked !== v) this.button.setChecked(v);
+    },
+    
+    setDisabled: function(v) {
+        // Adapt to event from syncTo
+        if (typeof v === 'object') v = v.value;
+        
+        if (this.disabled === v) return;
+        this.disabled = v;
+        if (this.inited) this.fireNewEvent('disabled', v);
+        
+        // Sync the other direction if necessary.
+        if (this.button && this.button.disabled !== v) this.button.setDisabled(v);
     },
     
     setExpansionState: function(v) {
