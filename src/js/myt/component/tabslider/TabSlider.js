@@ -46,18 +46,6 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
     },
     
     doAfterAdoption: function() {
-        var wrapper = new myt.View(this, {
-            name:'wrapper', ignorePlacement:true,
-            y:this.buttonHeight, height:0,
-            visible:false, maskFocus:true,
-            clip:true, overflow:'hidden', percentOfParentWidth:100
-        }, [myt.SizeToParent]);
-        
-        var container = new myt.View(wrapper, {name:'container'});
-        new myt.SizeToChildren(container, {axis:'y'});
-        
-        this.applyConstraint('_updateHeight', [wrapper, 'y', wrapper, 'height']);
-        
         var self = this;
         var btnClass = this.buttonClass;
         new btnClass(this, {
@@ -99,6 +87,18 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
         }]);
         this.syncTo(this.button, 'setSelected', 'checked');
         this.syncTo(this.button, 'setDisabled', 'disabled');
+        
+        var wrapper = new myt.View(this, {
+            name:'wrapper', ignorePlacement:true,
+            y:this.buttonHeight, height:0,
+            visible:false, maskFocus:true,
+            clip:true, overflow:'hidden', percentOfParentWidth:100
+        }, [myt.SizeToParent]);
+        
+        var container = new myt.View(wrapper, {name:'container'});
+        new myt.SizeToChildren(container, {axis:'y'});
+        
+        this.applyConstraint('_updateHeight', [wrapper, 'y', wrapper, 'height']);
         
         this.callSuper();
     },

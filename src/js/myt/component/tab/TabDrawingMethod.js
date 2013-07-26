@@ -18,7 +18,7 @@ myt.TabDrawingMethod = new JS.Class('TabDrawingMethod', myt.DrawingMethod, {
         var inset = config.borderSize, twiceInset = 2 * inset,
             rTL = 0, rTR = 0, rBL = 0, rBR = 0,
             irTL = 0, irTR = 0, irBL = 0, irBR = 0,
-            r = myt.TabDrawingMethod.DEFAULT_RADIUS,
+            r = config.cornerRadius === undefined ? myt.TabDrawingMethod.DEFAULT_RADIUS : config.cornerRadius,
             ir = r - inset,
             x2 = x + inset, y2 = y + inset, 
             w2 = w - twiceInset, h2 = h - twiceInset,

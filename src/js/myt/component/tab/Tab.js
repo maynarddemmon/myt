@@ -25,6 +25,8 @@ myt.Tab = new JS.Class('Tab', myt.DrawButton, {
         if (attrs.labelTextColorChecked === undefined) attrs.labelTextColorChecked = T.DEFAULT_LABEL_TEXT_COLOR_CHECKED;
         if (attrs.drawingMethodClassname === undefined) attrs.drawingMethodClassname = 'myt.TabDrawingMethod';
         
+        if (attrs.groupId === undefined) attrs.groupId = parent.groupId;
+        
         this.callSuper(parent, attrs);
         
         this.syncTo(this, 'setSelected', 'checked');
@@ -33,6 +35,7 @@ myt.Tab = new JS.Class('Tab', myt.DrawButton, {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setLabelTextColorChecked: function(v) {this.labelTextColorChecked = v;},
+    setCornerRadius: function(v) {this.cornerRadius = v;},
     
     setSelected: function(v) {
         // Adapt to event from syncTo
@@ -60,6 +63,7 @@ myt.Tab = new JS.Class('Tab', myt.DrawButton, {
     getDrawConfig: function(state) {
         var config = this.callSuper(state);
         config.location = this.parent.location;
+        config.cornerRadius = this.cornerRadius;
         if (this.focused && state !== 'active') config.fillColor = this.fillColorHover;
         if (this.checked) config.fillColor = this.fillColorChecked;
         return config;

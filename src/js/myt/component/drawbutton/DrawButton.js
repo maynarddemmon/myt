@@ -48,6 +48,18 @@ myt.DrawButton = new JS.Class('DrawButton', myt.Canvas, {
         return {state:state, focused:this.focused, bounds:this.getDrawBounds()};
     },
     
+    setWidth: function(v) {
+        this.callSuper(v);
+        
+        if (this.inited) this.redraw();
+    },
+    
+    setHeight: function(v) {
+        this.callSuper(v);
+        
+        if (this.inited) this.redraw();
+    },
+    
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.Button */

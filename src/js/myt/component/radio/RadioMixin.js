@@ -43,11 +43,14 @@ myt.RadioMixin = new JS.Module('RadioMixin', {
     },
     
     getGroupValue: function() {
+        var checkedRadio = this.getCheckedRadio();
+        if (checkedRadio) return checkedRadio.getValue();
+        return null;
+    },
+    
+    getCheckedRadio: function() {
         var bag = this.getBAG('checked', this.groupId);
-        if (bag) {
-            var trueNode = bag.trueNode;
-            if (trueNode) return trueNode.getValue();
-        }
+        if (bag) return bag.trueNode;
         return null;
     },
     

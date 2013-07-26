@@ -13,7 +13,7 @@ myt.TabContainer = new JS.Module('TabContainer', {
         if (attrs.spacing === undefined) attrs.spacing = myt.TabContainer.DEFAULT_SPACING;
         
         if (attrs.location === undefined) attrs.location = 'top';
-        if (attrs.groupdId === undefined) attrs.groupId = myt.generateGuid();
+        if (attrs.groupId === undefined) attrs.groupId = myt.generateGuid();
         
         this.callSuper(parent, attrs);
     },
@@ -49,6 +49,16 @@ myt.TabContainer = new JS.Module('TabContainer', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    getFirstTab: function() {
+        return this._tabs[0];
+    },
+    
+    getSelected: function() {
+        var tab = this._tabs[0];
+        if (tab) return tab.getCheckedRadio();
+        return null;
+    },
+    
     /** @overrides myt.View */
     subnodeAdded: function(node) {
         this.callSuper(node);
@@ -75,7 +85,7 @@ myt.TabContainer = new JS.Module('TabContainer', {
     /** @overrides myt.View */
     subnodeRemoved: function(node) {
         if (node instanceof myt.Tab) {
-            var tabs = self._tabs, i = tabs.length;
+            var tabs = this._tabs, i = tabs.length;
             while (i) {
                 if (tabs[--i] === node) {
                     tabs.splice(i, 1);

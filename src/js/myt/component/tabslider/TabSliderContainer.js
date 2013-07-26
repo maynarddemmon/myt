@@ -16,7 +16,7 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
         
         if (attrs.clip === undefined) attrs.clip = true;
         if (attrs.overflow === undefined) attrs.overflow = 'auto';
-        if (attrs.groupdId === undefined) attrs.groupId = myt.generateGuid();
+        if (attrs.groupId === undefined) attrs.groupId = myt.generateGuid();
         
         myt.DelayedMethodCall.createDelayedMethodCall(this, 0, '_updateLayout');
         

@@ -14,6 +14,9 @@
         shrinkToFit:boolean when true the button will be as narrow as possible
             to fit the text, icon, inset and outset. When false the button 
             will be as wide as the set width. Defaults to false.
+        contentAlign: determines how the icon and text will be positioned when
+            not in shrinkToFit mode. Allowed values are: 'left', 'center' and
+            'right'. Defaults to 'center'.
         textView:myt.Text a reference to the child text view.
         iconView:myt.Image a reference to the child image view.
 */
@@ -25,6 +28,7 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         this.inset = this.outset = 0;
         
         if (attrs.shrinkToFit === undefined) attrs.shrinkToFit = false;
+        if (attrs.contentAlign === undefined) attrs.contentAlign = 'center';
         
         this.callSuper(parent, attrs);
     },
@@ -61,6 +65,7 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         this.applyConstraint('__updateContentPosition', [
             this, 'inset', this, 'outset',
             this, 'width', this, 'shrinkToFit', this, 'iconSpacing',
+            this, 'contentAlign',
             iconView, 'width', iconView, 'visible',
             textView, 'visible', textView, 'width'
         ]);
@@ -101,6 +106,12 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         if (this.shrinkToFit === v) return;
         this.shrinkToFit = v;
         if (this.inited) this.fireNewEvent('shrinkToFit', v);
+    },
+    
+    setContentAlign: function(v) {
+        if (this.contentAlign === v) return;
+        this.contentAlign = v;
+        if (this.inited) this.fireNewEvent('contentAlign', v);
     },
     
     /** The url for the iconView's image. */
@@ -190,8 +201,15 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
             
             this.updateUI();
         } else {
-            var extraWidth = this.width - inset - iconExtent - textWidth - outset;
-            var leftPos = inset + (extraWidth / 2);
+            var leftPos;
+            if (this.contentAlign === 'left') {
+                leftPos = inset;
+            } else if (this.contentAlign === 'center') {
+                var extraWidth = this.width - inset - iconExtent - textWidth - outset;
+                leftPos = inset + (extraWidth / 2);
+            } else {
+                leftPos = this.width - iconExtent - textWidth - outset;
+            }
             
             iconView.setX(leftPos);
             textView.setX(leftPos + iconExtent);

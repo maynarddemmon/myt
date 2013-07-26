@@ -223,5 +223,9 @@ myt = {
             
             return retval;
         };
+    },
+    
+    dumpStack: function(msg) {
+        console.log((new Error(msg)).stack);
     }
 };

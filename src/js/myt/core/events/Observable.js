@@ -164,7 +164,7 @@ myt.Observable = new JS.Module('Observable', {
         var activeEventTypes = this.__activeEventTypes;
         if (!activeEventTypes) activeEventTypes = this.__activeEventTypes = {};
         if (activeEventTypes[type] === true) {
-            console.log((new Error("Attempt to refire active event: " + type)).stack);
+            myt.dumpStack("Attempt to refire active event: " + type);
             return;
         }
         
