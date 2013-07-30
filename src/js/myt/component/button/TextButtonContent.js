@@ -30,7 +30,7 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
         // been sized to the dom until it's added in.
         var attrs = {
             name:'textView', whiteSpace: this.shrinkToFit ? 'nowrap' : 'normal', 
-            text:this.text, fontSize:'12px', fontWeight:'bold'
+            text:this.text, domClass:'mytButtonText'
         };
         var textY = this.textY;
         if (typeof textY === 'string') {

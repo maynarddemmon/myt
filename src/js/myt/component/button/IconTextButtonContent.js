@@ -50,8 +50,7 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         // Setup the constraint after adoption since the textView won't have
         // been sized to the dom until it's added in.
         var attrs = {
-            name:'textView', whiteSpace:'nowrap', text:this.text, 
-            fontSize:'12px', fontWeight:'bold'
+            name:'textView', whiteSpace:'nowrap', text:this.text, domClass:'mytButtonText'
         };
         var textY = this.textY;
         if (typeof textY === 'string') {

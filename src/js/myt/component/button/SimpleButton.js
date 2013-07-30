@@ -46,6 +46,12 @@ myt.SimpleButton = new JS.Class('SimpleButton', myt.View, {
         if (this.inited) this.updateUI();
     },
     
+    setCornerRadius: function(v) {
+        if (this.cornerRadius === v) return;
+        this.cornerRadius = v;
+        this.setRoundedCorners(v);
+    },
+    
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.Button */

@@ -129,11 +129,17 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'timer/Timer.js'          ).provides('myt.Timer'          ).requires('myt.Callback');
     file(MYT_COMPONENT_ROOT + 'timer/RepeatableTimer.js').provides('myt.RepeatableTimer').requires('myt.Timer');
     
+    // Component : Tooltip
+    file(MYT_COMPONENT_ROOT + 'tooltip/BaseTooltip.js' ).provides('myt.BaseTooltip' ).requires('myt.RootView');
+    file(MYT_COMPONENT_ROOT + 'tooltip/Tooltip.js'     ).provides('myt.Tooltip'     ).requires('myt.Canvas','myt.BaseTooltip');
+    file(MYT_COMPONENT_ROOT + 'tooltip/TooltipMixin.js').provides('myt.TooltipMixin').requires('myt.global','myt.Tooltip');
+    
     // Component : Button
     file(MYT_COMPONENT_ROOT + 'button/Button.js'               ).provides('myt.Button'               ).requires('myt.UpdateableUI','myt.MouseOverAndDown','myt.KeyActivation','myt.Disableable');
     file(MYT_COMPONENT_ROOT + 'button/SimpleButton.js'         ).provides('myt.SimpleButton'         ).requires('myt.View','myt.Button');
     file(MYT_COMPONENT_ROOT + 'button/IconTextButtonContent.js').provides('myt.IconTextButtonContent').requires('myt.Image','myt.Text');
     file(MYT_COMPONENT_ROOT + 'button/TextButtonContent.js'    ).provides('myt.TextButtonContent'    ).requires('myt.Text');
+    file(MYT_COMPONENT_ROOT + 'button/SimpleIconTextButton.js' ).provides('myt.SimpleIconTextButton' ).requires('myt.SimpleButton','myt.IconTextButtonContent','myt.Tooltip');
     
     // Component : Panel
     file(MYT_COMPONENT_ROOT + 'panel/ThreePanel.js'          ).provides('myt.ThreePanel'          ).requires('myt.View','myt.Image','myt.ResizeLayout','myt.SizeToChildren');
@@ -142,11 +148,6 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'panel/BaseMouseablePanel.js'  ).provides('myt.BaseMouseablePanel'  ).requires('myt.Button');
     file(MYT_COMPONENT_ROOT + 'panel/MouseableH3Panel.js'    ).provides('myt.MouseableH3Panel'    ).requires('myt.BaseMouseablePanel','myt.HorizontalThreePanel');
     file(MYT_COMPONENT_ROOT + 'panel/MouseableV3Panel.js'    ).provides('myt.MouseableV3Panel'    ).requires('myt.BaseMouseablePanel','myt.VerticalThreePanel');
-    
-    // Component : Tooltip
-    file(MYT_COMPONENT_ROOT + 'tooltip/BaseTooltip.js' ).provides('myt.BaseTooltip' ).requires('myt.RootView');
-    file(MYT_COMPONENT_ROOT + 'tooltip/Tooltip.js'     ).provides('myt.Tooltip'     ).requires('myt.Canvas','myt.BaseTooltip');
-    file(MYT_COMPONENT_ROOT + 'tooltip/TooltipMixin.js').provides('myt.TooltipMixin').requires('myt.global','myt.Tooltip');
     
     // Component : Panel Button
     file(MYT_COMPONENT_ROOT + 'panelbutton/PanelButton.js'        ).provides('myt.PanelButton'        ).requires('myt.MouseableH3Panel');
@@ -210,7 +211,7 @@ JS.Packages(function() {with(this) {
         'myt.SizeToWindowWidth', 'myt.SizeToWindowHeight', 'myt.TransformSupport', 
         'myt.Animator', 'myt.Callback', 'myt.RepeatableTimer', 'myt.StateMachine', 'myt.URI', 'myt.Ajax', 
         'myt.Draggable', 'myt.WrappingLayout', 'myt.ResizeLayout', 'myt.AlignedLayout', 'myt.ThreePanel',
-        'myt.DrawButton', 'myt.SimpleButton', 'myt.IconTextPanelButton', 'myt.DelayedMethodCall',
+        'myt.DrawButton', 'myt.SimpleIconTextButton', 'myt.IconTextPanelButton', 'myt.DelayedMethodCall',
         'myt.FloatingPanelAnchor',
         'myt.TextCheckbox','myt.TextRadio','myt.TextTabSlider', 'myt.Tab',
         'myt.InputText', 'myt.InputTextArea', 'myt.InputCheckbox', 'myt.InputRadio', 'myt.InputSelectOption'
