@@ -202,6 +202,9 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'input/InputSelect.js'       ).provides('myt.InputSelect'       ).requires('myt.NativeInputWrapper','myt.SizeToDom');
     file(MYT_COMPONENT_ROOT + 'input/InputSelectOption.js' ).provides('myt.InputSelectOption' ).requires('myt.InputSelect');
     
+    // Component : Uploader
+    file(MYT_COMPONENT_ROOT + 'uploader/Uploader.js'     ).provides('myt.Uploader'     ).requires('myt.View','myt.Disableable','myt.Ajax');
+    file(MYT_COMPONENT_ROOT + 'uploader/ImageUploader.js').provides('myt.ImageUploader').requires('myt.Uploader');
     
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
@@ -214,6 +217,7 @@ JS.Packages(function() {with(this) {
         'myt.DrawButton', 'myt.SimpleIconTextButton', 'myt.IconTextPanelButton', 'myt.DelayedMethodCall',
         'myt.FloatingPanelAnchor',
         'myt.TextCheckbox','myt.TextRadio','myt.TextTabSlider', 'myt.Tab',
-        'myt.InputText', 'myt.InputTextArea', 'myt.InputCheckbox', 'myt.InputRadio', 'myt.InputSelectOption'
+        'myt.InputText', 'myt.InputTextArea', 'myt.InputCheckbox', 'myt.InputRadio', 'myt.InputSelectOption',
+        'myt.ImageUploader'
     );
 }});

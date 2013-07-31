@@ -13,6 +13,12 @@ myt.RootView = new JS.Module('RootView', {
         this.callSuper(parent, attrs);
         
         myt.global.roots.addRoot(this);
+        
+        // Prevent default drag/drop behavior
+        var cdf = this.__captureDrop = function(event) {event.preventDefault();};
+        var de = this.domElement;
+        myt.addEventListener(de, 'drop', cdf);
+        myt.addEventListener(de, 'dragover', cdf);
     },
     
     /** @overrides myt.View */
@@ -24,6 +30,11 @@ myt.RootView = new JS.Module('RootView', {
     
     /** @overrides myt.View */
     destroyAfterOrphaning: function() {
+        // Cleanup dom listeners for drag/drop.
+        var de = this.domElement, cdf = this.__captureDrop;
+        myt.removeEventListener(de, 'drop', cdf);
+        myt.removeEventListener(de, 'dragover', cdf);
+        
         myt.global.roots.removeRoot(this);
         if (!this.keepDomElementWhenDestroyed) this.removeDomElement();
         this.callSuper();
