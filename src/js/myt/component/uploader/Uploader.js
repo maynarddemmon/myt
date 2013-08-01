@@ -203,12 +203,8 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     },
     
     clearFiles: function() {
-        var files = this.files, i = files.length, f;
-        while (i) {
-            f = files[--i];
-            files.splice(i, 1);
-            this.fireNewEvent('removeFile', f);
-        }
+        var files = this.files, i = files.length;
+        while (i) this.removeFile(files[--i]);
     },
     
     isSameFile: function(f1, f2) {

@@ -101,6 +101,8 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
         }
     },
     
+    // FIXME: should we give away focus when we become not visible?
+    
     
     // Methods /////////////////////////////////////////////////////////////////
     /** Gives the focus to the next focusable element or, if nothing else

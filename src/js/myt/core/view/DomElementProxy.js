@@ -186,6 +186,21 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
         }
     },
     
+    /** A convienence method for setting a CSS outline.
+        @param v:Array where index 0 is the size, index 1 is the type and
+            index 2 is the color. */
+    setCSSOutline: function(v) {
+        this.CSSOutline = v;
+        if (v) {
+            var size = v[0] || 0,
+                type = v[1] || '',
+                color = v[2] || '';
+            this.deStyle.outline = size + 'px' + ' ' + type + ' ' + color;
+        } else {
+            this.deStyle.outline = '0px';
+        }
+    },
+    
     /** A convienence method to set rounded corners on an element.
         @param radius:number the radius of the corners.
         @returns void */

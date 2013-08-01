@@ -77,7 +77,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
                 image.setImageUrl(event.target.result);
                 
                 var size = self.scaleToFit(self.width, self.height, file.width, file.height),
-                    w = size[0], h = size[1];
+                    w = Math.round(size[0]), h = Math.round(size[1]);
                 image.setImageSize(w + 'px ' + h + 'px');
                 image.setWidth(w);
                 image.setHeight(h);
