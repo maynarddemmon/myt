@@ -176,14 +176,7 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
             index 2 is the color. */
     setCSSBorder: function(v) {
         this.CSSBorder = v;
-        if (v) {
-            var size = v[0] || 0,
-                type = v[1] || '',
-                color = v[2] || '';
-            this.deStyle.border = size + 'px' + ' ' + type + ' ' + color;
-        } else {
-            this.deStyle.border = '0px';
-        }
+        this._setCSSEdgeTreatment(v, 'border');
     },
     
     /** A convienence method for setting a CSS outline.
@@ -191,13 +184,20 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
             index 2 is the color. */
     setCSSOutline: function(v) {
         this.CSSOutline = v;
+        this._setCSSEdgeTreatment(v, 'outline');
+    },
+    
+    /** A convienence method for setting a CSS outline or border.
+        @param v:Array where index 0 is the size, index 1 is the type and
+            index 2 is the color. */
+    _setCSSEdgeTreatment: function(v, kind) {
         if (v) {
             var size = v[0] || 0,
                 type = v[1] || '',
                 color = v[2] || '';
-            this.deStyle.outline = size + 'px' + ' ' + type + ' ' + color;
+            this.deStyle[kind] = size + 'px' + ' ' + type + ' ' + color;
         } else {
-            this.deStyle.outline = '0px';
+            this.deStyle[kind] = '0px';
         }
     },
     

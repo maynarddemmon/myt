@@ -18,6 +18,10 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
         this.callSuper(parent, attrs);
         
         this.attachToDom(this, '_handleInput', 'input');
+        
+        // Allow filtering of input
+        this.attachToDom(this, '_filterInput', 'keypress');
+        this.attachToDom(this, '_filterInput', 'keyup');
     },
     
     
@@ -46,6 +50,17 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    _filterInput: function(v) {
+        var de = this.domElement;
+        var curValue = de.value;
+        var newValue = this.filterInput(curValue);
+        if (curValue !== newValue) de.value = newValue;
+    },
+    
+    filterInput: function(v) {
+        return v;
+    },
+    
     _handleInput: function(event) {
         this.setValue(this.domElement.value);
     },
