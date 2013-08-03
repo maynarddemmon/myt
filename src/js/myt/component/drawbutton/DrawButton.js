@@ -60,6 +60,12 @@ myt.DrawButton = new JS.Class('DrawButton', myt.Canvas, {
         if (this.inited) this.redraw();
     },
     
+    setCornerRadius: function(v) {
+        if (this.cornerRadius === v) return;
+        this.cornerRadius = v;
+        this.setRoundedCorners(v);
+    },
+    
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.Button */
@@ -91,7 +97,12 @@ myt.DrawButton = new JS.Class('DrawButton', myt.Canvas, {
         if (state === undefined) state = this._lastState;
         this._lastState = state;
         
-        var dm = this.drawingMethod;
-        if (dm) dm.draw(this, this.getDrawConfig(state));
+        var dm = this.drawingMethod || this;
+        dm.draw(this, this.getDrawConfig(state));
+    },
+    
+    /** Used if no drawing method is found. */
+    draw: function(canvas, config) {
+        myt.dumpStack("No drawing method found");
     }
 });
