@@ -101,7 +101,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         if (sv === this.fileInput) {
             this.callSuper(sv);
         } else {
-            this.sendSubviewBehind(this.fileInput);
+            this.sendSubviewBehind(sv, this.fileInput);
         }
     },
     
@@ -109,7 +109,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     subviewAdded: function(sv) {
         this.callSuper(sv);
         
-        this.bringSubviewToFront(this.fileInput);
+        if (this.fileInput) this.bringSubviewToFront(this.fileInput);
     },
     
     _setupDragListeners: function() {
