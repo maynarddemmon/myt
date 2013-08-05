@@ -203,7 +203,7 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'input/InputSelectOption.js' ).provides('myt.InputSelectOption' ).requires('myt.InputSelect');
     
     // Component : Uploader
-    file(MYT_COMPONENT_ROOT + 'uploader/Uploader.js'     ).provides('myt.Uploader'     ).requires('myt.View','myt.Disableable','myt.Ajax');
+    file(MYT_COMPONENT_ROOT + 'uploader/Uploader.js'     ).provides('myt.Uploader'     ).requires('myt.View','myt.NativeInputWrapper','myt.Disableable','myt.Ajax');
     file(MYT_COMPONENT_ROOT + 'uploader/ImageUploader.js').provides('myt.ImageUploader').requires('myt.Uploader');
     
     // Include Everything

@@ -21,6 +21,25 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         this.callSuper(parent, attrs);
         
         var self = this;
+        
+        // Support click to upload too.
+        new myt.NativeInputWrapper(this, {
+            name:'fileInput', percentOfParentWidth:100, percentOfParentHeight:100,
+            opacity:0.01, disabled:this.disabled
+        }, [myt.SizeToParent, {
+            initNode: function(parent, attrs) {
+                this.inputType = 'file';
+                this.callSuper(parent, attrs);
+                this.attachToDom(this, '_handleInput', 'change');
+                
+                this.domElement.multiple = self.maxFiles > 1;
+            },
+            
+            _handleInput: function(event) {
+                self._handleFiles(this.domElement.files);
+            }
+        }]);
+        
         this._dragLeaveFunc = function(event) {self.doDragLeave(event);};
         this._dragEnterFunc = function(event) {self.doDragEnter(event);};
         this._dragOverFunc = function(event) {self.doDragOver(event);}
@@ -46,17 +65,20 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         
         if (this.inited) {
             if (v) {
-                this._setupDragListeners();
-            } else {
                 this._teardownDragListeners();
+            } else {
+                this._setupDragListeners();
             }
         }
+        
+        if (this.fileInput) this.fileInput.setDisabled(v);
     },
     
     setMaxFiles: function(v) {
         if (this.maxFiles === v) return;
         this.maxFiles = v;
         if (this.inited) this.fireNewEvent('maxFiles', v);
+        if (this.fileInput) this.fileInput.domElement.multiple = v > 1;
     },
     
     setUploadUrl: function(v) {
@@ -74,6 +96,22 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** @overrides myt.View */
+    bringSubviewToFront: function(sv) {
+        if (sv === this.fileInput) {
+            this.callSuper(sv);
+        } else {
+            this.sendSubviewBehind(this.fileInput);
+        }
+    },
+    
+    /** @overrides myt.View */
+    subviewAdded: function(sv) {
+        this.callSuper(sv);
+        
+        this.bringSubviewToFront(this.fileInput);
+    },
+    
     _setupDragListeners: function() {
         var de = this.domElement;
         myt.addEventListener(de, 'dragleave', this._dragLeaveFunc);
@@ -106,7 +144,13 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     },
     
     doDrop: function(event) {
-        var files = event.dataTransfer.files;
+        this._handleFiles(event.dataTransfer.files);
+        
+        event.preventDefault();
+        event.stopPropagation();
+    },
+    
+    _handleFiles: function(files) {
         if (files !== undefined) {
             var i = files.length, file;
             while (i) {
@@ -119,9 +163,6 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         } else {
             myt.dumpStack("No support for the File API in this web browser");
         }
-        
-        event.preventDefault();
-        event.stopPropagation();
     },
     
     handleDroppedFile: function(file) {},
