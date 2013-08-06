@@ -25,7 +25,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         // Support click to upload too.
         new myt.NativeInputWrapper(this, {
             name:'fileInput', percentOfParentWidth:100, percentOfParentHeight:100,
-            opacity:0.01, disabled:this.disabled
+            opacity:0.01, disabled:this.disabled, clip:true
         }, [myt.SizeToParent, {
             initNode: function(parent, attrs) {
                 this.inputType = 'file';

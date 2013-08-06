@@ -25,12 +25,17 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
     addFile: function(file) {
         this.callSuper(file);
         
-        var image = new myt.Image(this, {
+        var image = this.getImageToReadInto();
+        if (image) {
+            image.file = file;
+            this.readImageInto(file, image);
+        }
+    },
+    
+    getImageToReadInto: function() {
+        return new myt.Image(this, {
             useNaturalSize:false, align:'center', valign:'middle'
         });
-        image.file = file;
-        
-        this.readImageInto(file, image);
     },
     
     scaleToFit: function(boundsWidth, boundsHeight, imgWidth, imgHeight) {
@@ -67,12 +72,12 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         if (FileReader !== undefined && this.isImageFile(file)) {
             var self = this;
             this.readFile(file, function(event) {
-                if (!image || image.destroyed) return
-                
                 var img = new Image();
                 img.onload = function() {
                     file.width = this.width;
                     file.height = this.height;
+                    
+                    if (!image || image.destroyed) return
                     
                     var size = self.scaleToFit(self.width, self.height, file.width, file.height),
                         w = Math.round(size[0]), 
