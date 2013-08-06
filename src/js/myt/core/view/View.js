@@ -616,7 +616,7 @@ myt.View = new JS.Class('View', myt.Node, {
         if (sv.parent === this && existing.parent === this) {
             var de = this.domElement;
             myt.View.retainFocusDuringDomUpdate(sv, function() {
-                de.insertBefore(sv.domElement, existing);
+                de.insertBefore(sv.domElement, existing.domElement);
             });
         }
     },
