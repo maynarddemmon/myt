@@ -1,7 +1,15 @@
-/** A mixin that adds a tooltip to the view.
+/** A mixin that adds tooltip support to a view.
     
-    Requires myt.MouseOverAndDown. */
+    Requires myt.MouseOver. */
 myt.TooltipMixin = new JS.Module('TooltipMixin', {
+    // Class Methods and Attributes ////////////////////////////////////////////
+    extend: {
+        /** The default class to use for tooltip views. If a project wants to use
+            a special tip class everywhere it should override this. */
+        DEFAULT_TIP_CLASS:myt.Tooltip
+    },
+    
+    
     // Accessors ///////////////////////////////////////////////////////////////
     /** The text to display in the tooltip. */
     setTooltip: function(v) {
@@ -38,7 +46,7 @@ myt.TooltipMixin = new JS.Module('TooltipMixin', {
         this.callSuper(isOver);
         
         if (isOver) {
-            var tipText = this.__getTipText();;
+            var tipText = this.tooltip;
             if (tipText) {
                 var ttv = this.__getTooltipView(),
                     tipAlign = this.tipAlign,
@@ -53,13 +61,9 @@ myt.TooltipMixin = new JS.Module('TooltipMixin', {
         }
     },
     
-    __getTipText: function() {
-        return this.tooltip;
-    },
-    
     __getTooltipView: function() {
         // Use configured class or default if none defined.
-        var tipClass = this.tipClass ? this.tipClass : myt.TooltipMixin.defaultTipClass;
+        var tipClass = this.tipClass ? this.tipClass : myt.TooltipMixin.DEFAULT_TIP_CLASS;
         
         // Destroy tip if it's not the correct class.
         var g = myt.global,
@@ -79,7 +83,3 @@ myt.TooltipMixin = new JS.Module('TooltipMixin', {
         return ttv;
     }
 });
-
-/** The default class to use for tooltip views. If a project wants to use
-    a special tip class everywhere it should override this. */
-myt.TooltipMixin.defaultTipClass = myt.Tooltip;

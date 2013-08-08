@@ -1,33 +1,52 @@
-/** An implementation of a tooltip. */
+/** An implementation of a tooltip.
+    
+    Attributes:
+        pointerInset:number The inset of the "pointer" from the left/right 
+            edge of the tip.
+        insetH:number The horizontal inset of the text from the border.
+        insetTop:number The top inset of the text from the border.
+        insetBottom:number The bottom inset of the text from the border.
+        shadowWidth:number The width of the shadow.
+        maxTextWidth:number The maximum width for the text view in the tooltip.
+        tipBgColor:string The color to use for the tip background.
+        borderColor:string The color used for the border.
+        shadowColor:string The color of the shadow.
+        _tipWidth:number The width of the tip text view.
+*/
 myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
+    // Class Methods and Attributes ////////////////////////////////////////////
+    extend: {
+        DEFAULT_POINTER_WIDTH:7,
+        DEFAULT_POINTER_HEIGHT:4,
+        DEFAULT_BORDER_WIDTH:1,
+        DEFAULT_POINTER_INSET:2,
+        DEFAULT_HORIZONTAL_INSET:4,
+        DEFAULT_TOP_INSET:2,
+        DEFAULT_BOTTOM_INSET:3,
+        DEFAULT_SHADOW_WIDTH:2,
+        DEFAULT_MAX_TEXT_WIDTH:280,
+        DEFAULT_TIP_BG_COLOR:'#dddddd',
+        DEFAULT_BORDER_COLOR:'#666666',
+        DEFAULT_SHADOW_COLOR:'#000000'
+    },
+    
+    
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        this.pointerWidth = 7;
-        this.pointerHeight = 4;
-        this.borderWidth = 1;
+        var T = myt.Tooltip;
+        if (attrs.pointerWidth === undefined) attrs.pointerWidth = T.DEFAULT_POINTER_WIDTH;
+        if (attrs.pointerHeight === undefined) attrs.pointerHeight = T.DEFAULT_POINTER_HEIGHT;
+        if (attrs.borderWidth === undefined) attrs.borderWidth = T.DEFAULT_BORDER_WIDTH;
+        if (attrs.pointerInset === undefined) attrs.pointerInset = T.DEFAULT_POINTER_INSET;
+        if (attrs.insetH === undefined) attrs.insetH = T.DEFAULT_HORIZONTAL_INSET;
+        if (attrs.insetTop === undefined) attrs.insetTop = T.DEFAULT_TOP_INSET;
+        if (attrs.insetBottom === undefined) attrs.insetBottom = T.DEFAULT_BOTTOM_INSET;
+        if (attrs.shadowWidth === undefined) attrs.shadowWidth = T.DEFAULT_SHADOW_WIDTH;
+        if (attrs.maxTextWidth === undefined) attrs.maxTextWidth = T.DEFAULT_MAX_TEXT_WIDTH;
+        if (attrs.tipBgColor === undefined) attrs.tipBgColor = T.DEFAULT_TIP_BG_COLOR;
+        if (attrs.borderColor === undefined) attrs.borderColor = T.DEFAULT_BORDER_COLOR;
+        if (attrs.shadowColor === undefined) attrs.shadowColor = T.DEFAULT_SHADOW_COLOR;
         
-        // The inset of the "pointer" from the left/right edge of the tip.
-        this.pointerInset = 2;
-        
-        // The horizontal inset of the text from the border.
-        this.insetH = 2;
-        
-        // The top inset of the text from the border.
-        this.insetTop = 0;
-        
-        // The bottom inset of the text from the border.
-        this.insetBottom = 1;
-        
-        // The width of the shadow.
-        this.shadowWidth = 2;
-        
-        // The maximum width for the text view in the tooltip
-        this.maxTextWidth = 280;
-        
-        // The color to use for the tip background.
-        this.tipBgColor = '#ffffcc';
-        
-        // The width of the tip text view.
         this._tipWidth = 0;
         
         this.callSuper(parent, attrs);
@@ -40,8 +59,26 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
         new myt.Canvas(this, {
             name:'_bg', percentOfParentWidth:100, percentOfParentHeight:100
         }, [myt.SizeToParent]);
-        new myt.Text(this, {name:'_tipText', x:this.borderWidth + this.insetH, whiteSpace:'inherit'});
+        new myt.Text(this, {
+            name:'_tipText', domClass:'mytTooltipText',
+            x:this.borderWidth + this.insetH, whiteSpace:'inherit'
+        });
     },
+    
+    
+    // Accessors ///////////////////////////////////////////////////////////////
+    setPointerWidth: function(v) {this.pointerWidth = v;},
+    setPointerHeight: function(v) {this.pointerHeight = v;},
+    setBorderWidth: function(v) {this.borderWidth = v;},
+    setPointerInset: function(v) {this.pointerInset = v;},
+    setInsetH: function(v) {this.insetH = v;},
+    setInsetTop: function(v) {this.insetTop = v;},
+    setInsetBottom: function(v) {this.insetBottom = v;},
+    setShadowWidth: function(v) {this.shadowWidth = v;},
+    setMaxTextWidth: function(v) {this.maxTextWidth = v;},
+    setTipBgColor: function(v) {this.tipBgColor = v;},
+    setBorderColor: function(v) {this.borderColor = v;},
+    setShadowColor: function(v) {this.shadowColor = v;},
     
     
     // Methods /////////////////////////////////////////////////////////////////
@@ -142,7 +179,10 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
             right = this._tipWidth,
             top = pointerOnTop ? this.pointerHeight : 0,
             bottom = 2*this.borderWidth + this.insetTop + this.insetBottom + tipText.height + top,
-            canvas = this._bg;
+            canvas = this._bg,
+            pointerWidth = this.pointerWidth,
+            pointerHeight = this.pointerHeight;
+        
         canvas.clear();
         
         // Draw Shadow
@@ -154,7 +194,7 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
         canvas.lineTo(left + shadowWidth, bottom + shadowWidth);
         canvas.closePath();
         canvas.setGlobalAlpha(0.3);
-        canvas.setFillStyle(this.getShadowColor());
+        canvas.setFillStyle(this.shadowColor);
         canvas.fill();
         
         canvas.setGlobalAlpha(1);
@@ -165,22 +205,22 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
         
         if (pointerOnTop) {
             canvas.lineTo(left + pointerX, top);
-            canvas.lineTo(left + pointerX + (this.pointerWidth / 2), top - this.pointerHeight);
-            canvas.lineTo(left + pointerX + this.pointerWidth, top);
+            canvas.lineTo(left + pointerX + (pointerWidth / 2), top - pointerHeight);
+            canvas.lineTo(left + pointerX + pointerWidth, top);
         }
         
         canvas.lineTo(right, top);
         canvas.lineTo(right, bottom);
         
         if (!pointerOnTop) {
-            canvas.lineTo(left + pointerX + this.pointerWidth, bottom);
-            canvas.lineTo(left + pointerX + (this.pointerWidth / 2), bottom + this.pointerHeight);
+            canvas.lineTo(left + pointerX + pointerWidth, bottom);
+            canvas.lineTo(left + pointerX + (pointerWidth / 2), bottom + pointerHeight);
             canvas.lineTo(left + pointerX, bottom);
         }
         
         canvas.lineTo(left, bottom);
         canvas.closePath();
-        canvas.setFillStyle(this.getBorderColor());
+        canvas.setFillStyle(this.borderColor);
         canvas.fill();
         
         // Draw Fill
@@ -195,34 +235,22 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
         
         if (pointerOnTop) {
             canvas.lineTo(left + pointerX - borderWidth, top);
-            canvas.lineTo(left + pointerX + (this.pointerWidth / 2) - borderWidth, top - this.pointerHeight);
-            canvas.lineTo(left + pointerX + this.pointerWidth - borderWidth, top);
+            canvas.lineTo(left + pointerX + (pointerWidth / 2) - borderWidth, top - pointerHeight);
+            canvas.lineTo(left + pointerX + pointerWidth - borderWidth, top);
         }
         
         canvas.lineTo(right, top);
         canvas.lineTo(right, bottom);
         
         if (!pointerOnTop) {
-            canvas.lineTo(left + pointerX + this.pointerWidth - borderWidth, bottom);
-            canvas.lineTo(left + pointerX + (this.pointerWidth / 2) - borderWidth, bottom + this.pointerHeight);
+            canvas.lineTo(left + pointerX + pointerWidth - borderWidth, bottom);
+            canvas.lineTo(left + pointerX + (pointerWidth / 2) - borderWidth, bottom + pointerHeight);
             canvas.lineTo(left + pointerX - borderWidth, bottom);
         }
         
         canvas.lineTo(left, bottom);
         canvas.closePath();
-        canvas.setFillStyle(this.getBgColor());
+        canvas.setFillStyle(this.tipBgColor);
         canvas.fill();
-    },
-    
-    getBorderColor: function() {
-        return '#666666';
-    },
-    
-    getBgColor: function() {
-        return this.tipBgColor !== null ? this.tipBgColor : '#cccccc';
-    },
-    
-    getShadowColor: function() {
-        return '#000000';
     }
 });
