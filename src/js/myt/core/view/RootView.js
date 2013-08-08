@@ -12,9 +12,13 @@ myt.RootView = new JS.Module('RootView', {
     initNode: function(parent, attrs) {
         this.callSuper(parent, attrs);
         
+        // Establish a stacking context
+        this.setStyleProperty('zIndex', 0);
+        
         myt.global.roots.addRoot(this);
         
         // Prevent default drag/drop behavior
+        // DUPE: Similar code exists in myt.Dimmer.
         var cdf = this.__captureDrop = function(event) {event.preventDefault();};
         var de = this.domElement;
         myt.addEventListener(de, 'drop', cdf);
@@ -31,6 +35,7 @@ myt.RootView = new JS.Module('RootView', {
     /** @overrides myt.View */
     destroyAfterOrphaning: function() {
         // Cleanup dom listeners for drag/drop.
+        // DUPE: Similar code exists in myt.Dimmer.
         var de = this.domElement, cdf = this.__captureDrop;
         myt.removeEventListener(de, 'drop', cdf);
         myt.removeEventListener(de, 'dragover', cdf);

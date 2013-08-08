@@ -47,6 +47,23 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
             return false;
         },
         
+        /** Gets the highest z-index of the dom element.
+            @returns int */
+        getHighestZIndex: function(elem) {
+            var zIdx = (window.getComputedStyle ? window.getComputedStyle(elem, "") : elem.currentStyle).zIndex;
+            if (zIdx === 'auto') {
+                zIdx = 0;
+                var children = elem.childNodes, i = children.length, child;
+                while (i) {
+                    child = children[--i];
+                    if (child.nodeType === 1) zIdx = Math.max(zIdx, this.getHighestZIndex(child));
+                }
+            } else {
+                zIdx = parseInt(zIdx, 10);
+            }
+            return zIdx;
+        },
+        
         /** Gets the x and y position of the underlying dom element relative to
             the page.
             @param elem:domElement the dom element to get the position for.
@@ -237,5 +254,11 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
     simulateDomEvent: function(eventName, customOpts) {
         var elem = this.domElement;
         if (elem) myt.DomElementProxy.simulateDomEvent(elem, eventName, customOpts);
+    },
+    
+    /** Gets the highest z-index of the dom element.
+        @returns int */
+    getHighestZIndex: function() {
+        return myt.DomElementProxy.getHighestZIndex(this.domElement);
     }
 });

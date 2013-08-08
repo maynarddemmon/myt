@@ -206,6 +206,13 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'uploader/Uploader.js'     ).provides('myt.Uploader'     ).requires('myt.View','myt.NativeInputWrapper','myt.Disableable','myt.Ajax');
     file(MYT_COMPONENT_ROOT + 'uploader/ImageUploader.js').provides('myt.ImageUploader').requires('myt.Uploader');
     
+    // Component : Dimmer
+    file(MYT_COMPONENT_ROOT + 'dimmer/Dimmer.js'    ).provides('myt.Dimmer'    ).requires('myt.View');
+    file(MYT_COMPONENT_ROOT + 'dimmer/ModalPanel.js').provides('myt.ModalPanel').requires('myt.Dimmer','myt.SizeToChildren');
+    
+    // Component : Dialog
+    file(MYT_COMPONENT_ROOT + 'dialog/Dialog.js').provides('myt.Dialog').requires('myt.ModalPanel','myt.DrawButton');
+    
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
         'myt.Cookie',
@@ -218,6 +225,6 @@ JS.Packages(function() {with(this) {
         'myt.FloatingPanelAnchor',
         'myt.TextCheckbox','myt.TextRadio','myt.TextTabSlider', 'myt.Tab',
         'myt.InputText', 'myt.InputTextArea', 'myt.InputCheckbox', 'myt.InputRadio', 'myt.InputSelectOption',
-        'myt.ImageUploader'
+        'myt.ImageUploader','myt.Dialog'
     );
 }});

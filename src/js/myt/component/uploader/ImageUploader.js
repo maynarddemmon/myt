@@ -79,17 +79,21 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
                     
                     if (!image || image.destroyed) return
                     
-                    var size = self.scaleToFit(self.width, self.height, file.width, file.height),
-                        w = Math.round(size[0]), 
-                        h = Math.round(size[1]);
-                    image.setImageSize(w + 'px ' + h + 'px');
-                    image.setWidth(w);
-                    image.setHeight(h);
-                    image.setImageUrl(this.src);
+                    self.updateImage(file, image, this.src);
                 };
                 img.src = event.target.result;
             });
         }
+    },
+    
+    updateImage: function(file, image, src) {
+        var size = this.scaleToFit(this.width, this.height, file.width, file.height),
+            w = Math.round(size[0]), 
+            h = Math.round(size[1]);
+        image.setImageSize(w + 'px ' + h + 'px');
+        image.setWidth(w);
+        image.setHeight(h);
+        image.setImageUrl(src);
     },
     
     isImageFile: function(file) {

@@ -107,6 +107,24 @@ myt.View = new JS.Class('View', myt.Node, {
         return this.subviews;
     },
     
+    /** Gets the views that are our siblings.
+        @returns array of myt.View or null if this view is orphaned. */
+    getSiblingViews: function() {
+        if (!this.parent) return null;
+        
+        var svs = this.parent.getSubviews(), i  = svs.length;
+        
+        // Filter out ourself
+        while (i) {
+            if (svs[--i] === this) {
+                svs.splice(i, 1);
+                break;
+            }
+        }
+        
+        return svs;
+    },
+    
     /** Does lazy instantiation of the layouts array. */
     getLayouts: function() {
         if (!this.layouts) this.layouts = [];
