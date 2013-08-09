@@ -210,8 +210,11 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'dimmer/Dimmer.js'    ).provides('myt.Dimmer'    ).requires('myt.View');
     file(MYT_COMPONENT_ROOT + 'dimmer/ModalPanel.js').provides('myt.ModalPanel').requires('myt.Dimmer','myt.SizeToChildren');
     
+    // Component : Spinner
+    file(MYT_COMPONENT_ROOT + 'spinner/Spinner.js').provides('myt.Spinner').requires('myt.View');
+    
     // Component : Dialog
-    file(MYT_COMPONENT_ROOT + 'dialog/Dialog.js').provides('myt.Dialog').requires('myt.ModalPanel','myt.DrawButton');
+    file(MYT_COMPONENT_ROOT + 'dialog/Dialog.js').provides('myt.Dialog').requires('myt.ModalPanel','myt.DrawButton','myt.Spinner');
     
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(

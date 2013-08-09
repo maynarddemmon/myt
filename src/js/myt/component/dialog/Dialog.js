@@ -104,11 +104,11 @@ myt.Dialog = new JS.Class('Dimmer', myt.ModalPanel, {
     
     showMessage: function(msg, opts) {
         opts = $.extend({}, myt.Dialog.MESSAGE_DEFAULTS, opts);
+        var content = this.content;
         
         this._destroyContent();
         
-        var w = opts
-        new myt.Text(this.content, {
+        new myt.Text(content, {
             text:msg, whiteSpace:'normal', fontWeight:'bold',
             x:myt.ModalPanel.DEFAULT_PADDING_X,
             y:myt.ModalPanel.DEFAULT_PADDING_Y,
@@ -117,10 +117,43 @@ myt.Dialog = new JS.Class('Dimmer', myt.ModalPanel, {
         
         this.show();
         
-        this.content.standardCancelBtn.focus();
+        var cancelBtn = content.standardCancelBtn;
+        cancelBtn.setVisible(true);
+        cancelBtn.focus();
     },
     
     doCancel: function() {
+        this.hide();
+    },
+    
+    showSpinner: function(msg, opts) {
+        opts = $.extend({}, myt.Dialog.MESSAGE_DEFAULTS, opts);
+        var content = this.content;
+        
+        this._destroyContent();
+        
+        var spinner = this.spinner = new myt.Spinner(content, {
+            align:'center', visible:true,
+            radius:10, lines:12, length:14, lineWidth:3,
+            y:myt.ModalPanel.DEFAULT_PADDING_Y
+        });
+        if (msg) {
+            new myt.Text(content, {
+                text:msg, fontWeight:'bold',
+                x:myt.ModalPanel.DEFAULT_PADDING_X,
+                y:spinner.y + spinner.getSize() + myt.ModalPanel.DEFAULT_PADDING_Y
+            });
+        }
+        
+        this.show();
+        
+        var cancelBtn = content.standardCancelBtn;
+        cancelBtn.setVisible(false);
+    },
+    
+    hideSpinner: function() {
+        this.spinner.setVisible(false);
+        this.spinner = undefined;
         this.hide();
     }
 });

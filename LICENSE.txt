@@ -17,11 +17,12 @@ public domain sources and has been noted as such in the source.
 
 Parts of the Software incorporates code from the following open-source 
 projects:
-* JS.Class, (c) 2007-2012 James Coglan and contributors (MIT License)
-* Easing Functions, (c) 2001 Robert Penner (BSD License)
-* jQuery Easing v1.3, (c) 2008 George McGinley Smith (BSD License)
-* jQuery Cookie Plugin v1.3.1, (c) 2013 Klaus Hartl (MIT License)
-* parseUri 1.2.2, (c) Steven Levithan <stevenlevithan.com> (MIT License)
+* JS.Class, Copyright (c) 2007-2012 James Coglan and contributors (MIT License)
+* Easing Functions, Copyright (c) 2001 Robert Penner (BSD License)
+* jQuery Easing v1.3, Copyright (c) 2008 George McGinley Smith (BSD License)
+* jQuery Cookie Plugin v1.3.1, Copyright (c) 2013 Klaus Hartl (MIT License)
+* parseUri 1.2.2, Copyright (c) Steven Levithan <stevenlevithan.com> (MIT License)
+* Spin.js 1.3.0 Copyright (c) 2011-2013 Felix Gnass (the MIT license)
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
