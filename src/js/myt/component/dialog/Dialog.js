@@ -152,8 +152,10 @@ myt.Dialog = new JS.Class('Dimmer', myt.ModalPanel, {
     },
     
     hideSpinner: function() {
-        this.spinner.setVisible(false);
-        this.spinner = undefined;
+        if (this.spinner) {
+            this.spinner.setVisible(false);
+            this.spinner = undefined;
+        }
         this.hide();
     }
 });
