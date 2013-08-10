@@ -16,10 +16,12 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
     setInitialState: function(v) {
         if (this.current === '') {
             // Get optional args if v is an array
-            var args = [];
-            if (v instanceof Array) {
+            var args;
+            if (Array.isArray(v)) {
                 args = v;
                 v = args.shift();
+            } else {
+                args = [];
             }
             
             this.current = this.initial = v;
@@ -51,7 +53,7 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
         if (!from) {
             from = [myt.StateMachine.WILDCARD];
         } else {
-            from = from instanceof Array ? from : [from];
+            from = Array.isArray(from) ? from : [from];
         }
         
         var i = from.length, mapEntry;
@@ -195,7 +197,7 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
     },
     
     is: function(stateName) {
-        if (stateName instanceof Array) {
+        if (Array.isArray(stateName)) {
             return stateName.indexOf(this.current) >= 0;
         } else {
             return this.current === stateName;

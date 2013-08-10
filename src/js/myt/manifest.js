@@ -216,6 +216,31 @@ JS.Packages(function() {with(this) {
     // Component : Dialog
     file(MYT_COMPONENT_ROOT + 'dialog/Dialog.js').provides('myt.Dialog').requires('myt.ModalPanel','myt.DrawButton','myt.Spinner');
     
+    // Component : Validator
+    file(MYT_COMPONENT_ROOT + 'validator/Validator.js'        ).provides('myt.Validator'        ).requires('myt');
+    file(MYT_COMPONENT_ROOT + 'validator/CompoundValidator.js').provides('myt.CompoundValidator').requires('myt.Validator');
+    
+    file(MYT_COMPONENT_ROOT + 'validator/validators/EqualFieldsValidator.js'     ).provides('myt.EqualFieldsValidator'     ).requires('myt.Validator');
+    file(MYT_COMPONENT_ROOT + 'validator/validators/EqualsIgnoreCaseValidator.js').provides('myt.EqualsIgnoreCaseValidator').requires('myt.Validator');
+    file(MYT_COMPONENT_ROOT + 'validator/validators/LengthValidator.js'          ).provides('myt.LengthValidator'          ).requires('myt.Validator');
+    file(MYT_COMPONENT_ROOT + 'validator/validators/NumericRangeValidator.js'    ).provides('myt.NumericRangeValidator'    ).requires('myt.Validator');
+    file(MYT_COMPONENT_ROOT + 'validator/validators/RequiredFieldValidator.js'   ).provides('myt.RequiredFieldValidator'   ).requires('myt.Validator');
+    
+    file(MYT_COMPONENT_ROOT + 'validator/ValidatorRegistry.js').provides('myt.global.validators').requires('myt.global','myt.Observable','myt.CompoundValidator','myt.EqualsIgnoreCaseValidator','myt.RequiredFieldValidator');
+    
+    // Component : Form
+    file(MYT_COMPONENT_ROOT + 'form/valueprocessor/ValueProcessor.js').provides('myt.ValueProcessor').requires('myt');
+    
+    file(MYT_COMPONENT_ROOT + 'form/valueprocessor/processors/ToNumberValueProcessor.js'            ).provides('myt.ToNumberValueProcessor'            ).requires('myt.ValueProcessor');
+    file(MYT_COMPONENT_ROOT + 'form/valueprocessor/processors/TrimValueProcessor.js'                ).provides('myt.TrimValueProcessor'                ).requires('myt.ValueProcessor');
+    file(MYT_COMPONENT_ROOT + 'form/valueprocessor/processors/UndefinedValueProcessor.js'           ).provides('myt.UndefinedValueProcessor'           ).requires('myt.ValueProcessor');
+    file(MYT_COMPONENT_ROOT + 'form/valueprocessor/processors/UseOtherFieldIfEmptyValueProcessor.js').provides('myt.UseOtherFieldIfEmptyValueProcessor').requires('myt.ValueProcessor');
+    
+    file(MYT_COMPONENT_ROOT + 'form/valueprocessor/ValueProcessorRegistry.js').provides('myt.global.valueProcessors').requires('myt.global','myt.Observable','myt.ToNumberValueProcessor','myt.TrimValueProcessor','myt.UndefinedValueProcessor');
+    
+    file(MYT_COMPONENT_ROOT + 'form/Form.js'       ).provides('myt.Form'       ).requires('myt.Node');
+    file(MYT_COMPONENT_ROOT + 'form/FormElement.js').provides('myt.FormElement').requires('myt.Form');
+    
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
         'myt.Cookie',
@@ -228,6 +253,8 @@ JS.Packages(function() {with(this) {
         'myt.FloatingPanelAnchor',
         'myt.TextCheckbox','myt.TextRadio','myt.TextTabSlider', 'myt.Tab',
         'myt.InputText', 'myt.InputTextArea', 'myt.InputCheckbox', 'myt.InputRadio', 'myt.InputSelectOption',
-        'myt.ImageUploader','myt.Dialog'
+        'myt.ImageUploader','myt.Dialog',
+        'myt.global.validators','myt.EqualFieldsValidator','myt.LengthValidator','myt.NumericRangeValidator',
+        'myt.global.valueProcessors','myt.UseOtherFieldIfEmptyValueProcessor','myt.FormElement'
     );
 }});
