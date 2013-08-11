@@ -18,23 +18,16 @@ myt.FormElement = new JS.Module('FormElement', {
         this._valueProcessors = [];
         
         this.callSuper(parent, attrs);
-        
-        if (this.form) this.form.addSubForm(this);
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setForm: function(v) {
-        if (this.form !== v) {
-            if (this.form) this.form.removeSubForm(this);
-            this.form = v;
-            if (this.inited && v) v.addSubForm(this);
-        }
-    },
     
     /** @overrides myt.Form */
     getValue: function() {
-        return this._processValue(this.value, 'runForCurrent');
+        return this._processValue(
+            this.callSuper ? this.callSuper() : this.value, 'runForCurrent'
+        );
     },
     
     /** @overrides myt.Form */
@@ -88,14 +81,14 @@ myt.FormElement = new JS.Module('FormElement', {
     /** Adds a ValueProcessor to this form element.
         @param processor:myt.ValueProcessor
         @returns void */
-    addValuePreProcessor: function(processor) {
+    addValueProcessor: function(processor) {
         this._valueProcessors.push(processor);
     },
     
     /** Removes a ValueProcessor from this form element.
         @param id:string the ID of the processor to remove.
         @returns the removed myt.ValueProcessor or null if not found. */
-    removeValuePreProcessor: function(id) {
+    removeValueProcessor: function(id) {
         if (id) {
             var processors = this._valueProcessors, i = processors.length, processor;
             while (i) {
@@ -174,8 +167,9 @@ myt.FormElement = new JS.Module('FormElement', {
     resetForm: function() {
         this._lockCascade = true;
         
-        this.setRollbackValue(this.getDefaultValue());
-        this.setValue(this.getDefaultValue());
+        var defaultValue = this.getDefaultValue();
+        this.setRollbackValue(defaultValue);
+        this.setValue(defaultValue);
         
         this.setIsChanged(false);
         this.setErrorMessages([]);

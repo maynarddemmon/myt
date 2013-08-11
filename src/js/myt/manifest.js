@@ -239,7 +239,8 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'form/valueprocessor/ValueProcessorRegistry.js').provides('myt.global.valueProcessors').requires('myt.global','myt.Observable','myt.ToNumberValueProcessor','myt.TrimValueProcessor','myt.UndefinedValueProcessor');
     
     file(MYT_COMPONENT_ROOT + 'form/Form.js'       ).provides('myt.Form'       ).requires('myt.Node');
-    file(MYT_COMPONENT_ROOT + 'form/FormElement.js').provides('myt.FormElement').requires('myt.Form');
+    file(MYT_COMPONENT_ROOT + 'form/RootForm.js'   ).provides('myt.RootForm'   ).requires('myt.Form');
+    file(MYT_COMPONENT_ROOT + 'form/FormElement.js').provides('myt.FormElement').requires('myt.RootForm');
     
     file(MYT_COMPONENT_ROOT + 'form/elements/FormInputText.js').provides('myt.FormInputText').requires('myt.FormElement','myt.InputText');
     

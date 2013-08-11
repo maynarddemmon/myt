@@ -13,11 +13,11 @@ new JS.Singleton('GlobalValueProcessorRegistry', {
         myt.global.register('valueProcessors', this);
         
         // Register a few common ValueProcessors
-        this.register(new myt.UndefinedValueProcessor('undefToEmpty'));
-        this.register(new myt.ToNumberValueProcessor('toNumber'));
-        this.register(new myt.TrimValueProcessor('trimLeft','left'));
-        this.register(new myt.TrimValueProcessor('trimRight','right'));
-        this.register(new myt.TrimValueProcessor('trimBoth','both'));
+        this.register(new myt.UndefinedValueProcessor('undefToEmpty', true, true, true, ''));
+        this.register(new myt.ToNumberValueProcessor('toNumber', true, true, true));
+        this.register(new myt.TrimValueProcessor('trimLeft', true, true, true, 'left'));
+        this.register(new myt.TrimValueProcessor('trimRight', true, true, true, 'right'));
+        this.register(new myt.TrimValueProcessor('trimBoth', true, true, true, 'both'));
     },
     
     
@@ -25,7 +25,7 @@ new JS.Singleton('GlobalValueProcessorRegistry', {
     /** Gets a ValueProcessor for the ID.
         @param id:string the ID of the ValueProcessor to get.
         @returns an myt.ValueProcessor or undefined if not found. */
-    getProcessor: function(id) {
+    getValueProcessor: function(id) {
         return this._processors[id];
     },
     

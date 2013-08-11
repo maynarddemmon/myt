@@ -3,14 +3,14 @@
     
     Attributes:
         id:string The unique ID for this form relative to its parent form.
-        parentForm:myt.Form a reference to the parent form if it exists.
+        form:myt.Form a reference to the parent form if it exists.
         errorMessages:array A list of error messages that occurred during the
             last execution of doValidation.
         isValid:boolean Indicates if the data in this form is valid or not.
         isChanged:boolean Indicates if the data in this form is different
             from the rollback value or not.
         _lockCascade:boolean Prevents changes to "isChanged" and "isValid" 
-            from cascading upwards to the parentForm. Used during reset 
+            from cascading upwards to the parent form. Used during reset 
             and rollback.
         _subForms:object A map of child forms/elements by ID.
         _validators:array A list of validators to apply to this form.
@@ -26,27 +26,45 @@ myt.Form = new JS.Module('Form', {
         
         this._subForms = {};
         this._validators = [];
-        this._accellerators = {};
+        this._accelerators = {};
         
         this.callSuper(parent, attrs);
+        
+        if (this.form) this.form.addSubForm(this);
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setId: function(v) {this.id = v;},
     setErrorMessages: function(v) {this.errorMessages = v;},
     
-    /** Don't call this method directly. Use parentForm.addSubForm instead. */
-    setParentForm: function(v) {this.parentForm = v;},
+    setId: function(v) {
+        if (this.id === v) return;
+        this.id = v;
+        
+        var pf = this.form;
+        if (this.inited && pf) {
+            pf.removeSubForm(this);
+            pf.addSubForm(this);
+        }
+    },
+    
+    setForm: function(v) {
+        if (this.form !== v) {
+            var existingForm = this.form;
+            this.form = v;
+            if (existingForm) existingForm.removeSubForm(this);
+            if (this.inited && v) v.addSubForm(this);
+        }
+    },
     
     setIsValid: function(v) {
-        // Don't abort when value hasn't changed since the reason this form is
-        // invalid may have changed and we want an event to fire so any new
+        // Don't abort when value hasn't changed. The reason this form is
+        // invalid may have changed so we want an event to fire so any new
         // error messages can be shown.
         this.isValid = v;
         if (this.inited) this.fireNewEvent('isValid', v);
         
-        var pf = this.parentForm;
+        var pf = this.form;
         if (pf && !this._lockCascade) {
             if (v) {
                 pf.verifyValidState(this);
@@ -61,7 +79,7 @@ myt.Form = new JS.Module('Form', {
         this.isChanged = v;
         if (this.inited) this.fireNewEvent('isChanged', v);
         
-        var pf = this.parentForm;
+        var pf = this.form;
         if (pf && !this._lockCascade) {
             if (v) {
                 pf.notifySubFormChanged();
@@ -71,14 +89,39 @@ myt.Form = new JS.Module('Form', {
         }
     },
     
+    /** Allows bulk setting of validators.
+        @param validators:array An array of myt.Validator instances or
+            IDs of validators from the myt.global.validators registry.
+        @returns void */
+    setValidators: function(validators) {
+        var i = validators.length, validator;
+        while (i) {
+            validator = validators[--i];
+            if (!(validator instanceof myt.Validator)) {
+                validator = validators[i] = myt.global.validators.getValidator(validator);
+                if (!validator) validators.splice(i, 1);
+            }
+        }
+        
+        this._validators = validators;
+    },
+    
     /** Gets the value of this form. For a form this will be a map of
         all the subform values by ID. Form elements should override this
         to return an element specific value.
         @returns object */
     getValue: function() {
-        var retval = {}, subForms = this._subForms, id;
-        for (id in subForms) retval[id] = subForms[id].getValue();
-        return retval;
+        // Allow for superclass to have custom getValue behavior.
+        if (this.callSuper) return this.callSuper();
+        
+        // Only do "form" behavior for true forms, not for form elements.
+        if (this.isA(myt.FormElement)) {
+            return this.value;
+        } else {
+            var retval = {}, subForms = this._subForms, id;
+            for (id in subForms) retval[id] = subForms[id].getValue();
+            return retval;
+        }
     },
     
     /** Sets the value of this form. For a form the value should be a map
@@ -87,6 +130,7 @@ myt.Form = new JS.Module('Form', {
         @param value:object the value to set.
         @returns the value that was actually set. */
     setValue: function(value) {
+        // Allow for superclass to have custom setValue behavior.
         if (this.callSuper) this.callSuper(value);
         
         // Only do "form" behavior for true forms, not for form elements.
@@ -189,7 +233,7 @@ myt.Form = new JS.Module('Form', {
     invokeAccelerator: function(id, value) {
         if (value === undefined) value = null;
         var accelerator = this._accelerators[id];
-        if (accelerator) accelerator(value);
+        if (accelerator) accelerator.call(this, value);
     },
     
     /** Adds a validator to this form.
@@ -219,7 +263,7 @@ myt.Form = new JS.Module('Form', {
     /** Gets the oldest ancestor form of this form or the form itself.
         @returns myt.Form */
     getRootForm: function() {
-        return this.parentForm ? this.parentForm.getRootForm() : this;
+        return this.form ? this.form.getRootForm() : this;
     },
     
     /** Adds an myt.Form to this form.
@@ -232,18 +276,11 @@ myt.Form = new JS.Module('Form', {
             return;
         }
         
-        subform.setParentForm(this);
+        subform.setForm(this);
         this._subForms[id] = subform;
         
         if (subform.isChanged) this.notifySubFormChanged();
         if (!subform.isValid) this.notifySubFormInvalid();
-    },
-    
-    /** Gets the subform with the provided ID from this form.
-        @param id:string The ID of the form to get.
-        @returns myt.Form or undefined if not found. */
-    getSubForm: function(id) {
-        return this._subForms[id];
     },
     
     /** Removes the subform with the provided ID from this form.
@@ -252,12 +289,19 @@ myt.Form = new JS.Module('Form', {
     removeSubForm: function(id) {
         var subform = this.getSubForm(id);
         if (subform) {
-            subform.setParentForm(null);
+            subform.setForm(null);
             delete this._subForms[id];
             this.verifyChangedState();
             this.verifyValidState();
         }
         return subform;
+    },
+    
+    /** Gets the subform with the provided ID from this form.
+        @param id:string The ID of the form to get.
+        @returns myt.Form or undefined if not found. */
+    getSubForm: function(id) {
+        return this._subForms[id];
     },
     
     /** Gets all error messages from the entire form tree.
@@ -309,7 +353,7 @@ myt.Form = new JS.Module('Form', {
     _applyValidation: function(isValid) {
         var validators = this._validators, len = validators.length, 
             errorMessages = [], i = 0;
-        for (; len > i; i++) isValid = validators[i].isFormValid(this, errorMessages) && isValid;
+        for (; len > i; i++) isValid = validators[i].isFormValid(this, null, errorMessages) && isValid;
         
         this.setErrorMessages(errorMessages);
         this.setIsValid(isValid);

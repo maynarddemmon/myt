@@ -19,7 +19,15 @@
         
         var rootView = new myt.View(appDiv, {
             bgColor:'#ffffff', id:'rootForm'
-        }, [myt.SizeToWindowWidth, myt.Form]);
+        }, [myt.SizeToWindowWidth, myt.RootForm, {
+            doValidSubmit: function(value) {
+                console.log("valid submit", value);
+            },
+            
+            doInvalidSubmit: function() {
+                console.log("invalid submit", this.getAllErrorMessages());
+            },
+        }]);
         
         new myt.SimpleIconTextButton(rootView, {
             height:25, width:70, cornerRadius:4, text:'setup',
@@ -64,26 +72,39 @@
             }
         }]);
         
+        // Define a few validators
+        var lenValidator = new myt.LengthValidator('len', 3, 10);
+        
         new myt.FormInputText(rootView, {
-            width:100, CSSBorder:[1, 'solid', '#999999'],
-            id:'fieldA', form:rootView
+            width:100, id:'fieldA', form:rootView, validators:[lenValidator, 'required']
         });
         new myt.FormInputText(rootView, {
-            width:100, CSSBorder:[1, 'solid', '#999999'],
-            id:'fieldB', form:rootView
+            width:100, id:'fieldB', form:rootView, validators:['equalsIgnoreCase', lenValidator], 
+            validateWhen:'blurWithKeyFix'
         });
         new myt.FormInputText(rootView, {
-            width:100, CSSBorder:[1, 'solid', '#999999'],
-            id:'fieldC', form:rootView
+            width:100, id:'fieldC', form:rootView, validators:[lenValidator]
         });
+        
+        // Subform: start
+        var subform = new myt.View(rootView, {
+            width:250, bgColor:'#cccccc', id:'subForm', form:rootView
+        }, [myt.Form]);
+        new myt.FormInputText(subform, {width:100, id:'fieldA', form:subform});
+        new myt.FormInputText(subform, {width:100, id:'fieldB', form:subform});
+        new myt.SpacedLayout(subform, {
+            name:'layout', axis:'x', inset:5, spacing:5, outset:5, collapseParent:true
+        });
+        new myt.ConstantLayout(subform, {targetAttrName:'y', targetValue:5});
+        new myt.SizeToChildren(subform, {axis:'y', paddingY:7});
+        // Subform: end
         
         var rollbackBtn = new myt.SimpleIconTextButton(rootView, {
             height:25, width:70, cornerRadius:4, text:'rollback',
             activeColor:'#bbbbbb', hoverColor:'#dddddd', readyColor:'#cccccc'
         }, [{
             doActivated: function() {
-                rootView.rollbackForm();
-                rootView.doValidation();
+                rootView.invokeAccelerator('cancel');
             },
             
             setDisabled: function(v) {
@@ -98,16 +119,18 @@
             activeColor:'#bbbbbb', hoverColor:'#dddddd', readyColor:'#cccccc'
         }, [{
             doActivated: function() {
-                var isValid = rootView.doValidation();
-                if (isValid) console.log(rootView.getValue());
+                rootView.invokeAccelerator('submit');
             },
             
             setDisabled: function(v) {
-                if (typeof v === 'object') v = !v.value;
+                if (typeof v === 'object') {
+                    v = !(rootView.isValid && rootView.isChanged);
+                }
                 this.callSuper(v);
             }
         }]);
         submitBtn.syncTo(rootView, 'setDisabled', 'isChanged');
+        submitBtn.syncTo(rootView, 'setDisabled', 'isValid');
         
         new myt.SpacedLayout(rootView, {
             name:'layout', axis:'y',

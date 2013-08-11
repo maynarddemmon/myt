@@ -5,8 +5,8 @@ myt.TrimValueProcessor = new JS.Class('TrimValueProcessor', myt.ValueProcessor, 
         @param trim:string Determines the type of trimming to do. Allowed
             values are 'left', 'right' or 'both'. The default value 
             is 'both'. */
-    initialize: function(id, trim) {
-        this.callSuper(id);
+    initialize: function(id, runForDefault, runForRollback, runForCurrent, trim) {
+        this.callSuper(id, runForDefault, runForRollback, runForCurrent);
         
         this.trim = trim;
     },

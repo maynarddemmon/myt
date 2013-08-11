@@ -38,6 +38,6 @@ myt.Validator = new JS.Class('Validator', {
         if (!config) config = {};
         config.form = form;
         
-        return this.isValid(form.getCurrentValue(), config, errorMessages);
+        return this.isValid(form.getValue(), config, errorMessages);
     }
 });

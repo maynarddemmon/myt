@@ -3,8 +3,8 @@ myt.UndefinedValueProcessor = new JS.Class('UndefinedValueProcessor', myt.ValueP
     // Constructor /////////////////////////////////////////////////////////////
     /** @overrides myt.ValueProcessor
     @param defaultValue:* the default value to convert undefined to. */
-    initialize: function(id, defaultValue) {
-        this.callSuper(id);
+    initialize: function(id, runForDefault, runForRollback, runForCurrent, defaultValue) {
+        this.callSuper(id, runForDefault, runForRollback, runForCurrent);
         
         this.defaultValue = defaultValue;
     },
