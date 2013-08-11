@@ -48,7 +48,7 @@ myt.Color = new JS.Class('Color', {
         /** Creates an myt.Color from an html color string.
             @returns myt.Color */
         makeColorFromHexString: function(value) {
-            if (value.indexOf('#') === 0) value = value.substring(1);
+            if (value && value.indexOf('#') === 0) value = value.substring(1);
             var num = parseInt(value, 16);
             return myt.Color.makeColorFromNumber(num);
         },
