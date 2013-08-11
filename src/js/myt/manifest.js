@@ -241,6 +241,8 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'form/Form.js'       ).provides('myt.Form'       ).requires('myt.Node');
     file(MYT_COMPONENT_ROOT + 'form/FormElement.js').provides('myt.FormElement').requires('myt.Form');
     
+    file(MYT_COMPONENT_ROOT + 'form/elements/FormInputText.js').provides('myt.FormInputText').requires('myt.FormElement','myt.InputText');
+    
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
         'myt.Cookie',
@@ -255,6 +257,7 @@ JS.Packages(function() {with(this) {
         'myt.InputText', 'myt.InputTextArea', 'myt.InputCheckbox', 'myt.InputRadio', 'myt.InputSelectOption',
         'myt.ImageUploader','myt.Dialog',
         'myt.global.validators','myt.EqualFieldsValidator','myt.LengthValidator','myt.NumericRangeValidator',
-        'myt.global.valueProcessors','myt.UseOtherFieldIfEmptyValueProcessor','myt.FormElement'
+        'myt.global.valueProcessors','myt.UseOtherFieldIfEmptyValueProcessor','myt.FormElement',
+        'myt.FormInputText'
     );
 }});

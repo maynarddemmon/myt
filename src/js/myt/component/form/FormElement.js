@@ -2,12 +2,12 @@
     form that actually has a value.
     
     Attributes:
-        currentValue:* The current value of the form element.
+        value:* The current value of the form element.
         rollbackValue:* The rollback value of the form element.
         defaultValue:* The default value of the form element.
         _valueProcessors:array A list of myt.ValueProcessors that get applied 
             to a value whenever it is retrieved via the methods: 
-            getCurrentValue, getRollbackValue or getDefaultValue.
+            getValue, getRollbackValue or getDefaultValue.
 */
 myt.FormElement = new JS.Module('FormElement', {
     include: [myt.Form],
@@ -18,21 +18,35 @@ myt.FormElement = new JS.Module('FormElement', {
         this._valueProcessors = [];
         
         this.callSuper(parent, attrs);
+        
+        if (this.form) this.form.addSubForm(this);
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrides myt.Form */
-    getCurrentValue: function() {
-        return this._processValue(this.currentValue, 'runForCurrent');
+    setForm: function(v) {
+        if (this.form !== v) {
+            if (this.form) this.form.removeSubForm(this);
+            this.form = v;
+            if (this.inited && v) v.addSubForm(this);
+        }
     },
     
     /** @overrides myt.Form */
-    setCurrentValue: function(value) {
+    getValue: function() {
+        return this._processValue(this.value, 'runForCurrent');
+    },
+    
+    /** @overrides myt.Form */
+    setValue: function(value) {
         if (value === undefined) value = this.getRollbackValue();
-        if (this.currentValue !== value) {
-            this.currentValue = value;
-            if (this.inited) this.fireNewEvent('currentValue', value);
+        if (this.value !== value) {
+            if (this.callSuper) {
+                this.callSuper(value);
+            } else {
+                this.value = value;
+                if (this.inited) this.fireNewEvent('value', value);
+            }
             this.verifyChangedState();
         }
         return value;
@@ -129,7 +143,7 @@ myt.FormElement = new JS.Module('FormElement', {
     
     /** @overrides myt.Form */
     verifyChangedState: function(subformToIgnore) {
-        var isChanged = this.currentValue !== this.rollbackValue;
+        var isChanged = this.value !== this.rollbackValue;
         this.setIsChanged(isChanged);
         return isChanged;
     },
@@ -142,7 +156,7 @@ myt.FormElement = new JS.Module('FormElement', {
         // setup behave identically.
         this.defaultValue = undefined;
         this.rollbackValue = undefined;
-        this.currentValue = undefined;
+        this.value = undefined;
         
         this.setDefaultValue(defaultValue);
         this.setRollbackValue(rollbackValue);
@@ -153,7 +167,7 @@ myt.FormElement = new JS.Module('FormElement', {
         
         this._lockCascade = false;
         
-        this.setCurrentValue(value);
+        this.setValue(value);
     },
     
     /** @overrides myt.Form */
@@ -161,7 +175,7 @@ myt.FormElement = new JS.Module('FormElement', {
         this._lockCascade = true;
         
         this.setRollbackValue(this.getDefaultValue());
-        this.setCurrentValue(this.getDefaultValue());
+        this.setValue(this.getDefaultValue());
         
         this.setIsChanged(false);
         this.setErrorMessages([]);
@@ -174,7 +188,7 @@ myt.FormElement = new JS.Module('FormElement', {
     rollbackForm: function() {
         this._lockCascade = true;
         
-        this.setCurrentValue(this.getRollbackValue());
+        this.setValue(this.getRollbackValue());
         
         this.setIsChanged(false);
         this.setErrorMessages([]);
@@ -187,6 +201,6 @@ myt.FormElement = new JS.Module('FormElement', {
         @returns The current value if this form is in the changed state,
             otherwise undefined. */
     getChangedValue: function() {
-        return this.isChanged ? this.getCurrentValue() : undefined;
+        return this.isChanged ? this.getValue() : undefined;
     }
 });

@@ -1,0 +1,122 @@
+<!doctype html><html><head>
+<title>Myt Framework : Form Example</title>
+<link rel="stylesheet" href="../src/css/myt.scss"/>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.0/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="../js/jquery/jquery-1.10.0.min.js">\x3C/script>');</script>
+<script src="../src/js/boilerplate.js"></script>
+<script src="../src/js/jsclass/min/loader-browser.js"></script>
+<script src="../src/js/myt/manifest.js"></script>
+</head><body>
+
+<div id="appDiv" style="position:absolute;"></div>
+<div id="tooltipDiv" style="position:absolute;"></div>
+
+<script>
+    JS.require('myt.all', function() {this.init();});
+    
+    function init() {
+        var appDiv = document.getElementById("appDiv");
+        
+        var rootView = new myt.View(appDiv, {
+            bgColor:'#ffffff', id:'rootForm'
+        }, [myt.SizeToWindowWidth, myt.Form]);
+        
+        new myt.SimpleIconTextButton(rootView, {
+            height:25, width:70, cornerRadius:4, text:'setup',
+            activeColor:'#bbbbbb', hoverColor:'#dddddd', readyColor:'#cccccc'
+        }, [{
+            doActivated: function() {
+                var defaultValue = {
+                    fieldA:"foo",
+                    fieldB:"bar",
+                    fieldC:'baz',
+                    subForm:{
+                        fieldA:"default A",
+                        fieldB:"default B"
+                    }
+                };
+                var rollbackValue = {
+                    fieldA:"FOO",
+                    fieldB:"",
+                    subForm:{
+                        fieldA:"rb A",
+                        fieldB:"rb B"
+                    }
+                };
+                var value = {
+                    fieldC:"blah",
+                    subForm:{
+                        fieldA:"whatever"
+                    }
+                };
+                rootView.setup(defaultValue, rollbackValue, value);
+                rootView.doValidation();
+            }
+        }]);
+        
+        new myt.SimpleIconTextButton(rootView, {
+            height:25, width:70, cornerRadius:4, text:'reset',
+            activeColor:'#bbbbbb', hoverColor:'#dddddd', readyColor:'#cccccc'
+        }, [{
+            doActivated: function() {
+                rootView.resetForm();
+                rootView.doValidation();
+            }
+        }]);
+        
+        new myt.FormInputText(rootView, {
+            width:100, CSSBorder:[1, 'solid', '#999999'],
+            id:'fieldA', form:rootView
+        });
+        new myt.FormInputText(rootView, {
+            width:100, CSSBorder:[1, 'solid', '#999999'],
+            id:'fieldB', form:rootView
+        });
+        new myt.FormInputText(rootView, {
+            width:100, CSSBorder:[1, 'solid', '#999999'],
+            id:'fieldC', form:rootView
+        });
+        
+        var rollbackBtn = new myt.SimpleIconTextButton(rootView, {
+            height:25, width:70, cornerRadius:4, text:'rollback',
+            activeColor:'#bbbbbb', hoverColor:'#dddddd', readyColor:'#cccccc'
+        }, [{
+            doActivated: function() {
+                rootView.rollbackForm();
+                rootView.doValidation();
+            },
+            
+            setDisabled: function(v) {
+                if (typeof v === 'object') v = !v.value;
+                this.callSuper(v);
+            }
+        }]);
+        rollbackBtn.syncTo(rootView, 'setDisabled', 'isChanged');
+        
+        var submitBtn = new myt.SimpleIconTextButton(rootView, {
+            height:25, width:70, cornerRadius:4, text:'submit',
+            activeColor:'#bbbbbb', hoverColor:'#dddddd', readyColor:'#cccccc'
+        }, [{
+            doActivated: function() {
+                var isValid = rootView.doValidation();
+                if (isValid) console.log(rootView.getValue());
+            },
+            
+            setDisabled: function(v) {
+                if (typeof v === 'object') v = !v.value;
+                this.callSuper(v);
+            }
+        }]);
+        submitBtn.syncTo(rootView, 'setDisabled', 'isChanged');
+        
+        new myt.SpacedLayout(rootView, {
+            name:'layout', axis:'y',
+            inset:25, spacing:5, outset:25, collapseParent:true
+        });
+        new myt.ConstantLayout(rootView, {targetAttrName:'x', targetValue:10});
+        
+        console.log(rootView);
+        window.rootView = rootView;
+    }
+</script>
+</body></html>

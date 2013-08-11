@@ -75,9 +75,9 @@ myt.Form = new JS.Module('Form', {
         all the subform values by ID. Form elements should override this
         to return an element specific value.
         @returns object */
-    getCurrentValue: function() {
+    getValue: function() {
         var retval = {}, subForms = this._subForms, id;
-        for (id in subForms) retval[id] = subForms[id].getCurrentValue();
+        for (id in subForms) retval[id] = subForms[id].getValue();
         return retval;
     },
     
@@ -86,15 +86,18 @@ myt.Form = new JS.Module('Form', {
         the map will be applied to each of the subforms.
         @param value:object the value to set.
         @returns the value that was actually set. */
-    setCurrentValue: function(value) {
-        if (typeof value === 'object') {
+    setValue: function(value) {
+        if (this.callSuper) this.callSuper(value);
+        
+        // Only do "form" behavior for true forms, not for form elements.
+        if (typeof value === 'object' && !this.isA(myt.FormElement)) {
             var subform, id;
             for (id in value) {
                 subform = this.getSubForm(id);
                 if (subform) {
-                    value[id] = subform.setCurrentValue(value[id]);
+                    value[id] = subform.setValue(value[id]);
                 } else {
-                    console.warn("ID in setCurrentValue for non-existant subform", id);
+                    console.warn("ID in setValue for non-existant subform", id);
                 }
             }
         }
@@ -341,9 +344,9 @@ myt.Form = new JS.Module('Form', {
         @param rollbackValue:object The rollback value.
         @param value:object The current value.
         @returns void */
-    setup: function() {
+    setup: function(defaultValue, rollbackValue, value) {
         this._lockCascade = true;
-        this.setIisChanged(false);
+        this.setIsChanged(false);
         this.setErrorMessages([]);
         this.setIsValid(true);
         this._lockCascade = false;
@@ -374,7 +377,7 @@ myt.Form = new JS.Module('Form', {
     
     /** Rolls back this form to the rollback values.
         @returns void */
-    rollbackFrom: function() {
+    rollbackForm: function() {
         this._lockCascade = true;
         
         var subForms = this._subForms, id;
