@@ -14,10 +14,12 @@ myt.RootForm = new JS.Module('RootForm', {
     
     // Methods /////////////////////////////////////////////////////////////////
     doSubmit: function() {
-        if (this.doValidation()) {
-            this.doValidSubmit(this.getValue());
-        } else {
-            this.doInvalidSubmit();
+        if (this.isChanged) {
+            if (this.doValidation()) {
+                this.doValidSubmit(this.getValue());
+            } else {
+                this.doInvalidSubmit();
+            }
         }
     },
     
