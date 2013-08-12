@@ -15,6 +15,12 @@
                     the user types if currently invalid.
                 none: Don't do any validation when interacting with the field.
             The default value is 'key'.
+        acceleratorScope:string The scope the accelerators will be applied to.
+            Supported values are:
+                element: Take action on this element only
+                root: Take action on the root form.
+                none: Take no action.
+            The default value is 'element'.
 */
 myt.FormInputText = new JS.Class('FormInputText', myt.InputText, {
     include: [myt.FormElement, myt.UpdateableUI],
@@ -27,6 +33,7 @@ myt.FormInputText = new JS.Class('FormInputText', myt.InputText, {
         if (attrs.errorColor === undefined) attrs.errorColor = '#ff9999';
         if (attrs.actionRequiredColor === undefined) attrs.actionRequiredColor = '#996666';
         if (attrs.normalColor === undefined) attrs.normalColor = '#999999';
+        if (attrs.acceleratorScope === undefined) attrs.acceleratorScope = 'element';
         
         if (attrs.focusEmbellishment === undefined) attrs.focusEmbellishment = true;
         
@@ -36,6 +43,9 @@ myt.FormInputText = new JS.Class('FormInputText', myt.InputText, {
         
         this.attachToDom(this, '_handleKeyDown', 'keydown');
         this.attachToDom(this, '_handleKeyUp', 'keyup');
+        
+        this.addAccelerator('accept', this.doAccept);
+        this.addAccelerator('reject', this.doReject);
     },
     
     
@@ -61,8 +71,42 @@ myt.FormInputText = new JS.Class('FormInputText', myt.InputText, {
         return retval;
     },
     
+    setAcceleratorScope: function(v) {this.acceleratorScope = v;},
+    
     
     // Methods /////////////////////////////////////////////////////////////////
+    doAccept: function() {
+        if (!this.disabled) {
+            switch (this.acceleratorScope) {
+                case 'root':
+                    this.getRootForm().invokeAccelerator("submit");
+                    break;
+                case 'element':
+                    // Tab navigate forward
+                    myt.global.focus.next(false);
+                    break;
+                case 'none':
+                default:
+            }
+        }
+    },
+    
+    doReject: function() {
+        if (!this.disabled) {
+            switch (this.acceleratorScope) {
+                case 'root':
+                    this.getRootForm().invokeAccelerator("cancel");
+                    break;
+                case 'element':
+                    this.rollbackForm();
+                    this.doValidation();
+                    break;
+                case 'none':
+                default:
+            }
+        }
+    },
+    
     showFocusEmbellishment: function() {
         this.hideDefaultFocusEmbellishment();
         this.setStyleProperty('boxShadow', myt.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
@@ -74,19 +118,11 @@ myt.FormInputText = new JS.Class('FormInputText', myt.InputText, {
     },
     
     _handleKeyDown: function(event) {
-        if (!this.disabled) {
-            if (myt.KeyObservable.getKeyCodeFromEvent(event) === 13) { // Enter key
-                this.getRootForm().invokeAccelerator("submit");
-            }
-        }
+        if (myt.KeyObservable.getKeyCodeFromEvent(event) === 13) this.invokeAccelerator("accept");
     },
     
     _handleKeyUp: function(event) {
-        if (!this.disabled) {
-            if (myt.KeyObservable.getKeyCodeFromEvent(event) === 27) { // Esc key
-                this.getRootForm().invokeAccelerator("cancel");
-            }
-        }
+        if (myt.KeyObservable.getKeyCodeFromEvent(event) === 27) this.invokeAccelerator("reject");
     },
     
     /** @overrides myt.FocusObservable */

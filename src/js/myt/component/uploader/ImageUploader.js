@@ -69,8 +69,19 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
     },
     
     readImageInto: function(file, image) {
-        if (FileReader !== undefined && this.isImageFile(file)) {
-            var self = this;
+        var self = this;
+        if (file.size === -1) {
+            var img = new Image();
+            img.onload = function() {
+                file.width = this.width;
+                file.height = this.height;
+                
+                if (!image || image.destroyed) return
+                
+                self.updateImage(file, image, this.src);
+            };
+            img.src = file.serverPath;
+        } else if (FileReader !== undefined && this.isImageFile(file)) {
             this.readFile(file, function(event) {
                 var img = new Image();
                 img.onload = function() {

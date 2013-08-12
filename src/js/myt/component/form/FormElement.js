@@ -34,12 +34,7 @@ myt.FormElement = new JS.Module('FormElement', {
     setValue: function(value) {
         if (value === undefined) value = this.getRollbackValue();
         if (this.value !== value) {
-            if (this.callSuper) {
-                this.callSuper(value);
-            } else {
-                this.value = value;
-                if (this.inited) this.fireNewEvent('value', value);
-            }
+            this.callSuper(value);
             this.verifyChangedState();
         }
         return value;

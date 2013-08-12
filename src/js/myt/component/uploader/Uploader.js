@@ -1,11 +1,17 @@
 /** Component to upload files. */
 myt.Uploader = new JS.Class('Uploader', myt.View, {
-    include: [myt.Disableable],
+    include: [myt.Disableable, myt.FormElement],
     
     
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
-        FILE_ATTR_SERVER_PATH: 'serverPath'
+        FILE_ATTR_SERVER_PATH: 'serverPath',
+        MIME_TYPES_BY_EXTENSION: {
+            gif:'image/gif',
+            png:'image/png',
+            jpg:'image/jpeg',
+            jpeg:'image/jpeg'
+        }
     },
     
     
@@ -57,6 +63,39 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
+    /** Add a "remote" file when the value is set.
+        @param v:string the URI for a remote image file. */
+    setValue: function(v) {
+        this.clearFiles();
+        
+        if (v) {
+            if (!Array.isArray(v)) v = [v];
+            var len = v.length, i = 0;
+            for(; len > i; ++i) this.addFile(this._createFile(v[i]));
+        }
+        
+        if (this.callSuper) {
+            return this.callSuper(v);
+        } else {
+            return v;
+        }
+    },
+    
+    /** @returns the path to the uploaded files. */
+    getValue: function() {
+        return this.value;
+    },
+    
+    _createFile: function(urlStr) {
+        var uri = new myt.URI(urlStr), name = uri.file, ext = name.split('.')[1];
+        return {
+            name: name,
+            serverPath: urlStr,
+            size: -1,
+            type: myt.Uploader.MIME_TYPES_BY_EXTENSION[ext]
+        };
+    },
+    
     /** @overrides myt.Disableable */
     setDisabled: function(v) {
         if (this.disabled === v) return;
@@ -229,6 +268,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     
     addFile: function(file) {
         this.files.push(file);
+        this.updateValueFromFiles();
         this.fireNewEvent('addFile', file);
     },
     
@@ -237,10 +277,26 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         while (i) {
             if (this.isSameFile(files[--i], file)) {
                 files.splice(i, 1);
+                this.updateValueFromFiles();
                 this.fireNewEvent('removeFile', file);
                 break;
             }
         }
+    },
+    
+    updateValueFromFiles: function() {
+        var value = [], files = this.files, i = files.length, serverPath;
+        while (i) {
+            serverPath = files[--i][myt.Uploader.FILE_ATTR_SERVER_PATH];
+            if (serverPath) value.push(serverPath);
+        }
+        
+        var len = value.length;
+        this.value = len === 1 ? value[0] : (len === 0 ? '' : value);
+        
+        this.verifyChangedState(); // FIXME: mimics what happens in myt.FormElement setValue
+        
+        this.fireNewEvent('value', this.value);
     },
     
     clearFiles: function() {
@@ -259,18 +315,5 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
             reader.onload = handlerFunc;
             reader.readAsDataURL(file);
         }
-    },
-    
-    /** @returns the path to the uploaded files. */
-    getValue: function() {
-        var retval = [],
-            files = this.files, i = files.length, serverPath;
-        while (i) {
-            serverPath = files[--i][myt.Uploader.FILE_ATTR_SERVER_PATH];
-            if (serverPath) retval.push(serverPath);
-        }
-        
-        var len = retval.length;
-        return len === 1 ? retval[0] : (len === 0 ? null : retval);
     }
 });
