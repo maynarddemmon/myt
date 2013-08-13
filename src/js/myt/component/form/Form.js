@@ -39,11 +39,12 @@ myt.Form = new JS.Module('Form', {
     
     setId: function(v) {
         if (this.id === v) return;
+        var existingId = this.id;
         this.id = v;
         
         var pf = this.form;
         if (this.inited && pf) {
-            pf.removeSubForm(this);
+            pf.removeSubForm(existingId);
             pf.addSubForm(this);
         }
     },
@@ -52,7 +53,7 @@ myt.Form = new JS.Module('Form', {
         if (this.form !== v) {
             var existingForm = this.form;
             this.form = v;
-            if (existingForm) existingForm.removeSubForm(this);
+            if (existingForm) existingForm.removeSubForm(this.id);
             if (this.inited && v) v.addSubForm(this);
         }
     },
@@ -395,13 +396,12 @@ myt.Form = new JS.Module('Form', {
         this.setIsValid(true);
         this._lockCascade = false;
         
-        if (typeof defaultValue === 'object' && 
-            typeof rollbackValue === 'object' && 
-            typeof value === 'object'
-        ) {
-            var subForms = this._subForms, id;
-            for (id in subForms) subForms[id].setup(defaultValue[id], rollbackValue[id], value[id]);
-        }
+        if (defaultValue == null) defaultValue = {};
+        if (rollbackValue == null) rollbackValue = {};
+        if (value == null) value = {};
+        
+        var subForms = this._subForms, id;
+        for (id in subForms) subForms[id].setup(defaultValue[id], rollbackValue[id], value[id]);
     },
     
     /** Resets this form to the default values.

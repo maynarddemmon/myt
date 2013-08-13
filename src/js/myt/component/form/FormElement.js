@@ -22,7 +22,6 @@ myt.FormElement = new JS.Module('FormElement', {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    
     /** @overrides myt.Form */
     getValue: function() {
         return this._processValue(
