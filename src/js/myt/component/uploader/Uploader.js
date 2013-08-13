@@ -292,7 +292,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         }
         
         var len = value.length;
-        this.value = len === 1 ? value[0] : (len === 0 ? '' : value);
+        this.value = len === 1 ? value[0] : (len === 0 ? undefined : value);
         
         this.verifyChangedState(); // FIXME: mimics what happens in myt.FormElement setValue
         
