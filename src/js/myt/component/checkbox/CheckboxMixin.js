@@ -6,6 +6,9 @@
             or not.
 */
 myt.CheckboxMixin = new JS.Module('CheckboxMixin', {
+    include: [myt.ValueComponent],
+    
+    
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
         /** The x location of the "icon". */
@@ -104,12 +107,7 @@ myt.CheckboxMixin = new JS.Module('CheckboxMixin', {
         return config;
     },
     
-    setValue: function(v) {
-        if (this.value === v) return;
-        this.value = v;
-        if (this.inited) this.fireNewEvent('value', this.getValue());
-    },
-    
+    /** @overrides myt.ValueComponent */
     getValue: function() {
         return this.checked ? this.value : null;
     },

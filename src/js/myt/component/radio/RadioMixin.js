@@ -30,33 +30,24 @@ myt.RadioMixin = new JS.Module('RadioMixin', {
         if (this.inited) this.fireNewEvent('groupId', v);
     },
     
-    /** @overrides myt.Checkbox */
-    setValue: function(v) {
-        if (this.value === v) return;
-        this.value = v;
-        if (this.inited) this.fireNewEvent('value', v);
-    },
-    
-    /** @overrides myt.Checkbox */
+    /** @overrides myt.CheckboxMixin */
     getValue: function() {
         return this.value;
     },
     
     getGroupValue: function() {
         var checkedRadio = this.getCheckedRadio();
-        if (checkedRadio) return checkedRadio.getValue();
-        return null;
+        return checkedRadio ? checkedRadio.getValue() : null;
     },
     
     getCheckedRadio: function() {
         var bag = this.getBAG('checked', this.groupId);
-        if (bag) return bag.trueNode;
-        return null;
+        return bag ? bag.trueNode : null;
     },
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.Checkbox */
+    /** @overrides myt.CheckboxMixin */
     doActivated: function() {
         if (!this.checked) {
             var bag = this.getBAG('checked', this.groupId);

@@ -97,6 +97,7 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'behavior/MouseOver.js'       ).provides('myt.MouseOver'       ).requires('myt.Disableable','myt.global.mouse','myt.MouseObservable');
     file(MYT_COMPONENT_ROOT + 'behavior/MouseDown.js'       ).provides('myt.MouseDown'       ).requires('myt.MouseOver');
     file(MYT_COMPONENT_ROOT + 'behavior/MouseOverAndDown.js').provides('myt.MouseOverAndDown').requires('myt.MouseDown');
+    file(MYT_COMPONENT_ROOT + 'behavior/ValueComponent.js'  ).provides('myt.ValueComponent'  ).requires('myt');
     
     // Component : Sizing
     file(MYT_COMPONENT_ROOT + 'sizing/SizeWidthToDom.js'    ).provides('myt.SizeWidthToDom'    ).requires('myt.View');
@@ -170,7 +171,7 @@ JS.Packages(function() {with(this) {
     
     // Component : Checkbox
     file(MYT_COMPONENT_ROOT + 'checkbox/CheckboxDrawingMethod.js').provides('myt.CheckboxDrawingMethod').requires('myt.DrawingMethod');
-    file(MYT_COMPONENT_ROOT + 'checkbox/CheckboxMixin.js'        ).provides('myt.CheckboxMixin'        ).requires('myt.CheckboxDrawingMethod');
+    file(MYT_COMPONENT_ROOT + 'checkbox/CheckboxMixin.js'        ).provides('myt.CheckboxMixin'        ).requires('myt.CheckboxDrawingMethod','myt.ValueComponent');
     file(MYT_COMPONENT_ROOT + 'checkbox/Checkbox.js'             ).provides('myt.Checkbox'             ).requires('myt.DrawButton','myt.CheckboxMixin');
     file(MYT_COMPONENT_ROOT + 'checkbox/TextCheckbox.js'         ).provides('myt.TextCheckbox'         ).requires('myt.Checkbox','myt.TextButtonContent','myt.TooltipMixin');
     
@@ -221,8 +222,9 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'validator/validators/LengthValidator.js'          ).provides('myt.LengthValidator'          ).requires('myt.Validator');
     file(MYT_COMPONENT_ROOT + 'validator/validators/NumericRangeValidator.js'    ).provides('myt.NumericRangeValidator'    ).requires('myt.Validator');
     file(MYT_COMPONENT_ROOT + 'validator/validators/RequiredFieldValidator.js'   ).provides('myt.RequiredFieldValidator'   ).requires('myt.Validator');
+    file(MYT_COMPONENT_ROOT + 'validator/validators/URLValidator.js'             ).provides('myt.URLValidator'             ).requires('myt.Validator','myt.URI');
     
-    file(MYT_COMPONENT_ROOT + 'validator/ValidatorRegistry.js').provides('myt.global.validators').requires('myt.global','myt.Observable','myt.CompoundValidator','myt.EqualsIgnoreCaseValidator','myt.RequiredFieldValidator');
+    file(MYT_COMPONENT_ROOT + 'validator/ValidatorRegistry.js').provides('myt.global.validators').requires('myt.global','myt.Observable','myt.CompoundValidator','myt.EqualsIgnoreCaseValidator','myt.RequiredFieldValidator','myt.URLValidator');
     
     // Component : Form
     file(MYT_COMPONENT_ROOT + 'form/valueprocessor/ValueProcessor.js').provides('myt.ValueProcessor').requires('myt');

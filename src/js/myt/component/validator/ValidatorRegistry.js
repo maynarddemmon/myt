@@ -15,6 +15,7 @@ new JS.Singleton('GlobalValidatorRegistry', {
         // Register a few common Validators
         this.register(new myt.RequiredFieldValidator('required'));
         this.register(new myt.EqualsIgnoreCaseValidator('equalsIgnoreCase'));
+        this.register(new myt.URLValidator('url'));
     },
     
     
