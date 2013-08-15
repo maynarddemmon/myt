@@ -254,6 +254,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     
     handleUploadSuccess: function(file, data, status, jqxhr) {
         file[myt.Uploader.FILE_ATTR_SERVER_PATH] = this.parseServerPathFromResponse(data);
+        this.updateValueFromFiles();
     },
     
     handleUploadFailure: function(file, jqxhr, status, exception) {
@@ -295,6 +296,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         this.value = len === 1 ? value[0] : (len === 0 ? undefined : value);
         
         this.verifyChangedState(); // FIXME: mimics what happens in myt.FormElement setValue
+        if (this.form) this.form.notifyValueChanged(this); // FIXME: mimics what happens in myt.Form setValue
         
         this.fireNewEvent('value', this.value);
     },

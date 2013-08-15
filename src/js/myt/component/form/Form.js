@@ -146,6 +146,10 @@ myt.Form = new JS.Module('Form', {
                 }
             }
         }
+        
+        // Notify parent form of value change.
+        if (this.form) this.form.notifyValueChanged(this);
+        
         return value;
     },
     
@@ -360,6 +364,13 @@ myt.Form = new JS.Module('Form', {
         this.setIsValid(isValid);
         
         return isValid;
+    },
+    
+    /** Called whenever a value changes for the form or any subform therein.
+        @param sourceForm:myt.Form the form that had a value change.
+        @returns void */
+    notifyValueChanged: function(sourceForm) {
+        if (this.form) this.form.notifyValueChanged(sourceForm);
     },
     
     /** Called when a subform changed to the "changed" state.
