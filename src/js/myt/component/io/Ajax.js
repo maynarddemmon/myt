@@ -72,6 +72,9 @@ myt.Ajax = new JS.Class('Ajax', myt.Node, {
             mappedOpts[key] = value;
         });
         
+        // Store url on jqxhr so we can read it in response handling code.
+        this.opts.beforeSend = function(jqxhr, settings) {jqxhr.requestURL = settings.url;};
+        
         return myt.Ajax.doRequest(
             $.extend([true], {}, this.opts, mappedOpts), successCallback, failureCallback
         );
