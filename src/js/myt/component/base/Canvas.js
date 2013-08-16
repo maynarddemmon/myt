@@ -110,6 +110,15 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
         ctx.restore();
     },
     
+    /** Draws a circle
+        @param x:number the x location of the center of the circle.
+        @param y:number the y location of the center of the circle.
+        @param radius:number the radius of the circle.
+        @returns void */
+    circle: function(x, y, radius) {
+        this.__ctx.arc(x, y, radius, 0, 2 * Math.PI);
+    },
+    
     save: function() {var ctx = this.__ctx; ctx.save.apply(ctx, arguments);},
     restore: function() {var ctx = this.__ctx; ctx.restore.apply(ctx, arguments);},
     

@@ -54,3 +54,11 @@ if (!String.prototype.trim) {
         return this.replace(/\s+$/,'');
     };
 }
+
+/** Provides support for Date.now in IE8 and ealier.
+    Taken from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/now */
+if (!Date.now) {
+    Date.now = function now() {
+        return new Date().getTime();
+    };
+}

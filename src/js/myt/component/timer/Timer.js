@@ -74,9 +74,9 @@ myt.Timer = new JS.Class('Timer', {
     /** Fix for firefox since that browser often executes setTimeout early. */
     __setTimeout: function(f, t) {
         var self = this;
-        var endTime = new Date().getTime() + t;
+        var endTime = Date.now() + t;
         return setTimeout(function() {
-            var now = new Date().getTime();
+            var now = Date.now();
             if (now < endTime) {
                 self.setTimerId(self.__setTimeout(f, endTime - now));
             } else {

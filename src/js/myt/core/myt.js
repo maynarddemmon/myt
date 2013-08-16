@@ -182,7 +182,7 @@ myt = {
         
         var s = document.createElement('script');
         s.type = 'text/javascript';
-        s.src = src + '?cacheBust=' + (new Date()).getTime();
+        s.src = src + '?cacheBust=' + Date.now();
         if (callback) {
             var r = false;
             s.onload = s.onreadystatechange = function() {
@@ -227,5 +227,21 @@ myt = {
     
     dumpStack: function(msg) {
         console.log((new Error(msg)).stack);
+    },
+    
+    // Random numbers
+    /** @returns a random number between 0 (inclusive) and 1 (exclusive) */
+    getRandom: function() {
+        return Math.random();
+    },
+    
+    /** @returns a random number between min and max */
+    getRandomArbitrary: function(min, max) {
+        return Math.random() * (max - min) + min;
+    },
+    
+    /** @returns a random integer between min and max */
+    getRandomInt: function(min, max) {
+        return Math.floor(Math.random() * (max - min + 1) + min);
     }
 };

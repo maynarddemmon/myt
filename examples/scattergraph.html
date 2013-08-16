@@ -1,0 +1,51 @@
+<!doctype html><html><head>
+<title>Myt Framework : Canvas Example</title>
+<link rel="stylesheet" href="../src/css/myt.scss"/>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.0/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="../src/js/jquery/jquery-1.10.0.min.js">\x3C/script>');</script>
+<script src="../src/js/boilerplate.js"></script>
+<script src="../src/js/jsclass/min/loader-browser.js"></script>
+<script src="../src/js/myt/manifest.js"></script>
+</head><body>
+
+<div id="appDiv" style="position:absolute;"></div>
+<div id="tooltipDiv" style="position:absolute;"></div>
+
+<script>
+    JS.require('myt.all', function() {this.init();});
+    
+    function init() {
+        var appDiv = document.getElementById("appDiv");
+        var rootView = new myt.View(appDiv, {width:600, height:600, bgColor:'#999999'}, [myt.SizeToWindow]);
+        
+        var graph = new myt.ScatterGraph(rootView, {x:10, y:10, width:900, height:500});
+        graph.addPointTemplate('red', myt.ScatterGraph.createCircleTemplate(2, '#ff0000'));
+        graph.addPointTemplate('green', myt.ScatterGraph.createCircleTemplate(2, '#00ff00'));
+        graph.addPointTemplate('blue', myt.ScatterGraph.createCircleTemplate(3, '#0000ff', 0.25, 0.5, null, 1));
+        graph.addPointTemplate('black', myt.ScatterGraph.createCircleTemplate(4, '#000000', 0.25, 0.5, null, 1));
+        
+        // Generate data points
+        var data = [];
+        
+        var i = 10000, count = i, config = {key:'blue'},
+            xMin = graph.getMinX(), xMax = graph.getMaxX(),
+            yMin = graph.getMinY(), yMax = graph.getMaxY();
+        
+        while (i) {
+            data[--i] = new myt.ScatterGraphPoint(myt.getRandomInt(xMin, xMax), myt.getRandomInt(yMin, yMax), config);
+        }
+        
+        var start = Date.now();
+        graph.convertPointsToPixels(data);
+        var end = Date.now();
+        var elapsed = end - start;
+        console.log("CONVERSION: " + elapsed + " LOOP TIME: " + (elapsed / count));
+        
+        start = Date.now();
+        graph.drawPoints(data, true);
+        end = Date.now();
+        elapsed = end - start;
+        console.log("RENDER: " + elapsed + " LOOP TIME: " + (elapsed / count));
+    }
+</script>
+</body></html>
