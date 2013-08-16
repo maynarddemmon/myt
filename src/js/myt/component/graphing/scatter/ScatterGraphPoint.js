@@ -5,6 +5,8 @@
         y:number The raw y value of the data.
         px:number the converted x pixel location.
         py:number the converted y pixel location.
+        config:object holds arbitrary config information. Typically used to
+            provide drawing hints.
 */
 myt.ScatterGraphPoint = new JS.Class('ScatterGraphPoint', {
     // Constructor /////////////////////////////////////////////////////////////
