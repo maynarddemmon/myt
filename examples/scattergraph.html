@@ -16,7 +16,25 @@
     
     function init() {
         var appDiv = document.getElementById("appDiv");
-        var rootView = new myt.View(appDiv, {width:600, height:600, bgColor:'#999999'}, [myt.SizeToWindow]);
+        var rootView = new myt.View(appDiv, {bgColor:'#999999'}, [myt.SizeToWindow]);
+        
+        new myt.IconTextPanelButton(rootView, {x:920, y:10, width:100, text:'Delete by idx'}, [{
+            initNode: function(parent, attrs) {
+                this.xLoc = 0;
+                this.yLoc = 0;
+                this.xScale = 1;
+                this.yScale = 1;
+                this.callSuper(parent, attrs);
+            },
+            
+            doActivated: function() {
+                this.xScale += 0.025;
+                this.yScale += 0.025;
+                graph.setScaleX(this.xScale);
+                graph.setScaleY(this.yScale);
+            }
+        }]);
+        
         
         var graph = new myt.ScatterGraph(rootView, {x:10, y:10, width:900, height:500});
         graph.addPointTemplate('red', myt.ScatterGraph.createCircleTemplate(2, '#ff0000'));
@@ -27,24 +45,21 @@
         // Generate data points
         var data = [];
         
-        var i = 10000, count = i, config = {key:'blue'},
+        var i = 1000, count = i, config = {key:'blue'},
             xMin = graph.getMinX(), xMax = graph.getMaxX(),
             yMin = graph.getMinY(), yMax = graph.getMaxY();
         
         while (i) {
-            data[--i] = new myt.ScatterGraphPoint(myt.getRandomInt(xMin, xMax), myt.getRandomInt(yMin, yMax), config);
+            data[--i] = new myt.ScatterGraphPoint('id_' + i, 
+                myt.getRandomInt(xMin, xMax), 
+                myt.getRandomInt(yMin, yMax), config
+            );
         }
         
         var start = Date.now();
-        graph.convertPointsToPixels(data);
+        graph.setData(data);
         var end = Date.now();
         var elapsed = end - start;
-        console.log("CONVERSION: " + elapsed + " LOOP TIME: " + (elapsed / count));
-        
-        start = Date.now();
-        graph.drawPoints(data, true);
-        end = Date.now();
-        elapsed = end - start;
         console.log("RENDER: " + elapsed + " LOOP TIME: " + (elapsed / count));
     }
 </script>
