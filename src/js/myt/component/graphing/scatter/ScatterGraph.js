@@ -45,6 +45,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
         this._pointTemplates = {};
+        this._animating = [];
         
         if (attrs.data === undefined) attrs.data = [];
         
@@ -101,6 +102,18 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         if (this.inited) this.redraw();
     },
     
+    setAnimating: function(v) {
+        if (this.animating === v) return;
+        this.animating = v;
+        if (this.inited) {
+            if (v) {
+                this.attachTo(myt.global.idle, '__animate', 'idle');
+            } else {
+                this.detachFrom(myt.global.idle, '__animate', 'idle');
+            }
+        }
+    },
+    
     
     // Methods /////////////////////////////////////////////////////////////////
     getMinX: function() {return this.convertXPixelToValue(0);},
@@ -121,15 +134,61 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         this.drawPoints(dataPoints);
     },
     
+    getDataPoint: function(matchFunc, multiple) {
+        return this._getDataPoint(this.data, matchFunc, multiple);
+    },
+    
+    getAnimatingDataPoint: function(matchFunc, multiple) {
+        return this._getDataPoint(this._animating, matchFunc, multiple);
+    },
+    
+    _getDataPoint: function(data, matchFunc, multiple) {
+        var i = data.length, dataPoint, retval = [];
+        while (i) {
+            dataPoint = data[--i];
+            if (matchFunc.call(this, dataPoint, i)) {
+                if (!multiple) return dataPoint;
+                retval.push(dataPoint);
+            }
+        }
+        
+        if (retval.length === 0) return null;
+        return retval;
+    },
+    
+    getDataPointById: function(id, type) {
+        return this._getDataPointBy(function(p, i) {return p.id === id;}, type);
+    },
+    
+    _getDataPointBy: function(func, type) {
+        if (type === 'animating') {
+            return this.getDataPoint(func);
+        } else if (type === 'still') {
+            return this.getAnimatingDataPoint(func);
+        } else {
+            // Check both
+            return this.getDataPoint(func) || this.getAnimatingDataPoint(func);
+        }
+    },
+    
+    removeDataPoint: function(matchFunc, multiple) {
+        return this._removeDataPoint(this.data, matchFunc, multiple);
+    },
+    
+    removeAnimatingDataPoint: function(matchFunc, multiple) {
+        return this._removeDataPoint(this._animating, matchFunc, multiple);
+    },
+    
     /** Removes one or more myt.ScatterGraphPoint that the provided matcher
         function returns true for.
+        @param data:array the data to search on.
         @param matchFunc:function
         @param multiple:boolean (optional) If true all matching points will
             be removed.
         @returns the removed point or null if not found. If multiple is true
             an array of removed mytScatterGraphPoints will be returned. */
-    removeDataPoint: function(matchFunc, multiple) {
-        var data = this.data, i = data.length, dataPoint, retval = [];
+    _removeDataPoint: function(data, matchFunc, multiple) {
+        var i = data.length, dataPoint, retval = [];
         while (i) {
             dataPoint = data[--i];
             if (matchFunc.call(this, dataPoint, i)) {
@@ -147,12 +206,27 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         return retval;
     },
     
-    removeDataPointById: function(id) {
-        return this.removeDataPoint(function(p, i) {return p.id === id;});
+    removeDataPointById: function(id, type) {
+        return this._removeDataPointBy(function(p, i) {return p.id === id;}, type);
     },
     
-    removeDataPointByIndex: function(idx) {
-        return this.removeDataPoint(function(p, i) {return i === idx;});
+    removeDataPointByIndex: function(idx, type) {
+        return this._removeDataPointBy(function(p, i) {return i === idx;}, type);
+    },
+    
+    removeDataPointByEquality: function(point, type) {
+        return this._removeDataPointBy(function(p, i) {return p === point;}, type);
+    },
+    
+    _removeDataPointBy: function(func, type) {
+        if (type === 'animating') {
+            return this.removeDataPoint(func);
+        } else if (type === 'still') {
+            return this.removeAnimatingDataPoint(func);
+        } else {
+            // Check both
+            return this.removeDataPoint(func) || this.removeAnimatingDataPoint(func);
+        }
     },
     
     removeDataPointInsideBounds: function(x, y, w, h, includeBounds) {
@@ -211,8 +285,8 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         @param p:object with a x and y properties each of which is a number.
         @return void */
     convertPointToPixels: function(p) {
-        p.px = this.convertXValueToPixel(p.x);
-        p.py = this.convertYValueToPixel(p.y);
+        p.setPx(this.convertXValueToPixel(p.x));
+        p.setPy(this.convertYValueToPixel(p.y));
     },
     
     /** Modifies the provided array of points so the value is in pixels.
@@ -225,8 +299,8 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
             originX = this.originX, originY = this.originY;
         while (i) {
             p = points[--i];
-            p.px = (p.x * scaleX) + originX;
-            p.py = (p.y * scaleY) + originY;
+            p.setPx((p.x * scaleX) + originX);
+            p.setPy((p.y * scaleY) + originY);
         }
     },
     
@@ -254,5 +328,42 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     redraw: function(skipConversion) {
         this.clear();
         this.drawPoints(this.data, skipConversion);
+    },
+    
+    // Animating
+    /** Animates the provided ScatterGraphPoint to the new x and y */
+    animatePoint: function(p, x, y) {
+        if (p) {
+            p.prepareForAnimation(x, y);
+            
+            this.removeDataPointByEquality(p);
+            
+            // Add animating point
+            this._animating.push(p);
+            this.setAnimating(true);
+        }
+    },
+    
+    __animate: function(idleEvent) {
+        var delta = idleEvent.value.delta;
+        
+        this.redraw(true);
+        
+        var points = this._animating, i = points.length, point;
+        while (i) {
+            point = points[--i];
+            if (!point.updateForAnimation(delta)) {
+                // Remove point since it no longer needs to animate
+                points.splice(i, 1);
+                this.addDataPoint(point);
+            }
+        }
+        
+        if (points.length > 0) {
+            this.drawPoints(points);
+        } else {
+            this.setAnimating(false);
+        }
+        
     }
 });

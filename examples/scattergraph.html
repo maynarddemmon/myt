@@ -28,10 +28,33 @@
             },
             
             doActivated: function() {
-                this.xScale += 0.025;
-                this.yScale += 0.025;
-                graph.setScaleX(this.xScale);
-                graph.setScaleY(this.yScale);
+                //this.xScale += 0.025;
+                //this.yScale += 0.025;
+                //graph.setScaleX(this.xScale);
+                //graph.setScaleY(this.yScale);
+                
+                var xMin = graph.getMinX(), xMax = graph.getMaxX(),
+                    yMin = graph.getMinY(), yMax = graph.getMaxY();
+                graph.animatePoint(graph.getDataPointById('id_0'),
+                    myt.getRandomInt(xMin, xMax), 
+                    myt.getRandomInt(yMin, yMax)
+                );
+                graph.animatePoint(graph.getDataPointById('id_1'),
+                    myt.getRandomInt(xMin, xMax), 
+                    myt.getRandomInt(yMin, yMax)
+                );
+                graph.animatePoint(graph.getDataPointById('id_2'),
+                    myt.getRandomInt(xMin, xMax), 
+                    myt.getRandomInt(yMin, yMax)
+                );
+                graph.animatePoint(graph.getDataPointById('id_3'),
+                    myt.getRandomInt(xMin, xMax), 
+                    myt.getRandomInt(yMin, yMax)
+                );
+                graph.animatePoint(graph.getDataPointById('id_4'),
+                    myt.getRandomInt(xMin, xMax), 
+                    myt.getRandomInt(yMin, yMax)
+                );
             }
         }]);
         
@@ -45,7 +68,7 @@
         // Generate data points
         var data = [];
         
-        var i = 1000, count = i, config = {key:'blue'},
+        var i = 1000, count = i, config = {key:'black'},
             xMin = graph.getMinX(), xMax = graph.getMaxX(),
             yMin = graph.getMinY(), yMax = graph.getMaxY();
         

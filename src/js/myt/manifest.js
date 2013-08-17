@@ -248,7 +248,7 @@ JS.Packages(function() {with(this) {
     
     // Component : Graphing
     file(MYT_COMPONENT_ROOT + 'graphing/scatter/ScatterGraphPoint.js').provides('myt.ScatterGraphPoint').requires('myt');
-    file(MYT_COMPONENT_ROOT + 'graphing/scatter/ScatterGraph.js'     ).provides('myt.ScatterGraph'     ).requires('myt.Canvas','myt.ScatterGraphPoint');
+    file(MYT_COMPONENT_ROOT + 'graphing/scatter/ScatterGraph.js'     ).provides('myt.ScatterGraph'     ).requires('myt.Canvas','myt.ScatterGraphPoint','myt.global.idle');
     
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
