@@ -16,74 +16,101 @@
     
     function init() {
         var appDiv = document.getElementById("appDiv");
-        var rootView = new myt.View(appDiv, {bgColor:'#999999'}, [myt.SizeToWindow]);
+        var rootView = new myt.View(appDiv, {bgColor:'#ffffff'}, [myt.SizeToWindow]);
         
-        new myt.IconTextPanelButton(rootView, {x:920, y:10, width:100, text:'Delete by idx'}, [{
-            initNode: function(parent, attrs) {
-                this.xLoc = 0;
-                this.yLoc = 0;
-                this.xScale = 1;
-                this.yScale = 1;
-                this.callSuper(parent, attrs);
-            },
-            
+        new myt.IconTextPanelButton(rootView, {x:920, y:10, width:100, text:'zoom in'}, [{
             doActivated: function() {
-                //this.xScale += 0.025;
-                //this.yScale += 0.025;
-                //graph.setScaleX(this.xScale);
-                //graph.setScaleY(this.yScale);
+                graph.setScaleX(graph.scaleX + 0.025);
+                graph.setScaleY(graph.scaleY + 0.025);
                 
                 var xMin = graph.getMinX(), xMax = graph.getMaxX(),
                     yMin = graph.getMinY(), yMax = graph.getMaxY();
-                graph.animatePoint(graph.getDataPointById('id_0'),
+                graph.animatePoints([
+                    graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
+                    myt.getRandomInt(xMin, xMax), 
+                    myt.getRandomInt(yMin, yMax),
+                    
+                    graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
+                    myt.getRandomInt(xMin, xMax), 
+                    myt.getRandomInt(yMin, yMax),
+                    
+                    graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
+                    myt.getRandomInt(xMin, xMax), 
+                    myt.getRandomInt(yMin, yMax),
+                    
+                    graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
+                    myt.getRandomInt(xMin, xMax), 
+                    myt.getRandomInt(yMin, yMax),
+                    
+                    graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
                     myt.getRandomInt(xMin, xMax), 
                     myt.getRandomInt(yMin, yMax)
-                );
-                graph.animatePoint(graph.getDataPointById('id_1'),
+                ]);
+            }
+        }]);
+        
+        new myt.IconTextPanelButton(rootView, {x:920, y:40, width:100, text:'zoom out'}, [{
+            doActivated: function() {
+                graph.setScaleX(graph.scaleX - 0.025);
+                graph.setScaleY(graph.scaleY - 0.025);
+                
+                var xMin = graph.getMinX(), xMax = graph.getMaxX(),
+                    yMin = graph.getMinY(), yMax = graph.getMaxY();
+                graph.animatePoints([
+                    graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
+                    myt.getRandomInt(xMin, xMax), 
+                    myt.getRandomInt(yMin, yMax),
+                    
+                    graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
+                    myt.getRandomInt(xMin, xMax), 
+                    myt.getRandomInt(yMin, yMax),
+                    
+                    graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
+                    myt.getRandomInt(xMin, xMax), 
+                    myt.getRandomInt(yMin, yMax),
+                    
+                    graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
+                    myt.getRandomInt(xMin, xMax), 
+                    myt.getRandomInt(yMin, yMax),
+                    
+                    graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
                     myt.getRandomInt(xMin, xMax), 
                     myt.getRandomInt(yMin, yMax)
-                );
-                graph.animatePoint(graph.getDataPointById('id_2'),
-                    myt.getRandomInt(xMin, xMax), 
-                    myt.getRandomInt(yMin, yMax)
-                );
-                graph.animatePoint(graph.getDataPointById('id_3'),
-                    myt.getRandomInt(xMin, xMax), 
-                    myt.getRandomInt(yMin, yMax)
-                );
-                graph.animatePoint(graph.getDataPointById('id_4'),
-                    myt.getRandomInt(xMin, xMax), 
-                    myt.getRandomInt(yMin, yMax)
-                );
+                ]);
             }
         }]);
         
         
         var graph = new myt.ScatterGraph(rootView, {x:10, y:10, width:900, height:500});
-        graph.addPointTemplate('red', myt.ScatterGraph.createCircleTemplate(2, '#ff0000'));
-        graph.addPointTemplate('green', myt.ScatterGraph.createCircleTemplate(2, '#00ff00'));
-        graph.addPointTemplate('blue', myt.ScatterGraph.createCircleTemplate(3, '#0000ff', 0.25, 0.5, null, 1));
+        graph.addPointTemplate('red', myt.ScatterGraph.createCircleTemplate(16, '#ff0000', 0.25, 0.5, null, 1));
+        graph.addPointTemplate('green', myt.ScatterGraph.createCircleTemplate(3, '#009900'));
+        graph.addPointTemplate('blue', myt.ScatterGraph.createCircleTemplate(5, '#0000ff', 0.25, 0.5, null, 1));
         graph.addPointTemplate('black', myt.ScatterGraph.createCircleTemplate(4, '#000000', 0.25, 0.5, null, 1));
         
         // Generate data points
         var data = [];
         
-        var i = 1000, count = i, config = {key:'black'},
+        var i = 1000, count = i, 
+            config,
+            config0 = {templateKey:'red'},
+            config1 = {templateKey:'green'},
+            config2 = {templateKey:'blue'},
             xMin = graph.getMinX(), xMax = graph.getMaxX(),
             yMin = graph.getMinY(), yMax = graph.getMaxY();
         
         while (i) {
+            switch (i % 3) {
+                case 0: config = config0; break;
+                case 1: config = config1; break;
+                case 2: config = config2; break;
+            }
             data[--i] = new myt.ScatterGraphPoint('id_' + i, 
                 myt.getRandomInt(xMin, xMax), 
                 myt.getRandomInt(yMin, yMax), config
             );
         }
         
-        var start = Date.now();
         graph.setData(data);
-        var end = Date.now();
-        var elapsed = end - start;
-        console.log("RENDER: " + elapsed + " LOOP TIME: " + (elapsed / count));
     }
 </script>
 </body></html>

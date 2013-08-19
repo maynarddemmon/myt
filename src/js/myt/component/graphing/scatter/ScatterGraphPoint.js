@@ -11,6 +11,13 @@
         ay:number The animation target y for a point being animated.
         config:object holds arbitrary config information. Typically used to
             provide drawing hints.
+        _progress:number The animation progress.
+        _origX:number The starting x when an animation begins.
+        _origY:number The starting y when an animation begins.
+        _xAttrDiff:number The x difference between the original and animation
+            target when an animation begins.
+        _yAttrDiff:number The y difference between the original and animation
+            target when an animation begins.
 */
 myt.ScatterGraphPoint = new JS.Class('ScatterGraphPoint', {
     // Constructor /////////////////////////////////////////////////////////////
@@ -44,7 +51,6 @@ myt.ScatterGraphPoint = new JS.Class('ScatterGraphPoint', {
         this._xAttrDiff = ax - this.x;
         this._yAttrDiff = ay - this.y;
         this._progress = 0;
-        this._easingFunc = myt.Animator.easingFunctions.easeInOutQuad;
     },
     
     updateForAnimation: function(timeDiff) {
@@ -59,8 +65,10 @@ myt.ScatterGraphPoint = new JS.Class('ScatterGraphPoint', {
         this._progress += timeDiff;
         if (this._progress > 1000) this._progress = 1000;
         
-        this.x = this._origX + this._easingFunc(this._progress, this._xAttrDiff, 1000);
-        this.y = this._origY + this._easingFunc(this._progress, this._yAttrDiff, 1000);
+        var easingFunc = this.config.easingFunction || myt.Animator.easingFunctions.easeInOutQuad;
+        
+        this.x = this._origX + easingFunc(this._progress, this._xAttrDiff, 1000);
+        this.y = this._origY + easingFunc(this._progress, this._yAttrDiff, 1000);
         return true;
     }
 });

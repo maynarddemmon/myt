@@ -5,7 +5,14 @@
         scaleY:number The number of pixels per data unit in the y-axis.
         originX:number The origin of the graph in pixels along the x-axis.
         originY:number The origin of the graph in pixels along the y-axis.
+        data:array An array of myt.ScatterGraphPoints this graph is displaying.
+        _animating:array An array of myt.ScatterGraphPoints this graph is
+            displaying and that are currently animating.
 */
+// TODO: separate render layer for animating points
+// TODO: mouseover to "highlight" a point
+// TODO: mouseclick to "select" a point.
+// TODO: Polygon bounds testing
 myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
@@ -56,7 +63,16 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         
         this.callSuper(parent, attrs);
         
-        this.redraw();
+        this.redrawPointsDelayed();
+        this.redrawAnimatingPointsDelayed();
+    },
+    
+    doBeforeAdoption: function() {
+        this.callSuper();
+        
+        new myt.Canvas(this, {
+            name:'animationLayer', percentOfParentWidth:100, percentOfParentHeight:100
+        }, [myt.SizeToParent])
     },
     
     
@@ -66,7 +82,8 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         this.scaleX = v;
         if (this.inited) {
             this.fireNewEvent('scaleX', v);
-            this.redraw();
+            this.redrawPointsDelayed();
+            this.redrawAnimatingPointsDelayed();
         }
     },
     
@@ -75,7 +92,8 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         this.scaleY = v;
         if (this.inited) {
             this.fireNewEvent('scaleY', v);
-            this.redraw();
+            this.redrawPointsDelayed();
+            this.redrawAnimatingPointsDelayed();
         }
     },
     
@@ -84,7 +102,8 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         this.originX = v;
         if (this.inited) {
             this.fireNewEvent('originX', v);
-            this.redraw();
+            this.redrawPointsDelayed();
+            this.redrawAnimatingPointsDelayed();
         }
     },
     
@@ -93,13 +112,14 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         this.originY = v;
         if (this.inited) {
             this.fireNewEvent('originY', v);
-            this.redraw();
+            this.redrawPointsDelayed();
+            this.redrawAnimatingPointsDelayed();
         }
     },
     
     setData: function(v) {
         this.data = v;
-        if (this.inited) this.redraw();
+        if (this.inited) this.redrawPointsDelayed();
     },
     
     setAnimating: function(v) {
@@ -172,11 +192,15 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     },
     
     removeDataPoint: function(matchFunc, multiple) {
-        return this._removeDataPoint(this.data, matchFunc, multiple);
+        var retval = this._removeDataPoint(this.data, matchFunc, multiple);
+        if (retval) this.redrawPoints(true);
+        return retval;
     },
     
     removeAnimatingDataPoint: function(matchFunc, multiple) {
-        return this._removeDataPoint(this._animating, matchFunc, multiple);
+        var retval = this._removeDataPoint(this._animating, matchFunc, multiple);
+        if (retval) this.redrawAnimatingPoints(true);
+        return retval;
     },
     
     /** Removes one or more myt.ScatterGraphPoint that the provided matcher
@@ -193,17 +217,12 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
             dataPoint = data[--i];
             if (matchFunc.call(this, dataPoint, i)) {
                 data.splice(i, 1);
-                if (!multiple) {
-                    this.redraw(true);
-                    return dataPoint;
-                }
+                if (!multiple) return dataPoint;
                 retval.push(dataPoint);
             }
         }
         
-        if (retval.length === 0) return null;
-        this.redraw(true);
-        return retval;
+        return retval.length === 0 ? null : retval;
     },
     
     removeDataPointById: function(id, type) {
@@ -305,32 +324,63 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     },
     
     // Drawing
-    drawPoint: function(p, skipConversion) {
+    drawPoint: function(p, context, skipConversion) {
+        if (this._lockDraw) return;
+        
+        if (!context) context = this.__ctx;
         if (!skipConversion) this.convertPointToPixels(p);
         
-        var template = this._pointTemplates[p.config.key];
-        this.__ctx.drawImage(template, p.px - template.centerX, p.py - template.centerY);
+        if ((p.px < 0) || (p.px > this.width) || (p.py < 0) || (p.py > this.height)) return;
+        
+        var template = this._pointTemplates[p.config.templateKey];
+        context.drawImage(template, p.px - template.centerX, p.py - template.centerY);
     },
     
-    drawPoints: function(data, skipConversion) {
-        var i = data.length, p, templates = this._pointTemplates, template
-            ctx = this.__ctx;
+    drawPoints: function(data, context, skipConversion) {
+        if (this._lockDraw) return;
+        
+        var i = data.length, p, templates = this._pointTemplates, template, 
+            w = this.width, h = this.height;
+        if (!context) context = this.__ctx;
         
         if (!skipConversion) this.convertPointsToPixels(data);
         
         while (i) {
             p = data[--i];
-            template = templates[p.config.key];
-            ctx.drawImage(template, p.px - template.centerX, p.py - template.centerY);
+            
+            if ((p.px < 0) || (p.px > w) || (p.py < 0) || (p.py > h)) continue;
+            
+            template = templates[p.config.templateKey];
+            context.drawImage(template, p.px - template.centerX, p.py - template.centerY);
         }
     },
     
-    redraw: function(skipConversion) {
+    redrawPoints: function(skipConversion) {
         this.clear();
-        this.drawPoints(this.data, skipConversion);
+        this.drawPoints(this.data, this.__ctx, skipConversion);
+    },
+    
+    redrawAnimatingPoints: function(skipConversion) {
+        this.animationLayer.clear();
+        this.drawPoints(this._animating, this.animationLayer.__ctx, skipConversion);
     },
     
     // Animating
+    animatePoints: function(triplets) {
+        this._lockDraw = true;
+        
+        var animatingCount = this._animating.length,
+            len = triplets.length, i = 0;
+        if (len % 3 === 0) {
+            while (len > i) this.animatePoint(triplets[i++], triplets[i++], triplets[i++]);
+        }
+        
+        this._lockDraw = false;
+        
+        this.redrawAnimatingPoints(true);
+        if (this._animating.length !== animatingCount) this.redrawPoints(true);
+    },
+    
     /** Animates the provided ScatterGraphPoint to the new x and y */
     animatePoint: function(p, x, y) {
         if (p) {
@@ -345,11 +395,8 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     },
     
     __animate: function(idleEvent) {
-        var delta = idleEvent.value.delta;
-        
-        this.redraw(true);
-        
-        var points = this._animating, i = points.length, point;
+        var points = this._animating, i = points.length, point,
+            delta = idleEvent.value.delta;
         while (i) {
             point = points[--i];
             if (!point.updateForAnimation(delta)) {
@@ -359,11 +406,11 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
             }
         }
         
-        if (points.length > 0) {
-            this.drawPoints(points);
-        } else {
-            this.setAnimating(false);
-        }
+        this.redrawAnimatingPoints();
         
+        if (points.length === 0) this.setAnimating(false);
     }
 });
+
+myt.DelayedMethodCall.createDelayedMethodCall(myt.ScatterGraph, 0, 'redrawPoints');
+myt.DelayedMethodCall.createDelayedMethodCall(myt.ScatterGraph, 0, 'redrawAnimatingPoints');
