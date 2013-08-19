@@ -66,7 +66,7 @@ myt.MouseOver = new JS.Module('MouseOver', {
         originating from the dom.
         @returns void */
     doSmoothMouseOver: function(v) {
-        if (this.inited) this.updateUI();
+        if (this.inited && this.updateUI) this.updateUI();
     },
     
     /** Called when the mouse is over this view. Subclasses must call super.

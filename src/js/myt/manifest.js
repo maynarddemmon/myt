@@ -249,7 +249,7 @@ JS.Packages(function() {with(this) {
     // Component : Graphing
     file(MYT_COMPONENT_ROOT + 'graphing/scatter/KDTree.js'           ).provides('myt.KDTreeNode','myt.BinaryHeap','myt.KDTree').requires('myt');
     file(MYT_COMPONENT_ROOT + 'graphing/scatter/ScatterGraphPoint.js').provides('myt.ScatterGraphPoint'                       ).requires('myt');
-    file(MYT_COMPONENT_ROOT + 'graphing/scatter/ScatterGraph.js'     ).provides('myt.ScatterGraph'                            ).requires('myt.Canvas','myt.ScatterGraphPoint','myt.global.idle','myt.KDTree');
+    file(MYT_COMPONENT_ROOT + 'graphing/scatter/ScatterGraph.js'     ).provides('myt.ScatterGraph'                            ).requires('myt.Canvas','myt.ScatterGraphPoint','myt.global.idle','myt.KDTree','myt.Disableable','myt.MouseOver');
     
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(

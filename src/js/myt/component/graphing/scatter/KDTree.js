@@ -162,11 +162,15 @@ myt.KDTree = new JS.Class('KDTree', {
         this.dimensions = dimensions;
         
         // If points is not an array, assume we're loading a pre-built tree
-        this.root = this.buildTree(points, 0, null);
+        this.rebuildTree(points);
     },
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    rebuildTree: function(points) {
+        this.root = this.buildTree(points, 0, null);
+    },
+    
     buildTree: function(points, depth, parent) {
         var dimensions = this.dimensions,
             dim = depth % dimensions.length, median, node;
@@ -189,18 +193,18 @@ myt.KDTree = new JS.Class('KDTree', {
     insert: function(point) {
         var dimensions = this.dimensions;
         
-        function innerSearch(node, parent) {
+        function innerSearch(node, parent, point) {
             if (node === null) return parent;
             
             var dimension = dimensions[node.dimension];
             if (point[dimension] < node.obj[dimension]) {
-                return innerSearch(node.left, node);
+                return innerSearch(node.left, node, point);
             } else {
-                return innerSearch(node.right, node);
+                return innerSearch(node.right, node, point);
             }
         }
         
-        var insertPosition = innerSearch(this.root, null), newNode, dimension;
+        var insertPosition = innerSearch(this.root, null, point), newNode, dimension;
         
         if (insertPosition === null) {
             this.root = new myt.KDTreeNode(point, 0, null);
@@ -217,10 +221,11 @@ myt.KDTree = new JS.Class('KDTree', {
         }
     },
     
-    remove: function(point) {
+    /*remove: function(point) {
+console.log("remove", point);
         var node, dimensions = this.dimensions, self = this;
         
-        function nodeSearch(node) {
+        function nodeSearch(node, point) {
             if (node === null) return null;
             
             if (node.obj === point) return node;
@@ -228,9 +233,9 @@ myt.KDTree = new JS.Class('KDTree', {
             var dimension = dimensions[node.dimension];
             
             if (point[dimension] < node.obj[dimension]) {
-                return nodeSearch(node.left, node);
+                return nodeSearch(node.left, point);
             } else {
-                return nodeSearch(node.right, node);
+                return nodeSearch(node.right, point);
             }
         }
         
@@ -307,15 +312,16 @@ myt.KDTree = new JS.Class('KDTree', {
             node.obj = nextObj;
         }
         
-        node = nodeSearch(self.root);
+        node = nodeSearch(this.root, point);
+console.log("found", node ? node.obj : null);
         if (node !== null) removeNode(node);
-    },
+    },*/
     
     nearest: function(point, maxNodes, maxDistance) {
         var i, result, bestNodes, dimensions = this.dimensions, self = this;
         
         bestNodes = new myt.BinaryHeap(
-            function (e) {return -e[1];}
+            function(e) {return -e[1];}
         );
         
         function nearestSearch(node) {
@@ -383,7 +389,7 @@ myt.KDTree = new JS.Class('KDTree', {
             }
         }
         
-        nearestSearch(self.root);
+        if (self.root) nearestSearch(self.root);
         
         result = [];
         
@@ -396,18 +402,25 @@ myt.KDTree = new JS.Class('KDTree', {
     },
     
     balanceFactor: function() {
+        var self = this;
+        
         function height(node) {
             if (node === null) return 0;
-            
             return Math.max(height(node.left), height(node.right)) + 1;
         }
         
         function count(node) {
             if (node === null) return 0;
-            
             return count(node.left) + count(node.right) + 1;
         }
         
         return height(self.root) / (Math.log(count(self.root)) / Math.log(2));
+    },
+    
+    dump: function() {this._dump(this.root, '  ', 'root');},
+    _dump: function(node, depth, label) {
+        console.log(depth + label + ' ' + node.dimension + ': ' + node.obj.id + ' x:' + node.obj.x + ' y:' + node.obj.y);
+        if (node.left) this._dump(node.left, depth + '  ', 'L');
+        if (node.right) this._dump(node.right, depth + '  ', 'R');
     }
 });

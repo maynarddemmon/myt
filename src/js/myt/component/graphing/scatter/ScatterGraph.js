@@ -9,8 +9,6 @@
         _animating:array An array of myt.ScatterGraphPoints this graph is
             displaying and that are currently animating.
 */
-// TODO: separate render layer for animating points
-// TODO: mouseover to "highlight" a point
 // TODO: mouseclick to "select" a point.
 // TODO: Polygon bounds testing
 myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
@@ -53,6 +51,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     initNode: function(parent, attrs) {
         this._pointTemplates = {};
         this._animating = [];
+        this._maxTemplateSizeSquared = 0;
         
         if (attrs.data === undefined) attrs.data = [];
         
@@ -65,6 +64,8 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         
         this.redrawPointsDelayed();
         this.redrawAnimatingPointsDelayed();
+        
+        this.attachToDom(this, '_doMouseMove', 'mousemove');
     },
     
     doBeforeAdoption: function() {
@@ -72,6 +73,10 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         
         new myt.Canvas(this, {
             name:'animationLayer', percentOfParentWidth:100, percentOfParentHeight:100
+        }, [myt.SizeToParent])
+        
+        new myt.Canvas(this, {
+            name:'highlightLayer', percentOfParentWidth:100, percentOfParentHeight:100
         }, [myt.SizeToParent])
     },
     
@@ -135,6 +140,15 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         }
     },
     
+    setHighlightedPoint: function(v) {
+        if (this.highlightedPoint === v) return;
+        this.highlightedPoint = v;
+        if (this.inited) {
+            this.fireNewEvent('highlightedPoint', v);
+            this.drawHighlightedPoint();
+        }
+    },
+    
     
     // Methods /////////////////////////////////////////////////////////////////
     getMinX: function() {return this.convertXPixelToValue(0);},
@@ -143,11 +157,70 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     getMaxY: function() {return this.convertYPixelToValue(this.height);},
     
     // Hit testing
+    _doMouseMove: function(event) {
+        var pos = myt.MouseObservable.getMouseFromEventRelativeToView(event, this);
+        pos.x = this.convertXPixelToValue(pos.x);
+        pos.y = this.convertYPixelToValue(pos.y);
+        var maxSize = this._maxTemplateSizeSquared / this.scaleX; // FIXME: assumes uniform scale
+        
+        var nearest = this.nearest(pos, 1000, maxSize);
+        
+        // Filter down to list that we're actually inside
+        var len = nearest.length, i = len, item, point, distance, template, templateSize;
+        var smallestRadius = 0;
+        while (i) {
+            item = nearest[--i];
+            point = item[0];
+            distance = item[1];
+            template = this._pointTemplates[point.config.templateKey];
+            templateSize = Math.max(template.centerX, template.centerY) / this.scaleX;
+            if (distance > (templateSize * templateSize)) {
+                nearest.splice(i, 1);
+            } else {
+                smallestRadius = smallestRadius === 0 ? templateSize : Math.min(smallestRadius, templateSize);
+            }
+        }
+        
+        // Filter down to smallest radius
+        i = nearest.length;
+        while (i) {
+            item = nearest[--i];
+            point = item[0];
+            template = this._pointTemplates[point.config.templateKey];
+            templateSize = Math.max(template.centerX, template.centerY) / this.scaleX;
+            if (templateSize !== smallestRadius) nearest.splice(i, 1);
+        }
+        
+        // Take closest
+        var nearestPoint;
+        if (nearest.length > 0) {
+            nearest.sort(function(a,b) {return a[1] - b[1];});
+            nearestPoint = nearest[0][0];
+        }
+        this.setHighlightedPoint(nearestPoint);
+    },
+    
     nearest: function(point, count, maxDistance) {
         if (this._kdtree) {
             return this._kdtree.nearest(point, count, maxDistance);
         } else {
             return null;
+        }
+    },
+    
+    drawHighlightedPoint: function() {
+        var layer = this.highlightLayer, hp = this.highlightedPoint;
+        layer.clear();
+        if (hp) {
+            if ((hp.px < 0) || (hp.px > this.width) || (hp.py < 0) || (hp.py > this.height)) return;
+            
+            var template = this._pointTemplates[hp.config.templateKey];
+            layer.beginPath();
+            layer.circle(hp.px, hp.py, template.centerX);
+            layer.closePath();
+            layer.setLineWidth(2);
+            layer.setStrokeStyle('#000000');
+            layer.stroke();
         }
     },
     
@@ -228,7 +301,10 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
             dataPoint = data[--i];
             if (matchFunc.call(this, dataPoint, i)) {
                 data.splice(i, 1);
-                this._kdtree.remove(dataPoint);
+                //this._kdtree.remove(dataPoint);
+                if (!this._lockRebuild && this.data === data) this._kdtree.rebuildTree(this.data);
+                
+                if (this.highlightedPoint === dataPoint) this.setHighlightedPoint(null);
                 if (!multiple) return dataPoint;
                 retval.push(dataPoint);
             }
@@ -287,6 +363,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         @returns void */
     addPointTemplate: function(key, template) {
         this._pointTemplates[key] = template;
+        this._recalcMaxTemplateSizeSquared();
     },
     
     /** Gets a point template.
@@ -302,7 +379,19 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     removePointTemplate: function(key) {
         var retval = this._pointTemplates[key];
         delete this._pointTemplates[key];
+        this._recalcMaxTemplateSizeSquared();
         return retval;
+    },
+    
+    _recalcMaxTemplateSizeSquared: function() {
+        var v = 0, key, templates = this._pointTemplates, template;
+        
+        for (key in templates) {
+            template = templates[key];
+            v = Math.max(v, Math.max(template.centerX, template.centerY));
+        }
+        
+        this._maxTemplateSizeSquared = v * v;
     },
     
     // Value Conversion
@@ -370,16 +459,20 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     redrawPoints: function(skipConversion) {
         this.clear();
         this.drawPoints(this.data, this.__ctx, skipConversion);
+        
+        this.drawHighlightedPoint();
     },
     
     redrawAnimatingPoints: function(skipConversion) {
         this.animationLayer.clear();
         this.drawPoints(this._animating, this.animationLayer.__ctx, skipConversion);
+        
+        this.drawHighlightedPoint();
     },
     
     // Animating
     animatePoints: function(triplets) {
-        this._lockDraw = true;
+        this._lockDraw = this._lockRebuild = true;
         
         var animatingCount = this._animating.length,
             len = triplets.length, i = 0;
@@ -387,10 +480,12 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
             while (len > i) this.animatePoint(triplets[i++], triplets[i++], triplets[i++]);
         }
         
-        this._lockDraw = false;
+        this._lockDraw = this._lockRebuild = false;
         
         this.redrawAnimatingPoints(true);
         if (this._animating.length !== animatingCount) this.redrawPoints(true);
+        
+        if (this._kdtree) this._kdtree.rebuildTree(this.data);
     },
     
     /** Animates the provided ScatterGraphPoint to the new x and y */

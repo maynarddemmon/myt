@@ -32,6 +32,14 @@ myt.MouseObservable = new JS.Module('MouseObservable', {
             } else {
                 return {x:domEvent.pageX, y:domEvent.pageY};
             }
+        },
+        
+        getMouseFromEventRelativeToView: function(event, view) {
+            var viewPos = view.getPagePosition(),
+                pos = this.getMouseFromEvent(event);
+            pos.x -= viewPos.x;
+            pos.y -= viewPos.y;
+            return pos;
         }
     },
     
