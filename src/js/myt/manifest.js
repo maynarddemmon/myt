@@ -247,8 +247,9 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'uploader/ImageUploader.js').provides('myt.ImageUploader').requires('myt.Uploader');
     
     // Component : Graphing
-    file(MYT_COMPONENT_ROOT + 'graphing/scatter/ScatterGraphPoint.js').provides('myt.ScatterGraphPoint').requires('myt');
-    file(MYT_COMPONENT_ROOT + 'graphing/scatter/ScatterGraph.js'     ).provides('myt.ScatterGraph'     ).requires('myt.Canvas','myt.ScatterGraphPoint','myt.global.idle');
+    file(MYT_COMPONENT_ROOT + 'graphing/scatter/KDTree.js'           ).provides('myt.KDTreeNode','myt.BinaryHeap','myt.KDTree').requires('myt');
+    file(MYT_COMPONENT_ROOT + 'graphing/scatter/ScatterGraphPoint.js').provides('myt.ScatterGraphPoint'                       ).requires('myt');
+    file(MYT_COMPONENT_ROOT + 'graphing/scatter/ScatterGraph.js'     ).provides('myt.ScatterGraph'                            ).requires('myt.Canvas','myt.ScatterGraphPoint','myt.global.idle','myt.KDTree');
     
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(

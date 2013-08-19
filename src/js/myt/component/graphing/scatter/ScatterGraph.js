@@ -119,6 +119,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     
     setData: function(v) {
         this.data = v;
+        this._kdtree = v ? new myt.KDTree(v, myt.KDTree.EUCLIDEAN_METRIC, ["x", "y"]) : null;
         if (this.inited) this.redrawPointsDelayed();
     },
     
@@ -141,11 +142,21 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     getMaxX: function() {return this.convertXPixelToValue(this.width);},
     getMaxY: function() {return this.convertYPixelToValue(this.height);},
     
+    // Hit testing
+    nearest: function(point, count, maxDistance) {
+        if (this._kdtree) {
+            return this._kdtree.nearest(point, count, maxDistance);
+        } else {
+            return null;
+        }
+    },
+    
     // Data
     /** Adds a single myt.ScatterGraphPoint
         @returns void */
     addDataPoint: function(dataPoint) {
         this.data.push(dataPoint);
+        this._kdtree.insert(dataPoint);
         this.drawPoint(dataPoint);
     },
     
@@ -217,6 +228,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
             dataPoint = data[--i];
             if (matchFunc.call(this, dataPoint, i)) {
                 data.splice(i, 1);
+                this._kdtree.remove(dataPoint);
                 if (!multiple) return dataPoint;
                 retval.push(dataPoint);
             }

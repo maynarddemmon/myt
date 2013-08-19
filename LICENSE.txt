@@ -23,6 +23,9 @@ projects:
 * jQuery Cookie Plugin v1.3.1, Copyright (c) 2013 Klaus Hartl (MIT License)
 * parseUri 1.2.2, Copyright (c) Steven Levithan <stevenlevithan.com> (MIT License)
 * Spin.js 1.3.0 Copyright (c) 2011-2013 Felix Gnass (the MIT license)
+* k-d Tree JavaScript - v1.0 Copyright (c) Mircea Pricop <pricop@ubilabs.net>,
+*                                          Martin Kleppe <kleppe@ubilabs.net>,
+*                                          Ubilabs http://ubilabs.net (MIT License)
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,

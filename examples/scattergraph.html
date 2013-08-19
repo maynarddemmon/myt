@@ -111,6 +111,12 @@
         }
         
         graph.setData(data);
+        
+        var start = Date.now();
+        var nearest = graph.nearest({x:4, y:2}, 1000, 16*16);
+        console.log(Date.now() - start);
+        
+        console.log(nearest);
     }
 </script>
 </body></html>
