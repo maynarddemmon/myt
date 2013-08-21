@@ -43,7 +43,13 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
             
             offscreen.destroy();
             return retval;
-        }
+        },
+        
+        convertXPixelToValue: function(px, graph) {return (px - graph.originX) / graph.scaleX;},
+        convertYPixelToValue: function(py, graph) {return (py - graph.originY) / graph.scaleY;},
+        
+        convertXValueToPixel: function(x, graph) {return (x * graph.scaleX) + graph.originX;},
+        convertYValueToPixel: function(y, graph) {return (y * graph.scaleY) + graph.originY;}
     },
     
     
@@ -59,6 +65,12 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         if (attrs.scaleY === undefined) attrs.scaleY = 1;
         if (attrs.originX === undefined) attrs.originX = 0;
         if (attrs.originY === undefined) attrs.originY = 0;
+        
+        var SG = myt.ScatterGraph;
+        if (attrs.xConversionFuncPxToV === undefined) attrs.xConversionFuncPxToV = SG.convertXPixelToValue;
+        if (attrs.yConversionFuncPxToV === undefined) attrs.yConversionFuncPxToV = SG.convertYPixelToValue;
+        if (attrs.xConversionFuncVToPx === undefined) attrs.xConversionFuncVToPx = SG.convertXValueToPixel;
+        if (attrs.yConversionFuncVToPx === undefined) attrs.yConversionFuncVToPx = SG.convertYValueToPixel;
         
         this.callSuper(parent, attrs);
         
@@ -82,6 +94,11 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
+    setXConversionFuncPxToV: function(v) {this.xConversionFuncPxToV = v},
+    setYConversionFuncPxToV: function(v) {this.yConversionFuncPxToV = v},
+    setXConversionFuncVToPx: function(v) {this.xConversionFuncVToPx = v},
+    setYConversionFuncVToPx: function(v) {this.yConversionFuncVToPx = v},
+    
     setScaleX: function(v) {
         if (this.scaleX === v) return;
         this.scaleX = v;
@@ -119,6 +136,32 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
             this.fireNewEvent('originY', v);
             this.redrawPointsDelayed();
             this.redrawAnimatingPointsDelayed();
+        }
+    },
+    
+    setScaleAndOrigin: function(scaleX, scaleY, originX, originY) {
+        var changed = false;
+        
+        if (this.scaleX !== scaleX) {
+            this.scaleX = scaleX;
+            changed = true;
+        }
+        if (this.scaleY !== scaleY) {
+            this.scaleY = scaleY;
+            changed = true;
+        }
+        if (this.originX !== originX) {
+            this.originX = originX;
+            changed = true;
+        }
+        if (this.originY !== originY) {
+            this.originY = originY;
+            changed = true;
+        }
+        
+        if (changed) {
+            this.redrawPoints();
+            this.redrawAnimatingPoints();
         }
     },
     
@@ -395,11 +438,11 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     },
     
     // Value Conversion
-    convertXPixelToValue: function(px) {return (px - this.originX) / this.scaleX;},
-    convertYPixelToValue: function(py) {return (py - this.originY) / this.scaleY;},
+    convertXPixelToValue: function(px) {return this.xConversionFuncPxToV(px, this);},
+    convertYPixelToValue: function(py) {return this.yConversionFuncPxToV(py, this);},
     
-    convertXValueToPixel: function(x) {return (x * this.scaleX) + this.originX;},
-    convertYValueToPixel: function(y) {return (y * this.scaleY) + this.originY;},
+    convertXValueToPixel: function(x) {return this.xConversionFuncVToPx(x, this);},
+    convertYValueToPixel: function(y) {return this.yConversionFuncVToPx(y, this);},
     
     /** Modifies the provided point so the value is in pixels.
         @param p:object with a x and y properties each of which is a number.
@@ -414,14 +457,8 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
             of which is a number.
         @return void */
     convertPointsToPixels: function(points) {
-        var i = points.length, p, 
-            scaleX = this.scaleX, scaleY = this.scaleY
-            originX = this.originX, originY = this.originY;
-        while (i) {
-            p = points[--i];
-            p.setPx((p.x * scaleX) + originX);
-            p.setPy((p.y * scaleY) + originY);
-        }
+        var i = points.length;
+        while (i) this.convertPointToPixels(points[--i]);
     },
     
     // Drawing

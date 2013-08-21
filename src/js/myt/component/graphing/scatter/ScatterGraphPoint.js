@@ -55,7 +55,7 @@ myt.ScatterGraphPoint = new JS.Class('ScatterGraphPoint', {
     
     updateForAnimation: function(timeDiff) {
         // Snap to final value when close
-        if (Math.abs(this.x - this.ax) + Math.abs(this.y - this.ay) < 0.5) {
+        if (Math.abs(this.x - this.ax) + Math.abs(this.y - this.ay) < 0.00000001) {
             this.x = this.ax;
             this.y = this.ay;
             return false;
