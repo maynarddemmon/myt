@@ -168,17 +168,19 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
         this.domElement.className = this.domClass = v;
     },
     
-    // TODO: test this
     addDomClass: function(v) {
-        this.domClass += v;
+        this.domClass = (this.domClass ? this.domClass + ' ' : '') + v;
         this.domElement.className = this.domClass;
     },
     
-    // TODO: test this
     removeDomClass: function(v) {
-        var regex = new RegExp('(?:^|\s)' + v + '(?!\S)', 'g');
-        this.domClass.replace(regex, '');
-        this.domElement.className = this.domClass;
+        if (this.domClass) {
+            var parts = this.domClass.split(' '), i = parts.length, part;
+            while (i) {
+                if (parts[--i] === v) parts.splice(i, 1);
+            }
+            this.domElement.className = this.domClass = parts.join(' ');
+        }
     },
     
     /** Sets the dom "id" attribute on the dom element.

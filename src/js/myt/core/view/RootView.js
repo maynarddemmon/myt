@@ -15,6 +15,9 @@ myt.RootView = new JS.Module('RootView', {
         // Establish a stacking context
         this.setStyleProperty('zIndex', 0);
         
+        // Set a css class to allow scoping of CSS rules
+        this.addDomClass('myt');
+        
         myt.global.roots.addRoot(this);
         
         // Prevent default drag/drop behavior

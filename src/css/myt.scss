@@ -1,7 +1,8 @@
 html,body{height:100%;margin:0px;padding:0px;border:0px none;}
-input:not([type=button]),textarea{margin:0px;padding:1px;border:0px none;}
-select{margin:0px;}
 input,textarea,select{box-sizing:border-box;-moz-box-sizing:border-box;}
+
+.myt input:not([type=button]),.myt textarea{margin:0px;padding:1px;border:0px none;}
+.myt select{margin:0px;}
 
 .mytTextTabSliderLabel{font-size:16px; font-weight:bold;}
 .mytButtonText{font-size:12px; font-weight:bold;}
