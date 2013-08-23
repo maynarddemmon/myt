@@ -11,6 +11,7 @@
 */
 // TODO: mouseclick to "select" a point.
 // TODO: Polygon bounds testing
+// TODO: Replace scale and origin with just the conversion functions.
 myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
@@ -241,6 +242,8 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
             nearestPoint = nearest[0][0];
         }
         this.setHighlightedPoint(nearestPoint);
+        
+        return true;
     },
     
     nearest: function(point, count, maxDistance) {
