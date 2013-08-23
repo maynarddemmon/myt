@@ -19,6 +19,9 @@ myt.NativeInputWrapper = new JS.Class('NativeInputWrapper', myt.View, {
         if (attrs.focusable === undefined) attrs.focusable = true;
         
         this.callSuper(parent, attrs);
+        
+        // Set a css class to allow scoping of CSS rules
+        this.addDomClass('mytNativeInput');
     },
     
     /** @overrides myt.View */
