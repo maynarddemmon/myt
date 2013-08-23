@@ -279,6 +279,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     addDataPoints: function(dataPoints) {
         this.data = this.data.concat(dataPoints);
         this.drawPoints(dataPoints);
+        if (!this._lockRebuild) this._kdtree.rebuildTree(this.data);
     },
     
     getDataPoint: function(matchFunc, multiple) {
@@ -344,7 +345,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
             dataPoint = data[--i];
             if (matchFunc.call(this, dataPoint, i)) {
                 data.splice(i, 1);
-                //this._kdtree.remove(dataPoint);
+                
                 if (!this._lockRebuild && this.data === data) this._kdtree.rebuildTree(this.data);
                 
                 if (this.highlightedPoint === dataPoint) this.setHighlightedPoint(null);
