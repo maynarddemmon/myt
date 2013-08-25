@@ -11,7 +11,7 @@ JS.Packages(function() {with(this) {
     file(MYT_SHIM_ROOT + 'BrowserDetect.js').provides('BrowserDetect');
     file(MYT_SHIM_ROOT + 'Console.js'      ).provides('console');
     file(MYT_SHIM_ROOT + 'json2.js'        ).provides('JSON');
-    file(MYT_SHIM_ROOT + 'Object.keys.js'  ).provides('Object.keys');
+    file(MYT_SHIM_ROOT + 'language.js'     ).provides('Object.keys','Array.isArray','Date.now');
     
     // Util
     var UTIL_ROOT = MYT_ROOT + 'util/';
@@ -22,7 +22,9 @@ JS.Packages(function() {with(this) {
     
     // Core
     var MYT_CORE_ROOT = MYT_ROOT + 'core/';
-    file(MYT_CORE_ROOT + 'myt.js'            ).provides('myt'                ).requires('BrowserDetect','console','JSON','Object.keys','JS.Class','JS.Module','JS.Singleton');
+    file(MYT_CORE_ROOT + 'myt.js'            ).provides('myt'                ).requires('BrowserDetect','console','JSON',
+                                                                                        'Object.keys','Array.isArray','Date.now',
+                                                                                        'JS.Class','JS.Module','JS.Singleton');
     file(MYT_CORE_ROOT + 'Destructible.js'   ).provides('myt.Destructible'   ).requires('myt');
     file(MYT_CORE_ROOT + 'AccessorSupport.js').provides('myt.AccessorSupport').requires('myt');
     file(MYT_CORE_ROOT + 'Node.js'           ).provides('myt.Node'           ).requires('myt.AccessorSupport','myt.Destructible','myt.Constrainable','myt.TrackActivesPool');
