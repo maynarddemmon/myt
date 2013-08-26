@@ -248,10 +248,16 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'uploader/Uploader.js'     ).provides('myt.Uploader'     ).requires('myt.View','myt.NativeInputWrapper','myt.Disableable','myt.Ajax','myt.FormElement');
     file(MYT_COMPONENT_ROOT + 'uploader/ImageUploader.js').provides('myt.ImageUploader').requires('myt.Uploader');
     
+    // Component : Selection
+    file(MYT_COMPONENT_ROOT + 'selection/Selectable.js'      ).provides('myt.Selectable'      ).requires('myt');
+    file(MYT_COMPONENT_ROOT + 'selection/SelectionManager.js').provides('myt.SelectionManager').requires('myt.Selectable');
+    
     // Component : Graphing
     file(MYT_COMPONENT_ROOT + 'graphing/scatter/KDTree.js'           ).provides('myt.KDTreeNode','myt.BinaryHeap','myt.KDTree').requires('myt');
-    file(MYT_COMPONENT_ROOT + 'graphing/scatter/ScatterGraphPoint.js').provides('myt.ScatterGraphPoint'                       ).requires('myt');
-    file(MYT_COMPONENT_ROOT + 'graphing/scatter/ScatterGraph.js'     ).provides('myt.ScatterGraph'                            ).requires('myt.Canvas','myt.ScatterGraphPoint','myt.global.idle','myt.KDTree','myt.Disableable','myt.MouseOver');
+    file(MYT_COMPONENT_ROOT + 'graphing/scatter/ScatterGraphPoint.js').provides('myt.ScatterGraphPoint'                       ).requires('myt','myt.Selectable');
+    file(MYT_COMPONENT_ROOT + 'graphing/scatter/ScatterGraph.js'     ).provides('myt.ScatterGraph'                            ).requires('myt.Canvas','myt.ScatterGraphPoint','myt.global.idle',
+                                                                                                                                         'myt.KDTree','myt.Disableable','myt.MouseOver',
+                                                                                                                                         'myt.SelectionManager');
     
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
