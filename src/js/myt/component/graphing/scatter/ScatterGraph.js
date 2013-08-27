@@ -16,16 +16,14 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
         createCircleTemplate: function(radius, color, opacity, strokeWidth, strokeColor, strokeOpacity) {
-            var twiceRadius = radius * 2,
-                strokeWidth = strokeWidth == null ? 0 : strokeWidth,
-                x = radius + strokeWidth, 
-                y = radius + strokeWidth,
-                size = twiceRadius + 2 * strokeWidth,
-                rootView = myt.global.roots.getRoots()[0],
-                offscreen = new myt.Canvas(rootView, {width:size, height:size, visible:false});
+            var strokeWidth = strokeWidth == null ? 0 : strokeWidth,
+                center = radius + strokeWidth + 1,
+                offscreen = new myt.Canvas(myt.global.roots.getRoots()[0], {
+                    width:2 * center, height:2 * center, visible:false
+                });
             
             offscreen.beginPath();
-            offscreen.circle(x, y, radius);
+            offscreen.circle(center, center, radius);
             offscreen.closePath();
             offscreen.setFillStyle(color);
             offscreen.setGlobalAlpha(opacity == null ? 1 : opacity);
@@ -39,8 +37,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
             }
             
             var retval = offscreen.__canvas;
-            retval.centerX = radius;
-            retval.centerY = radius;
+            retval.centerX = retval.centerY = center;
             
             offscreen.destroy();
             return retval;
@@ -49,8 +46,8 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         convertXPixelToValue: function(px, graph) {return (px - graph.originX) / graph.scaleX;},
         convertYPixelToValue: function(py, graph) {return (py - graph.originY) / graph.scaleY;},
         
-        convertXValueToPixel: function(x, graph) {return (x * graph.scaleX) + graph.originX;},
-        convertYValueToPixel: function(y, graph) {return (y * graph.scaleY) + graph.originY;}
+        convertXValueToPixel: function(x, graph) {return Math.round((x * graph.scaleX) + graph.originX);},
+        convertYValueToPixel: function(y, graph) {return Math.round((y * graph.scaleY) + graph.originY);}
     },
     
     
@@ -262,7 +259,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
             
             var template = this._pointTemplates[hp.config.templateKey];
             layer.beginPath();
-            layer.circle(hp.px, hp.py, template.centerX);
+            layer.circle(hp.px, hp.py, template.centerX + 2);
             layer.closePath();
             layer.setLineWidth(2);
             layer.setStrokeStyle('#000000');
