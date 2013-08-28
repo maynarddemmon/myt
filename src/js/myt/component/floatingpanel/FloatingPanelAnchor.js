@@ -28,6 +28,7 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
         panelsByPanelId: {}
     },
     
+    
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
         if (attrs.floatingAlign === undefined) attrs.floatingAlign = 'insideLeft';

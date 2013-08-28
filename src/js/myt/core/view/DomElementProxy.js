@@ -79,6 +79,8 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
                 elem = elem.offsetParent;
             }
             
+            // JQuery $(elem).offset() works with transforms
+            
             return {x:x, y:y};
         },
         
@@ -199,7 +201,7 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
     },
     
     /** A convienence method for setting a CSS outline.
-        @param v:Array where index 0 is the size, index 1 is the type and
+        @param v:array where index 0 is the size, index 1 is the type and
             index 2 is the color. */
     setCSSOutline: function(v) {
         this.CSSOutline = v;
@@ -225,6 +227,23 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
         @returns void */
     setRoundedCorners: function(radius) {
         this.setStyleProperty('borderRadius', radius + 'px');
+    },
+    
+    /** Sets the CSS boxShadow property.
+        @param v:array where index 0 is the horizontal shadow offset,
+            index 1 is the vertical shadow offset, index 2 is the blur amount,
+            and index 3 is the color.
+        @returns void */
+    setBoxShadow: function(v) {
+        if (v) {
+            var hShadow = v[0] || 0,
+                vShadow = v[1] || 0,
+                blur = v[2] || 7,
+                color = v[3] || '#000000';
+            this.deStyle.boxShadow = hShadow + 'px ' + vShadow + 'px ' + blur + 'px ' + color;
+        } else {
+            this.deStyle.boxShadow = 'none';
+        }
     },
     
     /** Set an arbitrary css style on the dom element. */
