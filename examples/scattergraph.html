@@ -94,14 +94,20 @@
         graph.addPointTemplate('blue', myt.ScatterGraph.createCircleTemplate(8, '#0000ff', 0.25, 0.5, null, 1));
         graph.addPointTemplate('black', myt.ScatterGraph.createCircleTemplate(4, '#000000', 0.25, 0.5, null, 1));
         
+        graph.addPointTemplate('red_selected', myt.ScatterGraph.createCircleTemplate(8, '#aa6600', 0.25, 1, null, 1));
+        graph.addPointTemplate('green_selected', myt.ScatterGraph.createCircleTemplate(1, '#aa6600', 0.25, 1, null, 1));
+        graph.addPointTemplate('blue_selected', myt.ScatterGraph.createCircleTemplate(4, '#aa6600', 0.25, 1, null, 1));
+        graph.addPointTemplate('black_selected', myt.ScatterGraph.createCircleTemplate(2, '#aa6600', 0.25, 1, null, 1));
+        graph.setHighlightSelectedColor('#aa6600');
+        
         // Generate data points
         var data = [];
         
         var i = 1000, count = i, 
             config,
-            config0 = {templateKey:'blue'},
-            config1 = {templateKey:'green'},
-            config2 = {templateKey:'red'},
+            config0 = {templateKey:'blue', selectedTemplateKey:'blue_selected'},
+            config1 = {templateKey:'green', selectedTemplateKey:'green_selected'},
+            config2 = {templateKey:'red', selectedTemplateKey:'red_selected'},
             xMin = graph.getMinX(), xMax = graph.getMaxX(),
             yMin = graph.getMinY(), yMax = graph.getMaxY();
         

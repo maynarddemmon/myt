@@ -250,7 +250,7 @@ JS.Packages(function() {with(this) {
     
     // Component : Selection
     file(MYT_COMPONENT_ROOT + 'selection/Selectable.js'      ).provides('myt.Selectable'      ).requires('myt');
-    file(MYT_COMPONENT_ROOT + 'selection/SelectionManager.js').provides('myt.SelectionManager').requires('myt.Selectable');
+    file(MYT_COMPONENT_ROOT + 'selection/SelectionManager.js').provides('myt.SelectionManager').requires('myt.Selectable','myt.global.keys');
     
     // Component : Graphing
     file(MYT_COMPONENT_ROOT + 'graphing/scatter/KDTree.js'           ).provides('myt.KDTreeNode','myt.BinaryHeap','myt.KDTree').requires('myt');

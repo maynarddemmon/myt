@@ -8,6 +8,11 @@
         itemSelectionId:string the name of the property on items that is used
             to differentiate them from each other for selection. The default
             value is 'id'.
+        maxSelected:number the maximum number of items that can be selected.
+            If -1 is provided the count is unlimited. If 1 is provided attempts
+            to select when an item is already selected will result in the
+            existing selection being cleared and the the new item being
+            selected. Defaults to -1.
         selectedCount:number the number of selected items.
         _selected:object a map of selected items by itemSelectionId.
         _lastSelectedItem:object a reference to the last item that was
@@ -22,17 +27,17 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
         attrs.selectedCount = 0;
         
         if (attrs.itemSelectionId === undefined) attrs.itemSelectionId = 'id';
+        if (attrs.maxSelected === undefined) attrs.maxSelected = -1;
         
         this.callSuper(parent, attrs);
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setItemSelectionId: function(v) {
-        this.itemSelectionId = v;
-    },
+    setItemSelectionId: function(v) {this.itemSelectionId = v;},
+    setMaxSelected: function(v) {this.maxSelected = v;},
     
-    setSelectedCount: function() {
+    setSelectedCount: function(v) {
         if (this.selectedCount === v) return;
         this.selectedCount = v;
         if (this.inited) this.fireNewEvent('selectedCount', v);
@@ -40,10 +45,26 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    isAddMode: function() {
+        return myt.global.keys.isShiftKeyDown();
+    },
+    
+    isToggleMode: function() {
+        return myt.global.keys.isControlKeyDown() || myt.global.keys.isCommandKeyDown();
+    },
+    
+    /** Gets the currently selected items.
+        @returns an array of the selected items. */
+    getSelected: function() {
+        var retval = [], items = this._selected, key;
+        for (key in selectedItems) retval.push(items[key]);
+        return retval;
+    },
+    
     /** Selects the provided item.
         @returns void */
     select: function(item) {
-        if (!this.isSelected(item) && item.canSelect(this)) {
+        if (!this.isSelected(item) && this.canSelect(item)) {
             item.setSelected(true);
             this._selected[item[this.itemSelectionId]] = item;
             this.setSelectedCount(this.selectedCount + 1);
@@ -52,6 +73,26 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
             
             this.fireNewEvent('itemSelected', item);
         }
+    },
+    
+    /** Checks if the item can be selected.
+        @returns true if selection is allowed, false otherwise. */
+    canSelect: function(item) {
+        var ms = this.maxSelected, sc = this.selectedCount;
+        
+        if (ms === 0) {
+            return false;
+        } else if (ms === 1) {
+            // Deselect current selection if necessary
+            if (sc > 0) {
+                this.deselectAll();
+                if (this.selectedCount > 0) return false;
+            }
+        } else if (ms > 1) {
+            if (sc >= ms) return false;
+        }
+        
+        return item.canSelect(this);
     },
     
     /** Selects all items that can be selected.
@@ -64,7 +105,7 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
     /** Deselects the provided item.
         @returns void */
     deselect: function(item) {
-        if (this.isSelected(item) && item.canDeselect(this)) {
+        if (this.isSelected(item) && this.canDeselect(item)) {
             item.setSelected(false);
             delete this._selected[item[this.itemSelectionId]];
             this.setSelectedCount(this.selectedCount - 1);
@@ -75,11 +116,17 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
         }
     },
     
+    /** Checks if the item can be deselected.
+        @returns true if deselection is allowed, false otherwise. */
+    canDeselect: function(item) {
+        return item.canDeselect(this);
+    },
+    
     /** Deselects all selected items.
         @returns void */
     deselectAll: function() {
         var items = this._selected, key;
-        for (key in selectedItems) this.deselect(items[key]);
+        for (key in items) this.deselect(items[key]);
     },
     
     /** Checks if the item is selected.

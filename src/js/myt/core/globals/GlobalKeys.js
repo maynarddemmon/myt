@@ -132,6 +132,7 @@ new JS.Singleton('GlobalKeys', {
         this.KEYCODE_SHIFT = 16;
         this.KEYCODE_CONTROL = 17;
         this.KEYCODE_ALT = 18;
+        this.KEYCODE_COMMAND = BrowserDetect.browser === 'Firefox' ? 224 : 91;
         
         this.setDomElement(document);
         this.attachTo(myt.global.focus, '_handleFocused', 'focused');
@@ -158,6 +159,9 @@ new JS.Singleton('GlobalKeys', {
     
     /** Tests if the 'alt' key is down. */
     isAltKeyDown: function() {return this.isKeyDown(this.KEYCODE_ALT);},
+    
+    /** Tests if the 'command' key is down. */
+    isCommandKeyDown: function() {return this.isKeyDown(this.KEYCODE_COMMAND);},
     
     _handleFocused: function(e) {
         var focused = e.value;

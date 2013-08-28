@@ -20,6 +20,9 @@
             target when an animation begins.
 */
 myt.ScatterGraphPoint = new JS.Class('ScatterGraphPoint', {
+    include: [myt.Selectable],
+    
+    
     // Constructor /////////////////////////////////////////////////////////////
     /** Create a new Path. */
     initialize: function(id, x, y, config) {
@@ -42,6 +45,10 @@ myt.ScatterGraphPoint = new JS.Class('ScatterGraphPoint', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    getTemplate: function(graph) {
+        return graph.getPointTemplate(this.selected ? this.config.selectedTemplateKey : this.config.templateKey);
+    },
+    
     prepareForAnimation: function(ax, ay) {
         this.ax = ax;
         this.ay = ay;

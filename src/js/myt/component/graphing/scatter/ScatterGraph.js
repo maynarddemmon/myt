@@ -1,6 +1,8 @@
 /** A graph of points.
     
     Attributes:
+        allowSelection:boolean If true selecting graph points is allowed.
+            Defaults to true.
         scaleX:number The number of pixels per data unit in the x-axis.
         scaleY:number The number of pixels per data unit in the y-axis.
         originX:number The origin of the graph in pixels along the x-axis.
@@ -13,11 +15,14 @@
 // TODO: Polygon bounds testing
 // TODO: Replace scale and origin with just the conversion functions.
 myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
+    include: [myt.SelectionManager],
+    
+    
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
         createCircleTemplate: function(radius, color, opacity, strokeWidth, strokeColor, strokeOpacity) {
             var strokeWidth = strokeWidth == null ? 0 : strokeWidth,
-                center = radius + strokeWidth + 1,
+                center = radius + strokeWidth + 1, // 1 is extra space for antialiasing
                 offscreen = new myt.Canvas(myt.global.roots.getRoots()[0], {
                     width:2 * center, height:2 * center, visible:false
                 });
@@ -70,7 +75,20 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         if (attrs.xConversionFuncVToPx === undefined) attrs.xConversionFuncVToPx = SG.convertXValueToPixel;
         if (attrs.yConversionFuncVToPx === undefined) attrs.yConversionFuncVToPx = SG.convertYValueToPixel;
         
+        if (attrs.highlightColor === undefined) attrs.highlightColor = '#000000';
+        if (attrs.highlightSelectedColor === undefined) attrs.highlightSelectedColor = '#000000';
+        if (attrs.highlightWidth === undefined) attrs.highlightWidth = 1;
+        if (attrs.highlightOffset === undefined) attrs.highlightOffset = 2;
+        
+        if (attrs.allowSelection === undefined) attrs.allowSelection = true;
+        
         this.callSuper(parent, attrs);
+        
+        var w = this.width, h = this.height, al = this.animationLayer, hl = this.highlightLayer;
+        al.setWidth(w);
+        hl.setWidth(w);
+        al.setHeight(h);
+        hl.setHeight(h);
         
         this.redrawPointsDelayed();
         this.redrawAnimatingPointsDelayed();
@@ -81,17 +99,44 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     doBeforeAdoption: function() {
         this.callSuper();
         
-        new myt.Canvas(this, {
-            name:'animationLayer', percentOfParentWidth:100, percentOfParentHeight:100
-        }, [myt.SizeToParent])
-        
-        new myt.Canvas(this, {
-            name:'highlightLayer', percentOfParentWidth:100, percentOfParentHeight:100
-        }, [myt.SizeToParent])
+        new myt.Canvas(this, {name:'animationLayer'});
+        new myt.Canvas(this, {name:'highlightLayer'});
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
+    /** @overrides myt.View */
+    setWidth: function(v) {
+        this.callSuper(v);
+        
+        if (this.inited) {
+            this.animationLayer.setWidth(v);
+            this.highlightLayer.setWidth(v);
+        }
+    },
+    
+    /** @overrides myt.View */
+    setHeight: function(v) {
+        this.callSuper(v);
+        
+        if (this.inited) {
+            this.animationLayer.setHeight(v);
+            this.highlightLayer.setHeight(v);
+        }
+    },
+    
+    setAllowSelection: function(v) {
+        if (this.allowSelection === v) return;
+        this.allowSelection = v;
+        if (this.inited) this.fireNewEvent('allowSelection', v);
+        
+        if (v) {
+            this.attachToDom(this, '_doClick', 'click');
+        } else {
+            if (this.inited) this.detachFromDom(this, '_doClick', 'click');
+        }
+    },
+    
     setXConversionFuncPxToV: function(v) {this.xConversionFuncPxToV = v},
     setYConversionFuncPxToV: function(v) {this.yConversionFuncPxToV = v},
     setXConversionFuncVToPx: function(v) {this.xConversionFuncVToPx = v},
@@ -190,12 +235,46 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         }
     },
     
+    setHighlightColor: function(v) {this.highlightColor = v;},
+    setHighlightSelectedColor: function(v) {this.highlightSelectedColor = v;},
+    setHighlightWidth: function(v) {this.highlightWidth = v;},
+    setHighlightOffset: function(v) {this.highlightOffset = v;},
+    
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** @overrides myt.SelectionManager */
+    getManagedItems: function() {
+        return this.data.concat(this.animating);
+    },
+    
     getMinX: function() {return this.convertXPixelToValue(0);},
     getMinY: function() {return this.convertYPixelToValue(0);},
     getMaxX: function() {return this.convertXPixelToValue(this.width);},
     getMaxY: function() {return this.convertYPixelToValue(this.height);},
+    
+    _doClick: function(event) {
+        var hp = this.highlightedPoint, 
+            isToggle = this.isToggleMode(), 
+            isAdd = this.isAddMode();
+        if (hp) {
+            if (isToggle) {
+                hp.selected ? this.deselect(hp) : this.select(hp);
+            } else if (isAdd) {
+                this.select(hp);
+            } else {
+                this.deselectAll();
+                this.select(hp);
+            }
+            
+            this.redrawPointsDelayed();
+            this.redrawAnimatingPointsDelayed();
+        } else if (this.selectedCount > 0 && !isToggle && !isAdd) {
+            this.deselectAll();
+            this.redrawPointsDelayed();
+            this.redrawAnimatingPointsDelayed();
+        }
+        return true;
+    },
     
     // Hit testing
     _doMouseMove: function(event) {
@@ -213,7 +292,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
             item = nearest[--i];
             point = item[0];
             distance = item[1];
-            template = this._pointTemplates[point.config.templateKey];
+            template = point.getTemplate(this);
             templateSize = Math.max(template.centerX, template.centerY) / this.scaleX;
             if (distance > (templateSize * templateSize)) {
                 nearest.splice(i, 1);
@@ -227,7 +306,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         while (i) {
             item = nearest[--i];
             point = item[0];
-            template = this._pointTemplates[point.config.templateKey];
+            template = point.getTemplate(this);
             templateSize = Math.max(template.centerX, template.centerY) / this.scaleX;
             if (templateSize !== smallestRadius) nearest.splice(i, 1);
         }
@@ -257,12 +336,12 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         if (hp) {
             if ((hp.px < 0) || (hp.px > this.width) || (hp.py < 0) || (hp.py > this.height)) return;
             
-            var template = this._pointTemplates[hp.config.templateKey];
+            var template = hp.getTemplate(this);
             layer.beginPath();
-            layer.circle(hp.px, hp.py, template.centerX + 2);
+            layer.circle(hp.px, hp.py, template.centerX + this.highlightOffset);
             layer.closePath();
-            layer.setLineWidth(2);
-            layer.setStrokeStyle('#000000');
+            layer.setLineWidth(this.highlightWidth);
+            layer.setStrokeStyle(hp.selected ? this.highlightSelectedColor : this.highlightColor);
             layer.stroke();
         }
     },
@@ -471,7 +550,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         
         if ((p.px < 0) || (p.px > this.width) || (p.py < 0) || (p.py > this.height)) return;
         
-        var template = this._pointTemplates[p.config.templateKey];
+        var template = p.getTemplate(this);
         context.drawImage(template, p.px - template.centerX, p.py - template.centerY);
     },
     
@@ -489,7 +568,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
             
             if ((p.px < 0) || (p.px > w) || (p.py < 0) || (p.py > h)) continue;
             
-            template = templates[p.config.templateKey];
+            template = p.getTemplate(this);
             context.drawImage(template, p.px - template.centerX, p.py - template.centerY);
         }
     },
