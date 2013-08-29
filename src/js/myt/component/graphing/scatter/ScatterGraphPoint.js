@@ -49,6 +49,16 @@ myt.ScatterGraphPoint = new JS.Class('ScatterGraphPoint', {
         return graph.getPointTemplate(this.selected ? this.config.selectedTemplateKey : this.config.templateKey);
     },
     
+    setData: function(key, value) {
+        var data = this._data;
+        if (!data) this._data = data = {};
+        data[key] = value;
+    },
+    
+    getData: function(key) {
+        return this._data ? this._data[key] : undefined;
+    },
+    
     prepareForAnimation: function(ax, ay) {
         this.ax = ax;
         this.ay = ay;
