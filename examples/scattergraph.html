@@ -111,6 +111,7 @@
             xMin = graph.getMinX(), xMax = graph.getMaxX(),
             yMin = graph.getMinY(), yMax = graph.getMaxY();
         
+        var func = function(v) {return v * v;};
         while (i) {
             switch (i % 3) {
                 case 0: config = config0; break;
@@ -118,8 +119,8 @@
                 case 2: config = config2; break;
             }
             data[--i] = new myt.ScatterGraphPoint('id_' + i, 
-                myt.getRandomInt(xMin, xMax), 
-                myt.getRandomInt(yMin, yMax), config
+                myt.getRandomInt(xMin, xMax, func), 
+                myt.getRandomInt(yMin, yMax, func), config
             );
         }
         

@@ -231,17 +231,17 @@ myt = {
     
     // Random numbers
     /** @returns a random number between 0 (inclusive) and 1 (exclusive) */
-    getRandom: function() {
-        return Math.random();
+    getRandom: function(func) {
+        return func ? func(Math.random()) : Math.random();
     },
     
     /** @returns a random number between min and max */
-    getRandomArbitrary: function(min, max) {
-        return Math.random() * (max - min) + min;
+    getRandomArbitrary: function(min, max, func) {
+        return this.getRandom(func) * (max - min) + min;
     },
     
     /** @returns a random integer between min and max */
-    getRandomInt: function(min, max) {
-        return Math.floor(Math.random() * (max - min + 1) + min);
+    getRandomInt: function(min, max, func) {
+        return Math.floor(this.getRandom(func) * (max - min + 1) + min);
     }
 };
