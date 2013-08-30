@@ -57,7 +57,7 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
         @returns an array of the selected items. */
     getSelected: function() {
         var retval = [], items = this._selected, key;
-        for (key in selectedItems) retval.push(items[key]);
+        for (key in items) retval.push(items[key]);
         return retval;
     },
     
