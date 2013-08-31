@@ -125,6 +125,12 @@
         }
         
         graph.setData(data);
+        
+        graph.setFilter(
+            function(p, graph) {
+                return p.px > 50 && p.px < 200 && p.py > 200 && p.py < 400
+            }
+        );
     }
 </script>
 </body></html>

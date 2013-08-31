@@ -10,6 +10,10 @@
         data:array An array of myt.ScatterGraphPoints this graph is displaying.
         _animating:array An array of myt.ScatterGraphPoints this graph is
             displaying and that are currently animating.
+        filter:function a filter function that reduces what gets drawn. The 
+            function should be of the form function(point, graph) and return 
+            true if the point should not be drawn or false if the point
+            should be drawn.
 */
 // TODO: mouseclick to "select" a point.
 // TODO: Polygon bounds testing
@@ -52,7 +56,13 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         convertYPixelToValue: function(py, graph) {return (py - graph.originY) / graph.scaleY;},
         
         convertXValueToPixel: function(x, graph) {return Math.round((x * graph.scaleX) + graph.originX);},
-        convertYValueToPixel: function(y, graph) {return Math.round((y * graph.scaleY) + graph.originY);}
+        convertYValueToPixel: function(y, graph) {return Math.round((y * graph.scaleY) + graph.originY);},
+        
+        /** A filter to prevent drawing points outside the bounds of
+            the scatter graph. */
+        BASE_FILTER: function(p, graph) {
+            return p.px < 0 || p.px > graph.width || p.py < 0 || p.py > graph.height;
+        }
     },
     
     
@@ -240,6 +250,14 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     setHighlightWidth: function(v) {this.highlightWidth = v;},
     setHighlightOffset: function(v) {this.highlightOffset = v;},
     
+    setFilter: function(func) {
+        this.filter = func;
+        if (this.inited) {
+            this.redrawPointsDelayed();
+            this.redrawAnimatingPointsDelayed();
+        }
+    },
+    
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.SelectionManager */
@@ -286,15 +304,18 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         var nearest = this.nearest(pos, 1000, maxSize);
         
         // Filter down to list that we're actually inside
-        var len = nearest.length, i = len, item, point, distance, template, templateSize;
-        var smallestRadius = 0;
+        var len = nearest.length, i = len, item, point, distance, template, templateSize,
+            BASE_FILTER = myt.ScatterGraph.BASE_FILTER,
+            smallestRadius = 0;
         while (i) {
             item = nearest[--i];
             point = item[0];
             distance = item[1];
             template = point.getTemplate(this);
             templateSize = Math.max(template.centerX, template.centerY) / this.scaleX;
-            if (distance > (templateSize * templateSize)) {
+            if (distance > (templateSize * templateSize) ||
+                BASE_FILTER(point, this) || (this.filter && this.filter(point, this))
+            ) {
                 nearest.splice(i, 1);
             } else {
                 smallestRadius = smallestRadius === 0 ? templateSize : Math.min(smallestRadius, templateSize);
@@ -334,7 +355,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         var layer = this.highlightLayer, hp = this.highlightedPoint;
         layer.clear();
         if (hp) {
-            if ((hp.px < 0) || (hp.px > this.width) || (hp.py < 0) || (hp.py > this.height)) return;
+            if (myt.ScatterGraph.BASE_FILTER(hp, this) || (this.filter && this.filter(hp, this))) return;
             
             var template = hp.getTemplate(this);
             layer.beginPath();
@@ -548,7 +569,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         if (!context) context = this.__ctx;
         if (!skipConversion) this.convertPointToPixels(p);
         
-        if ((p.px < 0) || (p.px > this.width) || (p.py < 0) || (p.py > this.height)) return;
+        if (myt.ScatterGraph.BASE_FILTER(p, this) || (this.filter && this.filter(p, this))) return;
         
         var template = p.getTemplate(this);
         context.drawImage(template, p.px - template.centerX, p.py - template.centerY);
@@ -558,7 +579,8 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         if (this._lockDraw) return;
         
         var i = data.length, p, templates = this._pointTemplates, template, 
-            w = this.width, h = this.height;
+            w = this.width, h = this.height,
+            BASE_FILTER = myt.ScatterGraph.BASE_FILTER;
         if (!context) context = this.__ctx;
         
         if (!skipConversion) this.convertPointsToPixels(data);
@@ -566,7 +588,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         while (i) {
             p = data[--i];
             
-            if ((p.px < 0) || (p.px > w) || (p.py < 0) || (p.py > h)) continue;
+            if (BASE_FILTER(p, this) || (this.filter && this.filter(p, this))) continue;
             
             template = p.getTemplate(this);
             context.drawImage(template, p.px - template.centerX, p.py - template.centerY);
