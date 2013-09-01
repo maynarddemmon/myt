@@ -99,7 +99,6 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'behavior/MouseOver.js'       ).provides('myt.MouseOver'       ).requires('myt.Disableable','myt.global.mouse','myt.MouseObservable');
     file(MYT_COMPONENT_ROOT + 'behavior/MouseDown.js'       ).provides('myt.MouseDown'       ).requires('myt.MouseOver');
     file(MYT_COMPONENT_ROOT + 'behavior/MouseOverAndDown.js').provides('myt.MouseOverAndDown').requires('myt.MouseDown');
-    file(MYT_COMPONENT_ROOT + 'behavior/ValueComponent.js'  ).provides('myt.ValueComponent'  ).requires('myt');
     
     // Component : Sizing
     file(MYT_COMPONENT_ROOT + 'sizing/SizeWidthToDom.js'    ).provides('myt.SizeWidthToDom'    ).requires('myt.View');
@@ -163,9 +162,13 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'drawbutton/DrawButton.js').provides('myt.DrawButton').requires('myt.Canvas','myt.Button','myt.DrawingMethod');
     
     // Component : Model
-    file(MYT_COMPONENT_ROOT + 'model/BAGMembership.js'    ).provides('myt.BAGMembership'    ).requires('myt.Node');
-    file(MYT_COMPONENT_ROOT + 'model/BAG.js'              ).provides('myt.BAG'              ).requires('myt.BAGMembership');
-    file(MYT_COMPONENT_ROOT + 'model/DelayedMethodCall.js').provides('myt.DelayedMethodCall').requires('myt.AccessorSupport','myt.Timer');
+    file(MYT_COMPONENT_ROOT + 'model/BAGMembership.js'        ).provides('myt.BAGMembership'        ).requires('myt.Node');
+    file(MYT_COMPONENT_ROOT + 'model/BAG.js'                  ).provides('myt.BAG'                  ).requires('myt.BAGMembership');
+    file(MYT_COMPONENT_ROOT + 'model/DelayedMethodCall.js'    ).provides('myt.DelayedMethodCall'    ).requires('myt.AccessorSupport','myt.Timer');
+    file(MYT_COMPONENT_ROOT + 'model/ValueComponent.js'       ).provides('myt.ValueComponent'       ).requires('myt');
+    file(MYT_COMPONENT_ROOT + 'model/BoundedValueComponent.js').provides('myt.BoundedValueComponent').requires('myt.ValueComponent');
+    file(MYT_COMPONENT_ROOT + 'model/RangeComponent.js'       ).provides('myt.RangeComponent'       ).requires('myt.ValueComponent');
+    file(MYT_COMPONENT_ROOT + 'model/BoundedRangeComponent.js').provides('myt.BoundedRangeComponent').requires('myt.RangeComponent','myt.BoundedValueComponent');
     
     // Component : Floating Panel
     file(MYT_COMPONENT_ROOT + 'floatingpanel/FloatingPanel.js'      ).provides('myt.FloatingPanel'      ).requires('myt.RootView');
@@ -275,6 +278,7 @@ JS.Packages(function() {with(this) {
         'myt.global.validators','myt.EqualFieldsValidator','myt.LengthValidator','myt.NumericRangeValidator',
         'myt.global.valueProcessors','myt.UseOtherFieldIfEmptyValueProcessor','myt.FormElement',
         'myt.FormInputText',
-        'myt.ScatterGraph'
+        'myt.ScatterGraph',
+        'myt.BoundedRangeComponent'
     );
 }});
