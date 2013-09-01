@@ -225,6 +225,19 @@ myt = {
         };
     },
     
+    /** Gets the last index of the value in the array.
+        @param arr:array the array to search.
+        @param v:* the value to search for.
+        @returns int: the last index of the value or -1 if not found or the
+            array is invalid in some way. */
+    getLastIndexOf: function(arr, v) {
+        if (Array.isArray(arr)) {
+            var i = arr.length;
+            while (i) if (v === arr[--i]) return i;
+        }
+        return -1;
+    },
+    
     dumpStack: function(msg) {
         console.log((new Error(msg)).stack);
     },

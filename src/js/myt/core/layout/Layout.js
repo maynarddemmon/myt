@@ -11,8 +11,8 @@
 myt.Layout = new JS.Class('Layout', myt.Node, {
     // Class Methods ///////////////////////////////////////////////////////////
     extend: {
-        /** Increments the global lock that prevents all layouts from
-            updating. */
+        /** Increments the global lock that prevents all layouts from updating.
+            @returns void */
         incrementGlobalLock: function() {
             if (myt.Layout._lockCount === undefined) myt.Layout._lockCount = 0;
             
@@ -21,8 +21,8 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
             if (wasUnlocked) myt.Layout.__setLocked(true);
         },
         
-        /** Decrements the global lock that prevents all layouts from 
-            updating. */
+        /** Decrements the global lock that prevents all layouts from updating.
+            @returns void */
         decrementGlobalLock: function() {
             if (myt.Layout._lockCount === undefined) myt.Layout._lockCount = 0;
             
@@ -33,7 +33,8 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
         },
         
         /** Adds a layout to a list of layouts that will get updated when the
-            global lock is no longer locked. */
+            global lock is no longer locked.
+            @returns void */
         deferLayoutUpdate: function(layout) {
             // Don't add a layout that is already deferred.
             if (layout.__deferredLayout) return;
@@ -42,8 +43,9 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
             layout.__deferredLayout = true;
         },
         
-        /** Called to set/unset the global lock. Will update all the
-            deferred layouts. */
+        /** Called to set/unset the global lock. Updates all the currently 
+            deferred layouts.
+            @private */
         __setLocked: function(v) {
             if (myt.Layout.locked === v) return;
             myt.Layout.locked = v;
@@ -67,15 +69,19 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Node */
     initNode: function(parent, attrs) {
-        this.locked = true;
-        this.lockedCounter = 1;
         this.subviews = [];
         
+        // Start the layout in the locked state.
+        this.locked = true;
+        this.lockedCounter = 1;
+        
+        // Remember how initial locking state should be set
         var initiallyLocked = attrs.locked === true;
         delete attrs.locked;
         
         this.callSuper(parent, attrs);
         
+        // Unlock if initial locking state calls for it.
         if (!initiallyLocked) this.decrementLockedCounter();
         
         this.update();
@@ -93,7 +99,8 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
     setParent: function(parent) {
         if (this.parent === parent) return;
         
-        // Lock during parent change so that old parent is not changed.
+        // Lock during parent change so that old parent is not updated by
+        // the calls to removeSubview and addSubview.
         var wasNotLocked = !this.locked;
         if (wasNotLocked) this.locked = true;
         
@@ -113,9 +120,8 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
         // Start monitoring new parent
         if (this.parent) {
             svs = this.parent.getSubviews();
-            for (i = 0, len = svs.length; len > i; ++i) {
-                this.addSubview(svs[i]);
-            }
+            for (i = 0, len = svs.length; len > i; ++i) this.addSubview(svs[i]);
+            
             this.attachTo(this.parent, '__handleParentSubviewAddedEvent', 'subviewAdded');
             this.attachTo(this.parent, '__handleParentSubviewRemovedEvent', 'subviewRemoved');
         }
@@ -140,9 +146,7 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
             myt.Layout.deferLayoutUpdate(this);
             return false;
         }
-        if (this.locked) return false;
-        
-        return true;
+        return !this.locked;
     },
     
     /** Updates the layout. Subclasses should call super to check lock state.
@@ -154,28 +158,14 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
         @param sv:View the view to check for.
         @returns true if the subview is found, false otherwise. */
     hasSubview: function(sv) {
-        var subs = this.subviews;
-        if (subs) {
-            var i = subs.length;
-            while (i) {
-                if (sv === subs[--i]) return true;
-            }
-        }
-        return false;
+        return this.getSubviewIndex(sv) !== -1;
     },
     
     /** Gets the index of the provided View in the subviews array.
         @param sv:View the view to check for.
         @returns the index of the subview or -1 if not found. */
     getSubviewIndex: function(sv) {
-        var subs = this.subviews;
-        if (subs) {
-            var i = subs.length;
-            while (i) {
-                if (sv === subs[--i]) return i;
-            }
-        }
-        return -1;
+        return myt.getLastIndexOf(this.subviews, sv);
     },
     
     /** Adds the provided View to the subviews array of this Layout.
@@ -209,7 +199,7 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
         @param sv:View the view to remove from this layout.
         @returns the index of the removed subview or -1 if not removed. */
     removeSubview: function(sv) {
-        if (this.ignore(sv)) return;
+        if (this.ignore(sv)) return -1;
         
         var idx = this.getSubviewIndex(sv);
         if (idx !== -1) {
@@ -237,10 +227,9 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
         while (i) this.stopMonitoringSubview(svs[--i]);
     },
     
-    /** Used to check if a subview can be added to this Layout or not. The
-        default implementation is to return the 'ignoreLayout' attributes of
-        the subview.
-        @param sv:View the view to check.
+    /** Checks if a subview can be added to this Layout or not. The default 
+        implementation returns the 'ignoreLayout' attributes of the subview.
+        @param sv:myt.View the view to check.
         @returns boolean true means the subview will be skipped, false
             otherwise. */
     ignore: function(sv) {
@@ -251,45 +240,44 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
         are layed out.
         @returns void */
     moveSubviewBefore: function(sv, target) {
-        var targetIdx = this.getSubviewIndex(target);
-        if (targetIdx < 0) return;
-        
-        var curIdx = this.getSubviewIndex(sv);
-        if (curIdx < 0) return;
-        
-        var svs = this.subviews;
-        svs.splice(curIdx, 1);
-        if (curIdx < targetIdx) --targetIdx;
-        svs.splice(targetIdx, 0, sv);
+        this.__moveSubview(sv, target, false);
     },
     
     /** Moves the subview after the target subview in the order the subviews
         are layed out.
         @returns void */
     moveSubviewAfter: function(sv, target) {
+        this.__moveSubview(sv, target, true);
+    },
+    
+    /** Implements moveSubviewBefore and moveSubviewAfter.
+        @private */
+    __moveSubview: function(sv, target, after) {
         var targetIdx = this.getSubviewIndex(target);
-        if (targetIdx < 0) return;
-        
-        var curIdx = this.getSubviewIndex(sv);
-        if (curIdx < 0) return;
-        
-        var svs = this.subviews;
-        svs.splice(curIdx, 1);
-        if (curIdx < targetIdx) --targetIdx;
-        svs.splice(targetIdx + 1, 0, sv);
+        if (targetIdx >= 0) {
+            var curIdx = this.getSubviewIndex(sv);
+            if (curIdx >= 0) {
+                var svs = this.subviews;
+                svs.splice(curIdx, 1);
+                if (curIdx < targetIdx) --targetIdx;
+                svs.splice(targetIdx + after ? 1 : 0, 0, sv);
+            }
+        }
     },
     
     sortSubviews: function(sortFunc) {
         this.subviews.sort(sortFunc);
     },
     
-    /** If our parent adds a new subview we should add it. */
+    /** If our parent adds a new subview we should add it.
+        @private */
     __handleParentSubviewAddedEvent: function(event) {
         var v = event.value;
         if (v.parent === this.parent) this.addSubview(v);
     },
     
-    /** If our parent removes a subview we should remove it. */
+    /** If our parent removes a subview we should remove it.
+        @private */
     __handleParentSubviewRemovedEvent: function(event) {
         var v = event.value;
         if (v.parent === this.parent) this.removeSubview(v);

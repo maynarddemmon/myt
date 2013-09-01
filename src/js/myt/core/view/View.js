@@ -484,28 +484,14 @@ myt.View = new JS.Class('View', myt.Node, {
         @param sv:View the view to look for.
         @returns true if the subview is found, false otherwise. */
     hasSubview: function(sv) {
-        var subs = this.subviews;
-        if (subs) {
-            var i = subs.length;
-            while (i) {
-                if (sv === subs[--i]) return true;
-            }
-        }
-        return false;
+        return this.getSubviewIndex(sv) !== -1;
     },
     
     /** Gets the index of the provided View in the subviews array.
         @param sv:View the view to look for.
         @returns the index of the subview or -1 if not found. */
     getSubviewIndex: function(sv) {
-        var subs = this.subviews;
-        if (subs) {
-            var i = subs.length;
-            while (i) {
-                if (sv === subs[--i]) return i;
-            }
-        }
-        return -1;
+        return myt.getLastIndexOf(this.subviews, sv);
     },
     
     /** Called when a View is added to this View. Do not call this method to 
@@ -525,28 +511,14 @@ myt.View = new JS.Class('View', myt.Node, {
         @param layout:Layout the layout to look for.
         @returns true if the layout is found, false otherwise. */
     hasLayout: function(layout) {
-        var subs = this.layouts;
-        if (subs) {
-            var i = subs.length;
-            while (i) {
-                if (layout === subs[--i]) return true;
-            }
-        }
-        return false;
+        return this.getLayoutIndex(layout) !== -1;
     },
     
     /** Gets the index of the provided Layout in the layouts array.
         @param layout:Layout the layout to look for.
         @returns the index of the layout or -1 if not found. */
     getLayoutIndex: function(layout) {
-        var subs = this.layouts;
-        if (subs) {
-            var i = subs.length;
-            while (i) {
-                if (layout === subs[--i]) return i;
-            }
-        }
-        return -1;
+        return myt.getLastIndexOf(this.layouts, layout);
     },
     
     /** Called when a Layout is added to this View. Do not call this method to 

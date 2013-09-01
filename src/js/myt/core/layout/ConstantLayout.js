@@ -1,5 +1,13 @@
-/** A Layout that sets the configured target attribute name to the configured
-    target value for every subview. */
+/** A layout that sets the target attribute name to the target value for 
+    each subview.
+    
+    Attributes:
+        targetAttrName:string the name of the attribute to set on each subview.
+        targetValue:* the value to set the attribute to.
+        setterName:string the name of the setter method to call on the subview
+            for the targetAttrName. This value is updated when
+            setTargetAttrName is called.
+*/
 myt.ConstantLayout = new JS.Class('ConstantLayout', myt.Layout, {
     // Accessors ///////////////////////////////////////////////////////////////
     setTargetAttrName: function(v) {

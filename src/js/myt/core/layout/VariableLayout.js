@@ -1,6 +1,16 @@
 /** An extension of ConstantLayout that allows for variation based on the
     index and subview. An updateSubview method is provided that can be
-    overriden to provide variable behavior. */
+    overriden to provide variable behavior.
+    
+    Attributes:
+        collapseParent:boolean If true the parent view will be resized to fit
+            the newly layed out child views. Defaults to false.
+        useOptimizations:boolean Turns on certain dom optimization techniques
+            that can speed up layout updates. Defaults to true.
+        reverse:boolean If true the layout will be position the items in the
+            opposite order. For right to left instead of left to right.
+            Defaults to false.
+*/
 myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Node */

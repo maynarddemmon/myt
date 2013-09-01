@@ -103,39 +103,32 @@ myt.SizeToChildren = new JS.Class('SizeToChildren', myt.Layout, {
         Provides a default implementation that calls update when the
         visibility of a subview changes. */
     startMonitoringSubview: function(sv) {
-        var axis = this.axis;
-        if (axis === 'x') {
-            this.attachTo(sv, 'update', 'x');
-            this.attachTo(sv, 'update', 'boundsWidth');
-        } else if (axis === 'y') {
-            this.attachTo(sv, 'update', 'y');
-            this.attachTo(sv, 'update', 'boundsHeight');
-        } else {
-            this.attachTo(sv, 'update', 'x');
-            this.attachTo(sv, 'update', 'boundsWidth');
-            this.attachTo(sv, 'update', 'y');
-            this.attachTo(sv, 'update', 'boundsHeight');
-        }
-        this.attachTo(sv, 'update', 'visible');
+        this.__updateMonitoringSubview(sv, this.attachTo);
     },
     
     /** @overrides myt.Layout
         Provides a default implementation that calls update when the
         visibility of a subview changes. */
     stopMonitoringSubview: function(sv) {
-        var axis = this.axis;
+        this.__updateMonitoringSubview(sv, this.detachFrom);
+    },
+    
+    /** Wrapped by startMonitoringSubview and stopMonitoringSubview.
+        @private */
+    __updateMonitoringSubview: function(sv, func) {
+        var axis = this.axis, func = func.bind(this);
         if (axis === 'x') {
-            this.detachFrom(sv, 'update', 'x');
-            this.detachFrom(sv, 'update', 'boundsWidth');
+            func(sv, 'update', 'x');
+            func(sv, 'update', 'boundsWidth');
         } else if (axis === 'y') {
-            this.detachFrom(sv, 'update', 'y');
-            this.detachFrom(sv, 'update', 'boundsHeight');
+            func(sv, 'update', 'y');
+            func(sv, 'update', 'boundsHeight');
         } else {
-            this.detachFrom(sv, 'update', 'x');
-            this.detachFrom(sv, 'update', 'boundsWidth');
-            this.detachFrom(sv, 'update', 'y');
-            this.detachFrom(sv, 'update', 'boundsHeight');
+            func(sv, 'update', 'x');
+            func(sv, 'update', 'boundsWidth');
+            func(sv, 'update', 'y');
+            func(sv, 'update', 'boundsHeight');
         }
-        this.detachFrom(sv, 'update', 'visible');
+        func(sv, 'update', 'visible');
     }
 });

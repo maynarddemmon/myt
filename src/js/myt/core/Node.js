@@ -309,11 +309,7 @@ myt.Node = new JS.Class('Node', {
         @returns Node */
     getRoot: function() {
         var p = this.parent;
-        if (p) {
-            return p.getRoot();
-        } else {
-            return this;
-        }
+        return p ? p.getRoot() : this;
     },
     
     /** Checks if this Node is a root Node.
@@ -383,28 +379,14 @@ myt.Node = new JS.Class('Node', {
         @param node:Node the subnode to check for.
         @returns true if the subnode is found, false otherwise. */
     hasSubnode: function(node) {
-        var subs = this.subnodes;
-        if (!subs) return false;
-        
-        var i = subs.length;
-        while (i) {
-            if (node === subs[--i]) return true;
-        }
-        return false;
+        return this.getSubnodeIndex(node) !== -1;
     },
     
     /** Gets the index of the provided Node in the subnodes array.
         @param node:Node the subnode to get the index for.
         @returns the index of the subnode or -1 if not found. */
     getSubnodeIndex: function(node) {
-        var subs = this.subnodes;
-        if (!subs) return -1;
-        
-        var i = subs.length;
-        while (i) {
-            if (node === subs[--i]) return i;
-        }
-        return -1;
+        return myt.getLastIndexOf(this.subnodes, node);
     },
     
     /** A convienence method to make a Node a child of this Node. The

@@ -1,5 +1,10 @@
 /** An extension of VariableLayout that also aligns each view vertically
-    or horizontally. */
+    or horizontally.
+    
+    Attributes:
+        align:string Determines which way the views are aligned. Allowed
+            values are 'left', 'center', 'right' and 'top', 'middle', 'bottom'.
+*/
 myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.VariableLayout */
@@ -84,7 +89,7 @@ myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
         this.setTargetValue(value);
     },
     
-    /** @overrides myt.ConstantLayout */
+    /** @overrides myt.VariableLayout */
     updateSubview: function(count, sv, setterName, value) {
         switch (this.align) {
             case 'center': case 'middle':
