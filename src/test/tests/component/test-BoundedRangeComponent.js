@@ -62,7 +62,6 @@ test("Create a BoundedRangeComponent", function() {
     c.destroy();
 });
 
-
 test("Create a BoundedRangeComponent and initialize it", function() {
     var c = new myt.Node(null, {lowerValue:3, upperValue:7, minValue:1, maxValue:9}, [myt.BoundedRangeComponent]);
     
@@ -80,4 +79,28 @@ test("Create a BoundedRangeComponent and initialize it", function() {
     
     c.destroy();
     d.destroy();
+});
+
+test("Filter chaining", function() {
+    var c = new myt.Node(null, {lowerValue:51, upperValue:77, minValue:-97, maxValue:97}, [myt.BoundedRangeComponent]);
+    
+    ok(c.getValue().upper === 77, "Upper should be 77.");
+    ok(c.getValue().lower === 51, "Lower should be 51.");
+    
+    c.chainValueFilter(function(v) {
+        v.lower = v.lower - v.lower % 5;
+        v.upper = v.upper - v.upper % 5;
+        return v;
+    });
+    
+    ok(c.getValue().upper === 75, "Upper should be 75.");
+    ok(c.getValue().lower === 50, "Lower should be 50");
+    
+    c.setUpperValue(99);
+    ok(c.getValue().upper === 95, "Upper should be 95.");
+    
+    c.setUpperValue(100);
+    ok(c.getValue().upper === 97, "Upper should be 97.");
+    
+    c.destroy();
 });
