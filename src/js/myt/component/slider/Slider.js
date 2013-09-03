@@ -35,12 +35,16 @@ myt.Slider = new JS.Class('Slider', myt.BaseSlider, {
     },
     
     _syncValueToThumb: function(thumb) {
+        this._lockSync = true;
+        
         this.setValue(this.convertPixelsToValue(
             this.axis === 'x' ? thumb.x + thumb.width / 2 : thumb.y + thumb.height / 2
         ));
         
         // Update thumb position since value may have been adjusted
         this._syncThumbToValue(thumb);
+        
+        this._lockSync = false;
     },
     
     _nudge: function(thumb, up) {

@@ -24,6 +24,7 @@ myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
+    /** @overrides myt.Disableable */
     setDisabled: function(v) {
         // Adapt to event from syncTo
         if (typeof v === 'object') v = v.value;
@@ -31,57 +32,56 @@ myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
         this.callSuper(v);
     },
     
+    /** @overrides myt.FocusObservable */
     setFocused: function(v) {
         this.callSuper(v);
-        if (v) this.setStyleProperty('zIndex', this.parent.getHighestZIndex() + 1);
+        if (v) this.setZIndex(this.parent.getHighestZIndex() + 1);
     },
     
+    /** @overrides myt.View */
     setX: function(v) {
         if (this.x === v) return;
         this.callSuper(v);
         
-        var parent = this.parent;
-        if (parent.axis === 'x') {
-            parent._lockSync = true;
-            parent._syncValueToThumb(this);
-            parent._lockSync = false;
-        }
+        if (this.parent.axis === 'x') this.parent._syncValueToThumb(this);
     },
     
+    /** @overrides myt.View */
     setY: function(v) {
         if (this.y === v) return;
         this.callSuper(v);
         
-        var parent = this.parent;
-        if (parent.axis === 'y') {
-            parent._lockSync = true;
-            parent._syncValueToThumb(this);
-            parent._lockSync = false;
-        }
+        if (this.parent.axis === 'y') this.parent._syncValueToThumb(this);
     },
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** @overrides myt.Draggable */
     requestDragPosition: function(x, y) {
-        if (this.disabled) return;
-        
-        var parent = this.parent;
-        
-        var minPx = parent.getMinPixelValueForThumb(this);
-        var maxPx = parent.getMaxPixelValueForThumb(this);
-        if (parent.axis === 'x') {
-            var halfWidth = this.width / 2;
-            this.setX(Math.min(Math.max(x, minPx - halfWidth), maxPx - halfWidth));
-        } else {
-            var halfHeight = this.height / 2;
-            this.setY(Math.min(Math.max(y, minPx - halfHeight), maxPx - halfHeight));
+        if (!this.disabled) {
+            var parent = this.parent,
+                minPx = parent.getMinPixelValueForThumb(this),
+                maxPx = parent.getMaxPixelValueForThumb(this),
+                halfSize, pos, func;
+            
+            if (parent.axis === 'x') {
+                halfSize = this.width / 2;
+                pos = x;
+                func = this.setX;
+            } else {
+                halfSize = this.height / 2;
+                pos = y;
+                func = this.setY;
+            }
+            
+            func.call(this, Math.min(Math.max(pos, minPx - halfSize), maxPx - halfSize));
         }
     },
     
+    /** @overrides myt.KeyActivation */
     __handleKeyDown: function(event) {
-        var parent = this.parent;
-        
         if (!this.disabled) {
+            var parent = this.parent;
             switch (myt.KeyObservable.getKeyCodeFromEvent(event)) {
                 case 37: // Left
                     parent.nudgeValueLeft(this);

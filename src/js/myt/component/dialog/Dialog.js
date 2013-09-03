@@ -31,11 +31,10 @@ myt.Dialog = new JS.Class('Dimmer', myt.ModalPanel, {
             },
             
             draw: function(canvas, config) {
-                var b = config.bounds, x = b.x, y = b.y, w = b.w, h = b.h;
-                
                 canvas.clear();
                 
-                if (w == 0 || h == 0) return;
+                var b = config.bounds;
+                if (b.w == 0 || b.h == 0) return;
                 
                 var fillColor;
                 switch (config.state) {
@@ -82,9 +81,6 @@ myt.Dialog = new JS.Class('Dimmer', myt.ModalPanel, {
     },
     
     
-    // Accessors ///////////////////////////////////////////////////////////////
-    
-    
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.Dimmer */
     eatMouseEvent: function(event) {
@@ -93,8 +89,7 @@ myt.Dialog = new JS.Class('Dimmer', myt.ModalPanel, {
     },
     
     _destroyContent: function() {
-        var content = this.content;
-        var svs = content.getSubviews(), i = svs.length, sv;
+        var svs = this.content.getSubviews(), i = svs.length, sv;
         while (i) {
             sv = svs[--i];
             if (sv.name === 'standardCancelBtn') continue;
@@ -104,14 +99,14 @@ myt.Dialog = new JS.Class('Dimmer', myt.ModalPanel, {
     
     showMessage: function(msg, opts) {
         opts = $.extend({}, myt.Dialog.MESSAGE_DEFAULTS, opts);
-        var content = this.content;
+        var content = this.content, MP = myt.ModalPanel;
         
         this._destroyContent();
         
         new myt.Text(content, {
             text:msg, whiteSpace:'normal', fontWeight:'bold',
-            x:myt.ModalPanel.DEFAULT_PADDING_X,
-            y:myt.ModalPanel.DEFAULT_PADDING_Y,
+            x:MP.DEFAULT_PADDING_X,
+            y:MP.DEFAULT_PADDING_Y,
             width:opts.width
         });
         
@@ -128,27 +123,26 @@ myt.Dialog = new JS.Class('Dimmer', myt.ModalPanel, {
     
     showSpinner: function(msg, opts) {
         opts = $.extend({}, myt.Dialog.MESSAGE_DEFAULTS, opts);
-        var content = this.content;
+        var content = this.content, MP = myt.ModalPanel;
         
         this._destroyContent();
         
         var spinner = this.spinner = new myt.Spinner(content, {
             align:'center', visible:true,
             radius:10, lines:12, length:14, lineWidth:3,
-            y:myt.ModalPanel.DEFAULT_PADDING_Y
+            y:MP.DEFAULT_PADDING_Y
         });
         if (msg) {
             new myt.Text(content, {
                 text:msg, fontWeight:'bold',
-                x:myt.ModalPanel.DEFAULT_PADDING_X,
-                y:spinner.y + spinner.getSize() + myt.ModalPanel.DEFAULT_PADDING_Y
+                x:MP.DEFAULT_PADDING_X,
+                y:spinner.y + spinner.getSize() + MP.DEFAULT_PADDING_Y
             });
         }
         
         this.show();
         
-        var cancelBtn = content.standardCancelBtn;
-        cancelBtn.setVisible(false);
+        content.standardCancelBtn.setVisible(false);
     },
     
     hideSpinner: function() {

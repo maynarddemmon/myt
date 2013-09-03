@@ -46,13 +46,13 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
     _syncRangeFillToValue: function() {
         var rangeFill = this.rangeFill, value = this.getValue(),
             lowerPx = this.convertValueToPixels(value.lower),
-            upperPx = this.convertValueToPixels(value.upper);
+            extent = this.convertValueToPixels(value.upper) - lowerPx;
         if (this.axis === 'x') {
             rangeFill.setX(lowerPx);
-            rangeFill.setWidth(upperPx - lowerPx);
+            rangeFill.setWidth(extent);
         } else {
             rangeFill.setY(lowerPx);
-            rangeFill.setHeight(upperPx - lowerPx);
+            rangeFill.setHeight(extent);
         }
     },
     
@@ -68,6 +68,8 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
     },
     
     _syncValueToThumb: function(thumb) {
+        this._lockSync = true;
+        
         var converted = this.convertPixelsToValue(
             this.axis === 'x' ? thumb.x + thumb.width / 2 : thumb.y + thumb.height / 2
         );
@@ -83,11 +85,13 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         // Update thumb position since value may have been adjusted
         if (this.thumbLower) this._syncThumbToValue(this.thumbLower);
         if (this.thumbUpper) this._syncThumbToValue(this.thumbUpper);
+        
+        this._lockSync = false;
     },
     
     _nudge: function(thumb, up) {
-        var value = this.getValueCopy();
-        var adj = this.nudgeAmount * (up ? 1 : -1);
+        var value = this.getValueCopy(),
+            adj = this.nudgeAmount * (up ? 1 : -1);
         if (thumb.name === 'thumbLower') {
             value.lower += adj;
             if (value.lower > value.upper) value.lower = value.upper;
@@ -99,18 +103,14 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
     },
     
     getMinPixelValueForThumb: function(thumb) {
-        if (thumb.name === 'thumbLower') {
-            return this.convertValueToPixels(this.minValue);
-        } else {
-            return this.convertValueToPixels(this.getValue().lower);
-        }
+        return this.convertValueToPixels(
+            thumb.name === 'thumbLower' ? this.minValue : this.getValue().lower
+        );
     },
     
     getMaxPixelValueForThumb: function(thumb) {
-        if (thumb.name === 'thumbLower') {
-            return this.convertValueToPixels(this.getValue().upper);
-        } else {
-            return this.convertValueToPixels(this.maxValue);
-        }
+        return this.convertValueToPixels(
+            thumb.name === 'thumbLower' ? this.getValue().upper : this.maxValue
+        );
     }
 });

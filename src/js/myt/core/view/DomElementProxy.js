@@ -196,7 +196,6 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
         @param v:Array where index 0 is the size, index 1 is the type and
             index 2 is the color. */
     setCSSBorder: function(v) {
-        this.CSSBorder = v;
         this._setCSSEdgeTreatment(v, 'border');
     },
     
@@ -204,7 +203,6 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
         @param v:array where index 0 is the size, index 1 is the type and
             index 2 is the color. */
     setCSSOutline: function(v) {
-        this.CSSOutline = v;
         this._setCSSEdgeTreatment(v, 'outline');
     },
     
@@ -216,10 +214,11 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
             var size = v[0] || 0,
                 type = v[1] || '',
                 color = v[2] || '';
-            this.deStyle[kind] = size + 'px' + ' ' + type + ' ' + color;
+            v = size + 'px' + ' ' + type + ' ' + color;
         } else {
-            this.deStyle[kind] = '0px';
+            v = '0px';
         }
+        this.deStyle[kind] = v;
     },
     
     /** A convienence method to set rounded corners on an element.
@@ -240,10 +239,15 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
                 vShadow = v[1] || 0,
                 blur = v[2] || 7,
                 color = v[3] || '#000000';
-            this.deStyle.boxShadow = hShadow + 'px ' + vShadow + 'px ' + blur + 'px ' + color;
+            v = hShadow + 'px ' + vShadow + 'px ' + blur + 'px ' + color;
         } else {
-            this.deStyle.boxShadow = 'none';
+            v = 'none';
         }
+        this.deStyle.boxShadow = v;
+    },
+    
+    setZIndex: function(v) {
+        this.deStyle.zIndex = v;
     },
     
     /** Set an arbitrary css style on the dom element. */
@@ -259,11 +263,7 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
             for this proxy. */
     getPagePosition: function() {
         var elem = this.domElement;
-        if (elem) {
-            return myt.DomElementProxy.getPagePosition(elem);
-        } else {
-            return null;
-        }
+        return elem ? myt.DomElementProxy.getPagePosition(elem) : null;
     },
     
     /** Generates a dom event on this proxy's dom element. Adapted from:

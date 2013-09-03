@@ -95,7 +95,7 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
                 zIdx = Math.max(zIdx, sibling.getHighestZIndex());
             }
         }
-        this.setStyleProperty('zIndex', ++zIdx);
+        this.setZIndex(++zIdx);
         
         // Prevent focus traversing
         if (this.focusable) this.focus();

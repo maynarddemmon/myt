@@ -13,7 +13,7 @@ myt.RootView = new JS.Module('RootView', {
         this.callSuper(parent, attrs);
         
         // Establish a stacking context
-        this.setStyleProperty('zIndex', 0);
+        this.setZIndex(0);
         
         // Set a css class to allow scoping of CSS rules
         this.addDomClass('myt');
@@ -22,8 +22,8 @@ myt.RootView = new JS.Module('RootView', {
         
         // Prevent default drag/drop behavior
         // DUPE: Similar code exists in myt.Dimmer.
-        var cdf = this.__captureDrop = function(event) {event.preventDefault();};
-        var de = this.domElement;
+        var cdf = this.__captureDrop = function(event) {event.preventDefault();},
+            de = this.domElement;
         myt.addEventListener(de, 'drop', cdf);
         myt.addEventListener(de, 'dragover', cdf);
     },
@@ -56,7 +56,7 @@ myt.RootView = new JS.Module('RootView', {
     
     /** @overrides myt.Node */
     setParent: function(parent) {
-        // RootView views don't have a parent.
+        // A root view doesn't have a parent view.
         this.callSuper(undefined);
     },
     
@@ -66,18 +66,20 @@ myt.RootView = new JS.Module('RootView', {
     bringToFront: function() {
         // Attempt to manipulate dom above root node.
         var parentNode = this.domElement.parentNode;
-        if (this.domElement === parentNode.lastChild) return;
-        var removedElem = parentNode.removeChild(this.domElement);
-        if (removedElem) parentNode.appendChild(removedElem);
+        if (this.domElement !== parentNode.lastChild) {
+            var removedElem = parentNode.removeChild(this.domElement);
+            if (removedElem) parentNode.appendChild(removedElem);
+        }
     },
     
     /** @overrides myt.View */
     sendToBack: function() {
         // Attempt to manipulate dom above root node.
         var parentNode = this.domElement.parentNode;
-        if (this.domElement === parentNode.firstChild) return;
-        var removedElem = parentNode.removeChild(this.domElement);
-        if (removedElem) parentNode.insertBefore(removedElem, parentNode.firstChild);
+        if (this.domElement !== parentNode.firstChild) {
+            var removedElem = parentNode.removeChild(this.domElement);
+            if (removedElem) parentNode.insertBefore(removedElem, parentNode.firstChild);
+        }
     },
     
     /** @overrides myt.View */
@@ -86,16 +88,18 @@ myt.RootView = new JS.Module('RootView', {
         var de = this.domElement,
             otherDe = otherRootView.domElement,
             parentNode = de.parentNode;
-        if (otherDe.parentNode !== parentNode) return;
-        var removedElem = parentNode.removeChild(de);
-        if (removedElem) parentNode.insertBefore(removedElem, otherDe);
+        if (otherDe.parentNode === parentNode) {
+            var removedElem = parentNode.removeChild(de);
+            if (removedElem) parentNode.insertBefore(removedElem, otherDe);
+        }
     },
     
     /** @overrides myt.View */
     sendInFrontOf: function(otherRootView) {
         // Attempt to manipulate dom above root node.
-        if (otherRootView.domElement.parentNode !== this.domElement.parentNode) return;
-        this.sendBehind(otherRootView);
-        otherRootView.sendBehind(this);
+        if (otherRootView.domElement.parentNode === this.domElement.parentNode) {
+            this.sendBehind(otherRootView);
+            otherRootView.sendBehind(this);
+        }
     }
 });
