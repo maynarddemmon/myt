@@ -114,12 +114,12 @@ myt.FormInputText = new JS.Class('FormInputText', myt.InputText, {
     
     showFocusEmbellishment: function() {
         this.hideDefaultFocusEmbellishment();
-        this.setStyleProperty('boxShadow', myt.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
+        this.setBoxShadow(myt.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
     },
     
     hideFocusEmbellishment: function() {
         this.hideDefaultFocusEmbellishment();
-        this.setStyleProperty('boxShadow', 'none');
+        this.setBoxShadow();
     },
     
     _handleKeyDown: function(event) {

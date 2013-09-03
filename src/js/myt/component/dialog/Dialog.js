@@ -3,7 +3,7 @@ myt.Dialog = new JS.Class('Dimmer', myt.ModalPanel, {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
         DEFAULT_RADIUS:12,
-        DEFAULT_SHADOW:'0px 4px 20px #666666',
+        DEFAULT_SHADOW:[0, 4, 20, '#666666'],
         DEFAULT_BGCOLOR:'#ffffff',
         
         MESSAGE_DEFAULTS: {
@@ -17,13 +17,13 @@ myt.Dialog = new JS.Class('Dimmer', myt.ModalPanel, {
         var D = myt.Dialog, content = this.content;
         content.setRoundedCorners(D.DEFAULT_RADIUS);
         content.setBgColor(D.DEFAULT_BGCOLOR);
-        content.setStyleProperty('boxShadow', D.DEFAULT_SHADOW);
+        content.setBoxShadow(D.DEFAULT_SHADOW);
         content.setFocusCage(true);
         
         var self = this;
         new myt.DrawButton(content, {
             name:'standardCancelBtn', width:16, height:16, y:4,
-            cornerRadius:8, tooltip:'Close Dialog.',
+            roundedCorners:8, tooltip:'Close Dialog.',
             ignoreLayout:true, align:'right', alignOffset:4
         }, [myt.TooltipMixin, {
             doActivated: function() {

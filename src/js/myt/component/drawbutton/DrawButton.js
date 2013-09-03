@@ -60,12 +60,6 @@ myt.DrawButton = new JS.Class('DrawButton', myt.Canvas, {
         if (this.inited) this.redraw();
     },
     
-    setCornerRadius: function(v) {
-        if (this.cornerRadius === v) return;
-        this.cornerRadius = v;
-        this.setRoundedCorners(v);
-    },
-    
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.Button */

@@ -30,7 +30,7 @@
         }]);
         
         new myt.SimpleIconTextButton(rootView, {
-            height:25, width:70, cornerRadius:4, text:'setup',
+            height:25, width:70, roundedCorners:4, text:'setup',
             activeColor:'#bbbbbb', hoverColor:'#dddddd', readyColor:'#cccccc'
         }, [{
             doActivated: function() {
@@ -63,7 +63,7 @@
         }]);
         
         new myt.SimpleIconTextButton(rootView, {
-            height:25, width:70, cornerRadius:4, text:'reset',
+            height:25, width:70, roundedCorners:4, text:'reset',
             activeColor:'#bbbbbb', hoverColor:'#dddddd', readyColor:'#cccccc'
         }, [{
             doActivated: function() {
@@ -100,7 +100,7 @@
         // Subform: end
         
         var rollbackBtn = new myt.SimpleIconTextButton(rootView, {
-            height:25, width:70, cornerRadius:4, text:'rollback',
+            height:25, width:70, roundedCorners:4, text:'rollback',
             activeColor:'#bbbbbb', hoverColor:'#dddddd', readyColor:'#cccccc'
         }, [{
             doActivated: function() {
@@ -115,7 +115,7 @@
         rollbackBtn.syncTo(rootView, 'setDisabled', 'isChanged');
         
         var submitBtn = new myt.SimpleIconTextButton(rootView, {
-            height:25, width:70, cornerRadius:4, text:'submit',
+            height:25, width:70, roundedCorners:4, text:'submit',
             activeColor:'#bbbbbb', hoverColor:'#dddddd', readyColor:'#cccccc'
         }, [{
             doActivated: function() {

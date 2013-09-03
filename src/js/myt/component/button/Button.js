@@ -19,7 +19,7 @@ myt.Button = new JS.Module('Button', {
     
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
-        DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE: '0px 0px 7px #666666',
+        DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE: [0, 0, 7, '#666666'],
         DEFAULT_DISABLED_OPACITY: 0.5
     },
     
@@ -100,12 +100,12 @@ myt.Button = new JS.Module('Button', {
     /** @overrides myt.FocusObservable */
     showFocusEmbellishment: function() {
         this.hideDefaultFocusEmbellishment();
-        this.setStyleProperty('boxShadow', myt.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
+        this.setBoxShadow(myt.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
     },
     
     /** @overrides myt.FocusObservable */
     hideFocusEmbellishment: function() {
         this.hideDefaultFocusEmbellishment();
-        this.setStyleProperty('boxShadow', 'none');
+        this.setBoxShadow();
     }
 });

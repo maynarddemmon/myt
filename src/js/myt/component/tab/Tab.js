@@ -1,4 +1,11 @@
-/** A tab component. */
+/** A tab component.
+    
+    Attributes:
+        cornerRadius:number Passed into the drawing config to determine if
+            a rounded corner is drawn or not.
+        labelTextColorChecked:color The color to use for the label text when
+            this tab is "checked".
+*/
 myt.Tab = new JS.Class('Tab', myt.DrawButton, {
     include: [myt.SizeToParent, myt.RadioMixin, myt.IconTextButtonContent],
     
