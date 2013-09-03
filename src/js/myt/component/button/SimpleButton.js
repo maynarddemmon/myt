@@ -46,6 +46,7 @@ myt.SimpleButton = new JS.Class('SimpleButton', myt.View, {
         if (this.inited) this.updateUI();
     },
     
+    // FIXME: this is no longer needed. We should be able to just use setRoundedCorners directly.
     setCornerRadius: function(v) {
         if (this.cornerRadius === v) return;
         this.cornerRadius = v;

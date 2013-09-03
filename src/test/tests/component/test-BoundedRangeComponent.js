@@ -12,7 +12,7 @@ test("Create a BoundedRangeComponent", function() {
     
     c.setValue(null);
     
-    ok(c.getValue() === null, "Value should be null after setting it to null.");
+    ok(c.getValue() === null, "Value should be null after setting it to null. " + c.getValue());
     
     c.setValue({lower:3, upper:7});
     
@@ -94,13 +94,47 @@ test("Filter chaining", function() {
     });
     
     ok(c.getValue().upper === 75, "Upper should be 75.");
-    ok(c.getValue().lower === 50, "Lower should be 50");
+    ok(c.getValue().lower === 50, "Lower should be 50.");
     
     c.setUpperValue(99);
     ok(c.getValue().upper === 95, "Upper should be 95.");
     
     c.setUpperValue(100);
     ok(c.getValue().upper === 97, "Upper should be 97.");
+    
+    c.destroy();
+});
+
+test("Snap to integer", function() {
+    var c = new myt.Node(null, {lowerValue:4.1, upperValue:9.9, minValue:0.3, maxValue:10.2}, [myt.BoundedRangeComponent]);
+    
+    ok(c.getValue().upper === 10, "Upper should be 10.");
+    ok(c.getValue().lower === 4, "Lower should be 4.");
+    
+    c.setLowerValue(5.1);
+    c.setUpperValue(8.9);
+    
+    ok(c.getValue().upper === 9, "Upper should be 9.");
+    ok(c.getValue().lower === 5, "Lower should be 5.");
+    
+    c.setSnapToInt(false);
+    
+    c.setLowerValue(5.3);
+    c.setUpperValue(8.7);
+    
+    ok(c.getValue().upper === 8.7, "Upper should be 8.7.");
+    ok(c.getValue().lower === 5.3, "Lower should be 5.3.");
+    
+    c.setSnapToInt(true);
+    
+    ok(c.getValue().upper === 9, "Upper should be 9.");
+    ok(c.getValue().lower === 5, "Lower should be 5.");
+    
+    c.setMinValue(1.2);
+    ok(c.minValue === 1, "Min value should get rounded.");
+    
+    c.setMaxValue(9.2);
+    ok(c.maxValue === 9, "Max value should get rounded.");
     
     c.destroy();
 });

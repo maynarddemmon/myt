@@ -57,5 +57,12 @@ myt.RangeComponent = new JS.Module('RangeComponent', {
         } else {
             this.callSuper(v);
         }
+    },
+    
+    
+    // Methods /////////////////////////////////////////////////////////////////
+    getValueCopy: function() {
+        var v = this.value;
+        return {lower:v.lower, upper:v.upper};
     }
 });

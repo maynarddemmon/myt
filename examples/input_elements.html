@@ -16,7 +16,7 @@
     
     function init() {
         var appDiv = document.getElementById("appDiv");
-        var rootView = new myt.View(appDiv, {width:600, height:450, bgColor:'#eeeeee'}, [myt.RootView]);
+        var rootView = new myt.View(appDiv, {width:600, height:600, bgColor:'#eeeeee'}, [myt.RootView]);
         
         var attrs;
         for (var i = 0; 100 > i; i++) {
@@ -57,6 +57,18 @@
                 }
             }]);
         }
+        
+        new myt.Slider(rootView, {width:200, minValue:0, maxValue:10, value:5});
+        new myt.Slider(rootView, {width:200, minValue:10, maxValue:90, value:50});
+        new myt.Slider(rootView, {width:200, minValue:10, maxValue:90, value:50, disabled:true});
+        new myt.Slider(rootView, {axis:'y', height:50, minValue:0, maxValue:10, value:5});
+        new myt.Slider(rootView, {axis:'y', height:50, minValue:0, maxValue:100, value:0});
+        
+        new myt.RangeSlider(rootView, {width:200, minValue:0, maxValue:10, lowerValue:5, upperValue:5});
+        new myt.RangeSlider(rootView, {width:200, minValue:10, maxValue:90, lowerValue:50, upperValue:70});
+        new myt.RangeSlider(rootView, {width:200, minValue:10, maxValue:90, lowerValue:50, upperValue:70, disabled:true});
+        new myt.RangeSlider(rootView, {axis:'y', height:50, minValue:0, maxValue:10, lowerValue:0, upperValue:3});
+        new myt.RangeSlider(rootView, {axis:'y', height:50, minValue:0, maxValue:100, lowerValue:0, upperValue:20});
         
         new myt.WrappingLayout(rootView, {name:'layout', axis:'x',
             inset:10, spacing:0, outset:5,

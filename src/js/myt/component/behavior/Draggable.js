@@ -128,6 +128,7 @@ myt.Draggable = new JS.Module('Draggable', {
         @param y:number the new y position.
         @returns void */
     requestDragPosition: function(x, y) {
+        if (this.disabled) return;
         this.setX(x);
         this.setY(y);
     }

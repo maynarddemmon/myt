@@ -5,12 +5,15 @@
             min value is enforced.
         maxValue:number the lowest value allowed. If undefined or null no
             max value is enforced.
+        snapToInt:boolean If true values can only be integers. Defaults to true.
 */
 myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
     include: [myt.ValueComponent],
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
+        if (attrs.snapToInt === undefined) attrs.snapToInt = true;
+        
         if (!attrs.valueFilter) {
             var self = this;
             attrs.valueFilter = function(v) {
@@ -29,7 +32,24 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
+    setSnapToInt: function(v) {
+        if (this.snapToInt === v) return;
+        this.snapToInt = v;
+        if (this.inited) {
+            this.fireNewEvent('snapToInt', v);
+            
+            // Update min, max and value since snap has been turned on
+            if (v) {
+                this.setMinValue(this.minValue);
+                this.setMaxValue(this.maxValue);
+                this.setValue(this.value);
+            }
+        }
+    },
+    
     setMinValue: function(v) {
+        if (v != null && this.snapToInt) v = Math.round(v);
+        
         if (this.minValue === v) return;
         
         var max = this.maxValue;
@@ -45,6 +65,8 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
     },
     
     setMaxValue: function(v) {
+        if (v != null && this.snapToInt) v = Math.round(v);
+        
         if (this.maxValue === v) return;
         
         var min = this.minValue;
@@ -57,5 +79,10 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
             // Rerun setValue since the filter has changed.
             this.setValue(this.value);
         }
+    },
+    
+    /** @overrides myt.ValueComponent */
+    setValue: function(v) {
+        this.callSuper(this.snapToInt && v != null && !isNaN(v) ? Math.round(v) : v);
     }
 });

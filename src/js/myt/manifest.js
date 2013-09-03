@@ -186,6 +186,14 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'radio/Radio.js'             ).provides('myt.Radio'             ).requires('myt.DrawButton','myt.RadioMixin');
     file(MYT_COMPONENT_ROOT + 'radio/TextRadio.js'         ).provides('myt.TextRadio'         ).requires('myt.Radio','myt.TextButtonContent','myt.TooltipMixin');
     
+    // Component : Slider
+    file(MYT_COMPONENT_ROOT + 'slider/SliderThumbMixin.js'     ).provides('myt.SliderThumbMixin'     ).requires('myt.Draggable');
+    file(MYT_COMPONENT_ROOT + 'slider/SimpleSliderThumb.js'    ).provides('myt.SimpleSliderThumb'    ).requires('myt.SliderThumbMixin');
+    file(MYT_COMPONENT_ROOT + 'slider/BaseSlider.js'           ).provides('myt.BaseSlider'           ).requires('myt.Disableable','myt.SimpleSliderThumb');
+    file(MYT_COMPONENT_ROOT + 'slider/Slider.js'               ).provides('myt.Slider'               ).requires('myt.BoundedValueComponent','myt.BaseSlider');
+    file(MYT_COMPONENT_ROOT + 'slider/SimpleSliderRangeFill.js').provides('myt.SimpleSliderRangeFill').requires('myt.View');
+    file(MYT_COMPONENT_ROOT + 'slider/RangeSlider.js'          ).provides('myt.RangeSlider'          ).requires('myt.BoundedRangeComponent','myt.BaseSlider','myt.SimpleSliderRangeFill');
+    
     // Component : Tab Slider
     file(MYT_COMPONENT_ROOT + 'tabslider/TabSliderContainer.js'    ).provides('myt.TabSliderContainer'    ).requires('myt');
     file(MYT_COMPONENT_ROOT + 'tabslider/TabSliderDrawingMethod.js').provides('myt.TabSliderDrawingMethod').requires('myt.DrawingMethod');
@@ -279,6 +287,6 @@ JS.Packages(function() {with(this) {
         'myt.global.valueProcessors','myt.UseOtherFieldIfEmptyValueProcessor','myt.FormElement',
         'myt.FormInputText',
         'myt.ScatterGraph',
-        'myt.BoundedRangeComponent'
+        'myt.Slider','myt.RangeSlider'
     );
 }});

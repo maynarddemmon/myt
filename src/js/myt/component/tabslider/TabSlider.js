@@ -40,6 +40,9 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
         
         this.callSuper(parent, attrs);
         
+        if (attrs.disabled === true) this.setDisabled(true);
+        if (attrs.selected === true) this.setSelected(true);
+        
         this.setHeight(this.getCollapsedHeight());
         
         this.parent.parent.updateLayout();

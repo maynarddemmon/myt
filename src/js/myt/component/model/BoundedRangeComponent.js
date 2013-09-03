@@ -18,5 +18,16 @@ myt.BoundedRangeComponent = new JS.Module('BoundedRangeComponent', {
         }
         
         this.callSuper(parent, attrs);
+    },
+    
+    
+    // Accessors ///////////////////////////////////////////////////////////////
+    /** @overrides myt.ValueComponent */
+    setValue: function(v) {
+        if (this.snapToInt && v != null) {
+            if (v.lower != null && !isNaN(v.lower)) v.lower = Math.round(v.lower);
+            if (v.upper != null && !isNaN(v.upper)) v.upper = Math.round(v.upper);
+        }
+        this.callSuper(v);
     }
 });
