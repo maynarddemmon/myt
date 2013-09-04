@@ -9,13 +9,30 @@ myt.Geometry = {
         @param rY:number the y coordinate of the rectangle.
         @param rW:number the width of the rectangle.
         @param rH:number the height of the rectangle.
+        
+        Alternate Params:
+        @param pX:object a point object with properties x and y.
+        @param rX:object a rect object with properties x, y, width and height.
+        
         @returns boolean True if the point is inside or on the rectangle. */
     rectContainsPoint: function(pX, pY, rX, rY, rW, rH) {
-        if (pX < rX) return false;
-        if (pY < rY) return false;
-        if (pX > rX + rW) return false;
-        if (pY > rY + rH) return false;
-        return true;
+        if (typeof pX === 'object') {
+            rH = rW;
+            rW = rY;
+            rY = rX;
+            rX = pY;
+            pY = pX.y;
+            pX = pX.x;
+        }
+        
+        if (typeof rX === 'object') {
+            rH = rX.height;
+            rW = rX.width;
+            rY = rX.y;
+            rX = rX.x;
+        }
+        
+        return pX >= rX && pY >= rY && pX <= rX + rW && pY <= rY + rH;
     },
     
     /** Checks if the provided point lies inside or on the edge of the

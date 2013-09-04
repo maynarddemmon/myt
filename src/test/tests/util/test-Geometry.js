@@ -19,6 +19,12 @@ test("Test rectContainsPoint.", function() {
     ok(myt.Geometry.rectContainsPoint(1, 1, 1, 1, 0, 0) === true, "Point on boundary of zero size rect should be true.");
 });
 
+test("Test rectContainsPoint with alternate params.", function() {
+    ok(myt.Geometry.rectContainsPoint({x:2, y:2}, 1, 1, 3, 3) === true, "Point inside rect should be true.");
+    ok(myt.Geometry.rectContainsPoint(0,  0, {x:-4, y:-4, width:3, height:3}) === false, "Negative Point outside rect should be false.");
+    ok(myt.Geometry.rectContainsPoint({x:0, y:0}, {x:-4, y:-4, width:3, height:3}) === false, "Negative Point outside rect should be false.");
+});
+
 test("Test measureDistance.", function() {
     ok(myt.Geometry.measureDistance(0, 0, 0, 0) === 0, "Identical points have a distance of zero.");
     ok(myt.Geometry.measureDistance(2, 2, 2, 2) === 0, "Identical points have a distance of zero.");
