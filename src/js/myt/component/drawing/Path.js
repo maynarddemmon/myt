@@ -123,25 +123,6 @@ myt.Path = new JS.Class('Path', {
             y = x.y;
             x = x.x;
         }
-        
-        // First test bounding box
-        if (myt.Geometry.rectContainsPoint(x, y, this.getBoundingBox())) {
-            // Test using Jordan Curve Theorem
-            var vecs = this.vectors, len = vecs.length;
-            
-            // Must at least be a triangle to have an inside.
-            if (len >= 6) {
-                var c = false, x1 = vecs[0], y1 = vecs[1], x2, y2;
-                while (len) {
-                    y2 = vecs[--len];
-                    x2 = vecs[--len];
-                    if (((y2 > y) !== (y1 > y)) && (x < (x1 - x2) * (y - y2) / (y1 - y2) + x2)) c = !c;
-                    x1 = x2;
-                    y1 = y2;
-                }
-                return c;
-            }
-        }
-        return false;
+        return myt.Geometry.isPointInPath(x, y, this.getBoundingBox(), this.vectors);
     }
 });

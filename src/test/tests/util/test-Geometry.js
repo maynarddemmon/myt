@@ -40,5 +40,5 @@ test("Test circleContainsPoint.", function() {
     ok(myt.Geometry.circleContainsPoint(1, 1, 1, 1, 1) === true, "Point at center of circle should be true.");
     ok(myt.Geometry.circleContainsPoint(1, 0, 1, 1, 1) === true, "Point on boundary of circle should be true.");
     ok(myt.Geometry.circleContainsPoint(1, 1, 1, 1, 0) === true, "Point on zero radius circle should be true.");
-    ok(myt.Geometry.circleContainsPoint(1, 1, 1, 1, -1) === false, "Point on negative radius circle should be false.");
+    ok(myt.Geometry.circleContainsPoint(1, 1, 1, 1, -1) === true, "Point on negative radius circle should be true.");
 });

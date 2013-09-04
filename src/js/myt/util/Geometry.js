@@ -44,7 +44,7 @@ myt.Geometry = {
         @param cR:number the radius of the circle.
         @return boolean True if the point is inside or on the circle. */
     circleContainsPoint: function(pX, pY, cX, cY, cR) {
-        return this.measureDistance(pX, pY, cX, cY) <= cR;
+        return this.measureDistance(pX, pY, cX, cY, true) <= cR * cR;
     },
     
     /** Measure the distance between two points.
@@ -52,9 +52,53 @@ myt.Geometry = {
         @param y1:number the y position of the first point.
         @param x2:number the x position of the second point.
         @param y2:number the y position of the second point.
+        @param squared:boolean (optional) If true, the squared distance will
+            be returned.
         @returns number the distance between the two points. */
-    measureDistance: function(x1, y1, x2, y2) {
-        var diffX = x2 - x1, diffY = y2 - y1
-        return Math.sqrt(diffX * diffX + diffY * diffY);
+    measureDistance: function(x1, y1, x2, y2, squared) {
+        var diffX = x2 - x1, 
+            diffY = y2 - y1, 
+            diffSquared = diffX * diffX + diffY * diffY;
+        return squared ? diffSquared : Math.sqrt(diffSquared);
+    },
+    
+    /** Tests if the provided point is inside this path.
+        @param x:number the x coordinate to test.
+        @param y:number the y coordinate to test.
+        @param boundingBox:object a bounding box object that bounds the path.
+        @param path:array an array of points where the index 0,2,4,... are
+            the x values and index 1,3,5,... are the y values.
+        
+        Alternate params:
+        @param x:object A point object with x and y properties.
+        
+        @return true if inside, false otherwise. */
+    isPointInPath: function(x, y, boundingBox, path) {
+        if (typeof x === 'object') {
+            path = boundingBox;
+            boundingBox = y;
+            y = x.y;
+            x = x.x;
+        }
+        
+        // First test bounding box
+        if (this.rectContainsPoint(x, y, boundingBox)) {
+            // Test using Jordan Curve Theorem
+            var len = path.length;
+            
+            // Must at least be a triangle to have an inside.
+            if (len >= 6) {
+                var c = false, x1 = path[0], y1 = path[1], x2, y2;
+                while (len) {
+                    y2 = path[--len];
+                    x2 = path[--len];
+                    if (((y2 > y) !== (y1 > y)) && (x < (x1 - x2) * (y - y2) / (y1 - y2) + x2)) c = !c;
+                    x1 = x2;
+                    y1 = y2;
+                }
+                return c;
+            }
+        }
+        return false;
     }
 };
