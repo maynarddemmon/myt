@@ -1,6 +1,46 @@
 /** Provides common geometry related functions. */
 myt.Geometry = {
-    // Methods /////////////////////////////////////////////////////////////////
+    // Methods /////////////////////////////////////////////////////////////////,
+    /** Tests if the provided point is inside this path.
+        @param x:number the x coordinate to test.
+        @param y:number the y coordinate to test.
+        @param boundingBox:object a bounding box object that bounds the path.
+        @param path:array an array of points where the index 0,2,4,... are
+            the x values and index 1,3,5,... are the y values.
+        
+        Alternate params:
+        @param x:object A point object with x and y properties.
+        
+        @return true if inside, false otherwise. */
+    isPointInPath: function(x, y, boundingBox, path) {
+        if (typeof x === 'object') {
+            path = boundingBox;
+            boundingBox = y;
+            y = x.y;
+            x = x.x;
+        }
+        
+        // First test bounding box
+        if (this.rectContainsPoint(x, y, boundingBox)) {
+            // Test using Jordan Curve Theorem
+            var len = path.length;
+            
+            // Must at least be a triangle to have an inside.
+            if (len >= 6) {
+                var c = false, x1 = path[0], y1 = path[1], x2, y2;
+                while (len) {
+                    y2 = path[--len];
+                    x2 = path[--len];
+                    if (((y2 > y) !== (y1 > y)) && (x < (x1 - x2) * (y - y2) / (y1 - y2) + x2)) c = !c;
+                    x1 = x2;
+                    y1 = y2;
+                }
+                return c;
+            }
+        }
+        return false;
+    },
+    
     /** Checks if the provided point is inside or on the edge of the provided 
         rectangle.
         @param pX:number the x coordinate of the point to test.
@@ -62,43 +102,53 @@ myt.Geometry = {
         return squared ? diffSquared : Math.sqrt(diffSquared);
     },
     
-    /** Tests if the provided point is inside this path.
-        @param x:number the x coordinate to test.
-        @param y:number the y coordinate to test.
-        @param boundingBox:object a bounding box object that bounds the path.
-        @param path:array an array of points where the index 0,2,4,... are
-            the x values and index 1,3,5,... are the y values.
-        
-        Alternate params:
-        @param x:object A point object with x and y properties.
-        
-        @return true if inside, false otherwise. */
-    isPointInPath: function(x, y, boundingBox, path) {
-        if (typeof x === 'object') {
-            path = boundingBox;
-            boundingBox = y;
-            y = x.y;
-            x = x.x;
-        }
-        
-        // First test bounding box
-        if (this.rectContainsPoint(x, y, boundingBox)) {
-            // Test using Jordan Curve Theorem
-            var len = path.length;
-            
-            // Must at least be a triangle to have an inside.
-            if (len >= 6) {
-                var c = false, x1 = path[0], y1 = path[1], x2, y2;
-                while (len) {
-                    y2 = path[--len];
-                    x2 = path[--len];
-                    if (((y2 > y) !== (y1 > y)) && (x < (x1 - x2) * (y - y2) / (y1 - y2) + x2)) c = !c;
-                    x1 = x2;
-                    y1 = y2;
-                }
-                return c;
-            }
-        }
-        return false;
+    /** Convert radians to degrees.
+        @param deg:number degrees.
+        @returns number: radians. */
+    degreesToRadians: function(deg) {
+        return deg * Math.PI / 180;
+    },
+    
+    /** Convert degrees to radians.
+        @param rad:number radians.
+        @returns number: degrees. */
+    radiansToDegrees: function(rad) {
+        return rad * 180 / Math.PI;
+    },
+    
+    // Geometry on a sphere
+    /** Checks if the provided lat/lng point lies inside or on the edge of the
+        provided circle.
+        @param pLat:number the latitude of the point to test.
+        @param pLng:number the longitude of the point to test.
+        @param cLat:number the latitude of the center of the circle.
+        @param cLng:number the longitude of the center of the circle.
+        @param cR:number the radius of the circle in kilometers.
+        @return boolean True if the point is inside or on the circle. */
+    circleContainsLatLng: function(pLat, pLng, cLat, cLng, cR) {
+        return this.measureLatLngDistance(pLat, pLng, cLat, cLng) <= cR;
+    },
+    
+    /** Measures the distance between two points on a sphere using latitude
+        and longitude.
+        @param lat1:number the latitude of the first point.
+        @param lng1:number the longitude of the first point.
+        @param lat2:number the latitude of the second point.
+        @param lng2:number the longitude of the second point.
+        @param sphereRadius:number (optional) the radius of the sphere the
+            measurement is being taken on in kilometers. If not provided the
+            radius of the earth is used.
+        @returns number the distance between the points in kilometers. */
+    measureLatLngDistance: function(lat1, lng1, lat2, lng2, sphereRadius) {
+        // Taken from: http://www.movable-type.co.uk/scripts/latlong.html
+        if (sphereRadius === undefined) sphereRadius = 6371; // kilometers for earth
+        lat1 = this.degreesToRadians(lat1);
+        lng1 = this.degreesToRadians(lng1);
+        lat2 = this.degreesToRadians(lat2);
+        lng2 = this.degreesToRadians(lng2);
+        return sphereRadius * Math.acos(
+            Math.sin(lat1) * Math.sin(lat2) + 
+            Math.cos(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1)
+        );
     }
 };
