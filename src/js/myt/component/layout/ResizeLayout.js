@@ -5,7 +5,7 @@ myt.ResizeLayout = new JS.Class('SpacedLayout', myt.SpacedLayout, {
     // Accessors ///////////////////////////////////////////////////////////////
     /** @overrides myt.VariableLayout */
     setCollapseParent: function(v) {
-        console.log("collapseParent attribute is unused in ResizeLayout.");
+        // collapseParent attribute is unused in ResizeLayout.
     },
     
     /** @overrides myt.SpacedLayout */
@@ -13,13 +13,9 @@ myt.ResizeLayout = new JS.Class('SpacedLayout', myt.SpacedLayout, {
         if (this.targetAttrName === v) return;
         
         if (this.inited) {
-            if (v === 'x') {
-                this.stopMonitoringParent('height');
-                this.startMonitoringParent('width');
-            } else if (v === 'y') {
-                this.stopMonitoringParent('width');
-                this.startMonitoringParent('height');
-            }
+            var isX = v === 'x';
+            this.stopMonitoringParent(isX ? 'height' : 'width');
+            this.startMonitoringParent(isX ? 'width' : 'height');
         }
         
         this.callSuper(v);
@@ -29,23 +25,12 @@ myt.ResizeLayout = new JS.Class('SpacedLayout', myt.SpacedLayout, {
     setParent: function(parent) {
         if (this.parent === parent) return;
         
-        if (this.parent) {
-            if (this.targetAttrName === 'x') {
-                this.stopMonitoringParent('width');
-            } else if (this.targetAttrName === 'y') {
-                this.stopMonitoringParent('height');
-            }
-        }
+        var dim = this.targetAttrName === 'x' ? 'width' : 'height';
+        if (this.parent) this.stopMonitoringParent(dim);
         
         this.callSuper(parent);
         
-        if (this.parent) {
-            if (this.targetAttrName === 'x') {
-                this.startMonitoringParent('width');
-            } else if (this.targetAttrName === 'y') {
-                this.startMonitoringParent('height');
-            }
-        }
+        if (this.parent) this.startMonitoringParent(dim);
     },
     
     
@@ -97,8 +82,7 @@ myt.ResizeLayout = new JS.Class('SpacedLayout', myt.SpacedLayout, {
         this.remainder = remainder;
         this.resizeSum = resizeSum;
         this.scalingFactor = remainder / resizeSum;
-        this.resizeSumUsed = 0;
-        this.remainderUsed = 0;
+        this.resizeSumUsed = this.remainderUsed = 0;
         this.measureSetter = measureAttrName === 'boundsWidth' ? 'setWidth' : 'setHeight';
     },
     
@@ -108,12 +92,9 @@ myt.ResizeLayout = new JS.Class('SpacedLayout', myt.SpacedLayout, {
         if (hint > 0) {
             this.resizeSumUsed += hint;
             
-            var size = Math.round(hint * this.scalingFactor);
-            
-            // Adjust for leftover
-            if (this.resizeSum === this.resizeSumUsed) {
-                size += this.remainder - (this.remainderUsed + size);
-            }
+            var size = this.resizeSum === this.resizeSumUsed ? 
+                this.remainder - this.remainderUsed : 
+                Math.round(hint * this.scalingFactor);
             
             this.remainderUsed += size;
             sv[this.measureSetter](size);

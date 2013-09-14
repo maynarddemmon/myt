@@ -30,9 +30,9 @@ myt.RangeComponent = new JS.Module('RangeComponent', {
     
     setValue: function(v) {
         if (v) {
-            var existing = this.value;
-            var existingLower = existing ? existing.lower : undefined;
-            var existingUpper = existing ? existing.upper : undefined;
+            var existing = this.value,
+                existingLower = existing ? existing.lower : undefined,
+                existingUpper = existing ? existing.upper : undefined;
             
             if (this.valueFilter) v = this.valueFilter(v);
             
@@ -53,7 +53,11 @@ myt.RangeComponent = new JS.Module('RangeComponent', {
             }
             
             this.value = v;
-            if (this.inited) this.fireNewEvent('value', this.getValue());
+            if (this.inited) {
+                this.fireNewEvent('value', this.getValue());
+                if (v.lower !== existingLower) this.fireNewEvent('lowerValue', v.lower);
+                if (v.upper !== existingUpper) this.fireNewEvent('upperValue', v.upper);
+            }
         } else {
             this.callSuper(v);
         }

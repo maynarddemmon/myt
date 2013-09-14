@@ -158,7 +158,7 @@ myt.View = new JS.Class('View', myt.Node, {
         this.ignoreLayout = v;
     },
     
-    /** A String that indicates this view is treated as "special" by the 
+    /** A value that indicates this view is treated as "special" by the 
         layout. The exact meaning of this value is up to the layouts used
         on the parent view. */
     setLayoutHint: function(v) {

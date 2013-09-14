@@ -33,7 +33,7 @@ myt.XML = {
                 try {
                     return new ActiveXObject(msxml[--i]);
                 } catch (err) {
-                    console.error(err.stack || err.stacktrace);
+                    myt.dumpStack(err);
                 }
             }
         }

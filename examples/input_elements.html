@@ -58,13 +58,21 @@
             }]);
         }
         
-        new myt.Slider(rootView, {width:200, minValue:0, maxValue:10, value:5});
+        var slider1 = new myt.Slider(rootView, {width:200, minValue:0, maxValue:10, value:5});
+        var txt1 = new myt.Text(rootView);
+        txt1.syncTo(slider1, 'setText', 'value');
+        
         new myt.Slider(rootView, {width:200, minValue:10, maxValue:90, value:50});
         new myt.Slider(rootView, {width:200, minValue:10, maxValue:90, value:50, disabled:true});
         new myt.Slider(rootView, {axis:'y', height:50, minValue:0, maxValue:10, value:5});
         new myt.Slider(rootView, {axis:'y', height:50, minValue:0, maxValue:100, value:0});
         
-        new myt.RangeSlider(rootView, {width:200, minValue:0, maxValue:10, lowerValue:5, upperValue:5});
+        var slider2 = new myt.RangeSlider(rootView, {width:200, minValue:0, maxValue:10, lowerValue:5, upperValue:5});
+        var txt2 = new myt.Text(rootView);
+        txt2.syncTo(slider2, 'setText', 'lowerValue');
+        var txt3 = new myt.Text(rootView);
+        txt3.syncTo(slider2, 'setText', 'upperValue');
+        
         new myt.RangeSlider(rootView, {width:200, minValue:10, maxValue:90, lowerValue:50, upperValue:70});
         new myt.RangeSlider(rootView, {width:200, minValue:10, maxValue:90, lowerValue:50, upperValue:70, disabled:true});
         new myt.RangeSlider(rootView, {axis:'y', height:50, minValue:0, maxValue:10, lowerValue:0, upperValue:3});

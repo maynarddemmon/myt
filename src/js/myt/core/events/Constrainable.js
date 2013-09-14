@@ -50,38 +50,40 @@ myt.Constrainable = new JS.Module('Constrainable', {
         try {
             this[methodName]();
         } catch (err) {
-            console.error(err.stack || err.stacktrace);
+            myt.dumpStack(err);
         }
     },
     
     /** Removes a constraint.
         @returns void */
     releaseConstraint: function(methodName) {
-        if (!methodName) return;
-        
-        // No need to remove if the constraint is already empty.
-        var constraints = this.__constraintsByMethodName;
-        if (!constraints) return;
-        var constraint = constraints[methodName];
-        if (!constraint) return;
-        var len = constraint.length;
-        if (len === 0) return;
-        
-        var observable, type;
-        for (var i = len - 1; i >= 1; i -= 2) {
-            observable = constraint[i - 1];
-            type = constraint[i];
-            this.detachFrom(observable, methodName, type);
+        if (methodName) {
+            // No need to remove if the constraint is already empty.
+            var constraints = this.__constraintsByMethodName;
+            if (constraints) {
+                var constraint = constraints[methodName];
+                if (constraint) {
+                    var len = constraint.length;
+                    if (len !== 0) {
+                        var observable, type;
+                        for (var i = len - 1; i >= 1; i -= 2) {
+                            observable = constraint[i - 1];
+                            type = constraint[i];
+                            this.detachFrom(observable, methodName, type);
+                        }
+                        constraint.length = 0;
+                    }
+                }
+            }
         }
-        constraint.length = 0;
     },
     
     /** Removes all constraints.
         @returns void */
     releaseAllConstraints: function() {
         var constraints = this.__constraintsByMethodName;
-        if (!constraints) return;
-        
-        for (var methodName in constraints) this.releaseConstraint(methodName);
+        if (constraints) {
+            for (var methodName in constraints) this.releaseConstraint(methodName);
+        }
     }
 });

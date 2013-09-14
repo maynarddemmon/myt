@@ -238,8 +238,15 @@ myt = {
         return -1;
     },
     
-    dumpStack: function(msg) {
-        console.log((new Error(msg)).stack);
+    /** Dumps a stacktrace to the console.
+        @param err: Error:string the error or message to dump stack for.
+        @param type:string (optional) the type of console message to write.
+            Allowed values are 'error', 'warn', 'log' and 'debug'. Defaults to
+            'error'.
+        @returns void */
+    dumpStack: function(err, type) {
+        if (typeof err === 'string') err = new Error(err);
+        console[type ? type : 'error'](err.stack || err.stacktrace)
     },
     
     // Random numbers

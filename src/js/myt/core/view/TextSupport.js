@@ -1,9 +1,19 @@
 /** Adds support for text display to a View. Requires myt.SizeToDom mixin
-    be used as a super mixin. */
+    be used as a super mixin.
+    
+    Attributes:
+        text:string|event object with a string value
+            The text to be displayed. The value will be assigned to the
+            inner html of the div.
+        fontFamily:string
+            The name of a font to use. The value will be assigned to the
+            font family CSS parameter. */
 myt.TextSupport = new JS.Module('TextSupport', {
     // Accessors ///////////////////////////////////////////////////////////////
     /** The text content to be displayed. */
     setText: function(v) {
+        if (typeof v === 'object') v = v.value;
+        
         if (this.text === v) return;
         // Use innerHTML rather than textContent since this allows us to
         // embed formatting markup.

@@ -192,7 +192,7 @@ myt.Observable = new JS.Module('Observable', {
                     if (observer[methodName](event)) break;
                 }
             } catch (err) {
-                console.error(err.stack || err.stacktrace);
+                myt.dumpStack(err);
             }
         }
         

@@ -44,7 +44,7 @@ myt.Observer = new JS.Module('Observer', {
         @returns void */
     attachToAndCallbackIfAttrEqual: function(observable, methodName, eventType, value, attrName, once) {
         if (attrName === undefined) attrName = eventType;
-        if (observable[attrName] === value) {
+        if (observable.get(attrName) === value) {
             this.syncTo(observable, methodName, eventType, attrName, once);
         } else {
             this.attachTo(observable, methodName, eventType, once);
@@ -66,7 +66,7 @@ myt.Observer = new JS.Module('Observer', {
         @returns void */
     attachToAndCallbackIfAttrNotEqual: function(observable, methodName, eventType, value, attrName, once) {
         if (attrName === undefined) attrName = eventType;
-        if (observable[attrName] !== value) {
+        if (observable.get(attrName) !== value) {
             this.syncTo(observable, methodName, eventType, attrName, once);
         } else {
             this.attachTo(observable, methodName, eventType, once);
@@ -89,9 +89,9 @@ myt.Observer = new JS.Module('Observer', {
     syncTo: function(observable, methodName, eventType, attrName, once) {
         if (attrName === undefined) attrName = eventType;
         try {
-            this[methodName](observable.createEvent(eventType, observable[attrName]));
+            this[methodName](observable.createEvent(eventType, observable.get(attrName)));
         } catch (err) {
-            console.error(err.stack || err.stacktrace);
+            myt.dumpStack(err);
         }
         
         // Providing a true value for once means we'll never actually attach.
