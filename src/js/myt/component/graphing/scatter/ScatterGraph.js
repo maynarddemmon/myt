@@ -369,6 +369,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     
     // Data
     /** Adds a single myt.ScatterGraphPoint
+        @param dataPoint:myt.ScatterGraphPoint the point to add.
         @returns void */
     addDataPoint: function(dataPoint) {
         this.data.push(dataPoint);
@@ -376,16 +377,32 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         this.drawPoint(dataPoint);
     },
     
+    /** Adds multiple data points.
+        @param dataPoints:array of myt.ScatterGraphPoint
+        @returns void */
     addDataPoints: function(dataPoints) {
         this.data = this.data.concat(dataPoints);
         this.drawPoints(dataPoints);
         if (!this._lockRebuild) this._kdtree.rebuildTree(this.data);
     },
     
+    // Get points
+    /** Gets one or more myt.ScatterGraphPoints that match the provided
+        matcher function which are not currently animating.
+        @param matchFunc:function the match function to use.
+        @param multiple:boolean (optional) indicates if only the first point 
+            found or all points found should be returned. Defaults to false.
+        @returns a single point or an array of points. */
     getDataPoint: function(matchFunc, multiple) {
         return this._getDataPoint(this.data, matchFunc, multiple);
     },
     
+    /** Gets one or more myt.ScatterGraphPoints that match the provided
+        matcher function which are currently animating.
+        @param matchFunc:function the match function to use.
+        @param multiple:boolean (optional) indicates if only the first point 
+            found or all points found should be returned. Defaults to false.
+        @returns a single point or an array of points. */
     getAnimatingDataPoint: function(matchFunc, multiple) {
         return this._getDataPoint(this._animating, matchFunc, multiple);
     },
@@ -404,21 +421,43 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         return retval;
     },
     
+    /** Gets an myt.ScatterGraphPoint with the matching ID.
+        @param id:string the id to match.
+        @param type:string (optional) indicates if 'animating', 'still' or 
+            'both' types of points should be searched. Defaults to 'both'.
+        @returns the data point or null if not found. */
     getDataPointById: function(id, type) {
-        return this._getDataPointBy(function(p, i) {return p.id === id;}, type);
+        return this._getDataPointsBy(function(p, i) {return p.id === id;}, type);
     },
     
-    _getDataPointBy: function(func, type) {
+    _getDataPointsBy: function(func, type, multiple) {
         if (type === 'animating') {
-            return this.getDataPoint(func);
+            return this.getDataPoint(func, multiple);
         } else if (type === 'still') {
-            return this.getAnimatingDataPoint(func);
+            return this.getAnimatingDataPoint(func, multiple);
         } else {
             // Check both
-            return this.getDataPoint(func) || this.getAnimatingDataPoint(func);
+            return this.getDataPoint(func, multiple) || this.getAnimatingDataPoint(func, multiple);
         }
     },
     
+    getDataPointsInsideCircle: function(centerX, centerY, radius, isLatLng) {
+        var func = myt.Geometry[isLatLng ? 'circleContainsLatLng' : 'circleContainsPoint'];
+        func  = func.bind(myt.Geometry);
+        return this._getDataPointsBy(function(p, i) {
+            return func(p.y, p.x, centerY, centerX, radius);
+        }, 'both', true);
+    },
+    
+    /** @param path:myt.Path */
+    getDataPointsInsidePolygon: function(path) {
+        var bounds = path.getBoundingBox(), pathData = path.vectors;
+        return this._getDataPointsBy(function(p, i) {
+            return myt.Geometry.isPointInPath(p.x, p.y, bounds, pathData);
+        }, 'both', true);
+    },
+    
+    // Remove points
     removeDataPoint: function(matchFunc, multiple) {
         var retval = this._removeDataPoint(this.data, matchFunc, multiple);
         if (retval) this.redrawPoints(true);
@@ -655,7 +694,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         this.redrawAnimatingPoints();
         
         if (points.length === 0) this.setAnimating(false);
-    }
+    },
 });
 
 myt.DelayedMethodCall.createDelayedMethodCall(myt.ScatterGraph, 0, 'redrawPoints');

@@ -124,9 +124,12 @@ myt.Geometry = {
         @param cLat:number the latitude of the center of the circle.
         @param cLng:number the longitude of the center of the circle.
         @param cR:number the radius of the circle in kilometers.
+        @param sphereRadius:number (optional) the radius of the sphere the
+            measurement is being taken on in kilometers. If not provided the
+            radius of the earth is used.
         @return boolean True if the point is inside or on the circle. */
-    circleContainsLatLng: function(pLat, pLng, cLat, cLng, cR) {
-        return this.measureLatLngDistance(pLat, pLng, cLat, cLng) <= cR;
+    circleContainsLatLng: function(pLat, pLng, cLat, cLng, cR, sphereRadius) {
+        return this.measureLatLngDistance(pLat, pLng, cLat, cLng, sphereRadius) <= cR;
     },
     
     /** Measures the distance between two points on a sphere using latitude
