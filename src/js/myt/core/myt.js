@@ -23,6 +23,10 @@
  * * jQuery Easing v1.3, (c) 2008 George McGinley Smith (BSD License)
  * * jQuery Cookie Plugin v1.3.1, (c) 2013 Klaus Hartl (MIT License)
  * * parseUri 1.2.2, (c) Steven Levithan <stevenlevithan.com> (MIT License)
+ * * Spin.js 1.3.0 (c) 2011-2013 Felix Gnass (the MIT license)
+ * * k-d Tree JavaScript - v1.0 (c) Mircea Pricop <pricop@ubilabs.net>,
+ *                                  Martin Kleppe <kleppe@ubilabs.net>,
+ *                                  Ubilabs http://ubilabs.net (MIT License)
  * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -200,7 +204,7 @@ myt = {
         function is exposed as this.callSuper within the wrapper function.
         @param fn:function the function to wrap.
         @param wrapperFn:function the wrapper function.
-        @returns a wrapped funcion. */
+        @returns a wrapped function. */
     wrapFunction: function(fn, wrapperFn) {
         var callSuper = function() {
             return fn.apply(this, arguments);
@@ -250,17 +254,32 @@ myt = {
     },
     
     // Random numbers
-    /** @returns a random number between 0 (inclusive) and 1 (exclusive) */
+    /** @returns a random number between 0 (inclusive) and 1 (exclusive)
+        @param func:function (optional) a distribution function for the
+            random numbers. The function should map a number between 0 and 1
+            to another number between 0 and 1. If not provided a flat 
+            distribution will be used. Example functions:
+                - function(v) {return v * v;} will skew the value towards 0.
+                - function(v) {return 1 - v * v;} will skew the value towards 1.
+        @returns number: a random number between 0 and 1. */
     getRandom: function(func) {
         return func ? func(Math.random()) : Math.random();
     },
     
-    /** @returns a random number between min and max */
+    /** @returns a random number between min (inclusive) and max (exclusive).
+        @param min:number the minimum value returned.
+        @param max:number the maximum value returned.
+        @param func:function a skew function. See myt.getRandom for more info.
+        @returns number: between min and max. */
     getRandomArbitrary: function(min, max, func) {
         return this.getRandom(func) * (max - min) + min;
     },
     
-    /** @returns a random integer between min and max */
+    /** @returns a random integer between min (inclusive) and max (inclusive)
+        @param min:number the minimum value returned.
+        @param max:number the maximum value returned.
+        @param func:function a skew function. See myt.getRandom for more info.
+        @returns number: an integer between min and max. */
     getRandomInt: function(min, max, func) {
         return Math.floor(this.getRandom(func) * (max - min + 1) + min);
     }
