@@ -39,7 +39,7 @@
 myt = {
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
-    IMAGE_ROOT:global.MYT_IMAGE_ROOT || '',
+    IMAGE_ROOT: global.MYT_IMAGE_ROOT || '',
     
     /** Used to generate globally unique IDs. */
     __GUID_COUNTER: 0,
@@ -206,16 +206,12 @@ myt = {
         @param wrapperFn:function the wrapper function.
         @returns a wrapped function. */
     wrapFunction: function(fn, wrapperFn) {
-        var callSuper = function() {
-            return fn.apply(this, arguments);
-        }
-        
         return function() {
             // Store existing callSuper function so we can put it back later.
             var oldSuper = this.callSuper;
             
             // Assign new callSuper and execute wrapperFn
-            this.callSuper = callSuper;
+            this.callSuper = fn;
             var retval = wrapperFn.apply(this, arguments);
             
             // Restore existing callSuper or delete new callSuper

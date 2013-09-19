@@ -695,6 +695,19 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         
         if (points.length === 0) this.setAnimating(false);
     },
+    
+    // Metrics
+    countDataPoints: function(func) {
+        if (func) {
+            var count = 0, points = this._getDataPoint(this._animating, func, true);
+            if (points) count += points.length;
+            points = this._getDataPoint(this.data, func, true);
+            if (points) count += points.length;
+            return count;
+        } else {
+            return this._animating.length + this.data.length;
+        }
+    }
 });
 
 myt.DelayedMethodCall.createDelayedMethodCall(myt.ScatterGraph, 0, 'redrawPoints');
