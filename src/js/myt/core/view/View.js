@@ -640,10 +640,18 @@ myt.View = new JS.Class('View', myt.Node, {
     /** Checks if the provided location is inside this view or not.
         @param locX:number the x position to test.
         @param locY:number the y position to test.
+        @param referenceFrameDomElem:dom_element (optional) The dom element
+            the locX and locY are relative to. If not provided the page is
+            assumed.
         @returns boolean True if the location is inside this view, false 
             if not. */
-    containsPoint: function(locX, locY) {
+    containsPoint: function(locX, locY, referenceFrameDomElem) {
         var pos = this.getPagePosition();
+        if (referenceFrameDomElem) {
+            var refPos = myt.DomElementProxy.getPagePosition(referenceFrameDomElem);
+            pos.x -= refPos.x;
+            pos.y -= refPos.y;
+        }
         return myt.Geometry.rectContainsPoint(locX, locY, pos.x, pos.y, this.width, this.height);
     }
 });
