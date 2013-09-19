@@ -19,6 +19,26 @@
             selected. If this item is deselected this will get set to null.
 */
 myt.SelectionManager = new JS.Module('SelectionManager', {
+    // Class Methods and Attributes ////////////////////////////////////////////
+    extend: {
+        /** Determines if we are in "add" mode for selection such that
+            selections will only be increased not reduced. Typically this
+            means the shift key is down.
+            @returns boolean true if in add mode, false otherwise. */
+        isAddMode: function() {
+            return myt.global.keys.isShiftKeyDown();
+        },
+        
+        /** Determines if we are in "toggle" mode for selection such that
+            selections can be added to or removed from incrementally. Typically 
+            this means the control or command key is down.
+            @returns boolean true if in add mode, false otherwise. */
+        isToggleMode: function() {
+            return myt.global.keys.isControlKeyDown() || myt.global.keys.isCommandKeyDown();
+        }
+    },
+    
+    
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
         this._selected = {};
@@ -45,12 +65,14 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** A wrapper around myt.SelectionManager.isAddMode. */
     isAddMode: function() {
-        return myt.global.keys.isShiftKeyDown();
+        return myt.SelectionManager.isAddMode();
     },
     
+    /** A wrapper around myt.SelectionManager.isToggleMode. */
     isToggleMode: function() {
-        return myt.global.keys.isControlKeyDown() || myt.global.keys.isCommandKeyDown();
+        return myt.SelectionManager.isToggleMode();
     },
     
     /** Gets the currently selected items.
