@@ -3,10 +3,16 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     include: [myt.RootView],
     
     
+    // Class Methods and Attributes ////////////////////////////////////////////
+    extend: {
+        /** The length of time in millis before the tip is shown. */
+        DEFAULT_TIP_DELAY:500
+    },
+    
+    
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        // The length of time before the tip is shown in millis.
-        this.tipDelay = 500;
+        this.tipDelay = myt.BaseTooltip.DEFAULT_TIP_DELAY;
         
         if (attrs.visible === undefined) attrs.visible = false;
         
@@ -18,8 +24,8 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    /** Sets the tooltip info that will be displayed. This is an object
-        consisting of:
+    /** Sets the tooltip info that will be displayed. 
+        @param v:object with the following keys:
             parent: (myt.View) The view to show the tip for.
             text: (string) The tip text.
             tipalign: (string) tip alignment, 'left' or 'right'.
@@ -49,7 +55,9 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
         this.showTip();
     },
     
-    /** If the mouse moves out of the tip's parent, hide the tip. */
+    /** Checks if the last mouse position is outside of the tip's parent
+        and if so, the tip will get hidden.
+        @returns boolean: true if the tip got hidden, false otherwise. */
     _checkOut: function() {
         var tt = this.tooltip;
         if (tt) {
@@ -69,6 +77,10 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
         
         this.setVisible(false);
         
+        // Don't consume mouse event since we just want to close the tip
+        // as a side effect of the user action. The typical case for this is
+        // the user clicking on a button while the tooltip for that button
+        // is shown.
         return true;
     },
     

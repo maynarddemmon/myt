@@ -15,8 +15,6 @@
             true if the point should not be drawn or false if the point
             should be drawn.
 */
-// TODO: mouseclick to "select" a point.
-// TODO: Polygon bounds testing
 // TODO: Replace scale and origin with just the conversion functions.
 myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     include: [myt.SelectionManager],

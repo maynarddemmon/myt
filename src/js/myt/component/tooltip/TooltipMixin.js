@@ -41,45 +41,42 @@ myt.TooltipMixin = new JS.Module('TooltipMixin', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides MouseOverAndDown. */
+    /** @overrides myt.MouseOver. */
     doSmoothMouseOver: function(isOver) {
         this.callSuper(isOver);
         
-        if (isOver) {
-            var tipText = this.tooltip;
-            if (tipText) {
-                var ttv = this.__getTooltipView(),
-                    tipAlign = this.tipAlign,
-                    tipValign = this.tipValign;
-                ttv.setTooltip({
-                    parent:this, 
-                    text:tipText, 
-                    tipalign:tipAlign ? tipAlign : 'left', 
-                    tipvalign:tipValign ? tipValign : 'top'
-                });
+        if (isOver && this.tooltip) {
+            // Use configured class or default if none defined.
+            var tipClass = this.tipClass ? this.tipClass : myt.TooltipMixin.DEFAULT_TIP_CLASS,
+                g = myt.global, 
+                ttv = g.tooltipView;
+            
+            // Destroy tip if it's not the correct class.
+            if (ttv && !(ttv instanceof tipClass)) {
+                g.unregister('tooltipView');
+                ttv.destroy();
+                ttv = null;
             }
+            
+            // Create new instance.
+            if (!ttv) {
+                // Create tooltip div if necessary
+                var elem = document.getElementById("tooltipDiv");
+                if (!elem) {
+                    elem = myt.DomElementProxy.createDomElement('div', {position:'absolute'});
+                    document.getElementsByTagName('body')[0].appendChild(elem);
+                }
+                
+                ttv = new tipClass(elem, {domId:'tooltipDiv'});
+                g.register('tooltipView', ttv);
+            }
+            
+            ttv.setTooltip({
+                parent:this, 
+                text:this.tooltip, 
+                tipalign:this.tipAlign ? this.tipAlign : 'left', 
+                tipvalign:this.tipValign ? this.tipValign : 'top'
+            });
         }
-    },
-    
-    __getTooltipView: function() {
-        // Use configured class or default if none defined.
-        var tipClass = this.tipClass ? this.tipClass : myt.TooltipMixin.DEFAULT_TIP_CLASS;
-        
-        // Destroy tip if it's not the correct class.
-        var g = myt.global,
-            ttv = g.tooltipView;
-        if (ttv && !(ttv instanceof tipClass)) {
-            g.unregister(ttv);
-            ttv.destroy();
-            ttv = null;
-        }
-        
-        // Create new instance.
-        if (!ttv) {
-            ttv = new tipClass(document.getElementById("tooltipDiv"), {});
-            g.register('tooltipView', ttv);
-        }
-        
-        return ttv;
     }
 });

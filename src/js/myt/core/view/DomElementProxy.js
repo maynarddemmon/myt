@@ -11,15 +11,15 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
     extend: {
         /** Creates a new dom element.
             @param tagname:string the name of the element to create.
-            @param styles:object a map of style keys and values to add to the
-                new element.
+            @param styles:object (optional) a map of style keys and values to 
+                add to the style property of the new element.
+            @param props:object (optional) a map of keys and values to add to 
+                the new element.
             @returns the created element. */
-        createDomElement: function(tagname, styles) {
-            var elem = document.createElement(tagname);
-            if (styles) {
-                var style = elem.style;
-                for (var key in styles) style[key] = styles[key];
-            }
+        createDomElement: function(tagname, styles, props) {
+            var elem = document.createElement(tagname), key;
+            if (props) for (key in props) elem[key] = props[key];
+            if (styles) for (key in styles) elem.style[key] = styles[key];
             return elem;
         },
         
