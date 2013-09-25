@@ -74,3 +74,88 @@ test("Test wrapFunction", function() {
     ok(f3() === 3, "Function three returns 3.");
 });
 
+test("Test filterObject", function() {
+    var obj = {
+        foo:"FOO",
+        bar:5,
+        baz:null,
+        biz:undefined
+    };
+    
+    var results = myt.filterObject(obj);
+    ok(results === undefined, "Just the undefined value should be removed.");
+    
+    results = myt.filterObject(obj);
+    ok(results === null, "No more undefined value so null should be returned.");
+    
+    results = myt.filterObject(obj, "FOO");
+    ok(results === "FOO", "The matching string value should be found.");
+    
+    results = myt.filterObject(obj, "FOO");
+    ok(results === null, "The matching string value should no longer be found.");
+    
+    results = myt.filterObject(obj, function(k, v) {return k === 'bar';});
+    ok(results === 5, "The match should have a value of 5.");
+    
+    results = myt.filterObject(obj, function(k, v) {return k === 'bar';});
+    ok(results === null, "The matching value should no longer be found.");
+    
+    var obj2 = {
+        foo:"FOO",
+        bar:"bar",
+        baz:"Baz",
+        biz:9
+    };
+    
+    results = myt.filterObject(obj2, "foo", true);
+    ok(results.length === 0, "Result should be an empty array since nothing matches.");
+    
+    results = myt.filterObject(obj2, "FOO", true);
+    ok(results.length === 1 && results[0] === "FOO", "Result should be an array.");
+    
+    results = myt.filterObject(obj2, "FOO", true);
+    ok(results.length === 0, "Result should be an empty array.");
+    
+    results = myt.filterObject(obj2, function(k, v) {return typeof v === 'string';}, true);
+    ok(results.length === 2, "Result should be an array of length 2.");
+    
+    ok(Object.keys(obj2).length === 1, "Object should now only have a 1 key left.");
+});
+
+test("Test filterArray", function() {
+    var arr = ['foo', 'bar', 'baz', undefined];
+    
+    var results = myt.filterArray(arr);
+    ok(results === undefined, "Just the undefined value should be removed.");
+    
+    results = myt.filterArray(arr);
+    ok(results === null, "No more undefined value so null should be returned.");
+    
+    results = myt.filterArray(arr, "foo");
+    ok(results === "foo", "The matching string value should be found.");
+    
+    results = myt.filterArray(arr, "foo");
+    ok(results === null, "The matching string value should no longer be found.");
+    
+    results = myt.filterArray(arr, function(v) {return v === 'bar';});
+    ok(results === 'bar', "The match should have a value of bar.");
+    
+    results = myt.filterArray(arr, function(v) {return v === 'bar';});
+    ok(results === null, "The matching value should no longer be found.");
+    
+    var arr2 = ['foo', 'bar', 'baz', undefined];
+    
+    results = myt.filterArray(arr2, "Foo", true);
+    ok(results.length === 0, "Result should be an empty array since nothing matches.");
+    
+    results = myt.filterArray(arr2, "foo", true);
+    ok(results.length === 1 && results[0] === "foo", "Result should be an array.");
+    
+    results = myt.filterArray(arr2, "foo", true);
+    ok(results.length === 0, "Result should be an empty array.");
+    
+    results = myt.filterArray(arr2, function(v) {return typeof v === 'string';}, true);
+    ok(results.length === 2, "Result should be an array of length 2.");
+    
+    ok(arr2.length === 1, "Array should now only have a length of 1.");
+});

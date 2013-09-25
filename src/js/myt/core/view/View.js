@@ -112,15 +112,10 @@ myt.View = new JS.Class('View', myt.Node, {
     getSiblingViews: function() {
         if (!this.parent) return null;
         
-        var svs = this.parent.getSubviews(), i  = svs.length;
+        var svs = this.parent.getSubviews();
         
         // Filter out ourself
-        while (i) {
-            if (svs[--i] === this) {
-                svs.splice(i, 1);
-                break;
-            }
-        }
+        myt.filterArray(svs, this);
         
         return svs;
     },

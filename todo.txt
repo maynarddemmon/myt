@@ -8,5 +8,22 @@ Myt
 
 o form components: combobox using datalist element: http://www.quackit.com/html_5/tags/html_datalist_tag.cfm
 o send mouse out to last "over" view if two overs happen in a row. Browser Bugfix: firefox
+
 o Replication/repeat. See AngularJS ngRepeat for inspiration.
 o List components
+  - Item tiling and pooling
+
+o Offset hint for layout
+o Target a hint to a specific layout when a view is controlled by multiple layouts.
+
+o SizeToParent should support an offset so we can do parent width minus 10px, etc.
+
+o Use Z-index for bring to front
+o Dialog should support multiple entries for spinner message using a key to add/remove them.
+o Confirm dialog component.
+o Build in delay to showSpinner code.
+o Move character filtering into FormInputText as "pattern"
+
+o Cached bitmap for checkbox/radio
+
+o Compensate for CSS border property

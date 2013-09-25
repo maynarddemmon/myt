@@ -241,3 +241,26 @@ test("View alignment", function() {
     var divFromDocAgain = document.getElementById(divId);
     ok(divFromDocAgain == null, "Div obtained from document after destroy should not exist.");
 });
+
+test("Test getSubviews and getSiblingViews", function() {
+    var div = document.createElement('div');
+    div.style.position = 'absolute';
+    var bdy = document.getElementsByTagName('body')[0];
+    bdy.appendChild(div);
+    
+    var divId = 'testDivId';
+    var v = new myt.View(div, {x:0, y:0, width:100, height:50}, [myt.RootView]);
+    var child1 = new myt.View(v);
+    var child2 = new myt.View(v);
+    var child3 = new myt.View(v);
+    
+    ok(v.getSubviews().length === 3, "Root view should have 3 subviews.");
+    
+    var siblings = child2.getSiblingViews();
+    ok(siblings.length === 2, "Child should have 2 siblings.");
+    ok(siblings[0] === child1, "First sibling should be the first child added.");
+    ok(siblings[1] === child3, "Second sibling should be the last child added.");
+    
+    // Destroy it
+    v.destroy();
+});

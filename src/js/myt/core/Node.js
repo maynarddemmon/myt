@@ -269,11 +269,7 @@ myt.Node = new JS.Class('Node', {
         
         var loc = this[placement];
         if (loc) {
-            if (remainder) {
-                return loc.determinePlacement(remainder);
-            } else {
-                return loc;
-            }
+            return remainder ? loc.determinePlacement(remainder) : loc;
         } else {
             return this;
         }
@@ -338,20 +334,14 @@ myt.Node = new JS.Class('Node', {
         @param node:Node the node to check for.
         @returns boolean */
     isAncestorOf: function(node) {
-        if (!node) return false;
-        
-        return node.isDescendantOf(this);
+        return node ? node.isDescendantOf(this) : false;
     },
     
     /** Find the youngest ancestor Node that is an instance of the class.
         @param klass the Class to search for.
         @returns Node or null if no klass is provided or match found. */
     searchAncestorsForClass: function(klass) {
-        if (klass) {
-            return this.searchAncestors(function(n) {return n instanceof klass;});
-        } else {
-            return null;
-        }
+        return klass ? this.searchAncestors(function(n) {return n instanceof klass;}) : null;
     },
     
     /** Get the youngest ancestor of this Node for which the matcher function 
