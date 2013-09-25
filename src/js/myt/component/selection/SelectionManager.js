@@ -168,7 +168,7 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
         myt.Selectable subviews.
         @returns array */
     getManagedItems: function() {
-        var retval = [], svs = this.subviews, i = svs.length, sv;
+        var retval = [], svs = this.getSubviews(), i = svs.length, sv;
         while (i) {
             sv = svs[--i];
             if (sv.isA(myt.Selectable)) retval.push(sv);

@@ -624,7 +624,7 @@ myt.View = new JS.Class('View', myt.Node, {
         @returns void */
     sortSubviews: function(sortFunc) {
         // Sort subviews
-        var svs = this.subviews, i = svs.length;
+        var svs = this.getSubviews(), i = svs.length;
         svs.sort(sortFunc);
         
         // Rearrange dom to match new sort order.

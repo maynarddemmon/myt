@@ -52,7 +52,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
     removeFile: function(file) {
         this.callSuper(file);
         
-        var images = this.subviews, i = images.length, image;
+        var images = this.getSubviews(), i = images.length, image;
         while (i) {
             image = images[--i];
             if (this.isSameFile(image.file, file)) {
