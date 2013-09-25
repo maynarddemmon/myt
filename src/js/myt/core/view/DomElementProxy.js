@@ -23,6 +23,14 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
             return elem;
         },
         
+        /** Gets the computed style for a dom element.
+            @param elem:dom element the dom element to get the style for.
+            @returns object the style object. */
+        getComputedStyle: function(elem) {
+            // getComputedStyle is IE's proprietary way.
+            return global.getComputedStyle ? global.getComputedStyle(elem, '') : elem.currentStyle;
+        },
+        
         /** Tests if a dom element is visible or not.
             @param elem:DomElement the element to check visibility for.
             @returns boolean True if visible, false otherwise. */
@@ -34,24 +42,26 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
             while (elem) {
                 if (elem === document) return true;
                 
-                style = elem.style;
-                if (!style) {
-                    // Try the computed style in a standard way, or get the 
-                    // computed style using IE's silly proprietary way
-                    style = window.getComputedStyle ? window.getComputedStyle(elem, "") : elem.currentStyle;
-                }
-                if (style.display === 'none' || style.visibility === 'hidden') return false;
+                style = this.getComputedStyle(elem);
+                if (style.display === 'none' || style.visibility === 'hidden') break;
                 
                 elem = elem.parentNode;
             }
             return false;
         },
         
-        /** Gets the highest z-index of the dom element.
+        /** Gets the z-index of the dom element or, if it does not define a 
+            stacking context, the highest z-index of any of the dom element's 
+            descendants.
             @returns int */
         getHighestZIndex: function(elem) {
-            var zIdx = (window.getComputedStyle ? window.getComputedStyle(elem, "") : elem.currentStyle).zIndex;
-            if (zIdx === 'auto') {
+            // See https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Understanding_z_index/The_stacking_context
+            var style = this.getComputedStyle(elem),
+                zIdx = style.zIndex, 
+                opacity = parseInt(style.opacity, 10),
+                isAuto = zIdx === 'auto';
+            if (isAuto && opacity === 1) {
+                // No new stacking context.
                 zIdx = 0;
                 var children = elem.childNodes, i = children.length, child;
                 while (i) {
@@ -59,7 +69,7 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
                     if (child.nodeType === 1) zIdx = Math.max(zIdx, this.getHighestZIndex(child));
                 }
             } else {
-                zIdx = parseInt(zIdx, 10);
+                zIdx = isAuto ? 0 : parseInt(zIdx, 10);
             }
             return zIdx;
         },
