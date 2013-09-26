@@ -27,6 +27,7 @@
             implemented, normal dom traversal will occur.
 */
 // TODO: fire focus and blur events rather than a focused event?
+// FIXME: should we give away focus when we become not visible?
 myt.FocusObservable = new JS.Module('FocusObservable', {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
@@ -101,8 +102,6 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
         }
     },
     
-    // FIXME: should we give away focus when we become not visible?
-    
     
     // Methods /////////////////////////////////////////////////////////////////
     /** Gives the focus to the next focusable element or, if nothing else
@@ -119,15 +118,12 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
         }
     },
     
-    /** Tests if this view is currently focusable.
-        @returns boolean True if this view is visible, enabled and focusable,
-            false otherwise. */
+    /** Tests if this view is in a state where it can receive focus.
+        @returns boolean True if this view is visible, enabled, focusable and
+            not focus masked, false otherwise. */
     isFocusable: function() {
-        if (!this.focusable) return false;
-        if (this.disabled) return false;
-        if (!this.isVisible()) return false;
-        if (this.searchAncestorsOrSelf(function(n) {return n.maskFocus === true;}) != null) return false;
-        return true;
+        return this.focusable && !this.disabled && this.isVisible() && 
+            this.searchAncestorsOrSelf(function(n) {return n.maskFocus === true;}) === null;
     },
     
     /** Calling this method will set focus onto this view if it is focusable.
