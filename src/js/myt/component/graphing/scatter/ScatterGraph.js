@@ -498,6 +498,35 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         return this._removeDataPointBy(function(p, i) {return p.id === id;}, type);
     },
     
+    /** Removes a list of data points that match the provided list of IDs.
+        Both still and animating points will be removed if they match.
+        @param idList:array an array of IDs to remove.
+        @returns void */
+    removeDataPointsById: function(idList) {
+        var i = idList.length, id, func, atLeastOneRemoval = false, atLeastOneAnimatingRemoval = false;
+        
+        this._lockDraw = this._lockRebuild = true;
+        while (i) {
+            id = idList[--i];
+            func = function(p, i) {return p.id === id;};
+            
+            if (this.removeDataPoint(func)) {
+                atLeastOneRemoval = true;
+            } else if (this.removeAnimatingDataPoint(func)) {
+                atLeastOneAnimatingRemoval = true;
+            }
+        }
+        this._lockDraw = this._lockRebuild = false;
+        
+        if (atLeastOneRemoval) {
+            this.redrawPoints(true);
+            this._kdtree.rebuildTree(this.data);
+        }
+        if (atLeastOneAnimatingRemoval) {
+            this.redrawAnimatingPoints(true);
+        }
+    },
+    
     removeDataPointByIndex: function(idx, type) {
         return this._removeDataPointBy(function(p, i) {return i === idx;}, type);
     },
