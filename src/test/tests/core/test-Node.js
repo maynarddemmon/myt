@@ -237,6 +237,10 @@ test("Ancestor matching", function() {
     
     // getMatchingAncestorOrSelf and searchAncestorsOrSelf
     var func = function(n) {return n.name === 'foo';};
+    
+    ok(myt.Node.getMatchingAncestorOrSelf(instA.foo, null) === null, "Bad args should return null.");
+    ok(myt.Node.getMatchingAncestorOrSelf(null, func) === null, "Bad args should return null.");
+    
     var match = myt.Node.getMatchingAncestorOrSelf(instA.foo, func);
     ok(match === instA.foo, "Name should match foo");
     var matchAlt = instA.foo.searchAncestorsOrSelf(func);
@@ -249,6 +253,10 @@ test("Ancestor matching", function() {
     
     // getMatchingAncestor and searchAncestors
     var func2 = function(n) {return n.isRoot();};
+    
+    ok(myt.Node.getMatchingAncestor(instC.bar.baz, null) === null, "Bad args should return null.");
+    ok(myt.Node.getMatchingAncestor(null, func2) === null, "Bad args should return null.");
+    
     var match2 = myt.Node.getMatchingAncestor(instC.bar.baz, func2);
     ok(match2 === instC, "Root should be root");
     var match2Alt = instC.bar.baz.searchAncestors(func2);

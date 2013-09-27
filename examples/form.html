@@ -14,6 +14,8 @@
     JS.require('myt.all', function() {this.init();});
     
     function init() {
+        myt.Layout.incrementGlobalLock();
+        
         var appDiv = document.getElementById("appDiv");
         
         var rootView = new myt.View(appDiv, {
@@ -139,6 +141,8 @@
         
         console.log(rootView);
         window.rootView = rootView;
+        
+        myt.Layout.decrementGlobalLock();
     }
 </script>
 </body></html>

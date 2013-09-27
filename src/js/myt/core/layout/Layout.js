@@ -11,50 +11,52 @@
 myt.Layout = new JS.Class('Layout', myt.Node, {
     // Class Methods ///////////////////////////////////////////////////////////
     extend: {
+        deferredLayouts: [],
+        
         /** Increments the global lock that prevents all layouts from updating.
             @returns void */
         incrementGlobalLock: function() {
-            if (myt.Layout._lockCount === undefined) myt.Layout._lockCount = 0;
+            var L = myt.Layout;
+            if (L._lockCount === undefined) L._lockCount = 0;
             
-            var wasUnlocked = myt.Layout._lockCount === 0;
-            myt.Layout._lockCount++;
-            if (wasUnlocked) myt.Layout.__setLocked(true);
+            L._lockCount++;
+            if (L._lockCount === 1) L.__setLocked(true);
         },
         
         /** Decrements the global lock that prevents all layouts from updating.
             @returns void */
         decrementGlobalLock: function() {
-            if (myt.Layout._lockCount === undefined) myt.Layout._lockCount = 0;
+            var L = myt.Layout;
+            if (L._lockCount === undefined) L._lockCount = 0;
             
-            if (myt.Layout._lockCount === 0) return;
-            
-            myt.Layout._lockCount--;
-            if (myt.Layout._lockCount === 0) myt.Layout.__setLocked(false);
+            if (L._lockCount !== 0) {
+                L._lockCount--;
+                if (L._lockCount === 0) L.__setLocked(false);
+            }
         },
         
         /** Adds a layout to a list of layouts that will get updated when the
             global lock is no longer locked.
+            @param layout:myt.Layout the layout to defer an update for.
             @returns void */
         deferLayoutUpdate: function(layout) {
             // Don't add a layout that is already deferred.
-            if (layout.__deferredLayout) return;
-            
-            myt.Layout.deferredLayouts.push(layout);
-            layout.__deferredLayout = true;
+            if (!layout.__deferredLayout) {
+                myt.Layout.deferredLayouts.push(layout);
+                layout.__deferredLayout = true;
+            }
         },
         
         /** Called to set/unset the global lock. Updates all the currently 
             deferred layouts.
             @private */
         __setLocked: function(v) {
-            if (myt.Layout.locked === v) return;
-            myt.Layout.locked = v;
+            var L = myt.Layout;
+            if (L.locked === v) return;
+            L.locked = v;
             
-            if (v) {
-                if (!myt.Layout.deferredLayouts) myt.Layout.deferredLayouts = [];
-            } else {
-                var layouts = myt.Layout.deferredLayouts,
-                    layout, i = layouts.length;
+            if (!v) {
+                var layouts = L.deferredLayouts, i = layouts.length, layout;
                 while (i) {
                     layout = layouts[--i];
                     layout.__deferredLayout = false;
@@ -165,7 +167,7 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
         @param sv:View the view to check for.
         @returns the index of the subview or -1 if not found. */
     getSubviewIndex: function(sv) {
-        return myt.getLastIndexOf(this.subviews, sv);
+        return this.subviews.indexOf(sv);
     },
     
     /** Adds the provided View to the subviews array of this Layout.
@@ -190,8 +192,7 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
         refreshing all the subview monitoring.
         @returns void */
     startMonitoringAllSubviews: function() {
-        var svs = this.subviews,
-            i = svs.length;
+        var svs = this.subviews, i = svs.length;
         while (i) this.startMonitoringSubview(svs[--i]);
     },
     
@@ -222,8 +223,7 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
         refreshing all the subview monitoring.
         @returns void */
     stopMonitoringAllSubviews: function() {
-        var svs = this.subviews,
-            i = svs.length;
+        var svs = this.subviews, i = svs.length;
         while (i) this.stopMonitoringSubview(svs[--i]);
     },
     

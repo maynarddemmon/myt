@@ -242,7 +242,7 @@ test("View alignment", function() {
     ok(divFromDocAgain == null, "Div obtained from document after destroy should not exist.");
 });
 
-test("Test getSubviews and getSiblingViews", function() {
+test("Test getSubviews, getSiblingViews, getLayouts", function() {
     var div = document.createElement('div');
     div.style.position = 'absolute';
     var bdy = document.getElementsByTagName('body')[0];
@@ -250,11 +250,24 @@ test("Test getSubviews and getSiblingViews", function() {
     
     var divId = 'testDivId';
     var v = new myt.View(div, {x:0, y:0, width:100, height:50}, [myt.RootView]);
+    
+    ok(v.subviews === undefined, "Subviews should begin as undefined.");
+    ok(v.getSubviews().length === 0, "Subviews should get lazy instantiated.");
+    ok(v.subviews.length === 0, "Subviews should now be defined.");
+    
+    ok(v.layouts === undefined, "Layouts should begin as undefined.");
+    ok(v.getLayouts().length === 0, "Layouts should get lazy instantiated.");
+    ok(v.layouts.length === 0, "Layouts should now be defined.");
+    
     var child1 = new myt.View(v);
     var child2 = new myt.View(v);
     var child3 = new myt.View(v);
     
+    var layout1 = new myt.ConstantLayout(v);
+    var layout2 = new myt.ConstantLayout(v);
+    
     ok(v.getSubviews().length === 3, "Root view should have 3 subviews.");
+    ok(v.getLayouts().length === 2, "Root view should have 2 layouts.");
     
     var siblings = child2.getSiblingViews();
     ok(siblings.length === 2, "Child should have 2 siblings.");

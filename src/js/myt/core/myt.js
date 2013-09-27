@@ -131,9 +131,10 @@ myt = {
             template = params.shift();
         
         if (template == null) return '';
-        var i = params.length, param;
-        while (i) {
-            param = params[--i];
+        
+        var param, i = 0, len = params.length;
+        for (; len > i; ++i) {
+            param = params[i];
             template = template.split("{" + i + "}").join(param == null ? '' : param);
         }
         return template;
@@ -146,6 +147,8 @@ myt = {
         used as the scope for the method.
         @param text:string the text to put inside the link.
         @param callbackMethodName:string the name of the method to execute.
+        @param attrs:object (optional) a map of additional attributes that
+            will be inserted into the tag.
         @returns void */
     generateLink: function(text, callbackMethodName, attrs) {
         var optAttrs = '';
@@ -153,8 +156,10 @@ myt = {
             for (var name in attrs) optAttrs += ' ' + name + '="' + attrs[name] + '"';
         }
         
-        var template = '<a href="#" onclick="myt._handleGeneratedLink(this, \'{1}\'); return false;"' + optAttrs + '>{0}</a>';
-        return this.fillTextTemplate(template, text, callbackMethodName);
+        return this.fillTextTemplate(
+            '<a href="#" onclick="myt._handleGeneratedLink(this, \'{0}\'); return false;"{2}>{1}</a>', 
+            callbackMethodName, text, optAttrs
+        );
     },
     
     /** See myt.generateLink for documentation.
@@ -237,19 +242,6 @@ myt = {
     },
     
     // Collection Utilities
-    /** Gets the last index of the value in the array.
-        @param arr:array the array to search.
-        @param v:* the value to search for.
-        @returns int: the last index of the value or -1 if not found or the
-            array is invalid in some way. */
-    getLastIndexOf: function(arr, v) {
-        if (Array.isArray(arr)) {
-            var i = arr.length;
-            while (i) if (v === arr[--i]) return i;
-        }
-        return -1;
-    },
-    
     /** Removes an item or items from the provided array that matches based 
         on the provided search function.
         @param arr:array the array to search.
@@ -323,13 +315,25 @@ myt = {
     /** @returns a random number between 0 (inclusive) and 1 (exclusive)
         @param func:function (optional) a distribution function for the
             random numbers. The function should map a number between 0 and 1
-            to another number between 0 and 1. If not provided a flat 
-            distribution will be used. Example functions:
+            to another number between 0 (inclusive) and 1 (exclusive). If not 
+            provided a flat distribution will be used. Example functions:
                 - function(v) {return v * v;} will skew the value towards 0.
-                - function(v) {return 1 - v * v;} will skew the value towards 1.
-        @returns number: a random number between 0 and 1. */
+                - function(v) {return 0.9999999999 - v * v;} will skew the 
+                  value towards a value very close to 1.
+        @returns number: a random number between 0 and almost 1. */
     getRandom: function(func) {
-        return func ? func(Math.random()) : Math.random();
+        var v = Math.random();
+        if (func) {
+            v = func(v);
+            
+            // Correct for badly behaved skew functions.
+            if (v >= 1) {
+                v = 0.9999999999;
+            } else if (v < 0) {
+                v = 0;
+            }
+        }
+        return v;
     },
     
     /** @returns a random number between min (inclusive) and max (exclusive).
@@ -338,6 +342,11 @@ myt = {
         @param func:function a skew function. See myt.getRandom for more info.
         @returns number: between min and max. */
     getRandomArbitrary: function(min, max, func) {
+        if (min > max) {
+            var tmp = min;
+            min = max;
+            max = tmp;
+        }
         return this.getRandom(func) * (max - min) + min;
     },
     
@@ -347,6 +356,24 @@ myt = {
         @param func:function a skew function. See myt.getRandom for more info.
         @returns number: an integer between min and max. */
     getRandomInt: function(min, max, func) {
+        if (min > max) {
+            var tmp = min;
+            min = max;
+            max = tmp;
+        }
         return Math.floor(this.getRandom(func) * (max - min + 1) + min);
+    },
+    
+    // Equality
+    /** Tests if two floats are essentially equal to each other.
+        @param a:float
+        @param b:float
+        @param epsilon:float (optional) the percent of different allowed
+            between a and b. Defaults to 0.000001 if not provided.
+        @return true if equal, false otherwise. */
+    areFloatsEqual: function(a, b, epsilon) {
+        var A = Math.abs(a), B = Math.abs(b);
+        epsilon = epsilon ? Math.abs(epsilon) : 0.000001;
+        return Math.abs(a - b) <= (A > B ? B : A) * epsilon;
     }
 };

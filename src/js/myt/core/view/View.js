@@ -103,8 +103,7 @@ myt.View = new JS.Class('View', myt.Node, {
     
     /** Does lazy instantiation of the subviews array. */
     getSubviews: function() {
-        if (!this.subviews) this.subviews = [];
-        return this.subviews;
+        return this.subviews ? this.subviews : this.subviews = [];
     },
     
     /** Gets the views that are our siblings.
@@ -122,8 +121,7 @@ myt.View = new JS.Class('View', myt.Node, {
     
     /** Does lazy instantiation of the layouts array. */
     getLayouts: function() {
-        if (!this.layouts) this.layouts = [];
-        return this.layouts;
+        return this.layouts ? this.layouts : this.layouts = [];
     },
     
     // Focus Attributes //
@@ -410,12 +408,7 @@ myt.View = new JS.Class('View', myt.Node, {
         checked. If you need to check that use myt.DomElementProxy.isDomElementVisible.
         @returns true if this view is visible, false otherwise. */
     isVisible: function() {
-        var p = this;
-        while (p) {
-            if (!p.visible) return false;
-            p = p.parent;
-        }
-        return true;
+        return this.searchAncestorsOrSelf(function(v) {return !v.visible;}) === null;
     },
     
     /** Finds the youngest ancestor (or self) that is a focusTrap or focusCage.
@@ -423,12 +416,11 @@ myt.View = new JS.Class('View', myt.Node, {
             ignored.
         @returns a View with focusTrap set to true or null if not found. */
     getFocusTrap: function(ignoreFocusTrap) {
-        var p = this;
-        while (p) {
-            if (p.focusCage || (p.focusTrap && !ignoreFocusTrap)) return p;
-            p = p.parent;
-        }
-        return null;
+        return this.searchAncestorsOrSelf(
+            function(v) {
+                return v.focusCage || (v.focusTrap && !ignoreFocusTrap);
+            }
+        );
     },
     
     /** @overrides myt.Node
@@ -486,7 +478,7 @@ myt.View = new JS.Class('View', myt.Node, {
         @param sv:View the view to look for.
         @returns the index of the subview or -1 if not found. */
     getSubviewIndex: function(sv) {
-        return myt.getLastIndexOf(this.subviews, sv);
+        return this.getSubviews().indexOf(sv);
     },
     
     /** Called when a View is added to this View. Do not call this method to 
@@ -513,7 +505,7 @@ myt.View = new JS.Class('View', myt.Node, {
         @param layout:Layout the layout to look for.
         @returns the index of the layout or -1 if not found. */
     getLayoutIndex: function(layout) {
-        return myt.getLastIndexOf(this.layouts, layout);
+        return this.getLayouts().indexOf(layout);
     },
     
     /** Called when a Layout is added to this View. Do not call this method to 

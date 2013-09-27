@@ -114,8 +114,7 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
     /** Use a timeout to greatly reduce the number of spurious updates during
         initialization. */
     __updateContentPosition: function(v) {
-        if (this.__updateContentPositionLoopBlock) return;
-        if (this.__updateContentPositionTimerId) return;
+        if (this.__updateContentPositionLoopBlock || this.__updateContentPositionTimerId) return;
         
         var self = this;
         this.__updateContentPositionTimerId = setTimeout(function() {
@@ -124,29 +123,31 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
     },
     
     __updateContentPositionAfterDelay: function() {
-        if (this.destroyed) return;
-        
-        this.__updateContentPositionTimerId = undefined;
-        
-        var inset = this.inset, outset = this.outset, textView = this.textView,
-            textViewVisible = textView.visible && this.text;
-        
-        if (this.shrinkToFit) {
-            textView.setX(inset);
+        if (!this.destroyed) {
+            this.__updateContentPositionTimerId = undefined;
             
-            this.__updateContentPositionLoopBlock = true;
-            this.setWidth(inset + (textViewVisible ? textView.width : 0) + outset);
-            this.__updateContentPositionLoopBlock = false;
+            var inset = this.inset, 
+                outset = this.outset, 
+                textView = this.textView,
+                textViewVisible = textView.visible && this.text;
             
-            this.setHeight(this.origHeight);
-        } else {
-            textView.setHeight('auto');
-            textView.setWidth(this.width - inset - outset);
-            textView.setX(inset);
+            if (this.shrinkToFit) {
+                textView.setX(inset);
+                
+                this.__updateContentPositionLoopBlock = true;
+                this.setWidth(inset + (textViewVisible ? textView.width : 0) + outset);
+                this.__updateContentPositionLoopBlock = false;
+                
+                this.setHeight(this.origHeight);
+            } else {
+                textView.setHeight('auto');
+                textView.setWidth(this.width - inset - outset);
+                textView.setX(inset);
+                
+                this.setHeight(textViewVisible ? textView.y + textView.height : this.origHeight);
+            }
             
-            this.setHeight(textViewVisible ? textView.y + textView.height : this.origHeight);
+            this.updateUI();
         }
-        
-        this.updateUI();
     }
 });

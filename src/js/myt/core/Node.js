@@ -27,13 +27,13 @@ myt.Node = new JS.Class('Node', {
             @param matcher:function the function to test for matching Nodes with.
             @returns Node or null if no match is found. */
         getMatchingAncestorOrSelf: function(n, matcherFunc) {
-            if (!n || !matcherFunc) return null;
-            
-            if (matcherFunc(n)) {
-                return n;
-            } else {
-                return myt.Node.getMatchingAncestor(n, matcherFunc);
+            if (n && matcherFunc) {
+                while (n) {
+                    if (matcherFunc(n)) return n;
+                    n = n.parent;
+                }
             }
+            return null;
         },
         
         /** Get the youngest ancestor of the provided Node for which the 
@@ -43,17 +43,7 @@ myt.Node = new JS.Class('Node', {
             @param matcher:function the function to test for matching Nodes with.
             @returns Node or null if no match is found. */
         getMatchingAncestor: function(n, matcherFunc) {
-            if (!n || !matcherFunc) return null;
-            
-            var p = n.parent;
-            
-            if (!p) {
-                return null;
-            } else if (matcherFunc(p)) {
-                return p;
-            } else {
-                return myt.Node.getMatchingAncestor(p, matcherFunc);
-            }
+            return myt.Node.getMatchingAncestorOrSelf(n ? n.parent : null, matcherFunc);
         }
     },
     
@@ -229,8 +219,7 @@ myt.Node = new JS.Class('Node', {
         subnodes array if no child Nodes exist.
         @returns array of subnodes. */
     getSubnodes: function() {
-        if (!this.subnodes) this.subnodes = [];
-        return this.subnodes;
+        return this.subnodes ? this.subnodes : this.subnodes = [];
     },
     
     
@@ -304,8 +293,7 @@ myt.Node = new JS.Class('Node', {
         ancestor or self that has no parent.
         @returns Node */
     getRoot: function() {
-        var p = this.parent;
-        return p ? p.getRoot() : this;
+        return this.parent ? this.parent.getRoot() : this;
     },
     
     /** Checks if this Node is a root Node.
@@ -376,7 +364,7 @@ myt.Node = new JS.Class('Node', {
         @param node:Node the subnode to get the index for.
         @returns the index of the subnode or -1 if not found. */
     getSubnodeIndex: function(node) {
-        return myt.getLastIndexOf(this.subnodes, node);
+        return this.getSubnodes().indexOf(node);
     },
     
     /** A convienence method to make a Node a child of this Node. The
