@@ -8,14 +8,11 @@
 <script src="../src/js/myt/manifest.js"></script>
 </head><body>
 
-<div id="appDiv" style="position:absolute;"></div>
-
 <script>
     JS.require('myt.all', function() {this.init();});
     
     function init() {
-        var appDiv = document.getElementById("appDiv");
-        var rootView = new myt.View(appDiv, {width:600, height:450, bgColor:'#ffffff'}, [myt.SizeToWindow]);
+        var rootView = new myt.View(null, {width:600, height:450, bgColor:'#ffffff'}, [myt.SizeToWindow]);
         
         new myt.ImageUploader(rootView, {x:10, y:10, width:100, height:100, bgColor:'#cccccc'});
         new myt.ImageUploader(rootView, {x:120, y:10, width:100, height:100, bgColor:'#cccccc'});

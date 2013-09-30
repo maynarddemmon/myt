@@ -64,7 +64,7 @@ myt.TooltipMixin = new JS.Module('TooltipMixin', {
                 var elem = document.getElementById("tooltipDiv");
                 if (!elem) {
                     elem = myt.DomElementProxy.createDomElement('div', {position:'absolute'});
-                    document.getElementsByTagName('body')[0].appendChild(elem);
+                    myt.getElement().appendChild(elem);
                 }
                 
                 ttv = new tipClass(elem, {domId:'tooltipDiv'});

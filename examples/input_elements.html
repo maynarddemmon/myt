@@ -8,16 +8,13 @@
 <script src="../src/js/myt/manifest.js"></script>
 </head><body>
 
-<div id="appDiv" style="position:absolute;"></div>
-
 <script>
     JS.require('myt.all', function() {this.init();});
     
     function init() {
         myt.Layout.incrementGlobalLock();
         
-        var appDiv = document.getElementById("appDiv");
-        var rootView = new myt.View(appDiv, {width:600, height:600, bgColor:'#eeeeee'}, [myt.RootView]);
+        var rootView = new myt.View(null, {width:600, height:600, bgColor:'#eeeeee'}, [myt.RootView]);
         
         var attrs;
         for (var i = 0; 100 > i; i++) {

@@ -2,6 +2,7 @@
 myt.Markup = new JS.Class('Markup', myt.View, {
     include: [myt.SizeToDom],
     
+    
     // Accessors ///////////////////////////////////////////////////////////////
     setHtml: function(v) {
         if (this.html === v) return;

@@ -8,14 +8,11 @@
 <script src="../src/js/myt/manifest.js"></script>
 </head><body>
 
-<div id="appDiv" style="position:absolute;"></div>
-
 <script>
     JS.require('myt.all', function() {this.init();});
     
     function init() {
-        var appDiv = document.getElementById("appDiv");
-        var rootView = new myt.View(appDiv, {x:10, y:10, width:600, height:400, bgColor:'#cccccc'}, [myt.RootView]);
+        var rootView = new myt.View(null, {x:10, y:10, width:600, height:400, bgColor:'#cccccc'}, [myt.RootView]);
         
         var ActivatedMixin = new JS.Module('ActivatedMixin', {
             doActivated: function() {

@@ -1,13 +1,7 @@
 module('PanelButton');
 
 asyncTest("Create and destroy an IconTextPanelButton", 11, function() {
-    var div = document.createElement('div');
-    div.style.position = 'absolute';
-    
-    var bdy = document.getElementsByTagName('body')[0];
-    bdy.appendChild(div);
-    
-    var v = new myt.View(div, {width:300, height:300}, [myt.RootView]);
+    var v = new myt.View(null, {width:300, height:300}, [myt.RootView]);
     
     var btn = new myt.IconTextPanelButton(v);
     var shrinkBtn = new myt.IconTextPanelButton(v, {shrinkToFit:true});
@@ -55,13 +49,7 @@ asyncTest("Create and destroy an IconTextPanelButton", 11, function() {
 });
 
 asyncTest("Set an icon on an IconTextPanelButton and test y positioning", 12, function() {
-    var div = document.createElement('div');
-    div.style.position = 'absolute';
-    
-    var bdy = document.getElementsByTagName('body')[0];
-    bdy.appendChild(div);
-    
-    var v = new myt.View(div, {width:300, height:300}, [myt.RootView]);
+    var v = new myt.View(null, {width:300, height:300}, [myt.RootView]);
     
     var iconUrl = './tests/component/rsrc/icon.png';
     var btn = new myt.IconTextPanelButton(v, {iconUrl:iconUrl});
@@ -115,13 +103,7 @@ asyncTest("Set an icon on an IconTextPanelButton and test y positioning", 12, fu
 });
 
 asyncTest("Test x positioning of text and icon", 12, function() {
-    var div = document.createElement('div');
-    div.style.position = 'absolute';
-    
-    var bdy = document.getElementsByTagName('body')[0];
-    bdy.appendChild(div);
-    
-    var v = new myt.View(div, {width:300, height:300}, [myt.RootView]);
+    var v = new myt.View(null, {width:300, height:300}, [myt.RootView]);
     
     var iconUrl = './tests/component/rsrc/icon.png';
     var btn = new myt.IconTextPanelButton(v, {width:100, iconUrl:iconUrl, text:'foo bar'});

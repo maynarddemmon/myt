@@ -1,5 +1,5 @@
 /** A modal panel that contains a Dialog. */
-myt.Dialog = new JS.Class('Dimmer', myt.ModalPanel, {
+myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
         DEFAULT_RADIUS:12,

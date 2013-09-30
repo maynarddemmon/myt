@@ -8,14 +8,11 @@
 <script src="../src/js/myt/manifest.js"></script>
 </head><body>
 
-<div id="appDiv" style="position:absolute;"></div>
-
 <script>
     JS.require('myt.all', function() {this.init();});
     
     function init() {
-        var appDiv = document.getElementById("appDiv");
-        var rootView = new myt.View(appDiv, {width:600, height:450, bgColor:'#cccccc'}, [myt.SizeToWindow]);
+        var rootView = new myt.View(null, {width:600, height:450, bgColor:'#cccccc'}, [myt.SizeToWindow]);
         
         new myt.Spinner(rootView, {x:10, y:10, radius:10, length:40, lines:16, lineWidth:4, bgColor:'#dddddd', visible:true});
         var foo = new myt.Spinner(rootView, {x:120, y:10, radius:25, length:25, lines:24, lineWidth:4, bgColor:'#dddddd'});

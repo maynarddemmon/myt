@@ -8,15 +8,11 @@
 <script src="../src/js/myt/manifest.js"></script>
 </head><body>
 
-<div id="appDiv" style="position:absolute;"></div>
-
 <script>
     JS.require('myt.all', function() {this.init();});
     
     function init() {
-        var appDiv = document.getElementById("appDiv");
-        
-        var view4 = new myt.View(appDiv, {bgColor:'#eeeeee'}, [myt.SizeToWindowWidth]);
+        var view4 = new myt.View(null, {bgColor:'#eeeeee'}, [myt.SizeToWindowWidth]);
         
         var LocalFlowBtn = new JS.Class('LocalFlowBtn', myt.SimpleButton, {
             include: [myt.TransformSupport],

@@ -20,7 +20,7 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Checkbox */
+    /** @overrides myt.View */
     initNode: function(parent, attrs) {
         attrs.focusable = attrs.focusCage = true;
         
@@ -48,6 +48,7 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
         myt.addEventListener(de, 'dragover', cdf);
     },
     
+    /** @overrides myt.View */
     doBeforeAdoption: function() {
         this.callSuper();
         

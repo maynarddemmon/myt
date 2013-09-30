@@ -62,6 +62,8 @@ myt.View = new JS.Class('View', myt.Node, {
     /** Creates the dom element we will be a proxy for. Called during View
         initialization. Gives subclasses a change to change how the view is
         backed.
+        @param parent:dom element The dom element that will be the parent
+            of the newly created dom element.
         @returns a dom element */
     createOurDomElement: function(parent) {
         var elem = document.createElement('div');

@@ -8,14 +8,11 @@
 <script src="../src/js/myt/manifest.js"></script>
 </head><body>
 
-<div id="appDiv" style="position:absolute;"></div>
-
 <script>
     JS.require('myt.all', function() {this.init();});
     
     function init() {
-        var appDiv = document.getElementById("appDiv");
-        var rootView = new myt.View(appDiv, {bgColor:'#ffffff'}, [myt.SizeToWindow]);
+        var rootView = new myt.View(null, {bgColor:'#ffffff'}, [myt.SizeToWindow]);
         
         new myt.IconTextPanelButton(rootView, {x:920, y:10, width:100, text:'zoom in'}, [{
             doActivated: function() {

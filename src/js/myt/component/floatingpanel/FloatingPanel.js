@@ -20,7 +20,7 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
         // the body.
         var elem = document.createElement('div');
         elem.style.position = 'absolute';
-        document.getElementsByTagName('body')[0].appendChild(elem);
+        myt.getElement().appendChild(elem);
         
         if (attrs.visible === undefined) attrs.visible = false;
         if (attrs.hideOnMouseDown === undefined) attrs.hideOnMouseDown = true;

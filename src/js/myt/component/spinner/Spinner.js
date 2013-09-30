@@ -149,7 +149,7 @@ myt.Spinner.FACTORY = function() {
    */
   var sheet = (function() {
     var el = createEl('style', {type : 'text/css'})
-    ins(document.getElementsByTagName('head')[0], el)
+    ins(myt.getElement('head'), el)
     return el.sheet || el.styleSheet
   }())
 

@@ -6,7 +6,7 @@ test("Create and destroy a view", function() {
     
     ok(div.id == null || div.id == '', "Div should not have an id yet." + div.id);
     
-    var bdy = document.getElementsByTagName('body')[0];
+    var bdy = myt.getElement();
     bdy.appendChild(div);
     
     var divId = 'testDivId';
@@ -40,7 +40,7 @@ test("Create and destroy a view with keepDomElementWhenDestroyed set to true.", 
     
     ok(div.id == null || div.id == '', "Div should not have an id yet." + div.id);
     
-    var bdy = document.getElementsByTagName('body')[0];
+    var bdy = myt.getElement();
     bdy.appendChild(div);
     
     var divId = 'testDivId';
@@ -71,16 +71,17 @@ test("Create and destroy a view with keepDomElementWhenDestroyed set to true.", 
     div.parentNode.removeChild(div);
 });
 
+test("Create a view without providing a div.", function() {
+    var v = new myt.View(null, {}, [myt.RootView]);
+    
+    ok(v.domElement != null, "A dom element should exist for the new root view.");
+    ok(v.domElement.parentNode.nodeName === 'BODY', "The dom element should be a child of the body.");
+    
+    v.destroy();
+});
+
 test("View position, size and clip.", function() {
-    var div = document.createElement('div');
-    div.style.position = 'absolute';
-    
-    ok(div.id == null || div.id == '', "Div should not have an id yet." + div.id);
-    
-    var bdy = document.getElementsByTagName('body')[0];
-    bdy.appendChild(div);
-    
-    var v = new myt.View(div, {x:10, y:20, width:30, height:40}, [myt.RootView]);
+    var v = new myt.View(null, {x:10, y:20, width:30, height:40}, [myt.RootView]);
     
     ok(v.x === 10, "View should have an x of 10.");
     ok(v.get('x') === 10, "View getter for x should return 10");
@@ -147,16 +148,8 @@ test("View position, size and clip.", function() {
 });
 
 test("View alignment", function() {
-    var div = document.createElement('div');
-    div.style.position = 'absolute';
-    
-    ok(div.id == null || div.id == '', "Div should not have an id yet." + div.id);
-    
-    var bdy = document.getElementsByTagName('body')[0];
-    bdy.appendChild(div);
-    
     var divId = 'testDivId';
-    var v = new myt.View(div, {x:0, y:0, width:100, height:50}, [myt.RootView]);
+    var v = new myt.View(null, {x:0, y:0, width:100, height:50}, [myt.RootView]);
     var child1 = new myt.View(v, {width:10, height:5, domId:divId});
     var child2 = new myt.View(v, {width:10, height:5, align:'center'});
     var child3 = new myt.View(v, {width:10, height:5, valign:'middle'});
@@ -243,13 +236,7 @@ test("View alignment", function() {
 });
 
 test("Test getSubviews, getSiblingViews, getLayouts", function() {
-    var div = document.createElement('div');
-    div.style.position = 'absolute';
-    var bdy = document.getElementsByTagName('body')[0];
-    bdy.appendChild(div);
-    
-    var divId = 'testDivId';
-    var v = new myt.View(div, {x:0, y:0, width:100, height:50}, [myt.RootView]);
+    var v = new myt.View(null, {x:0, y:0, width:100, height:50}, [myt.RootView]);
     
     ok(v.subviews === undefined, "Subviews should begin as undefined.");
     ok(v.getSubviews().length === 0, "Subviews should get lazy instantiated.");

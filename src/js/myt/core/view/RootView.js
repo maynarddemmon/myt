@@ -30,6 +30,12 @@ myt.RootView = new JS.Module('RootView', {
     
     /** @overrides myt.View */
     createOurDomElement: function(parent) {
+        // If not parent is provided create a new dom element
+        if (!parent) {
+            parent = this.callSuper(parent);
+            myt.getElement().appendChild(parent);
+        }
+        
         // A root view has a dom element provided as the parent. We use
         // that dom element as our domElement.
         return parent;

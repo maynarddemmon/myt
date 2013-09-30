@@ -201,8 +201,7 @@ myt = {
                 }
             };
         }
-        var t = document.getElementsByTagName('script')[0];
-        t.parentNode.insertBefore(s, t);
+        this.getElement('head').appendChild(s);
     },
     
     /** Used to wrap the first function with the second function. The first
@@ -375,5 +374,16 @@ myt = {
         var A = Math.abs(a), B = Math.abs(b);
         epsilon = epsilon ? Math.abs(epsilon) : 0.000001;
         return Math.abs(a - b) <= (A > B ? B : A) * epsilon;
-    }
+    },
+    
+    // DOM
+    /** Gets the dom element of the provided tagname and index.
+        @param tagname:string (optional) the name of the tag to search for.
+            Defaults to 'body' if not provided
+        @param index:int (optional) the index of the tag to get. Defaults to
+            0 if not provided.
+        @returns a dom element or undefined if none exist. */
+    getElement: function(tagname, index) {
+        return document.getElementsByTagName(tagname ? tagname : 'body')[index > 0 ? index : 0];
+    },
 };

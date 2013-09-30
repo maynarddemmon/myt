@@ -8,8 +8,6 @@
 <script src="../src/js/myt/manifest.js"></script>
 </head><body>
 
-<div id="appDiv" style="position:absolute;"></div>
-
 <script>
     JS.require('myt.all', function() {this.init();});
     
@@ -38,9 +36,7 @@
             }
         });
         
-        var div1 = document.getElementById("appDiv");
-        
-        var rootView = new myt.View(div1, {x:10, y:20, width:400, height:400, bgColor:'#999999'}, [myt.RootView]);
+        var rootView = new myt.View(null, {x:10, y:20, width:400, height:400, bgColor:'#999999'}, [myt.RootView]);
         
         window.btn = new myt.IconTextPanelButton(rootView, {
             name:'btn', text:'baz', width:40, tooltip:'Example tooltip'
