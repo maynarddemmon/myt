@@ -73,7 +73,8 @@
         var lenValidator = new myt.LengthValidator('len', 3, 10);
         
         new myt.FormInputText(rootView, {
-            width:100, id:'fieldA', form:rootView, validators:[lenValidator, 'required']
+            width:100, id:'fieldA', form:rootView, validators:[lenValidator, 'required'],
+            allowedChars:'0123456789'
         });
         new myt.FormInputText(rootView, {
             width:100, id:'fieldB', form:rootView, validators:['equalsIgnoreCase', lenValidator], 
@@ -134,9 +135,6 @@
             inset:25, spacing:5, outset:25, collapseParent:true
         });
         new myt.ConstantLayout(rootView, {targetAttrName:'x', targetValue:10});
-        
-        console.log(rootView);
-        window.rootView = rootView;
         
         myt.Layout.decrementGlobalLock();
     }

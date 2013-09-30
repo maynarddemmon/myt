@@ -22,7 +22,6 @@ o Use Z-index for bring to front
 o Dialog should support multiple entries for spinner message using a key to add/remove them.
 o Confirm dialog component.
 o Build in delay to showSpinner code.
-o Move character filtering into FormInputText as "pattern"
 
 o Cached bitmap for checkbox/radio
 
