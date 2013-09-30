@@ -16,8 +16,9 @@ myt.Text = new JS.Class('Text', myt.View, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** Measures the width of this element if the wrapping was set to 'nowrap'.
-        The dom element is manipulated directly so that no events get fired.
+    /** Measures the width of this element as if the wrapping was set 
+        to 'nowrap'. The dom element is manipulated directly so that no 
+        events get fired.
         @returns number the unwrapped width of this text view. */
     measureNoWrapWidth: function() {
         if (this.whiteSpace === 'nowrap') {

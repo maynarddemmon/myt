@@ -5,7 +5,6 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
         Subclasses should call super. */
     doAfterAdoption: function() {
         this.sizeViewToDom();
-        
         this.__updateBounds(this.width, this.height);
     },
     
@@ -44,7 +43,7 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
         var bounds, scaling;
         
         if (!this.__hasSetWidth) {
-            if (!bounds) bounds = this.domElement.getBoundingClientRect();
+            bounds = this.domElement.getBoundingClientRect();
             var w = bounds.width;
             
             // Bounding rect doesn't factor in scaling so we need to calculate
@@ -56,7 +55,7 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
             if (this.width !== w) {
                 this.width = w;
                 if (this.clip) this.__applyClipToDom();
-                this.__updateBounds(this.width, this.height);
+                if (this.inited) this.__updateBounds(this.width, this.height);
                 this.fireNewEvent('width', w);
             }
         }
@@ -74,7 +73,7 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
             if (this.height !== h) {
                 this.height = h;
                 if (this.clip) this.__applyClipToDom();
-                this.__updateBounds(this.width, this.height);
+                if (this.inited) this.__updateBounds(this.width, this.height);
                 this.fireNewEvent('height', h);
             }
         }

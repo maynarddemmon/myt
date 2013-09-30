@@ -24,75 +24,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
         }
     },
     
-    // Font Attributes
-    setFontFamily: function(v) {
-        if (this.fontFamily === v) return;
-        this.fontFamily = v;
-        this.deStyle.fontFamily = v ? v : 'inherit';
-        if (this.inited) {
-            this.fireNewEvent('fontFamily', v);
-            this.sizeViewToDom();
-        }
-    },
-    
-    /** Supported values: 'normal', 'italic', 'oblique', 'inherit'. */
-    setFontStyle: function(v) {
-        if (this.fontStyle === v) return;
-        this.fontStyle = v;
-        this.deStyle.fontStyle = v ? v : 'inherit';
-        if (this.inited) {
-            this.fireNewEvent('fontStyle', v);
-            this.sizeViewToDom();
-        }
-    },
-    
-    /** Supported values: 'normal', 'small-caps', 'inherit'. */
-    setFontVariant: function(v) {
-        if (this.fontVariant === v) return;
-        this.fontVariant = v;
-        this.deStyle.fontVariant = v ? v : 'inherit';
-        if (this.inited) {
-            this.fireNewEvent('fontVariant', v);
-            this.sizeViewToDom();
-        }
-    },
-    
-    /** Supported values: 'normal', 'bold', 'bolder', 'lighter', '100-900', 'inherit'. */
-    setFontWeight: function(v) {
-        if (this.fontWeight === v) return;
-        this.fontWeight = v;
-        this.deStyle.fontWeight = v ? v : 'inherit';
-        if (this.inited) {
-            this.fireNewEvent('fontWeight', v);
-            this.sizeViewToDom();
-        }
-    },
-    
-    /** Supported values: 'normal, '14px', '14pt', 'xx-small', 'x-small', 'small'
-        'medium', 'large', 'x-large', 'xx-large', 'smaller', 'larger', '75%', 
-        'inherit'. */
-    setFontSize: function(v) {
-        if (this.fontSize === v) return;
-        this.fontSize = v;
-        this.deStyle.fontSize = v ? v : 'inherit';
-        if (this.inited) {
-            this.fireNewEvent('fontSize', v);
-            this.sizeViewToDom();
-        }
-    },
-    
     // Text Attributes
-    /** Supported values: 'normal', 'nowrap', 'pre', 'pre-line', 'pre-wrap', 'inherit'. */
-    setWhiteSpace: function(v) {
-        if (this.whiteSpace === v) return;
-        this.whiteSpace = v;
-        this.deStyle.whiteSpace = v ? v : 'inherit';
-        if (this.inited) {
-            this.fireNewEvent('whiteSpace', v);
-            this.sizeViewToDom();
-        }
-    },
-    
     /** Supported values: 'ellipsis', 'clip', 'inherit'. */
     setTextOverflow: function(v) {
         if (this.textOverflow === v) return;
@@ -109,68 +41,74 @@ myt.TextSupport = new JS.Module('TextSupport', {
         if (this.inited) this.fireNewEvent('textAlign', v);
     },
     
+    /** Supported values: 'normal', 'nowrap', 'pre', 'pre-line', 'pre-wrap', 'inherit'. */
+    setWhiteSpace: function(v) {
+        this.__textSetter(v, 'whiteSpace');
+    },
+    
     /** Supported values: '20px', '10%', 'inherit'. */
     setTextIndent: function(v) {
-        if (this.textIndent === v) return;
-        this.textIndent = v;
-        this.deStyle.textIndent = v ? v : 'inherit';
-        if (this.inited) {
-            this.fireNewEvent('textIndent', v);
-            this.sizeViewToDom();
-        }
+        this.__textSetter(v, 'textIndent');
     },
     
     /** Supported values: 'none', 'capitalize', 'uppercase', 'lowercase', 'inherit'. */
     setTextTransform: function(v) {
-        if (this.textTransform === v) return;
-        this.textTransform = v;
-        this.deStyle.textTransform = v ? v : 'inherit';
-        if (this.inited) {
-            this.fireNewEvent('textTransform', v);
-            this.sizeViewToDom();
-        }
+        this.__textSetter(v, 'textTransform');
     },
     
     /** Supported values: 'none', 'underline', 'overline', 'line-through', 'blink', 'inherit'. */
     setTextDecoration: function(v) {
-        if (this.textDecoration === v) return;
-        this.textDecoration = v;
-        this.deStyle.textDecoration = v ? v : 'inherit';
-        if (this.inited) {
-            this.fireNewEvent('textDecoration', v);
-            this.sizeViewToDom();
-        }
+        this.__textSetter(v, 'textDecoration');
     },
     
     /** Supported values: 'normal', '1.5', '22px', '150%', 'inherit'. */
     setLineHeight: function(v) {
-        if (this.lineHeight === v) return;
-        this.lineHeight = v;
-        this.deStyle.lineHeight = v ? v : 'inherit';
-        if (this.inited) {
-            this.fireNewEvent('lineHeight', v);
-            this.sizeViewToDom();
-        }
+        this.__textSetter(v, 'lineHeight');
     },
     
     /** Supported values: 'normal', '3px', 'inherit'. */
     setLetterSpacing: function(v) {
-        if (this.letterSpacing === v) return;
-        this.letterSpacing = v;
-        this.deStyle.letterSpacing = v ? v : 'inherit';
-        if (this.inited) {
-            this.fireNewEvent('letterSpacing', v);
-            this.sizeViewToDom();
-        }
+        this.__textSetter(v, 'letterSpacing');
     },
     
     /** Supported values: 'normal', '3px', 'inherit'. */
     setWordSpacing: function(v) {
-        if (this.wordSpacing === v) return;
-        this.wordSpacing = v;
-        this.deStyle.wordSpacing = v ? v : 'inherit';
+        this.__textSetter(v, 'wordSpacing');
+    },
+    
+    // Font Attributes
+    setFontFamily: function(v) {
+        this.__textSetter(v, 'fontFamily');
+    },
+    
+    /** Supported values: 'normal', 'italic', 'oblique', 'inherit'. */
+    setFontStyle: function(v) {
+        this.__textSetter(v, 'fontStyle');
+    },
+    
+    /** Supported values: 'normal', 'small-caps', 'inherit'. */
+    setFontVariant: function(v) {
+        this.__textSetter(v, 'fontVariant');
+    },
+    
+    /** Supported values: 'normal', 'bold', 'bolder', 'lighter', '100-900', 'inherit'. */
+    setFontWeight: function(v) {
+        this.__textSetter(v, 'fontWeight');
+    },
+    
+    /** Supported values: 'normal, '14px', '14pt', 'xx-small', 'x-small', 'small'
+        'medium', 'large', 'x-large', 'xx-large', 'smaller', 'larger', '75%', 
+        'inherit'. */
+    setFontSize: function(v) {
+        this.__textSetter(v, 'fontSize');
+    },
+    
+    __textSetter: function(v, attrName) {
+        if (this[attrName] === v) return;
+        this[attrName] = v;
+        this.deStyle[attrName] = v ? v : 'inherit';
         if (this.inited) {
-            this.fireNewEvent('wordSpacing', v);
+            this.fireNewEvent(attrName, v);
             this.sizeViewToDom();
         }
     },

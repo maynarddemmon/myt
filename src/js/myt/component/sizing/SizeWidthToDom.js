@@ -42,7 +42,7 @@ myt.SizeWidthToDom = new JS.Module('SizeWidthToDom', {
             if (this.width !== w) {
                 this.width = w;
                 if (this.clip) this.__applyClipToDom();
-                this.__updateBounds(this.width, this.height);
+                if (this.inited) this.__updateBounds(this.width, this.height);
                 this.fireNewEvent('width', w);
             }
         }
