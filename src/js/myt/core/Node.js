@@ -231,10 +231,10 @@ myt.Node = new JS.Class('Node', {
         @returns the Node to place a subnode into. */
     determinePlacement: function(placement) {
         // Parse "active" placement and remaining placement.
-        var idx = placement.indexOf('.'), remainder;
+        var idx = placement.indexOf('.'), remainder, loc;
         if (idx !== -1) {
             remainder = placement.substring(idx + 1);
-            placement = placement.substr(0, idx);
+            placement = placement.substring(0, idx);
         }
         
         // Evaluate placement of '*' as defaultPlacement.
@@ -246,7 +246,7 @@ myt.Node = new JS.Class('Node', {
                 idx = placement.indexOf('.');
                 if (idx !== -1) {
                     remainder = placement.substring(idx + 1) + (remainder ? '.' + remainder : '');
-                    placement = placement.substr(0, idx);
+                    placement = placement.substring(0, idx);
                 }
             }
             
@@ -256,12 +256,8 @@ myt.Node = new JS.Class('Node', {
             // returning 'this'.
         }
         
-        var loc = this[placement];
-        if (loc) {
-            return remainder ? loc.determinePlacement(remainder) : loc;
-        } else {
-            return this;
-        }
+        loc = this[placement];
+        return loc ? (remainder ? loc.determinePlacement(remainder) : loc) : this;
     },
     
     /** Adds a named reference to a subnode.

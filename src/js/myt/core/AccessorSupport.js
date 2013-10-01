@@ -26,7 +26,7 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
             prepending the prefix.
             @returns string */
         generateName: function(attrName, prefix) {
-            return prefix + attrName.substr(0,1).toUpperCase() + attrName.substring(1);
+            return prefix + attrName.substring(0,1).toUpperCase() + attrName.substring(1);
         },
         
         /** Creates a standard setter function for the provided attrName on the
@@ -53,103 +53,11 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
             };
         },
         
-        /** Caches getter names. The cache is pre-filled with some commonly 
-            used getter names. */
+        /** Caches getter names. */
         GETTER_NAMES:{},
         
-        /** Caches setter names for use in Node.initNode. The cache is 
-            pre-filled with some commonly used setter names. */
-        SETTER_NAMES:{
-            // Node
-            name:'setName',
-            
-            placement:'setPlacement',
-            defaultPlacement:'setDefaultPlacement',
-            ignorePlacement:'setIgnorePlacement',
-            
-            // DomElementProxy
-            domClass:'setDomClass',
-            domId:'setDomId',
-            
-            // View
-            focusTrap:'setFocusTrap',
-            x:'setX',
-            y:'setY',
-            width:'setWidth',
-            height:'setHeight',
-            bgColor:'setBgColor',
-            opacity:'setOpacity',
-            clip:'setClip',
-            overflow:'setOverflow',
-            visible:'setVisible',
-            cursor:'setCursor',
-            
-            // FocusObservable
-            focusable:'setFocusable',
-            focusEmbellishment:'setFocusEmbellishment',
-            
-            // Disableable
-            disabled:'setDisabled',
-            
-            // ImageSupport
-            imageUrl:'setImageUrl',
-            imageSize:'setImageSize',
-            imageRepeat:'setImageRepeat',
-            imagePosition:'setImagePosition',
-            imageAttachment:'setImageAttachment',
-            
-            // TextSupport
-            text:'setText',
-            textColor:'setTextColor',
-            fontFamily:'setFontFamily',
-            fontStyle:'setFontStyle',
-            fontVariant:'setFontVariant',
-            fontWeight:'setFontWeight',
-            fontSize:'setFontSize',
-            whiteSpace:'setWhiteSpace',
-            textOverflow:'setTextOverflow',
-            textAlign:'setTextAlign',
-            textIndent:'setTextIndent',
-            textTransform:'setTextTransform',
-            textDecoration:'setTextDecoration',
-            lineHeight:'setLineHeight',
-            letterSpacing:'setLetterSpacing',
-            wordSpacing:'setWordSpacing',
-            
-            // TransformSupport
-            rotation:'setRotation',
-            scale:'setScale',
-            scaleX:'setScaleX',
-            scaleY:'setScaleY',
-            skewX:'setSkewX',
-            skewY:'setSkewY',
-            
-            // Markup
-            markup:'setHtml',
-            
-            // Canvas
-            fillStyle:'setFillStyle',
-            strokeStyle:'setStrokeStyle',
-            shadowColor:'setShadowColor',
-            shadowBlur:'setShadowBlur',
-            shadowOffsetX:'setShadowOffsetX',
-            shadowOffsetY:'setShadowOffsetY',
-            lineWidth:'setLineWidth',
-            lineCap:'setLineCap',
-            lineJoin:'setLineJoin',
-            miterLimit:'setMiterLimit',
-            font:'setFont',
-            textAlign:'setTextAlign',
-            textBaseline:'setTextBaseline',
-            globalAlpha:'setGlobalAlpha',
-            globalCompositeOperation:'setGlobalCompositeOperation',
-            
-            // SizeToWindow
-            resizeDimension:'setResizeDimension',
-            
-            // Input
-            value:'setValue'
-        }
+        /** Caches setter names. */
+        SETTER_NAMES:{}
     },
     
     

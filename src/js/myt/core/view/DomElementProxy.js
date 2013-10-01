@@ -235,7 +235,7 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
         @param radius:number the radius of the corners.
         @returns void */
     setRoundedCorners: function(radius) {
-        this.setStyleProperty('borderRadius', radius + 'px');
+        this.deStyle.borderRadius = radius + 'px';
     },
     
     /** Sets the CSS boxShadow property.
