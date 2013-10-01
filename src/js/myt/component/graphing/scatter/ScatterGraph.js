@@ -405,6 +405,36 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         return this._getDataPoint(this._animating, matchFunc, multiple);
     },
     
+    /** Gets all data points that match the provided match function.
+        @param matchFunc:function (optional) A function that filters the
+            returned points.
+        @param invert:boolean (optional) If true the points that don't match
+            will be returned.
+        @returns array */
+    getAllDataPoints: function(matchFunc, invert) {
+        var retval = [];
+        
+        if (matchFunc) {
+            var data = this.data, i = data.length, dataPoint;
+            while (i) {
+                dataPoint = data[--i];
+                if (matchFunc.call(this, dataPoint, i) === !invert) retval.push(dataPoint);
+            }
+            
+            data = this._animating;
+            i = data.length;
+            
+            while (i) {
+                dataPoint = data[--i];
+                if (matchFunc.call(this, dataPoint, i) === !invert) retval.push(dataPoint);
+            }
+        } else {
+            retval = this.data.concat(this._animating);
+        }
+        
+        return retval;
+    },
+    
     _getDataPoint: function(data, matchFunc, multiple) {
         var i = data.length, dataPoint, retval = [];
         while (i) {
@@ -435,24 +465,34 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
             return this.getAnimatingDataPoint(func, multiple);
         } else {
             // Check both
-            return this.getDataPoint(func, multiple) || this.getAnimatingDataPoint(func, multiple);
+            if (multiple) {
+                return this._getDataPoint(this.getAllDataPoints(), func, true);
+            } else {
+                return this.getDataPoint(func, multiple) || this.getAnimatingDataPoint(func, multiple);
+            }
         }
     },
     
-    getDataPointsInsideCircle: function(centerX, centerY, radius, isLatLng) {
+    getDataPointsInsideCircle: function(centerX, centerY, radius, isLatLng, points) {
         var func = myt.Geometry[isLatLng ? 'circleContainsLatLng' : 'circleContainsPoint'];
-        func  = func.bind(myt.Geometry);
-        return this._getDataPointsBy(function(p, i) {
+        func = func.bind(myt.Geometry);
+        
+        if (!points) points = this.getAllDataPoints();
+        
+        return this._getDataPoint(points, function(p, i) {
             return func(p.y, p.x, centerY, centerX, radius);
-        }, 'both', true);
+        }, true);
     },
     
     /** @param path:myt.Path */
-    getDataPointsInsidePolygon: function(path) {
+    getDataPointsInsidePolygon: function(path, points) {
         var bounds = path.getBoundingBox(), pathData = path.vectors;
-        return this._getDataPointsBy(function(p, i) {
+        
+        if (!points) points = this.getAllDataPoints();
+        
+        return this._getDataPoint(points, function(p, i) {
             return myt.Geometry.isPointInPath(p.x, p.y, bounds, pathData);
-        }, 'both', true);
+        }, true);
     },
     
     // Remove points
@@ -726,11 +766,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     // Metrics
     countDataPoints: function(func) {
         if (func) {
-            var count = 0, points = this._getDataPoint(this._animating, func, true);
-            if (points) count += points.length;
-            points = this._getDataPoint(this.data, func, true);
-            if (points) count += points.length;
-            return count;
+            return this.getAllDataPoints(func).length;
         } else {
             return this._animating.length + this.data.length;
         }
