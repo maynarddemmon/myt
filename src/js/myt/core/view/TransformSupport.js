@@ -2,15 +2,14 @@
 myt.TransformSupport = new JS.Module('TransformSupport', {
     // Class Methods ///////////////////////////////////////////////////////////
     extend: {
-        /** Determine the name to use for the transform style property. */
-        _styleKey: function() {
-            switch (BrowserDetect.browser) {
-                case 'Chrome': case 'Safari': case 'OmniWeb': return 'webkitTransform';
-                case 'MSIE': return 'msTransform';
-                case 'Opera': return 'oTransform';
-                case 'Firefox': default: return 'transform';
-            }
-        }(),
+        /** Sets the 'transformOrigin' style property of the provided
+            style property map.
+            @param s:Object the style map to modify.
+            @param v:string the transformOrigin to set.
+            @returns void */
+        setTransformOrigin: function(s, v) {
+            s[this._styleOriginKey] = v ? v : '50% 50% 0';
+        },
         
         /** Adds an entry to the 'transform' style property of the provided
             style property map.
@@ -32,13 +31,11 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
             @returns string: the new transform value after the removal has been
                 applied. */
         removeTransform: function(s, type) {
-            var key = this._styleKey,
-                value = s[key];
+            var key = this._styleKey, value = s[key];
             
             if (!value || value.length === 0) return '';
             
-            var parts = value.split(' '),
-                i = parts.length;
+            var parts = value.split(' '), i = parts.length;
             while (i) {
                 if (parts[--i].indexOf(type) === 0) {
                     parts.splice(i, 1);
@@ -90,6 +87,16 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
     },
     
     // Accessors ///////////////////////////////////////////////////////////////
+    setTransformOrigin: function(v) {
+        if (this.transformOrigin === v) return;
+        this.transformOrigin = v;
+        myt.TransformSupport.setTransformOrigin(this.deStyle, v);
+        if (this.inited) {
+            this.__updateBounds(this.width, this.height);
+            this.fireNewEvent('transformOrigin', v);
+        }
+    },
+    
     /** Value is in degrees. */
     setRotation: function(v) {
         if (this.rotation === v) return;
@@ -190,3 +197,25 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
         this.callSuper(w, h);
     }
 });
+
+/** Setup style keys for myt.TransformSupport one time only based on the
+    browser being used. */
+(function() {
+    var prefix;
+    switch (BrowserDetect.browser) {
+        case 'Chrome': case 'Safari': case 'OmniWeb': 
+            prefix = 'webkit';
+            break;
+        case 'MSIE': 
+            prefix = 'ms';
+            break;
+        case 'Opera': 
+            prefix = 'o';
+            break;
+        case 'Firefox': default: 
+            prefix = '';
+    }
+    
+    this._styleKey = prefix ? prefix + 'Transform' : 'transform';
+    this._styleOriginKey = this._styleKey + 'Origin';
+}).call(myt.TransformSupport);

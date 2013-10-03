@@ -45,6 +45,26 @@
         
         var v3 = new myt.View(v, {x:5, y:5, width:50, height:50, bgColor:'#ff0000'});
         v3.setParent(v2);
+        
+        // Border and outline testing
+        var v4 = new myt.View(null, {x:10, y:10, width:100, height:100, bgColor:'#cccccc'}, [myt.RootView]);
+        
+        var v5 = new myt.View(v4, {x:1, y:1, width:8, height:8, bgColor:'#999999'});
+        var v6 = new myt.View(v4, {x:12, y:1, width:8, height:8, bgColor:'#999999'});
+        var v7 = new myt.View(v4, {x:23, y:1, width:8, height:8, bgColor:'#999999'});
+        
+        var v8 = new myt.View(v4, {x:1, y:12, width:8, height:8, bgColor:'#999999'}, [myt.TransformSupport]);
+        var v9 = new myt.View(v4, {x:12, y:12, width:8, height:8, bgColor:'#999999', CSSBorder:[1,'solid','#000000']}, [myt.TransformSupport]);
+        var v10 = new myt.View(v4, {x:23, y:12, width:8, height:8, bgColor:'#999999', CSSOutline:[1,'solid','#000000']});
+        
+        var v11 = new myt.View(v9, {x:1, y:1, width:4, height:4, bgColor:'#ffffff'});
+        var v12 = new myt.View(v10, {x:1, y:1, width:4, height:4, bgColor:'#ffffff'});
+        
+        v9.setScale(2);
+        v9.setTransformOrigin('0 0 0');
+        
+        v8.setTransformOrigin('0 0 0');
+        v8.setScale(2);
     }
 </script>
 </body></html>
