@@ -17,10 +17,10 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
                 the new element.
             @returns the created element. */
         createDomElement: function(tagname, styles, props) {
-            var elem = document.createElement(tagname), key;
-            if (props) for (key in props) elem[key] = props[key];
-            if (styles) for (key in styles) elem.style[key] = styles[key];
-            return elem;
+            var de = document.createElement(tagname), key;
+            if (props) for (key in props) de[key] = props[key];
+            if (styles) for (key in styles) de.style[key] = styles[key];
+            return de;
         },
         
         /** Gets the computed style for a dom element.
@@ -201,66 +201,12 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
         this.domElement.id = this.domId = v;
     },
     
-    // Misc CSS Accesors ///////////////////////////////////////////////////////
-    /** A convienence method for setting a CSS border.
-        @param v:Array where index 0 is the size, index 1 is the type and
-            index 2 is the color. */
-    setCSSBorder: function(v) {
-        this._setCSSEdgeTreatment(v, 'border');
-    },
-    
-    /** A convienence method for setting a CSS outline.
-        @param v:array where index 0 is the size, index 1 is the type and
-            index 2 is the color. */
-    setCSSOutline: function(v) {
-        this._setCSSEdgeTreatment(v, 'outline');
-    },
-    
-    /** A convienence method for setting a CSS outline or border.
-        @param v:Array where index 0 is the size, index 1 is the type and
-            index 2 is the color. */
-    _setCSSEdgeTreatment: function(v, kind) {
-        if (v) {
-            var size = v[0] || 0,
-                type = v[1] || '',
-                color = v[2] || '';
-            v = size + 'px' + ' ' + type + ' ' + color;
-        } else {
-            v = '0px';
-        }
-        this.deStyle[kind] = v;
-    },
-    
-    /** A convienence method to set rounded corners on an element.
-        @param radius:number the radius of the corners.
-        @returns void */
-    setRoundedCorners: function(radius) {
-        this.deStyle.borderRadius = radius + 'px';
-    },
-    
-    /** Sets the CSS boxShadow property.
-        @param v:array where index 0 is the horizontal shadow offset,
-            index 1 is the vertical shadow offset, index 2 is the blur amount,
-            and index 3 is the color.
-        @returns void */
-    setBoxShadow: function(v) {
-        if (v) {
-            var hShadow = v[0] || 0,
-                vShadow = v[1] || 0,
-                blur = v[2] || 7,
-                color = v[3] || '#000000';
-            v = hShadow + 'px ' + vShadow + 'px ' + blur + 'px ' + color;
-        } else {
-            v = 'none';
-        }
-        this.deStyle.boxShadow = v;
-    },
-    
+    /** Set the z-index of the dom element. */
     setZIndex: function(v) {
         this.deStyle.zIndex = v;
     },
     
-    /** Set an arbitrary css style on the dom element. */
+    /** A convience method to set an arbitrary css style on the dom element. */
     setStyleProperty: function(propertyName, value) {
         this.deStyle[propertyName] = value;
     },
@@ -272,8 +218,8 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
         @returns object with 'x' and 'y' keys or null if no dom element exists
             for this proxy. */
     getPagePosition: function() {
-        var elem = this.domElement;
-        return elem ? myt.DomElementProxy.getPagePosition(elem) : null;
+        var de = this.domElement;
+        return de ? myt.DomElementProxy.getPagePosition(de) : null;
     },
     
     /** Generates a dom event on this proxy's dom element. Adapted from:
@@ -283,8 +229,8 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
             be added onto the dom event object.
         @returns void */
     simulateDomEvent: function(eventName, customOpts) {
-        var elem = this.domElement;
-        if (elem) myt.DomElementProxy.simulateDomEvent(elem, eventName, customOpts);
+        var de = this.domElement;
+        if (de) myt.DomElementProxy.simulateDomEvent(de, eventName, customOpts);
     },
     
     /** Gets the highest z-index of the dom element.

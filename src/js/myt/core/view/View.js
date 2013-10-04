@@ -403,6 +403,61 @@ myt.View = new JS.Class('View', myt.Node, {
         }
     },
     
+    // Edge treatements
+    /** A convienence method for setting a CSS border.
+        @param v:Array where index 0 is the size, index 1 is the type and
+            index 2 is the color. */
+    setCSSBorder: function(v) {
+        this._setCSSEdgeTreatment(v, 'border');
+    },
+    
+    /** A convienence method for setting a CSS outline.
+        @param v:array where index 0 is the size, index 1 is the type and
+            index 2 is the color. */
+    setCSSOutline: function(v) {
+        this._setCSSEdgeTreatment(v, 'outline');
+    },
+    
+    /** A convienence method for setting a CSS outline or border.
+        @param v:Array where index 0 is the size, index 1 is the type and
+            index 2 is the color. */
+    _setCSSEdgeTreatment: function(v, kind) {
+        if (v) {
+            var size = v[0] || 0,
+                type = v[1] || '',
+                color = v[2] || '';
+            v = size + 'px' + ' ' + type + ' ' + color;
+        } else {
+            v = '0px';
+        }
+        this.deStyle[kind] = v;
+    },
+    
+    /** A convienence method to set rounded corners on an element.
+        @param radius:number the radius of the corners.
+        @returns void */
+    setRoundedCorners: function(radius) {
+        this.deStyle.borderRadius = radius + 'px';
+    },
+    
+    /** Sets the CSS boxShadow property.
+        @param v:array where index 0 is the horizontal shadow offset,
+            index 1 is the vertical shadow offset, index 2 is the blur amount,
+            and index 3 is the color.
+        @returns void */
+    setBoxShadow: function(v) {
+        if (v) {
+            var hShadow = v[0] || 0,
+                vShadow = v[1] || 0,
+                blur = v[2] || 7,
+                color = v[3] || '#000000';
+            v = hShadow + 'px ' + vShadow + 'px ' + blur + 'px ' + color;
+        } else {
+            v = 'none';
+        }
+        this.deStyle.boxShadow = v;
+    },
+    
     
     // Methods /////////////////////////////////////////////////////////////////
     /** Checks if this view is visible and each view in the parent chain to
