@@ -23,8 +23,8 @@ myt.CheckboxMixin = new JS.Module('CheckboxMixin', {
         DEFAULT_FILL_COLOR_HOVER: '#eeeeee',
         DEFAULT_FILL_COLOR_ACTIVE: '#cccccc',
         DEFAULT_FILL_COLOR_READY: '#ffffff',
-        DEFAULT_BORDER_COLOR: '#333333',
-        DEFAULT_BORDER_SIZE: 0.5
+        DEFAULT_EDGE_COLOR: '#333333',
+        DEFAULT_EDGE_SIZE: 0.5
     },
     
     
@@ -42,8 +42,8 @@ myt.CheckboxMixin = new JS.Module('CheckboxMixin', {
         if (attrs.fillColorHover === undefined) attrs.fillColorHover = CBM.DEFAULT_FILL_COLOR_HOVER;
         if (attrs.fillColorActive === undefined) attrs.fillColorActive = CBM.DEFAULT_FILL_COLOR_ACTIVE;
         if (attrs.fillColorReady === undefined) attrs.fillColorReady = CBM.DEFAULT_FILL_COLOR_READY;
-        if (attrs.borderColor === undefined) attrs.borderColor = CBM.DEFAULT_BORDER_COLOR;
-        if (attrs.borderSize === undefined) attrs.borderSize = CBM.DEFAULT_BORDER_SIZE;
+        if (attrs.edgeColor === undefined) attrs.edgeColor = CBM.DEFAULT_EDGE_COLOR;
+        if (attrs.edgeSize === undefined) attrs.edgeSize = CBM.DEFAULT_EDGE_SIZE;
         
         this.callSuper(parent, attrs);
     },
@@ -54,8 +54,8 @@ myt.CheckboxMixin = new JS.Module('CheckboxMixin', {
     setFillColorHover: function(v) {this.fillColorHover = v;},
     setFillColorActive: function(v) {this.fillColorActive = v;},
     setFillColorReady: function(v) {this.fillColorReady = v;},
-    setBorderColor: function(v) {this.borderColor = v;},
-    setBorderSize: function(v) {this.borderSize = v;},
+    setEdgeColor: function(v) {this.edgeColor = v;},
+    setEdgeSize: function(v) {this.edgeSize = v;},
     
     setFocused: function(v) {
         this.callSuper(v);
@@ -88,8 +88,8 @@ myt.CheckboxMixin = new JS.Module('CheckboxMixin', {
         var config = this.callSuper(state);
         config.checked = this.checked;
         config.checkedColor = this.fillColorChecked;
-        config.borderColor = this.borderColor;
-        config.borderSize = this.borderSize;
+        config.edgeColor = this.edgeColor;
+        config.edgeSize = this.edgeSize;
         
         switch (state) {
             case 'hover':

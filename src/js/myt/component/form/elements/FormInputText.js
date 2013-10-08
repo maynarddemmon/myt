@@ -7,7 +7,6 @@
             error exists but the user has not modified the value.
         normalColor:color_string The color to use when no validation 
             error exists.
-        borderSize:number The size of the border to draw.
         validateWhen:string Indicates when to run validation.
             Supported values are:
                 key: Validate as the user types.
@@ -35,7 +34,8 @@ myt.FormInputText = new JS.Class('FormInputText', myt.InputText, {
         if (attrs.actionRequiredColor === undefined) attrs.actionRequiredColor = '#996666';
         if (attrs.normalColor === undefined) attrs.normalColor = '#999999';
         if (attrs.acceleratorScope === undefined) attrs.acceleratorScope = 'element';
-        if (attrs.borderSize === undefined) attrs.borderSize = 1;
+        if (attrs.borderWidth === undefined) attrs.borderWidth = 1;
+        if (attrs.borderStyle === undefined) attrs.borderStyle = 'solid';
         
         if (attrs.focusEmbellishment === undefined) attrs.focusEmbellishment = true;
         
@@ -73,7 +73,6 @@ myt.FormInputText = new JS.Class('FormInputText', myt.InputText, {
         return retval;
     },
     
-    setBorderSize: function(v) {this.borderSize = v;},
     setAcceleratorScope: function(v) {this.acceleratorScope = v;},
     
     
@@ -141,12 +140,8 @@ myt.FormInputText = new JS.Class('FormInputText', myt.InputText, {
     
     /** @overrides myt.UpdateableUI */
     updateUI: function() {
-        var color;
-        if (this.isValid) {
-            color = this.normalColor;
-        } else {
-            color = this.isChanged ? this.errorColor : this.actionRequiredColor;
-        }
-        this.setCSSBorder([this.borderSize, 'solid', color]);
+        this.setBorderColor(
+            this.isValid ? this.normalColor : (this.isChanged ? this.errorColor : this.actionRequiredColor)
+        );
     }
 });

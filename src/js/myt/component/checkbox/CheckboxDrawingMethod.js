@@ -18,7 +18,7 @@ myt.CheckboxDrawingMethod = new JS.Class('CheckboxDrawingMethod', myt.DrawingMet
         
         if (w == 0 || h == 0) return;
         
-        var inset = config.borderSize,
+        var inset = config.edgeSize,
             x2 = x + inset, y2 = y + inset,
             w2 = w - 2*inset, h2 = h - 2*inset;
         
@@ -30,7 +30,7 @@ myt.CheckboxDrawingMethod = new JS.Class('CheckboxDrawingMethod', myt.DrawingMet
         canvas.setShadowColor(config.focused ? config.focusedShadowColor : config.shadowColor);
         
         myt.DrawingUtil.drawRoundedRect(canvas, radius, 0, x, y, w, h);
-        canvas.setFillStyle(config.borderColor);
+        canvas.setFillStyle(config.edgeColor);
         canvas.fill();
         canvas.restore();
         

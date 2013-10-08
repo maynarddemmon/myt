@@ -12,8 +12,8 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
         DEFAULT_FILL_COLOR_HOVER: '#eeeeee',
         DEFAULT_FILL_COLOR_ACTIVE: '#cccccc',
         DEFAULT_FILL_COLOR_READY: '#ffffff',
-        DEFAULT_BORDER_COLOR: '#333333',
-        DEFAULT_BORDER_SIZE: 0.5,
+        DEFAULT_EDGE_COLOR: '#333333',
+        DEFAULT_EDGE_SIZE: 0.5,
         DEFAULT_ANIMATION_MILLIS: 500
     },
     
@@ -34,8 +34,8 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
         if (attrs.fillColorHover === undefined) attrs.fillColorHover = TS.DEFAULT_FILL_COLOR_HOVER;
         if (attrs.fillColorActive === undefined) attrs.fillColorActive = TS.DEFAULT_FILL_COLOR_ACTIVE;
         if (attrs.fillColorReady === undefined) attrs.fillColorReady = TS.DEFAULT_FILL_COLOR_READY;
-        if (attrs.borderColor === undefined) attrs.borderColor = TS.DEFAULT_BORDER_COLOR;
-        if (attrs.borderSize === undefined) attrs.borderSize = TS.DEFAULT_BORDER_SIZE;
+        if (attrs.edgeColor === undefined) attrs.edgeColor = TS.DEFAULT_EDGE_COLOR;
+        if (attrs.edgeSize === undefined) attrs.edgeSize = TS.DEFAULT_EDGE_SIZE;
         if (attrs.minContainerHeight === undefined) attrs.minContainerHeight = TS.DEFAULT_MINIMUM_CONTAINER_HEIGHT;
         
         this.callSuper(parent, attrs);
@@ -52,7 +52,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
         var self = this;
         var btnClass = this.buttonClass;
         new btnClass(this, {
-            name:'button', ignorePlacement:true,
+            name:'button', ignorePlacement:true, zIndex:1,
             height:this.buttonHeight,
             focusEmbellishment:true,
             drawingMethodClassname:'myt.TabSliderDrawingMethod',
@@ -64,7 +64,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
             fillColorActive:this.fillColorActive,
             fillColorReady:this.fillColorReady,
             fillBorderColor:this.fillBorderColor,
-            borderSize:this.borderSize
+            edgeSize:this.edgeSize
         }, [myt.SizeToParent, {
             /** @overrides myt.CheckboxMixin */
             getDrawConfig: function(state) {
@@ -128,15 +128,15 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
         this.fillColorReady = v;
         if (this.button) this.button.setFillColorReady(v);
     },
-    setBorderColor: function(v) {
-        if (this.borderColor === v) return;
-        this.borderColor = v;
-        if (this.button) this.button.setBorderColor(v);
+    setEdgeColor: function(v) {
+        if (this.edgeColor === v) return;
+        this.edgeColor = v;
+        if (this.button) this.button.setEdgeColor(v);
     },
-    setBorderSize: function(v) {
-        if (this.borderSize === v) return;
-        this.borderSize = v;
-        if (this.button) this.button.setBorderSize(v);
+    setEdgeSize: function(v) {
+        if (this.edgeSize === v) return;
+        this.edgeSize = v;
+        if (this.button) this.button.setEdgeSize(v);
     },
     setButtonHeight: function(v) {
         if (this.buttonHeight === v) return;

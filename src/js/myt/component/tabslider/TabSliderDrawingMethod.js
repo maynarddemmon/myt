@@ -9,14 +9,14 @@ myt.TabSliderDrawingMethod = new JS.Class('TabSliderDrawingMethod', myt.DrawingM
         
         if (w == 0 || h == 0) return;
         
-        var inset = config.borderSize, twiceInset = 2 * inset;
+        var inset = config.edgeSize, twiceInset = 2 * inset;
         
         // Border
         if (inset > 0) {
             canvas.beginPath();
             canvas.rect(x, y, w, h);
             canvas.closePath();
-            canvas.setFillStyle(config.borderColor);
+            canvas.setFillStyle(config.edgeColor);
             canvas.fill();
         }
         

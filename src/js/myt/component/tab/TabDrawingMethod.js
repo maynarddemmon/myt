@@ -15,7 +15,7 @@ myt.TabDrawingMethod = new JS.Class('TabDrawingMethod', myt.DrawingMethod, {
         
         if (w == 0 || h == 0) return;
         
-        var inset = config.borderSize, twiceInset = 2 * inset,
+        var inset = config.edgeSize, twiceInset = 2 * inset,
             rTL = 0, rTR = 0, rBL = 0, rBR = 0,
             irTL = 0, irTR = 0, irBL = 0, irBR = 0,
             r = config.cornerRadius === undefined ? myt.TabDrawingMethod.DEFAULT_RADIUS : config.cornerRadius,
@@ -58,7 +58,7 @@ myt.TabDrawingMethod = new JS.Class('TabDrawingMethod', myt.DrawingMethod, {
             canvas.beginPath();
             myt.DrawingUtil.drawPartiallyRoundedRect(canvas, rTL, rTR, rBL, rBR, x, y, w, h);
             canvas.closePath();
-            canvas.setFillStyle(config.borderColor);
+            canvas.setFillStyle(config.edgeColor);
             canvas.fill();
         }
         

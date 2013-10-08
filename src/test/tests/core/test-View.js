@@ -333,3 +333,72 @@ test("Outlines", function() {
     
     v.destroy();
 });
+
+test("Borders", function() {
+    var v = new myt.View(null, {x:0, y:0, width:100, height:100}, [myt.RootView]);
+    
+    var v1 = new myt.View(v, {width:10, height:10});
+    
+    ok(v1.borderWidth === undefined, "No borderWidth defined on view yet.");
+    ok(v1.deStyle.borderWidth === '', "No borderWidth defined on dom element yet.");
+    
+    ok(v1.borderStyle === undefined, "No borderStyle defined on view yet.");
+    ok(v1.deStyle.borderStyle === '', "No borderStyle defined on dom element yet.");
+    
+    ok(v1.borderColor === undefined, "No borderColor defined on view yet.");
+    ok(v1.deStyle.borderColor === '', "No borderColor defined on dom element yet.");
+    
+    v1.setBorderWidth(5);
+    
+    ok(v1.borderWidth === 5, "Border width is now 5.");
+    ok(v1.deStyle.borderWidth === '5px', "Border width is 5px.");
+    
+    v1.setBorderStyle('solid');
+    
+    ok(v1.borderStyle === 'solid', "Border style is now solid.");
+    ok(v1.deStyle.borderStyle === 'solid', "Border style is solid.");
+    
+    v1.setBorderColor('#ffffff');
+    
+    ok(v1.borderColor === '#ffffff', "Border color is now #ffffff.");
+    ok(v1.deStyle.borderColor === 'rgb(255, 255, 255)', "Border color is now rgb(255, 255, 255).");
+    
+    v1.setBorder(null);
+    
+    ok(v1.borderWidth === 0, "Border width is now 0.");
+    ok(v1.deStyle.borderWidth === '0px', "Border width is now 0px.");
+    
+    ok(v1.borderStyle === 'none', "Border style is now none.");
+    ok(v1.deStyle.borderStyle === 'none', "Border style is now none.");
+    
+    ok(v1.borderColor === '#000000', "Border color is now #000000.");
+    ok(v1.deStyle.borderColor === 'rgb(0, 0, 0)', "Border color is now rgb(0, 0, 0).");
+    
+    v1.setBorder([2, 'dotted', '#ffffff']);
+    
+    ok(v1.borderWidth === 2, "Border width is now 2.");
+    ok(v1.deStyle.borderWidth === '2px', "Border width is now 2px.");
+    
+    ok(v1.borderStyle === 'dotted', "Border style is now dotted.");
+    ok(v1.deStyle.borderStyle === 'dotted', "Border style is now dotted.");
+    
+    ok(v1.borderColor === '#ffffff', "Border color is now #ffffff.");
+    ok(v1.deStyle.borderColor === 'rgb(255, 255, 255)', "Border color is now rgb(255, 255, 255).");
+    
+    v1.setBorderWidth();
+    
+    ok(v1.borderWidth === 0, "Border width is now 0.");
+    ok(v1.deStyle.borderWidth === '0px', "Border width is now 0px.");
+    
+    v1.setBorderStyle(false);
+    
+    ok(v1.borderStyle === 'none', "Border style is now none.");
+    ok(v1.deStyle.borderStyle === 'none', "Border style is now none.");
+    
+    v1.setBorderColor(0);
+    
+    ok(v1.borderColor === '#000000', "Border color is now #000000.");
+    ok(v1.deStyle.borderColor === 'rgb(0, 0, 0)', "Border color is now rgb(0, 0, 0).");
+    
+    v.destroy();
+});

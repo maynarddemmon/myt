@@ -443,29 +443,47 @@ myt.View = new JS.Class('View', myt.Node, {
         this.deStyle.outlineColor = this.outlineColor = v || '#000000';
     },
     
+    // Borders
+    /** Sets borderWidth, borderStyle and borderColor via a single 
+        array. If a value equivalent to false is provided the border 
+        will be supressed.
+        @param v:array where index 0 is borderWidth, index 1 is border 
+            style and index 2 is borderColor.
+        @returns void */
+    setBorder: function(v) {
+        v = v ? v : [];
+        this.setBorderWidth(v[0]);
+        this.setBorderStyle(v[1]);
+        this.setBorderColor(v[2]);
+    },
+    
+    /** Sets the width of the border. If a value equivalent to false is 
+        provided 0 will be used.
+        @param v:number the width
+        @returns void */
+    setBorderWidth: function(v) {
+        this.borderWidth = v || 0;
+        this.deStyle.borderWidth = this.borderWidth + 'px';
+    },
+    
+    /** Sets the style for a CSS border. If null or undefined is provided
+        'none' will be used.
+        @param v:string Supported values: 'none', 'dotted', 'dashed', 'solid', 
+            'double', 'groove', 'ridge', 'inset', 'outset', 'inherit'.
+        @returns void */
+    setBorderStyle: function(v) {
+        this.deStyle.borderStyle = this.borderStyle = v || 'none';
+    },
+    
+    /** Sets the color of the border. If null or undefined is provided
+        '#000000' will be used.
+        @param v:string an html color value.
+        @returns void */
+    setBorderColor: function(v) {
+        this.deStyle.borderColor = this.borderColor = v || '#000000';
+    },
+    
     // Edge treatements
-    /** A convienence method for setting a CSS border.
-        @param v:Array where index 0 is the size, index 1 is the type and
-            index 2 is the color. */
-    setCSSBorder: function(v) {
-        this._setCSSEdgeTreatment(v, 'border');
-    },
-    
-    /** A convienence method for setting a CSS outline or border.
-        @param v:Array where index 0 is the size, index 1 is the type and
-            index 2 is the color. */
-    _setCSSEdgeTreatment: function(v, kind) {
-        if (v) {
-            var size = v[0] || 0,
-                type = v[1] || '',
-                color = v[2] || '';
-            v = size + 'px ' + type + ' ' + color;
-        } else {
-            v = '0px';
-        }
-        this.deStyle[kind] = v;
-    },
-    
     /** A convienence method to set rounded corners on an element.
         @param radius:number the radius of the corners.
         @returns void */

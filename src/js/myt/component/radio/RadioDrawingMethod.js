@@ -16,7 +16,7 @@ myt.RadioDrawingMethod = new JS.Class('RadioDrawingMethod', myt.DrawingMethod, {
         
         if (w == 0 || h == 0) return;
         
-        var inset = config.borderSize,
+        var inset = config.edgeSize,
             radius = w / 2,
             twoPi = Math.PI * 2,
             radius2 = radius - inset,
@@ -34,7 +34,7 @@ myt.RadioDrawingMethod = new JS.Class('RadioDrawingMethod', myt.DrawingMethod, {
         canvas.beginPath();
         canvas.arc(centerX, centerY, radius, 0, twoPi);
         canvas.closePath();
-        canvas.setFillStyle(config.borderColor);
+        canvas.setFillStyle(config.edgeColor);
         canvas.fill();
         canvas.restore();
         
