@@ -264,3 +264,72 @@ test("Test getSubviews, getSiblingViews, getLayouts", function() {
     // Destroy it
     v.destroy();
 });
+
+test("Outlines", function() {
+    var v = new myt.View(null, {x:0, y:0, width:100, height:100}, [myt.RootView]);
+    
+    var v1 = new myt.View(v, {width:10, height:10});
+    
+    ok(v1.outlineWidth === undefined, "No outlineWidth defined on view yet.");
+    ok(v1.deStyle.outlineWidth === '', "No outlineWidth defined on dom element yet.");
+    
+    ok(v1.outlineStyle === undefined, "No outlineStyle defined on view yet.");
+    ok(v1.deStyle.outlineStyle === '', "No outlineStyle defined on dom element yet.");
+    
+    ok(v1.outlineColor === undefined, "No outlineColor defined on view yet.");
+    ok(v1.deStyle.outlineColor === '', "No outlineColor defined on dom element yet.");
+    
+    v1.setOutlineWidth(5);
+    
+    ok(v1.outlineWidth === 5, "Outline width is now 5.");
+    ok(v1.deStyle.outlineWidth === '5px', "Outline width is 5px.");
+    
+    v1.setOutlineStyle('solid');
+    
+    ok(v1.outlineStyle === 'solid', "Outline style is now solid.");
+    ok(v1.deStyle.outlineStyle === 'solid', "Outline style is solid.");
+    
+    v1.setOutlineColor('#ffffff');
+    
+    ok(v1.outlineColor === '#ffffff', "Outline color is now #ffffff.");
+    ok(v1.deStyle.outlineColor === 'rgb(255, 255, 255)', "Outline color is now rgb(255, 255, 255).");
+    
+    v1.setOutline(null);
+    
+    ok(v1.outlineWidth === 0, "Outline width is now 0.");
+    ok(v1.deStyle.outlineWidth === '0px', "Outline width is now 0px.");
+    
+    ok(v1.outlineStyle === 'none', "Outline style is now none.");
+    ok(v1.deStyle.outlineStyle === 'none', "Outline style is now none.");
+    
+    ok(v1.outlineColor === '#000000', "Outline color is now #000000.");
+    ok(v1.deStyle.outlineColor === 'rgb(0, 0, 0)', "Outline color is now rgb(0, 0, 0).");
+    
+    v1.setOutline([2, 'dotted', '#ffffff']);
+    
+    ok(v1.outlineWidth === 2, "Outline width is now 2.");
+    ok(v1.deStyle.outlineWidth === '2px', "Outline width is now 2px.");
+    
+    ok(v1.outlineStyle === 'dotted', "Outline style is now dotted.");
+    ok(v1.deStyle.outlineStyle === 'dotted', "Outline style is now dotted.");
+    
+    ok(v1.outlineColor === '#ffffff', "Outline color is now #ffffff.");
+    ok(v1.deStyle.outlineColor === 'rgb(255, 255, 255)', "Outline color is now rgb(255, 255, 255).");
+    
+    v1.setOutlineWidth();
+    
+    ok(v1.outlineWidth === 0, "Outline width is now 0.");
+    ok(v1.deStyle.outlineWidth === '0px', "Outline width is now 0px.");
+    
+    v1.setOutlineStyle(false);
+    
+    ok(v1.outlineStyle === 'none', "Outline style is now none.");
+    ok(v1.deStyle.outlineStyle === 'none', "Outline style is now none.");
+    
+    v1.setOutlineColor(0);
+    
+    ok(v1.outlineColor === '#000000', "Outline color is now #000000.");
+    ok(v1.deStyle.outlineColor === 'rgb(0, 0, 0)', "Outline color is now rgb(0, 0, 0).");
+    
+    v.destroy();
+});

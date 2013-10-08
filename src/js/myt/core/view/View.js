@@ -403,19 +403,52 @@ myt.View = new JS.Class('View', myt.Node, {
         }
     },
     
+    // Outlines
+    /** Sets outlineWidth, outlineStyle and outlineColor via a single 
+        array. If a value equivalent to false is provided the outline 
+        will be supressed.
+        @param v:array where index 0 is outlineWidth, index 1 is outline 
+            style and index 2 is outlineColor.
+        @returns void */
+    setOutline: function(v) {
+        v = v ? v : [];
+        this.setOutlineWidth(v[0]);
+        this.setOutlineStyle(v[1]);
+        this.setOutlineColor(v[2]);
+    },
+    
+    /** Sets the width of the outline. If a value equivalent to false is 
+        provided 0 will be used.
+        @param v:number the width
+        @returns void */
+    setOutlineWidth: function(v) {
+        this.outlineWidth = v || 0;
+        this.deStyle.outlineWidth = this.outlineWidth + 'px';
+    },
+    
+    /** Sets the style for a CSS outline. If null or undefined is provided
+        'none' will be used.
+        @param v:string Supported values: 'none', 'dotted', 'dashed', 'solid', 
+            'double', 'groove', 'ridge', 'inset', 'outset', 'inherit'.
+        @returns void */
+    setOutlineStyle: function(v) {
+        this.deStyle.outlineStyle = this.outlineStyle = v || 'none';
+    },
+    
+    /** Sets the color of the outline. If null or undefined is provided
+        '#000000' will be used.
+        @param v:string an html color value.
+        @returns void */
+    setOutlineColor: function(v) {
+        this.deStyle.outlineColor = this.outlineColor = v || '#000000';
+    },
+    
     // Edge treatements
     /** A convienence method for setting a CSS border.
         @param v:Array where index 0 is the size, index 1 is the type and
             index 2 is the color. */
     setCSSBorder: function(v) {
         this._setCSSEdgeTreatment(v, 'border');
-    },
-    
-    /** A convienence method for setting a CSS outline.
-        @param v:array where index 0 is the size, index 1 is the type and
-            index 2 is the color. */
-    setCSSOutline: function(v) {
-        this._setCSSEdgeTreatment(v, 'outline');
     },
     
     /** A convienence method for setting a CSS outline or border.
@@ -426,7 +459,7 @@ myt.View = new JS.Class('View', myt.Node, {
             var size = v[0] || 0,
                 type = v[1] || '',
                 color = v[2] || '';
-            v = size + 'px' + ' ' + type + ' ' + color;
+            v = size + 'px ' + type + ' ' + color;
         } else {
             v = '0px';
         }
