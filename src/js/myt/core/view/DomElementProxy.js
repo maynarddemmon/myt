@@ -74,11 +74,13 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
             return zIdx;
         },
         
-        /** Gets the x and y position of the underlying dom element relative to
-            the page.
+        /** Gets the x and y position of the dom element relative to the page.
             @param elem:domElement the dom element to get the position for.
-            @returns object with 'x' and 'y' keys. */
+            @returns object with 'x' and 'y' keys or null if an error has
+                occurred. */
         getPagePosition: function(elem) {
+            if (!elem) return null;
+            
             var x = y = 0;
             
             // de.nodeName !== "BODY" test prevents us from looking at the body
@@ -102,46 +104,48 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
                 be added onto the dom event object.
             @returns void */
         simulateDomEvent: function(elem, eventName, customOpts) {
-            var opts = {
-                pointerX:0, pointerY:0, button:0,
-                ctrlKey:false, altKey:false, shiftKey:false, metaKey:false,
-                bubbles:true, cancelable:true
-            };
-            
-            if (customOpts) {
-                for (var p in customOpts) opts[p] = customOpts[p];
-            }
-            
-            var eventType,
-                eventMatchers = {
-                    'HTMLEvents': /^(?:load|unload|abort|error|select|change|submit|reset|focus|blur|resize|scroll)$/,
-                    'MouseEvents': /^(?:click|dblclick|mouse(?:down|up|over|move|out))$/
+            if (elem) {
+                var opts = {
+                    pointerX:0, pointerY:0, button:0,
+                    ctrlKey:false, altKey:false, shiftKey:false, metaKey:false,
+                    bubbles:true, cancelable:true
                 };
-            for (var name in eventMatchers) {
-                if (eventMatchers[name].test(eventName)) {eventType = name; break;}
-            }
-            if (!eventType) throw new SyntaxError('Only HTMLEvent and MouseEvent interfaces supported');
-            
-            var domEvent;
-            if (document.createEvent) {
-                domEvent = document.createEvent(eventType);
-                if (eventType === 'HTMLEvents') {
-                    domEvent.initEvent(eventName, opts.bubbles, opts.cancelable);
-                } else {
-                    domEvent.initMouseEvent(
-                        eventName, opts.bubbles, opts.cancelable, document.defaultView,
-                        opts.button, opts.pointerX, opts.pointerY, opts.pointerX, opts.pointerY,
-                        opts.ctrlKey, opts.altKey, opts.shiftKey, opts.metaKey, 
-                        opts.button, null
-                    );
+                
+                if (customOpts) {
+                    for (var p in customOpts) opts[p] = customOpts[p];
                 }
-                elem.dispatchEvent(domEvent);
-            } else {
-                opts.clientX = opts.pointerX;
-                opts.clientY = opts.pointerY;
-                domEvent = document.createEventObject();
-                for (var key in opts) domEvent[key] = opts[key];
-                elem.fireEvent('on' + eventName, domEvent);
+                
+                var eventType,
+                    eventMatchers = {
+                        'HTMLEvents': /^(?:load|unload|abort|error|select|change|submit|reset|focus|blur|resize|scroll)$/,
+                        'MouseEvents': /^(?:click|dblclick|mouse(?:down|up|over|move|out))$/
+                    };
+                for (var name in eventMatchers) {
+                    if (eventMatchers[name].test(eventName)) {eventType = name; break;}
+                }
+                if (!eventType) throw new SyntaxError('Only HTMLEvent and MouseEvent interfaces supported');
+                
+                var domEvent;
+                if (document.createEvent) {
+                    domEvent = document.createEvent(eventType);
+                    if (eventType === 'HTMLEvents') {
+                        domEvent.initEvent(eventName, opts.bubbles, opts.cancelable);
+                    } else {
+                        domEvent.initMouseEvent(
+                            eventName, opts.bubbles, opts.cancelable, document.defaultView,
+                            opts.button, opts.pointerX, opts.pointerY, opts.pointerX, opts.pointerY,
+                            opts.ctrlKey, opts.altKey, opts.shiftKey, opts.metaKey, 
+                            opts.button, null
+                        );
+                    }
+                    elem.dispatchEvent(domEvent);
+                } else {
+                    opts.clientX = opts.pointerX;
+                    opts.clientY = opts.pointerY;
+                    domEvent = document.createEventObject();
+                    for (var key in opts) domEvent[key] = opts[key];
+                    elem.fireEvent('on' + eventName, domEvent);
+                }
             }
         }
     },
@@ -161,13 +165,15 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
         v.model = this;
     },
     
-    /** Removes this DomElementProxy's dom element from its parent node. */
+    /** Removes this DomElementProxy's dom element from its parent node.
+        @returns void */
     removeDomElement: function() {
         var de = this.domElement;
         de.parentNode.removeChild(de);
     },
     
-    /** Called when this DomElementProxy is destroyed. */
+    /** Called when this DomElementProxy is destroyed.
+        @returns void */
     disposeOfDomElement: function() {
         delete this.domElement.model;
         delete this.deStyle;
@@ -175,40 +181,60 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
     },
     
     /** Sets the dom "class" attribute on the dom element.
-        @param v:string the dom class name. */
+        @param v:string the dom class name.
+        @returns void */
     setDomClass: function(v) {
         this.domElement.className = this.domClass = v;
     },
     
+    /** Adds a dom "class" to the existing dom classes on the dom element.
+        @param v:string the dom class to add.
+        @returns void */
     addDomClass: function(v) {
-        this.domClass = (this.domClass ? this.domClass + ' ' : '') + v;
-        this.domElement.className = this.domClass;
+        var existing = this.domElement.className;
+        this.setDomClass((existing ? existing + ' ' : '') + v);
     },
     
+    /** Removes a dom "class" from the dom element.
+        @param v:string the dom class to remove.
+        @returns void */
     removeDomClass: function(v) {
-        if (this.domClass) {
-            var parts = this.domClass.split(' '), i = parts.length, part;
+        var existing = this.domElement.className;
+        if (existing) {
+            var parts = existing.split(' '), i = parts.length;
             while (i) {
                 if (parts[--i] === v) parts.splice(i, 1);
             }
-            this.domElement.className = this.domClass = parts.join(' ');
+            this.setDomClass(parts.join(' '));
         }
     },
     
+    /** Clears the dom "class".
+        @returns void */
+    clearDomClass: function() {
+        this.setDomClass('');
+    },
+    
     /** Sets the dom "id" attribute on the dom element.
-        @param v:string the dom id name. */
+        @param v:string the dom id name.
+        @returns void */
     setDomId: function(v) {
         this.domElement.id = this.domId = v;
     },
     
-    /** Set the z-index of the dom element. */
+    /** Set the z-index of the dom element.
+        @param v:number the z-index to set.
+        @returns void */
     setZIndex: function(v) {
         this.deStyle.zIndex = v;
     },
     
-    /** A convience method to set an arbitrary css style on the dom element. */
-    setStyleProperty: function(propertyName, value) {
-        this.deStyle[propertyName] = value;
+    /** Set an arbitrary CSS style on the dom element.
+        @param propertyName:string the name of the CSS property to set.
+        @param v:* the value to set.
+        @returns void */
+    setStyleProperty: function(propertyName, v) {
+        this.deStyle[propertyName] = v;
     },
     
     
@@ -218,19 +244,16 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
         @returns object with 'x' and 'y' keys or null if no dom element exists
             for this proxy. */
     getPagePosition: function() {
-        var de = this.domElement;
-        return de ? myt.DomElementProxy.getPagePosition(de) : null;
+        return myt.DomElementProxy.getPagePosition(this.domElement);
     },
     
-    /** Generates a dom event on this proxy's dom element. Adapted from:
-            http://stackoverflow.com/questions/6157929/how-to-simulate-mouse-click-using-javascript
+    /** Generates a dom event on this proxy's dom element.
         @param eventName:string the name of the dom event to generate.
         @param customOpts:Object (optional) a map of options that will
             be added onto the dom event object.
         @returns void */
     simulateDomEvent: function(eventName, customOpts) {
-        var de = this.domElement;
-        if (de) myt.DomElementProxy.simulateDomEvent(de, eventName, customOpts);
+        myt.DomElementProxy.simulateDomEvent(this.domElement, eventName, customOpts);
     },
     
     /** Gets the highest z-index of the dom element.
