@@ -246,9 +246,10 @@ myt = {
         @param arr:array the array to search.
         @param search:function|object (optional) the function used to determine
             a match or an object to search for. If not provided all undefined
-            array values will be removed. The search function takes a single
-            argument, the item to inspect, and should return true if the 
-            item should be removed.
+            array values will be removed. The search function takes two
+            arguments: the first is the index of the item in the array and
+            the second is the item to match against, and should return true 
+            if the item should be removed.
         @param multiple:boolean (optional) if true all items matching the
             search will be removed and returned. Defaults to false.
         @returns the removed item or null if not found, or an array of removed
@@ -258,10 +259,10 @@ myt = {
         
         if (Array.isArray(arr)) {
             var i = arr.length, value,
-                matchFunc = (search == null || typeof search !== 'function') ? function(v) {return v === search;} : search;
+                matchFunc = (search == null || typeof search !== 'function') ? function(i, v) {return v === search;} : search;
             while (i) {
                 value = arr[--i];
-                if (matchFunc(value)) {
+                if (matchFunc(i, value)) {
                     arr.splice(i, 1);
                     if (multiple) {
                         retval.push(value);
@@ -367,7 +368,7 @@ myt = {
     /** Tests if two floats are essentially equal to each other.
         @param a:float
         @param b:float
-        @param epsilon:float (optional) the percent of different allowed
+        @param epsilon:float (optional) the percent of difference allowed
             between a and b. Defaults to 0.000001 if not provided.
         @return true if equal, false otherwise. */
     areFloatsEqual: function(a, b, epsilon) {

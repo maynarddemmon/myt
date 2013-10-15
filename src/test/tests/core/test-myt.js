@@ -169,10 +169,10 @@ test("Test filterArray", function() {
     results = myt.filterArray(arr, "foo");
     ok(results === null, "The matching string value should no longer be found.");
     
-    results = myt.filterArray(arr, function(v) {return v === 'bar';});
+    results = myt.filterArray(arr, function(i, v) {return v === 'bar';});
     ok(results === 'bar', "The match should have a value of bar.");
     
-    results = myt.filterArray(arr, function(v) {return v === 'bar';});
+    results = myt.filterArray(arr, function(i, v) {return v === 'bar';});
     ok(results === null, "The matching value should no longer be found.");
     
     var arr2 = ['foo', 'bar', 'baz', undefined];
@@ -186,10 +186,16 @@ test("Test filterArray", function() {
     results = myt.filterArray(arr2, "foo", true);
     ok(results.length === 0, "Result should be an empty array.");
     
-    results = myt.filterArray(arr2, function(v) {return typeof v === 'string';}, true);
+    results = myt.filterArray(arr2, function(i, v) {return typeof v === 'string';}, true);
     ok(results.length === 2, "Result should be an array of length 2.");
     
     ok(arr2.length === 1, "Array should now only have a length of 1.");
+    
+    var arr3 = ['foo', 'bar', 'baz'];
+    results = myt.filterArray(arr3, function(i, v) {return i === 0;});
+    ok(results === "foo", "The item at index 0 should have been removed.");
+    ok(arr3.length === 2, "The array should now have a length of 2.");
+    ok(arr3[0] === "bar", "The first item in the array should now be 'bar'.");
 });
 
 test("Test areFloatsEqual", function() {
