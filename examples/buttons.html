@@ -86,6 +86,19 @@
         }).next(
             function(success) {layout.animate({attribute:'spacing', to:2, duration:250});}
         );
+        
+        var txt1 = new myt.Text(rootView, {text:'foo'});
+        txt1.showTextShadow(0, 0, 0);
+        var txt2 = new myt.Text(rootView, {text:'bar'});
+        txt2.showTextShadow(0, 0, 1);
+        var txt3 = new myt.Text(rootView, {text:'baz'});
+        txt3.showTextShadow();
+        var txt4 = new myt.Text(rootView, {text:'Hey there'});
+        txt4.showTextShadow(5, 5, 3, '#ffffff', 4);
+        txt4.enableEllipsis();
+        txt4.setWidth(50);
+        txt4.disableEllipsis();
+        txt4.hideTextShadow();
     }
 </script>
 </body></html>

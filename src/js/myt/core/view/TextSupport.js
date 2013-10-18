@@ -12,6 +12,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
     // Accessors ///////////////////////////////////////////////////////////////
     /** The text content to be displayed. */
     setText: function(v) {
+        if (!v) v = '';
         if (typeof v === 'object') v = v.value;
         
         if (this.text === v) return;
@@ -41,74 +42,80 @@ myt.TextSupport = new JS.Module('TextSupport', {
         if (this.inited) this.fireNewEvent('textAlign', v);
     },
     
-    /** Supported values: 'normal', 'nowrap', 'pre', 'pre-line', 'pre-wrap', 'inherit'. */
+    /** Supported values: 'normal', 'nowrap', 'pre', 'pre-line', 'pre-wrap', 
+        'inherit'. */
     setWhiteSpace: function(v) {
-        this.__textSetter(v, 'whiteSpace');
+        this.__s(v, 'whiteSpace');
     },
     
     /** Supported values: 'break-word', 'normal'. */
     setWordWrap: function(v) {
-        this.__textSetter(v, 'wordWrap', 'normal');
+        this.__s(v, 'wordWrap', 'normal');
     },
     
     /** Supported values: '20px', '10%', 'inherit'. */
     setTextIndent: function(v) {
-        this.__textSetter(v, 'textIndent');
+        this.__s(v, 'textIndent');
     },
     
-    /** Supported values: 'none', 'capitalize', 'uppercase', 'lowercase', 'inherit'. */
+    /** Supported values: 'none', 'capitalize', 'uppercase', 'lowercase', 
+        'inherit'. */
     setTextTransform: function(v) {
-        this.__textSetter(v, 'textTransform');
+        this.__s(v, 'textTransform');
     },
     
-    /** Supported values: 'none', 'underline', 'overline', 'line-through', 'blink', 'inherit'. */
+    /** Supported values: 'none', 'underline', 'overline', 'line-through', 
+        'blink', 'inherit'. */
     setTextDecoration: function(v) {
-        this.__textSetter(v, 'textDecoration');
+        this.__s(v, 'textDecoration');
     },
     
     /** Supported values: 'normal', '1.5', '22px', '150%', 'inherit'. */
     setLineHeight: function(v) {
-        this.__textSetter(v, 'lineHeight');
+        this.__s(v, 'lineHeight');
     },
     
     /** Supported values: 'normal', '3px', 'inherit'. */
     setLetterSpacing: function(v) {
-        this.__textSetter(v, 'letterSpacing');
+        this.__s(v, 'letterSpacing');
     },
     
     /** Supported values: 'normal', '3px', 'inherit'. */
     setWordSpacing: function(v) {
-        this.__textSetter(v, 'wordSpacing');
+        this.__s(v, 'wordSpacing');
     },
     
     // Font Attributes
     setFontFamily: function(v) {
-        this.__textSetter(v, 'fontFamily');
+        this.__s(v, 'fontFamily');
     },
     
     /** Supported values: 'normal', 'italic', 'oblique', 'inherit'. */
     setFontStyle: function(v) {
-        this.__textSetter(v, 'fontStyle');
+        this.__s(v, 'fontStyle');
     },
     
     /** Supported values: 'normal', 'small-caps', 'inherit'. */
     setFontVariant: function(v) {
-        this.__textSetter(v, 'fontVariant');
+        this.__s(v, 'fontVariant');
     },
     
-    /** Supported values: 'normal', 'bold', 'bolder', 'lighter', '100-900', 'inherit'. */
-    setFontWeight: function(v) {
-        this.__textSetter(v, 'fontWeight');
-    },
-    
-    /** Supported values: 'normal, '14px', '14pt', 'xx-small', 'x-small', 'small'
-        'medium', 'large', 'x-large', 'xx-large', 'smaller', 'larger', '75%', 
+    /** Supported values: 'normal', 'bold', 'bolder', 'lighter', '100-900', 
         'inherit'. */
-    setFontSize: function(v) {
-        this.__textSetter(v, 'fontSize');
+    setFontWeight: function(v) {
+        this.__s(v, 'fontWeight');
     },
     
-    __textSetter: function(v, attrName, defaultValue) {
+    /** Supported values: 'normal, '14px', '14pt', 'xx-small', 'x-small', 
+        'small', 'medium', 'large', 'x-large', 'xx-large', 'smaller', 'larger',
+        '75%', 'inherit'. */
+    setFontSize: function(v) {
+        this.__s(v, 'fontSize');
+    },
+    
+    /** A private setter function that provides a common implementation for
+        most of this setters in this mixin. */
+    __s: function(v, attrName, defaultValue) {
         if (this[attrName] === v) return;
         this[attrName] = v;
         this.deStyle[attrName] = v ? v : (defaultValue ? defaultValue : 'inherit');
@@ -121,31 +128,48 @@ myt.TextSupport = new JS.Module('TextSupport', {
     
     // Methods /////////////////////////////////////////////////////////////////
     /** Configures the attributes for this Text so that an ellipsis will be
-        displayed.
+        displayed. To actually see an ellipsis, an explicit width should be
+        set on the Text so that overflow will occur.
         @returns void */
     enableEllipsis: function() {
         this.setWhiteSpace('nowrap');
         this.setOverflow('hidden');
         this.setTextOverflow('ellipsis');
-        
-        // NOTE: To reveal hidden text set overflow:visible
+    },
+    
+    /** Turns ellipsis off by setting overflow to 'visible'. Other CSS
+        related changes for ellipsis are not undone such as whiteSpace and
+        textOverflow.
+        @returns void */
+    disableEllipsis: function() {
+        this.setOverflow('visible');
     },
     
     /** Turns on a text shadow.
-        @param x:number the x offset in pixels of the shadow.
-        @param y:number the y offset in pixels of the shadow.
-        @param blur:number the bluriness in pixels of the shadow.
-        @param color:color_string the color of the shadow.
-        @param extraStrength:number the number of times to render the shadow
-            to give the shadow extra opacity.
+        @param x:number (optional) The x offset in pixels of the shadow.
+            Defaults to 0 if not provided.
+        @param y:number (optional) The y offset in pixels of the shadow.
+            Defaults to 0 if not provided.
+        @param blur:number (optional) The bluriness in pixels of the shadow.
+            Defaults to 2 if not provided.
+        @param color:color_string (optional) The color of the shadow. Defaults
+            to '#000000' if not provided.
+        @param extraStrength:number (optional) The number of times to render 
+            the shadow to give the shadow extra opacity.
         @returns void */
     showTextShadow: function(x, y, blur, color, extraStrength) {
-        var shadow = x + 'px ' + y + 'px ' + blur + 'px ' + color;
-        if (extraStrength === undefined || extraStrength < 0) extraStrength = 0;
+        var shadow = (x != null ? x : 0) + 'px ' + 
+            (y != null ? y : 0) + 'px ' + 
+            (blur != null ? blur : 2) + 'px ' + 
+            (color || '#000000');
+            
+        if (extraStrength > 0) {
+            var value = [shadow];
+            while (extraStrength--) value.push(shadow);
+            shadow = value.join(',');
+        }
         
-        var value = shadow;
-        while (extraStrength--) value += ',' + shadow;
-        this.deStyle.textShadow = value;
+        this.deStyle.textShadow = shadow;
     },
     
     /** Turns off a text shadow.
