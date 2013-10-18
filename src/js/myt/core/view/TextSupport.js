@@ -46,6 +46,11 @@ myt.TextSupport = new JS.Module('TextSupport', {
         this.__textSetter(v, 'whiteSpace');
     },
     
+    /** Supported values: 'break-word', 'normal'. */
+    setWordWrap: function(v) {
+        this.__textSetter(v, 'wordWrap', 'normal');
+    },
+    
     /** Supported values: '20px', '10%', 'inherit'. */
     setTextIndent: function(v) {
         this.__textSetter(v, 'textIndent');
@@ -103,10 +108,10 @@ myt.TextSupport = new JS.Module('TextSupport', {
         this.__textSetter(v, 'fontSize');
     },
     
-    __textSetter: function(v, attrName) {
+    __textSetter: function(v, attrName, defaultValue) {
         if (this[attrName] === v) return;
         this[attrName] = v;
-        this.deStyle[attrName] = v ? v : 'inherit';
+        this.deStyle[attrName] = v ? v : (defaultValue ? defaultValue : 'inherit');
         if (this.inited) {
             this.fireNewEvent(attrName, v);
             this.sizeViewToDom();

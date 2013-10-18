@@ -36,6 +36,8 @@
             }]
         });
         
+        new myt.Dialog(rootView, {name:'dialog'});
+        
         var layout = new myt.SpacedLayout(rootView, {axis:'x', spacing:2, inset:5});
         
         var btn1 = new BtnClass(rootView, {name:'one', width:50, height:20});
@@ -60,9 +62,21 @@
             name:'six', width:50, height:20, activeColor:'#990000', hoverColor:'#ff0000', readyColor:'#cc0000'
         }, [ActivatedMixin]);
         
-        var btn7 = new myt.IconTextPanelButton(rootView, {name:'seven', text:'foo', tooltip:'here is a tip', shrinkToFit:true}, [ActivatedMixin]);
+        var btn7 = new myt.IconTextPanelButton(rootView, {name:'seven', text:'foo', tooltip:'here is a tip', shrinkToFit:true}, [ActivatedMixin, {
+            doActivated: function() {
+                var dialog = this.parent.dialog;
+                dialog.showSpinner("Here is a message with a spinner.");
+                this.callSuper();
+                dialog.doOnceLater('hide', 1000);
+            }
+        }]);
         var btn8 = new myt.IconTextPanelButton(rootView, {name:'eight', text:'bar', shrinkToFit:true, disabled:true}, [ActivatedMixin]);
-        var btn9 = new myt.IconTextPanelButton(rootView, {name:'nine', text:'baz', width:40}, [ActivatedMixin]);
+        var btn9 = new myt.IconTextPanelButton(rootView, {name:'nine', text:'baz', width:40}, [ActivatedMixin, {
+            doActivated: function() {
+                this.parent.dialog.showMessage("Here is a withasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdf message.");
+                this.callSuper();
+            }
+        }]);
         
         // Do some simple animation
         btn3.animate('y', 100, undefined, false, function(success) {btn3.animate({attribute:'x', to:52, relative:true});});

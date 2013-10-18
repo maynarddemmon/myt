@@ -28,6 +28,7 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
         if (attrs.percentOfParentHeight === undefined) attrs.percentOfParentHeight = 100;
         if (attrs.visible === undefined) attrs.visible = false;
         if (attrs.restoreFocus === undefined) attrs.restoreFocus = true;
+        if (attrs.ignoreLayout === undefined) attrs.ignoreLayout = true;
         
         this.callSuper(parent, attrs);
         

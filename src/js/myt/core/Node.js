@@ -461,5 +461,25 @@ myt.Node = new JS.Class('Node', {
         @returns void */
     doOnceOnIdle: function(methodName) {
         this.attachTo(myt.global.idle, methodName, 'idle', true);
+    },
+    
+    /** A convienence method to execute a method once after a delay.
+        @param methodName:string the name of the method on this object
+            to execute.
+        @param delay:number (optional) the time to wait in millis. Defaults 
+            to 0.
+        @param arguments Remaining arguments will be passed to the called
+            method in the order provided.
+        @returns void */
+    doOnceLater: function() {
+        var params = Array.prototype.slice.call(arguments),
+            methodName = params.shift(),
+            delay = params.shift();
+            
+        var method = this[methodName];
+        if (method) {
+            params.unshift(this);
+            setTimeout(method.bind.apply(method, params), delay >= 0 ? delay : 0);
+        }
     }
 });

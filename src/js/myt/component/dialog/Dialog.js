@@ -6,8 +6,21 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         DEFAULT_SHADOW:[0, 4, 20, '#666666'],
         DEFAULT_BGCOLOR:'#ffffff',
         
-        MESSAGE_DEFAULTS: {
-            width:200
+        /** Makes the text will wrap at 200px and the dialog will be at
+            least 200px wide. */
+        WRAP_TEXT_DEFAULTS: {
+            width:200,
+            fontWeight:'bold',
+            whiteSpace:'normal',
+            wordWrap:'break-word'
+        },
+        
+        /** Makes the text stay on a single line and the dialog sizes to fit. */
+        NO_WRAP_TEXT_DEFAULTS: {
+            width:'auto',
+            fontWeight:'bold',
+            whiteSpace:'nowrap',
+            wordWrap:'break-word'
         }
     },
     
@@ -81,13 +94,33 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     },
     
     
-    // Methods /////////////////////////////////////////////////////////////////
+    // Methods /////////////////////////////////////////////////////////////////,
+    /** @overrides myt.Dimmer */
+    hide: function() {
+        // Hide spinner related elements
+        if (this.spinner) {
+            this.spinner.setVisible(false);
+            this.spinner = undefined;
+        }
+        
+        this.callSuper();
+    },
+    
     /** @overrides myt.Dimmer */
     eatMouseEvent: function(event) {
         this.content.standardCancelBtn.focus();
         return this.callSuper(event);
     },
     
+    /** Called when the standard cancel button is activated.
+        @returns void */
+    doCancel: function() {
+        this.hide();
+    },
+    
+    /** Called before a dialog is shown to cleanup UI elements from the
+        previous state of the Dialog.
+        @returns void */
     _destroyContent: function() {
         var svs = this.content.getSubviews(), i = svs.length, sv;
         while (i) {
@@ -97,14 +130,22 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         }
     },
     
+    /** Shows a dialog with a message and the standard cancel button.
+        @param msg:string the message to show.
+        @param opts:object options that modify how the message is displayed.
+            Supports: fontWeight, whiteSpace, wordWrap and width.
+        @returns void */
     showMessage: function(msg, opts) {
-        opts = $.extend({}, myt.Dialog.MESSAGE_DEFAULTS, opts);
+        opts = $.extend({}, myt.Dialog.WRAP_TEXT_DEFAULTS, opts);
         var content = this.content, MP = myt.ModalPanel;
         
         this._destroyContent();
         
         new myt.Text(content, {
-            text:msg, whiteSpace:'normal', fontWeight:'bold',
+            text:msg,
+            whiteSpace:opts.whiteSpace,
+            wordWrap:opts.wordWrap,
+            fontWeight:opts.fontWeight,
             x:MP.DEFAULT_PADDING_X,
             y:MP.DEFAULT_PADDING_Y,
             width:opts.width
@@ -117,12 +158,14 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         cancelBtn.focus();
     },
     
-    doCancel: function() {
-        this.hide();
-    },
-    
+    /** Shows a dialog with a spinner and a message and no standard cancel
+        button.
+        @param msg:string the message to show.
+        @param opts:object options that modify how the message is displayed.
+            Supports: fontWeight, whiteSpace, wordWrap and width.
+        @returns void */
     showSpinner: function(msg, opts) {
-        opts = $.extend({}, myt.Dialog.MESSAGE_DEFAULTS, opts);
+        opts = $.extend({}, myt.Dialog.NO_WRAP_TEXT_DEFAULTS, opts);
         var content = this.content, MP = myt.ModalPanel;
         
         this._destroyContent();
@@ -134,22 +177,18 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         });
         if (msg) {
             new myt.Text(content, {
-                text:msg, fontWeight:'bold',
+                text:msg,
+                whiteSpace:opts.whiteSpace,
+                wordWrap:opts.wordWrap,
+                fontWeight:opts.fontWeight,
                 x:MP.DEFAULT_PADDING_X,
-                y:spinner.y + spinner.getSize() + MP.DEFAULT_PADDING_Y
+                y:spinner.y + spinner.getSize() + MP.DEFAULT_PADDING_Y,
+                width:opts.width
             });
         }
         
         this.show();
         
         content.standardCancelBtn.setVisible(false);
-    },
-    
-    hideSpinner: function() {
-        if (this.spinner) {
-            this.spinner.setVisible(false);
-            this.spinner = undefined;
-        }
-        this.hide();
     }
 });
