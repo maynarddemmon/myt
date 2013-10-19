@@ -21,7 +21,8 @@ myt.ModalPanel = new JS.Class('ModalPanel', myt.Dimmer, {
             name:'content', ignorePlacement:true, align:'center', valign:'middle'
         });
         var MP = myt.ModalPanel;
-        new myt.SizeToChildren(content, {axis:'both',
+        new myt.SizeToChildren(content, {
+            name:'sizeToChildren', axis:'both',
             paddingX:MP.DEFAULT_PADDING_X, 
             paddingY:MP.DEFAULT_PADDING_Y
         });

@@ -12,7 +12,7 @@
     JS.require('myt.all', function() {this.init();});
     
     function init() {
-        myt.Layout.incrementGlobalLock();
+        var start = Date.now();
         
         var rootView = new myt.View(null, {width:600, height:600, bgColor:'#eeeeee'}, [myt.RootView]);
         
@@ -81,10 +81,7 @@
             lineInset:10, lineSpacing:0,
         });
         
-        // Delay layout a while until buttons are all rendered.
-        setTimeout(function() {
-            myt.Layout.decrementGlobalLock();
-        }, 300);
+        console.log(Date.now() - start);
     }
 </script>
 </body></html>

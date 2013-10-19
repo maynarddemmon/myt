@@ -208,9 +208,15 @@ myt.View = new JS.Class('View', myt.Node, {
     __setupAlignConstraint: function() {
         if (this.parent) {
             switch(this.align) {
-                case 'center': this.applyConstraint('__doAlignCenter', [this, 'width', this, 'alignOffset', this.parent, 'width']); break;
-                case 'right': this.applyConstraint('__doAlignRight', [this, 'width', this, 'alignOffset', this.parent, 'width']); break;
-                case 'left': this.setX(this.alignOffset ? this.alignOffset : 0); break;
+                case 'center':
+                    this.applyConstraint('__doAlignCenter', [this, 'width', this, 'alignOffset', this.parent, 'width']);
+                    break;
+                case 'right':
+                    this.applyConstraint('__doAlignRight', [this, 'width', this, 'alignOffset', this.parent, 'width']);
+                    break;
+                case 'left':
+                    this.setX(this.alignOffset ? this.alignOffset : 0);
+                    break;
                 default: // Do nothing
             }
         }
@@ -256,9 +262,15 @@ myt.View = new JS.Class('View', myt.Node, {
     __setupValignConstraint: function() {
         if (this.parent) {
             switch(this.valign) {
-                case 'middle': this.applyConstraint('__doValignMiddle', [this, 'height', this, 'valignOffset', this.parent, 'height']); break;
-                case 'bottom': this.applyConstraint('__doValignBottom', [this, 'height', this, 'valignOffset', this.parent, 'height']); break;
-                case 'top': this.setY(this.valignOffset ? this.valignOffset : 0); break;
+                case 'middle':
+                    this.applyConstraint('__doValignMiddle', [this, 'height', this, 'valignOffset', this.parent, 'height']);
+                    break;
+                case 'bottom':
+                    this.applyConstraint('__doValignBottom', [this, 'height', this, 'valignOffset', this.parent, 'height']);
+                    break;
+                case 'top':
+                    this.setY(this.valignOffset ? this.valignOffset : 0);
+                    break;
                 default: // Do nothing
             }
         }
@@ -489,6 +501,43 @@ myt.View = new JS.Class('View', myt.Node, {
         @returns void */
     setRoundedCorners: function(radius) {
         this.deStyle.borderRadius = radius + 'px';
+    },
+    
+    /** A convienence method to round the top left corner.
+        @param radius:number the radius of the corner.
+        @returns void */
+    setRoundedTopLeftCorner: function(radius) {
+        this.setRoundedCorner(radius, 'TopLeft');
+    },
+    
+    /** A convienence method to round the top right corner.
+        @param radius:number the radius of the corner.
+        @returns void */
+    setRoundedTopRightCorner: function(radius) {
+        this.setRoundedCorner(radius, 'TopRight');
+    },
+    
+    /** A convienence method to round the bottom left corner.
+        @param radius:number the radius of the corner.
+        @returns void */
+    setRoundedBottomLeftCorner: function(radius) {
+        this.setRoundedCorner(radius, 'BottomLeft');
+    },
+    
+    /** A convienence method to round the bottom right corner.
+        @param radius:number the radius of the corner.
+        @returns void */
+    setRoundedBottomRightCorner: function(radius) {
+        this.setRoundedCorner(radius, 'BottomRight');
+    },
+    
+    /** A convienence method to set a single rounded corner on an element.
+        @param radius:number the radius of the corner.
+        @param corner:string One of 'TopLeft', 'TopRight', 'BottomLeft' or
+            'BottomRight'.
+        @returns void */
+    setRoundedCorner: function(radius, corner) {
+        this.deStyle['border' + corner + 'Radius'] = radius + 'px';
     },
     
     /** Sets the CSS boxShadow property.

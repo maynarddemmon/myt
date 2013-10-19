@@ -470,7 +470,8 @@ myt.Node = new JS.Class('Node', {
             to 0.
         @param arguments Remaining arguments will be passed to the called
             method in the order provided.
-        @returns void */
+        @returns number The timer ID if the timer is started, othewise
+            undefined is returned. */
     doOnceLater: function() {
         var params = Array.prototype.slice.call(arguments),
             methodName = params.shift(),
@@ -479,7 +480,7 @@ myt.Node = new JS.Class('Node', {
         var method = this[methodName];
         if (method) {
             params.unshift(this);
-            setTimeout(method.bind.apply(method, params), delay >= 0 ? delay : 0);
+            return setTimeout(method.bind.apply(method, params), delay >= 0 ? delay : 0);
         }
     }
 });

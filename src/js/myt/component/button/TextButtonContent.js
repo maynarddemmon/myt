@@ -2,7 +2,7 @@
     
     Attributes:
         __updateContentPositionLoopBlock:boolean Used in __updateContentPosition
-            and __updateContentPositionAfterDelay to prevent infinite loops.
+            to prevent infinite loops.
         text:string the text to display on the button.
         inset:number the left padding before the text. Defaults to 0.
         outset:number the right padding after the text. Defaults to 0.
@@ -23,31 +23,34 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
         this.textY = attrs.shrinkToFit ? 'middle' : 0;
         
         this.callSuper(parent, attrs);
+        
+        // Setup the constraint after adoption since the textView won't have
+        // been sized to the dom until it's added in.
+        var textView = this.textView;
+        this.applyConstraint('__updateContentPosition', [
+            this, 'inset', this, 'outset',
+            this, 'width', this, 'shrinkToFit',
+            textView, 'visible', textView, 'width',
+            textView, 'height', textView, 'y'
+        ]);
     },
     
     doAfterAdoption: function() {
-        // Setup the constraint after adoption since the textView won't have
-        // been sized to the dom until it's added in.
-        var attrs = {
-            name:'textView', whiteSpace: this.shrinkToFit ? 'nowrap' : 'normal', 
-            text:this.text, domClass:'mytButtonText'
-        };
-        var textY = this.textY;
+        var textY = this.textY, 
+            attrs = {
+                name:'textView', 
+                whiteSpace: this.shrinkToFit ? 'nowrap' : 'normal', 
+                text:this.text, domClass:'mytButtonText'
+            };
         if (typeof textY === 'string') {
             attrs.valign = textY;
         } else {
             attrs.y = textY;
         }
-        var textView = new myt.Text(this, attrs);
+        new myt.Text(this, attrs);
         
         // Record original height
         this.setOrigHeight(this.height);
-        
-        this.applyConstraint('__updateContentPosition', [
-            this, 'inset', this, 'outset',
-            this, 'width', this, 'shrinkToFit', this, 'multiline',
-            textView, 'visible', textView, 'width'
-        ]);
         
         this.callSuper();
     },
@@ -111,43 +114,32 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** Use a timeout to greatly reduce the number of spurious updates during
-        initialization. */
     __updateContentPosition: function(v) {
-        if (this.__updateContentPositionLoopBlock || this.__updateContentPositionTimerId) return;
+        if (this.__updateContentPositionLoopBlock || this.destroyed) return;
         
-        var self = this;
-        this.__updateContentPositionTimerId = setTimeout(function() {
-            self.__updateContentPositionAfterDelay();
-        }, 40);
-    },
-    
-    __updateContentPositionAfterDelay: function() {
-        if (!this.destroyed) {
-            this.__updateContentPositionTimerId = undefined;
+        var inset = this.inset, 
+            outset = this.outset, 
+            textView = this.textView,
+            textViewVisible = textView.visible && this.text;
+        
+        if (this.shrinkToFit) {
+            textView.setX(inset);
             
-            var inset = this.inset, 
-                outset = this.outset, 
-                textView = this.textView,
-                textViewVisible = textView.visible && this.text;
+            this.__updateContentPositionLoopBlock = true;
+            this.setWidth(inset + (textViewVisible ? textView.width : 0) + outset);
+            this.__updateContentPositionLoopBlock = false;
             
-            if (this.shrinkToFit) {
-                textView.setX(inset);
-                
-                this.__updateContentPositionLoopBlock = true;
-                this.setWidth(inset + (textViewVisible ? textView.width : 0) + outset);
-                this.__updateContentPositionLoopBlock = false;
-                
-                this.setHeight(this.origHeight);
-            } else {
-                textView.setHeight('auto');
-                textView.setWidth(this.width - inset - outset);
-                textView.setX(inset);
-                
-                this.setHeight(textViewVisible ? textView.y + textView.height : this.origHeight);
-            }
+            this.setHeight(this.origHeight);
+        } else {
+            textView.setHeight('auto');
+            textView.setWidth(this.width - inset - outset);
+            textView.setX(inset);
             
-            this.updateUI();
+            this.__updateContentPositionLoopBlock = true;
+            this.setHeight(textViewVisible ? textView.y + textView.height : this.origHeight);
+            this.__updateContentPositionLoopBlock = false;
         }
+        
+        this.updateUI();
     }
 });

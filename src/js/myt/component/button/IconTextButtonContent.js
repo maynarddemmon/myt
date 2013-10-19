@@ -2,7 +2,7 @@
     
     Attributes:
         __updateContentPositionLoopBlock:boolean Used in __updateContentPosition
-            and __updateContentPositionAfterDelay to prevent infinite loops.
+            to prevent infinite loops.
         text:string the text to display on the button.
         iconUrl:string the url to an image to display in the button.
         inset:number the left padding before the icon. Defaults to 0.
@@ -31,36 +31,10 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         if (attrs.contentAlign === undefined) attrs.contentAlign = 'center';
         
         this.callSuper(parent, attrs);
-    },
-    
-    doBeforeAdoption: function() {
-        this.callSuper();
         
-        var attrs = {name:'iconView', imageUrl:this.iconUrl}
-        var iconY = this.iconY;
-        if (typeof iconY === 'string') {
-            attrs.valign = iconY;
-        } else {
-            attrs.y = iconY;
-        }
-        new myt.Image(this, attrs);
-    },
-    
-    doAfterAdoption: function() {
-        // Setup the constraint after adoption since the textView won't have
+        // Setup the constraint after inited since the textView won't have
         // been sized to the dom until it's added in.
-        var attrs = {
-            name:'textView', whiteSpace:'nowrap', text:this.text, domClass:'mytButtonText'
-        };
-        var textY = this.textY;
-        if (typeof textY === 'string') {
-            attrs.valign = textY;
-        } else {
-            attrs.y = textY;
-        }
-        var textView = new myt.Text(this, attrs);
-        
-        var iconView = this.iconView;
+        var iconView = this.iconView, textView = this.textView;
         this.applyConstraint('__updateContentPosition', [
             this, 'inset', this, 'outset',
             this, 'width', this, 'shrinkToFit', this, 'iconSpacing',
@@ -68,6 +42,33 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
             iconView, 'width', iconView, 'visible',
             textView, 'visible', textView, 'width'
         ]);
+    },
+    
+    doAfterAdoption: function() {
+        var attrs, iconY = this.iconY, textY = this.textY;
+        
+        // Setup iconView
+        attrs = {
+            name:'iconView', imageUrl:this.iconUrl
+        };
+        if (typeof iconY === 'string') {
+            attrs.valign = iconY;
+        } else {
+            attrs.y = iconY;
+        }
+        new myt.Image(this, attrs);
+        
+        // Setup textView
+        attrs = {
+            name:'textView', whiteSpace:'nowrap', text:this.text, 
+            domClass:'mytButtonText'
+        };
+        if (typeof textY === 'string') {
+            attrs.valign = textY;
+        } else {
+            attrs.y = textY;
+        }
+        new myt.Text(this, attrs);
         
         this.callSuper();
     },
@@ -161,22 +162,8 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** Use a timeout to greatly reduce the number of spurious updates during
-        initialization. */
     __updateContentPosition: function(v) {
-        if (this.__updateContentPositionLoopBlock) return;
-        if (this.__updateContentPositionTimerId) return;
-        
-        var self = this;
-        this.__updateContentPositionTimerId = setTimeout(function() {
-            self.__updateContentPositionAfterDelay();
-        }, 40);
-    },
-    
-    __updateContentPositionAfterDelay: function() {
-        if (this.destroyed) return;
-        
-        this.__updateContentPositionTimerId = undefined;
+        if (this.__updateContentPositionLoopBlock || this.destroyed) return;
         
         var inset = this.inset,
             outset = this.outset,

@@ -60,7 +60,27 @@
         
         var btn6 = new myt.SimpleButton(rootView, {
             name:'six', width:50, height:20, activeColor:'#990000', hoverColor:'#ff0000', readyColor:'#cc0000'
-        }, [ActivatedMixin]);
+        }, [ActivatedMixin,  {
+            doActivated: function() {
+                this.parent.dialog.showConfirm(
+                    "Can you confirm or deny that the rumors are true?",
+                    function(action) {
+                        switch(action) {
+                            case 'closeBtn': return true;
+                            case 'cancelBtn':
+                                console.log("cancelled");
+                                break;
+                            case 'confirmBtn':
+                                console.log("confirmed");
+                                break;
+                        }
+                    },
+                    
+                    {cancelTxt:'Deny'}
+                );
+                this.callSuper();
+            }
+        }]);
         
         var btn7 = new myt.IconTextPanelButton(rootView, {name:'seven', text:'foo', tooltip:'here is a tip', shrinkToFit:true}, [ActivatedMixin, {
             doActivated: function() {
@@ -73,7 +93,7 @@
         var btn8 = new myt.IconTextPanelButton(rootView, {name:'eight', text:'bar', shrinkToFit:true, disabled:true}, [ActivatedMixin]);
         var btn9 = new myt.IconTextPanelButton(rootView, {name:'nine', text:'baz', width:40}, [ActivatedMixin, {
             doActivated: function() {
-                this.parent.dialog.showMessage("Here is a withasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdf message.");
+                this.parent.dialog.showMessage("Can you confirm or deny that the rumors are true?");
                 this.callSuper();
             }
         }]);
