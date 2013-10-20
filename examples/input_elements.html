@@ -56,6 +56,8 @@
             }]);
         }
         
+        console.log(Date.now() - start);
+        
         var slider1 = new myt.Slider(rootView, {width:200, minValue:0, maxValue:10, value:5});
         var txt1 = new myt.Text(rootView);
         txt1.syncTo(slider1, 'setText', 'value');

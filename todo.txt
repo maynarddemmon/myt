@@ -20,7 +20,6 @@ o SizeToParent should support an offset so we can do parent width minus 10px, et
 
 o Use Z-index for bring to front
 o Dialog should support multiple entries for spinner message using a key to add/remove them.
-o Confirm dialog component.
 o Build in delay to showSpinner code.
 
 o Cached bitmap for checkbox/radio

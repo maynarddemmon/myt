@@ -50,17 +50,13 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
         new myt.Text(this, attrs);
         
         // Record original height
-        this.setOrigHeight(this.height);
+        this.origHeight = this.height;
         
         this.callSuper();
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setOrigHeight: function(v) {
-        this.origHeight = v;
-    },
-    
     setInset: function(v) {
         // Adapt to event from syncTo
         if (typeof v === 'object') v = v.value;
@@ -139,7 +135,5 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
             this.setHeight(textViewVisible ? textView.y + textView.height : this.origHeight);
             this.__updateContentPositionLoopBlock = false;
         }
-        
-        this.updateUI();
     }
 });

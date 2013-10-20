@@ -13,16 +13,12 @@ myt.TextCheckbox = new JS.Class('TextCheckbox', myt.Checkbox, {
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        this.callSuper(parent, attrs);
-        
-        if (!this.shrinkToFit) this.setTextY(myt.TextCheckbox.DEFAULT_MULTILINE_PAD_Y);
-    },
-    
     doAfterAdoption: function() {
-        var padX = myt.TextCheckbox.DEFAULT_PAD_X;
+        var TC = myt.TextCheckbox, padX = TC.DEFAULT_PAD_X;
         this.setInset(this.getIconExtentX() + padX);
         this.setOutset(padX);
+        
+        if (!this.shrinkToFit) this.setTextY(TC.DEFAULT_MULTILINE_PAD_Y);
         
         this.callSuper();
     }

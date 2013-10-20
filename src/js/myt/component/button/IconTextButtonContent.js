@@ -184,8 +184,6 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
             this.__updateContentPositionLoopBlock = true;
             this.setWidth(totalWidth);
             this.__updateContentPositionLoopBlock = false;
-            
-            this.updateUI();
         } else {
             var leftPos;
             if (this.contentAlign === 'left') {
