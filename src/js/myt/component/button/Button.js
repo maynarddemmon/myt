@@ -5,7 +5,8 @@
     By default Button instances are focusable.
     
     Attributes:
-        __restoreCursor:string the cursor to restore to when no longer disabled.
+        __restoreCursor:string the cursor to restore to when the button is
+            no longer disabled.
 */
 myt.Button = new JS.Module('Button', {
     include: [

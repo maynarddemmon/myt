@@ -14,13 +14,11 @@ myt.Observable = new JS.Module('Observable', {
         @returns boolean true if the observer was successfully attached, 
             false otherwise. */
     attachObserver: function(observer, methodName, type) {
-        if (!observer || !methodName || !type) return false;
-        
-        var observers = this.getObservers(type);
-        observers.push(methodName);
-        observers.push(observer);
-        
-        return true;
+        if (observer && methodName && type) {
+            this.getObservers(type).push(methodName, observer);
+            return true;
+        }
+        return false;
     },
     
     /** Removes the provided observer from the list of observers for
@@ -28,54 +26,57 @@ myt.Observable = new JS.Module('Observable', {
         @returns boolean true if the observer was successfully detached, 
             false otherwise. */
     detachObserver: function(observer, methodName, type) {
-        if (!observer || !methodName || !type) return false;
-        
-        var observersByType = this.__observersByType;
-        if (!observersByType) return false;
-        var observers = observersByType[type];
-        if (!observers) return false;
-        
-        // Remove all instances of the observer and methodName combination.
-        var retval = false, i = observers.length;
-        while (i) {
-            // Ensures we decrement twice. First with --i, then with i-- since 
-            // the part after && may not be executed.
-            --i;
-            if (observer === observers[i--] && methodName === observers[i]) {
-                observers.splice(i, 2); // <- Detach Activity that detachAllObservers cares about.
-                retval = true;
+        if (observer && methodName && type) {
+            var observersByType = this.__observersByType;
+            if (observersByType) {
+                var observers = observersByType[type];
+                if (observers) {
+                    // Remove all instances of the observer and methodName 
+                    // combination.
+                    var retval = false, i = observers.length;
+                    while (i) {
+                        // Ensures we decrement twice. First with --i, then 
+                        // with i-- since the part after && may not be executed.
+                        --i;
+                        if (observer === observers[i--] && methodName === observers[i]) {
+                            observers.splice(i, 2); // <- Detach Activity that detachAllObservers cares about.
+                            retval = true;
+                        }
+                    }
+                    return retval;
+                }
             }
         }
-        return retval;
+        return false;
     },
     
     /** Removes all observers from this Observable.
         @returns void */
     detachAllObservers: function() {
         var observersByType = this.__observersByType;
-        if (!observersByType) return;
-        
-        var observers, observer, methodName, i;
-        for (var type in observersByType) {
-            observers = observersByType[type];
-            i = observers.length;
-            while (i) {
-                observer = observers[--i];
-                methodName = observers[--i];
-                
-                // If an observer is registered more than once the list may 
-                // get shortened by observer.detachFrom. If so, just continue 
-                // decrementing downwards.
-                if (observer == null || methodName == null) continue;
-                
-                if (typeof observer.detachFrom !== 'function' || 
-                    !observer.detachFrom(this, methodName, type)
-                ) {
-                    // Observer may not have a detachFrom function or observer 
-                    // may not have attached via Observer.attachTo so do
-                    // default detach activity as implemented in 
-                    // Observable.detachObserver
-                    observers.splice(i, 2);
+        if (observersByType) {
+            var observers, observer, methodName, i, type;
+            for (type in observersByType) {
+                observers = observersByType[type];
+                i = observers.length;
+                while (i) {
+                    observer = observers[--i];
+                    methodName = observers[--i];
+                    
+                    // If an observer is registered more than once the list may 
+                    // get shortened by observer.detachFrom. If so, just 
+                    // continue decrementing downwards.
+                    if (observer == null || methodName == null) continue;
+                    
+                    if (typeof observer.detachFrom !== 'function' || 
+                        !observer.detachFrom(this, methodName, type)
+                    ) {
+                        // Observer may not have a detachFrom function or 
+                        // observer may not have attached via Observer.attachTo
+                        // so do default detach activity as implemented in 
+                        // Observable.detachObserver
+                        observers.splice(i, 2);
+                    }
                 }
             }
         }
@@ -114,9 +115,10 @@ myt.Observable = new JS.Module('Observable', {
             be sent to this specific list of observers and no others.
         @return void */
     fireEvent: function(event, observers) {
-        if (!event || event.source !== this) return;
-        observers = this.__determineObservers(event.type, observers);
-        if (observers) this.__fireEvent(event, observers);
+        if (event && event.source === this) {
+            observers = this.__determineObservers(event.type, observers);
+            if (observers) this.__fireEvent(event, observers);
+        }
     },
     
     /** Generates a new event from the provided type and value and fires it
@@ -138,9 +140,8 @@ myt.Observable = new JS.Module('Observable', {
             return observers;
         } else if (this.hasObservers(type)) {
             return this.__observersByType[type];
-        } else {
-            return null;
         }
+        return null;
     },
     
     /** Creates a new event with the provided type and value and using this

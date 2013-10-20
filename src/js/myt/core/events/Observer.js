@@ -107,20 +107,19 @@ myt.Observer = new JS.Module('Observer', {
         @param eventType:string the event type to check for.
         @returns true if attached, false otherwise. */
     isAttachedTo: function(observable, methodName, eventType) {
-        if (!observable || !methodName || !eventType) return false;
-        
-        var observablesByType = this.__observablesByType;
-        if (!observablesByType) return false;
-        var observables = observablesByType[eventType];
-        if (!observables) return false;
-        
-        var i = observables.length;
-        while (i) {
-            // Ensures we decrement twice. First with --i, then with i-- since 
-            // the part after && may not be executed.
-            --i;
-            if (observable === observables[i--] && methodName === observables[i]) {
-                return true;
+        if (observable && methodName && eventType) {
+            var observablesByType = this.__observablesByType;
+            if (observablesByType) {
+                var observables = observablesByType[eventType];
+                if (observables) {
+                    var i = observables.length;
+                    while (i) {
+                        // Ensures we decrement twice. First with --i, then 
+                        // with i-- since the part after && may not be executed.
+                        --i;
+                        if (observable === observables[i--] && methodName === observables[i]) return true;
+                    }
+                }
             }
         }
         return false;
@@ -160,39 +159,36 @@ myt.Observer = new JS.Module('Observer', {
         @returns boolean true if the observable was successfully registered, 
             false otherwise. */
     attachTo: function(observable, methodName, eventType, once) {
-        if (!observable || !methodName || !eventType) return false;
-        
-        var observables = this.getObservables(eventType);
-        
-        // Setup wrapper method when 'once' is true.
-        if (once) {
-            var origMethodName = methodName;
+        if (observable && methodName && eventType) {
+            var observables = this.getObservables(eventType);
             
-            // Generate one time method name.
-            if (this.__methodNameCounter === undefined) {
-                this.__methodNameCounter = 0;
-            } else {
-                this.__methodNameCounter++;
+            // Setup wrapper method when 'once' is true.
+            if (once) {
+                var self = this, origMethodName = methodName;
+                
+                // Generate one time method name.
+                if (this.__methodNameCounter === undefined) {
+                    this.__methodNameCounter = 0;
+                } else {
+                    this.__methodNameCounter++;
+                }
+                methodName = '__DO_ONCE_' + this.__methodNameCounter;
+                
+                // Setup wrapper method that will do the detachFrom.
+                this[methodName] = function(e) {
+                    self.detachFrom(observable, methodName, eventType);
+                    delete self[methodName];
+                    return self[origMethodName](e);
+                };
             }
-            methodName = '__DO_ONCE_' + this.__methodNameCounter;
             
-            // Setup wrapper method that will do the detachFrom.
-            var self = this;
-            this[methodName] = function(e) {
-                self.detachFrom(observable, methodName, eventType);
-                delete self[methodName];
-                return self[origMethodName](e);
-            };
+            // Register this observer with the observable
+            if (observable.attachObserver(this, methodName, eventType)) {
+                observables.push(methodName, observable);
+                return true;
+            }
         }
-        
-        // Register this observer with the observable
-        if (observable.attachObserver(this, methodName, eventType)) {
-            observables.push(methodName);
-            observables.push(observable);
-            return true;
-        } else {
-            return false;
-        }
+        return false;
     },
     
     /** Unregisters this Observer from the provided Observable
@@ -203,28 +199,31 @@ myt.Observer = new JS.Module('Observer', {
         @returns boolean true if one or more detachments occurred, false 
             otherwise. */
     detachFrom: function(observable, methodName, eventType) {
-        if (!observable || !methodName || !eventType) return false;
-        
-        // No need to unregister if observable array doesn't exist.
-        var observablesByType = this.__observablesByType;
-        if (!observablesByType) return false;
-        var observables = observablesByType[eventType];
-        if (!observables) return false;
-        
-        // Remove all instances of this observer/methodName/eventType from the observable
-        var retval = false, i = observables.length;
-        while (i) {
-            --i;
-            if (observable === observables[i--] && methodName === observables[i]) {
-                if (observable.detachObserver(this, methodName, eventType)) {
-                    observables.splice(i, 2);
-                    retval = true;
+        if (observable && methodName && eventType) {
+            // No need to unregister if observable array doesn't exist.
+            var observablesByType = this.__observablesByType;
+            if (observablesByType) {
+                var observables = observablesByType[eventType];
+                if (observables) {
+                    // Remove all instances of this observer/methodName/eventType 
+                    // from the observable
+                    var retval = false, i = observables.length;
+                    while (i) {
+                        --i;
+                        if (observable === observables[i--] && methodName === observables[i]) {
+                            if (observable.detachObserver(this, methodName, eventType)) {
+                                observables.splice(i, 2);
+                                retval = true;
+                            }
+                        }
+                    }
+                    
+                    // Source wasn't found
+                    return retval;
                 }
             }
         }
-        
-        // Source wasn't found
-        return retval;
+        return false;
     },
     
     /** Tries to detach this Observer from all Observables it
@@ -232,14 +231,14 @@ myt.Observer = new JS.Module('Observer', {
         @returns void */
     detachFromAllObservables: function() {
         var observablesByType = this.__observablesByType;
-        if (!observablesByType) return;
-        
-        var observables, i;
-        for (var eventType in observablesByType) {
-            observables = observablesByType[eventType];
-            i = observables.length;
-            while (i) observables[--i].detachObserver(this, observables[--i], eventType);
-            observables.length = 0;
+        if (observablesByType) {
+            var observables, i;
+            for (var eventType in observablesByType) {
+                observables = observablesByType[eventType];
+                i = observables.length;
+                while (i) observables[--i].detachObserver(this, observables[--i], eventType);
+                observables.length = 0;
+            }
         }
     }
 });

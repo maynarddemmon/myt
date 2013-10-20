@@ -15,42 +15,42 @@ myt.Constrainable = new JS.Module('Constrainable', {
             will attach to each observable for the event type.
         @returns void */
     applyConstraint: function(methodName, observables) {
-        if (!methodName || !observables) return;
-        
-        // Make sure an even number of observable/type was provided
-        var len = observables.length;
-        if (len % 2 !== 0) {
-            console.log("Observables was not even.", this);
-            return;
-        }
-        
-        // Lazy instantiate constraints array.
-        var constraints = this.__constraintsByMethodName;
-        if (!constraints) constraints = this.__constraintsByMethodName = {};
-        var constraint = constraints[methodName];
-        if (!constraint) constraint = constraints[methodName] = [];
-        
-        // Don't allow a constraint to be clobbered.
-        if (constraint.length > 0) {
-            console.log("Constraint already exists for " + methodName + " on " + this);
-            return;
-        }
-        
-        var observable, type;
-        for (var i = 0; len !== i;) {
-            observable = observables[i++];
-            type = observables[i++];
-            if (!observable || !type) continue;
-            this.attachTo(observable, methodName, type);
-            constraint.push(observable);
-            constraint.push(type);
-        }
-        
-        // Call constraint method once so it can "sync" the constraint
-        try {
-            this[methodName]();
-        } catch (err) {
-            myt.dumpStack(err);
+        if (methodName && observables) {
+            // Make sure an even number of observable/type was provided
+            var len = observables.length;
+            if (len % 2 !== 0) {
+                console.log("Observables was not even.", this);
+                return;
+            }
+            
+            // Lazy instantiate constraints array.
+            var constraints = this.__constraintsByMethodName;
+            if (!constraints) constraints = this.__constraintsByMethodName = {};
+            var constraint = constraints[methodName];
+            if (!constraint) constraint = constraints[methodName] = [];
+            
+            // Don't allow a constraint to be clobbered.
+            if (constraint.length > 0) {
+                console.log("Constraint already exists for " + methodName + " on " + this);
+                return;
+            }
+            
+            var observable, type;
+            for (var i = 0; len !== i;) {
+                observable = observables[i++];
+                type = observables[i++];
+                if (observable && type) {
+                    this.attachTo(observable, methodName, type);
+                    constraint.push(observable, type);
+                }
+            }
+            
+            // Call constraint method once so it can "sync" the constraint
+            try {
+                this[methodName]();
+            } catch (err) {
+                myt.dumpStack(err);
+            }
         }
     },
     
@@ -63,16 +63,13 @@ myt.Constrainable = new JS.Module('Constrainable', {
             if (constraints) {
                 var constraint = constraints[methodName];
                 if (constraint) {
-                    var len = constraint.length;
-                    if (len !== 0) {
-                        var observable, type;
-                        for (var i = len - 1; i >= 1; i -= 2) {
-                            observable = constraint[i - 1];
-                            type = constraint[i];
-                            this.detachFrom(observable, methodName, type);
-                        }
-                        constraint.length = 0;
+                    var i = constraint.length, type, observable;
+                    while (i) {
+                        type = constraint[--i];
+                        observable = constraint[--i];
+                        this.detachFrom(observable, methodName, type);
                     }
+                    constraint.length = 0;
                 }
             }
         }

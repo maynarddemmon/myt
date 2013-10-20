@@ -1,7 +1,7 @@
 /** Provides a 'mouseDown' attribute that tracks mouse up/down state.
     
-    Requires: myt.Activateable, myt.MouseOver, myt.Disableable and 
-        myt.MouseObservable super mixins.
+    Requires: myt.UpdateableUI, myt.Activateable, myt.MouseOver, 
+        myt.Disableable and myt.MouseObservable super mixins.
     
     Attributes:
         mouseDown:boolean */

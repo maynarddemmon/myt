@@ -1,5 +1,13 @@
 /** A base class for MouseableH3Panel and MouseableV3Panel.
-    Includes the myt.Button mixin. */
+    Includes the myt.Button mixin.
+    
+    Attributes:
+        imageRoot:string the path to the directory with the images.
+        extension:string the file extension for the images.
+        firstPrefix:string the filename for the top/left panel image.
+        secondPrefix:string the filename for the middle/center panel image.
+        thirdPrefix:string the filename for the bottom/right panel image.
+*/
 myt.BaseMouseablePanel = new JS.Module('BaseMouseablePanel', {
     include: [myt.Button],
     
@@ -9,7 +17,7 @@ myt.BaseMouseablePanel = new JS.Module('BaseMouseablePanel', {
         this.extension = 'png';
         
         // @overrides behavior from HorizontalThreePanel and VerticalThreePanel
-        // mixins which will be used in with this mixin in MouseableH3Panel
+        // mixins which will be used with this mixin in MouseableH3Panel
         // and MouseableV3Panel respectively.
         if (attrs.repeat === undefined) attrs.repeat = false;
         
