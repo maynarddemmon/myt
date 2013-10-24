@@ -49,54 +49,54 @@ myt.SizeToChildren = new JS.Class('SizeToChildren', myt.Layout, {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.ConstantLayout */
     update: function() {
-        if (!this.canUpdate()) return;
-        
-        // Prevent inadvertent loops
-        this.incrementLockedCounter();
-        
-        var svs = this.subviews, i = svs.length, sv,
-            xMax, yMax,
-            p = this.parent,
-            axis = this.axis,
-            maxFunc = Math.max,
-            bw, bh;
-        
-        if (axis === 'x') {
-            xMax = 0;
-            while(i) {
-                sv = svs[--i];
-                bw = sv.boundsWidth;
-                bw = bw > 0 ? bw : 0;
-                if (sv.visible) xMax = maxFunc(xMax, sv.x + bw);
-            }
-            p.setWidth(xMax + this.paddingX);
-        } else if (axis === 'y') {
-            yMax = 0;
-            while(i) {
-                sv = svs[--i];
-                bh = sv.boundsHeight;
-                bh = bh > 0 ? bh : 0;
-                if (sv.visible) yMax = maxFunc(yMax, sv.y + bh);
-            }
-            p.setHeight(yMax + this.paddingY);
-        } else {
-            xMax = yMax = 0;
-            while(i) {
-                sv = svs[--i];
-                if (sv.visible) {
+        if (this.canUpdate()) {
+            // Prevent inadvertent loops
+            this.incrementLockedCounter();
+            
+            var svs = this.subviews, i = svs.length, sv,
+                xMax, yMax,
+                p = this.parent,
+                axis = this.axis,
+                maxFunc = Math.max,
+                bw, bh;
+            
+            if (axis === 'x') {
+                xMax = 0;
+                while(i) {
+                    sv = svs[--i];
                     bw = sv.boundsWidth;
                     bw = bw > 0 ? bw : 0;
-                    xMax = maxFunc(xMax, sv.x + bw);
+                    if (sv.visible) xMax = maxFunc(xMax, sv.x + bw);
+                }
+                p.setWidth(xMax + this.paddingX);
+            } else if (axis === 'y') {
+                yMax = 0;
+                while(i) {
+                    sv = svs[--i];
                     bh = sv.boundsHeight;
                     bh = bh > 0 ? bh : 0;
-                    yMax = maxFunc(yMax, sv.y + bh);
+                    if (sv.visible) yMax = maxFunc(yMax, sv.y + bh);
                 }
+                p.setHeight(yMax + this.paddingY);
+            } else {
+                xMax = yMax = 0;
+                while(i) {
+                    sv = svs[--i];
+                    if (sv.visible) {
+                        bw = sv.boundsWidth;
+                        bw = bw > 0 ? bw : 0;
+                        xMax = maxFunc(xMax, sv.x + bw);
+                        bh = sv.boundsHeight;
+                        bh = bh > 0 ? bh : 0;
+                        yMax = maxFunc(yMax, sv.y + bh);
+                    }
+                }
+                p.setWidth(xMax + this.paddingX);
+                p.setHeight(yMax + this.paddingY);
             }
-            p.setWidth(xMax + this.paddingX);
-            p.setHeight(yMax + this.paddingY);
+            
+            this.decrementLockedCounter();
         }
-        
-        this.decrementLockedCounter();
     },
     
     /** @overrides myt.Layout

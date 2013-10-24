@@ -52,74 +52,75 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.ConstantLayout */
     update: function() {
-        if (!this.canUpdate()) return;
-        
-        // Prevent inadvertent loops
-        this.incrementLockedCounter();
-        
-        this.doBeforeUpdate();
-        
-        var setterName = this.setterName,
-            value = this.targetValue,
-            svs = this.subviews,
-            len = svs.length,
-            i, sv, count = 0;
-        
-        if (this.useOptimizations) {
-            // OPTIMIZATION: Prevent dom reflow during layout by temporarily 
-            // removing the parent dom element.
-            var elem = this.parent.domElement,
-                parentElem = elem.parentNode,
-                nextSibling = elem.nextSibling,
-                restoreFocus;
+        if (this.canUpdate()) {
+            // Prevent inadvertent loops
+            this.incrementLockedCounter();
             
-            // Focus can get lost in webkit when an element is removed from the dom.
-            // TODO: make use of myt.View.retainFocusDuringDomUpdate
-            if (parentElem) {
-                var currentFocus = myt.global.focus.focusedView;
-                if (currentFocus && currentFocus.isDescendantOf(this.parent)) {
-                    restoreFocus = currentFocus;
-                    restoreFocus._ignoreFocus = true;
-                }
+            this.doBeforeUpdate();
+            
+            var setterName = this.setterName,
+                value = this.targetValue,
+                svs = this.subviews,
+                len = svs.length,
+                i, sv, count = 0;
+            
+            if (this.useOptimizations) {
+                // OPTIMIZATION: Prevent dom reflow during layout by 
+                // temporarily removing the parent dom element.
+                var elem = this.parent.domElement,
+                    parentElem = elem.parentNode,
+                    nextSibling = elem.nextSibling,
+                    restoreFocus;
                 
-                parentElem.removeChild(elem);
+                // Focus can get lost in webkit when an element is removed from
+                // the dom.
+                // TODO: make use of myt.View.retainFocusDuringDomUpdate
+                if (parentElem) {
+                    var currentFocus = myt.global.focus.focusedView;
+                    if (currentFocus && currentFocus.isDescendantOf(this.parent)) {
+                        restoreFocus = currentFocus;
+                        restoreFocus._ignoreFocus = true;
+                    }
+                    
+                    parentElem.removeChild(elem);
+                }
+                // OPTIMIZATION: end
             }
-            // OPTIMIZATION: end
-        }
-        
-        if (this.reverse) {
-            i = len;
-            while(i) {
-                sv = svs[--i];
-                if (this.skipSubview(sv)) continue;
-                value = this.updateSubview(++count, sv, setterName, value);
-            }
-        } else {
-            for (i = 0; len > i; ++i) {
-                sv = svs[i];
-                if (this.skipSubview(sv)) continue;
-                value = this.updateSubview(++count, sv, setterName, value);
-            }
-        }
-        
-        if (this.useOptimizations) {
-            // OPTIMIZATION: Reinsert the parent dom element now that we've 
-            // finished updating
-            if (parentElem) {
-                parentElem.insertBefore(elem, nextSibling);
-                if (restoreFocus) {
-                    restoreFocus._ignoreFocus = false;
-                    restoreFocus.focus(true);
+            
+            if (this.reverse) {
+                i = len;
+                while(i) {
+                    sv = svs[--i];
+                    if (this.skipSubview(sv)) continue;
+                    value = this.updateSubview(++count, sv, setterName, value);
+                }
+            } else {
+                for (i = 0; len > i; ++i) {
+                    sv = svs[i];
+                    if (this.skipSubview(sv)) continue;
+                    value = this.updateSubview(++count, sv, setterName, value);
                 }
             }
-            // OPTIMIZATION: end
+            
+            if (this.useOptimizations) {
+                // OPTIMIZATION: Reinsert the parent dom element now that we've 
+                // finished updating
+                if (parentElem) {
+                    parentElem.insertBefore(elem, nextSibling);
+                    if (restoreFocus) {
+                        restoreFocus._ignoreFocus = false;
+                        restoreFocus.focus(true);
+                    }
+                }
+                // OPTIMIZATION: end
+            }
+            
+            this.doAfterUpdate();
+            
+            if (this.collapseParent) this.updateParent(setterName, value);
+            
+            this.decrementLockedCounter();
         }
-        
-        this.doAfterUpdate();
-        
-        if (this.collapseParent) this.updateParent(setterName, value);
-        
-        this.decrementLockedCounter();
     },
     
     /** Called by update before any processing is done. Gives subviews a

@@ -33,11 +33,7 @@ myt.AbstractPool = new JS.Class('AbstractPool', {
         var objPool = this.__objPool;
         if (!objPool) objPool = this.__objPool = [];
         
-        if (objPool.length) {
-            return objPool.pop();
-        } else {
-            return this.createInstance.apply(this, arguments);
-        }
+        return objPool.length ? objPool.pop() : this.createInstance.apply(this, arguments);
     },
     
     /** Creates a new object that can be stored in the pool. The default
@@ -63,7 +59,21 @@ myt.AbstractPool = new JS.Class('AbstractPool', {
         @param obj:object the object to be cleaned.
         @returns object the cleaned object. */
     cleanInstance: function(obj) {
-        if (typeof obj.isA === 'function' && obj.isA(myt.Reusable)) obj.clean();
+        if (typeof obj.clean === 'function') obj.clean();
         return obj;
+    },
+    
+    /** Calls the destroy method on all object stored in the pool if they
+        have a destroy function.
+        @returns void */
+    destroyPooledInstances: function() {
+        var objPool = this.__objPool;
+        if (objPool) {
+            var i = objPool.length, obj;
+            while (i) {
+                obj = objPool[--i];
+                if (typeof obj.destroy === 'function') obj.destroy();
+            }
+        }
     }
 });

@@ -29,36 +29,39 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
     /** @overrides myt.AbstractPool */
     putInstance: function(obj) {
         var actives = this.__actives;
-        
-        // Don't allow put if the instance isn't one of the actives.
-        if (!actives) {
-            console.warn("Attempt to putInstance when no actives exist.", obj, this);
-            return;
-        }
-        
-        var exists = false, i = actives.length;
-        while (i) {
-            if (actives[--i] === obj) {
-                actives.splice(i, 1);
-                exists = true;
-                break;
+        if (actives) {
+            var exists = false, i = actives.length;
+            while (i) {
+                if (actives[--i] === obj) {
+                    actives.splice(i, 1);
+                    exists = true;
+                    break;
+                }
             }
+            
+            if (exists) {
+                this.callSuper(obj);
+            } else {
+                console.warn("Attempt to putInstance for a non-active instance.", obj, this);
+            }
+        } else {
+            console.warn("Attempt to putInstance when no actives exist.", obj, this);
         }
-        
-        if (!exists) {
-            console.warn("Attempt to putInstance for a non-active instance.", obj, this);
-            return;
-        }
-        
-        this.callSuper(obj);
     },
     
     /** Gets an array of the active instances.
         @returns array */
     getActives: function() {
+        return this.__actives ? this.__actives.concat() : [];
+    },
+    
+    /** Puts all the active instances back in the pool.
+        @returns void */
+    putActives: function() {
         var actives = this.__actives;
-        if (!actives) actives = this.__actives = [];
-        
-        return actives.concat();
+        if (actives) {
+            var i = actives.length;
+            while (i) this.putInstance(actives[--i]);
+        }
     }
 });

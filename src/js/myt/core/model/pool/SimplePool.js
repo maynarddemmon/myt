@@ -28,11 +28,7 @@ myt.SimplePool = new JS.Class('SimplePool', myt.AbstractPool, {
     createInstance: function() {
         // If we ever need full arguments with new, see:
         // http://stackoverflow.com/questions/1606797/use-of-apply-with-new-operator-is-this-possible
-        var parent = this.instanceParent;
-        if (parent) {
-            return new this.instanceClass(parent, arguments[0]);
-        } else {
-            return new this.instanceClass();
-        }
+        var parent = this.instanceParent, instanceClass = this.instanceClass;
+        return parent ? new instanceClass(parent, arguments[0]) : new instanceClass();
     }
 });

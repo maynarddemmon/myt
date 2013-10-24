@@ -17,6 +17,15 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
         this.__setupPercentOfParentHeightConstraint();
     },
     
+    setPercentOfParentWidthOffset: function(v) {
+        if (this.percentOfParentWidthOffset === v) return;
+        this.percentOfParentWidthOffset = v;
+        if (this.inited) {
+            this.fireNewEvent('percentOfParentWidthOffset', v);
+            this.__doPercentOfParentWidth();
+        }
+    },
+    
     setPercentOfParentWidth: function(v) {
         if (this.percentOfParentWidth === v) return;
         if (this.inited) this.__teardownPercentOfParentWidthConstraint();
@@ -38,10 +47,20 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
     },
     
     __doPercentOfParentWidth: function(e) {
-        this.setWidth(this.parent.width * (this.percentOfParentWidth / 100));
+        var offset = this.percentOfParentWidthOffset == null ? 0 : this.percentOfParentWidthOffset;
+        this.setWidth(offset + this.parent.width * (this.percentOfParentWidth / 100));
         // Force width event if not inited yet so that align constraint
         // will work.
         if (!this.inited) this.fireNewEvent('width', this.width);
+    },
+    
+    setPercentOfParentHeightOffset: function(v) {
+        if (this.percentOfParentHeightOffset === v) return;
+        this.percentOfParentHeightOffset = v;
+        if (this.inited) {
+            this.fireNewEvent('percentOfParentHeightOffset', v);
+            this.__doPercentOfParentHeight();
+        }
     },
     
     setPercentOfParentHeight: function(v) {
@@ -65,7 +84,8 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
     },
     
     __doPercentOfParentHeight: function(e) {
-        this.setHeight(this.parent.height * (this.percentOfParentHeight / 100));
+        var offset = this.percentOfParentHeightOffset == null ? 0 : this.percentOfParentHeightOffset;
+        this.setHeight(offset + this.parent.height * (this.percentOfParentHeight / 100));
         // Force height event if not inited yet so that valign constraint
         // will work.
         if (!this.inited) this.fireNewEvent('height', this.height);

@@ -131,6 +131,10 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'timer/Timer.js'          ).provides('myt.Timer'          ).requires('myt.Callback');
     file(MYT_COMPONENT_ROOT + 'timer/RepeatableTimer.js').provides('myt.RepeatableTimer').requires('myt.Timer');
     
+    // Component : Replicator
+    file(MYT_COMPONENT_ROOT + 'replicator/Replicable.js').provides('myt.Replicable').requires('myt.Reusable');
+    file(MYT_COMPONENT_ROOT + 'replicator/Replicator.js').provides('myt.Replicator').requires('myt.Replicable','myt.Node','myt.TrackActivesPool');
+    
     // Component : Tooltip
     file(MYT_COMPONENT_ROOT + 'tooltip/BaseTooltip.js' ).provides('myt.BaseTooltip' ).requires('myt.RootView');
     file(MYT_COMPONENT_ROOT + 'tooltip/Tooltip.js'     ).provides('myt.Tooltip'     ).requires('myt.Canvas','myt.BaseTooltip');
@@ -276,7 +280,8 @@ JS.Packages(function() {with(this) {
         'myt.global.keys',
         'myt.Text', 'myt.Markup', 'myt.SizeWidthToDom', 'myt.SizeHeightToDom', 'myt.SizeToParent',
         'myt.SizeToWindowWidth', 'myt.SizeToWindowHeight', 'myt.TransformSupport', 
-        'myt.Animator', 'myt.Callback', 'myt.RepeatableTimer', 'myt.StateMachine', 'myt.URI', 'myt.Ajax', 
+        'myt.Animator', 'myt.Callback', 'myt.RepeatableTimer', 'myt.StateMachine', 'myt.URI', 'myt.Ajax',
+        'myt.Replicator',
         'myt.Draggable', 'myt.WrappingLayout', 'myt.ResizeLayout', 'myt.AlignedLayout', 'myt.ThreePanel',
         'myt.DrawButton', 'myt.SimpleIconTextButton', 'myt.IconTextPanelButton', 'myt.DelayedMethodCall',
         'myt.FloatingPanelAnchor',
