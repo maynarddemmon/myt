@@ -677,21 +677,67 @@ myt.View = new JS.Class('View', myt.Node, {
         @returns void */
     layoutRemoved: function(layout) {},
     
-    // Z-Ordering //
+    // Dom-Ordering //
     /** Test if the provided view is behind this view. The view to test can
         be anywhere in the document.
+        @param view:myt.View the view to check.
+        @param checkZIndex:boolean (optional) If true z-index will first be
+            used to check if the view is behind or not.
         @returns true if the view is behind this view, false otherwise. */
-    isBehind: function(view) {
-        var rel = this.domElement.compareDocumentPosition(view.domElement);
-        return rel === 4 || rel === 8;
+    isBehind: function(view, checkZIndex) {
+        return this.__comparePosition(view, false, checkZIndex);
     },
     
     /** Test if the provided view is front of this view. The view to test can
         be anywhere in the document.
+        @param view:myt.View the view to check.
+        @param checkZIndex:boolean (optional) If true z-index will first be
+            used to check if the view is in front or not.
         @returns true if the view is in front of this view, false otherwise. */
-    isInFrontOf: function(view) {
-        var rel = this.domElement.compareDocumentPosition(view.domElement);
-        return rel === 2 || rel === 10;
+    isInFrontOf: function(view, checkZIndex) {
+        return this.__comparePosition(view, true, checkZIndex);
+    },
+    
+    /** Implements isBehind and isInFrontOf methods.
+        @private
+        @param front:boolean indicates if this is the isInFrontOf test or not.
+        @returns boolean */
+    __comparePosition: function(view, front, checkZIndex) {
+        if (view) {
+            if (checkZIndex) {
+                var commonAncestor = this.getLeastCommonAncestor(view);
+                if (commonAncestor) {
+                    var commonAncestorElem = commonAncestor.domElement,
+                        DEP = myt.DomElementProxy,
+                        zIdx = DEP.getZIndexRelativeToAncestor(this.domElement, commonAncestorElem),
+                        otherZIdx = DEP.getZIndexRelativeToAncestor(view.domElement, commonAncestorElem);
+                    
+                    // Reverse comparison order
+                    if (front) {
+                        zIdx *= -1;
+                        otherZIdx *= -1;
+                    }
+                    
+                    if (zIdx < otherZIdx) {
+                        return true;
+                    } else if (otherZIdx < zIdx) {
+                        return false;
+                    }
+                    // Fall through to dom comparison since z-indices are equal.
+                }
+            }
+            
+            // DOCUMENT_POSITION_DISCONNECTED 1
+            // DOCUMENT_POSITION_PRECEDING 2
+            // DOCUMENT_POSITION_FOLLOWING 4
+            // DOCUMENT_POSITION_CONTAINS 8
+            // DOCUMENT_POSITION_CONTAINED_BY 16
+            // DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC 32
+            var rel = this.domElement.compareDocumentPosition(view.domElement);
+            return front ? rel === 2 || rel === 10 : rel === 4 || rel === 20;
+        } else {
+            return false;
+        }
     },
     
     /** Brings this view to the front. */

@@ -271,3 +271,35 @@ test("Ancestor matching", function() {
     instB.destroy();
     instC.destroy();
 });
+
+test("Node: getLeastCommonAncestor", function() {
+    var root = new myt.Node();
+    
+    var n1 = new myt.Node(root);
+    var n2 = new myt.Node(root);
+    var n3 = new myt.Node(root);
+    
+    var n11 = new myt.Node(n1);
+    var n12 = new myt.Node(n1);
+    var n13 = new myt.Node(n1);
+    
+    var n31 = new myt.Node(n3);
+    var n32 = new myt.Node(n3);
+    var n33 = new myt.Node(n3);
+    
+    ok(root.getLeastCommonAncestor() === null, "Common ancestor of undefined is null.");
+    ok(root.getLeastCommonAncestor(null) === null, "Common ancestor of null is null.");
+    ok(root.getLeastCommonAncestor(true) === null, "Common ancestor of true is null.");
+    
+    ok(root.getLeastCommonAncestor(root) === root, "Common ancestor of node and itself is the node itself.");
+    ok(n1.getLeastCommonAncestor(root) === root, "Common ancestor of ancestor and the node is the ancestor.");
+    ok(n11.getLeastCommonAncestor(root) === root, "Common ancestor of ancestor and the node is the ancestor.");
+    ok(root.getLeastCommonAncestor(n1) === root, "Common ancestor of node and descendant is the node.");
+    ok(root.getLeastCommonAncestor(n11) === root, "Common ancestor of node and descendant is the node.");
+    
+    ok(n12.getLeastCommonAncestor(n11) === n1, "Common ancestor of two siblings is the parent node.");
+    ok(n13.getLeastCommonAncestor(n33) === root, "Common ancestor of two cousins is the grandparent node.");
+    ok(n13.getLeastCommonAncestor(n2) === root, "Common ancestor of node and uncle is the grandparent node.");
+    
+    root.destroy();
+});

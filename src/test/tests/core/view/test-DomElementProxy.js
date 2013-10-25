@@ -96,3 +96,87 @@ test("getComputedStye, setStyleProperty and setZIndex", function() {
     proxy.disposeOfDomElement();
     proxy.destroy();
 });
+
+test("getAncestorsArray", function() {
+    var v = new myt.View(null, {}, [myt.RootView]);
+    
+    var sv1 = new myt.View(v);
+    var sv2 = new myt.View(v);
+    var sv3 = new myt.View(v);
+    
+    var sv31 = new myt.View(sv3);
+    var sv32 = new myt.View(sv3);
+    var sv33 = new myt.View(sv3);
+    
+    var sv331 = new myt.View(sv33);
+    
+    var none = myt.DomElementProxy.getAncestorsArray(null);
+    ok(none.length === 0, "No ancestors of null.");
+    
+    var ancestorsOfRoot = myt.DomElementProxy.getAncestorsArray(v.domElement);
+    ok(ancestorsOfRoot.length === 4, "Four ancestors of root element.");
+    ok(ancestorsOfRoot[0] === v.domElement, "First ancestor of root dom element is the dom element itself.");
+    ok(ancestorsOfRoot[1] === document.body, "Second ancestor of root dom element is the document body element.");
+    ok(ancestorsOfRoot[2] === document.documentElement, "Third ancestor of root dom element is the html element.");
+    ok(ancestorsOfRoot[3] === document, "Fourth ancestor of root dom element is the document element.");
+    
+    ancestorsOfRoot = myt.DomElementProxy.getAncestorsArray(v.domElement, v.domElement);
+    ok(ancestorsOfRoot.length === 1, "One ancestor of root element.");
+    ok(ancestorsOfRoot[0] === v.domElement, "First ancestor of root dom element is the dom element itself.");
+    
+    var ancestors = myt.DomElementProxy.getAncestorsArray(sv331.domElement, v.domElement);
+    ok(ancestors.length === 4, "Four ancestor of view sv331.");
+    ok(ancestors[0] === sv331.domElement, "sv331 is first ancestor.");
+    ok(ancestors[1] === sv33.domElement, "sv33 is second ancestor.");
+    ok(ancestors[2] === sv3.domElement, "sv3 is third ancestor.");
+    ok(ancestors[3] === v.domElement, "v is fourth ancestor.");
+    
+    ancestors = myt.DomElementProxy.getAncestorsArray(sv331.domElement, sv2.domElement);
+    ok(ancestors.length === 7, "Full ancestor array up to document.");
+    ok(ancestors[0] === sv331.domElement, "First ancestor is the element itself.");
+    ok(ancestors[6] === document, "Seventh ancestor is the document element.");
+    v.destroy();
+});
+
+test("getZIndexRelativeToAncestor", function() {
+    var v = new myt.View(null, {}, [myt.RootView]);
+    
+    var sv1 = new myt.View(v, {zIndex:1});
+    var sv2 = new myt.View(v, {opacity:0.5});
+    var sv3 = new myt.View(v);
+    
+    var sv11 = new myt.View(sv1);
+    var sv12 = new myt.View(sv1);
+    var sv13 = new myt.View(sv1, {zIndex:2});
+    
+    var sv21 = new myt.View(sv2, {zIndex:1});
+    var sv22 = new myt.View(sv2);
+    var sv23 = new myt.View(sv2);
+    
+    var sv31 = new myt.View(sv3);
+    var sv32 = new myt.View(sv3);
+    var sv33 = new myt.View(sv3, {zIndex:3});
+    
+    var sv331 = new myt.View(sv33);
+    
+    ok(myt.DomElementProxy.getZIndexRelativeToAncestor() === 0, "Undefined returns 0");
+    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(null) === 0, "Null returns 0");
+    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(null, null) === 0, "Null arguments returns 0");
+    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(v.domElement, null) === 0, "Missing ancestor returns 0");
+    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(null, v.domElement) === 0, "Missing element returns 0");
+    
+    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(v.domElement, v.domElement) === 0, "Z-index relative to self is 0.");
+    
+    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(sv1.domElement, v.domElement) === 1, "Z-index should be 1.");
+    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(sv11.domElement, v.domElement) === 1, "Z-index should be 1 since parent has a defined z-index.");
+    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(sv13.domElement, v.domElement) === 1, "Z-index should be 1 since parent has a defined z-index.");
+    
+    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(sv2.domElement, v.domElement) === 0, "Z-index should be 0.");
+    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(sv21.domElement, v.domElement) === 0, "Z-index should be 0 since parent has opacity of 0.5.");
+    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(sv21.domElement, sv2.domElement) === 1, "Z-index should be 1.");
+    
+    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(sv33.domElement, v.domElement) === 3, "Z-index should be 3.");
+    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(sv331.domElement, v.domElement) === 3, "Z-index should be 3.");
+    
+    v.destroy();
+});

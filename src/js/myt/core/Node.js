@@ -298,7 +298,8 @@ myt.Node = new JS.Class('Node', {
         return this.parent == null;
     },
     
-    /** Tests if this Node is a descendant of the provided Node.
+    /** Tests if this Node is a descendant of the provided Node or is the
+        node itself.
         @returns boolean */
     isDescendantOf: function(node) {
         if (!node) return false;
@@ -314,11 +315,23 @@ myt.Node = new JS.Class('Node', {
         }
     },
     
-    /** Tests if this Node is an ancestor of the provided Node.
+    /** Tests if this Node is an ancestor of the provided Node or is the
+        node itself.
         @param node:Node the node to check for.
         @returns boolean */
     isAncestorOf: function(node) {
         return node ? node.isDescendantOf(this) : false;
+    },
+    
+    /** Gets the youngest common ancestor of this node and the provided node.
+        @param node:myt.Node The node to look for a common ancestor with.
+        @returns The youngest common Node or null if none exists. */
+    getLeastCommonAncestor: function(node) {
+        while (node) {
+            if (this.isDescendantOf(node)) return node;
+            node = node.parent;
+        }
+        return null;
     },
     
     /** Find the youngest ancestor Node that is an instance of the class.

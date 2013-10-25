@@ -265,6 +265,90 @@ test("Test getSubviews, getSiblingViews, getLayouts", function() {
     v.destroy();
 });
 
+test("Dom-Ordering: isBehind, isInFrontOf", function() {
+    var v = new myt.View(null, {x:0, y:0, width:100, height:50}, [myt.RootView]);
+    
+    var sv1 = new myt.View(v);
+    var sv2 = new myt.View(v);
+    var sv3 = new myt.View(v);
+    
+    var sv31 = new myt.View(sv3);
+    var sv32 = new myt.View(sv3);
+    var sv33 = new myt.View(sv3);
+    
+    // isBehind
+    // Garbage arguments
+    ok(sv1.isBehind(null) === false, "Subview 1 is not behind null.");
+    ok(sv1.isBehind(undefined) === false, "Subview 1 is not behind undefined.");
+    ok(sv1.isBehind(true) === false, "Subview 1 is not behind true.");
+    ok(sv1.isBehind(1) === false, "Subview 1 is not behind the number 1.");
+    
+    // Basic dom-ordering
+    ok(sv1.isBehind(sv1) === false, "Subview 1 is not behind itself.");
+    ok(v.isBehind(sv1) === true, "Root view is behind its descendants.");
+    ok(v.isBehind(sv32) === true, "Root view is behind its descendants.");
+    ok(sv1.isBehind(v) === false, "Subview is not behind its ancestors.");
+    
+    ok(sv1.isBehind(sv2) === true, "Subview 1 is behind subview 2.");
+    ok(sv1.isBehind(sv3) === true, "Subview 1 is behind subview 3.");
+    ok(sv2.isBehind(sv3) === true, "Subview 2 is behind subview 3.");
+    ok(sv2.isBehind(sv31) === true, "Subview 2 is behind subview 3 sub 1.");
+    ok(sv31.isBehind(sv2) === false, "Subview 3 sub 1 is not behind subview 2.");
+    
+    // isInFrontOf
+    // Garbage arguments
+    ok(sv1.isInFrontOf(null) === false, "Subview 1 is not in front of null.");
+    ok(sv1.isInFrontOf(undefined) === false, "Subview 1 is not in front of undefined.");
+    ok(sv1.isInFrontOf(true) === false, "Subview 1 is not in front of true.");
+    ok(sv1.isInFrontOf(1) === false, "Subview 1 is not in front of the number 1.");
+    
+    // Basic dom-ordering
+    ok(sv1.isInFrontOf(sv1) === false, "Subview 1 is not in front of itself.");
+    ok(sv1.isInFrontOf(v) === true, "Subview 1 is in front of its ancestors.");
+    ok(sv32.isInFrontOf(v) === true, "Subview 3 sub 2 is in front of its ancestors.");
+    ok(v.isInFrontOf(sv1) === false, "Subview is not in front of its descendants.");
+    
+    ok(sv2.isInFrontOf(sv1) === true, "Subview 2 is in front of subview 1.");
+    ok(sv3.isInFrontOf(sv1) === true, "Subview 3 is in front of subview 1.");
+    ok(sv3.isInFrontOf(sv2) === true, "Subview 3 is in front of subview 2.");
+    ok(sv2.isInFrontOf(sv31) === false, "Subview 2 is not in front of subview 3 sub 1.");
+    ok(sv31.isInFrontOf(sv2) === true, "Subview 3 sub 1 is in front of subview 2.");
+    
+    // z-order
+    sv2.setZIndex(1);
+    ok(sv2.isInFrontOf(sv3) === false, "Subview 2 is not in front of subview 3 since z-index will not be checked.");
+    ok(sv2.isInFrontOf(sv3, true) === true, "Subview 2 is in front of subview 3 since z-index will be checked and it has a higher z-index.");
+    
+    ok(sv3.isBehind(sv2) === false, "Subview 3 is not behind subview 2 since z-index will not be checked.");
+    ok(sv3.isBehind(sv2, true) === true, "Subview 3 is behind subview 2 since z-index will be checked and it has a higher z-index.");
+    
+    sv3.setZIndex(2);
+    
+    ok(sv31.isInFrontOf(sv3, true) === true, "A child view will always be in front of an ancestor regardless of z-index.");
+    ok(sv3.isBehind(sv31, true) === true, "A view will always be behind a descendant regardless of z-index.");
+    
+    sv31.setZIndex(1);
+    
+    ok(sv31.isInFrontOf(sv3, true) === true, "A child view will always be in front of an ancestor regardless of z-index.");
+    ok(sv3.isBehind(sv31, true) === true, "A view will always be behind a descendant regardless of z-index.");
+    
+    v.destroy();
+});
+
+/*test("Dom-Ordering: bringToFront, sendToBack, sendBehind, sendInFrontOf, bringSubviewToFront, sendSubviewToBack, sendSubviewBehind, sendSubviewInFrontOf, sortSubviews", function() {
+    var v = new myt.View(null, {x:0, y:0, width:100, height:50}, [myt.RootView]);
+    
+    var sv1 = new myt.View(v);
+    var sv2 = new myt.View(v);
+    var sv3 = new myt.View(v);
+    
+    var sv31 = new myt.View(sv3);
+    var sv32 = new myt.View(sv3);
+    var sv33 = new myt.View(sv3);
+    
+    v.destroy();
+});*/
+
 test("Outlines", function() {
     var v = new myt.View(null, {x:0, y:0, width:100, height:100}, [myt.RootView]);
     

@@ -50,6 +50,45 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
             return false;
         },
         
+        /** Gets the z-index of a dom element relative to an ancestor dom
+            element.
+            @returns int */
+        getZIndexRelativeToAncestor: function(elem, ancestor) {
+            if (elem && ancestor) {
+                var ancestors = this.getAncestorsArray(elem, ancestor),
+                    i = ancestors.length - 1, style, zIdx, isAuto;
+                
+                while (i) {
+                    style = this.getComputedStyle(ancestors[--i]);
+                    zIdx = style.zIndex;
+                    isAuto = zIdx === 'auto';
+                    
+                    if (i !== 0 && isAuto && parseInt(style.opacity, 10) === 1) {
+                        continue;
+                    } else {
+                        return isAuto ? 0 : parseInt(zIdx, 10);
+                    }
+                }
+            }
+            return 0;
+        },
+        
+        /** Gets an array of ancestor dom elements including the element
+            itself.
+            @param elem:DomElement the element to start from.
+            @param ancestor:DomElement (optional) The dom element to stop
+                getting ancestors at.
+            @returns an array of ancestor dom elements. */
+        getAncestorsArray: function(elem, ancestor) {
+            var ancestors = [];
+            while (elem) {
+                ancestors.push(elem);
+                if (elem === ancestor) break;
+                elem = elem.parentNode;
+            }
+            return ancestors;
+        },
+        
         /** Gets the z-index of the dom element or, if it does not define a 
             stacking context, the highest z-index of any of the dom element's 
             descendants.
@@ -58,9 +97,8 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
             // See https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Understanding_z_index/The_stacking_context
             var style = this.getComputedStyle(elem),
                 zIdx = style.zIndex, 
-                opacity = parseInt(style.opacity, 10),
                 isAuto = zIdx === 'auto';
-            if (isAuto && opacity === 1) {
+            if (isAuto && parseInt(style.opacity, 10) === 1) {
                 // No new stacking context.
                 zIdx = 0;
                 var children = elem.childNodes, i = children.length, child;
