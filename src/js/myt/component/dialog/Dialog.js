@@ -33,6 +33,62 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         CONFIRM_DEFAULTS: {
             cancelTxt:'Cancel',
             confirmTxt:'Confirm'
+        },
+        
+        createCloseButton: function(targetView, callbackTarget) {
+            return new myt.DrawButton(targetView, {
+                name:'closeBtn', width:16, height:16, y:4,
+                roundedCorners:8, tooltip:'Close Dialog.',
+                ignoreLayout:true, align:'right', alignOffset:4
+            }, [myt.TooltipMixin, {
+                doActivated: function() {callbackTarget._doCallback(this);},
+                
+                draw: function(canvas, config) {
+                    canvas.clear();
+                    
+                    var b = config.bounds;
+                    if (b.w == 0 || b.h == 0) return;
+                    
+                    var fillColor;
+                    switch (config.state) {
+                        case 'hover':
+                            fillColor = '#666666';
+                            break;
+                        case 'active':
+                            fillColor = '#000000';
+                            break;
+                        case 'ready':
+                        case 'disabled':
+                        default:
+                            fillColor = '#333333';
+                            break;
+                    }
+                    
+                    canvas.beginPath();
+                    canvas.arc(8, 8, 8, 0, Math.PI * 2);
+                    canvas.closePath();
+                    canvas.setFillStyle(fillColor);
+                    canvas.fill();
+                    
+                    // Draw white X
+                    canvas.beginPath();
+                    canvas.moveTo(8,6);
+                    canvas.lineTo(11,3);
+                    canvas.lineTo(13,5);
+                    canvas.lineTo(10,8);
+                    canvas.lineTo(13,11);
+                    canvas.lineTo(11,13);
+                    canvas.lineTo(8,10);
+                    canvas.lineTo(5,13);
+                    canvas.lineTo(3,11);
+                    canvas.lineTo(6,8);
+                    canvas.lineTo(3,5);
+                    canvas.lineTo(5,3);
+                    canvas.closePath();
+                    canvas.setFillStyle('#ffffff');
+                    canvas.fill();
+                }
+            }]);
         }
     },
     
@@ -45,60 +101,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         content.setBoxShadow(D.DEFAULT_SHADOW);
         content.setFocusCage(true);
         
-        var self = this;
-        new myt.DrawButton(content, {
-            name:'closeBtn', width:16, height:16, y:4,
-            roundedCorners:8, tooltip:'Close Dialog.',
-            ignoreLayout:true, align:'right', alignOffset:4
-        }, [myt.TooltipMixin, {
-            doActivated: function() {self._doCallback(this);},
-            
-            draw: function(canvas, config) {
-                canvas.clear();
-                
-                var b = config.bounds;
-                if (b.w == 0 || b.h == 0) return;
-                
-                var fillColor;
-                switch (config.state) {
-                    case 'hover':
-                        fillColor = '#666666';
-                        break;
-                    case 'active':
-                        fillColor = '#000000';
-                        break;
-                    case 'ready':
-                    case 'disabled':
-                    default:
-                        fillColor = '#333333';
-                        break;
-                }
-                
-                canvas.beginPath();
-                canvas.arc(8, 8, 8, 0, Math.PI * 2);
-                canvas.closePath();
-                canvas.setFillStyle(fillColor);
-                canvas.fill();
-                
-                // Draw white X
-                canvas.beginPath();
-                canvas.moveTo(8,6);
-                canvas.lineTo(11,3);
-                canvas.lineTo(13,5);
-                canvas.lineTo(10,8);
-                canvas.lineTo(13,11);
-                canvas.lineTo(11,13);
-                canvas.lineTo(8,10);
-                canvas.lineTo(5,13);
-                canvas.lineTo(3,11);
-                canvas.lineTo(6,8);
-                canvas.lineTo(3,5);
-                canvas.lineTo(5,3);
-                canvas.closePath();
-                canvas.setFillStyle('#ffffff');
-                canvas.fill();
-            }
-        }]);
+        myt.Dialog.createCloseButton(content, this);
         
         this.callSuper();
     },
@@ -114,7 +117,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     },
     
     
-    // Methods /////////////////////////////////////////////////////////////////,
+    // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.Dimmer */
     hide: function() {
         // Hide spinner related elements
