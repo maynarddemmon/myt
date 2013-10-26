@@ -35,7 +35,12 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             confirmTxt:'Confirm'
         },
         
-        createCloseButton: function(targetView, callbackTarget) {
+        createCloseButton: function(targetView, callbackTarget, hoverColor, activeColor, readyColor, iconColor) {
+            hoverColor = hoverColor || '#666666';
+            activeColor = activeColor || '#000000';
+            readyColor = readyColor || '#333333';
+            iconColor = iconColor || '#ffffff';
+            
             return new myt.DrawButton(targetView, {
                 name:'closeBtn', width:16, height:16, y:4,
                 roundedCorners:8, tooltip:'Close Dialog.',
@@ -52,15 +57,15 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
                     var fillColor;
                     switch (config.state) {
                         case 'hover':
-                            fillColor = '#666666';
+                            fillColor = hoverColor;
                             break;
                         case 'active':
-                            fillColor = '#000000';
+                            fillColor = activeColor;
                             break;
                         case 'ready':
                         case 'disabled':
                         default:
-                            fillColor = '#333333';
+                            fillColor = readyColor;
                             break;
                     }
                     
@@ -85,7 +90,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
                     canvas.lineTo(3,5);
                     canvas.lineTo(5,3);
                     canvas.closePath();
-                    canvas.setFillStyle('#ffffff');
+                    canvas.setFillStyle(iconColor);
                     canvas.fill();
                 }
             }]);
