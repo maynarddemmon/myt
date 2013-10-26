@@ -112,7 +112,7 @@ myt.Replicator = new JS.Class('Replicator', myt.Node, {
             }
             
             // Sort layout subviews so the layout reflects the data list order.
-            this._sortLayouts(layouts);
+            this._sortLayouts(layouts, myt.Replicator.SORT_FUNCTION);
             
             this._unlockLayouts(layouts, true);
         }
