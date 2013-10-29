@@ -118,6 +118,19 @@ myt.Replicator = new JS.Class('Replicator', myt.Node, {
         }
     },
     
+    // FIXME: Make this a mixin?
+    /** Sends a message to each active myt.Replicable.
+        @param key:string the name of the message
+        @param value:* the value of the message.
+        @returns void */
+    notify: function(key, value) {
+        var pool = this.__pool;
+        if (pool) {
+            var actives = pool.getActives(), i = actives.length;
+            while (i) actives[--i].notify(key, value);
+        }
+    },
+    
     _lockLayouts: function(layouts) {
         var i = layouts.length;
         while (i) layouts[--i].incrementLockedCounter();

@@ -23,6 +23,13 @@ myt.Replicable = new JS.Module('Replicable', {
         this.replicationIndex = idx;
     },
     
+    // FIXME: Make this a mixin?
+    /** Notifies this object that something happened.
+        @param key:string the name of the message
+        @param value:* the value of the message.
+        @returns void */
+    notify: function(key, value) {},
+    
     /** @overrides myt.Reusable
         Subclasses should call super. */
     clean: function() {

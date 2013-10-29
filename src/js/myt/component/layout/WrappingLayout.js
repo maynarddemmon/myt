@@ -13,7 +13,7 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
         this.otherMeasureAttrName = 'boundsHeight';
         this.otherMeasureAttrBaseName = 'height';
         this.parentSetterName = 'setHeight';
-        this.targetValue = this.spacing = this.inset = this.outset = 0;
+        this.targetValue = this.spacing = this.inset = this.outset = this.lineSpacing = this.lineInset = this.lineOutset = 0;
         
         this.callSuper(parent, attrs);
     },
