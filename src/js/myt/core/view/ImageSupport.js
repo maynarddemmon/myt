@@ -1,4 +1,11 @@
-/** Adds support for image display to a View. */
+/** Adds support for image display to a View.
+    
+    Attributes:
+        imageUrl:string The URL to load the image data from.
+        imageSize:string Determines the size of the image. Allowed values
+            are: 'auto', 'cover', 'contain', absolute ('20px 10px') and 
+            percentage ('100% 50%').
+*/
 myt.ImageSupport = new JS.Module('ImageSupport', {
     // Class Methods ///////////////////////////////////////////////////////////
     extend: {
