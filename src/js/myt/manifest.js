@@ -48,7 +48,7 @@ JS.Packages(function() {with(this) {
     // Core : View
     var MYT_VIEW_ROOT = MYT_CORE_ROOT + 'view/';
     file(MYT_VIEW_ROOT + 'DomElementProxy.js').provides('myt.DomElementProxy').requires('myt');
-    file(MYT_VIEW_ROOT + 'View.js'           ).provides('myt.View'           ).requires('myt.Layout','myt.MouseObservable','myt.KeyObservable','myt.DomObserver','myt.FocusObservable','myt.Geometry');
+    file(MYT_VIEW_ROOT + 'View.js'           ).provides('myt.View'           ).requires('myt.Layout','myt.MouseObservable','myt.KeyObservable','myt.DomObserver','myt.FocusObservable','myt.ScrollObservable','myt.Geometry');
     file(MYT_VIEW_ROOT + 'RootView.js'       ).provides('myt.RootView'       ).requires('myt.View','myt.global.roots');
     
     file(MYT_VIEW_ROOT + 'SizeToDom.js'       ).provides('myt.SizeToDom'       ).requires('myt.View');
@@ -58,11 +58,12 @@ JS.Packages(function() {with(this) {
     
     // Core : Dom Events
     var MYT_DOM_EVENTS_ROOT = MYT_CORE_ROOT + 'dom_events/';
-    file(MYT_DOM_EVENTS_ROOT + 'DomObservable.js'  ).provides('myt.DomObservable'  ).requires('myt.DomElementProxy');
-    file(MYT_DOM_EVENTS_ROOT + 'DomObserver.js'    ).provides('myt.DomObserver'    ).requires('myt.DomObservable');
-    file(MYT_DOM_EVENTS_ROOT + 'MouseObservable.js').provides('myt.MouseObservable').requires('myt.DomObservable');
-    file(MYT_DOM_EVENTS_ROOT + 'KeyObservable.js'  ).provides('myt.KeyObservable'  ).requires('myt.DomObservable');
-    file(MYT_DOM_EVENTS_ROOT + 'FocusObservable.js').provides('myt.FocusObservable').requires('myt.DomObservable','myt.global.focus');
+    file(MYT_DOM_EVENTS_ROOT + 'DomObservable.js'   ).provides('myt.DomObservable'   ).requires('myt.DomElementProxy');
+    file(MYT_DOM_EVENTS_ROOT + 'DomObserver.js'     ).provides('myt.DomObserver'     ).requires('myt.DomObservable');
+    file(MYT_DOM_EVENTS_ROOT + 'MouseObservable.js' ).provides('myt.MouseObservable' ).requires('myt.DomObservable');
+    file(MYT_DOM_EVENTS_ROOT + 'KeyObservable.js'   ).provides('myt.KeyObservable'   ).requires('myt.DomObservable');
+    file(MYT_DOM_EVENTS_ROOT + 'FocusObservable.js' ).provides('myt.FocusObservable' ).requires('myt.DomObservable','myt.global.focus');
+    file(MYT_DOM_EVENTS_ROOT + 'ScrollObservable.js').provides('myt.ScrollObservable').requires('myt.DomObservable');
     
     // Core : Layout
     var MYT_LAYOUT_ROOT = MYT_CORE_ROOT + 'layout/';

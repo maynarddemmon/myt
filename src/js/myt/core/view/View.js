@@ -7,6 +7,7 @@ myt.View = new JS.Class('View', myt.Node, {
         myt.DomObserver, 
         myt.MouseObservable, 
         myt.KeyObservable, 
+        myt.ScrollObservable, 
         myt.FocusObservable
     ],
     
@@ -378,7 +379,9 @@ myt.View = new JS.Class('View', myt.Node, {
     setVisible: function(v) {
         if (this.visible === v) return;
         this.visible = v;
-        this.deStyle.visibility = v ? 'inherit' : 'hidden';
+        var deStyle = this.deStyle;
+        deStyle.visibility = v ? 'inherit' : 'hidden';
+        deStyle.display = v ? 'block' : 'none';
         if (this.inited) this.fireNewEvent('visible', v);
     },
     
