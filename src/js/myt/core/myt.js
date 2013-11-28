@@ -388,4 +388,12 @@ myt = {
     getElement: function(tagname, index) {
         return document.getElementsByTagName(tagname ? tagname : 'body')[index > 0 ? index : 0];
     },
+    
+    // Misc
+    /** Make a deep copy of an object.
+        @param obj:object the object to copy.
+        @returns object a copy of the object. */
+    clone: function(obj) {
+        return JSON.parse(JSON.stringify(obj));
+    }
 };
