@@ -43,7 +43,6 @@ myt.View = new JS.Class('View', myt.Node, {
     initNode: function(parent, attrs) {
         this.x = this.y = this.width = this.height = 0;
         this.opacity = 1;
-        this.clip = false;
         this.visible = true;
         
         this.setDomElement(this.createOurDomElement(parent));
@@ -310,7 +309,6 @@ myt.View = new JS.Class('View', myt.Node, {
         if (this.width === v) return;
         this.width = v;
         this.deStyle.width = v + 'px';
-        if (this.clip) this.__applyClipToDom();
         if (this.inited) {
             this.__updateBounds(v, this.height);
             if (!supressEvent) this.fireNewEvent('width', v);
@@ -325,7 +323,6 @@ myt.View = new JS.Class('View', myt.Node, {
         if (this.height === v) return;
         this.height = v;
         this.deStyle.height = v + 'px';
-        if (this.clip) this.__applyClipToDom();
         if (this.inited) {
             this.__updateBounds(this.width, v);
             if (!supressEvent) this.fireNewEvent('height', v);
@@ -358,14 +355,6 @@ myt.View = new JS.Class('View', myt.Node, {
         if (this.inited) this.fireNewEvent('opacity', v);
     },
     
-    /** Turns clipping on and off for this view. The default value is false. */
-    setClip: function(v) {
-        if (this.clip === v) return;
-        this.clip = v;
-        this.__applyClipToDom();
-        if (this.inited) this.fireNewEvent('clip', v);
-    },
-    
     /** Allowed values: 'visible', 'hidden', 'scroll', 'auto', 'inherit'. */
     setOverflow: function(v) {
         if (this.overflow === v) return;
@@ -379,9 +368,7 @@ myt.View = new JS.Class('View', myt.Node, {
     setVisible: function(v) {
         if (this.visible === v) return;
         this.visible = v;
-        var deStyle = this.deStyle;
-        deStyle.visibility = v ? 'inherit' : 'hidden';
-        deStyle.display = v ? 'block' : 'none';
+        this.deStyle.visibility = v ? 'inherit' : 'hidden';
         if (this.inited) this.fireNewEvent('visible', v);
     },
     
@@ -395,13 +382,6 @@ myt.View = new JS.Class('View', myt.Node, {
         this.cursor = v;
         this.deStyle.cursor = v ? v : 'auto';
         if (this.inited) this.fireNewEvent('cursor', v);
-    },
-    
-    /** Applys a clipping rect to the domElement.
-        @returns void */
-    __applyClipToDom: function() {
-        var style = this.deStyle;
-        style.clip = this.clip ? 'rect(0px, ' + style.width + ', ' + style.height + ', 0px)' : 'auto';
     },
     
     /** Updates the boundsWidth and boundsHeight attributes.

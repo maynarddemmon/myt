@@ -95,7 +95,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
             name:'wrapper', ignorePlacement:true,
             y:this.buttonHeight, height:0,
             visible:false, maskFocus:true,
-            clip:true, overflow:'hidden', percentOfParentWidth:100
+            overflow:'hidden', percentOfParentWidth:100
         }, [myt.SizeToParent]);
         
         var container = new myt.View(wrapper, {name:'container'});

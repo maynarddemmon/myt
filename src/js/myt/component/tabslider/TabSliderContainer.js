@@ -14,7 +14,6 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
         
         if (attrs.spacing === undefined) attrs.spacing = myt.TabSliderContainer.DEFAULT_SPACING;
         
-        if (attrs.clip === undefined) attrs.clip = true;
         if (attrs.overflow === undefined) attrs.overflow = 'auto';
         if (attrs.groupId === undefined) attrs.groupId = myt.generateGuid();
         

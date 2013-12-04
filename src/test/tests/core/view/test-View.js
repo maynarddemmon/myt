@@ -80,7 +80,7 @@ test("Create a view without providing a div.", function() {
     v.destroy();
 });
 
-test("View position, size and clip.", function() {
+test("View position and size.", function() {
     var v = new myt.View(null, {x:10, y:20, width:30, height:40}, [myt.RootView]);
     
     ok(v.x === 10, "View should have an x of 10.");
@@ -102,17 +102,6 @@ test("View position, size and clip.", function() {
     ok(v.get('height') === 40, "View getter for height should return 40");
     ok(v.deStyle.height === '40px', "domElement.style.height should be 40px.");
     ok(v.domElement.offsetHeight === 40, "Dom element should have an offsetHeight of 40.");
-    
-    // Should be no clip
-    ok(v.deStyle.clip === '', "No clip is applied so none should exist.");
-    ok(v.clip === false, "Clip should be initially false.");
-    v.setClip(true);
-    ok(v.deStyle.clip === 'rect(0px 30px 40px 0px)' || 
-        v.deStyle.clip === 'rect(0px, 30px, 40px, 0px)', 
-        "True clip so it should be a rect: " + v.deStyle.clip
-    ); // commas are in firefox.
-    v.setClip(false);
-    ok(v.deStyle.clip === 'auto', "False clip applied so it should now be auto.");
     
     // Bounding client rect
     var bounds = v.domElement.getBoundingClientRect();

@@ -54,7 +54,6 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
             // Circumvent setter
             if (this.width !== w) {
                 this.width = w;
-                if (this.clip) this.__applyClipToDom();
                 if (this.inited) this.__updateBounds(this.width, this.height);
                 this.fireNewEvent('width', w);
             }
@@ -72,7 +71,6 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
             // Circumvent setter
             if (this.height !== h) {
                 this.height = h;
-                if (this.clip) this.__applyClipToDom();
                 if (this.inited) this.__updateBounds(this.width, this.height);
                 this.fireNewEvent('height', h);
             }
