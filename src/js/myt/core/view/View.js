@@ -289,7 +289,11 @@ myt.View = new JS.Class('View', myt.Node, {
     setX: function(v) {
         if (this.x === v) return;
         this.x = v;
-        this.deStyle.left = v + 'px';
+        
+        // Only set location if currently visible. See this.setVisible for
+        // more info.
+        if (this.visible) this.deStyle.left = v + 'px';
+        
         if (this.inited) this.fireNewEvent('x', v);
     },
     
@@ -297,7 +301,11 @@ myt.View = new JS.Class('View', myt.Node, {
     setY: function(v) {
         if (this.y === v) return;
         this.y = v;
-        this.deStyle.top = v + 'px';
+        
+        // Only set location if currently visible. See this.setVisible for
+        // more info.
+        if (this.visible) this.deStyle.top = v + 'px';
+        
         if (this.inited) this.fireNewEvent('y', v);
     },
     
@@ -368,7 +376,20 @@ myt.View = new JS.Class('View', myt.Node, {
     setVisible: function(v) {
         if (this.visible === v) return;
         this.visible = v;
-        this.deStyle.visibility = v ? 'inherit' : 'hidden';
+        
+        var s = this.deStyle;
+        s.visibility = v ? 'inherit' : 'hidden';
+        
+        // Move invisible elements to a very negative location so they won't
+        // effect scrollable area. Ideally we could use display:none but we
+        // can't because that makes measuring bounds not work.
+        if (v) {
+            s.top = this.y + 'px';
+            s.left = this.x + 'px';
+        } else {
+            s.top = s.left = '-1000000px';
+        }
+        
         if (this.inited) this.fireNewEvent('visible', v);
     },
     

@@ -92,6 +92,7 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
         /** Gets the z-index of the dom element or, if it does not define a 
             stacking context, the highest z-index of any of the dom element's 
             descendants.
+            @param elem:DomElement
             @returns int */
         getHighestZIndex: function(elem) {
             // See https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Understanding_z_index/The_stacking_context
