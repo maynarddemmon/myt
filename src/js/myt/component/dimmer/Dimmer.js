@@ -33,13 +33,13 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
         this.callSuper(parent, attrs);
         
         // Eat mouse events
-        this.attachDomObserver(this, 'eatMouseEvent', 'mouseover', true);
-        this.attachDomObserver(this, 'eatMouseEvent', 'mouseout', true);
-        this.attachDomObserver(this, 'eatMouseEvent', 'mousedown', true);
-        this.attachDomObserver(this, 'eatMouseEvent', 'mouseup', true);
-        this.attachDomObserver(this, 'eatMouseEvent', 'click', true);
-        this.attachDomObserver(this, 'eatMouseEvent', 'dblclick', true);
-        this.attachDomObserver(this, 'eatMouseEvent', 'mousemove', true);
+        this.attachDomObserver(this, 'eatMouseEvent', 'mouseover');
+        this.attachDomObserver(this, 'eatMouseEvent', 'mouseout');
+        this.attachDomObserver(this, 'eatMouseEvent', 'mousedown');
+        this.attachDomObserver(this, 'eatMouseEvent', 'mouseup');
+        this.attachDomObserver(this, 'eatMouseEvent', 'click');
+        this.attachDomObserver(this, 'eatMouseEvent', 'dblclick');
+        this.attachDomObserver(this, 'eatMouseEvent', 'mousemove');
         
         // Prevent drag/drop behavior.
         // DUPE: Similar code exists in myt.RootView.
