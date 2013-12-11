@@ -467,6 +467,29 @@ myt.Node = new JS.Class('Node', {
         return animPool.getActives();
     },
     
+    /** Stops all active animations.
+        @param filterFunc:function/string a function that filters which 
+            animations get stopped. The filter should return true for 
+            functions to be stopped. If the provided values is a string it will
+            be used as a matching attribute name.
+        @returns void */
+    stopActiveAnimators: function(filterFunc) {
+        if (filterFunc == null) {
+            filterFunc = function(anim) {return true;};
+        } else if (typeof filterFunc === 'string') {
+            var attrName = filterFunc;
+            filterFunc = function(anim) {
+                return anim.attribute === attrName;
+            };
+        }
+        
+        var activeAnims = this.getActiveAnimators(), i = activeAnims.length, anim;
+        while (i) {
+            anim = activeAnims[--i];
+            if (filterFunc.call(this, anim)) anim.reset(false);
+        }
+    },
+    
     // Timing and Delay
     /** A convienence method to execute a method once on idle.
         @param methodName:string the name of the method to execute on

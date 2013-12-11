@@ -11,6 +11,14 @@
             the interactive footprint of the component to be larger than the
             visible footprint. This value will be applied to the top and bottom
             or left and right edge of the component.
+        expansionState:number Used by the "primary" action to update the 
+            divider position. Allowed values are:
+                collapsed:0
+                restored just collapsed:1
+                restored just expanded:2
+                expanded:3
+        restoreValue:number The value used to restore the position in the
+            "primary" action.
 */
 myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
     include: [myt.BoundedValueComponent, myt.Draggable],
@@ -25,13 +33,16 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
         if (attrs.value === undefined) attrs.value = attrs.minValue;
         if (attrs.focusEmbellishment === undefined) attrs.focusEmbellishment = false;
         if (attrs.repeatKeyDown === undefined) attrs.repeatKeyDown = true;
+        if (attrs.expansionState === undefined) attrs.expansionState = 2;
         
         if (attrs.activationKeys === undefined) {
             attrs.activationKeys = [
                 37, // left arrow
                 38, // up arrow
                 39, // right arrow
-                40  // down arrow
+                40, // down arrow
+                13, // enter
+                32  // spacebar
             ];
         }
         
@@ -48,11 +59,20 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
         
         this.callSuper(parent, attrs);
         
+        // Do afterwards since value might have been constrained from the
+        // value provided in attrs.
+        if (attrs.restoreValue === undefined) this.setRestoreValue(this.value);
+        
         if (this.limitToParent !== undefined) this.__updateLimitToParentConstraint();
+        
+        this.attachDomObserver(this, 'doPrimaryAction', 'dblclick');
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
+    setExpansionState: function(v) {this.expansionState = v;},
+    setRestoreValue: function(v) {this.restoreValue = v;},
+    
     setLimitToParent: function(v) {
         if (this.limitToParent !== v) {
             this.limitToParent = v;
@@ -88,15 +108,20 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
     },
     
     /** Update the x or y position of the component as the value changes.
+        @param restoreValueAlso:boolean (optional) If true, the restoreValue
+            will also be updated.
         @overrides myt.ValueComponent */
-    setValue: function(v) {
+    setValue: function(v, restoreValueAlso) {
         this.callSuper(v);
         
+        v = this.value;
         if (this.axis === 'y') {
-            this.setY(this.value);
+            this.setY(v);
         } else {
-            this.setX(this.value);
+            this.setX(v);
         }
+        
+        if (restoreValueAlso) this.setRestoreValue(v);
     },
     
     /** Ensure the component gets redrawn when it gains and loses focus.
@@ -134,12 +159,67 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
         switch (key) {
             case 37: case 38: dir = -1; break;
             case 39: case 40: dir = 1; break;
+            case 13: case 32: default:
+                this.doPrimaryAction();
+                return;
         }
         
         // Update nudge amount, but never nudge more than 20.
         this.__nudgeAcc = Math.min(this.__nudgeAcc + 1, 20);
         
-        this.setValue(this.value + dir * this.__nudgeAcc);
+        this.setValue(this.value + dir * this.__nudgeAcc, true);
+        this.setExpansionState(2);
+    },
+    
+    doPrimaryAction: function() {
+        var toValue, rv = this.restoreValue, maxV = this.maxValue, minV = this.minValue;
+        switch (this.expansionState) {
+            case 0:
+                if (rv != null) {
+                    this.setExpansionState(1);
+                    if (rv === minV) {
+                        // Prevent infinite loop if there's nowhere to animate to.
+                        if (rv !== maxV) this.doPrimaryAction();
+                    } else {
+                        toValue = rv;
+                    }
+                }
+                break;
+            case 1:
+                if (maxV != null) {
+                    this.setExpansionState(3);
+                    if (this.value === maxV) {
+                        this.doPrimaryAction();
+                    } else {
+                        toValue = maxV;
+                    }
+                }
+                break;
+            case 2:
+                if (minV != null) {
+                    this.setExpansionState(0);
+                    if (this.value === minV) {
+                        this.doPrimaryAction();
+                    } else {
+                        toValue = minV;
+                    }
+                }
+                break;
+            case 3:
+                if (rv != null) {
+                    this.setExpansionState(2);
+                    if (rv === maxV) {
+                        this.doPrimaryAction();
+                    } else {
+                        toValue = rv;
+                    }
+                }
+                break;
+        }
+        if (toValue != null) {
+            this.stopActiveAnimators('value');
+            this.animate('value', toValue, null, null, null, 250, null, null, 'easeInOutQuad');
+        }
     },
     
     /** Reset nudge acceleration when the key is released.
@@ -159,7 +239,10 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
     /** Constrain dragging to horizontal or vertical based on axis.
         @overrides myt.Draggable */
     requestDragPosition: function(x, y) {
-        if (!this.disabled) this.setValue(this.axis === 'y' ? y : x);
+        if (!this.disabled) {
+            this.setValue(this.axis === 'y' ? y : x, true);
+            this.setExpansionState(2);
+        }
     },
     
     /** @overrides myt.DrawButton */

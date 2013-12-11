@@ -216,10 +216,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
     expand: function(targetHeight) {
         this.setExpansionState('expanding');
         
-        // Stop any running animations
-        var activeAnims = this.wrapper.getActiveAnimators(),
-            i = activeAnims.length;
-        while (i) activeAnims[--i].reset(false);
+        this.wrapper.stopActiveAnimators();
         
         var self = this;
         this.wrapper.animate({
@@ -231,10 +228,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
     collapse: function(targetHeight) {
         this.setExpansionState('collapsing');
         
-        // Stop any running animations
-        var activeAnims = this.wrapper.getActiveAnimators(),
-            i = activeAnims.length;
-        while (i) activeAnims[--i].reset(false);
+        this.wrapper.stopActiveAnimators();
         
         var self = this;
         this.wrapper.animate({
