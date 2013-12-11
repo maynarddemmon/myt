@@ -175,6 +175,12 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'model/RangeComponent.js'       ).provides('myt.RangeComponent'       ).requires('myt.ValueComponent');
     file(MYT_COMPONENT_ROOT + 'model/BoundedRangeComponent.js').provides('myt.BoundedRangeComponent').requires('myt.RangeComponent','myt.BoundedValueComponent');
     
+    // Component : Divider
+    file(MYT_COMPONENT_ROOT + 'divider/DividerDrawingMethod.js').provides('myt.DividerDrawingMethod').requires('myt.DrawingMethod');
+    file(MYT_COMPONENT_ROOT + 'divider/BaseDivider.js'         ).provides('myt.BaseDivider'         ).requires('myt.DrawButton','myt.DividerDrawingMethod','myt.BoundedValueComponent','myt.Draggable');
+    file(MYT_COMPONENT_ROOT + 'divider/HorizontalDivider.js'   ).provides('myt.HorizontalDivider'   ).requires('myt.BaseDivider');
+    file(MYT_COMPONENT_ROOT + 'divider/VerticalDivider.js'     ).provides('myt.VerticalDivider'     ).requires('myt.BaseDivider');
+    
     // Component : Floating Panel
     file(MYT_COMPONENT_ROOT + 'floatingpanel/FloatingPanel.js'      ).provides('myt.FloatingPanel'      ).requires('myt.RootView');
     file(MYT_COMPONENT_ROOT + 'floatingpanel/FloatingPanelAnchor.js').provides('myt.FloatingPanelAnchor').requires('myt.FloatingPanel');
@@ -293,6 +299,7 @@ JS.Packages(function() {with(this) {
         'myt.global.valueProcessors','myt.UseOtherFieldIfEmptyValueProcessor','myt.FormElement',
         'myt.FormInputText',
         'myt.ScatterGraph',
-        'myt.Slider','myt.RangeSlider'
+        'myt.Slider','myt.RangeSlider',
+        'myt.HorizontalDivider','myt.VerticalDivider'
     );
 }});

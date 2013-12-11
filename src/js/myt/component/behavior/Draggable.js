@@ -23,32 +23,32 @@ myt.Draggable = new JS.Module('Draggable', {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setIsDraggable: function(v) {
-        if (this.isDraggable === v) return;
-        this.isDraggable = v;
-        // No event needed.
-        
-        var func;
-        if (v) {
-            func = this.attachToDom;
-        } else if (this.inited) {
-            func = this.detachFromDom;
-        }
-        
-        if (func) {
-            var dvs = this.getDragViews(), i = dvs.length;
-            while(i) func.call(this, dvs[--i], '__doMouseDown', 'mousedown');
+        if (this.isDraggable !== v) {
+            this.isDraggable = v;
+            // No event needed.
+            
+            var func;
+            if (v) {
+                func = this.attachToDom;
+            } else if (this.inited) {
+                func = this.detachFromDom;
+            }
+            
+            if (func) {
+                var dvs = this.getDragViews(), i = dvs.length;
+                while(i) func.call(this, dvs[--i], '__doMouseDown', 'mousedown');
+            }
         }
     },
     
     setIsDragging: function(v) {
-        if (this.isDragging === v) return;
-        this.isDragging = v;
-        if (this.inited) this.fireNewEvent('isDragging', v);
+        if (this.isDragging !== v) {
+            this.isDragging = v;
+            if (this.inited) this.fireNewEvent('isDragging', v);
+        }
     },
     
-    setDistanceBeforeDrag: function(v) {
-        this.distanceBeforeDrag = v;
-    },
+    setDistanceBeforeDrag: function(v) {this.distanceBeforeDrag = v;},
     
     
     // Methods /////////////////////////////////////////////////////////////////
@@ -85,8 +85,8 @@ myt.Draggable = new JS.Module('Draggable', {
     },
     
     __doDragCheck: function(event) {
-        var pos = myt.MouseObservable.getMouseFromEvent(event);
-        var distance = myt.Geometry.measureDistance(pos.x, pos.y, this._dragInitX + this.x, this._dragInitY + this.y);
+        var pos = myt.MouseObservable.getMouseFromEvent(event),
+            distance = myt.Geometry.measureDistance(pos.x, pos.y, this._dragInitX + this.x, this._dragInitY + this.y);
         if (distance >= this.distanceBeforeDrag) {
             this.detachFromDom(myt.global.mouse, '__doDragCheck', 'mousemove', true);
             this.startDrag();
@@ -113,9 +113,8 @@ myt.Draggable = new JS.Module('Draggable', {
     /** Stop the drag. (see startDrag for more details)
         @returns void */
     stopDrag: function(event) {
-        var g = myt.global;
+        var g = myt.global, gm = g.mouse;
         g.dragManager.stopDrag(event);
-        var gm = g.mouse;
         this.detachFromDom(gm, '__doMouseUp', 'mouseup', true);
         this.detachFromDom(gm, '__updateDrag', 'mousemove', true);
         this.setIsDragging(false);

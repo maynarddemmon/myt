@@ -27,6 +27,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
         
         if (attrs.selected === undefined) attrs.selected = false;
         if (attrs.buttonClass === undefined) attrs.buttonClass = myt.Radio;
+        if (attrs.zIndex === undefined) attrs.zIndex = 0;
         
         var TS = myt.TabSlider;
         if (attrs.buttonHeight === undefined) attrs.buttonHeight = TS.DEFAULT_BUTTON_HEIGHT;
@@ -49,8 +50,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
     },
     
     doAfterAdoption: function() {
-        var self = this;
-        var btnClass = this.buttonClass;
+        var self = this, btnClass = this.buttonClass;
         new btnClass(this, {
             name:'button', ignorePlacement:true, zIndex:1,
             height:this.buttonHeight,
@@ -109,41 +109,48 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setFillColorChecked: function(v) {
-        if (this.fillColorChecked === v) return;
-        this.fillColorChecked = v;
-        if (this.button) this.button.setFillColorChecked(v);
+        if (this.fillColorChecked !== v) {
+            this.fillColorChecked = v;
+            if (this.button) this.button.setFillColorChecked(v);
+        }
     },
     setFillColorHover: function(v) {
-        if (this.fillColorHover === v) return;
-        this.fillColorHover = v;
-        if (this.button) this.button.setFillColorHover(v);
+        if (this.fillColorHover !== v) {
+            this.fillColorHover = v;
+            if (this.button) this.button.setFillColorHover(v);
+        }
     },
     setFillColorActive: function(v) {
-        if (this.fillColorActive === v) return;
-        this.fillColorActive = v;
-        if (this.button) this.button.setFillColorActive(v);
+        if (this.fillColorActive !== v) {
+            this.fillColorActive = v;
+            if (this.button) this.button.setFillColorActive(v);
+        }
     },
     setFillColorReady: function(v) {
-        if (this.fillColorReady === v) return;
-        this.fillColorReady = v;
-        if (this.button) this.button.setFillColorReady(v);
+        if (this.fillColorReady !== v) {
+            this.fillColorReady = v;
+            if (this.button) this.button.setFillColorReady(v);
+        }
     },
     setEdgeColor: function(v) {
-        if (this.edgeColor === v) return;
-        this.edgeColor = v;
-        if (this.button) this.button.setEdgeColor(v);
+        if (this.edgeColor !== v) {
+            this.edgeColor = v;
+            if (this.button) this.button.setEdgeColor(v);
+        }
     },
     setEdgeSize: function(v) {
-        if (this.edgeSize === v) return;
-        this.edgeSize = v;
-        if (this.button) this.button.setEdgeSize(v);
+        if (this.edgeSize !== v) {
+            this.edgeSize = v;
+            if (this.button) this.button.setEdgeSize(v);
+        }
     },
     setButtonHeight: function(v) {
-        if (this.buttonHeight === v) return;
-        this.buttonHeight = v;
-        if (this.button) {
-            this.button.setHeight(v);
-            this.wrapper.setY(v);
+        if (this.buttonHeight !== v) {
+            this.buttonHeight = v;
+            if (this.button) {
+                this.button.setHeight(v);
+                this.wrapper.setY(v);
+            }
         }
     },
     setMinContainerHeight: function(v) {this.minContainerHeight = v;},
@@ -153,43 +160,46 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
         // Adapt to event from syncTo
         if (typeof v === 'object') v = v.value;
         
-        if (this.selected === v) return;
-        this.selected = v;
-        if (this.inited) this.fireNewEvent('selected', v);
-        
-        // Sync the other direction if necessary.
-        if (this.button && this.button.checked !== v) this.button.setChecked(v);
+        if (this.selected !== v) {
+            this.selected = v;
+            if (this.inited) this.fireNewEvent('selected', v);
+            
+            // Sync the other direction if necessary.
+            if (this.button && this.button.checked !== v) this.button.setChecked(v);
+        }
     },
     
     setDisabled: function(v) {
         // Adapt to event from syncTo
         if (typeof v === 'object') v = v.value;
         
-        if (this.disabled === v) return;
-        this.disabled = v;
-        if (this.inited) this.fireNewEvent('disabled', v);
-        
-        // Sync the other direction if necessary.
-        if (this.button && this.button.disabled !== v) this.button.setDisabled(v);
+        if (this.disabled !== v) {
+            this.disabled = v;
+            if (this.inited) this.fireNewEvent('disabled', v);
+            
+            // Sync the other direction if necessary.
+            if (this.button && this.button.disabled !== v) this.button.setDisabled(v);
+        }
     },
     
     setExpansionState: function(v) {
-        if (this.expansionState === v) return;
-        this.expansionState = v;
-        if (this.inited) this.fireNewEvent('expansionState', v);
-        
-        var wrapper = this.wrapper;
-        if (wrapper) {
-            if (v === 'expanded') {
-                wrapper.setMaskFocus(false);
-                wrapper.setOverflow('auto');
-            } else if (v === 'expanding') {
-                wrapper.setVisible(true);
-            } else if (v === 'collapsed') {
-                wrapper.setVisible(false);
-            } else if (v === 'collapsing') {
-                wrapper.setMaskFocus(true);
-                wrapper.setOverflow('hidden');
+        if (this.expansionState !== v) {
+            this.expansionState = v;
+            if (this.inited) this.fireNewEvent('expansionState', v);
+            
+            var wrapper = this.wrapper;
+            if (wrapper) {
+                if (v === 'expanded') {
+                    wrapper.setMaskFocus(false);
+                    wrapper.setOverflow('auto');
+                } else if (v === 'expanding') {
+                    wrapper.setVisible(true);
+                } else if (v === 'collapsed') {
+                    wrapper.setVisible(false);
+                } else if (v === 'collapsing') {
+                    wrapper.setMaskFocus(true);
+                    wrapper.setOverflow('hidden');
+                }
             }
         }
     },
@@ -207,8 +217,8 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
         this.setExpansionState('expanding');
         
         // Stop any running animations
-        var activeAnims = this.wrapper.getActiveAnimators();
-        var i = activeAnims.length;
+        var activeAnims = this.wrapper.getActiveAnimators(),
+            i = activeAnims.length;
         while (i) activeAnims[--i].reset(false);
         
         var self = this;
@@ -222,8 +232,8 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
         this.setExpansionState('collapsing');
         
         // Stop any running animations
-        var activeAnims = this.wrapper.getActiveAnimators();
-        var i = activeAnims.length;
+        var activeAnims = this.wrapper.getActiveAnimators(),
+            i = activeAnims.length;
         while (i) activeAnims[--i].reset(false);
         
         var self = this;

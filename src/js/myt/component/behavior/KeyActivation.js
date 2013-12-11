@@ -9,6 +9,8 @@
     Attributes:
         activateKeyDown:number the keycode of the activation key that is
             currently down. This will be -1 when no key is down.
+        repeatKeyDown:boolean Indicates if doActivationKeyDown will be called
+            for repeated keydown events or not. Defaults to false.
 */
 myt.KeyActivation = new JS.Module('KeyActivation', {
     // Class Methods and Attributes ////////////////////////////////////////////
@@ -48,12 +50,14 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         // No event needed
     },
     
+    setRepeatKeyDown: function(v) {this.repeatKeyDown = v;},
+    
     
     // Methods /////////////////////////////////////////////////////////////////
     __handleKeyDown: function(event) {
         if (this.disabled) return;
         
-        if (this.activateKeyDown === -1) {
+        if (this.activateKeyDown === -1 || this.repeatKeyDown) {
             var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event),
                 keys = this.activationKeys, i = keys.length;
             while (i) {

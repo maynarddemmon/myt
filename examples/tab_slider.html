@@ -84,7 +84,16 @@
         // TabSlider
         var left = new myt.View(rootView, {
             width:200, bgColor:'#eeeeee', percentOfParentHeight:100, groupId:'nav'
-        }, [myt.TabSliderContainer, myt.SizeToParent]);
+        }, [myt.TabSliderContainer, myt.SizeToParent, {
+            updateWidth: function(event) {
+                this.setWidth(event.value + event.source.inset);
+            },
+            updateY: function(event) {
+                var v = event.value + event.source.inset;
+                this.setPercentOfParentHeightOffset(-v);
+                this.setY(v);
+            },
+        }]);
         
         var attrs = {
             buttonHeight:40,
@@ -126,6 +135,19 @@
         
         var ts8 = new myt.TextTabSlider(left, attrs);
         new myt.View(ts8, {width:100, height:350, bgColor:'#fff0f0'});
+        
+        global.hDivider = new myt.HorizontalDivider(rootView, {
+            percentOfParentHeight:100, limitToParent:0, minValue:98
+        }, [myt.SizeToParent]);
+        
+        left.syncTo(global.hDivider, 'updateWidth', 'value');
+        
+        global.vDivider = new myt.VerticalDivider(rootView, {
+            percentOfParentWidth:100
+        }, [myt.SizeToParent]);
+        global.vDivider.setLimitToParent(100);
+        
+        left.syncTo(global.vDivider, 'updateY', 'value');
     }
 </script>
 </body></html>

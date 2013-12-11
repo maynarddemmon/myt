@@ -17,15 +17,16 @@ myt.Disableable = new JS.Module('Disableable', {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setDisabled: function(v) {
-        if (this.disabled === v) return;
-        this.disabled = v;
-        if (this.inited) this.fireNewEvent('disabled', v);
-        
-        // Give away focus if we become disabled and this instance is
-        // a FocusObservable
-        if (v && this.giveAwayFocus) this.giveAwayFocus();
-        
-        this.doDisabled();
+        if (this.disabled !== v) {
+            this.disabled = v;
+            if (this.inited) this.fireNewEvent('disabled', v);
+            
+            // Give away focus if we become disabled and this instance is
+            // a FocusObservable
+            if (v && this.giveAwayFocus) this.giveAwayFocus();
+            
+            this.doDisabled();
+        }
     },
     
     

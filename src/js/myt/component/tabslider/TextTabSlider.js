@@ -32,9 +32,10 @@ myt.TextTabSlider = new JS.Class('TextTabSlider', myt.TabSlider, {
     setLabelTextColor: function(v) {this.labelTextColor = v;},
     
     setText: function(v) {
-        if (this.text === v) return;
-        this.text = v;
-        if (this.button && this.button.label) this.button.label.setText(v);
+        if (this.text !== v) {
+            this.text = v;
+            if (this.button && this.button.label) this.button.label.setText(v);
+        }
     },
     
     

@@ -60,14 +60,13 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setGroupId: function(v) {
-        this.groupId = v;
-    },
+    setGroupId: function(v) {this.groupId = v;},
     
     setSpacing: function(v) {
-        if (this.spacing === v) return;
-        this.spacing = v;
-        if (this.layout) this.layout.setSpacing(v);
+        if (this.spacing !== v) {
+            this.spacing = v;
+            if (this.layout) this.layout.setSpacing(v);
+        }
     },
     
     
@@ -77,8 +76,8 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
     },
     
     _updateLayout: function() {
-        var tabSliders = this._tabSliders, i = tabSliders.length, tabSlider;
-        var min = 0, preferred = 0, visCount = 0;
+        var tabSliders = this._tabSliders, i = tabSliders.length, tabSlider,
+            min = 0, preferred = 0, visCount = 0;
         
         while (i) {
             tabSlider = tabSliders[--i];
@@ -95,13 +94,13 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
             }
         }
         
-        var layout = this.container.layout;
-        var layoutOverage = layout.inset + layout.outset + layout.spacing * (visCount - 1);
+        var layout = this.container.layout,
+            layoutOverage = layout.inset + layout.outset + layout.spacing * (visCount - 1);
         min += layoutOverage;
         preferred += layoutOverage;
         
-        var minIsOver = min > this.height;
-        var preferredIsOver = preferred > this.height;
+        var minIsOver = min > this.height,
+            preferredIsOver = preferred > this.height;
         
         i = tabSliders.length;
         while (i) {
