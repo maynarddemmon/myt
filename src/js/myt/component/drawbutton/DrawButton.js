@@ -21,17 +21,18 @@ myt.DrawButton = new JS.Class('DrawButton', myt.Canvas, {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setDrawingMethodClassname: function(v) {
-        if (this.drawingMethodClassname === v) return;
-        this.drawingMethodClassname = v;
-        
-        this.setDrawingMethod(myt.DrawingMethod.get(v));
+        if (this.drawingMethodClassname !== v) {
+            this.drawingMethodClassname = v;
+            this.setDrawingMethod(myt.DrawingMethod.get(v));
+        }
     },
     
     setDrawingMethod: function(v) {
-        if (this.drawingMethod === v) return;
-        this.drawingMethod = v;
-        // No event needed
-        if (this.inited) this.updateUI();
+        if (this.drawingMethod !== v) {
+            this.drawingMethod = v;
+            // No event needed
+            if (this.inited) this.updateUI();
+        }
     },
     
     /** Gets the bounds used by the DrawingMethod to draw within. By default

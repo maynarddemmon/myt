@@ -61,7 +61,6 @@ myt.DividerDrawingMethod = new JS.Class('DividerDrawingMethod', myt.DrawingMetho
             y = y + bumpSize / 2;
             
             myt.DrawingUtil.drawRoundedRect(canvas, bumpSize / 2, 0, x, y, bumpLength, bumpSize);
-            canvas.fill();
         } else {
             bumpSize = w / 2;
             bumpLength = Math.max(3 * bumpSize, 14);
@@ -69,7 +68,7 @@ myt.DividerDrawingMethod = new JS.Class('DividerDrawingMethod', myt.DrawingMetho
             x = x + bumpSize / 2;
             
             myt.DrawingUtil.drawRoundedRect(canvas, bumpSize / 2, 0, x, y, bumpSize, bumpLength);
-            canvas.fill();
         }
+        canvas.fill();
     }
 });

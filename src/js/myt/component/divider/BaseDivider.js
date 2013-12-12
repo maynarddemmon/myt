@@ -151,8 +151,8 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
     /** Nudge the divider when the arrow keys are used. Nuding accelerates
         up to a limit if the key is held down.
         @overrides myt.Button. */
-    doActivationKeyDown: function(key) {
-        this.callSuper(key);
+    doActivationKeyDown: function(key, isRepeat) {
+        this.callSuper(key, isRepeat);
         
         // Determine nudge direction
         var dir = 0;
@@ -164,8 +164,8 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
                 return;
         }
         
-        // Update nudge amount, but never nudge more than 20.
-        this.__nudgeAcc = Math.min(this.__nudgeAcc + 1, 20);
+        // Update nudge amount, but never nudge more than 64.
+        this.__nudgeAcc = isRepeat ? Math.min(this.__nudgeAcc + 1, 64) : 1;
         
         this.setValue(this.value + dir * this.__nudgeAcc, true);
         this.setExpansionState(2);
@@ -220,20 +220,6 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
             this.stopActiveAnimators('value');
             this.animate('value', toValue, null, null, null, 250, null, null, 'easeInOutQuad');
         }
-    },
-    
-    /** Reset nudge acceleration when the key is released.
-        @overrides myt.Button. */
-    doActivationKeyUp: function(key) {
-        this.callSuper(key);
-        this.__nudgeAcc = 1;
-    },
-    
-    /** Reset nudge acceleration when the key is aborted.
-        @overrides myt.Button. */
-    doActivationKeyAborted: function(key) {
-        this.callSuper(key);
-        this.__nudgeAcc = 1;
     },
     
     /** Constrain dragging to horizontal or vertical based on axis.

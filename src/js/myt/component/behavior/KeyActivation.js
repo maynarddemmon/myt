@@ -62,8 +62,12 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
                 keys = this.activationKeys, i = keys.length;
             while (i) {
                 if (keyCode === keys[--i]) {
-                    this.activateKeyDown = keyCode;
-                    this.doActivationKeyDown(keyCode);
+                    if (this.activateKeyDown === keyCode) {
+                        this.doActivationKeyDown(keyCode, true);
+                    } else {
+                        this.activateKeyDown = keyCode;
+                        this.doActivationKeyDown(keyCode, false);
+                    }
                     event.value.preventDefault();
                     return;
                 }
@@ -117,8 +121,9 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
     
     /** Called when an activation key is pressed down.
         @param key:number the keycode that is down.
+        @param isRepeat:boolean Indicates if this is a key repeat event or not.
         @returns void */
-    doActivationKeyDown: function(key) {},
+    doActivationKeyDown: function(key, isRepeat) {},
     
     /** Called when an activation key is release up. This executes the
         'doActivated' method by default. 

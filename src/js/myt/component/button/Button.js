@@ -37,8 +37,8 @@ myt.Button = new JS.Module('Button', {
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.KeyActivation. */
-    doActivationKeyDown: function(key) {
-        this.updateUI();
+    doActivationKeyDown: function(key, isRepeat) {
+        if (!isRepeat) this.updateUI();
     },
     
     /** @overrides myt.KeyActivation. */
