@@ -247,8 +247,9 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'validator/validators/NumericRangeValidator.js'    ).provides('myt.NumericRangeValidator'    ).requires('myt.Validator');
     file(MYT_COMPONENT_ROOT + 'validator/validators/RequiredFieldValidator.js'   ).provides('myt.RequiredFieldValidator'   ).requires('myt.Validator');
     file(MYT_COMPONENT_ROOT + 'validator/validators/URLValidator.js'             ).provides('myt.URLValidator'             ).requires('myt.Validator','myt.URI');
+    file(MYT_COMPONENT_ROOT + 'validator/validators/JSONValidator.js'            ).provides('myt.JSONValidator'            ).requires('myt.Validator','JSON');
     
-    file(MYT_COMPONENT_ROOT + 'validator/ValidatorRegistry.js').provides('myt.global.validators').requires('myt.global','myt.Observable','myt.CompoundValidator','myt.EqualsIgnoreCaseValidator','myt.RequiredFieldValidator','myt.URLValidator');
+    file(MYT_COMPONENT_ROOT + 'validator/ValidatorRegistry.js').provides('myt.global.validators').requires('myt.global','myt.Observable','myt.CompoundValidator','myt.EqualsIgnoreCaseValidator','myt.RequiredFieldValidator','myt.URLValidator','myt.JSONValidator');
     
     // Component : Form
     file(MYT_COMPONENT_ROOT + 'form/valueprocessor/ValueProcessor.js').provides('myt.ValueProcessor').requires('myt');

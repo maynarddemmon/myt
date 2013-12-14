@@ -16,6 +16,7 @@ new JS.Singleton('GlobalValidatorRegistry', {
         this.register(new myt.RequiredFieldValidator('required'));
         this.register(new myt.EqualsIgnoreCaseValidator('equalsIgnoreCase'));
         this.register(new myt.URLValidator('url'));
+        this.register(new myt.JSONValidator('json'));
     },
     
     
