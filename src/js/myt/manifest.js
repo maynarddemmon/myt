@@ -264,7 +264,8 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'form/RootForm.js'   ).provides('myt.RootForm'   ).requires('myt.Form');
     file(MYT_COMPONENT_ROOT + 'form/FormElement.js').provides('myt.FormElement').requires('myt.RootForm');
     
-    file(MYT_COMPONENT_ROOT + 'form/elements/FormInputText.js').provides('myt.FormInputText').requires('myt.FormElement','myt.InputText');
+    file(MYT_COMPONENT_ROOT + 'form/elements/FormInputText.js'    ).provides('myt.FormInputText'    ).requires('myt.FormElement','myt.InputText');
+    file(MYT_COMPONENT_ROOT + 'form/elements/FormInputTextArea.js').provides('myt.FormInputTextArea').requires('myt.FormElement','myt.InputTextArea');
     
     // Component : Uploader
     file(MYT_COMPONENT_ROOT + 'uploader/Uploader.js'     ).provides('myt.Uploader'     ).requires('myt.View','myt.NativeInputWrapper','myt.Disableable','myt.Ajax','myt.FormElement');
@@ -297,7 +298,7 @@ JS.Packages(function() {with(this) {
         'myt.ImageUploader','myt.Dialog',
         'myt.global.validators','myt.EqualFieldsValidator','myt.LengthValidator','myt.NumericRangeValidator',
         'myt.global.valueProcessors','myt.UseOtherFieldIfEmptyValueProcessor','myt.FormElement',
-        'myt.FormInputText',
+        'myt.FormInputText','myt.FormInputTextArea',
         'myt.ScatterGraph',
         'myt.Slider','myt.RangeSlider',
         'myt.HorizontalDivider','myt.VerticalDivider'
