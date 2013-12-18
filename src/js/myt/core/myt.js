@@ -150,27 +150,36 @@ myt = {
         @param callbackMethodName:string the name of the method to execute.
         @param attrs:object (optional) a map of additional attributes that
             will be inserted into the tag.
+        @param data:object (optional) Data that will be serialized as JSON
+            and provided to the link handler.
         @returns void */
-    generateLink: function(text, callbackMethodName, attrs) {
+    generateLink: function(text, callbackMethodName, attrs, data) {
         var optAttrs = '';
         if (attrs) {
             for (var name in attrs) optAttrs += ' ' + name + '="' + attrs[name] + '"';
         }
         
         return this.fillTextTemplate(
-            '<a href="#" onclick="myt._handleGeneratedLink(this, \'{0}\'); return false;"{2}>{1}</a>', 
-            callbackMethodName, text, optAttrs
+            '<a href="#" onclick="myt._handleGeneratedLink(this, \'{0}\', \'{3}\'); return false;"{2}>{1}</a>', 
+            callbackMethodName, text, optAttrs, JSON.stringify(data)
         );
     },
     
     /** See myt.generateLink for documentation.
         @returns void */
-    _handleGeneratedLink: function(elem, callbackMethodName) {
+    _handleGeneratedLink: function(elem, callbackMethodName, data) {
         var model;
         while (elem) {
             model = elem.model;
             if (model) {
-                model[callbackMethodName].call(model);
+                var value;
+                try {
+                    value = JSON.parse(data);
+                } catch(e) {
+                    myt.dumpStack(e);
+                }
+                
+                model[callbackMethodName].call(model, value);
                 break;
             }
             elem = elem.parentNode;
