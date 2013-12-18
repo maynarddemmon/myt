@@ -174,7 +174,7 @@ myt = {
             if (model) {
                 var value;
                 try {
-                    value = JSON.parse(data);
+                    if (data) value = JSON.parse(data);
                 } catch(e) {
                     myt.dumpStack(e);
                 }
