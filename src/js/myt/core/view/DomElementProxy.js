@@ -115,19 +115,29 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
         
         /** Gets the x and y position of the dom element relative to the page.
             @param elem:domElement the dom element to get the position for.
+            @param ancestorElem:domElement (optional) An ancestor dom element
+                that if encountered will halt the page position calculation
+                thus giving the position of elem relative to ancestorElem.
             @returns object with 'x' and 'y' keys or null if an error has
                 occurred. */
-        getPagePosition: function(elem) {
+        getPagePosition: function(elem, ancestorElem) {
             if (!elem) return null;
             
             var x = y = 0;
             
-            // de.nodeName !== "BODY" test prevents us from looking at the body
+            // elem.nodeName !== "BODY" test prevents looking at the body
             // which causes problems when the document is scrolled on webkit.
-            while (elem && elem.nodeName !== "BODY" && !isNaN(elem.offsetLeft) && !isNaN(elem.offsetTop)) {
-                x += elem.offsetLeft - elem.scrollLeft;
-                y += elem.offsetTop - elem.scrollTop;
+            while (elem && elem.nodeName !== "BODY" && 
+                elem !== ancestorElem &&
+                !isNaN(elem.offsetLeft) && !isNaN(elem.offsetTop)
+            ) {
+                x += elem.offsetLeft;
+                y += elem.offsetTop;
                 elem = elem.offsetParent;
+                if (elem && elem.nodeName !== "BODY") {
+                    x -= elem.scrollLeft;
+                    y -= elem.scrollTop;
+                }
             }
             
             // JQuery $(elem).offset() works with transforms

@@ -160,7 +160,7 @@ myt = {
         }
         
         return this.fillTextTemplate(
-            '<a href="#" onclick="myt._handleGeneratedLink(this, \'{0}\', \'{3}\'); return false;"{2}>{1}</a>', 
+            '<a href="#" onclick=\'myt._handleGeneratedLink(this, "{0}", &apos;{3}&apos;); return false;\'{2}>{1}</a>', 
             callbackMethodName, text, optAttrs, JSON.stringify(data)
         );
     },

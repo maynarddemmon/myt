@@ -52,6 +52,33 @@ myt.DrawingUtil = {
         canvas.closePath();
     },
     
+    /** Draws a rect outline into the provided drawview.
+        @param thickness:Number the thickness of the line. */
+    drawRectOutline: function(canvas, thickness, left, top, w, h) {
+        var bottom = top + h, 
+            right = left + w,
+            ileft = left + thickness,
+            iright = right - thickness,
+            itop = top + thickness,
+            ibottom = bottom - thickness;
+        
+        canvas.beginPath();
+        
+        canvas.moveTo(left, top);
+        canvas.lineTo(left, bottom);
+        canvas.lineTo(right, bottom);
+        canvas.lineTo(right, top);
+        canvas.lineTo(left, top);
+        
+        canvas.lineTo(ileft, itop);
+        canvas.lineTo(iright, itop);
+        canvas.lineTo(iright, ibottom);
+        canvas.lineTo(ileft, ibottom);
+        canvas.lineTo(ileft, itop);
+        
+        canvas.closePath();
+    },
+    
     /** Draws a rounded rect with one or more flat corners.
         @param rTL:Number the radius for the top left corner.
         @param rTR:Number the radius for the top right corner.
