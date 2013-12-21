@@ -123,7 +123,8 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
         getPagePosition: function(elem, ancestorElem) {
             if (!elem) return null;
             
-            var x = y = 0;
+            var x = y = 0,
+                borderMultiplier = BrowserDetect.browser === 'Firefox' ? 2 : 1; // I have no idea why firefox needs it twice, but it does.
             
             // elem.nodeName !== "BODY" test prevents looking at the body
             // which causes problems when the document is scrolled on webkit.
@@ -137,6 +138,11 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
                 if (elem && elem.nodeName !== "BODY") {
                     x -= elem.scrollLeft;
                     y -= elem.scrollTop;
+                    
+                    // Handle borders
+                    var s = this.getComputedStyle(elem);
+                    x += borderMultiplier * parseInt(s.borderLeftWidth, 10);
+                    y += borderMultiplier * parseInt(s.borderTopWidth, 10);
                 }
             }
             
