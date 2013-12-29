@@ -2,7 +2,7 @@
 <title>Myt Framework : Buttons Example</title>
 <link rel="stylesheet" href="../src/css/myt.scss"/>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-<script>window.jQuery || document.write('<script src="../js/jquery/jquery-1.10.2.min.js">\x3C/script>');</script>
+<script>window.jQuery || document.write('<script src="../src/js/jquery/jquery-1.10.2.min.js">\x3C/script>');</script>
 <script src="../src/js/boilerplate.js"></script>
 <script src="../src/js/jsclass/min/loader-browser.js"></script>
 <script src="../src/js/myt/manifest.js"></script>
@@ -56,7 +56,33 @@
                 this.setDisabled(true);
             }
         }]);
-        var btn5 = new BtnClass(rootView, {name:'five', width:50, height:20});
+        var btn5 = new BtnClass(rootView, {name:'five', width:50, height:20}, [ActivatedMixin,  {
+            doActivated: function() {
+                this.parent.dialog.showContentConfirm(
+                    function(container) {
+                        new myt.View(container, {width:300, height:100, bgColor:'#999999'});
+                        new myt.View(container, {width:300, height:100, bgColor:'#999999'});
+                        new myt.View(container, {width:300, height:100, bgColor:'#999999'});
+                        new myt.View(container, {width:300, height:100, bgColor:'#999999'});
+                        new myt.SpacedLayout(container, {axis:'y', spacing:1});
+                    },
+                    function(action) {
+                        switch(action) {
+                            case 'closeBtn':
+                            case 'cancelBtn':
+                                console.log("cancelled");
+                                break;
+                            case 'confirmBtn':
+                                console.log("confirmed");
+                                break;
+                        }
+                    },
+                    
+                    {confirmTxt:'Submit', maxContainerHeight:300, titleText:'This is a title'}
+                );
+                this.callSuper();
+            }
+        }]);
         
         var btn6 = new myt.SimpleButton(rootView, {
             name:'six', width:50, height:20, activeColor:'#990000', hoverColor:'#ff0000', readyColor:'#cc0000'

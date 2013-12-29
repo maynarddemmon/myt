@@ -32,10 +32,26 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         /** Defaults used in a confirm dialog. */
         CONFIRM_DEFAULTS: {
             cancelTxt:'Cancel',
-            confirmTxt:'Confirm'
+            confirmTxt:'Confirm',
+            maxContainerHeight:300
         },
         
-        createCloseButton: function(targetView, callbackTarget, hoverColor, activeColor, readyColor, iconColor) {
+        /** Does basic styling of a dialog and creates a close button.
+            @param dialog:myt.Dialog The dialog to apply the styling to.
+            @returns void */
+        setupDialog: function(dialog) {
+            var content = dialog.content;
+            content.setRoundedCorners(this.DEFAULT_RADIUS);
+            content.setBgColor(this.DEFAULT_BGCOLOR);
+            content.setBoxShadow(this.DEFAULT_SHADOW);
+            content.setFocusCage(true);
+            
+            this.createCloseButton(content, dialog);
+        },
+        
+        createCloseButton: function(
+            targetView, callbackTarget, hoverColor, activeColor, readyColor, iconColor
+        ) {
             hoverColor = hoverColor || '#666666';
             activeColor = activeColor || '#000000';
             readyColor = readyColor || '#333333';
@@ -100,13 +116,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     doAfterAdoption: function() {
-        var D = myt.Dialog, content = this.content;
-        content.setRoundedCorners(D.DEFAULT_RADIUS);
-        content.setBgColor(D.DEFAULT_BGCOLOR);
-        content.setBoxShadow(D.DEFAULT_SHADOW);
-        content.setFocusCage(true);
-        
-        myt.Dialog.createCloseButton(content, this);
+        myt.Dialog.setupDialog(this);
         
         this.callSuper();
     },
@@ -144,7 +154,9 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         from the previous display of the Dialog.
         @returns void */
     _destroyContent: function() {
-        var content = this.content, svs = content.getSubviews(), 
+        var content = this.content, MP = myt.ModalPanel,
+            stc = content.sizeToChildren,
+            svs = content.getSubviews(), 
             i = svs.length, sv;
         while (i) {
             sv = svs[--i];
@@ -156,7 +168,10 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         this.setCallbackFunction();
         
         // Confirm dialog modifies this.
-        content.sizeToChildren.setPaddingY(myt.ModalPanel.DEFAULT_PADDING_Y);
+        stc.setPaddingY(MP.DEFAULT_PADDING_Y);
+        
+        // Confirm content dialog modifies this.
+        stc.setPaddingX(MP.DEFAULT_PADDING_X);
     },
     
     /** Called by each of the buttons that can trigger the dialog to be hidden.
@@ -248,12 +263,71 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         
         this.showMessage(msg, callbackFunction, opts);
         
-        var self = this, content = this.content, MP = myt.ModalPanel,
-            MP_DPY = MP.DEFAULT_PADDING_Y,
-            msg = content.msg;
+        this._setupConfirmButtons(this.content.msg, opts);
+        
+        this.setDisplayMode('confirm');
+    },
+    
+    showContentConfirm: function(contentBuilderFunc, callbackFunction, opts) {
+        var MP = myt.ModalPanel, content = this.content;
+        
+        opts = $.extend({}, myt.Dialog.CONFIRM_DEFAULTS, opts);
+        
+        this._destroyContent();
+        
+        content.sizeToChildren.setPaddingX(1);
+        this.setCallbackFunction(callbackFunction);
+        
+        // Setup form
+        var maxHeight = opts.maxContainerHeight;
+        var contentContainer = new myt.Text(content, {
+            name:'contentContainer',
+            x:1, y:25, overflow:'auto'
+        }, [{
+            setHeight: function(v) {
+                if (v > maxHeight) v = maxHeight;
+                this.callSuper(v);
+            }
+        }]);
+        
+        contentBuilderFunc.call(this, contentContainer);
+        
+        new myt.SizeToChildren(contentContainer, {axis:'both'});
+        
+        this.show();
+        
+        var closeBtn = content.closeBtn;
+        closeBtn.setVisible(true);
+        closeBtn.focus();
+        
+        this._setupConfirmButtons(contentContainer, opts);
+        
+        var r = myt.Dialog.DEFAULT_RADIUS;
+        var bg = new myt.View(content, {
+            ignoreLayout:true,
+            x:0, y:0,
+            width:content.width, height:24,
+            bgColor:'#eeeeee',
+            roundedTopLeftCorner:r,
+            roundedTopRightCorner:r
+        });
+        bg.sendToBack();
+        
+        new myt.Text(content, {
+            name:'title', x:r, y:4, text:opts.titleText,
+            fontWeight:'bold'
+        });
+        
+        this.setDisplayMode('content');
+    },
+    
+    _setupConfirmButtons: function(mainView, opts) {
+        var self = this, content = this.content, 
+            MP = myt.ModalPanel,
+            MP_DPY = MP.DEFAULT_PADDING_Y;
         
         var btnContainer = new myt.View(content, {
-            y:msg.y + msg.height + MP_DPY, align:'center'
+            y:mainView.y + mainView.height + MP_DPY, align:'center'
         });
         
         var attrs = {
@@ -288,7 +362,5 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         });
         bg.setHeight(content.height - bg.y);
         bg.sendToBack();
-        
-        this.setDisplayMode('confirm');
     }
 });
