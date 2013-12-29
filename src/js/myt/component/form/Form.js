@@ -33,6 +33,12 @@ myt.Form = new JS.Module('Form', {
         if (this.form) this.form.addSubForm(this);
     },
     
+    /** @overrides myt.Node. */
+    destroy: function() {
+        if (this.form) this.form.removeSubForm(this.id);
+        
+        this.callSuper();
+    },
     
     // Accessors ///////////////////////////////////////////////////////////////
     setErrorMessages: function(v) {this.errorMessages = v;},
