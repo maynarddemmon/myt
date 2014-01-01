@@ -41,12 +41,7 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
         this.attachDomObserver(this, 'eatMouseEvent', 'dblclick');
         this.attachDomObserver(this, 'eatMouseEvent', 'mousemove');
         
-        // Prevent drag/drop behavior.
-        // DUPE: Similar code exists in myt.RootView.
-        var cdf = this.__captureDrop = function(event) {event.preventDefault();},
-            de = this.domElement;
-        myt.addEventListener(de, 'drop', cdf);
-        myt.addEventListener(de, 'dragover', cdf);
+        myt.RootView.setupCaptureDrop(this);
     },
     
     /** @overrides myt.View */
@@ -65,11 +60,7 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
     
     /** @overrides myt.View */
     destroyAfterOrphaning: function() {
-        // Cleanup dom listeners for drag/drop.
-        // DUPE: Similar code exists in myt.RootView.
-        var de = this.domElement, cdf = this.__captureDrop;
-        myt.removeEventListener(de, 'drop', cdf);
-        myt.removeEventListener(de, 'dragover', cdf);
+        myt.RootView.teardownCaptureDrop(this);
         
         this.callSuper();
     },
