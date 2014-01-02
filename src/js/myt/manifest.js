@@ -181,6 +181,12 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'divider/HorizontalDivider.js'   ).provides('myt.HorizontalDivider'   ).requires('myt.BaseDivider');
     file(MYT_COMPONENT_ROOT + 'divider/VerticalDivider.js'     ).provides('myt.VerticalDivider'     ).requires('myt.BaseDivider');
     
+    // Component : Grid
+    file(MYT_COMPONENT_ROOT + 'grid/GridColumnHeader.js').provides('myt.GridColumnHeader').requires('myt.BoundedValueComponent');
+    file(MYT_COMPONENT_ROOT + 'grid/GridRow.js'         ).provides('myt.GridRow'         ).requires('myt.GridColumnHeader');
+    file(MYT_COMPONENT_ROOT + 'grid/GridController.js'  ).provides('myt.GridController'  ).requires('myt.GridRow');
+    file(MYT_COMPONENT_ROOT + 'grid/Grid.js'            ).provides('myt.Grid'            ).requires('myt.GridController');
+    
     // Component : Floating Panel
     file(MYT_COMPONENT_ROOT + 'floatingpanel/FloatingPanel.js'      ).provides('myt.FloatingPanel'      ).requires('myt.RootView');
     file(MYT_COMPONENT_ROOT + 'floatingpanel/FloatingPanelAnchor.js').provides('myt.FloatingPanelAnchor').requires('myt.FloatingPanel');
@@ -302,6 +308,7 @@ JS.Packages(function() {with(this) {
         'myt.FormInputText','myt.FormInputTextArea',
         'myt.ScatterGraph',
         'myt.Slider','myt.RangeSlider',
-        'myt.HorizontalDivider','myt.VerticalDivider'
+        'myt.HorizontalDivider','myt.VerticalDivider',
+        'myt.Grid'
     );
 }});

@@ -18,39 +18,42 @@ myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
     // Accessors ///////////////////////////////////////////////////////////////
     /** @overrides myt.ConstantLayout */
     setTargetAttrName: function(v) {
-        if (this.targetAttrName === v) return;
-        if (v === 'x') {
-            if (this.inited) this.stopMonitoringAllSubviews();
-            this.measureAttrName = 'boundsWidth';
-            this.measureAttrBaseName = 'width';
-            this.parentSetterName = 'setWidth';
-            if (this.inited) this.startMonitoringAllSubviews();
-            this.callSuper(v);
-        } else if (v === 'y') {
-            if (this.inited) this.stopMonitoringAllSubviews();
-            this.measureAttrName = 'boundsHeight';
-            this.measureAttrBaseName = 'height';
-            this.parentSetterName = 'setHeight';
-            if (this.inited) this.startMonitoringAllSubviews();
-            this.callSuper(v);
+        if (this.targetAttrName !== v) {
+            if (v === 'x') {
+                if (this.inited) this.stopMonitoringAllSubviews();
+                this.measureAttrName = 'boundsWidth';
+                this.measureAttrBaseName = 'width';
+                this.parentSetterName = 'setWidth';
+                if (this.inited) this.startMonitoringAllSubviews();
+                this.callSuper(v);
+            } else if (v === 'y') {
+                if (this.inited) this.stopMonitoringAllSubviews();
+                this.measureAttrName = 'boundsHeight';
+                this.measureAttrBaseName = 'height';
+                this.parentSetterName = 'setHeight';
+                if (this.inited) this.startMonitoringAllSubviews();
+                this.callSuper(v);
+            }
         }
     },
     
     setSpacing: function(v) {
-        if (this.spacing === v) return;
-        this.spacing = v;
-        if (this.inited) {
-            this.fireNewEvent('spacing', v);
-            this.update();
+        if (this.spacing !== v) {
+            this.spacing = v;
+            if (this.inited) {
+                this.fireNewEvent('spacing', v);
+                this.update();
+            }
         }
     },
     
     setOutset: function(v) {
-        if (this.outset === v) return;
-        this.outset = v;
-        if (this.inited) {
-            this.fireNewEvent('outset', v);
-            this.update();
+        if (this.outset !== v) {
+            this.outset = v;
+            if (this.inited) {
+                this.fireNewEvent('outset', v);
+                this.update();
+            }
         }
     },
     

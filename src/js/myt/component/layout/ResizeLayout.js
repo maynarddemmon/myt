@@ -10,27 +10,27 @@ myt.ResizeLayout = new JS.Class('SpacedLayout', myt.SpacedLayout, {
     
     /** @overrides myt.SpacedLayout */
     setTargetAttrName: function(v) {
-        if (this.targetAttrName === v) return;
-        
-        if (this.inited) {
-            var isX = v === 'x';
-            this.stopMonitoringParent(isX ? 'height' : 'width');
-            this.startMonitoringParent(isX ? 'width' : 'height');
+        if (this.targetAttrName !== v) {
+            if (this.inited) {
+                var isX = v === 'x';
+                this.stopMonitoringParent(isX ? 'height' : 'width');
+                this.startMonitoringParent(isX ? 'width' : 'height');
+            }
+            
+            this.callSuper(v);
         }
-        
-        this.callSuper(v);
     },
     
     /** @overrides myt.Layout */
     setParent: function(parent) {
-        if (this.parent === parent) return;
-        
-        var dim = this.targetAttrName === 'x' ? 'width' : 'height';
-        if (this.parent) this.stopMonitoringParent(dim);
-        
-        this.callSuper(parent);
-        
-        if (this.parent) this.startMonitoringParent(dim);
+        if (this.parent !== parent) {
+            var dim = this.targetAttrName === 'x' ? 'width' : 'height';
+            if (this.parent) this.stopMonitoringParent(dim);
+            
+            this.callSuper(parent);
+            
+            if (this.parent) this.startMonitoringParent(dim);
+        }
     },
     
     
@@ -59,8 +59,8 @@ myt.ResizeLayout = new JS.Class('SpacedLayout', myt.SpacedLayout, {
         // Calculate minimum required size
         remainder -= this.targetValue + this.outset;
         
-        var svs = this.subviews, i = svs.length, sv;
-        var count = 0, resizeSum = 0;
+        var svs = this.subviews, i = svs.length, sv,
+            count = 0, resizeSum = 0;
         
         while(i) {
             sv = svs[--i];
@@ -73,17 +73,16 @@ myt.ResizeLayout = new JS.Class('SpacedLayout', myt.SpacedLayout, {
             }
         }
         
-        // Abort, nothing to layout
-        if (count === 0) return;
-        
-        remainder -= (count - 1) * this.spacing;
-        
-        // Store for update
-        this.remainder = remainder;
-        this.resizeSum = resizeSum;
-        this.scalingFactor = remainder / resizeSum;
-        this.resizeSumUsed = this.remainderUsed = 0;
-        this.measureSetter = measureAttrName === 'boundsWidth' ? 'setWidth' : 'setHeight';
+        if (count !== 0) {
+            remainder -= (count - 1) * this.spacing;
+            
+            // Store for update
+            this.remainder = remainder;
+            this.resizeSum = resizeSum;
+            this.scalingFactor = remainder / resizeSum;
+            this.resizeSumUsed = this.remainderUsed = 0;
+            this.measureSetter = measureAttrName === 'boundsWidth' ? 'setWidth' : 'setHeight';
+        }
     },
     
     /** @overrides myt.SpacedLayout */

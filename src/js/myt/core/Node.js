@@ -165,7 +165,7 @@ myt.Node = new JS.Class('Node', {
         // Use placement if indicated
         if (newParent && !this.ignorePlacement) {
             var placement = this.placement || newParent.defaultPlacement;
-            if (placement) newParent = newParent.determinePlacement(placement);
+            if (placement) newParent = newParent.determinePlacement(placement, this);
         }
         
         // Abort if parent isn't changing
@@ -228,8 +228,9 @@ myt.Node = new JS.Class('Node', {
         hierarchy. Subclasses will not typically override this method, but if
         they do, they probably won't need to call super.
         @param placement:string the placement path to use.
+        @param subnode:myt.Node the subnode being placed.
         @returns the Node to place a subnode into. */
-    determinePlacement: function(placement) {
+    determinePlacement: function(placement, subnode) {
         // Parse "active" placement and remaining placement.
         var idx = placement.indexOf('.'), remainder, loc;
         if (idx !== -1) {
@@ -257,7 +258,7 @@ myt.Node = new JS.Class('Node', {
         }
         
         loc = this[placement];
-        return loc ? (remainder ? loc.determinePlacement(remainder) : loc) : this;
+        return loc ? (remainder ? loc.determinePlacement(remainder, subnode) : loc) : this;
     },
     
     /** Adds a named reference to a subnode.
