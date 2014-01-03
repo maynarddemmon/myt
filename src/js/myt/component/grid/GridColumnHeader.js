@@ -6,15 +6,28 @@
         gridController:myt.GridController the controller for the grid this
             component is part of.
         flex:number If 1 or more the column will get extra space if any exists.
+        resizable:boolean Indicates if this column can be resized or not.
+            Defaults to true.
+        last:boolean Indicates if this is the last column header or not.
 */
 myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
     include: [myt.BoundedValueComponent],
     
     
+    // Class Methods and Attributes ////////////////////////////////////////////
+    extend: {
+        DEFAULT_MIN_VALUE: 16,
+        DEFAULT_MAX_VALUE: 9999
+    },
+    
+    
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        if (attrs.minValue === undefined) attrs.minValue = 10;
-        if (attrs.maxValue === undefined) attrs.maxValue = 9999;
+        var GCH = myt.GridColumnHeader;
+        if (attrs.minValue === undefined) attrs.minValue = GCH.DEFAULT_MIN_VALUE;
+        if (attrs.maxValue === undefined) attrs.maxValue = GCH.DEFAULT_MAX_VALUE;
+        if (attrs.resizable === undefined) attrs.resizable = true;
+        if (attrs.flex === undefined) attrs.flex = 0;
         
         // Ensure participation in determinePlacement method of myt.Grid
         if (attrs.placement === undefined) attrs.placement = '*';
@@ -27,13 +40,56 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
             distanceBeforeDrag:0
         }, [myt.SizeToParent, myt.Draggable, {
             requestDragPosition: function(x, y) {
-                var p = this.parent, 
-                    curValue = p.value,
-                    diff = x - this.x,
-                    newValue = curValue + diff;
-                p.setValue(newValue);
-                var diff = newValue - p.value;
-                if (diff < 0) this._dragInitX += p._stealFromPrevious(diff);
+                var p = this.parent, gc = p.gridController,
+                    diff = x - this.x;
+                
+                if (gc.fitToWidth) {
+                    if (diff > 0) {
+                        // Get amount that this header can grow
+                        var growAmt = p.maxValue - p.value;
+                        // Get amount that can be given on the left
+                        var giveLeft = p._getGiveLeft();
+                        
+                        // Get amount that can be stolen on the right
+                        var takeRight = p._getTakeRight();
+                        
+                        diff = Math.min(diff, Math.min(-takeRight, growAmt + giveLeft));
+                    } else if (diff < 0) {
+                        // Get amount that this header can shrink
+                        var shrinkAmt = p.minValue - p.value;
+                        // Get amount that can be stolen on the left
+                        var takeLeft = p._getTakeLeft();
+                        
+                        // Get amount that can be given on the right
+                        var giveRight = p._getGiveRight();
+                        
+                        diff = Math.max(diff, Math.max(-giveRight, shrinkAmt + takeLeft));
+                    }
+                    
+                    if (diff === 0) return;
+                }
+                
+                var newValue = p.value + diff;
+                
+                if (p.resizable) p.setValue(newValue);
+                var remainingDiff = newValue - p.value;
+                var stolenAmt = remainingDiff - diff;
+                var additionalActualDiff = 0;
+                if (remainingDiff < 0) {
+                    additionalActualDiff = p._stealPrevWidth(remainingDiff);
+                } else if (remainingDiff > 0) {
+                    additionalActualDiff = p._givePrevWidth(remainingDiff);
+                }
+                this._dragInitX += additionalActualDiff;
+                stolenAmt -= additionalActualDiff;
+                
+                if (gc.fitToWidth) {
+                    if (stolenAmt < 0) {
+                        p._stealNextWidth(stolenAmt);
+                    } else if (stolenAmt > 0) {
+                        p._giveNextWidth(stolenAmt);
+                    }
+                }
             }
         }]);
         
@@ -43,7 +99,7 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
             gc.notifyColumnHeaderXChange(this);
         }
         this.setWidth(this.value);
-        this._updateResizer();
+        this._updateLast();
     },
     
     destroy: function(v) {
@@ -54,12 +110,19 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setFlex: function(v) {
-        this.flex = v;
+    setFlex: function(v) {this.flex = v;},
+    setColumnId: function(v) {this.columnId = v;},
+    
+    setLast: function(v) {
+        this.last = v;
+        if (this.inited) this._updateLast();
     },
     
-    setColumnId: function(v) {
-        this.columnId = v;
+    setResizable: function(v) {
+        if (this.resizable !== v) {
+            this.resizable = v;
+            if (this.inited) this.fireNewEvent('resizable', v);
+        }
     },
     
     setGridController: function(v) {
@@ -92,7 +155,6 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
         
         if (this.inited && gc && oldValue !== v) {
             gc.setMinWidth(gc.minWidth + v - oldValue);
-            this._updateResizer();
         }
     },
     
@@ -101,12 +163,13 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
         var oldValue = this.maxValue || 0,
             gc = this.gridController;
         
+        if (v == null) v = myt.GridColumnHeader.DEFAULT_MAX_VALUE;
+        
         this.callSuper(v);
         v = this.maxValue;
         
         if (this.inited && gc && oldValue !== v) {
             gc.setMaxWidth(gc.maxWidth + v - oldValue);
-            this._updateResizer();
         }
     },
     
@@ -132,25 +195,96 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    _updateResizer: function() {
-        this.resizer.setVisible(this.minValue !== this.maxValue);
+    _updateLast: function() {
+        this.resizer.setVisible(!(this.last && this.gridController.fitToWidth));
     },
     
     /** Steals width from previous column headers.
         @param diff:number the amount to steal. Will be a negative number.
         @returns number:the amount of width actually stolen. */
-    _stealFromPrevious: function(diff) {
+    _stealPrevWidth: function(diff) {
         var hdr = this.gridController.getPrevColumnHeader(this),
             usedDiff = 0;
         if (hdr) {
-            var curValue = hdr.value, 
-                newValue = curValue + diff;
-            hdr.setValue(newValue);
+            var newValue = hdr.value + diff;
+            if (hdr.resizable) hdr.setValue(newValue);
             var remainingDiff = newValue - hdr.value;
             usedDiff = diff - remainingDiff;
-            if (remainingDiff < 0) usedDiff += hdr._stealFromPrevious(remainingDiff);
+            if (remainingDiff < 0) usedDiff += hdr._stealPrevWidth(remainingDiff);
         }
         
         return usedDiff;
+    },
+    
+    /** Gives width to previous column headers.
+        @param diff:number the amount to give. Will be a positive number.
+        @returns number:the amount of width actually given. */
+    _givePrevWidth: function(diff) {
+        var hdr = this.gridController.getPrevColumnHeader(this),
+            usedDiff = 0;
+        if (hdr) {
+            var newValue = hdr.value + diff;
+            if (hdr.resizable) hdr.setValue(newValue);
+            var remainingDiff = newValue - hdr.value;
+            usedDiff = diff - remainingDiff;
+            if (remainingDiff > 0) usedDiff += hdr._givePrevWidth(remainingDiff);
+        }
+        
+        return usedDiff;
+    },
+    
+
+    /** Steals width from next column headers.
+        @param diff:number the amount to steal. Will be a negative number.
+        @returns number:the amount of width actually stolen. */
+    _stealNextWidth: function(diff) {
+        var hdr = this.gridController.getNextColumnHeader(this);
+        if (hdr) {
+            var newValue = hdr.value + diff;
+            if (hdr.resizable) hdr.setValue(newValue);
+            var remainingDiff = newValue - hdr.value;
+            if (remainingDiff < 0) hdr._stealNextWidth(remainingDiff);
+        }
+    },
+    
+    /** Gives width to next column headers.
+        @param diff:number the amount to give. Will be a positive number.
+        @returns number:the amount of width actually given. */
+    _giveNextWidth: function(diff) {
+        var hdr = this.gridController.getNextColumnHeader(this);
+        if (hdr) {
+            var newValue = hdr.value + diff;
+            if (hdr.resizable) hdr.setValue(newValue);
+            var remainingDiff = newValue - hdr.value;
+            if (remainingDiff > 0) hdr._giveNextWidth(remainingDiff);
+        }
+    },
+    
+    _getGiveLeft: function() {
+        var hdr = this.gridController.getPrevColumnHeader(this),
+            give = 0;
+        if (hdr) give = hdr.maxValue - hdr.value + hdr._getGiveLeft();
+        return give;
+    },
+    
+    _getGiveRight: function() {
+        var hdr = this.gridController.getNextColumnHeader(this),
+            give = 0;
+        if (hdr) give = hdr.maxValue - hdr.value + hdr._getGiveRight();
+        return give;
+    },
+    
+    _getTakeLeft: function() {
+        var hdr = this.gridController.getPrevColumnHeader(this),
+            take = 0;
+        if (hdr) take = hdr.minValue - hdr.value + hdr._getTakeLeft();
+        return take;
+    },
+    
+    _getTakeRight: function() {
+        var hdr = this.gridController.getNextColumnHeader(this),
+            take = 0;
+        if (hdr) take = hdr.minValue - hdr.value + hdr._getTakeRight();
+        return take;
     }
 });
