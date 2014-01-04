@@ -38,26 +38,31 @@ myt.GridController = new JS.Module('GridController', {
     
     setLocked: function(v) {
         this.locked = v;
-        if (this.inited && !v) this._fitToWidth();
+        if (this.inited && !v) {
+            this.__tempLock = true; // Prevent change calls during fitToWidth
+            this._fitToWidth();
+            this.__tempLock = false;
+            
+            var hdrs = this.columnHeaders, i = hdrs.length, hdr;
+            while (i) {
+                hdr = hdrs[--i];
+                this.notifyColumnHeaderXChange(hdr);
+                this.notifyColumnHeaderWidthChange(hdr);
+            }
+        }
     },
     
     setMaxWidth: function(v) {
         if (this.maxWidth !== v) {
             this.maxWidth = v;
-            if (this.inited) {
-                this.fireNewEvent('maxWidth', v);
-                //this._fitToWidth();
-            }
+            if (this.inited) this.fireNewEvent('maxWidth', v);
         }
     },
     
     setMinWidth: function(v) {
         if (this.minWidth !== v) {
             this.minWidth = v;
-            if (this.inited) {
-                this.fireNewEvent('minWidth', v);
-                //this._fitToWidth();
-            }
+            if (this.inited) this.fireNewEvent('minWidth', v);
         }
     },
     
@@ -258,11 +263,13 @@ myt.GridController = new JS.Module('GridController', {
     },
     
     notifyColumnHeaderXChange: function(columnHeader) {
+        if (this.locked || this.__tempLock) return;
         var rows = this.rows, i = rows.length;
         while (i) rows[--i].notifyColumnHeaderXChange(columnHeader);
     },
     
     notifyColumnHeaderWidthChange: function(columnHeader) {
+        if (this.locked || this.__tempLock) return;
         var rows = this.rows, i = rows.length;
         while (i) rows[--i].notifyColumnHeaderWidthChange(columnHeader);
     },
@@ -279,6 +286,16 @@ myt.GridController = new JS.Module('GridController', {
     notifyAddRow: function(row) {
         if (!this.hasRow(row)) {
             this.rows.push(row);
+            
+            // Update cell positions
+            if (!this.locked) {
+                var hdrs = this.columnHeaders, i = hdrs.length, hdr;
+                while (i) {
+                    hdr = hdrs[--i];
+                    row.notifyColumnHeaderXChange(hdr);
+                    row.notifyColumnHeaderWidthChange(hdr);
+                }
+            }
         }
     },
     

@@ -6,6 +6,9 @@ myt.GridRow = new JS.Module('GridRow', {
         if (attrs.placement === undefined) attrs.placement = '*';
         
         this.callSuper(parent, attrs);
+        
+        var gc = this.gridController;
+        if (gc) gc.notifyAddRow(this);
     },
     
     destroy: function(v) {
@@ -21,7 +24,7 @@ myt.GridRow = new JS.Module('GridRow', {
         if (existing !== v) {
             if (existing) existing.notifyRemoveRow(this);
             this.gridController = v;
-            if (v) v.notifyAddRow(this);
+            if (this.inited && v) v.notifyAddRow(this);
         }
     },
     

@@ -175,9 +175,10 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
     
     /** @overrides myt.View */
     setWidth: function(v, supressEvent) {
+        var cur = this.width;
         this.callSuper(v, supressEvent);
         
-        if (this.inited) {
+        if (this.inited && cur !== this.width) {
             var gc = this.gridController;
             if (gc) gc.notifyColumnHeaderWidthChange(this);
         }
@@ -185,9 +186,10 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
     
     /** @overrides myt.View */
     setX: function(v) {
+        var cur = this.x;
         this.callSuper(v);
         
-        if (this.inited) {
+        if (this.inited && cur !== this.x) {
             var gc = this.gridController;
             if (gc) gc.notifyColumnHeaderXChange(this);
         }

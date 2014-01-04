@@ -8,6 +8,8 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     initNode: function(parent, attrs) {
         if (attrs.overflow === undefined) attrs.overflow = 'auto';
         if (attrs.bgColor === undefined) attrs.bgColor = '#cccccc';
+        if (attrs.rowSpacing === undefined) attrs.rowSpacing = 1;
+        if (attrs.columnSpacing === undefined) attrs.columnSpacing = 1;
         
         this.callSuper(parent, attrs);
     },
@@ -15,11 +17,16 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     /** @overrides myt.View */
     doAfterAdoption: function() {
         var header = new myt.View(this, {name:'header', overflow:'hidden'});
-        new myt.SpacedLayout(header, {axis:'x', collapseParent:true, spacing:1}); // FIXME: no spacing
-        new myt.SizeToChildren(header, {axis:'y'});
+        new myt.SpacedLayout(header, {
+            name:'xLayout', locked:true, axis:'x', collapseParent:true, 
+            spacing:this.columnSpacing
+        });
+        new myt.SizeToChildren(header, {name:'yLayout', locked:true, axis:'y'});
         
         var content = new myt.View(this, {name:'content', overflow:'auto'});
-        new myt.SpacedLayout(content, {axis:'y', spacing:1}); // FIXME: no spacing
+        new myt.SpacedLayout(content, {
+            name:'yLayout', locked:true, axis:'y', spacing:this.rowSpacing
+        });
         
         this.syncTo(this, 'setGridWidth', 'width');
         this.syncTo(header, '_updateContentWidth', 'width');
@@ -30,6 +37,44 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
+    setRowSpacing: function(v) {
+        if (this.rowSpacing !== v) {
+            this.rowSpacing = v;
+            if (this.inited) this.content.yLayout.setSpacing(v);
+        }
+    },
+    
+    setColumnSpacing: function(v) {
+        if (this.columnSpacing !== v) {
+            this.columnSpacing = v;
+            if (this.inited) this.header.xLayout.setSpacing(v);
+        }
+    },
+    
+    /** @overrides myt.GridController */
+    setLocked: function(v) {
+        // Performance: don't update layouts until the grid is unlocked.
+        if (this.inited) {
+            var header = this.header,
+                headerXLayout = header.xLayout,
+                headerYLayout = header.yLayout,
+                contentYLayout = this.content.yLayout;
+            if (v) {
+                headerXLayout.incrementLockedCounter();
+                headerYLayout.incrementLockedCounter();
+                contentYLayout.incrementLockedCounter();
+            } else {
+                headerXLayout.decrementLockedCounter();
+                headerXLayout.update();
+                headerYLayout.decrementLockedCounter();
+                headerYLayout.update();
+                contentYLayout.decrementLockedCounter();
+                contentYLayout.update();
+            }
+        }
+        
+        this.callSuper(v);
+    },
     
     
     // Methods /////////////////////////////////////////////////////////////////

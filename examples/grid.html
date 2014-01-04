@@ -16,8 +16,12 @@
             include: [myt.GridRow],
             
             initNode: function(parent, attrs) {
-                this.callSuper(parent, attrs);
+                if (attrs.height === undefined) attrs.height = 18;
                 
+                this.callSuper(parent, attrs);
+            },
+            
+            doAfterAdoption: function() {
                 var foo = new myt.Text(this, {name:'foo', bgColor:'#ffffff', text:'foo col'});
                 foo.enableEllipsis();
                 var bar = new myt.Text(this, {name:'bar', bgColor:'#ffffff', text:'bar col'});
@@ -27,15 +31,13 @@
                 var baz = new myt.Text(this, {name:'baz', bgColor:'#ffffff', text:'baz col'});
                 baz.enableEllipsis();
                 
-                new myt.SizeToChildren(this, {axis:'both'});
+                this.callSuper();
             }
         });
         
         var rootView = new myt.View(null, {bgColor:'#333333'}, [myt.SizeToWindow]);
         
         var grid = new myt.Grid(rootView, {
-            x:1, y:1,
-            percentOfParentHeightOffset:-2,
             percentOfParentHeight:100,
             fitToWidth:true
         }, [myt.SizeToParent, {
@@ -44,44 +46,16 @@
             }
         }]);
         
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
-        new RowClass(grid);
+        var i = 200;
+        var t0 = Date.now();
+        while (i--) new RowClass(grid);
+        var t1 = Date.now();
+        console.log(t1 - t0);
         
         global.foo = new myt.View(grid, {columnId:'foo',  flex:1, height:23, bgColor:'#666666', value:100, minValue:100, maxValue:200}, [myt.GridColumnHeader]);
         global.bar = new myt.View(grid, {columnId:'bar',  flex:0, height:23, bgColor:'#666666', value:50,  minValue:50, maxValue:100, resizable:true}, [myt.GridColumnHeader]);
         global.bar = new myt.View(grid, {columnId:'bar2', flex:0, height:23, bgColor:'#666666', value:50,  minValue:50, maxValue:100, resizable:true}, [myt.GridColumnHeader]);
         global.baz = new myt.View(grid, {columnId:'baz',  flex:1, height:23, bgColor:'#666666', value:25,  minValue:10, maxValue:300}, [myt.GridColumnHeader]);
-        
-        // Unlock now that the grid is setup.
-        grid.setLocked(false);
         
         var divider = new myt.HorizontalDivider(rootView, {
             percentOfParentHeight:100,
@@ -90,8 +64,8 @@
         
         grid.syncTo(divider, 'updateWidth', 'value');
         
-        global.grid = grid;
-        global.root = rootView;
+        // Unlock now that the grid is setup.
+        grid.setLocked(false);
     }
 </script>
 </body></html>
