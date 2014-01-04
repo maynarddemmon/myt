@@ -22,15 +22,15 @@
             },
             
             doAfterAdoption: function() {
-                var foo = new myt.Text(this, {name:'foo', bgColor:'#ffffff', text:'foo col'});
+                var foo = new myt.Text(this, {name:'foo', bgColor:'#ffffff', text:myt.getRandomInt(0, 1000) + ' foo'});
                 foo.enableEllipsis();
-                var bar = new myt.Text(this, {name:'bar', bgColor:'#ffffff', text:'bar col'});
+                var bar = new myt.Text(this, {name:'bar', bgColor:'#ffffff', text:myt.getRandomInt(0, 1000) + ' bar'});
                 bar.enableEllipsis();
-                var bar2 = new myt.Text(this, {name:'bar2', bgColor:'#ffffff', text:'bar 2 col'});
+                var bar2 = new myt.Text(this, {name:'bar2', bgColor:'#ffffff', text:myt.getRandomInt(0, 1000) + ' bar 2'});
                 bar2.enableEllipsis();
-                var bar3 = new myt.Text(this, {name:'bar3', bgColor:'#ffffff', text:'bar 3 col'});
+                var bar3 = new myt.Text(this, {name:'bar3', bgColor:'#ffffff', text:myt.getRandomInt(0, 1000) + ' bar 3'});
                 bar3.enableEllipsis();
-                var baz = new myt.Text(this, {name:'baz', bgColor:'#ffffff', text:'baz col'});
+                var baz = new myt.Text(this, {name:'baz', bgColor:'#ffffff', text:myt.getRandomInt(0, 1000) + ' baz'});
                 baz.enableEllipsis();
                 
                 this.callSuper();
@@ -45,7 +45,7 @@
             }
         }]);
         
-        var i = 100;
+        var i = 10;
         while (i--) new RowClass(grid);
         
         new myt.SimpleGridColumnHeader(grid, {columnId:'foo',  flex:1, value:100, minValue:100, maxValue:200, text:'Column One'});
@@ -63,6 +63,7 @@
         grid.setLocked(false);
         
         global.grid = grid;
+        global.RowClass = RowClass;
     }
 </script>
 </body></html>

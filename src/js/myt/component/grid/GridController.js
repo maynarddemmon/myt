@@ -24,6 +24,7 @@ myt.GridController = new JS.Module('GridController', {
         
         this._fitToWidth();
         this._notifyHeadersOfSortState();
+        if (!this.locked) this.doSort();
     },
     
     
@@ -34,6 +35,7 @@ myt.GridController = new JS.Module('GridController', {
             if (this.inited) {
                 this.fireNewEvent('sort', v);
                 this._notifyHeadersOfSortState();
+                if (!this.locked) this.doSort();
             }
         }
     },
@@ -62,6 +64,8 @@ myt.GridController = new JS.Module('GridController', {
                 this.notifyColumnHeaderXChange(hdr);
                 this.notifyColumnHeaderWidthChange(hdr);
             }
+            
+            this.doSort();
         }
     },
     
@@ -245,6 +249,11 @@ myt.GridController = new JS.Module('GridController', {
         }
     },
     
+    /** Sorts the rows according to the current sort criteria. Subclasses and
+        instances should implement this as needed.
+        @returns void */
+    doSort: function() {},
+    
     // Column Headers
     /** Gets the column header before the provided one.
         @returns myt.GridColumnHeader or null if none exists. */
@@ -324,6 +333,8 @@ myt.GridController = new JS.Module('GridController', {
                     row.notifyColumnHeaderXChange(hdr);
                     row.notifyColumnHeaderWidthChange(hdr);
                 }
+                
+                this.doSort();
             }
         }
     },

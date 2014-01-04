@@ -113,5 +113,35 @@ myt.Grid = new JS.Class('Grid', myt.View, {
         }
         
         return this.callSuper(placement, subnode);
+    },
+    
+    /** @overrides myt.GridController */
+    doSort: function() {
+        var sort = this.sort,
+            sortFunc = this.getSortFunction(sort ? sort[0] : '', sort ? sort[1] : '');
+        this.content.sortSubviews(sortFunc);
+        this.content.yLayout.sortSubviews(sortFunc);
+        this.content.yLayout.update();
+    },
+    
+    /** Gets the sort function used to sort the rows. Subclasses and instances
+        should implement this as needed.
+        @returns function a comparator function used for sorting. */
+    getSortFunction: function(sortColumnId, sortOrder) {
+        if (sortColumnId && sortOrder) {
+            // Default sort function uses the 'text' attribute of the subview.
+            var sortNum = sortOrder === 'ascending' ? 1 : -1;
+            return function(a, b) {
+                var aValue = a[sortColumnId].text,
+                    bValue = b[sortColumnId].text;
+                if (aValue > bValue) {
+                    return sortNum;
+                } else if (bValue > aValue) {
+                    return -sortNum;
+                } else {
+                    return 0;
+                }
+            };
+        }
     }
 });
