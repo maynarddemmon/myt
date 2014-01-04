@@ -9,6 +9,12 @@
         resizable:boolean Indicates if this column can be resized or not.
             Defaults to true.
         last:boolean Indicates if this is the last column header or not.
+        sortable:boolean Indicates if this column can be sorted or not.
+            Defaults to true.
+        sortState:string The sort state of this column. Allowed values are:
+            'ascending': Sorted in ascending order.
+            'descending': Sorted in descending order.
+            'none': Not currently an active sort column.
 */
 myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
     include: [myt.BoundedValueComponent],
@@ -29,6 +35,9 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
         if (attrs.resizable === undefined) attrs.resizable = true;
         if (attrs.flex === undefined) attrs.flex = 0;
         
+        if (attrs.sortable === undefined) attrs.sortable = true;
+        if (attrs.sortState === undefined) attrs.sortState = 'none';
+        
         // Ensure participation in determinePlacement method of myt.Grid
         if (attrs.placement === undefined) attrs.placement = '*';
         
@@ -37,7 +46,7 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
         new myt.View(this, {
             name:'resizer', cursor:'col-resize', width:10, zIndex:1,
             percentOfParentHeight:100, align:'right', alignOffset:-5,
-            distanceBeforeDrag:0
+            distanceBeforeDrag:0, draggableAllowBubble:false
         }, [myt.SizeToParent, myt.Draggable, {
             requestDragPosition: function(x, y) {
                 var p = this.parent, gc = p.gridController,
@@ -110,6 +119,20 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
+    setSortable: function(v) {
+        if (this.sortable !== v) {
+            this.sortable = v;
+            if (this.inited) this.fireNewEvent('sortable', v);
+        }
+    },
+    
+    setSortState: function(v) {
+        if (this.sortState !== v) {
+            this.sortState = v;
+            if (this.inited) this.fireNewEvent('sortState', v);
+        }
+    },
+    
     setFlex: function(v) {this.flex = v;},
     setColumnId: function(v) {this.columnId = v;},
     

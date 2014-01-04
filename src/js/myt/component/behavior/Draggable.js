@@ -1,19 +1,23 @@
 /** Makes a View draggable.
     
     Attributes:
-        isDraggable: (boolean) Configures the view to be draggable or not. The 
+        isDraggable:boolean Configures the view to be draggable or not. The 
             default value is true.
-        distanceBeforeDrag: (number) The distance, in pixels, before a mouse down 
-            and drag is considered a drag action.
-        isDragging: (boolean) Indicates that this view is currently being dragged.
-        _dragInitX: (number) Stores initial mouse x position during dragging.
-        _dragInitY: (number) Stores initial mouse y position during dragging. */
+        distanceBeforeDrag:number The distance, in pixels, before a mouse 
+            down and drag is considered a drag action.
+        isDragging:boolean Indicates that this view is currently being dragged.
+        draggableAllowBubble:boolean Determines if mousedown and mouseup
+            dom events handled by this component will bubble or not. Defaults
+            to true.
+        _dragInitX:number Stores initial mouse x position during dragging.
+        _dragInitY:number Stores initial mouse y position during dragging. */
 myt.Draggable = new JS.Module('Draggable', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides */
     initNode: function(parent, attrs) {
         this.isDraggable = this.isDragging = false;
         this.distanceBeforeDrag = 2;
+        this.draggableAllowBubble = true;
         
         if (attrs.isDraggable === undefined) attrs.isDraggable = true;
         
@@ -49,6 +53,7 @@ myt.Draggable = new JS.Module('Draggable', {
     },
     
     setDistanceBeforeDrag: function(v) {this.distanceBeforeDrag = v;},
+    setDraggableAllowBubble: function(v) {this.draggableAllowBubble = v;},
     
     
     // Methods /////////////////////////////////////////////////////////////////
@@ -70,7 +75,7 @@ myt.Draggable = new JS.Module('Draggable', {
         this.attachToDom(gm, '__doDragCheck', 'mousemove', true);
         
         event.value.preventDefault();
-        return true;
+        return this.draggableAllowBubble;
     },
     
     __doMouseUp: function(event) {
@@ -81,7 +86,7 @@ myt.Draggable = new JS.Module('Draggable', {
             this.detachFromDom(gm, '__doMouseUp', 'mouseup', true);
             this.detachFromDom(gm, '__doDragCheck', 'mousemove', true);
         }
-        return true;
+        return this.draggableAllowBubble;
     },
     
     __doDragCheck: function(event) {

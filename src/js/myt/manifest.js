@@ -187,6 +187,10 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'grid/GridController.js'  ).provides('myt.GridController'  ).requires('myt.GridRow');
     file(MYT_COMPONENT_ROOT + 'grid/Grid.js'            ).provides('myt.Grid'            ).requires('myt.GridController');
     
+    file(MYT_COMPONENT_ROOT + 'grid/SimpleGridColumnHeader.js').provides('myt.SimpleGridColumnHeader').requires(
+        'myt.GridColumnHeader','myt.SimpleIconTextButton'
+    );
+    
     // Component : Floating Panel
     file(MYT_COMPONENT_ROOT + 'floatingpanel/FloatingPanel.js'      ).provides('myt.FloatingPanel'      ).requires('myt.RootView');
     file(MYT_COMPONENT_ROOT + 'floatingpanel/FloatingPanelAnchor.js').provides('myt.FloatingPanelAnchor').requires('myt.FloatingPanel');
@@ -309,6 +313,6 @@ JS.Packages(function() {with(this) {
         'myt.ScatterGraph',
         'myt.Slider','myt.RangeSlider',
         'myt.HorizontalDivider','myt.VerticalDivider',
-        'myt.Grid'
+        'myt.Grid','myt.SimpleGridColumnHeader'
     );
 }});

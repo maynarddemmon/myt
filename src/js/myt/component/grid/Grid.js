@@ -1,4 +1,9 @@
-/** An implementation of a grid component. */
+/** An implementation of a grid component.
+    
+    Attributes:
+        rowSpacing:number The spacing between rows. Defaults to 1.
+        columnSpacing:number the spacing between columns. Defaults to 1.
+*/
 myt.Grid = new JS.Class('Grid', myt.View, {
     include: [myt.GridController],
     
@@ -91,6 +96,8 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     
     /** @overrides myt.Node */
     determinePlacement: function(placement, subnode) {
+        // Automatically place column headers and rows in the header and
+        // content views respectively.
         if (placement === '*') {
             var target;
             if (subnode.isA(myt.GridRow)) {

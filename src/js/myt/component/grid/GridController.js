@@ -6,6 +6,10 @@
         gridWidth:number the width of the grid component.
         fitToWidth:boolean determines if the columns will always fill up the
             width of the grid or not. Defaults to true.
+        lastColumn:myt.GridColumnHeader Holds a reference to the last
+            column header.
+        sort:array An array containing the id of the column to sort by and
+            the order to sort by.
 */
 myt.GridController = new JS.Module('GridController', {
     // Life Cycle //////////////////////////////////////////////////////////////
@@ -19,10 +23,21 @@ myt.GridController = new JS.Module('GridController', {
         this.callSuper(parent, attrs);
         
         this._fitToWidth();
+        this._notifyHeadersOfSortState();
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
+    setSort: function(v) {
+        if (!myt.areArraysEqual(v, this.sort)) {
+            this.sort = v;
+            if (this.inited) {
+                this.fireNewEvent('sort', v);
+                this._notifyHeadersOfSortState();
+            }
+        }
+    },
+    
     setLastColumn: function(v) {
         var cur = this.lastColumn;
         if (cur !== v) {
@@ -32,9 +47,7 @@ myt.GridController = new JS.Module('GridController', {
         }
     },
     
-    setFitToWidth: function(v) {
-        this.fitToWidth = v;
-    },
+    setFitToWidth: function(v) {this.fitToWidth = v;},
     
     setLocked: function(v) {
         this.locked = v;
@@ -212,6 +225,22 @@ myt.GridController = new JS.Module('GridController', {
                 info = resizeInfo[--i];
                 hdr = info.hdr;
                 hdr.setValue(hdr.value + info.amt);
+            }
+        }
+    },
+    
+    // Sorting
+    _notifyHeadersOfSortState: function() {
+        var hdrs = this.columnHeaders, i = hdrs.length, hdr,
+            sort = this.sort,
+            sortColumnId = sort ? sort[0] : '',
+            sortOrder = sort ? sort[1] : '';
+        while (i) {
+            hdr = hdrs[--i];
+            if (hdr.columnId === sortColumnId) {
+                if (hdr.sortable) hdr.setSortState(sortOrder);
+            } else {
+                hdr.setSortState('none');
             }
         }
     },

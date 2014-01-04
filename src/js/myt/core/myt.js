@@ -387,6 +387,20 @@ myt = {
         return Math.abs(a - b) <= (A > B ? B : A) * epsilon;
     },
     
+    /** Tests if two array are equal. For a more complete deep equal
+        implementation use underscore.js */
+    areArraysEqual: function(a, b) {
+        if (a === b) return true;
+        if (a == null || b == null) return false;
+        if (a.length !== b.length) return false;
+        
+        var i = a.length;
+        while (i) {
+            if (a[--i] !== b[i]) return false;
+        }
+        return true;
+    },
+    
     // DOM
     /** Gets the dom element of the provided tagname and index.
         @param tagname:string (optional) the name of the tag to search for.

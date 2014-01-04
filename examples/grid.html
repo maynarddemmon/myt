@@ -28,6 +28,8 @@
                 bar.enableEllipsis();
                 var bar2 = new myt.Text(this, {name:'bar2', bgColor:'#ffffff', text:'bar 2 col'});
                 bar2.enableEllipsis();
+                var bar3 = new myt.Text(this, {name:'bar3', bgColor:'#ffffff', text:'bar 3 col'});
+                bar3.enableEllipsis();
                 var baz = new myt.Text(this, {name:'baz', bgColor:'#ffffff', text:'baz col'});
                 baz.enableEllipsis();
                 
@@ -37,35 +39,30 @@
         
         var rootView = new myt.View(null, {bgColor:'#333333'}, [myt.SizeToWindow]);
         
-        var grid = new myt.Grid(rootView, {
-            percentOfParentHeight:100,
-            fitToWidth:true
-        }, [myt.SizeToParent, {
+        var grid = new myt.Grid(rootView, {percentOfParentHeight:100}, [myt.SizeToParent, {
             updateWidth: function(event) {
                 this.setWidth(event.value + event.source.inset - this.x);
             }
         }]);
         
-        var i = 200;
-        var t0 = Date.now();
+        var i = 100;
         while (i--) new RowClass(grid);
-        var t1 = Date.now();
-        console.log(t1 - t0);
         
-        global.foo = new myt.View(grid, {columnId:'foo',  flex:1, height:23, bgColor:'#666666', value:100, minValue:100, maxValue:200}, [myt.GridColumnHeader]);
-        global.bar = new myt.View(grid, {columnId:'bar',  flex:0, height:23, bgColor:'#666666', value:50,  minValue:50, maxValue:100, resizable:true}, [myt.GridColumnHeader]);
-        global.bar = new myt.View(grid, {columnId:'bar2', flex:0, height:23, bgColor:'#666666', value:50,  minValue:50, maxValue:100, resizable:true}, [myt.GridColumnHeader]);
-        global.baz = new myt.View(grid, {columnId:'baz',  flex:1, height:23, bgColor:'#666666', value:25,  minValue:10, maxValue:300}, [myt.GridColumnHeader]);
+        new myt.SimpleGridColumnHeader(grid, {columnId:'foo',  flex:1, value:100, minValue:100, maxValue:200, text:'Column One'});
+        new myt.SimpleGridColumnHeader(grid, {columnId:'bar',  flex:0, value:50,  minValue:50,  maxValue:100, text:'Column Two', sortable:false});
+        new myt.SimpleGridColumnHeader(grid, {columnId:'bar2', flex:0, value:50,  minValue:50,  maxValue:100, text:'Column Three'});
+        new myt.SimpleGridColumnHeader(grid, {columnId:'bar3', flex:0, value:50,  minValue:50,  maxValue:100, text:'Column Four'});
+        new myt.SimpleGridColumnHeader(grid, {columnId:'baz',  flex:1, value:25,                maxValue:400, text:'Column Five'});
         
         var divider = new myt.HorizontalDivider(rootView, {
-            percentOfParentHeight:100,
-            minValue:25, value:400, limitToParent:0
+            percentOfParentHeight:100, minValue:25, value:400, limitToParent:0
         }, [myt.SizeToParent]);
-        
         grid.syncTo(divider, 'updateWidth', 'value');
         
         // Unlock now that the grid is setup.
         grid.setLocked(false);
+        
+        global.grid = grid;
     }
 </script>
 </body></html>
