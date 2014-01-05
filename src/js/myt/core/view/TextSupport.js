@@ -10,6 +10,19 @@
             font family CSS parameter. */
 myt.TextSupport = new JS.Module('TextSupport', {
     // Accessors ///////////////////////////////////////////////////////////////
+    /** @overrides myt.View */
+    setWidth: function(v) {
+        this.callSuper(v);
+        
+        // Height can change with width change when wrapping occurs.
+        if (v !== 'auto') {
+            var ws = this.whiteSpace;
+            if (ws === 'normal' || ws === 'pre-line' || ws === 'pre-wrap') {
+                this.sizeViewToDom();
+            }
+        }
+    },
+    
     /** The text content to be displayed. */
     setText: function(v) {
         if (!v) v = '';
