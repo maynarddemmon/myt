@@ -102,6 +102,9 @@ myt.Node = new JS.Class('Node', {
     
     /** @overrides myt.Destructible. */
     destroy: function() {
+        // Allows descendants to know destruction is in process
+        this.isBeingDestroyed = true;
+        
         // Destroy subnodes depth first
         var subs = this.subnodes;
         if (subs) {

@@ -117,7 +117,9 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
             
             this.doAfterUpdate();
             
-            if (this.collapseParent) this.updateParent(setterName, value);
+            if (this.collapseParent && !this.parent.isBeingDestroyed) {
+                this.updateParent(setterName, value);
+            }
             
             this.decrementLockedCounter();
         }
