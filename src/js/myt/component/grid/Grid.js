@@ -3,6 +3,8 @@
     Attributes:
         rowSpacing:number The spacing between rows. Defaults to 1.
         columnSpacing:number the spacing between columns. Defaults to 1.
+        sizeHeightToRows:boolean If true, this component will be sized to fit
+            all the rows without showing scrollbars. Defaults to false.
 */
 myt.Grid = new JS.Class('Grid', myt.View, {
     include: [myt.GridController],
@@ -21,6 +23,8 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     
     /** @overrides myt.View */
     doAfterAdoption: function() {
+        var shtr = this.sizeHeightToRows;
+        
         var header = new myt.View(this, {name:'header', overflow:'hidden'});
         new myt.SpacedLayout(header, {
             name:'xLayout', locked:true, axis:'x', collapseParent:true, 
@@ -30,18 +34,26 @@ myt.Grid = new JS.Class('Grid', myt.View, {
         
         var content = new myt.View(this, {name:'content', overflow:'auto'});
         new myt.SpacedLayout(content, {
-            name:'yLayout', locked:true, axis:'y', spacing:this.rowSpacing
+            name:'yLayout', locked:true, axis:'y', spacing:this.rowSpacing,
+            collapseParent:shtr
         });
         
         this.syncTo(this, 'setGridWidth', 'width');
         this.syncTo(header, '_updateContentWidth', 'width');
-        this.applyConstraint('_updateContentHeight', [this, 'height', header, 'height', header, 'y']);
+        
+        this.applyConstraint('_updateContentHeight', [
+            shtr ? content : this, 'height', 
+            header, 'height', 
+            header, 'y'
+        ]);
         
         this.callSuper();
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
+    setSizeHeightToRows: function(v) {this.sizeHeightToRows = v;},
+    
     setRowSpacing: function(v) {
         if (this.rowSpacing !== v) {
             this.rowSpacing = v;
@@ -91,7 +103,12 @@ myt.Grid = new JS.Class('Grid', myt.View, {
         var header = this.header, content = this.content,
             y = header.y + header.height;
         content.setY(y);
-        content.setHeight(this.height - y);
+        
+        if (this.sizeHeightToRows) {
+            this.setHeight(y + content.height);
+        } else {
+            content.setHeight(this.height - y);
+        }
     },
     
     /** @overrides myt.Node */
@@ -132,8 +149,8 @@ myt.Grid = new JS.Class('Grid', myt.View, {
             // Default sort function uses the 'text' attribute of the subview.
             var sortNum = sortOrder === 'ascending' ? 1 : -1;
             return function(a, b) {
-                var aValue = a[sortColumnId].text,
-                    bValue = b[sortColumnId].text;
+                var aValue = a[sortColumnId + 'View'].text,
+                    bValue = b[sortColumnId + 'View'].text;
                 if (aValue > bValue) {
                     return sortNum;
                 } else if (bValue > aValue) {

@@ -15,6 +15,10 @@
             'ascending': Sorted in ascending order.
             'descending': Sorted in descending order.
             'none': Not currently an active sort column.
+        cellXAdj:number The amount to shift the x values of cells updated by
+            this column. Defaults to 0.
+        cellWidthAdj:number The amount to grow/shrink the width of cells 
+            updated by this column. Defaults to 0.
 */
 myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
     include: [myt.BoundedValueComponent],
@@ -34,6 +38,8 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
         if (attrs.maxValue === undefined) attrs.maxValue = GCH.DEFAULT_MAX_VALUE;
         if (attrs.resizable === undefined) attrs.resizable = true;
         if (attrs.flex === undefined) attrs.flex = 0;
+        if (attrs.cellXAdj === undefined) attrs.cellXAdj = 0;
+        if (attrs.cellWidthAdj === undefined) attrs.cellWidthAdj = 0;
         
         if (attrs.sortable === undefined) attrs.sortable = true;
         if (attrs.sortState === undefined) attrs.sortState = 'none';
@@ -133,6 +139,8 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
         }
     },
     
+    setCellWidthAdj: function(v) {this.cellWidthAdj = v;},
+    setCellXAdj: function(v) {this.cellXAdj = v;},
     setFlex: function(v) {this.flex = v;},
     setColumnId: function(v) {this.columnId = v;},
     

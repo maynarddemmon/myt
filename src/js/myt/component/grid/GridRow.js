@@ -31,12 +31,12 @@ myt.GridRow = new JS.Module('GridRow', {
     
     // Methods /////////////////////////////////////////////////////////////////
     notifyColumnHeaderXChange: function(columnHeader) {
-        var sv = this[columnHeader.columnId];
-        if (sv) sv.setX(columnHeader.x);
+        var sv = this[columnHeader.columnId + 'View'];
+        if (sv) sv.setX(columnHeader.x + columnHeader.cellXAdj);
     },
     
     notifyColumnHeaderWidthChange: function(columnHeader) {
-        var sv = this[columnHeader.columnId];
-        if (sv) sv.setWidth(columnHeader.width);
+        var sv = this[columnHeader.columnId + 'View'];
+        if (sv) sv.setWidth(columnHeader.width + columnHeader.cellWidthAdj);
     }
 });
