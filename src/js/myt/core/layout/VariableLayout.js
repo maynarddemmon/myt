@@ -70,7 +70,7 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
                 var elem = this.parent.domElement,
                     parentElem = elem.parentNode,
                     nextSibling = elem.nextSibling,
-                    restoreFocus;
+                    restoreFocus, restoreScrollTop, restoreScrollLeft;
                 
                 // Focus can get lost in webkit when an element is removed from
                 // the dom.
@@ -81,6 +81,11 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
                         restoreFocus = currentFocus;
                         restoreFocus._ignoreFocus = true;
                     }
+                    
+                    // Also maintain scrollTop/scrollLeft since those also
+                    // get reset when a dom element is removed.
+                    restoreScrollTop = elem.scrollTop;
+                    restoreScrollLeft = elem.scrollLeft;
                     
                     parentElem.removeChild(elem);
                 }
@@ -111,6 +116,10 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
                         restoreFocus._ignoreFocus = false;
                         restoreFocus.focus(true);
                     }
+                    
+                    // Restore scrollTop/scrollLeft
+                    elem.scrollTop = restoreScrollTop;
+                    elem.scrollLeft = restoreScrollLeft;
                 }
                 // OPTIMIZATION: end
             }

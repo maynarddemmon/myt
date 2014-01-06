@@ -71,6 +71,17 @@ myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** @overrides myt.Layout */
+    addSubview: function(sv) {
+        // OPTIMIZATION: Skip the update call that happens during subview add.
+        // The boundsWidth/boundsHeight events will be fired immediately 
+        // after and are a more appropriate time to do the update.
+        var isLocked = this.locked; // Remember original locked state.
+        this.locked = true; // Lock the layout so no updateds occur.
+        this.callSuper(sv);
+        this.locked = isLocked; // Restore original locked state.
+    },
+    
     /** @overrides myt.VariableLayout */
     startMonitoringSubview: function(sv) {
         this.attachTo(sv, 'update', this.measureAttrName);

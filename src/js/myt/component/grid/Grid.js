@@ -136,9 +136,11 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     doSort: function() {
         var sort = this.sort,
             sortFunc = this.getSortFunction(sort ? sort[0] : '', sort ? sort[1] : '');
-        this.content.sortSubviews(sortFunc);
-        this.content.yLayout.sortSubviews(sortFunc);
-        this.content.yLayout.update();
+        if (sortFunc) {
+            this.content.sortSubviews(sortFunc);
+            this.content.yLayout.sortSubviews(sortFunc);
+            this.content.yLayout.update();
+        }
     },
     
     /** Gets the sort function used to sort the rows. Subclasses and instances
