@@ -70,6 +70,8 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         this._animating = [];
         this._maxTemplateSizeSquared = 0;
         
+        this.drawnCount = this.drawnAnimatingCount = this.drawnCountTotal = 0;
+        
         if (attrs.data === undefined) attrs.data = [];
         
         if (attrs.scaleDataX === undefined) attrs.scaleDataX = 1;
@@ -253,6 +255,23 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         if (this.inited) {
             this.redrawPointsDelayed();
             this.redrawAnimatingPointsDelayed();
+        }
+    },
+    
+    setDrawnCount: function(v) {
+        this.drawnCount = v;
+        this.setDrawnCountTotal(v + this.drawnAnimatingCount);
+    },
+    
+    setDrawnAnimatingCount: function(v) {
+        this.drawnAnimatingCount = v;
+        this.setDrawnCountTotal(v + this.drawnCount);
+    },
+    
+    setDrawnCountTotal: function(v) {
+        if (this.drawnCountTotal !== v) {
+            this.drawnCountTotal = v;
+            if (this.inited) this.fireNewEvent('drawnCountTotal', v);
         }
     },
     
@@ -670,49 +689,52 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     
     // Drawing
     drawPoint: function(p, context, skipConversion) {
-        if (this._lockDraw) return;
-        
-        if (!context) context = this.__ctx;
-        if (!skipConversion) this.convertPointToPixels(p);
-        
-        if (myt.ScatterGraph.BASE_FILTER(p, this) || (this.filter && this.filter(p, this))) return;
-        
-        var template = p.getTemplate(this);
-        context.drawImage(template, p.px - template.centerX, p.py - template.centerY);
-    },
-    
-    drawPoints: function(data, context, skipConversion) {
-        if (this._lockDraw) return;
-        
-        var i = data.length, p, templates = this._pointTemplates, template, 
-            w = this.width, h = this.height,
-            BASE_FILTER = myt.ScatterGraph.BASE_FILTER;
-        if (!context) context = this.__ctx;
-        
-        if (!skipConversion) this.convertPointsToPixels(data);
-        
-        while (i) {
-            p = data[--i];
+        if (!this._lockDraw) {
+            if (!context) context = this.__ctx;
+            if (!skipConversion) this.convertPointToPixels(p);
             
-            if (BASE_FILTER(p, this) || (this.filter && this.filter(p, this))) continue;
+            if (myt.ScatterGraph.BASE_FILTER(p, this) || (this.filter && this.filter(p, this))) return;
             
-            template = p.getTemplate(this);
+            var template = p.getTemplate(this);
             context.drawImage(template, p.px - template.centerX, p.py - template.centerY);
         }
     },
     
+    drawPoints: function(data, context, skipConversion) {
+        var drawnCount = 0;
+        if (!this._lockDraw) {
+            var i = data.length, p, templates = this._pointTemplates, template, 
+                w = this.width, h = this.height,
+                BASE_FILTER = myt.ScatterGraph.BASE_FILTER;
+            if (!context) context = this.__ctx;
+            
+            if (!skipConversion) this.convertPointsToPixels(data);
+            
+            while (i) {
+                p = data[--i];
+                
+                if (BASE_FILTER(p, this) || (this.filter && this.filter(p, this))) continue;
+                
+                template = p.getTemplate(this);
+                context.drawImage(template, p.px - template.centerX, p.py - template.centerY);
+                ++drawnCount;
+            }
+        }
+        return drawnCount;
+    },
+    
     redrawPoints: function(skipConversion) {
         this.clear();
-        this.drawPoints(this.data, this.__ctx, skipConversion);
-        
+        var drawnCount = this.drawPoints(this.data, this.__ctx, skipConversion);
         this.drawHighlightedPoint();
+        this.setDrawnCount(drawnCount);
     },
     
     redrawAnimatingPoints: function(skipConversion) {
         this.animationLayer.clear();
-        this.drawPoints(this._animating, this.animationLayer.__ctx, skipConversion);
-        
+        var drawnCount = this.drawPoints(this._animating, this.animationLayer.__ctx, skipConversion);
         this.drawHighlightedPoint();
+        this.setDrawnAnimatingCount(drawnCount);
     },
     
     // Animating
