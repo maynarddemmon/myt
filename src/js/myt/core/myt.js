@@ -390,13 +390,14 @@ myt = {
     /** Tests if two array are equal. For a more complete deep equal
         implementation use underscore.js */
     areArraysEqual: function(a, b) {
-        if (a === b) return true;
-        if (a == null || b == null) return false;
-        if (a.length !== b.length) return false;
-        
-        var i = a.length;
-        while (i) {
-            if (a[--i] !== b[i]) return false;
+        if (a !== b) {
+            if (a == null || b == null) return false;
+            var i = a.length;
+            if (i !== b.length) return false;
+            
+            while (i) {
+                if (a[--i] !== b[i]) return false;
+            }
         }
         return true;
     },

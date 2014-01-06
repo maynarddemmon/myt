@@ -16,8 +16,8 @@
         
         new myt.IconTextPanelButton(rootView, {x:920, y:10, width:100, text:'zoom in'}, [{
             doActivated: function() {
-                //graph.setScaleX(graph.scaleX + 0.025);
-                //graph.setScaleY(graph.scaleY + 0.025);
+                //graph.setScaleDataX(graph.scaleDataX + 0.025);
+                //graph.setScaleDataY(graph.scaleDataY + 0.025);
                 
                 var xMin = graph.getMinX(), xMax = graph.getMaxX(),
                     yMin = graph.getMinY(), yMax = graph.getMaxY();
@@ -47,8 +47,8 @@
         
         new myt.IconTextPanelButton(rootView, {x:920, y:40, width:100, text:'zoom out'}, [{
             doActivated: function() {
-                //graph.setScaleX(graph.scaleX - 0.025);
-                //graph.setScaleY(graph.scaleY - 0.025);
+                //graph.setScaleDataX(graph.scaleDataX - 0.025);
+                //graph.setScaleDataY(graph.scaleDataY - 0.025);
                 
                 var xMin = graph.getMinX(), xMax = graph.getMaxX(),
                     yMin = graph.getMinY(), yMax = graph.getMaxY();

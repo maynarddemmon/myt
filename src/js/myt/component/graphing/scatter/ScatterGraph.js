@@ -3,8 +3,8 @@
     Attributes:
         allowSelection:boolean If true selecting graph points is allowed.
             Defaults to true.
-        scaleX:number The number of pixels per data unit in the x-axis.
-        scaleY:number The number of pixels per data unit in the y-axis.
+        scaleDataX:number The number of pixels per data unit in the x-axis.
+        scaleDataY:number The number of pixels per data unit in the y-axis.
         originX:number The origin of the graph in pixels along the x-axis.
         originY:number The origin of the graph in pixels along the y-axis.
         data:array An array of myt.ScatterGraphPoints this graph is displaying.
@@ -50,11 +50,11 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
             return retval;
         },
         
-        convertXPixelToValue: function(px, graph) {return (px - graph.originX) / graph.scaleX;},
-        convertYPixelToValue: function(py, graph) {return (py - graph.originY) / graph.scaleY;},
+        convertXPixelToValue: function(px, graph) {return (px - graph.originX) / graph.scaleDataX;},
+        convertYPixelToValue: function(py, graph) {return (py - graph.originY) / graph.scaleDataY;},
         
-        convertXValueToPixel: function(x, graph) {return Math.round((x * graph.scaleX) + graph.originX);},
-        convertYValueToPixel: function(y, graph) {return Math.round((y * graph.scaleY) + graph.originY);},
+        convertXValueToPixel: function(x, graph) {return Math.round((x * graph.scaleDataX) + graph.originX);},
+        convertYValueToPixel: function(y, graph) {return Math.round((y * graph.scaleDataY) + graph.originY);},
         
         /** A filter to prevent drawing points outside the bounds of
             the scatter graph. */
@@ -72,8 +72,8 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         
         if (attrs.data === undefined) attrs.data = [];
         
-        if (attrs.scaleX === undefined) attrs.scaleX = 1;
-        if (attrs.scaleY === undefined) attrs.scaleY = 1;
+        if (attrs.scaleDataX === undefined) attrs.scaleDataX = 1;
+        if (attrs.scaleDataY === undefined) attrs.scaleDataY = 1;
         if (attrs.originX === undefined) attrs.originX = 0;
         if (attrs.originY === undefined) attrs.originY = 0;
         
@@ -150,21 +150,21 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     setXConversionFuncVToPx: function(v) {this.xConversionFuncVToPx = v},
     setYConversionFuncVToPx: function(v) {this.yConversionFuncVToPx = v},
     
-    setScaleX: function(v) {
-        if (this.scaleX === v) return;
-        this.scaleX = v;
+    setScaleDataX: function(v) {
+        if (this.scaleDataX === v) return;
+        this.scaleDataX = v;
         if (this.inited) {
-            this.fireNewEvent('scaleX', v);
+            this.fireNewEvent('scaleDataX', v);
             this.redrawPointsDelayed();
             this.redrawAnimatingPointsDelayed();
         }
     },
     
-    setScaleY: function(v) {
-        if (this.scaleY === v) return;
-        this.scaleY = v;
+    setScaleDataY: function(v) {
+        if (this.scaleDataY === v) return;
+        this.scaleDataY = v;
         if (this.inited) {
-            this.fireNewEvent('scaleY', v);
+            this.fireNewEvent('scaleDataY', v);
             this.redrawPointsDelayed();
             this.redrawAnimatingPointsDelayed();
         }
@@ -190,15 +190,15 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         }
     },
     
-    setScaleAndOrigin: function(scaleX, scaleY, originX, originY) {
+    setScaleAndOrigin: function(scaleDataX, scaleDataY, originX, originY) {
         var changed = false;
         
-        if (this.scaleX !== scaleX) {
-            this.scaleX = scaleX;
+        if (this.scaleDataX !== scaleDataX) {
+            this.scaleDataX = scaleDataX;
             changed = true;
         }
-        if (this.scaleY !== scaleY) {
-            this.scaleY = scaleY;
+        if (this.scaleDataY !== scaleDataY) {
+            this.scaleDataY = scaleDataY;
             changed = true;
         }
         if (this.originX !== originX) {
@@ -297,7 +297,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         var pos = myt.MouseObservable.getMouseFromEventRelativeToView(event, this);
         pos.x = this.convertXPixelToValue(pos.x);
         pos.y = this.convertYPixelToValue(pos.y);
-        var maxSize = this._maxTemplateSizeSquared / this.scaleX; // FIXME: assumes uniform scale
+        var maxSize = this._maxTemplateSizeSquared / this.scaleDataX; // FIXME: assumes uniform scale
         
         var nearest = this.nearest(pos, 1000, maxSize);
         
@@ -310,7 +310,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
             point = item[0];
             distance = item[1];
             template = point.getTemplate(this);
-            templateSize = Math.max(template.centerX, template.centerY) / this.scaleX;
+            templateSize = Math.max(template.centerX, template.centerY) / this.scaleDataX;
             if (distance > (templateSize * templateSize) ||
                 BASE_FILTER(point, this) || (this.filter && this.filter(point, this))
             ) {
@@ -326,7 +326,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
             item = nearest[--i];
             point = item[0];
             template = point.getTemplate(this);
-            templateSize = Math.max(template.centerX, template.centerY) / this.scaleX;
+            templateSize = Math.max(template.centerX, template.centerY) / this.scaleDataX;
             if (templateSize !== smallestRadius) nearest.splice(i, 1);
         }
         

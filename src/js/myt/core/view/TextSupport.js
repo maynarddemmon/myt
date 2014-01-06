@@ -11,8 +11,8 @@
 myt.TextSupport = new JS.Module('TextSupport', {
     // Accessors ///////////////////////////////////////////////////////////////
     /** @overrides myt.View */
-    setWidth: function(v) {
-        this.callSuper(v);
+    setWidth: function(v, supressEvent) {
+        this.callSuper(v, supressEvent);
         
         // Height can change with width change when wrapping occurs.
         if (v !== 'auto') {
@@ -28,31 +28,34 @@ myt.TextSupport = new JS.Module('TextSupport', {
         if (!v) v = '';
         if (typeof v === 'object') v = v.value;
         
-        if (this.text === v) return;
-        // Use innerHTML rather than textContent since this allows us to
-        // embed formatting markup.
-        this.domElement.innerHTML = this.text = v;
-        if (this.inited) {
-            this.fireNewEvent('text', v);
-            this.sizeViewToDom();
+        if (this.text !== v) {
+            // Use innerHTML rather than textContent since this allows us to
+            // embed formatting markup.
+            this.domElement.innerHTML = this.text = v;
+            if (this.inited) {
+                this.fireNewEvent('text', v);
+                this.sizeViewToDom();
+            }
         }
     },
     
     // Text Attributes
     /** Supported values: 'ellipsis', 'clip', 'inherit'. */
     setTextOverflow: function(v) {
-        if (this.textOverflow === v) return;
-        this.textOverflow = v;
-        this.deStyle.textOverflow = v ? v : 'inherit';
-        if (this.inited) this.fireNewEvent('textOverflow', v);
+        if (this.textOverflow !== v) {
+            this.textOverflow = v;
+            this.deStyle.textOverflow = v ? v : 'inherit';
+            if (this.inited) this.fireNewEvent('textOverflow', v);
+        }
     },
     
     /** Supported values: 'left', 'right', 'center', 'justify', 'inherit'. */
     setTextAlign: function(v) {
-        if (this.textAlign === v) return;
-        this.textAlign = v;
-        this.deStyle.textAlign = v ? v : 'inherit';
-        if (this.inited) this.fireNewEvent('textAlign', v);
+        if (this.textAlign !== v) {
+            this.textAlign = v;
+            this.deStyle.textAlign = v ? v : 'inherit';
+            if (this.inited) this.fireNewEvent('textAlign', v);
+        }
     },
     
     /** Supported values: 'normal', 'nowrap', 'pre', 'pre-line', 'pre-wrap', 
@@ -129,12 +132,13 @@ myt.TextSupport = new JS.Module('TextSupport', {
     /** A private setter function that provides a common implementation for
         most of this setters in this mixin. */
     __s: function(v, attrName, defaultValue) {
-        if (this[attrName] === v) return;
-        this[attrName] = v;
-        this.deStyle[attrName] = v ? v : (defaultValue ? defaultValue : 'inherit');
-        if (this.inited) {
-            this.fireNewEvent(attrName, v);
-            this.sizeViewToDom();
+        if (this[attrName] !== v) {
+            this[attrName] = v;
+            this.deStyle[attrName] = v ? v : (defaultValue ? defaultValue : 'inherit');
+            if (this.inited) {
+                this.fireNewEvent(attrName, v);
+                this.sizeViewToDom();
+            }
         }
     },
     

@@ -11,26 +11,26 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
     
     // Accessors ///////////////////////////////////////////////////////////////
     /** @overrides myt.View */
-    setWidth: function(v) {
+    setWidth: function(v, supressEvent) {
         if (v === 'auto') {
             this.__hasSetWidth = false;
             this.deStyle.width = 'auto';
             this.sizeViewToDom();
         } else {
             this.__hasSetWidth = true;
-            this.callSuper(v);
+            this.callSuper(v, supressEvent);
         }
     },
     
     /** @overrides myt.View */
-    setHeight: function(v) {
+    setHeight: function(v, supressEvent) {
         if (v === 'auto') {
             this.__hasSetHeight = false;
             this.deStyle.height = 'auto';
             this.sizeViewToDom();
         } else {
             this.__hasSetHeight = true;
-            this.callSuper(v);
+            this.callSuper(v, supressEvent);
         }
     },
     
