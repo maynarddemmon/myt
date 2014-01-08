@@ -4,6 +4,8 @@
         locked:boolean When true, the layout will not update.
         lockedCounter:number Counter created by myt.ThresholdCounter.
         subviews:array An array of Views managed by this layout.
+    
+    Private Attributes:
         __deferredLayout:boolean Marks a layout as deferred if the global
             layout lock, myt.Layout.locked, is true during a call to 
             'canUpdate' on the layout.

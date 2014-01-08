@@ -1,11 +1,17 @@
-/** Provides button functionality to a view. Most of the functionality comes
-    from the mixins included by this mixin. This mixin resolves issues that 
-    arise when the various mixins are used together.
+/** Provides button functionality to an myt.View. Most of the functionality 
+    comes from the mixins included by this mixin. This mixin resolves issues 
+    that arise when the various mixins are used together.
     
-    By default Button instances are focusable.
+    By default myt.Button instances are focusable.
+    
+    Events:
+        None
     
     Attributes:
-        __restoreCursor:string the cursor to restore to when the button is
+        None
+    
+    Private Attributes:
+        __restoreCursor:string The cursor to restore to when the button is
             no longer disabled.
 */
 myt.Button = new JS.Module('Button', {
@@ -38,6 +44,7 @@ myt.Button = new JS.Module('Button', {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.KeyActivation. */
     doActivationKeyDown: function(key, isRepeat) {
+        // Prevent unnecessary UI updates when the activation key is repeating.
         if (!isRepeat) this.updateUI();
     },
     
@@ -64,7 +71,7 @@ myt.Button = new JS.Module('Button', {
         } else {
             var rc = this.__restoreCursor;
             if (rc) {
-                this.setCursor(this.__restoreCursor);
+                this.setCursor(rc);
                 this.__restoreCursor = null;
             }
             
@@ -80,23 +87,31 @@ myt.Button = new JS.Module('Button', {
     
     /** Draw the UI when the component is in the disabled state.
         @returns void */
-    drawDisabledState: function() {},
+    drawDisabledState: function() {
+        // Subclasses to implement as needed.
+    },
     
     /** Draw the UI when the component is on the verge of being interacted 
         with. For mouse interactions this corresponds to the over state.
         @returns void */
-    drawHoverState: function() {},
+    drawHoverState: function() {
+        // Subclasses to implement as needed.
+    },
     
     /** Draw the UI when the component has a pending activation. For mouse
         interactions this corresponds to the down state.
         @returns void */
-    drawActiveState: function() {},
+    drawActiveState: function() {
+        // Subclasses to implement as needed.
+    },
     
     /** Draw the UI when the component is ready to be interacted with. For
         mouse interactions this corresponds to the enabled state when the
         mouse is not over the component.
         @returns void */
-    drawReadyState: function() {},
+    drawReadyState: function() {
+        // Subclasses to implement as needed.
+    },
     
     /** @overrides myt.FocusObservable */
     showFocusEmbellishment: function() {

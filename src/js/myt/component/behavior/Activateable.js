@@ -1,7 +1,10 @@
-/** Adds the capability for a view to be "activated". */
+/** Adds the capability for an myt.View to be "activated". A doActivated method
+    is added that gets called when the view is "activated". */
 myt.Activateable = new JS.Module('Activateable', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Called when this view should be activated.
         @returns void */
-    doActivated: function() {}
+    doActivated: function() {
+        // Subclasses to implement as needed.
+    }
 });

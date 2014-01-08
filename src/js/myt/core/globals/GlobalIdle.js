@@ -7,10 +7,12 @@
                 time: The time in millis of this idle event.
     
     Attributes:
-        running:boolean indicates if idle events are currently being fired
+        running:boolean Indicates if idle events are currently being fired
             or not.
-        lastTime:number the millis of the last idle event fired.
-        __timerId:number the ID of the last idle event in the browser.
+        lastTime:number The millis of the last idle event fired.
+    
+    Private Attributes:
+        __timerId:number The ID of the last idle event in the browser.
 */
 new JS.Singleton('GlobalIdle', {
     include: [myt.Observable],

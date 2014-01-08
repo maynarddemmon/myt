@@ -8,7 +8,7 @@
         useOptimizations:boolean Turns on certain dom optimization techniques
             that can speed up layout updates. Defaults to true.
         reverse:boolean If true the layout will be position the items in the
-            opposite order. For right to left instead of left to right.
+            opposite order. For example, right to left instead of left to right.
             Defaults to false.
 */
 myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
@@ -26,21 +26,23 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
     /** When true, the parent view will be resized to fit the extent of the
         layout. */
     setCollapseParent: function(v) {
-        if (this.collapseParent === v) return;
-        this.collapseParent = v;
-        if (this.inited) {
-            this.fireNewEvent('collapseParent', v);
-            this.update();
+        if (this.collapseParent !== v) {
+            this.collapseParent = v;
+            if (this.inited) {
+                this.fireNewEvent('collapseParent', v);
+                this.update();
+            }
         }
     },
     
     /** When true, the subviews are layed out in reverse order. */
     setReverse: function(v) {
-        if (this.reverse === v) return;
-        this.reverse = v;
-        if (this.inited) {
-            this.fireNewEvent('reverse', v);
-            this.update();
+        if (this.reverse !== v) {
+            this.reverse = v;
+            if (this.inited) {
+                this.fireNewEvent('reverse', v);
+                this.update();
+            }
         }
     },
     
@@ -58,13 +60,10 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
             
             this.doBeforeUpdate();
             
-            var setterName = this.setterName,
-                value = this.targetValue,
-                svs = this.subviews,
-                len = svs.length,
-                i, sv, count = 0;
-            
             if (this.useOptimizations) {
+                // DUPLICATION: Nearly identical code exists in 
+                // myt.View.retainFocusDuringDomUpdate
+                
                 // OPTIMIZATION: Prevent dom reflow during layout by 
                 // temporarily removing the parent dom element.
                 var elem = this.parent.domElement,
@@ -72,18 +71,12 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
                     nextSibling = elem.nextSibling,
                     restoreFocus, restoreScrollTop, restoreScrollLeft;
                 
-                // Focus can get lost in webkit when an element is removed from
-                // the dom.
-                // TODO: make use of myt.View.retainFocusDuringDomUpdate
                 if (parentElem) {
-                    var currentFocus = myt.global.focus.focusedView;
-                    if (currentFocus && currentFocus.isDescendantOf(this.parent)) {
-                        restoreFocus = currentFocus;
+                    restoreFocus = myt.global.focus.focusedView;
+                    if (restoreFocus && restoreFocus.isDescendantOf(this.parent)) {
                         restoreFocus._ignoreFocus = true;
                     }
                     
-                    // Also maintain scrollTop/scrollLeft since those also
-                    // get reset when a dom element is removed.
                     restoreScrollTop = elem.scrollTop;
                     restoreScrollLeft = elem.scrollLeft;
                     
@@ -91,6 +84,9 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
                 }
                 // OPTIMIZATION: end
             }
+            
+            var setterName = this.setterName, value = this.targetValue,
+                svs = this.subviews, len = svs.length, i, sv, count = 0;
             
             if (this.reverse) {
                 i = len;
@@ -100,8 +96,8 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
                     value = this.updateSubview(++count, sv, setterName, value);
                 }
             } else {
-                for (i = 0; len > i; ++i) {
-                    sv = svs[i];
+                for (i = 0; len > i;) {
+                    sv = svs[i++];
                     if (this.skipSubview(sv)) continue;
                     value = this.updateSubview(++count, sv, setterName, value);
                 }
@@ -176,15 +172,16 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
         return value;
     },
     
-    /** Called for each subview in the layout. The default implementation
-        returns true if the subview is not visible.
-        @returns true if the subview should be skipped.*/
+    /** Called for each subview in the layout to determine if the view should
+        be positioned or not. The default implementation returns true if the 
+        subview is not visible.
+        @returns true if the subview should be skipped during layout updates.*/
     skipSubview: function(sv) {
         return !sv.visible;
     },
     
-    /** Called if collapseParent is true. Subclasses should implement this
-        if they want to modify the parent view.
+    /** Called if the collapseParent attribute is true. Subclasses should 
+        implement this if they want to modify the parent view.
         @returns void */
     updateParent: function(setterName, value) {
         // Subclasses to implement as needed.

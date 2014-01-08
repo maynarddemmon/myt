@@ -2,6 +2,9 @@
     Requires myt.DomElementProxy be included when this mixin is included.
     
     Attributes:
+        None
+    
+    Private Attributes:
         __domObserversByType: (Object) Stores arrays of dom observers and 
             method names by event type */
 myt.DomObservable = new JS.Module('DomObservable', {

@@ -14,19 +14,26 @@ myt.View = new JS.Class('View', myt.Node, {
     
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
-        /** Preserves focus during dom updates. Focus can get lost in webkit 
-            when an element is removed from the dom.
+        /** Preserves focus and scroll position during dom updates. Focus can 
+            get lost in webkit when an element is removed from the dom.
             viewBeingRemoved:myt.View
             wrapperFunc:function a function to execute that manipulates the
-                dom in some way.
+                dom in some way, typically a remove followed by an insert.
             @returns void */
         retainFocusDuringDomUpdate: function(viewBeingRemoved, wrappedFunc) {
-            var restoreFocus,
-                currentFocus = myt.global.focus.focusedView;
-            if (currentFocus && (currentFocus === viewBeingRemoved || currentFocus.isDescendantOf(viewBeingRemoved))) {
-                restoreFocus = currentFocus;
+            // DUPLICATION: Nearly identical code exists in 
+            // myt.VariableLayout.update
+            var restoreFocus = myt.global.focus.focusedView, 
+                elem = viewBeingRemoved.domElement, restoreScrollTop, restoreScrollLeft;
+            if (restoreFocus === viewBeingRemoved || (restoreFocus && restoreFocus.isDescendantOf(viewBeingRemoved))) {
                 restoreFocus._ignoreFocus = true;
             }
+            
+            // Also maintain scrollTop/scrollLeft since those also
+            // get reset when a dom element is removed. Note: descendant
+            // elements with scroll positions won't get maintained.
+            restoreScrollTop = elem.scrollTop;
+            restoreScrollLeft = elem.scrollLeft;
             
             wrappedFunc.call();
             
@@ -34,6 +41,10 @@ myt.View = new JS.Class('View', myt.Node, {
                 restoreFocus._ignoreFocus = false;
                 restoreFocus.focus(true);
             }
+            
+            // Restore scrollTop/scrollLeft
+            elem.scrollTop = restoreScrollTop;
+            elem.scrollLeft = restoreScrollLeft;
         }
     },
     
@@ -93,14 +104,15 @@ myt.View = new JS.Class('View', myt.Node, {
     // Accessors ///////////////////////////////////////////////////////////////
     /** @overrides myt.Node */
     setParent: function(parent) {
-        if (this.parent === parent) return;
-        if (this.inited) {
-            this.__teardownAlignConstraint();
-            this.__teardownValignConstraint();
+        if (this.parent !== parent) {
+            if (this.inited) {
+                this.__teardownAlignConstraint();
+                this.__teardownValignConstraint();
+            }
+            this.callSuper(parent);
+            this.__setupAlignConstraint();
+            this.__setupValignConstraint();
         }
-        this.callSuper(parent);
-        this.__setupAlignConstraint();
-        this.__setupValignConstraint();
     },
     
     /** Does lazy instantiation of the subviews array. */
@@ -163,36 +175,40 @@ myt.View = new JS.Class('View', myt.Node, {
     // Dom Selector Attributes //
     /** @overrides myt.DomElementProxy */
     setDomClass: function(v) {
-        if (this.domClass === v) return;
-        this.callSuper(v);
-        if (this.inited) this.fireNewEvent('domClass', v);
+        if (this.domClass !== v) {
+            this.callSuper(v);
+            if (this.inited) this.fireNewEvent('domClass', v);
+        }
     },
     
     /** @overrides myt.DomElementProxy */
     setDomId: function(v) {
-        if (this.domId === v) return;
-        this.callSuper(v);
-        if (this.inited) this.fireNewEvent('domId', v);
+        if (this.domId !== v) {
+            this.callSuper(v);
+            if (this.inited) this.fireNewEvent('domId', v);
+        }
     },
     
     // Alignment Attributes //
     /** Offset to use when aligning a view. */
     setAlignOffset: function(v) {
-        if (this.alignOffset === v) return;
-        this.alignOffset = v;
-        if (this.inited) this.fireNewEvent('alignOffset', v);
-        if (this.parent && this.align === 'left') this.setX(v);
+        if (this.alignOffset !== v) {
+            this.alignOffset = v;
+            if (this.inited) this.fireNewEvent('alignOffset', v);
+            if (this.parent && this.align === 'left') this.setX(v);
+        }
     },
     
     /** Aligns the view within its parent. Allowed values are: 'left', 'center',
         'right' and ''. The default is undefined. */
     setAlign: function(v) {
-        if (this.align === v) return;
-        if (this.inited) this.__teardownAlignConstraint();
-        this.align = v;
-        if (this.inited) {
-            this.fireNewEvent('align', v);
-            this.__setupAlignConstraint();
+        if (this.align !== v) {
+            if (this.inited) this.__teardownAlignConstraint();
+            this.align = v;
+            if (this.inited) {
+                this.fireNewEvent('align', v);
+                this.__setupAlignConstraint();
+            }
         }
     },
     
@@ -232,21 +248,23 @@ myt.View = new JS.Class('View', myt.Node, {
     
     /** Offset to use when vertically aligning a view. */
     setValignOffset: function(v) {
-        if (this.valignOffset === v) return;
-        this.valignOffset = v;
-        if (this.inited) this.fireNewEvent('valignOffset', v);
-        if (this.parent && this.valign === 'top') this.setY(v);
+        if (this.valignOffset !== v) {
+            this.valignOffset = v;
+            if (this.inited) this.fireNewEvent('valignOffset', v);
+            if (this.parent && this.valign === 'top') this.setY(v);
+        }
     },
     
     /** Vertically aligns the view within its parent. Allowed values are: 'top', 
         'middle', 'bottom' and ''. The default is undefined. */
     setValign: function(v) {
-        if (this.valign === v) return;
-        if (this.inited) this.__teardownValignConstraint();
-        this.valign = v;
-        if (this.inited) {
-            this.fireNewEvent('valign', v);
-            this.__setupValignConstraint();
+        if (this.valign !== v) {
+            if (this.inited) this.__teardownValignConstraint();
+            this.valign = v;
+            if (this.inited) {
+                this.fireNewEvent('valign', v);
+                this.__setupValignConstraint();
+            }
         }
     },
     
@@ -287,26 +305,24 @@ myt.View = new JS.Class('View', myt.Node, {
     // Visual Attributes //
     /** Sets the x position of this view. */
     setX: function(v) {
-        if (this.x === v) return;
-        this.x = v;
-        
-        // Only set location if currently visible. See this.setVisible for
-        // more info.
-        if (this.visible) this.deStyle.left = v + 'px';
-        
-        if (this.inited) this.fireNewEvent('x', v);
+        if (this.x !== v) {
+            this.x = v;
+            
+            // Only set x-location if currently visible. See this.setVisible 
+            // for more info.
+            if (this.visible) this.deStyle.left = v + 'px';
+            
+            if (this.inited) this.fireNewEvent('x', v);
+        }
     },
     
     /** Sets the y position of this view. */
     setY: function(v) {
-        if (this.y === v) return;
-        this.y = v;
-        
-        // Only set location if currently visible. See this.setVisible for
-        // more info.
-        if (this.visible) this.deStyle.top = v + 'px';
-        
-        if (this.inited) this.fireNewEvent('y', v);
+        if (this.y !== v) {
+            this.y = v;
+            this.deStyle.top = v + 'px';
+            if (this.inited) this.fireNewEvent('y', v);
+        }
     },
     
     /** Sets the width of this view. */
@@ -314,12 +330,13 @@ myt.View = new JS.Class('View', myt.Node, {
         // Dom elements don't support negative width
         if (0 > v) v = 0;
         
-        if (this.width === v) return;
-        this.width = v;
-        this.deStyle.width = v + 'px';
-        if (this.inited) {
-            this.__updateBounds(v, this.height);
-            if (!supressEvent) this.fireNewEvent('width', v);
+        if (this.width !== v) {
+            this.width = v;
+            this.deStyle.width = v + 'px';
+            if (this.inited) {
+                this.__updateBounds(v, this.height);
+                if (!supressEvent) this.fireNewEvent('width', v);
+            }
         }
     },
     
@@ -328,12 +345,13 @@ myt.View = new JS.Class('View', myt.Node, {
         // Dom elements don't support negative height
         if (0 > v) v = 0;
         
-        if (this.height === v) return;
-        this.height = v;
-        this.deStyle.height = v + 'px';
-        if (this.inited) {
-            this.__updateBounds(this.width, v);
-            if (!supressEvent) this.fireNewEvent('height', v);
+        if (this.height !== v) {
+            this.height = v;
+            this.deStyle.height = v + 'px';
+            if (this.inited) {
+                this.__updateBounds(this.width, v);
+                if (!supressEvent) this.fireNewEvent('height', v);
+            }
         }
     },
     
@@ -341,18 +359,20 @@ myt.View = new JS.Class('View', myt.Node, {
         if they don't themselves set textColor or if they set textColor to
         'inherit'. */
     setTextColor: function(v) {
-        if (this.textColor === v) return;
-        this.textColor = v;
-        this.deStyle.color = v ? v : 'inherit';
-        if (this.inited) this.fireNewEvent('textColor', v);
+        if (this.textColor !== v) {
+            this.textColor = v;
+            this.deStyle.color = v ? v : 'inherit';
+            if (this.inited) this.fireNewEvent('textColor', v);
+        }
     },
     
     /** Sets the background color of this view. Use a value of 'transparent'
         to make this view transparent. */
     setBgColor: function(v) {
-        if (this.bgColor === v) return;
-        this.deStyle.backgroundColor = this.bgColor = v;
-        if (this.inited) this.fireNewEvent('bgColor', v);
+        if (this.bgColor !== v) {
+            this.deStyle.backgroundColor = this.bgColor = v;
+            if (this.inited) this.fireNewEvent('bgColor', v);
+        }
     },
     
     /** Sets the opacity of this view. The value should be a number between
@@ -365,32 +385,29 @@ myt.View = new JS.Class('View', myt.Node, {
     
     /** Allowed values: 'visible', 'hidden', 'scroll', 'auto', 'inherit'. */
     setOverflow: function(v) {
-        if (this.overflow === v) return;
-        this.overflow = v;
-        this.deStyle.overflow = v ? v : 'visible';
-        if (this.inited) this.fireNewEvent('overflow', v);
+        if (this.overflow !== v) {
+            this.overflow = v;
+            this.deStyle.overflow = v ? v : 'visible';
+            if (this.inited) this.fireNewEvent('overflow', v);
+        }
     },
     
     /** Makes this view visible or not. The default value is true which means
         visbility is inherited from the parent view. */
     setVisible: function(v) {
-        if (this.visible === v) return;
-        this.visible = v;
-        
-        var s = this.deStyle;
-        s.visibility = v ? 'inherit' : 'hidden';
-        
-        // Move invisible elements to a very negative location so they won't
-        // effect scrollable area. Ideally we could use display:none but we
-        // can't because that makes measuring bounds not work.
-        if (v) {
-            s.top = this.y + 'px';
-            s.left = this.x + 'px';
-        } else {
-            s.top = s.left = '-1000000px';
+        if (this.visible !== v) {
+            this.visible = v;
+            
+            var s = this.deStyle;
+            s.visibility = v ? 'inherit' : 'hidden';
+            
+            // Move invisible elements to a very negative location so they won't
+            // effect scrollable area. Ideally we could use display:none but we
+            // can't because that makes measuring bounds not work.
+            s.left = v ? this.x + 'px' : '-1000000px';
+            
+            if (this.inited) this.fireNewEvent('visible', v);
         }
-        
-        if (this.inited) this.fireNewEvent('visible', v);
     },
     
     /** Allowed values: 'auto', 'move', 'no-drop', 'col-resize', 'all-scroll', 
@@ -399,10 +416,11 @@ myt.View = new JS.Class('View', myt.Node, {
         'help', 'vertical-text', 's-resize', 'se-resize', 'inherit', 'wait', 
         'w-resize', 'sw-resize' */
     setCursor: function(v) {
-        if (this.cursor === v) return;
-        this.cursor = v;
-        this.deStyle.cursor = v ? v : 'auto';
-        if (this.inited) this.fireNewEvent('cursor', v);
+        if (this.cursor !== v) {
+            this.cursor = v;
+            this.deStyle.cursor = v ? v : 'auto';
+            if (this.inited) this.fireNewEvent('cursor', v);
+        }
     },
     
     /** Updates the boundsWidth and boundsHeight attributes.
@@ -687,7 +705,8 @@ myt.View = new JS.Class('View', myt.Node, {
         @param view:myt.View the view to check.
         @param checkZIndex:boolean (optional) If true z-index will first be
             used to check if the view is behind or not.
-        @returns true if the view is behind this view, false otherwise. */
+        @returns boolean: true if the view is behind this view, 
+            false otherwise. */
     isBehind: function(view, checkZIndex) {
         return this.__comparePosition(view, false, checkZIndex);
     },
@@ -697,7 +716,8 @@ myt.View = new JS.Class('View', myt.Node, {
         @param view:myt.View the view to check.
         @param checkZIndex:boolean (optional) If true z-index will first be
             used to check if the view is in front or not.
-        @returns true if the view is in front of this view, false otherwise. */
+        @returns boolean: true if the view is in front of this view, 
+            false otherwise. */
     isInFrontOf: function(view, checkZIndex) {
         return this.__comparePosition(view, true, checkZIndex);
     },

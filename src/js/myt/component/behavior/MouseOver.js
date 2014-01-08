@@ -2,10 +2,15 @@
     provides a mechanism to smoothe over/out events so only one call to
     'doSmoothMouseOver' occurs per idle event.
     
-    Requires Disableable and MouseObservable super mixins.
+    Requires myt.Disableable and myt.MouseObservable super mixins.
+    
+    Events:
+        None
     
     Attributes:
-        mouseOver:boolean
+        mouseOver:boolean Indicates if the mouse is over this view or not.
+    
+    Private Attributes:
         __attachedToOverIdle:boolean Used by the code that smoothes out
             mouseover events. Indicates that we are registered with the
             idle event.
@@ -27,27 +32,30 @@ myt.MouseOver = new JS.Module('MouseOver', {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setMouseOver: function(v) {
-        if (this.mouseOver === v) return;
-        this.mouseOver = v;
-        // No event needed
-        
-        // Smooth out over/out events by delaying until the next idle event.
-        if (this.inited && !this.__attachedToOverIdle) {
-            this.__attachedToOverIdle = true;
-            this.attachTo(myt.global.idle, '__doMouseOverOnIdle', 'idle');
+        if (this.mouseOver !== v) {
+            this.mouseOver = v;
+            // No event needed
+            
+            // Smooth out over/out events by delaying until the next idle event.
+            if (this.inited && !this.__attachedToOverIdle) {
+                this.__attachedToOverIdle = true;
+                this.attachTo(myt.global.idle, '__doMouseOverOnIdle', 'idle');
+            }
         }
     },
     
     /** @overrides myt.Disableable */
     setDisabled: function(v) {
-        // When disabled make sure mouseOver is not true.
-        if (this.mouseOver && v) this.setMouseOver(false);
+        // When about to disable make sure mouseOver is not true. This 
+        // helps prevent unwanted behavior of a disabled view.
+        if (v && this.mouseOver) this.setMouseOver(false);
         
         this.callSuper(v);
     },
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** @private */
     __doMouseOverOnIdle: function() {
         this.detachFrom(myt.global.idle, '__doMouseOverOnIdle', 'idle');
         this.__attachedToOverIdle = false;
@@ -71,13 +79,13 @@ myt.MouseOver = new JS.Module('MouseOver', {
     
     /** Called when the mouse is over this view. Subclasses must call super.
         @returns void */
-    doMouseOver: function(e) {
+    doMouseOver: function(event) {
         if (!this.disabled) this.setMouseOver(true);
     },
     
     /** Called when the mouse leaves this view. Subclasses must call super.
         @returns void */
-    doMouseOut: function(e) {
+    doMouseOut: function(event) {
         if (!this.disabled) this.setMouseOver(false);
     }
 });

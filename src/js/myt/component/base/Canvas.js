@@ -1,9 +1,16 @@
 /** A view for programatic drawing. This view is backed by an html 
     canvas element.
     
+    Events:
+        None
+    
     Attributes:
+        Same as HTML canvas element.
+    
+    Private Attributes:
         __canvas: A reference to the canvas dom element.
-        __ctx: A reference to the 2D drawing context. */
+        __ctx: A reference to the 2D drawing context.
+*/
 myt.Canvas = new JS.Class('Canvas', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
@@ -23,19 +30,19 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
     /** @overrides myt.View
         Needed because canvas must also set width/height attribute.
         See: http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#attr-canvas-width */
-    setWidth: function(v) {
+    setWidth: function(v, supressEvent) {
         if (0 > v) v = 0;
         this.__canvas.setAttribute('width', v);
-        this.callSuper(v);
+        this.callSuper(v, supressEvent);
     },
     
     /** @overrides myt.View
         Needed because canvas must also set width/height attribute.
         See: http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#attr-canvas-width */
-    setHeight: function(v) {
+    setHeight: function(v, supressEvent) {
         if (0 > v) v = 0;
         this.__canvas.setAttribute('height', v);
-        this.callSuper(v);
+        this.callSuper(v, supressEvent);
     },
     
     setFillStyle: function(v) {this.__ctx.fillStyle = v;},

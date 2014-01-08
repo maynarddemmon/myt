@@ -47,6 +47,8 @@
         callback:function A function that gets called when the animation
             completes. A boolean value is passed into the function and will be
             true if the animation completed successfully or false if not.
+    
+    Private Attributes:
         __loopCount:number the loop currently being run.
         __progress:number the number of millis currently used during the
             current animation loop.

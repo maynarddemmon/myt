@@ -1,10 +1,14 @@
-/** Makes a View draggable.
+/** Makes an myt.View draggable via the mouse.
+    
+    Events:
+        isDragging:boolean Fired when the isDragging attribute is modified
+            via setIsDragging.
     
     Attributes:
         isDraggable:boolean Configures the view to be draggable or not. The 
             default value is true.
         distanceBeforeDrag:number The distance, in pixels, before a mouse 
-            down and drag is considered a drag action.
+            down and drag is considered a drag action. Defaults to 2.
         isDragging:boolean Indicates that this view is currently being dragged.
         draggableAllowBubble:boolean Determines if mousedown and mouseup
             dom events handled by this component will bubble or not. Defaults
@@ -13,7 +17,7 @@
         _dragInitY:number Stores initial mouse y position during dragging. */
 myt.Draggable = new JS.Module('Draggable', {
     // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides */
+    /** @overrides myt.View */
     initNode: function(parent, attrs) {
         this.isDraggable = this.isDragging = false;
         this.distanceBeforeDrag = 2;
@@ -65,6 +69,7 @@ myt.Draggable = new JS.Module('Draggable', {
         return [this];
     },
     
+    /** @private */
     __doMouseDown: function(event) {
         var pos = myt.MouseObservable.getMouseFromEvent(event);
         this._dragInitX = pos.x - this.x;
@@ -78,6 +83,7 @@ myt.Draggable = new JS.Module('Draggable', {
         return this.draggableAllowBubble;
     },
     
+    /** @private */
     __doMouseUp: function(event) {
         if (this.isDragging) {
             this.stopDrag(event);
@@ -89,6 +95,7 @@ myt.Draggable = new JS.Module('Draggable', {
         return this.draggableAllowBubble;
     },
     
+    /** @private */
     __doDragCheck: function(event) {
         var pos = myt.MouseObservable.getMouseFromEvent(event),
             distance = myt.Geometry.measureDistance(pos.x, pos.y, this._dragInitX + this.x, this._dragInitY + this.y);

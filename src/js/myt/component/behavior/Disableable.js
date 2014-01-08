@@ -1,9 +1,15 @@
-/** Adds the capability to be "disabled" to a node. When a node is disabled
-    the user can not interact with it.
+/** Adds the capability to be "disabled" to an myt.Node. When an myt.Node is 
+    disabled the user should typically not be able to interact with it.
+    
+    When disabled becomes true an attempt will be made to give away the focus
+    using myt.FocusObservable's giveAwayFocus method.
+    
+    Events:
+        disabled:boolean Fired when the disabled attribute is modified
+            via setDisabled.
     
     Attributes:
-        disabled:boolean (Fires Event) Indicates that this component 
-            is disabled.
+        disabled:boolean Indicates that this component is disabled.
 */
 myt.Disableable = new JS.Module('Disableable', {
     // Life Cycle //////////////////////////////////////////////////////////////
@@ -21,20 +27,23 @@ myt.Disableable = new JS.Module('Disableable', {
             this.disabled = v;
             if (this.inited) this.fireNewEvent('disabled', v);
             
-            // Give away focus if we become disabled and this instance is
-            // a FocusObservable
-            if (v && this.giveAwayFocus) this.giveAwayFocus();
-            
             this.doDisabled();
         }
     },
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** Called after the disabled attribute is set. Subclasses should call
-        super if they want the default behavior of calling 'updateUI'.
+    /** Called after the disabled attribute is set. Default behavior attempts
+        to give away focus and calls the updateUI method of myt.UpdateableUI if 
+        it is defined.
         @returns void */
     doDisabled: function() {
-        if (this.inited && this.updateUI) this.updateUI();
+        if (this.inited) {
+            // Give away focus if we become disabled and this instance is
+            // a FocusObservable
+            if (this.disabled && this.giveAwayFocus) this.giveAwayFocus();
+            
+            if (this.updateUI) this.updateUI();
+        }
     }
 });

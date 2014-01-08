@@ -1,16 +1,29 @@
 /** A mixin that adds a text element to the inside of a button.
     
+    Events:
+        inset:number
+        outset:number
+        text:string
+        shrinkToFit:boolean
+        textY:number|string
+    
     Attributes:
-        __updateContentPositionLoopBlock:boolean Used in __updateContentPosition
-            to prevent infinite loops.
-        text:string the text to display on the button.
-        inset:number the left padding before the text. Defaults to 0.
-        outset:number the right padding after the text. Defaults to 0.
-        textY:number the y offset for the text.
-        shrinkToFit:boolean when true the button will be as narrow as possible
+        inset:number The left padding before the text. Defaults to 0.
+        outset:number The right padding after the text. Defaults to 0.
+        text:string The text to display on the button.
+        shrinkToFit:boolean When true the button will be as narrow as possible
             to fit the text, inset and outset. When false the button 
             will be as wide as the set width. Defaults to false.
-        textView:myt.Text a reference to the child text view.
+        textY:number|string The y offset for the text. If a string it must be
+            a valign value: 'top', 'middle' or 'bottom'.
+        textView:myt.Text A reference to the child text view.
+    
+    Private Attributes:
+        __updateContentPositionLoopBlock:boolean Used in __updateContentPosition
+            to prevent infinite loops.
+        __origHeight:number The height the button has after adoption. Used to
+            keep a positive height for the button even when the textView is
+            not shown.
 */
 myt.TextButtonContent = new JS.Module('TextButtonContent', {
     // Life Cycle //////////////////////////////////////////////////////////////
@@ -50,7 +63,7 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
         new myt.Text(this, attrs);
         
         // Record original height
-        this.origHeight = this.height;
+        this.__origHeight = this.height;
         
         this.callSuper();
     },
@@ -59,51 +72,55 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
     // Accessors ///////////////////////////////////////////////////////////////
     setInset: function(v) {
         // Adapt to event from syncTo
-        if (typeof v === 'object') v = v.value;
+        if (v !== null && typeof v === 'object') v = v.value;
         
-        if (this.inset === v) return;
-        this.inset = v;
-        if (this.inited) this.fireNewEvent('inset', v);
+        if (this.inset !== v) {
+            this.inset = v;
+            if (this.inited) this.fireNewEvent('inset', v);
+        }
     },
     
     setOutset: function(v) {
         // Adapt to event from syncTo
-        if (typeof v === 'object') v = v.value;
+        if (v !== null && typeof v === 'object') v = v.value;
         
-        if (this.outset === v) return;
-        this.outset = v;
-        if (this.inited) this.fireNewEvent('outset', v);
+        if (this.outset !== v) {
+            this.outset = v;
+            if (this.inited) this.fireNewEvent('outset', v);
+        }
     },
     
     setText: function(v) {
-        if (this.text === v) return;
-        this.text = v;
-        if (this.inited) {
-            this.textView.setText(v);
-            this.fireNewEvent('text', v);
+        if (this.text !== v) {
+            this.text = v;
+            if (this.inited) {
+                this.textView.setText(v);
+                this.fireNewEvent('text', v);
+            }
         }
     },
     
     setShrinkToFit: function(v) {
-        if (this.shrinkToFit === v) return;
-        this.shrinkToFit = v;
-        if (this.inited) {
-            if (this.textView) this.textView.setWhiteSpace(v ? 'nowrap' : 'normal');
-            this.fireNewEvent('shrinkToFit', v);
+        if (this.shrinkToFit !== v) {
+            this.shrinkToFit = v;
+            if (this.inited) {
+                if (this.textView) this.textView.setWhiteSpace(v ? 'nowrap' : 'normal');
+                this.fireNewEvent('shrinkToFit', v);
+            }
         }
     },
     
-    /** For fine tuning the y-position of the textView. */
     setTextY: function(v) {
-        if (this.textY === v) return;
-        this.textY = v;
-        if (this.inited) {
-            this.fireNewEvent('textY', v);
-            if (typeof v === 'string') {
-                this.textView.setValign(v);
-            } else {
-                this.textView.setValign('');
-                this.textView.setY(v);
+        if (this.textY !== v) {
+            this.textY = v;
+            if (this.inited) {
+                this.fireNewEvent('textY', v);
+                if (typeof v === 'string') {
+                    this.textView.setValign(v);
+                } else {
+                    this.textView.setValign('');
+                    this.textView.setY(v);
+                }
             }
         }
     },
@@ -125,14 +142,14 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
             this.setWidth(inset + (textViewVisible ? textView.width : 0) + outset);
             this.__updateContentPositionLoopBlock = false;
             
-            this.setHeight(this.origHeight);
+            this.setHeight(this.__origHeight);
         } else {
             textView.setHeight('auto');
             textView.setWidth(this.width - inset - outset);
             textView.setX(inset);
             
             this.__updateContentPositionLoopBlock = true;
-            this.setHeight(textViewVisible ? textView.y + textView.height : this.origHeight);
+            this.setHeight(textViewVisible ? textView.y + textView.height : this.__origHeight);
             this.__updateContentPositionLoopBlock = false;
         }
     }

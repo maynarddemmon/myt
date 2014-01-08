@@ -60,44 +60,48 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setFocused: function(v) {
-        if (this.focused === v) return;
-        this.focused = v;
-        if (this.inited) {
-            this.fireNewEvent('focused', v);
-            if (v) {
-                myt.global.focus.notifyFocus(this);
-            } else {
-                myt.global.focus.notifyBlur(this);
+        if (this.focused !== v) {
+            this.focused = v;
+            if (this.inited) {
+                this.fireNewEvent('focused', v);
+                var gf = myt.global.focus;
+                if (v) {
+                    gf.notifyFocus(this);
+                } else {
+                    gf.notifyBlur(this);
+                }
             }
         }
     },
     
     setFocusable: function(v) {
-        if (this.focusable === v) return;
-        var wasFocusable = this.focusable;
-        this.focusable = v;
-        
-        if (v) {
-            this.domElement.tabIndex = 0; // Make focusable. -1 is programtic only
-            this.attachToDom(this, '_doFocus', 'focus');
-            this.attachToDom(this, '_doBlur', 'blur');
-        } else if (wasFocusable) {
-            this.domElement.removeAttribute('tabIndex'); // Make unfocusable
-            this.detachFromDom(this, '_doFocus', 'focus');
-            this.detachFromDom(this, '_doBlur', 'blur');
+        if (this.focusable !== v) {
+            var wasFocusable = this.focusable;
+            this.focusable = v;
+            
+            if (v) {
+                this.domElement.tabIndex = 0; // Make focusable. -1 is programtic only
+                this.attachToDom(this, '__doFocus', 'focus');
+                this.attachToDom(this, '__doBlur', 'blur');
+            } else if (wasFocusable) {
+                this.domElement.removeAttribute('tabIndex'); // Make unfocusable
+                this.detachFromDom(this, '__doFocus', 'focus');
+                this.detachFromDom(this, '__doBlur', 'blur');
+            }
+            
+            if (this.inited) this.fireNewEvent('focusable', v);
         }
-        
-        if (this.inited) this.fireNewEvent('focusable', v);
     },
     
     setFocusEmbellishment: function(v) {
-        if (this.focusEmbellishment === v) return;
-        this.focusEmbellishment = v;
-        if (this.focused) {
-            if (v) {
-                this.showFocusEmbellishment();
-            } else {
-                this.hideFocusEmbellishment();
+        if (this.focusEmbellishment !== v) {
+            this.focusEmbellishment = v;
+            if (this.focused) {
+                if (v) {
+                    this.showFocusEmbellishment();
+                } else {
+                    this.hideFocusEmbellishment();
+                }
             }
         }
     },
@@ -108,12 +112,11 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
         is focusable, blurs away from this element.
         @returns void */
     giveAwayFocus: function() {
-        // Try to select the next focusable element when we get destroyed.
         if (this.focused) {
+            // Try to go to next focusable element.
             myt.global.focus.next();
             
-            // If focus loops back around to ourself make sure we don't keep
-            // the focus.
+            // If focus loops around to ourself make sure we don't keep it.
             if (this.focused) this.blur();
         }
     },
@@ -135,6 +138,8 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
             if (noScroll) {
                 // Record current scroll position and then scroll back after
                 // doing focus since focus may adjust scroll position.
+                // TODO: This only works on the widow but would be better to
+                // work on the parent or something.
                 var x = window.scrollX, y = window.scrollY;
                 this.domElement.focus();
                 window.scrollTo(x, y);
@@ -144,17 +149,21 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
         }
     },
     
-    /** Removes the focus from this view. Do not call this method directly. */
+    /** Removes the focus from this view. Do not call this method directly.
+        @private
+        @returns void */
     blur: function() {
         this.domElement.blur();
     },
     
-    _doFocus: function(event) {
+    /** @private */
+    __doFocus: function(event) {
         this.setFocused(true);
         this.doFocus();
     },
     
-    _doBlur: function(event) {
+    /** @private */
+    __doBlur: function(event) {
         this.doBlur();
         this.setFocused(false);
     },

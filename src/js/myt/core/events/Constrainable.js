@@ -1,6 +1,9 @@
 /** Provides the ability to apply and release constraints.
     
     Attributes:
+        None
+    
+    Private Attributes:
         __constraintsByMethodName: (Object) Holds arrays of constraints by 
             method name */
 myt.Constrainable = new JS.Module('Constrainable', {

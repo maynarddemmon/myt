@@ -2,6 +2,9 @@
     been obtained by the "getInstance" method.
     
     Attributes:
+        None
+    
+    Private Attributes:
         __actives:array an array of active instances.
 */
 myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {

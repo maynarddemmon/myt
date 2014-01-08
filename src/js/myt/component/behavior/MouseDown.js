@@ -3,8 +3,11 @@
     Requires: myt.UpdateableUI, myt.Activateable, myt.MouseOver, 
         myt.Disableable and myt.MouseObservable super mixins.
     
+    Events:
+        None
+    
     Attributes:
-        mouseDown:boolean */
+        mouseDown:boolean Indicates if the mouse is down or not. */
 myt.MouseDown = new JS.Module('MouseDown', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides */
@@ -20,19 +23,21 @@ myt.MouseDown = new JS.Module('MouseDown', {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setMouseDown: function(v) {
-        if (this.mouseDown === v) return;
-        this.mouseDown = v;
-        // No event needed
-        if (this.inited) {
-            if (this.isFocusable()) this.focus(true);
-            this.updateUI();
+        if (this.mouseDown !== v) {
+            this.mouseDown = v;
+            // No event needed
+            if (this.inited) {
+                if (v && this.isFocusable()) this.focus(true);
+                this.updateUI();
+            }
         }
     },
     
     /** @overrides myt.Disableable */
     setDisabled: function(v) {
-        // When disabled make sure mouseDown is not true.
-        if (this.mouseDown && v) this.setMouseDown(false);
+        // When about to disable the view make sure mouseDown is not true. This 
+        // helps prevent unwanted activation of a disabled view.
+        if (v && this.mouseDown) this.setMouseDown(false);
         
         this.callSuper(v);
     },
@@ -48,9 +53,12 @@ myt.MouseDown = new JS.Module('MouseDown', {
     /** @overrides myt.MouseOver */
     doMouseOut: function(event) {
         this.callSuper(event);
-        if (!this.disabled && this.mouseDown) {
-            this.attachToDom(myt.global.mouse, 'doMouseUp', 'mouseup', true);
-        }
+        
+        // Wait for a mouse up anywhere if the user moves the mouse out of the
+        // view while the mouse is still down. This allows the user to move
+        // the mouse in and out of the view with the view still behaving 
+        // as moused down.
+        if (!this.disabled && this.mouseDown) this.attachToDom(myt.global.mouse, 'doMouseUp', 'mouseup', true);
     },
     
     /** Called when the mouse is down on this view. Subclasses must call super.
@@ -62,10 +70,16 @@ myt.MouseDown = new JS.Module('MouseDown', {
     /** Called when the mouse is up on this view. Subclasses must call super.
         @returns void */
     doMouseUp: function(event) {
+        // Cleanup global mouse listener since the mouseUp occurred outside
+        // the view.
         if (!this.mouseOver) this.detachFromDom(myt.global.mouse, 'doMouseUp', 'mouseup', true);
         
         if (!this.disabled && this.mouseDown) {
             this.setMouseDown(false);
+            
+            // Only do mouseUpInside if the mouse is actually over the view.
+            // This means the user can mouse down on a view, move the mouse
+            // out and then mouse up and not "activate" the view.
             if (this.mouseOver) this.doMouseUpInside(event);
         }
     },

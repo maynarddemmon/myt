@@ -1,14 +1,18 @@
 /** Makes an object selectable.
     
+    Events:
+        selected:boolean
+    
     Attributes:
         selected:boolean Indicates the object is selected.
 */
 myt.Selectable = new JS.Module('Selectable', {
     // Accessors ///////////////////////////////////////////////////////////////
     setSelected: function(v) {
-        if (this.selected === v) return;
-        this.selected = v;
-        if (this.inited && this.fireNewEvent) this.fireNewEvent('selected', v);
+        if (this.selected !== v) {
+            this.selected = v;
+            if (this.inited && this.fireNewEvent) this.fireNewEvent('selected', v);
+        }
     },
     
     

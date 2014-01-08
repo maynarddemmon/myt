@@ -1,6 +1,9 @@
 /** Apply this mixin to any Object that needs to fire events.
     
     Attributes:
+        None
+    
+    Private Attributes:
         __observersByType: (Object) Stores arrays of observers and method names 
             by Event type
         __activeEventTypes: (Object) Stores event types that have currently 

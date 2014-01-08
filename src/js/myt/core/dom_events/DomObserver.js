@@ -8,6 +8,9 @@
     observable to become broken.
     
     Attributes:
+        None
+    
+    Private Attributes:
         __domSourcesByType: (Object) Holds arrays of DomObservables by 
             event type */
 myt.DomObserver = new JS.Module('DomObserver', {

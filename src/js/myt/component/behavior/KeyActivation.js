@@ -1,12 +1,19 @@
-/** This mixin provides keyboard handling to "activate" the component when a 
-    key is pressed down or up. By default, when a keyup event occurs for
+/** Provides keyboard handling to "activate" the component when a key is 
+    pressed down or released up. By default, when a keyup event occurs for
     an activation key and this view is not disabled, the 'doActivated' method
     will get called.
     
-    Requires: myt.Disableable, myt.KeyObservable and 
+    Requires: myt.Activateable, myt.Disableable, myt.KeyObservable and 
         myt.FocusObservable super mixins.
     
+    Events:
+        None
+    
     Attributes:
+        activationKeys:array of chars The keys that when keyed down will
+            activate this component. Note: The value is not copied so
+            modification of the array outside the scope of this object will
+            effect behavior.
         activateKeyDown:number the keycode of the activation key that is
             currently down. This will be -1 when no key is down.
         repeatKeyDown:boolean Indicates if doActivationKeyDown will be called
@@ -34,96 +41,91 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         this.attachToDom(this, '__handleKeyDown', 'keydown');
         this.attachToDom(this, '__handleKeyPress', 'keypress');
         this.attachToDom(this, '__handleKeyUp', 'keyup');
-        this.attachToDom(this, 'doDomBlur', 'blur');
+        this.attachToDom(this, '__doDomBlur', 'blur');
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    /** Set the activation keys.
-        @param v:array an array of keycodes. The values are not copied so
-            modification of the array outside the scope of this object will
-            effect behavior.
-        @returns void */
-    setActivationKeys: function(v) {
-        if (this.activationKeys === v) return;
-        this.activationKeys = v;
-        // No event needed
-    },
-    
+    setActivationKeys: function(v) {this.activationKeys = v;},
     setRepeatKeyDown: function(v) {this.repeatKeyDown = v;},
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** @private */
     __handleKeyDown: function(event) {
-        if (this.disabled) return;
-        
-        if (this.activateKeyDown === -1 || this.repeatKeyDown) {
-            var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event),
-                keys = this.activationKeys, i = keys.length;
-            while (i) {
-                if (keyCode === keys[--i]) {
-                    if (this.activateKeyDown === keyCode) {
-                        this.doActivationKeyDown(keyCode, true);
-                    } else {
-                        this.activateKeyDown = keyCode;
-                        this.doActivationKeyDown(keyCode, false);
+        if (!this.disabled) {
+            if (this.activateKeyDown === -1 || this.repeatKeyDown) {
+                var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event),
+                    keys = this.activationKeys, i = keys.length;
+                while (i) {
+                    if (keyCode === keys[--i]) {
+                        if (this.activateKeyDown === keyCode) {
+                            this.doActivationKeyDown(keyCode, true);
+                        } else {
+                            this.activateKeyDown = keyCode;
+                            this.doActivationKeyDown(keyCode, false);
+                        }
+                        event.value.preventDefault();
+                        return;
                     }
-                    event.value.preventDefault();
-                    return;
                 }
             }
         }
     },
     
+    /** @private */
     __handleKeyPress: function(event) {
-        if (this.disabled) return;
-        
-        var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
-        if (this.activateKeyDown === keyCode) {
-            var keys = this.activationKeys, i = keys.length;
-            while (i) {
-                if (keyCode === keys[--i]) {
-                    event.value.preventDefault();
-                    return;
+        if (!this.disabled) {
+            var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
+            if (this.activateKeyDown === keyCode) {
+                var keys = this.activationKeys, i = keys.length;
+                while (i) {
+                    if (keyCode === keys[--i]) {
+                        event.value.preventDefault();
+                        return;
+                    }
                 }
             }
         }
     },
     
+    /** @private */
     __handleKeyUp: function(event) {
-        if (this.disabled) return;
-        
-        var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
-        if (this.activateKeyDown === keyCode) {
-            var keys = this.activationKeys, i = keys.length;
-            while (i) {
-                if (keyCode === keys[--i]) {
-                    this.activateKeyDown = -1;
-                    this.doActivationKeyUp(keyCode);
-                    event.value.preventDefault();
-                    return;
+        if (!this.disabled) {
+            var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
+            if (this.activateKeyDown === keyCode) {
+                var keys = this.activationKeys, i = keys.length;
+                while (i) {
+                    if (keyCode === keys[--i]) {
+                        this.activateKeyDown = -1;
+                        this.doActivationKeyUp(keyCode);
+                        event.value.preventDefault();
+                        return;
+                    }
                 }
             }
         }
     },
     
-    /** Called when a dom blur event occurs.
-        @returns void */
-    doDomBlur: function(event) {
-        if (this.disabled) return;
-        
-        if (this.activateKeyDown !== -1) {
+    /** @private */
+    __doDomBlur: function(event) {
+        if (!this.disabled) {
             var keyThatWasDown = this.activateKeyDown;
-            this.activateKeyDown = -1;
-            this.doActivationKeyAborted(keyThatWasDown);
+            if (keyThatWasDown !== -1) {
+                this.activateKeyDown = -1;
+                this.doActivationKeyAborted(keyThatWasDown);
+            }
         }
     },
     
-    /** Called when an activation key is pressed down.
+    /** Called when an activation key is pressed down. Default implementation
+        does nothing.
         @param key:number the keycode that is down.
         @param isRepeat:boolean Indicates if this is a key repeat event or not.
         @returns void */
-    doActivationKeyDown: function(key, isRepeat) {},
+    doActivationKeyDown: function(key, isRepeat) {
+        // Subclasses to implement as needed.
+    },
     
     /** Called when an activation key is release up. This executes the
         'doActivated' method by default. 
@@ -133,8 +135,11 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         this.doActivated();
     },
     
-    /** Called when focus is lost while an activation key is down.
+    /** Called when focus is lost while an activation key is down. Default 
+        implementation does nothing.
         @param key:number the keycode that is down.
         @returns void */
-    doActivationKeyAborted: function(key) {}
+    doActivationKeyAborted: function(key) {
+        // Subclasses to implement as needed.
+    }
 });

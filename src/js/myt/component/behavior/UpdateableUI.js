@@ -1,5 +1,12 @@
 /** Adds an udpateUI method that should be called to update the UI. Various
-    mixins will rely on the updateUI method to trigger visual updates. */
+    mixins will rely on the updateUI method to trigger visual updates.
+    
+    Events:
+        None
+    
+    Attributes:
+        None
+*/
 myt.UpdateableUI = new JS.Module('UpdateableUI', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides */
@@ -16,5 +23,7 @@ myt.UpdateableUI = new JS.Module('UpdateableUI', {
     /** Updates the UI whenever a change occurs that requires a visual update.
         Subclasses should implement this as needed.
         @returns void */
-    updateUI: function() {}
+    updateUI: function() {
+        // Subclasses to implement as needed.
+    }
 });

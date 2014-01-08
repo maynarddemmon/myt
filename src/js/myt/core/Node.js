@@ -13,6 +13,8 @@
         parent:Node the parent of this Node.
         name:string the name of this node. Used to reference this Node from
             its parent Node.
+    
+    Private Attributes:
         __animPool:array An myt.TrackActivesPool used by the 'animate' method.
 */
 myt.Node = new JS.Class('Node', {
@@ -67,6 +69,7 @@ myt.Node = new JS.Class('Node', {
         this.inited = false;
         this.initNode(parent, attrs ? attrs : {});
     },
+    
     
     // Life Cycle //////////////////////////////////////////////////////////////
     /** Called during initialization. Sets initial state for life cycle attrs,
@@ -171,34 +174,33 @@ myt.Node = new JS.Class('Node', {
             if (placement) newParent = newParent.determinePlacement(placement, this);
         }
         
-        // Abort if parent isn't changing
-        if (this.parent === newParent) return;
-        
-        // Abort if the new parent is in the destroyed life-cycle state.
-        if (newParent && newParent.destroyed) return;
-        
-        // Remove ourselves from our existing parent if we have one.
-        var curParent = this.parent;
-        if (curParent) {
-            var idx = curParent.getSubnodeIndex(this);
-            if (idx !== -1) {
-                if (this.name) curParent.__removeNameRef(this);
-                curParent.subnodes.splice(idx, 1);
-                curParent.subnodeRemoved(this);
+        if (this.parent !== newParent) {
+            // Abort if the new parent is in the destroyed life-cycle state.
+            if (newParent && newParent.destroyed) return;
+            
+            // Remove ourselves from our existing parent if we have one.
+            var curParent = this.parent;
+            if (curParent) {
+                var idx = curParent.getSubnodeIndex(this);
+                if (idx !== -1) {
+                    if (this.name) curParent.__removeNameRef(this);
+                    curParent.subnodes.splice(idx, 1);
+                    curParent.subnodeRemoved(this);
+                }
             }
+            
+            this.parent = newParent;
+            
+            // Add ourselves to our new parent
+            if (newParent) {
+                newParent.getSubnodes().push(this);
+                if (this.name) newParent.__addNameRef(this);
+                newParent.subnodeAdded(this);
+            }
+            
+            // Fire an event
+            if (this.inited) this.fireNewEvent('parent', newParent);
         }
-        
-        this.parent = newParent;
-        
-        // Add ourselves to our new parent
-        if (newParent) {
-            newParent.getSubnodes().push(this);
-            if (this.name) newParent.__addNameRef(this);
-            newParent.subnodeAdded(this);
-        }
-        
-        // Fire an event
-        if (this.inited) this.fireNewEvent('parent', newParent);
     },
     
     /** The 'name' of a Node allows it to be referenced by name from its
@@ -206,16 +208,16 @@ myt.Node = new JS.Class('Node', {
         Node stored in the var 'bar' would be referenced like this: bar.foo or
         bar['foo']. */
     setName: function(name) {
-        if (this.name === name) return;
-        
-        // Remove "name" reference from parent.
-        var p = this.parent;
-        if (p && this.name) p.__removeNameRef(this);
-        
-        this.name = name;
-        
-        // Add "name" reference to parent.
-        if (p && name) p.__addNameRef(this);
+        if (this.name !== name) {
+            // Remove "name" reference from parent.
+            var p = this.parent;
+            if (p && this.name) p.__removeNameRef(this);
+            
+            this.name = name;
+            
+            // Add "name" reference to parent.
+            if (p && name) p.__addNameRef(this);
+        }
     },
     
     /** Gets the subnodes for this Node and does lazy instantiation of the 
@@ -272,7 +274,7 @@ myt.Node = new JS.Class('Node', {
         if (this[name] === undefined) {
             this[name] = node;
         } else {
-            console.log("Named reference already in use: " + name);
+            console.log("Name in use: " + name);
         }
     },
     
@@ -284,7 +286,7 @@ myt.Node = new JS.Class('Node', {
         if (this[name] === node) {
             delete this[name];
         } else {
-            console.log("Named reference not in use for subnode: " + name);
+            console.log("Name not in use: " + name);
         }
     },
     
@@ -306,17 +308,18 @@ myt.Node = new JS.Class('Node', {
         node itself.
         @returns boolean */
     isDescendantOf: function(node) {
-        if (!node) return false;
-        if (node === this) return true;
-        if (!this.parent) return false;
-        
-        // Optimization: use the dom element contains function if both nodes 
-        // are DomElementProxy instances.
-        if (this.domElement && node.domElement) {
-            return node.domElement.contains(this.domElement);
-        } else {
-            return this.parent.isDescendantOf(node);
+        if (node) {
+            if (node === this) return true;
+            if (this.parent) {
+                // Optimization: use the dom element contains function if 
+                // both nodes are DomElementProxy instances.
+                if (this.domElement && node.domElement) {
+                    return node.domElement.contains(this.domElement);
+                }
+                return this.parent.isDescendantOf(node);
+            }
         }
+        return false;
     },
     
     /** Tests if this Node is an ancestor of the provided Node or is the

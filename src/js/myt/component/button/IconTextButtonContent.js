@@ -1,24 +1,39 @@
 /** A mixin that adds an icon and text to the inside of a button.
     
+    Events:
+        inset:number
+        outset:number
+        text:string
+        shrinkToFit:boolean
+        contentAlign:string
+        iconUrl:string
+        iconY:number|string
+        iconSpacing:number
+        textY:number|string
+    
     Attributes:
-        __updateContentPositionLoopBlock:boolean Used in __updateContentPosition
-            to prevent infinite loops.
-        text:string the text to display on the button.
-        iconUrl:string the url to an image to display in the button.
-        inset:number the left padding before the icon. Defaults to 0.
-        outset:number the right padding after the text/icon. Defaults to 0.
-        textY:number the y offset for the text.
-        iconY:number the y offset for the icon.
-        iconSpacing:number spacing between the icon and the text. Defaults
-            to 2.
-        shrinkToFit:boolean when true the button will be as narrow as possible
+        text:string The text to display on the button.
+        iconUrl:string The url for an image to display in the button.
+        inset:number The left padding before the icon. Defaults to 0.
+        outset:number The right padding after the text/icon. Defaults to 0.
+        textY:number|string The y offset for the text. If a string it must be
+            a valign value: 'top', 'middle' or 'bottom'.
+        iconY:number|string The y offset for the icon. If a string it must be
+            a valign value: 'top', 'middle' or 'bottom'.
+        iconSpacing:number The spacing between the iconView and the textView. 
+            Defaults to 2.
+        shrinkToFit:boolean When true the button will be as narrow as possible
             to fit the text, icon, inset and outset. When false the button 
             will be as wide as the set width. Defaults to false.
-        contentAlign: determines how the icon and text will be positioned when
-            not in shrinkToFit mode. Allowed values are: 'left', 'center' and
-            'right'. Defaults to 'center'.
-        textView:myt.Text a reference to the child text view.
-        iconView:myt.Image a reference to the child image view.
+        contentAlign:string Determines how the icon and text will be 
+            positioned when not in shrinkToFit mode. Allowed values are: 
+            'left', 'center' and 'right'. Defaults to 'center'.
+        textView:myt.Text A reference to the child text view.
+        iconView:myt.Image A reference to the child image view.
+        
+    Private Attributes:
+        __updateContentPositionLoopBlock:boolean Used in __updateContentPosition
+            to prevent infinite loops.
 */
 myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
     // Life Cycle //////////////////////////////////////////////////////////////
@@ -77,91 +92,97 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
     // Accessors ///////////////////////////////////////////////////////////////
     setInset: function(v) {
         // Adapt to event from syncTo
-        if (typeof v === 'object') v = v.value;
+        if (v !== null && typeof v === 'object') v = v.value;
         
-        if (this.inset === v) return;
-        this.inset = v;
-        if (this.inited) this.fireNewEvent('inset', v);
+        if (this.inset !== v) {
+            this.inset = v;
+            if (this.inited) this.fireNewEvent('inset', v);
+        }
     },
     
     setOutset: function(v) {
         // Adapt to event from syncTo
-        if (typeof v === 'object') v = v.value;
+        if (v !== null && typeof v === 'object') v = v.value;
         
-        if (this.outset === v) return;
-        this.outset = v;
-        if (this.inited) this.fireNewEvent('outset', v);
+        if (this.outset !== v) {
+            this.outset = v;
+            if (this.inited) this.fireNewEvent('outset', v);
+        }
     },
     
     setText: function(v) {
-        if (this.text === v) return;
-        this.text = v;
-        if (this.inited) {
-            this.textView.setText(v);
-            this.fireNewEvent('text', v);
-        }
-    },
-    
-    setShrinkToFit: function(v) {
-        if (this.shrinkToFit === v) return;
-        this.shrinkToFit = v;
-        if (this.inited) this.fireNewEvent('shrinkToFit', v);
-    },
-    
-    setContentAlign: function(v) {
-        if (this.contentAlign === v) return;
-        this.contentAlign = v;
-        if (this.inited) this.fireNewEvent('contentAlign', v);
-    },
-    
-    /** The url for the iconView's image. */
-    setIconUrl: function(v) {
-        if (this.iconUrl === v) return;
-        this.iconUrl = v;
-        if (this.inited) {
-            this.fireNewEvent('iconUrl', v);
-            this.iconView.setImageUrl(v);
-        }
-    },
-    
-    /** For fine tuning the y-position of the iconView. */
-    setIconY: function(v) {
-        if (this.iconY === v) return;
-        this.iconY = v;
-        if (this.inited) {
-            this.fireNewEvent('iconY', v);
-            if (typeof v === 'string') {
-                this.iconView.setValign(v);
-            } else {
-               this.iconView.setY(v);
+        if (this.text !== v) {
+            this.text = v;
+            if (this.inited) {
+                this.textView.setText(v);
+                this.fireNewEvent('text', v);
             }
         }
     },
     
-    /** Spacing between the iconView and the textView. */
-    setIconSpacing: function(v) {
-        if (this.iconSpacing === v) return;
-        this.iconSpacing = v;
-        if (this.inited) this.fireNewEvent('iconSpacing', v);
+    setShrinkToFit: function(v) {
+        if (this.shrinkToFit !== v) {
+            this.shrinkToFit = v;
+            if (this.inited) this.fireNewEvent('shrinkToFit', v);
+        }
     },
     
-    /** For fine tuning the y-position of the textView. */
+    setContentAlign: function(v) {
+        if (this.contentAlign !== v) {
+            this.contentAlign = v;
+            if (this.inited) this.fireNewEvent('contentAlign', v);
+        }
+    },
+    
+    setIconUrl: function(v) {
+        if (this.iconUrl !== v) {
+            this.iconUrl = v;
+            if (this.inited) {
+                this.fireNewEvent('iconUrl', v);
+                this.iconView.setImageUrl(v);
+            }
+        }
+    },
+    
+    setIconY: function(v) {
+        if (this.iconY !== v) {
+            this.iconY = v;
+            if (this.inited) {
+                this.fireNewEvent('iconY', v);
+                if (typeof v === 'string') {
+                    this.iconView.setValign(v);
+                } else {
+                   this.iconView.setY(v);
+                }
+            }
+        }
+    },
+    
+    setIconSpacing: function(v) {
+        if (this.iconSpacing !== v) {
+            this.iconSpacing = v;
+            if (this.inited) this.fireNewEvent('iconSpacing', v);
+        }
+    },
+    
     setTextY: function(v) {
-        if (this.textY === v) return;
-        this.textY = v;
-        if (this.inited) {
-            this.fireNewEvent('textY', v);
-            if (typeof v === 'string') {
-                this.textView.setValign(v);
-            } else {
-                this.textView.setValign('');
-                this.textView.setY(v);
+        if (this.textY !== v) {
+            this.textY = v;
+            if (this.inited) {
+                this.fireNewEvent('textY', v);
+                if (typeof v === 'string') {
+                    this.textView.setValign(v);
+                } else {
+                    this.textView.setValign('');
+                    this.textView.setY(v);
+                }
             }
         }
     },
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** @private */
     __updateContentPosition: function(v) {
         if (this.__updateContentPositionLoopBlock || this.destroyed) return;
         

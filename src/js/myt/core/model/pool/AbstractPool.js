@@ -2,6 +2,9 @@
     createInstance method.
     
     Attributes:
+        None
+    
+    Private Attributes:
         __objPool:array The array of object stored in the pool.
 */
 myt.AbstractPool = new JS.Class('AbstractPool', {

@@ -7,6 +7,9 @@
     between observer and observable to be broken.
     
     Attributes:
+        None
+    
+    Private Attributes:
         __observablesByType: (Object) Stores arrays of Observables by Event type
         __methodNameCounter: (int) used to create unique method names when a
             callback should only be called once.

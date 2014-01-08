@@ -1,6 +1,9 @@
 /** An myt.Button that makes use of activeColor, hoverColor and readyColor
     attributes to fill the button.
     
+    Events:
+        None
+    
     Attributes:
         activeColor:string A color string such as '#ff0000' or 'transparent'.
             Used when the button is in the active state. The default value 
@@ -26,24 +29,27 @@ myt.SimpleButton = new JS.Class('SimpleButton', myt.View, {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setActiveColor: function(v) {
-        if (this.activeColor === v) return;
-        this.activeColor = v;
-        // No event needed
-        if (this.inited) this.updateUI();
+        if (this.activeColor !== v) {
+            this.activeColor = v;
+            // No event needed
+            if (this.inited) this.updateUI();
+        }
     },
     
     setHoverColor: function(v) {
-        if (this.hoverColor === v) return;
-        this.hoverColor = v;
-        // No event needed
-        if (this.inited) this.updateUI();
+        if (this.hoverColor !== v) {
+            this.hoverColor = v;
+            // No event needed
+            if (this.inited) this.updateUI();
+        }
     },
     
     setReadyColor: function(v) {
-        if (this.readyColor === v) return;
-        this.readyColor = v;
-        // No event needed
-        if (this.inited) this.updateUI();
+        if (this.readyColor !== v) {
+            this.readyColor = v;
+            // No event needed
+            if (this.inited) this.updateUI();
+        }
     },
     
     
