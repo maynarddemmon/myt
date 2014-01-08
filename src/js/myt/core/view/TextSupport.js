@@ -1,13 +1,63 @@
-/** Adds support for text display to a View. Requires myt.SizeToDom mixin
-    be used as a super mixin.
+/** Adds support for text display to a View.
+    
+    Requires:
+        myt.SizeToDom super mixin.
+    
+    Events:
+        text:string
+        textOverflow:string
+        textAlign:string
+        whiteSpace:string
+        wordWrap:string
+        textIndent:string
+        textTransform:string
+        textDecoration:string
+        lineHeight:string
+        letterSpacing:string
+        wordSpacing:string
+        fontFamily:string
+        fontStyle:string
+        fontVariant:string
+        fontWeight:string
+        fontSize:string
     
     Attributes:
-        text:string|event object with a string value
-            The text to be displayed. The value will be assigned to the
-            inner html of the div.
-        fontFamily:string
-            The name of a font to use. The value will be assigned to the
-            font family CSS parameter. */
+        text:string|event(string) The text to be displayed. The value will 
+            be assigned to the inner html of the div.
+        textOverflow:string How text will be treated when it overflows the
+            bounds. Supported values: 'ellipsis', 'clip', 'inherit'.
+        textAlign:string How text will be aligned within the bounds. Supported 
+            values: 'left', 'right', 'center', 'justify', 'inherit'.
+        whiteSpace:string How white space is handled. Supported values: 
+            'normal', 'nowrap', 'pre', 'pre-line', 'pre-wrap', 'inherit'.
+        wordWrap:string How line wrapping is done. Supported 
+            values: 'break-word', 'normal'.
+        textIndent:string How text gets indented. Supported values: '20px', 
+            '10%', 'inherit'.
+        textTransform:string Transformation performed on the text during
+            display. Supported values: 'none', 'capitalize', 'uppercase', 
+            'lowercase', 'inherit'.
+        textDecoration:string Visual decoration to the text. Supported 
+            values: 'none', 'underline', 'overline', 'line-through', 
+            'blink', 'inherit'.
+        lineHeight:string The height of individual lines of text. Supported 
+            values: 'normal', '1.5', '22px', '150%', 'inherit'.
+        letterSpacing:string Spacing between letters. Supported values: 
+            'normal', '3px', 'inherit'.
+        wordSpacing:string Spacing between words. Supported values: 
+            'normal', '3px', 'inherit'.
+        fontFamily:string The name of a font to use. The value will be 
+            assigned to the font family CSS parameter.
+        fontStyle:string Styling applied to the text. Supported values: 
+            'normal', 'italic', 'oblique', 'inherit'.
+        fontVariant:string The font variant. Supported values: 'normal', 
+            'small-caps', 'inherit'.
+        fontWeight:string The font weight. Supported values: 'normal', 'bold', 
+            'bolder', 'lighter', '100-900', 'inherit'.
+        fontSize:string The size of the font. Supported values: 'normal, 
+            '14px', '14pt', 'xx-small', 'x-small', 'small', 'medium', 'large', 
+            'x-large', 'xx-large', 'smaller', 'larger', '75%', 'inherit'.
+*/
 myt.TextSupport = new JS.Module('TextSupport', {
     // Accessors ///////////////////////////////////////////////////////////////
     /** @overrides myt.View */
@@ -23,7 +73,6 @@ myt.TextSupport = new JS.Module('TextSupport', {
         }
     },
     
-    /** The text content to be displayed. */
     setText: function(v) {
         if (!v) v = '';
         if (typeof v === 'object') v = v.value;
@@ -40,7 +89,6 @@ myt.TextSupport = new JS.Module('TextSupport', {
     },
     
     // Text Attributes
-    /** Supported values: 'ellipsis', 'clip', 'inherit'. */
     setTextOverflow: function(v) {
         if (this.textOverflow !== v) {
             this.textOverflow = v;
@@ -49,7 +97,6 @@ myt.TextSupport = new JS.Module('TextSupport', {
         }
     },
     
-    /** Supported values: 'left', 'right', 'center', 'justify', 'inherit'. */
     setTextAlign: function(v) {
         if (this.textAlign !== v) {
             this.textAlign = v;
@@ -58,79 +105,25 @@ myt.TextSupport = new JS.Module('TextSupport', {
         }
     },
     
-    /** Supported values: 'normal', 'nowrap', 'pre', 'pre-line', 'pre-wrap', 
-        'inherit'. */
-    setWhiteSpace: function(v) {
-        this.__s(v, 'whiteSpace');
-    },
-    
-    /** Supported values: 'break-word', 'normal'. */
-    setWordWrap: function(v) {
-        this.__s(v, 'wordWrap', 'normal');
-    },
-    
-    /** Supported values: '20px', '10%', 'inherit'. */
-    setTextIndent: function(v) {
-        this.__s(v, 'textIndent');
-    },
-    
-    /** Supported values: 'none', 'capitalize', 'uppercase', 'lowercase', 
-        'inherit'. */
-    setTextTransform: function(v) {
-        this.__s(v, 'textTransform');
-    },
-    
-    /** Supported values: 'none', 'underline', 'overline', 'line-through', 
-        'blink', 'inherit'. */
-    setTextDecoration: function(v) {
-        this.__s(v, 'textDecoration');
-    },
-    
-    /** Supported values: 'normal', '1.5', '22px', '150%', 'inherit'. */
-    setLineHeight: function(v) {
-        this.__s(v, 'lineHeight');
-    },
-    
-    /** Supported values: 'normal', '3px', 'inherit'. */
-    setLetterSpacing: function(v) {
-        this.__s(v, 'letterSpacing');
-    },
-    
-    /** Supported values: 'normal', '3px', 'inherit'. */
-    setWordSpacing: function(v) {
-        this.__s(v, 'wordSpacing');
-    },
+    setWhiteSpace: function(v) {this.__s(v, 'whiteSpace');},
+    setWordWrap: function(v) {this.__s(v, 'wordWrap', 'normal');},
+    setTextIndent: function(v) {this.__s(v, 'textIndent');},
+    setTextTransform: function(v) {this.__s(v, 'textTransform');},
+    setTextDecoration: function(v) {this.__s(v, 'textDecoration');},
+    setLineHeight: function(v) {this.__s(v, 'lineHeight');},
+    setLetterSpacing: function(v) {this.__s(v, 'letterSpacing');},
+    setWordSpacing: function(v) {this.__s(v, 'wordSpacing');},
     
     // Font Attributes
-    setFontFamily: function(v) {
-        this.__s(v, 'fontFamily');
-    },
-    
-    /** Supported values: 'normal', 'italic', 'oblique', 'inherit'. */
-    setFontStyle: function(v) {
-        this.__s(v, 'fontStyle');
-    },
-    
-    /** Supported values: 'normal', 'small-caps', 'inherit'. */
-    setFontVariant: function(v) {
-        this.__s(v, 'fontVariant');
-    },
-    
-    /** Supported values: 'normal', 'bold', 'bolder', 'lighter', '100-900', 
-        'inherit'. */
-    setFontWeight: function(v) {
-        this.__s(v, 'fontWeight');
-    },
-    
-    /** Supported values: 'normal, '14px', '14pt', 'xx-small', 'x-small', 
-        'small', 'medium', 'large', 'x-large', 'xx-large', 'smaller', 'larger',
-        '75%', 'inherit'. */
-    setFontSize: function(v) {
-        this.__s(v, 'fontSize');
-    },
+    setFontFamily: function(v) {this.__s(v, 'fontFamily');},
+    setFontStyle: function(v) {this.__s(v, 'fontStyle');},
+    setFontVariant: function(v) {this.__s(v, 'fontVariant');},
+    setFontWeight: function(v) {this.__s(v, 'fontWeight');},
+    setFontSize: function(v) {this.__s(v, 'fontSize');},
     
     /** A private setter function that provides a common implementation for
-        most of this setters in this mixin. */
+        most of this setters in this mixin.
+        @private */
     __s: function(v, attrName, defaultValue) {
         if (this[attrName] !== v) {
             this[attrName] = v;

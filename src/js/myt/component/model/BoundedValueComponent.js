@@ -1,5 +1,10 @@
 /** A numeric value component that stays within a minimum and maximum value.
     
+    Events:
+        minValue:number
+        maxValue:number
+        snapToInt:boolean
+    
     Attributes:
         minValue:number the largest value allowed. If undefined or null no
             min value is enforced.
@@ -33,16 +38,17 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setSnapToInt: function(v) {
-        if (this.snapToInt === v) return;
-        this.snapToInt = v;
-        if (this.inited) {
-            this.fireNewEvent('snapToInt', v);
-            
-            // Update min, max and value since snap has been turned on
-            if (v) {
-                this.setMinValue(this.minValue);
-                this.setMaxValue(this.maxValue);
-                this.setValue(this.value);
+        if (this.snapToInt !== v) {
+            this.snapToInt = v;
+            if (this.inited) {
+                this.fireNewEvent('snapToInt', v);
+                
+                // Update min, max and value since snap has been turned on
+                if (v) {
+                    this.setMinValue(this.minValue);
+                    this.setMaxValue(this.maxValue);
+                    this.setValue(this.value);
+                }
             }
         }
     },
@@ -50,34 +56,34 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
     setMinValue: function(v) {
         if (v != null && this.snapToInt) v = Math.round(v);
         
-        if (this.minValue === v) return;
-        
-        var max = this.maxValue;
-        if (max != null && v > max) v = max;
-        
-        this.minValue = v;
-        if (this.inited) {
-            this.fireNewEvent('minValue', v);
+        if (this.minValue !== v) {
+            var max = this.maxValue;
+            if (max != null && v > max) v = max;
             
-            // Rerun setValue since the filter has changed.
-            this.setValue(this.value);
+            this.minValue = v;
+            if (this.inited) {
+                this.fireNewEvent('minValue', v);
+                
+                // Rerun setValue since the filter has changed.
+                this.setValue(this.value);
+            }
         }
     },
     
     setMaxValue: function(v) {
         if (v != null && this.snapToInt) v = Math.round(v);
         
-        if (this.maxValue === v) return;
-        
-        var min = this.minValue;
-        if (min != null && v < min) v = min;
-        
-        this.maxValue = v;
-        if (this.inited) {
-            this.fireNewEvent('maxValue', v);
+        if (this.maxValue !== v) {
+            var min = this.minValue;
+            if (min != null && v < min) v = min;
             
-            // Rerun setValue since the filter has changed.
-            this.setValue(this.value);
+            this.maxValue = v;
+            if (this.inited) {
+                this.fireNewEvent('maxValue', v);
+                
+                // Rerun setValue since the filter has changed.
+                this.setValue(this.value);
+            }
         }
     },
     

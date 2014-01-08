@@ -1,5 +1,109 @@
 /** A Node that can be viewed. Instances of view are typically backed by
-    an absolutely positioned div element. */
+    an absolutely positioned div element.
+    
+    Events:
+        domClass:string Fired when the domClass setter is called.
+        domId:string Fired when the domId setter is called.
+        align:string
+        alignOffset:number
+        valign:string
+        valignOffset:number
+        x:number
+        y:number
+        width:number (supressable)
+        height:number (supressable)
+        boundsWidth:number Fired when the bounds width of the view changes.
+        boundsHeight:number Fired when the bounds height of the view changes.
+        textColor:string
+        bgColor:string
+        opacity:number
+        overflow:string
+        visible:boolean
+        cursor:string
+        subviewAdded:myt.View Fired when a subview is added to this view.
+        subviewRemoved:myt.View Fired when a subview is removed from this view.
+        layoutAdded:myt.Layout Fired when a layout is added to this view.
+        layoutRemoved:myt.Layout Fired when a layout is removed from this view.
+    
+    Attributes:
+        focusTrap:boolean Determines if focus traversal can move above this view
+            or not. The default is undefined which is equivalent to false. Can 
+            be ignored using a key modifier. The key modifier is 
+            typically 'option'.
+        focusCage:boolean Determines if focus traversal can move above this view
+            or not. The default is undefined which is equivalent to false. This
+            is the same as focusTrap except it can't be ignored using a 
+            key modifier.
+        maskFocus:boolean Prevents focus from traversing into this view or any
+            of its subviews. The default is undefined which is equivalent 
+            to false.
+        ignoreLayout:boolean Determines if this view should be included in 
+            layouts or not. Default is undefined which is equivalent to false.
+        layoutHint:* A value that indicates this view is treated as "special" 
+            by the layout. The interpretation of this value is up to the 
+            layout managing the view.
+        align:string Aligns the view horizontally within its parent. 
+            Supported values are: 'left', 'center', 'right' and ''. 
+            The default is undefined which is equivalent to ''.
+        alignOffset:number A pixel offset to use when aligning a view.
+        valign:string Aligns the view vertically within its parent. 
+            Supported values are: 'top', 'middle', 'bottom' and ''. 
+            The default is undefined which is equivalent to ''.
+        valignOffset:number A pixel offset to use when valigning a view.
+        x:number The x-position of this view in pixels. Defaults to 0.
+        y:number The y-position of this view in pixels. Defaults to 0.
+        width:number The width of this view in pixels. Defaults to 0.
+        height:number the height of this view in pixels. Defaults to 0.
+        boundsWidth:number (read only) The actual bounds of the view in the
+            x-dimension. This value is in pixels relative to the RootView and
+            thus compensates for rotation and scaling.
+        boundsHeight:number (read only) The actual bounds of the view in the
+            y-dimension. This value is in pixels relative to the RootView and
+            thus compensates for rotation and scaling.
+        textColor:string The color used for text. Will be inherited by 
+            descendant views if they don't themselves set textColor or if 
+            they set textColor to 'inherit'. Defaults to undefined which is
+            equivalent to 'inherit'.
+        bgColor:string The background color of this view. Use a value of 
+            'transparent' to make this view transparent. Defaults 
+            to 'transparent'.
+        opacity:number The opacity of this view. The value should be a number 
+            between 0 and 1. Defaults to 1.
+        overflow:string Determines how descendant content overflows the bounds.
+            Allowed values: 'visible', 'hidden', 'scroll', 'auto', 'inherit'.
+            Defaults to undefined which is equivalent to 'visible'.
+        visible:boolean Makes this view visible or not. The default value is 
+            true which means visbility is inherited from the parent view.
+        cursor:string Determines what cursor to show when moused over the view.
+            Allowed values: 'auto', 'move', 'no-drop', 'col-resize', 
+            'all-scroll', 'pointer', 'not-allowed', 'row-resize', 'crosshair', 
+            'progress', 'e-resize', 'ne-resize', 'default', 'text', 'n-resize', 
+            'nw-resize', 'help', 'vertical-text', 's-resize', 'se-resize', 
+            'inherit', 'wait', 'w-resize', 'sw-resize'. Defaults to undefined 
+            which is equivalent to 'auto'.
+        outlineWidth:number The width of the CSS outline. If a value equivalent
+            to false is provided 0 will be used.
+        outlineStyle:string The CSS outline style. If null or undefined is 
+            provided 'none' will be used. Supported values: 'none', 'dotted', 
+            'dashed', 'solid', 'double', 'groove', 'ridge', 'inset', 
+            'outset', 'inherit'.
+        outlineColor:string Sets the color of the CSS outline. If null or 
+            undefined is provided '#000000' will be used.
+        borderWidth:number The width of the CSS border. If a value equivalent 
+            to false is provided 0 will be used.
+        borderStyle:string The CSS border style. If null or undefined is 
+            provided 'none' will be used. Supported values: 'none', 'dotted', 
+            'dashed', 'solid', 'double', 'groove', 'ridge', 'inset', 
+            'outset', 'inherit'.
+        borderColor:string Sets the color of the CSS border. If null or 
+            undefined is provided '#000000' will be used.
+    
+    Private Attributes:
+        subviews:array The array of child myt.Views for this view. Should 
+            be accessed through the getSubviews method.
+        layouts:array The array of child myt.Layouts for this view. Should
+            be accessed through the getLayouts method.
+*/
 myt.View = new JS.Class('View', myt.Node, {
     include: [
         myt.DomElementProxy, 
@@ -139,38 +243,13 @@ myt.View = new JS.Class('View', myt.Node, {
     },
     
     // Focus Attributes //
-    /** A boolean that determines if focus traversal can move above this view
-        or not. The default is false. */
-    setFocusTrap: function(v) {
-        this.focusTrap = v;
-    },
-    
-    /** A boolean that determines if focus traversal can move above this view
-        or not. The default is false. This is the same as focusTrap except
-        it can't be ignored. */
-    setFocusCage: function(v) {
-        this.focusCage = v;
-    },
-    
-    /** A boolean that prevents focus from traversing into this view or any
-        of its subviews. The default is false. */
-    setMaskFocus: function(v) {
-        this.maskFocus = v;
-    },
+    setFocusTrap: function(v) {this.focusTrap = v;},
+    setFocusCage: function(v) {this.focusCage = v;},
+    setMaskFocus: function(v) {this.maskFocus = v;},
     
     // Layout Attributes //
-    /** A boolean that determines if this view should be included in layouts
-        or not. */
-    setIgnoreLayout: function(v) {
-        this.ignoreLayout = v;
-    },
-    
-    /** A value that indicates this view is treated as "special" by the 
-        layout. The exact meaning of this value is up to the layouts used
-        on the parent view. */
-    setLayoutHint: function(v) {
-        this.layoutHint = v;
-    },
+    setIgnoreLayout: function(v) {this.ignoreLayout = v;},
+    setLayoutHint: function(v) {this.layoutHint = v;},
     
     // Dom Selector Attributes //
     /** @overrides myt.DomElementProxy */
@@ -190,7 +269,6 @@ myt.View = new JS.Class('View', myt.Node, {
     },
     
     // Alignment Attributes //
-    /** Offset to use when aligning a view. */
     setAlignOffset: function(v) {
         if (this.alignOffset !== v) {
             this.alignOffset = v;
@@ -199,8 +277,6 @@ myt.View = new JS.Class('View', myt.Node, {
         }
     },
     
-    /** Aligns the view within its parent. Allowed values are: 'left', 'center',
-        'right' and ''. The default is undefined. */
     setAlign: function(v) {
         if (this.align !== v) {
             if (this.inited) this.__teardownAlignConstraint();
@@ -212,8 +288,9 @@ myt.View = new JS.Class('View', myt.Node, {
         }
     },
     
+    /** @private */
     __teardownAlignConstraint: function() {
-        switch(this.align) {
+        switch (this.align) {
             case 'center': this.releaseConstraint('__doAlignCenter'); break;
             case 'right': this.releaseConstraint('__doAlignRight'); break;
             case 'left':
@@ -221,9 +298,10 @@ myt.View = new JS.Class('View', myt.Node, {
         }
     },
     
+    /** @private */
     __setupAlignConstraint: function() {
         if (this.parent) {
-            switch(this.align) {
+            switch (this.align) {
                 case 'center':
                     this.applyConstraint('__doAlignCenter', [this, 'width', this, 'alignOffset', this.parent, 'width']);
                     break;
@@ -238,15 +316,16 @@ myt.View = new JS.Class('View', myt.Node, {
         }
     },
     
+    /** @private */
     __doAlignCenter: function(e) {
         this.setX(((this.parent.width - this.width) / 2) + (this.alignOffset ? this.alignOffset : 0));
     },
     
+    /** @private */
     __doAlignRight: function(e) {
         this.setX(this.parent.width - this.width - (this.alignOffset ? this.alignOffset : 0));
     },
     
-    /** Offset to use when vertically aligning a view. */
     setValignOffset: function(v) {
         if (this.valignOffset !== v) {
             this.valignOffset = v;
@@ -255,8 +334,6 @@ myt.View = new JS.Class('View', myt.Node, {
         }
     },
     
-    /** Vertically aligns the view within its parent. Allowed values are: 'top', 
-        'middle', 'bottom' and ''. The default is undefined. */
     setValign: function(v) {
         if (this.valign !== v) {
             if (this.inited) this.__teardownValignConstraint();
@@ -268,8 +345,9 @@ myt.View = new JS.Class('View', myt.Node, {
         }
     },
     
+    /** @private */
     __teardownValignConstraint: function() {
-        switch(this.valign) {
+        switch (this.valign) {
             case 'middle': this.releaseConstraint('__doValignMiddle'); break;
             case 'bottom': this.releaseConstraint('__doValignBottom'); break;
             case 'top':
@@ -277,9 +355,10 @@ myt.View = new JS.Class('View', myt.Node, {
         }
     },
     
+    /** @private */
     __setupValignConstraint: function() {
         if (this.parent) {
-            switch(this.valign) {
+            switch (this.valign) {
                 case 'middle':
                     this.applyConstraint('__doValignMiddle', [this, 'height', this, 'valignOffset', this.parent, 'height']);
                     break;
@@ -294,16 +373,17 @@ myt.View = new JS.Class('View', myt.Node, {
         }
     },
     
+    /** @private */
     __doValignMiddle: function(e) {
         this.setY(((this.parent.height - this.height) / 2) + (this.valignOffset ? this.valignOffset : 0));
     },
     
+    /** @private */
     __doValignBottom: function(e) {
         this.setY(this.parent.height - this.height - (this.valignOffset ? this.valignOffset : 0));
     },
     
     // Visual Attributes //
-    /** Sets the x position of this view. */
     setX: function(v) {
         if (this.x !== v) {
             this.x = v;
@@ -316,7 +396,6 @@ myt.View = new JS.Class('View', myt.Node, {
         }
     },
     
-    /** Sets the y position of this view. */
     setY: function(v) {
         if (this.y !== v) {
             this.y = v;
@@ -325,7 +404,6 @@ myt.View = new JS.Class('View', myt.Node, {
         }
     },
     
-    /** Sets the width of this view. */
     setWidth: function(v, supressEvent) {
         // Dom elements don't support negative width
         if (0 > v) v = 0;
@@ -340,7 +418,6 @@ myt.View = new JS.Class('View', myt.Node, {
         }
     },
     
-    /** Sets the height of this view. */
     setHeight: function(v, supressEvent) {
         // Dom elements don't support negative height
         if (0 > v) v = 0;
@@ -355,9 +432,6 @@ myt.View = new JS.Class('View', myt.Node, {
         }
     },
     
-    /** Sets the color used for text. Will be inherited by descendant views
-        if they don't themselves set textColor or if they set textColor to
-        'inherit'. */
     setTextColor: function(v) {
         if (this.textColor !== v) {
             this.textColor = v;
@@ -366,8 +440,6 @@ myt.View = new JS.Class('View', myt.Node, {
         }
     },
     
-    /** Sets the background color of this view. Use a value of 'transparent'
-        to make this view transparent. */
     setBgColor: function(v) {
         if (this.bgColor !== v) {
             this.deStyle.backgroundColor = this.bgColor = v;
@@ -375,15 +447,13 @@ myt.View = new JS.Class('View', myt.Node, {
         }
     },
     
-    /** Sets the opacity of this view. The value should be a number between
-        0 and 1. The default value is 1. */
     setOpacity: function(v) {
-        if (this.opacity === v) return;
-        this.deStyle.opacity = this.opacity = v;
-        if (this.inited) this.fireNewEvent('opacity', v);
+        if (this.opacity !== v) {
+            this.deStyle.opacity = this.opacity = v;
+            if (this.inited) this.fireNewEvent('opacity', v);
+        }
     },
     
-    /** Allowed values: 'visible', 'hidden', 'scroll', 'auto', 'inherit'. */
     setOverflow: function(v) {
         if (this.overflow !== v) {
             this.overflow = v;
@@ -392,8 +462,6 @@ myt.View = new JS.Class('View', myt.Node, {
         }
     },
     
-    /** Makes this view visible or not. The default value is true which means
-        visbility is inherited from the parent view. */
     setVisible: function(v) {
         if (this.visible !== v) {
             this.visible = v;
@@ -410,11 +478,6 @@ myt.View = new JS.Class('View', myt.Node, {
         }
     },
     
-    /** Allowed values: 'auto', 'move', 'no-drop', 'col-resize', 'all-scroll', 
-        'pointer', 'not-allowed', 'row-resize', 'crosshair', 'progress', 
-        'e-resize', 'ne-resize', 'default', 'text', 'n-resize', 'nw-resize', 
-        'help', 'vertical-text', 's-resize', 'se-resize', 'inherit', 'wait', 
-        'w-resize', 'sw-resize' */
     setCursor: function(v) {
         if (this.cursor !== v) {
             this.cursor = v;
@@ -424,6 +487,9 @@ myt.View = new JS.Class('View', myt.Node, {
     },
     
     /** Updates the boundsWidth and boundsHeight attributes.
+        @private
+        @param w:number the boundsWidth to set.
+        @param h:number the boundsHeight to set.
         @returns void */
     __updateBounds: function(w, h) {
         if (this.boundsWidth !== w) {
@@ -451,28 +517,15 @@ myt.View = new JS.Class('View', myt.Node, {
         this.setOutlineColor(v[2]);
     },
     
-    /** Sets the width of the outline. If a value equivalent to false is 
-        provided 0 will be used.
-        @param v:number the width
-        @returns void */
     setOutlineWidth: function(v) {
         this.outlineWidth = v || 0;
         this.deStyle.outlineWidth = this.outlineWidth + 'px';
     },
     
-    /** Sets the style for a CSS outline. If null or undefined is provided
-        'none' will be used.
-        @param v:string Supported values: 'none', 'dotted', 'dashed', 'solid', 
-            'double', 'groove', 'ridge', 'inset', 'outset', 'inherit'.
-        @returns void */
     setOutlineStyle: function(v) {
         this.deStyle.outlineStyle = this.outlineStyle = v || 'none';
     },
     
-    /** Sets the color of the outline. If null or undefined is provided
-        '#000000' will be used.
-        @param v:string an html color value.
-        @returns void */
     setOutlineColor: function(v) {
         this.deStyle.outlineColor = this.outlineColor = v || '#000000';
     },
@@ -491,28 +544,15 @@ myt.View = new JS.Class('View', myt.Node, {
         this.setBorderColor(v[2]);
     },
     
-    /** Sets the width of the border. If a value equivalent to false is 
-        provided 0 will be used.
-        @param v:number the width
-        @returns void */
     setBorderWidth: function(v) {
         this.borderWidth = v || 0;
         this.deStyle.borderWidth = this.borderWidth + 'px';
     },
     
-    /** Sets the style for a CSS border. If null or undefined is provided
-        'none' will be used.
-        @param v:string Supported values: 'none', 'dotted', 'dashed', 'solid', 
-            'double', 'groove', 'ridge', 'inset', 'outset', 'inherit'.
-        @returns void */
     setBorderStyle: function(v) {
         this.deStyle.borderStyle = this.borderStyle = v || 'none';
     },
     
-    /** Sets the color of the border. If null or undefined is provided
-        '#000000' will be used.
-        @param v:string an html color value.
-        @returns void */
     setBorderColor: function(v) {
         this.deStyle.borderColor = this.borderColor = v || '#000000';
     },

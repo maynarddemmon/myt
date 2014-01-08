@@ -1,4 +1,27 @@
-/** Adds CSS3 transform support to a View. */
+/** Adds CSS3 transform support to a View.
+    
+    Events:
+        transformOrigin:string
+        rotation:number
+        scaleX:number
+        scaleY:number
+        skewX:number
+        skewY:number
+    
+    Attributes:
+        transformOrigin:string The origin point for transforms.
+        rotation:number The rotation in degrees.
+        scale:number (write only) Sets the scale for the view in both the x 
+            and y dimension to the same value. A value of 1 is no scaling, 
+            0.5 is 50%, 2 is 200%, etc. Note: The setters for scaleX and 
+            scaleY are not called.
+        scaleX:number The scale for the view in the x-dimension. A value of 1 
+            is no scaling, 0.5 is 50%, 2 is 200%, etc.
+        scaleY:number The scale for the view in the y-dimension. A value of 1 
+            is no scaling, 0.5 is 50%, 2 is 200%, etc.
+        skewX:number Sets the horizontal skew in degrees.
+        skewY:number Sets the vertical skew in degrees.
+*/
 myt.TransformSupport = new JS.Module('TransformSupport', {
     // Class Methods ///////////////////////////////////////////////////////////
     extend: {
@@ -63,29 +86,27 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setTransformOrigin: function(v) {
-        if (this.transformOrigin === v) return;
-        this.transformOrigin = v;
-        myt.TransformSupport.setTransformOrigin(this.deStyle, v);
-        if (this.inited) {
-            this.__updateBounds(this.width, this.height);
-            this.fireNewEvent('transformOrigin', v);
+        if (this.transformOrigin !== v) {
+            this.transformOrigin = v;
+            myt.TransformSupport.setTransformOrigin(this.deStyle, v);
+            if (this.inited) {
+                this.__updateBounds(this.width, this.height);
+                this.fireNewEvent('transformOrigin', v);
+            }
         }
     },
     
-    /** Set rotation in degrees.
-        @param v:number amount of rotation in degrees. */
     setRotation: function(v) {
-        if (this.rotation === v) return;
-        this.rotation = v;
-        myt.TransformSupport.addTransform(this.deStyle, 'rotate', (v ? v : 0) + 'deg');
-        if (this.inited) {
-            this.__updateBounds(this.width, this.height);
-            this.fireNewEvent('rotation', v);
+        if (this.rotation !== v) {
+            this.rotation = v;
+            myt.TransformSupport.addTransform(this.deStyle, 'rotate', (v ? v : 0) + 'deg');
+            if (this.inited) {
+                this.__updateBounds(this.width, this.height);
+                this.fireNewEvent('rotation', v);
+            }
         }
     },
     
-    /** Sets the scale for the view in both the x and y dimension to the
-        same value. A value of 1 is no scaling, 0.5 is 50%, 2 is 200%, etc. */
     setScale: function(v) {
         var doUpdateX = this.scaleX !== v;
         if (doUpdateX) {
@@ -106,59 +127,54 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
         }
     },
     
-    /** Sets the scale for the view in the x dimension. A value of 1 is no 
-        scaling, 0.5 is 50%, 2 is 200%, etc. */
     setScaleX: function(v) {
-        if (this.scaleX === v) return;
-        this.scaleX = v;
-        myt.TransformSupport.addTransform(this.deStyle, 'scaleX', v ? v : 1);
-        if (this.inited) {
-            this.__updateBounds(this.width, this.height);
-            this.fireNewEvent('scaleX', v);
+        if (this.scaleX !== v) {
+            this.scaleX = v;
+            myt.TransformSupport.addTransform(this.deStyle, 'scaleX', v ? v : 1);
+            if (this.inited) {
+                this.__updateBounds(this.width, this.height);
+                this.fireNewEvent('scaleX', v);
+            }
         }
     },
     
-    /** Sets the scale for the view in the y dimension. A value of 1 is no 
-        scaling, 0.5 is 50%, 2 is 200%, etc. */
     setScaleY: function(v) {
-        if (this.scaleY === v) return;
-        this.scaleY = v;
-        myt.TransformSupport.addTransform(this.deStyle, 'scaleY', v ? v : 1);
-        if (this.inited) {
-            this.__updateBounds(this.width, this.height);
-            this.fireNewEvent('scaleY', v);
+        if (this.scaleY !== v) {
+            this.scaleY = v;
+            myt.TransformSupport.addTransform(this.deStyle, 'scaleY', v ? v : 1);
+            if (this.inited) {
+                this.__updateBounds(this.width, this.height);
+                this.fireNewEvent('scaleY', v);
+            }
         }
     },
     
-    /** Sets the horizontal skew in degrees.
-        @param v:number The skew in degrees.
-        @returns void */
     setSkewX: function(v) {
-        if (this.skewX === v) return;
-        this.skewX = v;
-        myt.TransformSupport.addTransform(this.deStyle, 'skewX', v ? v : 0);
-        if (this.inited) {
-            this.__updateBounds(this.width, this.height);
-            this.fireNewEvent('skewX', v);
+        if (this.skewX !== v) {
+            this.skewX = v;
+            myt.TransformSupport.addTransform(this.deStyle, 'skewX', v ? v : 0);
+            if (this.inited) {
+                this.__updateBounds(this.width, this.height);
+                this.fireNewEvent('skewX', v);
+            }
         }
     },
     
-    /** Sets the vertical skew in degrees.
-        @param v:number The skew in degrees.
-        @returns void */
     setSkewY: function(v) {
-        if (this.skewY === v) return;
-        this.skewY = v;
-        myt.TransformSupport.addTransform(this.deStyle, 'skewY', v ? v : 0);
-        if (this.inited) {
-            this.__updateBounds(this.width, this.height);
-            this.fireNewEvent('skewY', v);
+        if (this.skewY !== v) {
+            this.skewY = v;
+            myt.TransformSupport.addTransform(this.deStyle, 'skewY', v ? v : 0);
+            if (this.inited) {
+                this.__updateBounds(this.width, this.height);
+                this.fireNewEvent('skewY', v);
+            }
         }
     },
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.View */
+    /** @overrides myt.View
+        @private */
     __updateBounds: function(w, h) {
         var r = this.rotation, sx = this.scaleX, sy = this.scaleY, notScaled = false;
         if ((sx === undefined || sx === 1) && (sy === undefined || sy === 1)) notScaled = true;

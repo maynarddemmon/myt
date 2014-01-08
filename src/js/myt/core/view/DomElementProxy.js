@@ -1,6 +1,9 @@
 /** Provides a dom element for this instance. Also assigns a reference to this
     DomElementProxy to a property named "model" on the dom element.
     
+    Events:
+        None
+    
     Attributes:
         domElement:domElement the dom element hidden we are a proxy for.
         deStyle:object a shortcut reference to the style attribute of 

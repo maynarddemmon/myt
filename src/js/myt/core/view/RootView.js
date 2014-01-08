@@ -2,6 +2,9 @@
     backed by a dom element from the page rather than a dom element created 
     by the view.
     
+    Events:
+        None
+    
     Attributes:
         keepDomElementWhenDestroyed:boolean Indicates the dom element backing 
             this view must not be destroyed when this view is destroyed. 
@@ -49,7 +52,7 @@ myt.RootView = new JS.Module('RootView', {
     
     /** @overrides myt.View */
     createOurDomElement: function(parent) {
-        // If not parent is provided create a new dom element
+        // If no parent is provided create a new dom element
         if (!parent) {
             parent = this.callSuper(parent);
             myt.getElement().appendChild(parent);

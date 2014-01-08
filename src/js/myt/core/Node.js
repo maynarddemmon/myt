@@ -8,14 +8,32 @@
     'doAfterAdoption', 'destroy', 'destroyBeforeOrphaning' and
     'destroyAfterOrphaning' methods.
     
+    Events:
+        parent:myt.Node Fired when the parent is set.
+    
     Attributes:
-        inited:boolean set to true after this Node has completed initializing.
-        parent:Node the parent of this Node.
-        name:string the name of this node. Used to reference this Node from
+        inited:boolean Set to true after this Node has completed initializing.
+        parent:myt.Node The parent of this Node.
+        name:string The name of this node. Used to reference this Node from
             its parent Node.
+        isBeingDestroyed:boolean Indicates that this node is in the process
+            of being destroyed. Set to true at the beginning of the destroy
+            lifecycle phase. Undefined before that.
+        placement:string The name of the subnode of this Node to add nodes to 
+            when setParent is called on the subnode. Placement can be nested 
+            using '.' For example 'foo.bar'. The special value of '*' means 
+            use the default placement. For example 'foo.*' means place in the 
+            foo subnode and then in the default placement for foo.
+        defaultPlacement:string The name of the subnode to add nodes to when 
+            no placement is specified. Defaults to undefined which means add
+            subnodes directly to this node.
+        ignorePlacement:boolean If set to true placement will not be processed 
+            for this Node when it is added to a parent Node.
     
     Private Attributes:
         __animPool:array An myt.TrackActivesPool used by the 'animate' method.
+        subnodes:array The array of child nodes for this node. Should be
+            accessed through the getSubnodes method.
 */
 myt.Node = new JS.Class('Node', {
     include: [myt.AccessorSupport, myt.Destructible, myt.Observable, myt.Constrainable],
@@ -45,7 +63,7 @@ myt.Node = new JS.Class('Node', {
             @param matcher:function the function to test for matching Nodes with.
             @returns Node or null if no match is found. */
         getMatchingAncestor: function(n, matcherFunc) {
-            return myt.Node.getMatchingAncestorOrSelf(n ? n.parent : null, matcherFunc);
+            return this.getMatchingAncestorOrSelf(n ? n.parent : null, matcherFunc);
         }
     },
     

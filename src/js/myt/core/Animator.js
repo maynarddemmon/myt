@@ -3,6 +3,10 @@
     Events:
         running:boolean Fired when the animation starts or stops.
         paused:boolean Fired when the animation is paused or unpaused.
+        reverse:boolean
+        easingFunction:function
+        from:number
+        to:number
         repeat:Fired when the animation repeats. The value is the current
             loop count.
         
@@ -79,50 +83,53 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setRunning: function(v) {
-        if (this.running === v) return;
-        this.running = v;
-        if (this.inited) this.fireNewEvent('running', v);
-        
-        if (!this.paused) {
-            if (v) {
-                this.attachTo(myt.global.idle, '__update', 'idle');
-            } else {
-                this.__loopCount = this.reverse ? this.repeat - 1 : 0;
-                this.__progress = this.reverse ? this.duration : 0;
-                if (this.__temporaryFrom) this.from = undefined;
-                this.__temporaryFrom = false;
-                this.detachFrom(myt.global.idle, '__update', 'idle');
+        if (this.running !== v) {
+            this.running = v;
+            if (this.inited) this.fireNewEvent('running', v);
+            
+            if (!this.paused) {
+                if (v) {
+                    this.attachTo(myt.global.idle, '__update', 'idle');
+                } else {
+                    this.__loopCount = this.reverse ? this.repeat - 1 : 0;
+                    this.__progress = this.reverse ? this.duration : 0;
+                    if (this.__temporaryFrom) this.from = undefined;
+                    this.__temporaryFrom = false;
+                    this.detachFrom(myt.global.idle, '__update', 'idle');
+                }
             }
         }
     },
     
     setPaused: function(v) {
-        if (this.paused === v) return;
-        this.paused = v;
-        if (this.inited) this.fireNewEvent('paused', v);
-        
-        if (this.running) {
-            if (v) {
-                this.detachFrom(myt.global.idle, '__update', 'idle');
-            } else {
-                this.attachTo(myt.global.idle, '__update', 'idle');
+        if (this.paused !== v) {
+            this.paused = v;
+            if (this.inited) this.fireNewEvent('paused', v);
+            
+            if (this.running) {
+                if (v) {
+                    this.detachFrom(myt.global.idle, '__update', 'idle');
+                } else {
+                    this.attachTo(myt.global.idle, '__update', 'idle');
+                }
             }
         }
     },
     
     setReverse: function(v) {
-        if (this.reverse === v) return;
-        this.reverse = v;
-        if (this.inited) this.fireNewEvent('reverse', v);
-        
-        if (!this.running) {
-            this.__loopCount = this.reverse ? this.repeat - 1 : 0;
-            this.__progress = this.reverse ? this.duration : 0;
+        if (this.reverse !== v) {
+            this.reverse = v;
+            if (this.inited) this.fireNewEvent('reverse', v);
+            
+            if (!this.running) {
+                this.__loopCount = this.reverse ? this.repeat - 1 : 0;
+                this.__progress = this.reverse ? this.duration : 0;
+            }
         }
     },
     
     setEasingFunction: function(v) {
-        // Lookup progress function if a string is provided.
+        // Lookup easing function if a string is provided.
         if (typeof v === 'string') {
             var func = myt.Animator.easingFunctions[v];
             if (!func) {
@@ -132,27 +139,27 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
             v = func;
         }
         
-        if (this.easingFunction === v) return;
-        this.easingFunction = v;
-        if (this.inited) this.fireNewEvent('easingFunction', v);
+        if (this.easingFunction !== v) {
+            this.easingFunction = v;
+            if (this.inited) this.fireNewEvent('easingFunction', v);
+        }
     },
     
     setFrom: function(v) {
-        if (this.from === v) return;
-        this.from = v;
-        if (this.inited) this.fireNewEvent('from', v);
+        if (this.from !== v) {
+            this.from = v;
+            if (this.inited) this.fireNewEvent('from', v);
+        }
     },
     
     setTo: function(v) {
-        if (this.to === v) return;
-        this.to = v;
-        if (this.inited) this.fireNewEvent('to', v);
+        if (this.to !== v) {
+            this.to = v;
+            if (this.inited) this.fireNewEvent('to', v);
+        }
     },
     
-    /** Sets a callback function to run when the animation completes. */
-    setCallback: function(v) {
-        this.callback = v;
-    },
+    setCallback: function(v) {this.callback = v;},
     
     
     // Methods /////////////////////////////////////////////////////////////////
@@ -190,9 +197,7 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         this.setRunning(false);
         this.setPaused(false);
         
-        if (executeCallback) {
-            if (this.callback) this.callback.call(this, false);
-        }
+        if (executeCallback && this.callback) this.callback.call(this, false);
     },
     
     /** @overrides myt.Reusable */
@@ -213,10 +218,12 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         this.setPaused(false);
     },
     
+    /** @private */
     __update: function(idleEvent) {
         this.__advance(idleEvent.value.delta);
     },
     
+    /** @private */
     __advance: function(timeDiff) {
         if (!this.running || this.paused) return;
         

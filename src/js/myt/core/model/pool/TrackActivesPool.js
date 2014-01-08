@@ -1,5 +1,8 @@
-/** An myt.SimplePool that tracks which objects are "active" since they have
-    been obtained by the "getInstance" method.
+/** An myt.SimplePool that tracks which objects are "active". An "active"
+    object is one that has been obtained by the getInstance method.
+    
+    Events:
+        None
     
     Attributes:
         None

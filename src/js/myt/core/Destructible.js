@@ -1,6 +1,14 @@
 /** Provides a destroy method that can be used as part of an Object creation
     and destruction lifecycle. When an object is "destroyed" it will have
-    a 'destroyed' attribute with a value of true. */
+    a 'destroyed' attribute with a value of true.
+    
+    Events:
+        None
+    
+    Attributes:
+        destroyed:boolean Set to true when the object is in the "destroyed"
+            state, undefinded otherwise.
+*/
 myt.Destructible = new JS.Module('Destructible', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Destroys this Object. Subclasses must call super.

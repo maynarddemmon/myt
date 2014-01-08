@@ -1,4 +1,24 @@
-/** A mixin that sizes the view to the width and height of the dom element. */
+/** A mixin that sizes the view to the width and height of the dom element.
+    
+    Events:
+        None
+    
+    Attributes:
+        width:number:string If a number the behavior is defined by the
+            superclass. If a string value of 'auto' is provided sizing to
+            the dom will occur. Using 'auto' allows the original SizeToDom
+            behavior to be restored after an explicit width has been set.
+        height:number:string If a number the behavior is defined by the
+            superclass. If a string value of 'auto' is provided sizing to
+            the dom will occur. Using 'auto' allows the original SizeToDom
+            behavior to be restored after an explicit height has been set.
+    
+    Private Attributes:
+        __hasSetWidth:boolean Indicates the an explicit width has been set
+            so that should be used rather than sizing to the dom element.
+        __hasSetHeight:boolean Indicates the an explicit height has been set
+            so that should be used rather than sizing to the dom element.
+*/
 myt.SizeToDom = new JS.Module('SizeToDom', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View 

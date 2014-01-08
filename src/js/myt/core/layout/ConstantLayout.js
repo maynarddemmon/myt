@@ -1,6 +1,10 @@
 /** A layout that sets the target attribute name to the target value for 
     each subview.
     
+    Events:
+        targetAttrName:string
+        targetValue:*
+    
     Attributes:
         targetAttrName:string the name of the attribute to set on each subview.
         targetValue:* the value to set the attribute to.
@@ -11,21 +15,23 @@
 myt.ConstantLayout = new JS.Class('ConstantLayout', myt.Layout, {
     // Accessors ///////////////////////////////////////////////////////////////
     setTargetAttrName: function(v) {
-        if (this.targetAttrName === v) return;
-        this.targetAttrName = v;
-        this.setterName = myt.AccessorSupport.generateSetterName(v);
-        if (this.inited) {
-            this.fireNewEvent('targetAttrName', v);
-            this.update();
+        if (this.targetAttrName !== v) {
+            this.targetAttrName = v;
+            this.setterName = myt.AccessorSupport.generateSetterName(v);
+            if (this.inited) {
+                this.fireNewEvent('targetAttrName', v);
+                this.update();
+            }
         }
     },
     
     setTargetValue: function(v) {
-        if (this.targetValue === v) return;
-        this.targetValue = v;
-        if (this.inited) {
-            this.fireNewEvent('targetValue', v);
-            this.update();
+        if (this.targetValue !== v) {
+            this.targetValue = v;
+            if (this.inited) {
+                this.fireNewEvent('targetValue', v);
+                this.update();
+            }
         }
     },
     

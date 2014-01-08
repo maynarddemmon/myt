@@ -34,11 +34,12 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
             @returns void */
         createSetterFunction: function(target, attrName) {
             var setterName = this.generateSetterName(attrName);
-            if (target[setterName]) console.log("warning overwriting setter", setterName);
+            if (target[setterName]) console.log("Overwriting setter", setterName);
             target[setterName] = function(v) {
-                if (target[attrName] === v) return;
-                target[attrName] = v;
-                if (target.inited) target.fireNewEvent(attrName, v);
+                if (target[attrName] !== v) {
+                    target[attrName] = v;
+                    if (target.inited) target.fireNewEvent(attrName, v);
+                }
             };
         },
         
@@ -47,7 +48,7 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
             @returns void */
         createGetterFunction: function(target, attrName) {
             var getterName = this.generateGetterName(attrName);
-            if (target[getterName]) console.log("warning overwriting getter", getterName);
+            if (target[getterName]) console.log("Overwriting getter", getterName);
             target[getterName] = function() {
                 return target[attrName];
             };
@@ -74,11 +75,7 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
         @returns the attribute value. */
     get: function(attrName) {
         var getterName = myt.AccessorSupport.generateGetterName(attrName);
-        if (this[getterName]) {
-            return this[getterName]();
-        } else {
-            return this[attrName];
-        }
+        return this[getterName] ? this[getterName]() : this[attrName];
     },
     
     /** A generic setter function that can be called to set a value on this
@@ -90,12 +87,9 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
         var setterName = myt.AccessorSupport.generateSetterName(attrName);
         if (this[setterName]) {
             this[setterName](v);
-        } else {
-            if (this[attrName] === v) return;
+        } else if (this[attrName] !== v) {
             this[attrName] = v;
-            if ((this.inited || this.inited === undefined) && this.fireNewEvent) { // undefined check is for useage with non Nodes.
-                this.fireNewEvent(attrName, v);
-            }
+            if (this.inited !== false && this.fireNewEvent) this.fireNewEvent(attrName, v);
         }
     },
     

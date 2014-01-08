@@ -1,14 +1,19 @@
 /** An implementation of an myt.AbstractPool.
     
+    Events
+        None
+    
     Attributes:
-        instanceClass:JS.Class the class to use for new instances.
-        instanceParent:myt.Node
+        instanceClass:JS.Class (initializer only) the class to use for 
+            new instances. Defaults to Object.
+        instanceParent:myt.Node (initializer only) The node to create new
+            instances on.
 */
 myt.SimplePool = new JS.Class('SimplePool', myt.AbstractPool, {
     // Constructor /////////////////////////////////////////////////////////////
     /** Create a new myt.SimplePool
         @param instanceClass:JS.Class the class to create instances from.
-        @param instanceParent:object (optional) the place to create instances 
+        @param instanceParent:object (optional) The place to create instances 
             on. When instanceClass is an myt.Node this will be the node parent.
         @returns void */
     initialize: function(instanceClass, instanceParent) {

@@ -2,12 +2,17 @@
     index and subview. An updateSubview method is provided that can be
     overriden to provide variable behavior.
     
+    Events:
+        collapseParent:boolean
+        reverse:boolean
+    
     Attributes:
-        collapseParent:boolean If true the parent view will be resized to fit
+        collapseParent:boolean If true the updateParent method will be called.
+            The updateParent method will typically resize the parent to fit
             the newly layed out child views. Defaults to false.
         useOptimizations:boolean Turns on certain dom optimization techniques
             that can speed up layout updates. Defaults to true.
-        reverse:boolean If true the layout will be position the items in the
+        reverse:boolean If true the layout will position the items in the
             opposite order. For example, right to left instead of left to right.
             Defaults to false.
 */
@@ -23,8 +28,6 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    /** When true, the parent view will be resized to fit the extent of the
-        layout. */
     setCollapseParent: function(v) {
         if (this.collapseParent !== v) {
             this.collapseParent = v;
@@ -35,7 +38,6 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
         }
     },
     
-    /** When true, the subviews are layed out in reverse order. */
     setReverse: function(v) {
         if (this.reverse !== v) {
             this.reverse = v;
@@ -46,9 +48,7 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
         }
     },
     
-    setUseOptimizations: function(v) {
-        this.useOptimizations = v;
-    },
+    setUseOptimizations: function(v) {this.useOptimizations = v;},
     
     
     // Methods /////////////////////////////////////////////////////////////////

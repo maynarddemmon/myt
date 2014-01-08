@@ -1,10 +1,38 @@
 /** Adds support for image display to a View.
     
+    Events:
+        imageUrl:string
+        imageSize:string
+        imageRepeat:string
+        imagePosition:string
+        imageAttachment:string
+        calculateNaturalSize:boolean
+        naturalWidth:number
+        naturalHeight:number
+        useNaturalSize:boolean
+    
     Attributes:
         imageUrl:string The URL to load the image data from.
         imageSize:string Determines the size of the image. Allowed values
             are: 'auto', 'cover', 'contain', absolute ('20px 10px') and 
             percentage ('100% 50%').
+        imageRepeat:string Determines if an image is repeated or not.
+            Allowed values: 'repeat', 'repeat-x', 'repeat-y', 'no-repeat', 
+            'inherit'. Defaults to 'no-repeat'.
+        imagePosition:string Determines where an image is positioned.
+        imageAttachment:string Determines how an image is attached to the view.
+            Allowed values are: 'scroll', 'fixed', 'inherit'. The default
+            value is 'scroll'.
+        calculateNaturalSize:boolean Determines if the natural size should be 
+            automatically calculated or not. Defaults to undefined which is
+            equivalent to false.
+        naturalWidth:number The natural width of the image. Only set if
+            calculateNaturalWidth is true.
+        naturalHeight:number The natural height of the image. Only set if
+            calculateNaturalWidth is true.
+        useNaturalSize:boolean If true this image view will be sized to the
+            naturalWidth and naturalHeight and calculateNaturalSize will be
+            set to true.
 */
 myt.ImageSupport = new JS.Module('ImageSupport', {
     // Class Methods ///////////////////////////////////////////////////////////
@@ -31,90 +59,92 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setImageUrl: function(v) {
-        if (this.imageUrl === v) return;
-        this.imageUrl = v;
-        this.deStyle.backgroundImage = v ? "url('" + v + "')" : 'none';
-        if (this.inited) {
-            this.fireNewEvent('imageUrl', v);
-            this.setNaturalWidth(undefined);
-            this.setNaturalHeight(undefined);
+        if (this.imageUrl !== v) {
+            this.imageUrl = v;
+            this.deStyle.backgroundImage = v ? "url('" + v + "')" : 'none';
+            if (this.inited) {
+                this.fireNewEvent('imageUrl', v);
+                this.setNaturalWidth(undefined);
+                this.setNaturalHeight(undefined);
+            }
+            this.__calculateNaturalSize();
         }
-        this.__calculateNaturalSize();
     },
     
     setImageSize: function(v) {
-        if (this.imageSize === v) return;
-        this.imageSize = v;
-        this.deStyle.backgroundSize = v ? v : 'auto';
-        if (this.inited) this.fireNewEvent('imageSize', v);
+        if (this.imageSize !== v) {
+            this.imageSize = v;
+            this.deStyle.backgroundSize = v ? v : 'auto';
+            if (this.inited) this.fireNewEvent('imageSize', v);
+        }
     },
     
-    /** Allowed values: repeat, repeat-x, repeat-y, no-repeat, inherit */
     setImageRepeat: function(v) {
-        if (this.imageRepeat === v) return;
-        this.deStyle.backgroundRepeat = this.imageRepeat = v;
-        if (this.inited) this.fireNewEvent('imageRepeat', v);
+        if (this.imageRepeat !== v) {
+            this.deStyle.backgroundRepeat = this.imageRepeat = v;
+            if (this.inited) this.fireNewEvent('imageRepeat', v);
+        }
     },
     
     setImagePosition: function(v) {
-        if (this.imagePosition === v) return;
-        this.deStyle.backgroundPosition = this.imagePosition = v;
-        if (this.inited) this.fireNewEvent('imagePosition', v);
-    },
-    
-    /** Allowed values: scroll, fixed, inherit */
-    setImageAttachment: function(v) {
-        if (this.imageAttachment === v) return;
-        this.deStyle.backgroundAttachment = this.imageAttachment = v;
-        if (this.inited) this.fireNewEvent('imageAttachment', v);
-    },
-    
-    /** Determines if the natural size should be automatically calculated 
-        or not. */
-    setCalculateNaturalSize: function(v) {
-        if (this.calculateNaturalSize === v) return;
-        this.calculateNaturalSize = v;
-        if (this.inited) this.fireNewEvent('calculateNaturalSize', v);
-        this.__calculateNaturalSize();
-    },
-    
-    /** The natural width of the image. */
-    setNaturalWidth: function(v) {
-        if (this.naturalWidth === v) return;
-        this.naturalWidth = v;
-        if (this.inited) this.fireNewEvent('naturalWidth', v);
-        if (this.useNaturalSize && v) this.setWidth(v);
-    },
-    
-    /** The natural width of the image. */
-    setNaturalHeight: function(v) {
-        if (this.naturalHeight === v) return;
-        this.naturalHeight = v;
-        if (this.inited) this.fireNewEvent('naturalHeight', v);
-        if (this.useNaturalSize && v) this.setHeight(v);
-    },
-    
-    /** Indicates if this view should be sized to the natural size of the
-        image. If set to true, calculateNaturalSize will also be set to true. */
-    setUseNaturalSize: function(v) {
-        if (this.useNaturalSize === v) return;
-        this.useNaturalSize = v;
-        if (this.inited) this.fireNewEvent('useNaturalSize', v);
-        
-        // Sync width and height
-        if (v) {
-            if (this.naturalWidth) this.setWidth(this.naturalWidth);
-            if (this.naturalHeight) this.setHeight(this.naturalHeight);
+        if (this.imagePosition !== v) {
+            this.deStyle.backgroundPosition = this.imagePosition = v;
+            if (this.inited) this.fireNewEvent('imagePosition', v);
         }
-        
-        // Turn on calculation of natural size if we're going to use
-        // natural size.
-        if (v && !this.calculateNaturalSize) this.setCalculateNaturalSize(true);
+    },
+    
+    setImageAttachment: function(v) {
+        if (this.imageAttachment !== v) {
+            this.deStyle.backgroundAttachment = this.imageAttachment = v;
+            if (this.inited) this.fireNewEvent('imageAttachment', v);
+        }
+    },
+    
+    setCalculateNaturalSize: function(v) {
+        if (this.calculateNaturalSize !== v) {
+            this.calculateNaturalSize = v;
+            if (this.inited) this.fireNewEvent('calculateNaturalSize', v);
+            this.__calculateNaturalSize();
+        }
+    },
+    
+    setNaturalWidth: function(v) {
+        if (this.naturalWidth !== v) {
+            this.naturalWidth = v;
+            if (this.inited) this.fireNewEvent('naturalWidth', v);
+            if (this.useNaturalSize && v) this.setWidth(v);
+        }
+    },
+    
+    setNaturalHeight: function(v) {
+        if (this.naturalHeight !== v) {
+            this.naturalHeight = v;
+            if (this.inited) this.fireNewEvent('naturalHeight', v);
+            if (this.useNaturalSize && v) this.setHeight(v);
+        }
+    },
+    
+    setUseNaturalSize: function(v) {
+        if (this.useNaturalSize !== v) {
+            this.useNaturalSize = v;
+            if (this.inited) this.fireNewEvent('useNaturalSize', v);
+            
+            // Sync width and height
+            if (v) {
+                if (this.naturalWidth) this.setWidth(this.naturalWidth);
+                if (this.naturalHeight) this.setHeight(this.naturalHeight);
+            }
+            
+            // Turn on calculation of natural size if we're going to use
+            // natural size.
+            if (v && !this.calculateNaturalSize) this.setCalculateNaturalSize(true);
+        }
     },
     
     
     // Methods /////////////////////////////////////////////////////////////////
     /** Loads an image to measure its size.
+        @private
         @returns void */
     __calculateNaturalSize: function() {
         var imgUrl = this.imageUrl;

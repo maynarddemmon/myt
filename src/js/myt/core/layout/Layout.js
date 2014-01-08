@@ -1,11 +1,14 @@
 /** A layout controls the positioning of views within a parent view.
     
+    Events:
+        None
+    
     Attributes:
         locked:boolean When true, the layout will not update.
         lockedCounter:number Counter created by myt.ThresholdCounter.
-        subviews:array An array of Views managed by this layout.
     
     Private Attributes:
+        subviews:array An array of Views managed by this layout.
         __deferredLayout:boolean Marks a layout as deferred if the global
             layout lock, myt.Layout.locked, is true during a call to 
             'canUpdate' on the layout.
@@ -101,39 +104,39 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
     // Accessors ///////////////////////////////////////////////////////////////
     /** @overrides myt.Node */
     setParent: function(parent) {
-        if (this.parent === parent) return;
-        
-        // Lock during parent change so that old parent is not updated by
-        // the calls to removeSubview and addSubview.
-        var wasNotLocked = !this.locked;
-        if (wasNotLocked) this.locked = true;
-        
-        // Stop monitoring parent
-        var svs, i;
-        if (this.parent) {
-            svs = this.subviews;
-            i = svs.length;
-            while (i) this.removeSubview(svs[--i]);
+        if (this.parent !== parent) {
+            // Lock during parent change so that old parent is not updated by
+            // the calls to removeSubview and addSubview.
+            var wasNotLocked = !this.locked;
+            if (wasNotLocked) this.locked = true;
             
-            this.detachFrom(this.parent, '__handleParentSubviewAddedEvent', 'subviewAdded');
-            this.detachFrom(this.parent, '__handleParentSubviewRemovedEvent', 'subviewRemoved');
-        }
-        
-        this.callSuper(parent);
-        
-        // Start monitoring new parent
-        if (this.parent) {
-            svs = this.parent.getSubviews();
-            for (i = 0, len = svs.length; len > i; ++i) this.addSubview(svs[i]);
+            // Stop monitoring parent
+            var svs, i;
+            if (this.parent) {
+                svs = this.subviews;
+                i = svs.length;
+                while (i) this.removeSubview(svs[--i]);
+                
+                this.detachFrom(this.parent, '__handleParentSubviewAddedEvent', 'subviewAdded');
+                this.detachFrom(this.parent, '__handleParentSubviewRemovedEvent', 'subviewRemoved');
+            }
             
-            this.attachTo(this.parent, '__handleParentSubviewAddedEvent', 'subviewAdded');
-            this.attachTo(this.parent, '__handleParentSubviewRemovedEvent', 'subviewRemoved');
-        }
-        
-        // Clear temporary lock and update if this happened after initialization.
-        if (wasNotLocked) {
-            this.locked = false;
-            if (this.inited && this.parent) this.update();
+            this.callSuper(parent);
+            
+            // Start monitoring new parent
+            if (this.parent) {
+                svs = this.parent.getSubviews();
+                for (i = 0, len = svs.length; len > i; ++i) this.addSubview(svs[i]);
+                
+                this.attachTo(this.parent, '__handleParentSubviewAddedEvent', 'subviewAdded');
+                this.attachTo(this.parent, '__handleParentSubviewRemovedEvent', 'subviewRemoved');
+            }
+            
+            // Clear temporary lock and update if this happened after initialization.
+            if (wasNotLocked) {
+                this.locked = false;
+                if (this.inited && this.parent) this.update();
+            }
         }
     },
     

@@ -1,11 +1,14 @@
-/** An implementation of an object pool. Subclasses must implement the
+/** Implements an object pool. Subclasses must at a minimum implement the 
     createInstance method.
+    
+    Events:
+        None
     
     Attributes:
         None
     
     Private Attributes:
-        __objPool:array The array of object stored in the pool.
+        __objPool:array The array of objects stored in the pool.
 */
 myt.AbstractPool = new JS.Class('AbstractPool', {
     include: [myt.Destructible],

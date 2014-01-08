@@ -1,6 +1,11 @@
 /** A mixin that sizes a RootView to the window width, height or both.
     
+    Events:
+        None
+    
     Attributes:
+        resizeDimension:string The dimension to resize in. Supported values
+            are 'width', 'height' and 'both'. Defaults to 'both'.
         minWidth:number the minimum width below which this view will not 
             resize its width. Defaults to 0.
         minWidth:number the minimum height below which this view will not
@@ -23,25 +28,29 @@ myt.SizeToWindow = new JS.Module('SizeToWindow', {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setResizeDimension: function(v) {
-        if (this.resizeDimension === v) return;
-        this.resizeDimension = v;
-        this.__handleResize(myt.global.windowResize.RESIZE_EVENT);
+        if (this.resizeDimension !== v) {
+            this.resizeDimension = v;
+            this.__handleResize(myt.global.windowResize.RESIZE_EVENT);
+        }
     },
     
     setMinWidth: function(v) {
-        if (this.minWidth === v) return;
-        this.minWidth = v;
-        this.__handleResize(myt.global.windowResize.RESIZE_EVENT);
+        if (this.minWidth !== v) {
+            this.minWidth = v;
+            this.__handleResize(myt.global.windowResize.RESIZE_EVENT);
+        }
     },
     
     setMinHeight: function(v) {
-        if (this.minHeight === v) return;
-        this.minHeight = v;
-        this.__handleResize(myt.global.windowResize.RESIZE_EVENT);
+        if (this.minHeight !== v) {
+            this.minHeight = v;
+            this.__handleResize(myt.global.windowResize.RESIZE_EVENT);
+        }
     },
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** @private */
     __handleResize: function(event) {
         var v = event.value,
             dim = this.resizeDimension;

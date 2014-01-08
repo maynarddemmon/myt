@@ -1,5 +1,8 @@
 /** Provides a setValue and getValue method.
     
+    Events:
+        value:*
+    
     Attributes:
         value:* The stored value.
         valueFilter:function If it exists, values will be run through this
@@ -28,9 +31,10 @@ myt.ValueComponent = new JS.Module('ValueComponent', {
     setValue: function(v) {
         if (this.valueFilter) v = this.valueFilter(v);
         
-        if (this.value === v) return;
-        this.value = v;
-        if (this.inited) this.fireNewEvent('value', this.getValue());
+        if (this.value !== v) {
+            this.value = v;
+            if (this.inited) this.fireNewEvent('value', this.getValue());
+        }
     },
     
     getValue: function() {
