@@ -1,5 +1,5 @@
 /** Provides events when a new myt.RootView is created or destroyed.
-    Registered in myt.global as 'roots'. 
+    Registered in myt.global as 'roots'.
     
     Events:
         rootAdded:RootView Fired when a RootView is added. The value is the 
@@ -8,7 +8,10 @@
             RootView removed.
     
     Attributes:
-        _roots:array Holds an array of RootViews.
+        None
+    
+    Private Attributes:
+        __roots:array Holds an array of RootViews.
 */
 new JS.Singleton('GlobalRootViewRegistry', {
     include: [myt.Observable],
@@ -16,7 +19,7 @@ new JS.Singleton('GlobalRootViewRegistry', {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initialize: function() {
-        this._roots = [];
+        this.__roots = [];
         myt.global.register('roots', this);
     },
     
@@ -25,7 +28,7 @@ new JS.Singleton('GlobalRootViewRegistry', {
     /** Gets the list of global root views.
         @returns array of RootViews. */
     getRoots: function() {
-        return this._roots;
+        return this.__roots;
     },
     
     
@@ -34,7 +37,7 @@ new JS.Singleton('GlobalRootViewRegistry', {
         @param r:RootView the RootView to add.
         @returns void */
     addRoot: function(r) {
-        this._roots.push(r);
+        this.__roots.push(r);
         this.fireNewEvent('rootAdded', r);
     },
     
@@ -42,7 +45,7 @@ new JS.Singleton('GlobalRootViewRegistry', {
         @param r:RootView the RootView to remove.
         @returns void */
     removeRoot: function(r) {
-        var roots = this._roots, i = roots.length, root;
+        var roots = this.__roots, i = roots.length, root;
         while(i) {
             root = roots[--i];
             if (root === r) {

@@ -11,8 +11,8 @@
         keyup:number fired when a key is released up. The value is the
             keycode of the key released up.
     
-    Attributes:
-        _keysDown:object A map of keycodes of the keys currently pressed down.
+    Private Attributes:
+        __keysDown:object A map of keycodes of the keys currently pressed down.
     
     Keycodes:
         backspace          8
@@ -135,9 +135,9 @@ new JS.Singleton('GlobalKeys', {
         this.KEYCODE_COMMAND = BrowserDetect.browser === 'Firefox' ? 224 : 91;
         
         this.setDomElement(document);
-        this.attachTo(myt.global.focus, '_handleFocused', 'focused');
-        this._keysDown = {};
-        this._listenToDocument();
+        this.attachTo(myt.global.focus, '__handleFocused', 'focused');
+        this.__keysDown = {};
+        this.__listenToDocument();
         
         myt.global.register('keys', this);
     },
@@ -148,7 +148,7 @@ new JS.Singleton('GlobalKeys', {
         @param keyCode:number the key to test.
         @returns true if the key is down, false otherwise. */
     isKeyDown: function(keyCode) {
-        return !!this._keysDown[keyCode];
+        return !!this.__keysDown[keyCode];
     },
     
     /** Tests if the 'shift' key is down. */
@@ -163,78 +163,82 @@ new JS.Singleton('GlobalKeys', {
     /** Tests if the 'command' key is down. */
     isCommandKeyDown: function() {return this.isKeyDown(this.KEYCODE_COMMAND);},
     
-    _handleFocused: function(e) {
-        var focused = e.value;
+    /** @private */
+    __handleFocused: function(event) {
+        var focused = event.value;
         if (focused) {
-            this._unlistenToDocument();
+            this.__unlistenToDocument();
             
-            this.attachToDom(focused, '_handleKeyDown', 'keydown');
-            this.attachToDom(focused, '_handleKeyPress', 'keypress');
-            this.attachToDom(focused, '_handleKeyUp', 'keyup');
+            this.attachToDom(focused, '__handleKeyDown', 'keydown');
+            this.attachToDom(focused, '__handleKeyPress', 'keypress');
+            this.attachToDom(focused, '__handleKeyUp', 'keyup');
         } else {
             var prevFocused = myt.global.focus.prevFocusedView;
             if (prevFocused) {
-                this.detachFromDom(prevFocused, '_handleKeyDown', 'keydown');
-                this.detachFromDom(prevFocused, '_handleKeyPress', 'keypress');
-                this.detachFromDom(prevFocused, '_handleKeyUp', 'keyup');
+                this.detachFromDom(prevFocused, '__handleKeyDown', 'keydown');
+                this.detachFromDom(prevFocused, '__handleKeyPress', 'keypress');
+                this.detachFromDom(prevFocused, '__handleKeyUp', 'keyup');
             }
             
-            this._listenToDocument();
+            this.__listenToDocument();
         }
     },
     
-    _listenToDocument: function() {
-        this.attachToDom(this, '_handleKeyDown', 'keydown');
-        this.attachToDom(this, '_handleKeyPress', 'keypress');
-        this.attachToDom(this, '_handleKeyUp', 'keyup');
+    /** @private */
+    __listenToDocument: function() {
+        this.attachToDom(this, '__handleKeyDown', 'keydown');
+        this.attachToDom(this, '__handleKeyPress', 'keypress');
+        this.attachToDom(this, '__handleKeyUp', 'keyup');
     },
     
-    _unlistenToDocument: function() {
-        this.detachFromDom(this, '_handleKeyDown', 'keydown');
-        this.detachFromDom(this, '_handleKeyPress', 'keypress');
-        this.detachFromDom(this, '_handleKeyUp', 'keyup');
+    /** @private */
+    __unlistenToDocument: function() {
+        this.detachFromDom(this, '__handleKeyDown', 'keydown');
+        this.detachFromDom(this, '__handleKeyPress', 'keypress');
+        this.detachFromDom(this, '__handleKeyUp', 'keyup');
     },
     
-    _handleKeyDown: function(event) {
+    /** @private */
+    __handleKeyDown: function(event) {
         var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event),
             domEvent = event.value;
-        if (this._shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
-        this._keysDown[keyCode] = true;
+        if (this.__shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
+        this.__keysDown[keyCode] = true;
         
         // Check for 'tab' key and do focus traversal.
         if (keyCode === 9) {
-            var ift = this.ignoreFocusTrap();
+            var ift = this.ignoreFocusTrap(), gf = myt.global.focus;
             if (this.isShiftKeyDown()) {
-                myt.global.focus.prev(ift);
+                gf.prev(ift);
             } else {
-                myt.global.focus.next(ift);
+                gf.next(ift);
             }
         }
         
         this.fireNewEvent('keydown', keyCode);
-        //console.log('global keydown', keyCode);
     },
     
     ignoreFocusTrap: function() {
         return this.isAltKeyDown();
     },
     
-    _handleKeyPress: function(event) {
+    /** @private */
+    __handleKeyPress: function(event) {
         var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
         this.fireNewEvent('keypress', keyCode);
-        //console.log('global keypress', keyCode);
     },
     
-    _handleKeyUp: function(event) {
+    /** @private */
+    __handleKeyUp: function(event) {
         var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event),
             domEvent = event.value;
-        if (this._shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
-        this._keysDown[keyCode] = false;
+        if (this.__shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
+        this.__keysDown[keyCode] = false;
         this.fireNewEvent('keyup', keyCode);
-        //console.log('global keyup', keyCode);
     },
     
-    _shouldPreventDefault: function(keyCode, targetElem) {
+    /** @private */
+    __shouldPreventDefault: function(keyCode, targetElem) {
         switch (keyCode) {
             case 8: // Backspace
                 // Catch backspace since it navigates the history. Allow it to

@@ -4,13 +4,19 @@
         displayMode:string (read only) Indicates what kind of dialog this 
             component is currently configured as. Allowed values are: 'message',
             'spinner' and 'confirm'.
+        callbackFunction:function (read only) A function that gets called when 
+            the dialog is about to be closed. A single argument is passed in 
+            that indicates the UI element interacted with that should close the 
+            dialog. Supported values are: 'closeBtn', 'cancelBtn' and 
+            'confirmBtn'. The function should return true if the close should 
+            be aborted.
 */
 myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
-        DEFAULT_RADIUS:12,
-        DEFAULT_SHADOW:[0, 4, 20, '#666666'],
-        DEFAULT_BGCOLOR:'#ffffff',
+        DEFAULT_RADIUS: 12,
+        DEFAULT_SHADOW: [0, 4, 20, '#666666'],
+        DEFAULT_BGCOLOR: '#ffffff',
         
         /** Makes the text will wrap at 200px and the dialog will be at
             least 200px wide. */
@@ -62,7 +68,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
                 roundedCorners:8, tooltip:'Close Dialog.',
                 ignoreLayout:true, align:'right', alignOffset:4
             }, [myt.TooltipMixin, {
-                doActivated: function() {callbackTarget._doCallback(this);},
+                doActivated: function() {callbackTarget.__doCallback(this);},
                 
                 draw: function(canvas, config) {
                     canvas.clear();
@@ -123,13 +129,8 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setDisplayMode: function(v) {
-        this.displayMode = v;
-    },
-    
-    setCallbackFunction: function(v) {
-        this.callbackFunction = v;
-    },
+    setDisplayMode: function(v) {this.displayMode = v;},
+    setCallbackFunction: function(v) {this.callbackFunction = v;},
     
     
     // Methods /////////////////////////////////////////////////////////////////
@@ -152,8 +153,9 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     
     /** Called before a dialog is shown to reset state and cleanup UI elements
         from the previous display of the Dialog.
+        @private
         @returns void */
-    _destroyContent: function() {
+    __destroyContent: function() {
         var content = this.content, MP = myt.ModalPanel,
             stc = content.sizeToChildren,
             svs = content.getSubviews(), 
@@ -175,10 +177,11 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     },
     
     /** Called by each of the buttons that can trigger the dialog to be hidden.
+        @private
         @param sourceView:myt.View the view that triggered the hiding 
             of the dialog.
         @returns void */
-    _doCallback: function(sourceView) {
+    __doCallback: function(sourceView) {
         var cbf = this.callbackFunction;
         if (!cbf || !cbf.call(this, sourceView.name)) this.hide();
     },
@@ -198,7 +201,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         opts = $.extend({}, myt.Dialog.WRAP_TEXT_DEFAULTS, opts);
         var content = this.content, MP = myt.ModalPanel;
         
-        this._destroyContent();
+        this.__destroyContent();
         
         this.setCallbackFunction(callbackFunction);
         
@@ -232,7 +235,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         opts = $.extend({}, myt.Dialog.NO_WRAP_TEXT_DEFAULTS, opts);
         var content = this.content, MP = myt.ModalPanel;
         
-        this._destroyContent();
+        this.__destroyContent();
         
         var spinner = this.spinner = new myt.Spinner(content, {
             align:'center', visible:true,
@@ -263,7 +266,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         
         this.showMessage(msg, callbackFunction, opts);
         
-        this._setupConfirmButtons(this.content.msg, opts);
+        this.__setupConfirmButtons(this.content.msg, opts);
         
         this.setDisplayMode('confirm');
     },
@@ -273,7 +276,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         
         opts = $.extend({}, myt.Dialog.CONFIRM_DEFAULTS, opts);
         
-        this._destroyContent();
+        this.__destroyContent();
         
         content.sizeToChildren.setPaddingX(1);
         this.setCallbackFunction(callbackFunction);
@@ -300,7 +303,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         closeBtn.setVisible(true);
         closeBtn.focus();
         
-        this._setupConfirmButtons(contentContainer, opts);
+        this.__setupConfirmButtons(contentContainer, opts);
         
         var r = myt.Dialog.DEFAULT_RADIUS;
         var bg = new myt.View(content, {
@@ -321,7 +324,8 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         this.setDisplayMode('content');
     },
     
-    _setupConfirmButtons: function(mainView, opts) {
+    /** @private */
+    __setupConfirmButtons: function(mainView, opts) {
         var self = this, content = this.content, 
             MP = myt.ModalPanel,
             MP_DPY = MP.DEFAULT_PADDING_Y;
@@ -336,13 +340,13 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             activeColor:'#bbbbbb', hoverColor:'#dddddd', readyColor:'#cccccc'
         };
         new myt.SimpleIconTextButton(btnContainer, attrs, [{
-            doActivated: function() {self._doCallback(this);}
+            doActivated: function() {self.__doCallback(this);}
         }]);
         
         attrs.name = 'confirmBtn';
         attrs.text = opts.confirmTxt;
         new myt.SimpleIconTextButton(btnContainer, attrs, [{
-            doActivated: function() {self._doCallback(this);}
+            doActivated: function() {self.__doCallback(this);}
         }]);
         
         new myt.SizeToChildren(btnContainer, {axis:'y'});

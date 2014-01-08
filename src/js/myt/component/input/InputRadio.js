@@ -1,61 +1,73 @@
 /** A wrapper around a native browser radio button.
     
+    Events:
+        checked:boolean
+        groupId:string
+        optionValue:string
+    
     Attributes:
-        checked:boolean checks or unchecks the radio button.
-        groupId:string the name of the group the radio button is a member of
+        checked:boolean Checks or unchecks the radio button.
+        groupId:string The name of the group the radio button is a member of
             If not provided during initialization a unique group id will be
-            generated.
-        optionValue:string the value of the radio button.
+            generated. Changes to the groupId after initialization do not
+            appear to effect the group membership.
+        optionValue:string The value of the radio button.
 */
 myt.InputRadio = new JS.Class('InputRadio', myt.NativeInputWrapper, {
     include: [myt.SizeToDom],
     
     // Class Methods ///////////////////////////////////////////////////////////
     extend: {
+        /** The group ID counter. */
+        __idCounter: 0,
+        
         /** Creates a new unique group ID.
             @returns the group ID. */
         getGroupId: function() {
-            if (!myt.InputRadio.__idCounter) myt.InputRadio.__idCounter = 0;
-            return ++myt.InputRadio.__idCounter;
-        }
+            return ++this.__idCounter;
+        },
+        
+        /** Stores the last checked myt.InputRadio by groupId. Needed so we
+            can set the of a radio to false when another radio in the group
+            is checked. */
+        lastChecked: {}
     },
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.NativeInputWrapper */
     initNode: function(parent, attrs) {
-        // Modify attrs so setter gets called.
         if (attrs.groupId === undefined) attrs.groupId = myt.InputRadio.getGroupId();
         
         this.inputType = 'radio';
         
         this.callSuper(parent, attrs);
         
-        this.attachToDom(this, '_handleInput', 'change');
-        this.attachToDom(this, '_handleMouseDown', 'mousedown');
+        this.attachToDom(this, '__handleInput', 'change');
+        this.attachToDom(this, '__handleMouseDown', 'mousedown');
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
     setChecked: function(v) {
-        if (this.checked === v) return;
-        this.checked = v;
-        this.domElement.checked = v;
-        if (this.inited) this.fireNewEvent('checked', v);
+        if (this.checked !== v) {
+            this.checked = this.domElement.checked = v;
+            if (this.inited) this.fireNewEvent('checked', v);
+        }
     },
     
     setGroupId: function(v) {
-        if (this.groupId === v) return;
-        this.groupId = v;
-        this.domElement.name = v;
-        if (this.inited) this.fireNewEvent('groupId', v);
+        if (this.groupId !== v) {
+            this.groupId = this.domElement.name = v;
+            if (this.inited) this.fireNewEvent('groupId', v);
+        }
     },
     
     setOptionValue: function(v) {
-        if (this.optionValue === v) return;
-        this.optionValue = v;
-        this.domElement.value = v;
-        if (this.inited) this.fireNewEvent('optionValue', v);
+        if (this.optionValue !== v) {
+            this.optionValue = this.domElement.value = v;
+            if (this.inited) this.fireNewEvent('optionValue', v);
+        }
     },
     
     
@@ -74,11 +86,23 @@ myt.InputRadio = new JS.Class('InputRadio', myt.NativeInputWrapper, {
         if (BrowserDetect.browser !== 'Firefox') this.callSuper();
     },
     
-    _handleInput: function(e) {
-        this.setValue(this.domElement.checked);
+    /** @private */
+    __handleInput: function(event) {
+        var isChecked = this.domElement.checked;
+        if (isChecked) {
+            // Get last checked and deselect
+            var groupId = this.groupId, 
+                cache = myt.InputRadio.lastChecked,
+                lastChecked = cache[groupId];
+            if (lastChecked) lastChecked.setValue(false);
+            
+            this.setValue(true);
+            cache[groupId] = this;
+        }
     },
     
-    _handleMouseDown: function(e) {
+    /** @private */
+    __handleMouseDown: function(event) {
         this.focus();
     }
 });

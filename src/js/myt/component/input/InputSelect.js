@@ -1,8 +1,13 @@
 /** A wrapper around a native browser select component.
     
+    Events:
+        multiple:boolean
+        size:int
+        value:string
+    
     Attributes:
-        multiple:boolean Indicats if multiple options can be selected or not.
-            The default value is false.
+        multiple:boolean Indicates if multiple options can be selected or not.
+            Defaults to false.
         size:int The number of options to show. The default value is 1.
         
 */
@@ -13,13 +18,12 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.NativeInputWrapper */
     initNode: function(parent, attrs) {
-        // Modify attrs so setter gets called.
         if (attrs.multiple === undefined) attrs.multiple = false;
         if (attrs.size === undefined) attrs.size = 1;
         
         this.callSuper(parent, attrs);
         
-        this.attachToDom(this, '_handleInput', 'change');
+        this.attachToDom(this, '__handleInput', 'change');
     },
     
     /** @overrides myt.NativeInputWrapper */
@@ -32,26 +36,27 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setMultiple: function(v) {
-        if (this.multiple === v) return;
-        this.multiple = v
-        this.domElement.multiple = v;
-        if (this.inited) this.fireNewEvent('multiple', v);
+        if (this.multiple !== v) {
+            this.multiple = this.domElement.multiple = v;
+            if (this.inited) this.fireNewEvent('multiple', v);
+        }
     },
     
     setSize: function(v) {
-        if (this.size === v) return;
-        this.size = v
-        this.domElement.size = v;
-        if (this.inited) this.fireNewEvent('size', v);
+        if (this.size !== v) {
+            this.size = this.domElement.size = v;
+            if (this.inited) this.fireNewEvent('size', v);
+        }
     },
     
     /** @overrides myt.NativeInputWrapper
         Does not update the dom since the dom element's 'value' attribute
         doesn't support lists. */
     setValue: function(v) {
-        if (this.value === v) return;
-        this.value = v;
-        if (this.inited) this.fireNewEvent('value', v);
+        if (this.value !== v) {
+            this.value = v;
+            if (this.inited) this.fireNewEvent('value', v);
+        }
     },
     
     
@@ -112,7 +117,7 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
         var option = this.getOptionForValue(value);
         if (option && !option.disabled) {
             option.selected = !option.selected;
-            this._handleInput(null);
+            this.__handleInput();
         }
     },
     
@@ -120,7 +125,7 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
         var option = this.getOptionForValue(value);
         if (option && !option.disabled && !option.selected) {
             option.selected = true;
-            this._handleInput(null);
+            this.__handleInput();
         }
     },
     
@@ -128,11 +133,12 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
         var option = this.getOptionForValue(value);
         if (option && !option.disabled && option.selected) {
             option.selected = false;
-            this._handleInput(null);
+            this.__handleInput();
         }
     },
     
-    _handleInput: function(event) {
+    /** @private */
+    __handleInput: function(event) {
         this.setValue(this.multiple ? this.getSelectedOptionValues() : this.domElement.value);
     }
 });

@@ -2,11 +2,12 @@
     
     Attributes:
         errorColor:color_string The color to use when a validation 
-            error exists.
+            error exists. Defaults to '#ff9999'.
         actionRequiredColor:color_string The color to use when a validation 
-            error exists but the user has not modified the value.
+            error exists but the user has not modified the value. Defaults
+            to '#996666'.
         normalColor:color_string The color to use when no validation 
-            error exists.
+            error exists. Defaults to '#999999'.
         validateWhen:string Indicates when to run validation.
             Supported values are:
                 key: Validate as the user types.
@@ -23,13 +24,14 @@ myt.FormInputTextArea = new JS.Class('FormInputTextArea', myt.InputTextArea, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Input */
     initNode: function(parent, attrs) {
-        if (attrs.validateWhen === undefined) attrs.validateWhen = 'key';
-        if (attrs.errorColor === undefined) attrs.errorColor = '#ff9999';
-        if (attrs.actionRequiredColor === undefined) attrs.actionRequiredColor = '#996666';
-        if (attrs.normalColor === undefined) attrs.normalColor = '#999999';
+        this.validateWhen = 'key';
+        this.errorColor = '#ff9999';
+        this.actionRequiredColor = '#996666';
+        this.normalColor = '#999999';
+        
+        if (attrs.bgColor === undefined) attrs.bgColor = '#ffffff';
         if (attrs.borderWidth === undefined) attrs.borderWidth = 1;
         if (attrs.borderStyle === undefined) attrs.borderStyle = 'solid';
-        
         if (attrs.focusEmbellishment === undefined) attrs.focusEmbellishment = true;
         
         this.callSuper(parent, attrs);
@@ -39,6 +41,11 @@ myt.FormInputTextArea = new JS.Class('FormInputTextArea', myt.InputTextArea, {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
+    setValidateWhen: function(v) {this.validateWhen = v;},
+    setErrorColor: function(v) {this.errorColor = v;},
+    setActionRequiredColor: function(v) {this.actionRequiredColor = v;},
+    setNormalColor: function(v) {this.normalColor = v;},
+    
     setIsChanged: function(v) {
         this.callSuper(v);
         if (this.inited) this.updateUI();

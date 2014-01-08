@@ -111,13 +111,14 @@ myt.Color = new JS.Class('Color', {
         return (this.red << 16) + (this.green << 8) + this.blue;
     },
     
-    _toHex: function(v) {
+    /** @private */
+    __toHex: function(v) {
         var str = Number(v).toString(16); 
         return str.length === 1 ? "0" + str : str; 
     },
     
     getHtmlHexString: function() {
-        return "#" + this._toHex(this.red) + this._toHex(this.green) + this._toHex(this.blue);
+        return "#" + this.__toHex(this.red) + this.__toHex(this.green) + this.__toHex(this.blue);
     },
     
     /** Tests if this color is lighter than the provided color.

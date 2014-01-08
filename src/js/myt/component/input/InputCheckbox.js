@@ -1,5 +1,8 @@
 /** A wrapper around a native browser checkbox.
     
+    Events:
+        checked:boolean
+    
     Attributes:
         checked:boolean checks or unchecks the checkbox.
 */
@@ -14,17 +17,17 @@ myt.InputCheckbox = new JS.Class('InputCheckbox', myt.NativeInputWrapper, {
         
         this.callSuper(parent, attrs);
         
-        this.attachToDom(this, '_handleInput', 'change');
-        this.attachToDom(this, '_handleMouseDown', 'mousedown');
+        this.attachToDom(this, '__handleInput', 'change');
+        this.attachToDom(this, '__handleMouseDown', 'mousedown');
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
     setChecked: function(v) {
-        if (this.checked === v) return;
-        this.checked = v
-        this.domElement.checked = v;
-        if (this.inited) this.fireNewEvent('checked', v);
+        if (this.checked !== v) {
+            this.checked = this.domElement.checked = v;
+            if (this.inited) this.fireNewEvent('checked', v);
+        }
     },
     
     
@@ -43,11 +46,13 @@ myt.InputCheckbox = new JS.Class('InputCheckbox', myt.NativeInputWrapper, {
         if (BrowserDetect.browser !== 'Firefox') this.callSuper();
     },
     
-    _handleInput: function(event) {
+    /** @private */
+    __handleInput: function(event) {
         this.setValue(this.domElement.checked);
     },
     
-    _handleMouseDown: function(event) {
+    /** @private */
+    __handleMouseDown: function(event) {
         this.focus();
     }
 });

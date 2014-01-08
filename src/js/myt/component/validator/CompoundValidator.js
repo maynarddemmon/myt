@@ -1,7 +1,13 @@
 /** A Validator composed from multiple Validators.
     
+    Events:
+        None
+    
     Attributes:
-        _validators:array the array of myt.Validators that compose 
+        None
+    
+    Private Attributes:
+        __validators:array the array of myt.Validators that compose 
             this Validator.
 */
 myt.CompoundValidator = new JS.Class('CompoundValidator', myt.Validator, {
@@ -27,7 +33,7 @@ myt.CompoundValidator = new JS.Class('CompoundValidator', myt.Validator, {
             }
         }
         
-        this._validators = args;
+        this.__validators = args;
     },
     
     
@@ -40,13 +46,13 @@ myt.CompoundValidator = new JS.Class('CompoundValidator', myt.Validator, {
             validator = myt.global.validators.getValidator(validator);
         }
         
-        if (validator) this._validators.push(validator);
+        if (validator) this.__validators.push(validator);
     },
     
     /** @overrides myt.Validator */
     isValid: function(value, config, errorMessages) {
         var isValid = true, 
-            validators = this._validators, 
+            validators = this.__validators, 
             len = validators.length, 
             i = 0;
         for (; len > i; ++i) {

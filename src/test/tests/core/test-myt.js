@@ -28,9 +28,9 @@ test("Test fillTextTemplate", function() {
 });
 
 test("Test generateLink", function() {
-    ok(myt.generateLink('foo', 'bar') === '<a href="#" onclick=\'myt._handleGeneratedLink(this, "bar", &apos;&apos;); return false;\'>foo</a>', "Basic link generation.");
-    ok(myt.generateLink('foo', 'bar', {a:'b', c:'d'}) === '<a href="#" onclick=\'myt._handleGeneratedLink(this, "bar", &apos;&apos;); return false;\' a="b" c="d">foo</a>', "Basic link generation.");
-    ok(myt.generateLink('foo', 'bar', null, {x:5}) === '<a href="#" onclick=\'myt._handleGeneratedLink(this, "bar", &apos;{"x":5}&apos;); return false;\'>foo</a>', "Basic link generation.");
+    ok(myt.generateLink('foo', 'bar') === '<a href="#" onclick=\'myt.__handleGeneratedLink(this, "bar", &apos;&apos;); return false;\'>foo</a>', "Basic link generation.");
+    ok(myt.generateLink('foo', 'bar', {a:'b', c:'d'}) === '<a href="#" onclick=\'myt.__handleGeneratedLink(this, "bar", &apos;&apos;); return false;\' a="b" c="d">foo</a>', "Basic link generation.");
+    ok(myt.generateLink('foo', 'bar', null, {x:5}) === '<a href="#" onclick=\'myt.__handleGeneratedLink(this, "bar", &apos;{"x":5}&apos;); return false;\'>foo</a>', "Basic link generation.");
 });
 
 test("Test wrapFunction", function() {

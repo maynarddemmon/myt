@@ -1,12 +1,16 @@
 /** An myt.InputText that is also a FormElement.
     
+    Events:
+        None
+    
     Attributes:
         errorColor:color_string The color to use when a validation 
-            error exists.
+            error exists. Defaults to '#ff9999'.
         actionRequiredColor:color_string The color to use when a validation 
-            error exists but the user has not modified the value.
+            error exists but the user has not modified the value. Defaults
+            to '#996666'.
         normalColor:color_string The color to use when no validation 
-            error exists.
+            error exists. Defaults to '#999999'.
         validateWhen:string Indicates when to run validation.
             Supported values are:
                 key: Validate as the user types.
@@ -29,22 +33,23 @@ myt.FormInputText = new JS.Class('FormInputText', myt.InputText, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Input */
     initNode: function(parent, attrs) {
-        if (attrs.validateWhen === undefined) attrs.validateWhen = 'key';
-        if (attrs.errorColor === undefined) attrs.errorColor = '#ff9999';
-        if (attrs.actionRequiredColor === undefined) attrs.actionRequiredColor = '#996666';
-        if (attrs.normalColor === undefined) attrs.normalColor = '#999999';
-        if (attrs.acceleratorScope === undefined) attrs.acceleratorScope = 'element';
+        this.acceleratorScope = 'element';
+        this.validateWhen = 'key';
+        this.errorColor = '#ff9999';
+        this.actionRequiredColor = '#996666';
+        this.normalColor = '#999999';
+        
+        if (attrs.bgColor === undefined) attrs.bgColor = '#ffffff';
         if (attrs.borderWidth === undefined) attrs.borderWidth = 1;
         if (attrs.borderStyle === undefined) attrs.borderStyle = 'solid';
-        
         if (attrs.focusEmbellishment === undefined) attrs.focusEmbellishment = true;
         
         this.callSuper(parent, attrs);
         
         this.addValueProcessor(myt.global.valueProcessors.getValueProcessor('undefToEmpty'));
         
-        this.attachToDom(this, '_handleKeyDown', 'keydown');
-        this.attachToDom(this, '_handleKeyUp', 'keyup');
+        this.attachToDom(this, '__handleKeyDown', 'keydown');
+        this.attachToDom(this, '__handleKeyUp', 'keyup');
         
         this.addAccelerator('accept', this.doAccept);
         this.addAccelerator('reject', this.doReject);
@@ -52,6 +57,12 @@ myt.FormInputText = new JS.Class('FormInputText', myt.InputText, {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
+    setValidateWhen: function(v) {this.validateWhen = v;},
+    setAcceleratorScope: function(v) {this.acceleratorScope = v;},
+    setErrorColor: function(v) {this.errorColor = v;},
+    setActionRequiredColor: function(v) {this.actionRequiredColor = v;},
+    setNormalColor: function(v) {this.normalColor = v;},
+    
     setIsChanged: function(v) {
         this.callSuper(v);
         if (this.inited) this.updateUI();
@@ -72,8 +83,6 @@ myt.FormInputText = new JS.Class('FormInputText', myt.InputText, {
         
         return retval;
     },
-    
-    setAcceleratorScope: function(v) {this.acceleratorScope = v;},
     
     
     // Methods /////////////////////////////////////////////////////////////////
@@ -121,11 +130,13 @@ myt.FormInputText = new JS.Class('FormInputText', myt.InputText, {
         this.setBoxShadow();
     },
     
-    _handleKeyDown: function(event) {
+    /** @private */
+    __handleKeyDown: function(event) {
         if (myt.KeyObservable.getKeyCodeFromEvent(event) === 13) this.invokeAccelerator("accept");
     },
     
-    _handleKeyUp: function(event) {
+    /** @private */
+    __handleKeyUp: function(event) {
         if (myt.KeyObservable.getKeyCodeFromEvent(event) === 27) this.invokeAccelerator("reject");
     },
     

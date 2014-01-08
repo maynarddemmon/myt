@@ -1,11 +1,18 @@
 /** A base class for input:text and textarea components.
     
+    Events:
+        spellcheck:boolean
+        maxLength:int
+    
     Attributes:
-        spellcheck:boolean turns browser spellchecking on and off.
-        maxLength:int sets a maximum number of input characters. Set to -1 to
-            turn of max length.
-        allowedChars:string each character in the string is an allowed
-            input character. If not set all characters are allowed.
+        spellcheck:boolean Turns browser spellchecking on and off. Defaults
+            to false.
+        maxLength:int Sets a maximum number of input characters. Set to a
+            negative number to turn off max length. Defaults to undefined
+            which is equivalent to a negative number.
+        allowedChars:string Each character in the string is an allowed
+            input character. If not set or empty all characters are allowed. 
+            Defaults to undefined.
 */
 myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     include: [myt.TextSupport],
@@ -19,11 +26,11 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
         
         this.callSuper(parent, attrs);
         
-        this.attachToDom(this, '_handleInput', 'input');
+        this.attachToDom(this, '__handleInput', 'input');
         
         // Allow filtering of input
-        this.attachToDom(this, '_filterInput', 'keypress');
-        this.attachToDom(this, '_filterInput', 'keyup');
+        this.attachToDom(this, '__filterInput', 'keypress');
+        this.attachToDom(this, '__filterInput', 'keyup');
     },
     
     
@@ -37,32 +44,34 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     },
     
     setSpellcheck: function(v) {
-        if (this.spellcheck === v) return;
-        this.spellcheck = this.domElement.spellcheck = v;
-        if (this.inited) this.fireNewEvent('spellcheck', v);
+        if (this.spellcheck !== v) {
+            this.spellcheck = this.domElement.spellcheck = v;
+            if (this.inited) this.fireNewEvent('spellcheck', v);
+        }
     },
     
     setMaxLength: function(v) {
         if (v == null || 0 > v) v = undefined;
         
-        if (this.maxLength === v) return;
-        this.maxLength = this.domElement.maxLength = v;
-        if (this.inited) this.fireNewEvent('maxLength', v);
+        if (this.maxLength !== v) {
+            this.maxLength = this.domElement.maxLength = v;
+            if (this.inited) this.fireNewEvent('maxLength', v);
+        }
     },
     
-    setAllowedChars: function(v) {
-        this.allowedChars = v;
-    },
+    setAllowedChars: function(v) {this.allowedChars = v;},
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    _filterInput: function(v) {
+    /** @private */
+    __filterInput: function(v) {
         var de = this.domElement, curValue = de.value,
-            newValue = this.filterInput(this._filterForAllowedChars(curValue));
+            newValue = this.filterInput(this.__filterForAllowedChars(curValue));
         if (curValue !== newValue) de.value = newValue;
     },
     
-    _filterForAllowedChars: function(v) {
+    /** @private */
+    __filterForAllowedChars: function(v) {
         var allowedChars = this.allowedChars;
         if (allowedChars) {
             var chars = v.split(''), i = chars.length;
@@ -72,11 +81,16 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
         return v;
     },
     
+    /** A hook for subclasses/instances to do input filtering. The default
+        implementation returns the value unchanged.
+        @param v:string the current value of the form element.
+        @returns string: The new value of the form element. */
     filterInput: function(v) {
         return v;
     },
     
-    _handleInput: function(event) {
+    /** @private */
+    __handleInput: function(event) {
         this.setValue(this.domElement.value);
     },
     

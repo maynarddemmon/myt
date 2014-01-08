@@ -1,5 +1,8 @@
 /** Tests if a value is "valid" or not.
     
+    Events:
+        None
+    
     Attributes:
         id:string the ideally unique ID for this Validator so it can be
             stored and retreived from the myt.global.validators registry.

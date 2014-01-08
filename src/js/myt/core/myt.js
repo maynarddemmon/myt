@@ -160,14 +160,15 @@ myt = {
         }
         
         return this.fillTextTemplate(
-            '<a href="#" onclick=\'myt._handleGeneratedLink(this, "{0}", &apos;{3}&apos;); return false;\'{2}>{1}</a>', 
+            '<a href="#" onclick=\'myt.__handleGeneratedLink(this, "{0}", &apos;{3}&apos;); return false;\'{2}>{1}</a>', 
             callbackMethodName, text, optAttrs, JSON.stringify(data)
         );
     },
     
     /** See myt.generateLink for documentation.
+        @private
         @returns void */
-    _handleGeneratedLink: function(elem, callbackMethodName, data) {
+    __handleGeneratedLink: function(elem, callbackMethodName, data) {
         var model;
         while (elem) {
             model = elem.model;

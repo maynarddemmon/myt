@@ -1,11 +1,17 @@
 /** Provides "form" element functionality to a node. A form element is a
     form that actually has a value.
     
+    Events:
+        defaultValue:* Fired when the default value changes.
+        rollbackValue:* Fired when the rollback value changes.
+    
     Attributes:
         value:* The current value of the form element.
         rollbackValue:* The rollback value of the form element.
         defaultValue:* The default value of the form element.
-        _valueProcessors:array A list of myt.ValueProcessors that get applied 
+    
+    Private Attributes:
+        __valueProcessors:array A list of myt.ValueProcessors that get applied 
             to a value whenever it is retrieved via the methods: 
             getValue, getRollbackValue or getDefaultValue.
 */
@@ -15,7 +21,7 @@ myt.FormElement = new JS.Module('FormElement', {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        this._valueProcessors = [];
+        this.__valueProcessors = [];
         
         this.callSuper(parent, attrs);
     },
@@ -24,7 +30,7 @@ myt.FormElement = new JS.Module('FormElement', {
     // Accessors ///////////////////////////////////////////////////////////////
     /** @overrides myt.Form */
     getValue: function() {
-        return this._processValue(
+        return this.__processValue(
             this.callSuper ? this.callSuper() : this.value, 'runForCurrent'
         );
     },
@@ -41,7 +47,7 @@ myt.FormElement = new JS.Module('FormElement', {
     
     /** @overrides myt.Form */
     getDefaultValue: function() {
-        return this._processValue(this.defaultValue, 'runForDefault');
+        return this.__processValue(this.defaultValue, 'runForDefault');
     },
     
     /** @overrides myt.Form */
@@ -56,7 +62,7 @@ myt.FormElement = new JS.Module('FormElement', {
     
     /** @overrides myt.Form */
     getRollbackValue: function() {
-        return this._processValue(this.rollbackValue, 'runForRollback');
+        return this.__processValue(this.rollbackValue, 'runForRollback');
     },
     
     /** @overrides myt.Form */
@@ -76,7 +82,7 @@ myt.FormElement = new JS.Module('FormElement', {
         @param processor:myt.ValueProcessor
         @returns void */
     addValueProcessor: function(processor) {
-        this._valueProcessors.push(processor);
+        this.__valueProcessors.push(processor);
     },
     
     /** Removes a ValueProcessor from this form element.
@@ -84,7 +90,7 @@ myt.FormElement = new JS.Module('FormElement', {
         @returns the removed myt.ValueProcessor or null if not found. */
     removeValueProcessor: function(id) {
         if (id) {
-            var processors = this._valueProcessors, i = processors.length, processor;
+            var processors = this.__valueProcessors, i = processors.length, processor;
             while (i) {
                 processor = processors[--i];
                 if (processor.id === id) {
@@ -97,12 +103,13 @@ myt.FormElement = new JS.Module('FormElement', {
     },
     
     /** Runs the provided value through all the ValueProcessors.
+        @private
         @param value:* the value to process.
         @param checkAttr:string the name of the attribute on each processor 
             that is checked to see if that processor should be run or not.
         @returns the processed value. */
-    _processValue: function(value, checkAttr) {
-        var processors = this._valueProcessors, 
+    __processValue: function(value, checkAttr) {
+        var processors = this.__valueProcessors, 
             len = processors.length, processor, i = 0;
         for (; len > i; ++i) {
             processor = processors[i];
