@@ -16,7 +16,7 @@
 myt.InputRadio = new JS.Class('InputRadio', myt.NativeInputWrapper, {
     include: [myt.SizeToDom],
     
-    // Class Methods ///////////////////////////////////////////////////////////
+    // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
         /** The group ID counter. */
         __idCounter: 0,

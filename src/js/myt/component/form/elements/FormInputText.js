@@ -112,7 +112,6 @@ myt.FormInputText = new JS.Class('FormInputText', myt.InputText, {
                     this.rollbackForm();
                     this.getRootForm().doValidation();
                     if (this.form) this.form.verifyChangedState(this);
-                    
                     break;
                 case 'none':
                 default:

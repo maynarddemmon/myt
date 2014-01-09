@@ -1,4 +1,9 @@
-/** Trims the whitespace from a value. */
+/** Trims the whitespace from a value.
+    
+    Attributes:
+        trim:string Determines what kind of trimming to do. Supported values
+            are 'left', 'right' and 'both'. The default value is 'both'.
+*/
 myt.TrimValueProcessor = new JS.Class('TrimValueProcessor', myt.ValueProcessor, {
     // Constructor /////////////////////////////////////////////////////////////
     /** @overrides myt.ValueProcessor

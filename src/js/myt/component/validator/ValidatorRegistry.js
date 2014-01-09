@@ -1,4 +1,5 @@
-/** Stores myt.Validators by ID.
+/** Stores myt.Validators by ID so they can be used in multiple
+    places easily.
     
     Events:
         validatorAdded:myt.Validator Fired when a validator is added to
@@ -10,7 +11,7 @@
         None
     
     Private Attributes:
-        __validators:Object a map of myt.Validators by ID.
+        __c:object A map of myt.Validators by ID.
 */
 new JS.Singleton('GlobalValidatorRegistry', {
     include: [myt.Observable],
@@ -18,7 +19,8 @@ new JS.Singleton('GlobalValidatorRegistry', {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initialize: function() {
-        this.__validators = {};
+        this.__c = {};
+        
         myt.global.register('validators', this);
         
         // Register a few common Validators
@@ -34,7 +36,7 @@ new JS.Singleton('GlobalValidatorRegistry', {
         @param id:string the ID of the Validator to get.
         @returns an myt.Validator or undefined if not found. */
     getValidator: function(id) {
-        return this.__validators[id];
+        return this.__c[id];
     },
     
     
@@ -46,13 +48,13 @@ new JS.Singleton('GlobalValidatorRegistry', {
         if (validator) {
             var id = validator.id;
             if (id) {
-                this.__validators[id] = validator;
+                this.__c[id] = validator;
                 this.fireNewEvent('validatorAdded', validator);
             } else {
-                myt.dumpStack("No ID on validator");
+                myt.dumpStack("No ID");
             }
         } else {
-            myt.dumpStack("No validator provided to register.");
+            myt.dumpStack("No validator");
         }
     },
     
@@ -63,17 +65,19 @@ new JS.Singleton('GlobalValidatorRegistry', {
         if (validator) {
             var id = validator.id;
             if (id) {
+                // Make sure it's in the repository.
                 validator = this.getValidator(id);
+                
                 if (validator) {
-                    delete this.__validators[id];
+                    delete this.__c[id];
                     this.fireNewEvent('validatorRemoved', validator);
                     return true;
                 }
             } else {
-                myt.dumpStack("No ID on validator");
+                myt.dumpStack("No ID");
             }
         } else {
-            myt.dumpStack("No validator provided to unregister.");
+            myt.dumpStack("No validator");
         }
         return false;
     }

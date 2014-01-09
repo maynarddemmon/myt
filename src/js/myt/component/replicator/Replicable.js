@@ -3,9 +3,12 @@
     clean method should also be implemented. The methods replicate and clean
     should perform setup and teardown of the object respectively.
     
+    Events:
+        None
+    
     Attributes:
-        replicationData:* the data provided during replication.
-        replicationIndex:number the replication index provided 
+        replicationData:* The data provided during replication.
+        replicationIndex:number The replication index provided 
             during replication.
 */
 myt.Replicable = new JS.Module('Replicable', {
@@ -44,6 +47,7 @@ myt.Replicable = new JS.Module('Replicable', {
         @returns boolean true if the provided data is already set on this
             replicable, false otherwise. */
     alreadyHasReplicationData: function(data, idx) {
+        // FIXME: Use deepEquals on replicationData?
         return idx === this.replicationIndex && data === this.replicationData;
     }
 });

@@ -31,7 +31,7 @@ myt.FormElement = new JS.Module('FormElement', {
     /** @overrides myt.Form */
     getValue: function() {
         return this.__processValue(
-            this.callSuper ? this.callSuper() : this.value, 'runForCurrent'
+            this.callSuper ? this.callSuper() : this.value, myt.ValueProcessor.CURRENT_ATTR
         );
     },
     
@@ -47,7 +47,7 @@ myt.FormElement = new JS.Module('FormElement', {
     
     /** @overrides myt.Form */
     getDefaultValue: function() {
-        return this.__processValue(this.defaultValue, 'runForDefault');
+        return this.__processValue(this.defaultValue, myt.ValueProcessor.DEFAULT_ATTR);
     },
     
     /** @overrides myt.Form */
@@ -62,7 +62,7 @@ myt.FormElement = new JS.Module('FormElement', {
     
     /** @overrides myt.Form */
     getRollbackValue: function() {
-        return this.__processValue(this.rollbackValue, 'runForRollback');
+        return this.__processValue(this.rollbackValue, myt.ValueProcessor.ROLLBACK_ATTR);
     },
     
     /** @overrides myt.Form */
@@ -104,14 +104,14 @@ myt.FormElement = new JS.Module('FormElement', {
     
     /** Runs the provided value through all the ValueProcessors.
         @private
-        @param value:* the value to process.
-        @param checkAttr:string the name of the attribute on each processor 
+        @param value:* The value to process.
+        @param checkAttr:string The name of the attribute on each processor 
             that is checked to see if that processor should be run or not.
-        @returns the processed value. */
+        @returns * The processed value. */
     __processValue: function(value, checkAttr) {
         var processors = this.__vp, len = processors.length, processor, i = 0;
-        for (; len > i; ++i) {
-            processor = processors[i];
+        for (; len > i;) {
+            processor = processors[i++];
             if (processor[checkAttr]) value = processor.process(value);
         }
         return value;
