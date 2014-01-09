@@ -18,7 +18,6 @@ myt.RadioDrawingMethod = new JS.Class('RadioDrawingMethod', myt.DrawingMethod, {
         
         var inset = config.edgeSize,
             radius = w / 2,
-            twoPi = Math.PI * 2,
             radius2 = radius - inset,
             dotRadius = (radius2 / 2) - 1,
             centerX = x + radius,
@@ -32,7 +31,7 @@ myt.RadioDrawingMethod = new JS.Class('RadioDrawingMethod', myt.DrawingMethod, {
         canvas.setShadowColor(config.focused ? config.focusedShadowColor : config.shadowColor);
         
         canvas.beginPath();
-        canvas.arc(centerX, centerY, radius, 0, twoPi);
+        canvas.circle(centerX, centerY, radius);
         canvas.closePath();
         canvas.setFillStyle(config.edgeColor);
         canvas.fill();
@@ -40,7 +39,7 @@ myt.RadioDrawingMethod = new JS.Class('RadioDrawingMethod', myt.DrawingMethod, {
         
         // Fill
         canvas.beginPath();
-        canvas.arc(centerX, centerY, radius2, 0, twoPi);
+        canvas.circle(centerX, centerY, radius2);
         canvas.closePath();
         var darkColor = (myt.Color.makeColorFromHexString(config.fillColor)).multiply(5/6);
         var grd = canvas.createLinearGradient(x, y, x, y + w);
@@ -52,7 +51,7 @@ myt.RadioDrawingMethod = new JS.Class('RadioDrawingMethod', myt.DrawingMethod, {
         // Checkmark
         if (config.checked) {
             canvas.beginPath();
-            canvas.arc(centerX, centerY, dotRadius, 0, twoPi);
+            canvas.circle(centerX, centerY, dotRadius);
             canvas.closePath();
             canvas.setFillStyle(config.checkedColor);
             canvas.fill();

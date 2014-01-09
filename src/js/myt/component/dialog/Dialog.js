@@ -18,7 +18,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         DEFAULT_SHADOW: [0, 4, 20, '#666666'],
         DEFAULT_BGCOLOR: '#ffffff',
         
-        /** Makes the text will wrap at 200px and the dialog will be at
+        /** Makes the text wrap at 200px and the dialog will be at
             least 200px wide. */
         WRAP_TEXT_DEFAULTS: {
             width:200,
@@ -55,6 +55,19 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             this.createCloseButton(content, dialog);
         },
         
+        /** Creates a close button on the provided targetView.
+            @param targetView:myt.View The view to create the button on.
+            @param callbackTarget:object An object with a doCallback method
+                that will get called when the close button is activated.
+            @param hoverColor:color (optional) The color used when the mouse 
+                hovers over the button. Defaults to '#666666'.
+            @param activeColor:color (optional) The color used when the button 
+                is active. Defaults to '#000000'.
+            @param readyColor:color (optional) The color used when the button 
+                is ready to be activated. Defaults to '#333333'.
+            @param iconColor:color (optional) The color used to draw the 
+                close icon. Defaults to '#ffffff'.
+            @returns myt.Button: The created button. */
         createCloseButton: function(
             targetView, callbackTarget, hoverColor, activeColor, readyColor, iconColor
         ) {
@@ -68,7 +81,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
                 roundedCorners:8, tooltip:'Close Dialog.',
                 ignoreLayout:true, align:'right', alignOffset:4
             }, [myt.TooltipMixin, {
-                doActivated: function() {callbackTarget.__doCallback(this);},
+                doActivated: function() {callbackTarget.doCallback(this);},
                 
                 draw: function(canvas, config) {
                     canvas.clear();
@@ -92,7 +105,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
                     }
                     
                     canvas.beginPath();
-                    canvas.arc(8, 8, 8, 0, Math.PI * 2);
+                    canvas.circle(8, 8, 8);
                     canvas.closePath();
                     canvas.setFillStyle(fillColor);
                     canvas.fill();
@@ -177,11 +190,10 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     },
     
     /** Called by each of the buttons that can trigger the dialog to be hidden.
-        @private
         @param sourceView:myt.View the view that triggered the hiding 
             of the dialog.
         @returns void */
-    __doCallback: function(sourceView) {
+    doCallback: function(sourceView) {
         var cbf = this.callbackFunction;
         if (!cbf || !cbf.call(this, sourceView.name)) this.hide();
     },
@@ -340,13 +352,13 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             activeColor:'#bbbbbb', hoverColor:'#dddddd', readyColor:'#cccccc'
         };
         new myt.SimpleIconTextButton(btnContainer, attrs, [{
-            doActivated: function() {self.__doCallback(this);}
+            doActivated: function() {self.doCallback(this);}
         }]);
         
         attrs.name = 'confirmBtn';
         attrs.text = opts.confirmTxt;
         new myt.SimpleIconTextButton(btnContainer, attrs, [{
-            doActivated: function() {self.__doCallback(this);}
+            doActivated: function() {self.doCallback(this);}
         }]);
         
         new myt.SizeToChildren(btnContainer, {axis:'y'});

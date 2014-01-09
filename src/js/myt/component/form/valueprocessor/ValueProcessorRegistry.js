@@ -1,7 +1,17 @@
-/** Stores myt.ValueProcessors by ID.
+/** Stores myt.ValueProcessors by ID so they can be used in multiple
+    places easily.
+    
+    Events:
+        processorAdded:myt.ValueProcessor Fired when a processor is registered
+            with the registry.
+        processorRemoved:myt.ValueProcessor Fired when a processor is 
+            unregistered from the registry.
     
     Attributes:
-        _processors:Object a map of myt.ValueProcessors by ID.
+        None
+    
+    Private Attributes:
+        __c:object A map of myt.ValueProcessors by ID.
 */
 new JS.Singleton('GlobalValueProcessorRegistry', {
     include: [myt.Observable],
@@ -9,7 +19,8 @@ new JS.Singleton('GlobalValueProcessorRegistry', {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initialize: function() {
-        this._processors = {};
+        this.__c = {};
+        
         myt.global.register('valueProcessors', this);
         
         // Register a few common ValueProcessors
@@ -26,7 +37,7 @@ new JS.Singleton('GlobalValueProcessorRegistry', {
         @param id:string the ID of the ValueProcessor to get.
         @returns an myt.ValueProcessor or undefined if not found. */
     getValueProcessor: function(id) {
-        return this._processors[id];
+        return this.__c[id];
     },
     
     
@@ -38,13 +49,13 @@ new JS.Singleton('GlobalValueProcessorRegistry', {
         if (processor) {
             var id = processor.id;
             if (id) {
-                this._processors[id] = processor;
+                this.__c[id] = processor;
                 this.fireNewEvent('processorAdded', processor);
             } else {
-                myt.dumpStack("No ID on processor");
+                myt.dumpStack("No ID");
             }
         } else {
-            myt.dumpStack("No processor provided to register.");
+            myt.dumpStack("No processor");
         }
     },
     
@@ -55,17 +66,19 @@ new JS.Singleton('GlobalValueProcessorRegistry', {
         if (processor) {
             var id = processor.id;
             if (id) {
+                // Make sure it's in the repository.
                 processor = this.getValueProcessor(id);
+                
                 if (processor) {
-                    delete this._processors[id];
+                    delete this.__c[id];
                     this.fireNewEvent('processorRemoved', processor);
                     return true;
                 }
             } else {
-                myt.dumpStack("No ID on processor");
+                myt.dumpStack("No ID");
             }
         } else {
-            myt.dumpStack("No processor provided to unregister.");
+            myt.dumpStack("No processor");
         }
         return false;
     }

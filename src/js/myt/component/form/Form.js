@@ -55,10 +55,10 @@ myt.Form = new JS.Module('Form', {
             var existingId = this.id;
             this.id = v;
             
-            var pf = this.form;
-            if (this.inited && pf) {
-                pf.removeSubForm(existingId);
-                pf.addSubForm(this);
+            var form = this.form;
+            if (form && this.inited) {
+                form.removeSubForm(existingId);
+                form.addSubForm(this);
             }
         }
     },
@@ -68,7 +68,7 @@ myt.Form = new JS.Module('Form', {
             var existingForm = this.form;
             this.form = v;
             if (existingForm) existingForm.removeSubForm(this.id);
-            if (this.inited && v) v.addSubForm(this);
+            if (v && this.inited) v.addSubForm(this);
         }
     },
     
@@ -79,12 +79,12 @@ myt.Form = new JS.Module('Form', {
         this.isValid = v;
         if (this.inited) this.fireNewEvent('isValid', v);
         
-        var pf = this.form;
-        if (pf && !this._lockCascade) {
+        var form = this.form;
+        if (form && !this._lockCascade) {
             if (v) {
-                pf.verifyValidState(this);
+                form.verifyValidState(this);
             } else {
-                pf.notifySubFormInvalid();
+                form.notifySubFormInvalid();
             }
         }
     },
@@ -94,12 +94,12 @@ myt.Form = new JS.Module('Form', {
             this.isChanged = v;
             if (this.inited) this.fireNewEvent('isChanged', v);
             
-            var pf = this.form;
-            if (pf && !this._lockCascade) {
+            var form = this.form;
+            if (form && !this._lockCascade) {
                 if (v) {
-                    pf.notifySubFormChanged();
+                    form.notifySubFormChanged();
                 } else {
-                    pf.verifyChangedState(this);
+                    form.verifyChangedState(this);
                 }
             }
         }
@@ -131,13 +131,11 @@ myt.Form = new JS.Module('Form', {
         if (this.callSuper) return this.callSuper();
         
         // Only do "form" behavior for true forms, not for form elements.
-        if (this.isA(myt.FormElement)) {
-            return this.value;
-        } else {
-            var retval = {}, subForms = this.__subForms, id;
-            for (id in subForms) retval[id] = subForms[id].getValue();
-            return retval;
-        }
+        if (this.isA(myt.FormElement)) return this.value;
+        
+        var retval = {}, subForms = this.__subForms, id;
+        for (id in subForms) retval[id] = subForms[id].getValue();
+        return retval;
     },
     
     /** Sets the value of this form. For a form the value should be a map

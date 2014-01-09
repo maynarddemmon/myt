@@ -11,7 +11,7 @@
         defaultValue:* The default value of the form element.
     
     Private Attributes:
-        __valueProcessors:array A list of myt.ValueProcessors that get applied 
+        __vp:array A list of myt.ValueProcessors that get applied 
             to a value whenever it is retrieved via the methods: 
             getValue, getRollbackValue or getDefaultValue.
 */
@@ -21,7 +21,7 @@ myt.FormElement = new JS.Module('FormElement', {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        this.__valueProcessors = [];
+        this.__vp = [];
         
         this.callSuper(parent, attrs);
     },
@@ -82,7 +82,7 @@ myt.FormElement = new JS.Module('FormElement', {
         @param processor:myt.ValueProcessor
         @returns void */
     addValueProcessor: function(processor) {
-        this.__valueProcessors.push(processor);
+        this.__vp.push(processor);
     },
     
     /** Removes a ValueProcessor from this form element.
@@ -90,7 +90,7 @@ myt.FormElement = new JS.Module('FormElement', {
         @returns the removed myt.ValueProcessor or null if not found. */
     removeValueProcessor: function(id) {
         if (id) {
-            var processors = this.__valueProcessors, i = processors.length, processor;
+            var processors = this.__vp, i = processors.length, processor;
             while (i) {
                 processor = processors[--i];
                 if (processor.id === id) {
@@ -109,8 +109,7 @@ myt.FormElement = new JS.Module('FormElement', {
             that is checked to see if that processor should be run or not.
         @returns the processed value. */
     __processValue: function(value, checkAttr) {
-        var processors = this.__valueProcessors, 
-            len = processors.length, processor, i = 0;
+        var processors = this.__vp, len = processors.length, processor, i = 0;
         for (; len > i; ++i) {
             processor = processors[i];
             if (processor[checkAttr]) value = processor.process(value);
