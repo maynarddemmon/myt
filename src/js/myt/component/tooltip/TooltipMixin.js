@@ -1,6 +1,24 @@
 /** A mixin that adds tooltip support to a view.
     
-    Requires myt.MouseOver. */
+    Requires:
+        myt.MouseOver
+    
+    Events:
+        tooltip:string
+        tipAlign:string
+        tipValign:string
+        tipClass:JS.Class
+    
+    Attributes:
+        tooltip:string The tip text to display.
+        tipAlign:string The horizontal alignment of the tooltip relative to
+            the view the tip is being shown for. Supported values are 'left'
+            and 'right'. Defaults to 'left'.
+        tipValign:string The vertical alignment of the tooltip relative to
+            the view the tip is being shown for. Supported values are 'above'
+            and 'below'. Defaults to 'above'.
+        tipClass:JS.Class The class to use to instantiate the tooltip.
+*/
 myt.TooltipMixin = new JS.Module('TooltipMixin', {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
@@ -11,32 +29,32 @@ myt.TooltipMixin = new JS.Module('TooltipMixin', {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    /** The text to display in the tooltip. */
     setTooltip: function(v) {
-        if (this.tooltip === v) return;
-        this.tooltip = v;
-        if (this.inited) this.fireNewEvent('tooltip', v);
+        if (this.tooltip !== v) {
+            this.tooltip = v;
+            if (this.inited) this.fireNewEvent('tooltip', v);
+        }
     },
     
-    /** The horizontal alignment of the tooltip. */
     setTipAlign: function(v) {
-        if (this.tipAlign === v) return;
-        this.tipAlign = v;
-        if (this.inited) this.fireNewEvent('tipAlign', v);
+        if (this.tipAlign !== v) {
+            this.tipAlign = v;
+            if (this.inited) this.fireNewEvent('tipAlign', v);
+        }
     },
     
-    /** The vertical alignment of the tooltip. */
     setTipValign: function(v) {
-        if (this.tipValign === v) return;
-        this.tipValign = v;
-        if (this.inited) this.fireNewEvent('tipValign', v);
+        if (this.tipValign !== v) {
+            this.tipValign = v;
+            if (this.inited) this.fireNewEvent('tipValign', v);
+        }
     },
     
-    /** Sets the tooltip class to use. */
     setTipClass: function(v) {
-        if (this.tipClass === v) return;
-        this.tipClass = v;
-        if (this.inited) this.fireNewEvent('tipClass', v);
+        if (this.tipClass !== v) {
+            this.tipClass = v;
+            if (this.inited) this.fireNewEvent('tipClass', v);
+        }
     },
     
     
@@ -75,7 +93,7 @@ myt.TooltipMixin = new JS.Module('TooltipMixin', {
                 parent:this, 
                 text:this.tooltip, 
                 tipalign:this.tipAlign ? this.tipAlign : 'left', 
-                tipvalign:this.tipValign ? this.tipValign : 'top'
+                tipvalign:this.tipValign ? this.tipValign : 'above'
             });
         }
     }

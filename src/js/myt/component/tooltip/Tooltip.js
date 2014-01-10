@@ -1,5 +1,8 @@
 /** An implementation of a tooltip.
     
+    Events:
+        None
+    
     Attributes:
         edgeWidth:number the width of the "edge" of the tip background.
         pointerInset:number The inset of the "pointer" from the left/right 
@@ -12,7 +15,9 @@
         tipBgColor:string The color to use for the tip background.
         edgeColor:string The color used for the edge.
         shadowColor:string The color of the shadow.
-        _tipWidth:number The width of the tip text view.
+    
+    Private Attributes:
+        __tipWidth:number The width of the tip text view.
 */
 myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
     // Class Methods and Attributes ////////////////////////////////////////////
@@ -48,7 +53,7 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
         if (attrs.edgeColor === undefined) attrs.edgeColor = T.DEFAULT_EDGE_COLOR;
         if (attrs.shadowColor === undefined) attrs.shadowColor = T.DEFAULT_SHADOW_COLOR;
         
-        this._tipWidth = 0;
+        this.__tipWidth = 0;
         
         this.callSuper(parent, attrs);
     },
@@ -105,14 +110,14 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
         // Determine X position
         tipText.setWidth('auto');
         var tipTextWidth = Math.min(tipText.measureNoWrapWidth(), this.maxTextWidth);
-        this._tipWidth = 2 * tipText.x + tipTextWidth;
+        this.__tipWidth = 2 * tipText.x + tipTextWidth;
         tipText.setWidth(tipTextWidth);
         tipText.sizeViewToDom();
         var pointerX = tipText.x + this.pointerInset;
         
         var alignRight = tt.tipalign === 'right';
         if (alignRight) {
-            tipX += ttp.width - this._tipWidth;
+            tipX += ttp.width - this.__tipWidth;
             pointerX = tipText.x + tipText.width - this.pointerInset - this.pointerWidth;
         }
         
@@ -125,8 +130,8 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
         }
         
         // Prevent out-of-bounds to the right
-        if (tipX + this._tipWidth > boundsXOffset + bounds.width) {
-            diff = (tipX + this._tipWidth) - (boundsXOffset + bounds.width);
+        if (tipX + this.__tipWidth > boundsXOffset + bounds.width) {
+            diff = (tipX + this.__tipWidth) - (boundsXOffset + bounds.width);
             tipX -= diff;
             pointerX += diff;
         }
@@ -163,21 +168,22 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
         this.setY(Math.round(tipY));
         tipText.setY(this.insetTop + this.edgeWidth + (pointerOnTop ? this.pointerHeight : 0));
         
-        this.setWidth(this._tipWidth + this.shadowWidth);
+        this.setWidth(this.__tipWidth + this.shadowWidth);
         this.setHeight(tipHeight + this.shadowWidth);
         
-        this._redraw(pointerX, pointerOnTop);
+        this.__redraw(pointerX, pointerOnTop);
         
         this.callSuper();
     },
     
-    _redraw: function(pointerX, pointerOnTop) {
+    /** @private */
+    __redraw: function(pointerX, pointerOnTop) {
         var tt = this.tooltip,
             tipText = this._tipText;
         
         // Calculate bounds
         var left = 0,
-            right = this._tipWidth,
+            right = this.__tipWidth,
             top = pointerOnTop ? this.pointerHeight : 0,
             bottom = 2*this.edgeWidth + this.insetTop + this.insetBottom + tipText.height + top,
             canvas = this._bg,
