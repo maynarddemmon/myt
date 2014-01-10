@@ -1,11 +1,14 @@
 /** Provides the ability to apply and release constraints.
     
+    Events:
+        None
+    
     Attributes:
         None
     
     Private Attributes:
-        __cbmn:object Holds arrays of constraints by 
-            method name */
+        __cbmn:object Holds arrays of constraints by method name.
+*/
 myt.Constrainable = new JS.Module('Constrainable', {
     include: [myt.Observer],
     
@@ -36,8 +39,8 @@ myt.Constrainable = new JS.Module('Constrainable', {
                 return;
             }
             
-            var observable, type;
-            for (var i = 0; len !== i;) {
+            var observable, type, i = 0;
+            for (; len !== i;) {
                 observable = observables[i++];
                 type = observables[i++];
                 if (observable && type) {

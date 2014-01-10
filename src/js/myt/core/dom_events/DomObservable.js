@@ -1,12 +1,16 @@
 /** Generates Dom Events and passes them on to one or more event observers.
     Requires myt.DomElementProxy be included when this mixin is included.
     
+    Events:
+        None
+    
     Attributes:
         None
     
     Private Attributes:
         __dobsbt:object Stores arrays of myt.DomObservers and method names 
-            by event type */
+            by event type.
+*/
 myt.DomObservable = new JS.Module('DomObservable', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Adds the observer to the list of event recipients for the event type.
@@ -24,7 +28,6 @@ myt.DomObservable = new JS.Module('DomObservable', {
             
             var methodRef = this.createDomMethodRef(domObserver, methodName, type);
             if (methodRef) {
-                // Lazy instantiate __dobsbt map.
                 var domObserversByType = this.__dobsbt || (this.__dobsbt = {});
                 
                 // Lazy instantiate dom observers array for type and insert observer.

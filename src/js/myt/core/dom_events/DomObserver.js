@@ -7,12 +7,15 @@
     is not done, it is possible for the relationship between observer and 
     observable to become broken.
     
+    Events:
+        None
+    
     Attributes:
         None
     
     Private Attributes:
-        __dobt: (Object) Holds arrays of DomObservables by 
-            event type */
+        __dobt: (Object) Holds arrays of DomObservables by event type.
+*/
 myt.DomObserver = new JS.Module('DomObserver', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Attaches this DomObserver to the provided DomObservable for the 

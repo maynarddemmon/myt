@@ -6,6 +6,9 @@
     using the methods below. Otherwise, it is possible for the relationship 
     between observer and observable to be broken.
     
+    Events:
+        None
+    
     Attributes:
         None
     

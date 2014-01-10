@@ -4,11 +4,11 @@
         None
     
     Private Attributes:
-        __obsbt:object Stores arrays of observers and method names 
+        __obsbt:object Stores arrays of myt.Observers and method names 
             by event type
-        __aet:object Stores active event types. An event type is active if it
-            has been fired from this Observable as part of the current call
-            stack. If an event type is "active" it will not be fired 
+        __aet:object Stores active event type strings. An event type is active
+            if it has been fired from this Observable as part of the current 
+            call stack. If an event type is "active" it will not be fired 
             again. This provides protection against infinite event loops.
 */
 myt.Observable = new JS.Module('Observable', {
@@ -70,16 +70,16 @@ myt.Observable = new JS.Module('Observable', {
                     // If an observer is registered more than once the list may 
                     // get shortened by observer.detachFrom. If so, just 
                     // continue decrementing downwards.
-                    if (observer == null || methodName == null) continue;
-                    
-                    if (typeof observer.detachFrom !== 'function' || 
-                        !observer.detachFrom(this, methodName, type)
-                    ) {
-                        // Observer may not have a detachFrom function or 
-                        // observer may not have attached via Observer.attachTo
-                        // so do default detach activity as implemented in 
-                        // Observable.detachObserver
-                        observers.splice(i, 2);
+                    if (observer && methodName) {
+                        if (typeof observer.detachFrom !== 'function' || 
+                            !observer.detachFrom(this, methodName, type)
+                        ) {
+                            // Observer may not have a detachFrom function or 
+                            // observer may not have attached via 
+                            // Observer.attachTo so do default detach activity 
+                            // as implemented in Observable.detachObserver
+                            observers.splice(i, 2);
+                        }
                     }
                 }
             }
@@ -91,12 +91,8 @@ myt.Observable = new JS.Module('Observable', {
             [methodName1, observerObj1, methodName2, observerObj2,...].
         @returns an array of observers. */
     getObservers: function(type) {
-        // Lazy instantiate observers array.
-        var observersByType = this.__obsbt;
-        if (!observersByType) observersByType = this.__obsbt = {};
-        var observers = observersByType[type];
-        if (!observers) observers = observersByType[type] = [];
-        return observers;
+        var observersByType = this.__obsbt || (this.__obsbt = {});
+        return observersByType[type] || (observersByType[type] = []);
     },
     
     /** Checks if any observers exist for the provided event type.
@@ -141,8 +137,7 @@ myt.Observable = new JS.Module('Observable', {
         @return array or null if no suitable observers exist. */
     __determineObservers: function(type, observers) {
         if (observers) return observers;
-        if (this.hasObservers(type)) return this.__obsbt[type];
-        return null;
+        return this.hasObservers(type) ? this.__obsbt[type] : null;
     },
     
     /** Creates a new event with the provided type and value and using this
