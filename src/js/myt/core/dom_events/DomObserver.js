@@ -11,7 +11,7 @@
         None
     
     Private Attributes:
-        __domSourcesByType: (Object) Holds arrays of DomObservables by 
+        __dobt: (Object) Holds arrays of DomObservables by 
             event type */
 myt.DomObserver = new JS.Module('DomObserver', {
     // Methods /////////////////////////////////////////////////////////////////
@@ -22,11 +22,9 @@ myt.DomObserver = new JS.Module('DomObserver', {
         if (observable && methodName && type) {
             capture = !!capture;
             
-            // Lazy instantiate __domSourcesByType map.
-            var observablesByType = this.__domSourcesByType;
-            if (!observablesByType) observablesByType = this.__domSourcesByType = {};
-            var observables = observablesByType[type];
-            if (!observables) observables = observablesByType[type] = [];
+            // Lazy instantiate __dobt map.
+            var observablesByType = this.__dobt || (this.__dobt = {});
+            var observables = observablesByType[type] || (observablesByType[type] = []);
             
             // Attach this DomObserver to the DomObservable
             if (observable.attachDomObserver(this, methodName, type, capture)) {
@@ -42,7 +40,7 @@ myt.DomObserver = new JS.Module('DomObserver', {
             capture = !!capture;
             
             // No need to detach if observable array doesn't exist.
-            var observablesByType = this.__domSourcesByType;
+            var observablesByType = this.__dobt;
             if (observablesByType) {
                 var observables = observablesByType[type];
                 if (observables) {
@@ -73,7 +71,7 @@ myt.DomObserver = new JS.Module('DomObserver', {
     /** Detaches this DomObserver from all DomObservables it is attached to.
         @returns void */
     detachFromAllDomSources: function() {
-        var observablesByType = this.__domSourcesByType;
+        var observablesByType = this.__dobt;
         if (observablesByType) {
             var observables, i, type;
             for (type in observablesByType) {

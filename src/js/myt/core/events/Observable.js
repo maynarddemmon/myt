@@ -4,12 +4,13 @@
         None
     
     Private Attributes:
-        __observersByType: (Object) Stores arrays of observers and method names 
-            by Event type
-        __activeEventTypes: (Object) Stores event types that have currently 
-            been fired from this Observable. If an event type is "active" it 
-            will not be fired again. This provides protection against infinite 
-            event loops. */
+        __obsbt:object Stores arrays of observers and method names 
+            by event type
+        __aet:object Stores active event types. An event type is active if it
+            has been fired from this Observable as part of the current call
+            stack. If an event type is "active" it will not be fired 
+            again. This provides protection against infinite event loops.
+*/
 myt.Observable = new JS.Module('Observable', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Adds the provided observer to the list of event recipients for the 
@@ -30,7 +31,7 @@ myt.Observable = new JS.Module('Observable', {
             false otherwise. */
     detachObserver: function(observer, methodName, type) {
         if (observer && methodName && type) {
-            var observersByType = this.__observersByType;
+            var observersByType = this.__obsbt;
             if (observersByType) {
                 var observers = observersByType[type];
                 if (observers) {
@@ -56,7 +57,7 @@ myt.Observable = new JS.Module('Observable', {
     /** Removes all observers from this Observable.
         @returns void */
     detachAllObservers: function() {
-        var observersByType = this.__observersByType;
+        var observersByType = this.__obsbt;
         if (observersByType) {
             var observers, observer, methodName, i, type;
             for (type in observersByType) {
@@ -91,8 +92,8 @@ myt.Observable = new JS.Module('Observable', {
         @returns an array of observers. */
     getObservers: function(type) {
         // Lazy instantiate observers array.
-        var observersByType = this.__observersByType;
-        if (!observersByType) observersByType = this.__observersByType = {};
+        var observersByType = this.__obsbt;
+        if (!observersByType) observersByType = this.__obsbt = {};
         var observers = observersByType[type];
         if (!observers) observers = observersByType[type] = [];
         return observers;
@@ -101,7 +102,7 @@ myt.Observable = new JS.Module('Observable', {
     /** Checks if any observers exist for the provided event type.
         @returns true if any exist, false otherwise. */
     hasObservers: function(type) {
-        var observersByType = this.__observersByType;
+        var observersByType = this.__obsbt;
         if (!observersByType) return false;
         var observers = observersByType[type];
         return observers && observers.length > 0;
@@ -139,11 +140,8 @@ myt.Observable = new JS.Module('Observable', {
     /** Private method to determine which array of observers to use.
         @return array or null if no suitable observers exist. */
     __determineObservers: function(type, observers) {
-        if (observers) {
-            return observers;
-        } else if (this.hasObservers(type)) {
-            return this.__observersByType[type];
-        }
+        if (observers) return observers;
+        if (this.hasObservers(type)) return this.__obsbt[type];
         return null;
     },
     
@@ -165,8 +163,7 @@ myt.Observable = new JS.Module('Observable', {
         var type = event.type;
         
         // Prevent "active" events from being fired again
-        var activeEventTypes = this.__activeEventTypes;
-        if (!activeEventTypes) activeEventTypes = this.__activeEventTypes = {};
+        var activeEventTypes = this.__aet || (this.__aet = {});
         if (activeEventTypes[type] === true) {
             myt.dumpStack("Attempt to refire active event: " + type);
             return;
@@ -186,17 +183,17 @@ myt.Observable = new JS.Module('Observable', {
             
             // Sometimes the list gets shortened by the method we called so
             // just continue decrementing downwards.
-            if (observer == null || methodName == null) continue;
-            
-            // Stop firing the event if it was "consumed".
-            try {
-                if (typeof methodName === 'function') {
-                    if (methodName.call(observer, event)) break;
-                } else {
-                    if (observer[methodName](event)) break;
+            if (observer && methodName) {
+                // Stop firing the event if it was "consumed".
+                try {
+                    if (typeof methodName === 'function') {
+                        if (methodName.call(observer, event)) break;
+                    } else {
+                        if (observer[methodName](event)) break;
+                    }
+                } catch (err) {
+                    myt.dumpStack(err);
                 }
-            } catch (err) {
-                myt.dumpStack(err);
             }
         }
         

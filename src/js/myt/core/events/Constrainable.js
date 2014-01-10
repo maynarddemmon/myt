@@ -4,7 +4,7 @@
         None
     
     Private Attributes:
-        __constraintsByMethodName: (Object) Holds arrays of constraints by 
+        __cbmn:object Holds arrays of constraints by 
             method name */
 myt.Constrainable = new JS.Module('Constrainable', {
     include: [myt.Observer],
@@ -27,10 +27,8 @@ myt.Constrainable = new JS.Module('Constrainable', {
             }
             
             // Lazy instantiate constraints array.
-            var constraints = this.__constraintsByMethodName;
-            if (!constraints) constraints = this.__constraintsByMethodName = {};
-            var constraint = constraints[methodName];
-            if (!constraint) constraint = constraints[methodName] = [];
+            var constraints = this.__cbmn || (this.__cbmn = {});
+            var constraint = constraints[methodName] || (constraints[methodName] = []);
             
             // Don't allow a constraint to be clobbered.
             if (constraint.length > 0) {
@@ -62,7 +60,7 @@ myt.Constrainable = new JS.Module('Constrainable', {
     releaseConstraint: function(methodName) {
         if (methodName) {
             // No need to remove if the constraint is already empty.
-            var constraints = this.__constraintsByMethodName;
+            var constraints = this.__cbmn;
             if (constraints) {
                 var constraint = constraints[methodName];
                 if (constraint) {
@@ -81,7 +79,7 @@ myt.Constrainable = new JS.Module('Constrainable', {
     /** Removes all constraints.
         @returns void */
     releaseAllConstraints: function() {
-        var constraints = this.__constraintsByMethodName;
+        var constraints = this.__cbmn;
         if (constraints) {
             for (var methodName in constraints) this.releaseConstraint(methodName);
         }

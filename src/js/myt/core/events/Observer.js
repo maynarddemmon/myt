@@ -10,10 +10,10 @@
         None
     
     Private Attributes:
-        __observablesByType: (Object) Stores arrays of Observables by Event type
-        __methodNameCounter: (int) used to create unique method names when a
+        __obt:object Stores arrays of Observables by event type
+        __methodNameCounter:int Used to create unique method names when a
             callback should only be called once.
-        __DO_ONCE_*: (function) the names used for methods that only get run
+        __DO_ONCE_*:function The names used for methods that only get run
             one time. */
 myt.Observer = new JS.Module('Observer', {
     // Methods /////////////////////////////////////////////////////////////////
@@ -111,7 +111,7 @@ myt.Observer = new JS.Module('Observer', {
         @returns true if attached, false otherwise. */
     isAttachedTo: function(observable, methodName, eventType) {
         if (observable && methodName && eventType) {
-            var observablesByType = this.__observablesByType;
+            var observablesByType = this.__obt;
             if (observablesByType) {
                 var observables = observablesByType[eventType];
                 if (observables) {
@@ -134,19 +134,15 @@ myt.Observer = new JS.Module('Observer', {
         @param eventType:string the event type to check for.
         @returns an array of observables. */
     getObservables: function(eventType) {
-        // Lazy instantiate observers array.
-        var observablesByType = this.__observablesByType;
-        if (!observablesByType) observablesByType = this.__observablesByType = {};
-        var observables = observablesByType[eventType];
-        if (!observables) observables = observablesByType[eventType] = [];
-        return observables;
+        var observablesByType = this.__obt || (this.__obt = {});
+        return observablesByType[eventType] || (observablesByType[eventType] = []);
     },
     
     /** Checks if any observables exist for the provided event type.
         @param eventType:string the event type to check for.
         @returns true if any exist, false otherwise. */
     hasObservables: function(eventType) {
-        var observablesByType = this.__observablesByType;
+        var observablesByType = this.__obt;
         if (!observablesByType) return false;
         var observables = observablesByType[eventType];
         return observables && observables.length > 0;
@@ -204,7 +200,7 @@ myt.Observer = new JS.Module('Observer', {
     detachFrom: function(observable, methodName, eventType) {
         if (observable && methodName && eventType) {
             // No need to unregister if observable array doesn't exist.
-            var observablesByType = this.__observablesByType;
+            var observablesByType = this.__obt;
             if (observablesByType) {
                 var observables = observablesByType[eventType];
                 if (observables) {
@@ -233,7 +229,7 @@ myt.Observer = new JS.Module('Observer', {
         is attached to.
         @returns void */
     detachFromAllObservables: function() {
-        var observablesByType = this.__observablesByType;
+        var observablesByType = this.__obt;
         if (observablesByType) {
             var observables, i;
             for (var eventType in observablesByType) {

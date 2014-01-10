@@ -1,6 +1,9 @@
 /** A dimmer that can be placed on another myt.View to obscure the subviews of
     that view.
     
+    Events:
+        None
+    
     Attributes:
         restoreFocus:boolean when true focus will be sent back to the view
             that had focus before the dimmer was shown when the dimmer is
@@ -82,11 +85,8 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
         // Set z-index
         var siblings = this.getSiblingViews(), zIdx = 0;
         if (siblings) {
-            var i = siblings.length, sibling;
-            while (i) {
-                sibling = siblings[--i];
-                zIdx = Math.max(zIdx, sibling.getHighestZIndex());
-            }
+            var i = siblings.length;
+            while (i) zIdx = Math.max(zIdx, siblings[--i].getHighestZIndex());
         }
         this.setZIndex(++zIdx);
         

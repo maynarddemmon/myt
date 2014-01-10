@@ -5,8 +5,8 @@
         None
     
     Private Attributes:
-        __domObserversByType: (Object) Stores arrays of dom observers and 
-            method names by event type */
+        __dobsbt:object Stores arrays of myt.DomObservers and method names 
+            by event type */
 myt.DomObservable = new JS.Module('DomObservable', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Adds the observer to the list of event recipients for the event type.
@@ -24,9 +24,8 @@ myt.DomObservable = new JS.Module('DomObservable', {
             
             var methodRef = this.createDomMethodRef(domObserver, methodName, type);
             if (methodRef) {
-                // Lazy instantiate __domObserversByType map.
-                var domObserversByType = this.__domObserversByType;
-                if (!domObserversByType) domObserversByType = this.__domObserversByType = {};
+                // Lazy instantiate __dobsbt map.
+                var domObserversByType = this.__dobsbt || (this.__dobsbt = {});
                 
                 // Lazy instantiate dom observers array for type and insert observer.
                 var domObservers = domObserversByType[type];
@@ -71,7 +70,7 @@ myt.DomObservable = new JS.Module('DomObservable', {
         if (domObserver && methodName && type) {
             capture = !!capture;
             
-            var domObserversByType = this.__domObserversByType;
+            var domObserversByType = this.__dobsbt;
             if (domObserversByType) {
                 var domObservers = domObserversByType[type];
                 if (domObservers) {
@@ -100,7 +99,7 @@ myt.DomObservable = new JS.Module('DomObservable', {
     detachAllDomObservers: function() {
         var domElement = this.domElement;
         if (domElement) {
-            var domObserversByType = this.__domObserversByType;
+            var domObserversByType = this.__dobsbt;
             if (domObserversByType) {
                 var domObservers, methodRef, capture, i, type;
                 for (type in domObserversByType) {
