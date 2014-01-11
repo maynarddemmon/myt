@@ -27,7 +27,7 @@ myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
     /** @overrides myt.Disableable */
     setDisabled: function(v) {
         // Adapt to event from syncTo
-        if (typeof v === 'object') v = v.value;
+        if (v !== null && typeof v === 'object') v = v.value;
         
         this.callSuper(v);
     },
@@ -40,18 +40,20 @@ myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
     
     /** @overrides myt.View */
     setX: function(v) {
-        if (this.x === v) return;
-        this.callSuper(v);
-        
-        if (this.parent.axis === 'x') this.parent._syncValueToThumb(this);
+        if (this.x !== v) {
+            this.callSuper(v);
+            
+            if (this.parent.axis === 'x') this.parent._syncValueToThumb(this);
+        }
     },
     
     /** @overrides myt.View */
     setY: function(v) {
-        if (this.y === v) return;
-        this.callSuper(v);
-        
-        if (this.parent.axis === 'y') this.parent._syncValueToThumb(this);
+        if (this.y !== v) {
+            this.callSuper(v);
+            
+            if (this.parent.axis === 'y') this.parent._syncValueToThumb(this);
+        }
     },
     
     
@@ -80,6 +82,7 @@ myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
     
     /** @overrides myt.KeyActivation */
     __handleKeyDown: function(event) {
+        // FIXME: Do we really need to override a private method?
         if (!this.disabled) {
             var parent = this.parent;
             switch (myt.KeyObservable.getKeyCodeFromEvent(event)) {
@@ -88,12 +91,14 @@ myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
                     break;
                 case 38: // Up
                     parent.nudgeValueUp(this);
+                    event.value.preventDefault(); // Prevent scrolling
                     break;
                 case 39: // Right
                     parent.nudgeValueRight(this);
                     break;
                 case 40: // Down
                     parent.nudgeValueDown(this);
+                    event.value.preventDefault(); // Prevent scrolling
                     break;
             }
         }

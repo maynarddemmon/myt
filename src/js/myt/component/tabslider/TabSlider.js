@@ -158,7 +158,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
     
     setSelected: function(v) {
         // Adapt to event from syncTo
-        if (typeof v === 'object') v = v.value;
+        if (v !== null && typeof v === 'object') v = v.value;
         
         if (this.selected !== v) {
             this.selected = v;
@@ -171,7 +171,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
     
     setDisabled: function(v) {
         // Adapt to event from syncTo
-        if (typeof v === 'object') v = v.value;
+        if (v !== null && typeof v === 'object') v = v.value;
         
         if (this.disabled !== v) {
             this.disabled = v;

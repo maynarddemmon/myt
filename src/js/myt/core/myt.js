@@ -1,7 +1,7 @@
 /**
  * Myt: A simple javascript UI framework
  * http://github.com/maynarddemmon/myt
- * Copyright (c) 2012-2013 Maynard Demmon and contributors
+ * Copyright (c) 2012-2014 Maynard Demmon and contributors
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -94,20 +94,21 @@ myt = {
     /** Takes a '.' separated string such as "foo.bar.baz" and resolves it
         into the value found at that location relative to a starting scope.
         If no scope is provided global scope is used.
-        @param objName:string|array the name to resolve or an array of path
+        @param objName:string|array The name to resolve or an array of path
             parts in descending order.
-        @param scope:Object (optional) the scope to resolve from. If not
+        @param scope:Object (optional) The scope to resolve from. If not
             provided global scope is used.
-        @returns the referenced object or undefined if resolution failed. */
+        @returns The referenced object or undefined if resolution failed. */
     resolveName: function(objName, scope) {
         if (!objName || objName.length === 0) return undefined;
         
-        var scope = scope || global;
-        var parts = Array.isArray(objName) ? objName : objName.split(".");
-        for (var i = 0, len = parts.length; i < len; i++) {
+        var scope = scope || global,
+            parts = Array.isArray(objName) ? objName : objName.split("."),
+            i = 0, len = parts.length
+        for (; i < len; ++i) {
             scope = scope[parts[i]];
             if (!scope) {
-                console.warn("resolveName failed for ", objName, " at part: ", i, parts[i]);
+                console.warn("resolveName failed for:", objName, "at part:", i, parts[i]);
                 return undefined;
             }
         }

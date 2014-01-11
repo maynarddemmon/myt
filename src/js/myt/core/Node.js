@@ -79,9 +79,7 @@ myt.Node = new JS.Class('Node', {
         @returns void */
     initialize: function(parent, attrs, mixins) {
         if (mixins) {
-            for (var i = 0, len = mixins.length; len > i; ++i) {
-                this.extend(mixins[i]);
-            }
+            for (var i = 0, len = mixins.length; len > i;) this.extend(mixins[i++]);
         }
         
         this.inited = false;
@@ -161,26 +159,9 @@ myt.Node = new JS.Class('Node', {
     
     
     // Structural Accessors ////////////////////////////////////////////////////
-    /** The name of the subnode to add nodes to when setParent is called.
-        Placement can be nested using '.' For example 'foo.bar'. The special
-        value of '*' means use the default placement. For example 'foo.*'
-        means place in the foo subnode and then in the default placement for
-        foo. */
-    setPlacement: function(v) {
-        this.placement = v;
-    },
-    
-    /** The name of the subnode to add nodes to when no placement is 
-        specified. */
-    setDefaultPlacement: function(v) {
-        this.defaultPlacement = v;
-    },
-    
-    /** If set to true placement will not be processed for this Node when
-        it is added to a parent Node. */
-    setIgnorePlacement: function(v) {
-        this.ignorePlacement = v;
-    },
+    setPlacement: function(v) {this.placement = v;},
+    setDefaultPlacement: function(v) {this.defaultPlacement = v;},
+    setIgnorePlacement: function(v) {this.ignorePlacement = v;},
     
     /** Sets the provided Node as the new parent of this Node. This is the
         most direct method to do reparenting. You can also use the addSubnode
@@ -242,7 +223,7 @@ myt.Node = new JS.Class('Node', {
         subnodes array if no child Nodes exist.
         @returns array of subnodes. */
     getSubnodes: function() {
-        return this.subnodes ? this.subnodes : this.subnodes = [];
+        return this.subnodes || (this.subnodes = []);
     },
     
     
@@ -292,7 +273,7 @@ myt.Node = new JS.Class('Node', {
         if (this[name] === undefined) {
             this[name] = node;
         } else {
-            console.log("Name in use: " + name);
+            console.log("Name in use:" + name);
         }
     },
     
@@ -304,7 +285,7 @@ myt.Node = new JS.Class('Node', {
         if (this[name] === node) {
             delete this[name];
         } else {
-            console.log("Name not in use: " + name);
+            console.log("Name not in use:" + name);
         }
     },
     
@@ -451,8 +432,7 @@ myt.Node = new JS.Class('Node', {
         @param easingFunction:function (optional)
         @returns The Animator being run. */
     animate: function(attribute, to, from, relative, callback, duration, reverse, repeat, easingFunction) {
-        var animPool = this.__animPool;
-        if (!animPool) animPool = this.__animPool = new myt.TrackActivesPool(myt.Animator, this);
+        var animPool = this.__getAnimPool();
         
         // ignorePlacement ensures the animator is directly attached to this node
         var anim = animPool.getInstance({ignorePlacement:true});
@@ -486,10 +466,7 @@ myt.Node = new JS.Class('Node', {
         by calls to the animate method.
         @returns an array of active animators. */
     getActiveAnimators: function() {
-        var animPool = this.__animPool;
-        if (!animPool) animPool = this.__animPool = new myt.TrackActivesPool(myt.Animator, this);
-        
-        return animPool.getActives();
+        return this.__getAnimPool().getActives();
     },
     
     /** Stops all active animations.
@@ -515,9 +492,17 @@ myt.Node = new JS.Class('Node', {
         }
     },
     
+    /** Gets the animation pool if it exists, or lazy instantiates it first
+        if necessary.
+        @private
+        @returns myt.TrackActivesPool */
+    __getAnimPool: function() {
+        return this.__animPool || (this.__animPool = new myt.TrackActivesPool(myt.Animator, this));
+    },
+    
     // Timing and Delay
     /** A convienence method to execute a method once on idle.
-        @param methodName:string the name of the method to execute on
+        @param methodName:string The name of the method to execute on
             this object.
         @returns void */
     doOnceOnIdle: function(methodName) {
@@ -525,13 +510,13 @@ myt.Node = new JS.Class('Node', {
     },
     
     /** A convienence method to execute a method once after a delay.
-        @param methodName:string the name of the method on this object
+        @param methodName:string The name of the method on this object
             to execute.
-        @param delay:number (optional) the time to wait in millis. Defaults 
+        @param delay:number (optional) The time to wait in millis. Defaults 
             to 0.
         @param arguments Remaining arguments will be passed to the called
             method in the order provided.
-        @returns number The timer ID if the timer is started, othewise
+        @returns number: The timer ID if the timer is started, othewise
             undefined is returned. */
     doOnceLater: function() {
         var params = Array.prototype.slice.call(arguments),
