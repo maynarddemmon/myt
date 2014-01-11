@@ -1,8 +1,8 @@
 /** A panel that floats above everything else.
     
     Attributes:
-        owner:FloatingPanelAnchor the anchor that currently "owns" this panel.
-        panelId:string the unique ID for this panel instance.
+        owner:FloatingPanelAnchor The anchor that currently "owns" this panel.
+        panelId:string The unique ID for this panel instance.
         hideOnMouseDown:boolean If true this panel will be hidden when a
             mousedown occurs outside the panel. True by default.
         ignoreOwnerForHideOnMouseDown:boolean If true the owner view for this
@@ -28,8 +28,7 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
         if (attrs.ignoreOwnerForHideOnMouseDown === undefined) attrs.ignoreOwnerForHideOnMouseDown = true;
         
         // Ensure the focus starts and ends with the panel
-        attrs.focusable = true;
-        attrs.focusCage = true;
+        attrs.focusable = attrs.focusCage = true;
         attrs.focusEmbellishment = false;
         
         this.callSuper(elem, attrs);
@@ -37,44 +36,32 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setOwner: function(v) {
-        this.owner = v;
-    },
-    
-    setPanelId: function(v) {
-        this.panelId = v;
-    },
-    
-    setIgnoreOwnerForHideOnMouseDown: function(v) {
-        this.ignoreOwnerForHideOnMouseDown = v;
-    },
+    setOwner: function(v) {this.owner = v;},
+    setPanelId: function(v) {this.panelId = v;},
+    setIgnoreOwnerForHideOnMouseDown: function(v) {this.ignoreOwnerForHideOnMouseDown = v;},
     
     setHideOnMouseDown: function(v) {
-        if (this.hideOnMouseDown === v) return;
-        this.hideOnMouseDown = v;
-        
-        if (this.inited && this.isShown()) {
-            var gm = myt.global.mouse;
-            if (v) {
+        if (this.hideOnMouseDown !== v) {
+            this.hideOnMouseDown = v;
+            
+            // Handle changes to panel behavior while it is shown.
+            if (this.inited && this.isShown()) {
+                var gm = myt.global.mouse;
                 this.detachFromDom(gm, '_doMouseDown', 'mousedown', true);
-            } else {
-                this.detachFromDom(gm, '_doMouseDown', 'mousedown', true);
-                this.attachToDom(gm, '_doMouseDown', 'mousedown', true);
+                if (v) this.attachToDom(gm, '_doMouseDown', 'mousedown', true);
             }
         }
     },
     
     setHideOnBlur: function(v) {
-        if (this.hideOnBlur === v) return;
-        this.hideOnBlur = v;
-        
-        if (this.inited && this.isShown()) {
-            var gf = myt.global.focus;
-            if (v) {
+        if (this.hideOnBlur !== v) {
+            this.hideOnBlur = v;
+            
+            // Handle changes to panel behavior while it is shown.
+            if (this.inited && this.isShown()) {
+                var gf = myt.global.focus;
                 this.detachFrom(gf, '_doGlobalFocusChange', 'focused');
-            } else {
-                this.detachFrom(gf, '_doGlobalFocusChange', 'focused');
-                this.attachTo(gf, '_doGlobalFocusChange', 'focused');
+                if (v) this.attachTo(gf, '_doGlobalFocusChange', 'focused');
             }
         }
     },
@@ -211,6 +198,7 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
         }
         this.setX(x);
         
+        // Vertical positioning
         type = typeof valign;
         
         if (type === 'string') {
