@@ -14,9 +14,46 @@
     function init() {
         var rootView = new myt.View(null, {width:600, height:450, bgColor:'#ffffff'}, [myt.SizeToWindow]);
         
+        // PanelStack
+         var Panel = new JS.Class('Panel', myt.View, {
+            include: [myt.StackablePanel],
+            
+            initNode: function(parent, attrs) {
+                this.callSuper(parent, attrs);
+                
+                new myt.Text(this, {x:10, y:10, text:this.panelId});
+            }
+        });
+        var panelStack = new myt.PanelStack(rootView, {x:310, y:30, width:300, height:170, bgColor:'#999999'});
+        new Panel(panelStack, {panelId:'one',   bgColor:'#ffccff'});
+        new Panel(panelStack, {panelId:'two',   bgColor:'#ffffcc'});
+        new Panel(panelStack, {panelId:'three', bgColor:'#ccffff'});
+        new Panel(panelStack, {panelId:'four'});
+        new Panel(panelStack, {panelId:'five'});
+        new Panel(panelStack, {panelId:'six'});
+        new Panel(panelStack, {panelId:'seven'});
+        new Panel(panelStack, {panelId:'eight'});
+        new Panel(panelStack, {panelId:'nine'});
+        new Panel(panelStack, {panelId:'ten'});
+        new Panel(panelStack, {panelId:'eleven'});
+        new Panel(panelStack, {panelId:'twelve'});
+        
+        // Tabs
+         var MyTab = new JS.Class('MyTab', myt.Tab, {
+            initNode: function(parent, attrs) {
+                this.panelId = attrs.panelId;
+                this.callSuper(parent, attrs);
+            },
+            
+            setSelected: function(v) {
+                this.callSuper(v);
+                if (this.selected) panelStack.selectPanel(this.panelId);
+            }
+        });
+         
         // Tab : top
         var top = new myt.View(rootView, {
-            x:210, height:30, bgColor:'#eeeeee', groupId:'topNav'
+            x:310, height:30, bgColor:'#eeeeee', groupId:'topNav'
         }, [myt.TabContainer]);
         
         var topTabAttrs = {
@@ -26,14 +63,17 @@
             shrinkToFit:true
         };
         
-        var tt1 = new myt.Tab(top, topTabAttrs);
-        var tt2 = new myt.Tab(top, topTabAttrs);
+        topTabAttrs.panelId = 'one';
+        var tt1 = new MyTab(top, topTabAttrs);
+        topTabAttrs.panelId = 'two';
+        var tt2 = new MyTab(top, topTabAttrs);
         tt2.setChecked(true);
-        var tt3 = new myt.Tab(top, topTabAttrs);
+        topTabAttrs.panelId = 'three';
+        var tt3 = new MyTab(top, topTabAttrs);
         
         // Tab : bottom
         var bottom = new myt.View(rootView, {
-            x:210, y:200, height:30, bgColor:'#eeeeee', groupId:'bottomNav', location:'bottom'
+            x:310, y:200, height:30, bgColor:'#eeeeee', groupId:'bottomNav', location:'bottom'
         }, [myt.TabContainer]);
         
         var bottomTabAttrs = {
@@ -67,7 +107,7 @@
         
         // Tab : right
         var right = new myt.View(rootView, {
-            x:410, y:60, width:100, bgColor:'#eeeeee', groupId:'rightNav', location:'right'
+            x:610, y:60, width:100, bgColor:'#eeeeee', groupId:'rightNav', location:'right'
         }, [myt.TabContainer]);
         
         var rightTabAttrs = {

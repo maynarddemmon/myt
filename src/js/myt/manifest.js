@@ -226,6 +226,10 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'tab/TabDrawingMethod.js').provides('myt.TabDrawingMethod').requires('myt.DrawingMethod');
     file(MYT_COMPONENT_ROOT + 'tab/Tab.js'             ).provides('myt.Tab'             ).requires('myt.DrawButton','myt.IconTextButtonContent','myt.RadioMixin','myt.TabDrawingMethod','myt.TabContainer');
     
+    // Component : Panel Stack
+    file(MYT_COMPONENT_ROOT + 'panelstack/StackablePanel.js').provides('myt.StackablePanel').requires('myt.Selectable');
+    file(MYT_COMPONENT_ROOT + 'panelstack/PanelStack.js'    ).provides('myt.PanelStack'    ).requires('myt.StackablePanel','myt.SelectionManager','myt.View');
+    
     // Component : Input
     file(MYT_COMPONENT_ROOT + 'input/InputObservable.js'   ).provides('myt.InputObservable'   ).requires('myt.DomObservable');
     file(MYT_COMPONENT_ROOT + 'input/NativeInputWrapper.js').provides('myt.NativeInputWrapper').requires('myt.View','myt.InputObservable','myt.Disableable');
@@ -313,6 +317,7 @@ JS.Packages(function() {with(this) {
         'myt.ScatterGraph',
         'myt.Slider','myt.RangeSlider',
         'myt.HorizontalDivider','myt.VerticalDivider',
-        'myt.Grid','myt.SimpleGridColumnHeader'
+        'myt.Grid','myt.SimpleGridColumnHeader',
+        'myt.PanelStack'
     );
 }});

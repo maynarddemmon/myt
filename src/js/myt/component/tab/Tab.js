@@ -46,14 +46,15 @@ myt.Tab = new JS.Class('Tab', myt.DrawButton, {
     
     setSelected: function(v) {
         // Adapt to event from syncTo
-        if (typeof v === 'object') v = v.value;
+        if (v !== null && typeof v === 'object') v = v.value;
         
-        if (this.selected === v) return;
-        this.selected = v;
-        if (this.inited) this.fireNewEvent('selected', v);
-        
-        // Sync the other direction if necessary.
-        if (this.checked !== v) this.setChecked(v);
+        if (this.selected !== v) {
+            this.selected = v;
+            if (this.inited) this.fireNewEvent('selected', v);
+            
+            // Sync the other direction if necessary.
+            if (this.checked !== v) this.setChecked(v);
+        }
     },
     
     
