@@ -38,7 +38,7 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
     },
     
     /** @private */
-    __updateHeight: function() {
+    __updateHeight: function(event) {
         // Only resize the active panel
         var panel = this.getActivePanel();
         if (panel) panel.setHeight(event.value);
