@@ -22,104 +22,109 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
     // Accessors ///////////////////////////////////////////////////////////////
     /** @overrides myt.ConstantLayout */
     setTargetAttrName: function(v) {
-        if (this.targetAttrName === v) return;
-        
-        if (v === 'x') {
-            if (this.inited) this.stopMonitoringAllSubviews();
-            this.measureAttrName = 'boundsWidth';
-            this.measureAttrBaseName = 'width';
-            this.otherMeasureAttrName = 'boundsHeight';
-            this.otherMeasureAttrBaseName = 'height';
-            this.parentSetterName = 'setHeight';
-            this.otherSetterName = 'setY';
-            if (this.inited) {
-                this.startMonitoringAllSubviews();
-                this.stopMonitoringParent('height');
-                this.startMonitoringParent('width');
+        if (this.targetAttrName !== v) {
+            if (v === 'x') {
+                if (this.inited) this.stopMonitoringAllSubviews();
+                this.measureAttrName = 'boundsWidth';
+                this.measureAttrBaseName = 'width';
+                this.otherMeasureAttrName = 'boundsHeight';
+                this.otherMeasureAttrBaseName = 'height';
+                this.parentSetterName = 'setHeight';
+                this.otherSetterName = 'setY';
+                if (this.inited) {
+                    this.startMonitoringAllSubviews();
+                    this.stopMonitoringParent('height');
+                    this.startMonitoringParent('width');
+                }
+                this.callSuper(v);
+            } else if (v === 'y') {
+                if (this.inited) this.stopMonitoringAllSubviews();
+                this.measureAttrName = 'boundsHeight';
+                this.measureAttrBaseName = 'height';
+                this.otherMeasureAttrName = 'boundsWidth';
+                this.otherMeasureAttrBaseName = 'width';
+                this.parentSetterName = 'setWidth';
+                this.otherSetterName = 'setX';
+                if (this.inited) {
+                    this.startMonitoringAllSubviews();
+                    this.stopMonitoringParent('width');
+                    this.startMonitoringParent('height');
+                }
+                this.callSuper(v);
             }
-            this.callSuper(v);
-        } else if (v === 'y') {
-            if (this.inited) this.stopMonitoringAllSubviews();
-            this.measureAttrName = 'boundsHeight';
-            this.measureAttrBaseName = 'height';
-            this.otherMeasureAttrName = 'boundsWidth';
-            this.otherMeasureAttrBaseName = 'width';
-            this.parentSetterName = 'setWidth';
-            this.otherSetterName = 'setX';
-            if (this.inited) {
-                this.startMonitoringAllSubviews();
-                this.stopMonitoringParent('width');
-                this.startMonitoringParent('height');
-            }
-            this.callSuper(v);
         }
     },
     
     /** @overrides myt.Layout */
-    setParent: function(parent) {
-        if (this.parent === parent) return;
-        
-        if (this.parent) {
-            if (this.targetAttrName === 'x') {
-                this.stopMonitoringParent('width');
-            } else if (this.targetAttrName === 'y') {
-                this.stopMonitoringParent('height');
+    setParent: function(v) {
+        if (this.parent !== parent) {
+            if (this.parent) {
+                if (this.targetAttrName === 'x') {
+                    this.stopMonitoringParent('width');
+                } else if (this.targetAttrName === 'y') {
+                    this.stopMonitoringParent('height');
+                }
             }
-        }
-        
-        this.callSuper(parent);
-        
-        if (this.parent) {
-            if (this.targetAttrName === 'x') {
-                this.startMonitoringParent('width');
-            } else if (this.targetAttrName === 'y') {
-                this.startMonitoringParent('height');
+            
+            this.callSuper(v);
+            
+            if (this.parent) {
+                if (this.targetAttrName === 'x') {
+                    this.startMonitoringParent('width');
+                } else if (this.targetAttrName === 'y') {
+                    this.startMonitoringParent('height');
+                }
             }
         }
     },
     
     setSpacing: function(v) {
-        if (this.spacing === v) return;
-        this.spacing = v;
-        if (this.inited) {
-            this.fireNewEvent('spacing', v);
-            this.update();
+        if (this.spacing !== v) {
+            this.spacing = v;
+            if (this.inited) {
+                this.fireNewEvent('spacing', v);
+                this.update();
+            }
         }
     },
     
     setOutset: function(v) {
-        if (this.outset === v) return;
-        this.outset = v;
-        if (this.inited) {
-            this.fireNewEvent('outset', v);
-            this.update();
+        if (this.outset !== v) {
+            this.outset = v;
+            if (this.inited) {
+                this.fireNewEvent('outset', v);
+                this.update();
+            }
         }
     },
     
     setLineSpacing: function(v) {
-        if (this.lineSpacing === v) return;
-        this.lineSpacing = v;
-        if (this.inited) {
-            this.fireNewEvent('lineSpacing', v);
-            this.update();
+        if (this.lineSpacing !== v) {
+            this.lineSpacing = v;
+            if (this.inited) {
+                this.fireNewEvent('lineSpacing', v);
+                this.update();
+            }
         }
     },
     
     setLineInset: function(v) {
-        if (this.lineInset === v) return;
-        this.lineInset = v;
-        if (this.inited) {
-            this.fireNewEvent('lineInset', v);
-            this.update();
+        if (this.lineInset !== v) {
+            this.lineInset = v;
+            if (this.inited) {
+                this.fireNewEvent('lineInset', v);
+                this.update();
+            }
         }
     },
     
     setLineOutset: function(v) {
-        if (this.lineOutset === v) return;
-        this.lineOutset = v;
-        if (this.inited) {
-            this.fireNewEvent('lineOutset', v);
-            this.update();
+        if (this.lineOutset !== v) {
+            this.lineOutset = v;
+            if (this.inited) {
+                this.fireNewEvent('lineOutset', v);
+                this.update();
+            }
         }
     },
     

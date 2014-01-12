@@ -1,12 +1,15 @@
 /** A base class for MouseableH3Panel and MouseableV3Panel.
     Includes the myt.Button mixin.
     
+    Events:
+        None
+    
     Attributes:
-        imageRoot:string the path to the directory with the images.
-        extension:string the file extension for the images.
-        firstPrefix:string the filename for the top/left panel image.
-        secondPrefix:string the filename for the middle/center panel image.
-        thirdPrefix:string the filename for the bottom/right panel image.
+        imageRoot:string The path to the directory with the images.
+        extension:string The file extension for the images.
+        firstPrefix:string The filename for the top/left panel image.
+        secondPrefix:string The filename for the middle/center panel image.
+        thirdPrefix:string The filename for the bottom/right panel image.
 */
 myt.BaseMouseablePanel = new JS.Module('BaseMouseablePanel', {
     include: [myt.Button],
@@ -27,33 +30,38 @@ myt.BaseMouseablePanel = new JS.Module('BaseMouseablePanel', {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setImageRoot: function(v) {
-        if (this.imageRoot === v) return;
-        this.imageRoot = v;
-        if (this.inited) updateUI();
+        if (this.imageRoot !== v) {
+            this.imageRoot = v;
+            if (this.inited) updateUI();
+        }
     },
     
     setExtension: function(v) {
-        if (this.extension === v) return;
-        this.extension = v;
-        if (this.inited) updateUI();
+        if (this.extension !== v) {
+            this.extension = v;
+            if (this.inited) updateUI();
+        }
     },
     
     setFirstPrefix: function(v) {
-        if (this.firstPrefix === v) return;
-        this.firstPrefix = v;
-        if (this.inited) updateUI();
+        if (this.firstPrefix !== v) {
+            this.firstPrefix = v;
+            if (this.inited) updateUI();
+        }
     },
     
     setSecondPrefix: function(v) {
-        if (this.secondPrefix === v) return;
-        this.secondPrefix = v;
-        if (this.inited) updateUI();
+        if (this.secondPrefix !== v) {
+            this.secondPrefix = v;
+            if (this.inited) updateUI();
+        }
     },
     
     setThirdPrefix: function(v) {
-        if (this.thirdPrefix === v) return;
-        this.thirdPrefix = v;
-        if (this.inited) updateUI();
+        if (this.thirdPrefix !== v) {
+            this.thirdPrefix = v;
+            if (this.inited) updateUI();
+        }
     },
     
     
@@ -82,6 +90,7 @@ myt.BaseMouseablePanel = new JS.Module('BaseMouseablePanel', {
         this.__updateImageUrls('up');
     },
     
+    /** @private */
     __updateImageUrls: function(mouseState) {
         var suffix = '_' + mouseState + '.' + this.extension,
             imageRoot = this.imageRoot;

@@ -1,6 +1,9 @@
 /** An extension of VariableLayout that also aligns each view vertically
     or horizontally.
     
+    Events:
+        align:string
+    
     Attributes:
         align:string Determines which way the views are aligned. Allowed
             values are 'left', 'center', 'right' and 'top', 'middle', 'bottom'.
@@ -24,30 +27,32 @@ myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
     // Accessors ///////////////////////////////////////////////////////////////
     /** @overrides myt.ConstantLayout */
     setTargetAttrName: function(v) {
-        if (this.targetAttrName === v) return;
-        if (v === 'x') {
-            if (this.inited) this.stopMonitoringAllSubviews();
-            this.measureAttrName = 'boundsWidth';
-            this.measureAttrBaseName = 'width';
-            this.parentSetterName = 'setWidth';
-            if (this.inited) this.startMonitoringAllSubviews();
-            this.callSuper(v);
-        } else if (v === 'y') {
-            if (this.inited) this.stopMonitoringAllSubviews();
-            this.measureAttrName = 'boundsHeight';
-            this.measureAttrBaseName = 'height';
-            this.parentSetterName = 'setHeight';
-            if (this.inited) this.startMonitoringAllSubviews();
-            this.callSuper(v);
+        if (this.targetAttrName !== v) {
+            if (v === 'x') {
+                if (this.inited) this.stopMonitoringAllSubviews();
+                this.measureAttrName = 'boundsWidth';
+                this.measureAttrBaseName = 'width';
+                this.parentSetterName = 'setWidth';
+                if (this.inited) this.startMonitoringAllSubviews();
+                this.callSuper(v);
+            } else if (v === 'y') {
+                if (this.inited) this.stopMonitoringAllSubviews();
+                this.measureAttrName = 'boundsHeight';
+                this.measureAttrBaseName = 'height';
+                this.parentSetterName = 'setHeight';
+                if (this.inited) this.startMonitoringAllSubviews();
+                this.callSuper(v);
+            }
         }
     },
     
     setAlign: function(v) {
-        if (this.align === v) return;
-        this.align = v;
-        if (this.inited) {
-            this.fireNewEvent('align', v);
-            this.update();
+        if (this.align !== v) {
+            this.align = v;
+            if (this.inited) {
+                this.fireNewEvent('align', v);
+                this.update();
+            }
         }
     },
     

@@ -1,7 +1,18 @@
 /** Must be mixed onto a View.
     
     A set of three images where the middle images resizes to fill the
-    available space. This component lays out the views horizontally. */
+    available space. This component lays out the views horizontally.
+    
+    Events:
+        repeat:boolean
+    
+    Attributes:
+        firstImageUrl:string
+        secondImageUrl:string
+        thirdImageUrl:string
+        repeat:boolean Determines if the second image is stretched(false) or 
+            repeated(true). Defaults to true.
+*/
 myt.HorizontalThreePanel = new JS.Module('HorizontalThreePanel', {
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
@@ -39,48 +50,53 @@ myt.HorizontalThreePanel = new JS.Module('HorizontalThreePanel', {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setFirstImageUrl: function(v) {
-        if (this.firstImageUrl === v) return;
-        this.firstImageUrl = v;
-        if (this.inited) this.first.setImageUrl(v);
+        if (this.firstImageUrl !== v) {
+            this.firstImageUrl = v;
+            if (this.inited) this.first.setImageUrl(v);
+        }
     },
     
     setSecondImageUrl: function(v) {
-        if (this.secondImageUrl === v) return;
-        this.secondImageUrl = v;
-        if (this.inited) this.second.setImageUrl(v);
+        if (this.secondImageUrl !== v) {
+            this.secondImageUrl = v;
+            if (this.inited) this.second.setImageUrl(v);
+        }
     },
     
     setThirdImageUrl: function(v) {
-        if (this.thirdImageUrl === v) return;
-        this.thirdImageUrl = v;
-        if (this.inited) this.third.setImageUrl(v);
+        if (this.thirdImageUrl !== v) {
+            this.thirdImageUrl = v;
+            if (this.inited) this.third.setImageUrl(v);
+        }
     },
     
-    /** Determines if the second image is stretched(false) or 
-        repeated(true). The default is stretched. */
     setRepeat: function(v) {
-        if (this.repeat === v) return;
-        this.repeat = v;
-        if (this.inited) {
-            this.fireNewEvent('repeat', v);
-            this.__updateRepeat();
+        if (this.repeat !== v) {
+            this.repeat = v;
+            if (this.inited) {
+                this.fireNewEvent('repeat', v);
+                this.__updateRepeat();
+            }
         }
     },
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** @private */
     __updateSize: function(e) {
         var v = this.second;
         v.setHeight(v.naturalHeight);
         this.__updateImageSize();
     },
     
+    /** @private */
     __updateImageSize: function(e) {
         var v = this.second;
         v.setImageSize(this.repeat ? undefined : v.width + 'px ' + v.height + 'px');
     },
     
-    __updateRepeat: function(e) {
+    /** @private */
+    __updateRepeat: function() {
         this.second.setImageRepeat(this.repeat ? 'repeat-x' : 'no-repeat');
     }
 });
