@@ -4,7 +4,7 @@ myt.SimpleSliderThumb = new JS.Class('SimpleSliderThumb', myt.SimpleButton, {
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Checkbox */
+    /** @overrides myt.SimpleButton */
     initNode: function(parent, attrs) {
         if (attrs.activeColor === undefined) attrs.activeColor = '#bbbbbb';
         if (attrs.readyColor === undefined) attrs.readyColor = '#cccccc';

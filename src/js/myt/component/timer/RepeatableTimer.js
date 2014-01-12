@@ -1,4 +1,13 @@
-/** A Timer that can be repeated as well as provide a value to execute. */
+/** A Timer that can be repeated as well as provide a value to execute.
+    
+    Events:
+        None
+    
+    Attributes:
+        value:* An optional value to be passed to the callbacks execute method.
+        repeatDelayInMillis:number If this value is greater than zero the 
+            timer will repeat using this value as the delay.
+*/
 myt.RepeatableTimer = new JS.Class('RepeatableTimer', myt.Timer, {
     // Constructor /////////////////////////////////////////////////////////////
     /** Creates a new Timer. If a callback and delay are provided
@@ -18,16 +27,8 @@ myt.RepeatableTimer = new JS.Class('RepeatableTimer', myt.Timer, {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    /** (*) An optional value to be passed to the callbacks execute method. */
-    setValue: function(value) {
-        this.value = value;
-    },
-    
-    /** (Number) If this value is greater than zero the timer will repeat
-        using this value as the delay. */
-    setRepeatDelayInMillis: function(repeatDelayInMillis) {
-        this.repeatDelayInMillis = repeatDelayInMillis;
-    },
+    setValue: function(value) {this.value = value;},
+    setRepeatDelayInMillis: function(repeatDelayInMillis) {this.repeatDelayInMillis = repeatDelayInMillis;},
     
     
     // Methods /////////////////////////////////////////////////////////////////
@@ -36,8 +37,8 @@ myt.RepeatableTimer = new JS.Class('RepeatableTimer', myt.Timer, {
         @returns void */
     clear: function() {
         this.callSuper();
-        this.setValue(undefined);
-        this.setRepeatDelayInMillis(undefined);
+        this.setValue();
+        this.setRepeatDelayInMillis();
     },
     
     /** Stops the Timer and restarts it with the callback and delay if
@@ -57,9 +58,9 @@ myt.RepeatableTimer = new JS.Class('RepeatableTimer', myt.Timer, {
         if (this.callback && delayInMillis >= 0) {
             var self = this;
             this.setTimerId(setTimeout(function() {
-                var repeatDelay = self.repeatDelayInMillis;
-                var isRepeating = repeatDelay !== undefined && repeatDelay >= 0;
-                if (!isRepeating) self.setTimerId(undefined);
+                var repeatDelay = self.repeatDelayInMillis,
+                    isRepeating = repeatDelay !== undefined && repeatDelay >= 0;
+                if (!isRepeating) self.setTimerId();
                 
                 if (self.value === undefined) {
                     self.callback.execute();

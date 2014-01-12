@@ -1,6 +1,10 @@
 /** A divider is a UI control that allows the user to resize two area by
     dragging the divider left/right or up/down.
     
+    Events:
+        limitToParent:number
+        inset:number
+    
     Attributes:
         axis:string Indicates if the divider should be constrained horizontally
             or vertically. Allowed values: 'x' or 'y'. This value can only
@@ -19,6 +23,9 @@
                 expanded:3
         restoreValue:number The value used to restore the position in the
             "primary" action.
+    
+    Private Attributes:
+        __nudgeAcc:number The multiplier in px per nudge.
 */
 myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
     include: [myt.BoundedValueComponent, myt.Draggable],
@@ -148,7 +155,7 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
         this.setMaxValue(this.parent[dim] - this.limitToParent - this[dim] + this.inset);
     },
     
-    /** Nudge the divider when the arrow keys are used. Nuding accelerates
+    /** Nudge the divider when the arrow keys are used. Nudging accelerates
         up to a limit if the key is held down.
         @overrides myt.Button. */
     doActivationKeyDown: function(key, isRepeat) {

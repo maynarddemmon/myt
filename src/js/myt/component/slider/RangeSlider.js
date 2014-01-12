@@ -1,14 +1,14 @@
 /** A slider component that support two thumbs.
     
-    Attributes:
-        _lockSync:boolean Used internally to prevent infinite loops.
+    Private Attributes:
+        __lockSync:boolean Used internally to prevent infinite loops.
 */
 myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
     include: [myt.BoundedRangeComponent],
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Checkbox */
+    /** @overrides myt.BaseSlider */
     initNode: function(parent, attrs) {
         if (attrs.rangeFillClass === undefined) attrs.rangeFillClass = myt.SimpleSliderRangeFill;
         
@@ -32,9 +32,10 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         
         if (this.inited) {
             // Sync position of thumb
-            if (!this._lockSync) {
-                this._syncThumbToValue(this.thumbLower);
-                this._syncThumbToValue(this.thumbUpper);
+            if (!this.__lockSync) {
+                v = this.getValue();
+                this._syncThumbToValue(this.thumbLower, v);
+                this._syncThumbToValue(this.thumbUpper, v);
             }
             
             this._syncRangeFillToValue();
@@ -56,19 +57,12 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         }
     },
     
-    _syncThumbToValue: function(thumb) {
-        var value = this.getValue();
-        value = this.convertValueToPixels(thumb.name === 'thumbLower' ? value.lower : value.upper);
-        
-        if (this.axis === 'x') {
-            thumb.setX(value - thumb.width / 2);
-        } else {
-            thumb.setY(value - thumb.height / 2);
-        }
+    _syncThumbToValue: function(thumb, value) {
+        this.callSuper(thumb, thumb.name === 'thumbLower' ? value.lower : value.upper);
     },
     
     _syncValueToThumb: function(thumb) {
-        this._lockSync = true;
+        this.__lockSync = true;
         
         var converted = this.convertPixelsToValue(
             this.axis === 'x' ? thumb.x + thumb.width / 2 : thumb.y + thumb.height / 2
@@ -83,10 +77,11 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         this.setValue(value);
         
         // Update thumb position since value may have been adjusted
-        if (this.thumbLower) this._syncThumbToValue(this.thumbLower);
-        if (this.thumbUpper) this._syncThumbToValue(this.thumbUpper);
+        value = this.getValue();
+        if (this.thumbLower) this._syncThumbToValue(this.thumbLower, value);
+        if (this.thumbUpper) this._syncThumbToValue(this.thumbUpper, value);
         
-        this._lockSync = false;
+        this.__lockSync = false;
     },
     
     _nudge: function(thumb, up) {

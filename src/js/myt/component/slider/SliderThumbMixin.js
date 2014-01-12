@@ -1,4 +1,14 @@
-/** Provides Slider thumb functionality. */
+/** Provides Slider thumb functionality.
+    
+    Requires:
+        myt.Button
+    
+    Events:
+        None
+    
+    Attributes:
+        None
+*/
 myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
     include: [myt.Draggable],
     
@@ -8,6 +18,16 @@ myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
     initNode: function(parent, attrs) {
         if (attrs.width === undefined) attrs.width = parent.thumbWidth;
         if (attrs.height === undefined) attrs.height = parent.thumbHeight;
+        
+        if (attrs.repeatKeyDown === undefined) attrs.repeatKeyDown = true;
+        if (attrs.activationKeys === undefined) {
+            attrs.activationKeys = [
+                37, // left arrow
+                38, // up arrow
+                39, // right arrow
+                40 // down arrow
+            ];
+        }
         
         this.callSuper(parent, attrs);
         
@@ -19,7 +39,7 @@ myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
         
         this.syncTo(parent, 'setDisabled', 'disabled');
         
-        parent._syncThumbToValue(this);
+        parent._syncThumbToValue(this, parent.getValue());
     },
     
     
@@ -80,29 +100,24 @@ myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
         }
     },
     
-    /** @overrides myt.KeyActivation */
-    __handleKeyDown: function(event) {
-        // FIXME: Do we really need to override a private method?
-        if (!this.disabled) {
-            var parent = this.parent;
-            switch (myt.KeyObservable.getKeyCodeFromEvent(event)) {
-                case 37: // Left
-                    parent.nudgeValueLeft(this);
-                    break;
-                case 38: // Up
-                    parent.nudgeValueUp(this);
-                    event.value.preventDefault(); // Prevent scrolling
-                    break;
-                case 39: // Right
-                    parent.nudgeValueRight(this);
-                    break;
-                case 40: // Down
-                    parent.nudgeValueDown(this);
-                    event.value.preventDefault(); // Prevent scrolling
-                    break;
-            }
+    /** @overrides myt.Button. */
+    doActivationKeyDown: function(key, isRepeat) {
+        var parent = this.parent;
+        switch (key) {
+            case 37: // Left
+                parent.nudgeValueLeft(this);
+                break;
+            case 38: // Up
+                parent.nudgeValueUp(this);
+                break;
+            case 39: // Right
+                parent.nudgeValueRight(this);
+                break;
+            case 40: // Down
+                parent.nudgeValueDown(this);
+                break;
         }
         
-        this.callSuper(event);
+        this.callSuper(key, isRepeat);
     }
 });

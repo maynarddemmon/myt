@@ -1,5 +1,15 @@
 /** A utility class that will call a myt.Callback or function after a 
-    specified time. */
+    specified time.
+    
+    Events:
+        None
+    
+    Attributes:
+        callback:myt.Callback|function The callback to get executed when the
+            timer completes.
+        timerId:number The "timer" ID returned by setTimeout. The initial value 
+            is undefined.
+*/
 myt.Timer = new JS.Class('Timer', {
     // Constructor /////////////////////////////////////////////////////////////
     /** Creates a new Timer. If a callback and delay are provided
@@ -13,16 +23,8 @@ myt.Timer = new JS.Class('Timer', {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    /** The myt.Callback or function to execute when the time completes. */
-    setCallback: function(callback) {
-        this.callback = callback;
-    },
-    
-    /** (Number) The "timer" ID returned by setTimeout. The initial value 
-        is undefined. */
-    setTimerId: function(timerId) {
-        this.timerId = timerId;
-    },
+    setCallback: function(callback) {this.callback = callback;},
+    setTimerId: function(timerId) {this.timerId = timerId;},
     
     
     // Methods /////////////////////////////////////////////////////////////////
@@ -31,9 +33,9 @@ myt.Timer = new JS.Class('Timer', {
     clear: function() {
         if (this.isRunning()) {
             clearTimeout(this.timerId);
-            this.setTimerId(undefined);
+            this.setTimerId();
         }
-        this.setCallback(undefined);
+        this.setCallback();
     },
     
     /** Stops the Timer and restarts it with the callback and delay if
@@ -51,7 +53,7 @@ myt.Timer = new JS.Class('Timer', {
         if (this.callback && delayInMillis >= 0) {
             var self = this;
             var func = function() {
-                self.setTimerId(undefined);
+                self.setTimerId();
                 if (self.callback.execute) {
                     self.callback.execute();
                 } else {
@@ -71,10 +73,11 @@ myt.Timer = new JS.Class('Timer', {
         return this.timerId !== undefined;
     },
     
-    /** Fix for firefox since that browser often executes setTimeout early. */
+    /** Fix for firefox since that browser often executes setTimeout early.
+        @private */
     __setTimeout: function(f, t) {
-        var self = this;
-        var endTime = Date.now() + t;
+        var self = this,
+            endTime = Date.now() + t;
         return setTimeout(function() {
             var now = Date.now();
             if (now < endTime) {

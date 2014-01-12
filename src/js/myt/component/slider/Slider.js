@@ -1,7 +1,7 @@
 /** A slider component.
     
-    Attributes:
-        _lockSync:boolean Used internally to prevent infinite loops.
+    Private Attributes:
+        __lockSync:boolean Used internally to prevent infinite loops.
 */
 myt.Slider = new JS.Class('Slider', myt.BaseSlider, {
     include: [myt.BoundedValueComponent],
@@ -20,31 +20,24 @@ myt.Slider = new JS.Class('Slider', myt.BaseSlider, {
         this.callSuper(v);
         
         // Sync position of thumb
-        if (this.inited && !this._lockSync) this._syncThumbToValue(this.thumb);
+        if (this.inited && !this.__lockSync) this._syncThumbToValue(this.thumb, this.getValue());
     },
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    _syncThumbToValue: function(thumb) {
-        var value = this.convertValueToPixels(this.getValue());
-        if (this.axis === 'x') {
-            thumb.setX(value - thumb.width / 2);
-        } else {
-            thumb.setY(value - thumb.height / 2);
-        }
-    },
-    
+    /** Should only be called by myt.SliderThumbMixin.
+        @private */
     _syncValueToThumb: function(thumb) {
-        this._lockSync = true;
+        this.__lockSync = true;
         
         this.setValue(this.convertPixelsToValue(
             this.axis === 'x' ? thumb.x + thumb.width / 2 : thumb.y + thumb.height / 2
         ));
         
         // Update thumb position since value may have been adjusted
-        this._syncThumbToValue(thumb);
+        this._syncThumbToValue(thumb, this.getValue());
         
-        this._lockSync = false;
+        this.__lockSync = false;
     },
     
     _nudge: function(thumb, up) {

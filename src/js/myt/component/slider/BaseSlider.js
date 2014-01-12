@@ -1,5 +1,8 @@
 /** A base class for slider components.
     
+    Events:
+        None
+    
     Attributes:
         axis:string Indicates the direction the slider moves in. Allowed values
             are 'x' and 'y'. Defaults to 'x'.
@@ -20,7 +23,7 @@ myt.BaseSlider = new JS.Class('BaseSlider', myt.View, {
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Checkbox */
+    /** @overrides myt.View */
     initNode: function(parent, attrs) {
         if (attrs.axis === undefined) attrs.axis = 'x';
         if (attrs.axis === 'x') {
@@ -62,15 +65,17 @@ myt.BaseSlider = new JS.Class('BaseSlider', myt.View, {
     
     // Methods /////////////////////////////////////////////////////////////////
     convertValueToPixels: function(v) {
-        var pxRange = (this.axis === 'x' ? this.width : this.height) - this.trackInset - this.trackOutset,
-            valueRange = this.maxValue - this.minValue;
-        return this.trackInset + ((v - this.minValue) * (pxRange / valueRange));
+        var minV = this.minValue, ti = this.trackInset,
+            pxRange = (this.axis === 'x' ? this.width : this.height) - ti - this.trackOutset,
+            valueRange = this.maxValue - minV;
+        return ti + ((v - minV) * (pxRange / valueRange));
     },
     
     convertPixelsToValue: function(px) {
-        var pxRange = (this.axis === 'x' ? this.width : this.height) - this.trackInset - this.trackOutset,
-            valueRange = this.maxValue - this.minValue;
-        return ((px - this.trackInset) * (valueRange / pxRange)) + this.minValue;
+        var minV = this.minValue, ti = this.trackInset,
+            pxRange = (this.axis === 'x' ? this.width : this.height) - ti - this.trackOutset,
+            valueRange = this.maxValue - minV;
+        return ((px - ti) * (valueRange / pxRange)) + minV;
     },
     
     nudgeValueLeft: function(thumb) {
@@ -91,5 +96,14 @@ myt.BaseSlider = new JS.Class('BaseSlider', myt.View, {
     
     _nudge: function(thumb, up) {
         // Subclasses to implement
+    },
+    
+    _syncThumbToValue: function(thumb, value) {
+        value = this.convertValueToPixels(value);
+        if (this.axis === 'x') {
+            thumb.setX(value - thumb.width / 2);
+        } else {
+            thumb.setY(value - thumb.height / 2);
+        }
     }
 });
