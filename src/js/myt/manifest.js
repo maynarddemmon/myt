@@ -216,7 +216,7 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'slider/RangeSlider.js'          ).provides('myt.RangeSlider'          ).requires('myt.BoundedRangeComponent','myt.BaseSlider','myt.SimpleSliderRangeFill');
     
     // Component : Tab Slider
-    file(MYT_COMPONENT_ROOT + 'tabslider/TabSliderContainer.js'    ).provides('myt.TabSliderContainer'    ).requires('myt');
+    file(MYT_COMPONENT_ROOT + 'tabslider/TabSliderContainer.js'    ).provides('myt.TabSliderContainer'    ).requires('myt.DelayedMethodCall');
     file(MYT_COMPONENT_ROOT + 'tabslider/TabSliderDrawingMethod.js').provides('myt.TabSliderDrawingMethod').requires('myt.DrawingMethod');
     file(MYT_COMPONENT_ROOT + 'tabslider/TabSlider.js'             ).provides('myt.TabSlider'             ).requires('myt.Radio','myt.TabSliderDrawingMethod','myt.TabSliderContainer');
     file(MYT_COMPONENT_ROOT + 'tabslider/TextTabSlider.js'         ).provides('myt.TextTabSlider'         ).requires('myt.TabSlider');
