@@ -22,18 +22,18 @@ myt.TabDrawingMethod = new JS.Class('TabDrawingMethod', myt.DrawingMethod, {
             ir = r - inset,
             x2 = x + inset, y2 = y + inset, 
             w2 = w - twiceInset, h2 = h - twiceInset,
-            checked = config.checked;
+            selected = config.selected;
         
         switch (config.location) {
             case 'top':
                 rTL = rTR = r;
                 irTL = irTR = r;
-                if (checked) h2 += inset;
+                if (selected) h2 += inset;
                 break;
             case 'right':
                 rBR = rTR = r;
                 irBR = irTR = r;
-                if (checked) {
+                if (selected) {
                     x2 -= inset;
                     w2 += inset;
                 }
@@ -41,7 +41,7 @@ myt.TabDrawingMethod = new JS.Class('TabDrawingMethod', myt.DrawingMethod, {
             case 'bottom':
                 rBL = rBR = r;
                 irBL = irBR = r;
-                if (checked) {
+                if (selected) {
                     y2 -= inset;
                     h2 += inset;
                 }
@@ -49,7 +49,7 @@ myt.TabDrawingMethod = new JS.Class('TabDrawingMethod', myt.DrawingMethod, {
             case 'left':
                 rTL = rBL = r;
                 irTL = irBL = r;
-                if (checked) w2 += inset;
+                if (selected) w2 += inset;
                 break;
         }
         

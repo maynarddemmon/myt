@@ -1,4 +1,13 @@
-/** A tab slider with a text label. */
+/** A tab slider with a text label.
+    
+    Events:
+        None
+    
+    Attributes:
+        labelTextColorChecked:color
+        labelTextColor:color
+        text:string The text for the tab slider.
+*/
 myt.TextTabSlider = new JS.Class('TextTabSlider', myt.TabSlider, {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {

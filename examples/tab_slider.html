@@ -39,63 +39,62 @@
         new Panel(panelStack, {panelId:'twelve'});
         
         // Tabs
-         var MyTab = new JS.Class('MyTab', myt.Tab, {
-            initNode: function(parent, attrs) {
-                this.panelId = attrs.panelId;
-                this.callSuper(parent, attrs);
-            },
-            
+        var MyTab = new JS.Class('MyTab', myt.Tab, {
             setSelected: function(v) {
                 this.callSuper(v);
-                if (this.selected) panelStack.selectPanel(this.panelId);
+                if (this.selected) panelStack.selectPanel(this.tabId);
             }
         });
          
         // Tab : top
         var top = new myt.View(rootView, {
-            x:310, height:30, bgColor:'#eeeeee', groupId:'topNav'
+            x:310, height:30, bgColor:'#eeeeee'
         }, [myt.TabContainer]);
         
         var topTabAttrs = {
-            fillColorHover: '#cccccc',
-            fillColorReady: '#bbbbbb',
             text:'tab text top',
-            shrinkToFit:true
+            shrinkToFit:true,
+            tabContainer:top
         };
         
-        topTabAttrs.panelId = 'one';
+        topTabAttrs.tabId = 'one';
         var tt1 = new MyTab(top, topTabAttrs);
-        topTabAttrs.panelId = 'two';
+        topTabAttrs.tabId = 'two';
         var tt2 = new MyTab(top, topTabAttrs);
-        tt2.setChecked(true);
-        topTabAttrs.panelId = 'three';
+        top.select(tt2);
+        topTabAttrs.tabId = 'three';
         var tt3 = new MyTab(top, topTabAttrs);
         
         // Tab : bottom
         var bottom = new myt.View(rootView, {
-            x:310, y:200, height:30, bgColor:'#eeeeee', groupId:'bottomNav', location:'bottom'
+            x:310, y:200, height:30, bgColor:'#000000', location:'bottom'
         }, [myt.TabContainer]);
         
         var bottomTabAttrs = {
-            fillColorHover: '#cccccc',
-            fillColorReady: '#bbbbbb',
+            fillColorHover: '#777777',
+            fillColorActive: '#333333',
+            fillColorReady: '#444444',
+            fillColorSelected: '#888888',
+            labelTextColorSelected:'#ffffff',
+            textColor:'#eeeeee',
+            edgeColor:'#999999',
+            
             text:'tab text bot',
             shrinkToFit:true
         };
         
         var tb1 = new myt.Tab(bottom, bottomTabAttrs);
+        bottomTabAttrs.selected = true;
         var tb2 = new myt.Tab(bottom, bottomTabAttrs);
-        tb2.setSelected(true);
+        bottomTabAttrs.selected = false;
         var tb3 = new myt.Tab(bottom, bottomTabAttrs);
         
         // Tab : left
         var left = new myt.View(rootView, {
-            x:210, y:60, width:100, bgColor:'#eeeeee', groupId:'leftNav', location:'left'
+            x:210, y:60, width:100, bgColor:'#eeeeee', location:'left'
         }, [myt.TabContainer]);
         
         var leftTabAttrs = {
-            fillColorHover: '#cccccc',
-            fillColorReady: '#bbbbbb',
             text:'tab text left',
             shrinkToFit:true
         };
@@ -107,12 +106,10 @@
         
         // Tab : right
         var right = new myt.View(rootView, {
-            x:610, y:60, width:100, bgColor:'#eeeeee', groupId:'rightNav', location:'right'
+            x:610, y:60, width:100, bgColor:'#eeeeee', location:'right'
         }, [myt.TabContainer]);
         
         var rightTabAttrs = {
-            fillColorHover: '#cccccc',
-            fillColorReady: '#bbbbbb',
             text:'tab text right',
             shrinkToFit:true
         };
@@ -188,6 +185,9 @@
         global.vDivider.setLimitToParent(100);
         
         left.syncTo(global.vDivider, 'updateY', 'value');
+        
+        
+        global.tc = top;
     }
 </script>
 </body></html>

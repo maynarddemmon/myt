@@ -9,6 +9,9 @@
 myt.Selectable = new JS.Module('Selectable', {
     // Accessors ///////////////////////////////////////////////////////////////
     setSelected: function(v) {
+        // Adapt to event from syncTo
+        if (v !== null && typeof v === 'object') v = v.value;
+        
         if (this.selected !== v) {
             this.selected = v;
             if (this.inited && this.fireNewEvent) this.fireNewEvent('selected', v);

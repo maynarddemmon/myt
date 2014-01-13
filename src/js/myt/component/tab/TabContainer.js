@@ -1,5 +1,18 @@
-/** A mixin that allows myt.Tabs to be added to a view. */
+/** A mixin that allows myt.Tabs to be added to a view.
+    
+    Events:
+        None
+    
+    Attributes:
+        location:string The location of the tabs relative to the container.
+            Supported values are: 'top', 'bottom', 'left' and 'right'. Defaults
+            to 'top'.
+        spacing:number The spacing between tabs.
+*/
 myt.TabContainer = new JS.Module('TabContainer', {
+    include: [myt.SelectionManager],
+    
+    
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
         DEFAULT_SPACING:1
@@ -11,9 +24,9 @@ myt.TabContainer = new JS.Module('TabContainer', {
         this._tabs = [];
         
         if (attrs.spacing === undefined) attrs.spacing = myt.TabContainer.DEFAULT_SPACING;
-        
         if (attrs.location === undefined) attrs.location = 'top';
-        if (attrs.groupId === undefined) attrs.groupId = myt.generateGuid();
+        if (attrs.itemSelectionId === undefined) attrs.itemSelectionId = 'tabId';
+        if (attrs.maxSelected === undefined) attrs.maxSelected = 1;
         
         this.callSuper(parent, attrs);
     },
@@ -38,13 +51,13 @@ myt.TabContainer = new JS.Module('TabContainer', {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setGroupId: function(v) {this.groupId = v;},
     setLocation: function(v) {this.location = v;},
     
     setSpacing: function(v) {
-        if (this.spacing === v) return;
-        this.spacing = v;
-        if (this.layout) this.layout.setSpacing(v);
+        if (this.spacing !== v) {
+            this.spacing = v;
+            if (this.layout) this.layout.setSpacing(v);
+        }
     },
     
     
@@ -53,10 +66,10 @@ myt.TabContainer = new JS.Module('TabContainer', {
         return this._tabs[0];
     },
     
-    getSelected: function() {
-        var tab = this._tabs[0];
-        if (tab) return tab.getCheckedRadio();
-        return null;
+    /** Gets the currently selected tab.
+        @returns myt.Tab or undefined if no tab is selected. */
+    getSelectedTab: function() {
+        return this.getSelected()[0];
     },
     
     /** @overrides myt.View */

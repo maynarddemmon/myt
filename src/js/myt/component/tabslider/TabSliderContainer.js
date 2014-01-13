@@ -17,7 +17,7 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
         if (attrs.overflow === undefined) attrs.overflow = 'auto';
         if (attrs.groupId === undefined) attrs.groupId = myt.generateGuid();
         
-        myt.DelayedMethodCall.createDelayedMethodCall(this, 0, '_updateLayout');
+        myt.DelayedMethodCall.createDelayedMethodCall(this, 0, '__updateLayout');
         
         this.callSuper(parent, attrs);
     },
@@ -72,10 +72,11 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
     
     // Methods /////////////////////////////////////////////////////////////////
     updateLayout: function(event) {
-        this._updateLayoutDelayed();
+        this.__updateLayoutDelayed();
     },
     
-    _updateLayout: function() {
+    /** @private */
+    __updateLayout: function() {
         var tabSliders = this._tabSliders, i = tabSliders.length, tabSlider,
             min = 0, preferred = 0, visCount = 0;
         
