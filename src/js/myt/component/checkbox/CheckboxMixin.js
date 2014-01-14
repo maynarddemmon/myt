@@ -1,6 +1,9 @@
 /** Mix onto a view to make it behave as a checkbox button. Should be used
     on an myt.DrawButton or subclass thereof.
     
+    Events:
+        checked:boolean
+    
     Attributes:
         checked:boolean Indicates if this component is in the "checked" state
             or not.
@@ -64,18 +67,18 @@ myt.CheckboxMixin = new JS.Module('CheckboxMixin', {
     },
     
     setChecked: function(v) {
-        if (this.checked === v) return;
-        this.checked = v;
-        if (this.inited) {
-            this.fireNewEvent('checked', v);
-            this.redraw();
+        if (this.checked !== v) {
+            this.checked = v;
+            if (this.inited) {
+                this.fireNewEvent('checked', v);
+                this.redraw();
+            }
         }
     },
     
     /** @overrides myt.DrawButton */
     getDrawBounds: function() {
-        var bounds = this.drawBounds;
-        var CBM = myt.CheckboxMixin;
+        var bounds = this.drawBounds, CBM = myt.CheckboxMixin;
         bounds.x = CBM.DEFAULT_PAD_X;
         bounds.y = CBM.DEFAULT_PAD_Y;
         bounds.w = CBM.DEFAULT_WIDTH;

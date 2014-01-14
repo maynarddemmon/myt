@@ -22,12 +22,13 @@ myt.RadioMixin = new JS.Module('RadioMixin', {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setGroupId: function(v) {
-        if (this.groupId === v) return;
-        var oldGroupId = this.groupId;
-        this.groupId = v;
-        if (oldGroupId) this.removeFromBAG('checked', oldGroupId);
-        if (v) this.addToBAG('checked', v);
-        if (this.inited) this.fireNewEvent('groupId', v);
+        if (this.groupId !== v) {
+            var oldGroupId = this.groupId;
+            this.groupId = v;
+            if (oldGroupId) this.removeFromBAG('checked', oldGroupId);
+            if (v) this.addToBAG('checked', v);
+            if (this.inited) this.fireNewEvent('groupId', v);
+        }
     },
     
     /** @overrides myt.CheckboxMixin */

@@ -1,11 +1,17 @@
 /** An myt.Button that makes use of an myt.DrawingMethod to display itself.
     
+    Events:
+        None
+    
     Attributes:
         drawingMethodClassname:string the name of the class to draw with.
         drawingMethod:myt.DrawingMethod the instance to draw with. Obtained
             by resolving the drawingMethodClassname. This attribute should be
             treated as read only.
         drawBounds:object the bounds for drawing within.
+    
+    Private Attributes:
+        __lastState:string The last draw state drawn.
 */
 myt.DrawButton = new JS.Class('DrawButton', myt.Canvas, {
     include: [myt.Button],
@@ -30,7 +36,6 @@ myt.DrawButton = new JS.Class('DrawButton', myt.Canvas, {
     setDrawingMethod: function(v) {
         if (this.drawingMethod !== v) {
             this.drawingMethod = v;
-            // No event needed
             if (this.inited) this.updateUI();
         }
     },
@@ -49,15 +54,15 @@ myt.DrawButton = new JS.Class('DrawButton', myt.Canvas, {
         return {state:state, focused:this.focused, bounds:this.getDrawBounds()};
     },
     
-    setWidth: function(v) {
-        this.callSuper(v);
-        
+    /** @overrides myt.View */
+    setWidth: function(v, supressEvent) {
+        this.callSuper(v, supressEvent);
         if (this.inited) this.redraw();
     },
     
-    setHeight: function(v) {
-        this.callSuper(v);
-        
+    /** @overrides myt.View */
+    setHeight: function(v, supressEvent) {
+        this.callSuper(v, supressEvent);
         if (this.inited) this.redraw();
     },
     
@@ -89,8 +94,8 @@ myt.DrawButton = new JS.Class('DrawButton', myt.Canvas, {
     
     redraw: function(state) {
         // Used if redrawing for focus changes
-        if (state === undefined) state = this._lastState;
-        this._lastState = state;
+        if (state === undefined) state = this.__lastState;
+        this.__lastState = state;
         
         var dm = this.drawingMethod || this;
         dm.draw(this, this.getDrawConfig(state));
