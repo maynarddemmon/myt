@@ -1,4 +1,11 @@
-/** Draws a tab slider into an myt.Canvas. */
+/** Draws a tab slider into an myt.Canvas.
+    
+    Events:
+        None
+    
+    Attributes:
+        None
+*/
 myt.TabSliderDrawingMethod = new JS.Class('TabSliderDrawingMethod', myt.DrawingMethod, {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.DrawingMethod */

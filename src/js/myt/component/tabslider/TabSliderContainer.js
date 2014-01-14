@@ -1,5 +1,16 @@
-/** A mixin that allows myt.TabSliders to be added to a view. */
+/** A mixin that allows myt.TabSliders to be added to a view.
+    
+    Events:
+        None
+    
+    Attributes:
+        spacing:number The spacing between tab sliders. Defaults to
+            myt.TabSliderContainer.DEFAULT_SPACING which is 1.
+*/
 myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
+    include: [myt.SelectionManager],
+    
+    
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
         DEFAULT_SPACING:1
@@ -13,9 +24,9 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
         attrs.defaultPlacement = 'container';
         
         if (attrs.spacing === undefined) attrs.spacing = myt.TabSliderContainer.DEFAULT_SPACING;
-        
         if (attrs.overflow === undefined) attrs.overflow = 'auto';
-        if (attrs.groupId === undefined) attrs.groupId = myt.generateGuid();
+        if (attrs.itemSelectionId === undefined) attrs.itemSelectionId = 'tabId';
+        if (attrs.maxSelected === undefined) attrs.maxSelected = 1;
         
         myt.DelayedMethodCall.createDelayedMethodCall(this, 0, '__updateLayout');
         
@@ -60,8 +71,6 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setGroupId: function(v) {this.groupId = v;},
-    
     setSpacing: function(v) {
         if (this.spacing !== v) {
             this.spacing = v;

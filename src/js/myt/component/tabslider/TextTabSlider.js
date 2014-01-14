@@ -31,7 +31,7 @@ myt.TextTabSlider = new JS.Class('TextTabSlider', myt.TabSlider, {
         new myt.Text(this.button, {
             name:'label', domClass:'mytTextTabSliderLabel', ignorePlacement:true,
             text:this.text, align:'center', valign:'middle', 
-            textColor:this.determineTextColor(this.button.checked)
+            textColor:this.selected ? this.labelTextColorChecked : this.labelTextColor
         });
     },
     
@@ -51,11 +51,7 @@ myt.TextTabSlider = new JS.Class('TextTabSlider', myt.TabSlider, {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.TabSlider */
     notifyButtonRedraw: function(state) {
-        var btn = this.button;
-        if (btn.label) btn.label.setTextColor(this.determineTextColor(btn.checked));
-    },
-    
-    determineTextColor: function(checked) {
-        return checked ? this.labelTextColorChecked : this.labelTextColor;
+        var label = this.button.label;
+        if (label) label.setTextColor(this.selected ? this.labelTextColorChecked : this.labelTextColor);
     }
 });

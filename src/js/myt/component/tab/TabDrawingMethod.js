@@ -1,4 +1,11 @@
-/** Draws a tab into an myt.Canvas. */
+/** Draws a tab into an myt.Canvas.
+    
+    Events:
+        None
+    
+    Attributes:
+        None
+*/
 myt.TabDrawingMethod = new JS.Class('TabDrawingMethod', myt.DrawingMethod, {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {

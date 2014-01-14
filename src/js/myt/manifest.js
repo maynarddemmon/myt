@@ -1,5 +1,4 @@
 JS.Packages(function() {with(this) {
-    
     // Package:myt
     var MYT_ROOT = global.MYT_ROOT || '../js/myt/';
     
@@ -229,7 +228,7 @@ JS.Packages(function() {with(this) {
                                                                                                                 'myt.SimpleSliderRangeFill');
     
     // Component : Tab Slider
-    file(MYT_COMPONENT_ROOT + 'tabslider/TabSliderContainer.js'    ).provides('myt.TabSliderContainer'    ).requires('myt.DelayedMethodCall');
+    file(MYT_COMPONENT_ROOT + 'tabslider/TabSliderContainer.js'    ).provides('myt.TabSliderContainer'    ).requires('myt.SelectionManager','myt.DelayedMethodCall');
     file(MYT_COMPONENT_ROOT + 'tabslider/TabSliderDrawingMethod.js').provides('myt.TabSliderDrawingMethod').requires('myt.DrawingMethod');
     file(MYT_COMPONENT_ROOT + 'tabslider/TabSlider.js'             ).provides('myt.TabSlider'             ).requires('myt.Radio','myt.TabSliderDrawingMethod','myt.TabSliderContainer');
     file(MYT_COMPONENT_ROOT + 'tabslider/TextTabSlider.js'         ).provides('myt.TextTabSlider'         ).requires('myt.TabSlider');
