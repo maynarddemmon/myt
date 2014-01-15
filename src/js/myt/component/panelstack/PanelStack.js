@@ -50,21 +50,17 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
     },
     
     getPanel: function(panelId) {
-        var subs = this.subviews, i = subs.length, panel;
-        while (i) {
-            panel = subs[--i];
-            if (panel.panelId === panelId) return panel;
-        }
-        return null;
+        return this.getSelectableItem(panelId);
     },
     
     selectPanel: function(panelId) {
-        var panel = this.getPanel(panelId);
-        if (panel) {
-            this.select(panel);
-            panel.setWidth(this.width);
-            panel.setHeight(this.height);
-        }
+        this.selectById(panelId);
+    },
+    
+    /** @overrides myt.SelectionManager */
+    doSelected: function(item) {
+        item.setWidth(this.width);
+        item.setHeight(this.height);
     },
     
     /** Called by a panel when it transitions between selected states. Should

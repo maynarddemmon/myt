@@ -18,6 +18,7 @@ myt.StackablePanel = new JS.Module('StackablePanel', {
         attrs.visible = attrs.selected = false;
         
         if (attrs.bgColor === undefined) attrs.bgColor = '#ffffff';
+        if (attrs.panelId === undefined) attrs.panelId = attrs.name;
         
         this.callSuper(parent, attrs);
         

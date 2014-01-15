@@ -101,8 +101,21 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
             
             this.__lastSelectedItem = item;
             
+            this.doSelected(item);
             this.fireNewEvent('itemSelected', item);
         }
+    },
+    
+    /** Called when an item is selected.
+        @param item:myt.Selectable The newly selected item.
+        @returns void */
+    doSelected: function(item) {},
+    
+    /** Selects the item with the provided item selection ID.
+        @param itemSelectionId:string
+        @returns void */
+    selectById: function(itemSelectionId) {
+        this.select(this.getSelectableItem(itemSelectionId));
     },
     
     /** Checks if the item can be selected.
@@ -144,8 +157,21 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
             
             if (this.__lastSelectedItem === item) this.__lastSelectedItem = null;
             
+            this.doDeselected(item);
             this.fireNewEvent('itemDeselected', item);
         }
+    },
+    
+    /** Called when an item is deselected.
+        @param item:myt.Selectable The newly deselected item.
+        @returns void */
+    doDeselected: function(item) {},
+    
+    /** Deselects the item with the provided item selection ID.
+        @param itemSelectionId:string
+        @returns void */
+    deselectById: function(itemSelectionId) {
+        this.deselect(this.getSelectableItem(itemSelectionId));
     },
     
     /** Checks if the item can be deselected.
@@ -195,5 +221,18 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
             if (!items[--i].canSelect(this)) items.splice(i, 1);
         }
         return items;
+    },
+    
+    /** Gets a selectable item with the the provided selection item ID.
+        @param itemSelectionId:string
+        @returns myt.Selectable: The item or null if not found. */
+    getSelectableItem: function(itemSelectionId) {
+        var items = this.getSelectableItems(), i = items.length, item,
+            selectionAttr = this.itemSelectionId;
+        while (i) {
+            item = items[--i];
+            if (item[selectionAttr] === itemSelectionId) return item;
+        }
+        return null;
     }
 });

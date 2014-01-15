@@ -15,7 +15,7 @@
         var rootView = new myt.View(null, {width:600, height:450, bgColor:'#ffffff'}, [myt.SizeToWindow]);
         
         // PanelStack
-         var Panel = new JS.Class('Panel', myt.View, {
+        var Panel = new JS.Class('Panel', myt.View, {
             include: [myt.StackablePanel],
             
             initNode: function(parent, attrs) {
@@ -42,7 +42,7 @@
         var MyTab = new JS.Class('MyTab', myt.Tab, {
             setSelected: function(v) {
                 this.callSuper(v);
-                if (this.selected) panelStack.selectPanel(this.tabId);
+                if (this.selected) panelStack.selectById(this.tabId);
             }
         });
          
