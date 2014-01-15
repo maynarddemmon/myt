@@ -24,8 +24,8 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
         
         this.callSuper(parent, attrs);
         
-        this.applyConstraint('__updateHeight', [this, 'height']);
-        this.applyConstraint('__updateWidth', [this, 'width']);
+        this.syncTo(this, '__updateHeight', 'height');
+        this.syncTo(this, '__updateWidth', 'width');
     },
     
     
@@ -44,9 +44,11 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
         if (panel) panel.setHeight(event.value);
     },
     
+    /** Gets the selected panel.
+        @returns myt.StackablePanel: The selected panel or undefined if
+            none selected. */
     getActivePanel: function() {
-        var selected = this.getSelected();
-        return selected.length > 0 ? selected[0] : null;
+        return this.getSelected()[0];
     },
     
     getPanel: function(panelId) {
