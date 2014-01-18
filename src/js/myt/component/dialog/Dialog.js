@@ -149,13 +149,19 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.Dimmer */
     hide: function() {
-        // Hide spinner related elements
+        this.__hideSpinner();
+        
+        this.callSuper();
+    },
+    
+    /** Hide spinner related elements.
+        @private
+        @returns void */
+    __hideSpinner: function() {
         if (this.spinner) {
             this.spinner.setVisible(false);
             this.spinner = undefined;
         }
-        
-        this.callSuper();
     },
     
     /** @overrides myt.Dimmer */
@@ -169,14 +175,17 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         @private
         @returns void */
     __destroyContent: function() {
+        this.__hideSpinner();
+        
         var content = this.content, MP = myt.ModalPanel,
             stc = content.sizeToChildren,
             svs = content.getSubviews(), 
             i = svs.length, sv;
+        
+        // Destroy all children except the close button since that gets reused.
         while (i) {
             sv = svs[--i];
-            if (sv.name === 'closeBtn') continue;
-            sv.destroy();
+            if (sv.name !== 'closeBtn') sv.destroy();
         }
         
         // Message and Confirm dialogs set this.

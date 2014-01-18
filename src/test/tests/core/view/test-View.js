@@ -153,11 +153,11 @@ test("View alignment", function() {
     ok(child2.y === 0, "View should have an y of 0.");
     ok(child2.domElement.offsetTop === 0, "Dom element should have an offsetTop of 0.");
     
-    ok(child3.y === 22.5, "Valign middle view should have an y of 22.");
+    ok(child3.y === 23, "Valign middle view should have an y of 23 since 22.5 will round up.");
     ok(child3.domElement.offsetTop === 23, "Valign middle dom element should have an offsetTop of 22.");
     var bounds = child3.domElement.getBoundingClientRect();
     console.log(bounds);
-    ok(bounds.top === 22.5, "Bounding client rect should have a top of 22.5: " + bounds.top);
+    ok(bounds.top === 23, "Bounding client rect should have a top of 23 since 22.5 will round up: " + bounds.top);
     
     // resize parent
     v.setWidth(200);
@@ -184,7 +184,7 @@ test("View alignment", function() {
     // resize parent
     v.setHeight(100);
     
-    ok(child3.y === 47.5, "View should have a y of 47.5.");
+    ok(child3.y === 48, "View should have a y of 48 since 47.5 will round up.");
     ok(child3.domElement.offsetTop === 48, "Dom element should have an offsetTop of 48.");
     
     // Change valign
@@ -248,6 +248,11 @@ test("Test getSubviews, getSiblingViews, getLayouts", function() {
     var siblings = child2.getSiblingViews();
     ok(siblings.length === 2, "Child should have 2 siblings.");
     ok(siblings[0] === child1, "First sibling should be the first child added.");
+    ok(siblings[1] === child3, "Second sibling should be the last child added.");
+    
+    siblings = child1.getSiblingViews();
+    ok(siblings.length === 2, "Child should have 2 siblings.");
+    ok(siblings[0] === child2, "First sibling should be the second child added.");
     ok(siblings[1] === child3, "Second sibling should be the last child added.");
     
     // Destroy it

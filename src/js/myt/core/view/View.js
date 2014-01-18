@@ -229,7 +229,8 @@ myt.View = new JS.Class('View', myt.Node, {
     getSiblingViews: function() {
         if (!this.parent) return null;
         
-        var svs = this.parent.getSubviews();
+        // Get a copy of the subviews since we will filter it.
+        var svs = this.parent.getSubviews().concat();
         
         // Filter out ourself
         myt.filterArray(svs, this);
@@ -318,7 +319,7 @@ myt.View = new JS.Class('View', myt.Node, {
     
     /** @private */
     __doAlignCenter: function(e) {
-        this.setX(((this.parent.width - this.width) / 2) + (this.alignOffset ? this.alignOffset : 0));
+        this.setX(Math.round((this.parent.width - this.width) / 2) + (this.alignOffset ? this.alignOffset : 0));
     },
     
     /** @private */
@@ -375,7 +376,7 @@ myt.View = new JS.Class('View', myt.Node, {
     
     /** @private */
     __doValignMiddle: function(e) {
-        this.setY(((this.parent.height - this.height) / 2) + (this.valignOffset ? this.valignOffset : 0));
+        this.setY(Math.round((this.parent.height - this.height) / 2) + (this.valignOffset ? this.valignOffset : 0));
     },
     
     /** @private */
