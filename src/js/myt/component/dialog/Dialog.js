@@ -351,6 +351,11 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             height:20, inset:10, outset:10, roundedCorners:5,
             activeColor:'#bbbbbb', hoverColor:'#dddddd', readyColor:'#cccccc'
         };
+        if (opts.activeColor !== undefined) attrs.activeColor = opts.activeColor;
+        if (opts.hoverColor !== undefined) attrs.hoverColor = opts.hoverColor;
+        if (opts.readyColor !== undefined) attrs.readyColor = opts.readyColor;
+        if (opts.textColor !== undefined) attrs.textColor = opts.textColor;
+        
         new myt.SimpleIconTextButton(btnContainer, attrs, [{
             doActivated: function() {self.doCallback(this);}
         }]);
