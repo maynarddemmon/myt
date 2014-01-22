@@ -85,7 +85,7 @@
                 var size;
                 var lorem = '. abcdefghijklmnopqrstuvwxyz';
                 var markup = '<nobr>A link to <a href="http://www.google.com/">google</a>. This is some more text with another <a href="http://www.cp.net">link</a>.</nobr>';
-                var groupId = myt.InputRadio.getGroupId();
+                var groupId = myt.generateGuid();
                 for (var i = 0; 15 > i; i++) {
                     size = Math.round(Math.random() * 21) + 5;
                     new myt.Text(this, {text:lorem.substr(0, size), bgColor:'#eeeeee', whiteSpace:'nowrap'});
