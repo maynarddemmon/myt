@@ -38,7 +38,9 @@
                     subForm:{
                         fieldA:"default A",
                         fieldB:"default B"
-                    }
+                    },
+                    fieldD:false,
+                    fieldE:true
                 };
                 var rollbackValue = {
                     fieldA:"FOO",
@@ -46,7 +48,9 @@
                     subForm:{
                         fieldA:"rb A",
                         fieldB:"rb B"
-                    }
+                    },
+                    fieldD:true,
+                    fieldE:false
                 };
                 var value = {
                     fieldC:"blah",
@@ -82,6 +86,12 @@
         });
         new myt.FormInputText(rootView, {
             width:100, id:'fieldC', form:rootView, validators:[lenValidator]
+        });
+        new myt.FormTextCheckbox(rootView, {
+            id:'fieldD', form:rootView, text:'It all makes sense', shrinkToFit:true
+        });
+        new myt.FormCheckbox(rootView, {
+            id:'fieldE', form:rootView
         });
         
         // Subform: start
