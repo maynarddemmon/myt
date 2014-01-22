@@ -1,5 +1,14 @@
-/** Provides the capability for a Node to participate in 
-    a BAG. */
+/** Provides the capability for a Node to participate in a BAG.
+    
+    Events:
+        None
+    
+    Attributes:
+        None
+    
+    Private Attributes:
+        __bags:array A list of BAGs this node is a member of.
+*/
 myt.BAGMembership = new JS.Module('BAGMembership', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Node */
@@ -41,14 +50,14 @@ myt.BAGMembership = new JS.Module('BAGMembership', {
         @returns void */
     addToBAG: function(attrName, groupId) {
         var group = this.getBAG(attrName, groupId);
-        if (this.isRegisteredWithBAG(group)) return;
-        
-        this.__bags.push(group);
-        group.register(this);
-        
-        // Monitor attribute
-        if (!this.isAttachedTo(this, '__updateForBAG', attrName)) {
-            this.attachTo(this, '__updateForBAG', attrName);
+        if (!this.isRegisteredWithBAG(group)) {
+            this.__bags.push(group);
+            group.register(this);
+            
+            // Monitor attribute
+            if (!this.isAttachedTo(this, '__updateForBAG', attrName)) {
+                this.attachTo(this, '__updateForBAG', attrName);
+            }
         }
     },
     
@@ -59,24 +68,25 @@ myt.BAGMembership = new JS.Module('BAGMembership', {
         @returns void */
     removeFromBAG: function(attrName, groupId) {
         var group = this.getBAG(attrName, groupId);
-        if (!this.isRegisteredWithBAG(group)) return;
-        
-        var groups = this.__bags, i = groups.length, g, detach = true;
-        while (i) {
-            g = groups[--i];
-            if (g === group) {
-                groups.splice(i, 1);
-                group.unregister(this);
-            } else if (g.attrName === attrName) {
-                // Don't detach if another group is listening to the same attr.
-                detach = false;
+        if (this.isRegisteredWithBAG(group)) {
+            var groups = this.__bags, i = groups.length, g, detach = true;
+            while (i) {
+                g = groups[--i];
+                if (g === group) {
+                    groups.splice(i, 1);
+                    group.unregister(this);
+                } else if (g.attrName === attrName) {
+                    // Don't detach if another group is listening to the same attr.
+                    detach = false;
+                }
             }
+            
+            if (detach) this.detachFrom(this, '__updateForBAG', attrName);
         }
-        
-        if (detach) this.detachFrom(this, '__updateForBAG', attrName);
     },
     
     /** Called whenever an event for the attrName is fired.
+        @private 
         @returns void */
     __updateForBAG: function(event) {
         var type = event.type,

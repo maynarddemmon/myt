@@ -34,8 +34,9 @@
         }
         
         for (i = 0; 100 > i; i++) {
-            attrs = {groupId:'foo', value:'v' + i};
-            if (i == 0 || i == 1) attrs.selected = true;
+            attrs = {groupId:'foo', optionValue:'v' + i};
+            if (i == 0) attrs.selected = true;
+            if (i == 1) attrs.value = 'v1';
             if (i % 2 == 0) attrs.groupId = 'bar';
             if (i % 5 == 0) attrs.disabled = true;
             if (i % 16 == 0) {
@@ -49,9 +50,9 @@
             }
             new myt.TextRadio(rootView, attrs, [{
                 doActivated: function() {
-                    console.log("before", this.getGroupValue());
+                    console.log("before", this.getValue());
                     this.callSuper();
-                    console.log("after", this.getGroupValue());
+                    console.log("after", this.getValue());
                 }
             }]);
         }
