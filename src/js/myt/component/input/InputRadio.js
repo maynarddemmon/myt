@@ -18,18 +18,9 @@ myt.InputRadio = new JS.Class('InputRadio', myt.NativeInputWrapper, {
     
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
-        /** The group ID counter. */
-        __idCounter: 0,
-        
-        /** Creates a new unique group ID.
-            @returns the group ID. */
-        getGroupId: function() {
-            return ++this.__idCounter;
-        },
-        
         /** Stores the last checked myt.InputRadio by groupId. Needed so we
-            can set the of a radio to false when another radio in the group
-            is checked. */
+            can set the value of a radio to false when another radio in the 
+            group is checked. */
         lastChecked: {}
     },
     
@@ -37,7 +28,7 @@ myt.InputRadio = new JS.Class('InputRadio', myt.NativeInputWrapper, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.NativeInputWrapper */
     initNode: function(parent, attrs) {
-        if (attrs.groupId === undefined) attrs.groupId = myt.InputRadio.getGroupId();
+        if (attrs.groupId === undefined) attrs.groupId = myt.generateGuid();
         
         this.inputType = 'radio';
         

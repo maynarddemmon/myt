@@ -20,7 +20,7 @@
         for (var i = 0; 100 > i; i++) {
             attrs = {};
             if (i % 5 == 0) attrs.disabled = true;
-            if (i % 3 == 0) attrs.checked = true;
+            if (i % 3 == 0) attrs.value = true;
             if (i % 16 == 0) {
                 attrs.text = "Here is some text.";
                 attrs.shrinkToFit = true;
@@ -35,7 +35,7 @@
         
         for (i = 0; 100 > i; i++) {
             attrs = {groupId:'foo', value:'v' + i};
-            if (i == 0 || i == 1) attrs.checked = true;
+            if (i == 0 || i == 1) attrs.selected = true;
             if (i % 2 == 0) attrs.groupId = 'bar';
             if (i % 5 == 0) attrs.disabled = true;
             if (i % 16 == 0) {

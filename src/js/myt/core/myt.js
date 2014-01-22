@@ -421,5 +421,16 @@ myt = {
         @returns object a copy of the object. */
     clone: function(obj) {
         return JSON.parse(JSON.stringify(obj));
+    },
+    
+    /** Memoize a function.
+        @param f:function The function to memoize
+        @returns function: The memoized function. */
+    memoize: function(f) {
+        return function() {
+            var hash = JSON.stringify(arguments),
+                cache = f.__cache || (f.__cache = {});
+            return (hash in cache) ? cache[hash] : cache[hash] = f.apply(this, arguments);
+        };
     }
 };

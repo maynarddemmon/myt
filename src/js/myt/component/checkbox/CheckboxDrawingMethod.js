@@ -1,44 +1,61 @@
 /** Draws a checkbox into an myt.Canvas. */
 myt.CheckboxDrawingMethod = new JS.Class('CheckboxDrawingMethod', myt.DrawingMethod, {
+    // Constructor /////////////////////////////////////////////////////////////
+    initialize: function() {
+        this.__getTemplate = myt.memoize(this.__getTemplate);
+    },
+    
+    
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.DrawingMethod */
     draw: function(canvas, config) {
-        // Setup default if not provided
-        if (config.shadowColor === undefined) config.shadowColor = 'rgba(0, 0, 0, 0.3)';
-        if (config.focusedShadowColor === undefined) config.focusedShadowColor = 'rgba(0, 0, 0, 0.5)';
-        if (config.shadowOffsetX === undefined) config.shadowOffsetX = 0;
-        if (config.shadowOffsetY === undefined) config.shadowOffsetY = 1;
-        if (config.shadowBlur === undefined) config.shadowBlur = 2;
-        if (config.radius === undefined) config.radius = 4;
-        
-        var b = config.bounds, x = b.x, y = b.y, w = b.w, h = b.h,
-            radius = config.radius;
-        
         canvas.clear();
+        canvas.drawImage(this.__getTemplate(config), 0, 0);
+    },
+    
+    /** @private */
+    __getTemplate: function(config) {
+        var b = config.bounds, x = b.x, y = b.y, w = b.w, h = b.h;
+        var shadowBlur         = config.shadowBlur == null ? 2 : config.shadowBlur,
+            shadowOffsetX      = config.shadowOffsetX == null ? 0 : config.shadowOffsetX,
+            shadowOffsetY      = config.shadowOffsetY == null ? 1 : config.shadowOffsetY,
+            radius             = config.radius == null ? 4 : config.radius,
+            shadowColor        = config.shadowColor == null ? 'rgba(0, 0, 0, 0.3)' : config.shadowColor,
+            focusedShadowColor = config.focusedShadowColor == null ? 'rgba(0, 0, 0, 0.5)' : config.focusedShadowColor,
+            fillColor          = config.fillColor,
+            focused            = config.focused,
+            inset              = config.edgeSize,
+            x2 = x + inset, 
+            y2 = y + inset,
+            w2 = w - 2*inset,
+            h2 = h - 2*inset,
+            darkColor = (myt.Color.makeColorFromHexString(fillColor)).multiply(5/6),
+            DU = myt.DrawingUtil;
         
-        if (w == 0 || h == 0) return;
-        
-        var inset = config.edgeSize,
-            x2 = x + inset, y2 = y + inset,
-            w2 = w - 2*inset, h2 = h - 2*inset;
+        var canvas = new myt.Canvas(myt.global.roots.getRoots()[0], {
+            width:x + w + shadowOffsetX + shadowBlur, 
+            height:y + h + shadowOffsetY + shadowBlur, 
+            visible:false, 
+            ignoreLayout:true, 
+            ignorePlacement:true
+        });
+        var grd = canvas.createLinearGradient(x2, y2, x2, y2 + w2);
         
         // Border and shadow
         canvas.save();
-        canvas.setShadowOffsetX(config.shadowOffsetX);
-        canvas.setShadowOffsetY(config.shadowOffsetY);
-        canvas.setShadowBlur(config.shadowBlur * (config.focused ? 2 : 1));
-        canvas.setShadowColor(config.focused ? config.focusedShadowColor : config.shadowColor);
+        canvas.setShadowOffsetX(shadowOffsetX);
+        canvas.setShadowOffsetY(shadowOffsetY);
+        canvas.setShadowBlur(shadowBlur * (focused ? 2 : 1));
+        canvas.setShadowColor(focused ? focusedShadowColor : shadowColor);
         
-        myt.DrawingUtil.drawRoundedRect(canvas, radius, 0, x, y, w, h);
+        DU.drawRoundedRect(canvas, radius, 0, x, y, w, h);
         canvas.setFillStyle(config.edgeColor);
         canvas.fill();
         canvas.restore();
         
         // Fill
-        myt.DrawingUtil.drawRoundedRect(canvas, radius - inset, 0, x2, y2, w2, h2);
-        var darkColor = (myt.Color.makeColorFromHexString(config.fillColor)).multiply(5/6);
-        var grd = canvas.createLinearGradient(x2, y2, x2, y2 + w2);
-        grd.addColorStop(0, config.fillColor);
+        DU.drawRoundedRect(canvas, radius - inset, 0, x2, y2, w2, h2);
+        grd.addColorStop(0, fillColor);
         grd.addColorStop(1, darkColor.getHtmlHexString());
         canvas.setFillStyle(grd);
         canvas.fill();
@@ -56,5 +73,9 @@ myt.CheckboxDrawingMethod = new JS.Class('CheckboxDrawingMethod', myt.DrawingMet
             canvas.setFillStyle(config.checkedColor);
             canvas.fill();
         }
+        
+        var retval = canvas.__canvas;
+        canvas.destroy();
+        return retval;
     }
 });
