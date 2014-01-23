@@ -33,7 +33,10 @@ myt.RadioMixin = new JS.Module('RadioMixin', {
             delete this.__initValue;
         }
         
-        if (this.selected) this.__setTrue();
+        if (this.selected) {
+            var bag = this.__getBAG();
+            if (bag) bag.setTrue(this);
+        }
     },
     
     
@@ -95,13 +98,7 @@ myt.RadioMixin = new JS.Module('RadioMixin', {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.DrawButton */
     doActivated: function() {
-        if (!this.selected) this.__setTrue();
-    },
-    
-    /** @private */
-    __setTrue: function() {
-        var bag = this.__getBAG();
-        if (bag) bag.setTrue(this);
+        if (!this.selected) this.setValue(this.optionValue);
     },
     
     /** @private */

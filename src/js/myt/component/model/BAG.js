@@ -16,7 +16,7 @@
         __nodes:array A list of the currently registered nodes.
 */
 myt.BAG = new JS.Class('BAG', {
-    include: [myt.Destructible, myt.Observable],
+    include: [myt.AccessorSupport, myt.Destructible, myt.Observable],
     
     
     // Class Methods and Attributes ////////////////////////////////////////////
@@ -164,6 +164,9 @@ myt.BAG = new JS.Class('BAG', {
             var attrName = this.attrName,
                 setterName = myt.AccessorSupport.generateSetterName(attrName),
                 nodes = this.__nodes, i = nodes.length, n;
+            
+            this.setTrueNode(node);
+            
             while (i) {
                 n = nodes[--i];
                 if (node === n) {
@@ -173,7 +176,6 @@ myt.BAG = new JS.Class('BAG', {
                 }
             }
             
-            this.setTrueNode(node);
         }
     },
     

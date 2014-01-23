@@ -40,7 +40,8 @@
                         fieldB:"default B"
                     },
                     fieldD:false,
-                    fieldE:true
+                    fieldE:true,
+                    fieldF:'c'
                 };
                 var rollbackValue = {
                     fieldA:"FOO",
@@ -50,7 +51,8 @@
                         fieldB:"rb B"
                     },
                     fieldD:true,
-                    fieldE:false
+                    fieldE:false,
+                    fieldF:'b'
                 };
                 var value = {
                     fieldC:"blah",
@@ -93,6 +95,11 @@
         new myt.FormCheckbox(rootView, {
             id:'fieldE', form:rootView
         });
+        
+        new myt.TextRadio(rootView, {groupId:'foo', optionValue:'a', text:'A', shrinkToFit:true});
+        new myt.TextRadio(rootView, {groupId:'foo', optionValue:'b', text:'B', shrinkToFit:true});
+        new myt.TextRadio(rootView, {groupId:'foo', optionValue:'c', text:'C', shrinkToFit:true});
+        new myt.FormRadioGroup(rootView, {id:'fieldF', form:rootView, groupId:'foo'});
         
         // Subform: start
         var subform = new myt.View(rootView, {
