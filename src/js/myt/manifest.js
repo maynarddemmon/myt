@@ -253,7 +253,7 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'input/InputCheckbox.js'     ).provides('myt.InputCheckbox'     ).requires('myt.NativeInputWrapper','myt.SizeToDom');
     file(MYT_COMPONENT_ROOT + 'input/InputRadio.js'        ).provides('myt.InputRadio'        ).requires('myt.NativeInputWrapper','myt.SizeToDom');
     file(MYT_COMPONENT_ROOT + 'input/InputSelect.js'       ).provides('myt.InputSelect'       ).requires('myt.NativeInputWrapper','myt.SizeToDom');
-    file(MYT_COMPONENT_ROOT + 'input/InputSelectOption.js' ).provides('myt.InputSelectOption' ).requires('myt.InputSelect');
+    file(MYT_COMPONENT_ROOT + 'input/InputSelectOption.js' ).provides('myt.InputSelectOption' ).requires('myt.InputSelect','myt.Selectable');
     
     // Component : Dimmer
     file(MYT_COMPONENT_ROOT + 'dimmer/Dimmer.js'    ).provides('myt.Dimmer'    ).requires('myt.View');

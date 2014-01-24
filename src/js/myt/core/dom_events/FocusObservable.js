@@ -187,7 +187,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
         // Mozilla and Webkit
         var s = this.deStyle;
         s.outlineWidth = 'thin';
-        s.outlineColor = '#3333ff';
+        s.outlineColor = '#88bbff';
         s.outlineStyle = 'solid';
         s.outlineOffset = '0px';
     },

@@ -63,6 +63,18 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** @overrides myt.FocusObservable */
+    showFocusEmbellishment: function() {
+        this.hideDefaultFocusEmbellishment();
+        this.setBoxShadow(myt.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
+    },
+    
+    /** @overrides myt.FocusObservable */
+    hideFocusEmbellishment: function() {
+        this.hideDefaultFocusEmbellishment();
+        this.setBoxShadow();
+    },
+    
     /** @private */
     __filterInput: function(v) {
         var de = this.domElement, curValue = de.value,

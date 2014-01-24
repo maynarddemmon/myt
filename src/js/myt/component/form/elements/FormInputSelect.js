@@ -23,36 +23,22 @@ myt.FormInputSelect = new JS.Class('FormInputSelect', myt.InputSelect, {
         
         // Clear Selection
         this.__abortSetValue = true;
-        this.deselectAllValues();
+        this.deselectAll();
         this.__abortSetValue = false;
         
         // Reselect for new value
         v = Array.isArray(retval) ? retval : [retval];
-        var options = this.domElement.options, len = options.length, option, j;
-        if (options) {
-            var i = v.length, value;
-            while (i) {
-                value = v[--i];
-                
-                j = len;
-                while (j) {
-                    option = options[--j];
-                    if (option.value === value) option.selected = true;
-                }
+        var options = this.getSubviews(), len = options.length, option, j, i = v.length, value;
+        while (i) {
+            value = v[--i];
+            
+            j = len;
+            while (j) {
+                option = options[--j];
+                if (option.value === value) option.setSelected(true);
             }
         }
         
         return retval;
-    },
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    showFocusEmbellishment: function() {
-        this.hideDefaultFocusEmbellishment();
-        this.setBoxShadow(myt.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
-    },
-    
-    hideFocusEmbellishment: function() {
-        this.hideDefaultFocusEmbellishment();
-        this.setBoxShadow();
     }
 });

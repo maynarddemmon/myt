@@ -119,16 +119,6 @@ myt.FormInputText = new JS.Class('FormInputText', myt.InputText, {
         }
     },
     
-    showFocusEmbellishment: function() {
-        this.hideDefaultFocusEmbellishment();
-        this.setBoxShadow(myt.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
-    },
-    
-    hideFocusEmbellishment: function() {
-        this.hideDefaultFocusEmbellishment();
-        this.setBoxShadow();
-    },
-    
     /** @private */
     __handleKeyDown: function(event) {
         if (myt.KeyObservable.getKeyCodeFromEvent(event) === 13) this.invokeAccelerator("accept");

@@ -19,7 +19,7 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     /** @overrides myt.NativeInputWrapper */
     initNode: function(parent, attrs) {
         if (attrs.multiple === undefined) attrs.multiple = false;
-        if (attrs.size === undefined) attrs.size = 1;
+        if (attrs.size === undefined) attrs.size = attrs.multiple ? 4 : 1;
         
         this.callSuper(parent, attrs);
         
@@ -63,56 +63,65 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** @overrides myt.View */
+    subviewAdded: function(sv) {
+        // Destory subview if it's not supported.
+        if (!(sv instanceof myt.InputSelectOption)) {
+            myt.dumpStack("Subview not supported. Destroying it.");
+            sv.destroy();
+        }
+    },
+    
     /** @overrides myt.FocusObservable */
     showFocusEmbellishment: function() {
-        // Outline positioning is inconsistent between retina and non-retina
-        // macs so just avoid messing with the built in focus styling all 
-        // together.
-        if (BrowserDetect.browser !== 'Firefox') this.callSuper();
+        this.hideDefaultFocusEmbellishment();
+        this.setBoxShadow(myt.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
     },
     
     /** @overrides myt.FocusObservable */
     hideFocusEmbellishment: function() {
-        // Outline positioning is inconsistent between retina and non-retina
-        // macs so just avoid messing with the built in focus styling all 
-        // together.
-        if (BrowserDetect.browser !== 'Firefox') this.callSuper();
+        this.hideDefaultFocusEmbellishment();
+        this.setBoxShadow();
     },
     
+    /** Gets an array of selected myt.InputSelectOptions.
+        @returns array: An arra of selected options. */
     getSelectedOptions: function() {
-        var options = this.domElement.options, retval = [];
-        if (options) {
-            var i = options.length, option;
-            while (i) {
-                option = options[--i];
-                if (option.selected) retval.push(option);
-            }
+        var options = this.getSubviews(), i = options.length, option, retval = [];
+        while (i) {
+            option = options[--i];
+            if (option.isSelected()) retval.push(option);
         }
         return retval;
     },
     
+    /** Gets an array of selected myt.InputSelectOption values.
+        @returns array: An arra of selected option values. */
     getSelectedOptionValues: function() {
-        var options = this.domElement.options, retval = []
-        if (options) {
-            var i = options.length, option;
-            while (i) {
-                option = options[--i];
-                if (option.selected) retval.push(option.value);
-            }
+        var options = this.getSubviews(), i = options.length, option, retval = []
+        while (i) {
+            option = options[--i];
+            if (option.isSelected()) retval.push(option.value);
         }
         return retval;
     },
     
-    deselectAllValues: function() {
-        var options = this.domElement.options, changed = false;
-        if (options) {
-            var i = options.length, option;
-            while (i) {
-                option = options[--i];
-                if (option.selected) {
-                    option.selected = false;
-                    changed = true;
-                }
+    getOptionForValue: function(value) {
+        var options = this.getSubviews(), i = options.length, option;
+        while (i) {
+            option = options[--i];
+            if (option.value === value) return option;
+        }
+        return null;
+    },
+    
+    deselectAll: function() {
+        var options = this.getSubviews(), i = options.length, option, changed = false;
+        while (i) {
+            option = options[--i];
+            if (option.isSelected()) {
+                option.setSelected(false);
+                changed = true;
             }
         }
         
@@ -120,33 +129,25 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     },
     
     selectValue: function(value) {
-        this.__modifySelection(value, true);
+        this.select(this.getOptionForValue(value));
     },
     
-    deselectValue: function(value) {
-        this.__modifySelection(value, false);
-    },
-    
-    /** @private */
-    __modifySelection: function(value, select) {
-        var option = this.__getOptionForValue(value);
-        if (option && !option.disabled && option.selected !== select) {
-            option.selected = select;
+    select: function(option) {
+        if (option && option.canSelect(this)) {
+            option.setSelected(true);
             this.__handleInput();
         }
     },
     
-    /** @private */
-    __getOptionForValue: function(value) {
-        var options = this.domElement.options;
-        if (options) {
-            var i = options.length, option;
-            while (i) {
-                option = options[--i];
-                if (option.value === value) return option;
-            }
+    deselectValue: function(value) {
+        this.deselect(this.getOptionForValue(value));
+    },
+    
+    deselect: function(option) {
+        if (option && option.canDeselect(this)) {
+            option.setSelected(false);
+            this.__handleInput();
         }
-        return null;
     },
     
     /** @private */

@@ -9,7 +9,7 @@
         label:string the text label for the option.
 */
 myt.InputSelectOption = new JS.Class('InputSelectOption', myt.View, {
-    include: [myt.Disableable],
+    include: [myt.Disableable, myt.Selectable],
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
@@ -20,6 +20,15 @@ myt.InputSelectOption = new JS.Class('InputSelectOption', myt.View, {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
+    /** @overrideds myt.Selectable */
+    setSelected: function(v) {
+        // Adapt to event from syncTo
+        if (v !== null && typeof v === 'object') v = v.value;
+        
+        var de = this.domElement;
+        if (de.selected !== v) de.selected = v;
+    },
+    
     /** @overrides myt.Disableable */
     setDisabled: function(v) {
         if (this.disabled !== v) {
@@ -41,5 +50,22 @@ myt.InputSelectOption = new JS.Class('InputSelectOption', myt.View, {
             this.domElement.textContent = this.label = v;
             if (this.inited) this.fireNewEvent('label', v);
         }
+    },
+    
+    
+    // Methods /////////////////////////////////////////////////////////////////
+    /** @overrideds myt.Selectable */
+    isSelected: function() {
+        return this.domElement.selected;
+    },
+    
+    /** @overrideds myt.Selectable */
+    canSelect: function(selectionManager) {
+        return !this.disabled && !this.domElement.selected;
+    },
+    
+    /** @overrideds myt.Selectable */
+    canDeselect: function(selectionManager) {
+        return !this.disabled && this.domElement.selected;
     }
 });

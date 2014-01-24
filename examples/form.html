@@ -113,7 +113,6 @@
         new myt.InputSelectOption(selectView, {value:'five', label:'Label Five'});
         new myt.InputSelectOption(selectView, {value:'six', label:'Label Six'});
         
-
         var multiSelectView = new myt.FormInputSelect(rootView, {id:'fieldH', form:rootView, multiple:true});
         new myt.InputSelectOption(multiSelectView, {value:'one', label:'Label One'});
         new myt.InputSelectOption(multiSelectView, {value:'two', label:'Label Two'});
@@ -121,7 +120,7 @@
         new myt.InputSelectOption(multiSelectView, {value:'four', label:'Label Four'});
         new myt.InputSelectOption(multiSelectView, {value:'five', label:'Label Five'});
         new myt.InputSelectOption(multiSelectView, {value:'six', label:'Label Six'});
-        
+        //var invalidView = new myt.View(multiSelectView, {}); // Will destroy immediately
         
         // Subform: start
         var subform = new myt.View(rootView, {

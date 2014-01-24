@@ -36,14 +36,24 @@ myt.InputCheckbox = new JS.Class('InputCheckbox', myt.NativeInputWrapper, {
     showFocusEmbellishment: function() {
         // Outline positioning is inconsistent between retina and non-retina
         // macs so just avoid messing with the built in focus styling all together.
-        if (BrowserDetect.browser !== 'Firefox') this.callSuper();
+        if (BrowserDetect.browser === 'Firefox') {
+            this.hideDefaultFocusEmbellishment();
+            this.setBoxShadow(myt.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
+        } else {
+            this.callSuper();
+        }
     },
     
     /** @overrides myt.FocusObservable */
     hideFocusEmbellishment: function() {
         // Outline positioning is inconsistent between retina and non-retina
         // macs so just avoid messing with the built in focus styling all together.
-        if (BrowserDetect.browser !== 'Firefox') this.callSuper();
+        if (BrowserDetect.browser === 'Firefox') {
+            this.hideDefaultFocusEmbellishment();
+            this.setBoxShadow();
+        } else {
+            this.callSuper();
+        }
     },
     
     /** @private */

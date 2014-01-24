@@ -69,16 +69,6 @@ myt.FormInputTextArea = new JS.Class('FormInputTextArea', myt.InputTextArea, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    showFocusEmbellishment: function() {
-        this.hideDefaultFocusEmbellishment();
-        this.setBoxShadow(myt.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
-    },
-    
-    hideFocusEmbellishment: function() {
-        this.hideDefaultFocusEmbellishment();
-        this.setBoxShadow();
-    },
-    
     /** @overrides myt.FocusObservable */
     doBlur: function() {
         this.callSuper();
