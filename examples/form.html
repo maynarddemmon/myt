@@ -41,7 +41,9 @@
                     },
                     fieldD:false,
                     fieldE:true,
-                    fieldF:'c'
+                    fieldF:'c',
+                    fieldG:'two',
+                    fieldH:['two','four']
                 };
                 var rollbackValue = {
                     fieldA:"FOO",
@@ -52,7 +54,9 @@
                     },
                     fieldD:true,
                     fieldE:false,
-                    fieldF:'b'
+                    fieldF:'b',
+                    fieldG:'four',
+                    fieldH:['four','five','six']
                 };
                 var value = {
                     fieldC:"blah",
@@ -100,6 +104,24 @@
         new myt.TextRadio(rootView, {groupId:'foo', optionValue:'b', text:'B', shrinkToFit:true});
         new myt.TextRadio(rootView, {groupId:'foo', optionValue:'c', text:'C', shrinkToFit:true});
         new myt.FormRadioGroup(rootView, {id:'fieldF', form:rootView, groupId:'foo'});
+        
+        var selectView = new myt.FormInputSelect(rootView, {id:'fieldG', form:rootView});
+        new myt.InputSelectOption(selectView, {value:'one', label:'Label One'});
+        new myt.InputSelectOption(selectView, {value:'two', label:'Label Two'});
+        new myt.InputSelectOption(selectView, {value:'three', label:'Label Three'});
+        new myt.InputSelectOption(selectView, {value:'four', label:'Label Four'});
+        new myt.InputSelectOption(selectView, {value:'five', label:'Label Five'});
+        new myt.InputSelectOption(selectView, {value:'six', label:'Label Six'});
+        
+
+        var multiSelectView = new myt.FormInputSelect(rootView, {id:'fieldH', form:rootView, multiple:true});
+        new myt.InputSelectOption(multiSelectView, {value:'one', label:'Label One'});
+        new myt.InputSelectOption(multiSelectView, {value:'two', label:'Label Two'});
+        new myt.InputSelectOption(multiSelectView, {value:'three', label:'Label Three'});
+        new myt.InputSelectOption(multiSelectView, {value:'four', label:'Label Four'});
+        new myt.InputSelectOption(multiSelectView, {value:'five', label:'Label Five'});
+        new myt.InputSelectOption(multiSelectView, {value:'six', label:'Label Six'});
+        
         
         // Subform: start
         var subform = new myt.View(rootView, {

@@ -296,6 +296,7 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'form/RootForm.js'   ).provides('myt.RootForm'   ).requires('myt.Form');
     file(MYT_COMPONENT_ROOT + 'form/FormElement.js').provides('myt.FormElement').requires('myt.RootForm');
     
+    file(MYT_COMPONENT_ROOT + 'form/elements/FormInputSelect.js'  ).provides('myt.FormInputSelect'  ).requires('myt.FormElement','myt.InputSelect');
     file(MYT_COMPONENT_ROOT + 'form/elements/FormRadioGroup.js'   ).provides('myt.FormRadioGroup'   ).requires('myt.FormElement','myt.Radio');
     file(MYT_COMPONENT_ROOT + 'form/elements/FormCheckbox.js'     ).provides('myt.FormCheckbox'     ).requires('myt.FormElement','myt.Checkbox');
     file(MYT_COMPONENT_ROOT + 'form/elements/FormTextCheckbox.js' ).provides('myt.FormTextCheckbox' ).requires('myt.FormElement','myt.TextCheckbox');
@@ -329,7 +330,7 @@ JS.Packages(function() {with(this) {
         'myt.ImageUploader','myt.Dialog',
         'myt.global.validators','myt.EqualFieldsValidator','myt.LengthValidator','myt.NumericRangeValidator',
         'myt.global.valueProcessors','myt.UseOtherFieldIfEmptyValueProcessor','myt.FormElement',
-        'myt.FormRadioGroup','myt.FormCheckbox','myt.FormTextCheckbox','myt.FormInputText','myt.FormInputTextArea',
+        'myt.FormInputSelect','myt.FormRadioGroup','myt.FormCheckbox','myt.FormTextCheckbox','myt.FormInputText','myt.FormInputTextArea',
         'myt.ScatterGraph',
         'myt.Slider','myt.RangeSlider',
         'myt.HorizontalDivider','myt.VerticalDivider',

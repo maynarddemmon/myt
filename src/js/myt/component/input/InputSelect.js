@@ -53,6 +53,8 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
         Does not update the dom since the dom element's 'value' attribute
         doesn't support lists. */
     setValue: function(v) {
+        if (Array.isArray(v) && myt.areArraysEqual(v, this.value)) return;
+        
         if (this.value !== v) {
             this.value = v;
             if (this.inited) this.fireNewEvent('value', v);
@@ -101,7 +103,41 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
         return retval;
     },
     
-    getOptionForValue: function(value) {
+    deselectAllValues: function() {
+        var options = this.domElement.options, changed = false;
+        if (options) {
+            var i = options.length, option;
+            while (i) {
+                option = options[--i];
+                if (option.selected) {
+                    option.selected = false;
+                    changed = true;
+                }
+            }
+        }
+        
+        if (changed) this.__handleInput();
+    },
+    
+    selectValue: function(value) {
+        this.__modifySelection(value, true);
+    },
+    
+    deselectValue: function(value) {
+        this.__modifySelection(value, false);
+    },
+    
+    /** @private */
+    __modifySelection: function(value, select) {
+        var option = this.__getOptionForValue(value);
+        if (option && !option.disabled && option.selected !== select) {
+            option.selected = select;
+            this.__handleInput();
+        }
+    },
+    
+    /** @private */
+    __getOptionForValue: function(value) {
         var options = this.domElement.options;
         if (options) {
             var i = options.length, option;
@@ -111,30 +147,6 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
             }
         }
         return null;
-    },
-    
-    toggleValue: function(value) {
-        var option = this.getOptionForValue(value);
-        if (option && !option.disabled) {
-            option.selected = !option.selected;
-            this.__handleInput();
-        }
-    },
-    
-    selectValue: function(value) {
-        var option = this.getOptionForValue(value);
-        if (option && !option.disabled && !option.selected) {
-            option.selected = true;
-            this.__handleInput();
-        }
-    },
-    
-    deselectValue: function(value) {
-        var option = this.getOptionForValue(value);
-        if (option && !option.disabled && option.selected) {
-            option.selected = false;
-            this.__handleInput();
-        }
     },
     
     /** @private */

@@ -160,9 +160,12 @@
                             disabled:j%3===0
                         });
                     }
-                    selectView.toggleValue('bar 3');
-                    selectView.toggleValue('bar 4');
-                    selectView.toggleValue('bar 5');
+                    selectView.selectValue('bar 3');
+                    selectView.selectValue('bar 4');
+                    selectView.selectValue('bar 5');
+                    selectView.selectValue('bar 6');
+                    selectView.selectValue('bar 7');
+                    selectView.deselectValue('bar 5');
                 }
                 
                 new myt.WrappingLayout(this, {name:'layout', axis:'x',
