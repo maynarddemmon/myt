@@ -21,23 +21,11 @@ myt.FormInputSelect = new JS.Class('FormInputSelect', myt.InputSelect, {
         
         var retval = this.callSuper(v);
         
-        // Clear Selection
+        // Clear Selection and then reselect
         this.__abortSetValue = true;
         this.deselectAll();
+        this.selectValues(retval);
         this.__abortSetValue = false;
-        
-        // Reselect for new value
-        v = Array.isArray(retval) ? retval : [retval];
-        var options = this.getSubviews(), len = options.length, option, j, i = v.length, value;
-        while (i) {
-            value = v[--i];
-            
-            j = len;
-            while (j) {
-                option = options[--j];
-                if (option.value === value) option.setSelected(true);
-            }
-        }
         
         return retval;
     }

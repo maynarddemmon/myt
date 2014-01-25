@@ -175,6 +175,12 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
         if (changed) this.__syncToDom();
     },
     
+    selectValues: function(values) {
+        values = Array.isArray(values) ? values : [values];
+        var i = values.length;
+        while (i) this.selectValue(values[--i]);
+    },
+    
     /** Selects the option that has the provided value.
         @param value:* The value of the option to select.
         @returns void */
