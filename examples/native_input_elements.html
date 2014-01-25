@@ -82,11 +82,17 @@
                 
                 this.applyConstraint('_constrainWidth', [this.parent, 'width', this, 'x']);
                 
-                var size;
-                var lorem = '. abcdefghijklmnopqrstuvwxyz';
-                var markup = '<nobr>A link to <a href="http://www.google.com/">google</a>. This is some more text with another <a href="http://www.cp.net">link</a>.</nobr>';
-                var groupId = myt.generateGuid();
-                for (var i = 0; 15 > i; i++) {
+                var size,
+                    lorem = '. abcdefghijklmnopqrstuvwxyz',
+                    markup = '<nobr>A link to <a href="http://www.google.com/">google</a>. This is some more text with another <a href="http://www.cp.net">link</a>.</nobr>',
+                    groupId = myt.generateGuid();
+                
+                var selectOptions = [];
+                for (var i = 0; 10 > i; ++i) {
+                    selectOptions.push({value:'bar ' + i, label:'Bar Baz ' + i, disabled:i%3===0});
+                }
+                
+                for (i = 0; 15 > i; i++) {
                     size = Math.round(Math.random() * 21) + 5;
                     new myt.Text(this, {text:lorem.substr(0, size), bgColor:'#eeeeee', whiteSpace:'nowrap'});
                     
@@ -144,7 +150,7 @@
                     
                     new LocalFlowBtn(this, {width:size, height:size, focusable:i%2===0, disabled:i%4===0});
                     
-                    var selectView = new myt.InputSelect(this, {width:100, size:i%6, multiple:i===5}, [{
+                    var selectView = new myt.InputSelect(this, {width:100, size:i%6, multiple:i===5, options:selectOptions}, [{
                         doBeforeAdoption: function() {
                             this.attachObserver(this, 'doValueChange', 'value');
                             this.callSuper();
@@ -154,18 +160,15 @@
                         }
                     }]);
                     
-                    for (var j = 0; 10 > j; j++) {
-                        new myt.InputSelectOption(selectView, {
-                            value:'bar ' + j, label:'Bar Baz ' + j,
-                            disabled:j%3===0
-                        });
-                    }
                     selectView.selectValue('bar 3');
                     selectView.selectValue('bar 4');
                     selectView.selectValue('bar 5');
                     selectView.selectValue('bar 6');
                     selectView.selectValue('bar 7');
                     selectView.deselectValue('bar 5');
+                    
+                    selectView.destroyOptionWithValue('bar 8');
+                    selectView.destroyOptionWithValue('bar 11'); // Doesn't exist but shouldn't error
                 }
                 
                 new myt.WrappingLayout(this, {name:'layout', axis:'x',

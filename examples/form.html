@@ -105,22 +105,18 @@
         new myt.TextRadio(rootView, {groupId:'foo', optionValue:'c', text:'C', shrinkToFit:true});
         new myt.FormRadioGroup(rootView, {id:'fieldF', form:rootView, groupId:'foo'});
         
-        var selectView = new myt.FormInputSelect(rootView, {id:'fieldG', form:rootView});
-        new myt.InputSelectOption(selectView, {value:'one', label:'Label One'});
-        new myt.InputSelectOption(selectView, {value:'two', label:'Label Two'});
-        new myt.InputSelectOption(selectView, {value:'three', label:'Label Three'});
-        new myt.InputSelectOption(selectView, {value:'four', label:'Label Four'});
-        new myt.InputSelectOption(selectView, {value:'five', label:'Label Five'});
-        new myt.InputSelectOption(selectView, {value:'six', label:'Label Six'});
-        
-        var multiSelectView = new myt.FormInputSelect(rootView, {id:'fieldH', form:rootView, multiple:true});
-        new myt.InputSelectOption(multiSelectView, {value:'one', label:'Label One'});
-        new myt.InputSelectOption(multiSelectView, {value:'two', label:'Label Two'});
-        new myt.InputSelectOption(multiSelectView, {value:'three', label:'Label Three'});
-        new myt.InputSelectOption(multiSelectView, {value:'four', label:'Label Four'});
-        new myt.InputSelectOption(multiSelectView, {value:'five', label:'Label Five'});
-        new myt.InputSelectOption(multiSelectView, {value:'six', label:'Label Six'});
-        //var invalidView = new myt.View(multiSelectView, {}); // Will destroy immediately
+        var options = [
+            {value:'one', label:'Label One'},
+            {value:'two', label:'Label Two'},
+            {value:'three', label:'Label Three'},
+            {value:'four', label:'Label Four'},
+            {value:'five', label:'Label Five'},
+            {value:'six', label:'Label Six'},
+            {value:'seven', label:'Label Seven'},
+            {value:'eight', label:'Label Eight'}
+        ];
+        new myt.FormInputSelect(rootView, {id:'fieldG', form:rootView, options:options});
+        new myt.FormInputSelect(rootView, {id:'fieldH', form:rootView, options:options, multiple:true});
         
         // Subform: start
         var subform = new myt.View(rootView, {

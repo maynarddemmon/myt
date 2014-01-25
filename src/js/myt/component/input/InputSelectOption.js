@@ -61,11 +61,11 @@ myt.InputSelectOption = new JS.Class('InputSelectOption', myt.View, {
     
     /** @overrideds myt.Selectable */
     canSelect: function(selectionManager) {
-        return !this.disabled && !this.domElement.selected;
+        return !this.disabled && !this.domElement.selected && this.parent === selectionManager;
     },
     
     /** @overrideds myt.Selectable */
     canDeselect: function(selectionManager) {
-        return !this.disabled && this.domElement.selected;
+        return !this.disabled && this.domElement.selected && this.parent === selectionManager;
     }
 });

@@ -8,8 +8,13 @@
     Attributes:
         multiple:boolean Indicates if multiple options can be selected or not.
             Defaults to false.
-        size:int The number of options to show. The default value is 1.
-        
+        size:int The number of options to show. The default value is 4 for
+            multiple == true and 1 for multiple == false. It is recommended
+            that a size of at least 4 be used when multiple is 2.
+        options:array (write only) Adds a list of options to this select list.
+            The value should be an array of myt.InputSelectOptions attrs that 
+            will be used to instantiate new myt.InputSelectOption instances on
+            this select list.
 */
 myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     include: [myt.SizeHeightToDom],
@@ -49,6 +54,12 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
         }
     },
     
+    setOptions: function(v) {
+        if (Array.isArray(v)) {
+            for (var i = 0, len = v.length; len > i; ++i) this.addOption(v[i]);
+        }
+    },
+    
     /** @overrides myt.NativeInputWrapper
         Does not update the dom since the dom element's 'value' attribute
         doesn't support lists. */
@@ -84,8 +95,9 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
         this.setBoxShadow();
     },
     
+    // Options //
     /** Gets an array of selected myt.InputSelectOptions.
-        @returns array: An arra of selected options. */
+        @returns array: An array of selected myt.InputSelectOptions. */
     getSelectedOptions: function() {
         var options = this.getSubviews(), i = options.length, option, retval = [];
         while (i) {
@@ -96,7 +108,7 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     },
     
     /** Gets an array of selected myt.InputSelectOption values.
-        @returns array: An arra of selected option values. */
+        @returns array: An array of selected option values. */
     getSelectedOptionValues: function() {
         var options = this.getSubviews(), i = options.length, option, retval = []
         while (i) {
@@ -106,6 +118,10 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
         return retval;
     },
     
+    /** Gets the myt.InputSelectOption with the provided value.
+        @param value:* The value of the option to get.
+        @returns myt.InputSelectOption: The matching option or null if not
+            found. */
     getOptionForValue: function(value) {
         var options = this.getSubviews(), i = options.length, option;
         while (i) {
@@ -115,6 +131,28 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
         return null;
     },
     
+    /** Adds a new myt.InputSelectionOption to this select list.
+        @param attrs:object The attrs for the new option
+        @returns myt.InputSelectOption: The newly created option. */
+    addOption: function(attrs) {
+        new myt.InputSelectOption(this, attrs);
+    },
+    
+    /** Destroys an option that has the provided value.
+        @param value:* The value of the option to remove.
+        @returns boolean: true if the option is destroyed, false otherwise. */
+    destroyOptionWithValue: function(value) {
+        var option = this.getOptionForValue(value);
+        if (option) {
+            option.destroy();
+            if (option.destroyed) return true;
+        }
+        return false;
+    },
+    
+    // Selection //
+    /** Deselects all selected options included disabled options.
+        @returns void */
     deselectAll: function() {
         var options = this.getSubviews(), i = options.length, option, changed = false;
         while (i) {
@@ -128,10 +166,16 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
         if (changed) this.__handleInput();
     },
     
+    /** Selects the option that has the provided value.
+        @param value:* The value of the option to select.
+        @returns void */
     selectValue: function(value) {
         this.select(this.getOptionForValue(value));
     },
     
+    /** Selects the provided option.
+        @param option:myt.InputSelectOption The option to select.
+        @returns void */
     select: function(option) {
         if (option && option.canSelect(this)) {
             option.setSelected(true);
@@ -139,10 +183,16 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
         }
     },
     
+    /** Deselects the option that has the provided value.
+        @param value:* The value of the option to deselect.
+        @returns void */
     deselectValue: function(value) {
         this.deselect(this.getOptionForValue(value));
     },
     
+    /** Deselects the provided option.
+        @param option:myt.InputSelectOption The option to deselect.
+        @returns void */
     deselect: function(option) {
         if (option && option.canDeselect(this)) {
             option.setSelected(false);
