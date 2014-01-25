@@ -28,7 +28,10 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
         
         this.callSuper(parent, attrs);
         
-        this.attachToDom(this, '__handleInput', 'change');
+        this.attachToDom(this, '__syncToDom', 'change');
+        
+        // Make sure initial value is in sync with the UI
+        this.__syncToDom();
     },
     
     /** @overrides myt.NativeInputWrapper */
@@ -169,7 +172,7 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
             }
         }
         
-        if (changed) this.__handleInput();
+        if (changed) this.__syncToDom();
     },
     
     /** Selects the option that has the provided value.
@@ -185,7 +188,7 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     select: function(option) {
         if (option && option.canSelect(this)) {
             option.setSelected(true);
-            this.__handleInput();
+            this.__syncToDom();
         }
     },
     
@@ -202,12 +205,12 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     deselect: function(option) {
         if (option && option.canDeselect(this)) {
             option.setSelected(false);
-            this.__handleInput();
+            this.__syncToDom();
         }
     },
     
     /** @private */
-    __handleInput: function(event) {
+    __syncToDom: function(event) {
         this.setValue(this.multiple ? this.getSelectedOptionValues() : this.domElement.value);
     }
 });

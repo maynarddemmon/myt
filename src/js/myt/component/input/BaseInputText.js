@@ -26,7 +26,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
         
         this.callSuper(parent, attrs);
         
-        this.attachToDom(this, '__handleInput', 'input');
+        this.attachToDom(this, '__syncToDom', 'input');
         
         // Allow filtering of input
         this.attachToDom(this, '__filterInput', 'keypress');
@@ -102,7 +102,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     },
     
     /** @private */
-    __handleInput: function(event) {
+    __syncToDom: function(event) {
         this.setValue(this.domElement.value);
     },
     

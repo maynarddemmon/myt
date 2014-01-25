@@ -17,7 +17,7 @@ myt.InputCheckbox = new JS.Class('InputCheckbox', myt.NativeInputWrapper, {
         
         this.callSuper(parent, attrs);
         
-        this.attachToDom(this, '__handleInput', 'change');
+        this.attachToDom(this, '__syncToDom', 'change');
         this.attachToDom(this, '__handleMouseDown', 'mousedown');
     },
     
@@ -57,7 +57,7 @@ myt.InputCheckbox = new JS.Class('InputCheckbox', myt.NativeInputWrapper, {
     },
     
     /** @private */
-    __handleInput: function(event) {
+    __syncToDom: function(event) {
         this.setValue(this.domElement.checked);
     },
     

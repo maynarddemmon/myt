@@ -34,7 +34,7 @@ myt.InputRadio = new JS.Class('InputRadio', myt.NativeInputWrapper, {
         
         this.callSuper(parent, attrs);
         
-        this.attachToDom(this, '__handleInput', 'change');
+        this.attachToDom(this, '__syncToDom', 'change');
         this.attachToDom(this, '__handleMouseDown', 'mousedown');
     },
     
@@ -88,7 +88,7 @@ myt.InputRadio = new JS.Class('InputRadio', myt.NativeInputWrapper, {
     },
     
     /** @private */
-    __handleInput: function(event) {
+    __syncToDom: function(event) {
         if (this.domElement.checked) {
             // Get last checked and deselect
             var groupId = this.groupId, 
