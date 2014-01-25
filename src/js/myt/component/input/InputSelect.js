@@ -60,6 +60,12 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
         }
     },
     
+    /** The options are just the subviews.
+        @returns an array of options for this select list. */
+    getOptions: function() {
+        return this.getSubviews().concat();
+    },
+    
     /** @overrides myt.NativeInputWrapper
         Does not update the dom since the dom element's 'value' attribute
         doesn't support lists. */
@@ -99,7 +105,7 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     /** Gets an array of selected myt.InputSelectOptions.
         @returns array: An array of selected myt.InputSelectOptions. */
     getSelectedOptions: function() {
-        var options = this.getSubviews(), i = options.length, option, retval = [];
+        var options = this.getOptions(), i = options.length, option, retval = [];
         while (i) {
             option = options[--i];
             if (option.isSelected()) retval.push(option);
@@ -110,7 +116,7 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     /** Gets an array of selected myt.InputSelectOption values.
         @returns array: An array of selected option values. */
     getSelectedOptionValues: function() {
-        var options = this.getSubviews(), i = options.length, option, retval = []
+        var options = this.getOptions(), i = options.length, option, retval = []
         while (i) {
             option = options[--i];
             if (option.isSelected()) retval.push(option.value);
@@ -123,7 +129,7 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
         @returns myt.InputSelectOption: The matching option or null if not
             found. */
     getOptionForValue: function(value) {
-        var options = this.getSubviews(), i = options.length, option;
+        var options = this.getOptions(), i = options.length, option;
         while (i) {
             option = options[--i];
             if (option.value === value) return option;
@@ -154,7 +160,7 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     /** Deselects all selected options included disabled options.
         @returns void */
     deselectAll: function() {
-        var options = this.getSubviews(), i = options.length, option, changed = false;
+        var options = this.getOptions(), i = options.length, option, changed = false;
         while (i) {
             option = options[--i];
             if (option.isSelected()) {
