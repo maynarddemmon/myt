@@ -46,7 +46,6 @@ myt.BaseSlider = new JS.Class('BaseSlider', myt.View, {
         if (attrs.nudgeAmount === undefined) attrs.nudgeAmount = 1;
         
         if (attrs.thumbClass === undefined) attrs.thumbClass = myt.SimpleSliderThumb;
-        if (attrs.rangeFillClass === undefined) attrs.rangeFillClass = myt.SimpleSliderRangeFill;
         
         this.callSuper(parent, attrs);
     },

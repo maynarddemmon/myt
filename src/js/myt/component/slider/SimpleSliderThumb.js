@@ -10,14 +10,11 @@ myt.SimpleSliderThumb = new JS.Class('SimpleSliderThumb', myt.SimpleButton, {
         if (attrs.readyColor === undefined) attrs.readyColor = '#cccccc';
         if (attrs.hoverColor === undefined) attrs.hoverColor = '#dddddd';
         
+        if (attrs.boxShadow === undefined) attrs.boxShadow = [0, 0, 4, '#666666'];
+        
         this.callSuper(parent, attrs);
         
-        if (attrs.roundedCorners === undefined) {
-            this.setRoundedCorners((parent.axis === 'x' ? this.height : this.width) / 2);
-        }
-        if (attrs.boxShadow === undefined) {
-            this.setBoxShadow([0, 0, 4, '#666666']);
-        }
+        if (attrs.roundedCorners === undefined) this.setRoundedCorners(Math.min(this.height, this.width) / 2);
     },
     
     

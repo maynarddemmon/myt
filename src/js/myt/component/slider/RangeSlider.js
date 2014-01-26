@@ -1,5 +1,11 @@
 /** A slider component that support two thumbs.
     
+    Events:
+        None
+    
+    Attributes:
+        rangeFillClass:JS.Class The class used to instantiate the rangeFill
+    
     Private Attributes:
         __lockSync:boolean Used internally to prevent infinite loops.
 */
@@ -44,6 +50,8 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** Should only be called by myt.SimpleSliderRangeFill.
+        @private */
     _syncRangeFillToValue: function() {
         var rangeFill = this.rangeFill, value = this.getValue(),
             lowerPx = this.convertValueToPixels(value.lower),
@@ -57,10 +65,13 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         }
     },
     
+    /** @overrides myt.BaseSlider */
     _syncThumbToValue: function(thumb, value) {
         this.callSuper(thumb, thumb.name === 'thumbLower' ? value.lower : value.upper);
     },
     
+    /** Should only be called by myt.SliderThumbMixin.
+        @private */
     _syncValueToThumb: function(thumb) {
         this.__lockSync = true;
         
@@ -84,6 +95,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         this.__lockSync = false;
     },
     
+    /** @overrides myt.BaseSlider */
     _nudge: function(thumb, up) {
         var value = this.getValueCopy(),
             adj = this.nudgeAmount * (up ? 1 : -1);
@@ -97,12 +109,16 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         this.setValue(value);
     },
     
+    /** Should only be called by myt.SliderThumbMixin.
+        @private */
     getMinPixelValueForThumb: function(thumb) {
         return this.convertValueToPixels(
             thumb.name === 'thumbLower' ? this.minValue : this.getValue().lower
         );
     },
     
+    /** Should only be called by myt.SliderThumbMixin.
+        @private */
     getMaxPixelValueForThumb: function(thumb) {
         return this.convertValueToPixels(
             thumb.name === 'thumbLower' ? this.getValue().upper : this.maxValue

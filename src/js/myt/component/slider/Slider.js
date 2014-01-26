@@ -1,5 +1,11 @@
 /** A slider component.
     
+    Events:
+        None
+    
+    Attributes:
+        None
+    
     Private Attributes:
         __lockSync:boolean Used internally to prevent infinite loops.
 */
@@ -40,14 +46,19 @@ myt.Slider = new JS.Class('Slider', myt.BaseSlider, {
         this.__lockSync = false;
     },
     
+    /** @overrides myt.BaseSlider */
     _nudge: function(thumb, up) {
         this.setValue(this.getValue() + this.nudgeAmount * (up ? 1 : -1));
     },
     
+    /** Should only be called by myt.SliderThumbMixin.
+        @private */
     getMinPixelValueForThumb: function(thumb) {
         return this.convertValueToPixels(this.minValue);
     },
     
+    /** Should only be called by myt.SliderThumbMixin.
+        @private */
     getMaxPixelValueForThumb: function(thumb) {
         return this.convertValueToPixels(this.maxValue);
     }
