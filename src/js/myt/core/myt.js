@@ -65,7 +65,7 @@ myt = {
                     registered during the capture phase or bubble phase.
                 @returns void */
             return function(elem, type, callback, capture) {
-                elem.addEventListener(type, callback, capture !== undefined ? capture : false);
+                elem.addEventListener(type, callback, capture || false);
             };
         } else {
             return function(elem, type, callback) {
@@ -79,7 +79,7 @@ myt = {
     removeEventListener: function() {
         if (window.addEventListener) {
             return function(elem, type, callback, capture) {
-                elem.removeEventListener(type, callback, capture !== undefined ? capture : false);
+                elem.removeEventListener(type, callback, capture || false);
             };
         } else {
             return function(elem, type, callback) {
@@ -104,7 +104,7 @@ myt = {
         
         var scope = scope || global,
             parts = Array.isArray(objName) ? objName : objName.split("."),
-            i = 0, len = parts.length
+            i = 0, len = parts.length;
         for (; i < len; ++i) {
             scope = scope[parts[i]];
             if (!scope) {
@@ -412,7 +412,7 @@ myt = {
             0 if not provided.
         @returns a dom element or undefined if none exist. */
     getElement: function(tagname, index) {
-        return document.getElementsByTagName(tagname ? tagname : 'body')[index > 0 ? index : 0];
+        return document.getElementsByTagName(tagname || 'body')[index > 0 ? index : 0];
     },
     
     // Misc

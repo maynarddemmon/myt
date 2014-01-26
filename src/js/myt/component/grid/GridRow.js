@@ -1,4 +1,12 @@
-/** Makes a view behave as a row in a grid. */
+/** Makes a view behave as a row in a grid.
+    
+    Events:
+        None
+    
+    Attributes:
+        gridController:myt.GridConstroller A reference to the grid controller
+            that is managing this row.
+*/
 myt.GridRow = new JS.Module('GridRow', {
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {

@@ -92,7 +92,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
     setTextOverflow: function(v) {
         if (this.textOverflow !== v) {
             this.textOverflow = v;
-            this.deStyle.textOverflow = v ? v : 'inherit';
+            this.deStyle.textOverflow = v || 'inherit';
             if (this.inited) this.fireNewEvent('textOverflow', v);
         }
     },
@@ -100,7 +100,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
     setTextAlign: function(v) {
         if (this.textAlign !== v) {
             this.textAlign = v;
-            this.deStyle.textAlign = v ? v : 'inherit';
+            this.deStyle.textAlign = v || 'inherit';
             if (this.inited) this.fireNewEvent('textAlign', v);
         }
     },
@@ -127,7 +127,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
     __s: function(v, attrName, defaultValue) {
         if (this[attrName] !== v) {
             this[attrName] = v;
-            this.deStyle[attrName] = v ? v : (defaultValue ? defaultValue : 'inherit');
+            this.deStyle[attrName] = v || defaultValue || 'inherit';
             if (this.inited) {
                 this.fireNewEvent(attrName, v);
                 this.sizeViewToDom();
@@ -168,8 +168,8 @@ myt.TextSupport = new JS.Module('TextSupport', {
             the shadow to give the shadow extra opacity.
         @returns void */
     showTextShadow: function(x, y, blur, color, extraStrength) {
-        var shadow = (x != null ? x : 0) + 'px ' + 
-            (y != null ? y : 0) + 'px ' + 
+        var shadow = (x || 0) + 'px ' + 
+            (y || 0) + 'px ' + 
             (blur != null ? blur : 2) + 'px ' + 
             (color || '#000000');
             

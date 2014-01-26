@@ -31,7 +31,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
             @param v:string the transformOrigin to set.
             @returns void */
         setTransformOrigin: function(s, v) {
-            s[this._styleOriginKey] = v ? v : '50% 50% 0';
+            s[this._styleOriginKey] = v || '50% 50% 0';
         },
         
         /** Adds an entry to the 'transform' style property of the provided
@@ -99,7 +99,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
     setRotation: function(v) {
         if (this.rotation !== v) {
             this.rotation = v;
-            myt.TransformSupport.addTransform(this.deStyle, 'rotate', (v ? v : 0) + 'deg');
+            myt.TransformSupport.addTransform(this.deStyle, 'rotate', (v || 0) + 'deg');
             if (this.inited) {
                 this.__updateBounds(this.width, this.height);
                 this.fireNewEvent('rotation', v);
@@ -111,13 +111,13 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
         var doUpdateX = this.scaleX !== v;
         if (doUpdateX) {
             this.scaleX = v;
-            myt.TransformSupport.addTransform(this.deStyle, 'scaleX', v ? v : 1);
+            myt.TransformSupport.addTransform(this.deStyle, 'scaleX', v || 1); // Also converts 0 to 1.
         }
         
         var doUpdateY = this.scaleY !== v;
         if (doUpdateY) {
             this.scaleY = v;
-            myt.TransformSupport.addTransform(this.deStyle, 'scaleY', v ? v : 1);
+            myt.TransformSupport.addTransform(this.deStyle, 'scaleY', v || 1); // Also converts 0 to 1.
         }
         
         if (this.inited) {
@@ -130,7 +130,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
     setScaleX: function(v) {
         if (this.scaleX !== v) {
             this.scaleX = v;
-            myt.TransformSupport.addTransform(this.deStyle, 'scaleX', v ? v : 1);
+            myt.TransformSupport.addTransform(this.deStyle, 'scaleX', v || 1); // Also converts 0 to 1.
             if (this.inited) {
                 this.__updateBounds(this.width, this.height);
                 this.fireNewEvent('scaleX', v);
@@ -141,7 +141,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
     setScaleY: function(v) {
         if (this.scaleY !== v) {
             this.scaleY = v;
-            myt.TransformSupport.addTransform(this.deStyle, 'scaleY', v ? v : 1);
+            myt.TransformSupport.addTransform(this.deStyle, 'scaleY', v || 1); // Also converts 0 to 1.
             if (this.inited) {
                 this.__updateBounds(this.width, this.height);
                 this.fireNewEvent('scaleY', v);
@@ -152,7 +152,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
     setSkewX: function(v) {
         if (this.skewX !== v) {
             this.skewX = v;
-            myt.TransformSupport.addTransform(this.deStyle, 'skewX', v ? v : 0);
+            myt.TransformSupport.addTransform(this.deStyle, 'skewX', v || 0);
             if (this.inited) {
                 this.__updateBounds(this.width, this.height);
                 this.fireNewEvent('skewX', v);
@@ -163,7 +163,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
     setSkewY: function(v) {
         if (this.skewY !== v) {
             this.skewY = v;
-            myt.TransformSupport.addTransform(this.deStyle, 'skewY', v ? v : 0);
+            myt.TransformSupport.addTransform(this.deStyle, 'skewY', v || 0);
             if (this.inited) {
                 this.__updateBounds(this.width, this.height);
                 this.fireNewEvent('skewY', v);

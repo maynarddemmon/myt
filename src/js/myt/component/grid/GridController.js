@@ -1,5 +1,10 @@
 /** Coordinates the behavior of a grid.
     
+    Events:
+        sort:array
+        maxWidth:number
+        minWidth:number
+    
     Attributes:
         maxWidth:number the sum of the maximum widths of the columns.
         minWidth:number the sum of the minimum widths of the columns.
@@ -10,6 +15,14 @@
             column header.
         sort:array An array containing the id of the column to sort by and
             the order to sort by.
+        locked:boolean Prevents the grid from updating the UI. Defaults to
+            true. After a grid has been setup a call should be made to
+            setLocked(false)
+    
+    Private Attributes:
+        columnHeaders:array An array of column headers in this grid.
+        rows:array An array of rows in this grid.
+        __tempLock:boolean Prevents "change" notifications from being processed.
 */
 myt.GridController = new JS.Module('GridController', {
     // Life Cycle //////////////////////////////////////////////////////////////

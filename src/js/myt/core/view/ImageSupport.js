@@ -74,7 +74,7 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
     setImageSize: function(v) {
         if (this.imageSize !== v) {
             this.imageSize = v;
-            this.deStyle.backgroundSize = v ? v : 'auto';
+            this.deStyle.backgroundSize = v || 'auto';
             if (this.inited) this.fireNewEvent('imageSize', v);
         }
     },

@@ -1,10 +1,14 @@
 /** An implementation of a grid component.
     
+    Events:
+        None
+    
     Attributes:
         rowSpacing:number The spacing between rows. Defaults to 1.
         columnSpacing:number the spacing between columns. Defaults to 1.
         sizeHeightToRows:boolean If true, this component will be sized to fit
-            all the rows without showing scrollbars. Defaults to false.
+            all the rows without showing scrollbars. Defaults to undefined
+            which is equivalent to false.
 */
 myt.Grid = new JS.Class('Grid', myt.View, {
     include: [myt.GridController],
@@ -137,9 +141,11 @@ myt.Grid = new JS.Class('Grid', myt.View, {
         var sort = this.sort,
             sortFunc = this.getSortFunction(sort ? sort[0] : '', sort ? sort[1] : '');
         if (sortFunc) {
-            this.content.sortSubviews(sortFunc);
-            this.content.yLayout.sortSubviews(sortFunc);
-            this.content.yLayout.update();
+            var content = this.content, 
+                yLayout = content.yLayout;
+            content.sortSubviews(sortFunc);
+            yLayout.sortSubviews(sortFunc);
+            yLayout.update();
         }
     },
     
@@ -157,9 +163,8 @@ myt.Grid = new JS.Class('Grid', myt.View, {
                     return sortNum;
                 } else if (bValue > aValue) {
                     return -sortNum;
-                } else {
-                    return 0;
                 }
+                return 0;
             };
         }
     }

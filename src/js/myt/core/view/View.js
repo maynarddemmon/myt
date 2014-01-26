@@ -221,7 +221,7 @@ myt.View = new JS.Class('View', myt.Node, {
     
     /** Does lazy instantiation of the subviews array. */
     getSubviews: function() {
-        return this.subviews ? this.subviews : this.subviews = [];
+        return this.subviews || (this.subviews = []);
     },
     
     /** Gets the views that are our siblings.
@@ -240,7 +240,7 @@ myt.View = new JS.Class('View', myt.Node, {
     
     /** Does lazy instantiation of the layouts array. */
     getLayouts: function() {
-        return this.layouts ? this.layouts : this.layouts = [];
+        return this.layouts || (this.layouts = []);
     },
     
     // Focus Attributes //
@@ -301,16 +301,17 @@ myt.View = new JS.Class('View', myt.Node, {
     
     /** @private */
     __setupAlignConstraint: function() {
-        if (this.parent) {
+        var parent = this.parent;
+        if (parent) {
             switch (this.align) {
                 case 'center':
-                    this.applyConstraint('__doAlignCenter', [this, 'width', this, 'alignOffset', this.parent, 'width']);
+                    this.applyConstraint('__doAlignCenter', [this, 'width', this, 'alignOffset', parent, 'width']);
                     break;
                 case 'right':
-                    this.applyConstraint('__doAlignRight', [this, 'width', this, 'alignOffset', this.parent, 'width']);
+                    this.applyConstraint('__doAlignRight', [this, 'width', this, 'alignOffset', parent, 'width']);
                     break;
                 case 'left':
-                    this.setX(this.alignOffset ? this.alignOffset : 0);
+                    this.setX(this.alignOffset || 0);
                     break;
                 default: // Do nothing
             }
@@ -319,12 +320,12 @@ myt.View = new JS.Class('View', myt.Node, {
     
     /** @private */
     __doAlignCenter: function(e) {
-        this.setX(Math.round((this.parent.width - this.width) / 2) + (this.alignOffset ? this.alignOffset : 0));
+        this.setX(Math.round((this.parent.width - this.width) / 2) + (this.alignOffset || 0));
     },
     
     /** @private */
     __doAlignRight: function(e) {
-        this.setX(this.parent.width - this.width - (this.alignOffset ? this.alignOffset : 0));
+        this.setX(this.parent.width - this.width - (this.alignOffset || 0));
     },
     
     setValignOffset: function(v) {
@@ -358,16 +359,17 @@ myt.View = new JS.Class('View', myt.Node, {
     
     /** @private */
     __setupValignConstraint: function() {
-        if (this.parent) {
+        var parent = this.parent;
+        if (parent) {
             switch (this.valign) {
                 case 'middle':
-                    this.applyConstraint('__doValignMiddle', [this, 'height', this, 'valignOffset', this.parent, 'height']);
+                    this.applyConstraint('__doValignMiddle', [this, 'height', this, 'valignOffset', parent, 'height']);
                     break;
                 case 'bottom':
-                    this.applyConstraint('__doValignBottom', [this, 'height', this, 'valignOffset', this.parent, 'height']);
+                    this.applyConstraint('__doValignBottom', [this, 'height', this, 'valignOffset', parent, 'height']);
                     break;
                 case 'top':
-                    this.setY(this.valignOffset ? this.valignOffset : 0);
+                    this.setY(this.valignOffset || 0);
                     break;
                 default: // Do nothing
             }
@@ -376,12 +378,12 @@ myt.View = new JS.Class('View', myt.Node, {
     
     /** @private */
     __doValignMiddle: function(e) {
-        this.setY(Math.round((this.parent.height - this.height) / 2) + (this.valignOffset ? this.valignOffset : 0));
+        this.setY(Math.round((this.parent.height - this.height) / 2) + (this.valignOffset || 0));
     },
     
     /** @private */
     __doValignBottom: function(e) {
-        this.setY(this.parent.height - this.height - (this.valignOffset ? this.valignOffset : 0));
+        this.setY(this.parent.height - this.height - (this.valignOffset || 0));
     },
     
     // Visual Attributes //
@@ -436,7 +438,7 @@ myt.View = new JS.Class('View', myt.Node, {
     setTextColor: function(v) {
         if (this.textColor !== v) {
             this.textColor = v;
-            this.deStyle.color = v ? v : 'inherit';
+            this.deStyle.color = v || 'inherit';
             if (this.inited) this.fireNewEvent('textColor', v);
         }
     },
@@ -458,7 +460,7 @@ myt.View = new JS.Class('View', myt.Node, {
     setOverflow: function(v) {
         if (this.overflow !== v) {
             this.overflow = v;
-            this.deStyle.overflow = v ? v : 'visible';
+            this.deStyle.overflow = v || 'visible';
             if (this.inited) this.fireNewEvent('overflow', v);
         }
     },
@@ -482,7 +484,7 @@ myt.View = new JS.Class('View', myt.Node, {
     setCursor: function(v) {
         if (this.cursor !== v) {
             this.cursor = v;
-            this.deStyle.cursor = v ? v : 'auto';
+            this.deStyle.cursor = v || 'auto';
             if (this.inited) this.fireNewEvent('cursor', v);
         }
     },
@@ -512,7 +514,7 @@ myt.View = new JS.Class('View', myt.Node, {
             style and index 2 is outlineColor.
         @returns void */
     setOutline: function(v) {
-        v = v ? v : [];
+        v = v || [];
         this.setOutlineWidth(v[0]);
         this.setOutlineStyle(v[1]);
         this.setOutlineColor(v[2]);
@@ -539,7 +541,7 @@ myt.View = new JS.Class('View', myt.Node, {
             style and index 2 is borderColor.
         @returns void */
     setBorder: function(v) {
-        v = v ? v : [];
+        v = v || [];
         this.setBorderWidth(v[0]);
         this.setBorderStyle(v[1]);
         this.setBorderColor(v[2]);

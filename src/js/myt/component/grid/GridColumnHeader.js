@@ -1,5 +1,10 @@
 /** Makes a view behave as a grid column header.
     
+    Events:
+        sortable:boolean
+        sortState:string
+        resizable:boolean
+    
     Attributes:
         columnId:string The unique ID for this column relative to the grid it
             is part of.
@@ -266,7 +271,6 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
         return usedDiff;
     },
     
-
     /** Steals width from next column headers.
         @param diff:number the amount to steal. Will be a negative number.
         @returns number:the amount of width actually stolen. */

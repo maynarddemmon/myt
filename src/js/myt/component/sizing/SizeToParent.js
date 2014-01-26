@@ -73,8 +73,7 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
     
     /** @private */
     __doPercentOfParentWidth: function(e) {
-        var offset = this.percentOfParentWidthOffset == null ? 0 : this.percentOfParentWidthOffset;
-        this.setWidth(offset + Math.round(this.parent.width * (this.percentOfParentWidth / 100)));
+        this.setWidth((this.percentOfParentWidthOffset || 0) + Math.round(this.parent.width * (this.percentOfParentWidth / 100)));
         // Force width event if not inited yet so that align constraint
         // will work.
         if (!this.inited) this.fireNewEvent('width', this.width);
@@ -112,8 +111,7 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
     
     /** @private */
     __doPercentOfParentHeight: function(e) {
-        var offset = this.percentOfParentHeightOffset == null ? 0 : this.percentOfParentHeightOffset;
-        this.setHeight(offset + Math.round(this.parent.height * (this.percentOfParentHeight / 100)));
+        this.setHeight((this.percentOfParentHeightOffset || 0) + Math.round(this.parent.height * (this.percentOfParentHeight / 100)));
         // Force height event if not inited yet so that valign constraint
         // will work.
         if (!this.inited) this.fireNewEvent('height', this.height);

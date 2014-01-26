@@ -83,7 +83,7 @@ myt.Node = new JS.Class('Node', {
         }
         
         this.inited = false;
-        this.initNode(parent, attrs ? attrs : {});
+        this.initNode(parent, attrs || {});
     },
     
     

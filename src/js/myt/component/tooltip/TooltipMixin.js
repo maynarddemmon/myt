@@ -65,7 +65,7 @@ myt.TooltipMixin = new JS.Module('TooltipMixin', {
         
         if (isOver && this.tooltip) {
             // Use configured class or default if none defined.
-            var tipClass = this.tipClass ? this.tipClass : myt.TooltipMixin.DEFAULT_TIP_CLASS,
+            var tipClass = this.tipClass || myt.TooltipMixin.DEFAULT_TIP_CLASS,
                 g = myt.global, 
                 ttv = g.tooltipView;
             
@@ -92,8 +92,8 @@ myt.TooltipMixin = new JS.Module('TooltipMixin', {
             ttv.setTooltip({
                 parent:this, 
                 text:this.tooltip, 
-                tipalign:this.tipAlign ? this.tipAlign : 'left', 
-                tipvalign:this.tipValign ? this.tipValign : 'above'
+                tipalign:this.tipAlign || 'left', 
+                tipvalign:this.tipValign || 'above'
             });
         }
     }

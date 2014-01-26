@@ -31,7 +31,7 @@ myt.InputTextArea = new JS.Class('InputTextArea', myt.BaseInputText, {
     // Accessors ///////////////////////////////////////////////////////////////
     setResize: function(v) {
         if (this.resize !== v) {
-            this.resize = this.deStyle.resize = v ? v : 'none';
+            this.resize = this.deStyle.resize = v || 'none';
             if (this.inited) this.fireNewEvent('resize', v);
         }
     },

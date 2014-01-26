@@ -2,6 +2,7 @@
     
     Attributes:
         sortIconColor:color the color to fill the sort icon with if shown.
+            Defaults to '#666666'.
 */
 myt.SimpleGridColumnHeader = new JS.Class('SimpleGridColumnHeader', myt.SimpleIconTextButton, {
     include: [myt.GridColumnHeader],
