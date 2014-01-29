@@ -1,5 +1,8 @@
 /** A modal panel that contains a Dialog.
     
+    Events:
+        None
+    
     Attributes:
         displayMode:string (read only) Indicates what kind of dialog this 
             component is currently configured as. Allowed values are: 'message',
@@ -278,6 +281,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         this.show();
         
         content.closeBtn.setVisible(false);
+        this.focus(); // Focus on the dimmer itself to prevent user interaction.
         
         this.setDisplayMode('spinner');
     },
