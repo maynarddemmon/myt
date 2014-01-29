@@ -1,62 +1,29 @@
-var JS = (typeof this.JS === 'undefined') ? {} : this.JS;
-
-(function(factory) {
-  var $ = (typeof this.global === 'object') ? this.global : this,
-      E = (typeof exports === 'object');
-
-  if (E) {
-    exports.JS = exports;
-    JS = exports;
-  } else {
-    $.JS = JS;
-  }
-  factory($, JS);
-
-})(function(global, exports) {
-'use strict';
-
-var JS = {
+JS = {
   extend: function(destination, source, overwrite) {
-    if (!destination || !source) return destination;
-    for (var field in source) {
-      if (destination[field] === source[field]) continue;
-      if (overwrite === false && destination.hasOwnProperty(field)) continue;
-      destination[field] = source[field];
+    if (destination && source) {
+      for (var field in source) {
+        if (destination[field] !== source[field]) {
+          if (overwrite || !destination.hasOwnProperty(field)) {
+            destination[field] = source[field];
+          }
+        }
+      }
     }
     return destination;
   },
   
-  isType: function(object, type) {
-    if (typeof type === 'string') return typeof object === type;
-  
-    if (object === null || object === undefined) return false;
-  
-    return (typeof type === 'function' && object instanceof type) ||
-           (object.isA && object.isA(type)) ||
-           object.constructor === type;
-  },
-  
-  makeBridge: function(parent) {
-    var bridge = function() {};
-    bridge.prototype = parent.prototype;
-    return new bridge();
-  },
-  
   makeClass: function(parent) {
     parent = parent || Object;
-  
+    
     var constructor = function() {
-      return this.initialize
-           ? this.initialize.apply(this, arguments) || this
-           : this;
+      var init = this.initialize;
+      return init ? init.apply(this, arguments) || this : this;
     };
-    constructor.prototype = this.makeBridge(parent);
-  
-    constructor.superclass = parent;
-  
-    constructor.subclasses = [];
-    if (parent.subclasses) parent.subclasses.push(constructor);
-  
+    
+    var bridge = function() {};
+    bridge.prototype = parent.prototype;
+    constructor.prototype = new bridge();
+    
     return constructor;
   }
 };
@@ -115,37 +82,14 @@ JS.extend(JS.Method.prototype, {
 JS.Method.create = function(module, name, callable) {
   if (callable && callable.__inc__ && callable.__fns__) return callable;
 
-  var method = (typeof callable !== 'function')
-             ? callable
-             : new this(module, name, callable);
-
-  this.notify(method);
-  return method;
+  return (typeof callable !== 'function') ? callable : new this(module, name, callable);
 };
 
 JS.Method.compile = function(method, environment) {
   return (method instanceof this) ? method.compile(environment) : method;
 };
 
-JS.Method.__listeners__ = [];
-
-JS.Method.added = function(block, context) {
-  this.__listeners__.push([block, context]);
-};
-
-JS.Method.notify = function(method) {
-  var listeners = this.__listeners__,
-      i = listeners.length,
-      listener;
-
-  while (i) {
-    listener = listeners[--i];
-    listener[0].call(listener[1], method);
-  }
-};
-
 JS.Module = JS.makeClass();
-JS.Module.__queue__ = [];
 
 JS.extend(JS.Module.prototype, {
   initialize: function(name, methods, options) {
@@ -164,16 +108,12 @@ JS.extend(JS.Module.prototype, {
     this.__mct__ = {};
 
     this.include(methods, {_resolve: false});
-
-    var queue = JS.Module.__queue__;
-    if (queue) queue.push(this);
   },
 
   define: function(name, callable, options) {
-    var method  = JS.Method.create(this, name, callable),
-        resolve = (options || {})._resolve;
+    var resolve = (options || {})._resolve;
 
-    this.__fns__[name] = method;
+    this.__fns__[name] = JS.Method.create(this, name, callable);
     if (resolve !== false) this.resolve();
   },
 
@@ -243,8 +183,7 @@ JS.extend(JS.Module.prototype, {
 
   shouldIgnore: function(field, value) {
     return (field === 'extend' || field === 'include') &&
-           (typeof value !== 'function' ||
-             (value.__fns__ && value.__inc__));
+           (typeof value !== 'function' || (value.__fns__ && value.__inc__));
   },
 
   ancestors: function(list) {
@@ -291,28 +230,6 @@ JS.extend(JS.Module.prototype, {
 
   instanceMethod: function(name) {
     return this.lookup(name).pop();
-  },
-
-  instanceMethods: function(recursive, list) {
-    var methods = list || [],
-        fns     = this.__fns__,
-        field;
-
-    for (field in fns) {
-      if (JS.isType(this.__fns__[field], JS.Method)) {
-        if (methods.indexOf(field) === -1) methods.push(field);
-      }
-    }
-
-    if (recursive !== false) {
-      var ancestors = this.ancestors(), i = ancestors.length;
-      while (i) ancestors[--i].instanceMethods(false, methods);
-    }
-    return methods;
-  },
-
-  match: function(object) {
-    return object && object.isA && object.isA(this);
   }
 });
 
@@ -333,10 +250,6 @@ JS.Kernel = new JS.Module('Kernel', {
     return this;
   },
 
-  hash: function() {
-    return JS.Kernel.hashFor(this);
-  },
-
   isA: function(module) {
     return (typeof module === 'function' && this instanceof module) ||
            this.__eigen__().includes(module);
@@ -353,23 +266,8 @@ JS.Kernel = new JS.Module('Kernel', {
     var bound = field.bind(this);
     cache[name] = {_value: field, _bound: bound};
     return bound;
-  },
-
-  methods: function() {
-    return this.__eigen__().instanceMethods();
   }
 });
-
-(function() {
-  var id = 1;
-
-  JS.Kernel.hashFor = function(object) {
-    if (object.__hash__ !== undefined) return object.__hash__;
-    object.__hash__ = (Date.now() + id).toString(16);
-    id += 1;
-    return object.__hash__;
-  };
-})();
 
 JS.Class = JS.makeClass(JS.Module);
 
@@ -392,8 +290,7 @@ JS.extend(JS.Class.prototype, {
     var klass = JS.makeClass(parent);
     JS.extend(klass, this);
 
-    klass.prototype.constructor =
-    klass.prototype.klass = klass;
+    klass.prototype.constructor = klass.prototype.klass = klass;
 
     klass.__eigen__().include(parent.__meta__, {_resolve: options._resolve});
 
@@ -409,50 +306,39 @@ JS.extend(JS.Class.prototype, {
 
     if (options._resolve !== false) klass.resolve();
 
-    if (typeof parent.inherited === 'function')
-      parent.inherited(klass);
+    if (typeof parent.inherited === 'function') parent.inherited(klass);
 
     return klass;
   }
 });
 
 (function() {
-  var methodsFromPrototype = function(klass) {
-    var methods = {},
-        proto = klass.prototype,
-        field;
-
+  var classify = function(klass, parent) {
+    klass.__inc__ = [];
+    klass.__dep__ = [];
+    var proto = klass.prototype,
+      methods = {}, 
+      field;
     for (field in proto) {
       if (proto.hasOwnProperty(field)) {
         methods[field] = JS.Method.create(klass, field, proto[field]);
       }
     }
-    return methods;
-  };
-
-  var classify = function(name, parentName) {
-    var klass  = JS[name],
-        parent = JS[parentName];
-
-    klass.__inc__ = [];
-    klass.__dep__ = [];
-    klass.__fns__ = methodsFromPrototype(klass);
-    klass.__tgt__ = klass.prototype;
-
-    klass.prototype.constructor = klass.prototype.klass = klass;
-
+    klass.__fns__ = methods;
+    klass.__tgt__ = proto;
+    
+    proto.constructor = proto.klass = klass;
+    
     JS.extend(klass, JS.Class.prototype);
-    klass.include(parent || JS.Kernel);
-
+    klass.include(parent);
+    
     klass.constructor = klass.klass = JS.Class;
   };
-
-  classify('Method');
-  classify('Module');
-  classify('Class', 'Module');
+  classify(JS.Method, JS.Kernel);
+  classify(JS.Module, JS.Kernel);
+  classify(JS.Class,  JS.Module);
 
   var eigen = JS.Kernel.instanceMethod('__eigen__');
-
   eigen.call(JS.Method).resolve();
   eigen.call(JS.Module).resolve();
   eigen.call(JS.Class).include(JS.Module.__meta__);
@@ -469,11 +355,11 @@ JS.Method.keywordCallSuper = function(method, env, receiver, args) {
     var i = arguments.length;
     while (i) params[--i] = arguments[i];
 
-    stackIndex -= 1;
+    stackIndex--;
     if (stackIndex === 0) delete receiver.callSuper;
     var returnValue = methods[stackIndex].apply(receiver, params);
     receiver.callSuper = _super;
-    stackIndex += 1;
+    stackIndex++;
 
     return returnValue;
   };
@@ -485,8 +371,4 @@ JS.Singleton = new JS.Class('Singleton', {
   initialize: function(name, parent, methods) {
     return new (new JS.Class(name, parent, methods));
   }
-});
-
-JS.extend(exports, JS);
-if (global.JS) JS.extend(global.JS, JS);
 });
