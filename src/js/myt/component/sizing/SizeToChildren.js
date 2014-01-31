@@ -18,9 +18,8 @@ myt.SizeToChildren = new JS.Class('SizeToChildren', myt.Layout, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Node */
     initNode: function(parent, attrs) {
-        if (attrs.axis === undefined) attrs.axis = 'x';
-        if (attrs.paddingX === undefined) attrs.paddingX = 0;
-        if (attrs.paddingY === undefined) attrs.paddingY = 0;
+        this.axis = 'x';
+        this.paddingX = this.paddingY = 0;
         
         this.callSuper(parent, attrs);
     },

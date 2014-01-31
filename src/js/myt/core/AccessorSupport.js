@@ -5,21 +5,13 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
         /** Generate a setter name for an attribute.
             @returns string */
         generateSetterName: function(attrName) {
-            var setterName = this.SETTER_NAMES[attrName];
-            if (setterName === undefined) {
-                this.SETTER_NAMES[attrName] = setterName = this.generateName(attrName, 'set');
-            }
-            return setterName;
+            return this.SETTER_NAMES[attrName] || (this.SETTER_NAMES[attrName] = this.generateName(attrName, 'set'));
         },
         
         /** Generate a getter name for an attribute.
             @returns string */
         generateGetterName: function(attrName) {
-            var getterName = this.GETTER_NAMES[attrName];
-            if (getterName === undefined) {
-                this.GETTER_NAMES[attrName] = getterName = this.generateName(attrName, 'get');
-            }
-            return getterName;
+            return this.GETTER_NAMES[attrName] || (this.GETTER_NAMES[attrName] = this.generateName(attrName, 'get'));
         },
         
         /** Generates a method name by capitalizing the attrName and
@@ -72,6 +64,7 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
     
     /** A generic getter function that can be called to get a value from this
         object. Will defer to a defined getter if it exists.
+        @param attrName:string The name of the attribute to get.
         @returns the attribute value. */
     get: function(attrName) {
         var getterName = myt.AccessorSupport.generateGetterName(attrName);
@@ -82,6 +75,8 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
         object. Will defer to a defined setter if it exists. The implementation
         assumes this object is an Observable so it will have a 'fireNewEvent'
         method.
+        @param attrName:string The name of the attribute to set.
+        @param v:* The value to set.
         @returns void */
     set: function(attrName, v) {
         var setterName = myt.AccessorSupport.generateSetterName(attrName);
@@ -89,16 +84,19 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
             this[setterName](v);
         } else if (this[attrName] !== v) {
             this[attrName] = v;
-            if (this.inited !== false && this.fireNewEvent) this.fireNewEvent(attrName, v);
+            if (this.inited !== false && this.fireNewEvent) this.fireNewEvent(attrName, v); // !== false allows this to work with non-nodes.
         }
     },
     
-    /** @returns true if the attribute value is not null or undefined. */
+    /** Checks if an attribute is not null or undefined.
+        @param attrName:string The name of the attribute to check.
+        @returns true if the attribute value is not null or undefined. */
     has: function(attrName) {
         return this.get(attrName) != null;
     },
     
     /** Checks if an attribute is exactly true.
+        @param attrName:string The name of the attribute to check.
         @returns true if the attribute value is === true. */
     is: function(attrName) {
         return this.get(attrName) === true;
@@ -106,6 +104,7 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
     
     /** Checks if an attribute is not exactly true. Note: this is not the same
         as testing exactly false.
+        @param attrName:string The name of the attribute to check.
         @returns true if the attribute value is !== true. */
     isNot: function(attrName) {
         return this.get(attrName) !== true;
