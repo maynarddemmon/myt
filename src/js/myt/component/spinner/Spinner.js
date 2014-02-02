@@ -1,49 +1,47 @@
 /** A spinner. Makes use of Spin.js.
     
+    Events:
+        None
+    
     Attributes:
-        _spinner:Spinner the Spin.js spinner.
+        lines:number
+        length:number
+        lineWidth:number
+        radius:number
+        corners:number
+        lineColor:string
+        direction:number
+        speed:number
+        trail:number
+        lineOpacity:number
+    
+    Private Attributes:
+        __spinner:Spinner the Spin.js spinner.
 */
 myt.Spinner = new JS.Class('Spinner', myt.View, {
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        DEFAULT_LINES: 12,
-        DEFAULT_LENGTH: 7,
-        DEFAULT_LINE_WIDTH: 5,
-        DEFAULT_RADIUS: 10,
-        DEFAULT_CORNERS: 1,
-        DEFAULT_LINE_COLOR: '#000000',
-        DEFAULT_DIRECTION: 1,
-        DEFAULT_SPEED: 1,
-        DEFAULT_TRAIL: 100,
-        DEFAULT_LINE_OPACITY: 0.25
-    },
-    
-    
     // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Checkbox */
+    /** @overrides myt.View */
     initNode: function(parent, attrs) {
-        if (attrs.visible === undefined) attrs.visible = false;
+        this.lines = 12;
+        this.length = 7;
+        this.lineWidth = 5;
+        this.radius = 10;
+        this.corners = 1;
+        this.lineColor = '#000000';
+        this.direction = this.speed = 1;
+        this.trail = 100;
+        this.lineOpacity = 0.25;
         
-        var S = myt.Spinner;
-        if (attrs.lines === undefined) attrs.lines = S.DEFAULT_LINES;
-        if (attrs.length === undefined) attrs.length = S.DEFAULT_LENGTH;
-        if (attrs.lineWidth === undefined) attrs.lineWidth = S.DEFAULT_LINE_WIDTH;
-        if (attrs.radius === undefined) attrs.radius = S.DEFAULT_RADIUS;
-        if (attrs.corners === undefined) attrs.corners = S.DEFAULT_CORNERS;
-        if (attrs.lineColor === undefined) attrs.lineColor = S.DEFAULT_LINE_COLOR;
-        if (attrs.direction === undefined) attrs.direction = S.DEFAULT_DIRECTION;
-        if (attrs.speed === undefined) attrs.speed = S.DEFAULT_SPEED;
-        if (attrs.trail === undefined) attrs.trail = S.DEFAULT_TRAIL;
-        if (attrs.lineOpacity === undefined) attrs.lineOpacity = S.DEFAULT_LINE_OPACITY;
+        if (attrs.visible === undefined) attrs.visible = false;
         
         this.callSuper(parent, attrs);
         
-        if (this.visible) this._show();
+        if (this.visible) this.__show();
     },
     
     /** @overrides myt.View */
     destroyBeforeOrphaning: function() {
-        this._hide();
+        this.__hide();
         
         this.callSuper();
     },
@@ -61,14 +59,15 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     setTrail: function(v) {this.trail = v;},
     setLineOpacity: function(v) {this.lineOpacity = v;},
     
+    /** @overrides myt.View */
     setVisible: function(v) {
         this.callSuper(v);
         
         if (this.inited) {
             if (this.visible) {
-                this._show();
+                this.__show();
             } else {
-                this._hide();
+                this.__hide();
             }
         }
     },
@@ -79,34 +78,31 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    _show: function() {
-        var spinner = this._spinner,
-            radius = this.radius,
-            length = this.length,
-            lineWidth = this.lineWidth,
-            size = this.getSize();
-            
-        if (!spinner) spinner = this._spinner = new myt.Spinner.FACTORY({
+    /** @private */
+    __show: function() {
+        var spinner = this.__spinner || (this.__spinner = new myt.Spinner.FACTORY({
             lines:this.lines, 
-            length:length, 
-            width:lineWidth, 
-            radius:radius, 
+            length:this.length, 
+            width:this.lineWidth, 
+            radius:this.radius, 
             corners:this.corners,
             color:this.lineColor,
             direction:this.direction,
             speed:this.speed,
             trail:this.trail,
             opacity:this.lineOpacity
-        });
+        }));
         
+        var size = this.getSize();
         this.setWidth(size);
         this.setHeight(size);
         
         spinner.spin(this.domElement);
     },
     
-    _hide: function() {
-        var spinner = this._spinner;
+    /** @private */
+    __hide: function() {
+        var spinner = this.__spinner;
         if (spinner) spinner.stop();
     }
 });
