@@ -16,7 +16,7 @@
 myt.VerticalThreePanel = new JS.Class('VerticalThreePanel', {
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        if (attrs.repeat === undefined) attrs.repeat = false;
+        this.repeat = false;
         
         this.callSuper(parent, attrs);
     },

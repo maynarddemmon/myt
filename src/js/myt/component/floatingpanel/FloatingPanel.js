@@ -1,7 +1,11 @@
 /** A panel that floats above everything else.
     
+    Events:
+        None
+    
     Attributes:
-        owner:FloatingPanelAnchor The anchor that currently "owns" this panel.
+        owner:myt.FloatingPanelAnchor The anchor that currently "owns" 
+            this panel.
         panelId:string The unique ID for this panel instance.
         hideOnMouseDown:boolean If true this panel will be hidden when a
             mousedown occurs outside the panel. True by default.
@@ -22,14 +26,12 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
         elem.style.position = 'absolute';
         myt.getElement().appendChild(elem);
         
-        if (attrs.visible === undefined) attrs.visible = false;
-        if (attrs.hideOnMouseDown === undefined) attrs.hideOnMouseDown = true;
-        if (attrs.hideOnBlur === undefined) attrs.hideOnBlur = true;
-        if (attrs.ignoreOwnerForHideOnMouseDown === undefined) attrs.ignoreOwnerForHideOnMouseDown = true;
+        this.ignoreOwnerForHideOnMouseDown = this.hideOnBlur = this.hideOnMouseDown = true;
+        
+        attrs.visible = attrs.focusEmbellishment = false;
         
         // Ensure the focus starts and ends with the panel
         attrs.focusable = attrs.focusCage = true;
-        attrs.focusEmbellishment = false;
         
         this.callSuper(elem, attrs);
     },
@@ -39,36 +41,13 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
     setOwner: function(v) {this.owner = v;},
     setPanelId: function(v) {this.panelId = v;},
     setIgnoreOwnerForHideOnMouseDown: function(v) {this.ignoreOwnerForHideOnMouseDown = v;},
-    
-    setHideOnMouseDown: function(v) {
-        if (this.hideOnMouseDown !== v) {
-            this.hideOnMouseDown = v;
-            
-            // Handle changes to panel behavior while it is shown.
-            if (this.inited && this.isShown()) {
-                var gm = myt.global.mouse;
-                this.detachFromDom(gm, '_doMouseDown', 'mousedown', true);
-                if (v) this.attachToDom(gm, '_doMouseDown', 'mousedown', true);
-            }
-        }
-    },
-    
-    setHideOnBlur: function(v) {
-        if (this.hideOnBlur !== v) {
-            this.hideOnBlur = v;
-            
-            // Handle changes to panel behavior while it is shown.
-            if (this.inited && this.isShown()) {
-                var gf = myt.global.focus;
-                this.detachFrom(gf, '_doGlobalFocusChange', 'focused');
-                if (v) this.attachTo(gf, '_doGlobalFocusChange', 'focused');
-            }
-        }
-    },
+    setHideOnBlur: function(v) {this.hideOnBlur = v;},
+    setHideOnMouseDown: function(v) {this.hideOnMouseDown = v;},
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    _doMouseDown: function(event) {
+    /** @private */
+    __doMouseDown: function(event) {
         var v = event.value, px = v.pageX, py = v.pageY;
         if (!this.containsPoint(px, py) && 
             (this.ignoreOwnerForHideOnMouseDown ? !this.owner.containsPoint(px, py) : true)
@@ -80,9 +59,10 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
     
     /** Called when a mousedown occurs outside the floating panel. The default
         behavior is to hide the panel. This gives subclasses a chance to 
-        provide different behavior. */
+        provide different behavior.
+        @returns void */
     doMouseDownOutside: function() {
-        this.hide(this.owner);
+        if (this.hideOnMouseDown) this.hide();
     },
     
     /** @overrides myt.FocusObservable
@@ -106,52 +86,66 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
         }
     },
     
-    /** Gets the view to give focus to when this panel gets focus. By default
-        this returns the panel itself.
-        @returns the view to give focus to. */
+    /** Gets the view to give focus to when this panel gets focus. Should be
+        a descendant of the floating panel or the panel itself. Returns this 
+        floating panel by default.
+        @returns myt.View: The view to give focus to. */
     getFirstFocusableDescendant: function() {
         return this;
     },
     
-    _doGlobalFocusChange: function(event) {
+    /** @private */
+    __doFocusChange: function(event) {
         var v = event.value;
         if (v && !this.isAncestorOf(v)) this.doLostFocus();
     },
     
+    /** Called when focus moves out of the floating panel. Hides the
+        floating panel by default.
+        @returns void */
     doLostFocus: function() {
-        this.hide(this.owner, true);
+        if (this.hideOnBlur) this.hide(true);
     },
     
+    /** Determines if this floating panel is being "shown" or not. Typically
+        this means the floating panel is visible.
+        @returns boolean: True if this panel is shown, otherwise false. */
     isShown: function() {
         return this.visible;
     },
     
+    /** Shows the floating panel for the provided myt.FloatingPanelAnchor.
+        @param panelAnchor:myt.FloatingPanelAnchor The floating panel anchor 
+            to show the panel for.
+        @returns void */
     show: function(panelAnchor) {
-        if (this.isShown()) return;
-        
-        this.setOwner(panelAnchor);
-        this.bringToFront();
-        this.updateLocation(panelAnchor);
-        this.setVisible(true);
-        
-        var gm = myt.global.mouse;
-        this.detachFromDom(gm, '_doMouseDown', 'mousedown', true);
-        if (this.hideOnMouseDown) this.attachToDom(gm, '_doMouseDown', 'mousedown', true);
-        
-        var gf = myt.global.focus;
-        this.detachFrom(gf, '_doGlobalFocusChange', 'focused');
-        if (this.hideOnBlur) this.attachTo(gf, '_doGlobalFocusChange', 'focused');
+        if (!this.isShown()) {
+            this.setOwner(panelAnchor);
+            this.bringToFront();
+            this.updateLocation(panelAnchor);
+            this.setVisible(true);
+            
+            var g = myt.global;
+            this.attachToDom(g.mouse, '__doMouseDown', 'mousedown', true);
+            this.attachTo(g.focus, '__doFocusChange', 'focused');
+        }
     },
     
-    hide: function(panelAnchor, ignoreRestoreFocus) {
-        if (!this.isShown()) return;
-        
-        this.detachFromDom(myt.global.mouse, '_doMouseDown', 'mousedown', true);
-        this.detachFrom(myt.global.focus, '_doGlobalFocusChange', 'focused');
-        
-        this.setVisible(false);
-        if (!ignoreRestoreFocus) this.restoreFocus();
-        this.setOwner(null);
+    /** Hids the floating panel for the provided myt.FloatingPanelAnchor.
+        @param ignoreRestoreFocus:boolean (Optional) If true the restoreFocus
+            method will not be called. Defaults to undefined which is
+            equivalent to false.
+        @returns void */
+    hide: function(ignoreRestoreFocus) {
+        if (this.isShown()) {
+            var g = myt.global;
+            this.detachFromDom(g.mouse, '__doMouseDown', 'mousedown', true);
+            this.detachFrom(g.focus, '__doFocusChange', 'focused');
+            
+            this.setVisible(false);
+            if (!ignoreRestoreFocus) this.restoreFocus();
+            this.setOwner();
+        }
     },
     
     /** Sends the focus back to the owner. Can be overridden to
@@ -161,35 +155,28 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
         if (this.owner) this.owner.focus();
     },
     
+    /** Updates the x and y position of the floating panel for the provided 
+        floating panel anchor.
+        @param panelAnchor:myt.FloatingPanelAnchor The anchor to update the
+            location for.
+        @returns void */
     updateLocation: function(panelAnchor) {
         var panelId = this.panelId,
             align = panelAnchor.getFloatingAlignForPanelId(panelId),
             valign = panelAnchor.getFloatingValignForPanelId(panelId),
-            alignOffset = panelAnchor.getFloatingAlignOffsetForPanelId(panelId),
-            valignOffset = panelAnchor.getFloatingValignOffsetForPanelId(panelId),
             anchorLocation = panelAnchor.getPagePosition(),
             x = 0, y = 0,
             type = typeof align;
         
         if (type === 'string') {
+            x = anchorLocation.x + panelAnchor.getFloatingAlignOffsetForPanelId(panelId);
             switch(align) {
-                case 'outsideRight':
-                    x = anchorLocation.x + panelAnchor.width;
-                    break;
-                case 'insideRight':
-                    x = anchorLocation.x + panelAnchor.width - this.width;
-                    break;
-                case 'outsideLeft':
-                    x = anchorLocation.x - this.width;
-                    break;
-                case 'insideLeft':
-                    x = anchorLocation.x;
-                    break;
-                default:
-                    console.warn("Unexpected align value", type, align);
+                case 'outsideRight': x += panelAnchor.width; break;
+                case 'insideRight': x += panelAnchor.width - this.width; break;
+                case 'outsideLeft': x -= this.width; break;
+                case 'insideLeft': break;
+                default: console.warn("Unexpected align value", type, align);
             }
-            
-            x += alignOffset;
         } else if (type === 'number') {
             // Absolute position
             x = align;
@@ -202,24 +189,14 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
         type = typeof valign;
         
         if (type === 'string') {
+            y = anchorLocation.y + panelAnchor.getFloatingValignOffsetForPanelId(panelId);
             switch(valign) {
-                case 'outsideBottom':
-                    y = anchorLocation.y + panelAnchor.height;
-                    break;
-                case 'insideBottom':
-                    y = anchorLocation.y + panelAnchor.height - this.height;
-                    break;
-                case 'outsideTop':
-                    y = anchorLocation.y - this.height;
-                    break;
-                case 'insideTop':
-                    y = anchorLocation.y;
-                    break;
-                default:
-                    console.warn("Unexpected valign value", type, valign);
+                case 'outsideBottom': y += panelAnchor.height; break;
+                case 'insideBottom': y += panelAnchor.height - this.height; break;
+                case 'outsideTop': y -= this.height; break;
+                case 'insideTop': break;
+                default: console.warn("Unexpected valign value", type, valign);
             }
-            
-            y += valignOffset;
         } else if (type === 'number') {
             // Absolute position
             y = valign;

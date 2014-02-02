@@ -43,11 +43,12 @@ new JS.Singleton('GlobalFocus', {
     // Accessors ///////////////////////////////////////////////////////////////
     /** Sets the currently focused view. */
     setFocusedView: function(v) {
-        if (this.focusedView === v) return;
-        this.prevFocusedView = this.focusedView; // Remember previous focus
-        this.focusedView = v;
-        if (v) this._focusedDom = null; // Wipe this since we have actual focus now.
-        this.fireNewEvent('focused', v);
+        if (this.focusedView !== v) {
+            this.prevFocusedView = this.focusedView; // Remember previous focus
+            this.focusedView = v;
+            if (v) this._focusedDom = null; // Wipe this since we have actual focus now.
+            this.fireNewEvent('focused', v);
+        }
     },
     
     
@@ -114,7 +115,7 @@ new JS.Singleton('GlobalFocus', {
         if (activeElem) {
             elem = startElem = activeElem;
             model = startElem.model;
-            if (!model) model = this._findModelForDomElement(startElem);
+            if (!model) model = this.__findModelForDomElement(startElem);
             if (model) {
                 var focusTrap = model.getFocusTrap(ignoreFocusTrap);
                 if (focusTrap) rootElem = focusTrap.domElement;
@@ -153,9 +154,9 @@ new JS.Singleton('GlobalFocus', {
             } else {
                 // Dom traverse backward
                 if (elem === rootElem) {
-                    elem = this._getDeepestDescendant(rootElem);
+                    elem = this.__getDeepestDescendant(rootElem);
                 } else if (elem.previousSibling) {
-                    elem = this._getDeepestDescendant(elem.previousSibling);
+                    elem = this.__getDeepestDescendant(elem.previousSibling);
                 } else {
                     elem = elem.parentNode;
                 }
@@ -179,7 +180,7 @@ new JS.Singleton('GlobalFocus', {
                             myt.DomElementProxy.isDomElementVisible(elem)
                         ) {
                             // Make sure the dom element isn't inside a maskFocus
-                            model = this._findModelForDomElement(elem);
+                            model = this.__findModelForDomElement(elem);
                             if (model && model.searchAncestorsOrSelf(function(n) {return n.maskFocus === true;})) {
                                 // Is a masked dom element so ignore.
                             } else {
@@ -198,8 +199,9 @@ new JS.Singleton('GlobalFocus', {
     
     /** Finds the closest model for the provided dom element.
         @param elem:domElement to element to start looking from.
-        @returns myt.View or null if not found. */
-    _findModelForDomElement: function(elem) {
+        @returns myt.View or null if not found.
+        @private */
+    __findModelForDomElement: function(elem) {
         var model;
         while (elem) {
             model = elem.model;
@@ -212,8 +214,9 @@ new JS.Singleton('GlobalFocus', {
     /** Gets the deepest dom element that is a descendant of the provided
         dom element or the element itself.
         @param elem:domElement The dom element to search downward from.
-        @returns a dom element. */
-    _getDeepestDescendant: function(elem) {
+        @returns a dom element.
+        @private */
+    __getDeepestDescendant: function(elem) {
         while (elem.lastChild) elem = elem.lastChild;
         return elem;
     }

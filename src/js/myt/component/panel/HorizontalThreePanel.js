@@ -16,7 +16,7 @@
 myt.HorizontalThreePanel = new JS.Module('HorizontalThreePanel', {
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        if (attrs.repeat === undefined) attrs.repeat = true;
+        this.repeat = true;
         
         this.callSuper(parent, attrs);
     },

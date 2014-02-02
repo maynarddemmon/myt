@@ -39,8 +39,8 @@ myt.ThreePanel = new JS.Module('ThreePanel', {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        if (attrs.axis === undefined) attrs.axis = 'x';
-        if (attrs.repeat === undefined) attrs.repeat = false;
+        this.axis = 'x';
+        this.repeat = false;
         
         this.callSuper(parent, attrs);
     },
@@ -135,7 +135,7 @@ myt.ThreePanel = new JS.Module('ThreePanel', {
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @private */
-    __updateSize: function(e) {
+    __updateSize: function(event) {
         var v = this.second;
         if (this.axis === 'x') {
             v.setHeight(v.naturalHeight);
@@ -145,26 +145,15 @@ myt.ThreePanel = new JS.Module('ThreePanel', {
     },
     
     /** @private */
-    __updateImageSize: function(e) {
+    __updateImageSize: function(event) {
         var v = this.second;
-        if (this.repeat) {
-            v.setImageSize();
-        } else {
-            v.setImageSize(v.width + 'px ' + v.height + 'px');
-        }
+        v.setImageSize(this.repeat ? undefined : v.width + 'px ' + v.height + 'px');
     },
     
     /** @private */
-    __updateRepeat: function(e) {
-        var v = this.second;
-        if (this.repeat) {
-            if (this.axis === 'x') {
-                v.setImageRepeat('repeat-x');
-            } else {
-                v.setImageRepeat('repeat-y');
-            }
-        } else {
-            v.setImageRepeat('no-repeat');
-        }
+    __updateRepeat: function(event) {
+        this.second.setImageRepeat(
+            this.repeat ? (this.axis === 'x' ? 'repeat-x' : 'repeat-y') : 'no-repeat'
+        );
     }
 });

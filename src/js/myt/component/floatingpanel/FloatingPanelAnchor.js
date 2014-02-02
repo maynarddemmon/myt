@@ -37,16 +37,17 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        if (attrs.floatingAlign === undefined) attrs.floatingAlign = 'insideLeft';
-        if (attrs.floatingValign === undefined) attrs.floatingValign = 'outsideBottom';
-        if (attrs.floatingAlignOffset === undefined) attrs.floatingAlignOffset = 0;
-        if (attrs.floatingValignOffset === undefined) attrs.floatingValignOffset = 0;
+        this.floatingAlign = 'insideLeft';
+        this.floatingValign = 'outsideBottom';
+        this.floatingAlignOffset = this.floatingValignOffset = 0;
         
         this.callSuper(parent, attrs);
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
+    setLastFloatingPanelShown: function(v) {this.lastFloatingPanelShown = v;},
+    
     setFloatingAlign: function(v) {
         if (this.floatingAlign !== v) {
             this.floatingAlign = v;
@@ -75,27 +76,22 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
         }
     },
     
-    setLastFloatingPanelShown: function(v) {this.lastFloatingPanelShown = v;},
-    
     
     // Methods /////////////////////////////////////////////////////////////////
     createFloatingPanel: function(panelId, panelClass, panelInitAttrs) {
-        var FPA = myt.FloatingPanelAnchor,
-            fp = FPA.panelsByPanelId[panelId];
-        
+        var fp = this.getFloatingPanel(panelId);
         if (!fp) {
-            if (!panelClass) panelClass = FPA.classesByPanelId[panelId];
-            
+            var FPA = myt.FloatingPanelAnchor;
+            panelClass = panelClass || FPA.classesByPanelId[panelId];
             if (!panelClass) {
                 console.log("No panel class found for panelId:", panelId);
                 return null;
             }
             
-            if (!panelInitAttrs) panelInitAttrs = {};
+            panelInitAttrs = panelInitAttrs || {};
             panelInitAttrs.panelId = panelId;
             fp = FPA.panelsByPanelId[panelId] = new panelClass(null, panelInitAttrs);
         }
-        
         return fp;
     },
     
@@ -125,7 +121,7 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
     hideFloatingPanel: function(panelId) {
         var fp = this.getFloatingPanel(panelId);
         if (fp) {
-            fp.hide(this);
+            fp.hide();
             this.setLastFloatingPanelShown();
         }
     },
