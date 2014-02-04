@@ -1,77 +1,51 @@
-/** Browser detection from: http://www.quirksmode.org/js/detect.html */
-BrowserDetect = {
-    init: function() {
-        this.browser = this.searchString(this.dataBrowser) || "UNKNOWN";
-        this.version = this.searchVersion(navigator.userAgent) || this.searchVersion(navigator.appVersion) || "UNKNOWN";
-        this.OS = this.searchString(this.dataOS) || "UNKNOWN";
-    },
+/** Based on browser detection from: http://www.quirksmode.org/js/detect.html
     
-    searchString: function(data) {
-        var dataItem, dataString, dataProp;
-        for (var i = 0, len = data.length; i < len; ++i) {
-            dataItem = data[i];
-            dataString = dataItem.string;
-            dataProp = dataItem.prop;
-            this.versionSearchString = dataItem.versionSearch || dataItem.identity;
-            if (dataString) {
-                if (dataString.indexOf(dataItem.subString) !== -1) return dataItem.identity;
-            } else if (dataProp) {
-                return dataItem.identity;
+    Events:
+        none
+    
+    Attributes:
+        browser:string The browser name.
+        version:number The browser version number.
+        os:string The operating system.
+*/
+BrowserDetect = (function() {
+    var versionSearchString,
+        
+        searchString = function(data) {
+            var dataItem, i = data.length;
+            while (i) {
+                dataItem = data[--i];
+                versionSearchString = dataItem.ver || dataItem.id;
+                if ((dataItem.str && dataItem.str.indexOf(dataItem.sub) >= 0) || dataItem.prop) return dataItem.id;
             }
-        }
-    },
+        },
+        
+        searchVersion = function(dataString) {
+            var index = dataString.indexOf(versionSearchString);
+            if (index >= 0) return parseFloat(dataString.substring(index + versionSearchString.length + 1));
+        },
+        
+        userAgent = navigator.userAgent, 
+        platform = navigator.platform, 
+        unknown = 'UNKNOWN';
     
-    searchVersion: function(dataString) {
-        var index = dataString.indexOf(this.versionSearchString);
-        if (index == -1) return;
-        return parseFloat(dataString.substring(index + this.versionSearchString.length + 1));
-    },
-    
-    dataBrowser: [{
-        string:navigator.userAgent,
-        subString:"Chrome",
-        identity:"Chrome"
-    },{
-        string:navigator.userAgent,
-        subString:"OmniWeb",
-        versionSearch:"OmniWeb/",
-        identity:"OmniWeb"
-    },{
-        string:navigator.vendor,
-        subString:"Apple",
-        identity:"Safari",
-        versionSearch:"Version"
-    },{
-        prop:window.opera,
-        identity:"Opera",
-        versionSearch:"Version"
-    },{
-        string:navigator.userAgent,
-        subString:"Firefox",
-        identity:"Firefox"
-    },{
-        string:navigator.userAgent,
-        subString:"MSIE",
-        identity:"Explorer",
-        versionSearch:"MSIE"
-    }],
-    
-    dataOS: [{
-        string:navigator.platform,
-        subString:"Win",
-        identity:"Windows"
-    },{
-        string:navigator.platform,
-        subString:"Mac",
-        identity:"Mac"
-    },{
-        string:navigator.userAgent,
-        subString:"iPhone",
-        identity:"iPhone/iPod"
-    },{
-        string:navigator.platform,
-        subString:"Linux",
-        identity:"Linux"
-    }]
-};
-BrowserDetect.init();
+    return {
+        browser:searchString([
+            {str:userAgent,        sub:"OmniWeb", id:"OmniWeb",  ver:"OmniWeb/"},
+            {prop:window.opera,                   id:"Opera",    ver:"Version"},
+            {str:navigator.vendor, sub:"Apple",   id:"Safari",   ver:"Version"},
+            {str:userAgent,        sub:"Firefox", id:"Firefox"},
+            {str:userAgent,        sub:"Chrome",  id:"Chrome"},
+            {str:userAgent,        sub:"MSIE",    id:"Explorer", ver:"MSIE"}
+        ]) || unknown,
+        
+        version:searchVersion(userAgent) || searchVersion(navigator.appVersion) || unknown,
+        
+        os:searchString([
+            {str:userAgent, sub:"iPhone", id:"iPhone/iPod"},
+            {str:platform,  sub:"Linux",  id:"Linux"},
+            {str:platform,  sub:"Mac",    id:"Mac"},
+            {str:platform,  sub:"Win",    id:"Windows"}
+        ]) || unknown,
+    };
+})();
