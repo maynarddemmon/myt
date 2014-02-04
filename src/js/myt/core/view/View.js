@@ -109,10 +109,10 @@ myt.View = new JS.Class('View', myt.Node, {
         myt.DomElementProxy, 
         myt.DomObservable, 
         myt.DomObserver, 
-        myt.MouseObservable, 
-        myt.KeyObservable, 
         myt.ScrollObservable, 
-        myt.FocusObservable
+        myt.FocusObservable, 
+        myt.KeyObservable, 
+        myt.MouseObservable
     ],
     
     

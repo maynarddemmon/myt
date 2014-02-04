@@ -32,13 +32,13 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
         /** A map of supported focus event types. */
-        FOCUS_EVENT_TYPES:{
+        EVENT_TYPES:{
             focus:true,
             blur:true
         },
         
         /** The common focus/blur event that gets reused. */
-        FOCUS_EVENT:{source:null, type:null, value:null}
+        EVENT:{source:null, type:null, value:null}
     },
     
     
@@ -207,7 +207,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
     
     /** @overrides myt.DomObservable */
     createDomMethodRef: function(domObserver, methodName, type) {
-        if (myt.FocusObservable.FOCUS_EVENT_TYPES[type]) {
+        if (myt.FocusObservable.EVENT_TYPES[type]) {
             var self = this;
             return function(domEvent) {
                 if (!domEvent) var domEvent = window.event;
@@ -222,7 +222,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
                 }
                 
                 // Configure common focus event.
-                var event = myt.FocusObservable.FOCUS_EVENT;
+                var event = myt.FocusObservable.EVENT;
                 event.source = self;
                 event.type = domEvent.type;
                 event.value = domEvent;
@@ -235,8 +235,8 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
                 
                 event.source = undefined;
             };
-        } else {
-            return this.callSuper(domObserver, methodName, type);
         }
+        
+        return this.callSuper(domObserver, methodName, type);
     }
 });

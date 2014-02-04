@@ -25,7 +25,7 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
         Subclasses should call super. */
     doAfterAdoption: function() {
         this.sizeViewToDom();
-        this.__updateBounds(this.width, this.height);
+        this.callSuper();
     },
     
     

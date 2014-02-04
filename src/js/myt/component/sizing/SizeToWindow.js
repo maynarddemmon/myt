@@ -16,7 +16,7 @@ myt.SizeToWindow = new JS.Module('SizeToWindow', {
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Node */
+    /** @overrides */
     initNode: function(parent, attrs) {
         this.minWidth = this.minHeight = 0;
         if (attrs.resizeDimension === undefined) attrs.resizeDimension = 'both';
@@ -30,21 +30,21 @@ myt.SizeToWindow = new JS.Module('SizeToWindow', {
     setResizeDimension: function(v) {
         if (this.resizeDimension !== v) {
             this.resizeDimension = v;
-            this.__handleResize(myt.global.windowResize.RESIZE_EVENT);
+            this.__handleResize();
         }
     },
     
     setMinWidth: function(v) {
         if (this.minWidth !== v) {
             this.minWidth = v;
-            this.__handleResize(myt.global.windowResize.RESIZE_EVENT);
+            this.__handleResize();
         }
     },
     
     setMinHeight: function(v) {
         if (this.minHeight !== v) {
             this.minHeight = v;
-            this.__handleResize(myt.global.windowResize.RESIZE_EVENT);
+            this.__handleResize();
         }
     },
     
@@ -52,7 +52,7 @@ myt.SizeToWindow = new JS.Module('SizeToWindow', {
     // Methods /////////////////////////////////////////////////////////////////
     /** @private */
     __handleResize: function(event) {
-        var v = event.value,
+        var v = myt.global.windowResize.EVENT.value, // Ignore the provided event.
             dim = this.resizeDimension;
         if (dim === 'width' || dim === 'both') this.setWidth(Math.max(this.minWidth, v.w));
         if (dim === 'height' || dim === 'both') this.setHeight(Math.max(this.minHeight, v.h));

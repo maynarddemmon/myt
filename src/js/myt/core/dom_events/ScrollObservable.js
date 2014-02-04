@@ -3,8 +3,13 @@
 myt.ScrollObservable = new JS.Module('ScrollObservable', {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
+        /** A map of supported scroll event types. */
+        EVENT_TYPES:{
+            scroll:true
+        },
+        
         /** The common scroll event that gets reused. */
-        SCROLL_EVENT:{source:null, type:null, value:null},
+        EVENT:{source:null, type:null, value:null},
         
         /** Gets the scrollLeft and scrollTop from the event.
             @param event:event
@@ -20,26 +25,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.DomObservable */
     createDomMethodRef: function(domObserver, methodName, type) {
-        if (type === 'scroll') {
-            var self = this;
-            return function(domEvent) {
-                if (!domEvent) var domEvent = window.event;
-                
-                // Configure common key event.
-                var event = myt.ScrollObservable.SCROLL_EVENT;
-                event.source = self;
-                event.type = domEvent.type;
-                event.value = domEvent;
-                
-                var allowPropogation = domObserver[methodName](event);
-                if (!allowPropogation) {
-                    if (domEvent.stopPropagation) domEvent.stopPropagation();
-                }
-                
-                event.source = undefined;
-            };
-        } else {
-            return this.callSuper(domObserver, methodName, type);
-        }
+        return this.createStandardDomMethodRef(domObserver, methodName, type, myt.ScrollObservable) || 
+            this.callSuper(domObserver, methodName, type);
     }
 });

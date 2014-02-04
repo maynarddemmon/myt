@@ -3,13 +3,13 @@
     
     Events:
         resize:object Fired when the browser window is resized. This is a
-            reused event stored at myt.global.windowResize.RESIZE_EVENT. The 
-            value is an object containing:
+            reused event stored at myt.global.windowResize.EVENT. The type
+            is 'resize' and the value is an object containing:
                 w:number the new window width.
                 h:number the new window height.
     
     Attributes:
-        RESIZE_EVENT:object The common resize event that gets fired.
+        EVENT:object The common resize event that gets fired.
     
     Private Attributes:
         __windowInnerWidth:number The inner width of the browser window.
@@ -22,8 +22,9 @@ new JS.Singleton('GlobalWindowResize', {
     // Life Cycle //////////////////////////////////////////////////////////////
     initialize: function() {
         // The common browser resize event that gets reused.
-        this.RESIZE_EVENT = {
-            source:this, type:'resize', value:{w:this.getWidth(), h:this.getHeight()}
+        this.EVENT = {
+            source:this, type:'resize', 
+            value:{w:this.getWidth(), h:this.getHeight()}
         };
         
         var self = this;
@@ -37,17 +38,13 @@ new JS.Singleton('GlobalWindowResize', {
     /** Gets the window's innerWidth.
         @returns the current width of the window. */
     getWidth: function() {
-        var retval = this.__windowInnerWidth;
-        if (retval === undefined) retval = this.__windowInnerWidth = window.innerWidth;
-        return retval;
+        return this.__windowInnerWidth || (this.__windowInnerWidth = window.innerWidth);
     },
     
     /** Gets the window's innerHeight.
         @returns the current height of the window. */
     getHeight: function() {
-        var retval = this.__windowInnerHeight;
-        if (retval === undefined) retval = this.__windowInnerHeight = window.innerHeight;
-        return retval;
+        return this.__windowInnerHeight || (this.__windowInnerHeight = window.innerHeight);
     },
     
     
@@ -59,10 +56,10 @@ new JS.Singleton('GlobalWindowResize', {
     __handleEvent: function(domEvent) {
         if (!domEvent) domEvent = window.event;
         
-        var event = this.RESIZE_EVENT,
-            target = domEvent.target,
+        var event = this.EVENT,
             value = event.value,
             isChanged = false,
+            target = domEvent.target,
             w = target.innerWidth,
             h = target.innerHeight;
         if (w !== value.w) {

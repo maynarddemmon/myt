@@ -61,6 +61,41 @@ myt.DomObservable = new JS.Module('DomObservable', {
         return null;
     },
     
+    /** Used by the createDomMethodRef implementations of submixins of 
+        myt.DomObservable to implement the standard methodRef.
+        @param domObserver:myt.DomObserver the observer that must be notified
+            when the dom event fires.
+        @param methodName:string the name of the function to pass the event to.
+        @param type:string the type of the event to fire.
+        @param observableClass:JS.Class The class that has the common event.
+        @param preventDefault:boolean (Optional) If true the default behavior
+            of the domEvent will be prevented.
+        @returns a function to handle the dom event or undefined if the event
+            will not be handled. */
+    createStandardDomMethodRef: function(domObserver, methodName, type, observableClass, preventDefault) {
+        if (observableClass.EVENT_TYPES[type]) {
+            var self = this, 
+                event = observableClass.EVENT;
+            return function(domEvent) {
+                if (!domEvent) var domEvent = window.event;
+                
+                event.source = self;
+                event.type = domEvent.type;
+                event.value = domEvent;
+                
+                var allowBubble = domObserver[methodName](event);
+                if (!allowBubble) {
+                    domEvent.cancelBubble = true;
+                    if (domEvent.stopPropagation) domEvent.stopPropagation();
+                    
+                    if (preventDefault) domEvent.preventDefault();
+                }
+                
+                event.source = undefined;
+            };
+        }
+    },
+    
     /** Removes the observer from the list of dom observers for the event type.
         @param domObserver:myt.DomObserver The dom observer to unregister.
         @param methodName:string The method name to unregister for.

@@ -4,7 +4,7 @@ myt.MouseObservable = new JS.Module('MouseObservable', {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
         /** A map of supported mouse event types. */
-        MOUSE_EVENT_TYPES:{
+        EVENT_TYPES:{
             mouseover:true,
             mouseout:true,
             mousedown:true,
@@ -15,23 +15,15 @@ myt.MouseObservable = new JS.Module('MouseObservable', {
         },
         
         /** The common mouse event that gets reused. */
-        MOUSE_EVENT:{source:null, type:null, value:null},
+        EVENT:{source:null, type:null, value:null},
         
-        /** Gets the mouse coordinate(s) from the provided event.
+        /** Gets the mouse coordinates from the provided event.
             @param event
-            @param coord:String (Optional) the coordinate to get. 'x', 'y' or 
-                'both'. If not provided, 'both' is assumed.
-            @returns number or object with 'x' and 'y' keys if 'both' 
-                was provided. */
-        getMouseFromEvent: function(event, coord) {
+            @returns object: An object with 'x' and 'y' keys containing the
+                x and y mouse position. */
+        getMouseFromEvent: function(event) {
             var domEvent = event.value;
-            if (coord === 'x') {
-                return domEvent.pageX;
-            } else if (coord === 'y') {
-                return domEvent.pageY;
-            } else {
-                return {x:domEvent.pageX, y:domEvent.pageY};
-            }
+            return {x:domEvent.pageX, y:domEvent.pageY};
         },
         
         getMouseFromEventRelativeToView: function(event, view) {
@@ -47,30 +39,7 @@ myt.MouseObservable = new JS.Module('MouseObservable', {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.DomObservable */
     createDomMethodRef: function(domObserver, methodName, type) {
-        if (myt.MouseObservable.MOUSE_EVENT_TYPES[type]) {
-            var self = this;
-            return function(domEvent) {
-                if (!domEvent) var domEvent = window.event;
-                
-                // Configure common mouse event.
-                var event = myt.MouseObservable.MOUSE_EVENT;
-                event.source = self;
-                event.type = domEvent.type;
-                event.value = domEvent;
-                
-                var allowBubble = domObserver[methodName](event);
-                if (!allowBubble) {
-                    domEvent.cancelBubble = true;
-                    if (domEvent.stopPropagation) domEvent.stopPropagation();
-                    
-                    // Also prevent default behavior
-                    domEvent.preventDefault();
-                }
-                
-                event.source = undefined;
-            };
-        } else {
-            return this.callSuper(domObserver, methodName, type);
-        }
+        return this.createStandardDomMethodRef(domObserver, methodName, type, myt.MouseObservable, true) || 
+            this.callSuper(domObserver, methodName, type);
     }
 });
