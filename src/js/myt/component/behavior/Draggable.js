@@ -8,20 +8,29 @@
         isDraggable:boolean Configures the view to be draggable or not. The 
             default value is true.
         distanceBeforeDrag:number The distance, in pixels, before a mouse 
-            down and drag is considered a drag action. Defaults to 2.
+            down and drag is considered a drag action. Defaults to 0.
         isDragging:boolean Indicates that this view is currently being dragged.
         draggableAllowBubble:boolean Determines if mousedown and mouseup
             dom events handled by this component will bubble or not. Defaults
             to true.
+        dragOffsetX:number The x amount to offset the position during dragging.
+            Defaults to 0.
+        dragOffsetY:number The y amount to offset the position during dragging.
+            Defaults to 0.
+    
+    Private Attributes:
         _dragInitX:number Stores initial mouse x position during dragging.
-        _dragInitY:number Stores initial mouse y position during dragging. */
+        _dragInitY:number Stores initial mouse y position during dragging.
+        __lastMousePosition:object The last position of the mouse during
+            dragging.
+*/
 myt.Draggable = new JS.Module('Draggable', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
         this.isDraggable = this.isDragging = false;
-        this.distanceBeforeDrag = 2;
         this.draggableAllowBubble = true;
+        this.distanceBeforeDrag = this.dragOffsetX = this.dragOffsetY = 0;
         
         if (attrs.isDraggable === undefined) attrs.isDraggable = true;
         
@@ -56,6 +65,20 @@ myt.Draggable = new JS.Module('Draggable', {
         }
     },
     
+    setDragOffsetX: function(v, supressUpdate) {
+        if (this.dragOffsetX !== v) {
+            this.dragOffsetX = v;
+            if (this.inited && this.isDragging && !supressUpdate) this.__requestDragPosition();
+        }
+    },
+    
+    setDragOffsetY: function(v, supressUpdate) {
+        if (this.dragOffsetY !== v) {
+            this.dragOffsetY = v;
+            if (this.inited && this.isDragging && !supressUpdate) this.__requestDragPosition();
+        }
+    },
+    
     setDistanceBeforeDrag: function(v) {this.distanceBeforeDrag = v;},
     setDraggableAllowBubble: function(v) {this.draggableAllowBubble = v;},
     
@@ -77,7 +100,11 @@ myt.Draggable = new JS.Module('Draggable', {
         
         var gm = myt.global.mouse;
         this.attachToDom(gm, '__doMouseUp', 'mouseup', true);
-        this.attachToDom(gm, '__doDragCheck', 'mousemove', true);
+        if (this.distanceBeforeDrag > 0) {
+            this.attachToDom(gm, '__doDragCheck', 'mousemove', true);
+        } else {
+            this.startDrag(event);
+        }
         
         event.value.preventDefault();
         return this.draggableAllowBubble;
@@ -101,34 +128,42 @@ myt.Draggable = new JS.Module('Draggable', {
             distance = myt.Geometry.measureDistance(pos.x, pos.y, this._dragInitX + this.x, this._dragInitY + this.y);
         if (distance >= this.distanceBeforeDrag) {
             this.detachFromDom(myt.global.mouse, '__doDragCheck', 'mousemove', true);
-            this.startDrag();
+            this.startDrag(event);
         }
     },
     
     /** Active until stopDrag is called. The view position will be bound
         to the mouse position. Subclasses typically call this onmousedown for
         subviews that allow dragging the view.
+        @param event:event The event the mouse event when the drag started.
         @returns void */
-    startDrag: function() {
+    startDrag: function(event) {
         this.setIsDragging(true);
-        this.attachToDom(myt.global.mouse, '__updateDrag', 'mousemove', true);
-        myt.global.dragManager.startDrag(this);
+        this.attachToDom(myt.global.mouse, 'updateDrag', 'mousemove', true);
     },
     
     /** Called on every mousemove event while dragging.
         @returns void */
-    __updateDrag: function(event) {
-        var pos = myt.MouseObservable.getMouseFromEvent(event);
-        this.requestDragPosition(pos.x - this._dragInitX, pos.y - this._dragInitY);
+    updateDrag: function(event) {
+        this.__lastMousePosition = myt.MouseObservable.getMouseFromEvent(event);
+        this.__requestDragPosition();
+    },
+    
+    /** @private */
+    __requestDragPosition: function() {
+        var pos = this.__lastMousePosition;
+        this.requestDragPosition(
+            pos.x - this._dragInitX + this.dragOffsetX, 
+            pos.y - this._dragInitY + this.dragOffsetY
+        );
     },
     
     /** Stop the drag. (see startDrag for more details)
         @returns void */
     stopDrag: function(event) {
-        var g = myt.global, gm = g.mouse;
-        g.dragManager.stopDrag(event);
+        var gm = myt.global.mouse;
         this.detachFromDom(gm, '__doMouseUp', 'mouseup', true);
-        this.detachFromDom(gm, '__updateDrag', 'mousemove', true);
+        this.detachFromDom(gm, 'updateDrag', 'mousemove', true);
         this.setIsDragging(false);
     },
     
@@ -139,8 +174,9 @@ myt.Draggable = new JS.Module('Draggable', {
         @param y:number the new y position.
         @returns void */
     requestDragPosition: function(x, y) {
-        if (this.disabled) return;
-        this.setX(x);
-        this.setY(y);
+        if (!this.disabled) {
+            this.setX(x);
+            this.setY(y);
+        }
     }
 });

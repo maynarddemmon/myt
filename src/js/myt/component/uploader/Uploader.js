@@ -1,6 +1,6 @@
 /** Component to upload files. */
 myt.Uploader = new JS.Class('Uploader', myt.View, {
-    include: [myt.Disableable, myt.FormElement],
+    include: [myt.DragDropObservable, myt.Disableable, myt.FormElement],
     
     
     // Class Methods and Attributes ////////////////////////////////////////////
@@ -46,19 +46,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
             }
         }]);
         
-        this._dragLeaveFunc = function(event) {self.doDragLeave(event);};
-        this._dragEnterFunc = function(event) {self.doDragEnter(event);};
-        this._dragOverFunc = function(event) {self.doDragOver(event);}
-        this._dropFunc = function(event) {self.doDrop(event);};
-        
         if (!this.disabled) this._setupDragListeners();
-    },
-    
-    /** @overrides myt.View. */
-    destroy: function() {
-        if (!this.disabled) this._teardownDragListeners();
-        
-        this.callSuper();
     },
     
     
@@ -98,38 +86,42 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     
     /** @overrides myt.Disableable */
     setDisabled: function(v) {
-        if (this.disabled === v) return;
-        this.domElement.disabled = v;
-        this.callSuper(v);
-        
-        if (this.inited) {
-            if (v) {
-                this._teardownDragListeners();
-            } else {
-                this._setupDragListeners();
+        if (this.disabled !== v) {
+            this.domElement.disabled = v;
+            this.callSuper(v);
+            
+            if (this.inited) {
+                if (v) {
+                    this._teardownDragListeners();
+                } else {
+                    this._setupDragListeners();
+                }
             }
+            
+            if (this.fileInput) this.fileInput.setDisabled(v);
         }
-        
-        if (this.fileInput) this.fileInput.setDisabled(v);
     },
     
     setMaxFiles: function(v) {
-        if (this.maxFiles === v) return;
-        this.maxFiles = v;
-        if (this.inited) this.fireNewEvent('maxFiles', v);
-        if (this.fileInput) this.fileInput.domElement.multiple = v > 1;
+        if (this.maxFiles !== v) {
+            this.maxFiles = v;
+            if (this.inited) this.fireNewEvent('maxFiles', v);
+            if (this.fileInput) this.fileInput.domElement.multiple = v > 1;
+        }
     },
     
     setUploadUrl: function(v) {
-        if (this.uploadUrl === v) return;
-        this.uploadUrl = v;
-        if (this.inited) this.fireNewEvent('uploadUrl', v);
+        if (this.uploadUrl !== v) {
+            this.uploadUrl = v;
+            if (this.inited) this.fireNewEvent('uploadUrl', v);
+        }
     },
     
     setRequestFileParam: function(v) {
-        if (this.requestFileParam === v) return;
-        this.requestFileParam = v;
-        if (this.inited) this.fireNewEvent('requestFileParam', v);
+        if (this.requestFileParam !== v) {
+            this.requestFileParam = v;
+            if (this.inited) this.fireNewEvent('requestFileParam', v);
+        }
     },
     
     
@@ -151,44 +143,33 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         if (this.fileInput) this.bringSubviewToFront(this.fileInput);
     },
     
+    /** @private */
     _setupDragListeners: function() {
-        var de = this.domElement;
-        myt.addEventListener(de, 'dragleave', this._dragLeaveFunc);
-        myt.addEventListener(de, 'dragenter', this._dragEnterFunc);
-        myt.addEventListener(de, 'dragover',  this._dragOverFunc);
-        myt.addEventListener(de, 'drop', this._dropFunc);
+        this.attachToDom(this, 'doDragOver', 'dragover', true);
+        this.attachToDom(this, 'doDragEnter', 'dragenter', true);
+        this.attachToDom(this, 'doDragLeave', 'dragleave', true);
+        this.attachToDom(this, 'doDrop', 'drop', true);
     },
     
+    /** @private */
     _teardownDragListeners: function() {
-        var de = this.domElement;
-        myt.removeEventListener(de, 'dragleave', this._dragLeaveFunc);
-        myt.removeEventListener(de, 'dragenter', this._dragEnterFunc);
-        myt.removeEventListener(de, 'dragover',  this._dragOverFunc);
-        myt.removeEventListener(de, 'drop', this._dropFunc);
+        this.detachFromDom(this, 'doDragOver', 'dragover', true);
+        this.detachFromDom(this, 'doDragEnter', 'dragenter', true);
+        this.detachFromDom(this, 'doDragLeave', 'dragleave', true);
+        this.detachFromDom(this, 'doDrop', 'drop', true);
     },
     
-    doDragOver: function(event) {
-        event.preventDefault();
-        event.stopPropagation();
-    },
+    doDragOver: function(event) {},
     
-    doDragEnter: function(event) {
-        event.preventDefault();
-        event.stopPropagation();
-    },
+    doDragEnter: function(event) {},
     
-    doDragLeave: function(event) {
-        event.preventDefault();
-        event.stopPropagation();
-    },
+    doDragLeave: function(event) {},
     
     doDrop: function(event) {
-        this._handleFiles(event.dataTransfer.files);
-        
-        event.preventDefault();
-        event.stopPropagation();
+        this._handleFiles(event.value.dataTransfer.files);
     },
     
+    /** @private */
     _handleFiles: function(files) {
         if (files !== undefined) {
             var i = files.length, file;
@@ -200,7 +181,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
                 }
             }
         } else {
-            myt.dumpStack("No support for the File API in this web browser");
+            myt.dumpStack("Browser doesn't support the File API");
         }
     },
     
@@ -214,15 +195,15 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     },
     
     uploadFiles: function(url, fileParam) {
-        if (url == null) url = this.uploadUrl;
+        url = url || this.uploadUrl;
         
         var files = this.files, i = files.length;
         while (i) this.uploadFile(files[--i], url, fileParam);
     },
     
     uploadFile: function(file, url, fileParam) {
-        if (url == null) url = this.uploadUrl;
-        if (fileParam == null) fileParam = this.requestFileParam;
+        url = url || this.uploadUrl;
+        fileParam = fileParam || this.requestFileParam;
         
         var self = this;
         var ajax = new myt.Ajax(this, {
@@ -239,17 +220,15 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
             }
         }]);
         
-        var opts = {
-            contentType:false,
-            cache: false,
-            processData: false
-        };
-        
         var formData = new FormData();
         formData.append(fileParam, file);
         ajax.setRequestData(formData);
         
-        ajax.doRequest(opts);
+        ajax.doRequest({
+            contentType:false,
+            cache: false,
+            processData: false
+        });
     },
     
     handleUploadSuccess: function(file, data, status, jqxhr) {

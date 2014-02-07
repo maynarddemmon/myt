@@ -1,0 +1,236 @@
+<!doctype html><html><head>
+<title>Myt Framework : Drag and Drop Example</title>
+<link rel="stylesheet" href="../src/css/myt.scss"/>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="../js/jquery/jquery-1.10.2.min.js">\x3C/script>');</script>
+<script src="../src/js/boilerplate.js"></script>
+<script src="../src/js/jsclass/min/loader-browser.js"></script>
+<script src="../src/js/myt/manifest.js"></script>
+</head><body>
+
+<script>
+    JS.require('myt.all', function() {this.init();});
+    
+    function init() {
+        var DragSource = new JS.Class('DragSource', myt.SimpleButton, {
+            include: [myt.DropSource],
+            
+            initNode: function(parent, attrs) {
+                if (attrs.activeColor === undefined) attrs.activeColor = '#bbbbbb';
+                if (attrs.readyColor === undefined) attrs.readyColor = '#cccccc';
+                if (attrs.hoverColor === undefined) attrs.hoverColor = '#dddddd';
+                
+                attrs.width = 30;
+                attrs.height = 30;
+                attrs.roundedCorners = 8;
+                
+                this.callSuper(parent, attrs);
+            }
+        });
+        
+        var DragBox = new JS.Class('DragBox', myt.SimpleButton, {
+            include: [myt.Dropable],
+            
+            initNode: function(parent, attrs) {
+                if (attrs.activeColor === undefined) attrs.activeColor = '#aa0000';
+                if (attrs.readyColor === undefined) attrs.readyColor = '#cc0000';
+                if (attrs.hoverColor === undefined) attrs.hoverColor = '#ff0000';
+                
+                attrs.ignoreLayout = true;
+                attrs.width = 30;
+                attrs.height = 30;
+                attrs.roundedCorners = 8;
+                attrs.boxShadow = [0, 0, 9, '#666666'];
+                
+                attrs.distanceBeforeDrag = 2;
+                
+                this.callSuper(parent, attrs);
+                
+                this._origW = this.width;
+                this._origH = this.height;
+            },
+            
+            startDrag: function() {
+                var root = this.getRoot();
+                if (this.parent !== root) {
+                    var pos = myt.DomElementProxy.getPagePosition(this.domElement, root.domElement);
+                    var diffX = pos.x - this.x, diffY = pos.y - this.y;
+                    this._dragInitX -= diffX;
+                    this._dragInitY -= diffY;
+                    this.setX(pos.x);
+                    this.setY(pos.y);
+                    this.setParent(root);
+                }
+                
+                this._dropped = false;
+                
+                this.callSuper();
+                this.bringToFront();
+            },
+            
+            notifyDragEnter: function(dropTarget) {
+                this.dropTarget = dropTarget;
+                
+                this.stopActiveAnimators('width');
+                this.stopActiveAnimators('height');
+                
+                this.stopActiveAnimators('dragOffsetX');
+                this.stopActiveAnimators('dragOffsetY');
+                this.setDragOffsetX(0, true);
+                this.setDragOffsetY(0, true);
+                
+                var pos = myt.DomElementProxy.getPagePosition(dropTarget.domElement, this.parent.domElement);
+                
+                this.animate('x', (pos.x + 10), null, null, null, 250, null, null, 'easeInOutQuad');
+                this.animate('y', (pos.y + 10), null, null, null, 250, null, null, 'easeInOutQuad');
+                this.animate('width', dropTarget.width - 20, null, null, null, 250, null, null, 'easeInOutQuad');
+                this.animate('height', dropTarget.height - 20, null, null, null, 250, null, null, 'easeInOutQuad');
+            },
+            
+            notifyDragLeave: function(dropTarget) {
+                this.stopActiveAnimators('width');
+                this.stopActiveAnimators('height');
+                this.stopActiveAnimators('x');
+                this.stopActiveAnimators('y');
+                
+                if (!this._dropped) {
+                    this.animate('width', this._origW, null, null, null, 250, null, null, 'easeInOutQuad');
+                    this.animate('height', this._origH, null, null, null, 250, null, null, 'easeInOutQuad');
+                    
+                    this._doCatchup = true;
+                }
+                
+                this.dropTarget = null;
+            },
+            
+            notifyDrop: function(dropTarget) {
+                this._dropped = true;
+                
+                if (!this.dropTarget) this._dropFailed = true;
+            },
+            
+            stopDrag: function(event) {
+                this.callSuper(event);
+                
+                if (this._dropFailed) this.destroy();
+            },
+            
+            requestDragPosition: function(x, y) {
+                if (!this.disabled && this.dropTarget) {
+                    // Do nothing since animators handle positioning
+                } else {
+                    if (this._doCatchup) {
+                        this._doCatchup = false;
+                        
+                        var startX = this.x - x, 
+                            startY = this.y - y;
+                        this.setDragOffsetX(startX, true);
+                        this.setDragOffsetY(startY, true);
+                        this.animate('dragOffsetX', 0, startX, null, null, 250, null, null, 'easeInOutQuad');
+                        this.animate('dragOffsetY', 0, startY, null, null, 250, null, null, 'easeInOutQuad');
+                        return;
+                    }
+                    this.callSuper(x, y);
+                }
+            }
+        });
+        
+        var DragTarget = new JS.Class('DragBox', myt.View, {
+            include: [myt.DropTarget],
+            
+            initNode: function(parent, attrs) {
+                if (attrs.width === undefined) attrs.width = 60;
+                if (attrs.height === undefined) attrs.height = 60;
+                attrs.bgColor = '#999999';
+                attrs.roundedCorners = 10;
+                
+                this.callSuper(parent, attrs);
+            },
+            
+            notifyDragStart: function(dropable) {
+                this.setBgColor('#888888');
+            },
+            
+            notifyDragStop: function(dropable) {
+                this.setBgColor('#999999');
+            },
+            
+            notifyDragEnter: function(dropable) {
+                this.setBoxShadow([0, 0, 9, '#666666']);
+            },
+            
+            notifyDragLeave: function(dropable) {
+                this.setBoxShadow();
+            },
+            
+            notifyDrop: function(dropable) {
+                // Reparent if necessary.
+                /*if (dropable.parent !== this.parent) dropable.setParent(this.parent);
+                
+                dropable.setX(this.x + (this.width - dropable.width) / 2);
+                dropable.setY(this.y + (this.height - dropable.height) / 2);*/
+                
+                if (dropable.parent !== this) dropable.setParent(this);
+                
+                dropable.setX((this.width - dropable.width) / 2);
+                dropable.setY((this.height - dropable.height) / 2);
+            }
+        });
+        
+        var rootView = new myt.View(null, {}, [myt.SizeToWindow]);
+        
+        var leftView = new myt.View(rootView, {overflow:'auto', bgColor:'#eeeeee', percentOfParentHeight:100}, [myt.SizeToParent, {
+            updateWidth: function(event) {
+                this.setWidth(event.value + event.source.inset - this.x);
+            }
+        }]);
+        var leftViewContent = new myt.View(leftView, {percentOfParentWidth:100}, [myt.SizeToParent]);
+        
+        var rightView = new myt.View(rootView, {overflow:'auto', bgColor:'#ffffff', percentOfParentHeight:100}, [myt.SizeToParent, {
+            updateWidth: function(event) {
+                this.setX(event.value + event.source.width - event.source.inset);
+                this.setWidth(this.parent.width - this.x);
+            }
+        }]);
+        var rightViewContent = new myt.View(rightView, {percentOfParentWidth:100}, [myt.SizeToParent]);
+        
+        var divider = new myt.HorizontalDivider(rootView, {
+            percentOfParentHeight:100, minValue:100, value:400, limitToParent:100
+        }, [myt.SizeToParent]);
+        leftView.syncTo(divider, 'updateWidth', 'value');
+        rightView.syncTo(divider, 'updateWidth', 'value');
+        rightView.syncTo(rootView, 'updateWidth', 'width');
+        
+        var i = 100;
+        while (i--) {
+            if (i % 3 === 0) {
+                new DragTarget(leftViewContent, {width:80, dragGroups:{foo:true}});
+            } else if (i % 3 === 1) {
+                new DragTarget(leftViewContent, {width:100, dragGroups:{foo:true, bar:true}});
+            } else {
+                new DragTarget(leftViewContent, {dragGroups:{bar:true}});
+            }
+        }
+        
+        var attrsOne = {x:10, y:10, dragGroups:{foo:true}, activeColor:'#00aa00', readyColor:'#00cc00', hoverColor:'#00ff00'};
+        var attrsTwo = {x:70, y:10, dragGroups:{foo:true, bar:true}, activeColor:'#aaaa00', readyColor:'#cccc00', hoverColor:'#ffff00'};
+        var attrsThree = {x:130, y:10, dragGroups:{bar:true}};
+        new DragBox(leftViewContent, attrsOne);
+        new DragBox(leftViewContent, attrsTwo);
+        var bar = new DragBox(leftViewContent, attrsThree);
+        bar.addDragGroup('baz');
+        
+        new myt.WrappingLayout(leftViewContent, {
+            inset:5, lineInset:5, outset:5, lineOutset:5, spacing:5, lineSpacing:5, collapseParent:true
+        });
+        
+        new DragSource(rightViewContent, {dropClass:DragBox, dropClassAttrs:attrsOne});
+        new DragSource(rightViewContent, {dropClass:DragBox, dropClassAttrs:attrsTwo});
+        new DragSource(rightViewContent, {dropClass:DragBox, dropClassAttrs:attrsThree});
+        
+        new myt.WrappingLayout(rightViewContent, {
+            inset:5, lineInset:5, outset:5, lineOutset:5, spacing:5, lineSpacing:5, collapseParent:true
+        });
+    }
+</script>
+</body></html>

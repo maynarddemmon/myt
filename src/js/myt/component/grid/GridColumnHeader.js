@@ -57,7 +57,7 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
         new myt.View(this, {
             name:'resizer', cursor:'col-resize', width:10, zIndex:1,
             percentOfParentHeight:100, align:'right', alignOffset:-5,
-            distanceBeforeDrag:0, draggableAllowBubble:false
+            draggableAllowBubble:false
         }, [myt.SizeToParent, myt.Draggable, {
             requestDragPosition: function(x, y) {
                 var p = this.parent, gc = p.gridController,

@@ -124,6 +124,11 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'util/Callback.js'    ).provides('myt.Callback'    ).requires('myt');
     file(MYT_COMPONENT_ROOT + 'util/StateMachine.js').provides('myt.StateMachine').requires('myt.Node');
     
+    // Component : Drag and Drop
+    file(MYT_COMPONENT_ROOT + 'dragdrop/Dropable.js'  ).provides('myt.Dropable'  ).requires('myt.Draggable');
+    file(MYT_COMPONENT_ROOT + 'dragdrop/DropTarget.js').provides('myt.DropTarget').requires('myt.Dropable');
+    file(MYT_COMPONENT_ROOT + 'dragdrop/DropSource.js').provides('myt.DropSource').requires('myt.Dropable');
+    
     // Component : Drawing
     file(MYT_COMPONENT_ROOT + 'drawing/Color.js'      ).provides('myt.Color'      ).requires('myt');
     file(MYT_COMPONENT_ROOT + 'drawing/Path.js'       ).provides('myt.Path'       ).requires('myt');
@@ -304,8 +309,9 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'form/elements/FormInputTextArea.js').provides('myt.FormInputTextArea').requires('myt.FormElement','myt.InputTextArea');
     
     // Component : Uploader
-    file(MYT_COMPONENT_ROOT + 'uploader/Uploader.js'     ).provides('myt.Uploader'     ).requires('myt.View','myt.NativeInputWrapper','myt.Disableable','myt.Ajax','myt.FormElement');
-    file(MYT_COMPONENT_ROOT + 'uploader/ImageUploader.js').provides('myt.ImageUploader').requires('myt.Uploader');
+    file(MYT_COMPONENT_ROOT + 'uploader/DragDropObservable.js').provides('myt.DragDropObservable').requires('myt.DomObservable');
+    file(MYT_COMPONENT_ROOT + 'uploader/Uploader.js'          ).provides('myt.Uploader'          ).requires('myt.View','myt.NativeInputWrapper','myt.DragDropObservable','myt.Disableable','myt.Ajax','myt.FormElement');
+    file(MYT_COMPONENT_ROOT + 'uploader/ImageUploader.js'     ).provides('myt.ImageUploader'     ).requires('myt.Uploader');
     
     // Component : Graphing
     file(MYT_COMPONENT_ROOT + 'graphing/scatter/KDTree.js'           ).provides('myt.KDTreeNode','myt.BinaryHeap','myt.KDTree').requires('myt');
@@ -322,7 +328,7 @@ JS.Packages(function() {with(this) {
         'myt.SizeToWindowWidth', 'myt.SizeToWindowHeight', 'myt.TransformSupport', 
         'myt.Animator', 'myt.Callback', 'myt.RepeatableTimer', 'myt.StateMachine', 'myt.URI', 'myt.Ajax',
         'myt.Replicator',
-        'myt.Draggable', 'myt.WrappingLayout', 'myt.ResizeLayout', 'myt.AlignedLayout', 'myt.ThreePanel',
+        'myt.WrappingLayout', 'myt.ResizeLayout', 'myt.AlignedLayout', 'myt.ThreePanel',
         'myt.DrawButton', 'myt.SimpleIconTextButton', 'myt.IconTextPanelButton', 'myt.DelayedMethodCall',
         'myt.FloatingPanelAnchor',
         'myt.TextCheckbox','myt.TextRadio','myt.TextTabSlider', 'myt.Tab',
@@ -335,6 +341,7 @@ JS.Packages(function() {with(this) {
         'myt.Slider','myt.RangeSlider',
         'myt.HorizontalDivider','myt.VerticalDivider',
         'myt.Grid','myt.SimpleGridColumnHeader',
-        'myt.PanelStack'
+        'myt.PanelStack',
+        'myt.DropTarget','myt.DropSource'
     );
 }});
