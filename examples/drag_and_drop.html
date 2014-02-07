@@ -40,7 +40,6 @@
                 attrs.width = 30;
                 attrs.height = 30;
                 attrs.roundedCorners = 8;
-                attrs.boxShadow = [0, 0, 9, '#666666'];
                 
                 attrs.distanceBeforeDrag = 2;
                 
@@ -59,13 +58,28 @@
                     this._dragInitY -= diffY;
                     this.setX(pos.x);
                     this.setY(pos.y);
-                    this.setParent(root);
+                    
+                    var self = this;
+                    myt.View.retainFocusDuringDomUpdate(this, function() {
+                        self.setParent(root);
+                    });
                 }
                 
                 this._dropped = false;
                 
+                this.syncTo(this, '_updateDragInitX', 'width');
+                this.syncTo(this, '_updateDragInitY', 'height');
+                
                 this.callSuper();
                 this.bringToFront();
+            },
+            
+            _updateDragInitX: function(event) {
+                this.dragInitX = this.width / 2;
+            },
+            
+            _updateDragInitY: function(event) {
+                this.dragInitY = this.height / 2;
             },
             
             notifyDragEnter: function(dropTarget) {
@@ -106,11 +120,28 @@
             notifyDrop: function(dropTarget) {
                 this._dropped = true;
                 
-                if (!this.dropTarget) this._dropFailed = true;
+                var dropTarget = this.dropTarget;
+                if (dropTarget) {
+                    // Reparent if necessary.
+                    if (this.parent !== dropTarget) {
+                        var self = this;
+                        myt.View.retainFocusDuringDomUpdate(this, function() {
+                            self.setParent(dropTarget);
+                        });
+                    }
+                    
+                    this.setX((dropTarget.width - this.width) / 2);
+                    this.setY((dropTarget.height - this.height) / 2);
+                } else {
+                    this._dropFailed = true;
+                }
             },
             
             stopDrag: function(event) {
                 this.callSuper(event);
+                
+                this.detachFrom(this, '_updateDragInitX', 'width');
+                this.detachFrom(this, '_updateDragInitY', 'height');
                 
                 if (this._dropFailed) this.destroy();
             },
@@ -148,7 +179,7 @@
             },
             
             notifyDragStart: function(dropable) {
-                this.setBgColor('#888888');
+                if (this.willAcceptDrop(dropable)) this.setBgColor('#888888');
             },
             
             notifyDragStop: function(dropable) {
@@ -163,17 +194,16 @@
                 this.setBoxShadow();
             },
             
-            notifyDrop: function(dropable) {
-                // Reparent if necessary.
-                /*if (dropable.parent !== this.parent) dropable.setParent(this.parent);
-                
-                dropable.setX(this.x + (this.width - dropable.width) / 2);
-                dropable.setY(this.y + (this.height - dropable.height) / 2);*/
-                
-                if (dropable.parent !== this) dropable.setParent(this);
-                
-                dropable.setX((this.width - dropable.width) / 2);
-                dropable.setY((this.height - dropable.height) / 2);
+            willAcceptDrop: function(dropable) {
+                if (this.hasContent()) {
+                    return false;
+                } else {
+                    return this.callSuper();
+                }
+            },
+            
+            hasContent: function() {
+                return this.getSubviews().length > 0;
             }
         });
         
@@ -195,7 +225,7 @@
         var rightViewContent = new myt.View(rightView, {percentOfParentWidth:100}, [myt.SizeToParent]);
         
         var divider = new myt.HorizontalDivider(rootView, {
-            percentOfParentHeight:100, minValue:100, value:400, limitToParent:100
+            percentOfParentHeight:100, minValue:100, value:400, limitToParent:110
         }, [myt.SizeToParent]);
         leftView.syncTo(divider, 'updateWidth', 'value');
         rightView.syncTo(divider, 'updateWidth', 'value');
@@ -224,6 +254,20 @@
             inset:5, lineInset:5, outset:5, lineOutset:5, spacing:5, lineSpacing:5, collapseParent:true
         });
         
+        new DragSource(rightViewContent, {dropClass:DragBox, dropClassAttrs:attrsOne});
+        new DragSource(rightViewContent, {dropClass:DragBox, dropClassAttrs:attrsTwo});
+        new DragSource(rightViewContent, {dropClass:DragBox, dropClassAttrs:attrsThree});
+        new DragSource(rightViewContent, {dropClass:DragBox, dropClassAttrs:attrsOne});
+        new DragSource(rightViewContent, {dropClass:DragBox, dropClassAttrs:attrsTwo});
+        new DragSource(rightViewContent, {dropClass:DragBox, dropClassAttrs:attrsThree});
+        
+        new DragTarget(rightViewContent, {width:100, height:100, layoutHint:'break'});
+        new DragTarget(rightViewContent, {width:100, height:150});
+        new DragTarget(rightViewContent, {width:100, height:200});
+        
+        new DragSource(rightViewContent, {dropClass:DragBox, dropClassAttrs:attrsOne, layoutHint:'break'});
+        new DragSource(rightViewContent, {dropClass:DragBox, dropClassAttrs:attrsTwo});
+        new DragSource(rightViewContent, {dropClass:DragBox, dropClassAttrs:attrsThree});
         new DragSource(rightViewContent, {dropClass:DragBox, dropClassAttrs:attrsOne});
         new DragSource(rightViewContent, {dropClass:DragBox, dropClassAttrs:attrsTwo});
         new DragSource(rightViewContent, {dropClass:DragBox, dropClassAttrs:attrsThree});

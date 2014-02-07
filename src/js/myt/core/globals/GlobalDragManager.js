@@ -105,11 +105,15 @@ new JS.Singleton('GlobalDragManager', {
             dropTarget, targetGroups, dragGroup;
         while (i) {
             dropTarget = dropTargets[--i];
-            targetGroups = dropTarget.getDragGroups();
-            for (dragGroup in dragGroups) {
-                if (targetGroups[dragGroup]) {
-                    retval.push(dropTarget);
-                    break;
+            if (dropTarget.acceptAnyDragGroup()) {
+                retval.push(dropTarget);
+            } else {
+                targetGroups = dropTarget.getDragGroups();
+                for (dragGroup in dragGroups) {
+                    if (targetGroups[dragGroup]) {
+                        retval.push(dropTarget);
+                        break;
+                    }
                 }
             }
         }
@@ -165,6 +169,7 @@ new JS.Singleton('GlobalDragManager', {
             while (i) {
                 dropTarget = dropTargets[--i];
                 if (dropTarget.containsPoint(mouseX, mouseY) && 
+                    dropTarget.willAcceptDrop(dropable) &&
                     (!topDropTarget || dropTarget.isInFrontOf(topDropTarget))
                 ) {
                     topDropTarget = dropTarget;

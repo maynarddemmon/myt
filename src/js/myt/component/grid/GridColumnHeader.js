@@ -100,7 +100,7 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
                 } else if (remainingDiff > 0) {
                     additionalActualDiff = p._givePrevWidth(remainingDiff);
                 }
-                this._dragInitX += additionalActualDiff;
+                this.dragInitX += additionalActualDiff;
                 stolenAmt -= additionalActualDiff;
                 
                 if (gc.fitToWidth) {

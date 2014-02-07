@@ -58,7 +58,7 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
             @returns int */
         getZIndexRelativeToAncestor: function(elem, ancestor) {
             if (elem && ancestor) {
-                var ancestors = this.getAncestorsArray(elem, ancestor),
+                var ancestors = this.getAncestorArray(elem, ancestor),
                     i = ancestors.length - 1, style, zIdx, isAuto;
                 
                 while (i) {
@@ -82,7 +82,7 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
             @param ancestor:DomElement (optional) The dom element to stop
                 getting ancestors at.
             @returns an array of ancestor dom elements. */
-        getAncestorsArray: function(elem, ancestor) {
+        getAncestorArray: function(elem, ancestor) {
             var ancestors = [];
             while (elem) {
                 ancestors.push(elem);

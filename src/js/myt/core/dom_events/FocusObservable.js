@@ -135,16 +135,29 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
         @returns void */
     focus: function(noScroll) {
         if (this.isFocusable()) {
+            var de = this.domElement;
             if (noScroll) {
-                // Record current scroll position and then scroll back after
-                // doing focus since focus may adjust scroll position.
-                // TODO: This only works on the widow but would be better to
-                // work on the parent or something.
-                var x = window.scrollX, y = window.scrollY;
-                this.domElement.focus();
-                window.scrollTo(x, y);
+                // Maintain scrollTop/scrollLeft
+                var ancestors = myt.DomElementProxy.getAncestorArray(de),
+                    len = ancestors.length, i = len, ancestor,
+                    scrollPositions = [], scrollPosition;
+                while (i) {
+                    ancestor = ancestors[--i];
+                    scrollPositions.unshift({scrollTop:ancestor.scrollTop, scrollLeft:ancestor.scrollLeft});
+                }
+                
+                de.focus();
+                
+                // Restore scrollTop/scrollLeft
+                i = len;
+                while (i) {
+                    ancestor = ancestors[--i];
+                    scrollPosition = scrollPositions[i];
+                    ancestor.scrollTop = scrollPosition.scrollTop;
+                    ancestor.scrollLeft = scrollPosition.scrollLeft;
+                }
             } else {
-                this.domElement.focus();
+                de.focus();
             }
         }
     },

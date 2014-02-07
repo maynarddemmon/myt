@@ -17,10 +17,10 @@
             Defaults to 0.
         dragOffsetY:number The y amount to offset the position during dragging.
             Defaults to 0.
+        dragInitX:number Stores initial mouse x position during dragging.
+        dragInitY:number Stores initial mouse y position during dragging.
     
     Private Attributes:
-        _dragInitX:number Stores initial mouse x position during dragging.
-        _dragInitY:number Stores initial mouse y position during dragging.
         __lastMousePosition:object The last position of the mouse during
             dragging.
 */
@@ -95,8 +95,8 @@ myt.Draggable = new JS.Module('Draggable', {
     /** @private */
     __doMouseDown: function(event) {
         var pos = myt.MouseObservable.getMouseFromEvent(event);
-        this._dragInitX = pos.x - this.x;
-        this._dragInitY = pos.y - this.y;
+        this.dragInitX = pos.x - this.x;
+        this.dragInitY = pos.y - this.y;
         
         var gm = myt.global.mouse;
         this.attachToDom(gm, '__doMouseUp', 'mouseup', true);
@@ -125,7 +125,7 @@ myt.Draggable = new JS.Module('Draggable', {
     /** @private */
     __doDragCheck: function(event) {
         var pos = myt.MouseObservable.getMouseFromEvent(event),
-            distance = myt.Geometry.measureDistance(pos.x, pos.y, this._dragInitX + this.x, this._dragInitY + this.y);
+            distance = myt.Geometry.measureDistance(pos.x, pos.y, this.dragInitX + this.x, this.dragInitY + this.y);
         if (distance >= this.distanceBeforeDrag) {
             this.detachFromDom(myt.global.mouse, '__doDragCheck', 'mousemove', true);
             this.startDrag(event);
@@ -153,8 +153,8 @@ myt.Draggable = new JS.Module('Draggable', {
     __requestDragPosition: function() {
         var pos = this.__lastMousePosition;
         this.requestDragPosition(
-            pos.x - this._dragInitX + this.dragOffsetX, 
-            pos.y - this._dragInitY + this.dragOffsetY
+            pos.x - this.dragInitX + this.dragOffsetX, 
+            pos.y - this.dragInitY + this.dragOffsetY
         );
     },
     

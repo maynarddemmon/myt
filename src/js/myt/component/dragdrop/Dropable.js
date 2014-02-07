@@ -5,7 +5,7 @@
     
     Attributes:
         dragGroups:object The keys are the set of drag groups this dropable
-            supports. By default a drag group of 'all' is defined.
+            supports.
 */
 myt.Dropable = new JS.Module('Dropable', {
     include: [myt.Draggable],
@@ -14,7 +14,7 @@ myt.Dropable = new JS.Module('Dropable', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
-        this.dragGroups = {all:true};
+        this.dragGroups = {};
         
         this.callSuper(parent, attrs);
     },

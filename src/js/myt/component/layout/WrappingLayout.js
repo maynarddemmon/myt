@@ -1,6 +1,10 @@
 /** An extension of VariableLayout that positions views along an axis using
     an inset, outset and spacing value. Views will be wrapped when they
-    overflow the available space. */
+    overflow the available space.
+    
+    Supported Layout Hints:
+        break:string Will force the subview to start a new line/column.
+*/
 myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.VariableLayout */
@@ -193,7 +197,7 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
         var size = sv[this.measureAttrName],
             otherSize = sv[this.otherMeasureAttrName];
         
-        if (value + size > this.parentSizeLessOutset) {
+        if (value + size > this.parentSizeLessOutset || sv.layoutHint === 'break') {
             // Check for overflow
             value = this.targetValue; // Reset to inset.
             this.linePos += this.lineSize + this.lineSpacing;

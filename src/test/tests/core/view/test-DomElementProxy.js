@@ -97,7 +97,7 @@ test("getComputedStye, setStyleProperty and setZIndex", function() {
     proxy.destroy();
 });
 
-test("getAncestorsArray", function() {
+test("getAncestorArray", function() {
     var v = new myt.View(null, {}, [myt.RootView]);
     
     var sv1 = new myt.View(v);
@@ -110,28 +110,28 @@ test("getAncestorsArray", function() {
     
     var sv331 = new myt.View(sv33);
     
-    var none = myt.DomElementProxy.getAncestorsArray(null);
+    var none = myt.DomElementProxy.getAncestorArray(null);
     ok(none.length === 0, "No ancestors of null.");
     
-    var ancestorsOfRoot = myt.DomElementProxy.getAncestorsArray(v.domElement);
+    var ancestorsOfRoot = myt.DomElementProxy.getAncestorArray(v.domElement);
     ok(ancestorsOfRoot.length === 4, "Four ancestors of root element.");
     ok(ancestorsOfRoot[0] === v.domElement, "First ancestor of root dom element is the dom element itself.");
     ok(ancestorsOfRoot[1] === document.body, "Second ancestor of root dom element is the document body element.");
     ok(ancestorsOfRoot[2] === document.documentElement, "Third ancestor of root dom element is the html element.");
     ok(ancestorsOfRoot[3] === document, "Fourth ancestor of root dom element is the document element.");
     
-    ancestorsOfRoot = myt.DomElementProxy.getAncestorsArray(v.domElement, v.domElement);
+    ancestorsOfRoot = myt.DomElementProxy.getAncestorArray(v.domElement, v.domElement);
     ok(ancestorsOfRoot.length === 1, "One ancestor of root element.");
     ok(ancestorsOfRoot[0] === v.domElement, "First ancestor of root dom element is the dom element itself.");
     
-    var ancestors = myt.DomElementProxy.getAncestorsArray(sv331.domElement, v.domElement);
+    var ancestors = myt.DomElementProxy.getAncestorArray(sv331.domElement, v.domElement);
     ok(ancestors.length === 4, "Four ancestor of view sv331.");
     ok(ancestors[0] === sv331.domElement, "sv331 is first ancestor.");
     ok(ancestors[1] === sv33.domElement, "sv33 is second ancestor.");
     ok(ancestors[2] === sv3.domElement, "sv3 is third ancestor.");
     ok(ancestors[3] === v.domElement, "v is fourth ancestor.");
     
-    ancestors = myt.DomElementProxy.getAncestorsArray(sv331.domElement, sv2.domElement);
+    ancestors = myt.DomElementProxy.getAncestorArray(sv331.domElement, sv2.domElement);
     ok(ancestors.length === 7, "Full ancestor array up to document.");
     ok(ancestors[0] === sv331.domElement, "First ancestor is the element itself.");
     ok(ancestors[6] === document, "Seventh ancestor is the document element.");
