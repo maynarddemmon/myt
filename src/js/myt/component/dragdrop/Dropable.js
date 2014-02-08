@@ -4,6 +4,11 @@
         None
     
     Attributes:
+        dropped:boolean Indicates this dropable was just dropped.
+        dropFailed:boolean Indicates this dropable was just dropped outside
+            of a drop target.
+        dropTarget:myt.DropTarget The drop target this dropable is currently
+            over.
         dragGroups:object The keys are the set of drag groups this dropable
             supports.
 */
@@ -20,6 +25,10 @@ myt.Dropable = new JS.Module('Dropable', {
     },
     
     // Accessors ///////////////////////////////////////////////////////////////
+    setDropTarget: function(v) {this.dropTarget = v;},
+    setDropped: function(v) {this.dropped = v;},
+    setDropFailed: function(v) {this.dropFailed = v;},
+    
     setDragGroups: function(v) {
         var newDragGroups = {};
         for (var dragGroup in v) newDragGroups[dragGroup] = true;
@@ -48,6 +57,9 @@ myt.Dropable = new JS.Module('Dropable', {
     
     /** @overrides myt.Draggable */
     startDrag: function(event) {
+        this.setDropped(false);
+        this.setDropFailed(false);
+        
         this.callSuper(event);
         myt.global.dragManager.startDrag(this);
     },
@@ -62,24 +74,39 @@ myt.Dropable = new JS.Module('Dropable', {
     stopDrag: function(event) {
         myt.global.dragManager.stopDrag(event, this);
         this.callSuper(event);
+        
+        if (this.dropFailed) this.notifyDropFailed();
     },
     
     /** Called by myt.GlobalDragManager when this view is dragged over a drop
         target.
         @param dropTarget:myt.DropTarget The target that was dragged over.
         @returns void */
-    notifyDragEnter: function(dropTarget) {},
+    notifyDragEnter: function(dropTarget) {
+        this.setDropTarget(dropTarget);
+    },
     
     /** Called by myt.GlobalDragManager when this view is dragged out of a drop
         target.
         @param dropTarget:myt.DropTarget The target that was dragged out of.
         @returns void */
-    notifyDragLeave: function(dropTarget) {},
+    notifyDragLeave: function(dropTarget) {
+        this.setDropTarget();
+    },
     
     /** Called by myt.GlobalDragManager when this view is dropped on a drop
         target.
         @param dropTarget:myt.DropTarget The target that was dropped on. Will
             be undefined if this dropable was dropped on no drop target.
         @returns void */
-    notifyDrop: function(dropTarget) {}
+    notifyDrop: function(dropTarget) {
+        this.setDropped(true);
+        
+        if (!this.dropTarget) this.setDropFailed(true);
+    },
+    
+    /** Called after dragging stops and the drop failed. The default
+        implementation does nothing.
+        @returns void */
+    notifyDropFailed: function() {}
 });

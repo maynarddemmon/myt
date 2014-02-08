@@ -19,6 +19,9 @@
             Defaults to 0.
         dragInitX:number Stores initial mouse x position during dragging.
         dragInitY:number Stores initial mouse y position during dragging.
+        centerOnMouse:boolean If true this draggable will update the dragInitX
+            and dragInitY to keep the view centered on the mouse. Defaults
+            to undefined which is equivalent to false.
     
     Private Attributes:
         __lastMousePosition:object The last position of the mouse during
@@ -81,6 +84,7 @@ myt.Draggable = new JS.Module('Draggable', {
     
     setDistanceBeforeDrag: function(v) {this.distanceBeforeDrag = v;},
     setDraggableAllowBubble: function(v) {this.draggableAllowBubble = v;},
+    setCenterOnMouse: function(v) {this.centerOnMouse = v;},
     
     
     // Methods /////////////////////////////////////////////////////////////////
@@ -140,6 +144,11 @@ myt.Draggable = new JS.Module('Draggable', {
     startDrag: function(event) {
         this.setIsDragging(true);
         this.attachToDom(myt.global.mouse, 'updateDrag', 'mousemove', true);
+        
+        if (this.centerOnMouse) {
+            this.syncTo(this, '__updateDragInitX', 'width');
+            this.syncTo(this, '__updateDragInitY', 'height');
+        }
     },
     
     /** Called on every mousemove event while dragging.
@@ -147,6 +156,16 @@ myt.Draggable = new JS.Module('Draggable', {
     updateDrag: function(event) {
         this.__lastMousePosition = myt.MouseObservable.getMouseFromEvent(event);
         this.__requestDragPosition();
+    },
+    
+    /** @private */
+    __updateDragInitX: function(event) {
+        this.dragInitX = this.width / 2;
+    },
+    
+    /** @private */
+    __updateDragInitY: function(event) {
+        this.dragInitY = this.height / 2;
     },
     
     /** @private */
@@ -164,6 +183,10 @@ myt.Draggable = new JS.Module('Draggable', {
         var gm = myt.global.mouse;
         this.detachFromDom(gm, '__doMouseUp', 'mouseup', true);
         this.detachFromDom(gm, 'updateDrag', 'mousemove', true);
+        if (this.centerOnMouse) {
+            this.detachFrom(this, '__updateDragInitX', 'width');
+            this.detachFrom(this, '__updateDragInitY', 'height');
+        }
         this.setIsDragging(false);
     },
     

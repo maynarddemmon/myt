@@ -20,8 +20,7 @@
                 if (attrs.readyColor === undefined) attrs.readyColor = '#cccccc';
                 if (attrs.hoverColor === undefined) attrs.hoverColor = '#dddddd';
                 
-                attrs.width = 30;
-                attrs.height = 30;
+                attrs.width = attrs.height = 30;
                 attrs.roundedCorners = 8;
                 
                 this.callSuper(parent, attrs);
@@ -37,25 +36,23 @@
                 if (attrs.hoverColor === undefined) attrs.hoverColor = '#ff0000';
                 
                 attrs.ignoreLayout = true;
-                attrs.width = 30;
-                attrs.height = 30;
+                attrs.width = attrs.height = 30;
                 attrs.roundedCorners = 8;
                 
+                attrs.centerOnMouse = true;
                 attrs.distanceBeforeDrag = 2;
                 
                 this.callSuper(parent, attrs);
                 
                 this._origW = this.width;
                 this._origH = this.height;
+                this.animDuration = 100;
             },
             
             startDrag: function() {
                 var root = this.getRoot();
                 if (this.parent !== root) {
                     var pos = myt.DomElementProxy.getPagePosition(this.domElement, root.domElement);
-                    var diffX = pos.x - this.x, diffY = pos.y - this.y;
-                    this._dragInitX -= diffX;
-                    this._dragInitY -= diffY;
                     this.setX(pos.x);
                     this.setY(pos.y);
                     
@@ -64,86 +61,17 @@
                         self.setParent(root);
                     });
                 }
-                
-                this._dropped = false;
-                
-                this.syncTo(this, '_updateDragInitX', 'width');
-                this.syncTo(this, '_updateDragInitY', 'height');
+                this.bringToFront();
                 
                 this.callSuper();
-                this.bringToFront();
             },
             
-            _updateDragInitX: function(event) {
-                this.dragInitX = this.width / 2;
-            },
-            
-            _updateDragInitY: function(event) {
-                this.dragInitY = this.height / 2;
-            },
-            
-            notifyDragEnter: function(dropTarget) {
-                this.dropTarget = dropTarget;
-                
-                this.stopActiveAnimators('width');
-                this.stopActiveAnimators('height');
-                
-                this.stopActiveAnimators('dragOffsetX');
-                this.stopActiveAnimators('dragOffsetY');
-                this.setDragOffsetX(0, true);
-                this.setDragOffsetY(0, true);
-                
-                var pos = myt.DomElementProxy.getPagePosition(dropTarget.domElement, this.parent.domElement);
-                
-                this.animate('x', (pos.x + 10), null, null, null, 250, null, null, 'easeInOutQuad');
-                this.animate('y', (pos.y + 10), null, null, null, 250, null, null, 'easeInOutQuad');
-                this.animate('width', dropTarget.width - 20, null, null, null, 250, null, null, 'easeInOutQuad');
-                this.animate('height', dropTarget.height - 20, null, null, null, 250, null, null, 'easeInOutQuad');
-            },
-            
-            notifyDragLeave: function(dropTarget) {
-                this.stopActiveAnimators('width');
-                this.stopActiveAnimators('height');
-                this.stopActiveAnimators('x');
-                this.stopActiveAnimators('y');
-                
-                if (!this._dropped) {
-                    this.animate('width', this._origW, null, null, null, 250, null, null, 'easeInOutQuad');
-                    this.animate('height', this._origH, null, null, null, 250, null, null, 'easeInOutQuad');
-                    
-                    this._doCatchup = true;
-                }
-                
-                this.dropTarget = null;
-            },
-            
-            notifyDrop: function(dropTarget) {
-                this._dropped = true;
-                
-                var dropTarget = this.dropTarget;
-                if (dropTarget) {
-                    // Reparent if necessary.
-                    if (this.parent !== dropTarget) {
-                        var self = this;
-                        myt.View.retainFocusDuringDomUpdate(this, function() {
-                            self.setParent(dropTarget);
-                        });
-                    }
-                    
-                    this.setX((dropTarget.width - this.width) / 2);
-                    this.setY((dropTarget.height - this.height) / 2);
-                } else {
-                    this._dropFailed = true;
-                }
-            },
-            
-            stopDrag: function(event) {
-                this.callSuper(event);
-                
-                this.detachFrom(this, '_updateDragInitX', 'width');
-                this.detachFrom(this, '_updateDragInitY', 'height');
-                
-                if (this._dropFailed) this.destroy();
+            notifyDropFailed: function() {
+                var self = this;
+                this.setDisabled(true);
+                this.animate('opacity', 0, 1, null, null, 500, null, null, 'easeInOutQuad').next(
+                    function(success) {self.destroy();}
+                );
             },
             
             requestDragPosition: function(x, y) {
@@ -153,15 +81,16 @@
                     if (this._doCatchup) {
                         this._doCatchup = false;
                         
-                        var startX = this.x - x, 
+                        var dur = this.animDuration,
+                            startX = this.x - x, 
                             startY = this.y - y;
                         this.setDragOffsetX(startX, true);
                         this.setDragOffsetY(startY, true);
-                        this.animate('dragOffsetX', 0, startX, null, null, 250, null, null, 'easeInOutQuad');
-                        this.animate('dragOffsetY', 0, startY, null, null, 250, null, null, 'easeInOutQuad');
-                        return;
+                        this.animate('dragOffsetX', 0, startX, null, null, dur, null, null, 'easeInOutQuad');
+                        this.animate('dragOffsetY', 0, startY, null, null, dur, null, null, 'easeInOutQuad');
+                    } else {
+                        this.callSuper(x, y);
                     }
-                    this.callSuper(x, y);
                 }
             }
         });
@@ -179,7 +108,7 @@
             },
             
             notifyDragStart: function(dropable) {
-                if (this.willAcceptDrop(dropable)) this.setBgColor('#888888');
+                if (this.willAcceptDrop(dropable)) this.setBgColor('#666666');
             },
             
             notifyDragStop: function(dropable) {
@@ -188,10 +117,50 @@
             
             notifyDragEnter: function(dropable) {
                 this.setBoxShadow([0, 0, 9, '#666666']);
+                
+                dropable.stopActiveAnimators('width');
+                dropable.stopActiveAnimators('height');
+                
+                dropable.stopActiveAnimators('dragOffsetX');
+                dropable.stopActiveAnimators('dragOffsetY');
+                dropable.setDragOffsetX(0, true);
+                dropable.setDragOffsetY(0, true);
+                
+                var pos = myt.DomElementProxy.getPagePosition(this.domElement, dropable.parent.domElement),
+                    dur = dropable.animDuration;
+                dropable.animate('x', (pos.x + 5), null, null, null, dur, null, null, 'easeInOutQuad');
+                dropable.animate('y', (pos.y + 5), null, null, null, dur, null, null, 'easeInOutQuad');
+                dropable.animate('width', this.width - 10, null, null, null, dur, null, null, 'easeInOutQuad');
+                dropable.animate('height', this.height - 10, null, null, null, dur, null, null, 'easeInOutQuad');
             },
             
             notifyDragLeave: function(dropable) {
                 this.setBoxShadow();
+                
+                dropable.stopActiveAnimators('width');
+                dropable.stopActiveAnimators('height');
+                dropable.stopActiveAnimators('x');
+                dropable.stopActiveAnimators('y');
+                
+                if (!dropable.dropped) {
+                    var dur = dropable.animDuration;
+                    dropable.animate('width', dropable._origW, null, null, null, dur, null, null, 'easeInOutQuad');
+                    dropable.animate('height', dropable._origH, null, null, null, dur, null, null, 'easeInOutQuad');
+                    dropable._doCatchup = true;
+                }
+            },
+            
+            notifyDrop: function(dropable) {
+                // Reparent if necessary.
+                if (dropable.parent !== this) {
+                    var self = this;
+                    myt.View.retainFocusDuringDomUpdate(dropable, function() {
+                        dropable.setParent(self);
+                    });
+                }
+                
+                dropable.setX((this.width - dropable.width) / 2);
+                dropable.setY((this.height - dropable.height) / 2);
             },
             
             willAcceptDrop: function(dropable) {
@@ -207,6 +176,8 @@
             }
         });
         
+        
+        // Create Views ////////////////////////////////////////////////////////
         var rootView = new myt.View(null, {}, [myt.SizeToWindow]);
         
         var leftView = new myt.View(rootView, {overflow:'auto', bgColor:'#eeeeee', percentOfParentHeight:100}, [myt.SizeToParent, {
@@ -225,7 +196,7 @@
         var rightViewContent = new myt.View(rightView, {percentOfParentWidth:100}, [myt.SizeToParent]);
         
         var divider = new myt.HorizontalDivider(rootView, {
-            percentOfParentHeight:100, minValue:100, value:400, limitToParent:110
+            percentOfParentHeight:100, minValue:110, value:400, limitToParent:110
         }, [myt.SizeToParent]);
         leftView.syncTo(divider, 'updateWidth', 'value');
         rightView.syncTo(divider, 'updateWidth', 'value');
