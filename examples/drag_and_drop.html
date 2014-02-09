@@ -180,14 +180,14 @@
         // Create Views ////////////////////////////////////////////////////////
         var rootView = new myt.View(null, {}, [myt.SizeToWindow]);
         
-        var leftView = new myt.View(rootView, {overflow:'auto', bgColor:'#eeeeee', percentOfParentHeight:100}, [myt.SizeToParent, {
+        var leftView = new myt.View(rootView, {bgColor:'#eeeeee', percentOfParentHeight:100}, [myt.SizeToParent, myt.AutoScroller, {
             updateWidth: function(event) {
                 this.setWidth(event.value + event.source.inset - this.x);
             }
         }]);
         var leftViewContent = new myt.View(leftView, {percentOfParentWidth:100}, [myt.SizeToParent]);
         
-        var rightView = new myt.View(rootView, {overflow:'auto', bgColor:'#ffffff', percentOfParentHeight:100}, [myt.SizeToParent, {
+        var rightView = new myt.View(rootView, {bgColor:'#ffffff', percentOfParentHeight:100}, [myt.SizeToParent, myt.AutoScroller, {
             updateWidth: function(event) {
                 this.setX(event.value + event.source.width - event.source.inset);
                 this.setWidth(this.parent.width - this.x);

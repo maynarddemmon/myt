@@ -125,9 +125,10 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'util/StateMachine.js').provides('myt.StateMachine').requires('myt.Node');
     
     // Component : Drag and Drop
-    file(MYT_COMPONENT_ROOT + 'dragdrop/Dropable.js'  ).provides('myt.Dropable'  ).requires('myt.Draggable');
-    file(MYT_COMPONENT_ROOT + 'dragdrop/DropTarget.js').provides('myt.DropTarget').requires('myt.Dropable');
-    file(MYT_COMPONENT_ROOT + 'dragdrop/DropSource.js').provides('myt.DropSource').requires('myt.Dropable');
+    file(MYT_COMPONENT_ROOT + 'dragdrop/Dropable.js'    ).provides('myt.Dropable'    ).requires('myt.Draggable');
+    file(MYT_COMPONENT_ROOT + 'dragdrop/DropTarget.js'  ).provides('myt.DropTarget'  ).requires('myt.Dropable');
+    file(MYT_COMPONENT_ROOT + 'dragdrop/DropSource.js'  ).provides('myt.DropSource'  ).requires('myt.Dropable');
+    file(MYT_COMPONENT_ROOT + 'dragdrop/AutoScroller.js').provides('myt.AutoScroller').requires('myt.View','myt.global.mouse');
     
     // Component : Drawing
     file(MYT_COMPONENT_ROOT + 'drawing/Color.js'      ).provides('myt.Color'      ).requires('myt');
@@ -342,6 +343,6 @@ JS.Packages(function() {with(this) {
         'myt.HorizontalDivider','myt.VerticalDivider',
         'myt.Grid','myt.SimpleGridColumnHeader',
         'myt.PanelStack',
-        'myt.DropTarget','myt.DropSource'
+        'myt.DropTarget','myt.DropSource','myt.AutoScroller'
     );
 }});

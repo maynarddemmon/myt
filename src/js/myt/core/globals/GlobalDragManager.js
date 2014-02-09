@@ -18,6 +18,8 @@
         overView:myt.View The view currently being dragged over.
         dropTargets:array The list of myt.DropTargets currently registered
             for notification when drag and drop events occur.
+        autoScrollers:array The list of myt.AutoScrollers currently registered
+            for notification when drags start and stop.
 */
 new JS.Singleton('GlobalDragManager', {
     include: [myt.Observable],
@@ -26,6 +28,7 @@ new JS.Singleton('GlobalDragManager', {
     // Constructor /////////////////////////////////////////////////////////////
     initialize: function() {
         this.dropTargets = [];
+        this.autoScrollers = [];
         
         myt.global.register('dragManager', this);
     },
@@ -37,19 +40,27 @@ new JS.Singleton('GlobalDragManager', {
         if (cur !== v) {
             this.dragView = v;
             
-            var isStart = !!v, dropTargets, i;
+            var isStart = !!v, targets, i, dt, funcName, eventName;
             
             if (isStart) {
-                dropTargets = this.getDropTargetsForDragGroups(v.getDragGroups());
-                i = dropTargets.length;
-                while (i) dropTargets[--i].notifyDragStart(v);
+                dt = v;
+                funcName = 'notifyDragStart';
+                eventName = 'startDrag';
             } else {
-                dropTargets = this.getDropTargetsForDragGroups(cur.getDragGroups());
-                i = dropTargets.length;
-                while (i) dropTargets[--i].notifyDragStop(cur);
+                dt = cur;
+                funcName = 'notifyDragStop';
+                eventName = 'stopDrag';
             }
             
-            this.fireNewEvent(isStart ? 'startDrag' : 'stopDrag', v);
+            targets = this.getDropTargetsForDragGroups(dt.getDragGroups());
+            i = targets.length;
+            while (i) targets[--i][funcName](dt);
+            
+            targets = this.getAutoScrollersForDragGroups(dt.getDragGroups());
+            i = targets.length;
+            while (i) targets[--i][funcName](dt);
+            
+            this.fireNewEvent(eventName, v);
         }
     },
     
@@ -75,6 +86,51 @@ new JS.Singleton('GlobalDragManager', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** Registers the provided auto scroller to receive notifications.
+        @param autoScroller:myt.AutoScroller The auto scroller to register.
+        @returns void */
+    registerAutoScroller: function(autoScroller) {
+        this.autoScrollers.push(autoScroller);
+    },
+    
+    /** Unregisters the provided auto scroller.
+        @param autoScroller:myt.AutoScroller The auto scroller to unregister.
+        @returns void */
+    unregisterAutoScroller: function(autoScroller) {
+        var autoScrollers = this.autoScrollers, i = autoScrollers.length;
+        while (i) {
+            if (autoScrollers[--i] === autoScroller) {
+                autoScrollers.splice(i, 1);
+                break;
+            }
+        }
+    },
+    
+    /** Gets an array of myt.AutoScrollers that have any of the provided
+        drag groups.
+        @param dragGroups:object The set of dragGroups to match against.
+        @returns array: An array of the matching auto scrollers. */
+    getAutoScrollersForDragGroups: function(dragGroups) {
+        retval = [];
+        var autoScrollers = this.autoScrollers, i = autoScrollers.length, 
+            autoScroller, targetGroups, dragGroup;
+        while (i) {
+            autoScroller = autoScrollers[--i];
+            if (autoScroller.acceptAnyDragGroup()) {
+                retval.push(autoScroller);
+            } else {
+                targetGroups = autoScroller.getDragGroups();
+                for (dragGroup in dragGroups) {
+                    if (targetGroups[dragGroup]) {
+                        retval.push(autoScroller);
+                        break;
+                    }
+                }
+            }
+        }
+        return retval;
+    },
+    
     /** Registers the provided drop target to receive notifications.
         @param dropTarget:myt.DropTarget The drop target to register.
         @returns void */
@@ -98,7 +154,7 @@ new JS.Singleton('GlobalDragManager', {
     /** Gets an array of myt.DropTargets that have any of the provided
         drag groups.
         @param dragGroups:object The set of dragGroups to match against.
-        @returns array: An array of the matching drag groups. */
+        @returns array: An array of the matching drop targets. */
     getDropTargetsForDragGroups: function(dragGroups) {
         retval = [];
         var dropTargets = this.dropTargets, i = dropTargets.length, 
