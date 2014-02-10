@@ -40,25 +40,25 @@ new JS.Singleton('GlobalDragManager', {
         if (cur !== v) {
             this.dragView = v;
             
-            var isStart = !!v, targets, i, dt, funcName, eventName;
+            var isStart = !!v, targets, i, dv, funcName, eventName;
             
             if (isStart) {
-                dt = v;
+                dv = v;
                 funcName = 'notifyDragStart';
                 eventName = 'startDrag';
             } else {
-                dt = cur;
+                dv = cur;
                 funcName = 'notifyDragStop';
                 eventName = 'stopDrag';
             }
             
-            targets = this.getDropTargetsForDragGroups(dt.getDragGroups());
+            targets = this.__filterList(dv, this.dropTargets);
             i = targets.length;
-            while (i) targets[--i][funcName](dt);
+            while (i) targets[--i][funcName](dv);
             
-            targets = this.getAutoScrollersForDragGroups(dt.getDragGroups());
+            targets = this.__filterList(dv, this.autoScrollers);
             i = targets.length;
-            while (i) targets[--i][funcName](dt);
+            while (i) targets[--i][funcName](dv);
             
             this.fireNewEvent(eventName, v);
         }
@@ -106,31 +106,6 @@ new JS.Singleton('GlobalDragManager', {
         }
     },
     
-    /** Gets an array of myt.AutoScrollers that have any of the provided
-        drag groups.
-        @param dragGroups:object The set of dragGroups to match against.
-        @returns array: An array of the matching auto scrollers. */
-    getAutoScrollersForDragGroups: function(dragGroups) {
-        retval = [];
-        var autoScrollers = this.autoScrollers, i = autoScrollers.length, 
-            autoScroller, targetGroups, dragGroup;
-        while (i) {
-            autoScroller = autoScrollers[--i];
-            if (autoScroller.acceptAnyDragGroup()) {
-                retval.push(autoScroller);
-            } else {
-                targetGroups = autoScroller.getDragGroups();
-                for (dragGroup in dragGroups) {
-                    if (targetGroups[dragGroup]) {
-                        retval.push(autoScroller);
-                        break;
-                    }
-                }
-            }
-        }
-        return retval;
-    },
-    
     /** Registers the provided drop target to receive notifications.
         @param dropTarget:myt.DropTarget The drop target to register.
         @returns void */
@@ -149,31 +124,6 @@ new JS.Singleton('GlobalDragManager', {
                 break;
             }
         }
-    },
-    
-    /** Gets an array of myt.DropTargets that have any of the provided
-        drag groups.
-        @param dragGroups:object The set of dragGroups to match against.
-        @returns array: An array of the matching drop targets. */
-    getDropTargetsForDragGroups: function(dragGroups) {
-        retval = [];
-        var dropTargets = this.dropTargets, i = dropTargets.length, 
-            dropTarget, targetGroups, dragGroup;
-        while (i) {
-            dropTarget = dropTargets[--i];
-            if (dropTarget.acceptAnyDragGroup()) {
-                retval.push(dropTarget);
-            } else {
-                targetGroups = dropTarget.getDragGroups();
-                for (dragGroup in dragGroups) {
-                    if (targetGroups[dragGroup]) {
-                        retval.push(dropTarget);
-                        break;
-                    }
-                }
-            }
-        }
-        return retval;
     },
     
     /** Called by a myt.Dropable when a drag starts.
@@ -203,17 +153,11 @@ new JS.Singleton('GlobalDragManager', {
         @param dropable:myt.Dropable The dropable that is being dragged.
         @returns void */
     updateDrag: function(event, dropable) {
-        this.setOverView(this.getViewUnderMouse(event, dropable));
-    },
-    
-    /** Gets the frontmost myt.DropTarget that is registered with this manager 
-        and is under the current mouse location and has a matching drag group.
-        @param event:event the mouse event to search with.
-        @param dropable:myt.Dropable The dropable that is being dragged.
-        @returns myt.DropTarget: The drop target or undefined if none found. */
-    getViewUnderMouse: function(event, dropable) {
+        // Get the frontmost myt.DropTarget that is registered with this 
+        // manager and is under the current mouse location and has a 
+        // matching drag group.
         var topDropTarget,
-            dropTargets = this.getDropTargetsForDragGroups(dropable.getDragGroups()),
+            dropTargets = this.__filterList(dropable, this.dropTargets);
             i = dropTargets.length;
         
         if (i > 0) {
@@ -224,8 +168,9 @@ new JS.Singleton('GlobalDragManager', {
             
             while (i) {
                 dropTarget = dropTargets[--i];
-                if (dropTarget.containsPoint(mouseX, mouseY) && 
-                    dropTarget.willAcceptDrop(dropable) &&
+                if (dropTarget.willAcceptDrop(dropable) &&
+                    dropable.willPermitDrop(dropTarget) &&
+                    dropTarget.containsPoint(mouseX, mouseY) && 
                     (!topDropTarget || dropTarget.isInFrontOf(topDropTarget))
                 ) {
                     topDropTarget = dropTarget;
@@ -233,6 +178,41 @@ new JS.Singleton('GlobalDragManager', {
             }
         }
         
-        return topDropTarget;
-    }
+        this.setOverView(topDropTarget);
+    },
+    
+    /** Filters the provided array of myt.DragGroupSupport items for the
+        provided dropable.
+        @private
+        @param dropable:myt.Dropable The dropable to filter for.
+        @returns array: An array of the matching list items. */
+    __filterList: function(dropable, list) {
+        var retval;
+        
+        if (dropable.acceptAnyDragGroup()) {
+            retval = list;
+        } else {
+            retval = [];
+            
+            var dragGroups = dropable.getDragGroups(),
+                i = list.length, 
+                item, targetGroups, dragGroup;
+            while (i) {
+                item = list[--i];
+                if (item.acceptAnyDragGroup()) {
+                    retval.push(item);
+                } else {
+                    targetGroups = item.getDragGroups();
+                    for (dragGroup in dragGroups) {
+                        if (targetGroups[dragGroup]) {
+                            retval.push(item);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return retval;
+    },
 });

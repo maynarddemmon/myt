@@ -13,9 +13,6 @@
         scrollAcceleration:number The amount to increase scrolling by as the
             mouse gets closer to the edge of the view. Setting this to 0 will
             result in no acceleration. Defaults to 7.
-        dragGroups:object The keys are the set of drag groups this drop target
-            supports. By default the special drag group of '*' which accepts
-            all drag groups is defined.
     
     Private Attributes:
         __amountscrollUp:number
@@ -32,10 +29,12 @@
         __timerIdAutoscrollRight:number
 */
 myt.AutoScroller = new JS.Module('AutoScroller', {
+    include: [myt.DragGroupSupport],
+    
+    
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides */
     initNode: function(parent, attrs) {
-        this.dragGroups = {'*':true};
         this.scrollBorder = 40;
         this.scrollFrequency = 50;
         this.scrollAmount = 2;
@@ -62,39 +61,8 @@ myt.AutoScroller = new JS.Module('AutoScroller', {
     setScrollAmount: function(v) {this.scrollAmount = v;},
     setScrollAcceleration: function(v) {this.scrollAcceleration = v;},
     
-    setDragGroups: function(v) {
-        var newDragGroups = {};
-        for (var dragGroup in v) newDragGroups[dragGroup] = true;
-        this.dragGroups = newDragGroups;
-    },
-    
-    getDragGroups: function() {
-        return this.dragGroups;
-    },
-    
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** Adds the provided dragGroup to the dragGroups.
-        @param dragGroup:string The drag group to add.
-        @returns void */
-    addDragGroup: function(dragGroup) {
-        if (dragGroup) this.dragGroups[dragGroup] = true;
-    },
-    
-    /** Removes the provided dragGroup from the dragGroups.
-        @param dragGroup:string The drag group to remove.
-        @returns void */
-    removeDragGroup: function(dragGroup) {
-        if (dragGroup) delete this.dragGroups[dragGroup];
-    },
-    
-    /** Determines if this drop target will accept drops from any drag group.
-        @returns boolean: True if any drag group will be accepted, false
-            otherwise. */
-    acceptAnyDragGroup: function() {
-        return this.dragGroups.hasOwnProperty('*');
-    },
-    
     /** Called by myt.GlobalDragManager when a dropable starts being dragged
         that has a matching drag group.
         @param dropable:myt.Dropable The dropable being dragged.

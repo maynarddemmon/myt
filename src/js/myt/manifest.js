@@ -125,10 +125,11 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'util/StateMachine.js').provides('myt.StateMachine').requires('myt.Node');
     
     // Component : Drag and Drop
-    file(MYT_COMPONENT_ROOT + 'dragdrop/Dropable.js'    ).provides('myt.Dropable'    ).requires('myt.Draggable');
-    file(MYT_COMPONENT_ROOT + 'dragdrop/DropTarget.js'  ).provides('myt.DropTarget'  ).requires('myt.Dropable');
-    file(MYT_COMPONENT_ROOT + 'dragdrop/DropSource.js'  ).provides('myt.DropSource'  ).requires('myt.Dropable');
-    file(MYT_COMPONENT_ROOT + 'dragdrop/AutoScroller.js').provides('myt.AutoScroller').requires('myt.View','myt.global.mouse');
+    file(MYT_COMPONENT_ROOT + 'dragdrop/DragGroupSupport.js').provides('myt.DragGroupSupport').requires('myt.View','myt.global.mouse');
+    file(MYT_COMPONENT_ROOT + 'dragdrop/Dropable.js'        ).provides('myt.Dropable'        ).requires('myt.Draggable','myt.DragGroupSupport');
+    file(MYT_COMPONENT_ROOT + 'dragdrop/DropTarget.js'      ).provides('myt.DropTarget'      ).requires('myt.Dropable','myt.DragGroupSupport');
+    file(MYT_COMPONENT_ROOT + 'dragdrop/DropSource.js'      ).provides('myt.DropSource'      ).requires('myt.Dropable');
+    file(MYT_COMPONENT_ROOT + 'dragdrop/AutoScroller.js'    ).provides('myt.AutoScroller'    ).requires('myt.DragGroupSupport');
     
     // Component : Drawing
     file(MYT_COMPONENT_ROOT + 'drawing/Color.js'      ).provides('myt.Color'      ).requires('myt');

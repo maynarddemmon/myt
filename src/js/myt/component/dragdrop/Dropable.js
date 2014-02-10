@@ -9,50 +9,25 @@
             of a drop target.
         dropTarget:myt.DropTarget The drop target this dropable is currently
             over.
-        dragGroups:object The keys are the set of drag groups this dropable
-            supports.
 */
 myt.Dropable = new JS.Module('Dropable', {
-    include: [myt.Draggable],
+    include: [myt.Draggable, myt.DragGroupSupport],
     
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.View */
-    initNode: function(parent, attrs) {
-        this.dragGroups = {};
-        
-        this.callSuper(parent, attrs);
-    },
     
     // Accessors ///////////////////////////////////////////////////////////////
     setDropTarget: function(v) {this.dropTarget = v;},
     setDropped: function(v) {this.dropped = v;},
     setDropFailed: function(v) {this.dropFailed = v;},
     
-    setDragGroups: function(v) {
-        var newDragGroups = {};
-        for (var dragGroup in v) newDragGroups[dragGroup] = true;
-        this.dragGroups = newDragGroups;
-    },
-    
-    getDragGroups: function() {
-        return this.dragGroups;
-    },
-    
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** Adds the provided dragGroup to the dragGroups.
-        @param dragGroup:string The drag group to add.
-        @returns void */
-    addDragGroup: function(dragGroup) {
-        if (dragGroup) this.dragGroups[dragGroup] = true;
-    },
-    
-    /** Removes the provided dragGroup from the dragGroups.
-        @param dragGroup:string The drag group to remove.
-        @returns void */
-    removeDragGroup: function(dragGroup) {
-        if (dragGroup) delete this.dragGroups[dragGroup];
+    /** Called by myt.GlobalDragManager when a dropable is dragged over a
+        target. Gives this dropable a chance to reject a drop regardless
+        of drag group. The default implementation returns true.
+        @param dropTarget:myt.DropTarget The drop target dragged over.
+        @returns boolean: True if the drop will be allowed, false otherwise. */
+    willPermitDrop: function(dropTarget) {
+        return true;
     },
     
     /** @overrides myt.Draggable */
