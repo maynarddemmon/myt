@@ -27,17 +27,17 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     
     /** @overrides myt.View */
     doAfterAdoption: function() {
-        var shtr = this.sizeHeightToRows;
+        var shtr = this.sizeHeightToRows, m = myt;
         
-        var header = new myt.View(this, {name:'header', overflow:'hidden'});
-        new myt.SpacedLayout(header, {
+        var header = new m.View(this, {name:'header', overflow:'hidden'});
+        new m.SpacedLayout(header, {
             name:'xLayout', locked:true, axis:'x', collapseParent:true, 
             spacing:this.columnSpacing
         });
-        new myt.SizeToChildren(header, {name:'yLayout', locked:true, axis:'y'});
+        new m.SizeToChildren(header, {name:'yLayout', locked:true, axis:'y'});
         
-        var content = new myt.View(this, {name:'content', overflow:'auto'});
-        new myt.SpacedLayout(content, {
+        var content = new m.View(this, {name:'content', overflow:'auto'});
+        new m.SpacedLayout(content, {
             name:'yLayout', locked:true, axis:'y', spacing:this.rowSpacing,
             collapseParent:shtr
         });

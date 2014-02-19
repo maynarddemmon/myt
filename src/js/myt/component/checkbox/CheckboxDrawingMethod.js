@@ -15,8 +15,9 @@ myt.CheckboxDrawingMethod = new JS.Class('CheckboxDrawingMethod', myt.DrawingMet
     
     /** @private */
     __getTemplate: function(config) {
-        var b = config.bounds, x = b.x, y = b.y, w = b.w, h = b.h;
-        var shadowBlur         = config.shadowBlur == null ? 2 : config.shadowBlur,
+        var m = myt, 
+            b = config.bounds, x = b.x, y = b.y, w = b.w, h = b.h,
+            shadowBlur         = config.shadowBlur == null ? 2 : config.shadowBlur,
             shadowOffsetX      = config.shadowOffsetX == null ? 0 : config.shadowOffsetX,
             shadowOffsetY      = config.shadowOffsetY == null ? 1 : config.shadowOffsetY,
             radius             = config.radius == null ? 4 : config.radius,
@@ -29,10 +30,10 @@ myt.CheckboxDrawingMethod = new JS.Class('CheckboxDrawingMethod', myt.DrawingMet
             y2 = y + inset,
             w2 = w - 2*inset,
             h2 = h - 2*inset,
-            darkColor = (myt.Color.makeColorFromHexString(fillColor)).multiply(5/6),
-            DU = myt.DrawingUtil;
+            darkColor = (m.Color.makeColorFromHexString(fillColor)).multiply(5/6),
+            DU = m.DrawingUtil;
         
-        var canvas = new myt.Canvas(myt.global.roots.getRoots()[0], {
+        var canvas = new m.Canvas(m.global.roots.getRoots()[0], {
             width:x + w + shadowOffsetX + shadowBlur, 
             height:y + h + shadowOffsetY + shadowBlur, 
             visible:false, 
@@ -62,7 +63,7 @@ myt.CheckboxDrawingMethod = new JS.Class('CheckboxDrawingMethod', myt.DrawingMet
         
         // Checkmark
         if (config.checked) {
-            var path = new myt.Path([
+            var path = new m.Path([
                 x2 + 2, y2 + 1/2 * h2,
                 x2 + 1/2 * w2, y2 + h2 - 2,
                 x + w + 3, y,

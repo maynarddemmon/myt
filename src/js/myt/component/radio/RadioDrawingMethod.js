@@ -15,7 +15,8 @@ myt.RadioDrawingMethod = new JS.Class('RadioDrawingMethod', myt.DrawingMethod, {
     
     /** @private */
     __getTemplate: function(config) {
-        var b = config.bounds, x = b.x, y = b.y, w = b.w, h = b.h,
+        var m = myt,
+            b = config.bounds, x = b.x, y = b.y, w = b.w, h = b.h,
             shadowBlur         = config.shadowBlur == null ? 2 : config.shadowBlur,
             shadowOffsetX      = config.shadowOffsetX == null ? 0 : config.shadowOffsetX,
             shadowOffsetY      = config.shadowOffsetY == null ? 1 : config.shadowOffsetY,
@@ -29,9 +30,9 @@ myt.RadioDrawingMethod = new JS.Class('RadioDrawingMethod', myt.DrawingMethod, {
             dotRadius = (radius2 / 2) - 1,
             centerX = x + radius,
             centerY = y + radius,
-            darkColor = (myt.Color.makeColorFromHexString(fillColor)).multiply(5/6);
+            darkColor = (m.Color.makeColorFromHexString(fillColor)).multiply(5/6);
         
-        var canvas = new myt.Canvas(myt.global.roots.getRoots()[0], {
+        var canvas = new m.Canvas(m.global.roots.getRoots()[0], {
             width:x + w + shadowOffsetX + shadowBlur, 
             height:y + h + shadowOffsetY + shadowBlur, 
             visible:false, 

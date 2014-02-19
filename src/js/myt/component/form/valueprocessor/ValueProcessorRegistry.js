@@ -21,14 +21,15 @@ new JS.Singleton('GlobalValueProcessorRegistry', {
     initialize: function() {
         this.__c = {};
         
-        myt.global.register('valueProcessors', this);
+        var m = myt;
+        m.global.register('valueProcessors', this);
         
         // Register a few common ValueProcessors
-        this.register(new myt.UndefinedValueProcessor('undefToEmpty', true, true, true, ''));
-        this.register(new myt.ToNumberValueProcessor('toNumber', true, true, true));
-        this.register(new myt.TrimValueProcessor('trimLeft', true, true, true, 'left'));
-        this.register(new myt.TrimValueProcessor('trimRight', true, true, true, 'right'));
-        this.register(new myt.TrimValueProcessor('trimBoth', true, true, true, 'both'));
+        this.register(new m.UndefinedValueProcessor('undefToEmpty', true, true, true, ''));
+        this.register(new m.ToNumberValueProcessor('toNumber', true, true, true));
+        this.register(new m.TrimValueProcessor('trimLeft', true, true, true, 'left'));
+        this.register(new m.TrimValueProcessor('trimRight', true, true, true, 'right'));
+        this.register(new m.TrimValueProcessor('trimBoth', true, true, true, 'both'));
     },
     
     

@@ -1,5 +1,61 @@
-/** An implementation of a finite state machine. */
+/** An implementation of a finite state machine.
+    
+    Events:
+        start + transition name: Fired when a transition starts.
+        start: Fired when a transition starts after the named start event.
+        leave + state name: Fired when a state is left.
+        leave: Fired when a state is left after the named leave event.
+        enter + state name: Fired when a state is entered.
+        enter: Fired when a state is entered after the named enter event.
+        end + transition name: Fired when a transition ends.
+        end: Fired when a transition ends after the named end event.
+        finished: Fired when the state machine has transitioned into the
+            terminal state if one is defined.
+    
+    Attributes:
+        map:object A map of state names to transition maps.
+        current:string The name of the current state.
+        initial:string The name of the state to start with.
+        terminal:string The name of the final state from which no other
+            transitions are allowed.
+    
+    Private Attributes:
+        __transitionInProgress:boolean Indicates that a transition is 
+            currently under way.
+        __pendingTransition:string The name of the transition that is currently
+            under way.
+        __additionalArgs:array An array of additional args passed into the
+            doTransition or doAsyncTransition methods.
+        __transitionDestinationState: The state the currently running 
+            transition is transitioning to
+        __transitionStage:string The stage of the current transition. Allowed
+            values are 'leaveState' and 'enterState'.
+        __deferredTransitions:array An array of transitions that will be
+            performed after the current one completes.
+*/
 myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
+    // Class Methods and Attributes ////////////////////////////////////////////
+    extend: {
+        /** The transition was successfull. */
+        SUCCEEDED:1,
+        /** The transition was cancelled before the state change occurred. */
+        CANCELLED:2,
+        /** An asynchronous transition is in progress. */
+        PENDING:3,
+        /** The transition was invalid in some way. */
+        INVALID:4,
+        /** No transition exists for the current state. */
+        NO_TRANSITION:5,
+        
+        /** Indicates a synchronous transition. */
+        SYNC:'sync',
+        /** Indicates an asynchronous transition. */
+        ASYNC:'async',
+        /** Special state name that holds transitions for all states. */
+        WILDCARD:'*'
+    },
+    
+    
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
         this.map = {};
@@ -76,6 +132,7 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
         return this.__doTransition.apply(this, args);
     },
     
+    /** @private */
     __doTransition: function() {
         var args = Array.prototype.slice.call(arguments);
         
@@ -94,16 +151,17 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
             transition = args.shift();
         
         // Invalid to start a transition if one is still pending.
-        if (this.__pendingTransition) return myt.StateMachine.PENDING;
+        var SM = myt.StateMachine;
+        if (this.__pendingTransition) return SM.PENDING;
         
         // Do not allow transition from the terminal states
         if (this.isFinished()) {
             this.__transitionInProgress = false;
-            return myt.StateMachine.NO_TRANSITION;
+            return SM.NO_TRANSITION;
         }
         
         var to = this.map[this.current][transition];
-        if (!to) to = this.map[myt.StateMachine.WILDCARD][transition];
+        if (!to) to = this.map[SM.WILDCARD][transition];
         if (to) {
             this.__pendingTransition = transition;
             this.__transitionDestinationState = to;
@@ -111,7 +169,7 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
             return this.resumeTransition(async);
         } else {
             this.__transitionInProgress = false;
-            return myt.StateMachine.NO_TRANSITION;
+            return SM.NO_TRANSITION;
         }
     },
     
@@ -119,7 +177,8 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
         var transition = this.__pendingTransition;
         
         // Invalid to resume a transition if none is pending.
-        if (!transition) return myt.StateMachine.INVALID;
+        var SM = myt.StateMachine;
+        if (!transition) return SM.INVALID;
         
         var current = this.current,
             to = this.__transitionDestinationState,
@@ -132,20 +191,21 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
                 if (result === false) {
                     this.__resetTransitionProgress();
                     this.__doDeferredTransitions();
-                    return myt.StateMachine.CANCELLED;
-                } else if (result === myt.StateMachine.ASYNC || async === myt.StateMachine.ASYNC) {
+                    return SM.CANCELLED;
+                } else if (result === SM.ASYNC || async === SM.ASYNC) {
                     this.__transitionStage = 'enterState';
                     this.fireNewEvent('start' + transition, eventValue);
                     this.fireNewEvent('start', eventValue);
                     this.fireNewEvent('leave' + current, eventValue);
                     this.fireNewEvent('leave', eventValue);
-                    this.__doDeferredTransitions();
-                    return myt.StateMachine.PENDING;
+                    this.__doDeferredTransitions(); // FIXME: Is there a bug here if a transition starts in the middle of an async transition?
+                    return SM.PENDING;
                 } else {
                     this.fireNewEvent('start' + transition, eventValue);
                     this.fireNewEvent('start', eventValue);
                     this.fireNewEvent('leave' + current, eventValue);
                     this.fireNewEvent('leave', eventValue);
+                    // Synchronous so fall through to 'enterState' case.
                 }
             case 'enterState':
                 this.current = to;
@@ -159,9 +219,10 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
         }
         
         this.__doDeferredTransitions();
-        return myt.StateMachine.SUCCEEDED;
+        return SM.SUCCEEDED;
     },
     
+    /** @private */
     __doDeferredTransitions: function() {
         this.__transitionInProgress = false;
         
@@ -181,6 +242,7 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
         // Subclasses to implement as needed.
     },
     
+    /** @private */
     __resetTransitionProgress: function() {
         this.__additionalArgs = [];
         this.__pendingTransition = '';
@@ -212,14 +274,3 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
         }
     }
 });
-
-// Class Attributes ////////////////////////////////////////////////////////////
-myt.StateMachine.SUCCEEDED = 1; // The transition was successfull
-myt.StateMachine.CANCELLED = 2; // The transition was cancelled before the state change occurred.
-myt.StateMachine.PENDING = 3; // An asynchronous transition is in progress.
-myt.StateMachine.INVALID = 4; // The transition was invalid in some way.
-myt.StateMachine.NO_TRANSITION = 5; // No transition exists for the current state.
-
-myt.StateMachine.SYNC = 'sync'; // Indicates a synchronous transition
-myt.StateMachine.ASYNC = 'async'; // Indicates an asynchronous transition
-myt.StateMachine.WILDCARD = '*'; // Special state name that holds transitions for all states.

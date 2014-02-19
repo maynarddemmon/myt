@@ -31,7 +31,8 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
             @returns object the style object. */
         getComputedStyle: function(elem) {
             // getComputedStyle is IE's proprietary way.
-            return global.getComputedStyle ? global.getComputedStyle(elem, '') : elem.currentStyle;
+            var g = global;
+            return g.getComputedStyle ? g.getComputedStyle(elem, '') : elem.currentStyle;
         },
         
         /** Tests if a dom element is visible or not.
@@ -126,26 +127,19 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
         getPagePosition: function(elem, ancestorElem) {
             if (!elem) return null;
             
-            var x = y = 0,
+            var x = y = 0, s,
                 borderMultiplier = BrowserDetect.browser === 'Firefox' ? 2 : 1; // I have no idea why firefox needs it twice, but it does.
             
             // elem.nodeName !== "BODY" test prevents looking at the body
             // which causes problems when the document is scrolled on webkit.
-            while (elem && elem.nodeName !== "BODY" && 
-                elem !== ancestorElem &&
-                !isNaN(elem.offsetLeft) && !isNaN(elem.offsetTop)
-            ) {
+            while (elem && elem.nodeName !== "BODY" && elem !== ancestorElem) {
                 x += elem.offsetLeft;
                 y += elem.offsetTop;
                 elem = elem.offsetParent;
                 if (elem && elem.nodeName !== "BODY") {
-                    x -= elem.scrollLeft;
-                    y -= elem.scrollTop;
-                    
-                    // Handle borders
-                    var s = this.getComputedStyle(elem);
-                    x += borderMultiplier * parseInt(s.borderLeftWidth, 10);
-                    y += borderMultiplier * parseInt(s.borderTopWidth, 10);
+                    s = this.getComputedStyle(elem);
+                    x += borderMultiplier * parseInt(s.borderLeftWidth, 10) - elem.scrollLeft;
+                    y += borderMultiplier * parseInt(s.borderTopWidth, 10) - elem.scrollTop;
                 }
             }
             

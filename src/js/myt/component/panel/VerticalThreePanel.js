@@ -24,24 +24,25 @@ myt.VerticalThreePanel = new JS.Class('VerticalThreePanel', {
     doBeforeAdoption: function() {
         this.callSuper();
         
-        new myt.Image(this, {
+        var m = myt;
+        new m.Image(this, {
             name:'first', imageUrl:this.firstImageUrl, ignoreLayout:true
         });
         
-        var second = new myt.Image(this, {
+        var second = new m.Image(this, {
             name:'second', layoutHint:1, imageUrl:this.secondImageUrl, 
             ignoreLayout:true, useNaturalSize:false, calculateNaturalSize:true
         });
         this.attachTo(second, '__updateSize', 'naturalWidth');
         this.attachTo(second, '__updateImageSize', 'height');
         
-        new myt.Image(this, {
+        new m.Image(this, {
             name:'third', imageUrl:this.thirdImageUrl, ignoreLayout:true
         });
         
-        var ignoreMixin = [myt.ThreePanel.IGNORE_FUNCTION_MIXIN];
-        new myt.ResizeLayout(this, {name:'resizeLayout', axis:'y'}, ignoreMixin);
-        new myt.SizeToChildren(this, {axis:'x'}, ignoreMixin);
+        var ignoreMixin = [m.ThreePanel.IGNORE_FUNCTION_MIXIN];
+        new m.ResizeLayout(this, {name:'resizeLayout', axis:'y'}, ignoreMixin);
+        new m.SizeToChildren(this, {axis:'x'}, ignoreMixin);
         
         this.__updateRepeat();
         this.__updateSize();

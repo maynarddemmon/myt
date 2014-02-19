@@ -24,24 +24,25 @@ myt.HorizontalThreePanel = new JS.Module('HorizontalThreePanel', {
     doBeforeAdoption: function() {
         this.callSuper();
         
-        new myt.Image(this, {
+        var m = myt;
+        new m.Image(this, {
             name:'first', imageUrl:this.firstImageUrl, ignoreLayout:true
         });
         
-        var second = new myt.Image(this, {
+        var second = new m.Image(this, {
             name:'second', layoutHint:1, imageUrl:this.secondImageUrl, 
             ignoreLayout:true, useNaturalSize:false, calculateNaturalSize:true
         });
         this.attachTo(second, '__updateSize', 'naturalHeight');
         this.attachTo(second, '__updateImageSize', 'width');
         
-        new myt.Image(this, {
+        new m.Image(this, {
             name:'third', imageUrl:this.thirdImageUrl, ignoreLayout:true
         });
         
-        var ignoreMixin = [myt.ThreePanel.IGNORE_FUNCTION_MIXIN];
-        new myt.ResizeLayout(this, {name:'resizeLayout'}, ignoreMixin);
-        new myt.SizeToChildren(this, {axis:'y'}, ignoreMixin);
+        var ignoreMixin = [m.ThreePanel.IGNORE_FUNCTION_MIXIN];
+        new m.ResizeLayout(this, {name:'resizeLayout'}, ignoreMixin);
+        new m.SizeToChildren(this, {axis:'y'}, ignoreMixin);
         
         this.__updateRepeat();
         this.__updateSize();
