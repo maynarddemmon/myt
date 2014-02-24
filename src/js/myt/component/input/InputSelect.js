@@ -85,7 +85,7 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     subviewAdded: function(sv) {
-        // Destory subview if it's not supported.
+        // Destroy subview if it's not supported.
         if (!(sv instanceof myt.InputSelectOption)) {
             myt.dumpStack("Subview not supported. Destroying it.");
             sv.destroy();

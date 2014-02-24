@@ -7,9 +7,9 @@ myt.ToNumberValueProcessor = new JS.Class('ToNumberValueProcessor', myt.ValuePro
         // Don't convert "empty" values to a number since they'll become zero
         // which is probably incorrect. Also catch undefined/null values since
         // they will become NaN.
-        if (v == null || v === "") return v;
+        if (v == null || v === "" || v === "-") return v;
         
         var numericValue = Number(v);
-        return isNaN(numericValue) ? value : numericValue;
+        return isNaN(numericValue) ? v : numericValue;
     }
 });
