@@ -248,7 +248,7 @@ myt = {
             'error'.
         @returns void */
     dumpStack: function(err, type) {
-        if (typeof err === 'string') err = new Error(err);
+        if (!err || typeof err === 'string') err = new Error(err);
         console[type ? type : 'error'](err.stack || err.stacktrace)
     },
     
