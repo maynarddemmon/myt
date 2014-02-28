@@ -19,50 +19,54 @@ myt.Ajax = new JS.Class('Ajax', myt.Node, {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setUrl: function(v) {
-        if (!v) {
-            delete this.opts.url;
-        } else {
-            this.opts.url = v;
-        }
+        this.__s('url', v);
     },
     
     /** The request type.
         Supported values: 'GET' or 'POST'. */
     setRequestMethod: function(v) {
-        if (!v) {
-            delete this.opts.type;
-        } else {
-            this.opts.type = v;
-        }
+        this.__s('type', v);
     },
     
     /** A map of name value pairs for the request. */
     setRequestData: function(v) {
-        if (v === undefined || v === null) {
-            delete this.opts.data;
-        } else {
-            this.opts.data = v;
-        }
+        this.__s('data', v);
     },
     
     /** The response type.
         Supported values: 'xml', 'html', 'json', 'jsonp', 'script', or 'text'. */
     setResponseType: function(v) {
-        if (!v) {
-            delete this.opts.datatype;
+        this.__s('datatype', v);
+    },
+    
+    /** A specialized setter function used by the setters.
+        @private */
+    __s: function(key, value) {
+        if (value) {
+            this.opts[key] = value;
         } else {
-            this.opts.dataType = v;
+            delete this.opts[key];
         }
     },
     
     
     // Methods /////////////////////////////////////////////////////////////////
     doRequest: function(opts, successCallback, failureCallback) {
-        if (successCallback === undefined) successCallback = this.handleSuccess;
-        if (failureCallback === undefined) failureCallback = this.handleFailure;
+        var mappedOpts = {
+            context:this,
+            
+            // Store url and anything stored under the "callbackData" and
+            // "requestData" key on the jqxhr so we can read it in response 
+            // handling code.
+            beforeSend: function(jqxhr, settings) {
+                jqxhr.callbackData = opts.callbackData;
+                jqxhr.requestData = opts.requestData;
+                
+                jqxhr.requestURL = settings.url;
+            }
+        };
         
         // Convert from myt.Ajax opts to JQuery.ajax opts.
-        var mappedOpts = {context:this};
         $.each(opts, function(key, value) {
             switch (key) {
                 case 'requestData': key = 'data'; break;
@@ -72,11 +76,10 @@ myt.Ajax = new JS.Class('Ajax', myt.Node, {
             mappedOpts[key] = value;
         });
         
-        // Store url on jqxhr so we can read it in response handling code.
-        this.opts.beforeSend = function(jqxhr, settings) {jqxhr.requestURL = settings.url;};
-        
         return myt.Ajax.doRequest(
-            $.extend([true], {}, this.opts, mappedOpts), successCallback, failureCallback
+            $.extend(true, {}, this.opts, mappedOpts), 
+            successCallback || this.handleSuccess, 
+            failureCallback || this.handleFailure
         );
     },
     
