@@ -76,6 +76,24 @@ myt.FormElement = new JS.Module('FormElement', {
         return value;
     },
     
+    /** Allows bulk setting of ValueProcessors.
+        @param processors:array An array of myt.ValueProcessor instances or
+            IDs of value processors from the myt.global.valueProcessors 
+            registry.
+        @returns void */
+    setValueProcessors: function(processors) {
+        var i = processors.length, processor;
+        while (i) {
+            processor = processors[--i];
+            if (typeof processor === 'string') {
+                processors[i] = processor = myt.global.valueProcessors.getValueProcessor(processor);
+                if (!processor) processors.splice(i, 1);
+            }
+        }
+        
+        this.__vp = processors;
+    },
+    
     
     // Methods /////////////////////////////////////////////////////////////////
     /** Adds a ValueProcessor to this form element.
