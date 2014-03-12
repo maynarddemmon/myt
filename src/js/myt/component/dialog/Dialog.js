@@ -308,7 +308,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         
         // Setup form
         var maxHeight = opts.maxContainerHeight;
-        var contentContainer = new myt.Text(content, {
+        var contentContainer = new myt.View(content, {
             name:'contentContainer',
             x:1, y:25, overflow:'auto'
         }, [{
@@ -347,6 +347,9 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         });
         
         this.setDisplayMode('content');
+        
+        // Set initial focus
+        if (contentContainer.initialFocus) contentContainer.initialFocus.focus();
     },
     
     /** @private */
