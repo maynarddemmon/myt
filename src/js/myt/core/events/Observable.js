@@ -13,8 +13,13 @@
 */
 myt.Observable = new JS.Module('Observable', {
     // Methods /////////////////////////////////////////////////////////////////
-    /** Adds the provided observer to the list of event recipients for the 
-        provided event type.
+    /** Adds the observer to the list of event recipients for the event type.
+        @param observer:myt.Observer The observer that will observe this
+            observable. If methodName is a function this object will be the
+            context for the function when it is called.
+        @param methodName:string|function The name of the method to call, or
+            a function, on the observer when the event fires.
+        @param type:string The name of the event the observer will listen to.
         @returns boolean true if the observer was successfully attached, 
             false otherwise. */
     attachObserver: function(observer, methodName, type) {
@@ -25,8 +30,13 @@ myt.Observable = new JS.Module('Observable', {
         return false;
     },
     
-    /** Removes the provided observer from the list of observers for
-        the provided Event type.
+    /** Removes the observer from the list of observers for the event type.
+        @param observer:myt.Observer The observer that will no longer be
+            observing this observable.
+        @param methodName:string|function The name of the method that was
+            to be called or the function to be called.
+        @param type:string The name of the event the observer will no longer
+            be listening to.
         @returns boolean true if the observer was successfully detached, 
             false otherwise. */
     detachObserver: function(observer, methodName, type) {
@@ -89,14 +99,16 @@ myt.Observable = new JS.Module('Observable', {
     /** Gets an array of observers and method names for the provided type.
         The array is structured as:
             [methodName1, observerObj1, methodName2, observerObj2,...].
-        @returns an array of observers. */
+        @param type:string The name of the event to get observers for.
+        @returns array: The observers of the event. */
     getObservers: function(type) {
         var observersByType = this.__obsbt || (this.__obsbt = {});
         return observersByType[type] || (observersByType[type] = []);
     },
     
     /** Checks if any observers exist for the provided event type.
-        @returns true if any exist, false otherwise. */
+        @param type:string The name of the event to check.
+        @returns boolean: True if any exist, false otherwise. */
     hasObservers: function(type) {
         var observersByType = this.__obsbt;
         if (!observersByType) return false;
@@ -110,89 +122,88 @@ myt.Observable = new JS.Module('Observable', {
         "consumed" and will not be sent to any other observers. Consuming an 
         event should be used when more than one observer may be listening for 
         an Event but only one observer needs to handle the Event.
-        @param event: the event to fire.
-        @param observers:array (Optional) if provided the event will
+        @param event:object The event to fire.
+        @param observers:array (Optional) If provided the event will
             be sent to this specific list of observers and no others.
         @return void */
     fireEvent: function(event, observers) {
         if (event && event.source === this) {
-            observers = this.__determineObservers(event.type, observers);
+            // Determine observers to use
+            var type = event.type;
+            observers = observers || (this.hasObservers(type) ? this.__obsbt[type] : null);
+            
+            // Fire event
             if (observers) this.__fireEvent(event, observers);
         }
     },
     
     /** Generates a new event from the provided type and value and fires it
         to the provided observers or the registered observers.
-        @param type:String the event type to fire.
-        @param value:* the value to set on the event.
-        @param observers:array (Optional) if provided the event will
+        @param type:string The event type to fire.
+        @param value:* The value to set on the event.
+        @param observers:array (Optional) If provided the event will
             be sent to this specific list of observers and no others.
         @returns void */
     fireNewEvent: function(type, value, observers) {
-        observers = this.__determineObservers(type, observers);
-        if (observers) this.__fireEvent(this.createEvent(type, value), observers);
+        // Determine observers to use
+        observers = observers || (this.hasObservers(type) ? this.__obsbt[type] : null);
+        
+        // Fire event
+        if (observers) this.__fireEvent({source:this, type:type, value:value}, observers); // Inlined from this.createEvent
     },
     
-    /** Private method to determine which array of observers to use.
-        @return array or null if no suitable observers exist. */
-    __determineObservers: function(type, observers) {
-        if (observers) return observers;
-        return this.hasObservers(type) ? this.__obsbt[type] : null;
-    },
-    
-    /** Creates a new event with the provided type and value and using this
-        Observable as the source.
-        @param type:string the event type.
-        @param value:* the event value.
-        @returns an event object consisting of source, type and value. */
+    /** Creates a new event with the type and value and using this as 
+        the source.
+        @param type:string The event type.
+        @param value:* The event value.
+        @returns An event object consisting of source, type and value. */
     createEvent: function(type, value) {
-        return {source:this, type:type, value:value};
+        return {source:this, type:type, value:value}; // Inlined in this.fireNewEvent
     },
     
-    /** Private method to actually fire the event.
-        @param event:Object the event to fire.
-        @param observers:array an array of method names and contexts to invoke
+    /** Fire the event to the observers.
+        @private
+        @param event:Object The event to fire.
+        @param observers:array An array of method names and contexts to invoke
             providing the event as the sole argument.
         @returns void */
     __fireEvent: function(event, observers) {
-        var type = event.type;
-        
         // Prevent "active" events from being fired again
-        var activeEventTypes = this.__aet || (this.__aet = {});
+        var activeEventTypes = this.__aet || (this.__aet = {}),
+            type = event.type;
         if (activeEventTypes[type] === true) {
             myt.dumpStack("Attempt to refire active event: " + type);
-            return;
-        }
-        
-        // Mark event type as "active"
-        activeEventTypes[type] = true;
-        
-        // Walk through observers backwards so that if the observer is
-        // detached by the event handler the index won't get messed up.
-        // FIXME: If necessary we could queue up detachObserver calls that 
-        // come in during iteration or make some sort of adjustment to 'i'.
-        var i = observers.length, observer, methodName;
-        while (i) {
-            observer = observers[--i]
-            methodName = observers[--i];
+        } else {
+            // Mark event type as "active"
+            activeEventTypes[type] = true;
             
-            // Sometimes the list gets shortened by the method we called so
-            // just continue decrementing downwards.
-            if (observer && methodName) {
-                // Stop firing the event if it was "consumed".
-                try {
-                    if (typeof methodName === 'function') {
-                        if (methodName.call(observer, event)) break;
-                    } else {
-                        if (observer[methodName](event)) break;
+            // Walk through observers backwards so that if the observer is
+            // detached by the event handler the index won't get messed up.
+            // FIXME: If necessary we could queue up detachObserver calls that 
+            // come in during iteration or make some sort of adjustment to 'i'.
+            var i = observers.length, observer, methodName;
+            while (i) {
+                observer = observers[--i]
+                methodName = observers[--i];
+                
+                // Sometimes the list gets shortened by the method we called so
+                // just continue decrementing downwards.
+                if (observer && methodName) {
+                    // Stop firing the event if it was "consumed".
+                    try {
+                        if (typeof methodName === 'function') {
+                            if (methodName.call(observer, event)) break;
+                        } else {
+                            if (observer[methodName](event)) break;
+                        }
+                    } catch (err) {
+                        myt.dumpStack(err);
                     }
-                } catch (err) {
-                    myt.dumpStack(err);
                 }
             }
+            
+            // Mark event type as "inactive"
+            activeEventTypes[type] = false;
         }
-        
-        // Mark event type as "inactive"
-        activeEventTypes[type] = false;
     }
 });
