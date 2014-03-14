@@ -225,77 +225,77 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
     
     /** @private */
     __advance: function(timeDiff) {
-        if (!this.running || this.paused) return;
-        
-        var reverse = this.reverse, 
-            duration = this.duration, 
-            repeat = this.repeat, 
-            attr = this.attribute;
-        if (reverse) timeDiff = timeDiff * -1;
-        
-        // Determine how much time to move forward by.
-        var oldProgress = this.__progress;
-        this.__progress += timeDiff;
-        
-        // Check for overage
-        var remainderTime = 0;
-        if (this.__progress > duration) {
-            remainderTime = this.__progress - duration;
-            this.__progress = duration;
+        if (this.running && !this.paused) {
+            var reverse = this.reverse, 
+                duration = this.duration, 
+                repeat = this.repeat, 
+                attr = this.attribute;
             
-            if (++this.__loopCount === repeat) remainderTime = 0;
-        } else if (0 > this.__progress) {
-            // Reverse case
-            remainderTime = -this.__progress;
-            this.__progress = 0;
+            // An animation in reverse is like time going backward.
+            if (reverse) timeDiff = timeDiff * -1;
             
-            if (0 > --this.__loopCount && repeat > 0) remainderTime = 0;
-        }
-        
-        // Apply to attribute
-        var target = this.target ? this.target : this.parent;
-        if (!target) {
-            console.log("No target found for animator.", this);
-            this.setRunning(false);
-            if (this.callback) this.callback.call(this, false);
-            return;
-        }
-        
-        if (this.from == null) {
-            this.__temporaryFrom = true;
-            this.from = this.relative ? 0 : target.get(attr);
-        }
-        var from = this.from,
-            attrDiff = this.to - from,
-            newValue = this.easingFunction(this.__progress, attrDiff, duration);
-        if (this.relative) {
-            var oldValue = this.easingFunction(oldProgress, attrDiff, duration),
-                curValue = target.get(attr);
-            target.set(attr, curValue + newValue - oldValue);
-        } else {
-            target.set(attr, from + newValue);
-        }
-        
-        // Stop animation if loop count exceeded
-        if (reverse) {
-            if (0 > this.__loopCount && repeat > 0) {
-                this.setRunning(false);
-                if (this.callback) this.callback.call(this, true);
-                return;
+            // Determine how much time to move forward by.
+            var oldProgress = this.__progress;
+            this.__progress += timeDiff;
+            
+            // Check for overage
+            var remainderTime = 0;
+            if (this.__progress > duration) {
+                remainderTime = this.__progress - duration;
+                this.__progress = duration;
+                
+                // Increment loop count and halt looping if necessary
+                if (++this.__loopCount === repeat) remainderTime = 0;
+            } else if (0 > this.__progress) {
+                // Reverse case
+                remainderTime = -this.__progress; // Flip reverse time back to forward time
+                this.__progress = 0;
+                
+                // Decrement loop count and halt looping if necessary
+                if (0 > --this.__loopCount && repeat > 0) remainderTime = 0;
             }
-        } else {
-            if (this.__loopCount === repeat) {
+            
+            var target = this.target || this.parent;
+            if (target) {
+                // Apply to attribute
+                if (this.from == null) {
+                    this.__temporaryFrom = true;
+                    this.from = this.relative ? 0 : target.get(attr);
+                }
+                var from = this.from,
+                    attrDiff = this.to - from,
+                    newValue = this.easingFunction(this.__progress, attrDiff, duration);
+                if (this.relative) {
+                    // Need to calculate old value since it's possible for
+                    // multiple animators to be animating the same attribute
+                    // at one time.
+                    var oldValue = this.easingFunction(oldProgress, attrDiff, duration),
+                        curValue = target.get(attr);
+                    target.set(attr, curValue + newValue - oldValue);
+                } else {
+                    target.set(attr, from + newValue);
+                }
+                
+                if (
+                    (!reverse && this.__loopCount === repeat) || // Forward check
+                    (reverse && 0 > this.__loopCount && repeat > 0) // Reverse check
+                ) {
+                    // Stop animation since loop count exceeded repeat count.
+                    this.setRunning(false);
+                    if (this.callback) this.callback.call(this, true);
+                } else if (remainderTime > 0) {
+                    // Advance again if time is remaining. This occurs when
+                    // the timeDiff provided was greater than the animation
+                    // duration and the animation loops.
+                    this.fireNewEvent('repeat', this.__loopCount);
+                    this.__progress = reverse ? duration : 0;
+                    this.__advance(remainderTime);
+                }
+            } else {
+                console.log("No target found for animator.", this);
                 this.setRunning(false);
-                if (this.callback) this.callback.call(this, true);
-                return;
+                if (this.callback) this.callback.call(this, false);
             }
-        }
-        
-        // Advance again if time is remaining
-        if (remainderTime > 0) {
-            this.fireNewEvent('repeat', this.__loopCount);
-            this.__progress = reverse ? duration : 0;
-            this.__advance(remainderTime);
         }
     }
 });
