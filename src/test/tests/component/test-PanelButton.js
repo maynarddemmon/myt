@@ -1,6 +1,8 @@
 module('PanelButton');
 
-asyncTest("Create and destroy an IconTextPanelButton", 11, function() {
+asyncTest("Create and destroy an IconTextPanelButton", function() {
+    expect(11);
+    
     var v = new myt.View(null, {width:300, height:300}, [myt.RootView]);
     
     var btn = new myt.IconTextPanelButton(v);
@@ -48,7 +50,9 @@ asyncTest("Create and destroy an IconTextPanelButton", 11, function() {
     }, 50);
 });
 
-asyncTest("Set an icon on an IconTextPanelButton and test y positioning", 12, function() {
+asyncTest("Set an icon on an IconTextPanelButton and test y positioning", function() {
+    expect(12);
+    
     var v = new myt.View(null, {width:300, height:300}, [myt.RootView]);
     
     var iconUrl = './tests/component/rsrc/icon.png';
@@ -102,7 +106,9 @@ asyncTest("Set an icon on an IconTextPanelButton and test y positioning", 12, fu
     }, 50);
 });
 
-asyncTest("Test x positioning of text and icon", 12, function() {
+asyncTest("Test x positioning of text and icon", function() {
+    expect(12);
+    
     var v = new myt.View(null, {width:300, height:300}, [myt.RootView]);
     
     var iconUrl = './tests/component/rsrc/icon.png';

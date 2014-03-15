@@ -1,6 +1,8 @@
 module('DelayedMethodCall');
 
-asyncTest("Add DelayedMethodCall to an instance.", 3, function() {
+asyncTest("Add DelayedMethodCall to an instance.", function() {
+    expect(3);
+    
     var TestClass = new JS.Class('TestClass', myt.Node, {
         doIt: function() {
             ok(true, "doIt method called.");
@@ -16,7 +18,9 @@ asyncTest("Add DelayedMethodCall to an instance.", 3, function() {
     n.doItDelayed();
 });
 
-asyncTest("Add DelayedMethodCall to a class.", 3, function() {
+asyncTest("Add DelayedMethodCall to a class.", function() {
+    expect(3);
+    
     var TestClass = new JS.Class('TestClass', myt.Node, {
         doIt: function() {
             ok(true, "doIt method called.");
@@ -32,7 +36,9 @@ asyncTest("Add DelayedMethodCall to a class.", 3, function() {
     n.doItDelayed();
 });
 
-asyncTest("Two calls collapse into one.", 1, function() {
+asyncTest("Two calls collapse into one.", function() {
+    expect(1);
+    
     var TestClass = new JS.Class('TestClass', myt.Node, {
         doIt: function() {
             ok(true, "doIt method called.");
@@ -48,7 +54,9 @@ asyncTest("Two calls collapse into one.", 1, function() {
     n.doItDelayed();
 });
 
-asyncTest("Ensure delay is long enough.", 1, function() {
+asyncTest("Ensure delay is long enough.", function() {
+    expect(1);
+    
     var delay = 100;
     var TestClass = new JS.Class('TestClass', myt.Node, {
         doIt: function() {
