@@ -257,8 +257,6 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'input/BaseInputText.js'     ).provides('myt.BaseInputText'     ).requires('myt.NativeInputWrapper','myt.TextSupport');
     file(MYT_COMPONENT_ROOT + 'input/InputText.js'         ).provides('myt.InputText'         ).requires('myt.BaseInputText');
     file(MYT_COMPONENT_ROOT + 'input/InputTextArea.js'     ).provides('myt.InputTextArea'     ).requires('myt.BaseInputText');
-    file(MYT_COMPONENT_ROOT + 'input/InputCheckbox.js'     ).provides('myt.InputCheckbox'     ).requires('myt.NativeInputWrapper','myt.SizeToDom');
-    file(MYT_COMPONENT_ROOT + 'input/InputRadio.js'        ).provides('myt.InputRadio'        ).requires('myt.NativeInputWrapper','myt.SizeToDom');
     file(MYT_COMPONENT_ROOT + 'input/InputSelect.js'       ).provides('myt.InputSelect'       ).requires('myt.NativeInputWrapper','myt.SizeToDom');
     file(MYT_COMPONENT_ROOT + 'input/InputSelectOption.js' ).provides('myt.InputSelectOption' ).requires('myt.InputSelect','myt.Selectable');
     
@@ -334,7 +332,7 @@ JS.Packages(function() {with(this) {
         'myt.DrawButton', 'myt.SimpleIconTextButton', 'myt.IconTextPanelButton', 'myt.DelayedMethodCall',
         'myt.FloatingPanelAnchor',
         'myt.TextCheckbox','myt.TextRadio','myt.TextTabSlider', 'myt.Tab',
-        'myt.InputText', 'myt.InputTextArea', 'myt.InputCheckbox', 'myt.InputRadio', 'myt.InputSelectOption',
+        'myt.InputText', 'myt.InputTextArea', 'myt.InputSelectOption',
         'myt.ImageUploader','myt.Dialog',
         'myt.global.validators','myt.EqualFieldsValidator','myt.LengthValidator','myt.NumericRangeValidator',
         'myt.global.valueProcessors','myt.UseOtherFieldIfEmptyValueProcessor','myt.FormElement',

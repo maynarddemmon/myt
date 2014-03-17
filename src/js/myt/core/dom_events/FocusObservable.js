@@ -45,8 +45,8 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Node */
     initNode: function(parent, attrs) {
-        if (attrs.focusable === undefined) attrs.focusable = false;
-        if (attrs.focusEmbellishment === undefined) attrs.focusEmbellishment = true;
+        this.focusable = false;
+        this.focusEmbellishment = true;
         
         this.callSuper(parent, attrs);
     },

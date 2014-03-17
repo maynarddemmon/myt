@@ -12,6 +12,8 @@
             generated. Changes to the groupId after initialization do not
             appear to effect the group membership.
         optionValue:string The value of the radio button.
+    
+    @deprecated No longer included in the manifest.js file.
 */
 myt.InputRadio = new JS.Class('InputRadio', myt.NativeInputWrapper, {
     include: [myt.SizeToDom],

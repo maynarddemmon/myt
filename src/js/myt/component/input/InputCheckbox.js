@@ -5,6 +5,8 @@
     
     Attributes:
         checked:boolean checks or unchecks the checkbox.
+    
+    @deprecated No longer included in the manifest.js file.
 */
 myt.InputCheckbox = new JS.Class('InputCheckbox', myt.NativeInputWrapper, {
     include: [myt.SizeToDom],
