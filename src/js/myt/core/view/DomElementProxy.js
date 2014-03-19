@@ -312,5 +312,18 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
         @returns int */
     getHighestZIndex: function() {
         return myt.DomElementProxy.getHighestZIndex(this.domElement);
+    },
+    
+    /** Gets the highest z-index of any of the descendant dom elements of
+        the domElement of this DomElementProxy.
+        @returns number */
+    getHighestChildZIndex: function() {
+        var DEP = myt.DomElementProxy, elem = this.domElement, 
+            children = elem.childNodes, i = children.length, child, zIdx = 0;
+        while (i) {
+            child = children[--i];
+            if (child.nodeType === 1) zIdx = Math.max(zIdx, DEP.getHighestZIndex(child));
+        }
+        return zIdx;
     }
 });

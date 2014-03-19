@@ -11,6 +11,8 @@
             mousedown occurs outside the panel. True by default.
         ignoreOwnerForHideOnMouseDown:boolean If true the owner view for this
             panel will also be ignored for mousedown events. True by default.
+        ignoreOwnerForHideOnBlur:boolean If true the owner view for this
+            panel will also be ignored for blur events. True by default.
         hideOnBlur:boolean If true this panel will be hidden when a
             focus traverses outside the panel. True by default.
 */
@@ -26,7 +28,7 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
         elem.style.position = 'absolute';
         myt.getElement().appendChild(elem);
         
-        this.ignoreOwnerForHideOnMouseDown = this.hideOnBlur = this.hideOnMouseDown = true;
+        this.ignoreOwnerForHideOnMouseDown = this.ignoreOwnerForHideOnBlur = this.hideOnBlur = this.hideOnMouseDown = true;
         
         attrs.visible = attrs.focusEmbellishment = false;
         
@@ -104,7 +106,11 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
         floating panel by default.
         @returns void */
     doLostFocus: function() {
-        if (this.hideOnBlur) this.hide(true);
+        if (this.hideOnBlur) {
+            if (this.ignoreOwnerForHideOnBlur && myt.global.focus.focusedView === this.owner) return;
+            
+            this.hide(true);
+        }
     },
     
     /** Determines if this floating panel is being "shown" or not. Typically

@@ -7,6 +7,8 @@
         floatingValignOffset:number
     
     Attributes:
+        floatingPanelId:string If defined this is the panel ID that will be
+            used by default in the various methods that require a panel ID.
         floatingAlign:string:number The horizontal alignment for panels shown 
             by this anchor. If the value is a string it is an alignment 
             identifier relative to this anchor. If the value is a number it is 
@@ -22,7 +24,7 @@
         floatingValignOffset:number The number of pixels to offset the panel
             position by vertically.
         lastFloatingPanelShown:myt.FloatingPanel A reference to the last
-            floating panel shown.
+            floating panel shown by this anchor.
 */
 myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
     // Class Methods and Attributes ////////////////////////////////////////////
@@ -47,6 +49,7 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setLastFloatingPanelShown: function(v) {this.lastFloatingPanelShown = v;},
+    setLastFloatingPanelId: function(v) {this.floatingPanelId = v;},
     
     setFloatingAlign: function(v) {
         if (this.floatingAlign !== v) {
@@ -79,39 +82,37 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
     
     // Methods /////////////////////////////////////////////////////////////////
     createFloatingPanel: function(panelId, panelClass, panelInitAttrs) {
-        var fp = this.getFloatingPanel(panelId);
-        if (!fp) {
-            var FPA = myt.FloatingPanelAnchor;
-            panelClass = panelClass || FPA.classesByPanelId[panelId];
-            if (!panelClass) {
-                console.log("No panel class found for panelId:", panelId);
-                return null;
-            }
-            
-            panelInitAttrs = panelInitAttrs || {};
-            panelInitAttrs.panelId = panelId;
-            fp = FPA.panelsByPanelId[panelId] = new panelClass(null, panelInitAttrs);
+        panelId = panelId || this.floatingPanelId;
+        
+        var FPA = myt.FloatingPanelAnchor;
+        panelClass = panelClass || FPA.classesByPanelId[panelId];
+        if (!panelClass) {
+            console.log("No panel class found for panelId:", panelId);
+            return null;
         }
-        return fp;
+        
+        panelInitAttrs = panelInitAttrs || {};
+        panelInitAttrs.panelId = panelId;
+        return FPA.panelsByPanelId[panelId] = new panelClass(null, panelInitAttrs);
     },
     
     getFloatingPanel: function(panelId) {
-        return myt.FloatingPanelAnchor.panelsByPanelId[panelId];
+        return myt.FloatingPanelAnchor.panelsByPanelId[panelId || this.floatingPanelId];
     },
     
     toggleFloatingPanel: function(panelId) {
+        panelId = panelId || this.floatingPanelId;
+        
         var fp = this.getFloatingPanel(panelId);
-        if (fp) {
-            if (fp.isShown()) {
-                this.hideFloatingPanel(panelId);
-            } else {
-                this.showFloatingPanel(panelId);
-            }
+        if (fp && fp.isShown()) {
+            this.hideFloatingPanel(panelId);
+        } else {
+            this.showFloatingPanel(panelId);
         }
     },
     
     showFloatingPanel: function(panelId) {
-        var fp = this.getFloatingPanel(panelId);
+        var fp = this.getFloatingPanel(panelId || this.floatingPanelId);
         if (fp) {
             fp.show(this);
             this.setLastFloatingPanelShown(fp);
@@ -119,7 +120,7 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
     },
     
     hideFloatingPanel: function(panelId) {
-        var fp = this.getFloatingPanel(panelId);
+        var fp = this.getFloatingPanel(panelId || this.floatingPanelId);
         if (fp) {
             fp.hide();
             this.setLastFloatingPanelShown();

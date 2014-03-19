@@ -95,6 +95,73 @@
                 return this.parent.btn;
             }
         }]);
+        
+        new myt.IconTextPanelButton(rootView, {
+            name:'btn6', text:'list view', x:250, width:60,
+            floatingPanelId:'listviewTest',
+            listViewAttrs:{maxHeight:349}
+        }, [myt.ListViewAnchor, {
+            doItemActivated: function(itemView) {
+                console.log(itemView.text);
+                this.callSuper(itemView);
+            },
+            doActivated: function() {
+                var cfg = [
+                    {attrs:{text:'foo'}},
+                    {attrs:{text:'bar har har'}},
+                    {attrs:{text:'baz'}},
+                    {attrs:{text:'a'}},
+                    {attrs:{text:'b'}},
+                    {attrs:{text:'c', disabled:true}},
+                    {attrs:{text:'d', visible:false}},
+                    {attrs:{text:'e'}},
+                    {attrs:{text:'f'}},
+                    {attrs:{text:'g'}},
+                    {klass:myt.ListViewSeparator},
+                    {attrs:{text:'h'}},
+                    {attrs:{text:'i'}},
+                    {attrs:{text:'j'}},
+                    {attrs:{text:'k'}},
+                    {klass:myt.ListViewSeparator},
+                    {attrs:{text:'l'}},
+                    {attrs:{text:'m'}},
+                    {attrs:{text:'n'}},
+                    {klass:myt.ListViewSeparator},
+                    {attrs:{text:'o'}},
+                    {attrs:{text:'p'}},
+                    {attrs:{text:'q'}},
+                    {attrs:{text:'r'}},
+                    {attrs:{text:'s'}},
+                    {attrs:{text:'t'}},
+                    {attrs:{text:'u'}},
+                    {attrs:{text:'v'}},
+                    {attrs:{text:'w'}},
+                    {attrs:{text:'x'}},
+                    {attrs:{text:'y'}},
+                    {attrs:{text:'z'}}
+                ];
+                cfg.length = myt.getRandomInt(5, cfg.length);
+                this.setItemConfig(cfg);
+                
+                this.toggleFloatingPanel();
+            }
+        }]);
+        
+        new myt.IconTextPanelButton(rootView, {
+            name:'btn7', text:'baz', x:325, width:40, 
+            floatingAlign:'outsideRight', floatingValign:'insideTop', floatingAlignOffset:2
+        }, [myt.FloatingPanelAnchor, {
+            doActivated: function() {
+                var panelId = '7';
+                var fp = this.getFloatingPanel(panelId);
+                if (!fp) this.createFloatingPanel(panelId, myt.FloatingPanel, {bgColor:'#00ff99', width:30, height:50, hideOnBlur:false});
+                this.toggleFloatingPanel(panelId);
+            },
+            
+            getNextFocusAfterPanel: function() {
+                return this.parent.btn;
+            }
+        }]);
     }
 </script>
 </body></html>
