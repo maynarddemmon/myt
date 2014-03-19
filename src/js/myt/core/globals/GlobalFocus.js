@@ -12,7 +12,7 @@
             to true.
         focusedView:View the view that currently has focus.
         prevFocusedView:View the view that previously had focus.
-        _focusedDom:DomElement holds the dom element that has focus when the
+        focusedDom:DomElement holds the dom element that has focus when the
             focus has traversed into a non myt managed area of the dom.
 */
 /* Dom element types reference:
@@ -46,7 +46,7 @@ new JS.Singleton('GlobalFocus', {
         if (this.focusedView !== v) {
             this.prevFocusedView = this.focusedView; // Remember previous focus
             this.focusedView = v;
-            if (v) this._focusedDom = null; // Wipe this since we have actual focus now.
+            if (v) this.focusedDom = null; // Wipe this since we have actual focus now.
             this.fireNewEvent('focused', v);
         }
     },
@@ -72,9 +72,9 @@ new JS.Singleton('GlobalFocus', {
     clear: function() {
         if (this.focusedView) {
             this.focusedView.blur();
-        } else if (this._focusedDom) {
-            this._focusedDom.blur();
-            this._focusedDom = null;
+        } else if (this.focusedDom) {
+            this.focusedDom.blur();
+            this.focusedDom = null;
         }
     },
     
@@ -185,7 +185,7 @@ new JS.Singleton('GlobalFocus', {
                                 // Is a masked dom element so ignore.
                             } else {
                                 elem.focus();
-                                this._focusedDom = elem;
+                                this.focusedDom = elem;
                                 return null;
                             }
                         }

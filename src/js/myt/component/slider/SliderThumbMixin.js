@@ -55,7 +55,7 @@ myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
     /** @overrides myt.FocusObservable */
     setFocused: function(v) {
         this.callSuper(v);
-        if (v) this.setZIndex(this.parent.getHighestZIndex() + 1);
+        if (v) this.setZIndex(this.parent.getHighestChildZIndex(this.domElement) + 1);
     },
     
     /** @overrides myt.View */

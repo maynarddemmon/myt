@@ -25,12 +25,13 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
+        this.restoreFocus = true;
+        
         attrs.focusable = attrs.focusCage = true;
         
         if (attrs.percentOfParentWidth === undefined) attrs.percentOfParentWidth = 100;
         if (attrs.percentOfParentHeight === undefined) attrs.percentOfParentHeight = 100;
         if (attrs.visible === undefined) attrs.visible = false;
-        if (attrs.restoreFocus === undefined) attrs.restoreFocus = true;
         if (attrs.ignoreLayout === undefined) attrs.ignoreLayout = true;
         
         this.callSuper(parent, attrs);
@@ -74,21 +75,20 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** A handler for mouse events that does nothing and prevents propogation.
+        @return boolean True so that the dom event gets eaten. */
     eatMouseEvent: function(event) {
         return true;
     },
     
+    /** Shows the dimmer and remembers the focus location.
+        @returns void */
     show: function() {
         var gf = myt.global.focus;
-        this.prevFocus = gf.focusedView || gf._focusedDom;
+        this.prevFocus = gf.focusedView || gf.focusedDom;
         
-        // Set z-index
-        var siblings = this.getSiblingViews(), zIdx = 0;
-        if (siblings) {
-            var i = siblings.length;
-            while (i) zIdx = Math.max(zIdx, siblings[--i].getHighestZIndex());
-        }
-        this.setZIndex(++zIdx);
+        // Bring to front
+        this.setZIndex(this.parent.getHighestChildZIndex(this.domElement) + 1);
         
         // Prevent focus traversing
         if (this.focusable) this.focus();
@@ -96,6 +96,8 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
         this.setVisible(true);
     },
     
+    /** Hides the dimmer and restores focus if necessary.
+        @returns void */
     hide: function() {
         this.setVisible(false);
         
