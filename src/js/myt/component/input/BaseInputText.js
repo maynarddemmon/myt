@@ -103,23 +103,20 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     
     /** @private */
     __syncToDom: function(event) {
-        this.setValue(this.domElement.value);
+        this.setValue(this.getDomValue());
     },
     
     /** Gets the location of the caret.
         @returns int. */
     getCaretPosition: function() {
-        var elem = this.domElement;
-        
+        // IE Support
         if (document.selection) {
-            // IE Support
             var selection = document.selection.createRange();
-            selection.moveStart('character', -elem.value.length);
+            selection.moveStart('character', -this.getDomValue().length);
             return selection.text.length;
-        } else if (elem.selectionStart || elem.selectionStart === 0) {
-            return elem.selectionStart;
         }
-        return 0;
+        
+        return this.domElement.selectionStart || 0;
     },
     
     /** Sets the caret and selection.
@@ -156,7 +153,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     /** Sets the caret to the end of the text input.
         @returns void */
     setCaretToEnd: function() {
-        this.setCaretPosition(this.domElement.value.length);
+        this.setCaretPosition(this.getDomValue().length);
     },
     
     /** Selects all the text in the input element.

@@ -43,7 +43,8 @@
                     fieldE:true,
                     fieldF:'c',
                     fieldG:'two',
-                    fieldH:['two','four']
+                    fieldH:['two','four'],
+                    fieldI:"bar"
                 };
                 var rollbackValue = {
                     fieldA:"FOO",
@@ -56,7 +57,8 @@
                     fieldE:false,
                     fieldF:'b',
                     fieldG:'four',
-                    fieldH:['four','five','six']
+                    fieldH:['four','five','six'],
+                    fieldI:""
                 };
                 var value = {
                     fieldC:"blah",
@@ -130,6 +132,16 @@
         new myt.ConstantLayout(subform, {targetAttrName:'y', targetValue:5});
         new myt.SizeToChildren(subform, {axis:'y', paddingY:5});
         // Subform: end
+        
+        var fieldI = new myt.FormEditableText(rootView, {
+            id:'fieldI', form:rootView, validators:['equalsIgnoreCase', lenValidator], 
+            validateWhen:'blurWithKeyFix', minWidth:25, minHeight:18, roundedCorners:6,
+            paddingTop:2, paddingBottom:2, paddingRight:6, paddingLeft:6
+        });
+        
+        new myt.EditableText(rootView, {name:'editTxt1', value:'foo bar baz', minHeight:17});
+        new myt.EditableText(rootView, {name:'editTxt2', value:'foo bar baz', minHeight:17});
+        new myt.EditableText(rootView, {name:'editTxt3', whitespace:'nowrap', value:'Here is some text that won\'t wrap.', minHeight:17});
         
         var rollbackBtn = new myt.SimpleIconTextButton(rootView, {
             height:25, width:70, roundedCorners:4, text:'rollback',

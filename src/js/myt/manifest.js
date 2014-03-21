@@ -264,6 +264,7 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'input/BaseInputText.js'     ).provides('myt.BaseInputText'     ).requires('myt.NativeInputWrapper','myt.TextSupport');
     file(MYT_COMPONENT_ROOT + 'input/InputText.js'         ).provides('myt.InputText'         ).requires('myt.BaseInputText');
     file(MYT_COMPONENT_ROOT + 'input/InputTextArea.js'     ).provides('myt.InputTextArea'     ).requires('myt.BaseInputText');
+    file(MYT_COMPONENT_ROOT + 'input/EditableText.js'      ).provides('myt.EditableText'      ).requires('myt.BaseInputText');
     file(MYT_COMPONENT_ROOT + 'input/InputSelect.js'       ).provides('myt.InputSelect'       ).requires('myt.NativeInputWrapper','myt.SizeToDom');
     file(MYT_COMPONENT_ROOT + 'input/InputSelectOption.js' ).provides('myt.InputSelectOption' ).requires('myt.InputSelect','myt.Selectable');
     
@@ -313,6 +314,7 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'form/elements/FormCheckbox.js'     ).provides('myt.FormCheckbox'     ).requires('myt.FormElement','myt.Checkbox');
     file(MYT_COMPONENT_ROOT + 'form/elements/FormTextCheckbox.js' ).provides('myt.FormTextCheckbox' ).requires('myt.FormElement','myt.TextCheckbox');
     file(MYT_COMPONENT_ROOT + 'form/elements/FormInputText.js'    ).provides('myt.FormInputText'    ).requires('myt.FormElement','myt.InputText');
+    file(MYT_COMPONENT_ROOT + 'form/elements/FormEditableText.js' ).provides('myt.FormEditableText' ).requires('myt.FormElement','myt.EditableText');
     file(MYT_COMPONENT_ROOT + 'form/elements/FormInputTextArea.js').provides('myt.FormInputTextArea').requires('myt.FormElement','myt.InputTextArea');
     
     // Component : Uploader
@@ -331,20 +333,20 @@ JS.Packages(function() {with(this) {
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
         'myt.Cookie',
         'myt.global.keys',
-        'myt.Text', 'myt.Markup', 'myt.SizeWidthToDom', 'myt.SizeHeightToDom', 'myt.SizeToParent',
-        'myt.SizeToWindowWidth', 'myt.SizeToWindowHeight', 'myt.TransformSupport', 
-        'myt.Animator', 'myt.Callback', 'myt.RepeatableTimer', 'myt.StateMachine', 'myt.URI', 'myt.Ajax',
+        'myt.Text','myt.Markup','myt.SizeWidthToDom','myt.SizeHeightToDom','myt.SizeToParent',
+        'myt.SizeToWindowWidth','myt.SizeToWindowHeight','myt.TransformSupport',
+        'myt.Animator','myt.Callback','myt.RepeatableTimer','myt.StateMachine','myt.URI','myt.Ajax',
         'myt.Replicator',
-        'myt.WrappingLayout', 'myt.ResizeLayout', 'myt.AlignedLayout', 'myt.ThreePanel',
-        'myt.DrawButton', 'myt.SimpleIconTextButton', 'myt.IconTextPanelButton', 'myt.DelayedMethodCall',
+        'myt.WrappingLayout','myt.ResizeLayout','myt.AlignedLayout','myt.ThreePanel',
+        'myt.DrawButton','myt.SimpleIconTextButton','myt.IconTextPanelButton','myt.DelayedMethodCall',
         'myt.FloatingPanelAnchor',
         'myt.ListViewAnchor',
-        'myt.TextCheckbox','myt.TextRadio','myt.TextTabSlider', 'myt.Tab',
-        'myt.InputText', 'myt.InputTextArea', 'myt.InputSelectOption',
+        'myt.TextCheckbox','myt.TextRadio','myt.TextTabSlider','myt.Tab',
+        'myt.EditableText','myt.InputText','myt.InputTextArea','myt.InputSelectOption',
         'myt.ImageUploader','myt.Dialog',
         'myt.global.validators','myt.EqualFieldsValidator','myt.LengthValidator','myt.NumericRangeValidator',
         'myt.global.valueProcessors','myt.UseOtherFieldIfEmptyValueProcessor','myt.FormElement',
-        'myt.FormInputSelect','myt.FormRadioGroup','myt.FormCheckbox','myt.FormTextCheckbox','myt.FormInputText','myt.FormInputTextArea',
+        'myt.FormInputSelect','myt.FormRadioGroup','myt.FormCheckbox','myt.FormTextCheckbox','myt.FormInputText','myt.FormInputTextArea','myt.FormEditableText',
         'myt.ScatterGraph',
         'myt.Slider','myt.RangeSlider',
         'myt.HorizontalDivider','myt.VerticalDivider',

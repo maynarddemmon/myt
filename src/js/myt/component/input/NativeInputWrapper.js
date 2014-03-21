@@ -47,9 +47,24 @@ myt.NativeInputWrapper = new JS.Class('NativeInputWrapper', myt.View, {
     setValue: function(v) {
         if (this.value !== v) {
             this.value = v;
-            var de = this.domElement;
-            if (de.value !== v) de.value = v;
+            this.setDomValue(v);
             if (this.inited) this.fireNewEvent('value', v);
         }
+    },
+    
+    
+    // Methods /////////////////////////////////////////////////////////////////
+    /** Gets the value from the DOM.
+        @returns * The value */
+    getDomValue: function() {
+        return this.domElement.value;
+    },
+    
+    /** Sets the value on the DOM.
+        @param v:* The value to set.
+        @returns void */
+    setDomValue: function(v) {
+        var de = this.domElement;
+        if (de.value !== v) de.value = v;
     }
 });

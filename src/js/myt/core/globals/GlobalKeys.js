@@ -243,13 +243,14 @@ new JS.Singleton('GlobalKeys', {
             case 8: // Backspace
                 // Catch backspace since it navigates the history. Allow it to
                 // go through for text input elements though.
-                if (targetElem.nodeName === 'TEXTAREA' || 
-                    (targetElem.nodeName === 'INPUT' && (targetElem.type === 'text' || targetElem.type === 'password'))
-                ) {
-                    return false;
-                } else {
-                    return true;
-                }
+                var nodeName = targetElem.nodeName;
+                if (nodeName === 'TEXTAREA' || 
+                    (nodeName === 'INPUT' && (targetElem.type === 'text' || targetElem.type === 'password')) ||
+                    (nodeName === 'DIV' && targetElem.contentEditable === 'true' && targetElem.firstChild)
+                ) return false;
+                
+                return true;
+                
             case 9: // Tab
                 // Tab navigation is handled by the framework.
                 return true;
