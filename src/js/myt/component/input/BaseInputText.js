@@ -29,7 +29,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
         this.attachToDom(this, '__syncToDom', 'input');
         
         // Allow filtering of input
-        this.attachToDom(this, '__filterInput', 'keypress');
+        this.attachToDom(this, '__filterInputPress', 'keypress');
         this.attachToDom(this, '__filterInput', 'keyup');
     },
     
@@ -76,21 +76,20 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     },
     
     /** @private */
-    __filterInput: function(v) {
-        var de = this.domElement, curValue = de.value,
-            newValue = this.filterInput(this.__filterForAllowedChars(curValue));
-        if (curValue !== newValue) de.value = newValue;
+    __filterInput: function(event) {
+        this.setDomValue(this.filterInput(this.getDomValue()));
     },
     
     /** @private */
-    __filterForAllowedChars: function(v) {
+    __filterInputPress: function(event) {
+        var domEvent = event.value,
+            c = String.fromCharCode(domEvent.which);
+        
+        // Filter for allowed characters
         var allowedChars = this.allowedChars;
-        if (allowedChars) {
-            var chars = v.split(''), i = chars.length;
-            while (i) if (allowedChars.indexOf(chars[--i]) === -1) chars.splice(i, 1);
-            v = chars.join('');
-        }
-        return v;
+        if (allowedChars && allowedChars.indexOf(c) === -1) domEvent.preventDefault();
+        
+        this.filterInputPress(domEvent);
     },
     
     /** A hook for subclasses/instances to do input filtering. The default
@@ -100,6 +99,12 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     filterInput: function(v) {
         return v;
     },
+    
+    /** A hook for subclasses/instances to do input filtering during key press.
+        The default implementation does nothing.
+        @param domEvent:object The dom key press event.
+        @returns void */
+    filterInputPress: function(domEvent) {},
     
     /** @private */
     __syncToDom: function(event) {

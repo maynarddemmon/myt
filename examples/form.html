@@ -134,7 +134,9 @@
         // Subform: end
         
         var fieldI = new myt.FormEditableText(rootView, {
-            id:'fieldI', form:rootView, validators:['equalsIgnoreCase', lenValidator], 
+            id:'fieldI', form:rootView, validators:['equalsIgnoreCase', lenValidator],
+            allowedChars:'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+            maxLength:32,
             validateWhen:'blurWithKeyFix', minWidth:25, minHeight:18, roundedCorners:6,
             paddingTop:2, paddingBottom:2, paddingRight:6, paddingLeft:6
         });

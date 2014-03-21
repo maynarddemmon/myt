@@ -81,6 +81,15 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** @overrides myt.BaseInputText */
+    filterInputPress: function(domEvent) {
+        // Implement maxLength
+        var maxLength = this.maxLength;
+        if (maxLength >= 0 && this.getCharacterCount() === maxLength) domEvent.preventDefault();
+        
+        this.callSuper(domEvent);
+    },
+    
     /** @overrides myt.NativeInputWrapper */
     getDomValue: function() {
         return this.domElement.innerHTML;
@@ -89,7 +98,11 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     /** @overrides myt.NativeInputWrapper */
     setDomValue: function(v) {
         var de = this.domElement;
-        if (de.innerHTML !== v) de.innerHTML = v;
+        if (de.innerHTML !== v) {
+            de.innerHTML = v;
+            this.sizeViewToDom();
+            this.restoreSelection();
+        }
     },
     
     /** @private */
@@ -115,10 +128,13 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     },
     
     // Caret handling
-    isCaretAtEnd: function() {
+    getCharacterCount: function() {
         var elem = this.domElement.firstChild;
-        if (elem) return this.getCaretPosition() === elem.length;
-        return true;
+        return elem ? elem.length : 0;
+    },
+    
+    isCaretAtEnd: function() {
+        return this.getCaretPosition() === this.getCharacterCount();
     },
     
     /** @overrides myt.BaseInputText */
