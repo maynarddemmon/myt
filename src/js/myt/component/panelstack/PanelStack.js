@@ -71,7 +71,7 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
         @returns void */
     doStackTransition: function(panel) {
         var selected = panel.selected;
-        if (selected) panel.bringToFront();
+        if (selected) panel.makeHighestZIndex();
         panel.setVisible(selected);
     }
 });

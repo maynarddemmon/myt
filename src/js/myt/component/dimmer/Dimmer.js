@@ -87,8 +87,7 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
         var gf = myt.global.focus;
         this.prevFocus = gf.focusedView || gf.focusedDom;
         
-        // Bring to front
-        this.setZIndex(this.parent.getHighestChildZIndex(this.domElement) + 1);
+        this.makeHighestZIndex();
         
         // Prevent focus traversing
         if (this.focusable) this.focus();
