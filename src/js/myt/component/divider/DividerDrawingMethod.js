@@ -13,20 +13,20 @@ myt.DividerDrawingMethod = new JS.Class('DividerDrawingMethod', myt.DrawingMetho
         // background
         switch (config.state) {
             case 'hover':
-                fillColor = '#d8d8d8';
-                bumpColor = '#e8e8e8';
+                fillColor = config.hoverFillColor || '#d8d8d8';
+                bumpColor = config.hoverBumpColor || '#e8e8e8';
                 break;
             case 'active':
-                fillColor = '#b8b8b8';
-                bumpColor = '#c8c8c8';
+                fillColor = config.activeFillColor || '#b8b8b8';
+                bumpColor = config.activeBumpColor || '#c8c8c8';
                 break;
             case 'ready':
-                fillColor = config.focused ? '#d8d8d8' : '#cccccc';
-                bumpColor = config.focused ? '#e8e8e8' : '#dddddd';
+                fillColor = config.focused ? (config.focusedFillColor || '#d8d8d8') : (config.readyFillColor || '#cccccc');
+                bumpColor = config.focused ? (config.focusedBumpColor || '#e8e8e8') : (config.readyBumpColor || '#dddddd');
                 break;
             case 'disabled':
-                fillColor = '#cccccc';
-                bumpColor = '#dddddd';
+                fillColor = config.readyFillColor || '#cccccc';
+                bumpColor = config.readyBumpColor || '#dddddd';
                 break;
         }
         
@@ -45,9 +45,9 @@ myt.DividerDrawingMethod = new JS.Class('DividerDrawingMethod', myt.DrawingMetho
         canvas.rect(x, y, w, h);
         canvas.closePath();
         
-        grd.addColorStop(0, '#cccccc');
+        grd.addColorStop(0, config.readyFillColor || '#cccccc');
         grd.addColorStop(0.5, fillColor);
-        grd.addColorStop(1, '#cccccc');
+        grd.addColorStop(1, config.readyFillColor || '#cccccc');
         canvas.setFillStyle(grd);
         
         canvas.fill();
@@ -56,14 +56,14 @@ myt.DividerDrawingMethod = new JS.Class('DividerDrawingMethod', myt.DrawingMetho
         canvas.setFillStyle(bumpColor);
         if (config.axis === 'y') {
             bumpSize = h / 2;
-            bumpLength = Math.max(3 * bumpSize, 14);
+            bumpLength = Math.max(3 * bumpSize, config.bumpMaxLength || 14);
             x = x + (w - bumpLength) / 2;
             y = y + bumpSize / 2;
             
             myt.DrawingUtil.drawRoundedRect(canvas, bumpSize / 2, 0, x, y, bumpLength, bumpSize);
         } else {
             bumpSize = w / 2;
-            bumpLength = Math.max(3 * bumpSize, 14);
+            bumpLength = Math.max(3 * bumpSize, config.bumpMaxLength || 14);
             y = y + (h - bumpLength) / 2;
             x = x + bumpSize / 2;
             
