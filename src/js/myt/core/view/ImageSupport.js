@@ -66,6 +66,12 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
                 this.fireNewEvent('imageUrl', v);
                 this.setNaturalWidth(undefined);
                 this.setNaturalHeight(undefined);
+                
+                // Collapse size if no url and we are using natural size
+                if (!v && this.useNaturalSize) {
+                    this.setWidth(0);
+                    this.setHeight(0);
+                }
             }
             this.__calculateNaturalSize();
         }
