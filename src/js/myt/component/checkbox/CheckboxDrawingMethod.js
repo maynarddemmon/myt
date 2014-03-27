@@ -40,7 +40,7 @@ myt.CheckboxDrawingMethod = new JS.Class('CheckboxDrawingMethod', myt.DrawingMet
             ignoreLayout:true, 
             ignorePlacement:true
         });
-        var grd = canvas.createLinearGradient(x2, y2, x2, y2 + w2);
+        var grd = canvas.createLinearGradient(x2, y2, x2, y2 + h2);
         
         // Border and shadow
         canvas.save();
