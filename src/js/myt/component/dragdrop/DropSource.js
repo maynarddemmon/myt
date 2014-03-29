@@ -43,8 +43,15 @@ myt.DropSource = new JS.Module('DropSource', {
         
         // Emulate mouse down on the dropable
         if (dropable) {
+            // Remember distance and set to zero so a drag will begin for sure.
+            var origDistance = dropable.distanceBeforeDrag;
+            dropable.distanceBeforeDrag = 0;
+            
             dropable.doMouseDown(event);
             dropable.__doMouseDown(event);
+            
+            // Restore distance
+            dropable.distanceBeforeDrag = origDistance;
         }
     },
     

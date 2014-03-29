@@ -35,8 +35,8 @@ myt.Dropable = new JS.Module('Dropable', {
         this.setDropped(false);
         this.setDropFailed(false);
         
-        this.callSuper(event);
         myt.global.dragManager.startDrag(this);
+        this.callSuper(event);
     },
     
     /** @overrides myt.Draggable */

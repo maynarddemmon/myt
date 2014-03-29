@@ -142,13 +142,14 @@ myt.Draggable = new JS.Module('Draggable', {
         @param event:event The event the mouse event when the drag started.
         @returns void */
     startDrag: function(event) {
-        this.setIsDragging(true);
-        this.attachToDom(myt.global.mouse, 'updateDrag', 'mousemove', true);
-        
         if (this.centerOnMouse) {
             this.syncTo(this, '__updateDragInitX', 'width');
             this.syncTo(this, '__updateDragInitY', 'height');
         }
+        
+        this.setIsDragging(true);
+        this.attachToDom(myt.global.mouse, 'updateDrag', 'mousemove', true);
+        this.updateDrag(event);
     },
     
     /** Called on every mousemove event while dragging.
