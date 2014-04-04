@@ -1,7 +1,8 @@
 /** Provides a 'mouseDown' attribute that tracks mouse up/down state.
     
-    Requires: myt.UpdateableUI, myt.Activateable, myt.MouseOver, 
-        myt.Disableable and myt.MouseObservable super mixins.
+    Requires: myt.MouseOver, myt.Disableable, myt.MouseObservable super mixins.
+    
+    Suggested: myt.UpdateableUI and myt.Activateable super mixins.
     
     Events:
         None
@@ -28,7 +29,7 @@ myt.MouseDown = new JS.Module('MouseDown', {
             // No event needed
             if (this.inited) {
                 if (v && this.isFocusable()) this.focus(true);
-                this.updateUI();
+                if (this.updateUI) this.updateUI();
             }
         }
     },
@@ -88,6 +89,6 @@ myt.MouseDown = new JS.Module('MouseDown', {
         the 'doActivated' method by default.
         @returns void */
     doMouseUpInside: function(event) {
-        this.doActivated();
+        if (this.doActivated) this.doActivated();
     }
 });

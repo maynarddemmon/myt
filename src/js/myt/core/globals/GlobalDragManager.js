@@ -170,7 +170,7 @@ new JS.Singleton('GlobalDragManager', {
                 dropTarget = dropTargets[--i];
                 if (dropTarget.willAcceptDrop(dropable) &&
                     dropable.willPermitDrop(dropTarget) &&
-                    dropTarget.containsPoint(mouseX, mouseY) && 
+                    dropTarget.isPointVisible(mouseX, mouseY) && 
                     (!topDropTarget || dropTarget.isInFrontOf(topDropTarget))
                 ) {
                     topDropTarget = dropTarget;

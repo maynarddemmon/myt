@@ -905,5 +905,26 @@ myt.View = new JS.Class('View', myt.Node, {
     containsPoint: function(locX, locY, referenceFrameDomElem) {
         var pos = myt.DomElementProxy.getPagePosition(this.domElement, referenceFrameDomElem);
         return myt.Geometry.rectContainsPoint(locX, locY, pos.x, pos.y, this.width, this.height);
+    },
+    
+    /** Checks if the provided location is visible on this view and is not
+        masked by the bounding box of the view or any of its ancestor views.
+        @returns boolean: true if visible, false otherwise. */
+    isPointVisible: function(locX, locY, referenceFrameDomElem) {
+        var pos = myt.DomElementProxy.getPagePosition(this.domElement, referenceFrameDomElem);
+        return this.__isPointVisible(locX - pos.x, locY - pos.y);
+    },
+    
+    /** @private */
+    __isPointVisible: function(x, y) {
+        if (myt.Geometry.rectContainsPoint(x, y, 0, 0, this.width, this.height)) {
+            var p = this.parent;
+            if (p) {
+                var de = p.domElement;
+                return p.__isPointVisible(x + this.x - de.scrollLeft, y + this.y - de.scrollTop);
+            }
+            return true;
+        }
+        return false;
     }
 });

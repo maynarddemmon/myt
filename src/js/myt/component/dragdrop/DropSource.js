@@ -47,8 +47,8 @@ myt.DropSource = new JS.Module('DropSource', {
             var origDistance = dropable.distanceBeforeDrag;
             dropable.distanceBeforeDrag = 0;
             
-            dropable.doMouseDown(event);
-            dropable.__doMouseDown(event);
+            dropable.doMouseDown(event); // Execute MouseDownMixin
+            dropable.__doMouseDown(event); // Execute Draggable
             
             // Restore distance
             dropable.distanceBeforeDrag = origDistance;
