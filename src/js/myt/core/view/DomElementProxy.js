@@ -117,8 +117,10 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
             return zIdx;
         },
         
-        /** Gets the x and y position of the dom element relative to the page.
-            @param elem:domElement the dom element to get the position for.
+        /** Gets the x and y position of the dom element relative to the 
+            ancestor dom element or the page. Transforms are not supported.
+            Use getTruePagePosition if you need support for transforms.
+            @param elem:domElement The dom element to get the position for.
             @param ancestorElem:domElement (optional) An ancestor dom element
                 that if encountered will halt the page position calculation
                 thus giving the position of elem relative to ancestorElem.
@@ -143,9 +145,18 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
                 }
             }
             
-            // JQuery $(elem).offset() works with transforms
-            
             return {x:x, y:y};
+        },
+        
+        /** Gets the x and y position of the dom element relative to the page
+            with support for transforms.
+            @param elem:domElement The dom element to get the position for.
+            @returns object with 'x' and 'y' keys or null if an error has
+                occurred. */
+        getTruePagePosition: function(elem) {
+            if (!elem) return null;
+            var pos = $(elem).offset();
+            return {x:pos.left, y:pos.top};
         },
         
         /** Generates a dom event on a dom element. Adapted from:
@@ -292,11 +303,19 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
     
     // Methods /////////////////////////////////////////////////////////////////
     /** Gets the x and y position of the underlying dom element relative to
-        the page.
+        the page. Transforms are not supported.
         @returns object with 'x' and 'y' keys or null if no dom element exists
             for this proxy. */
     getPagePosition: function() {
         return myt.DomElementProxy.getPagePosition(this.domElement);
+    },
+    
+    /** Gets the x and y position of the underlying dom element relative 
+        to the page with support for transforms.
+        @returns object with 'x' and 'y' keys or null if no dom element exists
+            for this proxy. */
+    getTruePagePosition: function() {
+        return myt.DomElementProxy.getTruePagePosition(this.domElement);
     },
     
     /** Generates a dom event on this proxy's dom element.

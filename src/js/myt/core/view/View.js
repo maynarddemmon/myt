@@ -910,21 +910,39 @@ myt.View = new JS.Class('View', myt.Node, {
     /** Checks if the provided location is visible on this view and is not
         masked by the bounding box of the view or any of its ancestor views.
         @returns boolean: true if visible, false otherwise. */
-    isPointVisible: function(locX, locY, referenceFrameDomElem) {
-        var pos = myt.DomElementProxy.getPagePosition(this.domElement, referenceFrameDomElem);
+    isPointVisible: function(locX, locY) {
+        var pos = this.getTruePagePosition();
+        this.calculateEffectiveScale();
         return this.__isPointVisible(locX - pos.x, locY - pos.y);
     },
     
     /** @private */
     __isPointVisible: function(x, y) {
-        if (myt.Geometry.rectContainsPoint(x, y, 0, 0, this.width, this.height)) {
+        var effectiveScale = this.__effectiveScale;
+        
+        if (myt.Geometry.rectContainsPoint(x, y, 0, 0, this.width * effectiveScale, this.height * effectiveScale)) {
             var p = this.parent;
             if (p) {
-                var de = p.domElement;
-                return p.__isPointVisible(x + this.x - de.scrollLeft, y + this.y - de.scrollTop);
+                var de = p.domElement, pScale = p.__effectiveScale;
+                return p.__isPointVisible(x + (this.x - de.scrollLeft) * pScale, y + (this.y - de.scrollTop) * pScale);
             }
             return true;
         }
         return false;
+    },
+    
+    calculateEffectiveScale: function() {
+        var ancestors = this.getAncestors(), i = ancestors.length, ancestor,
+            effectiveScale = 1;
+        while (i) {
+            ancestor = ancestors[--i];
+            effectiveScale *= ancestor.scaleX || 1;
+            ancestor.__effectiveScale = effectiveScale;
+        }
+    },
+    
+    getEffectiveScale: function() {
+        this.calculateEffectiveScale();
+        return this.__effectiveScale;
     }
 });

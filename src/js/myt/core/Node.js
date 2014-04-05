@@ -367,6 +367,17 @@ myt.Node = new JS.Class('Node', {
         return myt.Node.getMatchingAncestorOrSelf(this, matcherFunc);
     },
     
+    /** Gets an array of ancestor nodes including the node itself.
+        @returns array: The array of ancestor nodes. */
+    getAncestors: function() {
+        var ancestors = [], node = this;
+        while (node) {
+            ancestors.push(node);
+            node = node.parent;
+        }
+        return ancestors;
+    },
+    
     // Subnode Methods //
     /** Checks if this Node has the provided Node in the subnodes array.
         @param node:Node the subnode to check for.
