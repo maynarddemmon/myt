@@ -1,5 +1,8 @@
 /** Generates Mouse Events and passes them on to one or more event observers.
-    Requires myt.DomObservable as a super mixin. */
+    Also provides the capability to capture contextmenu events.
+    
+    Requires: myt.DomObservable super mixin.
+*/
 myt.MouseObservable = new JS.Module('MouseObservable', {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
@@ -11,7 +14,8 @@ myt.MouseObservable = new JS.Module('MouseObservable', {
             mouseup:true,
             click:true,
             dblclick:true,
-            mousemove:true
+            mousemove:true,
+            contextmenu:true
         },
         
         /** The common mouse event that gets reused. */

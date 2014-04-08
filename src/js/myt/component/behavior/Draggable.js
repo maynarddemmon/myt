@@ -1,5 +1,8 @@
 /** Makes an myt.View draggable via the mouse.
     
+    Also supresses context menus since the mouse down to open it causes bad
+    behavior since a mouseup event is not always fired.
+    
     Events:
         isDragging:boolean Fired when the isDragging attribute is modified
             via setIsDragging.
@@ -55,8 +58,12 @@ myt.Draggable = new JS.Module('Draggable', {
             }
             
             if (func) {
-                var dvs = this.getDragViews(), i = dvs.length;
-                while(i) func.call(this, dvs[--i], '__doMouseDown', 'mousedown');
+                var dvs = this.getDragViews(), dragview, i = dvs.length;
+                while(i) {
+                    dragview = dvs[--i];
+                    func.call(this, dragview, '__doMouseDown', 'mousedown');
+                    func.call(this, dragview, '__doContextMenu', 'contextmenu');
+                }
             }
         }
     },
@@ -94,6 +101,11 @@ myt.Draggable = new JS.Module('Draggable', {
         view capable of starting a drag. */
     getDragViews: function() {
         return [this];
+    },
+    
+    /** @private */
+    __doContextMenu: function(event) {
+        // Do nothing so the context menu event is supressed.
     },
     
     /** @private */
