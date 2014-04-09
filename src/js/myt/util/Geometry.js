@@ -1,6 +1,57 @@
 /** Provides common geometry related functions. */
 myt.Geometry = {
-    // Methods /////////////////////////////////////////////////////////////////,
+    // Methods /////////////////////////////////////////////////////////////////
+    /** Get the closest point on a line to a given point.
+        @param Ax:number The x-coordinate of the first point that defines 
+            the line.
+        @param Ay:number The y-coordinate of the first point that defines 
+            the line.
+        @param Bx:number The x-coordinate of the second point that defines 
+            the line.
+        @param By:number The y-coordinate of the second point that defines 
+            the line.
+        @param Px:number The x-coordinate of the point.
+        @param Py:number The y-coordinate of the point.
+        @returns object: A position object with x and y properties. */
+    getClosestPointOnALineToAPoint: function(Ax, Ay, Bx, By, Px, Py) {
+        var APx = Px - Ax,
+            APy = Py - Ay,
+            ABx = Bx - Ax,
+            ABy = By - Ay,
+            magAB2 = ABx * ABx + ABy * ABy,
+            ABdotAP = ABx * APx + ABy * APy,
+            t = ABdotAP / magAB2;
+        return {x:Ax + ABx * t, y:Ay + ABy * t};
+    },
+    
+    /** Get the closest point on a segment to a given point.
+        @param Ax:number The x-coordinate of the first endpoint that defines 
+            the segment.
+        @param Ay:number The y-coordinate of the first endpoint that defines 
+            the segment.
+        @param Bx:number The x-coordinate of the second endpoint that defines 
+            the segment.
+        @param By:number The y-coordinate of the second endpoint that defines 
+            the segment.
+        @param Px:number The x-coordinate of the point.
+        @param Py:number The y-coordinate of the point.
+        @returns object: A position object with x and y properties. */
+    getClosestPointOnASegmentToAPoint: function(Ax, Ay, Bx, By, Px, Py) {
+        var APx = Px - Ax,
+            APy = Py - Ay,
+            ABx = Bx - Ax,
+            ABy = By - Ay,
+            magAB2 = ABx * ABx + ABy * ABy,
+            ABdotAP = ABx * APx + ABy * APy,
+            t = ABdotAP / magAB2;
+        if (t < 0) {
+            return {x:Ax, y:Ay};
+        } else if (t > 1) {
+            return {x:Bx, y:By};
+        }
+        return {x:Ax + ABx * t, y:Ay + ABy * t};
+    },
+    
     /** Tests if the provided point is inside this path.
         @param x:number the x coordinate to test.
         @param y:number the y coordinate to test.
