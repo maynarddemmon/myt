@@ -715,6 +715,26 @@ myt.View = new JS.Class('View', myt.Node, {
         @returns void */
     subviewRemoved: function(sv) {},
     
+    /** Gets the next sibling view based on lexical ordering of dom elements.
+        @returns myt.View: The next sibling view or null if none exists. */
+    getNextSibling: function() {
+        if (this.parent) {
+            var nextDomElement = this.domElement.nextElementSibling;
+            if (nextDomElement) return nextDomElement.model;
+        }
+        return null;
+    },
+    
+    /** Gets the previous sibling view.
+        @returns myt.View: The previous sibling view or null if none exists. */
+    getPrevSibling: function() {
+        if (this.parent) {
+            var prevDomElement = this.domElement.previousElementSibling;
+            if (prevDomElement) return prevDomElement.model;
+        }
+        return null;
+    },
+    
     // Layouts //
     /** Checks if this View has the provided Layout in the layouts array.
         @param layout:Layout the layout to look for.
@@ -824,14 +844,14 @@ myt.View = new JS.Class('View', myt.Node, {
     
     /** Sends this view in front of the provided sibling view. */
     sendInFrontOf: function(sv) {
-        this.parent.sendSubviewInFrontOf(sv, this);
+        this.parent.sendSubviewInFrontOf(this, sv);
     },
     
     /** Sends the provided subview to the back.
         @param sv:View the subview of this view to bring to front.
         @returns void */
     bringSubviewToFront: function(sv) {
-        if (sv.parent === this) {
+        if (sv && sv.parent === this) {
             var de = this.domElement;
             if (sv.domElement !== de.lastChild) {
                 myt.View.retainFocusDuringDomUpdate(sv, function() {
@@ -845,7 +865,7 @@ myt.View = new JS.Class('View', myt.Node, {
         @param sv:View the subview of this view to send to back.
         @returns void */
     sendSubviewToBack: function(sv) {
-        if (sv.parent === this) {
+        if (sv && sv.parent === this) {
             var de = this.domElement;
             if (sv.domElement !== de.firstChild) {
                 myt.View.retainFocusDuringDomUpdate(sv, function() {
@@ -860,7 +880,7 @@ myt.View = new JS.Class('View', myt.Node, {
         @param existing:View the subview to send the other subview behind.
         @returns void */
     sendSubviewBehind: function(sv, existing) {
-        if (sv.parent === this && existing.parent === this) {
+        if (sv && existing && sv.parent === this && existing.parent === this) {
             var de = this.domElement;
             myt.View.retainFocusDuringDomUpdate(sv, function() {
                 de.insertBefore(sv.domElement, existing.domElement);
@@ -872,8 +892,8 @@ myt.View = new JS.Class('View', myt.Node, {
         @param sv:View the subview to send in front of the existing view.
         @param existing:View the subview to send the other subview in front of.
         @returns void */
-    sendSubviewInFrontOf: function(existing, sv) {
-        if (sv.parent === this && existing.parent === this) {
+    sendSubviewInFrontOf: function(sv, existing) {
+        if (sv && existing && sv.parent === this && existing.parent === this) {
             this.sendSubviewBehind(sv, existing);
             this.sendSubviewBehind(existing, sv);
         }
