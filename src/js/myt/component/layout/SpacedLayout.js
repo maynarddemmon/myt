@@ -1,5 +1,15 @@
 /** An extension of VariableLayout that positions views along an axis using
-    an inset, outset and spacing value. */
+    an inset, outset and spacing value.
+    
+    Events:
+        None
+    
+    Attributes:
+        noAddSubviewOptimization:boolean Turns the optimization to supress
+            layout updates when a subview is added off/on. Defaults to 
+            undefined which is equivalent to false and thus leaves the
+            optimization on.
+*/
 myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.VariableLayout */
@@ -16,6 +26,8 @@ myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
+    setNoAddSubviewOptimization: function(v) {this.noAddSubviewOptimization = v;},
+    
     /** @overrides myt.ConstantLayout */
     setTargetAttrName: function(v) {
         if (this.targetAttrName !== v) {
@@ -77,7 +89,7 @@ myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
         // The boundsWidth/boundsHeight events will be fired immediately 
         // after and are a more appropriate time to do the update.
         var isLocked = this.locked; // Remember original locked state.
-        this.locked = true; // Lock the layout so no updateds occur.
+        if (!this.noAddSubviewOptimization) this.locked = true; // Lock the layout so no updates occur.
         this.callSuper(sv);
         this.locked = isLocked; // Restore original locked state.
     },
