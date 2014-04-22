@@ -173,12 +173,12 @@ myt.Draggable = new JS.Module('Draggable', {
     
     /** @private */
     __updateDragInitX: function(event) {
-        this.dragInitX = this.width / 2;
+        this.dragInitX = this.width / 2 * (this.scaleX || 1);
     },
     
     /** @private */
     __updateDragInitY: function(event) {
-        this.dragInitY = this.height / 2;
+        this.dragInitY = this.height / 2 * (this.scaleY || 1);
     },
     
     /** @private */
