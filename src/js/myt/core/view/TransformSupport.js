@@ -109,16 +109,10 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
     
     setScale: function(v) {
         var doUpdateX = this.scaleX !== v;
-        if (doUpdateX) {
-            this.scaleX = v;
-            myt.TransformSupport.addTransform(this.deStyle, 'scaleX', v || 1); // Also converts 0 to 1.
-        }
+        if (doUpdateX) this.__applyScale('scaleX', this.scaleX = v);
         
         var doUpdateY = this.scaleY !== v;
-        if (doUpdateY) {
-            this.scaleY = v;
-            myt.TransformSupport.addTransform(this.deStyle, 'scaleY', v || 1); // Also converts 0 to 1.
-        }
+        if (doUpdateY) this.__applyScale('scaleY', this.scaleY = v);
         
         if (this.inited) {
             if (doUpdateX || doUpdateY) this.__updateBounds(this.width, this.height);
@@ -129,8 +123,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
     
     setScaleX: function(v) {
         if (this.scaleX !== v) {
-            this.scaleX = v;
-            myt.TransformSupport.addTransform(this.deStyle, 'scaleX', v || 1); // Also converts 0 to 1.
+            this.__applyScale('scaleX', this.scaleX = v);
             if (this.inited) {
                 this.__updateBounds(this.width, this.height);
                 this.fireNewEvent('scaleX', v);
@@ -140,12 +133,20 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
     
     setScaleY: function(v) {
         if (this.scaleY !== v) {
-            this.scaleY = v;
-            myt.TransformSupport.addTransform(this.deStyle, 'scaleY', v || 1); // Also converts 0 to 1.
+            this.__applyScale('scaleY', this.scaleY = v);
             if (this.inited) {
                 this.__updateBounds(this.width, this.height);
                 this.fireNewEvent('scaleY', v);
             }
+        }
+    },
+    
+    /** @private */
+    __applyScale: function(axis, v) {
+        if (v == null) {
+            myt.TransformSupport.removeTransform(this.deStyle, axis);
+        } else {
+            myt.TransformSupport.addTransform(this.deStyle, axis, v || 1); // Also converts 0 to 1.
         }
     },
     
