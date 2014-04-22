@@ -169,6 +169,7 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     /** @private */
     __userInteraction: function(event) {
         this.saveSelection();
+        return true;
     },
     
     getSelection: function() {
