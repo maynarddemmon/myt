@@ -7,6 +7,8 @@
         tooltip:object The tooltip configuration assigned to this tooltip
             when the mouse has moved over a view with TooltipMixin.
         tipDelay:number The time in millis to wait before showing the tooltip.
+        tipHideDelay:number The time in millis to wait before hiding 
+            the tooltip.
     
     Private Attributes:
         __checkTipCallback:myt.Callback The callback invoked by 
@@ -22,13 +24,16 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
         /** The length of time in millis before the tip is shown. */
-        DEFAULT_TIP_DELAY:500
+        DEFAULT_TIP_DELAY:500,
+        /** The length of time in millis before the tip is hidden. */
+        DEFAULT_TIP_HIDE_DELAY:100
     },
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        this.tipDelay = myt.BaseTooltip.DEFAULT_TIP_DELAY;
+        this.tipDelay = this.nextTipDelay = myt.BaseTooltip.DEFAULT_TIP_DELAY;
+        this.tipHideDelay = myt.BaseTooltip.DEFAULT_TIP_HIDE_DELAY;
         
         if (attrs.visible === undefined) attrs.visible = false;
         
@@ -49,7 +54,13 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     setTooltip: function(v) {
         if (this.inited) {
             this.tooltip = v;
-            if (v) this.attachToDom(myt.global.mouse, '__checkMouseMovement', 'mousemove', true);
+            if (v) {
+                this.attachToDom(myt.global.mouse, '__checkMouseMovement', 'mousemove', true);
+                
+                var ttp = v.parent;
+                this.attachToDom(ttp, 'hideTip', 'mousedown', true);
+                this.attachToDom(ttp, 'hideTip', 'mouseup', true);
+            }
         }
     },
     
@@ -58,11 +69,7 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     /** @private */
     __checkMouseMovement: function(event) {
         this._lastPos = myt.MouseObservable.getMouseFromEvent(event);
-        if (this.__checkOut()) {
-            this.__checkTipTimer.clear();
-        } else {
-            this.__checkTipTimer.reset(this.__checkTipCallback, this.tipDelay);
-        }
+        if (!this.__checkOut()) this.__checkTipTimer.reset(this.__checkTipCallback, this.nextTipDelay);
     },
     
     /** If the mouse rests in the tip's parent, show the tip.
@@ -90,11 +97,14 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     /** Called when the tip will be hidden.
         @returns boolean */
     hideTip: function(event) {
+        this.__checkTipTimer.clear();
+        
         var ttp = this.tooltip.parent;
         this.detachFromDom(ttp, 'hideTip', 'mousedown', true);
         this.detachFromDom(ttp, 'hideTip', 'mouseup', true);
         this.detachFromDom(myt.global.mouse, '__checkMouseMovement', 'mousemove', true);
         
+        this.nextTipDelay = this.tipDelay;
         this.setVisible(false);
         
         // Don't consume mouse event since we just want to close the tip
@@ -111,10 +121,7 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
         // distracting while this is going on.
         if (myt.global.dragManager.dragView) return;
         
-        var ttp = this.tooltip.parent;
-        this.attachToDom(ttp, 'hideTip', 'mousedown', true);
-        this.attachToDom(ttp, 'hideTip', 'mouseup', true);
-        
+        this.nextTipDelay = this.tipHideDelay;
         this.bringToFront();
         this.setVisible(true);
     }
