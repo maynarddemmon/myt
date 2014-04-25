@@ -416,11 +416,19 @@ myt = {
     },
     
     // Misc
-    /** Make a deep copy of an object.
+    /** Make a deep or shallow copy of an object.
         @param obj:object the object to copy.
+        @param shallow:boolean (optional) If true is provided a shallow copy
+            will be created in a more performant way than a deep copy.
         @returns object a copy of the object. */
-    clone: function(obj) {
-        return JSON.parse(JSON.stringify(obj));
+    clone: function(obj, shallow) {
+        if (shallow) {
+            var tmp = function(){};
+            tmp.prototype = obj;
+            return new tmp();
+        } else {
+            return JSON.parse(JSON.stringify(obj));
+        }
     },
     
     /** Memoize a function.
