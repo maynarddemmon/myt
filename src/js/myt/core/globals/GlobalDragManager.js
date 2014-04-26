@@ -137,15 +137,15 @@ new JS.Singleton('GlobalDragManager', {
         @param event:event The mouse event that triggered the stop drag.
         @param dropable:myt.Dropable The dropable that stopped being dragged.
         @returns void */
-    stopDrag: function(event, dropable) {
+    stopDrag: function(event, dropable, isAbort) {
         var overView = this.overView;
-        dropable.notifyDrop(overView);
-        if (overView) overView.notifyDrop(dropable);
+        dropable.notifyDrop(overView, isAbort);
+        if (overView && !isAbort) overView.notifyDrop(dropable);
         
         this.setOverView();
         this.setDragView();
         
-        if (overView) this.fireNewEvent('drop', [dropable, overView]);
+        if (overView && !isAbort) this.fireNewEvent('drop', [dropable, overView]);
     },
     
     /** Called by a myt.Dropable during dragging.

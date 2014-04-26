@@ -46,11 +46,15 @@ myt.Dropable = new JS.Module('Dropable', {
     },
     
     /** @overrides myt.Draggable */
-    stopDrag: function(event) {
-        myt.global.dragManager.stopDrag(event, this);
-        this.callSuper(event);
+    stopDrag: function(event, isAbort) {
+        myt.global.dragManager.stopDrag(event, this, isAbort);
+        this.callSuper(event, isAbort);
         
-        if (this.dropFailed) this.notifyDropFailed();
+        if (isAbort) {
+            this.notifyDropAborted();
+        } else if (this.dropFailed) {
+            this.notifyDropFailed();
+        }
     },
     
     /** Called by myt.GlobalDragManager when this view is dragged over a drop
@@ -69,12 +73,13 @@ myt.Dropable = new JS.Module('Dropable', {
         this.setDropTarget();
     },
     
-    /** Called by myt.GlobalDragManager when this view is dropped on a drop
-        target.
+    /** Called by myt.GlobalDragManager when this view is dropped.
         @param dropTarget:myt.DropTarget The target that was dropped on. Will
             be undefined if this dropable was dropped on no drop target.
+        @param isAbort:boolean Indicates if the drop was the result of an
+            abort or a normal drop.
         @returns void */
-    notifyDrop: function(dropTarget) {
+    notifyDrop: function(dropTarget, isAbort) {
         this.setDropped(true);
         
         if (!this.dropTarget) this.setDropFailed(true);
@@ -83,5 +88,10 @@ myt.Dropable = new JS.Module('Dropable', {
     /** Called after dragging stops and the drop failed. The default
         implementation does nothing.
         @returns void */
-    notifyDropFailed: function() {}
+    notifyDropFailed: function() {},
+    
+    /** Called after dragging stops and the drop was aborted. The default
+        implementation does nothing.
+        @returns void */
+    notifyDropAborted: function() {}
 });

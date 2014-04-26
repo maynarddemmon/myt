@@ -8,6 +8,9 @@
             via setIsDragging.
     
     Attributes:
+        allowAbort:boolean Allows a drag to be aborted by the user by
+            pressing the 'esc' key. Defaults to undefined which is equivalent
+            to false.
         isDraggable:boolean Configures the view to be draggable or not. The 
             default value is true.
         distanceBeforeDrag:number The distance, in pixels, before a mouse 
@@ -92,6 +95,7 @@ myt.Draggable = new JS.Module('Draggable', {
     setDistanceBeforeDrag: function(v) {this.distanceBeforeDrag = v;},
     setDraggableAllowBubble: function(v) {this.draggableAllowBubble = v;},
     setCenterOnMouse: function(v) {this.centerOnMouse = v;},
+    setAllowAbort: function(v) {this.allowAbort = v;},
     
     
     // Methods /////////////////////////////////////////////////////////////////
@@ -129,13 +133,18 @@ myt.Draggable = new JS.Module('Draggable', {
     /** @private */
     __doMouseUp: function(event) {
         if (this.isDragging) {
-            this.stopDrag(event);
+            this.stopDrag(event, false);
         } else {
             var gm = myt.global.mouse;
             this.detachFromDom(gm, '__doMouseUp', 'mouseup', true);
             this.detachFromDom(gm, '__doDragCheck', 'mousemove', true);
         }
         return this.draggableAllowBubble;
+    },
+    
+    /** @private */
+    __watchForAbort: function(event) {
+        if (event.value === 27) this.stopDrag(event, true);
     },
     
     /** @private */
@@ -159,8 +168,11 @@ myt.Draggable = new JS.Module('Draggable', {
             this.syncTo(this, '__updateDragInitY', 'height');
         }
         
+        var g = myt.global;
+        if (this.allowAbort) this.attachTo(g.keys, '__watchForAbort', 'keyup');
+        
         this.setIsDragging(true);
-        this.attachToDom(myt.global.mouse, 'updateDrag', 'mousemove', true);
+        this.attachToDom(g.mouse, 'updateDrag', 'mousemove', true);
         this.updateDrag(event);
     },
     
@@ -191,15 +203,19 @@ myt.Draggable = new JS.Module('Draggable', {
     },
     
     /** Stop the drag. (see startDrag for more details)
+        @param event:object The event that ended the drag.
+        @param isAbort:boolean Indicates if the drag ended normally or was
+            aborted.
         @returns void */
-    stopDrag: function(event) {
-        var gm = myt.global.mouse;
+    stopDrag: function(event, isAbort) {
+        var g = myt.global, gm = g.mouse;
         this.detachFromDom(gm, '__doMouseUp', 'mouseup', true);
         this.detachFromDom(gm, 'updateDrag', 'mousemove', true);
         if (this.centerOnMouse) {
             this.detachFrom(this, '__updateDragInitX', 'width');
             this.detachFrom(this, '__updateDragInitY', 'height');
         }
+        if (this.allowAbort) this.detachFrom(g.keys, '__watchForAbort', 'keyup');
         this.setIsDragging(false);
     },
     

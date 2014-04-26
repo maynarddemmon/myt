@@ -41,6 +41,7 @@
                 
                 attrs.centerOnMouse = true;
                 attrs.distanceBeforeDrag = 2;
+                attrs.allowAbort = true;
                 
                 this.callSuper(parent, attrs);
                 
@@ -74,6 +75,11 @@
                 this.bringToFront();
                 
                 this.callSuper();
+            },
+            
+            notifyDropAborted: function() {
+                console.log('aborted: behave as a drop fail.');
+                this.notifyDropFailed();
             },
             
             notifyDropFailed: function() {
