@@ -221,7 +221,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         }]);
         
         var formData = new FormData();
-        formData.append(fileParam, file);
+        formData.append(fileParam, file, file.name);
         ajax.setRequestData(formData);
         
         ajax.doRequest({
