@@ -115,7 +115,7 @@ new JS.Singleton('GlobalFocus', {
         if (activeElem) {
             elem = startElem = activeElem;
             model = startElem.model;
-            if (!model) model = this.__findModelForDomElement(startElem);
+            if (!model) model = this.findModelForDomElement(startElem);
             if (model) {
                 var focusTrap = model.getFocusTrap(ignoreFocusTrap);
                 if (focusTrap) rootElem = focusTrap.domElement;
@@ -180,7 +180,7 @@ new JS.Singleton('GlobalFocus', {
                             myt.DomElementProxy.isDomElementVisible(elem)
                         ) {
                             // Make sure the dom element isn't inside a maskFocus
-                            model = this.__findModelForDomElement(elem);
+                            model = this.findModelForDomElement(elem);
                             if (model && model.searchAncestorsOrSelf(function(n) {return n.maskFocus === true;})) {
                                 // Is a masked dom element so ignore.
                             } else {
@@ -201,7 +201,7 @@ new JS.Singleton('GlobalFocus', {
         @param elem:domElement to element to start looking from.
         @returns myt.View or null if not found.
         @private */
-    __findModelForDomElement: function(elem) {
+    findModelForDomElement: function(elem) {
         var model;
         while (elem) {
             model = elem.model;
