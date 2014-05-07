@@ -105,7 +105,12 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
             
             /** @overrides myt.DrawButton */
             doActivated: function() {
-                if (!self.selected) self.tabContainer.select(self);
+                var tc = self.tabContainer;
+                if (self.isSelected() && tc.maxSelected !== 1) {
+                    tc.deselect(self);
+                } else {
+                    tc.select(self);
+                }
             },
             
             /** @overrides myt.DrawButton */

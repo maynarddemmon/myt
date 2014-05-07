@@ -109,8 +109,11 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
         min += layoutOverage;
         preferred += layoutOverage;
         
-        var minIsOver = min > this.height,
-            preferredIsOver = preferred > this.height;
+        var h = this.height,
+            minIsOver = min > h,
+            preferredIsOver = preferred > h,
+            overage = preferred - h,
+            tabPreferred, tabMin, newVal;
         
         i = tabSliders.length;
         while (i) {
@@ -121,8 +124,18 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
                     if (minIsOver) {
                         tabSlider.expand(tabSlider.getMinimumExpandedHeight());
                     } else if (preferredIsOver) {
-                        var diff = preferred - this.height;
-                        tabSlider.expand(tabSlider.getPreferredExpandedHeight() - diff);
+                        tabPreferred = tabSlider.getPreferredExpandedHeight();
+                        tabMin = tabSlider.getMinimumExpandedHeight();
+                        
+                        newVal = tabPreferred - overage;
+                        if (tabMin > newVal) {
+                            overage -= tabPreferred - tabMin;
+                            newVal = tabMin;
+                        } else {
+                            overage = 0;
+                        }
+                        
+                        tabSlider.expand(newVal);
                     } else {
                         tabSlider.expand(tabSlider.getPreferredExpandedHeight());
                     }
