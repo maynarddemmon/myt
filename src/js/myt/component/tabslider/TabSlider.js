@@ -121,7 +121,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
                 config.edgeColor = self.edgeColor;
                 config.edgeSize = self.edgeSize;
                 
-                if (self.selected) {
+                if (self.selected && self.tabContainer.maxSelected !== -1) {
                     config.fillColor = self.fillColorSelected;
                 } else {
                     switch (state) {
