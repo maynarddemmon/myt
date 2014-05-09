@@ -38,6 +38,7 @@ new JS.Singleton('GlobalIdle', {
             self.__timerId = win.requestAnimationFrame(doIdle);
             var lastTime = self.lastTime;
             if (lastTime !== -1) {
+                time = Math.round(time);
                 var event = self.__event;
                 event.delta = time - lastTime;
                 event.time = time;

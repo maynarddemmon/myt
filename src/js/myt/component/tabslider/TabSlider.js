@@ -10,6 +10,8 @@
             manages this tab.
         buttonClass:JS.Class The class to use for the button portion of the
             tab slider. Defaults to myt.DrawButton.
+        drawingMethodClassname:string The name of the class to draw the button
+            with.
         edgeColor:color The color of the edge of the tab slider button.
         edgeSize:number The size of the edge of the tab slider button.
         fillColorSelected:color The color of the button when selected.
@@ -56,6 +58,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
         
         if (attrs.selected === undefined) attrs.selected = false;
         if (attrs.buttonClass === undefined) attrs.buttonClass = myt.DrawButton;
+        if (attrs.drawingMethodClassname === undefined) attrs.drawingMethodClassname = 'myt.TabSliderDrawingMethod';
         if (attrs.zIndex === undefined) attrs.zIndex = 0;
         
         var TS = myt.TabSlider;
@@ -88,7 +91,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
             name:'button', ignorePlacement:true, zIndex:1,
             height:this.buttonHeight,
             focusEmbellishment:true,
-            drawingMethodClassname:'myt.TabSliderDrawingMethod',
+            drawingMethodClassname:this.drawingMethodClassname,
             groupId:this.parent.parent.groupId,
             percentOfParentWidth:100,
             fillColorChecked:this.fillColorChecked,
@@ -162,7 +165,11 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
             y:this.buttonHeight, height:0,
             visible:false, maskFocus:true,
             overflow:'hidden', percentOfParentWidth:100
-        }, [myt.SizeToParent]);
+        }, [myt.SizeToParent, {
+            setHeight: function(v, supressEvent) {
+                this.callSuper(Math.round(v), supressEvent);
+            }
+        }]);
         
         var container = new myt.View(wrapper, {name:'container'});
         new myt.SizeToChildren(container, {axis:'y'});
@@ -185,6 +192,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
     
     setMinContainerHeight: function(v) {this.minContainerHeight = v;},
     setButtonClass: function(v) {this.buttonClass = v;},
+    setDrawingMethodClassname: function(v) {this.drawingMethodClassname = v;},
     setEdgeColor: function(v) {this.edgeColor = v;},
     setEdgeSize: function(v) {this.edgeSize = v;},
     setFillColorSelected: function(v) {this.fillColorSelected = v;},
@@ -248,13 +256,21 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
     expand: function(targetHeight) {
         this.setExpansionState('expanding');
         
-        this.wrapper.stopActiveAnimators();
+        var wrapper = this.wrapper,
+            to = targetHeight - this.getCollapsedHeight();
         
-        var self = this;
-        this.wrapper.animate({
-            attribute:'height', to:targetHeight - this.getCollapsedHeight(), 
-            duration:myt.TabSlider.DEFAULT_ANIMATION_MILLIS, easingFunction:'easeInOutQuad'
-        }).next(function(success) {self.setExpansionState('expanded');});
+        wrapper.stopActiveAnimators();
+        
+        if (wrapper.height !== to) {
+            var self = this;
+            wrapper.animate({
+                attribute:'height', to:to, 
+                duration:myt.TabSlider.DEFAULT_ANIMATION_MILLIS, 
+                easingFunction:'easeInOutQuad'
+            }).next(function(success) {self.setExpansionState('expanded');});
+        } else {
+            this.setExpansionState('expanded');
+        }
     },
     
     /** Should only be called from the TabSliderContainer.
@@ -262,13 +278,21 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
     collapse: function(targetHeight) {
         this.setExpansionState('collapsing');
         
-        this.wrapper.stopActiveAnimators();
+        var wrapper = this.wrapper,
+            to = targetHeight - this.getCollapsedHeight();
         
-        var self = this;
-        this.wrapper.animate({
-            attribute:'height', to:targetHeight - this.getCollapsedHeight(), 
-            duration:myt.TabSlider.DEFAULT_ANIMATION_MILLIS, easingFunction:'easeInOutQuad'
-        }).next(function(success) {self.setExpansionState('collapsed');});
+        wrapper.stopActiveAnimators();
+        
+        if (wrapper.height !== to) {
+            var self = this;
+            wrapper.animate({
+                attribute:'height', to:to, 
+                duration:myt.TabSlider.DEFAULT_ANIMATION_MILLIS, 
+                easingFunction:'easeInOutQuad'
+            }).next(function(success) {self.setExpansionState('collapsed');});
+        } else {
+            this.setExpansionState('collapsed');
+        }
     },
     
     /** Gets the height of the tab slider when it is collapsed. Will be the
