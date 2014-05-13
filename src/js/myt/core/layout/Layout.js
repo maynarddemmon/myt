@@ -242,14 +242,16 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
     },
     
     /** Moves the subview before the target subview in the order the subviews
-        are layed out.
+        are layed out. If no target subview is provided, or it isn't in the
+        layout the subview will be moved to the front of the list.
         @returns void */
     moveSubviewBefore: function(sv, target) {
         this.__moveSubview(sv, target, false);
     },
     
     /** Moves the subview after the target subview in the order the subviews
-        are layed out.
+        are layed out. If no target subview is provided, or it isn't in the
+        layout the subview will be moved to the back of the list.
         @returns void */
     moveSubviewAfter: function(sv, target) {
         this.__moveSubview(sv, target, true);
@@ -258,14 +260,21 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
     /** Implements moveSubviewBefore and moveSubviewAfter.
         @private */
     __moveSubview: function(sv, target, after) {
-        var targetIdx = this.getSubviewIndex(target);
-        if (targetIdx >= 0) {
-            var curIdx = this.getSubviewIndex(sv);
-            if (curIdx >= 0) {
-                var svs = this.subviews;
-                svs.splice(curIdx, 1);
+        var curIdx = this.getSubviewIndex(sv);
+        if (curIdx >= 0) {
+            var svs = this.subviews,
+                targetIdx = this.getSubviewIndex(target);
+            svs.splice(curIdx, 1);
+            if (targetIdx >= 0) {
                 if (curIdx < targetIdx) --targetIdx;
                 svs.splice(targetIdx + after ? 1 : 0, 0, sv);
+            } else {
+                // Make first or last since target was not found
+                if (after) {
+                    svs.push(sv);
+                } else {
+                    svs.unshift(sv);
+                }
             }
         }
     },
