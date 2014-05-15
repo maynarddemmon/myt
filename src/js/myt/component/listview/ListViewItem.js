@@ -47,7 +47,7 @@ myt.ListViewItem = new JS.Class('ListViewItem', myt.SimpleIconTextButton, {
             textViewVisible = textView.visible && this.text,
             iconWidth = iconView.visible ? iconView.width : 0,
             iconExtent = iconWidth + (textViewVisible && iconWidth > 0 ? this.iconSpacing : 0),
-            textWidth = textViewVisible ? textView.width : 0;
+            textWidth = textViewVisible ? Math.ceil(textView.width) : 0;
         return this.inset + iconExtent + textWidth + this.outset;
     },
     
