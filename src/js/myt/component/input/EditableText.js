@@ -172,6 +172,7 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
         return true;
     },
     
+    /** @overrides myt.BaseInputText */
     getSelection: function() {
         var range;
         if (window.getSelection) {
@@ -194,6 +195,7 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
         };
     },
     
+    /** @overrides myt.BaseInputText */
     setSelection: function(selection) {
         if (selection) {
             var startElem = selection.startElem,
@@ -212,13 +214,5 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
                 }
             }
         }
-    },
-    
-    saveSelection: function(selection) {
-        this._selRange = selection || this.getSelection() || this._selRange;
-    },
-    
-    restoreSelection: function() {
-        this.setSelection(this._selRange);
     }
 });

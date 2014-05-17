@@ -161,9 +161,32 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
         this.setCaretPosition(this.getDomValue().length);
     },
     
+    // Selection //
     /** Selects all the text in the input element.
         @returns void */
     selectAll: function() {
         this.domElement.select();
+    },
+    
+    getSelection: function() {
+        var de = this.domElement;
+        return {
+            start:de.selectionStart,
+            startElem:de,
+            end:de.selectionEnd,
+            endElem:de
+        };
+    },
+    
+    setSelection: function(selection) {
+        if (selection) this.setCaretPosition(selection.start, selection.end);
+    },
+    
+    saveSelection: function(selection) {
+        this._selRange = selection || this.getSelection() || this._selRange;
+    },
+    
+    restoreSelection: function() {
+        this.setSelection(this._selRange);
     }
 });
