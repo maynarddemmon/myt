@@ -171,14 +171,18 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
     
     /** @private */
     __doFocus: function(event) {
-        this.setFocused(true);
-        this.doFocus();
+        if (!this.focused) {
+            this.setFocused(true);
+            this.doFocus();
+        }
     },
     
     /** @private */
     __doBlur: function(event) {
-        this.doBlur();
-        this.setFocused(false);
+        if (this.focused) {
+            this.doBlur();
+            this.setFocused(false);
+        }
     },
     
     doFocus: function() {
