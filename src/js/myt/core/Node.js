@@ -131,7 +131,10 @@ myt.Node = new JS.Class('Node', {
             while (i) subs[--i].destroy();
         }
         
-        if (this.__animPool) this.__animPool.destroy();
+        if (this.__animPool) {
+            this.stopActiveAnimators();
+            this.__animPool.destroy();
+        }
         
         this.destroyBeforeOrphaning();
         if (this.parent) this.setParent(null);
@@ -487,19 +490,21 @@ myt.Node = new JS.Class('Node', {
             be used as a matching attribute name.
         @returns void */
     stopActiveAnimators: function(filterFunc) {
-        if (filterFunc == null) {
-            filterFunc = function(anim) {return true;};
-        } else if (typeof filterFunc === 'string') {
-            var attrName = filterFunc;
-            filterFunc = function(anim) {
-                return anim.attribute === attrName;
-            };
-        }
-        
         var activeAnims = this.getActiveAnimators(), i = activeAnims.length, anim;
-        while (i) {
-            anim = activeAnims[--i];
-            if (filterFunc.call(this, anim)) anim.reset(false);
+        if (i > 0) {
+            if (filterFunc == null) {
+                filterFunc = function(anim) {return true;};
+            } else if (typeof filterFunc === 'string') {
+                var attrName = filterFunc;
+                filterFunc = function(anim) {
+                    return anim.attribute === attrName;
+                };
+            }
+            
+            while (i) {
+                anim = activeAnims[--i];
+                if (filterFunc.call(this, anim)) anim.reset(false);
+            }
         }
     },
     
