@@ -58,6 +58,7 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     },
     
     setOptions: function(v) {
+        this.destroyAllOptions();
         if (Array.isArray(v)) {
             for (var i = 0, len = v.length; len > i; ++i) this.addOption(v[i]);
         }
@@ -145,6 +146,11 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
         @returns myt.InputSelectOption: The newly created option. */
     addOption: function(attrs) {
         new myt.InputSelectOption(this, attrs);
+    },
+    
+    destroyAllOptions: function() {
+        var options = this.getOptions(), i = options.length;
+        while (i) options[--i].destroy();
     },
     
     /** Destroys an option that has the provided value.
