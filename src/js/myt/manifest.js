@@ -309,13 +309,14 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'form/RootForm.js'   ).provides('myt.RootForm'   ).requires('myt.Form');
     file(MYT_COMPONENT_ROOT + 'form/FormElement.js').provides('myt.FormElement').requires('myt.RootForm');
     
-    file(MYT_COMPONENT_ROOT + 'form/elements/FormInputSelect.js'  ).provides('myt.FormInputSelect'  ).requires('myt.FormElement','myt.InputSelect');
-    file(MYT_COMPONENT_ROOT + 'form/elements/FormRadioGroup.js'   ).provides('myt.FormRadioGroup'   ).requires('myt.FormElement','myt.Radio');
-    file(MYT_COMPONENT_ROOT + 'form/elements/FormCheckbox.js'     ).provides('myt.FormCheckbox'     ).requires('myt.FormElement','myt.Checkbox');
-    file(MYT_COMPONENT_ROOT + 'form/elements/FormTextCheckbox.js' ).provides('myt.FormTextCheckbox' ).requires('myt.FormElement','myt.TextCheckbox');
-    file(MYT_COMPONENT_ROOT + 'form/elements/FormInputText.js'    ).provides('myt.FormInputText'    ).requires('myt.FormElement','myt.InputText');
-    file(MYT_COMPONENT_ROOT + 'form/elements/FormEditableText.js' ).provides('myt.FormEditableText' ).requires('myt.FormElement','myt.EditableText');
-    file(MYT_COMPONENT_ROOT + 'form/elements/FormInputTextArea.js').provides('myt.FormInputTextArea').requires('myt.FormElement','myt.InputTextArea');
+    file(MYT_COMPONENT_ROOT + 'form/elements/FormInputSelect.js'   ).provides('myt.FormInputSelect'   ).requires('myt.FormElement','myt.InputSelect');
+    file(MYT_COMPONENT_ROOT + 'form/elements/FormRadioGroup.js'    ).provides('myt.FormRadioGroup'    ).requires('myt.FormElement','myt.Radio');
+    file(MYT_COMPONENT_ROOT + 'form/elements/FormCheckbox.js'      ).provides('myt.FormCheckbox'      ).requires('myt.FormElement','myt.Checkbox');
+    file(MYT_COMPONENT_ROOT + 'form/elements/FormTextCheckbox.js'  ).provides('myt.FormTextCheckbox'  ).requires('myt.FormElement','myt.TextCheckbox');
+    file(MYT_COMPONENT_ROOT + 'form/elements/FormInputTextMixin.js').provides('myt.FormInputTextMixin').requires('myt.FormElement');
+    file(MYT_COMPONENT_ROOT + 'form/elements/FormInputText.js'     ).provides('myt.FormInputText'     ).requires('myt.FormInputTextMixin','myt.InputText');
+    file(MYT_COMPONENT_ROOT + 'form/elements/FormEditableText.js'  ).provides('myt.FormEditableText'  ).requires('myt.FormInputTextMixin','myt.EditableText');
+    file(MYT_COMPONENT_ROOT + 'form/elements/FormInputTextArea.js' ).provides('myt.FormInputTextArea' ).requires('myt.FormInputTextMixin','myt.InputTextArea');
     
     // Component : Uploader
     file(MYT_COMPONENT_ROOT + 'uploader/DragDropObservable.js').provides('myt.DragDropObservable').requires('myt.DomObservable');
