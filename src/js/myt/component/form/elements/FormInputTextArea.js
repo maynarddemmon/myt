@@ -1,5 +1,12 @@
 /** An myt.InputTextArea that is also a FormElement.
     
+    Accelerators:
+        reject: Invokes the doReject function. Activated upon key up of 
+            the ESC key.
+    
+    Events:
+        None
+    
     Attributes:
         errorColor:color_string The color to use when a validation 
             error exists. Defaults to '#ff9999'.
@@ -16,6 +23,12 @@
                     the user types if currently invalid.
                 none: Don't do any validation when interacting with the field.
             The default value is 'key'.
+        acceleratorScope:string The scope the accelerators will be applied to.
+            Supported values are:
+                element: Take action on this element only
+                root: Take action on the root form.
+                none: Take no action.
+            The default value is 'element'.
 */
 myt.FormInputTextArea = new JS.Class('FormInputTextArea', myt.InputTextArea, {
     include: [myt.FormElement, myt.UpdateableUI],
@@ -24,6 +37,7 @@ myt.FormInputTextArea = new JS.Class('FormInputTextArea', myt.InputTextArea, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Input */
     initNode: function(parent, attrs) {
+        this.acceleratorScope = 'element';
         this.validateWhen = 'key';
         this.errorColor = '#ff9999';
         this.actionRequiredColor = '#996666';
@@ -37,11 +51,16 @@ myt.FormInputTextArea = new JS.Class('FormInputTextArea', myt.InputTextArea, {
         this.callSuper(parent, attrs);
         
         this.addValueProcessor(myt.global.valueProcessors.getValueProcessor('undefToEmpty'));
+        
+        this.attachToDom(this, '__handleKeyUp', 'keyup');
+        
+        this.addAccelerator('reject', this.doReject);
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
     setValidateWhen: function(v) {this.validateWhen = v;},
+    setAcceleratorScope: function(v) {this.acceleratorScope = v;},
     setErrorColor: function(v) {this.errorColor = v;},
     setActionRequiredColor: function(v) {this.actionRequiredColor = v;},
     setNormalColor: function(v) {this.normalColor = v;},
@@ -69,6 +88,28 @@ myt.FormInputTextArea = new JS.Class('FormInputTextArea', myt.InputTextArea, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    doReject: function() {
+        if (!this.disabled) {
+            switch (this.acceleratorScope) {
+                case 'root':
+                    this.getRootForm().invokeAccelerator("cancel");
+                    break;
+                case 'element':
+                    this.rollbackForm();
+                    this.getRootForm().doValidation();
+                    if (this.form) this.form.verifyChangedState(this);
+                    break;
+                case 'none':
+                default:
+            }
+        }
+    },
+    
+    /** @private */
+    __handleKeyUp: function(event) {
+        if (myt.KeyObservable.getKeyCodeFromEvent(event) === 27) this.invokeAccelerator("reject");
+    },
+    
     /** @overrides myt.FocusObservable */
     doBlur: function() {
         this.callSuper();

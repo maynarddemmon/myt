@@ -1,5 +1,11 @@
 /** An myt.InputText that is also a FormElement.
     
+    Accelerators:
+        accept: Invokes the doAccept function. Activated upon key down of
+            the ENTER key.
+        reject: Invokes the doReject function. Activated upon key up of 
+            the ESC key.
+    
     Events:
         None
     
