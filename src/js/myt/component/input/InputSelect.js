@@ -178,7 +178,7 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
             }
         }
         
-        if (changed) this.__syncToDom();
+        if (changed) this.__doChanged();
     },
     
     selectValues: function(values) {
@@ -222,7 +222,17 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     },
     
     /** @private */
-    __syncToDom: function(event) {
+    __doChanged: function(event) {
+        this.__syncToDom();
+        this.doChanged();
+    },
+    
+    /** Called whenever the underlying dom element fires a "change" event.
+        @returns void */
+    doChanged: function() {},
+    
+    /** @private */
+    __syncToDom: function() {
         this.setValue(this.multiple ? this.getSelectedOptionValues() : this.getDomValue());
     }
 });
