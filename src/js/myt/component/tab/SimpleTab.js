@@ -43,6 +43,7 @@ myt.SimpleTab = new JS.Class('SimpleTab', myt.SimpleIconTextButton, {
         this.callSuper(parent, attrs);
         
         this.__updateCornerRadius();
+        this.__updateTextColor();
     },
     
     
@@ -58,6 +59,8 @@ myt.SimpleTab = new JS.Class('SimpleTab', myt.SimpleIconTextButton, {
         if (this.inited) this.__updateCornerRadius();
     },
     
+    setLabelTextColor: function(v) {this.labelTextColor = v;},
+    
     setLabelTextSelectedColor: function(v) {
         this.labelTextSelectedColor = v;
         if (this.inited && this.selected) this.textView.setTextColor(v);
@@ -67,8 +70,7 @@ myt.SimpleTab = new JS.Class('SimpleTab', myt.SimpleIconTextButton, {
         this.callSuper(v);
         if (this.inited) {
             this.updateUI();
-            
-            this.textView.setTextColor(this.selected ? this.labelTextSelectedColor : this.labelTextColor);
+            this.__updateTextColor();
         }
     },
     
@@ -79,6 +81,11 @@ myt.SimpleTab = new JS.Class('SimpleTab', myt.SimpleIconTextButton, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** @private */
+    __updateTextColor: function() {
+        this.textView.setTextColor(this.selected ? this.labelTextSelectedColor : this.labelTextColor);
+    },
+    
     /** @private */
     __updateCornerRadius: function() {
         var r = this.cornerRadius != null ? this.cornerRadius : myt.TabDrawingMethod.DEFAULT_RADIUS;

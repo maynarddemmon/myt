@@ -73,6 +73,7 @@ myt.Tab = new JS.Class('Tab', myt.DrawButton, {
     setFillColorHover: function(v) {this.fillColorHover = v;},
     setFillColorActive: function(v) {this.fillColorActive = v;},
     setFillColorReady: function(v) {this.fillColorReady = v;},
+    setLabelTextColor: function(v) {this.labelTextColor = v;},
     setLabelTextColorSelected: function(v) {this.labelTextColorSelected = v;},
     setCornerRadius: function(v) {this.cornerRadius = v;},
     
