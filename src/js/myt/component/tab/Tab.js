@@ -19,7 +19,7 @@
             causes myt.TabDrawingMethod.DEFAULT_RADIUS to be used.
 */
 myt.Tab = new JS.Class('Tab', myt.DrawButton, {
-    include: [myt.Selectable, myt.IconTextButtonContent],
+    include: [myt.TabMixin, myt.IconTextButtonContent],
     
     
     // Class Methods and Attributes ////////////////////////////////////////////
@@ -50,8 +50,6 @@ myt.Tab = new JS.Class('Tab', myt.DrawButton, {
         if (attrs.outset === undefined) attrs.outset = T.DEFAULT_OUTSET;
         
         // myt.Tab
-        if (attrs.tabId === undefined) attrs.tabId = myt.generateGuid();
-        if (attrs.tabContainer === undefined) attrs.tabContainer = parent;
         if (attrs.edgeColor === undefined) attrs.edgeColor = T.DEFAULT_EDGE_COLOR;
         if (attrs.edgeSize === undefined) attrs.edgeSize = T.DEFAULT_EDGE_SIZE;
         if (attrs.fillColorSelected === undefined) attrs.fillColorSelected = T.DEFAULT_FILL_COLOR_SELECTED;
@@ -64,22 +62,11 @@ myt.Tab = new JS.Class('Tab', myt.DrawButton, {
         if (attrs.height === undefined) attrs.height = T.DEFAULT_HEIGHT;
         if (attrs.focusEmbellishment === undefined) attrs.focusEmbellishment = false;
         
-        // Selection must be done via the select method on the tabContainer
-        if (attrs.selected) {
-            var initiallySelected = true;
-            delete attrs.selected;
-        }
-        
         this.callSuper(parent, attrs);
-        
-        if (initiallySelected) this.tabContainer.select(this);
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setTabId: function(v) {this.tabId = v;},
-    setTabContainer: function(v) {this.tabContainer = v;},
-    
     setEdgeColor: function(v) {this.edgeColor = v;},
     setEdgeSize: function(v) {this.edgeSize = v;},
     setFillColorSelected: function(v) {this.fillColorSelected = v;},
@@ -102,11 +89,6 @@ myt.Tab = new JS.Class('Tab', myt.DrawButton, {
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.DrawButton */
-    doActivated: function() {
-        if (!this.selected) this.tabContainer.select(this);
-    },
-    
-    /** @overrides myt.DrawButton */
     getDrawBounds: function() {
         var bounds = this.drawBounds;
         bounds.w = this.width;
@@ -119,7 +101,7 @@ myt.Tab = new JS.Class('Tab', myt.DrawButton, {
         var config = this.callSuper(state);
         
         config.selected = this.selected;
-        config.location = this.parent.location;
+        config.location = this.tabContainer.location;
         config.cornerRadius = this.cornerRadius;
         config.edgeColor = this.edgeColor;
         config.edgeSize = this.edgeSize;

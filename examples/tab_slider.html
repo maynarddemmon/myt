@@ -39,7 +39,7 @@
         new Panel(panelStack, {panelId:'twelve'});
         
         // Tabs
-        var MyTab = new JS.Class('MyTab', myt.Tab, {
+        var MyTab = new JS.Class('MyTab', myt.SimpleTab, {
             setSelected: function(v) {
                 this.callSuper(v);
                 if (this.selected) panelStack.selectById(this.tabId);
@@ -71,23 +71,22 @@
         }, [myt.TabContainer]);
         
         var bottomTabAttrs = {
-            fillColorHover: '#777777',
-            fillColorActive: '#333333',
-            fillColorReady: '#444444',
-            fillColorSelected: '#888888',
-            labelTextColorSelected:'#ffffff',
+            hoverColor: '#777777',
+            activeColor: '#333333',
+            readyColor: '#444444',
+            selectedColor: '#999999',
+            labelTextSelectedColor:'#ffffff',
             textColor:'#eeeeee',
-            edgeColor:'#999999',
             
             text:'tab text bot',
             shrinkToFit:true
         };
         
-        var tb1 = new myt.Tab(bottom, bottomTabAttrs);
+        var tb1 = new myt.SimpleTab(bottom, bottomTabAttrs);
         bottomTabAttrs.selected = true;
-        var tb2 = new myt.Tab(bottom, bottomTabAttrs);
+        var tb2 = new myt.SimpleTab(bottom, bottomTabAttrs);
         bottomTabAttrs.selected = false;
-        var tb3 = new myt.Tab(bottom, bottomTabAttrs);
+        var tb3 = new myt.SimpleTab(bottom, bottomTabAttrs);
         
         // Tab : left
         var left = new myt.View(rootView, {

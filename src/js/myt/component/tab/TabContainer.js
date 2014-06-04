@@ -4,10 +4,12 @@
         None
     
     Attributes:
+        layout:myt.SpacedLayout The layout for the tabs.
         location:string The location of the tabs relative to the container.
             Supported values are: 'top', 'bottom', 'left' and 'right'. Defaults
             to 'top'.
-        spacing:number The spacing between tabs.
+        spacing:number The spacing between tabs. Defaults to 1.
+        inset:number The inset for the layout. Defaults to 0.
 */
 myt.TabContainer = new JS.Module('TabContainer', {
     include: [myt.SelectionManager],
@@ -15,23 +17,26 @@ myt.TabContainer = new JS.Module('TabContainer', {
     
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
-        DEFAULT_SPACING:1
+        DEFAULT_SPACING:1,
+        DEFAULT_INSET:0
     },
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        this._tabs = [];
+        this.__tabs = [];
         
-        if (attrs.spacing === undefined) attrs.spacing = myt.TabContainer.DEFAULT_SPACING;
+        var TC = myt.TabContainer;
+        if (attrs.spacing === undefined) attrs.spacing = TC.DEFAULT_SPACING;
+        if (attrs.inset === undefined) attrs.inset = TC.DEFAULT_INSET;
+        
         if (attrs.location === undefined) attrs.location = 'top';
+        
         if (attrs.itemSelectionId === undefined) attrs.itemSelectionId = 'tabId';
         if (attrs.maxSelected === undefined) attrs.maxSelected = 1;
         
         this.callSuper(parent, attrs);
-    },
-    
-    doAfterAdoption: function() {
+        
         var axis;
         switch (this.location) {
             case 'top':
@@ -44,9 +49,10 @@ myt.TabContainer = new JS.Module('TabContainer', {
                 break;
         }
         
-        new myt.SpacedLayout(this, {name:'layout', axis:axis, spacing:this.spacing, collapseParent:true});
-        
-        this.callSuper();
+        new myt.SpacedLayout(this, {
+            name:'layout', axis:axis, spacing:this.spacing, inset:this.inset,
+            collapseParent:true
+        });
     },
     
     
@@ -60,10 +66,17 @@ myt.TabContainer = new JS.Module('TabContainer', {
         }
     },
     
+    setInset: function(v) {
+        if (this.inset !== v) {
+            this.inset = v;
+            if (this.layout) this.layout.setInset(v);
+        }
+    },
+    
     
     // Methods /////////////////////////////////////////////////////////////////
     getFirstTab: function() {
-        return this._tabs[0];
+        return this.__tabs[0];
     },
     
     /** Gets the currently selected tab.
@@ -75,8 +88,8 @@ myt.TabContainer = new JS.Module('TabContainer', {
     /** @overrides myt.View */
     subnodeAdded: function(node) {
         this.callSuper(node);
-        if (node instanceof myt.Tab) {
-            this._tabs.push(node);
+        if (node.isA(myt.TabMixin)) {
+            this.__tabs.push(node);
             
             switch (this.location) {
                 case 'top':
@@ -97,8 +110,8 @@ myt.TabContainer = new JS.Module('TabContainer', {
     
     /** @overrides myt.View */
     subnodeRemoved: function(node) {
-        if (node instanceof myt.Tab) {
-            var tabs = this._tabs, i = tabs.length;
+        if (node.isA(myt.TabMixin)) {
+            var tabs = this.__tabs, i = tabs.length;
             while (i) {
                 if (tabs[--i] === node) {
                     tabs.splice(i, 1);
