@@ -920,7 +920,10 @@ myt.View = new JS.Class('View', myt.Node, {
         @returns boolean True if the location is inside this view, false 
             if not. */
     containsPoint: function(locX, locY, referenceFrameDomElem) {
-        var pos = myt.DomElementProxy.getPagePosition(this.domElement, referenceFrameDomElem);
+        var de = this.domElement;
+        if (!de) return false;
+        
+        var pos = myt.DomElementProxy.getPagePosition(de, referenceFrameDomElem);
         return myt.Geometry.rectContainsPoint(locX, locY, pos.x, pos.y, this.width, this.height);
     },
     
