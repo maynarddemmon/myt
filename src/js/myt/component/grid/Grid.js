@@ -17,7 +17,9 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
+        // Allows horizontal scrolling if the grid columns are too wide.
         if (attrs.overflow === undefined) attrs.overflow = 'auto';
+        
         if (attrs.bgColor === undefined) attrs.bgColor = '#cccccc';
         if (attrs.rowSpacing === undefined) attrs.rowSpacing = 1;
         if (attrs.columnSpacing === undefined) attrs.columnSpacing = 1;
