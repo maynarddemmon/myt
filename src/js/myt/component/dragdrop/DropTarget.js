@@ -35,7 +35,7 @@ myt.DropTarget = new JS.Module('DropTarget', {
         @returns boolean: True if the drop will be allowed, false otherwise. */
     willAcceptDrop: function(dropable) {
         // Handle the common case of a disabled or not visible component.
-        if (this.disabled || !this.visible) return false;
+        if (this.disabled || !this.isVisible()) return false;
         
         return true;
     },
