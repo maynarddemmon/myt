@@ -34,8 +34,8 @@ myt.DropTarget = new JS.Module('DropTarget', {
         @param dropable:myt.Dropable The dropable being dragged.
         @returns boolean: True if the drop will be allowed, false otherwise. */
     willAcceptDrop: function(dropable) {
-        // Handle the common case of a disabled component.
-        if (this.disabled) return false;
+        // Handle the common case of a disabled or not visible component.
+        if (this.disabled || !this.visible) return false;
         
         return true;
     },
