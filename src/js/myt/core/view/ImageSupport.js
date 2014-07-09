@@ -61,7 +61,7 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
     setImageUrl: function(v) {
         if (this.imageUrl !== v) {
             this.imageUrl = v;
-            this.deStyle.backgroundImage = v ? "url('" + v + "')" : 'none';
+            this.deStyle.backgroundImage = v ? 'url("' + v + '")' : 'none';
             if (this.inited) {
                 this.fireNewEvent('imageUrl', v);
                 this.setNaturalWidth(undefined);
