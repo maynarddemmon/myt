@@ -203,19 +203,36 @@ new JS.Singleton('GlobalKeys', {
         var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event),
             domEvent = event.value;
         if (this.__shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
-        this.__keysDown[keyCode] = true;
         
-        // Check for 'tab' key and do focus traversal.
-        if (keyCode === 9) {
-            var ift = this.ignoreFocusTrap(), gf = myt.global.focus;
-            if (this.isShiftKeyDown()) {
-                gf.prev(ift);
-            } else {
-                gf.next(ift);
+        // Keyup events do not fire when command key is down so fire a keyup
+        // event immediately
+        if (this.isCommandKeyDown()) {
+            this.fireNewEvent('keydown', keyCode);
+            this.fireNewEvent('keyup', keyCode);
+            
+            // Assume command key goes back up since it is common for the page
+            // to lose focus after the command key is used. Do this for every 
+            // key other than 'z' since repeated undo/redo is nice to have and
+            // doesn't typically result in loss of focus to the page.
+            if (keyCode !== 90) {
+                    this.fireNewEvent('keyup', this.KEYCODE_COMMAND);
+                    this.__keysDown[this.KEYCODE_COMMAND] = false;
             }
+        } else {
+            this.__keysDown[keyCode] = true;
+            
+            // Check for 'tab' key and do focus traversal.
+            if (keyCode === 9) {
+                var ift = this.ignoreFocusTrap(), gf = myt.global.focus;
+                if (this.isShiftKeyDown()) {
+                    gf.prev(ift);
+                } else {
+                    gf.next(ift);
+                }
+            }
+            
+            this.fireNewEvent('keydown', keyCode);
         }
-        
-        this.fireNewEvent('keydown', keyCode);
     },
     
     ignoreFocusTrap: function() {
@@ -234,6 +251,7 @@ new JS.Singleton('GlobalKeys', {
             domEvent = event.value;
         if (this.__shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
         this.__keysDown[keyCode] = false;
+console.log("  UP", keyCode);
         this.fireNewEvent('keyup', keyCode);
     },
     
