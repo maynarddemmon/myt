@@ -251,7 +251,6 @@ new JS.Singleton('GlobalKeys', {
             domEvent = event.value;
         if (this.__shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
         this.__keysDown[keyCode] = false;
-console.log("  UP", keyCode);
         this.fireNewEvent('keyup', keyCode);
     },
     
