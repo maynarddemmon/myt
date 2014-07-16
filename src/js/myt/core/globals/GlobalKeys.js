@@ -132,7 +132,9 @@ new JS.Singleton('GlobalKeys', {
         this.KEYCODE_SHIFT = 16;
         this.KEYCODE_CONTROL = 17;
         this.KEYCODE_ALT = 18;
-        this.KEYCODE_COMMAND = BrowserDetect.browser === 'Firefox' ? 224 : 91;
+        var isFirefox = BrowserDetect.browser === 'Firefox';
+        this.KEYCODE_COMMAND = isFirefox ? 224 : 91;
+        this.KEYCODE_RIGHT_COMMAND = isFirefox ? 224 : 93;
         
         this.setDomElement(document);
         this.attachTo(myt.global.focus, '__handleFocused', 'focused');
@@ -161,7 +163,9 @@ new JS.Singleton('GlobalKeys', {
     isAltKeyDown: function() {return this.isKeyDown(this.KEYCODE_ALT);},
     
     /** Tests if the 'command' key is down. */
-    isCommandKeyDown: function() {return this.isKeyDown(this.KEYCODE_COMMAND);},
+    isCommandKeyDown: function() {
+        return this.isKeyDown(this.KEYCODE_COMMAND) || this.isKeyDown(this.KEYCODE_RIGHT_COMMAND);
+    },
     
     /** @private */
     __handleFocused: function(event) {
@@ -205,18 +209,20 @@ new JS.Singleton('GlobalKeys', {
         if (this.__shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
         
         // Keyup events do not fire when command key is down so fire a keyup
-        // event immediately
-        if (this.isCommandKeyDown()) {
+        // event immediately. Not an issue for other meta keys: shift, ctrl 
+        // and option.
+        if (this.isCommandKeyDown() && keyCode !== 16 && keyCode !== 17 && keyCode !== 18) {
             this.fireNewEvent('keydown', keyCode);
             this.fireNewEvent('keyup', keyCode);
             
             // Assume command key goes back up since it is common for the page
             // to lose focus after the command key is used. Do this for every 
-            // key other than 'z' since repeated undo/redo is nice to have and
-            // doesn't typically result in loss of focus to the page.
+            // key other than 'z' since repeated undo/redo is 
+            // nice to have and doesn't typically result in loss of focus 
+            // to the page.
             if (keyCode !== 90) {
-                    this.fireNewEvent('keyup', this.KEYCODE_COMMAND);
-                    this.__keysDown[this.KEYCODE_COMMAND] = false;
+                this.fireNewEvent('keyup', this.KEYCODE_COMMAND);
+                this.__keysDown[this.KEYCODE_COMMAND] = false;
             }
         } else {
             this.__keysDown[keyCode] = true;
