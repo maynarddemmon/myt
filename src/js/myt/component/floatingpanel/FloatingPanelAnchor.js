@@ -127,6 +127,20 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
         }
     },
     
+    /** Called when a floating panel has been shown for this anchor.
+        @param panel:myt.FloatingPanel The panel that is now shown.
+        @returns void */
+    notifyPanelShown: function(panel) {
+        // Subclasses to implement as needed.
+    },
+    
+    /** Called when a floating panel has been hidden for this anchor.
+        @param panel:myt.FloatingPanel The panel that is now hidden.
+        @returns void */
+    notifyPanelHidden: function(panel) {
+        // Subclasses to implement as needed.
+    },
+    
     /** Called by the FloatingPanel to determine where to position itself
         horizontally. By default this returns the floatingAlign attribute. 
         Subclasses and instances should override this if panel specific 

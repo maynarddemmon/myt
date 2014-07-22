@@ -131,13 +131,15 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
             this.updateLocation(panelAnchor);
             this.setVisible(true);
             
+            this.owner.notifyPanelShown(this);
+            
             var g = myt.global;
             this.attachToDom(g.mouse, '__doMouseDown', 'mousedown', true);
             this.attachTo(g.focus, '__doFocusChange', 'focused');
         }
     },
     
-    /** Hids the floating panel for the provided myt.FloatingPanelAnchor.
+    /** Hides the floating panel for the provided myt.FloatingPanelAnchor.
         @param ignoreRestoreFocus:boolean (Optional) If true the restoreFocus
             method will not be called. Defaults to undefined which is
             equivalent to false.
@@ -149,6 +151,7 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
             this.detachFrom(g.focus, '__doFocusChange', 'focused');
             
             this.setVisible(false);
+            this.owner.notifyPanelHidden(this);
             if (!ignoreRestoreFocus) this.restoreFocus();
             this.setOwner();
         }
