@@ -129,7 +129,7 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
         getPagePosition: function(elem, ancestorElem) {
             if (!elem) return null;
             
-            var x = y = 0, s,
+            var x = 0, y = 0, s,
                 borderMultiplier = BrowserDetect.browser === 'Firefox' ? 2 : 1; // I have no idea why firefox needs it twice, but it does.
             
             // elem.nodeName !== "BODY" test prevents looking at the body
