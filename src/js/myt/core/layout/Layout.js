@@ -111,7 +111,7 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
             if (wasNotLocked) this.locked = true;
             
             // Stop monitoring parent
-            var svs, i;
+            var svs, i, len;
             if (this.parent) {
                 svs = this.subviews;
                 i = svs.length;
