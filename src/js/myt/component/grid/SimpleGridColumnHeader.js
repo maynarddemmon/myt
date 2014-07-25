@@ -34,7 +34,10 @@ myt.SimpleGridColumnHeader = new JS.Class('SimpleGridColumnHeader', myt.SimpleIc
     
     /** @overrides myt.View */
     doAfterAdoption: function() {
-        new myt.Canvas(this, {name:'sortIcon', align:'right', alignOffset:3, width:8, height:10, y:4});
+        new myt.Canvas(this, {
+            name:'sortIcon', align:'right', alignOffset:3, width:8, height:10,
+            y:Math.floor((this.height - 10) / 2)
+        });
         
         this.callSuper();
         
