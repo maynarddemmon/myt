@@ -5,8 +5,8 @@
     
     Attributes:
         displayMode:string (read only) Indicates what kind of dialog this 
-            component is currently configured as. Allowed values are: 'message',
-            'spinner' and 'confirm'.
+            component is currently configured as. Allowed values are: 'blank',
+            'message', 'spinner' and 'confirm'.
         callbackFunction:function (read only) A function that gets called when 
             the dialog is about to be closed. A single argument is passed in 
             that indicates the UI element interacted with that should close the 
@@ -191,6 +191,10 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             if (sv.name !== 'closeBtn') sv.destroy();
         }
         
+        // Blank sets this.
+        content.setVisible(true);
+        this.overlay.setBgColor(myt.Dimmer.DEFAULT_COLOR);
+        
         // Message and Confirm dialogs set this.
         this.setCallbackFunction();
         
@@ -208,6 +212,21 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     doCallback: function(sourceView) {
         var cbf = this.callbackFunction;
         if (!cbf || !cbf.call(this, sourceView.name)) this.hide();
+    },
+    
+    /** Shows this dialog as a regular dimmer.
+        @param opts:object If opts.bgColor is provided it will be used for
+            the bgColor of the overlay.
+        @returns void */
+    showBlank: function(opts) {
+        this.__destroyContent();
+        
+        this.content.setVisible(false);
+        if (opts && opts.bgColor) this.overlay.setBgColor(opts.bgColor);
+        
+        this.show();
+        
+        this.setDisplayMode('blank');
     },
     
     /** Shows a dialog with a message and the standard cancel button.
