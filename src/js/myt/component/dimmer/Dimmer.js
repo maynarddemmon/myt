@@ -97,9 +97,9 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
     
     /** Hides the dimmer and restores focus if necessary.
         @returns void */
-    hide: function() {
+    hide: function(ignoreRestoreFocus) {
         this.setVisible(false);
         
-        if (this.restoreFocus && this.prevFocus) this.prevFocus.focus();
+        if (!ignoreRestoreFocus && this.restoreFocus && this.prevFocus) this.prevFocus.focus();
     }
 });

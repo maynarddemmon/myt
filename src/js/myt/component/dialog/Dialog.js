@@ -151,10 +151,10 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.Dimmer */
-    hide: function() {
+    hide: function(ignoreRestoreFocus) {
         this.__hideSpinner();
         
-        this.callSuper();
+        this.callSuper(ignoreRestoreFocus);
     },
     
     /** Hide spinner related elements.
