@@ -381,10 +381,13 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             y:mainView.y + mainView.height + MP_DPY, align:'center'
         });
         
+        // Cancel Button
         var attrs = {
             name:'cancelBtn', text:opts.cancelTxt, shrinkToFit:true,
             height:20, inset:10, outset:10, roundedCorners:5,
-            activeColor:'#bbbbbb', hoverColor:'#dddddd', readyColor:'#cccccc'
+            activeColor:'#bbbbbb',
+            hoverColor:'#dddddd',
+            readyColor:'#cccccc'
         };
         if (opts.activeColor !== undefined) attrs.activeColor = opts.activeColor;
         if (opts.hoverColor !== undefined) attrs.hoverColor = opts.hoverColor;
@@ -395,11 +398,39 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             doActivated: function() {self.doCallback(this);}
         }]);
         
+        // Confirm Button
         attrs.name = 'confirmBtn';
         attrs.text = opts.confirmTxt;
+        if (opts.activeColorConfirm !== undefined) attrs.activeColor = opts.activeColorConfirm;
+        if (opts.hoverColorConfirm !== undefined) attrs.hoverColor = opts.hoverColorConfirm;
+        if (opts.readyColorConfirm !== undefined) attrs.readyColor = opts.readyColorConfirm;
+        if (opts.textColorConfirm !== undefined) attrs.textColor = opts.textColorConfirm;
+        
         new myt.SimpleIconTextButton(btnContainer, attrs, [{
             doActivated: function() {self.doCallback(this);}
         }]);
+        
+        // Additional Buttons
+        var buttons = opts.buttons;
+        if (buttons) {
+            for (var i = 0, len = buttons.length; len > i; i++) {
+                attrs = buttons[i];
+                if (attrs.name == null) attrs.name = 'btn_' + i;
+                if (attrs.shrinkToFit == null) attrs.shrinkToFit = true;
+                if (attrs.height == null) attrs.height = 20;
+                if (attrs.inset == null) attrs.inset = 10;
+                if (attrs.outset == null) attrs.outset = 10;
+                if (attrs.roundedCorners == null) attrs.roundedCorners = 5;
+                if (attrs.activeColor == null) attrs.activeColor = '#bbbbbb';
+                if (attrs.hoverColor == null) attrs.hoverColor = '#dddddd';
+                if (attrs.readyColor == null) attrs.readyColor = '#cccccc';
+                if (attrs.textColor == null) attrs.textColor = '#000000';
+                
+                new myt.SimpleIconTextButton(btnContainer, attrs, [{
+                    doActivated: function() {self.doCallback(this);}
+                }]);
+            }
+        }
         
         new myt.SizeToChildren(btnContainer, {axis:'y'});
         new myt.SpacedLayout(btnContainer, {spacing:4, axis:'x', collapseParent:true});
