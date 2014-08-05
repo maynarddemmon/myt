@@ -1,5 +1,13 @@
 /** Component to upload image files. */
 myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
+    // Class Methods and Attributes ////////////////////////////////////////////
+    extend: {
+        isImageFile: function(file) {
+            return (/image/i).test(file.type);
+        }
+    },
+    
+    
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
@@ -11,7 +19,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
     
     // Methods /////////////////////////////////////////////////////////////////
     filterFiles: function(file) {
-        if (!this.isImageFile(file)) return false;
+        if (!myt.ImageUploader.isImageFile(file)) return false;
         
         // Remove existing file
         while (this.files.length > 0) this.removeFile(this.files[0]);
@@ -81,7 +89,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
                 self.updateImage(file, image, this.src);
             };
             img.src = file.serverPath;
-        } else if (FileReader !== undefined && this.isImageFile(file)) {
+        } else if (FileReader !== undefined && myt.ImageUploader.isImageFile(file)) {
             myt.Uploader.readFile(file, function(event) {
                 var img = new Image();
                 img.onload = function() {
@@ -105,9 +113,5 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         image.setWidth(w);
         image.setHeight(h);
         image.setImageUrl(src);
-    },
-    
-    isImageFile: function(file) {
-        return (/image/i).test(file.type);
     }
 });

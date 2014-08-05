@@ -76,5 +76,5 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
         return true;
     },
     
-    handleDroppedFile: function(file) {},
+    handleDroppedFile: function(file) {}
 });
