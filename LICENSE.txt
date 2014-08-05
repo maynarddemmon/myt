@@ -1,6 +1,6 @@
 Myt: A simple javascript UI framework
 http://github.com/maynarddemmon/myt
-Copyright (c) 2012-2013 Maynard Demmon and contributors
+Copyright (c) 2012-2014 Maynard Demmon and contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,10 +22,11 @@ projects:
 * jQuery Easing v1.3, Copyright (c) 2008 George McGinley Smith (BSD License)
 * jQuery Cookie Plugin v1.3.1, Copyright (c) 2013 Klaus Hartl (MIT License)
 * parseUri 1.2.2, Copyright (c) Steven Levithan <stevenlevithan.com> (MIT License)
-* Spin.js 1.3.0 Copyright (c) 2011-2013 Felix Gnass (the MIT license)
+* Spin.js 1.3.0 Copyright (c) 2011-2013 Felix Gnass (MIT license)
 * k-d Tree JavaScript - v1.0 Copyright (c) Mircea Pricop <pricop@ubilabs.net>,
 *                                          Martin Kleppe <kleppe@ubilabs.net>,
 *                                          Ubilabs http://ubilabs.net (MIT License)
+* Spectrum Colorpicker v1.4.1 Copyright (c) Brian Grinstead (MIT license) https://github.com/bgrins/spectrum
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,

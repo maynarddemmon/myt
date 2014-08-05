@@ -1,0 +1,46 @@
+<!doctype html><html><head>
+<title>Myt Framework : Color Picker Example</title>
+<link rel="stylesheet" href="../src/css/myt.scss"/>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="../src/js/jquery/jquery-1.10.2.min.js">\x3C/script>');</script>
+<script src="../src/js/boilerplate.js"></script>
+<script src="../src/js/jsclass/min/loader-browser.js"></script>
+<script src="../src/js/myt/manifest.js"></script>
+</head><body>
+
+<script>
+    JS.require('myt.all', function() {this.init();});
+    
+    function init() {
+        var rootView = new myt.View(null, {bgColor:'#eeeeee'}, [myt.SizeToWindow]);
+        
+        new myt.Dialog(rootView, {name:'dialog'});
+        
+        new myt.SimpleButton(rootView, {
+            x:10, y:10, width:50, height:20,
+            activeColor:'#999999', hoverColor:'#bbbbbb', readyColor:'#aaaaaa'
+        }, [{
+            doActivated: function() {
+                this.parent.dialog.showColorPicker(
+                    function(action, color) {
+                        switch(action) {
+                            case 'closeBtn':
+                                console.log("cancelled");
+                                break;
+                            case 'cancelBtn':
+                                console.log("cancelled");
+                                break;
+                            case 'confirmBtn':
+                                console.log("confirmed", color);
+                                break;
+                        }
+                    },{
+                        color:'#ffcc99'
+                    }
+                );
+                this.callSuper();
+            }
+        }]);
+    }
+</script>
+</body></html>

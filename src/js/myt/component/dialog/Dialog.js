@@ -6,7 +6,7 @@
     Attributes:
         displayMode:string (read only) Indicates what kind of dialog this 
             component is currently configured as. Allowed values are: 'blank',
-            'message', 'spinner' and 'confirm'.
+            'message', 'spinner', 'color_picker' and 'confirm'.
         callbackFunction:function (read only) A function that gets called when 
             the dialog is about to be closed. A single argument is passed in 
             that indicates the UI element interacted with that should close the 
@@ -43,6 +43,14 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             cancelTxt:'Cancel',
             confirmTxt:'Confirm',
             maxContainerHeight:300
+        },
+        
+        /** Defaults used in a color picker dialog. */
+        PICKER_DEFAULTS: {
+            cancelTxt:'Cancel',
+            confirmTxt:'Choose',
+            titleText:'Choose a Color',
+            color:'#000000'
         },
         
         /** Does basic styling of a dialog and creates a close button.
@@ -303,6 +311,78 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         this.focus(); // Focus on the dimmer itself to prevent user interaction.
         
         this.setDisplayMode('spinner');
+    },
+    
+    showColorPicker: function(callbackFunction, opts) {
+        var MP = myt.ModalPanel, content = this.content;
+        
+        opts = $.extend({}, myt.Dialog.PICKER_DEFAULTS, opts);
+        
+        this.__destroyContent();
+        
+        var wrappedCallbackFunction = function(action) {
+            switch(action) {
+                case 'closeBtn':
+                case 'cancelBtn':
+                    callbackFunction.call(this, action);
+                    break;
+                case 'confirmBtn':
+                    var color = this._spectrum.get();
+                    this._spectrum.addColorToSelectionPalette(color);
+                    callbackFunction.call(this, action, color ? color.toHexString() : 'transparent');
+                    break;
+            }
+            this._spectrum.destroy();
+        };
+        
+        
+        this.setCallbackFunction(wrappedCallbackFunction);
+        
+        // Build Picker
+        var picker = new myt.View(content, {
+            name:'picker',
+            x:MP.DEFAULT_PADDING_X,
+            y:MP.DEFAULT_PADDING_Y + 24,
+            width:344,
+            height:168
+        });
+        var spectrumView = new myt.View(picker, {});
+        
+        $(spectrumView.domElement).spectrum({
+            color:opts.color,
+            palette: [['#000000','#111111','#222222','#333333','#444444','#555555','#666666','#777777'],
+                      ['#888888','#999999','#aaaaaa','#bbbbbb','#cccccc','#dddddd','#eeeeee','#ffffff']],
+            localStorageKey: "myt.default",
+            dialog:this
+        });
+        
+        this.show();
+        
+        var closeBtn = content.closeBtn;
+        closeBtn.setVisible(true);
+        closeBtn.focus();
+        
+        this.__setupConfirmButtons(picker, opts);
+        
+        var r = myt.Dialog.DEFAULT_RADIUS;
+        var bg = new myt.View(content, {
+            ignoreLayout:true,
+            x:0, y:0,
+            width:content.width, height:24,
+            bgColor:'#eeeeee',
+            roundedTopLeftCorner:r,
+            roundedTopRightCorner:r
+        });
+        bg.sendToBack();
+        new myt.Text(content, {
+            name:'title', x:r, y:4, text:opts.titleText, fontWeight:'bold'
+        });
+        
+        this.setDisplayMode('color_picker');
+    },
+    
+    _spectrumCallback: function(spectrum) {
+        this._spectrum = spectrum;
     },
     
     showConfirm: function(msg, callbackFunction, opts) {
