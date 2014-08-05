@@ -55,7 +55,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         var images = this.getSubviews(), i = images.length, image;
         while (i) {
             image = images[--i];
-            if (this.isSameFile(image.file, file)) {
+            if (myt.Uploader.isSameFile(image.file, file)) {
                 image.destroy();
                 break;
             }
@@ -82,7 +82,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
             };
             img.src = file.serverPath;
         } else if (FileReader !== undefined && this.isImageFile(file)) {
-            this.readFile(file, function(event) {
+            myt.Uploader.readFile(file, function(event) {
                 var img = new Image();
                 img.onload = function() {
                     file.width = this.width;

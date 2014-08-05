@@ -323,7 +323,8 @@ JS.Packages(function() {with(this) {
     
     // Component : Uploader
     file(MYT_COMPONENT_ROOT + 'uploader/DragDropObservable.js').provides('myt.DragDropObservable').requires('myt.DomObservable');
-    file(MYT_COMPONENT_ROOT + 'uploader/Uploader.js'          ).provides('myt.Uploader'          ).requires('myt.View','myt.NativeInputWrapper','myt.DragDropObservable','myt.Disableable','myt.Ajax','myt.FormElement');
+    file(MYT_COMPONENT_ROOT + 'uploader/DragDropSupport.js'   ).provides('myt.DragDropSupport'   ).requires('myt.DragDropObservable','myt.Disableable');
+    file(MYT_COMPONENT_ROOT + 'uploader/Uploader.js'          ).provides('myt.Uploader'          ).requires('myt.View','myt.NativeInputWrapper','myt.DragDropSupport','myt.Ajax','myt.FormElement');
     file(MYT_COMPONENT_ROOT + 'uploader/ImageUploader.js'     ).provides('myt.ImageUploader'     ).requires('myt.Uploader');
     
     // Component : Graphing

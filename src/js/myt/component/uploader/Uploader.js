@@ -1,16 +1,42 @@
 /** Component to upload files. */
 myt.Uploader = new JS.Class('Uploader', myt.View, {
-    include: [myt.DragDropObservable, myt.Disableable, myt.FormElement],
+    include: [myt.DragDropSupport, myt.Disableable, myt.FormElement],
     
     
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
+        /** The attribute key used in a file to store the path for the file
+            on the server. */
         FILE_ATTR_SERVER_PATH: 'serverPath',
+        
         MIME_TYPES_BY_EXTENSION: {
             gif:'image/gif',
             png:'image/png',
             jpg:'image/jpeg',
             jpeg:'image/jpeg'
+        },
+        
+        readFile: function(file, handlerFunc) {
+            if (FileReader !== undefined) {
+                reader = new FileReader();
+                reader.onload = handlerFunc;
+                reader.readAsDataURL(file);
+            }
+        },
+        
+        isSameFile: function(f1, f2) {
+            if (f1 == null || f2 == null) return false;
+            return f1.name === f2.name && f1.type === f2.type && f1.size === f2.size;
+        },
+        
+        createFile: function(urlStr) {
+            var uri = new myt.URI(urlStr), name = uri.file, ext = name.split('.')[1];
+            return {
+                name: name,
+                serverPath: urlStr,
+                size: -1,
+                type: this.MIME_TYPES_BY_EXTENSION[ext]
+            };
         }
     },
     
@@ -42,11 +68,9 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
             },
             
             _handleInput: function(event) {
-                self._handleFiles(this.domElement.files);
+                self.handleFiles(this.domElement.files);
             }
         }]);
-        
-        if (!this.disabled) this._setupDragListeners();
     },
     
     
@@ -59,7 +83,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         if (v) {
             if (!Array.isArray(v)) v = [v];
             var len = v.length, i = 0;
-            for(; len > i; ++i) this.addFile(this._createFile(v[i]));
+            for(; len > i; ++i) this.addFile(myt.Uploader.createFile(v[i]));
         }
         
         if (this.callSuper) {
@@ -74,32 +98,11 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         return this.value;
     },
     
-    _createFile: function(urlStr) {
-        var uri = new myt.URI(urlStr), name = uri.file, ext = name.split('.')[1];
-        return {
-            name: name,
-            serverPath: urlStr,
-            size: -1,
-            type: myt.Uploader.MIME_TYPES_BY_EXTENSION[ext]
-        };
-    },
-    
     /** @overrides myt.Disableable */
     setDisabled: function(v) {
-        if (this.disabled !== v) {
-            this.domElement.disabled = v;
-            this.callSuper(v);
-            
-            if (this.inited) {
-                if (v) {
-                    this._teardownDragListeners();
-                } else {
-                    this._setupDragListeners();
-                }
-            }
-            
-            if (this.fileInput) this.fileInput.setDisabled(v);
-        }
+        this.callSuper(v);
+        
+        if (this.fileInput) this.fileInput.setDisabled(v);
     },
     
     setMaxFiles: function(v) {
@@ -143,50 +146,11 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         if (this.fileInput) this.bringSubviewToFront(this.fileInput);
     },
     
-    /** @private */
-    _setupDragListeners: function() {
-        this.attachToDom(this, 'doDragOver', 'dragover', true);
-        this.attachToDom(this, 'doDragEnter', 'dragenter', true);
-        this.attachToDom(this, 'doDragLeave', 'dragleave', true);
-        this.attachToDom(this, 'doDrop', 'drop', true);
+    handleDroppedFile: function(file) {
+        this.addFile(file);
     },
     
-    /** @private */
-    _teardownDragListeners: function() {
-        this.detachFromDom(this, 'doDragOver', 'dragover', true);
-        this.detachFromDom(this, 'doDragEnter', 'dragenter', true);
-        this.detachFromDom(this, 'doDragLeave', 'dragleave', true);
-        this.detachFromDom(this, 'doDrop', 'drop', true);
-    },
-    
-    doDragOver: function(event) {},
-    
-    doDragEnter: function(event) {},
-    
-    doDragLeave: function(event) {},
-    
-    doDrop: function(event) {
-        this._handleFiles(event.value.dataTransfer.files);
-    },
-    
-    /** @private */
-    _handleFiles: function(files) {
-        if (files !== undefined) {
-            var i = files.length, file;
-            while (i) {
-                file = files[--i];
-                if (this.filterFiles(file)) {
-                    this.addFile(file);
-                    this.handleDroppedFile(file);
-                }
-            }
-        } else {
-            myt.dumpStack("Browser doesn't support the File API");
-        }
-    },
-    
-    handleDroppedFile: function(file) {},
-    
+    /** @overrides myt.DragDropSupport */
     filterFiles: function(file) {
         var maxFiles = this.maxFiles;
         if (maxFiles >= 0 && this.files.length >= maxFiles) return false;
@@ -255,7 +219,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     removeFile: function(file) {
         var files = this.files, i = files.length;
         while (i) {
-            if (this.isSameFile(files[--i], file)) {
+            if (myt.Uploader.isSameFile(files[--i], file)) {
                 files.splice(i, 1);
                 this.updateValueFromFiles();
                 this.fireNewEvent('removeFile', file);
@@ -283,18 +247,5 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     clearFiles: function() {
         var files = this.files, i = files.length;
         while (i) this.removeFile(files[--i]);
-    },
-    
-    isSameFile: function(f1, f2) {
-        if (f1 == null || f2 == null) return false;
-        return f1.name === f2.name && f1.type === f2.type && f1.size === f2.size;
-    },
-    
-    readFile: function(file, handlerFunc) {
-        if (FileReader !== undefined) {
-            reader = new FileReader();
-            reader.onload = handlerFunc;
-            reader.readAsDataURL(file);
-        }
     }
 });
