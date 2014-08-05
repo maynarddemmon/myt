@@ -10,7 +10,8 @@
         allowEmpty: true,
         showSelectionPalette: true,
         localStorageKey: false,
-        maxSelectionSize: 8,
+        selectionWrapSize: 8,
+        maxSelectionSize: 56,
         clearText: "Clear Color Selection",
         noColorSelectedText: "No Color Selected",
         palette: [],
@@ -98,6 +99,7 @@
             paletteArray = [],
             paletteLookup = {},
             selectionPalette = opts.selectionPalette.slice(0),
+            selectionWrapSize = opts.selectionWrapSize,
             maxSelectionSize = opts.maxSelectionSize,
             draggingClass = "sp-dragging",
             shiftMovementDirection = null;
@@ -253,7 +255,12 @@
 
             updateSelectionPaletteFromStorage();
 
-            if (selectionPalette) html.push(paletteTemplate(getUniqueSelectionPalette(), currentColor, opts));
+            if (selectionPalette) {
+                var uniquePalette = getUniqueSelectionPalette();
+                for (var i = 0, len = uniquePalette.length; len > i; i += selectionWrapSize) {
+                    html.push(paletteTemplate(uniquePalette.slice(i, i + selectionWrapSize), currentColor, opts));
+                }
+            }
 
             paletteContainer.html(html.join(""));
         }

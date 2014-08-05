@@ -343,8 +343,8 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             name:'picker',
             x:MP.DEFAULT_PADDING_X,
             y:MP.DEFAULT_PADDING_Y + 24,
-            width:344,
-            height:168
+            width:337,
+            height:177
         });
         var spectrumView = new myt.View(picker, {});
         
