@@ -68,7 +68,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
             },
             
             _handleInput: function(event) {
-                self.handleFiles(this.domElement.files);
+                self.handleFiles(this.domElement.files, event);
             }
         }]);
     },
@@ -146,7 +146,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         if (this.fileInput) this.bringSubviewToFront(this.fileInput);
     },
     
-    handleDroppedFile: function(file) {
+    handleDroppedFile: function(file, event) {
         this.addFile(file);
     },
     

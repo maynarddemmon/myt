@@ -56,16 +56,16 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
     doDragLeave: function(event) {},
     
     doDrop: function(event) {
-        this.handleFiles(event.value.dataTransfer.files);
+        this.handleFiles(event.value.dataTransfer.files, event);
     },
     
     /** @private */
-    handleFiles: function(files) {
+    handleFiles: function(files, event) {
         if (files !== undefined) {
             var i = files.length, file;
             while (i) {
                 file = files[--i];
-                if (this.filterFiles(file)) this.handleDroppedFile(file);
+                if (this.filterFiles(file)) this.handleDroppedFile(file, event);
             }
         } else {
             myt.dumpStack("Browser doesn't support the File API");
@@ -76,5 +76,5 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
         return true;
     },
     
-    handleDroppedFile: function(file) {}
+    handleDroppedFile: function(file, event) {}
 });

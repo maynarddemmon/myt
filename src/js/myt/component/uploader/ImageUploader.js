@@ -70,8 +70,8 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         }
     },
     
-    handleDroppedFile: function(file) {
-        this.callSuper(file);
+    handleDroppedFile: function(file, event) {
+        this.callSuper(file, event);
         
         this.uploadFile(file, this.uploadUrl);
     },
