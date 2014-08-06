@@ -35,18 +35,18 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
     // Methods /////////////////////////////////////////////////////////////////
     /** @private */
     setupDragListeners: function() {
-        this.attachToDom(this, 'doDragOver', 'dragover', true);
-        this.attachToDom(this, 'doDragEnter', 'dragenter', true);
-        this.attachToDom(this, 'doDragLeave', 'dragleave', true);
-        this.attachToDom(this, 'doDrop', 'drop', true);
+        this.attachToDom(this, 'doDragOver', 'dragover', false);
+        this.attachToDom(this, 'doDragEnter', 'dragenter', false);
+        this.attachToDom(this, 'doDragLeave', 'dragleave', false);
+        this.attachToDom(this, 'doDrop', 'drop', false);
     },
     
     /** @private */
     teardownDragListeners: function() {
-        this.detachFromDom(this, 'doDragOver', 'dragover', true);
-        this.detachFromDom(this, 'doDragEnter', 'dragenter', true);
-        this.detachFromDom(this, 'doDragLeave', 'dragleave', true);
-        this.detachFromDom(this, 'doDrop', 'drop', true);
+        this.detachFromDom(this, 'doDragOver', 'dragover', false);
+        this.detachFromDom(this, 'doDragEnter', 'dragenter', false);
+        this.detachFromDom(this, 'doDragLeave', 'dragleave', false);
+        this.detachFromDom(this, 'doDrop', 'drop', false);
     },
     
     doDragOver: function(event) {},
