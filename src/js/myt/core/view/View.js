@@ -183,6 +183,11 @@ myt.View = new JS.Class('View', myt.Node, {
     createOurDomElement: function(parent) {
         var elem = document.createElement('div');
         elem.style.position = 'absolute';
+        
+        // Make dom elements easier to location via selectors
+        var klass = this.klass;
+        elem.className = klass.__cssClassName || (klass.__cssClassName = 'myt-' + klass.__displayName.split('.').join('-'));
+        
         return elem;
     },
     

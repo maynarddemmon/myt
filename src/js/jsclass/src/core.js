@@ -288,6 +288,7 @@ JS.extend(JS.Class.prototype, {
     options = options || {};
 
     var klass = JS.makeClass(parent);
+    klass.__displayName = name;
     JS.extend(klass, this);
 
     klass.prototype.constructor = klass.prototype.klass = klass;
