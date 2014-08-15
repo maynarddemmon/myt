@@ -515,6 +515,20 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     },
     
     // Remove points
+    /** Remove all data points from this graph.
+        @returns void */
+    removeAllDataPoints: function() {
+        var data = this.data;
+        data.length = 0;
+        this._animating.length = 0;
+        this._kdtree.rebuildTree(data);
+        
+        this.setHighlightedPoint(null);
+        this.deselectAll();
+        this.redrawPoints(true);
+        this.redrawAnimatingPoints(true);
+    },
+    
     removeDataPoint: function(matchFunc, multiple) {
         var retval = this._removeDataPoint(this.data, matchFunc, multiple);
         if (retval) this.redrawPoints(true);

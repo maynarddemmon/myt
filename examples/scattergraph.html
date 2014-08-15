@@ -45,7 +45,7 @@
             }
         }]);
         
-        new myt.IconTextPanelButton(rootView, {x:920, y:40, width:100, text:'zoom out'}, [{
+        new myt.IconTextPanelButton(rootView, {x:920, y:30, width:100, text:'zoom out'}, [{
             doActivated: function() {
                 //graph.setScaleDataX(graph.scaleDataX - 0.025);
                 //graph.setScaleDataY(graph.scaleDataY - 0.025);
@@ -76,7 +76,22 @@
             }
         }]);
         
-        var highlightInfo = new myt.Text(rootView, {x:920, y:70});
+        new myt.IconTextPanelButton(rootView, {x:920, y:50, width:100, text:'clear all'}, [{
+            doActivated: function() {
+                graph.removeAllDataPoints();
+            }
+        }]);
+        
+        new myt.IconTextPanelButton(rootView, {x:920, y:70, width:100, text:'add pont'}, [{
+            doActivated: function() {
+                graph.addDataPoint(new myt.ScatterGraphPoint('id_' + (++i), 
+                    myt.getRandomInt(xMin, xMax, func), 
+                    myt.getRandomInt(yMin, yMax, func), config0
+                ));
+            }
+        }]);
+        
+        var highlightInfo = new myt.Text(rootView, {x:920, y:100});
         
         var graph = new myt.ScatterGraph(rootView, {x:10, y:10, width:900, height:500}, [{
             setHighlightedPoint: function(v) {
