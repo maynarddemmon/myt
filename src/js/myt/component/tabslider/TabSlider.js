@@ -168,6 +168,10 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
         }, [myt.SizeToParent, {
             setHeight: function(v, supressEvent) {
                 this.callSuper(Math.round(v), supressEvent);
+            },
+            setWidth: function(v, supressEvent) {
+                this.callSuper(v, supressEvent);
+                if (this.inited) this.container.setWidth(v);
             }
         }]);
         
