@@ -53,7 +53,7 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
             attrs = {
                 name:'textView', 
                 whiteSpace: this.shrinkToFit ? 'nowrap' : 'normal', 
-                text:this.text, domClass:'mytButtonText'
+                text:this.text, domClass:'mytButtonText mytUnselectable'
             };
         if (typeof textY === 'string') {
             attrs.valign = textY;
