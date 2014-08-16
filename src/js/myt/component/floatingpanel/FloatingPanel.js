@@ -126,7 +126,6 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
         @returns void */
     show: function(panelAnchor) {
         if (!this.isShown()) {
-            this.setOwner(panelAnchor);
             this.bringToFront();
             this.updateLocation(panelAnchor);
             this.setVisible(true);
@@ -170,6 +169,8 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
             location for.
         @returns void */
     updateLocation: function(panelAnchor) {
+        this.setOwner(panelAnchor);
+        
         var panelId = this.panelId,
             align = panelAnchor.getFloatingAlignForPanelId(panelId),
             valign = panelAnchor.getFloatingValignForPanelId(panelId),
