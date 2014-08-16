@@ -8,6 +8,8 @@ select.mytNativeInput{margin:0px;}
 .mytButtonText{font-size:12px; font-weight:bold;}
 .mytTooltipText{font-size:12px;}
 
+.mytUnselectable{-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;}
+
 /*** START: Spectrum Colorpicker v1.4.1
             https://github.com/bgrins/spectrum
             Author: Brian Grinstead

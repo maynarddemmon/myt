@@ -57,6 +57,10 @@
         fontSize:string The size of the font. Supported values: 'normal, 
             '14px', '14pt', 'xx-small', 'x-small', 'small', 'medium', 'large', 
             'x-large', 'xx-large', 'smaller', 'larger', '75%', 'inherit'.
+        userUnselectable:boolean If set to true the CSS property user-select 
+            will be set to 'none' thus making text selection not work.
+            Furthermore, the cursor will be set to the default so it no longer
+            appears as an i-beam.
 */
 myt.TextSupport = new JS.Module('TextSupport', {
     // Accessors ///////////////////////////////////////////////////////////////
@@ -132,6 +136,15 @@ myt.TextSupport = new JS.Module('TextSupport', {
                 this.fireNewEvent(attrName, v);
                 this.sizeViewToDom();
             }
+        }
+    },
+    
+    setUserUnselectable: function(v) {
+        if (this.userUnselectable !== v) {
+            this.userUnselectable = v;
+            this[v ? 'addDomClass' : 'removeDomClass']('mytUnselectable');
+            this.setCursor(v ? 'default' : 'text');
+            if (this.inited) this.fireNewEvent('userUnselectable', v);
         }
     },
     

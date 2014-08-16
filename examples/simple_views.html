@@ -41,6 +41,9 @@
         var txtView = new myt.Text(v2, {
             x:65, y:25, whiteSpace:'normal', text:'Here is some longish text that should wrap.'
         });
+        var txtView2 = new myt.Text(v2, {
+            x:65, y:75, userUnselectable:true, text:'Text that is not not selectable.'
+        });
         console.log(txtView.measureNoWrapWidth());
         
         var v3 = new myt.View(v, {x:5, y:5, width:50, height:50, bgColor:'#ff0000'});
