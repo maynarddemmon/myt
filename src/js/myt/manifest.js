@@ -26,6 +26,8 @@ JS.Packages(function() {with(this) {
                                                                                         'JS.Class','JS.Module','JS.Singleton');
     file(MYT_CORE_ROOT + 'Destructible.js'   ).provides('myt.Destructible'   ).requires('myt');
     file(MYT_CORE_ROOT + 'AccessorSupport.js').provides('myt.AccessorSupport').requires('myt');
+    file(MYT_CORE_ROOT + 'Eventable.js'      ).provides('myt.Eventable'      ).requires('myt.AccessorSupport','myt.Destructible',
+                                                                                        'myt.Constrainable','myt.TrackActivesPool');
     file(MYT_CORE_ROOT + 'Node.js'           ).provides('myt.Node'           ).requires('myt.AccessorSupport','myt.Destructible',
                                                                                         'myt.Constrainable','myt.TrackActivesPool');
     file(MYT_CORE_ROOT + 'Animator.js'       ).provides('myt.Animator'       ).requires('myt.Node','myt.global.idle','myt.Reusable');
@@ -357,6 +359,7 @@ JS.Packages(function() {with(this) {
         'myt.HorizontalDivider','myt.VerticalDivider',
         'myt.Grid','myt.SimpleGridColumnHeader',
         'myt.PanelStack',
-        'myt.DropTarget','myt.DropSource','myt.AutoScroller'
+        'myt.DropTarget','myt.DropSource','myt.AutoScroller',
+        'myt.Eventable'
     );
 }});
