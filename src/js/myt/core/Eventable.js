@@ -23,6 +23,7 @@ myt.Eventable = new JS.Class('Eventable', {
             for (var i = 0, len = mixins.length; len > i;) this.extend(mixins[i++]);
         }
         
+        this.inited = false;
         this.init(attrs || {});
     },
     
@@ -34,6 +35,7 @@ myt.Eventable = new JS.Class('Eventable', {
         @returns void */
     init: function(attrs) {
         this.callSetters(attrs);
+        this.inited = true;
     },
     
     /** @overrides myt.Destructible. */
