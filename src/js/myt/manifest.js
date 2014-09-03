@@ -10,6 +10,7 @@ JS.Packages(function() {with(this) {
     file(MYT_SHIM_ROOT + 'BrowserDetect.js').provides('BrowserDetect');
     file(MYT_SHIM_ROOT + 'Console.js'      ).provides('console');
     file(MYT_SHIM_ROOT + 'json2.js'        ).provides('JSON');
+    file(MYT_SHIM_ROOT + 'history.js'      ).provides('History','History.Adapter').requires('JSON');
     file(MYT_SHIM_ROOT + 'language.js'     ).provides('Object.keys','Array.isArray','Date.now');
     
     // Util
@@ -21,7 +22,7 @@ JS.Packages(function() {with(this) {
     
     // Core
     var MYT_CORE_ROOT = MYT_ROOT + 'core/';
-    file(MYT_CORE_ROOT + 'myt.js'            ).provides('myt'                ).requires('BrowserDetect','console','JSON',
+    file(MYT_CORE_ROOT + 'myt.js'            ).provides('myt'                ).requires('BrowserDetect','console','JSON','History','History.Adapter',
                                                                                         'Object.keys','Array.isArray','Date.now',
                                                                                         'JS.Class','JS.Module','JS.Singleton');
     file(MYT_CORE_ROOT + 'Destructible.js'   ).provides('myt.Destructible'   ).requires('myt');
@@ -78,6 +79,7 @@ JS.Packages(function() {with(this) {
     // Core : Globals
     var MYT_GLOBALS_ROOT = MYT_CORE_ROOT + 'globals/';
     file(MYT_GLOBALS_ROOT + 'Global.js'                ).provides('myt.global'             ).requires('myt.Constrainable');
+    file(MYT_GLOBALS_ROOT + 'GlobalHistory.js'         ).provides('myt.global.history'     ).requires('myt.global','myt.Observable','History','History.Adapter');
     file(MYT_GLOBALS_ROOT + 'GlobalIdle.js'            ).provides('myt.global.idle'        ).requires('myt.global','myt.Observable');
     file(MYT_GLOBALS_ROOT + 'GlobalMouse.js'           ).provides('myt.global.mouse'       ).requires('myt.global','myt.DomObservable','myt.MouseObservable');
     file(MYT_GLOBALS_ROOT + 'GlobalFocus.js'           ).provides('myt.global.focus'       ).requires('myt.global','myt.Observable');
@@ -339,7 +341,7 @@ JS.Packages(function() {with(this) {
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
         'myt.Cookie',
-        'myt.global.keys',
+        'myt.global.keys','myt.global.history',
         'myt.Text','myt.Markup','myt.SizeWidthToDom','myt.SizeHeightToDom','myt.SizeToParent',
         'myt.SizeToWindowWidth','myt.SizeToWindowHeight','myt.TransformSupport',
         'myt.Animator','myt.Callback','myt.RepeatableTimer','myt.StateMachine','myt.URI','myt.Ajax',
