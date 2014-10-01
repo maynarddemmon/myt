@@ -86,14 +86,18 @@
         
         new myt.FormInputText(rootView, {
             width:100, id:'fieldA', form:rootView, validators:[lenValidator, 'required'],
-            allowedChars:'0123456789'
+            allowedChars:'0123456789', placeholder:'Numbers Only'
         });
         new myt.FormInputText(rootView, {
             width:100, id:'fieldB', form:rootView, validators:['equalsIgnoreCase', lenValidator], 
-            validateWhen:'blurWithKeyFix'
+            validateWhen:'blurWithKeyFix', placeholder:'Ignore Case'
         });
         new myt.FormInputText(rootView, {
             width:100, id:'fieldC', form:rootView, validators:[lenValidator]
+        });
+        new myt.FormInputTextArea(rootView, {
+            width:100, height:43, id:'fieldCAlt', form:rootView, validators:[lenValidator],
+            placeholder:'Length must be 3 to 10.'
         });
         new myt.FormTextCheckbox(rootView, {
             id:'fieldD', form:rootView, text:'It all makes sense', shrinkToFit:true

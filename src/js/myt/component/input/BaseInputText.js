@@ -3,6 +3,7 @@
     Events:
         spellcheck:boolean
         maxLength:int
+        placeholder:string
     
     Attributes:
         spellcheck:boolean Turns browser spellchecking on and off. Defaults
@@ -13,6 +14,7 @@
         allowedChars:string Each character in the string is an allowed
             input character. If not set or empty all characters are allowed. 
             Defaults to undefined.
+        placeholder:string Text that will be shown if the value is empty.
 */
 myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     include: [myt.TextSupport],
@@ -60,6 +62,13 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     },
     
     setAllowedChars: function(v) {this.allowedChars = v;},
+    
+    setPlaceholder: function(v) {
+        if (this.placeholder !== v) {
+            this.domElement.placeholder = this.placeholder = v;
+            if (this.inited) this.fireNewEvent('placeholder', v);
+        }
+    },
     
     
     // Methods /////////////////////////////////////////////////////////////////
