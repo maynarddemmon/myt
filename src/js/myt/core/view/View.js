@@ -81,6 +81,9 @@
             'nw-resize', 'help', 'vertical-text', 's-resize', 'se-resize', 
             'inherit', 'wait', 'w-resize', 'sw-resize'. Defaults to undefined 
             which is equivalent to 'auto'.
+        pointerEvents:string Determines if this view responds to pointer events
+            or not. Supported values: 'none', 'auto' and 'inherit'. Defaults 
+            to undefined which is equivalent to 'auto'.
         outlineWidth:number The width of the CSS outline. If a value equivalent
             to false is provided 0 will be used.
         outlineStyle:string The CSS outline style. If null or undefined is 
@@ -480,6 +483,14 @@ myt.View = new JS.Class('View', myt.Node, {
             s.top = v ? this.y + 'px' : '-100000px';
             
             if (this.inited) this.fireNewEvent('visible', v);
+        }
+    },
+    
+    setPointerEvents: function(v) {
+        if (this.pointerEvents !== v) {
+            this.pointerEvents = v;
+            this.deStyle.pointerEvents = v || 'auto';
+            if (this.inited) this.fireNewEvent('pointerEvents', v);
         }
     },
     
