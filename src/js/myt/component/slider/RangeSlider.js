@@ -21,6 +21,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         this.callSuper(parent, attrs);
     },
     
+    /** @overrides */
     doAfterAdoption: function() {
         new this.rangeFillClass(this, {name:'rangeFill'});
         new this.thumbClass(this, {name:'thumbLower'});
@@ -33,6 +34,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
     // Accessors ///////////////////////////////////////////////////////////////
     setRangeFillClass: function(v) {this.rangeFillClass = v;},
     
+    /** @overrides */
     setValue: function(v) {
         this.callSuper(v);
         
@@ -45,6 +47,30 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
             }
             
             this._syncRangeFillToValue();
+        }
+    },
+    
+    /** Update the thumb position if the width changes.
+        @overrides */
+    setWidth: function(v, supressEvent) {
+        var existing = this.width;
+        this.callSuper(v, supressEvent);
+        if (this.inited && this.axis === 'x' && this.width !== existing) {
+            var value = this.getValue();
+            this._syncThumbToValue(this.thumbLower, value);
+            this._syncThumbToValue(this.thumbUpper, value);
+        }
+    },
+    
+    /** Update the thumb position if the height changes.
+        @overrides */
+    setHeight: function(v, supressEvent) {
+        var existing = this.height;
+        this.callSuper(v, supressEvent);
+        if (this.inited && this.axis === 'y' && this.height !== existing) {
+            var value = this.getValue();
+            this._syncThumbToValue(this.thumbLower, value);
+            this._syncThumbToValue(this.thumbUpper, value);
         }
     },
     

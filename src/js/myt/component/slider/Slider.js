@@ -22,11 +22,28 @@ myt.Slider = new JS.Class('Slider', myt.BaseSlider, {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
+    /** @overrides */
     setValue: function(v) {
         this.callSuper(v);
         
         // Sync position of thumb
         if (this.inited && !this.__lockSync) this._syncThumbToValue(this.thumb, this.getValue());
+    },
+    
+    /** Update the thumb position if the width changes.
+        @overrides */
+    setWidth: function(v, supressEvent) {
+        var existing = this.width;
+        this.callSuper(v, supressEvent);
+        if (this.inited && this.axis === 'x' && this.width !== existing) this._syncThumbToValue(this.thumb, this.getValue());
+    },
+    
+    /** Update the thumb position if the height changes.
+        @overrides */
+    setHeight: function(v, supressEvent) {
+        var existing = this.height;
+        this.callSuper(v, supressEvent);
+        if (this.inited && this.axis === 'y' && this.height !== existing) this._syncThumbToValue(this.thumb, this.getValue());
     },
     
     
