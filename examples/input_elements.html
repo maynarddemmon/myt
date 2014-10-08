@@ -79,6 +79,41 @@
         new myt.RangeSlider(rootView, {axis:'y', height:50, minValue:0, maxValue:10, lowerValue:0, upperValue:3});
         new myt.RangeSlider(rootView, {axis:'y', height:50, minValue:0, maxValue:100, lowerValue:0, upperValue:20});
         
+        new myt.ComboBox(rootView, {
+            width:100,
+            fullItemConfig:[
+                {attrs:{text:'and'}},
+                {attrs:{text:'any'}},
+                {attrs:{text:'big'}},
+                {attrs:{text:'bigger'}},
+                {attrs:{text:'biggest'}},
+                {attrs:{text:'blaze'}},
+                {attrs:{text:'claw'}},
+                {attrs:{text:'Clone'}},
+                {attrs:{text:'ward'}},
+                {attrs:{text:'word'}},
+                {attrs:{text:'zip'}}
+            ]
+        });
+        
+        new myt.ComboBox(rootView, {
+            width:100,
+            placeholder:'Choose Value',
+            fullItemConfig:[
+                {attrs:{text:'0'}},
+                {attrs:{text:'1'}},
+                {attrs:{text:'2'}},
+                {attrs:{text:'3'}},
+                {attrs:{text:'4'}},
+                {attrs:{text:'50'}},
+                {attrs:{text:'60'}},
+                {attrs:{text:'70'}},
+                {attrs:{text:'80'}},
+                {attrs:{text:'90'}},
+                {attrs:{text:'100'}}
+            ]
+        });
+        
         new myt.WrappingLayout(rootView, {name:'layout', axis:'x',
             inset:10, spacing:0, outset:5,
             lineInset:10, lineSpacing:0,

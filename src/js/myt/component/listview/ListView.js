@@ -4,6 +4,9 @@
         maxHeight:number
     
     Attributes:
+        minWidth:number The minimum width for the list. The list will size
+            itself to fit the maximum width of the items in the list or this
+            value whichever is larger. Defaults to 0.
         maxHeight:number The maximum height of the list view in pixels. If set 
             to -1 no max height will be used.
         defaultItemClass:JS.Class The class to use for list items if one is
@@ -17,6 +20,7 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
     initNode: function(parent, attrs) {
         this.items = [];
         this.maxHeight = -1;
+        this.minWidth = 0;
         
         if (attrs.defaultItemClass === undefined) attrs.defaultItemClass = myt.ListViewItem;
         if (attrs.overflow === undefined) attrs.overflow = 'auto';
@@ -33,6 +37,7 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
+    setMinWidth: function(v) {this.minWidth = v;},
     setDefaultItemClass: function(v) {this.defaultItemClass = v;},
     setItemConfig: function(v) {
         this.itemConfig = v;
@@ -105,7 +110,7 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
             contentView = this.getContentView(), 
             layouts = contentView.getLayouts(), layout,
             layoutLen = layouts.length, i,
-            minItemWidth, minWidth = 0;
+            minItemWidth, minWidth = this.minWidth;
         
         // Lock layouts during reconfiguration
         i = layoutLen;

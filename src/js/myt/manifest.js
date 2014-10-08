@@ -269,6 +269,7 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'input/NativeInputWrapper.js').provides('myt.NativeInputWrapper').requires('myt.View','myt.InputObservable','myt.Disableable');
     file(MYT_COMPONENT_ROOT + 'input/BaseInputText.js'     ).provides('myt.BaseInputText'     ).requires('myt.NativeInputWrapper','myt.TextSupport');
     file(MYT_COMPONENT_ROOT + 'input/InputText.js'         ).provides('myt.InputText'         ).requires('myt.BaseInputText');
+    file(MYT_COMPONENT_ROOT + 'input/ComboBox.js'          ).provides('myt.ComboBox'          ).requires('myt.InputText','myt.ListViewAnchor');
     file(MYT_COMPONENT_ROOT + 'input/InputTextArea.js'     ).provides('myt.InputTextArea'     ).requires('myt.BaseInputText');
     file(MYT_COMPONENT_ROOT + 'input/EditableText.js'      ).provides('myt.EditableText'      ).requires('myt.BaseInputText');
     file(MYT_COMPONENT_ROOT + 'input/InputSelect.js'       ).provides('myt.InputSelect'       ).requires('myt.NativeInputWrapper','myt.SizeToDom');
@@ -351,7 +352,7 @@ JS.Packages(function() {with(this) {
         'myt.FloatingPanelAnchor',
         'myt.ListViewAnchor',
         'myt.TextCheckbox','myt.TextRadio','myt.TextTabSlider','myt.Tab','myt.SimpleTab',
-        'myt.EditableText','myt.InputText','myt.InputTextArea','myt.InputSelectOption',
+        'myt.EditableText','myt.InputText','myt.ComboBox','myt.InputTextArea','myt.InputSelectOption',
         'myt.ImageUploader','myt.Dialog',
         'myt.global.validators','myt.EqualFieldsValidator','myt.LengthValidator','myt.NumericRangeValidator',
         'myt.global.valueProcessors','myt.UseOtherFieldIfEmptyValueProcessor','myt.FormElement',
