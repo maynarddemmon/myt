@@ -32,6 +32,7 @@
         }, [{
             doActivated: function() {
                 var defaultValue = {
+                    field0:"and",
                     fieldA:"foo",
                     fieldB:"bar",
                     fieldC:'baz',
@@ -47,6 +48,7 @@
                     fieldI:"bar"
                 };
                 var rollbackValue = {
+                    field0:"any",
                     fieldA:"FOO",
                     fieldB:"",
                     subForm:{
@@ -61,6 +63,7 @@
                     fieldI:""
                 };
                 var value = {
+                    field0:"big",
                     fieldC:"blah",
                     subForm:{
                         fieldA:"whatever"
@@ -84,6 +87,23 @@
         // Define a few validators
         var lenValidator = new myt.LengthValidator('len', 3, 10);
         
+        new myt.FormComboBox(rootView, {
+            width:100, id:'field0', form:rootView,
+            validators:[lenValidator],
+            fullItemConfig:[
+                {attrs:{text:'and'}},
+                {attrs:{text:'any'}},
+                {attrs:{text:'big'}},
+                {attrs:{text:'bigger'}},
+                {attrs:{text:'biggest'}},
+                {attrs:{text:'blaze'}},
+                {attrs:{text:'claw'}},
+                {attrs:{text:'Clone'}},
+                {attrs:{text:'ward'}},
+                {attrs:{text:'word'}},
+                {attrs:{text:'zip'}}
+            ]
+        });
         new myt.FormInputText(rootView, {
             width:100, id:'fieldA', form:rootView, validators:[lenValidator, 'required'],
             allowedChars:'0123456789', placeholder:'Numbers Only'
