@@ -64,6 +64,31 @@ myt.Node = new JS.Class('Node', {
             @returns Node or null if no match is found. */
         getMatchingAncestor: function(n, matcherFunc) {
             return this.getMatchingAncestorOrSelf(n ? n.parent : null, matcherFunc);
+        },
+        
+        /** A convienence method to execute a method once after a delay.
+            @param target:object The object to call the method on.
+            @param methodName:string The name of the method on this object
+                to execute.
+            @param delay:number (optional) The time to wait in millis. Defaults 
+                to 0.
+            @param arguments Remaining arguments will be passed to the called
+                method in the order provided.
+            @returns number: The timer ID if the timer is started, othewise
+                undefined is returned. */
+        doOnceLater: function() {
+            var params = Array.prototype.slice.call(arguments),
+                target = params.shift(),
+                methodName = params.shift(),
+                delay = params.shift();
+            
+            if (target) {
+                var method = target[methodName];
+                if (method) {
+                    params.unshift(target);
+                    return setTimeout(method.bind.apply(method, params), delay >= 0 ? delay : 0);
+                }
+            }
         }
     },
     
@@ -535,14 +560,8 @@ myt.Node = new JS.Class('Node', {
         @returns number: The timer ID if the timer is started, othewise
             undefined is returned. */
     doOnceLater: function() {
-        var params = Array.prototype.slice.call(arguments),
-            methodName = params.shift(),
-            delay = params.shift();
-            
-        var method = this[methodName];
-        if (method) {
-            params.unshift(this);
-            return setTimeout(method.bind.apply(method, params), delay >= 0 ? delay : 0);
-        }
+        var params = Array.prototype.slice.call(arguments);
+        params.unshift(this);
+        return myt.Node.doOnceLater.apply(this, arguments);
     }
 });
