@@ -32,8 +32,9 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        this.tipDelay = this.nextTipDelay = myt.BaseTooltip.DEFAULT_TIP_DELAY;
-        this.tipHideDelay = myt.BaseTooltip.DEFAULT_TIP_HIDE_DELAY;
+        var BTT = myt.BaseTooltip;
+        this.tipDelay = this.nextTipDelay = BTT.DEFAULT_TIP_DELAY;
+        this.tipHideDelay = BTT.DEFAULT_TIP_HIDE_DELAY;
         
         if (attrs.visible === undefined) attrs.visible = false;
         
@@ -69,29 +70,28 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     /** @private */
     __checkMouseMovement: function(event) {
         this._lastPos = myt.MouseObservable.getMouseFromEvent(event);
-        if (!this.__checkOut()) this.__checkTipTimer.reset(this.__checkTipCallback, this.nextTipDelay);
+        if (this.__checkIn()) this.__checkTipTimer.reset(this.__checkTipCallback, this.nextTipDelay);
     },
     
     /** If the mouse rests in the tip's parent, show the tip.
         @private
         @returns void */
     __checkTip: function() {
-        if (this.__checkOut()) return;
-        this.showTip();
+        if (this.__checkIn()) this.showTip();
     },
     
-    /** Checks if the last mouse position is outside of the tip's parent
-        and if so, the tip will get hidden.
+    /** Checks if the last mouse position is inside the tip's parent.
+        If not inside the tip will also get hidden.
         @private
-        @returns boolean: true if the tip got hidden, false otherwise. */
-    __checkOut: function() {
+        @returns boolean: false if the tip got hidden, true otherwise. */
+    __checkIn: function() {
         var tt = this.tooltip;
         if (tt) {
             var pos = this._lastPos;
-            if (tt.parent.containsPoint(pos.x, pos.y)) return false;
+            if (tt.parent.containsPoint(pos.x, pos.y)) return true;
         }
         this.hideTip();
-        return true;
+        return false;
     },
     
     /** Called when the tip will be hidden.
@@ -119,10 +119,10 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     showTip: function() {
         // Don't show tooltips while doing drag and drop since they're
         // distracting while this is going on.
-        if (myt.global.dragManager.dragView) return;
-        
-        this.nextTipDelay = this.tipHideDelay;
-        this.bringToFront();
-        this.setVisible(true);
+        if (!myt.global.dragManager.dragView) {
+            this.nextTipDelay = this.tipHideDelay;
+            this.bringToFront();
+            this.setVisible(true);
+        }
     }
 });

@@ -23,10 +23,6 @@ myt.TextTabSlider = new JS.Class('TextTabSlider', myt.TabSlider, {
         if (attrs.labelTextColor === undefined) attrs.labelTextColor = TTS.DEFAULT_LABEL_TEXT_COLOR;
         
         this.callSuper(parent, attrs);
-    },
-    
-    doAfterAdoption: function() {
-        this.callSuper();
         
         new myt.Text(this.button, {
             name:'label', domClass:'mytTextTabSliderLabel', ignorePlacement:true,
@@ -43,7 +39,8 @@ myt.TextTabSlider = new JS.Class('TextTabSlider', myt.TabSlider, {
     setText: function(v) {
         if (this.text !== v) {
             this.text = v;
-            if (this.button && this.button.label) this.button.label.setText(v);
+            var button = this.button;
+            if (button && button.label) button.label.setText(v);
         }
     },
     

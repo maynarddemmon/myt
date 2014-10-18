@@ -56,17 +56,12 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
         this.__tipWidth = 0;
         
         this.callSuper(parent, attrs);
-    },
-    
-    /** @overrides myt.Node */
-    doAfterAdoption: function() {
-        this.callSuper();
         
         new myt.Canvas(this, {
             name:'_bg', percentOfParentWidth:100, percentOfParentHeight:100
         }, [myt.SizeToParent]);
         new myt.Text(this, {
-            name:'_tipText', domClass:'mytTooltipText',
+            name:'_tipText', fontSize:'12px',
             x:this.edgeWidth + this.insetH, whiteSpace:'inherit'
         });
     },
@@ -91,11 +86,14 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
     /** @overrides myt.BaseTooltip. */
     showTip: function() {
         var tt = this.tooltip,
+            txt = tt.text,
             ttp = tt.parent,
-            tipText = this._tipText;
+            tipText = this._tipText,
+            insetTop = this.insetTop,
+            shadowWidth = this.shadowWidth;
         
         // Set tip text
-        if (tipText.text !== tt.text) tipText.setText(tt.text);
+        if (tipText.text !== txt) tipText.setText(txt);
         
         // Get floating boundary
         var gwr = myt.global.windowResize,
@@ -109,16 +107,17 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
         
         // Determine X position
         tipText.setWidth('auto');
-        var tipTextWidth = Math.min(tipText.measureNoWrapWidth(), this.maxTextWidth);
-        this.__tipWidth = 2 * tipText.x + tipTextWidth;
+        var tipTextWidth = Math.min(tipText.measureNoWrapWidth(), this.maxTextWidth),
+            pointerX = tipText.x;
+        this.__tipWidth = 2 * pointerX + tipTextWidth;
         tipText.setWidth(tipTextWidth);
         tipText.sizeViewToDom();
-        var pointerX = tipText.x + this.pointerInset;
         
-        var alignRight = tt.tipalign === 'right';
-        if (alignRight) {
+        if (tt.tipalign === 'right') {
             tipX += ttp.width - this.__tipWidth;
-            pointerX = tipText.x + tipText.width - this.pointerInset - this.pointerWidth;
+            pointerX += tipText.width - this.pointerInset - this.pointerWidth;
+        } else {
+            pointerX += this.pointerInset;
         }
         
         // Prevent out-of-bounds to the left
@@ -137,7 +136,7 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
         }
         
         // Determine Y position
-        var tipHeight = 2*this.edgeWidth + this.insetTop + this.insetBottom + tipText.height + this.pointerHeight,
+        var tipHeight = 2*this.edgeWidth + insetTop + this.insetBottom + tipText.height + this.pointerHeight,
             tipParentHeight = ttp.height,
             pointerOnTop, tipY;
         switch (tt.tipvalign) {
@@ -166,10 +165,10 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
         // Apply values
         this.setX(Math.round(tipX));
         this.setY(Math.round(tipY));
-        tipText.setY(this.insetTop + this.edgeWidth + (pointerOnTop ? this.pointerHeight : 0));
+        tipText.setY(insetTop + this.edgeWidth + (pointerOnTop ? this.pointerHeight : 0));
         
-        this.setWidth(this.__tipWidth + this.shadowWidth);
-        this.setHeight(tipHeight + this.shadowWidth);
+        this.setWidth(this.__tipWidth + shadowWidth);
+        this.setHeight(tipHeight + shadowWidth);
         
         this.__redraw(pointerX, pointerOnTop);
         
@@ -178,27 +177,26 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
     
     /** @private */
     __redraw: function(pointerX, pointerOnTop) {
-        var tt = this.tooltip,
-            tipText = this._tipText;
-        
-        // Calculate bounds
-        var left = 0,
+        var canvas = this._bg,
             right = this.__tipWidth,
             top = pointerOnTop ? this.pointerHeight : 0,
-            bottom = 2*this.edgeWidth + this.insetTop + this.insetBottom + tipText.height + top,
-            canvas = this._bg,
+            bottom = 2*this.edgeWidth + this.insetTop + this.insetBottom + this._tipText.height + top,
             pointerWidth = this.pointerWidth,
-            pointerHeight = this.pointerHeight;
+            pointerXCtr = pointerX + pointerWidth / 2,
+            pointerXRt = pointerX + pointerWidth,
+            pointerHeight = this.pointerHeight,
+            shadowWidth = this.shadowWidth,
+            edgeWidth = this.edgeWidth,
+            lineTo = canvas.lineTo.bind(canvas);
         
         canvas.clear();
         
         // Draw Shadow
-        var shadowWidth = this.shadowWidth;
         canvas.beginPath();
-        canvas.moveTo(left + shadowWidth, top + shadowWidth);
-        canvas.lineTo(right + shadowWidth, top + shadowWidth);
-        canvas.lineTo(right + shadowWidth, bottom + shadowWidth);
-        canvas.lineTo(left + shadowWidth, bottom + shadowWidth);
+        canvas.moveTo(shadowWidth, top + shadowWidth);
+        lineTo(right + shadowWidth, top + shadowWidth);
+        lineTo(right + shadowWidth, bottom + shadowWidth);
+        lineTo(shadowWidth, bottom + shadowWidth);
         canvas.closePath();
         canvas.setGlobalAlpha(0.3);
         canvas.setFillStyle(this.shadowColor);
@@ -208,54 +206,52 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
         
         // Draw Edge
         canvas.beginPath();
-        canvas.moveTo(left, top);
+        canvas.moveTo(0, top);
         
         if (pointerOnTop) {
-            canvas.lineTo(left + pointerX, top);
-            canvas.lineTo(left + pointerX + (pointerWidth / 2), top - pointerHeight);
-            canvas.lineTo(left + pointerX + pointerWidth, top);
+            lineTo(pointerX, top);
+            lineTo(pointerXCtr, top - pointerHeight);
+            lineTo(pointerXRt, top);
         }
         
-        canvas.lineTo(right, top);
-        canvas.lineTo(right, bottom);
+        lineTo(right, top);
+        lineTo(right, bottom);
         
         if (!pointerOnTop) {
-            canvas.lineTo(left + pointerX + pointerWidth, bottom);
-            canvas.lineTo(left + pointerX + (pointerWidth / 2), bottom + pointerHeight);
-            canvas.lineTo(left + pointerX, bottom);
+            lineTo(pointerXRt, bottom);
+            lineTo(pointerXCtr, bottom + pointerHeight);
+            lineTo(pointerX, bottom);
         }
         
-        canvas.lineTo(left, bottom);
+        lineTo(0, bottom);
         canvas.closePath();
         canvas.setFillStyle(this.edgeColor);
         canvas.fill();
         
         // Draw Fill
-        var edgeWidth = this.edgeWidth;
-        left += edgeWidth;
         right -= edgeWidth;
         top += edgeWidth;
         bottom -= edgeWidth;
         
         canvas.beginPath();
-        canvas.moveTo(left, top);
+        canvas.moveTo(edgeWidth, top);
         
         if (pointerOnTop) {
-            canvas.lineTo(left + pointerX - edgeWidth, top);
-            canvas.lineTo(left + pointerX + (pointerWidth / 2) - edgeWidth, top - pointerHeight);
-            canvas.lineTo(left + pointerX + pointerWidth - edgeWidth, top);
+            lineTo(pointerX, top);
+            lineTo(pointerXCtr, top - pointerHeight);
+            lineTo(pointerXRt, top);
         }
         
-        canvas.lineTo(right, top);
-        canvas.lineTo(right, bottom);
+        lineTo(right, top);
+        lineTo(right, bottom);
         
         if (!pointerOnTop) {
-            canvas.lineTo(left + pointerX + pointerWidth - edgeWidth, bottom);
-            canvas.lineTo(left + pointerX + (pointerWidth / 2) - edgeWidth, bottom + pointerHeight);
-            canvas.lineTo(left + pointerX - edgeWidth, bottom);
+            lineTo(pointerXRt, bottom);
+            lineTo(pointerXCtr, bottom + pointerHeight);
+            lineTo(pointerX, bottom);
         }
         
-        canvas.lineTo(left, bottom);
+        lineTo(edgeWidth, bottom);
         canvas.closePath();
         canvas.setFillStyle(this.tipBgColor);
         canvas.fill();
