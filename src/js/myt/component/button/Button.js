@@ -41,6 +41,15 @@ myt.Button = new JS.Module('Button', {
     },
     
     
+    // Accessors ///////////////////////////////////////////////////////////////
+    /** @overrides myt.FocusObservable */
+    setFocused: function(v) {
+        var existing = this.focused;
+        this.callSuper(v);
+        if (this.inited && this.focused !== existing) this.updateUI();
+    },
+    
+    
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.KeyActivation. */
     doActivationKeyDown: function(key, isRepeat) {
@@ -77,6 +86,8 @@ myt.Button = new JS.Module('Button', {
             
             if (this.activateKeyDown !== -1 || this.mouseDown) {
                 this.drawActiveState();
+            } else if (this.focused) {
+                this.drawFocusedState();
             } else if (this.mouseOver) {
                 this.drawHoverState();
             } else {
@@ -89,6 +100,13 @@ myt.Button = new JS.Module('Button', {
         @returns void */
     drawDisabledState: function() {
         // Subclasses to implement as needed.
+    },
+    
+    /** Draw the UI when the component has focus. The default implementation
+        calls drawHoverState.
+        @returns void */
+    drawFocusedState: function() {
+        this.drawHoverState();
     },
     
     /** Draw the UI when the component is on the verge of being interacted 

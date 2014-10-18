@@ -66,13 +66,6 @@ myt.SimpleGridColumnHeader = new JS.Class('SimpleGridColumnHeader', myt.SimpleIc
         if (this.inited) this._drawSortIcon();
     },
     
-    /** @overrides myt.FocusObservable */
-    setFocused: function(v) {
-        this.callSuper(v);
-        
-        if (this.inited) this.updateUI();
-    },
-    
     /** @overrides myt.View */
     setWidth: function(v, supressEvent) {
         this.callSuper(v, supressEvent);
@@ -82,15 +75,16 @@ myt.SimpleGridColumnHeader = new JS.Class('SimpleGridColumnHeader', myt.SimpleIc
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** @private */
     _drawSortIcon: function() {
-        var canvas = this.sortIcon, sortState = this.sortState;
+        var canvas = this.sortIcon;
         canvas.clear();
         
         if (this.sortable) {
             canvas.beginPath();
             
             var fillColor;
-            switch (sortState) {
+            switch (this.sortState) {
                 case 'ascending':
                     fillColor = this.sortIconColor;
                     canvas.moveTo(0,10);
@@ -118,6 +112,7 @@ myt.SimpleGridColumnHeader = new JS.Class('SimpleGridColumnHeader', myt.SimpleIc
         }
     },
     
+    /** @private */
     _updateTextWidth: function() {
         if (this.contentAlign === 'left') {
             var tv = this.textView;
@@ -139,21 +134,6 @@ myt.SimpleGridColumnHeader = new JS.Class('SimpleGridColumnHeader', myt.SimpleIc
     /** @overrides myt.SimpleButton */
     drawDisabledState: function() {
         this.setBgColor(this.readyColor);
-    },
-    
-    /** @overrides myt.SimpleButton */
-    drawHoverState: function() {
-        this.setBgColor(this.hoverColor);
-    },
-    
-    /** @overrides myt.SimpleButton */
-    drawActiveState: function() {
-        this.setBgColor(this.activeColor);
-    },
-    
-    /** @overrides myt.SimpleButton */
-    drawReadyState: function() {
-        this.setBgColor(this.focused ? this.hoverColor : this.readyColor);
     },
     
     /** @overrides myt.Button */

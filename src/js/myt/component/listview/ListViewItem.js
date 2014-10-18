@@ -22,20 +22,9 @@ myt.ListViewItem = new JS.Class('ListViewItem', myt.SimpleIconTextButton, {
         if (attrs.inset === undefined) attrs.inset = 8;
         if (attrs.outset === undefined) attrs.outset = 8;
         
-        if (attrs.activationKeys === undefined) {
-            attrs.activationKeys = [13,27,32,37,38,39,40];
-        }
+        if (attrs.activationKeys === undefined) attrs.activationKeys = [13,27,32,37,38,39,40];
         
         this.callSuper(parent, attrs);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrides myt.FocusObservable */
-    setFocused: function(v) {
-        this.callSuper(v);
-        
-        if (this.inited) this.updateUI();
     },
     
     
@@ -54,12 +43,6 @@ myt.ListViewItem = new JS.Class('ListViewItem', myt.SimpleIconTextButton, {
     /** @overrides myt.Button */
     doActivated: function() {
         this.listView.doItemActivated(this);
-    },
-    
-    /** @overrides myt.SimpleButton */
-    drawReadyState: function() {
-        this.setOpacity(1);
-        this.setBgColor(this.focused ? this.hoverColor : this.readyColor);
     },
     
     /** @overrides myt.Button */

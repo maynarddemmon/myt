@@ -49,9 +49,6 @@ myt.SimpleTab = new JS.Class('SimpleTab', myt.SimpleIconTextButton, {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setSelectedColor: function(v) {this.selectedColor = v;},
-    setHoverColor: function(v) {this.hoverColor = v;},
-    setActiveColor: function(v) {this.activeColor = v;},
-    setReadyColor: function(v) {this.readyColor = v;},
     
     setCornerRadius: function(v) {
         this.cornerRadius = v;
@@ -72,11 +69,6 @@ myt.SimpleTab = new JS.Class('SimpleTab', myt.SimpleIconTextButton, {
             this.updateUI();
             this.__updateTextColor();
         }
-    },
-    
-    setFocused: function(v) {
-        this.callSuper(v);
-        if (this.inited) this.updateUI();
     },
     
     
@@ -130,10 +122,6 @@ myt.SimpleTab = new JS.Class('SimpleTab', myt.SimpleIconTextButton, {
     /** @overrides myt.SimpleButton */
     drawReadyState: function() {
         this.callSuper();
-        if (this.selected) {
-            this.setBgColor(this.selectedColor);
-        } else if (this.focused) {
-            this.setBgColor(this.hoverColor);
-        }
+        if (this.selected) this.setBgColor(this.selectedColor);
     }
 });
