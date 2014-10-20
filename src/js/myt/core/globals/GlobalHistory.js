@@ -36,6 +36,23 @@ new JS.Singleton('GlobalHistory', {
         var state = History.getState();
         monitor.handleStateChange({value:state});
         History.setTitle(state); // Title doesn't get updated for the initial page load.
+    },
+    
+    // Disable History Navigation
+    /** Enables or disables the browser forward/back history buttons so that
+        they do nothing.
+        See http://programmerslate.blogspot.com/2013/06/disable-back-button-of-your-browser.html
+        @param enabled:boolean Indicates if history should be enabled or not.
+        @returns void */
+    enableHistoryNavigation: function(enabled) {
+        var location = global.location;
+        if (enabled) {
+            location.hash = '';
+        } else {
+            location.hash = "no-back-button";
+            location.hash = "Again-no-back-button"; // Again because google chrome don't insert first hash into history
+        }
+        global.onhashchange = enabled ? null : function() {location.hash = "no-back-button";};
     }
 });
 
