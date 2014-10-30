@@ -79,7 +79,7 @@ myt.Cookie = {
     /** Stores a cookie.
         @param key:string the name of the cookie to store.
         @param value:* the value to store.
-        @param options:object options that determine how the coookie is
+        @param options:object options that determine how the cookie is
             written and stored. Supported options are:
                 expires:number the number of days until the cookie expires.
                 path:string the path scope for the cookie.

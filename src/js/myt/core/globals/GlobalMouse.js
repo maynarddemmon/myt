@@ -1,4 +1,4 @@
-/** Provides global mouse events by listening to mouse event on the the
+/** Provides global mouse events by listening to mouse events on the the
     document. Registered with myt.global as 'mouse'. */
 new JS.Singleton('GlobalMouse', {
     include: [myt.DomElementProxy, myt.DomObservable, myt.MouseObservable],

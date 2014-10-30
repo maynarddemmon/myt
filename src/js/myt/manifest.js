@@ -69,6 +69,7 @@ JS.Packages(function() {with(this) {
     file(MYT_DOM_EVENTS_ROOT + 'KeyObservable.js'   ).provides('myt.KeyObservable'   ).requires('myt.DomObservable');
     file(MYT_DOM_EVENTS_ROOT + 'FocusObservable.js' ).provides('myt.FocusObservable' ).requires('myt.DomObservable','myt.global.focus');
     file(MYT_DOM_EVENTS_ROOT + 'ScrollObservable.js').provides('myt.ScrollObservable').requires('myt.DomObservable');
+    file(MYT_DOM_EVENTS_ROOT + 'TouchObservable.js' ).provides('myt.TouchObservable' ).requires('myt.DomObservable');
     
     // Core : Layout
     var MYT_LAYOUT_ROOT = MYT_CORE_ROOT + 'layout/';
@@ -82,6 +83,7 @@ JS.Packages(function() {with(this) {
     file(MYT_GLOBALS_ROOT + 'GlobalHistory.js'         ).provides('myt.global.history'     ).requires('myt.global','myt.Observable','History','History.Adapter');
     file(MYT_GLOBALS_ROOT + 'GlobalIdle.js'            ).provides('myt.global.idle'        ).requires('myt.global','myt.Observable');
     file(MYT_GLOBALS_ROOT + 'GlobalMouse.js'           ).provides('myt.global.mouse'       ).requires('myt.global','myt.DomObservable','myt.MouseObservable');
+    file(MYT_GLOBALS_ROOT + 'GlobalTouch.js'           ).provides('myt.global.touch'       ).requires('myt.global','myt.DomObservable','myt.TouchObservable');
     file(MYT_GLOBALS_ROOT + 'GlobalFocus.js'           ).provides('myt.global.focus'       ).requires('myt.global','myt.Observable');
     file(MYT_GLOBALS_ROOT + 'GlobalKeys.js'            ).provides('myt.global.keys'        ).requires('myt.global','myt.DomObserver','myt.KeyObservable',
                                                                                                       'myt.global.focus','myt.Observer');
@@ -343,7 +345,7 @@ JS.Packages(function() {with(this) {
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
         'myt.Cookie',
-        'myt.global.keys','myt.global.history',
+        'myt.global.keys','myt.global.touch','myt.global.history',
         'myt.Text','myt.Markup','myt.SizeWidthToDom','myt.SizeHeightToDom','myt.SizeToParent',
         'myt.SizeToWindowWidth','myt.SizeToWindowHeight',
         'myt.Animator','myt.Callback','myt.RepeatableTimer','myt.StateMachine',
