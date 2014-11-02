@@ -1,5 +1,6 @@
 /** Generates Mouse Events and passes them on to one or more event observers.
-    Also provides the capability to capture contextmenu events.
+    Also provides the capability to capture contextmenu events and mouse
+    wheel events.
     
     Requires: myt.DomObservable super mixin.
 */
@@ -15,7 +16,8 @@ myt.MouseObservable = new JS.Module('MouseObservable', {
             click:true,
             dblclick:true,
             mousemove:true,
-            contextmenu:true
+            contextmenu:true,
+            wheel:true
         },
         
         /** The common mouse event that gets reused. */
