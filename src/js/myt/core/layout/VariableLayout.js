@@ -10,8 +10,6 @@
         collapseParent:boolean If true the updateParent method will be called.
             The updateParent method will typically resize the parent to fit
             the newly layed out child views. Defaults to false.
-        useOptimizations:boolean Turns on certain dom optimization techniques
-            that can speed up layout updates. Defaults to true.
         reverse:boolean If true the layout will position the items in the
             opposite order. For example, right to left instead of left to right.
             Defaults to false.
@@ -20,7 +18,6 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Node */
     initNode: function(parent, attrs) {
-        this.useOptimizations = true;
         this.collapseParent = this.reverse = false;
         
         this.callSuper(parent, attrs);
@@ -48,8 +45,6 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
         }
     },
     
-    setUseOptimizations: function(v) {this.useOptimizations = v;},
-    
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.ConstantLayout */
@@ -59,31 +54,6 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
             this.incrementLockedCounter();
             
             this.doBeforeUpdate();
-            
-            if (this.useOptimizations) {
-                // DUPLICATION: Nearly identical code exists in 
-                // myt.View.retainFocusDuringDomUpdate
-                
-                // OPTIMIZATION: Prevent dom reflow during layout by 
-                // temporarily removing the parent dom element.
-                var elem = this.parent.domElement,
-                    parentElem = elem.parentNode,
-                    nextSibling = elem.nextSibling,
-                    restoreFocus, restoreScrollTop, restoreScrollLeft;
-                
-                if (parentElem) {
-                    restoreFocus = myt.global.focus.focusedView;
-                    if (restoreFocus && restoreFocus.isDescendantOf(this.parent)) {
-                        restoreFocus._ignoreFocus = true;
-                    }
-                    
-                    restoreScrollTop = elem.scrollTop;
-                    restoreScrollLeft = elem.scrollLeft;
-                    
-                    parentElem.removeChild(elem);
-                }
-                // OPTIMIZATION: end
-            }
             
             var setterName = this.setterName, value = this.targetValue,
                 svs = this.subviews, len = svs.length, i, sv, count = 0;
@@ -101,23 +71,6 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
                     if (this.skipSubview(sv)) continue;
                     value = this.updateSubview(++count, sv, setterName, value);
                 }
-            }
-            
-            if (this.useOptimizations) {
-                // OPTIMIZATION: Reinsert the parent dom element now that we've 
-                // finished updating
-                if (parentElem) {
-                    parentElem.insertBefore(elem, nextSibling);
-                    if (restoreFocus) {
-                        restoreFocus._ignoreFocus = false;
-                        restoreFocus.focus(true);
-                    }
-                    
-                    // Restore scrollTop/scrollLeft
-                    elem.scrollTop = restoreScrollTop;
-                    elem.scrollLeft = restoreScrollLeft;
-                }
-                // OPTIMIZATION: end
             }
             
             this.doAfterUpdate();

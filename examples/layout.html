@@ -1,0 +1,45 @@
+<!doctype html><html><head>
+<title>Myt Framework : Spaced Layout Example</title>
+<link rel="stylesheet" href="../src/css/myt.scss"/>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="../src/js/jquery/jquery-1.10.2.min.js">\x3C/script>');</script>
+<script src="../src/js/boilerplate.js"></script>
+<script src="../src/js/jsclass/min/loader-browser.js"></script>
+<script src="../src/js/myt/manifest.js"></script>
+</head><body>
+
+<script>
+    JS.require('myt.all', function() {this.init();});
+    
+    function init() {
+        var start = Date.now();
+        
+        var rootView = new myt.View(null, {bgColor:'#eeeeee'}, [myt.SizeToWindow]);
+        for (var i = 0; 1000 > i; i++) new myt.View(rootView, {width:10, height:10, bgColor:'#ff0000'});
+        /*new myt.WrappingLayout(rootView, {
+            collapseParent:true,
+            inset:5, spacing:1, outset:5,
+            lineInset:5, lineSpacing:1, lineOutset:5
+        });*/
+        
+        /*new myt.SpacedLayout(rootView, {
+            axis:'x', inset:5, spacing:1
+        });
+        new myt.SpacedLayout(rootView, {
+            axis:'y', collapseParent:true, inset:5, spacing:1
+        });*/
+        
+        new myt.VariableLayout(rootView, {}, [{
+            updateSubview: function(count, sv, setterName, value) {
+                var size = 1 + (count / 50);
+                sv.setWidth(size);
+                sv.setHeight(size);
+                sv.setX(550 + (Math.sin(count / 10) * (count / 2)));
+                sv.setY(350 + (Math.cos(count / 10) * (count / 3.5)));
+            }
+        }]);
+        
+        console.log(Date.now() - start);
+    }
+</script>
+</body></html>

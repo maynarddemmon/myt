@@ -128,8 +128,6 @@ myt.View = new JS.Class('View', myt.Node, {
                 dom in some way, typically a remove followed by an insert.
             @returns void */
         retainFocusDuringDomUpdate: function(viewBeingRemoved, wrappedFunc) {
-            // DUPLICATION: Nearly identical code exists in 
-            // myt.VariableLayout.update
             var restoreFocus = myt.global.focus.focusedView, 
                 elem = viewBeingRemoved.domElement, restoreScrollTop, restoreScrollLeft;
             if (restoreFocus === viewBeingRemoved || (restoreFocus && restoreFocus.isDescendantOf(viewBeingRemoved))) {
