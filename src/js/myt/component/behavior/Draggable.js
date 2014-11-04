@@ -41,9 +41,17 @@ myt.Draggable = new JS.Module('Draggable', {
         this.draggableAllowBubble = true;
         this.distanceBeforeDrag = this.dragOffsetX = this.dragOffsetY = 0;
         
-        if (attrs.isDraggable === undefined) attrs.isDraggable = true;
+        // Will be set after init since the draggable subview probably
+        // doesn't exist yet.
+        var isDraggable = true;
+        if (attrs.isDraggable !== undefined) {
+            isDraggable = attrs.isDraggable;
+            delete attrs.isDraggable;
+        }
         
         this.callSuper(parent, attrs);
+        
+        this.setIsDraggable(isDraggable);
     },
     
     
@@ -62,7 +70,7 @@ myt.Draggable = new JS.Module('Draggable', {
             
             if (func) {
                 var dvs = this.getDragViews(), dragview, i = dvs.length;
-                while(i) {
+                while (i) {
                     dragview = dvs[--i];
                     func.call(this, dragview, '__doMouseDown', 'mousedown');
                     func.call(this, dragview, '__doContextMenu', 'contextmenu');
