@@ -15,7 +15,7 @@
         var start = Date.now();
         
         var rootView = new myt.View(null, {bgColor:'#eeeeee'}, [myt.SizeToWindow]);
-        for (var i = 0; 1000 > i; i++) new myt.View(rootView, {width:10, height:10, bgColor:'#ff0000'});
+        for (var i = 0; 1000 > i; i++) new myt.View(rootView, {width:10, height:10, bgColor:'#000000', opacity:0.15});
         /*new myt.WrappingLayout(rootView, {
             collapseParent:true,
             inset:5, spacing:1, outset:5,
@@ -29,17 +29,86 @@
             axis:'y', collapseParent:true, inset:5, spacing:1
         });*/
         
-        new myt.VariableLayout(rootView, {}, [{
+        var spiralLayout = new myt.VariableLayout(rootView, {}, [{
+            initNode: function(parent, attrs) {
+                this.xFrequency = this.yFrequency = 0.1;
+                this.xScale = this.yScale = 0.25;
+                this.size = 50;
+                this.callSuper(parent, attrs);
+            },
+            setXFrequency: function(v) {
+                if (this.xFrequency !== v) {
+                    this.xFrequency = v;
+                    if (this.inited) this.update();
+                }
+            },
+            setYFrequency: function(v) {
+                if (this.yFrequency !== v) {
+                    this.yFrequency = v;
+                    if (this.inited) this.update();
+                }
+            },
+            setXScale: function(v) {
+                if (this.xScale !== v) {
+                    this.xScale = v;
+                    if (this.inited) this.update();
+                }
+            },
+            setYScale: function(v) {
+                if (this.yScale !== v) {
+                    this.yScale = v;
+                    if (this.inited) this.update();
+                }
+            },
+            setSize: function(v) {
+                if (this.size !== v) {
+                    this.size = v;
+                    if (this.inited) this.update();
+                }
+            },
             updateSubview: function(count, sv, setterName, value) {
-                var size = 1 + (count / 50);
+                var size = Math.round(1 + (count / (this.size + 8))),
+                    halfSize = size / 2;
                 sv.setWidth(size);
                 sv.setHeight(size);
-                sv.setX(550 + (Math.sin(count / 10) * (count / 2)));
-                sv.setY(350 + (Math.cos(count / 10) * (count / 3.5)));
+                sv.setRoundedCorners(halfSize);
+                sv.setX(rootView.width / 2 + Math.round((Math.sin(count * this.xFrequency) * (count * this.xScale))) - halfSize);
+                sv.setY(rootView.height / 2 + Math.round((Math.cos(count * this.yFrequency) * (count * this.yScale))) - halfSize);
             }
         }]);
         
         console.log(Date.now() - start);
+        
+        new myt.Slider(rootView, {ignoreLayout:true, opacity:0.75, x:5, y:5, width:500, minValue:0, maxValue:500, value:500}, [{
+            setValue: function(v) {
+                this.callSuper(v);
+                spiralLayout.setXFrequency(0.05 + Math.round(v) / 10000);
+            }
+        }]);
+        new myt.Slider(rootView, {ignoreLayout:true, opacity:0.75, x:5, y:25, width:500, minValue:0, maxValue:500, value:500}, [{
+            setValue: function(v) {
+                this.callSuper(v);
+                spiralLayout.setYFrequency(0.05 + Math.round(v) / 10000);
+            }
+        }]);
+        new myt.Slider(rootView, {ignoreLayout:true, opacity:0.75, x:5, y:45, width:500, minValue:0, maxValue:500, value:250}, [{
+            setValue: function(v) {
+                this.callSuper(v);
+                spiralLayout.setXScale(Math.round(v) / 1000);
+            }
+        }]);
+        new myt.Slider(rootView, {ignoreLayout:true, opacity:0.75, x:5, y:65, width:500, minValue:0, maxValue:500, value:250}, [{
+            setValue: function(v) {
+                this.callSuper(v);
+                spiralLayout.setYScale(Math.round(v) / 1000);
+            }
+        }]);
+        new myt.Slider(rootView, {ignoreLayout:true, opacity:0.75, x:5, y:85, width:100, minValue:0, maxValue:100, value:50}, [{
+            setValue: function(v) {
+                this.callSuper(v);
+                spiralLayout.setSize(v);
+            }
+        }]);
     }
 </script>
 </body></html>
