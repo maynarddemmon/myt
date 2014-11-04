@@ -1,0 +1,64 @@
+<!doctype html><html><head>
+<title>Myt Framework : Touch Events Example</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<link rel="stylesheet" href="../src/css/myt.scss"/>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="../src/js/jquery/jquery-1.10.2.min.js">\x3C/script>');</script>
+<script src="../src/js/boilerplate.js"></script>
+<script src="../src/js/jsclass/min/loader-browser.js"></script>
+<script src="../src/js/myt/manifest.js"></script>
+</head><body>
+
+<script>
+    JS.require('myt.all', function() {this.init();});
+    
+    function init() {
+        var rootView = new myt.View(null, {x:10, y:10, width:300, height:400, bgColor:'#cccccc'}, [myt.RootView, {
+            initNode: function(parent, attrs) {
+                this.callSuper(parent, attrs);
+                
+                var g = myt.global,
+                    gt = g.touch,
+                    gm = g.mouse;
+                
+                this.attachToDom(gt, 'doTouchStart', 'touchstart');
+                this.attachToDom(gt, 'doTouchEnd', 'touchend');
+                this.attachToDom(gt, 'doTouchMove', 'touchmove');
+                
+                this.attachToDom(gm, 'doMouseDown', 'mousedown');
+                this.attachToDom(gm, 'doMouseUp', 'mouseup');
+                this.attachToDom(gm, 'doMouseMove', 'mousemove');
+                this.attachToDom(gm, 'doClick', 'click');
+            },
+            doTouchStart: function(event) {
+                console.log('touch start', event);
+            },
+            doTouchEnd: function(event) {
+                console.log('touch end', event);
+            },
+            doTouchMove: function(event) {
+                console.log('touch move', event);
+            },
+            
+            doMouseDown: function(event) {
+                console.log('mouse down', event);
+            },
+            doMouseUp: function(event) {
+                console.log('mouse up', event);
+            },
+            doMouseMove: function(event) {
+                console.log('mouse move', event);
+            },
+            doClick: function(event) {
+                console.log('mouse click', event);
+            }
+        }]);
+        
+        new myt.SimpleButton(rootView, {width:100, height:30, readyColor:'#999999', activeColor:'#666666', hoverColor:'#eeeeee'}, [{
+            doActivated: function() {
+                console.log('BUTTON ACTIVATED');
+            }
+        }]);
+    }
+</script>
+</body></html>

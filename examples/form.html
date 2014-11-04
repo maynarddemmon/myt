@@ -1,0 +1,214 @@
+<!doctype html><html><head>
+<title>Myt Framework : Form Example</title>
+<link rel="stylesheet" href="../src/css/myt.scss"/>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="../src/js/jquery/jquery-1.10.2.min.js">\x3C/script>');</script>
+<script src="../src/js/boilerplate.js"></script>
+<script src="../src/js/jsclass/min/loader-browser.js"></script>
+<script src="../src/js/myt/manifest.js"></script>
+</head><body>
+
+<script>
+    JS.require('myt.all', function() {this.init();});
+    
+    function init() {
+        myt.Layout.incrementGlobalLock();
+        
+        var rootView = new myt.View(null, {
+            bgColor:'#ffffff', id:'rootForm'
+        }, [myt.SizeToWindowWidth, myt.RootForm, {
+            doValidSubmit: function(value) {
+                console.log("valid submit", value);
+            },
+            
+            doInvalidSubmit: function() {
+                console.log("invalid submit", this.getAllErrorMessages());
+            },
+        }]);
+        
+        new myt.SimpleIconTextButton(rootView, {
+            height:25, width:70, roundedCorners:4, text:'setup',
+            activeColor:'#bbbbbb', hoverColor:'#dddddd', readyColor:'#cccccc'
+        }, [{
+            doActivated: function() {
+                var defaultValue = {
+                    field0:"and",
+                    fieldA:"foo",
+                    fieldB:"bar",
+                    fieldC:'baz',
+                    subForm:{
+                        fieldA:"default A",
+                        fieldB:"default B"
+                    },
+                    fieldD:false,
+                    fieldE:true,
+                    fieldF:'c',
+                    fieldG:'two',
+                    fieldH:['two','four'],
+                    fieldI:"bar"
+                };
+                var rollbackValue = {
+                    field0:"any",
+                    fieldA:"FOO",
+                    fieldB:"",
+                    subForm:{
+                        fieldA:"rb A",
+                        fieldB:"rb B"
+                    },
+                    fieldD:true,
+                    fieldE:false,
+                    fieldF:'b',
+                    fieldG:'four',
+                    fieldH:['four','five','six'],
+                    fieldI:""
+                };
+                var value = {
+                    field0:"big",
+                    fieldC:"blah",
+                    subForm:{
+                        fieldA:"whatever"
+                    }
+                };
+                rootView.setup(defaultValue, rollbackValue, value);
+                rootView.doValidation();
+            }
+        }]);
+        
+        new myt.SimpleIconTextButton(rootView, {
+            height:25, width:70, roundedCorners:4, text:'reset',
+            activeColor:'#bbbbbb', hoverColor:'#dddddd', readyColor:'#cccccc'
+        }, [{
+            doActivated: function() {
+                rootView.resetForm();
+                rootView.doValidation();
+            }
+        }]);
+        
+        // Define a few validators
+        var lenValidator = new myt.LengthValidator('len', 3, 10);
+        
+        new myt.FormComboBox(rootView, {
+            width:100, id:'field0', form:rootView,
+            validators:[lenValidator],
+            fullItemConfig:[
+                {attrs:{text:'and'}},
+                {attrs:{text:'any'}},
+                {attrs:{text:'big'}},
+                {attrs:{text:'bigger'}},
+                {attrs:{text:'biggest'}},
+                {attrs:{text:'blaze'}},
+                {attrs:{text:'claw'}},
+                {attrs:{text:'Clone'}},
+                {attrs:{text:'ward'}},
+                {attrs:{text:'word'}},
+                {attrs:{text:'zip'}}
+            ]
+        });
+        new myt.FormInputText(rootView, {
+            width:100, id:'fieldA', form:rootView, validators:[lenValidator, 'required'],
+            allowedChars:'0123456789', placeholder:'Numbers Only'
+        });
+        new myt.FormInputText(rootView, {
+            width:100, id:'fieldB', form:rootView, validators:['equalsIgnoreCase', lenValidator], 
+            validateWhen:'blurWithKeyFix', placeholder:'Ignore Case'
+        });
+        new myt.FormInputText(rootView, {
+            width:100, id:'fieldC', form:rootView, validators:[lenValidator]
+        });
+        new myt.FormInputTextArea(rootView, {
+            width:100, height:43, id:'fieldCAlt', form:rootView, validators:[lenValidator],
+            placeholder:'Length must be 3 to 10.'
+        });
+        new myt.FormTextCheckbox(rootView, {
+            id:'fieldD', form:rootView, text:'It all makes sense', shrinkToFit:true
+        });
+        new myt.FormCheckbox(rootView, {
+            id:'fieldE', form:rootView
+        });
+        
+        new myt.TextRadio(rootView, {groupId:'foo', optionValue:'a', text:'A', shrinkToFit:true});
+        new myt.TextRadio(rootView, {groupId:'foo', optionValue:'b', text:'B', shrinkToFit:true});
+        new myt.TextRadio(rootView, {groupId:'foo', optionValue:'c', text:'C', shrinkToFit:true});
+        new myt.FormRadioGroup(rootView, {id:'fieldF', form:rootView, groupId:'foo'});
+        
+        var options = [
+            {value:'one', label:'Label One'},
+            {value:'two', label:'Label Two'},
+            {value:'three', label:'Label Three'},
+            {value:'four', label:'Label Four'},
+            {value:'five', label:'Label Five'},
+            {value:'six', label:'Label Six'},
+            {value:'seven', label:'Label Seven'},
+            {value:'eight', label:'Label Eight'}
+        ];
+        new myt.FormInputSelect(rootView, {id:'fieldG', form:rootView, options:options});
+        new myt.FormInputSelect(rootView, {id:'fieldH', form:rootView, options:options, multiple:true});
+        
+        // Subform: start
+        var subform = new myt.View(rootView, {
+            width:250, bgColor:'#cccccc', id:'subForm', form:rootView
+        }, [myt.Form]);
+        new myt.FormInputText(subform, {width:100, id:'fieldA', form:subform});
+        new myt.FormInputText(subform, {width:100, id:'fieldB', form:subform});
+        new myt.SpacedLayout(subform, {
+            name:'layout', axis:'x', inset:5, spacing:5, outset:5, collapseParent:true
+        });
+        new myt.ConstantLayout(subform, {targetAttrName:'y', targetValue:5});
+        new myt.SizeToChildren(subform, {axis:'y', paddingY:5});
+        // Subform: end
+        
+        var fieldI = new myt.FormEditableText(rootView, {
+            id:'fieldI', form:rootView, validators:['equalsIgnoreCase', lenValidator],
+            allowedChars:'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+            maxLength:32,
+            validateWhen:'blurWithKeyFix', minWidth:25, minHeight:18, roundedCorners:6,
+            paddingTop:2, paddingBottom:2, paddingRight:6, paddingLeft:6
+        });
+        
+        new myt.EditableText(rootView, {name:'editTxt1', value:'foo bar baz', minHeight:17});
+        new myt.EditableText(rootView, {name:'editTxt2', value:'foo bar baz', minHeight:17});
+        new myt.EditableText(rootView, {name:'editTxt3', whitespace:'nowrap', value:'Here is some text that won\'t wrap.', minHeight:17});
+        
+        var rollbackBtn = new myt.SimpleIconTextButton(rootView, {
+            height:25, width:70, roundedCorners:4, text:'rollback',
+            activeColor:'#bbbbbb', hoverColor:'#dddddd', readyColor:'#cccccc'
+        }, [{
+            doActivated: function() {
+                rootView.invokeAccelerator('cancel');
+            },
+            
+            setDisabled: function(v) {
+                if (typeof v === 'object') v = !v.value;
+                this.callSuper(v);
+            }
+        }]);
+        rollbackBtn.syncTo(rootView, 'setDisabled', 'isChanged');
+        
+        var submitBtn = new myt.SimpleIconTextButton(rootView, {
+            height:25, width:70, roundedCorners:4, text:'submit',
+            activeColor:'#bbbbbb', hoverColor:'#dddddd', readyColor:'#cccccc'
+        }, [{
+            doActivated: function() {
+                rootView.invokeAccelerator('submit');
+            },
+            
+            setDisabled: function(v) {
+                if (typeof v === 'object') {
+                    v = !(rootView.isValid && rootView.isChanged);
+                }
+                this.callSuper(v);
+            }
+        }]);
+        submitBtn.syncTo(rootView, 'setDisabled', 'isChanged');
+        submitBtn.syncTo(rootView, 'setDisabled', 'isValid');
+        
+        new myt.SpacedLayout(rootView, {
+            name:'layout', axis:'y',
+            inset:25, spacing:5, outset:25, collapseParent:true
+        });
+        new myt.ConstantLayout(rootView, {targetAttrName:'x', targetValue:10});
+        
+        myt.Layout.decrementGlobalLock();
+    }
+</script>
+</body></html>

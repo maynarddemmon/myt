@@ -1,0 +1,125 @@
+<!doctype html><html><head>
+<title>Myt Framework : Input Elements Example</title>
+<link rel="stylesheet" href="../src/css/myt.scss"/>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="../src/js/jquery/jquery-1.10.2.min.js">\x3C/script>');</script>
+<script src="../src/js/boilerplate.js"></script>
+<script src="../src/js/jsclass/min/loader-browser.js"></script>
+<script src="../src/js/myt/manifest.js"></script>
+</head><body>
+
+<script>
+    JS.require('myt.all', function() {this.init();});
+    
+    function init() {
+        var start = Date.now();
+        
+        var rootView = new myt.View(null, {width:600, height:600, bgColor:'#eeeeee'}, [myt.RootView]);
+        
+        var attrs;
+        for (var i = 0; 100 > i; i++) {
+            attrs = {};
+            if (i % 5 == 0) attrs.disabled = true;
+            if (i % 3 == 0) attrs.value = true;
+            if (i % 16 == 0) {
+                attrs.text = "Here is some text.";
+                attrs.shrinkToFit = true;
+            }
+            if (i % 32 == 0) {
+                attrs.shrinkToFit = false;
+                attrs.text = "Here is some text that will definitely wrap.";
+                attrs.width = 120;
+            }
+            new myt.TextCheckbox(rootView, attrs);
+        }
+        
+        for (i = 0; 100 > i; i++) {
+            attrs = {groupId:'foo', optionValue:'v' + i};
+            if (i == 0) attrs.selected = true;
+            if (i == 1) attrs.value = 'v1';
+            if (i % 2 == 0) attrs.groupId = 'bar';
+            if (i % 5 == 0) attrs.disabled = true;
+            if (i % 16 == 0) {
+                attrs.text = "Here is some text.";
+                attrs.shrinkToFit = true;
+            }
+            if (i % 32 == 0) {
+                attrs.shrinkToFit = false;
+                attrs.text = "Here is some text that will definitely wrap.";
+                attrs.width = 120;
+            }
+            new myt.TextRadio(rootView, attrs, [{
+                doActivated: function() {
+                    console.log("before", this.getValue());
+                    this.callSuper();
+                    console.log("after", this.getValue());
+                }
+            }]);
+        }
+        
+        console.log(Date.now() - start);
+        
+        var slider1 = new myt.Slider(rootView, {width:200, minValue:0, maxValue:10, value:5});
+        var txt1 = new myt.Text(rootView);
+        txt1.syncTo(slider1, 'setText', 'value');
+        
+        new myt.Slider(rootView, {width:200, minValue:10, maxValue:90, value:50});
+        new myt.Slider(rootView, {width:200, minValue:10, maxValue:90, value:50, disabled:true});
+        new myt.Slider(rootView, {axis:'y', height:50, minValue:0, maxValue:10, value:5});
+        new myt.Slider(rootView, {axis:'y', height:50, minValue:0, maxValue:100, value:0});
+        
+        var slider2 = new myt.RangeSlider(rootView, {width:200, minValue:0, maxValue:10, lowerValue:5, upperValue:5});
+        var txt2 = new myt.Text(rootView);
+        txt2.syncTo(slider2, 'setText', 'lowerValue');
+        var txt3 = new myt.Text(rootView);
+        txt3.syncTo(slider2, 'setText', 'upperValue');
+        
+        new myt.RangeSlider(rootView, {width:200, minValue:10, maxValue:90, lowerValue:50, upperValue:70});
+        new myt.RangeSlider(rootView, {width:200, minValue:10, maxValue:90, lowerValue:50, upperValue:70, disabled:true});
+        new myt.RangeSlider(rootView, {axis:'y', height:50, minValue:0, maxValue:10, lowerValue:0, upperValue:3});
+        new myt.RangeSlider(rootView, {axis:'y', height:50, minValue:0, maxValue:100, lowerValue:0, upperValue:20});
+        
+        new myt.ComboBox(rootView, {
+            width:100,
+            fullItemConfig:[
+                {attrs:{text:'and'}},
+                {attrs:{text:'any'}},
+                {attrs:{text:'big'}},
+                {attrs:{text:'bigger'}},
+                {attrs:{text:'biggest'}},
+                {attrs:{text:'blaze'}},
+                {attrs:{text:'claw'}},
+                {attrs:{text:'Clone'}},
+                {attrs:{text:'ward'}},
+                {attrs:{text:'word'}},
+                {attrs:{text:'zip'}}
+            ]
+        });
+        
+        new myt.ComboBox(rootView, {
+            width:100,
+            placeholder:'Choose Value',
+            fullItemConfig:[
+                {attrs:{text:'0'}},
+                {attrs:{text:'1'}},
+                {attrs:{text:'2'}},
+                {attrs:{text:'3'}},
+                {attrs:{text:'4'}},
+                {attrs:{text:'50'}},
+                {attrs:{text:'60'}},
+                {attrs:{text:'70'}},
+                {attrs:{text:'80'}},
+                {attrs:{text:'90'}},
+                {attrs:{text:'100'}}
+            ]
+        });
+        
+        new myt.WrappingLayout(rootView, {name:'layout', axis:'x',
+            inset:10, spacing:0, outset:5,
+            lineInset:10, lineSpacing:0,
+        });
+        
+        console.log(Date.now() - start);
+    }
+</script>
+</body></html>

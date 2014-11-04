@@ -1,0 +1,81 @@
+<!doctype html><html><head>
+<title>Myt Framework : Simple Views Example</title>
+<link rel="stylesheet" href="../src/css/myt.scss"/>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="../src/js/jquery/jquery-1.10.2.min.js">\x3C/script>');</script>
+<script src="../src/js/boilerplate.js"></script>
+<script src="../src/js/jsclass/min/loader-browser.js"></script>
+<script src="../src/js/myt/manifest.js"></script>
+</head><body>
+
+<script>
+    JS.require('myt.all', function() {this.init();});
+    
+    function init() {
+        var v = new myt.View(null, {x:10, y:20, width:200, height:400, bgColor:'#999999'}, [myt.RootView, {
+            redoAnim: function() {
+                anim.setReverse(!anim.reverse);
+                anim.setRunning(true);
+            }
+        }]);
+        v.domElement.innerHTML = 'blah blah blah';
+        
+        v.attachToDom(v, 'redoAnim', 'click');
+        
+        var anim = new myt.Animator(v, {attribute:'x', from:10, to:500, duration:2000, relative:false, easingFunction:'easeInOutElastic'});
+        var anim3 = new myt.Animator(v, {attribute:'y', from:0, to:100, duration:1000, relative:true, running:true, repeat:3});
+        anim.setRunning(true);
+        
+        var va = new myt.View(v, {
+            bgColor:'#eeeeee', width:50, height:10, align:'right', valign:'bottom',
+            percentOfParentWidth:50, percentOfParentHeight:50, alignOffset:10
+        }, [myt.SizeToParent]);
+        va.setValign('middle');
+        va.setHeight(50);
+        va.setValign('bottom');
+        va.setValignOffset(5);
+        
+        var v2 = new myt.View(null, {x:50, y:140, width:300, height:150, bgColor:'#ff9999'}, [myt.RootView]);
+        v2.setOpacity(0.5);
+        
+        var txtView = new myt.Text(v2, {
+            x:65, y:25, whiteSpace:'normal', text:'Here is some longish text that should wrap.'
+        });
+        var txtView2 = new myt.Text(v2, {
+            x:65, y:75, userUnselectable:true, text:'Text that is not not selectable.'
+        });
+        console.log(txtView.measureNoWrapWidth());
+        
+        var v3 = new myt.View(v, {x:5, y:5, width:50, height:50, bgColor:'#ff0000'});
+        v3.setParent(v2);
+        
+        // Border and outline testing
+        var v4 = new myt.View(null, {x:10, y:10, width:100, height:100, bgColor:'#cccccc'}, [myt.RootView]);
+        
+        var v5 = new myt.View(v4, {x:1, y:1, width:8, height:8, bgColor:'#999999'});
+        var v6 = new myt.View(v4, {x:12, y:1, width:8, height:8, bgColor:'#999999'});
+        var v7 = new myt.View(v4, {x:23, y:1, width:8, height:8, bgColor:'#999999'});
+        
+        var v8 = new myt.View(v4, {x:1, y:12, width:8, height:8, bgColor:'#999999'}, [myt.TransformSupport]);
+        var v9 = new myt.View(v4, {x:12, y:12, width:8, height:8, bgColor:'#999999', border:[1,'solid','#000000']}, [myt.TransformSupport]);
+        var v10 = new myt.View(v4, {x:23, y:12, width:8, height:8, bgColor:'#999999', outline:[1,'solid','#000000']});
+        
+        var v11 = new myt.View(v9, {x:1, y:1, width:4, height:4, bgColor:'#ffffff'});
+        var v12 = new myt.View(v10, {x:1, y:1, width:4, height:4, bgColor:'#ffffff'});
+        
+        var v13 = new myt.View(v4, {x:1, y:35, width:8, height:8, bgColor:'#999999', roundedCorners:3});
+        var v14 = new myt.View(v4, {x:12, y:35, width:8, height:8, bgColor:'#999999', roundedCorners:3, border:[1,'solid','#000000']});
+        var v15 = new myt.View(v4, {x:23, y:35, width:8, height:8, bgColor:'#999999', roundedCorners:3, outline:[1,'solid','#000000']});
+        
+        var v16 = new myt.View(v4, {x:1, y:55, width:8, height:8, bgColor:'#999999', outline:[1, 'solid', '#000000']});
+        var v17 = new myt.View(v4, {x:12, y:55, width:8, height:8, bgColor:'#999999', outlineWidth:1, outlineStyle:'dotted'});
+        var v18 = new myt.View(v4, {x:23, y:55, width:8, height:8, bgColor:'#999999', outlineWidth:2, outlineStyle:'solid', outlineColor:'#ffffff'});
+        
+        v9.setScale(2);
+        v9.setTransformOrigin('0 0 0');
+        
+        v8.setTransformOrigin('0 0 0');
+        v8.setScale(2);
+    }
+</script>
+</body></html>

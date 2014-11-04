@@ -1,0 +1,132 @@
+<!doctype html><html><head>
+<title>Myt Framework : Replicator Example</title>
+<link rel="stylesheet" href="../src/css/myt.scss"/>
+
+<style type="text/css">
+    .blur_when_not_hovering{-webkit-filter:blur(3px); filter:url(#blur-effect-1);}
+    .blur_when_not_hovering:hover{-webkit-filter:none; filter:none;}
+</style>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="../src/js/jquery/jquery-1.10.2.min.js">\x3C/script>');</script>
+<script src="../src/js/boilerplate.js"></script>
+<script src="../src/js/jsclass/min/loader-browser.js"></script>
+<script src="../src/js/myt/manifest.js"></script>
+</head><body>
+
+<svg style="position:absolute;width:0px;height:0px;">
+    <filter id="blur-effect-1"><feGaussianBlur stdDeviation="3"/></filter>
+</svg>
+
+<script>
+    JS.require('myt.all', function() {this.init();});
+    
+    function init() {
+        var template = new JS.Class('Template', myt.SimpleIconTextButton, {
+            include: [myt.Replicable, myt.SizeToParent],
+            
+            initNode: function(parent, attrs) {
+                attrs.percentOfParentWidth = 100;
+                attrs.percentOfParentWidthOffset = -4;
+                attrs.activeColor = '#999999';
+                attrs.hoverColor = '#cccccc';
+                attrs.readyColor = '#aaaaaa';
+                attrs.height = 20;
+                
+                attrs.x = 2;
+                attrs.roundedCorners = 4;
+                
+                this.callSuper(parent, attrs);
+            },
+            
+            replicate: function(data, idx) {
+                this.callSuper(data, idx);
+                
+                this.setText(data);
+                this.setReadyColor(idx % 2 ? '#aaaaaa' : '#bbbbbb');
+                this.setVisible(true);
+            },
+            
+            clean: function() {
+                this.callSuper();
+                
+                this.setText('');
+                this.setVisible(false);
+            }
+        });
+        
+        var template2 = new JS.Class('Template', template, {
+            replicate: function(data, idx) {
+                this.callSuper(data, idx);
+                
+                this.setReadyColor(idx % 2 ? '#bbaaaa' : '#ccaaaa');
+            }
+        });
+        
+        var rootView = new myt.View(null, {width:600, height:400, bgColor:'#eeeeee'}, [myt.RootView]);
+        
+        var panelView = new myt.View(rootView, {x:5, y:5, width:200, bgColor:'#999999', roundedCorners:6});
+        
+        var data = ['foo', 'bar', 'baz'];
+        var replicator = new myt.Replicator(panelView, {template:template, data:data});
+        new myt.SpacedLayout(panelView, {axis:'y', collapseParent:true, inset:2, spacing:2, outset:2});
+        
+        var data2 = ['here', 'we', 'are', 'now'];
+        replicator.setData(data2);
+        replicator.setTemplate(template2);
+        
+        var dataInput = new myt.FormInputText(rootView, {x:250, y:5, width:100, bgColor:'#ffffff'});
+        var indexInput = new myt.FormInputText(rootView, {x:355, y:5, width:50, bgColor:'#ffffff'});
+        
+        new myt.SimpleIconTextButton(rootView, {
+            x:410, y:3, height:21, width:70, roundedCorners:4, text:'Update',
+            activeColor:'#bbbbbb', hoverColor:'#dddddd', readyColor:'#cccccc'
+        }, [{
+            doActivated: function() {
+                var idx = indexInput.getValue();
+                if (0 > idx) idx = 0;
+                if (idx >= data2.length) idx = data2.length - 1;
+                
+                var value = dataInput.getValue();
+                if (value && idx >= 0) {
+                    data2[idx] = value;
+                    replicator.doReplication();
+                }
+            }
+        }]);
+        
+        new myt.SimpleIconTextButton(rootView, {
+            x:410, y:30, height:21, width:70, roundedCorners:4, text:'Insert',
+            activeColor:'#bbbbbb', hoverColor:'#dddddd', readyColor:'#cccccc'
+        }, [{
+            doActivated: function() {
+                var idx = indexInput.getValue();
+                if (0 > idx) idx = 0;
+                if (idx > data2.length) idx = data2.length;
+                
+                var value = dataInput.getValue();
+                if (value && idx >= 0) {
+                    data2.splice(idx, 0, value);
+                    replicator.doReplication();
+                }
+            }
+        }]);
+        
+        new myt.SimpleIconTextButton(rootView, {
+            x:410, y:57, height:21, width:70, roundedCorners:4, text:'Delete',
+            activeColor:'#bbbbbb', hoverColor:'#dddddd', readyColor:'#cccccc'
+        }, [{
+            doActivated: function() {
+                var idx = indexInput.getValue();
+                if (0 > idx) idx = 0;
+                if (idx >= data2.length) idx = data2.length - 1;
+                
+                if (idx >= 0) {
+                    data2.splice(idx, 1);
+                    replicator.doReplication();
+                }
+            }
+        }]);
+    }
+</script>
+</body></html>

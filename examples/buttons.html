@@ -1,0 +1,150 @@
+<!doctype html><html><head>
+<title>Myt Framework : Buttons Example</title>
+<link rel="stylesheet" href="../src/css/myt.scss"/>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="../src/js/jquery/jquery-1.10.2.min.js">\x3C/script>');</script>
+<script src="../src/js/boilerplate.js"></script>
+<script src="../src/js/jsclass/min/loader-browser.js"></script>
+<script src="../src/js/myt/manifest.js"></script>
+</head><body>
+
+<script>
+    JS.require('myt.all', function() {this.init();});
+    
+    function init() {
+        var rootView = new myt.View(null, {x:10, y:10, width:600, height:400, bgColor:'#cccccc'}, [myt.RootView]);
+        
+        var ActivatedMixin = new JS.Module('ActivatedMixin', {
+            doActivated: function() {
+                console.log("activated", this.name);
+            }
+        });
+        var BtnClass = new JS.Class('BtnClass', myt.View, {
+            include: [myt.Button, ActivatedMixin, {
+                drawDisabledState: function() {
+                    this.setBgColor('#999999');
+                },
+                drawHoverState: function() {
+                    this.setBgColor('#ff0000');
+                },
+                drawActiveState: function() {
+                    this.setBgColor('#990000');
+                },
+                drawReadyState: function() {
+                    this.setBgColor('#cc0000');
+                }
+            }]
+        });
+        
+        new myt.Dialog(rootView, {name:'dialog'});
+        
+        var layout = new myt.SpacedLayout(rootView, {axis:'x', spacing:2, inset:5});
+        
+        var btn1 = new BtnClass(rootView, {name:'one', width:50, height:20});
+        btn1.setRoundedCorners(5);
+        var btn2 = new BtnClass(rootView, {name:'two', width:50, height:20, y:100});
+        btn2.setRoundedCorners(8);
+        var btn3 = new BtnClass(rootView, {name:'three', width:50, height:20, disabled:true, y:25});
+        var btn4 = new BtnClass(rootView, {name:'four', width:50, height:20}, [{
+            doMouseDown: function(event) {
+                this.callSuper(event);
+                this.setDisabled(true);
+            },
+            
+            doActivationKeyDown: function(key) {
+                this.callSuper(key);
+                this.setDisabled(true);
+            }
+        }]);
+        var btn5 = new BtnClass(rootView, {name:'five', width:50, height:20}, [ActivatedMixin,  {
+            doActivated: function() {
+                this.parent.dialog.showContentConfirm(
+                    function(container) {
+                        new myt.View(container, {width:300, height:100, bgColor:'#999999'});
+                        new myt.View(container, {width:300, height:100, bgColor:'#999999'});
+                        new myt.View(container, {width:300, height:100, bgColor:'#999999'});
+                        new myt.View(container, {width:300, height:100, bgColor:'#999999'});
+                        new myt.SpacedLayout(container, {axis:'y', spacing:1});
+                    },
+                    function(action) {
+                        switch(action) {
+                            case 'closeBtn':
+                            case 'cancelBtn':
+                                console.log("cancelled");
+                                break;
+                            case 'confirmBtn':
+                                console.log("confirmed");
+                                break;
+                        }
+                    },
+                    
+                    {confirmTxt:'Submit', maxContainerHeight:300, titleText:'This is a title'}
+                );
+                this.callSuper();
+            }
+        }]);
+        
+        var btn6 = new myt.SimpleButton(rootView, {
+            name:'six', width:50, height:20, activeColor:'#990000', hoverColor:'#ff0000', readyColor:'#cc0000'
+        }, [ActivatedMixin,  {
+            doActivated: function() {
+                this.parent.dialog.showConfirm(
+                    "Can you confirm or deny that the rumors are true?",
+                    function(action) {
+                        switch(action) {
+                            case 'closeBtn': return true;
+                            case 'cancelBtn':
+                                console.log("cancelled");
+                                break;
+                            case 'confirmBtn':
+                                console.log("confirmed");
+                                break;
+                        }
+                    },
+                    
+                    {cancelTxt:'Deny'}
+                );
+                this.callSuper();
+            }
+        }]);
+        
+        var btn7 = new myt.IconTextPanelButton(rootView, {name:'seven', text:'foo', tooltip:'here is a tip', shrinkToFit:true}, [ActivatedMixin, {
+            doActivated: function() {
+                var dialog = this.parent.dialog;
+                dialog.showSpinner("Here is a message with a spinner.");
+                this.callSuper();
+                dialog.doOnceLater('hide', 1000);
+            }
+        }]);
+        var btn8 = new myt.IconTextPanelButton(rootView, {name:'eight', text:'bar', shrinkToFit:true, disabled:true}, [ActivatedMixin]);
+        var btn9 = new myt.IconTextPanelButton(rootView, {name:'nine', text:'baz', width:40}, [ActivatedMixin, {
+            doActivated: function() {
+                this.parent.dialog.showMessage("Can you confirm or deny that the rumors are true?");
+                this.callSuper();
+            }
+        }]);
+        
+        // Do some simple animation
+        btn3.animate('y', 100, undefined, false, function(success) {btn3.animate({attribute:'x', to:52, relative:true});});
+        
+        layout.animate({
+            attribute:'spacing', to:25, duration:250
+        }).next(
+            function(success) {layout.animate({attribute:'spacing', to:2, duration:250});}
+        );
+        
+        var txt1 = new myt.Text(rootView, {text:'foo'});
+        txt1.showTextShadow(0, 0, 0);
+        var txt2 = new myt.Text(rootView, {text:'bar'});
+        txt2.showTextShadow(0, 0, 1);
+        var txt3 = new myt.Text(rootView, {text:'baz'});
+        txt3.showTextShadow();
+        var txt4 = new myt.Text(rootView, {text:'Hey there'});
+        txt4.showTextShadow(5, 5, 3, '#ffffff', 4);
+        txt4.enableEllipsis();
+        txt4.setWidth(50);
+        txt4.disableEllipsis();
+        txt4.hideTextShadow();
+    }
+</script>
+</body></html>
