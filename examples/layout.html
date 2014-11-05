@@ -34,7 +34,7 @@
         
         var start = Date.now();
         var count = 1000, bgColors = ['#ff0000','#ffff00','#00ff00','#00ffff','#0000ff','#ff00ff'];
-        for (var i = 0; count > i; i++) new myt.View(rootView, {width:10, height:10, bgColor:bgColors[i % 6], opacity:0.15});
+        for (var i = 0; count > i; i++) new myt.View(rootView, {width:10, height:10, bgColor:bgColors[i % 6], opacity:0.5});
         console.log('Build ' + count + ' Views', Date.now() - start);
         rootView.resetViews();
         
@@ -95,8 +95,8 @@
         }]);
         
         var controlsView = new myt.View(rootView, {
-            ignoreLayout:true, x:20, y:20, width:607, height:200, roundedCorners:8,
-            bgColor:'#666666', opacity:0.5, boxShadow:[0, 4, 8, '#000000']
+            ignoreLayout:true, x:20, y:20, width:607, height:217, roundedCorners:8,
+            bgColor:'#666666', opacity:0.65, boxShadow:[0, 4, 8, '#000000']
         }, [myt.Draggable, {
             doAfterAdoption: function() {
                 this.callSuper();
@@ -151,7 +151,27 @@
                 var spacedLayout = rootView.spacedLayout;
                 var labelWidth = 90;
                 new myt.Text(panelOne, {width:labelWidth, textAlign:'right', text:'Axis'});
-                new myt.View(panelOne, {width:100, height:18}); // FIXME: axis checkboxes
+                new myt.View(panelOne, {height:18}, [{
+                    initNode: function(parent, attrs) {
+                        this.callSuper(parent, attrs);
+                        new myt.TextRadio(this, {y:-1, groupId:'spacedAxis', optionValue:'x', text:'X', shrinkToFit:true, selected:true}, [{
+                            doActivated: function() {this.callSuper();spacedLayout.setAxis(this.getValue());}
+                        }]);
+                        new myt.TextRadio(this, {y:-1, groupId:'spacedAxis', optionValue:'y', text:'Y', shrinkToFit:true}, [{
+                            doActivated: function() {this.callSuper();spacedLayout.setAxis(this.getValue());}
+                        }]);
+                        new myt.SpacedLayout(this);
+                    }
+                }]);
+                new myt.Text(panelOne, {width:labelWidth, textAlign:'right', text:'Reversed'});
+                new myt.View(panelOne, {height:18}, [{
+                    initNode: function(parent, attrs) {
+                        this.callSuper(parent, attrs);
+                        new myt.Checkbox(this, {y:-2}, [{
+                            doActivated: function() {this.callSuper();spacedLayout.setReverse(this.getValue());}
+                        }]);
+                    }
+                }]);
                 new myt.Text(panelOne, {width:labelWidth, textAlign:'right', text:'Inset'});
                 new myt.Slider(panelOne, {width:200, minValue:0, maxValue:100, value:20}, [{
                     setValue: function(v) {this.callSuper(v);spacedLayout.setInset(this.value);}
@@ -180,7 +200,35 @@
                 // Panel Two
                 var wrappingLayout = rootView.wrappingLayout;
                 new myt.Text(panelTwo, {width:labelWidth, textAlign:'right', text:'Axis'});
-                new myt.View(panelTwo, {width:100, height:18}); // FIXME: axis checkboxes
+                new myt.View(panelTwo, {height:18}, [{
+                    initNode: function(parent, attrs) {
+                        this.callSuper(parent, attrs);
+                        new myt.TextRadio(this, {y:-1, groupId:'wrappingAxis', optionValue:'x', text:'X', shrinkToFit:true, selected:true}, [{
+                            doActivated: function() {
+                                this.callSuper();
+                                rootView.setWidth(myt.global.windowResize.getWidth());
+                                wrappingLayout.setAxis(this.getValue());
+                            }
+                        }]);
+                        new myt.TextRadio(this, {y:-1, groupId:'wrappingAxis', optionValue:'y', text:'Y', shrinkToFit:true}, [{
+                            doActivated: function() {
+                                this.callSuper();
+                                rootView.setHeight(myt.global.windowResize.getHeight());
+                                wrappingLayout.setAxis(this.getValue());
+                            }
+                        }]);
+                        new myt.SpacedLayout(this);
+                    }
+                }]);
+                new myt.Text(panelTwo, {width:labelWidth, textAlign:'right', text:'Reversed'});
+                new myt.View(panelTwo, {height:18}, [{
+                    initNode: function(parent, attrs) {
+                        this.callSuper(parent, attrs);
+                        new myt.Checkbox(this, {y:-2}, [{
+                            doActivated: function() {this.callSuper();wrappingLayout.setReverse(this.getValue());}
+                        }]);
+                    }
+                }]);
                 new myt.Text(panelTwo, {width:labelWidth, textAlign:'right', text:'Inset'});
                 new myt.Slider(panelTwo, {width:200, minValue:0, maxValue:100, value:5}, [{
                     setValue: function(v) {this.callSuper(v);wrappingLayout.setInset(this.value);}
