@@ -7,278 +7,274 @@
 <script src="../dist/myt.min.js"></script>
 </head><body>
 <script>
-    JS.require('myt.all', function() {this.init();});
+    var rootView = new myt.View(null, {bgColor:'#eeeeee'}, [myt.RootView, {
+        resetViews: function() {
+            var svs = this.getSubviews(), i = svs.length, sv;
+            while (i) {
+                sv = svs[--i];
+                if (!sv.ignoreLayout) {
+                    sv.setX(0);
+                    sv.setY(0);
+                    sv.setRoundedCorners(0);
+                    sv.setWidth(10);
+                    sv.setHeight(10);
+                }
+            }
+            
+            var wr = myt.global.windowResize;
+            rootView.setWidth(wr.getWidth());
+            rootView.setHeight(wr.getHeight());
+        }
+    }]);
     
-    function init() {
-        var rootView = new myt.View(null, {bgColor:'#eeeeee'}, [myt.RootView, {
-            resetViews: function() {
-                var svs = this.getSubviews(), i = svs.length, sv;
-                while (i) {
-                    sv = svs[--i];
-                    if (!sv.ignoreLayout) {
-                        sv.setX(0);
-                        sv.setY(0);
-                        sv.setRoundedCorners(0);
-                        sv.setWidth(10);
-                        sv.setHeight(10);
-                    }
-                }
-                
-                var wr = myt.global.windowResize;
-                rootView.setWidth(wr.getWidth());
-                rootView.setHeight(wr.getHeight());
+    var start = Date.now();
+    var count = 1000, bgColors = ['#ff0000','#ffff00','#00ff00','#00ffff','#0000ff','#ff00ff'];
+    for (var i = 0; count > i; i++) new myt.View(rootView, {width:10, height:10, bgColor:bgColors[i % 6], opacity:0.5});
+    console.log('Build ' + count + ' Views', Date.now() - start);
+    rootView.resetViews();
+    
+    rootView.spacedLayout = new myt.SpacedLayout(rootView, {
+        axis:'x', locked:true, collapseParent:true
+    });
+    
+    rootView.wrappingLayout = new myt.WrappingLayout(rootView, {
+        collapseParent:true, locked:true
+    });
+    
+    rootView.spiralLayout = new myt.VariableLayout(rootView, {locked:true}, [{
+        initNode: function(parent, attrs) {
+            this.xFrequency = this.yFrequency = 0.1;
+            this.xScale = this.yScale = 0.25;
+            this.size = 50;
+            this.callSuper(parent, attrs);
+        },
+        setXFrequency: function(v) {
+            if (this.xFrequency !== v) {
+                this.xFrequency = v;
+                if (this.inited) this.update();
             }
-        }]);
-        
-        var start = Date.now();
-        var count = 1000, bgColors = ['#ff0000','#ffff00','#00ff00','#00ffff','#0000ff','#ff00ff'];
-        for (var i = 0; count > i; i++) new myt.View(rootView, {width:10, height:10, bgColor:bgColors[i % 6], opacity:0.5});
-        console.log('Build ' + count + ' Views', Date.now() - start);
-        rootView.resetViews();
-        
-        rootView.spacedLayout = new myt.SpacedLayout(rootView, {
-            axis:'x', locked:true, collapseParent:true
-        });
-        
-        rootView.wrappingLayout = new myt.WrappingLayout(rootView, {
-            collapseParent:true, locked:true
-        });
-        
-        rootView.spiralLayout = new myt.VariableLayout(rootView, {locked:true}, [{
-            initNode: function(parent, attrs) {
-                this.xFrequency = this.yFrequency = 0.1;
-                this.xScale = this.yScale = 0.25;
-                this.size = 50;
-                this.callSuper(parent, attrs);
-            },
-            setXFrequency: function(v) {
-                if (this.xFrequency !== v) {
-                    this.xFrequency = v;
-                    if (this.inited) this.update();
-                }
-            },
-            setYFrequency: function(v) {
-                if (this.yFrequency !== v) {
-                    this.yFrequency = v;
-                    if (this.inited) this.update();
-                }
-            },
-            setXScale: function(v) {
-                if (this.xScale !== v) {
-                    this.xScale = v;
-                    if (this.inited) this.update();
-                }
-            },
-            setYScale: function(v) {
-                if (this.yScale !== v) {
-                    this.yScale = v;
-                    if (this.inited) this.update();
-                }
-            },
-            setSize: function(v) {
-                if (this.size !== v) {
-                    this.size = v;
-                    if (this.inited) this.update();
-                }
-            },
-            updateSubview: function(count, sv, setterName, value) {
-                var size = Math.round(1 + (count / (this.size + 8))),
-                    halfSize = size / 2;
-                sv.setWidth(size);
-                sv.setHeight(size);
-                sv.setRoundedCorners(halfSize);
-                sv.setX(rootView.width / 2 + Math.round((Math.sin(count * this.xFrequency) * (count * this.xScale))) - halfSize);
-                sv.setY(rootView.height / 2 + Math.round((Math.cos(count * this.yFrequency) * (count * this.yScale))) - halfSize);
+        },
+        setYFrequency: function(v) {
+            if (this.yFrequency !== v) {
+                this.yFrequency = v;
+                if (this.inited) this.update();
             }
-        }]);
-        
-        var controlsView = new myt.View(rootView, {
-            ignoreLayout:true, x:20, y:20, width:607, height:217, roundedCorners:8,
-            bgColor:'#666666', opacity:0.65, boxShadow:[0, 4, 8, '#000000']
-        }, [myt.Draggable, {
-            doAfterAdoption: function() {
-                this.callSuper();
-                var w = this.width - 2;
-                var header = this.header = new myt.View(this, {
-                    x:1, y:1, roundedTopLeftCorner:7, roundedTopRightCorner:7, 
-                    width:w, height:22, bgColor:'#cccccc'
-                });
-                new myt.Text(header, {text:'Layout Controls', x:8, valign:'middle', fontWeight:'bold', userUnselectable:true});
-                var contentView = new myt.View(this, {
-                    name:'content', x:1, y:24, roundedBottomLeftCorner:7, roundedBottomRightCorner:7, 
-                    width:w, height:this.height - 25, bgColor:'#aaaaaa',
-                    overflow:'hidden'
-                });
-                this.setDefaultPlacement('content');
-                
-                // Tabs
-                var panelStack = new myt.PanelStack(this, {x:0, y:25, width:w, height:contentView.height - 25});
-                var PanelClass = new JS.Class('Panel', myt.View, {include: [myt.StackablePanel, {
-                    setManagedLayout: function(v) {this.managedLayout = v;},
-                    setSelected: function(v) {
-                        this.callSuper(v);
-                        var layout = this.managedLayout;
-                        if (v) {
-                            layout.decrementLockedCounter();
-                            var start = Date.now();
-                            layout.update();
-                            console.log('Update Layout', Date.now() - start);
-                        } else if (!layout.locked) {
-                            layout.incrementLockedCounter();
-                            rootView.resetViews();
+        },
+        setXScale: function(v) {
+            if (this.xScale !== v) {
+                this.xScale = v;
+                if (this.inited) this.update();
+            }
+        },
+        setYScale: function(v) {
+            if (this.yScale !== v) {
+                this.yScale = v;
+                if (this.inited) this.update();
+            }
+        },
+        setSize: function(v) {
+            if (this.size !== v) {
+                this.size = v;
+                if (this.inited) this.update();
+            }
+        },
+        updateSubview: function(count, sv, setterName, value) {
+            var size = Math.round(1 + (count / (this.size + 8))),
+                halfSize = size / 2;
+            sv.setWidth(size);
+            sv.setHeight(size);
+            sv.setRoundedCorners(halfSize);
+            sv.setX(rootView.width / 2 + Math.round((Math.sin(count * this.xFrequency) * (count * this.xScale))) - halfSize);
+            sv.setY(rootView.height / 2 + Math.round((Math.cos(count * this.yFrequency) * (count * this.yScale))) - halfSize);
+        }
+    }]);
+    
+    var controlsView = new myt.View(rootView, {
+        ignoreLayout:true, x:20, y:20, width:607, height:217, roundedCorners:8,
+        bgColor:'#666666', opacity:0.65, boxShadow:[0, 4, 8, '#000000']
+    }, [myt.Draggable, {
+        doAfterAdoption: function() {
+            this.callSuper();
+            var w = this.width - 2;
+            var header = this.header = new myt.View(this, {
+                x:1, y:1, roundedTopLeftCorner:7, roundedTopRightCorner:7, 
+                width:w, height:22, bgColor:'#cccccc'
+            });
+            new myt.Text(header, {text:'Layout Controls', x:8, valign:'middle', fontWeight:'bold', userUnselectable:true});
+            var contentView = new myt.View(this, {
+                name:'content', x:1, y:24, roundedBottomLeftCorner:7, roundedBottomRightCorner:7, 
+                width:w, height:this.height - 25, bgColor:'#aaaaaa',
+                overflow:'hidden'
+            });
+            this.setDefaultPlacement('content');
+            
+            // Tabs
+            var panelStack = new myt.PanelStack(this, {x:0, y:25, width:w, height:contentView.height - 25});
+            var PanelClass = new JS.Class('Panel', myt.View, {include: [myt.StackablePanel, {
+                setManagedLayout: function(v) {this.managedLayout = v;},
+                setSelected: function(v) {
+                    this.callSuper(v);
+                    var layout = this.managedLayout;
+                    if (v) {
+                        layout.decrementLockedCounter();
+                        var start = Date.now();
+                        layout.update();
+                        console.log('Update Layout', Date.now() - start);
+                    } else if (!layout.locked) {
+                        layout.incrementLockedCounter();
+                        rootView.resetViews();
+                    }
+                }
+            }]});
+            var panelOne = new PanelClass(panelStack, {panelId:'one', managedLayout:rootView.spacedLayout});
+            var panelTwo = new PanelClass(panelStack, {panelId:'two', managedLayout:rootView.wrappingLayout});
+            var panelThree = new PanelClass(panelStack, {panelId:'three', managedLayout:rootView.spiralLayout});
+            
+            var TabClass = new JS.Class('MyTab', myt.SimpleTab, {
+                setSelected: function(v) {
+                    this.callSuper(v);
+                    if (this.selected) panelStack.selectById(this.tabId);
+                }
+            });
+            
+            var tabContainerView = new myt.View(this, {height:25}, [myt.TabContainer]);
+            new TabClass(tabContainerView, {tabId:'one', text:'Spaced', selected:true, shrinkToFit:true, tabContainer:tabContainerView});
+            new TabClass(tabContainerView, {tabId:'two', text:'Wrapping', shrinkToFit:true, tabContainer:tabContainerView});
+            new TabClass(tabContainerView, {tabId:'three', text:'Spiral', shrinkToFit:true, tabContainer:tabContainerView});
+            
+            // Panel One
+            var spacedLayout = rootView.spacedLayout;
+            var labelWidth = 90;
+            new myt.Text(panelOne, {width:labelWidth, textAlign:'right', text:'Axis'});
+            new myt.View(panelOne, {height:18}, [{
+                initNode: function(parent, attrs) {
+                    this.callSuper(parent, attrs);
+                    new myt.TextRadio(this, {y:-1, groupId:'spacedAxis', optionValue:'x', text:'X', shrinkToFit:true, selected:true}, [{
+                        doActivated: function() {this.callSuper();spacedLayout.setAxis(this.getValue());}
+                    }]);
+                    new myt.TextRadio(this, {y:-1, groupId:'spacedAxis', optionValue:'y', text:'Y', shrinkToFit:true}, [{
+                        doActivated: function() {this.callSuper();spacedLayout.setAxis(this.getValue());}
+                    }]);
+                    new myt.SpacedLayout(this);
+                }
+            }]);
+            new myt.Text(panelOne, {width:labelWidth, textAlign:'right', text:'Reversed'});
+            new myt.View(panelOne, {height:18}, [{
+                initNode: function(parent, attrs) {
+                    this.callSuper(parent, attrs);
+                    new myt.Checkbox(this, {y:-2}, [{
+                        doActivated: function() {this.callSuper();spacedLayout.setReverse(this.getValue());}
+                    }]);
+                }
+            }]);
+            new myt.Text(panelOne, {width:labelWidth, textAlign:'right', text:'Inset'});
+            new myt.Slider(panelOne, {width:200, minValue:0, maxValue:100, value:20}, [{
+                setValue: function(v) {this.callSuper(v);spacedLayout.setInset(this.value);}
+            }]);
+            new myt.Text(panelOne, {width:labelWidth, textAlign:'right', text:'Spacing'});
+            new myt.Slider(panelOne, {width:200, minValue:-10, maxValue:100, value:5}, [{
+                setValue: function(v) {this.callSuper(v);spacedLayout.setSpacing(this.value);}
+            }]);
+            new myt.Text(panelOne, {width:labelWidth, textAlign:'right', text:'Outset'});
+            new myt.Slider(panelOne, {width:200, minValue:0, maxValue:100, value:20}, [{
+                setValue: function(v) {this.callSuper(v);spacedLayout.setOutset(this.value);}
+            }]);
+            var layoutY = new myt.SpacedLayout(panelOne, {axis:'y', inset:5, spacing:2}, [{
+                updateSubview: function(count, sv, setterName, value) {
+                    if (count % 2 === 1) {
+                        sv.setX(5);
+                        this.callSuper(count, sv, setterName, value);
+                        return value;
+                    } else {
+                        sv.setX(labelWidth + 10);
+                        return this.callSuper(count, sv, setterName, value);
+                    }
+                }
+            }]);
+            
+            // Panel Two
+            var wrappingLayout = rootView.wrappingLayout;
+            new myt.Text(panelTwo, {width:labelWidth, textAlign:'right', text:'Axis'});
+            new myt.View(panelTwo, {height:18}, [{
+                initNode: function(parent, attrs) {
+                    this.callSuper(parent, attrs);
+                    new myt.TextRadio(this, {y:-1, groupId:'wrappingAxis', optionValue:'x', text:'X', shrinkToFit:true, selected:true}, [{
+                        doActivated: function() {
+                            this.callSuper();
+                            rootView.setWidth(myt.global.windowResize.getWidth());
+                            wrappingLayout.setAxis(this.getValue());
                         }
-                    }
-                }]});
-                var panelOne = new PanelClass(panelStack, {panelId:'one', managedLayout:rootView.spacedLayout});
-                var panelTwo = new PanelClass(panelStack, {panelId:'two', managedLayout:rootView.wrappingLayout});
-                var panelThree = new PanelClass(panelStack, {panelId:'three', managedLayout:rootView.spiralLayout});
-                
-                var TabClass = new JS.Class('MyTab', myt.SimpleTab, {
-                    setSelected: function(v) {
-                        this.callSuper(v);
-                        if (this.selected) panelStack.selectById(this.tabId);
-                    }
-                });
-                
-                var tabContainerView = new myt.View(this, {height:25}, [myt.TabContainer]);
-                new TabClass(tabContainerView, {tabId:'one', text:'Spaced', selected:true, shrinkToFit:true, tabContainer:tabContainerView});
-                new TabClass(tabContainerView, {tabId:'two', text:'Wrapping', shrinkToFit:true, tabContainer:tabContainerView});
-                new TabClass(tabContainerView, {tabId:'three', text:'Spiral', shrinkToFit:true, tabContainer:tabContainerView});
-                
-                // Panel One
-                var spacedLayout = rootView.spacedLayout;
-                var labelWidth = 90;
-                new myt.Text(panelOne, {width:labelWidth, textAlign:'right', text:'Axis'});
-                new myt.View(panelOne, {height:18}, [{
-                    initNode: function(parent, attrs) {
-                        this.callSuper(parent, attrs);
-                        new myt.TextRadio(this, {y:-1, groupId:'spacedAxis', optionValue:'x', text:'X', shrinkToFit:true, selected:true}, [{
-                            doActivated: function() {this.callSuper();spacedLayout.setAxis(this.getValue());}
-                        }]);
-                        new myt.TextRadio(this, {y:-1, groupId:'spacedAxis', optionValue:'y', text:'Y', shrinkToFit:true}, [{
-                            doActivated: function() {this.callSuper();spacedLayout.setAxis(this.getValue());}
-                        }]);
-                        new myt.SpacedLayout(this);
-                    }
-                }]);
-                new myt.Text(panelOne, {width:labelWidth, textAlign:'right', text:'Reversed'});
-                new myt.View(panelOne, {height:18}, [{
-                    initNode: function(parent, attrs) {
-                        this.callSuper(parent, attrs);
-                        new myt.Checkbox(this, {y:-2}, [{
-                            doActivated: function() {this.callSuper();spacedLayout.setReverse(this.getValue());}
-                        }]);
-                    }
-                }]);
-                new myt.Text(panelOne, {width:labelWidth, textAlign:'right', text:'Inset'});
-                new myt.Slider(panelOne, {width:200, minValue:0, maxValue:100, value:20}, [{
-                    setValue: function(v) {this.callSuper(v);spacedLayout.setInset(this.value);}
-                }]);
-                new myt.Text(panelOne, {width:labelWidth, textAlign:'right', text:'Spacing'});
-                new myt.Slider(panelOne, {width:200, minValue:-10, maxValue:100, value:5}, [{
-                    setValue: function(v) {this.callSuper(v);spacedLayout.setSpacing(this.value);}
-                }]);
-                new myt.Text(panelOne, {width:labelWidth, textAlign:'right', text:'Outset'});
-                new myt.Slider(panelOne, {width:200, minValue:0, maxValue:100, value:20}, [{
-                    setValue: function(v) {this.callSuper(v);spacedLayout.setOutset(this.value);}
-                }]);
-                var layoutY = new myt.SpacedLayout(panelOne, {axis:'y', inset:5, spacing:2}, [{
-                    updateSubview: function(count, sv, setterName, value) {
-                        if (count % 2 === 1) {
-                            sv.setX(5);
-                            this.callSuper(count, sv, setterName, value);
-                            return value;
-                        } else {
-                            sv.setX(labelWidth + 10);
-                            return this.callSuper(count, sv, setterName, value);
+                    }]);
+                    new myt.TextRadio(this, {y:-1, groupId:'wrappingAxis', optionValue:'y', text:'Y', shrinkToFit:true}, [{
+                        doActivated: function() {
+                            this.callSuper();
+                            rootView.setHeight(myt.global.windowResize.getHeight());
+                            wrappingLayout.setAxis(this.getValue());
                         }
-                    }
-                }]);
-                
-                // Panel Two
-                var wrappingLayout = rootView.wrappingLayout;
-                new myt.Text(panelTwo, {width:labelWidth, textAlign:'right', text:'Axis'});
-                new myt.View(panelTwo, {height:18}, [{
-                    initNode: function(parent, attrs) {
-                        this.callSuper(parent, attrs);
-                        new myt.TextRadio(this, {y:-1, groupId:'wrappingAxis', optionValue:'x', text:'X', shrinkToFit:true, selected:true}, [{
-                            doActivated: function() {
-                                this.callSuper();
-                                rootView.setWidth(myt.global.windowResize.getWidth());
-                                wrappingLayout.setAxis(this.getValue());
-                            }
-                        }]);
-                        new myt.TextRadio(this, {y:-1, groupId:'wrappingAxis', optionValue:'y', text:'Y', shrinkToFit:true}, [{
-                            doActivated: function() {
-                                this.callSuper();
-                                rootView.setHeight(myt.global.windowResize.getHeight());
-                                wrappingLayout.setAxis(this.getValue());
-                            }
-                        }]);
-                        new myt.SpacedLayout(this);
-                    }
-                }]);
-                new myt.Text(panelTwo, {width:labelWidth, textAlign:'right', text:'Reversed'});
-                new myt.View(panelTwo, {height:18}, [{
-                    initNode: function(parent, attrs) {
-                        this.callSuper(parent, attrs);
-                        new myt.Checkbox(this, {y:-2}, [{
-                            doActivated: function() {this.callSuper();wrappingLayout.setReverse(this.getValue());}
-                        }]);
-                    }
-                }]);
-                new myt.Text(panelTwo, {width:labelWidth, textAlign:'right', text:'Inset'});
-                new myt.Slider(panelTwo, {width:200, minValue:0, maxValue:100, value:5}, [{
-                    setValue: function(v) {this.callSuper(v);wrappingLayout.setInset(this.value);}
-                }]);
-                new myt.Text(panelTwo, {width:labelWidth, textAlign:'right', text:'Spacing'});
-                new myt.Slider(panelTwo, {width:200, minValue:-10, maxValue:100, value:1}, [{
-                    setValue: function(v) {this.callSuper(v);wrappingLayout.setSpacing(this.value);}
-                }]);
-                new myt.Text(panelTwo, {width:labelWidth, textAlign:'right', text:'Outset'});
-                new myt.Slider(panelTwo, {width:200, minValue:0, maxValue:100, value:5}, [{
-                    setValue: function(v) {this.callSuper(v);wrappingLayout.setOutset(this.value);}
-                }]);
-                new myt.Text(panelTwo, {width:labelWidth, textAlign:'right', text:'Line Inset'});
-                new myt.Slider(panelTwo, {width:200, minValue:0, maxValue:100, value:5}, [{
-                    setValue: function(v) {this.callSuper(v);wrappingLayout.setLineInset(this.value);}
-                }]);
-                new myt.Text(panelTwo, {width:labelWidth, textAlign:'right', text:'Line Spacing'});
-                new myt.Slider(panelTwo, {width:200, minValue:-10, maxValue:100, value:1}, [{
-                    setValue: function(v) {this.callSuper(v);wrappingLayout.setLineSpacing(this.value);}
-                }]);
-                new myt.Text(panelTwo, {width:labelWidth, textAlign:'right', text:'Line Outset'});
-                new myt.Slider(panelTwo, {width:200, minValue:0, maxValue:100, value:5}, [{
-                    setValue: function(v) {this.callSuper(v);wrappingLayout.setLineOutset(this.value);}
-                }]);
-                layoutY.setParent(panelTwo);
-                
-                // Panel Three
-                var spiralLayout = rootView.spiralLayout;
-                new myt.Text(panelThree, {width:labelWidth, textAlign:'right', text:'X Frequency'});
-                new myt.Slider(panelThree, {width:500, minValue:0, maxValue:500, value:500}, [{
-                    setValue: function(v) {this.callSuper(v);spiralLayout.setXFrequency(0.05 + this.value / 10000);}
-                }]);
-                new myt.Text(panelThree, {width:labelWidth, textAlign:'right', text:'Y Frequency'});
-                new myt.Slider(panelThree, {width:500, minValue:0, maxValue:500, value:500}, [{
-                    setValue: function(v) {this.callSuper(v);spiralLayout.setYFrequency(0.05 + this.value / 10000);}
-                }]);
-                new myt.Text(panelThree, {width:labelWidth, textAlign:'right', text:'X Scale'});
-                new myt.Slider(panelThree, {width:500, minValue:0, maxValue:500, value:250}, [{
-                    setValue: function(v) {this.callSuper(v);spiralLayout.setXScale(this.value / 1000);}
-                }]);
-                new myt.Text(panelThree, {width:labelWidth, textAlign:'right', text:'Y Scale'});
-                new myt.Slider(panelThree, {width:500, minValue:0, maxValue:500, value:250}, [{
-                    setValue: function(v) {this.callSuper(v);spiralLayout.setYScale(this.value / 1000);}
-                }]);
-                new myt.Text(panelThree, {width:labelWidth, textAlign:'right', text:'View Size'});
-                new myt.Slider(panelThree, {width:100, minValue:0, maxValue:100, value:50}, [{
-                    setValue: function(v) {this.callSuper(v);spiralLayout.setSize(v);}
-                }]);
-                layoutY.setParent(panelThree);
-            },
-            getDragViews: function() {return [this.header];}
-        }]);
-    }
+                    }]);
+                    new myt.SpacedLayout(this);
+                }
+            }]);
+            new myt.Text(panelTwo, {width:labelWidth, textAlign:'right', text:'Reversed'});
+            new myt.View(panelTwo, {height:18}, [{
+                initNode: function(parent, attrs) {
+                    this.callSuper(parent, attrs);
+                    new myt.Checkbox(this, {y:-2}, [{
+                        doActivated: function() {this.callSuper();wrappingLayout.setReverse(this.getValue());}
+                    }]);
+                }
+            }]);
+            new myt.Text(panelTwo, {width:labelWidth, textAlign:'right', text:'Inset'});
+            new myt.Slider(panelTwo, {width:200, minValue:0, maxValue:100, value:5}, [{
+                setValue: function(v) {this.callSuper(v);wrappingLayout.setInset(this.value);}
+            }]);
+            new myt.Text(panelTwo, {width:labelWidth, textAlign:'right', text:'Spacing'});
+            new myt.Slider(panelTwo, {width:200, minValue:-10, maxValue:100, value:1}, [{
+                setValue: function(v) {this.callSuper(v);wrappingLayout.setSpacing(this.value);}
+            }]);
+            new myt.Text(panelTwo, {width:labelWidth, textAlign:'right', text:'Outset'});
+            new myt.Slider(panelTwo, {width:200, minValue:0, maxValue:100, value:5}, [{
+                setValue: function(v) {this.callSuper(v);wrappingLayout.setOutset(this.value);}
+            }]);
+            new myt.Text(panelTwo, {width:labelWidth, textAlign:'right', text:'Line Inset'});
+            new myt.Slider(panelTwo, {width:200, minValue:0, maxValue:100, value:5}, [{
+                setValue: function(v) {this.callSuper(v);wrappingLayout.setLineInset(this.value);}
+            }]);
+            new myt.Text(panelTwo, {width:labelWidth, textAlign:'right', text:'Line Spacing'});
+            new myt.Slider(panelTwo, {width:200, minValue:-10, maxValue:100, value:1}, [{
+                setValue: function(v) {this.callSuper(v);wrappingLayout.setLineSpacing(this.value);}
+            }]);
+            new myt.Text(panelTwo, {width:labelWidth, textAlign:'right', text:'Line Outset'});
+            new myt.Slider(panelTwo, {width:200, minValue:0, maxValue:100, value:5}, [{
+                setValue: function(v) {this.callSuper(v);wrappingLayout.setLineOutset(this.value);}
+            }]);
+            layoutY.setParent(panelTwo);
+            
+            // Panel Three
+            var spiralLayout = rootView.spiralLayout;
+            new myt.Text(panelThree, {width:labelWidth, textAlign:'right', text:'X Frequency'});
+            new myt.Slider(panelThree, {width:500, minValue:0, maxValue:500, value:500}, [{
+                setValue: function(v) {this.callSuper(v);spiralLayout.setXFrequency(0.05 + this.value / 10000);}
+            }]);
+            new myt.Text(panelThree, {width:labelWidth, textAlign:'right', text:'Y Frequency'});
+            new myt.Slider(panelThree, {width:500, minValue:0, maxValue:500, value:500}, [{
+                setValue: function(v) {this.callSuper(v);spiralLayout.setYFrequency(0.05 + this.value / 10000);}
+            }]);
+            new myt.Text(panelThree, {width:labelWidth, textAlign:'right', text:'X Scale'});
+            new myt.Slider(panelThree, {width:500, minValue:0, maxValue:500, value:250}, [{
+                setValue: function(v) {this.callSuper(v);spiralLayout.setXScale(this.value / 1000);}
+            }]);
+            new myt.Text(panelThree, {width:labelWidth, textAlign:'right', text:'Y Scale'});
+            new myt.Slider(panelThree, {width:500, minValue:0, maxValue:500, value:250}, [{
+                setValue: function(v) {this.callSuper(v);spiralLayout.setYScale(this.value / 1000);}
+            }]);
+            new myt.Text(panelThree, {width:labelWidth, textAlign:'right', text:'View Size'});
+            new myt.Slider(panelThree, {width:100, minValue:0, maxValue:100, value:50}, [{
+                setValue: function(v) {this.callSuper(v);spiralLayout.setSize(v);}
+            }]);
+            layoutY.setParent(panelThree);
+        },
+        getDragViews: function() {return [this.header];}
+    }]);
 </script>
 </body></html>
