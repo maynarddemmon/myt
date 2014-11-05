@@ -503,9 +503,17 @@ myt.Node = new JS.Class('Node', {
     
     /** Gets an array of the currently running animators that were created
         by calls to the animate method.
+        @param filterFunc:function/string a function that filters which 
+            animations get stopped. The filter should return true for 
+            functions to be included. If the provided values is a string it will
+            be used as a matching attribute name.
         @returns an array of active animators. */
-    getActiveAnimators: function() {
-        return this.__getAnimPool().getActives();
+    getActiveAnimators: function(filterFunc) {
+        if (typeof filterFunc === 'string') {
+            var attrName = filterFunc;
+            filterFunc = function(anim) {return anim.attribute === attrName;};
+        }
+        return this.__getAnimPool(filterFunc).getActives();
     },
     
     /** Stops all active animations.
@@ -515,20 +523,13 @@ myt.Node = new JS.Class('Node', {
             be used as a matching attribute name.
         @returns void */
     stopActiveAnimators: function(filterFunc) {
-        var activeAnims = this.getActiveAnimators(), i = activeAnims.length, anim;
+        var activeAnims = this.getActiveAnimators(filterFunc), i = activeAnims.length, anim;
         if (i > 0) {
-            if (filterFunc == null) {
-                filterFunc = function(anim) {return true;};
-            } else if (typeof filterFunc === 'string') {
-                var attrName = filterFunc;
-                filterFunc = function(anim) {
-                    return anim.attribute === attrName;
-                };
-            }
-            
+            var animPool = this.__getAnimPool();
             while (i) {
                 anim = activeAnims[--i];
-                if (filterFunc.call(this, anim)) anim.reset(false);
+                anim.reset(false);
+                animPool.putInstance(anim);
             }
         }
     },

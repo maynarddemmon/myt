@@ -1,0 +1,210 @@
+<!doctype html><html><head>
+<title>Myt Framework : Animation Examples</title>
+<link rel="stylesheet" href="../src/css/myt.scss"/>
+<style>
+    body{font-family:Arial, Helvetica, sans-serif;}
+</style>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="../src/js/jquery/jquery-1.10.2.min.js">\x3C/script>');</script>
+<script src="../src/js/boilerplate.js"></script>
+<script src="../dist/myt.min.js"></script>
+</head><body>
+<script>
+    var rootView = new myt.View(null, {bgColor:'#eeeeee'}, [myt.SizeToWindow]);
+    
+    var AnimClass = new JS.Class('AnimClass', myt.View, {
+        initNode: function(parent, attrs) {
+            attrs.x = 8;
+            attrs.width = parent.width - 2 * attrs.x;
+            attrs.height = 12;
+            
+            this.callSuper(parent, attrs);
+            
+            var self = this,
+                labelWidth = 85,
+                trackX = labelWidth + 4;
+            
+            new myt.Text(this, {text:attrs.easing, textAlign:'right', fontSize:'10px', width:labelWidth});
+            var trackView = new myt.View(this, {
+                x:trackX, width:this.width - trackX, height:attrs.height, 
+                bgColor:'#f8f8f8', roundedCorners:2
+            });
+            
+            this.targetView = new myt.SimpleButton(trackView, {
+                width:attrs.height, height:attrs.height, 
+                activeColor:'#555555', hoverColor:'#777777', readyColor:'#666666', 
+                roundedCorners:attrs.roundedCorners
+            }, [{
+                doActivated: function() {
+                    self.doAnimation();
+                }
+            }]);
+        },
+        
+        setEasing: function(v) {this.easing = v;},
+        
+        doAnimation: function() {
+            var targetView = this.targetView,
+                parentView = targetView.parent,
+                repeat = Number(repeatTxt.value) || 1,
+                duration = Number(durationTxt.value) || 2000;
+            targetView.stopActiveAnimators('x');
+            targetView.animate('x', parentView.width - targetView.width, 0, false, null, duration, false, repeat, this.easing);
+        },
+        
+        stopAnimation: function() {
+            this.targetView.stopActiveAnimators('x');
+        },
+        
+        resetAnimation: function() {
+            this.stopAnimation();
+            this.targetView.setX(0);
+        },
+        
+        pauseAnimation: function(pause) {
+            var anims = this.targetView.getActiveAnimators('x'), i = anims.length;
+            while (i) anims[--i].setPaused(pause);
+        },
+        
+        reverseAnimation: function(reverse) {
+            var anims = this.targetView.getActiveAnimators('x'), i = anims.length;
+            while (i) anims[--i].setReverse(reverse);
+        }
+    });
+    
+    var BtnClass = new JS.Class('BtnClass', myt.SimpleIconTextButton, {
+        initNode: function(parent, attrs) {
+            attrs.height = 22;
+            if (attrs.width === undefined) attrs.shrinkToFit = true;
+            attrs.inset = attrs.outset = 8;
+            attrs.activeColor = '#888888';
+            attrs.hoverColor = '#aaaaaa';
+            attrs.readyColor = '#999999';
+            attrs.textColor = '#ffffff';
+            attrs.roundedCorners = 1;
+            
+            this.callSuper(parent, attrs);
+        }
+    });
+    
+    var InputClass = new JS.Class('InputClass', myt.InputText, {
+        initNode: function(parent, attrs) {
+            attrs.height = 22;
+            attrs.roundedCorners = 2;
+            attrs.border = [1,'solid','#999999'];
+            
+            this.callSuper(parent, attrs);
+            
+            this.setStyleProperty('paddingLeft', '4px');
+            this.setStyleProperty('paddingBottom', '2px');
+        }
+    });
+    
+    var contentView = new myt.View(rootView, {
+        x:50, y:50, width:500, bgColor:'#cccccc', roundedCorners:10
+    }, [{
+        notify: function(methodName) {
+            var args = Array.prototype.slice.call(arguments, 1);
+            var svs = this.getSubviews(), i = svs.length, sv;
+            while (i) {
+                sv = svs[--i];
+                if (!sv.ignoreLayout) sv[methodName].apply(sv, args);
+            }
+        },
+        start: function() {
+            this.resetPaused();
+            this.resetReversed();
+            this.notify('doAnimation');
+        },
+        stop: function() {
+            this.resetPaused();
+            this.resetReversed();
+            this.notify('stopAnimation');
+        },
+        reset: function() {
+            this.resetPaused();
+            this.resetReversed();
+            this.notify('resetAnimation');
+        },
+        togglePaused: function() {
+            var paused = this.paused = !this.paused;
+            this.notify('pauseAnimation', paused);
+            pauseBtn.setText(paused ? 'resume' : 'pause');
+        },
+        resetPaused: function() {
+            this.paused = false;
+            pauseBtn.setText('pause');
+        },
+        toggleReversed: function() {
+            var reversed = this.reversed = !this.reversed;
+            this.notify('reverseAnimation', reversed);
+            reverseBtn.setText(reversed ? 'normal' : 'reverse');
+        },
+        resetReversed: function() {
+            this.reversed = false;
+            reverseBtn.setText('reverse');
+        }
+    }]);
+    
+    var controlView = new myt.View(contentView, {
+        ignoreLayout:true,
+        x:8, y:8, width:contentView.width - 16, height:24, 
+        bgColor:'#ffffff', roundedCorners:2
+    });
+    new BtnClass(controlView, {text:'start'}, [{doActivated: function() {contentView.start();}}]);
+    new BtnClass(controlView, {text:'stop'}, [{doActivated: function() {contentView.stop();}}]);
+    var pauseBtn = new BtnClass(controlView, {text:'pause', width:59}, [{doActivated: function() {contentView.togglePaused();}}]);
+    var reverseBtn = new BtnClass(controlView, {text:'reverse', width:58}, [{doActivated: function() {contentView.toggleReversed();}}]);
+    new BtnClass(controlView, {text:'reset'}, [{doActivated: function() {contentView.reset();}}]);
+    
+    var repeatTxt = new InputClass(controlView, {
+        width:45, placeholder:'repeat', allowedChars:'-0123456789', maxLength:4, text:'1'
+    });
+    var durationTxt = new InputClass(controlView, {
+        width:60, placeholder:'duration', allowedChars:'0123456789', maxLength:6, text:'2000'
+    });
+    
+    new myt.SpacedLayout(controlView, {spacing:1, inset:1});
+    new myt.ConstantLayout(controlView, {targetAttrName:'y', targetValue:1});
+    
+    var easings = [
+        'linear',
+        
+        'easeInQuad',
+        'easeInCubic',
+        'easeInQuart',
+        'easeInQuint',
+        'easeInSine',
+        'easeInExpo',
+        'easeInCirc',
+        'easeInElastic',
+        'easeInBack',
+        'easeInBounce',
+        
+        'easeOutQuad',
+        'easeOutCubic',
+        'easeOutQuart',
+        'easeOutQuint',
+        'easeOutSine',
+        'easeOutExpo',
+        'easeOutCirc',
+        'easeOutElastic',
+        'easeOutBack',
+        'easeOutBounce',
+        
+        'easeInOutQuad',
+        'easeInOutCubic',
+        'easeInOutQuart',
+        'easeInOutQuint',
+        'easeInOutSine',
+        'easeInOutExpo',
+        'easeInOutCirc',
+        'easeInOutElastic',
+        'easeInOutBack',
+        'easeInOutBounce'
+    ], len = easings.length, i = 0;
+    for (;len > i;) new AnimClass(contentView, {easing:easings[i++]});
+    
+    new myt.SpacedLayout(contentView, {axis:'y', spacing:1, inset:40, outset:8, collapseParent:true});
+</script>
+</body></html>

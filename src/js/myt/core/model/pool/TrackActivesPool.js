@@ -56,8 +56,22 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
     },
     
     /** Gets an array of the active instances.
+        @param filterFunc:function (optional) If provided filters the
+            results.
         @returns array */
-    getActives: function() {
+    getActives: function(filterFunc) {
+        if (filterFunc) {
+            var retval = [], actives = this.__actives;
+            if (actives) {
+                var len = actives.length, i = 0, active;
+                for (; len > i;) {
+                    active = actives[i++];
+                    if (filterFunc.call(this, active)) retval.push(active);
+                }
+            }
+            return retval;
+        }
+        
         return this.__actives ? this.__actives.concat() : [];
     },
     

@@ -17,9 +17,9 @@
         from:number The starting value of the attribute. If not specified the 
             current value on the target will be used.
         to:number The ending value of the attribute.
-        duration:number The length of time for the animation in millis. The 
-            default value is 1000.
-        easingFunction:string/function Control the rate of animation.
+        duration:number The length of time the animation will run in millis.
+            The default value is 1000.
+        easingFunction:string/function Controls the rate of animation.
             string: See http://easings.net/ for more info. One of the following:
                 linear(default), 
                 easeInQuad, easeOutQuad, easeInOutQuad, 
@@ -35,9 +35,9 @@
             
             function: A function that determines the rate of change of the 
                 attribute. The arguments to the easing function are:
-                t: animation progress in millis
-                c: value change (to - from)
-                d: duration
+                t: Animation progress in millis
+                c: Value change (to - from)
+                d: Animation duration in millis
         relative:boolean Determines if the animated value is set on the target 
             (false), or added to the exiting value on the target (true). The 
             default value is false.
@@ -75,9 +75,7 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         
         this.callSuper(parent, attrs);
         
-        this.__temporaryFrom = false;
-        this.__loopCount = this.reverse ? this.repeat - 1 : 0;
-        this.__progress = this.reverse ? this.duration : 0;
+        this.__reset();
     },
     
     
@@ -91,10 +89,8 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
                 if (v) {
                     this.attachTo(myt.global.idle, '__update', 'idle');
                 } else {
-                    this.__loopCount = this.reverse ? this.repeat - 1 : 0;
-                    this.__progress = this.reverse ? this.duration : 0;
                     if (this.__temporaryFrom) this.from = undefined;
-                    this.__temporaryFrom = false;
+                    this.__reset();
                     this.detachFrom(myt.global.idle, '__update', 'idle');
                 }
             }
@@ -121,10 +117,7 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
             this.reverse = v;
             if (this.inited) this.fireNewEvent('reverse', v);
             
-            if (!this.running) {
-                this.__loopCount = this.reverse ? this.repeat - 1 : 0;
-                this.__progress = this.reverse ? this.duration : 0;
-            }
+            if (!this.running) this.__reset();
         }
     },
     
@@ -185,14 +178,10 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
     
     /** Puts the animator back to an initial configured state.
         @param executeCallback:boolean (optional) if true the callback, if
-            it exists will be executed.
+            it exists, will be executed.
         @returns void */
     reset: function(executeCallback) {
-        if (this.paused) {
-            this.__temporaryFrom = false;
-            this.__loopCount = this.reverse ? this.repeat - 1 : 0;
-            this.__progress = this.reverse ? this.duration : 0;
-        }
+        this.__reset();
         
         this.setRunning(false);
         this.setPaused(false);
@@ -208,14 +197,14 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         this.repeat = 1;
         this.easingFunction = myt.Animator.easingFunctions.linear;
         
-        if (this.paused) {
-            this.__temporaryFrom = false;
-            this.__loopCount = this.reverse ? this.repeat - 1 : 0;
-            this.__progress = this.reverse ? this.duration : 0;
-        }
-        
-        this.setRunning(false);
-        this.setPaused(false);
+        this.reset(false);
+    },
+    
+    /** @private */
+    __reset: function() {
+        this.__temporaryFrom = false;
+        this.__loopCount = this.reverse ? this.repeat - 1 : 0;
+        this.__progress = this.reverse ? this.duration : 0;
     },
     
     /** @private */
@@ -458,7 +447,7 @@ myt.Animator.easingFunctions = {
     },
     easeInBack: function (t, c, d, s) {
         if (s === undefined) s = 1.70158;
-        return c*(t/=d)*t*((s+1)*t - s) + b;
+        return c*(t/=d)*t*((s+1)*t - s);
     },
     easeOutBack: function (t, c, d, s) {
         if (s === undefined) s = 1.70158;
