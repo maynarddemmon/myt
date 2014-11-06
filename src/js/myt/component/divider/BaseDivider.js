@@ -225,7 +225,7 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
         }
         if (toValue != null) {
             this.stopActiveAnimators('value');
-            this.animate('value', toValue, null, null, null, 250, null, null, 'easeInOutQuad');
+            this.animateOnce('value', toValue, null, 250);
         }
     },
     

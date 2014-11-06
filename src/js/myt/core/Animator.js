@@ -21,8 +21,8 @@
             The default value is 1000.
         easingFunction:string/function Controls the rate of animation.
             string: See http://easings.net/ for more info. One of the following:
-                linear(default), 
-                easeInQuad, easeOutQuad, easeInOutQuad, 
+                linear, 
+                easeInQuad, easeOutQuad, easeInOutQuad(default), 
                 easeInCubic, easeOutCubic, easeInOutCubic, 
                 easeInQuart, easeOutQuart, easeInOutQuart, 
                 easeInQuint, easeOutQuint, easeInOutQuint, 
@@ -73,7 +73,7 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         this.duration = 1000;
         this.relative = this.reverse = this.running = this.paused = false;
         this.repeat = 1;
-        this.easingFunction = myt.Animator.easingFunctions.linear;
+        this.easingFunction = myt.Animator.DEFAULT_EASING_FUNCTION;
         
         this.callSuper(parent, attrs);
         
@@ -125,14 +125,10 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
     
     setEasingFunction: function(v) {
         // Lookup easing function if a string is provided.
-        if (typeof v === 'string') {
-            var func = myt.Animator.easingFunctions[v];
-            if (!func) {
-                console.log("Unknown easingFunction: ", v);
-                func = myt.Animator.easingFunctions.linear;
-            }
-            v = func;
-        }
+        if (typeof v === 'string') v = myt.Animator.easingFunctions[v];
+        
+        // Use default if invalid
+        if (!v) v = myt.Animator.DEFAULT_EASING_FUNCTION;
         
         if (this.easingFunction !== v) {
             this.easingFunction = v;
@@ -197,7 +193,7 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         this.duration = 1000;
         this.relative = this.reverse = false;
         this.repeat = 1;
-        this.easingFunction = myt.Animator.easingFunctions.linear;
+        this.easingFunction = myt.Animator.DEFAULT_EASING_FUNCTION;
         
         this.reset(false);
     },
@@ -479,3 +475,6 @@ myt.Animator.easingFunctions = {
         return myt.Animator.easingFunctions.easeOutBounce(t*2-d, c, d) * .5 + c*.5;
     }
 };
+
+/** Setup the default easing function. */
+myt.Animator.DEFAULT_EASING_FUNCTION = myt.Animator.easingFunctions.easeInOutQuad;

@@ -269,8 +269,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
             var self = this;
             wrapper.animate({
                 attribute:'height', to:to, 
-                duration:myt.TabSlider.DEFAULT_ANIMATION_MILLIS, 
-                easingFunction:'easeInOutQuad'
+                duration:myt.TabSlider.DEFAULT_ANIMATION_MILLIS
             }).next(function(success) {self.setExpansionState('expanded');});
         } else {
             this.setExpansionState('expanded');
@@ -291,8 +290,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
             var self = this;
             wrapper.animate({
                 attribute:'height', to:to, 
-                duration:myt.TabSlider.DEFAULT_ANIMATION_MILLIS, 
-                easingFunction:'easeInOutQuad'
+                duration:myt.TabSlider.DEFAULT_ANIMATION_MILLIS
             }).next(function(success) {self.setExpansionState('collapsed');});
         } else {
             this.setExpansionState('collapsed');

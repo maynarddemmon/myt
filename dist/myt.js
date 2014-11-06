@@ -7102,6 +7102,21 @@ myt.Node = new JS.Class('Node', {
     subnodeRemoved: function(node) {},
     
     // Animation
+    /** A wrapper on Node.animate that will only animate one time and that 
+        provides a streamlined list of the most commonly used arguments.
+        @param attribute:string/object the name of the attribute to animate. If
+            an object is provided it should be the only argument and its keys
+            should be the params of this method. This provides a more concise
+            way of passing in sparse optional parameters.
+        @param to:number the target value to animate to.
+        @param from:number the target value to animate from. (optional)
+        @param duration:number (optional)
+        @param easingFunction:function (optional)
+        @returns The Animator being run. */
+    animateOnce: function(attribute, to, from, duration, easingFunction) {
+        return this.animate(attribute, to, from, false, null, duration, false, 1, easingFunction);
+    },
+    
     /** Animates an attribute using the provided parameters.
         @param attribute:string/object the name of the attribute to animate. If
             an object is provided it should be the only argument and its keys
@@ -7112,7 +7127,7 @@ myt.Node = new JS.Class('Node', {
         @param relative:boolean (optional)
         @param callback:function (optional)
         @param duration:number (optional)
-        @param revers:boolean (optional)
+        @param reverse:boolean (optional)
         @param repeat:number (optional)
         @param easingFunction:function (optional)
         @returns The Animator being run. */
@@ -10574,8 +10589,8 @@ new JS.Singleton('GlobalIdle', {
             The default value is 1000.
         easingFunction:string/function Controls the rate of animation.
             string: See http://easings.net/ for more info. One of the following:
-                linear(default), 
-                easeInQuad, easeOutQuad, easeInOutQuad, 
+                linear, 
+                easeInQuad, easeOutQuad, easeInOutQuad(default), 
                 easeInCubic, easeOutCubic, easeInOutCubic, 
                 easeInQuart, easeOutQuart, easeInOutQuart, 
                 easeInQuint, easeOutQuint, easeInOutQuint, 
@@ -10626,7 +10641,7 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         this.duration = 1000;
         this.relative = this.reverse = this.running = this.paused = false;
         this.repeat = 1;
-        this.easingFunction = myt.Animator.easingFunctions.linear;
+        this.easingFunction = myt.Animator.DEFAULT_EASING_FUNCTION;
         
         this.callSuper(parent, attrs);
         
@@ -10678,14 +10693,10 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
     
     setEasingFunction: function(v) {
         // Lookup easing function if a string is provided.
-        if (typeof v === 'string') {
-            var func = myt.Animator.easingFunctions[v];
-            if (!func) {
-                console.log("Unknown easingFunction: ", v);
-                func = myt.Animator.easingFunctions.linear;
-            }
-            v = func;
-        }
+        if (typeof v === 'string') v = myt.Animator.easingFunctions[v];
+        
+        // Use default if invalid
+        if (!v) v = myt.Animator.DEFAULT_EASING_FUNCTION;
         
         if (this.easingFunction !== v) {
             this.easingFunction = v;
@@ -10750,7 +10761,7 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         this.duration = 1000;
         this.relative = this.reverse = false;
         this.repeat = 1;
-        this.easingFunction = myt.Animator.easingFunctions.linear;
+        this.easingFunction = myt.Animator.DEFAULT_EASING_FUNCTION;
         
         this.reset(false);
     },
@@ -11032,6 +11043,9 @@ myt.Animator.easingFunctions = {
         return myt.Animator.easingFunctions.easeOutBounce(t*2-d, c, d) * .5 + c*.5;
     }
 };
+
+/** Setup the default easing function. */
+myt.Animator.DEFAULT_EASING_FUNCTION = myt.Animator.easingFunctions.easeInOutQuad;
 
 
 /** Stores a function name and a context to call that function on along with 
@@ -18322,8 +18336,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
             var self = this;
             wrapper.animate({
                 attribute:'height', to:to, 
-                duration:myt.TabSlider.DEFAULT_ANIMATION_MILLIS, 
-                easingFunction:'easeInOutQuad'
+                duration:myt.TabSlider.DEFAULT_ANIMATION_MILLIS
             }).next(function(success) {self.setExpansionState('expanded');});
         } else {
             this.setExpansionState('expanded');
@@ -18344,8 +18357,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
             var self = this;
             wrapper.animate({
                 attribute:'height', to:to, 
-                duration:myt.TabSlider.DEFAULT_ANIMATION_MILLIS, 
-                easingFunction:'easeInOutQuad'
+                duration:myt.TabSlider.DEFAULT_ANIMATION_MILLIS
             }).next(function(success) {self.setExpansionState('collapsed');});
         } else {
             this.setExpansionState('collapsed');
@@ -24381,7 +24393,7 @@ myt.ScatterGraphPoint = new JS.Class('ScatterGraphPoint', {
         this._progress += timeDiff;
         if (this._progress > 1000) this._progress = 1000;
         
-        var easingFunc = this.config.easingFunction || myt.Animator.easingFunctions.easeInOutQuad;
+        var easingFunc = this.config.easingFunction || myt.Animator.DEFAULT_EASING_FUNCTION;
         
         this.x = this._origX + easingFunc(this._progress, this._xAttrDiff, 1000);
         this.y = this._origY + easingFunc(this._progress, this._yAttrDiff, 1000);
@@ -27137,7 +27149,7 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
         }
         if (toValue != null) {
             this.stopActiveAnimators('value');
-            this.animate('value', toValue, null, null, null, 250, null, null, 'easeInOutQuad');
+            this.animateOnce('value', toValue, null, 250);
         }
     },
     

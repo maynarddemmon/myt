@@ -456,6 +456,21 @@ myt.Node = new JS.Class('Node', {
     subnodeRemoved: function(node) {},
     
     // Animation
+    /** A wrapper on Node.animate that will only animate one time and that 
+        provides a streamlined list of the most commonly used arguments.
+        @param attribute:string/object the name of the attribute to animate. If
+            an object is provided it should be the only argument and its keys
+            should be the params of this method. This provides a more concise
+            way of passing in sparse optional parameters.
+        @param to:number the target value to animate to.
+        @param from:number the target value to animate from. (optional)
+        @param duration:number (optional)
+        @param easingFunction:function (optional)
+        @returns The Animator being run. */
+    animateOnce: function(attribute, to, from, duration, easingFunction) {
+        return this.animate(attribute, to, from, false, null, duration, false, 1, easingFunction);
+    },
+    
     /** Animates an attribute using the provided parameters.
         @param attribute:string/object the name of the attribute to animate. If
             an object is provided it should be the only argument and its keys
@@ -466,7 +481,7 @@ myt.Node = new JS.Class('Node', {
         @param relative:boolean (optional)
         @param callback:function (optional)
         @param duration:number (optional)
-        @param revers:boolean (optional)
+        @param reverse:boolean (optional)
         @param repeat:number (optional)
         @param easingFunction:function (optional)
         @returns The Animator being run. */
