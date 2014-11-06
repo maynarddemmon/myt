@@ -273,5 +273,51 @@
     var h = contentView.height - lowerLine.y - 8;
     lowerLine.setHeight(h);
     upperLine.setHeight(h);
+    
+    // Race around the edge to test next chaining
+    new myt.SimpleButton(rootView, {
+        x:contentView.x, y:contentView.y, width:8, height:8,
+        activeColor:'#cc0000', hoverColor:'#ff3333', readyColor:'#ff0000',
+        roundedCorners:2
+    }, [{
+        doActivated: function() {
+            this.setX(contentView.x);
+            this.setY(contentView.y);
+            this.stopActiveAnimators();
+            
+            var self = this, 
+                xAmount = contentView.width - this.width, 
+                yAmount = contentView.height - this.height;
+            this.animate('x', xAmount, null, true, null, 1000, false, 1, 'easeInOutQuad').next(
+                function(success) {
+                    // Demonstrate relative adding
+                    self.animate('x', 100, null, true, null, 1000, false, 1, 'easeInQuad');
+                    self.animate('x', -100, null, true, null, 1000, false, 1, 'easeOutQuad');
+                    
+                    self.animate('y', yAmount, null, true, null, 1000, false, 1, 'easeInOutQuad').next(
+                        function(success) {
+                            // Demonstrate relative adding
+                            self.animate('y', 100, null, true, null, 1000, false, 1, 'easeInQuad');
+                            self.animate('y', -100, null, true, null, 1000, false, 1, 'easeOutQuad');
+                            
+                            self.animate('x', -xAmount, null, true, null, 1000, false, 1, 'easeInOutQuad').next(
+                                function(success) {
+                                    // Demonstrate relative adding
+                                    self.animate('x', -100, null, true, null, 1000, false, 1, 'easeInQuad');
+                                    self.animate('x', 100, null, true, null, 1000, false, 1, 'easeOutQuad');
+                                    
+                                    self.animate('y', -yAmount, null, true, null, 1000, false, 1, 'easeInOutQuad');
+                                }
+                            );
+                        }
+                    );
+                }
+            );
+            
+            // Demonstrate relative adding
+            self.animate('y', -100, null, true, null, 1000, false, 1, 'easeInQuad');
+            self.animate('y', 100, null, true, null, 1000, false, 1, 'easeOutQuad');
+        }
+    }]);
 </script>
 </body></html>
