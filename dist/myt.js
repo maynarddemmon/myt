@@ -7689,6 +7689,28 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
         return sv.ignoreLayout;
     },
     
+    /** If our parent adds a new subview we should add it.
+        @private */
+    __handleParentSubviewAddedEvent: function(event) {
+        var v = event.value;
+        if (v.parent === this.parent) this.addSubview(v);
+    },
+    
+    /** If our parent removes a subview we should remove it.
+        @private */
+    __handleParentSubviewRemovedEvent: function(event) {
+        var v = event.value;
+        if (v.parent === this.parent) this.removeSubview(v);
+    },
+    
+    // Subview ordering //
+    /** Sorts the subviews array according to the provided sort function.
+        @param sortFunc:function the sort function to sort the subviews with.
+        @returns void */
+    sortSubviews: function(sortFunc) {
+        this.subviews.sort(sortFunc);
+    },
+    
     /** Moves the subview before the target subview in the order the subviews
         are layed out. If no target subview is provided, or it isn't in the
         layout the subview will be moved to the front of the list.
@@ -7725,24 +7747,6 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
                 }
             }
         }
-    },
-    
-    sortSubviews: function(sortFunc) {
-        this.subviews.sort(sortFunc);
-    },
-    
-    /** If our parent adds a new subview we should add it.
-        @private */
-    __handleParentSubviewAddedEvent: function(event) {
-        var v = event.value;
-        if (v.parent === this.parent) this.addSubview(v);
-    },
-    
-    /** If our parent removes a subview we should remove it.
-        @private */
-    __handleParentSubviewRemovedEvent: function(event) {
-        var v = event.value;
-        if (v.parent === this.parent) this.removeSubview(v);
     }
 });
 
@@ -11810,10 +11814,10 @@ myt.ConstantLayout = new JS.Class('ConstantLayout', myt.Layout, {
         if (this.canUpdate()) {
             var setterName = this.setterName, 
                 value = this.targetValue, 
-                svs = this.subviews,
-                sv, setter;
-            for (var i = 0, len = svs.length; len > i; ++i) {
-                sv = svs[i];
+                svs = this.subviews, len = svs.length, sv,
+                setter, i = 0;
+            for (; len > i;) {
+                sv = svs[i++];
                 setter = sv[setterName];
                 if (setter) setter.call(sv, value);
             }

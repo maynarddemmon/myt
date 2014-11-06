@@ -42,10 +42,10 @@ myt.ConstantLayout = new JS.Class('ConstantLayout', myt.Layout, {
         if (this.canUpdate()) {
             var setterName = this.setterName, 
                 value = this.targetValue, 
-                svs = this.subviews,
-                sv, setter;
-            for (var i = 0, len = svs.length; len > i; ++i) {
-                sv = svs[i];
+                svs = this.subviews, len = svs.length, sv,
+                setter, i = 0;
+            for (; len > i;) {
+                sv = svs[i++];
                 setter = sv[setterName];
                 if (setter) setter.call(sv, value);
             }
