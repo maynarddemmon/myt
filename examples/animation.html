@@ -47,9 +47,20 @@
             var targetView = this.targetView,
                 parentView = targetView.parent,
                 repeat = Number(repeatTxt.value) || 1,
-                duration = Number(durationTxt.value) || 2000;
+                duration = Number(durationTxt.value) || 2000,
+                from = lowerLine.x === 12 ? null : lowerLine.x - 97,
+                to = upperLine.x - 97 - targetView.width + 1,
+                easing = this.easing;
+            
+            var isRelative = false,
+                relativeTo = relativeToTxt.value;
+            if (relativeTo) {
+                isRelative = true;
+                from = 0;
+                to = Number(relativeTo);
+            }
             targetView.stopActiveAnimators('x');
-            targetView.animate('x', parentView.width - targetView.width, 0, false, null, duration, false, repeat, this.easing);
+            targetView.animate('x', to, from, isRelative, null, duration, false, repeat, easing);
         },
         
         stopAnimation: function() {
@@ -58,7 +69,7 @@
         
         resetAnimation: function() {
             this.stopAnimation();
-            this.targetView.setX(0);
+            this.targetView.setX(lowerLine.x === 12 ? 0 : lowerLine.x - 97);
         },
         
         pauseAnimation: function(pause) {
@@ -101,7 +112,7 @@
     });
     
     var contentView = new myt.View(rootView, {
-        x:50, y:50, width:500, bgColor:'#cccccc', roundedCorners:10
+        x:10, y:10, width:600, bgColor:'#cccccc', roundedCorners:10
     }, [{
         notify: function(methodName) {
             var args = Array.prototype.slice.call(arguments, 1);
@@ -146,6 +157,7 @@
         }
     }]);
     
+    // Control View //
     var controlView = new myt.View(contentView, {
         ignoreLayout:true,
         x:8, y:8, width:contentView.width - 16, height:24, 
@@ -156,17 +168,19 @@
     var pauseBtn = new BtnClass(controlView, {text:'pause', width:59}, [{doActivated: function() {contentView.togglePaused();}}]);
     var reverseBtn = new BtnClass(controlView, {text:'reverse', width:58}, [{doActivated: function() {contentView.toggleReversed();}}]);
     new BtnClass(controlView, {text:'reset'}, [{doActivated: function() {contentView.reset();}}]);
-    
     var repeatTxt = new InputClass(controlView, {
         width:45, placeholder:'repeat', allowedChars:'-0123456789', maxLength:4, text:'1'
     });
     var durationTxt = new InputClass(controlView, {
         width:60, placeholder:'duration', allowedChars:'0123456789', maxLength:6, text:'2000'
     });
-    
+    var relativeToTxt = new InputClass(controlView, {
+        width:65, placeholder:'relative to', allowedChars:'-0123456789', maxLength:4, text:''
+    });
     new myt.SpacedLayout(controlView, {spacing:1, inset:1});
     new myt.ConstantLayout(controlView, {targetAttrName:'y', targetValue:1});
     
+    // Easing Views //
     var easings = [
         'linear',
         
@@ -205,6 +219,58 @@
     ], len = easings.length, i = 0;
     for (;len > i;) new AnimClass(contentView, {easing:easings[i++]});
     
-    new myt.SpacedLayout(contentView, {axis:'y', spacing:1, inset:40, outset:8, collapseParent:true});
+    
+    // Markers //
+    var w = contentView.width,
+        upperLimit = w - 13;
+    var lowerView = new myt.SimpleButton(contentView, {
+        ignoreLayout:true, y:34, x:93, width:7, height:10,
+        activeColor:'#999999', hoverColor:'#bbbbbb', readyColor:'#aaaaaa',
+        border:[1,'solid','#666666'],
+        roundedCorners:2
+    }, [myt.Draggable, {
+        requestDragPosition: function(x, y) {
+            y = 34;
+            if (x <= 75) {
+                x = 8;
+            } else {
+                x = Math.min(Math.max(x, 93), upperLimit);
+            }
+            this.callSuper(x, y);
+        }
+    }]);
+    var lowerLine = new myt.View(contentView, {
+        ignoreLayout:true, y:46, x:96, width:1, height:0,
+        bgColor:'#00ff00', opacity:0.5
+    }, [{
+        updateX: function(event) {this.setX(event.value + 4);}
+    }]);
+    lowerLine.syncTo(lowerView, 'updateX', 'x');
+    
+    var upperView = new myt.SimpleButton(contentView, {
+        ignoreLayout:true, y:34, x:upperLimit, width:7, height:10,
+        activeColor:'#999999', hoverColor:'#bbbbbb', readyColor:'#aaaaaa',
+        border:[1,'solid','#666666'],
+        roundedCorners:2
+    }, [myt.Draggable, {
+        requestDragPosition: function(x, y) {
+            y = 34;
+            x = Math.min(Math.max(x, 93), upperLimit);
+            this.callSuper(x, y);
+        }
+    }]);
+    var upperLine = new myt.View(contentView, {
+        ignoreLayout:true, y:46, x:w - 10, width:1, height:0,
+        bgColor:'#ff0000', opacity:0.5
+    }, [{
+        updateX: function(event) {this.setX(event.value + 4);}
+    }]);
+    upperLine.syncTo(upperView, 'updateX', 'x');
+    
+    new myt.SpacedLayout(contentView, {axis:'y', spacing:1, inset:48, outset:8, collapseParent:true});
+    
+    var h = contentView.height - lowerLine.y - 8;
+    lowerLine.setHeight(h);
+    upperLine.setHeight(h);
 </script>
 </body></html>

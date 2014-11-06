@@ -6589,11 +6589,8 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.AbstractPool */
     getInstance: function() {
-        var actives = this.__actives;
-        if (!actives) actives = this.__actives = [];
-        
         var instance = this.callSuper();
-        actives.push(instance);
+        (this.__actives || (this.__actives = [])).push(instance);
         return instance;
     },
     
@@ -6601,20 +6598,15 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
     putInstance: function(obj) {
         var actives = this.__actives;
         if (actives) {
-            var exists = false, i = actives.length;
+            var i = actives.length;
             while (i) {
                 if (actives[--i] === obj) {
                     actives.splice(i, 1);
-                    exists = true;
-                    break;
+                    this.callSuper(obj);
+                    return;
                 }
             }
-            
-            if (exists) {
-                this.callSuper(obj);
-            } else {
-                console.warn("Attempt to putInstance for a non-active instance.", obj, this);
-            }
+            console.warn("Attempt to putInstance for a non-active instance.", obj, this);
         } else {
             console.warn("Attempt to putInstance when no actives exist.", obj, this);
         }
@@ -6625,19 +6617,19 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
             results.
         @returns array */
     getActives: function(filterFunc) {
-        if (filterFunc) {
-            var retval = [], actives = this.__actives;
-            if (actives) {
-                var len = actives.length, i = 0, active;
+        var actives = this.__actives;
+        if (actives) {
+            if (filterFunc) {
+                var retval = [], len = actives.length, i = 0, active;
                 for (; len > i;) {
                     active = actives[i++];
                     if (filterFunc.call(this, active)) retval.push(active);
                 }
+                return retval;
             }
-            return retval;
+            return actives.concat();
         }
-        
-        return this.__actives ? this.__actives.concat() : [];
+        return [];
     },
     
     /** Puts all the active instances back in the pool.
@@ -10600,8 +10592,10 @@ new JS.Singleton('GlobalIdle', {
                 c: Value change (to - from)
                 d: Animation duration in millis
         relative:boolean Determines if the animated value is set on the target 
-            (false), or added to the exiting value on the target (true). The 
-            default value is false.
+            (false), or added to the exiting value on the target (true). Note
+            that this means the difference between the from and to values
+            will be "added" to the existing value on the target. The default 
+            value is false.
         repeat:number The number of times to repeat the animation. If negative 
             the animation will repeat forever. The default value is 1.
         reverse:boolean If true, the animation is run in reverse.

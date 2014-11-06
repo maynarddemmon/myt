@@ -39,8 +39,10 @@
                 c: Value change (to - from)
                 d: Animation duration in millis
         relative:boolean Determines if the animated value is set on the target 
-            (false), or added to the exiting value on the target (true). The 
-            default value is false.
+            (false), or added to the exiting value on the target (true). Note
+            that this means the difference between the from and to values
+            will be "added" to the existing value on the target. The default 
+            value is false.
         repeat:number The number of times to repeat the animation. If negative 
             the animation will repeat forever. The default value is 1.
         reverse:boolean If true, the animation is run in reverse.
