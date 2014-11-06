@@ -6635,11 +6635,8 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.AbstractPool */
     getInstance: function() {
-        var actives = this.__actives;
-        if (!actives) actives = this.__actives = [];
-        
         var instance = this.callSuper();
-        actives.push(instance);
+        (this.__actives || (this.__actives = [])).push(instance);
         return instance;
     },
     
@@ -6647,29 +6644,38 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
     putInstance: function(obj) {
         var actives = this.__actives;
         if (actives) {
-            var exists = false, i = actives.length;
+            var i = actives.length;
             while (i) {
                 if (actives[--i] === obj) {
                     actives.splice(i, 1);
-                    exists = true;
-                    break;
+                    this.callSuper(obj);
+                    return;
                 }
             }
-            
-            if (exists) {
-                this.callSuper(obj);
-            } else {
-                console.warn("Attempt to putInstance for a non-active instance.", obj, this);
-            }
+            console.warn("Attempt to putInstance for a non-active instance.", obj, this);
         } else {
             console.warn("Attempt to putInstance when no actives exist.", obj, this);
         }
     },
     
     /** Gets an array of the active instances.
+        @param filterFunc:function (optional) If provided filters the
+            results.
         @returns array */
-    getActives: function() {
-        return this.__actives ? this.__actives.concat() : [];
+    getActives: function(filterFunc) {
+        var actives = this.__actives;
+        if (actives) {
+            if (filterFunc) {
+                var retval = [], len = actives.length, i = 0, active;
+                for (; len > i;) {
+                    active = actives[i++];
+                    if (filterFunc.call(this, active)) retval.push(active);
+                }
+                return retval;
+            }
+            return actives.concat();
+        }
+        return [];
     },
     
     /** Puts all the active instances back in the pool.
@@ -7189,9 +7195,17 @@ myt.Node = new JS.Class('Node', {
     
     /** Gets an array of the currently running animators that were created
         by calls to the animate method.
+        @param filterFunc:function/string a function that filters which 
+            animations get stopped. The filter should return true for 
+            functions to be included. If the provided values is a string it will
+            be used as a matching attribute name.
         @returns an array of active animators. */
-    getActiveAnimators: function() {
-        return this.__getAnimPool().getActives();
+    getActiveAnimators: function(filterFunc) {
+        if (typeof filterFunc === 'string') {
+            var attrName = filterFunc;
+            filterFunc = function(anim) {return anim.attribute === attrName;};
+        }
+        return this.__getAnimPool(filterFunc).getActives();
     },
     
     /** Stops all active animations.
@@ -7201,20 +7215,13 @@ myt.Node = new JS.Class('Node', {
             be used as a matching attribute name.
         @returns void */
     stopActiveAnimators: function(filterFunc) {
-        var activeAnims = this.getActiveAnimators(), i = activeAnims.length, anim;
+        var activeAnims = this.getActiveAnimators(filterFunc), i = activeAnims.length, anim;
         if (i > 0) {
-            if (filterFunc == null) {
-                filterFunc = function(anim) {return true;};
-            } else if (typeof filterFunc === 'string') {
-                var attrName = filterFunc;
-                filterFunc = function(anim) {
-                    return anim.attribute === attrName;
-                };
-            }
-            
+            var animPool = this.__getAnimPool();
             while (i) {
                 anim = activeAnims[--i];
-                if (filterFunc.call(this, anim)) anim.reset(false);
+                anim.reset(false);
+                animPool.putInstance(anim);
             }
         }
     },
@@ -10609,9 +10616,9 @@ new JS.Singleton('GlobalIdle', {
         from:number The starting value of the attribute. If not specified the 
             current value on the target will be used.
         to:number The ending value of the attribute.
-        duration:number The length of time for the animation in millis. The 
-            default value is 1000.
-        easingFunction:string/function Control the rate of animation.
+        duration:number The length of time the animation will run in millis.
+            The default value is 1000.
+        easingFunction:string/function Controls the rate of animation.
             string: See http://easings.net/ for more info. One of the following:
                 linear(default), 
                 easeInQuad, easeOutQuad, easeInOutQuad, 
@@ -10627,12 +10634,14 @@ new JS.Singleton('GlobalIdle', {
             
             function: A function that determines the rate of change of the 
                 attribute. The arguments to the easing function are:
-                t: animation progress in millis
-                c: value change (to - from)
-                d: duration
+                t: Animation progress in millis
+                c: Value change (to - from)
+                d: Animation duration in millis
         relative:boolean Determines if the animated value is set on the target 
-            (false), or added to the exiting value on the target (true). The 
-            default value is false.
+            (false), or added to the exiting value on the target (true). Note
+            that this means the difference between the from and to values
+            will be "added" to the existing value on the target. The default 
+            value is false.
         repeat:number The number of times to repeat the animation. If negative 
             the animation will repeat forever. The default value is 1.
         reverse:boolean If true, the animation is run in reverse.
@@ -10667,9 +10676,7 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         
         this.callSuper(parent, attrs);
         
-        this.__temporaryFrom = false;
-        this.__loopCount = this.reverse ? this.repeat - 1 : 0;
-        this.__progress = this.reverse ? this.duration : 0;
+        this.__reset();
     },
     
     
@@ -10683,10 +10690,8 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
                 if (v) {
                     this.attachTo(myt.global.idle, '__update', 'idle');
                 } else {
-                    this.__loopCount = this.reverse ? this.repeat - 1 : 0;
-                    this.__progress = this.reverse ? this.duration : 0;
                     if (this.__temporaryFrom) this.from = undefined;
-                    this.__temporaryFrom = false;
+                    this.__reset();
                     this.detachFrom(myt.global.idle, '__update', 'idle');
                 }
             }
@@ -10713,10 +10718,7 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
             this.reverse = v;
             if (this.inited) this.fireNewEvent('reverse', v);
             
-            if (!this.running) {
-                this.__loopCount = this.reverse ? this.repeat - 1 : 0;
-                this.__progress = this.reverse ? this.duration : 0;
-            }
+            if (!this.running) this.__reset();
         }
     },
     
@@ -10777,14 +10779,10 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
     
     /** Puts the animator back to an initial configured state.
         @param executeCallback:boolean (optional) if true the callback, if
-            it exists will be executed.
+            it exists, will be executed.
         @returns void */
     reset: function(executeCallback) {
-        if (this.paused) {
-            this.__temporaryFrom = false;
-            this.__loopCount = this.reverse ? this.repeat - 1 : 0;
-            this.__progress = this.reverse ? this.duration : 0;
-        }
+        this.__reset();
         
         this.setRunning(false);
         this.setPaused(false);
@@ -10800,14 +10798,14 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         this.repeat = 1;
         this.easingFunction = myt.Animator.easingFunctions.linear;
         
-        if (this.paused) {
-            this.__temporaryFrom = false;
-            this.__loopCount = this.reverse ? this.repeat - 1 : 0;
-            this.__progress = this.reverse ? this.duration : 0;
-        }
-        
-        this.setRunning(false);
-        this.setPaused(false);
+        this.reset(false);
+    },
+    
+    /** @private */
+    __reset: function() {
+        this.__temporaryFrom = false;
+        this.__loopCount = this.reverse ? this.repeat - 1 : 0;
+        this.__progress = this.reverse ? this.duration : 0;
     },
     
     /** @private */
@@ -11050,7 +11048,7 @@ myt.Animator.easingFunctions = {
     },
     easeInBack: function (t, c, d, s) {
         if (s === undefined) s = 1.70158;
-        return c*(t/=d)*t*((s+1)*t - s) + b;
+        return c*(t/=d)*t*((s+1)*t - s);
     },
     easeOutBack: function (t, c, d, s) {
         if (s === undefined) s = 1.70158;
