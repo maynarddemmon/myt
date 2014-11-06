@@ -50,6 +50,7 @@
                 duration = Number(durationTxt.value) || 2000,
                 from = lowerLine.x === 12 ? null : lowerLine.x - 97,
                 to = upperLine.x - 97 - targetView.width + 1,
+                reversed = contentView.reversed,
                 easing = this.easing;
             
             var isRelative = false,
@@ -60,7 +61,7 @@
                 to = Number(relativeTo);
             }
             targetView.stopActiveAnimators('x');
-            targetView.animate('x', to, from, isRelative, null, duration, false, repeat, easing);
+            targetView.animate('x', to, from, isRelative, null, duration, reversed, repeat, easing);
         },
         
         stopAnimation: function() {
@@ -99,6 +100,8 @@
     });
     
     var InputClass = new JS.Class('InputClass', myt.InputText, {
+        include: [myt.MouseOver, myt.TooltipMixin],
+        
         initNode: function(parent, attrs) {
             attrs.height = 22;
             attrs.roundedCorners = 2;
@@ -124,17 +127,14 @@
         },
         start: function() {
             this.resetPaused();
-            this.resetReversed();
             this.notify('doAnimation');
         },
         stop: function() {
             this.resetPaused();
-            this.resetReversed();
             this.notify('stopAnimation');
         },
         reset: function() {
             this.resetPaused();
-            this.resetReversed();
             this.notify('resetAnimation');
         },
         togglePaused: function() {
@@ -149,11 +149,7 @@
         toggleReversed: function() {
             var reversed = this.reversed = !this.reversed;
             this.notify('reverseAnimation', reversed);
-            reverseBtn.setText(reversed ? 'normal' : 'reverse');
-        },
-        resetReversed: function() {
-            this.reversed = false;
-            reverseBtn.setText('reverse');
+            reverseBtn.setText(reversed ? 'reversed' : 'normal');
         }
     }]);
     
@@ -165,17 +161,20 @@
     });
     new BtnClass(controlView, {text:'start'}, [{doActivated: function() {contentView.start();}}]);
     new BtnClass(controlView, {text:'stop'}, [{doActivated: function() {contentView.stop();}}]);
-    var pauseBtn = new BtnClass(controlView, {text:'pause', width:59}, [{doActivated: function() {contentView.togglePaused();}}]);
-    var reverseBtn = new BtnClass(controlView, {text:'reverse', width:58}, [{doActivated: function() {contentView.toggleReversed();}}]);
+    var pauseBtn = new BtnClass(controlView, {text:'pause', width:58}, [{doActivated: function() {contentView.togglePaused();}}]);
+    var reverseBtn = new BtnClass(controlView, {text:'normal', width:64}, [{doActivated: function() {contentView.toggleReversed();}}]);
     new BtnClass(controlView, {text:'reset'}, [{doActivated: function() {contentView.reset();}}]);
     var repeatTxt = new InputClass(controlView, {
-        width:45, placeholder:'repeat', allowedChars:'-0123456789', maxLength:4, text:'1'
+        width:45, placeholder:'repeat', allowedChars:'-0123456789', maxLength:4, text:'1',
+        tooltip:'The number of times to repeat the animation. If negative it will repeat forever.'
     });
     var durationTxt = new InputClass(controlView, {
-        width:60, placeholder:'duration', allowedChars:'0123456789', maxLength:6, text:'2000'
+        width:60, placeholder:'duration', allowedChars:'0123456789', maxLength:6, text:'2000',
+        tooltip:'The duration of the animation in milliseconds.'
     });
     var relativeToTxt = new InputClass(controlView, {
-        width:65, placeholder:'relative to', allowedChars:'-0123456789', maxLength:4, text:''
+        width:65, placeholder:'relative to', allowedChars:'-0123456789', maxLength:4, text:'',
+        tooltip:'If not empty a relative animation will be performed using this as the to value.'
     });
     new myt.SpacedLayout(controlView, {spacing:1, inset:1});
     new myt.ConstantLayout(controlView, {targetAttrName:'y', targetValue:1});
@@ -227,11 +226,12 @@
         ignoreLayout:true, y:34, x:93, width:7, height:10,
         activeColor:'#999999', hoverColor:'#bbbbbb', readyColor:'#aaaaaa',
         border:[1,'solid','#666666'],
-        roundedCorners:2
-    }, [myt.Draggable, {
+        roundedCorners:2,
+        tooltip:'The from value of the animation. If you slide this away to the left the current location of the animation target will be used.'
+    }, [myt.Draggable, myt.TooltipMixin, {
         requestDragPosition: function(x, y) {
             y = 34;
-            if (x <= 75) {
+            if (x <= 70) {
                 x = 8;
             } else {
                 x = Math.min(Math.max(x, 93), upperLimit);
@@ -251,8 +251,9 @@
         ignoreLayout:true, y:34, x:upperLimit, width:7, height:10,
         activeColor:'#999999', hoverColor:'#bbbbbb', readyColor:'#aaaaaa',
         border:[1,'solid','#666666'],
-        roundedCorners:2
-    }, [myt.Draggable, {
+        roundedCorners:2,
+        tooltip:'The to value for the animation.'
+    }, [myt.Draggable, myt.TooltipMixin, {
         requestDragPosition: function(x, y) {
             y = 34;
             x = Math.min(Math.max(x, 93), upperLimit);
