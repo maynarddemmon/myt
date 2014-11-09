@@ -120,8 +120,8 @@ JS.extend(JS.Module.prototype, {
   include: function(module, options) {
     if (!module) return this;
 
-    var options = options || {},
-        resolve = options._resolve !== false,
+    options = options || {};
+    var resolve = options._resolve !== false,
         extend  = module.extend,
         include = module.include,
         extended, field, value, mixins, i, n;
@@ -158,8 +158,8 @@ JS.extend(JS.Module.prototype, {
   },
 
   resolve: function(host) {
-    var host   = host || this,
-        target = host.__tgt__,
+    host = host || this;
+    var target = host.__tgt__,
         inc    = this.__inc__,
         fns    = this.__fns__,
         i, n, key, compiled;
@@ -188,8 +188,8 @@ JS.extend(JS.Module.prototype, {
 
   ancestors: function(list) {
     var cachable = !list,
-        list     = list || [],
-        inc      = this.__inc__;
+        inc = this.__inc__;
+    list = list || [];
 
     if (cachable && this.__anc__) return this.__anc__.slice();
 
@@ -205,11 +205,10 @@ JS.extend(JS.Module.prototype, {
     var cached = this.__mct__[name];
     if (cached && cached.slice) return cached.slice();
 
-    var ancestors = this.ancestors(),
-        methods   = [],
-        fns;
-
-    for (var i = 0, n = ancestors.length; i < n;) {
+    var ancestors = this.ancestors(), n = ancestors.length,
+        methods = [],
+        fns, i = 0;
+    for (; i < n;) {
       fns = ancestors[i++].__fns__;
       if (fns.hasOwnProperty(name)) methods.push(fns[name]);
     }
@@ -220,9 +219,8 @@ JS.extend(JS.Module.prototype, {
   includes: function(module) {
     if (module === this) return true;
 
-    var inc = this.__inc__;
-
-    for (var i = 0, n = inc.length; i < n;) {
+    var inc = this.__inc__, n = inc.length, i = 0;
+    for (; i < n;) {
       if (inc[i++].includes(module)) return true;
     }
     return false;
@@ -235,9 +233,10 @@ JS.extend(JS.Module.prototype, {
 
 JS.Kernel = new JS.Module('Kernel', {
   __eigen__: function() {
-    if (this.__meta__) return this.__meta__;
-    this.__meta__ = new JS.Module('', null, {_target: this});
-    return this.__meta__.include(this.klass, {_resolve: false});
+    var meta = this.__meta__;
+    if (meta) return meta;
+    meta = this.__meta__ = new JS.Module('', null, {_target: this});
+    return meta.include(this.klass, {_resolve: false});
   },
 
   equals: function(other) {
@@ -245,8 +244,10 @@ JS.Kernel = new JS.Module('Kernel', {
   },
 
   extend: function(module, options) {
-    var resolve = (options || {})._resolve;
-    this.__eigen__().include(module, {_extended: this, _resolve: resolve});
+    if (module) {
+      var resolve = (options || {})._resolve;
+      this.__eigen__().include(module, {_extended: this, _resolve: resolve});
+    }
     return this;
   },
 
@@ -256,7 +257,7 @@ JS.Kernel = new JS.Module('Kernel', {
   },
 
   method: function(name) {
-    var cache = this.__mct__ = this.__mct__ || {},
+    var cache = this.__mct__ || (this.__mct__ = {}),
         value = cache[name],
         field = this[name];
 

@@ -1,7 +1,6 @@
 JS.Class
-    1) Warning when a mixin is null or undefined in "include".
-    2) Configure name for "callSuper", "initialize", "extend", etc.
-    3) Call super on other superclass methods.
+    o Configure name for "callSuper", "initialize", "extend", etc.
+    o Call super on other superclass methods.
 
 Myt
     o Send mouse out to last "over" view if two overs happen in a row. Browser Bugfix: firefox

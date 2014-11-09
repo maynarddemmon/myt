@@ -104,7 +104,15 @@ myt.Node = new JS.Class('Node', {
         @returns void */
     initialize: function(parent, attrs, mixins) {
         if (mixins) {
-            for (var i = 0, len = mixins.length; len > i;) this.extend(mixins[i++]);
+            var i = 0, len = mixins.length, mixin;
+            for (; len > i;) {
+                mixin = mixins[i++];
+                if (mixin) {
+                    this.extend(mixin);
+                } else {
+                    console.warn("Undefined mixin in initialization of: " + this.klass.__displayName);
+                }
+            }
         }
         
         this.inited = false;
