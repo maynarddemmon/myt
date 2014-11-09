@@ -4,18 +4,11 @@ JS.Class
 
 Myt
     o Send mouse out to last "over" view if two overs happen in a row. Browser Bugfix: firefox
-    
     o Replication/repeat. See AngularJS ngRepeat for inspiration.
     o List components
       - Item tiling and pooling
-    
     o Offset hint for layout
     o Target a hint to a specific layout when a view is controlled by multiple layouts.
-    
-    o SizeToParent should support an offset so we can do parent width minus 10px, etc.
-    
     o Use Z-index for bring to front
     o Dialog should support multiple entries for spinner message using a key to add/remove them.
     o Build in delay to showSpinner code.
-    
-    o Compensate for CSS border property
