@@ -4798,18 +4798,14 @@ myt.Observer = new JS.Module('Observer', {
                 var self = this, origMethodName = methodName;
                 
                 // Generate one time method name.
-                if (this.__methodNameCounter === undefined) {
-                    this.__methodNameCounter = 0;
-                } else {
-                    this.__methodNameCounter++;
-                }
-                methodName = '__DO_ONCE_' + this.__methodNameCounter;
+                if (this.__methodNameCounter === undefined) this.__methodNameCounter = 0;
+                methodName = '__DO_ONCE_' + this.__methodNameCounter++;
                 
                 // Setup wrapper method that will do the detachFrom.
-                this[methodName] = function(e) {
+                this[methodName] = function(event) {
                     self.detachFrom(observable, methodName, eventType);
                     delete self[methodName];
-                    return self[origMethodName](e);
+                    return self[origMethodName](event);
                 };
             }
             
@@ -8647,12 +8643,12 @@ myt.View = new JS.Class('View', myt.Node, {
     },
     
     /** @private */
-    __doAlignCenter: function(e) {
+    __doAlignCenter: function(event) {
         this.setX(Math.round((this.parent.width - this.width) / 2) + (this.alignOffset || 0));
     },
     
     /** @private */
-    __doAlignRight: function(e) {
+    __doAlignRight: function(event) {
         this.setX(this.parent.width - this.width - (this.alignOffset || 0));
     },
     
@@ -8705,12 +8701,12 @@ myt.View = new JS.Class('View', myt.Node, {
     },
     
     /** @private */
-    __doValignMiddle: function(e) {
+    __doValignMiddle: function(event) {
         this.setY(Math.round((this.parent.height - this.height) / 2) + (this.valignOffset || 0));
     },
     
     /** @private */
-    __doValignBottom: function(e) {
+    __doValignBottom: function(event) {
         this.setY(this.parent.height - this.height - (this.valignOffset || 0));
     },
     
@@ -10044,7 +10040,7 @@ myt.SizeHeightToDom = new JS.Module('SizeHeightToDom', {
 */
 myt.SizeToParent = new JS.Module('SizeToParent', {
     // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrides myt.Node */
+    /** @overrides myt.View */
     setParent: function(parent) {
         if (this.parent !== parent) {
             if (this.inited) {
@@ -10076,25 +10072,6 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
         }
     },
     
-    /** @private */
-    __teardownPercentOfParentWidthConstraint: function() {
-        if (this.percentOfParentWidth >= 0) this.detachFrom(this.parent, '__doPercentOfParentWidth', 'width');
-    },
-    
-    /** @private */
-    __setupPercentOfParentWidthConstraint: function() {
-        var p = this.parent;
-        if (p && this.percentOfParentWidth >= 0) this.syncTo(p, '__doPercentOfParentWidth', 'width');
-    },
-    
-    /** @private */
-    __doPercentOfParentWidth: function(e) {
-        this.setWidth((this.percentOfParentWidthOffset || 0) + Math.round(this.parent.width * (this.percentOfParentWidth / 100)));
-        // Force width event if not inited yet so that align constraint
-        // will work.
-        if (!this.inited) this.fireNewEvent('width', this.width);
-    },
-    
     setPercentOfParentHeightOffset: function(v) {
         if (this.percentOfParentHeightOffset !== v) {
             this.percentOfParentHeightOffset = v;
@@ -10114,6 +10091,27 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
         }
     },
     
+    
+    // Methods /////////////////////////////////////////////////////////////////
+    /** @private */
+    __teardownPercentOfParentWidthConstraint: function() {
+        if (this.percentOfParentWidth >= 0) this.detachFrom(this.parent, '__doPercentOfParentWidth', 'width');
+    },
+    
+    /** @private */
+    __setupPercentOfParentWidthConstraint: function() {
+        var p = this.parent;
+        if (p && this.percentOfParentWidth >= 0) this.syncTo(p, '__doPercentOfParentWidth', 'width');
+    },
+    
+    /** @private */
+    __doPercentOfParentWidth: function(event) {
+        this.setWidth((this.percentOfParentWidthOffset || 0) + Math.round(this.parent.width * (this.percentOfParentWidth / 100)));
+        // Force width event if not inited yet so that align constraint
+        // in myt.View will work.
+        if (!this.inited) this.fireNewEvent('width', this.width);
+    },
+    
     /** @private */
     __teardownPercentOfParentHeightConstraint: function() {
         if (this.percentOfParentHeight >= 0) this.detachFrom(this.parent, '__doPercentOfParentHeight', 'height');
@@ -10126,10 +10124,10 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
     },
     
     /** @private */
-    __doPercentOfParentHeight: function(e) {
+    __doPercentOfParentHeight: function(event) {
         this.setHeight((this.percentOfParentHeightOffset || 0) + Math.round(this.parent.height * (this.percentOfParentHeight / 100)));
         // Force height event if not inited yet so that valign constraint
-        // will work.
+        // in myt.View will work.
         if (!this.inited) this.fireNewEvent('height', this.height);
     }
 });
@@ -15584,14 +15582,14 @@ myt.HorizontalThreePanel = new JS.Module('HorizontalThreePanel', {
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @private */
-    __updateSize: function(e) {
+    __updateSize: function(event) {
         var v = this.second;
         v.setHeight(v.naturalHeight);
         this.__updateImageSize();
     },
     
     /** @private */
-    __updateImageSize: function(e) {
+    __updateImageSize: function(event) {
         var v = this.second;
         v.setImageSize(this.repeat ? undefined : v.width + 'px ' + v.height + 'px');
     },

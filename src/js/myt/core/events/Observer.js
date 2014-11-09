@@ -169,18 +169,14 @@ myt.Observer = new JS.Module('Observer', {
                 var self = this, origMethodName = methodName;
                 
                 // Generate one time method name.
-                if (this.__methodNameCounter === undefined) {
-                    this.__methodNameCounter = 0;
-                } else {
-                    this.__methodNameCounter++;
-                }
-                methodName = '__DO_ONCE_' + this.__methodNameCounter;
+                if (this.__methodNameCounter === undefined) this.__methodNameCounter = 0;
+                methodName = '__DO_ONCE_' + this.__methodNameCounter++;
                 
                 // Setup wrapper method that will do the detachFrom.
-                this[methodName] = function(e) {
+                this[methodName] = function(event) {
                     self.detachFrom(observable, methodName, eventType);
                     delete self[methodName];
-                    return self[origMethodName](e);
+                    return self[origMethodName](event);
                 };
             }
             

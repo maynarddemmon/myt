@@ -325,12 +325,12 @@ myt.View = new JS.Class('View', myt.Node, {
     },
     
     /** @private */
-    __doAlignCenter: function(e) {
+    __doAlignCenter: function(event) {
         this.setX(Math.round((this.parent.width - this.width) / 2) + (this.alignOffset || 0));
     },
     
     /** @private */
-    __doAlignRight: function(e) {
+    __doAlignRight: function(event) {
         this.setX(this.parent.width - this.width - (this.alignOffset || 0));
     },
     
@@ -383,12 +383,12 @@ myt.View = new JS.Class('View', myt.Node, {
     },
     
     /** @private */
-    __doValignMiddle: function(e) {
+    __doValignMiddle: function(event) {
         this.setY(Math.round((this.parent.height - this.height) / 2) + (this.valignOffset || 0));
     },
     
     /** @private */
-    __doValignBottom: function(e) {
+    __doValignBottom: function(event) {
         this.setY(this.parent.height - this.height - (this.valignOffset || 0));
     },
     

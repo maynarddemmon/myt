@@ -28,7 +28,7 @@
 */
 myt.SizeToParent = new JS.Module('SizeToParent', {
     // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrides myt.Node */
+    /** @overrides myt.View */
     setParent: function(parent) {
         if (this.parent !== parent) {
             if (this.inited) {
@@ -60,25 +60,6 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
         }
     },
     
-    /** @private */
-    __teardownPercentOfParentWidthConstraint: function() {
-        if (this.percentOfParentWidth >= 0) this.detachFrom(this.parent, '__doPercentOfParentWidth', 'width');
-    },
-    
-    /** @private */
-    __setupPercentOfParentWidthConstraint: function() {
-        var p = this.parent;
-        if (p && this.percentOfParentWidth >= 0) this.syncTo(p, '__doPercentOfParentWidth', 'width');
-    },
-    
-    /** @private */
-    __doPercentOfParentWidth: function(e) {
-        this.setWidth((this.percentOfParentWidthOffset || 0) + Math.round(this.parent.width * (this.percentOfParentWidth / 100)));
-        // Force width event if not inited yet so that align constraint
-        // will work.
-        if (!this.inited) this.fireNewEvent('width', this.width);
-    },
-    
     setPercentOfParentHeightOffset: function(v) {
         if (this.percentOfParentHeightOffset !== v) {
             this.percentOfParentHeightOffset = v;
@@ -98,6 +79,27 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
         }
     },
     
+    
+    // Methods /////////////////////////////////////////////////////////////////
+    /** @private */
+    __teardownPercentOfParentWidthConstraint: function() {
+        if (this.percentOfParentWidth >= 0) this.detachFrom(this.parent, '__doPercentOfParentWidth', 'width');
+    },
+    
+    /** @private */
+    __setupPercentOfParentWidthConstraint: function() {
+        var p = this.parent;
+        if (p && this.percentOfParentWidth >= 0) this.syncTo(p, '__doPercentOfParentWidth', 'width');
+    },
+    
+    /** @private */
+    __doPercentOfParentWidth: function(event) {
+        this.setWidth((this.percentOfParentWidthOffset || 0) + Math.round(this.parent.width * (this.percentOfParentWidth / 100)));
+        // Force width event if not inited yet so that align constraint
+        // in myt.View will work.
+        if (!this.inited) this.fireNewEvent('width', this.width);
+    },
+    
     /** @private */
     __teardownPercentOfParentHeightConstraint: function() {
         if (this.percentOfParentHeight >= 0) this.detachFrom(this.parent, '__doPercentOfParentHeight', 'height');
@@ -110,10 +112,10 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
     },
     
     /** @private */
-    __doPercentOfParentHeight: function(e) {
+    __doPercentOfParentHeight: function(event) {
         this.setHeight((this.percentOfParentHeightOffset || 0) + Math.round(this.parent.height * (this.percentOfParentHeight / 100)));
         // Force height event if not inited yet so that valign constraint
-        // will work.
+        // in myt.View will work.
         if (!this.inited) this.fireNewEvent('height', this.height);
     }
 });

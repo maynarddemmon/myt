@@ -84,14 +84,14 @@ myt.HorizontalThreePanel = new JS.Module('HorizontalThreePanel', {
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @private */
-    __updateSize: function(e) {
+    __updateSize: function(event) {
         var v = this.second;
         v.setHeight(v.naturalHeight);
         this.__updateImageSize();
     },
     
     /** @private */
-    __updateImageSize: function(e) {
+    __updateImageSize: function(event) {
         var v = this.second;
         v.setImageSize(this.repeat ? undefined : v.width + 'px ' + v.height + 'px');
     },
