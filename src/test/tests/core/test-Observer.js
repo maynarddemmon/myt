@@ -19,6 +19,8 @@ test("Attach and Remove event observers.", function() {
     // Attach to an observable and verify it's there
     ok(observer.attachTo(observable, 'handleFooEvent', 'foo') === true, "Attach to observable worked");
     
+    ok(observer.isAttachedTo(observable, 'handleFooEvent', 'foo') === true, "Observer should now be attached.");
+    
     ok(observer.attachTo(null, 'handleFooEvent', 'foo') === false, "Attach to observable should not work when observable is missing.");
     ok(observer.attachTo(observable, '', 'foo') === false, "Attach to observable should not work when method name is empty.");
     ok(observer.attachTo(observable, 'handleFooEvent', '') === false, "Attach to observable should not work when event type is missing.");
@@ -182,6 +184,204 @@ test("Fire an event after observer has attached.", function() {
     observer.destroy();
 });
 
-// TODO: test specialized attachment methods
-// TODO: test once cases
+test("Attach once.", function() {
+    var observable = new myt.Node();
+    
+    var observer = new myt.Node(null, null, [{
+        doBeforeAdoption: function() {
+            this.fooEventCount = 0;
+            this.lastFooEvent = null;
+        },
+        
+        handleFooEvent: function(e) {
+            this.fooEventCount++;
+            this.lastFooEvent = e;
+        }
+    }]);
+    
+    // Fire event once before attachment just to make sure the observer
+    // is not somehow registered or being notified on attach.
+    observable.fireNewEvent('foo', 'bar');
+    
+    ok(observer.fooEventCount === 0, "Ensure observer initialization of fooEventCount was correct.");
+    ok(observer.lastFooEvent === null, "Ensure observer initialization lastFooEvent was correct.");
+    
+    ok(observer.isAttachedTo(observable, 'handleFooEvent', 'foo') === false, "Observer should not be attached yet.");
+    ok(observer.isAttachedTo(observable, '__DO_ONCE_0', 'foo') === false, "Observer should not be attached yet.");
+    
+    ok(observer.__methodNameCounter === undefined, "Method name counter should start as undefined.");
+    
+    observer.attachTo(observable, 'handleFooEvent', 'foo', true);
+    
+    ok(observer.__methodNameCounter === 1, "Method name counter should now be 1.");
+    ok(observer.isAttachedTo(observable, 'handleFooEvent', 'foo') === false, "Observer should still no be attached to handleFooEvent.");
+    ok(observer.isAttachedTo(observable, '__DO_ONCE_0', 'foo') === true, "Observer should now be attached to __DO_ONCE_0.");
+    
+    observable.fireNewEvent('foo', 'bar');
+    
+    ok(observer.isAttachedTo(observable, 'handleFooEvent', 'foo') === false, "Observer should still no be attached to handleFooEvent.");
+    ok(observer.isAttachedTo(observable, '__DO_ONCE_0', 'foo') === false, "Observer should no longer be attached to __DO_ONCE_0.");
+    
+    ok(observer.fooEventCount === 1, "One event should have been fired.");
+    ok(observer.lastFooEvent != null, "Last foo event should exist now.");
+    
+    // Attach again
+    observer.attachTo(observable, 'handleFooEvent', 'foo', true);
+    
+    ok(observer.__methodNameCounter === 2, "Method name counter should now be 1.");
+    ok(observer.isAttachedTo(observable, 'handleFooEvent', 'foo') === false, "Observer should still no be attached to handleFooEvent.");
+    ok(observer.isAttachedTo(observable, '__DO_ONCE_1', 'foo') === true, "Observer should now be attached to __DO_ONCE_1.");
+    
+    observable.fireNewEvent('foo', 'bar');
+    
+    ok(observer.isAttachedTo(observable, 'handleFooEvent', 'foo') === false, "Observer should still no be attached to handleFooEvent.");
+    ok(observer.isAttachedTo(observable, '__DO_ONCE_1', 'foo') === false, "Observer should no longer be attached to __DO_ONCE_1.");
+    
+    observable.destroy();
+    observer.destroy();
+});
 
+test("Test attachToAndCallbackIfAttrNotEqual", function() {
+    var observable = new myt.Node(null, null, [{
+        doBeforeAdoption: function() {
+            this.bar = "hey";
+        }
+    }]);
+    
+    var observer = new myt.Node(null, null, [{
+        doBeforeAdoption: function() {
+            this.fooEventCount = 0;
+            this.lastFooEvent = null;
+            this.barEventCount = 0;
+            this.lastBarEvent = null;
+        },
+        
+        handleFooEvent: function(e) {
+            this.fooEventCount++;
+            this.lastFooEvent = e;
+        },
+        
+        handleBarEvent: function(e) {
+            this.barEventCount++;
+            this.lastBarEvent = e;
+        }
+    }]);
+    
+    // Value not equal so an event fires
+    ok(observer.isAttachedTo(observable, 'handleFooEvent', 'foo') === false, "Observer should not be attached yet.");
+    
+    observer.attachToAndCallbackIfAttrNotEqual(observable, 'handleFooEvent', 'foo', 'blah');
+    
+    ok(observer.isAttachedTo(observable, 'handleFooEvent', 'foo') === true, "Observer should now be attached.");
+    ok(observer.fooEventCount === 1, "One event should have been fired.");
+    ok(observer.lastFooEvent != null, "Last foo event should exist now.");
+    
+    // Value is equal so no event fires
+    ok(observer.isAttachedTo(observable, 'handleBarEvent', 'bar') === false, "Observer should not be attached yet.");
+    
+    observer.attachToAndCallbackIfAttrNotEqual(observable, 'handleBarEvent', 'bar', 'hey');
+    
+    ok(observer.isAttachedTo(observable, 'handleBarEvent', 'bar') === true, "Observer should now be attached.");
+    ok(observer.barEventCount === 0, "No event should have been fired.");
+    ok(observer.lastBarEvent === null, "Last foo event should still not exist.");
+    
+    observable.destroy();
+    observer.destroy();
+});
+
+test("Test attachToAndCallbackIfAttrEqual", function() {
+    var observable = new myt.Node(null, null, [{
+        doBeforeAdoption: function() {
+            this.bar = "hey";
+            this.foo = "blah";
+        }
+    }]);
+    
+    var observer = new myt.Node(null, null, [{
+        doBeforeAdoption: function() {
+            this.fooEventCount = 0;
+            this.lastFooEvent = null;
+            this.barEventCount = 0;
+            this.lastBarEvent = null;
+        },
+        
+        handleFooEvent: function(e) {
+            this.fooEventCount++;
+            this.lastFooEvent = e;
+        },
+        
+        handleBarEvent: function(e) {
+            this.barEventCount++;
+            this.lastBarEvent = e;
+        }
+    }]);
+    
+    // Value not equal so no event fires
+    ok(observer.isAttachedTo(observable, 'handleBarEvent', 'bar') === false, "Observer should not be attached yet.");
+    
+    observer.attachToAndCallbackIfAttrEqual(observable, 'handleBarEvent', 'bar', 'blah');
+    
+    ok(observer.isAttachedTo(observable, 'handleBarEvent', 'bar') === true, "Observer should now be attached.");
+    ok(observer.barEventCount === 0, "No event should have been fired.");
+    ok(observer.lastBarEvent === null, "Last foo event should still not exist.");
+    
+    // Value is equal so an event fires
+    ok(observer.isAttachedTo(observable, 'handleFooEvent', 'foo') === false, "Observer should not be attached yet.");
+    
+    observer.attachToAndCallbackIfAttrEqual(observable, 'handleFooEvent', 'foo', 'blah');
+    
+    ok(observer.isAttachedTo(observable, 'handleFooEvent', 'foo') === true, "Observer should now be attached.");
+    ok(observer.fooEventCount === 1, "One event should have been fired.");
+    ok(observer.lastFooEvent != null, "Last foo event should exist now.");
+    
+    observable.destroy();
+    observer.destroy();
+});
+
+test("Test attachToAndCallbackIfAttrExists", function() {
+    var observable = new myt.Node(null, null, [{
+        doBeforeAdoption: function() {
+            this.foo = "hey";
+        }
+    }]);
+    
+    var observer = new myt.Node(null, null, [{
+        doBeforeAdoption: function() {
+            this.fooEventCount = 0;
+            this.lastFooEvent = null;
+            this.barEventCount = 0;
+            this.lastBarEvent = null;
+        },
+        
+        handleFooEvent: function(e) {
+            this.fooEventCount++;
+            this.lastFooEvent = e;
+        },
+        
+        handleBarEvent: function(e) {
+            this.barEventCount++;
+            this.lastBarEvent = e;
+        }
+    }]);
+    
+    // Value does not exist so no event fires
+    ok(observer.isAttachedTo(observable, 'handleBarEvent', 'bar') === false, "Observer should not be attached yet.");
+    
+    observer.attachToAndCallbackIfAttrExists(observable, 'handleBarEvent', 'bar');
+    
+    ok(observer.isAttachedTo(observable, 'handleBarEvent', 'bar') === true, "Observer should now be attached.");
+    ok(observer.barEventCount === 0, "No event should have been fired.");
+    ok(observer.lastBarEvent === null, "Last foo event should still not exist.");
+    
+    // Value exists so an event fires
+    ok(observer.isAttachedTo(observable, 'handleFooEvent', 'foo') === false, "Observer should not be attached yet.");
+    
+    observer.attachToAndCallbackIfAttrExists(observable, 'handleFooEvent', 'foo');
+    
+    ok(observer.isAttachedTo(observable, 'handleFooEvent', 'foo') === true, "Observer should now be attached.");
+    ok(observer.fooEventCount === 1, "One event should have been fired.");
+    ok(observer.lastFooEvent != null, "Last foo event should exist now.");
+    
+    observable.destroy();
+    observer.destroy();
+});
