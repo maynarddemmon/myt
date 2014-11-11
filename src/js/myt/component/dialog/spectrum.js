@@ -83,7 +83,7 @@
     }
 
     function spectrum(element, o) {
-        var opts = $.extend({}, defaultOpts, o),
+        var opts = myt.extend({}, defaultOpts, o),
             showSelectionPalette = opts.showSelectionPalette,
             localStorageKey = opts.localStorageKey,
             dragWidth = 0,
@@ -398,7 +398,7 @@
         }
 
         function option(optionName, optionValue) {
-            if (optionName === undefined) return $.extend({}, opts);
+            if (optionName === undefined) return myt.extend({}, opts);
             if (optionValue === undefined) return opts[optionName];
 
             opts[optionName] = optionValue;
@@ -527,7 +527,7 @@
 
         // Initializing a new instance of spectrum
         return this.spectrum("destroy").each(function () {
-            var options = $.extend({}, opts, $(this).data());
+            var options = myt.extend({}, opts, $(this).data());
             var spect = spectrum(this, options);
             $(this).data(dataID, spect.id);
         });

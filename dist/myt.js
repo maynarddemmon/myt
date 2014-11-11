@@ -4278,6 +4278,48 @@ myt = {
                 cache = f.__cache || (f.__cache = {});
             return (hash in cache) ? cache[hash] : cache[hash] = f.apply(this, arguments);
         };
+    },
+    
+    /** Copies properties from the source objects to the target object.
+        @param targetObj:object The object that properties will be copied into.
+        @param sourceObj:object The object that properties will be copied from.
+        @param arguments... Additional arguments beyond the second will also
+            be used as source objects and copied in order from left to right.
+        @param mappingFunction:function (optional) If the last argument is a 
+            function it will be used to copy values from the source to the
+            target. The function will be passed three values, the key, the 
+            target and the source. The mapping function should copy the
+            source value into the target value if so desired.
+        @returns The target object. */
+    extend: function(targetObj, sourceObj) {
+        var iterable = targetObj, 
+            result = iterable,
+            args = arguments, argsLength = args.length, argsIndex = 0,
+            key, mappingFunc, ownIndex, ownProps, length;
+        
+        if (iterable) {
+            if (argsLength > 2 && typeof args[argsLength - 1] === 'function') mappingFunc = args[--argsLength];
+            
+            while (++argsIndex < argsLength) {
+                iterable = args[argsIndex];
+                
+                if (iterable) {
+                    ownIndex = -1;
+                    ownKeys = Object.keys(iterable);
+                    length = ownKeys ? ownKeys.length : 0;
+                    
+                    while (++ownIndex < length) {
+                        key = ownKeys[ownIndex];
+                        if (mappingFunc) {
+                            mappingFunc(key, result, iterable);
+                        } else {
+                            result[key] = iterable[key];
+                        }
+                    }
+                }
+            }
+        }
+        return result
     }
 };
 
@@ -4335,7 +4377,7 @@ myt.Cookie = {
                     cookie value before it is returned.
         @returns The cookie value string or a parsed cookie value. */
     read: function(key, options) {
-        options = $.extend({}, this.defaults, options);
+        options = myt.extend({}, this.defaults, options);
         
         var decodeFunc = options.raw ? this._raw : this._decoded,
             useJson = options.json,
@@ -4375,7 +4417,7 @@ myt.Cookie = {
                     the cookie value.
         @returns void */
     write: function(key, value, options) {
-        options = $.extend({}, this.defaults, options);
+        options = myt.extend({}, this.defaults, options);
         
         if (typeof options.expires === 'number') {
             var days = options.expires;
@@ -4403,7 +4445,7 @@ myt.Cookie = {
     remove: function(key, options) {
         if (this.read(key, options) !== undefined) {
             // Must not alter options, thus extending a fresh object.
-            this.write(key, '', $.extend({}, options, {expires: -1}));
+            this.write(key, '', myt.extend({}, options, {expires: -1}));
             return true;
         }
         return false;
@@ -19264,7 +19306,7 @@ myt.Ajax = new JS.Class('Ajax', myt.Node, {
         });
         
         return myt.Ajax.doRequest(
-            $.extend(true, {}, this.opts, mappedOpts), 
+            myt.extend({}, this.opts, mappedOpts), 
             successCallback || this.handleSuccess, 
             failureCallback || this.handleFailure
         );
@@ -20495,7 +20537,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
     }
 
     function spectrum(element, o) {
-        var opts = $.extend({}, defaultOpts, o),
+        var opts = myt.extend({}, defaultOpts, o),
             showSelectionPalette = opts.showSelectionPalette,
             localStorageKey = opts.localStorageKey,
             dragWidth = 0,
@@ -20810,7 +20852,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         }
 
         function option(optionName, optionValue) {
-            if (optionName === undefined) return $.extend({}, opts);
+            if (optionName === undefined) return myt.extend({}, opts);
             if (optionValue === undefined) return opts[optionName];
 
             opts[optionName] = optionValue;
@@ -20939,7 +20981,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
 
         // Initializing a new instance of spectrum
         return this.spectrum("destroy").each(function () {
-            var options = $.extend({}, opts, $(this).data());
+            var options = myt.extend({}, opts, $(this).data());
             var spect = spectrum(this, options);
             $(this).data(dataID, spect.id);
         });
@@ -21879,7 +21921,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             displayed. Supports: fontWeight, whiteSpace, wordWrap and width.
         @returns void */
     showMessage: function(msg, callbackFunction, opts) {
-        opts = $.extend({}, myt.Dialog.WRAP_TEXT_DEFAULTS, opts);
+        opts = myt.extend({}, myt.Dialog.WRAP_TEXT_DEFAULTS, opts);
         var content = this.content, MP = myt.ModalPanel;
         
         this.__destroyContent();
@@ -21913,7 +21955,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             Supports: fontWeight, whiteSpace, wordWrap and width.
         @returns void */
     showSpinner: function(msg, opts) {
-        opts = $.extend({}, myt.Dialog.NO_WRAP_TEXT_DEFAULTS, opts);
+        opts = myt.extend({}, myt.Dialog.NO_WRAP_TEXT_DEFAULTS, opts);
         var content = this.content, MP = myt.ModalPanel;
         
         this.__destroyContent();
@@ -21946,7 +21988,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     showColorPicker: function(callbackFunction, opts) {
         var MP = myt.ModalPanel, content = this.content;
         
-        opts = $.extend({}, myt.Dialog.PICKER_DEFAULTS, opts);
+        opts = myt.extend({}, myt.Dialog.PICKER_DEFAULTS, opts);
         
         this.__destroyContent();
         
@@ -22016,7 +22058,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     },
     
     showConfirm: function(msg, callbackFunction, opts) {
-        opts = $.extend({}, myt.Dialog.CONFIRM_DEFAULTS, opts);
+        opts = myt.extend({}, myt.Dialog.CONFIRM_DEFAULTS, opts);
         
         this.showMessage(msg, callbackFunction, opts);
         
@@ -22028,7 +22070,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     showContentConfirm: function(contentBuilderFunc, callbackFunction, opts) {
         var MP = myt.ModalPanel, content = this.content;
         
-        opts = $.extend({}, myt.Dialog.CONFIRM_DEFAULTS, opts);
+        opts = myt.extend({}, myt.Dialog.CONFIRM_DEFAULTS, opts);
         
         this.__destroyContent();
         

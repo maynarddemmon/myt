@@ -249,7 +249,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             displayed. Supports: fontWeight, whiteSpace, wordWrap and width.
         @returns void */
     showMessage: function(msg, callbackFunction, opts) {
-        opts = $.extend({}, myt.Dialog.WRAP_TEXT_DEFAULTS, opts);
+        opts = myt.extend({}, myt.Dialog.WRAP_TEXT_DEFAULTS, opts);
         var content = this.content, MP = myt.ModalPanel;
         
         this.__destroyContent();
@@ -283,7 +283,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             Supports: fontWeight, whiteSpace, wordWrap and width.
         @returns void */
     showSpinner: function(msg, opts) {
-        opts = $.extend({}, myt.Dialog.NO_WRAP_TEXT_DEFAULTS, opts);
+        opts = myt.extend({}, myt.Dialog.NO_WRAP_TEXT_DEFAULTS, opts);
         var content = this.content, MP = myt.ModalPanel;
         
         this.__destroyContent();
@@ -316,7 +316,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     showColorPicker: function(callbackFunction, opts) {
         var MP = myt.ModalPanel, content = this.content;
         
-        opts = $.extend({}, myt.Dialog.PICKER_DEFAULTS, opts);
+        opts = myt.extend({}, myt.Dialog.PICKER_DEFAULTS, opts);
         
         this.__destroyContent();
         
@@ -386,7 +386,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     },
     
     showConfirm: function(msg, callbackFunction, opts) {
-        opts = $.extend({}, myt.Dialog.CONFIRM_DEFAULTS, opts);
+        opts = myt.extend({}, myt.Dialog.CONFIRM_DEFAULTS, opts);
         
         this.showMessage(msg, callbackFunction, opts);
         
@@ -398,7 +398,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     showContentConfirm: function(contentBuilderFunc, callbackFunction, opts) {
         var MP = myt.ModalPanel, content = this.content;
         
-        opts = $.extend({}, myt.Dialog.CONFIRM_DEFAULTS, opts);
+        opts = myt.extend({}, myt.Dialog.CONFIRM_DEFAULTS, opts);
         
         this.__destroyContent();
         

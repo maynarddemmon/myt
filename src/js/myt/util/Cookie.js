@@ -51,7 +51,7 @@ myt.Cookie = {
                     cookie value before it is returned.
         @returns The cookie value string or a parsed cookie value. */
     read: function(key, options) {
-        options = $.extend({}, this.defaults, options);
+        options = myt.extend({}, this.defaults, options);
         
         var decodeFunc = options.raw ? this._raw : this._decoded,
             useJson = options.json,
@@ -91,7 +91,7 @@ myt.Cookie = {
                     the cookie value.
         @returns void */
     write: function(key, value, options) {
-        options = $.extend({}, this.defaults, options);
+        options = myt.extend({}, this.defaults, options);
         
         if (typeof options.expires === 'number') {
             var days = options.expires;
@@ -119,7 +119,7 @@ myt.Cookie = {
     remove: function(key, options) {
         if (this.read(key, options) !== undefined) {
             // Must not alter options, thus extending a fresh object.
-            this.write(key, '', $.extend({}, options, {expires: -1}));
+            this.write(key, '', myt.extend({}, options, {expires: -1}));
             return true;
         }
         return false;

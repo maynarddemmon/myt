@@ -77,7 +77,7 @@ myt.Ajax = new JS.Class('Ajax', myt.Node, {
         });
         
         return myt.Ajax.doRequest(
-            $.extend(true, {}, this.opts, mappedOpts), 
+            myt.extend({}, this.opts, mappedOpts), 
             successCallback || this.handleSuccess, 
             failureCallback || this.handleFailure
         );

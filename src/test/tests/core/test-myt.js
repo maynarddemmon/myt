@@ -285,3 +285,40 @@ test("Test getRandomArbitrary", function() {
     r = myt.getRandomArbitrary(3.05, 5.7, function(v) {return 1;});
     ok(myt.areFloatsEqual(r, 5.7), "Bad skew function with too high of a value still works.");
 });
+
+
+test("Test extend", function() {
+    var objA = {a:'foo', b:false, c:5}, objB = {a:'bar', d:'hey'};
+    
+    ok(objA.a === 'foo' && objB.a === 'bar', "Initial value was set.");
+    
+    // One source
+    var source = {e:'here'};
+    var result = myt.extend(source, objA);
+    
+    ok(source === result, "Returned value is the source.");
+    ok(objA.a === 'foo' && objB.a === 'bar', "Source value was not changed.");
+    ok(objA.d === undefined, "Source value did not have anything added to it.");
+    ok(result.a === 'foo' && result.b === false && result.c === 5 && result.e === 'here', "Result has all the values");
+    
+    // Two sources
+    var source2 = {e:'here'};
+    var result2 = myt.extend(source2, objA, objB);
+    
+    ok(source2 === result2, "Returned value is the source.");
+    ok(objA.a === 'foo' && objB.a === 'bar', "Source value was not changed.");
+    ok(objA.d === undefined, "Source value did not have anything added to it.");
+    ok(result2.a === 'bar' && result2.b === false && result2.c === 5 && result2.d === 'hey' && result2.e === 'here', "Result has all the values");
+    
+    // Two sources and a filter
+    var source3 = {e:'here'};
+    var result3 = myt.extend(source3, objA, objB, function(key, target, source) {
+        if (key === 'a' || source[key] === 'hey') target[key] = source[key];
+    });
+    
+    ok(source3 === result3, "Returned value is the source.");
+    ok(objA.a === 'foo' && objB.a === 'bar', "Source value was not changed.");
+    ok(objA.d === undefined, "Source value did not have anything added to it.");
+    console.log(result3);
+    ok(result3.a === 'bar' && result3.b === undefined && result3.c === undefined && result3.d === 'hey' && result3.e === 'here', "Result has all the values that the filter allows.");
+});

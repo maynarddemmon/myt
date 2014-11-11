@@ -440,5 +440,47 @@ myt = {
                 cache = f.__cache || (f.__cache = {});
             return (hash in cache) ? cache[hash] : cache[hash] = f.apply(this, arguments);
         };
+    },
+    
+    /** Copies properties from the source objects to the target object.
+        @param targetObj:object The object that properties will be copied into.
+        @param sourceObj:object The object that properties will be copied from.
+        @param arguments... Additional arguments beyond the second will also
+            be used as source objects and copied in order from left to right.
+        @param mappingFunction:function (optional) If the last argument is a 
+            function it will be used to copy values from the source to the
+            target. The function will be passed three values, the key, the 
+            target and the source. The mapping function should copy the
+            source value into the target value if so desired.
+        @returns The target object. */
+    extend: function(targetObj, sourceObj) {
+        var iterable = targetObj, 
+            result = iterable,
+            args = arguments, argsLength = args.length, argsIndex = 0,
+            key, mappingFunc, ownIndex, ownProps, length;
+        
+        if (iterable) {
+            if (argsLength > 2 && typeof args[argsLength - 1] === 'function') mappingFunc = args[--argsLength];
+            
+            while (++argsIndex < argsLength) {
+                iterable = args[argsIndex];
+                
+                if (iterable) {
+                    ownIndex = -1;
+                    ownKeys = Object.keys(iterable);
+                    length = ownKeys ? ownKeys.length : 0;
+                    
+                    while (++ownIndex < length) {
+                        key = ownKeys[ownIndex];
+                        if (mappingFunc) {
+                            mappingFunc(key, result, iterable);
+                        } else {
+                            result[key] = iterable[key];
+                        }
+                    }
+                }
+            }
+        }
+        return result
     }
 };
