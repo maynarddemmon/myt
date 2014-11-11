@@ -52,7 +52,8 @@ myt.Ajax = new JS.Class('Ajax', myt.Node, {
     
     // Methods /////////////////////////////////////////////////////////////////
     doRequest: function(opts, successCallback, failureCallback) {
-        var mappedOpts = {
+        // Convert from myt.Ajax opts to JQuery.ajax opts.
+        var mappedOpts = myt.extend({
             context:this,
             
             // Store url and anything stored under the "callbackData" and
@@ -64,16 +65,14 @@ myt.Ajax = new JS.Class('Ajax', myt.Node, {
                 
                 jqxhr.requestURL = settings.url;
             }
-        };
-        
-        // Convert from myt.Ajax opts to JQuery.ajax opts.
-        $.each(opts, function(key, value) {
+        }, opts, function(key, target, source) {
+            var targetKey = key;
             switch (key) {
-                case 'requestData': key = 'data'; break;
-                case 'requestMethod': key = 'type'; break;
-                case 'responseType': key = 'datatype'; break;
+                case 'requestData': targetKey = 'data'; break;
+                case 'requestMethod': targetKey = 'type'; break;
+                case 'responseType': targetKey = 'datatype'; break;
             }
-            mappedOpts[key] = value;
+            target[targetKey] = source[key];
         });
         
         return myt.Ajax.doRequest(
