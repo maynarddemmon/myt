@@ -11,6 +11,28 @@
 myt.Color = new JS.Class('Color', {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
+        /** Converts a number or string representation of a number to a 
+            two character hex string.
+            @param value:number/string The number or string to convert.
+            @returns string: A two character hex string such as: '0c' or 'c9'. */
+        toHex: function(value) {
+            value = Math.round(Number(value)).toString(16);
+            return value.length === 1 ? '0' + value : value;
+        },
+        
+        /** Converts red, green, and blue color channel numbers to a six 
+            character hex string.
+            @param red:number The red color channel.
+            @param green:number The green color channel.
+            @param blue:number The blue color channel.
+            @param prependHash:boolean (optional) If true a '#' character
+                will be prepended to the return value.
+            @returns string: Something like: '#ff9c02' or 'ff9c02' */
+        rgbToHex: function(red, green, blue, prependHash) {
+            var toHex = this.toHex;
+            return [prependHash ? '#' : '', toHex(red), toHex(green), toHex(blue)].join('');
+        },
+        
         /** Limits a channel value to integers between 0 and 255.
             @param value:number the channel value to clean up.
             @returns number */
@@ -122,19 +144,10 @@ myt.Color = new JS.Class('Color', {
         return (this.red << 16) + (this.green << 8) + this.blue;
     },
     
-    /** Converts the provided number to a 2 character hex string.
-        @private 
-        @param v:number The number to convert.
-        @returns a 2 character hex string such as: '0c' or 'c9'. */
-    __toHex: function(v) {
-        var str = Number(v).toString(16); 
-        return str.length === 1 ? "0" + str : str;
-    },
-    
     /** Gets the hex string representation of this color.
         @returns string: A hex color such as '#a0bbcc'. */
     getHtmlHexString: function() {
-        return "#" + this.__toHex(this.red) + this.__toHex(this.green) + this.__toHex(this.blue);
+        return myt.Color.rgbToHex(this.red, this.green, this.blue, true);
     },
     
     /** Tests if this color is lighter than the provided color.

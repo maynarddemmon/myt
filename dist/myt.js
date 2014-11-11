@@ -13931,6 +13931,28 @@ myt.Button = new JS.Module('Button', {
 myt.Color = new JS.Class('Color', {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
+        /** Converts a number or string representation of a number to a 
+            two character hex string.
+            @param value:number/string The number or string to convert.
+            @returns string: A two character hex string such as: '0c' or 'c9'. */
+        toHex: function(value) {
+            value = Math.round(Number(value)).toString(16);
+            return value.length === 1 ? '0' + value : value;
+        },
+        
+        /** Converts red, green, and blue color channel numbers to a six 
+            character hex string.
+            @param red:number The red color channel.
+            @param green:number The green color channel.
+            @param blue:number The blue color channel.
+            @param prependHash:boolean (optional) If true a '#' character
+                will be prepended to the return value.
+            @returns string: Something like: '#ff9c02' or 'ff9c02' */
+        rgbToHex: function(red, green, blue, prependHash) {
+            var toHex = this.toHex;
+            return [prependHash ? '#' : '', toHex(red), toHex(green), toHex(blue)].join('');
+        },
+        
         /** Limits a channel value to integers between 0 and 255.
             @param value:number the channel value to clean up.
             @returns number */
@@ -14042,19 +14064,10 @@ myt.Color = new JS.Class('Color', {
         return (this.red << 16) + (this.green << 8) + this.blue;
     },
     
-    /** Converts the provided number to a 2 character hex string.
-        @private 
-        @param v:number The number to convert.
-        @returns a 2 character hex string such as: '0c' or 'c9'. */
-    __toHex: function(v) {
-        var str = Number(v).toString(16); 
-        return str.length === 1 ? "0" + str : str;
-    },
-    
     /** Gets the hex string representation of this color.
         @returns string: A hex color such as '#a0bbcc'. */
     getHtmlHexString: function() {
-        return "#" + this.__toHex(this.red) + this.__toHex(this.green) + this.__toHex(this.blue);
+        return myt.Color.rgbToHex(this.red, this.green, this.blue, true);
     },
     
     /** Tests if this color is lighter than the provided color.
@@ -20471,7 +20484,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         selectionPalette: []
     },
     spectrums = [],
-    IE = !!/msie/i.exec(window.navigator.userAgent),
+    IE = BrowserDetect.browser === 'Explorer',
     markup = (function () {
         // IE does not support gradients with multiple stops, so we need to simulate
         //  that for the rainbow slider with 8 divs that each have a single gradient
@@ -20996,8 +21009,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
     // Brian Grinstead, MIT License
     (function() {
 
-    var trimLeft = /^[\s,#]+/,
-        trimRight = /\s+$/,
+    var trimHash = /^[#]+/,
         math = Math,
         mathRound = math.round,
         mathMin = math.min,
@@ -21055,7 +21067,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
             return {h:hsl.h * 360, s:hsl.s, l:hsl.l};
         },
         toHexString: function() {
-            return '#' + rgbToHex(this._r, this._g, this._b);
+            return myt.Color.rgbToHex(this._r, this._g, this._b, true);
         }
     };
 
@@ -21172,23 +21184,6 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         return {r:r * 255, g:g * 255, b:b * 255};
     }
 
-    // `rgbToHex`
-    // Converts an RGB color to hex
-    // Assumes r, g, and b are contained in the set [0, 255]
-    // Returns a 3 or 6 character hex
-    function rgbToHex(r, g, b) {
-        return [
-            pad2(mathRound(r).toString(16)),
-            pad2(mathRound(g).toString(16)),
-            pad2(mathRound(b).toString(16))
-        ].join("");
-    }
-
-    // Force a hex value to have 2 characters
-    function pad2(c) {
-        return c.length == 1 ? '0' + c : '' + c;
-    }
-
     // Take input from [0, n] and return it as [0, 1]
     function bound01(n, max) {
         var isString = typeof n == "string";
@@ -21225,7 +21220,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
     // Permissive string parsing.  Take in a number of formats, and output an object
     // based on detected format.  Returns `{ r, g, b }` or `{ h, s, l }` or `{ h, s, v}`
     function stringInputToObject(color) {
-        color = color.replace(trimLeft, '').replace(trimRight, '').toLowerCase();
+        color = color.trim().toLowerCase().replace(trimHash, '');
 
         // Try to match string input using regular expressions.
         // Keep most of the number bounding out of this function - don't worry about [0,1] or [0,100] or [0,360]

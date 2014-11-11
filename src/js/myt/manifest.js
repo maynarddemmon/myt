@@ -285,7 +285,7 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'spinner/Spinner.js').provides('myt.Spinner').requires('myt.View');
     
     // Component : Dialog
-    file(MYT_COMPONENT_ROOT + 'dialog/spectrum.js').provides('$.spectrum'); // Requires JQuery 1.7.0+
+    file(MYT_COMPONENT_ROOT + 'dialog/spectrum.js').provides('$.spectrum').requires('myt.Color'); // Requires JQuery 1.7.0+
     file(MYT_COMPONENT_ROOT + 'dialog/Dialog.js').provides('myt.Dialog').requires('$.spectrum','myt.ModalPanel','myt.DrawButton','myt.Spinner');
     
     // Component : Validator

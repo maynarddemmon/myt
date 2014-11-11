@@ -18,7 +18,7 @@
         selectionPalette: []
     },
     spectrums = [],
-    IE = !!/msie/i.exec(window.navigator.userAgent),
+    IE = BrowserDetect.browser === 'Explorer',
     markup = (function () {
         // IE does not support gradients with multiple stops, so we need to simulate
         //  that for the rainbow slider with 8 divs that each have a single gradient
@@ -543,8 +543,7 @@
     // Brian Grinstead, MIT License
     (function() {
 
-    var trimLeft = /^[\s,#]+/,
-        trimRight = /\s+$/,
+    var trimHash = /^[#]+/,
         math = Math,
         mathRound = math.round,
         mathMin = math.min,
@@ -602,7 +601,7 @@
             return {h:hsl.h * 360, s:hsl.s, l:hsl.l};
         },
         toHexString: function() {
-            return '#' + rgbToHex(this._r, this._g, this._b);
+            return myt.Color.rgbToHex(this._r, this._g, this._b, true);
         }
     };
 
@@ -719,23 +718,6 @@
         return {r:r * 255, g:g * 255, b:b * 255};
     }
 
-    // `rgbToHex`
-    // Converts an RGB color to hex
-    // Assumes r, g, and b are contained in the set [0, 255]
-    // Returns a 3 or 6 character hex
-    function rgbToHex(r, g, b) {
-        return [
-            pad2(mathRound(r).toString(16)),
-            pad2(mathRound(g).toString(16)),
-            pad2(mathRound(b).toString(16))
-        ].join("");
-    }
-
-    // Force a hex value to have 2 characters
-    function pad2(c) {
-        return c.length == 1 ? '0' + c : '' + c;
-    }
-
     // Take input from [0, n] and return it as [0, 1]
     function bound01(n, max) {
         var isString = typeof n == "string";
@@ -772,7 +754,7 @@
     // Permissive string parsing.  Take in a number of formats, and output an object
     // based on detected format.  Returns `{ r, g, b }` or `{ h, s, l }` or `{ h, s, v}`
     function stringInputToObject(color) {
-        color = color.replace(trimLeft, '').replace(trimRight, '').toLowerCase();
+        color = color.trim().toLowerCase().replace(trimHash, '');
 
         // Try to match string input using regular expressions.
         // Keep most of the number bounding out of this function - don't worry about [0,1] or [0,100] or [0,360]
