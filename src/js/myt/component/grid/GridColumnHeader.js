@@ -130,19 +130,8 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setSortable: function(v) {
-        if (this.sortable !== v) {
-            this.sortable = v;
-            if (this.inited) this.fireNewEvent('sortable', v);
-        }
-    },
-    
-    setSortState: function(v) {
-        if (this.sortState !== v) {
-            this.sortState = v;
-            if (this.inited) this.fireNewEvent('sortState', v);
-        }
-    },
+    setSortable: function(v) {this.set('sortable', v, true);},
+    setSortState: function(v) {this.set('sortState', v, true);},
     
     setCellWidthAdj: function(v) {this.cellWidthAdj = v;},
     setCellXAdj: function(v) {this.cellXAdj = v;},
@@ -154,12 +143,7 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
         if (this.inited) this._updateLast();
     },
     
-    setResizable: function(v) {
-        if (this.resizable !== v) {
-            this.resizable = v;
-            if (this.inited) this.fireNewEvent('resizable', v);
-        }
-    },
+    setResizable: function(v) {this.set('resizable', v, true);},
     
     setGridController: function(v) {
         var existing = this.gridController;

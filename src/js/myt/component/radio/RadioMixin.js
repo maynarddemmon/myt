@@ -41,12 +41,7 @@ myt.RadioMixin = new JS.Module('RadioMixin', {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setOptionValue: function(v) {
-        if (this.optionValue !== v) {
-            this.optionValue = v;
-            if (this.inited) this.fireNewEvent('optionValue', v);
-        }
-    },
+    setOptionValue: function(v) {this.set('optionValue', v, true);},
     
     /** Sets the value of the radio group. Calling this method on any
         radio button in the group should have the same effect. */

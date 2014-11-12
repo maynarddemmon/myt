@@ -86,11 +86,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
             for(; len > i; ++i) this.addFile(myt.Uploader.createFile(v[i]));
         }
         
-        if (this.callSuper) {
-            return this.callSuper(v);
-        } else {
-            return v;
-        }
+        return this.callSuper ? this.callSuper(v) : v;
     },
     
     /** @returns the path to the uploaded files. */
@@ -113,19 +109,8 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         }
     },
     
-    setUploadUrl: function(v) {
-        if (this.uploadUrl !== v) {
-            this.uploadUrl = v;
-            if (this.inited) this.fireNewEvent('uploadUrl', v);
-        }
-    },
-    
-    setRequestFileParam: function(v) {
-        if (this.requestFileParam !== v) {
-            this.requestFileParam = v;
-            if (this.inited) this.fireNewEvent('requestFileParam', v);
-        }
-    },
+    setUploadUrl: function(v) {this.set('uploadUrl', v, true);},
+    setRequestFileParam: function(v) {this.set('requestFileParam', v, true);},
     
     
     

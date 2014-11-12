@@ -97,30 +97,10 @@ myt.BAG = new JS.Class('BAG', {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setGroupId: function(v) {
-        if (this.groupId !== v) {
-            this.groupId = v;
-            this.fireNewEvent('groupId', v);
-        }
-    },
-    
-    setAttrName: function(v) {
-        if (this.attrName !== v) {
-            this.attrName = v;
-            this.fireNewEvent('attrName', v);
-        }
-    },
-    
-    setTrueNode: function(v) {
-        if (this.trueNode !== v) {
-            this.trueNode = v;
-            this.fireNewEvent('trueNode', v);
-        }
-    },
-    
-    getNodes: function() {
-        return this.__nodes;
-    },
+    setGroupId: function(v) {this.set('groupId', v, true);},
+    setAttrName: function(v) {this.set('attrName', v, true);},
+    setTrueNode: function(v) {this.set('trueNode', v, true);},
+    getNodes: function() {return this.__nodes;},
     
     
     // Methods /////////////////////////////////////////////////////////////////

@@ -82,19 +82,8 @@ myt.GridController = new JS.Module('GridController', {
         }
     },
     
-    setMaxWidth: function(v) {
-        if (this.maxWidth !== v) {
-            this.maxWidth = v;
-            if (this.inited) this.fireNewEvent('maxWidth', v);
-        }
-    },
-    
-    setMinWidth: function(v) {
-        if (this.minWidth !== v) {
-            this.minWidth = v;
-            if (this.inited) this.fireNewEvent('minWidth', v);
-        }
-    },
+    setMaxWidth: function(v) {this.set('maxWidth', v, true);},
+    setMinWidth: function(v) {this.set('minWidth', v, true);},
     
     setGridWidth: function(v) {
         if (v !== null && typeof v === 'object') v = v.value;

@@ -268,12 +268,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         this.setDrawnCountTotal(v + this.drawnCount);
     },
     
-    setDrawnCountTotal: function(v) {
-        if (this.drawnCountTotal !== v) {
-            this.drawnCountTotal = v;
-            if (this.inited) this.fireNewEvent('drawnCountTotal', v);
-        }
-    },
+    setDrawnCountTotal: function(v) {this.set('drawnCountTotal', v, true);},
     
     
     // Methods /////////////////////////////////////////////////////////////////

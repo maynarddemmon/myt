@@ -77,12 +77,17 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
         method.
         @param attrName:string The name of the attribute to set.
         @param v:* The value to set.
+        @param noSetter:boolean (optional) If true no attempt will be made to
+            invoke a setter function. Useful when you want to invoke standard 
+            setter behavior. Defaults to undefined which is equivalent to false.
         @returns void */
-    set: function(attrName, v) {
-        var setterName = myt.AccessorSupport.generateSetterName(attrName);
-        if (this[setterName]) {
-            this[setterName](v);
-        } else if (this[attrName] !== v) {
+    set: function(attrName, v, noSetter) {
+        if (!noSetter) {
+            var setterName = myt.AccessorSupport.generateSetterName(attrName);
+            if (this[setterName]) return this[setterName](v);
+        }
+        
+        if (this[attrName] !== v) {
             this[attrName] = v;
             if (this.inited !== false && this.fireNewEvent) this.fireNewEvent(attrName, v); // !== false allows this to work with non-nodes.
         }

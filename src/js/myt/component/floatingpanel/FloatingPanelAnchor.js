@@ -51,33 +51,10 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
     setLastFloatingPanelShown: function(v) {this.lastFloatingPanelShown = v;},
     setLastFloatingPanelId: function(v) {this.floatingPanelId = v;},
     
-    setFloatingAlign: function(v) {
-        if (this.floatingAlign !== v) {
-            this.floatingAlign = v;
-            if (this.inited) this.fireNewEvent('floatingAlign', v);
-        }
-    },
-    
-    setFloatingValign: function(v) {
-        if (this.floatingValign !== v) {
-            this.floatingValign = v;
-            if (this.inited) this.fireNewEvent('floatingValign', v);
-        }
-    },
-    
-    setFloatingAlignOffset: function(v) {
-        if (this.floatingAlignOffset !== v) {
-            this.floatingAlignOffset = v;
-            if (this.inited) this.fireNewEvent('floatingAlignOffset', v);
-        }
-    },
-    
-    setFloatingValignOffset: function(v) {
-        if (this.floatingValignOffset !== v) {
-            this.floatingValignOffset = v;
-            if (this.inited) this.fireNewEvent('floatingValignOffset', v);
-        }
-    },
+    setFloatingAlign: function(v) {this.set('floatingAlign', v, true);},
+    setFloatingValign: function(v) {this.set('floatingValign', v, true);},
+    setFloatingAlignOffset: function(v) {this.set('floatingAlignOffset', v, true);},
+    setFloatingValignOffset: function(v) {this.set('floatingValignOffset', v, true);},
     
     
     // Methods /////////////////////////////////////////////////////////////////
@@ -101,9 +78,7 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
     },
     
     toggleFloatingPanel: function(panelId) {
-        panelId = panelId || this.floatingPanelId;
-        
-        var fp = this.getFloatingPanel(panelId);
+        var fp = this.getFloatingPanel(panelId = panelId || this.floatingPanelId);
         if (fp && fp.isShown()) {
             this.hideFloatingPanel(panelId);
         } else {

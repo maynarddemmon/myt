@@ -6385,12 +6385,17 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
         method.
         @param attrName:string The name of the attribute to set.
         @param v:* The value to set.
+        @param noSetter:boolean (optional) If true no attempt will be made to
+            invoke a setter function. Useful when you want to invoke standard 
+            setter behavior. Defaults to undefined which is equivalent to false.
         @returns void */
-    set: function(attrName, v) {
-        var setterName = myt.AccessorSupport.generateSetterName(attrName);
-        if (this[setterName]) {
-            this[setterName](v);
-        } else if (this[attrName] !== v) {
+    set: function(attrName, v, noSetter) {
+        if (!noSetter) {
+            var setterName = myt.AccessorSupport.generateSetterName(attrName);
+            if (this[setterName]) return this[setterName](v);
+        }
+        
+        if (this[attrName] !== v) {
             this[attrName] = v;
             if (this.inited !== false && this.fireNewEvent) this.fireNewEvent(attrName, v); // !== false allows this to work with non-nodes.
         }
@@ -16039,33 +16044,10 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
     setLastFloatingPanelShown: function(v) {this.lastFloatingPanelShown = v;},
     setLastFloatingPanelId: function(v) {this.floatingPanelId = v;},
     
-    setFloatingAlign: function(v) {
-        if (this.floatingAlign !== v) {
-            this.floatingAlign = v;
-            if (this.inited) this.fireNewEvent('floatingAlign', v);
-        }
-    },
-    
-    setFloatingValign: function(v) {
-        if (this.floatingValign !== v) {
-            this.floatingValign = v;
-            if (this.inited) this.fireNewEvent('floatingValign', v);
-        }
-    },
-    
-    setFloatingAlignOffset: function(v) {
-        if (this.floatingAlignOffset !== v) {
-            this.floatingAlignOffset = v;
-            if (this.inited) this.fireNewEvent('floatingAlignOffset', v);
-        }
-    },
-    
-    setFloatingValignOffset: function(v) {
-        if (this.floatingValignOffset !== v) {
-            this.floatingValignOffset = v;
-            if (this.inited) this.fireNewEvent('floatingValignOffset', v);
-        }
-    },
+    setFloatingAlign: function(v) {this.set('floatingAlign', v, true);},
+    setFloatingValign: function(v) {this.set('floatingValign', v, true);},
+    setFloatingAlignOffset: function(v) {this.set('floatingAlignOffset', v, true);},
+    setFloatingValignOffset: function(v) {this.set('floatingValignOffset', v, true);},
     
     
     // Methods /////////////////////////////////////////////////////////////////
@@ -16089,9 +16071,7 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
     },
     
     toggleFloatingPanel: function(panelId) {
-        panelId = panelId || this.floatingPanelId;
-        
-        var fp = this.getFloatingPanel(panelId);
+        var fp = this.getFloatingPanel(panelId = panelId || this.floatingPanelId);
         if (fp && fp.isShown()) {
             this.hideFloatingPanel(panelId);
         } else {
@@ -17397,30 +17377,10 @@ myt.BAG = new JS.Class('BAG', {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setGroupId: function(v) {
-        if (this.groupId !== v) {
-            this.groupId = v;
-            this.fireNewEvent('groupId', v);
-        }
-    },
-    
-    setAttrName: function(v) {
-        if (this.attrName !== v) {
-            this.attrName = v;
-            this.fireNewEvent('attrName', v);
-        }
-    },
-    
-    setTrueNode: function(v) {
-        if (this.trueNode !== v) {
-            this.trueNode = v;
-            this.fireNewEvent('trueNode', v);
-        }
-    },
-    
-    getNodes: function() {
-        return this.__nodes;
-    },
+    setGroupId: function(v) {this.set('groupId', v, true);},
+    setAttrName: function(v) {this.set('attrName', v, true);},
+    setTrueNode: function(v) {this.set('trueNode', v, true);},
+    getNodes: function() {return this.__nodes;},
     
     
     // Methods /////////////////////////////////////////////////////////////////
@@ -17546,12 +17506,7 @@ myt.RadioMixin = new JS.Module('RadioMixin', {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setOptionValue: function(v) {
-        if (this.optionValue !== v) {
-            this.optionValue = v;
-            if (this.inited) this.fireNewEvent('optionValue', v);
-        }
-    },
+    setOptionValue: function(v) {this.set('optionValue', v, true);},
     
     /** Sets the value of the radio group. Calling this method on any
         radio button in the group should have the same effect. */
@@ -20180,11 +20135,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
             for(; len > i; ++i) this.addFile(myt.Uploader.createFile(v[i]));
         }
         
-        if (this.callSuper) {
-            return this.callSuper(v);
-        } else {
-            return v;
-        }
+        return this.callSuper ? this.callSuper(v) : v;
     },
     
     /** @returns the path to the uploaded files. */
@@ -20207,19 +20158,8 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         }
     },
     
-    setUploadUrl: function(v) {
-        if (this.uploadUrl !== v) {
-            this.uploadUrl = v;
-            if (this.inited) this.fireNewEvent('uploadUrl', v);
-        }
-    },
-    
-    setRequestFileParam: function(v) {
-        if (this.requestFileParam !== v) {
-            this.requestFileParam = v;
-            if (this.inited) this.fireNewEvent('requestFileParam', v);
-        }
-    },
+    setUploadUrl: function(v) {this.set('uploadUrl', v, true);},
+    setRequestFileParam: function(v) {this.set('requestFileParam', v, true);},
     
     
     
@@ -25142,12 +25082,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         this.setDrawnCountTotal(v + this.drawnCount);
     },
     
-    setDrawnCountTotal: function(v) {
-        if (this.drawnCountTotal !== v) {
-            this.drawnCountTotal = v;
-            if (this.inited) this.fireNewEvent('drawnCountTotal', v);
-        }
-    },
+    setDrawnCountTotal: function(v) {this.set('drawnCountTotal', v, true);},
     
     
     // Methods /////////////////////////////////////////////////////////////////
@@ -27366,19 +27301,8 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setSortable: function(v) {
-        if (this.sortable !== v) {
-            this.sortable = v;
-            if (this.inited) this.fireNewEvent('sortable', v);
-        }
-    },
-    
-    setSortState: function(v) {
-        if (this.sortState !== v) {
-            this.sortState = v;
-            if (this.inited) this.fireNewEvent('sortState', v);
-        }
-    },
+    setSortable: function(v) {this.set('sortable', v, true);},
+    setSortState: function(v) {this.set('sortState', v, true);},
     
     setCellWidthAdj: function(v) {this.cellWidthAdj = v;},
     setCellXAdj: function(v) {this.cellXAdj = v;},
@@ -27390,12 +27314,7 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
         if (this.inited) this._updateLast();
     },
     
-    setResizable: function(v) {
-        if (this.resizable !== v) {
-            this.resizable = v;
-            if (this.inited) this.fireNewEvent('resizable', v);
-        }
-    },
+    setResizable: function(v) {this.set('resizable', v, true);},
     
     setGridController: function(v) {
         var existing = this.gridController;
@@ -27699,19 +27618,8 @@ myt.GridController = new JS.Module('GridController', {
         }
     },
     
-    setMaxWidth: function(v) {
-        if (this.maxWidth !== v) {
-            this.maxWidth = v;
-            if (this.inited) this.fireNewEvent('maxWidth', v);
-        }
-    },
-    
-    setMinWidth: function(v) {
-        if (this.minWidth !== v) {
-            this.minWidth = v;
-            if (this.inited) this.fireNewEvent('minWidth', v);
-        }
-    },
+    setMaxWidth: function(v) {this.set('maxWidth', v, true);},
+    setMinWidth: function(v) {this.set('minWidth', v, true);},
     
     setGridWidth: function(v) {
         if (v !== null && typeof v === 'object') v = v.value;
