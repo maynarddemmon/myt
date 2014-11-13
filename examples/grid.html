@@ -4,66 +4,57 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script>window.jQuery || document.write('<script src="../src/js/jquery/jquery-1.11.1.min.js">\x3C/script>');</script>
 <script src="../src/js/boilerplate.js"></script>
-<script src="../src/js/jsclass/min/loader-browser.js"></script>
-<script src="../src/js/myt/manifest.js"></script>
+<script src="../dist/myt.min.js"></script>
 </head><body>
-
 <script>
-    JS.require('myt.all', function() {this.init();});
+    var RowClass = new JS.Class('RowClass', myt.View, {
+        include: [myt.GridRow],
+        
+        initNode: function(parent, attrs) {
+            if (attrs.height === undefined) attrs.height = 18;
+            
+            this.callSuper(parent, attrs);
+        },
+        
+        doAfterAdoption: function() {
+            var foo = new myt.Text(this, {name:'fooView', bgColor:'#ffffff', text:myt.getRandomInt(0, 1000) + ' foo'});
+            foo.enableEllipsis();
+            var bar = new myt.Text(this, {name:'barView', bgColor:'#ffffff', text:myt.getRandomInt(0, 1000) + ' bar'});
+            bar.enableEllipsis();
+            var bar2 = new myt.Text(this, {name:'bar2View', bgColor:'#ffffff', text:myt.getRandomInt(0, 1000) + ' bar 2'});
+            bar2.enableEllipsis();
+            var bar3 = new myt.Text(this, {name:'bar3View', bgColor:'#ffffff', text:myt.getRandomInt(0, 1000) + ' bar 3'});
+            bar3.enableEllipsis();
+            var baz = new myt.Text(this, {name:'bazView', bgColor:'#ffffff', text:myt.getRandomInt(0, 1000) + ' baz'});
+            baz.enableEllipsis();
+            
+            this.callSuper();
+        }
+    });
     
-    function init() {
-        var RowClass = new JS.Class('RowClass', myt.View, {
-            include: [myt.GridRow],
-            
-            initNode: function(parent, attrs) {
-                if (attrs.height === undefined) attrs.height = 18;
-                
-                this.callSuper(parent, attrs);
-            },
-            
-            doAfterAdoption: function() {
-                var foo = new myt.Text(this, {name:'fooView', bgColor:'#ffffff', text:myt.getRandomInt(0, 1000) + ' foo'});
-                foo.enableEllipsis();
-                var bar = new myt.Text(this, {name:'barView', bgColor:'#ffffff', text:myt.getRandomInt(0, 1000) + ' bar'});
-                bar.enableEllipsis();
-                var bar2 = new myt.Text(this, {name:'bar2View', bgColor:'#ffffff', text:myt.getRandomInt(0, 1000) + ' bar 2'});
-                bar2.enableEllipsis();
-                var bar3 = new myt.Text(this, {name:'bar3View', bgColor:'#ffffff', text:myt.getRandomInt(0, 1000) + ' bar 3'});
-                bar3.enableEllipsis();
-                var baz = new myt.Text(this, {name:'bazView', bgColor:'#ffffff', text:myt.getRandomInt(0, 1000) + ' baz'});
-                baz.enableEllipsis();
-                
-                this.callSuper();
-            }
-        });
-        
-        var rootView = new myt.View(null, {bgColor:'#333333'}, [myt.SizeToWindow]);
-        
-        var grid = new myt.Grid(rootView, {percentOfParentHeight:100}, [myt.SizeToParent, {
-            updateWidth: function(event) {
-                this.setWidth(event.value + event.source.inset - this.x);
-            }
-        }]);
-        
-        var i = 25;
-        while (i--) new RowClass(grid);
-        
-        new myt.SimpleGridColumnHeader(grid, {columnId:'foo',  flex:1, value:100, minValue:100, maxValue:200, text:'Column One'});
-        new myt.SimpleGridColumnHeader(grid, {columnId:'bar',  flex:0, value:50,  minValue:50,  maxValue:100, text:'Column Two', sortable:false});
-        new myt.SimpleGridColumnHeader(grid, {columnId:'bar2', flex:0, value:50,  minValue:50,  maxValue:100, text:'Column Three'});
-        new myt.SimpleGridColumnHeader(grid, {columnId:'bar3', flex:0, value:50,  minValue:50,  maxValue:100, text:'Column Four', cellXAdj:2, cellWidthAdj:-2});
-        new myt.SimpleGridColumnHeader(grid, {columnId:'baz',  flex:1, value:25,                maxValue:400, text:'Column Five'});
-        
-        var divider = new myt.HorizontalDivider(rootView, {
-            percentOfParentHeight:100, minValue:25, value:400, limitToParent:0
-        }, [myt.SizeToParent]);
-        grid.syncTo(divider, 'updateWidth', 'value');
-        
-        // Unlock now that the grid is setup.
-        grid.setLocked(false);
-        
-        global.grid = grid;
-        global.RowClass = RowClass;
-    }
+    var rootView = new myt.View(null, {bgColor:'#eeeeee'}, [myt.SizeToWindow]);
+    
+    var grid = new myt.Grid(rootView, {percentOfParentHeight:100}, [myt.SizeToParent, {
+        updateWidth: function(event) {
+            this.setWidth(event.value + event.source.inset - this.x);
+        }
+    }]);
+    
+    var i = 50;
+    while (i--) new RowClass(grid);
+    
+    new myt.SimpleGridColumnHeader(grid, {columnId:'foo',  flex:1, value:100, minValue:100, maxValue:200, text:'Column One'});
+    new myt.SimpleGridColumnHeader(grid, {columnId:'bar',  flex:0, value:50,  minValue:50,  maxValue:100, text:'Column Two', sortable:false});
+    new myt.SimpleGridColumnHeader(grid, {columnId:'bar2', flex:0, value:50,  minValue:50,  maxValue:100, text:'Column Three'});
+    new myt.SimpleGridColumnHeader(grid, {columnId:'bar3', flex:0, value:50,  minValue:50,  maxValue:100, text:'Column Four', cellXAdj:2, cellWidthAdj:-2});
+    new myt.SimpleGridColumnHeader(grid, {columnId:'baz',  flex:1, value:25,                maxValue:400, text:'Column Five'});
+    
+    var divider = new myt.HorizontalDivider(rootView, {
+        percentOfParentHeight:100, minValue:25, value:400, limitToParent:0
+    }, [myt.SizeToParent]);
+    grid.syncTo(divider, 'updateWidth', 'value');
+    
+    // Unlock now that the grid is setup.
+    grid.setLocked(false);
 </script>
 </body></html>

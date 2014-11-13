@@ -4,43 +4,37 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script>window.jQuery || document.write('<script src="../src/js/jquery/jquery-1.11.1.min.js">\x3C/script>');</script>
 <script src="../src/js/boilerplate.js"></script>
-<script src="../src/js/jsclass/min/loader-browser.js"></script>
-<script src="../src/js/myt/manifest.js"></script>
+<script src="../dist/myt.min.js"></script>
 </head><body>
-
 <script>
-    JS.require('myt.all', function() {this.init();});
+    var UploaderClass = new JS.Class('UploaderClass', myt.ImageUploader, {
+        initNode: function(parent, attrs) {
+            attrs.width = 100;
+            attrs.height = 100;
+            attrs.bgColor = '#cccccc';
+            attrs.roundedCorners = 16;
+            attrs.overflow = 'auto';
+            this.callSuper(parent, attrs);
+        },
+        
+        doDragEnter: function(event) {
+            this.setBoxShadow([0, 0, 9, '#666666']);
+        },
+        
+        doDragLeave: function(event) {
+            this.setBoxShadow();
+        },
+        
+        doDrop: function(event) {
+            this.callSuper(event);
+            this.setBoxShadow();
+        }
+    });
     
-    function init() {
-        var UploaderClass = new JS.Class('UploaderClass', myt.ImageUploader, {
-            initNode: function(parent, attrs) {
-                attrs.width = 100;
-                attrs.height = 100;
-                attrs.bgColor = '#cccccc';
-                attrs.roundedCorners = 16;
-                attrs.overflow = 'auto';
-                this.callSuper(parent, attrs);
-            },
-            
-            doDragEnter: function(event) {
-                this.setBoxShadow([0, 0, 9, '#666666']);
-            },
-            
-            doDragLeave: function(event) {
-                this.setBoxShadow();
-            },
-            
-            doDrop: function(event) {
-                this.callSuper(event);
-                this.setBoxShadow();
-            }
-        });
-        
-        var rootView = new myt.View(null, {width:600, height:450, bgColor:'#eeeeee'}, [myt.RootView]);
-        
-        new UploaderClass(rootView, {x:10, y:10});
-        new UploaderClass(rootView, {x:120, y:10});
-        new UploaderClass(rootView, {x:230, y:10, uploadUrl: '/admin/data/uploadImages?casino=55'});
-    }
+    var rootView = new myt.View(null, {bgColor:'#eeeeee'}, [myt.SizeToWindow]);
+    
+    new UploaderClass(rootView, {x:10, y:10});
+    new UploaderClass(rootView, {x:120, y:10});
+    new UploaderClass(rootView, {x:230, y:10, uploadUrl: '/admin/data/uploadImages?casino=55'});
 </script>
 </body></html>
