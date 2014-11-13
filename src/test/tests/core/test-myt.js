@@ -319,6 +319,5 @@ test("Test extend", function() {
     ok(source3 === result3, "Returned value is the source.");
     ok(objA.a === 'foo' && objB.a === 'bar', "Source value was not changed.");
     ok(objA.d === undefined, "Source value did not have anything added to it.");
-    console.log(result3);
     ok(result3.a === 'bar' && result3.b === undefined && result3.c === undefined && result3.d === 'hey' && result3.e === 'here', "Result has all the values that the filter allows.");
 });

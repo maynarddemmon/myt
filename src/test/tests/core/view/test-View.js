@@ -156,7 +156,6 @@ test("View alignment", function() {
     ok(child3.y === 23, "Valign middle view should have an y of 23 since 22.5 will round up.");
     ok(child3.domElement.offsetTop === 23, "Valign middle dom element should have an offsetTop of 22.");
     var bounds = child3.domElement.getBoundingClientRect();
-    console.log(bounds);
     ok(bounds.top === 23, "Bounding client rect should have a top of 23 since 22.5 will round up: " + bounds.top);
     
     // resize parent
