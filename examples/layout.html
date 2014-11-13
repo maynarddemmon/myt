@@ -7,7 +7,7 @@
 <script src="../dist/myt.min.js"></script>
 </head><body>
 <script>
-    var rootView = new myt.View(null, {bgColor:'#eeeeee'}, [myt.RootView, {
+    var rootView = new myt.View(null, {bgColor:'#eeeeee'}, [myt.SizeToWindow, {
         resetViews: function() {
             var svs = this.getSubviews(), i = svs.length, sv;
             while (i) {

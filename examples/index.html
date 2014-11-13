@@ -1,0 +1,86 @@
+<!doctype html><html><head>
+<title>Myt Framework : Examples</title>
+<link rel="stylesheet" href="../src/css/myt.scss"/>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="../src/js/jquery/jquery-1.11.1.min.js">\x3C/script>');</script>
+<script src="../src/js/boilerplate.js"></script>
+<script src="../dist/myt.min.js"></script>
+</head><body>
+<script>
+    var ItemClass = new JS.Class('ItemClass', myt.SimpleIconTextButton, {
+        include: [myt.SizeToParent],
+        
+        initNode: function(parent, attrs) {
+            attrs.percentOfParentWidth = 100;
+            attrs.percentOfParentWidthOffset = -10;
+            attrs.x = 5;
+            attrs.height = 28;
+            
+            attrs.roundedCorners = 2;
+            attrs.focusEmbellishment = false;
+            
+            attrs.activeColor = '#dddddd';
+            attrs.hoverColor = '#ffffff';
+            attrs.readyColor = '#eeeeee';
+            attrs.contentAlign = 'left';
+            attrs.inset = 10;
+            
+            this.callSuper(parent, attrs);
+        },
+        
+        setUrl: function(v) {this.url = v;},
+        
+        doActivated: function() {
+            rightPanel.setSrc(this.url);
+        }
+    });
+    
+    var rootView = new myt.View(null, {}, [myt.SizeToWindow]);
+    
+    var leftPanel = new myt.View(rootView, {
+        percentOfParentHeight:100, bgColor:'#999999',
+        overflow:'auto'
+    }, [myt.SizeToParent, {
+        updateWidth: function(event) {
+            this.setWidth(event.value + event.source.inset);
+        }
+    }]);
+    var itemContainer = new myt.View(leftPanel, {percentOfParentWidth:100}, [myt.SizeToParent]);
+    new ItemClass(itemContainer, {text:'Animation', url:'./animation.html'});
+    new ItemClass(itemContainer, {text:'Buttons', url:'./buttons.html'});
+    new ItemClass(itemContainer, {text:'Color Picker', url:'./color_picker.html'});
+    new ItemClass(itemContainer, {text:'Drag and Drop', url:'./drag_and_drop.html'});
+    new ItemClass(itemContainer, {text:'Floating Panel', url:'./floating_panel.html'});
+    new ItemClass(itemContainer, {text:'Form', url:'./form.html'});
+    new ItemClass(itemContainer, {text:'Grid', url:'./grid.html'});
+    new ItemClass(itemContainer, {text:'Input Elements', url:'./input_elements.html'});
+    new ItemClass(itemContainer, {text:'Input Elements 2', url:'./input_elements_two.html'});
+    new ItemClass(itemContainer, {text:'Layout', url:'./layout.html'});
+    new ItemClass(itemContainer, {text:'Replication', url:'./replicator.html'});
+    new ItemClass(itemContainer, {text:'Scatter Graph', url:'./scattergraph.html'});
+    new ItemClass(itemContainer, {text:'Simple Views', url:'./simple_views.html'});
+    new ItemClass(itemContainer, {text:'Spinner', url:'./spinner.html'});
+    new ItemClass(itemContainer, {text:'Tab and Tab Slider', url:'./tab_slider.html'});
+    new ItemClass(itemContainer, {text:'Touch', url:'./touch.html'});
+    new ItemClass(itemContainer, {text:'Uploader', url:'./uploader.html'});
+    new myt.SpacedLayout(itemContainer, {axis:'y', spacing:1, inset:5, outset:5, collapseParent:true});
+    
+    
+    var divider = new myt.HorizontalDivider(rootView, {
+        percentOfParentHeight:100, limitToParent:600, minValue:150, zIndex:1
+    }, [myt.SizeToParent]);
+    
+    var rightPanel = new myt.Frame(rootView, {
+        percentOfParentHeight:100, bgColor:'#ffffff'
+    }, [myt.SizeToParent, {
+        updateX: function(event) {
+            var x = divider.x + divider.width - divider.inset;
+            this.setX(x);
+            this.setWidth(rootView.width - x);
+        }
+    }]);
+    
+    leftPanel.syncTo(divider, 'updateWidth', 'value');
+    rightPanel.applyConstraint('updateX', [divider, 'x', rootView, 'width']);
+</script>
+</body></html>

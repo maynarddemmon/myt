@@ -98,6 +98,7 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'base/Text.js'  ).provides('myt.Text'  ).requires('myt.TextSupport');
     file(MYT_COMPONENT_ROOT + 'base/Markup.js').provides('myt.Markup').requires('myt.SizeToDom');
     file(MYT_COMPONENT_ROOT + 'base/Canvas.js').provides('myt.Canvas').requires('myt.View');
+    file(MYT_COMPONENT_ROOT + 'base/Frame.js' ).provides('myt.Frame' ).requires('myt.View');
     file(MYT_COMPONENT_ROOT + 'base/Image.js' ).provides('myt.Image' ).requires('myt.ImageSupport');
     
     // Component : Behavior
@@ -346,7 +347,7 @@ JS.Packages(function() {with(this) {
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
         'myt.Cookie',
         'myt.global.keys','myt.global.touch','myt.global.history',
-        'myt.Text','myt.Markup','myt.SizeWidthToDom','myt.SizeHeightToDom','myt.SizeToParent',
+        'myt.Text','myt.Markup','myt.Frame','myt.SizeWidthToDom','myt.SizeHeightToDom','myt.SizeToParent',
         'myt.SizeToWindowWidth','myt.SizeToWindowHeight',
         'myt.Animator','myt.Callback','myt.RepeatableTimer','myt.StateMachine',
         'myt.Replicator',
