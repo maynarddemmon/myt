@@ -1,147 +1,141 @@
 <!doctype html><html><head>
 <title>Myt Framework : Canvas Example</title>
-<link rel="stylesheet" href="../src/css/myt.scss"/>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-<script>window.jQuery || document.write('<script src="../src/js/jquery/jquery-1.10.2.min.js">\x3C/script>');</script>
+<link rel="stylesheet" href="../src/css/myt.css"/>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="../src/js/jquery/jquery-1.11.1.min.js">\x3C/script>');</script>
 <script src="../src/js/boilerplate.js"></script>
-<script src="../src/js/jsclass/min/loader-browser.js"></script>
-<script src="../src/js/myt/manifest.js"></script>
+<script src="../dist/myt.min.js"></script>
 </head><body>
-
 <script>
-    JS.require('myt.all', function() {this.init();});
+    var rootView = new myt.View(null, {bgColor:'#eeeeee'}, [myt.SizeToWindow]);
     
-    function init() {
-        var rootView = new myt.View(null, {bgColor:'#ffffff'}, [myt.SizeToWindow]);
-        
-        new myt.IconTextPanelButton(rootView, {x:920, y:10, width:100, text:'zoom in'}, [{
-            doActivated: function() {
-                //graph.setScaleDataX(graph.scaleDataX + 0.025);
-                //graph.setScaleDataY(graph.scaleDataY + 0.025);
+    new myt.IconTextPanelButton(rootView, {x:620, y:10, width:100, text:'zoom in'}, [{
+        doActivated: function() {
+            //graph.setScaleDataX(graph.scaleDataX + 0.025);
+            //graph.setScaleDataY(graph.scaleDataY + 0.025);
+            
+            var xMin = graph.getMinX(), xMax = graph.getMaxX(),
+                yMin = graph.getMinY(), yMax = graph.getMaxY();
+            graph.animatePoints([
+                graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
+                myt.getRandomInt(xMin, xMax), 
+                myt.getRandomInt(yMin, yMax),
                 
-                var xMin = graph.getMinX(), xMax = graph.getMaxX(),
-                    yMin = graph.getMinY(), yMax = graph.getMaxY();
-                graph.animatePoints([
-                    graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
-                    myt.getRandomInt(xMin, xMax), 
-                    myt.getRandomInt(yMin, yMax),
-                    
-                    graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
-                    myt.getRandomInt(xMin, xMax), 
-                    myt.getRandomInt(yMin, yMax),
-                    
-                    graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
-                    myt.getRandomInt(xMin, xMax), 
-                    myt.getRandomInt(yMin, yMax),
-                    
-                    graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
-                    myt.getRandomInt(xMin, xMax), 
-                    myt.getRandomInt(yMin, yMax),
-                    
-                    graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
-                    myt.getRandomInt(xMin, xMax), 
-                    myt.getRandomInt(yMin, yMax)
-                ]);
-            }
-        }]);
-        
-        new myt.IconTextPanelButton(rootView, {x:920, y:30, width:100, text:'zoom out'}, [{
-            doActivated: function() {
-                //graph.setScaleDataX(graph.scaleDataX - 0.025);
-                //graph.setScaleDataY(graph.scaleDataY - 0.025);
+                graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
+                myt.getRandomInt(xMin, xMax), 
+                myt.getRandomInt(yMin, yMax),
                 
-                var xMin = graph.getMinX(), xMax = graph.getMaxX(),
-                    yMin = graph.getMinY(), yMax = graph.getMaxY();
-                graph.animatePoints([
-                    graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
-                    myt.getRandomInt(xMin, xMax), 
-                    myt.getRandomInt(yMin, yMax),
-                    
-                    graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
-                    myt.getRandomInt(xMin, xMax), 
-                    myt.getRandomInt(yMin, yMax),
-                    
-                    graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
-                    myt.getRandomInt(xMin, xMax), 
-                    myt.getRandomInt(yMin, yMax),
-                    
-                    graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
-                    myt.getRandomInt(xMin, xMax), 
-                    myt.getRandomInt(yMin, yMax),
-                    
-                    graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
-                    myt.getRandomInt(xMin, xMax), 
-                    myt.getRandomInt(yMin, yMax)
-                ]);
-            }
-        }]);
-        
-        new myt.IconTextPanelButton(rootView, {x:920, y:50, width:100, text:'clear all'}, [{
-            doActivated: function() {
-                graph.removeAllDataPoints();
-            }
-        }]);
-        
-        new myt.IconTextPanelButton(rootView, {x:920, y:70, width:100, text:'add pont'}, [{
-            doActivated: function() {
-                graph.addDataPoint(new myt.ScatterGraphPoint('id_' + (++i), 
-                    myt.getRandomInt(xMin, xMax, func), 
-                    myt.getRandomInt(yMin, yMax, func), config0
-                ));
-            }
-        }]);
-        
-        var highlightInfo = new myt.Text(rootView, {x:920, y:100});
-        
-        var graph = new myt.ScatterGraph(rootView, {x:10, y:10, width:900, height:500}, [{
-            setHighlightedPoint: function(v) {
-                this.callSuper(v);
+                graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
+                myt.getRandomInt(xMin, xMax), 
+                myt.getRandomInt(yMin, yMax),
                 
-                highlightInfo.setText(v ? 'point: ' + v.id : '');
-            }
-        }]);
-        graph.addPointTemplate('red', myt.ScatterGraph.createCircleTemplate(16, '#ff0000', 0.25, 0.5, null, 1));
-        graph.addPointTemplate('green', myt.ScatterGraph.createCircleTemplate(2, '#009900'));
-        graph.addPointTemplate('blue', myt.ScatterGraph.createCircleTemplate(8, '#0000ff', 0.25, 0.5, null, 1));
-        graph.addPointTemplate('black', myt.ScatterGraph.createCircleTemplate(4, '#000000', 0.25, 0.5, null, 1));
-        
-        graph.addPointTemplate('red_selected', myt.ScatterGraph.createCircleTemplate(8, '#aa6600', 0.25, 1, null, 1));
-        graph.addPointTemplate('green_selected', myt.ScatterGraph.createCircleTemplate(1, '#aa6600', 0.25, 1, null, 1));
-        graph.addPointTemplate('blue_selected', myt.ScatterGraph.createCircleTemplate(4, '#aa6600', 0.25, 1, null, 1));
-        graph.addPointTemplate('black_selected', myt.ScatterGraph.createCircleTemplate(2, '#aa6600', 0.25, 1, null, 1));
-        graph.setHighlightSelectedColor('#aa6600');
-        
-        // Generate data points
-        var data = [];
-        
-        var i = 1000, count = i, 
-            config,
-            config0 = {templateKey:'blue', selectedTemplateKey:'blue_selected'},
-            config1 = {templateKey:'green', selectedTemplateKey:'green_selected'},
-            config2 = {templateKey:'red', selectedTemplateKey:'red_selected'},
-            xMin = graph.getMinX(), xMax = graph.getMaxX(),
-            yMin = graph.getMinY(), yMax = graph.getMaxY();
-        
-        var func = function(v) {return v * v;};
-        while (i) {
-            switch (i % 3) {
-                case 0: config = config0; break;
-                case 1: config = config1; break;
-                case 2: config = config2; break;
-            }
-            data[--i] = new myt.ScatterGraphPoint('id_' + i, 
-                myt.getRandomInt(xMin, xMax, func), 
-                myt.getRandomInt(yMin, yMax, func), config
-            );
+                graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
+                myt.getRandomInt(xMin, xMax), 
+                myt.getRandomInt(yMin, yMax),
+                
+                graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
+                myt.getRandomInt(xMin, xMax), 
+                myt.getRandomInt(yMin, yMax)
+            ]);
         }
-        
-        graph.setData(data);
-        
-        graph.setFilter(
-            function(p, graph) {
-                return p.px > 50 && p.px < 200 && p.py > 200 && p.py < 400
-            }
+    }]);
+    
+    new myt.IconTextPanelButton(rootView, {x:620, y:30, width:100, text:'zoom out'}, [{
+        doActivated: function() {
+            //graph.setScaleDataX(graph.scaleDataX - 0.025);
+            //graph.setScaleDataY(graph.scaleDataY - 0.025);
+            
+            var xMin = graph.getMinX(), xMax = graph.getMaxX(),
+                yMin = graph.getMinY(), yMax = graph.getMaxY();
+            graph.animatePoints([
+                graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
+                myt.getRandomInt(xMin, xMax), 
+                myt.getRandomInt(yMin, yMax),
+                
+                graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
+                myt.getRandomInt(xMin, xMax), 
+                myt.getRandomInt(yMin, yMax),
+                
+                graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
+                myt.getRandomInt(xMin, xMax), 
+                myt.getRandomInt(yMin, yMax),
+                
+                graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
+                myt.getRandomInt(xMin, xMax), 
+                myt.getRandomInt(yMin, yMax),
+                
+                graph.getDataPointById('id_' + myt.getRandomInt(0, count)),
+                myt.getRandomInt(xMin, xMax), 
+                myt.getRandomInt(yMin, yMax)
+            ]);
+        }
+    }]);
+    
+    new myt.IconTextPanelButton(rootView, {x:620, y:50, width:100, text:'clear all'}, [{
+        doActivated: function() {
+            graph.removeAllDataPoints();
+        }
+    }]);
+    
+    new myt.IconTextPanelButton(rootView, {x:620, y:70, width:100, text:'add pont'}, [{
+        doActivated: function() {
+            graph.addDataPoint(new myt.ScatterGraphPoint('id_' + (++i), 
+                myt.getRandomInt(xMin, xMax, func), 
+                myt.getRandomInt(yMin, yMax, func), config0
+            ));
+        }
+    }]);
+    
+    var highlightInfo = new myt.Text(rootView, {x:620, y:100});
+    
+    var graph = new myt.ScatterGraph(rootView, {x:10, y:10, width:600, height:600}, [{
+        setHighlightedPoint: function(v) {
+            this.callSuper(v);
+            
+            highlightInfo.setText(v ? 'point: ' + v.id : '');
+        }
+    }]);
+    graph.addPointTemplate('red', myt.ScatterGraph.createCircleTemplate(16, '#ff0000', 0.25, 0.5, null, 1));
+    graph.addPointTemplate('green', myt.ScatterGraph.createCircleTemplate(2, '#009900'));
+    graph.addPointTemplate('blue', myt.ScatterGraph.createCircleTemplate(8, '#0000ff', 0.25, 0.5, null, 1));
+    graph.addPointTemplate('black', myt.ScatterGraph.createCircleTemplate(4, '#000000', 0.25, 0.5, null, 1));
+    
+    graph.addPointTemplate('red_selected', myt.ScatterGraph.createCircleTemplate(8, '#aa6600', 0.25, 1, null, 1));
+    graph.addPointTemplate('green_selected', myt.ScatterGraph.createCircleTemplate(1, '#aa6600', 0.25, 1, null, 1));
+    graph.addPointTemplate('blue_selected', myt.ScatterGraph.createCircleTemplate(4, '#aa6600', 0.25, 1, null, 1));
+    graph.addPointTemplate('black_selected', myt.ScatterGraph.createCircleTemplate(2, '#aa6600', 0.25, 1, null, 1));
+    graph.setHighlightSelectedColor('#aa6600');
+    
+    // Generate data points
+    var data = [];
+    
+    var i = 1000, count = i, 
+        config,
+        config0 = {templateKey:'blue', selectedTemplateKey:'blue_selected'},
+        config1 = {templateKey:'green', selectedTemplateKey:'green_selected'},
+        config2 = {templateKey:'red', selectedTemplateKey:'red_selected'},
+        xMin = graph.getMinX(), xMax = graph.getMaxX(),
+        yMin = graph.getMinY(), yMax = graph.getMaxY();
+    
+    var func = function(v) {return v * v;};
+    while (i) {
+        switch (i % 3) {
+            case 0: config = config0; break;
+            case 1: config = config1; break;
+            case 2: config = config2; break;
+        }
+        data[--i] = new myt.ScatterGraphPoint('id_' + i, 
+            myt.getRandomInt(xMin, xMax, func), 
+            myt.getRandomInt(yMin, yMax, func), config
         );
     }
+    
+    graph.setData(data);
+    
+    graph.setFilter(
+        function(p, graph) {
+            return p.px > 50 && p.px < 200 && p.py > 200 && p.py < 400
+        }
+    );
 </script>
 </body></html>

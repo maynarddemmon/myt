@@ -1,13 +1,20 @@
 <!doctype html><html><head>
 <title>Myt Framework</title>
-<link rel="stylesheet" href="./src/css/myt.scss"/>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-<script>window.jQuery || document.write('<script src="./src/js/jquery/jquery-1.10.2.min.js">\x3C/script>');</script>
+<link rel="stylesheet" href="./src/css/myt.css"/>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="./src/js/jquery/jquery-1.11.1.min.js">\x3C/script>');</script>
 <script src="./src/js/boilerplate.js"></script>
 <script src="./dist/myt.min.js"></script>
 </head><body>
 <script>
     var rootView = new myt.View(null, {bgColor:'#cccccc'}, [myt.SizeToWindow]);
-    new myt.Text(rootView, {x:5, y:5, text:'Welcome to the Myt Framework.'});
+    new myt.Text(rootView, {x:5, y:5, text:myt.fillTextTemplate(
+        "Welcome to the Myt Framework.<br />Here are some {0}.", 
+        myt.generateLink('examples', 'doExamplesLink')
+    )}, [{
+        doExamplesLink: function() {
+            window.location = './examples/';
+        }
+    }]);
 </script>
 </body></html>

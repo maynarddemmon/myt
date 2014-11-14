@@ -3514,10 +3514,8 @@ JS = {
   extend: function(destination, source, overwrite) {
     if (destination && source) {
       for (var field in source) {
-        if (destination[field] !== source[field]) {
-          if (overwrite || !destination.hasOwnProperty(field)) {
-            destination[field] = source[field];
-          }
+        if (destination[field] !== source[field] && (overwrite || !destination.hasOwnProperty(field))) {
+          destination[field] = source[field];
         }
       }
     }
@@ -3525,15 +3523,13 @@ JS = {
   },
   
   makeClass: function(parent) {
-    parent = parent || Object;
-    
     var constructor = function() {
       var init = this.initialize;
       return init ? init.apply(this, arguments) || this : this;
     };
     
     var bridge = function() {};
-    bridge.prototype = parent.prototype;
+    bridge.prototype = (parent || Object).prototype;
     constructor.prototype = new bridge();
     
     return constructor;
@@ -3541,11 +3537,10 @@ JS = {
 };
 
 JS.Method = JS.makeClass();
-
 JS.extend(JS.Method.prototype, {
   initialize: function(module, name, callable) {
-    this.module   = module;
-    this.name     = name;
+    this.module = module;
+    this.name = name;
     this.callable = callable;
     this._hasSuper = typeof callable === 'function' && callable.toString().indexOf('callSuper') !== -1;
   },
@@ -3563,7 +3558,7 @@ JS.extend(JS.Method.prototype, {
         callable = method.callable,
         keywordCallSuper = JS.Method.keywordCallSuper,
         superFunc = method._hasSuper && keywordCallSuper ? keywordCallSuper : null;
-
+    
     return superFunc === null ? callable : function() {
       var prevValue, prevOwn, 
         existing = this.callSuper,
@@ -3592,90 +3587,94 @@ JS.extend(JS.Method.prototype, {
 });
 
 JS.Method.create = function(module, name, callable) {
-  if (callable && callable.__inc__ && callable.__fns__) return callable;
-
-  return (typeof callable !== 'function') ? callable : new this(module, name, callable);
+  return (callable && callable.__inc__ && callable.__fns__) || typeof callable !== 'function' ? callable : new this(module, name, callable);
 };
 
 JS.Method.compile = function(method, environment) {
-  return (method instanceof this) ? method.compile(environment) : method;
+  return method instanceof this ? method.compile(environment) : method;
 };
 
 JS.Module = JS.makeClass();
-
 JS.extend(JS.Module.prototype, {
   initialize: function(name, methods, options) {
-    if (typeof name !== 'string') {
-      options = arguments[1];
-      methods = arguments[0];
-      name    = undefined;
-    }
-    options = options || {};
-
     this.__inc__ = [];
     this.__dep__ = [];
     this.__fns__ = {};
-    this.__tgt__ = options._target;
+    this.__tgt__ = (options || {})._target;
     this.__anc__ = null;
     this.__mct__ = {};
-
-    this.include(methods, {_resolve: false});
+    
+    this.include(methods, {_resolve:false});
   },
 
+  /** Adds a single named method to a JS.Class/JS.Module. If you’re modifying 
+      a class, the method instantly becomes available in instances of the 
+      class, and in its subclasses.
+      @param name:string The name of the method to add.
+      @param callable:function The method implementation.
+      @param options:object (optional)
+      @returns void */
   define: function(name, callable, options) {
-    var resolve = (options || {})._resolve;
-
     this.__fns__[name] = JS.Method.create(this, name, callable);
-    if (resolve !== false) this.resolve();
+    if ((options || {})._resolve !== false) this.resolve();
   },
 
+  /** Mixes in a module to this module.
+      @param module:JS.Module The module to mix in.
+      @param options:object (optional)
+      @returns JS.Module this module. */
   include: function(module, options) {
-    if (!module) return this;
-
-    var options = options || {},
-        resolve = options._resolve !== false,
-        extend  = module.extend,
-        include = module.include,
-        extended, field, value, mixins, i, n;
-
-    if (module.__fns__ && module.__inc__) {
-      this.__inc__.push(module);
-      if ((module.__dep__ || {}).push) module.__dep__.push(this);
-
-      if (extended = options._extended) {
-        if (typeof module.extended === 'function') module.extended(extended);
+    if (module) {
+      options = options || {};
+      var extend  = module.extend,
+          include = module.include,
+          extended, field, value, mixins, i, n, resolveFalse;
+      
+      if (module.__fns__ && module.__inc__) {
+        this.__inc__.push(module);
+        module.__dep__.push(this);
+        
+        if (extended = options._extended) {
+          if (typeof module.extended === 'function') module.extended(extended);
+        } else {
+          if (typeof module.included === 'function') module.included(this);
+        }
       } else {
-        if (typeof module.included === 'function') module.included(this);
-      }
-    } else {
-      if (this.shouldIgnore('extend', extend)) {
-        mixins = [].concat(extend);
-        for (i = 0, n = mixins.length; i < n;) this.extend(mixins[i++]);
-      }
-      if (this.shouldIgnore('include', include)) {
-        mixins = [].concat(include);
-        for (i = 0, n = mixins.length; i < n;) this.include(mixins[i++], {_resolve: false});
-      }
-      for (field in module) {
-        if (module.hasOwnProperty(field)) {
-          value = module[field];
-          if (this.shouldIgnore(field, value)) continue;
-          this.define(field, value, {_resolve: false});
+        resolveFalse = {_resolve:false};
+        if (this._ignore(extend)) {
+          mixins = [].concat(extend);
+          for (i = 0, n = mixins.length; i < n;) this.extend(mixins[i++]);
+        }
+        if (this._ignore(include)) {
+          mixins = [].concat(include);
+          for (i = 0, n = mixins.length; i < n;) this.include(mixins[i++], resolveFalse);
+        }
+        for (field in module) {
+          if (module.hasOwnProperty(field)) {
+            value = module[field];
+            if ((field === 'extend' || field === 'include') && this._ignore(value)) continue;
+            this.define(field, value, resolveFalse);
+          }
         }
       }
+      
+      if (options._resolve !== false) this.resolve();
     }
-
-    if (resolve) this.resolve();
     return this;
   },
 
-  resolve: function(host) {
-    var host   = host || this,
-        target = host.__tgt__,
-        inc    = this.__inc__,
-        fns    = this.__fns__,
-        i, n, key, compiled;
+  /** @private */
+  _ignore: function(value) {
+    return typeof value !== 'function' || (value.__fns__ && value.__inc__);
+  },
 
+  resolve: function(host) {
+    host = host || this;
+    var target = host.__tgt__,
+        inc = this.__inc__,
+        fns = this.__fns__,
+        i, n, key, compiled;
+    
     if (host === this) {
       this.__anc__ = null;
       this.__mct__ = {};
@@ -3693,35 +3692,37 @@ JS.extend(JS.Module.prototype, {
     }
   },
 
-  shouldIgnore: function(field, value) {
-    return (field === 'extend' || field === 'include') &&
-           (typeof value !== 'function' || (value.__fns__ && value.__inc__));
-  },
-
+  /** Gets the ancestor classes array.
+      @param list:array (optional) An array of ancestors that will have
+        ancestor classes pushed onto. If not provided a new array will
+        be created.
+      @return array */
   ancestors: function(list) {
     var cachable = !list,
-        list     = list || [],
-        inc      = this.__inc__;
-
+        inc = this.__inc__;
+    list = list || [];
+    
     if (cachable && this.__anc__) return this.__anc__.slice();
-
+    
     for (var i = 0, n = inc.length; i < n;) inc[i++].ancestors(list);
-
+    
     if (list.indexOf(this) < 0) list.push(this);
-
+    
     if (cachable) this.__anc__ = list.slice();
     return list;
   },
 
+  /** Gets an array of JS.Methods for the provided method name.
+      @param name:string The name of the method to lookup.
+      @return array An array of JS.Methods from the ancestors chain. */
   lookup: function(name) {
     var cached = this.__mct__[name];
-    if (cached && cached.slice) return cached.slice();
-
-    var ancestors = this.ancestors(),
-        methods   = [],
-        fns;
-
-    for (var i = 0, n = ancestors.length; i < n;) {
+    if (cached) return cached.slice();
+    
+    var ancestors = this.ancestors(), 
+      n = ancestors.length,
+      methods = [], fns, i = 0;
+    for (; i < n;) {
       fns = ancestors[i++].__fns__;
       if (fns.hasOwnProperty(name)) methods.push(fns[name]);
     }
@@ -3729,17 +3730,22 @@ JS.extend(JS.Module.prototype, {
     return methods;
   },
 
+  /** Checks if this module includes the provided module.
+      @param module:JS.Module The module to check for.
+      @return boolean True if the module is included, otherwise false. */
   includes: function(module) {
     if (module === this) return true;
-
-    var inc = this.__inc__;
-
-    for (var i = 0, n = inc.length; i < n;) {
+    
+    var inc = this.__inc__, n = inc.length, i = 0;
+    for (; i < n;) {
       if (inc[i++].includes(module)) return true;
     }
     return false;
   },
 
+  /** Extracts a single named method from a module.
+      @param name:string The name of the method to extract.
+      @return JS.Method The extracted method. */
   instanceMethod: function(name) {
     return this.lookup(name).pop();
   }
@@ -3747,9 +3753,10 @@ JS.extend(JS.Module.prototype, {
 
 JS.Kernel = new JS.Module('Kernel', {
   __eigen__: function() {
-    if (this.__meta__) return this.__meta__;
-    this.__meta__ = new JS.Module('', null, {_target: this});
-    return this.__meta__.include(this.klass, {_resolve: false});
+    var meta = this.__meta__;
+    if (meta) return meta;
+    meta = this.__meta__ = new JS.Module('', null, {_target: this});
+    return meta.include(this.klass, {_resolve: false});
   },
 
   equals: function(other) {
@@ -3757,129 +3764,118 @@ JS.Kernel = new JS.Module('Kernel', {
   },
 
   extend: function(module, options) {
-    var resolve = (options || {})._resolve;
-    this.__eigen__().include(module, {_extended: this, _resolve: resolve});
+    if (module) this.__eigen__().include(module, {_extended:this, _resolve:(options || {})._resolve});
     return this;
   },
 
+  /** Checks if this object includes, extends or is the provided module.
+      @param module:JS.Module The module to check for.
+      @return boolean */
   isA: function(module) {
-    return (typeof module === 'function' && this instanceof module) ||
-           this.__eigen__().includes(module);
+    return (typeof module === 'function' && this instanceof module) || this.__eigen__().includes(module);
   },
 
   method: function(name) {
-    var cache = this.__mct__ = this.__mct__ || {},
+    var cache = this.__mct__ || (this.__mct__ = {}),
         value = cache[name],
         field = this[name];
-
+    
     if (typeof field !== 'function') return field;
     if (value && field === value._value) return value._bound;
-
+    
     var bound = field.bind(this);
-    cache[name] = {_value: field, _bound: bound};
+    cache[name] = {_value:field, _bound:bound};
     return bound;
   }
 });
 
 JS.Class = JS.makeClass(JS.Module);
-
 JS.extend(JS.Class.prototype, {
   initialize: function(name, parent, methods, options) {
-    if (typeof name !== 'string') {
-      options = arguments[2];
-      methods = arguments[1];
-      parent  = arguments[0];
-      name    = undefined;
-    }
     if (typeof parent !== 'function') {
       options = methods;
       methods = parent;
       parent  = Object;
     }
-    JS.Module.prototype.initialize.call(this, name);
-    options = options || {};
-
-    var klass = JS.makeClass(parent);
+    
+    JS.Module.prototype.initialize.call(this);
+    
+    var resolve = (options || {})._resolve,
+      resolveFalse = {_resolve:false},
+      klass = JS.makeClass(parent);
     klass.__displayName = name;
     JS.extend(klass, this);
-
     klass.prototype.constructor = klass.prototype.klass = klass;
-
-    klass.__eigen__().include(parent.__meta__, {_resolve: options._resolve});
-
+    klass.__eigen__().include(parent.__meta__, {_resolve:resolve});
     klass.__tgt__ = klass.prototype;
-
-    var parentModule = (parent === Object)
-                     ? {}
-                     : (parent.__fns__ ? parent : new JS.Module(parent.prototype, {_resolve: false}));
-
-    klass.include(JS.Kernel,    {_resolve: false})
-         .include(parentModule, {_resolve: false})
-         .include(methods,      {_resolve: false});
-
-    if (options._resolve !== false) klass.resolve();
-
+    
+    var parentModule = parent === Object ? {} : (parent.__fns__ ? parent : new JS.Module(parent.prototype, resolveFalse));
+    klass.include(JS.Kernel, resolveFalse).include(parentModule, resolveFalse).include(methods, resolveFalse);
+     
+    if (resolve !== false) klass.resolve();
     if (typeof parent.inherited === 'function') parent.inherited(klass);
-
+    
     return klass;
   }
 });
 
 (function() {
-  var classify = function(klass, parent) {
-    klass.__inc__ = [];
-    klass.__dep__ = [];
-    var proto = klass.prototype,
-      methods = {}, 
-      field;
-    for (field in proto) {
-      if (proto.hasOwnProperty(field)) {
-        methods[field] = JS.Method.create(klass, field, proto[field]);
+  var JS_METHOD = JS.Method, JS_KERNEL = JS.Kernel, 
+    JS_CLASS = JS.Class, JS_MODULE = JS.Module,
+    classify = function(klass, parent) {
+      klass.__inc__ = [];
+      klass.__dep__ = [];
+      var proto = klass.prototype,
+        methods = {}, 
+        field;
+      for (field in proto) {
+        if (proto.hasOwnProperty(field)) methods[field] = JS_METHOD.create(klass, field, proto[field]);
       }
-    }
-    klass.__fns__ = methods;
-    klass.__tgt__ = proto;
-    
-    proto.constructor = proto.klass = klass;
-    
-    JS.extend(klass, JS.Class.prototype);
-    klass.include(parent);
-    
-    klass.constructor = klass.klass = JS.Class;
-  };
-  classify(JS.Method, JS.Kernel);
-  classify(JS.Module, JS.Kernel);
-  classify(JS.Class,  JS.Module);
-
-  var eigen = JS.Kernel.instanceMethod('__eigen__');
-  eigen.call(JS.Method).resolve();
-  eigen.call(JS.Module).resolve();
-  eigen.call(JS.Class).include(JS.Module.__meta__);
+      klass.__fns__ = methods;
+      klass.__tgt__ = proto;
+      
+      proto.constructor = proto.klass = klass;
+      
+      JS.extend(klass, JS_CLASS.prototype);
+      klass.include(parent);
+      
+      klass.constructor = klass.klass = JS_CLASS;
+    };
+  classify(JS_METHOD, JS_KERNEL);
+  classify(JS_MODULE, JS_KERNEL);
+  classify(JS_CLASS,  JS_MODULE);
+  
+  var eigen = JS_KERNEL.instanceMethod('__eigen__');
+  eigen.call(JS_METHOD).resolve();
+  eigen.call(JS_MODULE).resolve();
+  eigen.call(JS_CLASS).include(JS_MODULE.__meta__);
 })();
 
+// Must come after classification.
 JS.Method.keywordCallSuper = function(method, env, receiver, args) {
-  var methods    = env.lookup(method.name),
+  var methods = env.lookup(method.name),
       stackIndex = methods.length - 1,
-      params     = Array.prototype.slice.call(args);
-
+      params = Array.prototype.slice.call(args);
+  
   if (stackIndex === 0) return undefined;
-
+  
   var _super = function() {
     var i = arguments.length;
     while (i) params[--i] = arguments[i];
-
+    
     stackIndex--;
     if (stackIndex === 0) delete receiver.callSuper;
     var returnValue = methods[stackIndex].apply(receiver, params);
     receiver.callSuper = _super;
     stackIndex++;
-
+    
     return returnValue;
   };
-
+  
   return _super;
 };
 
+/** Create a single instance of a "private" class. */
 JS.Singleton = new JS.Class('Singleton', {
   initialize: function(name, parent, methods) {
     return new (new JS.Class(name, parent, methods));
@@ -4328,6 +4324,48 @@ myt = {
                 cache = f.__cache || (f.__cache = {});
             return (hash in cache) ? cache[hash] : cache[hash] = f.apply(this, arguments);
         };
+    },
+    
+    /** Copies properties from the source objects to the target object.
+        @param targetObj:object The object that properties will be copied into.
+        @param sourceObj:object The object that properties will be copied from.
+        @param arguments... Additional arguments beyond the second will also
+            be used as source objects and copied in order from left to right.
+        @param mappingFunction:function (optional) If the last argument is a 
+            function it will be used to copy values from the source to the
+            target. The function will be passed three values, the key, the 
+            target and the source. The mapping function should copy the
+            source value into the target value if so desired.
+        @returns The target object. */
+    extend: function(targetObj, sourceObj) {
+        var iterable = targetObj, 
+            result = iterable,
+            args = arguments, argsLength = args.length, argsIndex = 0,
+            key, mappingFunc, ownIndex, ownProps, length;
+        
+        if (iterable) {
+            if (argsLength > 2 && typeof args[argsLength - 1] === 'function') mappingFunc = args[--argsLength];
+            
+            while (++argsIndex < argsLength) {
+                iterable = args[argsIndex];
+                
+                if (iterable) {
+                    ownIndex = -1;
+                    ownKeys = Object.keys(iterable);
+                    length = ownKeys ? ownKeys.length : 0;
+                    
+                    while (++ownIndex < length) {
+                        key = ownKeys[ownIndex];
+                        if (mappingFunc) {
+                            mappingFunc(key, result, iterable);
+                        } else {
+                            result[key] = iterable[key];
+                        }
+                    }
+                }
+            }
+        }
+        return result
     }
 };
 
@@ -4385,7 +4423,7 @@ myt.Cookie = {
                     cookie value before it is returned.
         @returns The cookie value string or a parsed cookie value. */
     read: function(key, options) {
-        options = $.extend({}, this.defaults, options);
+        options = myt.extend({}, this.defaults, options);
         
         var decodeFunc = options.raw ? this._raw : this._decoded,
             useJson = options.json,
@@ -4425,7 +4463,7 @@ myt.Cookie = {
                     the cookie value.
         @returns void */
     write: function(key, value, options) {
-        options = $.extend({}, this.defaults, options);
+        options = myt.extend({}, this.defaults, options);
         
         if (typeof options.expires === 'number') {
             var days = options.expires;
@@ -4453,7 +4491,7 @@ myt.Cookie = {
     remove: function(key, options) {
         if (this.read(key, options) !== undefined) {
             // Must not alter options, thus extending a fresh object.
-            this.write(key, '', $.extend({}, options, {expires: -1}));
+            this.write(key, '', myt.extend({}, options, {expires: -1}));
             return true;
         }
         return false;
@@ -4843,18 +4881,14 @@ myt.Observer = new JS.Module('Observer', {
                 var self = this, origMethodName = methodName;
                 
                 // Generate one time method name.
-                if (this.__methodNameCounter === undefined) {
-                    this.__methodNameCounter = 0;
-                } else {
-                    this.__methodNameCounter++;
-                }
-                methodName = '__DO_ONCE_' + this.__methodNameCounter;
+                if (this.__methodNameCounter === undefined) this.__methodNameCounter = 0;
+                methodName = '__DO_ONCE_' + this.__methodNameCounter++;
                 
                 // Setup wrapper method that will do the detachFrom.
-                this[methodName] = function(e) {
+                this[methodName] = function(event) {
                     self.detachFrom(observable, methodName, eventType);
                     delete self[methodName];
-                    return self[origMethodName](e);
+                    return self[origMethodName](event);
                 };
             }
             
@@ -6397,12 +6431,17 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
         method.
         @param attrName:string The name of the attribute to set.
         @param v:* The value to set.
+        @param noSetter:boolean (optional) If true no attempt will be made to
+            invoke a setter function. Useful when you want to invoke standard 
+            setter behavior. Defaults to undefined which is equivalent to false.
         @returns void */
-    set: function(attrName, v) {
-        var setterName = myt.AccessorSupport.generateSetterName(attrName);
-        if (this[setterName]) {
-            this[setterName](v);
-        } else if (this[attrName] !== v) {
+    set: function(attrName, v, noSetter) {
+        if (!noSetter) {
+            var setterName = myt.AccessorSupport.generateSetterName(attrName);
+            if (this[setterName]) return this[setterName](v);
+        }
+        
+        if (this[attrName] !== v) {
             this[attrName] = v;
             if (this.inited !== false && this.fireNewEvent) this.fireNewEvent(attrName, v); // !== false allows this to work with non-nodes.
         }
@@ -6796,7 +6835,15 @@ myt.Node = new JS.Class('Node', {
         @returns void */
     initialize: function(parent, attrs, mixins) {
         if (mixins) {
-            for (var i = 0, len = mixins.length; len > i;) this.extend(mixins[i++]);
+            var i = 0, len = mixins.length, mixin;
+            for (; len > i;) {
+                mixin = mixins[i++];
+                if (mixin) {
+                    this.extend(mixin);
+                } else {
+                    console.warn("Undefined mixin in initialization of: " + this.klass.__displayName);
+                }
+            }
         }
         
         this.inited = false;
@@ -7148,6 +7195,21 @@ myt.Node = new JS.Class('Node', {
     subnodeRemoved: function(node) {},
     
     // Animation
+    /** A wrapper on Node.animate that will only animate one time and that 
+        provides a streamlined list of the most commonly used arguments.
+        @param attribute:string/object the name of the attribute to animate. If
+            an object is provided it should be the only argument and its keys
+            should be the params of this method. This provides a more concise
+            way of passing in sparse optional parameters.
+        @param to:number the target value to animate to.
+        @param from:number the target value to animate from. (optional)
+        @param duration:number (optional)
+        @param easingFunction:function (optional)
+        @returns The Animator being run. */
+    animateOnce: function(attribute, to, from, duration, easingFunction) {
+        return this.animate(attribute, to, from, false, null, duration, false, 1, easingFunction);
+    },
+    
     /** Animates an attribute using the provided parameters.
         @param attribute:string/object the name of the attribute to animate. If
             an object is provided it should be the only argument and its keys
@@ -7158,7 +7220,7 @@ myt.Node = new JS.Class('Node', {
         @param relative:boolean (optional)
         @param callback:function (optional)
         @param duration:number (optional)
-        @param revers:boolean (optional)
+        @param reverse:boolean (optional)
         @param repeat:number (optional)
         @param easingFunction:function (optional)
         @returns The Animator being run. */
@@ -7720,6 +7782,28 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
         return sv.ignoreLayout;
     },
     
+    /** If our parent adds a new subview we should add it.
+        @private */
+    __handleParentSubviewAddedEvent: function(event) {
+        var v = event.value;
+        if (v.parent === this.parent) this.addSubview(v);
+    },
+    
+    /** If our parent removes a subview we should remove it.
+        @private */
+    __handleParentSubviewRemovedEvent: function(event) {
+        var v = event.value;
+        if (v.parent === this.parent) this.removeSubview(v);
+    },
+    
+    // Subview ordering //
+    /** Sorts the subviews array according to the provided sort function.
+        @param sortFunc:function the sort function to sort the subviews with.
+        @returns void */
+    sortSubviews: function(sortFunc) {
+        this.subviews.sort(sortFunc);
+    },
+    
     /** Moves the subview before the target subview in the order the subviews
         are layed out. If no target subview is provided, or it isn't in the
         layout the subview will be moved to the front of the list.
@@ -7756,24 +7840,6 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
                 }
             }
         }
-    },
-    
-    sortSubviews: function(sortFunc) {
-        this.subviews.sort(sortFunc);
-    },
-    
-    /** If our parent adds a new subview we should add it.
-        @private */
-    __handleParentSubviewAddedEvent: function(event) {
-        var v = event.value;
-        if (v.parent === this.parent) this.addSubview(v);
-    },
-    
-    /** If our parent removes a subview we should remove it.
-        @private */
-    __handleParentSubviewRemovedEvent: function(event) {
-        var v = event.value;
-        if (v.parent === this.parent) this.removeSubview(v);
     }
 });
 
@@ -8665,12 +8731,12 @@ myt.View = new JS.Class('View', myt.Node, {
     },
     
     /** @private */
-    __doAlignCenter: function(e) {
+    __doAlignCenter: function(event) {
         this.setX(Math.round((this.parent.width - this.width) / 2) + (this.alignOffset || 0));
     },
     
     /** @private */
-    __doAlignRight: function(e) {
+    __doAlignRight: function(event) {
         this.setX(this.parent.width - this.width - (this.alignOffset || 0));
     },
     
@@ -8723,12 +8789,12 @@ myt.View = new JS.Class('View', myt.Node, {
     },
     
     /** @private */
-    __doValignMiddle: function(e) {
+    __doValignMiddle: function(event) {
         this.setY(Math.round((this.parent.height - this.height) / 2) + (this.valignOffset || 0));
     },
     
     /** @private */
-    __doValignBottom: function(e) {
+    __doValignBottom: function(event) {
         this.setY(this.parent.height - this.height - (this.valignOffset || 0));
     },
     
@@ -9906,6 +9972,68 @@ myt.Markup = new JS.Class('Markup', myt.View, {
 });
 
 
+/** A view for an iframe. This component also listens to global mousedown/up
+    events and turns off point-events so that the iframe will interfere
+    less with mouse behavior in the parent document.
+    
+    Events:
+        src:string
+    
+    Attributes:
+        src:string The URL to an HTML document to load into the iframe.
+    
+    Private Attributes:
+        __restorePointerEvents:string The value of pointerEvents before a
+            mousedown occurs. Used as part of turning off pointer-events
+            so that the iframe messes less with mouse behavior in the 
+            parent document.
+*/
+myt.Frame = new JS.Class('Frame', myt.View, {
+    // Life Cycle //////////////////////////////////////////////////////////////
+    /** @overrides myt.View */
+    initNode: function(parent, attrs) {
+        this.callSuper(parent, attrs);
+        
+        var gm = myt.global.mouse;
+        this.attachToDom(gm, '__doMouseDown', 'mousedown', true);
+        this.attachToDom(gm, '__doMouseUp', 'mouseup', true);
+    },
+    
+    /** @overrides myt.View */
+    createOurDomElement: function(parent) {
+        var elem = document.createElement('iframe'),
+            s = elem.style;
+        s.position = 'absolute';
+        s.border = '0px';
+        return elem;
+    },
+    
+    
+    // Accessors ///////////////////////////////////////////////////////////////
+    setSrc: function(v) {
+        if (this.src !== v) {
+            this.src = this.domElement.src = v;
+            if (this.inited) this.fireNewEvent('src', v);
+        }
+    },
+    
+    
+    // Methods /////////////////////////////////////////////////////////////////
+    /** @private */
+    __doMouseDown: function(event) {
+        this.__restorePointerEvents = this.pointerEvents;
+        this.setPointerEvents('none');
+        return true;
+    },
+    
+    /** @private */
+    __doMouseUp: function(event) {
+        this.setPointerEvents(this.__restorePointerEvents);
+        return true;
+    }
+});
+
+
 /** A variation of myt.SizeToDom that sizes the view to the width of the 
     dom element only.
     
@@ -10062,7 +10190,7 @@ myt.SizeHeightToDom = new JS.Module('SizeHeightToDom', {
 */
 myt.SizeToParent = new JS.Module('SizeToParent', {
     // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrides myt.Node */
+    /** @overrides myt.View */
     setParent: function(parent) {
         if (this.parent !== parent) {
             if (this.inited) {
@@ -10094,25 +10222,6 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
         }
     },
     
-    /** @private */
-    __teardownPercentOfParentWidthConstraint: function() {
-        if (this.percentOfParentWidth >= 0) this.detachFrom(this.parent, '__doPercentOfParentWidth', 'width');
-    },
-    
-    /** @private */
-    __setupPercentOfParentWidthConstraint: function() {
-        var p = this.parent;
-        if (p && this.percentOfParentWidth >= 0) this.syncTo(p, '__doPercentOfParentWidth', 'width');
-    },
-    
-    /** @private */
-    __doPercentOfParentWidth: function(e) {
-        this.setWidth((this.percentOfParentWidthOffset || 0) + Math.round(this.parent.width * (this.percentOfParentWidth / 100)));
-        // Force width event if not inited yet so that align constraint
-        // will work.
-        if (!this.inited) this.fireNewEvent('width', this.width);
-    },
-    
     setPercentOfParentHeightOffset: function(v) {
         if (this.percentOfParentHeightOffset !== v) {
             this.percentOfParentHeightOffset = v;
@@ -10132,6 +10241,27 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
         }
     },
     
+    
+    // Methods /////////////////////////////////////////////////////////////////
+    /** @private */
+    __teardownPercentOfParentWidthConstraint: function() {
+        if (this.percentOfParentWidth >= 0) this.detachFrom(this.parent, '__doPercentOfParentWidth', 'width');
+    },
+    
+    /** @private */
+    __setupPercentOfParentWidthConstraint: function() {
+        var p = this.parent;
+        if (p && this.percentOfParentWidth >= 0) this.syncTo(p, '__doPercentOfParentWidth', 'width');
+    },
+    
+    /** @private */
+    __doPercentOfParentWidth: function(event) {
+        this.setWidth((this.percentOfParentWidthOffset || 0) + Math.round(this.parent.width * (this.percentOfParentWidth / 100)));
+        // Force width event if not inited yet so that align constraint
+        // in myt.View will work.
+        if (!this.inited) this.fireNewEvent('width', this.width);
+    },
+    
     /** @private */
     __teardownPercentOfParentHeightConstraint: function() {
         if (this.percentOfParentHeight >= 0) this.detachFrom(this.parent, '__doPercentOfParentHeight', 'height');
@@ -10144,10 +10274,10 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
     },
     
     /** @private */
-    __doPercentOfParentHeight: function(e) {
+    __doPercentOfParentHeight: function(event) {
         this.setHeight((this.percentOfParentHeightOffset || 0) + Math.round(this.parent.height * (this.percentOfParentHeight / 100)));
         // Force height event if not inited yet so that valign constraint
-        // will work.
+        // in myt.View will work.
         if (!this.inited) this.fireNewEvent('height', this.height);
     }
 });
@@ -10620,8 +10750,8 @@ new JS.Singleton('GlobalIdle', {
             The default value is 1000.
         easingFunction:string/function Controls the rate of animation.
             string: See http://easings.net/ for more info. One of the following:
-                linear(default), 
-                easeInQuad, easeOutQuad, easeInOutQuad, 
+                linear, 
+                easeInQuad, easeOutQuad, easeInOutQuad(default), 
                 easeInCubic, easeOutCubic, easeInOutCubic, 
                 easeInQuart, easeOutQuart, easeInOutQuart, 
                 easeInQuint, easeOutQuint, easeInOutQuint, 
@@ -10672,7 +10802,7 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         this.duration = 1000;
         this.relative = this.reverse = this.running = this.paused = false;
         this.repeat = 1;
-        this.easingFunction = myt.Animator.easingFunctions.linear;
+        this.easingFunction = myt.Animator.DEFAULT_EASING_FUNCTION;
         
         this.callSuper(parent, attrs);
         
@@ -10724,14 +10854,10 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
     
     setEasingFunction: function(v) {
         // Lookup easing function if a string is provided.
-        if (typeof v === 'string') {
-            var func = myt.Animator.easingFunctions[v];
-            if (!func) {
-                console.log("Unknown easingFunction: ", v);
-                func = myt.Animator.easingFunctions.linear;
-            }
-            v = func;
-        }
+        if (typeof v === 'string') v = myt.Animator.easingFunctions[v];
+        
+        // Use default if invalid
+        if (!v) v = myt.Animator.DEFAULT_EASING_FUNCTION;
         
         if (this.easingFunction !== v) {
             this.easingFunction = v;
@@ -10796,7 +10922,7 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         this.duration = 1000;
         this.relative = this.reverse = false;
         this.repeat = 1;
-        this.easingFunction = myt.Animator.easingFunctions.linear;
+        this.easingFunction = myt.Animator.DEFAULT_EASING_FUNCTION;
         
         this.reset(false);
     },
@@ -11078,6 +11204,9 @@ myt.Animator.easingFunctions = {
         return myt.Animator.easingFunctions.easeOutBounce(t*2-d, c, d) * .5 + c*.5;
     }
 };
+
+/** Setup the default easing function. */
+myt.Animator.DEFAULT_EASING_FUNCTION = myt.Animator.easingFunctions.easeInOutQuad;
 
 
 /** Stores a function name and a context to call that function on along with 
@@ -11842,10 +11971,10 @@ myt.ConstantLayout = new JS.Class('ConstantLayout', myt.Layout, {
         if (this.canUpdate()) {
             var setterName = this.setterName, 
                 value = this.targetValue, 
-                svs = this.subviews,
-                sv, setter;
-            for (var i = 0, len = svs.length; len > i; ++i) {
-                sv = svs[i];
+                svs = this.subviews, len = svs.length, sv,
+                setter, i = 0;
+            for (; len > i;) {
+                sv = svs[i++];
                 setter = sv[setterName];
                 if (setter) setter.call(sv, value);
             }
@@ -13915,6 +14044,28 @@ myt.Button = new JS.Module('Button', {
 myt.Color = new JS.Class('Color', {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
+        /** Converts a number or string representation of a number to a 
+            two character hex string.
+            @param value:number/string The number or string to convert.
+            @returns string: A two character hex string such as: '0c' or 'c9'. */
+        toHex: function(value) {
+            value = Math.round(Number(value)).toString(16);
+            return value.length === 1 ? '0' + value : value;
+        },
+        
+        /** Converts red, green, and blue color channel numbers to a six 
+            character hex string.
+            @param red:number The red color channel.
+            @param green:number The green color channel.
+            @param blue:number The blue color channel.
+            @param prependHash:boolean (optional) If true a '#' character
+                will be prepended to the return value.
+            @returns string: Something like: '#ff9c02' or 'ff9c02' */
+        rgbToHex: function(red, green, blue, prependHash) {
+            var toHex = this.toHex;
+            return [prependHash ? '#' : '', toHex(red), toHex(green), toHex(blue)].join('');
+        },
+        
         /** Limits a channel value to integers between 0 and 255.
             @param value:number the channel value to clean up.
             @returns number */
@@ -14026,19 +14177,10 @@ myt.Color = new JS.Class('Color', {
         return (this.red << 16) + (this.green << 8) + this.blue;
     },
     
-    /** Converts the provided number to a 2 character hex string.
-        @private 
-        @param v:number The number to convert.
-        @returns a 2 character hex string such as: '0c' or 'c9'. */
-    __toHex: function(v) {
-        var str = Number(v).toString(16); 
-        return str.length === 1 ? "0" + str : str;
-    },
-    
     /** Gets the hex string representation of this color.
         @returns string: A hex color such as '#a0bbcc'. */
     getHtmlHexString: function() {
-        return "#" + this.__toHex(this.red) + this.__toHex(this.green) + this.__toHex(this.blue);
+        return myt.Color.rgbToHex(this.red, this.green, this.blue, true);
     },
     
     /** Tests if this color is lighter than the provided color.
@@ -15603,14 +15745,14 @@ myt.HorizontalThreePanel = new JS.Module('HorizontalThreePanel', {
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @private */
-    __updateSize: function(e) {
+    __updateSize: function(event) {
         var v = this.second;
         v.setHeight(v.naturalHeight);
         this.__updateImageSize();
     },
     
     /** @private */
-    __updateImageSize: function(e) {
+    __updateImageSize: function(event) {
         var v = this.second;
         v.setImageSize(this.repeat ? undefined : v.width + 'px ' + v.height + 'px');
     },
@@ -16010,33 +16152,10 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
     setLastFloatingPanelShown: function(v) {this.lastFloatingPanelShown = v;},
     setLastFloatingPanelId: function(v) {this.floatingPanelId = v;},
     
-    setFloatingAlign: function(v) {
-        if (this.floatingAlign !== v) {
-            this.floatingAlign = v;
-            if (this.inited) this.fireNewEvent('floatingAlign', v);
-        }
-    },
-    
-    setFloatingValign: function(v) {
-        if (this.floatingValign !== v) {
-            this.floatingValign = v;
-            if (this.inited) this.fireNewEvent('floatingValign', v);
-        }
-    },
-    
-    setFloatingAlignOffset: function(v) {
-        if (this.floatingAlignOffset !== v) {
-            this.floatingAlignOffset = v;
-            if (this.inited) this.fireNewEvent('floatingAlignOffset', v);
-        }
-    },
-    
-    setFloatingValignOffset: function(v) {
-        if (this.floatingValignOffset !== v) {
-            this.floatingValignOffset = v;
-            if (this.inited) this.fireNewEvent('floatingValignOffset', v);
-        }
-    },
+    setFloatingAlign: function(v) {this.set('floatingAlign', v, true);},
+    setFloatingValign: function(v) {this.set('floatingValign', v, true);},
+    setFloatingAlignOffset: function(v) {this.set('floatingAlignOffset', v, true);},
+    setFloatingValignOffset: function(v) {this.set('floatingValignOffset', v, true);},
     
     
     // Methods /////////////////////////////////////////////////////////////////
@@ -16060,9 +16179,7 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
     },
     
     toggleFloatingPanel: function(panelId) {
-        panelId = panelId || this.floatingPanelId;
-        
-        var fp = this.getFloatingPanel(panelId);
+        var fp = this.getFloatingPanel(panelId = panelId || this.floatingPanelId);
         if (fp && fp.isShown()) {
             this.hideFloatingPanel(panelId);
         } else {
@@ -17368,30 +17485,10 @@ myt.BAG = new JS.Class('BAG', {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setGroupId: function(v) {
-        if (this.groupId !== v) {
-            this.groupId = v;
-            this.fireNewEvent('groupId', v);
-        }
-    },
-    
-    setAttrName: function(v) {
-        if (this.attrName !== v) {
-            this.attrName = v;
-            this.fireNewEvent('attrName', v);
-        }
-    },
-    
-    setTrueNode: function(v) {
-        if (this.trueNode !== v) {
-            this.trueNode = v;
-            this.fireNewEvent('trueNode', v);
-        }
-    },
-    
-    getNodes: function() {
-        return this.__nodes;
-    },
+    setGroupId: function(v) {this.set('groupId', v, true);},
+    setAttrName: function(v) {this.set('attrName', v, true);},
+    setTrueNode: function(v) {this.set('trueNode', v, true);},
+    getNodes: function() {return this.__nodes;},
     
     
     // Methods /////////////////////////////////////////////////////////////////
@@ -17517,12 +17614,7 @@ myt.RadioMixin = new JS.Module('RadioMixin', {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setOptionValue: function(v) {
-        if (this.optionValue !== v) {
-            this.optionValue = v;
-            if (this.inited) this.fireNewEvent('optionValue', v);
-        }
-    },
+    setOptionValue: function(v) {this.set('optionValue', v, true);},
     
     /** Sets the value of the radio group. Calling this method on any
         radio button in the group should have the same effect. */
@@ -18368,8 +18460,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
             var self = this;
             wrapper.animate({
                 attribute:'height', to:to, 
-                duration:myt.TabSlider.DEFAULT_ANIMATION_MILLIS, 
-                easingFunction:'easeInOutQuad'
+                duration:myt.TabSlider.DEFAULT_ANIMATION_MILLIS
             }).next(function(success) {self.setExpansionState('expanded');});
         } else {
             this.setExpansionState('expanded');
@@ -18390,8 +18481,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
             var self = this;
             wrapper.animate({
                 attribute:'height', to:to, 
-                duration:myt.TabSlider.DEFAULT_ANIMATION_MILLIS, 
-                easingFunction:'easeInOutQuad'
+                duration:myt.TabSlider.DEFAULT_ANIMATION_MILLIS
             }).next(function(success) {self.setExpansionState('collapsed');});
         } else {
             this.setExpansionState('collapsed');
@@ -19267,7 +19357,8 @@ myt.Ajax = new JS.Class('Ajax', myt.Node, {
     
     // Methods /////////////////////////////////////////////////////////////////
     doRequest: function(opts, successCallback, failureCallback) {
-        var mappedOpts = {
+        // Convert from myt.Ajax opts to JQuery.ajax opts.
+        var mappedOpts = myt.extend({
             context:this,
             
             // Store url and anything stored under the "callbackData" and
@@ -19279,20 +19370,18 @@ myt.Ajax = new JS.Class('Ajax', myt.Node, {
                 
                 jqxhr.requestURL = settings.url;
             }
-        };
-        
-        // Convert from myt.Ajax opts to JQuery.ajax opts.
-        $.each(opts, function(key, value) {
+        }, opts, function(key, target, source) {
+            var targetKey = key;
             switch (key) {
-                case 'requestData': key = 'data'; break;
-                case 'requestMethod': key = 'type'; break;
-                case 'responseType': key = 'datatype'; break;
+                case 'requestData': targetKey = 'data'; break;
+                case 'requestMethod': targetKey = 'type'; break;
+                case 'responseType': targetKey = 'datatype'; break;
             }
-            mappedOpts[key] = value;
+            target[targetKey] = source[key];
         });
         
         return myt.Ajax.doRequest(
-            $.extend(true, {}, this.opts, mappedOpts), 
+            myt.extend({}, this.opts, mappedOpts), 
             successCallback || this.handleSuccess, 
             failureCallback || this.handleFailure
         );
@@ -20154,11 +20243,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
             for(; len > i; ++i) this.addFile(myt.Uploader.createFile(v[i]));
         }
         
-        if (this.callSuper) {
-            return this.callSuper(v);
-        } else {
-            return v;
-        }
+        return this.callSuper ? this.callSuper(v) : v;
     },
     
     /** @returns the path to the uploaded files. */
@@ -20181,19 +20266,8 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         }
     },
     
-    setUploadUrl: function(v) {
-        if (this.uploadUrl !== v) {
-            this.uploadUrl = v;
-            if (this.inited) this.fireNewEvent('uploadUrl', v);
-        }
-    },
-    
-    setRequestFileParam: function(v) {
-        if (this.requestFileParam !== v) {
-            this.requestFileParam = v;
-            if (this.inited) this.fireNewEvent('requestFileParam', v);
-        }
-    },
+    setUploadUrl: function(v) {this.set('uploadUrl', v, true);},
+    setRequestFileParam: function(v) {this.set('requestFileParam', v, true);},
     
     
     
@@ -20458,7 +20532,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         selectionPalette: []
     },
     spectrums = [],
-    IE = !!/msie/i.exec(window.navigator.userAgent),
+    IE = BrowserDetect.browser === 'Explorer',
     markup = (function () {
         // IE does not support gradients with multiple stops, so we need to simulate
         //  that for the rainbow slider with 8 divs that each have a single gradient
@@ -20523,7 +20597,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
     }
 
     function spectrum(element, o) {
-        var opts = $.extend({}, defaultOpts, o),
+        var opts = myt.extend({}, defaultOpts, o),
             showSelectionPalette = opts.showSelectionPalette,
             localStorageKey = opts.localStorageKey,
             dragWidth = 0,
@@ -20566,7 +20640,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         function applyOptions() {
             if (opts.palette) {
                 palette = opts.palette.slice(0);
-                paletteArray = $.isArray(palette[0]) ? palette : [palette];
+                paletteArray = Array.isArray(palette[0]) ? palette : [palette];
                 paletteLookup = {};
                 for (var i = 0; i < paletteArray.length; i++) {
                     for (var j = 0; j < paletteArray[i].length; j++) {
@@ -20838,7 +20912,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         }
 
         function option(optionName, optionValue) {
-            if (optionName === undefined) return $.extend({}, opts);
+            if (optionName === undefined) return myt.extend({}, opts);
             if (optionValue === undefined) return opts[optionName];
 
             opts[optionName] = optionValue;
@@ -20967,7 +21041,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
 
         // Initializing a new instance of spectrum
         return this.spectrum("destroy").each(function () {
-            var options = $.extend({}, opts, $(this).data());
+            var options = myt.extend({}, opts, $(this).data());
             var spect = spectrum(this, options);
             $(this).data(dataID, spect.id);
         });
@@ -20983,8 +21057,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
     // Brian Grinstead, MIT License
     (function() {
 
-    var trimLeft = /^[\s,#]+/,
-        trimRight = /\s+$/,
+    var trimHash = /^[#]+/,
         math = Math,
         mathRound = math.round,
         mathMin = math.min,
@@ -21042,7 +21115,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
             return {h:hsl.h * 360, s:hsl.s, l:hsl.l};
         },
         toHexString: function() {
-            return '#' + rgbToHex(this._r, this._g, this._b);
+            return myt.Color.rgbToHex(this._r, this._g, this._b, true);
         }
     };
 
@@ -21159,23 +21232,6 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         return {r:r * 255, g:g * 255, b:b * 255};
     }
 
-    // `rgbToHex`
-    // Converts an RGB color to hex
-    // Assumes r, g, and b are contained in the set [0, 255]
-    // Returns a 3 or 6 character hex
-    function rgbToHex(r, g, b) {
-        return [
-            pad2(mathRound(r).toString(16)),
-            pad2(mathRound(g).toString(16)),
-            pad2(mathRound(b).toString(16))
-        ].join("");
-    }
-
-    // Force a hex value to have 2 characters
-    function pad2(c) {
-        return c.length == 1 ? '0' + c : '' + c;
-    }
-
     // Take input from [0, n] and return it as [0, 1]
     function bound01(n, max) {
         var isString = typeof n == "string";
@@ -21212,7 +21268,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
     // Permissive string parsing.  Take in a number of formats, and output an object
     // based on detected format.  Returns `{ r, g, b }` or `{ h, s, l }` or `{ h, s, v}`
     function stringInputToObject(color) {
-        color = color.replace(trimLeft, '').replace(trimRight, '').toLowerCase();
+        color = color.trim().toLowerCase().replace(trimHash, '');
 
         // Try to match string input using regular expressions.
         // Keep most of the number bounding out of this function - don't worry about [0,1] or [0,100] or [0,360]
@@ -21907,7 +21963,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             displayed. Supports: fontWeight, whiteSpace, wordWrap and width.
         @returns void */
     showMessage: function(msg, callbackFunction, opts) {
-        opts = $.extend({}, myt.Dialog.WRAP_TEXT_DEFAULTS, opts);
+        opts = myt.extend({}, myt.Dialog.WRAP_TEXT_DEFAULTS, opts);
         var content = this.content, MP = myt.ModalPanel;
         
         this.__destroyContent();
@@ -21941,7 +21997,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             Supports: fontWeight, whiteSpace, wordWrap and width.
         @returns void */
     showSpinner: function(msg, opts) {
-        opts = $.extend({}, myt.Dialog.NO_WRAP_TEXT_DEFAULTS, opts);
+        opts = myt.extend({}, myt.Dialog.NO_WRAP_TEXT_DEFAULTS, opts);
         var content = this.content, MP = myt.ModalPanel;
         
         this.__destroyContent();
@@ -21974,7 +22030,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     showColorPicker: function(callbackFunction, opts) {
         var MP = myt.ModalPanel, content = this.content;
         
-        opts = $.extend({}, myt.Dialog.PICKER_DEFAULTS, opts);
+        opts = myt.extend({}, myt.Dialog.PICKER_DEFAULTS, opts);
         
         this.__destroyContent();
         
@@ -22044,7 +22100,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     },
     
     showConfirm: function(msg, callbackFunction, opts) {
-        opts = $.extend({}, myt.Dialog.CONFIRM_DEFAULTS, opts);
+        opts = myt.extend({}, myt.Dialog.CONFIRM_DEFAULTS, opts);
         
         this.showMessage(msg, callbackFunction, opts);
         
@@ -22056,7 +22112,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     showContentConfirm: function(contentBuilderFunc, callbackFunction, opts) {
         var MP = myt.ModalPanel, content = this.content;
         
-        opts = $.extend({}, myt.Dialog.CONFIRM_DEFAULTS, opts);
+        opts = myt.extend({}, myt.Dialog.CONFIRM_DEFAULTS, opts);
         
         this.__destroyContent();
         
@@ -24427,7 +24483,7 @@ myt.ScatterGraphPoint = new JS.Class('ScatterGraphPoint', {
         this._progress += timeDiff;
         if (this._progress > 1000) this._progress = 1000;
         
-        var easingFunc = this.config.easingFunction || myt.Animator.easingFunctions.easeInOutQuad;
+        var easingFunc = this.config.easingFunction || myt.Animator.DEFAULT_EASING_FUNCTION;
         
         this.x = this._origX + easingFunc(this._progress, this._xAttrDiff, 1000);
         this.y = this._origY + easingFunc(this._progress, this._yAttrDiff, 1000);
@@ -25134,12 +25190,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         this.setDrawnCountTotal(v + this.drawnCount);
     },
     
-    setDrawnCountTotal: function(v) {
-        if (this.drawnCountTotal !== v) {
-            this.drawnCountTotal = v;
-            if (this.inited) this.fireNewEvent('drawnCountTotal', v);
-        }
-    },
+    setDrawnCountTotal: function(v) {this.set('drawnCountTotal', v, true);},
     
     
     // Methods /////////////////////////////////////////////////////////////////
@@ -27183,7 +27234,7 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
         }
         if (toValue != null) {
             this.stopActiveAnimators('value');
-            this.animate('value', toValue, null, null, null, 250, null, null, 'easeInOutQuad');
+            this.animateOnce('value', toValue, null, 250);
         }
     },
     
@@ -27358,19 +27409,8 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setSortable: function(v) {
-        if (this.sortable !== v) {
-            this.sortable = v;
-            if (this.inited) this.fireNewEvent('sortable', v);
-        }
-    },
-    
-    setSortState: function(v) {
-        if (this.sortState !== v) {
-            this.sortState = v;
-            if (this.inited) this.fireNewEvent('sortState', v);
-        }
-    },
+    setSortable: function(v) {this.set('sortable', v, true);},
+    setSortState: function(v) {this.set('sortState', v, true);},
     
     setCellWidthAdj: function(v) {this.cellWidthAdj = v;},
     setCellXAdj: function(v) {this.cellXAdj = v;},
@@ -27382,12 +27422,7 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
         if (this.inited) this._updateLast();
     },
     
-    setResizable: function(v) {
-        if (this.resizable !== v) {
-            this.resizable = v;
-            if (this.inited) this.fireNewEvent('resizable', v);
-        }
-    },
+    setResizable: function(v) {this.set('resizable', v, true);},
     
     setGridController: function(v) {
         var existing = this.gridController;
@@ -27691,19 +27726,8 @@ myt.GridController = new JS.Module('GridController', {
         }
     },
     
-    setMaxWidth: function(v) {
-        if (this.maxWidth !== v) {
-            this.maxWidth = v;
-            if (this.inited) this.fireNewEvent('maxWidth', v);
-        }
-    },
-    
-    setMinWidth: function(v) {
-        if (this.minWidth !== v) {
-            this.minWidth = v;
-            if (this.inited) this.fireNewEvent('minWidth', v);
-        }
-    },
+    setMaxWidth: function(v) {this.set('maxWidth', v, true);},
+    setMinWidth: function(v) {this.set('minWidth', v, true);},
     
     setGridWidth: function(v) {
         if (v !== null && typeof v === 'object') v = v.value;

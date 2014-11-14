@@ -4,8 +4,8 @@
 <style>
     body{font-family:Arial, Helvetica, sans-serif;}
 </style>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-<script>window.jQuery || document.write('<script src="../src/js/jquery/jquery-1.10.2.min.js">\x3C/script>');</script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="../src/js/jquery/jquery-1.11.1.min.js">\x3C/script>');</script>
 <script src="../src/js/boilerplate.js"></script>
 <script src="../dist/myt.min.js"></script>
 </head><body>
@@ -288,25 +288,25 @@
             var self = this, 
                 xAmount = contentView.width - this.width, 
                 yAmount = contentView.height - this.height;
-            this.animate('x', xAmount, null, true, null, 1000, false, 1, 'easeInOutQuad').next(
+            this.animate('x', xAmount, null, true).next(
                 function(success) {
                     // Demonstrate relative adding
                     self.animate('x', 100, null, true, null, 1000, false, 1, 'easeInQuad');
                     self.animate('x', -100, null, true, null, 1000, false, 1, 'easeOutQuad');
                     
-                    self.animate('y', yAmount, null, true, null, 1000, false, 1, 'easeInOutQuad').next(
+                    self.animate('y', yAmount, null, true).next(
                         function(success) {
                             // Demonstrate relative adding
                             self.animate('y', 100, null, true, null, 1000, false, 1, 'easeInQuad');
                             self.animate('y', -100, null, true, null, 1000, false, 1, 'easeOutQuad');
                             
-                            self.animate('x', -xAmount, null, true, null, 1000, false, 1, 'easeInOutQuad').next(
+                            self.animate('x', -xAmount, null, true).next(
                                 function(success) {
-                                    // Demonstrate relative adding
-                                    self.animate('x', -100, null, true, null, 1000, false, 1, 'easeInQuad');
-                                    self.animate('x', 100, null, true, null, 1000, false, 1, 'easeOutQuad');
+                                    // Demonstrate relative adding and object param
+                                    self.animate({attribute:'x', to:-100, relative:true, easingFunction:'easeInQuad'});
+                                    self.animate({attribute:'x', to:100, relative:true, easingFunction:'easeOutQuad'});
                                     
-                                    self.animate('y', -yAmount, null, true, null, 1000, false, 1, 'easeInOutQuad');
+                                    self.animate({attribute:'y', to:-yAmount, relative:true});
                                 }
                             );
                         }
