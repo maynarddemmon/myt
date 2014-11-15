@@ -7,13 +7,14 @@
     Attributes:
         align:string Determines which way the views are aligned. Allowed
             values are 'left', 'center', 'right' and 'top', 'middle', 'bottom'.
+            Defaults to 'middle'.
 */
 myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.VariableLayout */
     initNode: function(parent, attrs) {
-        this.targetAttrName = this.axis = 'x';
         this.align = 'middle';
+        this.targetAttrName = 'x';
         this.setterName = 'setX';
         this.measureAttrName = 'boundsWidth';
         this.measureAttrBaseName = 'width';
@@ -28,27 +29,28 @@ myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
     /** @overrides myt.ConstantLayout */
     setTargetAttrName: function(v) {
         if (this.targetAttrName !== v) {
-            if (v === 'x') {
-                if (this.inited) this.stopMonitoringAllSubviews();
-                this.measureAttrName = 'boundsWidth';
-                this.measureAttrBaseName = 'width';
-                this.parentSetterName = 'setWidth';
-                if (this.inited) this.startMonitoringAllSubviews();
-                this.callSuper(v);
-            } else if (v === 'y') {
-                if (this.inited) this.stopMonitoringAllSubviews();
-                this.measureAttrName = 'boundsHeight';
-                this.measureAttrBaseName = 'height';
-                this.parentSetterName = 'setHeight';
-                if (this.inited) this.startMonitoringAllSubviews();
-                this.callSuper(v);
-            }
+            var isY = v === 'y',
+                inited = this.inited;
+            if (inited) this.stopMonitoringAllSubviews();
+            this.measureAttrName = isY ? 'boundsHeight' : 'boundsWidth';
+            this.measureAttrBaseName = isY ? 'height' : 'width';
+            this.parentSetterName = isY ? 'setHeight' : 'setWidth';
+            if (inited) this.startMonitoringAllSubviews();
+            this.callSuper(v);
         }
     },
     
     setAlign: function(v) {
         if (this.align !== v) {
             this.align = v;
+            
+            // Update orientation but don't trigger an update since we
+            // already call update at the end of this setter.
+            var isLocked = this.locked;
+            this.locked = true;
+            this.setTargetAttrName((v === 'middle' || v === 'bottom' || v === 'top') ? 'y' : 'x');
+            this.locked = isLocked;
+            
             if (this.inited) {
                 this.fireNewEvent('align', v);
                 this.update();
@@ -56,40 +58,30 @@ myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
         }
     },
     
-    // Aliases: We use a wrapper rather than .alias since .alias doesn't
-    // appear to carry over to subclasses.
-    setAxis: function(v) {
-        this.setTargetAttrName(v);
-        this.axis = this.targetAttrName;
-    },
-    
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.VariableLayout */
     startMonitoringSubview: function(sv) {
         this.attachTo(sv, 'update', this.measureAttrName);
-        this.attachTo(sv, 'update', 'visible');
+        this.callSuper(sv);
     },
     
     /** @overrides myt.VariableLayout */
     stopMonitoringSubview: function(sv) {
         this.detachFrom(sv, 'update', this.measureAttrName);
-        this.detachFrom(sv, 'update', 'visible');
+        this.callSuper(sv);
     },
     
     /** Determine the maximum subview width/height according to the axis.
         @overrides myt.VariableLayout */
     doBeforeUpdate: function() {
         var measureAttrName = this.measureAttrName,
-            value = 0,
-            svs = this.subviews, sv, i = svs.length;
+            value = 0, svs = this.subviews, sv, i = svs.length;
         while(i) {
             sv = svs[--i];
             if (this.skipSubview(sv)) continue;
-            value = Math.max(value, sv[measureAttrName]);
+            value = value > sv[measureAttrName] ? value : sv[measureAttrName];
         }
-        
-        if (isNaN(value) || 0 >= value) value = 0;
         
         this.setTargetValue(value);
     },
@@ -105,7 +97,6 @@ myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
                 break;
             default:
                 sv[setterName](0);
-                break;
         }
         return value;
     },

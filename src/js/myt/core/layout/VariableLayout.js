@@ -66,7 +66,8 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
                     value = this.updateSubview(++count, sv, setterName, value);
                 }
             } else {
-                for (i = 0; len > i;) {
+                i = 0;
+                while(len > i) {
                     sv = svs[i++];
                     if (this.skipSubview(sv)) continue;
                     value = this.updateSubview(++count, sv, setterName, value);
@@ -128,6 +129,7 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
     /** Called for each subview in the layout to determine if the view should
         be positioned or not. The default implementation returns true if the 
         subview is not visible.
+        @param sv:View The subview to test.
         @returns true if the subview should be skipped during layout updates.*/
     skipSubview: function(sv) {
         return !sv.visible;
@@ -135,6 +137,9 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
     
     /** Called if the collapseParent attribute is true. Subclasses should 
         implement this if they want to modify the parent view.
+        @param setterName:string the name of the setter method to call on
+            the parent.
+        @param value:* the value to set on the parent.
         @returns void */
     updateParent: function(setterName, value) {
         // Subclasses to implement as needed.

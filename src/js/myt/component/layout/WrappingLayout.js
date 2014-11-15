@@ -27,60 +27,39 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
     /** @overrides myt.ConstantLayout */
     setTargetAttrName: function(v) {
         if (this.targetAttrName !== v) {
-            if (v === 'x') {
-                if (this.inited) this.stopMonitoringAllSubviews();
-                this.measureAttrName = 'boundsWidth';
-                this.measureAttrBaseName = 'width';
-                this.otherMeasureAttrName = 'boundsHeight';
-                this.otherMeasureAttrBaseName = 'height';
-                this.parentSetterName = 'setHeight';
-                this.otherSetterName = 'setY';
-                if (this.inited) {
-                    this.startMonitoringAllSubviews();
-                    this.stopMonitoringParent('height');
-                    this.startMonitoringParent('width');
-                }
-                this.callSuper(v);
-            } else if (v === 'y') {
-                if (this.inited) this.stopMonitoringAllSubviews();
-                this.measureAttrName = 'boundsHeight';
-                this.measureAttrBaseName = 'height';
-                this.otherMeasureAttrName = 'boundsWidth';
-                this.otherMeasureAttrBaseName = 'width';
-                this.parentSetterName = 'setWidth';
-                this.otherSetterName = 'setX';
-                if (this.inited) {
-                    this.startMonitoringAllSubviews();
-                    this.stopMonitoringParent('width');
-                    this.startMonitoringParent('height');
-                }
-                this.callSuper(v);
+            var isY = v === 'y',
+                inited = this.inited;
+            
+            if (inited) this.stopMonitoringAllSubviews();
+            
+            this.measureAttrName = isY ? 'boundsHeight' : 'boundsWidth';
+            var mabn = this.measureAttrBaseName = isY ? 'height' : 'width';
+            this.otherMeasureAttrName = isY ? 'boundsWidth' : 'boundsHeight';
+            var omabn = this.otherMeasureAttrBaseName = isY ? 'width' : 'height';
+            this.parentSetterName = isY ? 'setWidth' : 'setHeight';
+            this.otherSetterName = isY ? 'setX' : 'setY';
+            
+            if (inited) {
+                this.startMonitoringAllSubviews();
+                this.stopMonitoringParent(omabn);
+                this.startMonitoringParent(mabn);
             }
+            this.callSuper(v);
         }
     },
     
     /** @overrides myt.Layout */
     setParent: function(v) {
         if (this.parent !== parent) {
-            if (this.parent) {
-                if (this.targetAttrName === 'x') {
-                    this.stopMonitoringParent('width');
-                } else if (this.targetAttrName === 'y') {
-                    this.stopMonitoringParent('height');
-                }
-            }
-            
+            var isY = this.targetAttrName === 'y';
+            if (this.parent) this.stopMonitoringParent(isY ? 'height' : 'width');
             this.callSuper(v);
-            
-            if (this.parent) {
-                if (this.targetAttrName === 'x') {
-                    this.startMonitoringParent('width');
-                } else if (this.targetAttrName === 'y') {
-                    this.startMonitoringParent('height');
-                }
-            }
+            if (this.parent) this.startMonitoringParent(isY ? 'height' : 'width');
         }
     },
+    
+    setAxis: function(v) {this.setTargetAttrName(this.axis = v);},
+    setInset: function(v) {this.setTargetValue(this.inset = v);},
     
     setSpacing: function(v) {
         if (this.spacing !== v) {
@@ -132,18 +111,6 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
         }
     },
     
-    // Aliases: We use a wrapper rather than .alias since .alias doesn't
-    // appear to carry over to subclasses.
-    setAxis: function(v) {
-        this.setTargetAttrName(v);
-        this.axis = this.targetAttrName;
-    },
-    
-    setInset: function(v) {
-        this.setTargetValue(v);
-        this.inset = this.targetValue;
-    },
-    
     
     // Methods /////////////////////////////////////////////////////////////////
     /** Called when monitoring of width/height should start on our parent. */
@@ -160,14 +127,14 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
     startMonitoringSubview: function(sv) {
         this.attachTo(sv, 'update', this.measureAttrName);
         this.attachTo(sv, 'update', this.otherMeasureAttrName);
-        this.attachTo(sv, 'update', 'visible');
+        this.callSuper(sv);
     },
     
     /** @overrides myt.Layout */
     stopMonitoringSubview: function(sv) {
         this.detachFrom(sv, 'update', this.measureAttrName);
         this.detachFrom(sv, 'update', this.otherMeasureAttrName);
-        this.detachFrom(sv, 'update', 'visible');
+        this.callSuper(sv);
     },
     
     
@@ -221,7 +188,6 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
     /** @overrides myt.VariableLayout */
     updateParent: function(setterName, value) {
         // Collapse in the other direction
-        value = this.linePos + this.lineSize + this.lineOutset;
-        this.parent[this.parentSetterName](value);
+        this.parent[this.parentSetterName](this.linePos + this.lineSize + this.lineOutset);
     }
 });

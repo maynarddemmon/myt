@@ -7651,7 +7651,8 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
         return !this.locked;
     },
     
-    /** Updates the layout. Subclasses should call super to check lock state.
+    /** Updates the layout. Subclasses should call canUpdate to check lock 
+        state before trying to do anything.
         @returns void */
     update: function() {},
     
@@ -12005,7 +12006,8 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
                     value = this.updateSubview(++count, sv, setterName, value);
                 }
             } else {
-                for (i = 0; len > i;) {
+                i = 0;
+                while(len > i) {
                     sv = svs[i++];
                     if (this.skipSubview(sv)) continue;
                     value = this.updateSubview(++count, sv, setterName, value);
@@ -12067,6 +12069,7 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
     /** Called for each subview in the layout to determine if the view should
         be positioned or not. The default implementation returns true if the 
         subview is not visible.
+        @param sv:View The subview to test.
         @returns true if the subview should be skipped during layout updates.*/
     skipSubview: function(sv) {
         return !sv.visible;
@@ -12074,6 +12077,9 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
     
     /** Called if the collapseParent attribute is true. Subclasses should 
         implement this if they want to modify the parent view.
+        @param setterName:string the name of the setter method to call on
+            the parent.
+        @param value:* the value to set on the parent.
         @returns void */
     updateParent: function(setterName, value) {
         // Subclasses to implement as needed.
@@ -12110,60 +12116,39 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
     /** @overrides myt.ConstantLayout */
     setTargetAttrName: function(v) {
         if (this.targetAttrName !== v) {
-            if (v === 'x') {
-                if (this.inited) this.stopMonitoringAllSubviews();
-                this.measureAttrName = 'boundsWidth';
-                this.measureAttrBaseName = 'width';
-                this.otherMeasureAttrName = 'boundsHeight';
-                this.otherMeasureAttrBaseName = 'height';
-                this.parentSetterName = 'setHeight';
-                this.otherSetterName = 'setY';
-                if (this.inited) {
-                    this.startMonitoringAllSubviews();
-                    this.stopMonitoringParent('height');
-                    this.startMonitoringParent('width');
-                }
-                this.callSuper(v);
-            } else if (v === 'y') {
-                if (this.inited) this.stopMonitoringAllSubviews();
-                this.measureAttrName = 'boundsHeight';
-                this.measureAttrBaseName = 'height';
-                this.otherMeasureAttrName = 'boundsWidth';
-                this.otherMeasureAttrBaseName = 'width';
-                this.parentSetterName = 'setWidth';
-                this.otherSetterName = 'setX';
-                if (this.inited) {
-                    this.startMonitoringAllSubviews();
-                    this.stopMonitoringParent('width');
-                    this.startMonitoringParent('height');
-                }
-                this.callSuper(v);
+            var isY = v === 'y',
+                inited = this.inited;
+            
+            if (inited) this.stopMonitoringAllSubviews();
+            
+            this.measureAttrName = isY ? 'boundsHeight' : 'boundsWidth';
+            var mabn = this.measureAttrBaseName = isY ? 'height' : 'width';
+            this.otherMeasureAttrName = isY ? 'boundsWidth' : 'boundsHeight';
+            var omabn = this.otherMeasureAttrBaseName = isY ? 'width' : 'height';
+            this.parentSetterName = isY ? 'setWidth' : 'setHeight';
+            this.otherSetterName = isY ? 'setX' : 'setY';
+            
+            if (inited) {
+                this.startMonitoringAllSubviews();
+                this.stopMonitoringParent(omabn);
+                this.startMonitoringParent(mabn);
             }
+            this.callSuper(v);
         }
     },
     
     /** @overrides myt.Layout */
     setParent: function(v) {
         if (this.parent !== parent) {
-            if (this.parent) {
-                if (this.targetAttrName === 'x') {
-                    this.stopMonitoringParent('width');
-                } else if (this.targetAttrName === 'y') {
-                    this.stopMonitoringParent('height');
-                }
-            }
-            
+            var isY = this.targetAttrName === 'y';
+            if (this.parent) this.stopMonitoringParent(isY ? 'height' : 'width');
             this.callSuper(v);
-            
-            if (this.parent) {
-                if (this.targetAttrName === 'x') {
-                    this.startMonitoringParent('width');
-                } else if (this.targetAttrName === 'y') {
-                    this.startMonitoringParent('height');
-                }
-            }
+            if (this.parent) this.startMonitoringParent(isY ? 'height' : 'width');
         }
     },
+    
+    setAxis: function(v) {this.setTargetAttrName(this.axis = v);},
+    setInset: function(v) {this.setTargetValue(this.inset = v);},
     
     setSpacing: function(v) {
         if (this.spacing !== v) {
@@ -12215,18 +12200,6 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
         }
     },
     
-    // Aliases: We use a wrapper rather than .alias since .alias doesn't
-    // appear to carry over to subclasses.
-    setAxis: function(v) {
-        this.setTargetAttrName(v);
-        this.axis = this.targetAttrName;
-    },
-    
-    setInset: function(v) {
-        this.setTargetValue(v);
-        this.inset = this.targetValue;
-    },
-    
     
     // Methods /////////////////////////////////////////////////////////////////
     /** Called when monitoring of width/height should start on our parent. */
@@ -12243,14 +12216,14 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
     startMonitoringSubview: function(sv) {
         this.attachTo(sv, 'update', this.measureAttrName);
         this.attachTo(sv, 'update', this.otherMeasureAttrName);
-        this.attachTo(sv, 'update', 'visible');
+        this.callSuper(sv);
     },
     
     /** @overrides myt.Layout */
     stopMonitoringSubview: function(sv) {
         this.detachFrom(sv, 'update', this.measureAttrName);
         this.detachFrom(sv, 'update', this.otherMeasureAttrName);
-        this.detachFrom(sv, 'update', 'visible');
+        this.callSuper(sv);
     },
     
     
@@ -12304,8 +12277,7 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
     /** @overrides myt.VariableLayout */
     updateParent: function(setterName, value) {
         // Collapse in the other direction
-        value = this.linePos + this.lineSize + this.lineOutset;
-        this.parent[this.parentSetterName](value);
+        this.parent[this.parentSetterName](this.linePos + this.lineSize + this.lineOutset);
     }
 });
 
@@ -12314,9 +12286,17 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
     an inset, outset and spacing value.
     
     Events:
-        None
+        spacing:number
+        outset:number
     
     Attributes:
+        axis:string The orientation of the layout. An alias 
+            for setTargetAttrName.
+        inset:number Padding before the first subview that gets positioned.
+            An alias for setTargetValue.
+        spacing:number Spacing between each subview.
+        outset:number Padding at the end of the layout. Only gets used
+            if collapseParent is true.
         noAddSubviewOptimization:boolean Turns the optimization to supress
             layout updates when a subview is added off/on. Defaults to 
             undefined which is equivalent to false and thus leaves the
@@ -12338,28 +12318,23 @@ myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setNoAddSubviewOptimization: function(v) {this.noAddSubviewOptimization = v;},
-    
     /** @overrides myt.ConstantLayout */
     setTargetAttrName: function(v) {
         if (this.targetAttrName !== v) {
-            if (v === 'x') {
-                if (this.inited) this.stopMonitoringAllSubviews();
-                this.measureAttrName = 'boundsWidth';
-                this.measureAttrBaseName = 'width';
-                this.parentSetterName = 'setWidth';
-                if (this.inited) this.startMonitoringAllSubviews();
-                this.callSuper(v);
-            } else if (v === 'y') {
-                if (this.inited) this.stopMonitoringAllSubviews();
-                this.measureAttrName = 'boundsHeight';
-                this.measureAttrBaseName = 'height';
-                this.parentSetterName = 'setHeight';
-                if (this.inited) this.startMonitoringAllSubviews();
-                this.callSuper(v);
-            }
+            var isY = v === 'y',
+                inited = this.inited;
+            if (inited) this.stopMonitoringAllSubviews();
+            this.measureAttrName = isY ? 'boundsHeight' : 'boundsWidth';
+            this.measureAttrBaseName = isY ? 'height' : 'width';
+            this.parentSetterName = isY ? 'setHeight' : 'setWidth';
+            if (inited) this.startMonitoringAllSubviews();
+            this.callSuper(v);
         }
     },
+    
+    setNoAddSubviewOptimization: function(v) {this.noAddSubviewOptimization = v;},
+    setAxis: function(v) {this.setTargetAttrName(this.axis = v);},
+    setInset: function(v) {this.setTargetValue(this.inset = v);},
     
     setSpacing: function(v) {
         if (this.spacing !== v) {
@@ -12381,18 +12356,6 @@ myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
         }
     },
     
-    // Aliases: We use a wrapper rather than .alias since .alias doesn't
-    // appear to carry over to subclasses.
-    setAxis: function(v) {
-        this.setTargetAttrName(v);
-        this.axis = this.targetAttrName;
-    },
-    
-    setInset: function(v) {
-        this.setTargetValue(v);
-        this.inset = this.targetValue;
-    },
-    
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.Layout */
@@ -12409,13 +12372,13 @@ myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
     /** @overrides myt.VariableLayout */
     startMonitoringSubview: function(sv) {
         this.attachTo(sv, 'update', this.measureAttrName);
-        this.attachTo(sv, 'update', 'visible');
+        this.callSuper(sv);
     },
     
     /** @overrides myt.VariableLayout */
     stopMonitoringSubview: function(sv) {
         this.detachFrom(sv, 'update', this.measureAttrName);
-        this.detachFrom(sv, 'update', 'visible');
+        this.callSuper(sv);
     },
     
     /** @overrides myt.ConstantLayout */
@@ -12427,8 +12390,7 @@ myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
     
     /** @overrides myt.VariableLayout */
     updateParent: function(setterName, value) {
-        var diff = this.outset - this.spacing;
-        this.parent[this.parentSetterName](value + diff);
+        this.parent[this.parentSetterName](value + this.outset - this.spacing);
     }
 });
 
@@ -12568,13 +12530,14 @@ myt.ResizeLayout = new JS.Class('SpacedLayout', myt.SpacedLayout, {
     Attributes:
         align:string Determines which way the views are aligned. Allowed
             values are 'left', 'center', 'right' and 'top', 'middle', 'bottom'.
+            Defaults to 'middle'.
 */
 myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.VariableLayout */
     initNode: function(parent, attrs) {
-        this.targetAttrName = this.axis = 'x';
         this.align = 'middle';
+        this.targetAttrName = 'x';
         this.setterName = 'setX';
         this.measureAttrName = 'boundsWidth';
         this.measureAttrBaseName = 'width';
@@ -12589,27 +12552,28 @@ myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
     /** @overrides myt.ConstantLayout */
     setTargetAttrName: function(v) {
         if (this.targetAttrName !== v) {
-            if (v === 'x') {
-                if (this.inited) this.stopMonitoringAllSubviews();
-                this.measureAttrName = 'boundsWidth';
-                this.measureAttrBaseName = 'width';
-                this.parentSetterName = 'setWidth';
-                if (this.inited) this.startMonitoringAllSubviews();
-                this.callSuper(v);
-            } else if (v === 'y') {
-                if (this.inited) this.stopMonitoringAllSubviews();
-                this.measureAttrName = 'boundsHeight';
-                this.measureAttrBaseName = 'height';
-                this.parentSetterName = 'setHeight';
-                if (this.inited) this.startMonitoringAllSubviews();
-                this.callSuper(v);
-            }
+            var isY = v === 'y',
+                inited = this.inited;
+            if (inited) this.stopMonitoringAllSubviews();
+            this.measureAttrName = isY ? 'boundsHeight' : 'boundsWidth';
+            this.measureAttrBaseName = isY ? 'height' : 'width';
+            this.parentSetterName = isY ? 'setHeight' : 'setWidth';
+            if (inited) this.startMonitoringAllSubviews();
+            this.callSuper(v);
         }
     },
     
     setAlign: function(v) {
         if (this.align !== v) {
             this.align = v;
+            
+            // Update orientation but don't trigger an update since we
+            // already call update at the end of this setter.
+            var isLocked = this.locked;
+            this.locked = true;
+            this.setTargetAttrName((v === 'middle' || v === 'bottom' || v === 'top') ? 'y' : 'x');
+            this.locked = isLocked;
+            
             if (this.inited) {
                 this.fireNewEvent('align', v);
                 this.update();
@@ -12617,40 +12581,30 @@ myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
         }
     },
     
-    // Aliases: We use a wrapper rather than .alias since .alias doesn't
-    // appear to carry over to subclasses.
-    setAxis: function(v) {
-        this.setTargetAttrName(v);
-        this.axis = this.targetAttrName;
-    },
-    
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.VariableLayout */
     startMonitoringSubview: function(sv) {
         this.attachTo(sv, 'update', this.measureAttrName);
-        this.attachTo(sv, 'update', 'visible');
+        this.callSuper(sv);
     },
     
     /** @overrides myt.VariableLayout */
     stopMonitoringSubview: function(sv) {
         this.detachFrom(sv, 'update', this.measureAttrName);
-        this.detachFrom(sv, 'update', 'visible');
+        this.callSuper(sv);
     },
     
     /** Determine the maximum subview width/height according to the axis.
         @overrides myt.VariableLayout */
     doBeforeUpdate: function() {
         var measureAttrName = this.measureAttrName,
-            value = 0,
-            svs = this.subviews, sv, i = svs.length;
+            value = 0, svs = this.subviews, sv, i = svs.length;
         while(i) {
             sv = svs[--i];
             if (this.skipSubview(sv)) continue;
-            value = Math.max(value, sv[measureAttrName]);
+            value = value > sv[measureAttrName] ? value : sv[measureAttrName];
         }
-        
-        if (isNaN(value) || 0 >= value) value = 0;
         
         this.setTargetValue(value);
     },
@@ -12666,7 +12620,6 @@ myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
                 break;
             default:
                 sv[setterName](0);
-                break;
         }
         return value;
     },
@@ -12969,47 +12922,38 @@ myt.SizeToChildren = new JS.Class('SizeToChildren', myt.Layout, {
             // Prevent inadvertent loops
             this.incrementLockedCounter();
             
-            var svs = this.subviews, i = svs.length, sv,
-                xMax, yMax,
-                p = this.parent,
-                axis = this.axis,
-                maxFunc = Math.max,
-                bw, bh;
+            var p = this.parent;
             
             if (!p.isBeingDestroyed) {
-                if (axis === 'x') {
-                    xMax = 0;
-                    while(i) {
-                        sv = svs[--i];
-                        bw = sv.boundsWidth;
-                        bw = bw > 0 ? bw : 0;
-                        if (sv.visible) xMax = maxFunc(xMax, sv.x + bw);
-                    }
-                    p.setWidth(xMax + this.paddingX);
-                } else if (axis === 'y') {
-                    yMax = 0;
-                    while(i) {
-                        sv = svs[--i];
-                        bh = sv.boundsHeight;
-                        bh = bh > 0 ? bh : 0;
-                        if (sv.visible) yMax = maxFunc(yMax, sv.y + bh);
-                    }
-                    p.setHeight(yMax + this.paddingY);
-                } else {
-                    xMax = yMax = 0;
+                var svs = this.subviews, len = svs.length, i, sv,
+                    max, bound,
+                    axis = this.axis,
+                    maxFunc = Math.max;
+                if (axis !== 'y') {
+                    i = len;
+                    max = 0;
                     while(i) {
                         sv = svs[--i];
                         if (sv.visible) {
-                            bw = sv.boundsWidth;
-                            bw = bw > 0 ? bw : 0;
-                            xMax = maxFunc(xMax, sv.x + bw);
-                            bh = sv.boundsHeight;
-                            bh = bh > 0 ? bh : 0;
-                            yMax = maxFunc(yMax, sv.y + bh);
+                            bound = sv.boundsWidth;
+                            bound = bound > 0 ? bound : 0;
+                            max = maxFunc(max, sv.x + bound);
                         }
                     }
-                    p.setWidth(xMax + this.paddingX);
-                    p.setHeight(yMax + this.paddingY);
+                    p.setWidth(max + this.paddingX);
+                }
+                if (axis !== 'x') {
+                    i = len;
+                    max = 0;
+                    while(i) {
+                        sv = svs[--i];
+                        if (sv.visible) {
+                            bound = sv.boundsHeight;
+                            bound = bound > 0 ? bound : 0;
+                            max = maxFunc(max, sv.y + bound);
+                        }
+                    }
+                    p.setHeight(max + this.paddingY);
                 }
             }
             
@@ -13034,16 +12978,13 @@ myt.SizeToChildren = new JS.Class('SizeToChildren', myt.Layout, {
     /** Wrapped by startMonitoringSubview and stopMonitoringSubview.
         @private */
     __updateMonitoringSubview: function(sv, func) {
-        var axis = this.axis, func = func.bind(this);
-        if (axis === 'x') {
+        var axis = this.axis;
+        func = func.bind(this);
+        if (axis !== 'y') {
             func(sv, 'update', 'x');
             func(sv, 'update', 'boundsWidth');
-        } else if (axis === 'y') {
-            func(sv, 'update', 'y');
-            func(sv, 'update', 'boundsHeight');
-        } else {
-            func(sv, 'update', 'x');
-            func(sv, 'update', 'boundsWidth');
+        }
+        if (axis !== 'x') {
             func(sv, 'update', 'y');
             func(sv, 'update', 'boundsHeight');
         }

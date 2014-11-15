@@ -68,47 +68,38 @@ myt.SizeToChildren = new JS.Class('SizeToChildren', myt.Layout, {
             // Prevent inadvertent loops
             this.incrementLockedCounter();
             
-            var svs = this.subviews, i = svs.length, sv,
-                xMax, yMax,
-                p = this.parent,
-                axis = this.axis,
-                maxFunc = Math.max,
-                bw, bh;
+            var p = this.parent;
             
             if (!p.isBeingDestroyed) {
-                if (axis === 'x') {
-                    xMax = 0;
-                    while(i) {
-                        sv = svs[--i];
-                        bw = sv.boundsWidth;
-                        bw = bw > 0 ? bw : 0;
-                        if (sv.visible) xMax = maxFunc(xMax, sv.x + bw);
-                    }
-                    p.setWidth(xMax + this.paddingX);
-                } else if (axis === 'y') {
-                    yMax = 0;
-                    while(i) {
-                        sv = svs[--i];
-                        bh = sv.boundsHeight;
-                        bh = bh > 0 ? bh : 0;
-                        if (sv.visible) yMax = maxFunc(yMax, sv.y + bh);
-                    }
-                    p.setHeight(yMax + this.paddingY);
-                } else {
-                    xMax = yMax = 0;
+                var svs = this.subviews, len = svs.length, i, sv,
+                    max, bound,
+                    axis = this.axis,
+                    maxFunc = Math.max;
+                if (axis !== 'y') {
+                    i = len;
+                    max = 0;
                     while(i) {
                         sv = svs[--i];
                         if (sv.visible) {
-                            bw = sv.boundsWidth;
-                            bw = bw > 0 ? bw : 0;
-                            xMax = maxFunc(xMax, sv.x + bw);
-                            bh = sv.boundsHeight;
-                            bh = bh > 0 ? bh : 0;
-                            yMax = maxFunc(yMax, sv.y + bh);
+                            bound = sv.boundsWidth;
+                            bound = bound > 0 ? bound : 0;
+                            max = maxFunc(max, sv.x + bound);
                         }
                     }
-                    p.setWidth(xMax + this.paddingX);
-                    p.setHeight(yMax + this.paddingY);
+                    p.setWidth(max + this.paddingX);
+                }
+                if (axis !== 'x') {
+                    i = len;
+                    max = 0;
+                    while(i) {
+                        sv = svs[--i];
+                        if (sv.visible) {
+                            bound = sv.boundsHeight;
+                            bound = bound > 0 ? bound : 0;
+                            max = maxFunc(max, sv.y + bound);
+                        }
+                    }
+                    p.setHeight(max + this.paddingY);
                 }
             }
             
@@ -133,16 +124,13 @@ myt.SizeToChildren = new JS.Class('SizeToChildren', myt.Layout, {
     /** Wrapped by startMonitoringSubview and stopMonitoringSubview.
         @private */
     __updateMonitoringSubview: function(sv, func) {
-        var axis = this.axis, func = func.bind(this);
-        if (axis === 'x') {
+        var axis = this.axis;
+        func = func.bind(this);
+        if (axis !== 'y') {
             func(sv, 'update', 'x');
             func(sv, 'update', 'boundsWidth');
-        } else if (axis === 'y') {
-            func(sv, 'update', 'y');
-            func(sv, 'update', 'boundsHeight');
-        } else {
-            func(sv, 'update', 'x');
-            func(sv, 'update', 'boundsWidth');
+        }
+        if (axis !== 'x') {
             func(sv, 'update', 'y');
             func(sv, 'update', 'boundsHeight');
         }

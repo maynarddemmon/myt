@@ -2,9 +2,17 @@
     an inset, outset and spacing value.
     
     Events:
-        None
+        spacing:number
+        outset:number
     
     Attributes:
+        axis:string The orientation of the layout. An alias 
+            for setTargetAttrName.
+        inset:number Padding before the first subview that gets positioned.
+            An alias for setTargetValue.
+        spacing:number Spacing between each subview.
+        outset:number Padding at the end of the layout. Only gets used
+            if collapseParent is true.
         noAddSubviewOptimization:boolean Turns the optimization to supress
             layout updates when a subview is added off/on. Defaults to 
             undefined which is equivalent to false and thus leaves the
@@ -26,28 +34,23 @@ myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setNoAddSubviewOptimization: function(v) {this.noAddSubviewOptimization = v;},
-    
     /** @overrides myt.ConstantLayout */
     setTargetAttrName: function(v) {
         if (this.targetAttrName !== v) {
-            if (v === 'x') {
-                if (this.inited) this.stopMonitoringAllSubviews();
-                this.measureAttrName = 'boundsWidth';
-                this.measureAttrBaseName = 'width';
-                this.parentSetterName = 'setWidth';
-                if (this.inited) this.startMonitoringAllSubviews();
-                this.callSuper(v);
-            } else if (v === 'y') {
-                if (this.inited) this.stopMonitoringAllSubviews();
-                this.measureAttrName = 'boundsHeight';
-                this.measureAttrBaseName = 'height';
-                this.parentSetterName = 'setHeight';
-                if (this.inited) this.startMonitoringAllSubviews();
-                this.callSuper(v);
-            }
+            var isY = v === 'y',
+                inited = this.inited;
+            if (inited) this.stopMonitoringAllSubviews();
+            this.measureAttrName = isY ? 'boundsHeight' : 'boundsWidth';
+            this.measureAttrBaseName = isY ? 'height' : 'width';
+            this.parentSetterName = isY ? 'setHeight' : 'setWidth';
+            if (inited) this.startMonitoringAllSubviews();
+            this.callSuper(v);
         }
     },
+    
+    setNoAddSubviewOptimization: function(v) {this.noAddSubviewOptimization = v;},
+    setAxis: function(v) {this.setTargetAttrName(this.axis = v);},
+    setInset: function(v) {this.setTargetValue(this.inset = v);},
     
     setSpacing: function(v) {
         if (this.spacing !== v) {
@@ -69,18 +72,6 @@ myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
         }
     },
     
-    // Aliases: We use a wrapper rather than .alias since .alias doesn't
-    // appear to carry over to subclasses.
-    setAxis: function(v) {
-        this.setTargetAttrName(v);
-        this.axis = this.targetAttrName;
-    },
-    
-    setInset: function(v) {
-        this.setTargetValue(v);
-        this.inset = this.targetValue;
-    },
-    
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.Layout */
@@ -97,13 +88,13 @@ myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
     /** @overrides myt.VariableLayout */
     startMonitoringSubview: function(sv) {
         this.attachTo(sv, 'update', this.measureAttrName);
-        this.attachTo(sv, 'update', 'visible');
+        this.callSuper(sv);
     },
     
     /** @overrides myt.VariableLayout */
     stopMonitoringSubview: function(sv) {
         this.detachFrom(sv, 'update', this.measureAttrName);
-        this.detachFrom(sv, 'update', 'visible');
+        this.callSuper(sv);
     },
     
     /** @overrides myt.ConstantLayout */
@@ -115,7 +106,6 @@ myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
     
     /** @overrides myt.VariableLayout */
     updateParent: function(setterName, value) {
-        var diff = this.outset - this.spacing;
-        this.parent[this.parentSetterName](value + diff);
+        this.parent[this.parentSetterName](value + this.outset - this.spacing);
     }
 });

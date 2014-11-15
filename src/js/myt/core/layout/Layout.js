@@ -156,7 +156,8 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
         return !this.locked;
     },
     
-    /** Updates the layout. Subclasses should call super to check lock state.
+    /** Updates the layout. Subclasses should call canUpdate to check lock 
+        state before trying to do anything.
         @returns void */
     update: function() {},
     
