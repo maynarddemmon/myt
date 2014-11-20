@@ -99,26 +99,28 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
     /** Should only be called by myt.SliderThumbMixin.
         @private */
     _syncValueToThumb: function(thumb) {
-        this.__lockSync = true;
-        
-        var converted = this.convertPixelsToValue(
-            this.axis === 'x' ? thumb.x + thumb.width / 2 : thumb.y + thumb.height / 2
-        );
-        
-        var value = this.getValueCopy();
-        if (thumb.name === 'thumbLower') {
-            value.lower = converted;
-        } else {
-            value.upper = converted;
+        if (this.inited && !this.__lockSync) {
+            this.__lockSync = true;
+            
+            var converted = this.convertPixelsToValue(
+                this.axis === 'x' ? thumb.x + thumb.width / 2 : thumb.y + thumb.height / 2
+            );
+            
+            var value = this.getValueCopy();
+            if (thumb.name === 'thumbLower') {
+                value.lower = converted;
+            } else {
+                value.upper = converted;
+            }
+            this.setValue(value);
+            
+            // Update thumb position since value may have been adjusted
+            value = this.getValue();
+            if (this.thumbLower) this._syncThumbToValue(this.thumbLower, value);
+            if (this.thumbUpper) this._syncThumbToValue(this.thumbUpper, value);
+            
+            this.__lockSync = false;
         }
-        this.setValue(value);
-        
-        // Update thumb position since value may have been adjusted
-        value = this.getValue();
-        if (this.thumbLower) this._syncThumbToValue(this.thumbLower, value);
-        if (this.thumbUpper) this._syncThumbToValue(this.thumbUpper, value);
-        
-        this.__lockSync = false;
     },
     
     /** @overrides myt.BaseSlider */

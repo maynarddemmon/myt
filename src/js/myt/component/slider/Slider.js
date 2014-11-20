@@ -51,16 +51,18 @@ myt.Slider = new JS.Class('Slider', myt.BaseSlider, {
     /** Should only be called by myt.SliderThumbMixin.
         @private */
     _syncValueToThumb: function(thumb) {
-        this.__lockSync = true;
-        
-        this.setValue(this.convertPixelsToValue(
-            this.axis === 'x' ? thumb.x + thumb.width / 2 : thumb.y + thumb.height / 2
-        ));
-        
-        // Update thumb position since value may have been adjusted
-        this._syncThumbToValue(thumb, this.getValue());
-        
-        this.__lockSync = false;
+        if (this.inited && !this.__lockSync) {
+            this.__lockSync = true;
+            
+            this.setValue(this.convertPixelsToValue(
+                this.axis === 'x' ? thumb.x + thumb.width / 2 : thumb.y + thumb.height / 2
+            ));
+            
+            // Update thumb position since value may have been adjusted
+            this._syncThumbToValue(thumb, this.getValue());
+            
+            this.__lockSync = false;
+        }
     },
     
     /** @overrides myt.BaseSlider */

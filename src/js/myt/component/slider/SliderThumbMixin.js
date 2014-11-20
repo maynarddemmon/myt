@@ -63,7 +63,8 @@ myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
         if (this.x !== v) {
             this.callSuper(v);
             
-            if (this.parent.axis === 'x') this.parent._syncValueToThumb(this);
+            var p = this.parent;
+            if (p.axis === 'x') p._syncValueToThumb(this);
         }
     },
     
@@ -72,7 +73,8 @@ myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
         if (this.y !== v) {
             this.callSuper(v);
             
-            if (this.parent.axis === 'y') this.parent._syncValueToThumb(this);
+            var p = this.parent;
+            if (p.axis === 'y') p._syncValueToThumb(this);
         }
     },
     
