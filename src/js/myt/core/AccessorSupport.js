@@ -1,4 +1,12 @@
-/** Provides support for getter and setter functions on an object. */
+/** Provides support for getter and setter functions on an object.
+    
+    Events:
+        None
+    
+    Attributes:
+        earlyAttrs:array An array of attribute names that will be set first.
+        lateAttrs:array An array of attribute names that will be set last.
+*/
 myt.AccessorSupport = new JS.Module('AccessorSupport', {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
@@ -55,11 +63,62 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    appendToEarlyAttrs: function() {Array.prototype.push.apply(this.earlyAttrs || (this.earlyAttrs = []), arguments);},
+    prependToEarlyAttrs: function() {Array.prototype.unshift.apply(this.earlyAttrs || (this.earlyAttrs = []), arguments);},
+    appendToLateAttrs: function() {Array.prototype.push.apply(this.lateAttrs || (this.lateAttrs = []), arguments);},
+    prependToLateAttrs: function() {Array.prototype.unshift.apply(this.lateAttrs || (this.lateAttrs = []), arguments);},
+    
     /** Calls a setter function for each attribute in the provided map.
         @param attrs:object a map of attributes to set.
         @returns void. */
     callSetters: function(attrs) {
+        var earlyAttrs = this.earlyAttrs,
+            lateAttrs = this.lateAttrs,
+            attrName, extractedLateAttrs, i, len;
+        if (earlyAttrs || lateAttrs) {
+            // Make a shallow copy of attrs since we can't guarantee that
+            // attrs won't be reused
+            var copyOfAttrs = {};
+            for (attrName in attrs) copyOfAttrs[attrName] = attrs[attrName];
+            attrs = copyOfAttrs;
+            
+            // Do early setters
+            if (earlyAttrs) {
+                i = 0;
+                len = earlyAttrs.length;
+                while (len > i) {
+                    attrName = earlyAttrs[i++];
+                    if (attrName in attrs) {
+                        this.set(attrName, attrs[attrName]);
+                        delete attrs[attrName];
+                    }
+                }
+            }
+            
+            // Extract late setters for later execution
+            if (lateAttrs) {
+                extractedLateAttrs = [];
+                i = 0;
+                len = lateAttrs.length;
+                while (len > i) {
+                    attrName = lateAttrs[i++];
+                    if (attrName in attrs) {
+                        extractedLateAttrs.push(attrName, attrs[attrName]);
+                        delete attrs[attrName];
+                    }
+                }
+            }
+        }
+        
+        // Do normal setters
         for (var attrName in attrs) this.set(attrName, attrs[attrName]);
+        
+        // Do late setters
+        if (extractedLateAttrs) {
+            i = 0;
+            len = extractedLateAttrs.length;
+            while (len > i) this.set(extractedLateAttrs[i++], extractedLateAttrs[i++]);
+        }
     },
     
     /** A generic getter function that can be called to get a value from this
@@ -77,12 +136,12 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
         method.
         @param attrName:string The name of the attribute to set.
         @param v:* The value to set.
-        @param noSetter:boolean (optional) If true no attempt will be made to
+        @param skipSetter:boolean (optional) If true no attempt will be made to
             invoke a setter function. Useful when you want to invoke standard 
             setter behavior. Defaults to undefined which is equivalent to false.
         @returns void */
-    set: function(attrName, v, noSetter) {
-        if (!noSetter) {
+    set: function(attrName, v, skipSetter) {
+        if (!skipSetter) {
             var setterName = myt.AccessorSupport.generateSetterName(attrName);
             if (this[setterName]) return this[setterName](v);
         }

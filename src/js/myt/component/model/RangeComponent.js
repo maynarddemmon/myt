@@ -5,6 +5,7 @@
 myt.RangeComponent = new JS.Module('RangeComponent', {
     include: [myt.ValueComponent],
     
+    
     // Accessors ///////////////////////////////////////////////////////////////
     setLowerValue: function(v) {
         this.setValue({

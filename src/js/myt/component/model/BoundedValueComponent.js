@@ -17,6 +17,8 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
+        this.appendToEarlyAttrs('snapToInt','minValue','maxValue');
+        
         if (attrs.snapToInt === undefined) attrs.snapToInt = true;
         
         if (!attrs.valueFilter) {
@@ -54,35 +56,39 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
     },
     
     setMinValue: function(v) {
-        if (v != null && this.snapToInt) v = Math.round(v);
+        if (this.snapToInt && v != null) v = Math.round(v);
         
         if (this.minValue !== v) {
             var max = this.maxValue;
             if (max != null && v > max) v = max;
             
-            this.minValue = v;
-            if (this.inited) {
-                this.fireNewEvent('minValue', v);
-                
-                // Rerun setValue since the filter has changed.
-                this.setValue(this.value);
+            if (this.minValue !== v) {
+                this.minValue = v;
+                if (this.inited) {
+                    this.fireNewEvent('minValue', v);
+                    
+                    // Rerun setValue since the filter has changed.
+                    this.setValue(this.value);
+                }
             }
         }
     },
     
     setMaxValue: function(v) {
-        if (v != null && this.snapToInt) v = Math.round(v);
+        if (this.snapToInt && v != null) v = Math.round(v);
         
         if (this.maxValue !== v) {
             var min = this.minValue;
             if (min != null && v < min) v = min;
             
-            this.maxValue = v;
-            if (this.inited) {
-                this.fireNewEvent('maxValue', v);
-                
-                // Rerun setValue since the filter has changed.
-                this.setValue(this.value);
+            if (this.maxValue !== v) {
+                this.maxValue = v;
+                if (this.inited) {
+                    this.fireNewEvent('maxValue', v);
+                    
+                    // Rerun setValue since the filter has changed.
+                    this.setValue(this.value);
+                }
             }
         }
     },

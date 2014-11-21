@@ -3558,6 +3558,8 @@ JS.extend(JS.Module.prototype, {
     this.__anc__ = null;
     this.__mct__ = {};
     
+    this.__displayName = name;
+    
     this.include(methods, {_resolve:false});
   },
 
@@ -3589,9 +3591,13 @@ JS.extend(JS.Module.prototype, {
         module.__dep__.push(this);
         
         if (extended = options._extended) {
+          // Meta programming hook: Called when a subclass is created of 
+          // this module
           if (typeof module.extended === 'function') module.extended(extended);
         } else {
-          if (typeof module.included === 'function') module.included(this);
+          // Meta programming hook: If you include() a module that has a 
+          // singleton method called includedBy, that method will be called.
+          if (typeof module.includedBy === 'function') module.includedBy(this);
         }
       } else {
         resolveFalse = {_resolve:false};
@@ -3752,12 +3758,11 @@ JS.extend(JS.Class.prototype, {
       parent  = Object;
     }
     
-    JS.Module.prototype.initialize.call(this);
+    JS.Module.prototype.initialize.call(this, name);
     
     var resolve = (options || {})._resolve,
       resolveFalse = {_resolve:false},
       klass = JS.makeClass(parent);
-    klass.__displayName = name;
     JS.extend(klass, this);
     klass.prototype.constructor = klass.prototype.klass = klass;
     klass.__eigen__().include(parent.__meta__, {_resolve:resolve});
@@ -3767,7 +3772,10 @@ JS.extend(JS.Class.prototype, {
     klass.include(JS.Kernel, resolveFalse).include(parentModule, resolveFalse).include(methods, resolveFalse);
      
     if (resolve !== false) klass.resolve();
-    if (typeof parent.inherited === 'function') parent.inherited(klass);
+    
+    // Meta programming hook: If a class has a class method called inheritedBy() 
+    // it will be called whenever you create a subclass of it
+    if (typeof parent.inheritedBy === 'function') parent.inheritedBy(klass);
     
     return klass;
   }
@@ -6306,7 +6314,15 @@ if (!global.mytNoHistoryShim) { // FIXME: remove conditional once old code has b
 }
 
 
-/** Provides support for getter and setter functions on an object. */
+/** Provides support for getter and setter functions on an object.
+    
+    Events:
+        None
+    
+    Attributes:
+        earlyAttrs:array An array of attribute names that will be set first.
+        lateAttrs:array An array of attribute names that will be set last.
+*/
 myt.AccessorSupport = new JS.Module('AccessorSupport', {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
@@ -6363,11 +6379,62 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    appendToEarlyAttrs: function() {Array.prototype.push.apply(this.earlyAttrs || (this.earlyAttrs = []), arguments);},
+    prependToEarlyAttrs: function() {Array.prototype.unshift.apply(this.earlyAttrs || (this.earlyAttrs = []), arguments);},
+    appendToLateAttrs: function() {Array.prototype.push.apply(this.lateAttrs || (this.lateAttrs = []), arguments);},
+    prependToLateAttrs: function() {Array.prototype.unshift.apply(this.lateAttrs || (this.lateAttrs = []), arguments);},
+    
     /** Calls a setter function for each attribute in the provided map.
         @param attrs:object a map of attributes to set.
         @returns void. */
     callSetters: function(attrs) {
+        var earlyAttrs = this.earlyAttrs,
+            lateAttrs = this.lateAttrs,
+            attrName, extractedLateAttrs, i, len;
+        if (earlyAttrs || lateAttrs) {
+            // Make a shallow copy of attrs since we can't guarantee that
+            // attrs won't be reused
+            var copyOfAttrs = {};
+            for (attrName in attrs) copyOfAttrs[attrName] = attrs[attrName];
+            attrs = copyOfAttrs;
+            
+            // Do early setters
+            if (earlyAttrs) {
+                i = 0;
+                len = earlyAttrs.length;
+                while (len > i) {
+                    attrName = earlyAttrs[i++];
+                    if (attrName in attrs) {
+                        this.set(attrName, attrs[attrName]);
+                        delete attrs[attrName];
+                    }
+                }
+            }
+            
+            // Extract late setters for later execution
+            if (lateAttrs) {
+                extractedLateAttrs = [];
+                i = 0;
+                len = lateAttrs.length;
+                while (len > i) {
+                    attrName = lateAttrs[i++];
+                    if (attrName in attrs) {
+                        extractedLateAttrs.push(attrName, attrs[attrName]);
+                        delete attrs[attrName];
+                    }
+                }
+            }
+        }
+        
+        // Do normal setters
         for (var attrName in attrs) this.set(attrName, attrs[attrName]);
+        
+        // Do late setters
+        if (extractedLateAttrs) {
+            i = 0;
+            len = extractedLateAttrs.length;
+            while (len > i) this.set(extractedLateAttrs[i++], extractedLateAttrs[i++]);
+        }
     },
     
     /** A generic getter function that can be called to get a value from this
@@ -6385,12 +6452,12 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
         method.
         @param attrName:string The name of the attribute to set.
         @param v:* The value to set.
-        @param noSetter:boolean (optional) If true no attempt will be made to
+        @param skipSetter:boolean (optional) If true no attempt will be made to
             invoke a setter function. Useful when you want to invoke standard 
             setter behavior. Defaults to undefined which is equivalent to false.
         @returns void */
-    set: function(attrName, v, noSetter) {
-        if (!noSetter) {
+    set: function(attrName, v, skipSetter) {
+        if (!skipSetter) {
             var setterName = myt.AccessorSupport.generateSetterName(attrName);
             if (this[setterName]) return this[setterName](v);
         }
@@ -16715,11 +16782,8 @@ myt.CheckboxStyleMixin = new JS.Module('CheckboxStyleMixin', {
 myt.ValueComponent = new JS.Module('ValueComponent', {
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
+        this.appendToEarlyAttrs('valueFilter','value');
         this.callSuper(parent, attrs);
-        
-        // Attempt to setValue again since the valueFilter may not have been
-        // set when setValue was originally called.
-        if (this.valueFilter) this.setValue(this.value);
     },
     
     
@@ -16961,7 +17025,7 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
             attrs = {
                 name:'textView', 
                 whiteSpace: this.shrinkToFit ? 'nowrap' : 'normal', 
-                text:this.text, domClass:'mytButtonText mytUnselectable'
+                text:this.text, domClass:'myt-Text mytButtonText mytUnselectable'
             };
         if (typeof textY === 'string') {
             attrs.valign = textY;
@@ -17043,23 +17107,18 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
             textView = this.textView,
             textViewVisible = textView.visible && this.text;
         
+        this.__updateContentPositionLoopBlock = true;
         if (this.shrinkToFit) {
             textView.setX(inset);
-            
-            this.__updateContentPositionLoopBlock = true;
             this.setWidth(inset + (textViewVisible ? textView.width : 0) + outset);
-            this.__updateContentPositionLoopBlock = false;
-            
             this.setHeight(this.__origHeight);
         } else {
             textView.setHeight('auto');
             textView.setWidth(this.width - inset - outset);
             textView.setX(inset);
-            
-            this.__updateContentPositionLoopBlock = true;
             this.setHeight(textViewVisible ? textView.y + textView.height : this.__origHeight);
-            this.__updateContentPositionLoopBlock = false;
         }
+        this.__updateContentPositionLoopBlock = false;
     }
 });
 
@@ -25644,6 +25703,8 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
+        this.appendToEarlyAttrs('snapToInt','minValue','maxValue');
+        
         if (attrs.snapToInt === undefined) attrs.snapToInt = true;
         
         if (!attrs.valueFilter) {
@@ -25681,35 +25742,39 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
     },
     
     setMinValue: function(v) {
-        if (v != null && this.snapToInt) v = Math.round(v);
+        if (this.snapToInt && v != null) v = Math.round(v);
         
         if (this.minValue !== v) {
             var max = this.maxValue;
             if (max != null && v > max) v = max;
             
-            this.minValue = v;
-            if (this.inited) {
-                this.fireNewEvent('minValue', v);
-                
-                // Rerun setValue since the filter has changed.
-                this.setValue(this.value);
+            if (this.minValue !== v) {
+                this.minValue = v;
+                if (this.inited) {
+                    this.fireNewEvent('minValue', v);
+                    
+                    // Rerun setValue since the filter has changed.
+                    this.setValue(this.value);
+                }
             }
         }
     },
     
     setMaxValue: function(v) {
-        if (v != null && this.snapToInt) v = Math.round(v);
+        if (this.snapToInt && v != null) v = Math.round(v);
         
         if (this.maxValue !== v) {
             var min = this.minValue;
             if (min != null && v < min) v = min;
             
-            this.maxValue = v;
-            if (this.inited) {
-                this.fireNewEvent('maxValue', v);
-                
-                // Rerun setValue since the filter has changed.
-                this.setValue(this.value);
+            if (this.maxValue !== v) {
+                this.maxValue = v;
+                if (this.inited) {
+                    this.fireNewEvent('maxValue', v);
+                    
+                    // Rerun setValue since the filter has changed.
+                    this.setValue(this.value);
+                }
             }
         }
     },
@@ -26549,6 +26614,7 @@ myt.Slider = new JS.Class('Slider', myt.BaseSlider, {
     form: {lower:number, upper:number}. */
 myt.RangeComponent = new JS.Module('RangeComponent', {
     include: [myt.ValueComponent],
+    
     
     // Accessors ///////////////////////////////////////////////////////////////
     setLowerValue: function(v) {

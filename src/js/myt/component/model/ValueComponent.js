@@ -13,11 +13,8 @@
 myt.ValueComponent = new JS.Module('ValueComponent', {
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
+        this.appendToEarlyAttrs('valueFilter','value');
         this.callSuper(parent, attrs);
-        
-        // Attempt to setValue again since the valueFilter may not have been
-        // set when setValue was originally called.
-        if (this.valueFilter) this.setValue(this.value);
     },
     
     
