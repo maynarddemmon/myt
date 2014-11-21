@@ -92,6 +92,8 @@ JS.extend(JS.Module.prototype, {
     this.__anc__ = null;
     this.__mct__ = {};
     
+    this.__displayName = name;
+    
     this.include(methods, {_resolve:false});
   },
 
@@ -123,9 +125,13 @@ JS.extend(JS.Module.prototype, {
         module.__dep__.push(this);
         
         if (extended = options._extended) {
+          // Meta programming hook: Called when a subclass is created of 
+          // this module
           if (typeof module.extended === 'function') module.extended(extended);
         } else {
-          if (typeof module.included === 'function') module.included(this);
+          // Meta programming hook: If you include() a module that has a 
+          // singleton method called includedBy, that method will be called.
+          if (typeof module.includedBy === 'function') module.includedBy(this);
         }
       } else {
         resolveFalse = {_resolve:false};
@@ -286,12 +292,11 @@ JS.extend(JS.Class.prototype, {
       parent  = Object;
     }
     
-    JS.Module.prototype.initialize.call(this);
+    JS.Module.prototype.initialize.call(this, name);
     
     var resolve = (options || {})._resolve,
       resolveFalse = {_resolve:false},
       klass = JS.makeClass(parent);
-    klass.__displayName = name;
     JS.extend(klass, this);
     klass.prototype.constructor = klass.prototype.klass = klass;
     klass.__eigen__().include(parent.__meta__, {_resolve:resolve});
@@ -301,7 +306,10 @@ JS.extend(JS.Class.prototype, {
     klass.include(JS.Kernel, resolveFalse).include(parentModule, resolveFalse).include(methods, resolveFalse);
      
     if (resolve !== false) klass.resolve();
-    if (typeof parent.inherited === 'function') parent.inherited(klass);
+    
+    // Meta programming hook: If a class has a class method called inheritedBy() 
+    // it will be called whenever you create a subclass of it
+    if (typeof parent.inheritedBy === 'function') parent.inheritedBy(klass);
     
     return klass;
   }
