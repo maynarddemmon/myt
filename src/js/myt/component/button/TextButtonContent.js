@@ -53,7 +53,7 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
             attrs = {
                 name:'textView', 
                 whiteSpace: this.shrinkToFit ? 'nowrap' : 'normal', 
-                text:this.text, domClass:'mytButtonText mytUnselectable'
+                text:this.text, domClass:'myt-Text mytButtonText mytUnselectable'
             };
         if (typeof textY === 'string') {
             attrs.valign = textY;
@@ -135,22 +135,17 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
             textView = this.textView,
             textViewVisible = textView.visible && this.text;
         
+        this.__updateContentPositionLoopBlock = true;
         if (this.shrinkToFit) {
             textView.setX(inset);
-            
-            this.__updateContentPositionLoopBlock = true;
             this.setWidth(inset + (textViewVisible ? textView.width : 0) + outset);
-            this.__updateContentPositionLoopBlock = false;
-            
             this.setHeight(this.__origHeight);
         } else {
             textView.setHeight('auto');
             textView.setWidth(this.width - inset - outset);
             textView.setX(inset);
-            
-            this.__updateContentPositionLoopBlock = true;
             this.setHeight(textViewVisible ? textView.y + textView.height : this.__origHeight);
-            this.__updateContentPositionLoopBlock = false;
         }
+        this.__updateContentPositionLoopBlock = false;
     }
 });
