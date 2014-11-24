@@ -8672,19 +8672,40 @@ myt.View = new JS.Class('View', myt.Node, {
         return svs;
     },
     
-    /** Does lazy instantiation of the layouts array. */
-    getLayouts: function() {
-        return this.layouts || (this.layouts = []);
-    },
-    
     // Focus Attributes //
     setFocusTrap: function(v) {this.focusTrap = v;},
     setFocusCage: function(v) {this.focusCage = v;},
     setMaskFocus: function(v) {this.maskFocus = v;},
     
     // Layout Attributes //
-    setIgnoreLayout: function(v) {this.ignoreLayout = v;},
     setLayoutHint: function(v) {this.layoutHint = v;},
+    
+    /** Does lazy instantiation of the layouts array. */
+    getLayouts: function() {
+        return this.layouts || (this.layouts = []);
+    },
+    
+    setIgnoreLayout: function(v) {
+        if (this.ignoreLayout !== v) {
+            // Add or remove ourselves from any layouts on our parent.
+            var ready = this.inited && this.parent, layouts, i;
+            if (v) {
+                if (ready) {
+                    layouts = this.parent.getLayouts();
+                    i = layouts.length;
+                    while (i) layouts[--i].removeSubview(this);
+                }
+                this.ignoreLayout = v;
+            } else {
+                this.ignoreLayout = v;
+                if (ready) {
+                    layouts = this.parent.getLayouts();
+                    i = layouts.length;
+                    while (i) layouts[--i].addSubview(this);
+                }
+            }
+        }
+    },
     
     // Dom Selector Attributes //
     /** @overrides myt.DomElementProxy */
