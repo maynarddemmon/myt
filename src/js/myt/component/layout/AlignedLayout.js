@@ -14,11 +14,11 @@ myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
     /** @overrides myt.VariableLayout */
     initNode: function(parent, attrs) {
         this.align = 'middle';
-        this.targetAttrName = 'x';
-        this.setterName = 'setX';
-        this.measureAttrName = 'boundsWidth';
-        this.measureAttrBaseName = 'width';
-        this.parentSetterName = 'setWidth';
+        this.targetAttrName = 'y';
+        this.setterName = 'setY';
+        this.measureAttrName = 'boundsHeight';
+        this.measureAttrBaseName = 'height';
+        this.parentSetterName = 'setHeight';
         this.targetValue = 0;
         
         this.callSuper(parent, attrs);
