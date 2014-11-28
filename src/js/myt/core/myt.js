@@ -241,15 +241,14 @@ myt = {
         };
     },
     
-    /** Dumps a stacktrace to the console.
-        @param err: Error:string the error or message to dump stack for.
-        @param type:string (optional) the type of console message to write.
+    /** A wrapper on myt.global.error.notify
+        @param err:Error/string The error or message to dump stack for.
+        @param type:string (optional) The type of console message to write.
             Allowed values are 'error', 'warn', 'log' and 'debug'. Defaults to
             'error'.
         @returns void */
     dumpStack: function(err, type) {
-        if (!err || typeof err === 'string') err = new Error(err);
-        console[type ? type : 'error'](err.stack || err.stacktrace)
+        myt.global.error.notify(type || 'error', err, err, err);
     },
     
     // Collection Utilities

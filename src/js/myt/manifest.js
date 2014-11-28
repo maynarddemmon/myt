@@ -71,15 +71,10 @@ JS.Packages(function() {with(this) {
     file(MYT_DOM_EVENTS_ROOT + 'ScrollObservable.js').provides('myt.ScrollObservable').requires('myt.DomObservable');
     file(MYT_DOM_EVENTS_ROOT + 'TouchObservable.js' ).provides('myt.TouchObservable' ).requires('myt.DomObservable');
     
-    // Core : Layout
-    var MYT_LAYOUT_ROOT = MYT_CORE_ROOT + 'layout/';
-    file(MYT_LAYOUT_ROOT + 'Layout.js'        ).provides('myt.Layout'        ).requires('myt.Node','myt.ThresholdCounter');
-    file(MYT_LAYOUT_ROOT + 'ConstantLayout.js').provides('myt.ConstantLayout').requires('myt.Layout');
-    file(MYT_LAYOUT_ROOT + 'VariableLayout.js').provides('myt.VariableLayout').requires('myt.ConstantLayout');
-    
     // Core : Globals
     var MYT_GLOBALS_ROOT = MYT_CORE_ROOT + 'globals/';
     file(MYT_GLOBALS_ROOT + 'Global.js'                ).provides('myt.global'             ).requires('myt.Constrainable');
+    file(MYT_GLOBALS_ROOT + 'GlobalError.js'           ).provides('myt.global.error'       ).requires('myt.global','myt.Observable');
     file(MYT_GLOBALS_ROOT + 'GlobalHistory.js'         ).provides('myt.global.history'     ).requires('myt.global','myt.Observable','History','History.Adapter');
     file(MYT_GLOBALS_ROOT + 'GlobalIdle.js'            ).provides('myt.global.idle'        ).requires('myt.global','myt.Observable');
     file(MYT_GLOBALS_ROOT + 'GlobalMouse.js'           ).provides('myt.global.mouse'       ).requires('myt.global','myt.DomObservable','myt.MouseObservable');
@@ -90,6 +85,12 @@ JS.Packages(function() {with(this) {
     file(MYT_GLOBALS_ROOT + 'GlobalDragManager.js'     ).provides('myt.global.dragManager' ).requires('myt.global','myt.Observable');
     file(MYT_GLOBALS_ROOT + 'GlobalWindowResize.js'    ).provides('myt.global.windowResize').requires('myt.global','myt.Observable');
     file(MYT_GLOBALS_ROOT + 'GlobalRootViewRegistry.js').provides('myt.global.roots'       ).requires('myt.global','myt.Observable');
+    
+    // Core : Layout
+    var MYT_LAYOUT_ROOT = MYT_CORE_ROOT + 'layout/';
+    file(MYT_LAYOUT_ROOT + 'Layout.js'        ).provides('myt.Layout'        ).requires('myt.Node','myt.ThresholdCounter');
+    file(MYT_LAYOUT_ROOT + 'ConstantLayout.js').provides('myt.ConstantLayout').requires('myt.Layout');
+    file(MYT_LAYOUT_ROOT + 'VariableLayout.js').provides('myt.VariableLayout').requires('myt.ConstantLayout');
     
     // Component
     var MYT_COMPONENT_ROOT = MYT_ROOT + 'component/';
@@ -346,7 +347,7 @@ JS.Packages(function() {with(this) {
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
         'myt.Cookie',
-        'myt.global.keys','myt.global.touch','myt.global.history',
+        'myt.global.error','myt.global.keys','myt.global.touch','myt.global.history',
         'myt.Text','myt.Markup','myt.Frame','myt.SizeWidthToDom','myt.SizeHeightToDom','myt.SizeToParent',
         'myt.SizeToWindowWidth','myt.SizeToWindowHeight',
         'myt.Animator','myt.Callback','myt.RepeatableTimer','myt.StateMachine',

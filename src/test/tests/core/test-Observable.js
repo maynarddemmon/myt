@@ -251,6 +251,9 @@ test("Verify infinite event loop protection.", function() {
         doBeforeAdoption: function() {
             this.fooEventCount = 0;
             this.lastFooEvent = null;
+            this.eventLoopFiredCount = 0;
+            
+            this.attachTo(myt.global.error, 'handleEventLoop', 'eventLoop');
         },
         
         handleFooEvent: function(e) {
@@ -258,6 +261,10 @@ test("Verify infinite event loop protection.", function() {
             this.lastFooEvent = e;
             
             this.fireNewEvent('foo','bar');
+        },
+        
+        handleEventLoop: function(e) {
+            if (e.type === 'eventLoop') this.eventLoopFiredCount++;
         }
     }]);
     
@@ -275,6 +282,7 @@ test("Verify infinite event loop protection.", function() {
     
     ok(n1.fooEventCount === 1, "One event should have been fired.");
     ok(n2.fooEventCount === 1, "One event should have been fired.");
+    ok(n2.eventLoopFiredCount === 1, "One eventLoop error event should have been fired.");
     
     n1.destroy();
     n2.destroy();
