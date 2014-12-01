@@ -12797,6 +12797,7 @@ myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
         naturalWidth:number
         naturalHeight:number
         useNaturalSize:boolean
+        imageLoadingError:boolean
     
     Attributes:
         imageUrl:string The URL to load the image data from.
@@ -12820,6 +12821,9 @@ myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
         useNaturalSize:boolean If true this image view will be sized to the
             naturalWidth and naturalHeight and calculateNaturalSize will be
             set to true.
+        imageLoadingError:boolean Gets set to true when an error occurs
+            loading the image. The image will be loaded whenever the
+            calculateNaturalSize attribute is set to true.
 */
 myt.ImageSupport = new JS.Module('ImageSupport', {
     // Class Methods ///////////////////////////////////////////////////////////
@@ -12863,6 +12867,8 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
             this.__calculateNaturalSize();
         }
     },
+    
+    setImageLoadingError: function(v) {this.set('imageLoadingError', v, true);},
     
     setImageSize: function(v) {
         if (this.imageSize !== v) {
@@ -12958,6 +12964,19 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
                     
                     // Start a size query
                     var img = new Image();
+                    img.onerror = function(err) {
+                        // Notify all ImageSupport instances that are waiting
+                        // for a natural size that an error has occurred.
+                        var openQueries = openQueryCache[imgUrl];
+                        if (openQueries) {
+                            var i = openQueries.length;
+                            while (i) openQueries[--i].setImageLoadingError(true);
+                            
+                            // Cleanup
+                            openQueries.length = 0;
+                            delete openQueryCache[imgUrl];
+                        }
+                    };
                     img.onload = function() {
                         var w = this.width, h = this.height;
                         

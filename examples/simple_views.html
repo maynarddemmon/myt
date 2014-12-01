@@ -75,6 +75,9 @@
         
         v8.setTransformOrigin('0 0 0');
         v8.setScale(2);
+        
+        var img1 = new myt.Image(v, {x:1, y:50, imageUrl:'./img/cat.jpg'});
+        var img2 = new myt.View(v, {x:1, y:100, imageUrl:'./missing.jpg', calculateNaturalSize:true}, [myt.ImageSupport]);
     }
 </script>
 </body></html>
