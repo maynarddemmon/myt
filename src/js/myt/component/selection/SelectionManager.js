@@ -39,8 +39,7 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
             this means the control or command key is down.
             @returns boolean true if in add mode, false otherwise. */
         isToggleMode: function() {
-            var gk = myt.global.keys;
-            return gk.isControlKeyDown() || gk.isCommandKeyDown();
+            return myt.global.keys.isAcceleratorKeyDown();
         }
     },
     
