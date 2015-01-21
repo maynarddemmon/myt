@@ -4,7 +4,7 @@ To build a single javascript file run the following from the myt root dir:
   > jsbuild -m src/js/myt/manifest.js -P -r ./src/js myt.SimpleListView > src/js/myt/myt.js
 
 To build a minified javascript file run the following from the myt root dir:
-  > bin/build src/js/myt/manifest.js src/js/myt/myt.js ./src/js myt.all > src/js/myt/myt.min.js
+  > bin/build src/js/myt/manifest.js dist/myt.js ./src/js myt.all > dist/myt.min.js
 
 Starting up JSTestDriver from the myt dir:
   > nohup java -jar src/test/jstestdriver/JsTestDriver.jar --port 8081 >dev/null>&1 &

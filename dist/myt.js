@@ -6152,6 +6152,11 @@ new JS.Singleton('GlobalKeys', {
         return this.isKeyDown(this.KEYCODE_COMMAND) || this.isKeyDown(this.KEYCODE_RIGHT_COMMAND);
     },
     
+    /** Tests if the platform specific "accelerator" key is down. */
+    isAcceleratorKeyDown: function() {
+        return BrowserDetect.os === 'Mac' ? this.isCommandKeyDown() : this.isControlKeyDown();
+    },
+    
     /** @private */
     __handleFocused: function(event) {
         var focused = event.value;
@@ -17900,8 +17905,7 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
             this means the control or command key is down.
             @returns boolean true if in add mode, false otherwise. */
         isToggleMode: function() {
-            var gk = myt.global.keys;
-            return gk.isControlKeyDown() || gk.isCommandKeyDown();
+            return myt.global.keys.isAcceleratorKeyDown();
         }
     },
     
@@ -23769,11 +23773,19 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     /** @private */
     __filterInputPress: function(event) {
         var domEvent = event.value,
-            c = String.fromCharCode(domEvent.which);
+            charCode = domEvent.which;
+        
+        // Firefox fires events for arrow keys and backspace which should be
+        // ignored completely.
+        switch (charCode) {
+            case 8: // backspace key
+            case 0: // arrow keys have a "charCode" of 0 in firefox.
+                return;
+        }
         
         // Filter for allowed characters
         var allowedChars = this.allowedChars;
-        if (allowedChars && allowedChars.indexOf(c) === -1) domEvent.preventDefault();
+        if (allowedChars && allowedChars.indexOf(String.fromCharCode(charCode)) === -1) domEvent.preventDefault();
         
         this.filterInputPress(domEvent);
     },
