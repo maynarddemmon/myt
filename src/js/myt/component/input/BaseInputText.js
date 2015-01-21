@@ -92,11 +92,19 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     /** @private */
     __filterInputPress: function(event) {
         var domEvent = event.value,
-            c = String.fromCharCode(domEvent.which);
+            charCode = domEvent.which;
+        
+        // Firefox fires events for arrow keys and backspace which should be
+        // ignored completely.
+        switch (charCode) {
+            case 8: // backspace key
+            case 0: // arrow keys have a "charCode" of 0 in firefox.
+                return;
+        }
         
         // Filter for allowed characters
         var allowedChars = this.allowedChars;
-        if (allowedChars && allowedChars.indexOf(c) === -1) domEvent.preventDefault();
+        if (allowedChars && allowedChars.indexOf(String.fromCharCode(charCode)) === -1) domEvent.preventDefault();
         
         this.filterInputPress(domEvent);
     },
