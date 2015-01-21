@@ -167,6 +167,11 @@ new JS.Singleton('GlobalKeys', {
         return this.isKeyDown(this.KEYCODE_COMMAND) || this.isKeyDown(this.KEYCODE_RIGHT_COMMAND);
     },
     
+    /** Tests if the platform specific "accelerator" key is down. */
+    isAcceleratorKeyDown: function() {
+        return BrowserDetect.os === 'Mac' ? this.isCommandKeyDown() : this.isControlKeyDown();
+    },
+    
     /** @private */
     __handleFocused: function(event) {
         var focused = event.value;
