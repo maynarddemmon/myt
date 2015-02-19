@@ -19,6 +19,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     extend: {
         DEFAULT_RADIUS: 12,
         DEFAULT_SHADOW: [0, 4, 20, '#666666'],
+        DEFAULT_BORDER: [1, 'solid', '#ffffff'],
         DEFAULT_BGCOLOR: '#ffffff',
         
         /** Makes the text wrap at 200px and the dialog will be at
@@ -61,6 +62,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             content.setRoundedCorners(this.DEFAULT_RADIUS);
             content.setBgColor(this.DEFAULT_BGCOLOR);
             content.setBoxShadow(this.DEFAULT_SHADOW);
+            content.setBorder(this.DEFAULT_BORDER);
             content.setFocusCage(true);
             
             this.createCloseButton(content, dialog);
@@ -188,7 +190,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     __destroyContent: function() {
         this.__hideSpinner();
         
-        var content = this.content, MP = myt.ModalPanel,
+        var content = this.content, MP = myt.ModalPanel, MD = myt.Dialog,
             stc = content.sizeToChildren,
             svs = content.getSubviews(), 
             i = svs.length, sv;
@@ -211,6 +213,12 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         
         // Confirm content dialog modifies this.
         stc.setPaddingX(MP.DEFAULT_PADDING_X);
+        
+        // Any opts could modify this
+        content.setRoundedCorners(MD.DEFAULT_RADIUS);
+        content.setBgColor(MD.DEFAULT_BGCOLOR);
+        content.setBoxShadow(MD.DEFAULT_SHADOW);
+        content.setBorder(MD.DEFAULT_BORDER);
     },
     
     /** Called by each of the buttons that can trigger the dialog to be hidden.
@@ -274,6 +282,46 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         closeBtn.focus();
         
         this.setDisplayMode('message');
+    },
+    
+    showSimple: function(contentBuilderFunc, callbackFunction, opts) {
+        var content = this.content,
+            closeBtn = content.closeBtn,
+            opts = opts || {},
+            maxHeight = opts.maxContainerHeight;
+        
+        this.__destroyContent();
+        
+        if (opts.bgColor) content.setBgColor(opts.bgColor);
+        if (opts.roundedCorners) content.setRoundedCorners(opts.roundedCorners);
+        if (opts.boxShadow) content.setBoxShadow(opts.boxShadow);
+        if (opts.border) content.setBorder(opts.border);
+        
+        content.sizeToChildren.setPaddingX(1);
+        this.setCallbackFunction(callbackFunction);
+        
+        var contentContainer = new myt.View(content, {
+            name:'contentContainer', x:1, y:25, overflow:'auto'
+        }, [{
+            setHeight: function(v) {
+                if (v > maxHeight) v = maxHeight;
+                this.callSuper(v);
+            }
+        }]);
+        
+        contentBuilderFunc.call(this, contentContainer);
+        
+        new myt.SizeToChildren(contentContainer, {axis:'both'});
+        
+        this.show();
+        
+        closeBtn.setVisible(true);
+        closeBtn.focus();
+        
+        this.setDisplayMode('content');
+        
+        // Set initial focus
+        if (contentContainer.initialFocus) contentContainer.initialFocus.focus();
     },
     
     /** Shows a dialog with a spinner and a message and no standard cancel
@@ -396,7 +444,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     },
     
     showContentConfirm: function(contentBuilderFunc, callbackFunction, opts) {
-        var MP = myt.ModalPanel, content = this.content;
+        var content = this.content;
         
         opts = myt.extend({}, myt.Dialog.CONFIRM_DEFAULTS, opts);
         
@@ -454,11 +502,10 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     /** @private */
     __setupConfirmButtons: function(mainView, opts) {
         var self = this, content = this.content, 
-            MP = myt.ModalPanel,
-            MP_DPY = MP.DEFAULT_PADDING_Y;
+            DPY = myt.ModalPanel.DEFAULT_PADDING_Y;
         
         var btnContainer = new myt.View(content, {
-            y:mainView.y + mainView.height + MP_DPY, align:'center'
+            y:mainView.y + mainView.height + DPY, align:'center'
         });
         
         // Cancel Button
@@ -515,13 +562,13 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         new myt.SizeToChildren(btnContainer, {axis:'y'});
         new myt.SpacedLayout(btnContainer, {spacing:4, axis:'x', collapseParent:true});
         
-        content.sizeToChildren.setPaddingY(MP_DPY / 2);
+        content.sizeToChildren.setPaddingY(DPY / 2);
         
         var r = myt.Dialog.DEFAULT_RADIUS;
         var bg = new myt.View(content, {
             ignoreLayout:true,
             x:0,
-            y:btnContainer.y - (MP_DPY / 2),
+            y:btnContainer.y - (DPY / 2),
             width:content.width,
             bgColor:'#eeeeee',
             roundedBottomLeftCorner:r,

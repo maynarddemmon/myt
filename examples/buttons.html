@@ -36,8 +36,50 @@
     new myt.ConstantLayout(rootView, {targetAttrName:'y', targetValue:5});
     var layout = new myt.SpacedLayout(rootView, {axis:'x', spacing:2, inset:5});
     
-    var btn1 = new BtnClass(rootView, {name:'one', width:50, height:20});
+    var btn1 = new BtnClass(rootView, {name:'one', width:50, height:20}, [ActivatedMixin, {
+        doActivated: function() {
+            this.parent.dialog.showSimple(
+                function(container) {
+                    new myt.SimpleButton(container, {
+                        name:'btn1', x:25,  width:50, height:50, roundedCorners:4, readyColor:'#999999'
+                    }, [{
+                        doActivated: function() {container.parent.parent.doCallback(this);}
+                    }]);
+                    new myt.SimpleButton(container, {
+                        name:'btn2', x:100, width:50, height:50, roundedCorners:4, readyColor:'#999999'
+                    }, [{
+                        doActivated: function() {container.parent.parent.doCallback(this);}
+                    }]);
+                    new myt.SimpleButton(container, {
+                        name:'btn3', x:175, width:50, height:50, roundedCorners:4, readyColor:'#999999'
+                    }, [{
+                        doActivated: function() {container.parent.parent.doCallback(this);}
+                    }]);
+                    new myt.View(container, {width:250, height:8, y:50});
+                },
+                function(action) {
+                    switch(action) {
+                        case 'closeBtn':
+                            console.log("cancelled");
+                            break;
+                        case 'btn1':
+                            console.log("btn1");
+                            break;
+                        case 'btn2':
+                            console.log("btn2");
+                            break;
+                        case 'btn3':
+                            console.log("btn3");
+                            break;
+                    }
+                },
+                {maxContainerHeight:300, bgColor:'#000000'}
+            );
+            this.callSuper();
+        }
+    }]);
     btn1.setRoundedCorners(5);
+    
     var btn2 = new BtnClass(rootView, {name:'two', width:50, height:20, y:100});
     btn2.setRoundedCorners(8);
     var btn3 = new BtnClass(rootView, {name:'three', width:50, height:20, disabled:true, y:25});
