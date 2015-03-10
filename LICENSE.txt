@@ -1,6 +1,6 @@
 Myt: A simple javascript UI framework
 http://github.com/maynarddemmon/myt
-Copyright (c) 2012-2014 Maynard Demmon and contributors
+Copyright (c) 2012-2015 Maynard Demmon and contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -15,8 +15,7 @@ all copies or substantial portions of the Software.
 Parts of the Software incorporates code and/or design patterns from various
 public domain sources and has been noted as such in the source.
 
-Parts of the Software incorporates code from the following open-source 
-projects:
+Parts of the Software incorporates code from the following open-source projects:
 * MIT License
 *   JS.Class, Copyright (c) 2007-2012 James Coglan and contributors 
 *   parseUri 1.2.2, Copyright (c) Steven Levithan <stevenlevithan.com>
@@ -26,6 +25,7 @@ projects:
 *                                             Ubilabs http://ubilabs.net
 *   jQuery Cookie Plugin v1.3.1, Copyright (c) 2013 Klaus Hartl (MIT License)
 *   Spectrum Colorpicker v1.4.1, Copyright (c) Brian Grinstead https://github.com/bgrins/spectrum
+*   date.format Date:03/10/15, Copyright (c) 2005 Jacob Wright https://github.com/jacwright/date.format
 *
 * BSD License
 *   Easing Functions, Copyright (c) 2001 Robert Penner

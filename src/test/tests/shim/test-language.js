@@ -28,6 +28,18 @@ test("Date.now API exists.", function() {
     ok(Date.now() > 1377460000000, "Date.now should be a large number.");
 });
 
+test("Date.format API exists.", function() {
+    ok(typeof Date.prototype.format === "function", "Date should have a format function.");
+    var date = new Date();
+    date.setYear(2015);
+    date.setMonth(3); // April
+    date.setDate(9);
+    date.setHours(16);
+    date.setMinutes(30);
+    date.setSeconds(45);
+    ok(date.format("Y-m-d H:i:s") === '2015-04-09 16:30:45', "Format a date.");
+});
+
 test("String trim functions should exist.", function() {
     ok(" foo  ".trim() === "foo", "String.prototype.trim should exist and work.");
     ok(" foo  ".trimLeft() === "foo  ", "String.prototype.trimLeft should exist and work.");
