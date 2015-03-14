@@ -1,7 +1,7 @@
 /**
  * Myt: A simple javascript UI framework
  * http://github.com/maynarddemmon/myt
- * Copyright (c) 2012-2014 Maynard Demmon and contributors
+ * Copyright (c) 2012-2015 Maynard Demmon and contributors
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@
  * * jQuery Cookie Plugin v1.3.1, (c) 2013 Klaus Hartl (MIT License)
  * * parseUri 1.2.2, (c) Steven Levithan <stevenlevithan.com> (MIT License)
  * * Spin.js 1.3.0 (c) 2011-2013 Felix Gnass (the MIT license)
+ * * date.format Date:03/10/15, Copyright (c) 2005 Jacob Wright https://github.com/jacwright/date.format
  * * k-d Tree JavaScript - v1.0 (c) Mircea Pricop <pricop@ubilabs.net>,
  *                                  Martin Kleppe <kleppe@ubilabs.net>,
  *                                  Ubilabs http://ubilabs.net (MIT License)
@@ -190,30 +191,50 @@ myt = {
     
     /** Dynamically load a script into the dom.
         @param src:string the URL to the script file.
-        @param callback:function a callback when the script loads.
-        @returns void */
-    loadScript: function(src, callback) {
+        @param callback:function (optional) A function that will be called
+            when the script loads.
+        @param noCacheBust:boolean (optional) If true, not cacheBust query
+            param will be added. Defaults to undefined which is equivalent
+            to false.
+        @returns The created script element or null if the script has already
+            been loaded. */
+    loadScript: function(src, callback, noCacheBust) {
         // Prevent reloading the same script
-        if (!this._loadedScripts) this._loadedScripts = {};
-        if (this._loadedScripts[src]) {
+        var loadedScripts = this._loadedScripts || (this._loadedScripts = {});
+        if (loadedScripts[src]) {
             console.warn("script already loaded for src", src);
-            return;
+            return null;
+        } else {
+            loadedScripts[src] = true;
+            
+            var s = document.createElement('script');
+            s.type = 'text/javascript';
+            s.async = false;
+            
+            if (callback) {
+                var r = false;
+                s.onload = s.onreadystatechange = function() {
+                    if (!r && (!this.readyState || this.readyState === 'complete')) {
+                        // Prevent refiring callback
+                        r = true;
+                        
+                        // Prevent later events from this script for example
+                        // if the src is changed.
+                        s.onload = s.onreadystatechange = null;
+                        
+                        callback();
+                    }
+                };
+            }
+            
+            // Must set src AFTER adding onreadystatechange listener otherwise
+            // we’ll miss the loaded event for cached scripts
+            s.src = src + (noCacheBust ? '' : (src.indexOf('?') !== -1 ? '&' : '?') + 'cacheBust=' + Date.now());
+            
+            this.getElement('head').appendChild(s);
+            
+            return s;
         }
-        this._loadedScripts[src] = true;
-        
-        var s = document.createElement('script');
-        s.type = 'text/javascript';
-        s.src = src + '?cacheBust=' + Date.now();
-        if (callback) {
-            var r = false;
-            s.onload = s.onreadystatechange = function() {
-                if (!r && (!this.readyState || this.readyState == 'complete')) {
-                    r = true; // Prevent refiring callback
-                    callback();
-                }
-            };
-        }
-        this.getElement('head').appendChild(s);
     },
     
     /** Used to wrap the first function with the second function. The first
