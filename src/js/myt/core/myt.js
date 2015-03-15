@@ -477,7 +477,7 @@ myt = {
         var iterable = targetObj, 
             result = iterable,
             args = arguments, argsLength = args.length, argsIndex = 0,
-            key, mappingFunc, ownIndex, ownProps, length;
+            key, mappingFunc, ownIndex, ownKeys, length;
         
         if (iterable) {
             if (argsLength > 2 && typeof args[argsLength - 1] === 'function') mappingFunc = args[--argsLength];
