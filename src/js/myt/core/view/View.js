@@ -70,8 +70,9 @@
         opacity:number The opacity of this view. The value should be a number 
             between 0 and 1. Defaults to 1.
         overflow:string Determines how descendant content overflows the bounds.
-            Allowed values: 'visible', 'hidden', 'scroll', 'auto', 'inherit'.
-            Defaults to undefined which is equivalent to 'visible'.
+            Allowed values: 'visible', 'hidden', 'scroll', 'auto', 'autoy',
+            'autox' and 'inherit'. Defaults to undefined which is equivalent 
+            to 'visible'.
         visible:boolean Makes this view visible or not. The default value is 
             true which means visbility is inherited from the parent view.
         cursor:string Determines what cursor to show when moused over the view.
@@ -481,9 +482,22 @@ myt.View = new JS.Class('View', myt.Node, {
     },
     
     setOverflow: function(v) {
-        if (this.overflow !== v) {
+        var existing = this.overflow;
+        if (existing !== v) {
             this.overflow = v;
-            this.deStyle.overflow = v || 'visible';
+            
+            var s = this.deStyle;
+            if (v === 'autox') {
+                s.overflowX = 'auto';
+                s.overflowY = 'hidden';
+            } else if (v === 'autoy') {
+                s.overflowY = 'auto';
+                s.overflowX = 'hidden';
+            } else {
+                if (existing === 'autox' || existing === 'autoy') s.overflowX = s.overflowY = null;
+                s.overflow = v || 'visible';
+            }
+            
             if (this.inited) this.fireNewEvent('overflow', v);
         }
     },
