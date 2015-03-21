@@ -18,7 +18,7 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
         // Allows horizontal scrolling if the grid columns are too wide.
-        if (attrs.overflow === undefined) attrs.overflow = 'auto';
+        if (attrs.overflow === undefined) attrs.overflow = 'autox';
         
         if (attrs.bgColor === undefined) attrs.bgColor = '#cccccc';
         if (attrs.rowSpacing === undefined) attrs.rowSpacing = 1;
@@ -140,8 +140,8 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     
     /** @overrides myt.GridController */
     doSort: function() {
-        var sort = this.sort,
-            sortFunc = this.getSortFunction(sort ? sort[0] : '', sort ? sort[1] : '');
+        var sort = this.sort || ['',''],
+            sortFunc = this.getSortFunction(sort[0], sort[1]);
         if (sortFunc) {
             var content = this.content, 
                 yLayout = content.yLayout;
@@ -155,12 +155,13 @@ myt.Grid = new JS.Class('Grid', myt.View, {
         should implement this as needed.
         @returns function a comparator function used for sorting. */
     getSortFunction: function(sortColumnId, sortOrder) {
-        if (sortColumnId && sortOrder) {
+        if (sortColumnId) {
             // Default sort function uses the 'text' attribute of the subview.
-            var sortNum = sortOrder === 'ascending' ? 1 : -1;
+            var sortNum = sortOrder === 'ascending' ? 1 : -1,
+                columnName = sortColumnId + 'View';
             return function(a, b) {
-                var aValue = a[sortColumnId + 'View'].text,
-                    bValue = b[sortColumnId + 'View'].text;
+                var aValue = a[columnName].text,
+                    bValue = b[columnName].text;
                 if (aValue > bValue) {
                     return sortNum;
                 } else if (bValue > aValue) {

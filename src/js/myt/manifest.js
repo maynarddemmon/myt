@@ -132,6 +132,9 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'util/Callback.js'    ).provides('myt.Callback'    ).requires('myt');
     file(MYT_COMPONENT_ROOT + 'util/StateMachine.js').provides('myt.StateMachine').requires('myt.Node');
     
+    // Component : Misc
+    file(MYT_COMPONENT_ROOT + 'misc/FontAwesome.js').provides('myt.FontAwesome').requires('myt.Markup');
+    
     // Component : Drag and Drop
     file(MYT_COMPONENT_ROOT + 'dragdrop/DragGroupSupport.js').provides('myt.DragGroupSupport').requires('myt.View','myt.global.mouse');
     file(MYT_COMPONENT_ROOT + 'dragdrop/Dropable.js'        ).provides('myt.Dropable'        ).requires('myt.Draggable','myt.DragGroupSupport');
@@ -351,6 +354,7 @@ JS.Packages(function() {with(this) {
         'myt.Text','myt.Markup','myt.Frame','myt.SizeWidthToDom','myt.SizeHeightToDom','myt.SizeToParent',
         'myt.SizeToWindowWidth','myt.SizeToWindowHeight',
         'myt.Animator','myt.Callback','myt.RepeatableTimer','myt.StateMachine',
+        'myt.FontAwesome',
         'myt.Replicator',
         'myt.WrappingLayout','myt.ResizeLayout','myt.AlignedLayout','myt.ThreePanel',
         'myt.DrawButton','myt.SimpleIconTextButton','myt.IconTextPanelButton','myt.DelayedMethodCall',

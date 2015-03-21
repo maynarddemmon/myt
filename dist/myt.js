@@ -4437,7 +4437,7 @@ myt = {
         var iterable = targetObj, 
             result = iterable,
             args = arguments, argsLength = args.length, argsIndex = 0,
-            key, mappingFunc, ownIndex, ownProps, length;
+            key, mappingFunc, ownIndex, ownKeys, length;
         
         if (iterable) {
             if (argsLength > 2 && typeof args[argsLength - 1] === 'function') mappingFunc = args[--argsLength];
@@ -8704,8 +8704,9 @@ myt.Geometry = {
         opacity:number The opacity of this view. The value should be a number 
             between 0 and 1. Defaults to 1.
         overflow:string Determines how descendant content overflows the bounds.
-            Allowed values: 'visible', 'hidden', 'scroll', 'auto', 'inherit'.
-            Defaults to undefined which is equivalent to 'visible'.
+            Allowed values: 'visible', 'hidden', 'scroll', 'auto', 'autoy',
+            'autox' and 'inherit'. Defaults to undefined which is equivalent 
+            to 'visible'.
         visible:boolean Makes this view visible or not. The default value is 
             true which means visbility is inherited from the parent view.
         cursor:string Determines what cursor to show when moused over the view.
@@ -9115,9 +9116,22 @@ myt.View = new JS.Class('View', myt.Node, {
     },
     
     setOverflow: function(v) {
-        if (this.overflow !== v) {
+        var existing = this.overflow;
+        if (existing !== v) {
             this.overflow = v;
-            this.deStyle.overflow = v || 'visible';
+            
+            var s = this.deStyle;
+            if (v === 'autox') {
+                s.overflowX = 'auto';
+                s.overflowY = 'hidden';
+            } else if (v === 'autoy') {
+                s.overflowY = 'auto';
+                s.overflowX = 'hidden';
+            } else {
+                if (existing === 'autox' || existing === 'autoy') s.overflowX = s.overflowY = null;
+                s.overflow = v || 'visible';
+            }
+            
             if (this.inited) this.fireNewEvent('overflow', v);
         }
     },
@@ -11954,6 +11968,132 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
         }
     }
 });
+
+
+/** An adapter for FontAwesome.
+    
+    Attributes:
+        icon:string The name of the FA icon to set.
+        size:number A number from 0 to 5 with 0 being normal size and 5 being
+            the largest size.
+        propeties:string || array A space separated string or list of FA
+            CSS classes to set.
+*/
+myt.FontAwesome = new JS.Class('FontAwesome', myt.Markup, {
+    // Class Methods and Attributes ////////////////////////////////////////////
+    extend: {
+        FA_SIZE_CLASSES: ['','fa-lg','fa-2x','fa-3x','fa-4x','fa-5x'],
+        
+        makeTag: function(props) {
+            if (Array.isArray(props)) {
+                var len = props.length;
+                if (len > 0) {
+                    props.unshift('fa');
+                    ++len;
+                    
+                    if (props[1].indexOf('fa-') !== 0) props[1] = 'fa-' + props[1];
+                    
+                    if (len >= 3) props[2] = this.FA_SIZE_CLASSES[props[2]] || '';
+                    
+                    if (len > 3) {
+                        var prop, i = 2;
+                        for (; len > i;) {
+                            prop = props[++i];
+                            if (prop.indexOf('fa-') !== 0) props[i] = 'fa-' + prop;
+                        }
+                    }
+                    
+                    return '<i class="' + props.join(' ') + '"></i>';
+                }
+            }
+            
+            myt.dumpStack('Error making tag');
+            console.error(props);
+            return '';
+        },
+        
+        targets: [],
+        active: false,
+        
+        registerForNotification: function(fa) {
+            if (!this.active) this.targets.push(fa);
+        },
+        
+        notifyActive: function(active) {
+            this.active = active;
+            if (active) {
+                var targets = this.targets;
+                while (targets.length) targets.pop().sizeViewToDom();
+            }
+        }
+    },
+    
+    
+    // Life Cycle //////////////////////////////////////////////////////////////
+    /** @overrides myt.View */
+    initNode: function(parent, attrs) {
+        this.size = 0;
+        
+        this.callSuper(parent, attrs);
+        
+        this.__update();
+        
+        myt.FontAwesome.registerForNotification(this);
+    },
+    
+    
+    // Accessors ///////////////////////////////////////////////////////////////
+    setIcon: function(v) {
+        var existing = this.icon;
+        this.set('icon', v, true);
+        if (this.inited && existing !== v) this.__update();
+    },
+    
+    setSize: function(v) {
+        var existing = this.size;
+        this.set('size', v, true);
+        if (this.inited && existing !== v) this.__update();
+    },
+    
+    setProperties: function(v) {
+        this.properties = v;
+        this.fireNewEvent('properties', v);
+        if (this.inited) this.__update();
+    },
+    
+    
+    // Methods /////////////////////////////////////////////////////////////////
+    /** @private */
+    __update: function() {
+        var props = this.properties;
+        if (props) {
+            if (typeof props === 'string') {
+                props = props.split(' ');
+            } else {
+                props = props.concat();
+            }
+            props.unshift(this.size);
+            props.unshift(this.icon);
+        } else {
+            props = [this.icon, this.size];
+        }
+        
+        this.setHtml(myt.FontAwesome.makeTag(props));
+    }
+});
+
+myt.loadScript('//ajax.googleapis.com/ajax/libs/webfont/1.5.10/webfont.js', function() {
+    WebFont.load({
+        custom: {
+            families: ['FontAwesome'],
+            urls: ['//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css'],
+            testStrings: {'FontAwesome':'\uf00c\uf000'}
+        },
+        fontactive: function(familyName, fvd) {
+            myt.FontAwesome.notifyActive(true);
+        }
+    });
+}, true);
 
 
 /** Objects that can be replicated should include this mixin and implemment
@@ -16639,7 +16779,7 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
         this.minWidth = 0;
         
         if (attrs.defaultItemClass === undefined) attrs.defaultItemClass = myt.ListViewItem;
-        if (attrs.overflow === undefined) attrs.overflow = 'auto';
+        if (attrs.overflow === undefined) attrs.overflow = 'autoy';
         if (attrs.bgColor === undefined) attrs.bgColor = '#cccccc';
         if (attrs.boxShadow === undefined) attrs.boxShadow = myt.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE;
         
@@ -18264,7 +18404,7 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
         attrs.defaultPlacement = 'container';
         
         if (attrs.spacing === undefined) attrs.spacing = myt.TabSliderContainer.DEFAULT_SPACING;
-        if (attrs.overflow === undefined) attrs.overflow = 'auto';
+        if (attrs.overflow === undefined) attrs.overflow = 'autoy';
         if (attrs.itemSelectionId === undefined) attrs.itemSelectionId = 'tabId';
         if (attrs.maxSelected === undefined) attrs.maxSelected = 1;
         
@@ -18274,14 +18414,16 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
     },
     
     doAfterAdoption: function() {
-        var self = this;
-        var container = new myt.View(this, {
+        var self = this,
+            M = myt,
+            TS = M.TabSlider;
+        var container = new M.View(this, {
             name:'container', ignorePlacement:true, percentOfParentWidth:100
-        }, [myt.SizeToParent, {
+        }, [M.SizeToParent, {
             /** @overrides myt.View */
             subnodeAdded: function(node) {
                 this.callSuper(node);
-                if (node instanceof myt.TabSlider) {
+                if (node instanceof TS) {
                     self._tabSliders.push(node);
                     self.attachTo(node, 'updateLayout', 'selected');
                 }
@@ -18289,7 +18431,7 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
             
             /** @overrides myt.View */
             subnodeRemoved: function(node) {
-                if (node instanceof myt.TabSlider) {
+                if (node instanceof TS) {
                     var tabSliders = self._tabSliders, i = tabSliders.length;
                     while (i) {
                         if (tabSliders[--i] === node) {
@@ -18302,7 +18444,7 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
                 this.callSuper(node);
             }
         }]);
-        new myt.SpacedLayout(container, {name:'layout', axis:'y', spacing:this.spacing, collapseParent:true});
+        new M.SpacedLayout(container, {name:'layout', axis:'y', spacing:this.spacing, collapseParent:true});
         
         this.attachTo(this, 'updateLayout', 'height');
         
@@ -18476,7 +18618,9 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
     },
     
     doAfterAdoption: function() {
-        var self = this, btnClass = this.buttonClass;
+        var self = this, 
+            M = myt,
+            btnClass = this.buttonClass;
         new btnClass(this, {
             name:'button', ignorePlacement:true, zIndex:1,
             height:this.buttonHeight,
@@ -18490,7 +18634,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
             fillColorReady:this.fillColorReady,
             fillBorderColor:this.fillBorderColor,
             edgeSize:this.edgeSize
-        }, [myt.SizeToParent, {
+        }, [M.SizeToParent, {
             setFocused: function(v) {
                 this.callSuper(v);
                 if (this.inited) this.redraw();
@@ -18550,12 +18694,12 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
             }
         }]);
         
-        var wrapper = new myt.View(this, {
+        var wrapper = new M.View(this, {
             name:'wrapper', ignorePlacement:true,
             y:this.buttonHeight, height:0,
             visible:false, maskFocus:true,
             overflow:'hidden', percentOfParentWidth:100
-        }, [myt.SizeToParent, {
+        }, [M.SizeToParent, {
             setHeight: function(v, supressEvent) {
                 this.callSuper(Math.round(v), supressEvent);
             },
@@ -18565,8 +18709,8 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
             }
         }]);
         
-        var container = new myt.View(wrapper, {name:'container'});
-        new myt.SizeToChildren(container, {axis:'y'});
+        var container = new M.View(wrapper, {name:'container'});
+        new M.SizeToChildren(container, {axis:'y'});
         
         this.applyConstraint('__updateHeight', [wrapper, 'y', wrapper, 'height']);
         
@@ -28279,7 +28423,7 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
         // Allows horizontal scrolling if the grid columns are too wide.
-        if (attrs.overflow === undefined) attrs.overflow = 'auto';
+        if (attrs.overflow === undefined) attrs.overflow = 'autox';
         
         if (attrs.bgColor === undefined) attrs.bgColor = '#cccccc';
         if (attrs.rowSpacing === undefined) attrs.rowSpacing = 1;
@@ -28299,7 +28443,7 @@ myt.Grid = new JS.Class('Grid', myt.View, {
         });
         new m.SizeToChildren(header, {name:'yLayout', locked:true, axis:'y'});
         
-        var content = new m.View(this, {name:'content', overflow:shtr ? 'hidden' : 'auto'});
+        var content = new m.View(this, {name:'content', overflow:shtr ? 'hidden' : 'autoy'});
         new m.SpacedLayout(content, {
             name:'yLayout', locked:true, axis:'y', spacing:this.rowSpacing,
             collapseParent:shtr
@@ -28401,8 +28545,8 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     
     /** @overrides myt.GridController */
     doSort: function() {
-        var sort = this.sort,
-            sortFunc = this.getSortFunction(sort ? sort[0] : '', sort ? sort[1] : '');
+        var sort = this.sort || ['',''],
+            sortFunc = this.getSortFunction(sort[0], sort[1]);
         if (sortFunc) {
             var content = this.content, 
                 yLayout = content.yLayout;
@@ -28416,12 +28560,13 @@ myt.Grid = new JS.Class('Grid', myt.View, {
         should implement this as needed.
         @returns function a comparator function used for sorting. */
     getSortFunction: function(sortColumnId, sortOrder) {
-        if (sortColumnId && sortOrder) {
+        if (sortColumnId) {
             // Default sort function uses the 'text' attribute of the subview.
-            var sortNum = sortOrder === 'ascending' ? 1 : -1;
+            var sortNum = sortOrder === 'ascending' ? 1 : -1,
+                columnName = sortColumnId + 'View';
             return function(a, b) {
-                var aValue = a[sortColumnId + 'View'].text,
-                    bValue = b[sortColumnId + 'View'].text;
+                var aValue = a[columnName].text,
+                    bValue = b[columnName].text;
                 if (aValue > bValue) {
                     return sortNum;
                 } else if (bValue > aValue) {

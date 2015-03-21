@@ -78,6 +78,17 @@
         
         var img1 = new myt.Image(v, {x:1, y:50, imageUrl:'./img/cat.jpg'});
         var img2 = new myt.View(v, {x:1, y:100, imageUrl:'./missing.jpg', calculateNaturalSize:true}, [myt.ImageSupport]);
+        
+        // Font Awesome
+        var container = new myt.View(null, {bgColor:'#cccccc', x:200, y:100}, [myt.RootView]);
+        new myt.SizeToChildren(container, {axis:'y'});
+        new myt.SpacedLayout(container, {axis:'x', spacing:1, collapseParent:true});
+        new myt.FontAwesome(container, {icon:'camera-retro'});
+        
+        setTimeout(function() {
+            new myt.FontAwesome(container, {icon:'cog'});
+            new myt.FontAwesome(container, {icon:'shield'});
+        }, 5000);
     }
 </script>
 </body></html>

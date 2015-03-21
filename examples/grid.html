@@ -11,21 +11,31 @@
         include: [myt.GridRow],
         
         initNode: function(parent, attrs) {
-            if (attrs.height === undefined) attrs.height = 18;
+            if (attrs.height === undefined) attrs.height = 22;
+            if (attrs.bgColor === undefined) attrs.bgColor = '#ffffff';
             
             this.callSuper(parent, attrs);
         },
         
         doAfterAdoption: function() {
-            var foo = new myt.Text(this, {name:'fooView', bgColor:'#ffffff', text:myt.getRandomInt(0, 1000) + ' foo'});
+            var foo = new myt.Text(this, {name:'fooView', y:4, text:myt.getRandomInt(0, 1000) + ' foo'});
             foo.enableEllipsis();
-            var bar = new myt.Text(this, {name:'barView', bgColor:'#ffffff', text:myt.getRandomInt(0, 1000) + ' bar'});
+            var bar = new myt.Text(this, {name:'barView', y:4, text:myt.getRandomInt(0, 1000) + ' bar'});
             bar.enableEllipsis();
-            var bar2 = new myt.Text(this, {name:'bar2View', bgColor:'#ffffff', text:myt.getRandomInt(0, 1000) + ' bar 2'});
+            var bar2 = new myt.Text(this, {name:'bar2View', y:4, text:myt.getRandomInt(0, 1000) + ' bar 2'});
             bar2.enableEllipsis();
-            var bar3 = new myt.Text(this, {name:'bar3View', bgColor:'#ffffff', text:myt.getRandomInt(0, 1000) + ' bar 3'});
+            var bar3 = new myt.Text(this, {name:'bar3View', y:4, text:myt.getRandomInt(0, 1000) + ' bar 3'});
             bar3.enableEllipsis();
-            var baz = new myt.Text(this, {name:'bazView', bgColor:'#ffffff', text:myt.getRandomInt(0, 1000) + ' baz'});
+            var baz = new myt.Text(this, {name:'bazView', y:4, text:myt.getRandomInt(0, 1000) + ' baz'}, [{
+                setWidth: function(v) {
+                    this.callSuper(v);
+                    this.parent.setWidth(this.x + v);
+                },
+                setX: function(v) {
+                    this.callSuper(v);
+                    this.parent.setWidth(v + this.width);
+                }
+            }]);
             baz.enableEllipsis();
             
             this.callSuper();
@@ -43,11 +53,11 @@
     var i = 50;
     while (i--) new RowClass(grid);
     
-    new myt.SimpleGridColumnHeader(grid, {columnId:'foo',  flex:1, value:100, minValue:100, maxValue:200, text:'Column One'});
-    new myt.SimpleGridColumnHeader(grid, {columnId:'bar',  flex:0, value:50,  minValue:50,  maxValue:100, text:'Column Two', sortable:false});
-    new myt.SimpleGridColumnHeader(grid, {columnId:'bar2', flex:0, value:50,  minValue:50,  maxValue:100, text:'Column Three'});
-    new myt.SimpleGridColumnHeader(grid, {columnId:'bar3', flex:0, value:50,  minValue:50,  maxValue:100, text:'Column Four', cellXAdj:2, cellWidthAdj:-2});
-    new myt.SimpleGridColumnHeader(grid, {columnId:'baz',  flex:1, value:25,                maxValue:400, text:'Column Five'});
+    new myt.SimpleGridColumnHeader(grid, {columnId:'foo',  flex:1, value:100, minValue:100, maxValue:200, text:'Column One',   cellXAdj:2, cellWidthAdj:-2});
+    new myt.SimpleGridColumnHeader(grid, {columnId:'bar',  flex:0, value:50,  minValue:50,  maxValue:100, text:'Column Two',   cellXAdj:2, cellWidthAdj:-2, sortable:false});
+    new myt.SimpleGridColumnHeader(grid, {columnId:'bar2', flex:0, value:50,  minValue:50,  maxValue:100, text:'Column Three', cellXAdj:2, cellWidthAdj:-2});
+    new myt.SimpleGridColumnHeader(grid, {columnId:'bar3', flex:0, value:50,  minValue:50,  maxValue:100, text:'Column Four',  cellXAdj:2, cellWidthAdj:-2});
+    new myt.SimpleGridColumnHeader(grid, {columnId:'baz',  flex:1, value:25,                maxValue:400, text:'Column Five',  cellXAdj:2, cellWidthAdj:-2});
     
     var divider = new myt.HorizontalDivider(rootView, {
         percentOfParentHeight:100, minValue:25, value:400, limitToParent:0
