@@ -24,7 +24,7 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
         attrs.defaultPlacement = 'container';
         
         if (attrs.spacing === undefined) attrs.spacing = myt.TabSliderContainer.DEFAULT_SPACING;
-        if (attrs.overflow === undefined) attrs.overflow = 'auto';
+        if (attrs.overflow === undefined) attrs.overflow = 'autoy';
         if (attrs.itemSelectionId === undefined) attrs.itemSelectionId = 'tabId';
         if (attrs.maxSelected === undefined) attrs.maxSelected = 1;
         
@@ -34,14 +34,16 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
     },
     
     doAfterAdoption: function() {
-        var self = this;
-        var container = new myt.View(this, {
+        var self = this,
+            M = myt,
+            TS = M.TabSlider;
+        var container = new M.View(this, {
             name:'container', ignorePlacement:true, percentOfParentWidth:100
-        }, [myt.SizeToParent, {
+        }, [M.SizeToParent, {
             /** @overrides myt.View */
             subnodeAdded: function(node) {
                 this.callSuper(node);
-                if (node instanceof myt.TabSlider) {
+                if (node instanceof TS) {
                     self._tabSliders.push(node);
                     self.attachTo(node, 'updateLayout', 'selected');
                 }
@@ -49,7 +51,7 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
             
             /** @overrides myt.View */
             subnodeRemoved: function(node) {
-                if (node instanceof myt.TabSlider) {
+                if (node instanceof TS) {
                     var tabSliders = self._tabSliders, i = tabSliders.length;
                     while (i) {
                         if (tabSliders[--i] === node) {
@@ -62,7 +64,7 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
                 this.callSuper(node);
             }
         }]);
-        new myt.SpacedLayout(container, {name:'layout', axis:'y', spacing:this.spacing, collapseParent:true});
+        new M.SpacedLayout(container, {name:'layout', axis:'y', spacing:this.spacing, collapseParent:true});
         
         this.attachTo(this, 'updateLayout', 'height');
         

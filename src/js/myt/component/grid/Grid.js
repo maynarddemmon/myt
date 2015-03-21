@@ -38,7 +38,7 @@ myt.Grid = new JS.Class('Grid', myt.View, {
         });
         new m.SizeToChildren(header, {name:'yLayout', locked:true, axis:'y'});
         
-        var content = new m.View(this, {name:'content', overflow:shtr ? 'hidden' : 'auto'});
+        var content = new m.View(this, {name:'content', overflow:shtr ? 'hidden' : 'autoy'});
         new m.SpacedLayout(content, {
             name:'yLayout', locked:true, axis:'y', spacing:this.rowSpacing,
             collapseParent:shtr

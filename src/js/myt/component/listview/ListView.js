@@ -23,7 +23,7 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
         this.minWidth = 0;
         
         if (attrs.defaultItemClass === undefined) attrs.defaultItemClass = myt.ListViewItem;
-        if (attrs.overflow === undefined) attrs.overflow = 'auto';
+        if (attrs.overflow === undefined) attrs.overflow = 'autoy';
         if (attrs.bgColor === undefined) attrs.bgColor = '#cccccc';
         if (attrs.boxShadow === undefined) attrs.boxShadow = myt.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE;
         

@@ -86,7 +86,9 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
     },
     
     doAfterAdoption: function() {
-        var self = this, btnClass = this.buttonClass;
+        var self = this, 
+            M = myt,
+            btnClass = this.buttonClass;
         new btnClass(this, {
             name:'button', ignorePlacement:true, zIndex:1,
             height:this.buttonHeight,
@@ -100,7 +102,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
             fillColorReady:this.fillColorReady,
             fillBorderColor:this.fillBorderColor,
             edgeSize:this.edgeSize
-        }, [myt.SizeToParent, {
+        }, [M.SizeToParent, {
             setFocused: function(v) {
                 this.callSuper(v);
                 if (this.inited) this.redraw();
@@ -160,12 +162,12 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
             }
         }]);
         
-        var wrapper = new myt.View(this, {
+        var wrapper = new M.View(this, {
             name:'wrapper', ignorePlacement:true,
             y:this.buttonHeight, height:0,
             visible:false, maskFocus:true,
             overflow:'hidden', percentOfParentWidth:100
-        }, [myt.SizeToParent, {
+        }, [M.SizeToParent, {
             setHeight: function(v, supressEvent) {
                 this.callSuper(Math.round(v), supressEvent);
             },
@@ -175,8 +177,8 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
             }
         }]);
         
-        var container = new myt.View(wrapper, {name:'container'});
-        new myt.SizeToChildren(container, {axis:'y'});
+        var container = new M.View(wrapper, {name:'container'});
+        new M.SizeToChildren(container, {axis:'y'});
         
         this.applyConstraint('__updateHeight', [wrapper, 'y', wrapper, 'height']);
         
