@@ -11996,9 +11996,9 @@ myt.FontAwesome = new JS.Class('FontAwesome', myt.Markup, {
                     if (len >= 3) props[2] = this.FA_SIZE_CLASSES[props[2]] || '';
                     
                     if (len > 3) {
-                        var prop, i = 2;
-                        for (; len > i;) {
-                            prop = props[++i];
+                        var prop, i = 3;
+                        for (; len > i; ++i) {
+                            prop = props[i];
                             if (prop.indexOf('fa-') !== 0) props[i] = 'fa-' + prop;
                         }
                     }
