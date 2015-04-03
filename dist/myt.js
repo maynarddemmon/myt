@@ -7494,7 +7494,7 @@ myt.Node = new JS.Class('Node', {
             var attrName = filterFunc;
             filterFunc = function(anim) {return anim.attribute === attrName;};
         }
-        return this.__getAnimPool(filterFunc).getActives();
+        return this.__getAnimPool().getActives(filterFunc);
     },
     
     /** Stops all active animations.
