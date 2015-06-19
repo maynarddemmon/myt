@@ -108,7 +108,7 @@ myt = {
             i = 0, len = parts.length;
         for (; i < len; ++i) {
             scope = scope[parts[i]];
-            if (!scope) {
+            if (scope === undefined) {
                 console.warn("resolveName failed for:", objName, "at part:", i, parts[i]);
                 return undefined;
             }
