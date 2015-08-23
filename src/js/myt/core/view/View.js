@@ -836,7 +836,7 @@ myt.View = new JS.Class('View', myt.Node, {
         @param front:boolean indicates if this is the isInFrontOf test or not.
         @returns boolean */
     __comparePosition: function(view, front, checkZIndex) {
-        if (view) {
+        if (view && typeof view === 'object') {
             if (checkZIndex) {
                 var commonAncestor = this.getLeastCommonAncestor(view);
                 if (commonAncestor) {
