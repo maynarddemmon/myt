@@ -38,6 +38,10 @@
  * THE SOFTWARE.
  */
 myt = {
+    /** A version number based on the time this distribution of myt was
+        created. */
+    version:20150908.1119,
+    
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
     IMAGE_ROOT: global.MYT_IMAGE_ROOT || '',

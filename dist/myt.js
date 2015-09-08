@@ -3445,6 +3445,10 @@ Array.isArray = Array.isArray || function(v) {
     return Object.prototype.toString.call(v) === "[object Array]"
 };
 
+// Number
+Number.parseInt = Number.parseInt || parseInt;
+Number.parseFloat = Number.parseFloat || parseFloat;
+
 // String
 /** Provides support for String.trim in IE8 and earlier.
     Taken from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/Trim */
@@ -3998,6 +4002,10 @@ JS.Singleton = new JS.Class('Singleton', {
  * THE SOFTWARE.
  */
 myt = {
+    /** A version number based on the time this distribution of myt was
+        created. */
+    version:20150908.1119,
+    
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
     IMAGE_ROOT: global.MYT_IMAGE_ROOT || '',
@@ -9470,7 +9478,7 @@ myt.View = new JS.Class('View', myt.Node, {
         @param front:boolean indicates if this is the isInFrontOf test or not.
         @returns boolean */
     __comparePosition: function(view, front, checkZIndex) {
-        if (view) {
+        if (view && typeof view === 'object') {
             if (checkZIndex) {
                 var commonAncestor = this.getLeastCommonAncestor(view);
                 if (commonAncestor) {

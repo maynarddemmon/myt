@@ -41,6 +41,10 @@ Array.isArray = Array.isArray || function(v) {
     return Object.prototype.toString.call(v) === "[object Array]"
 };
 
+// Number
+Number.parseInt = Number.parseInt || parseInt;
+Number.parseFloat = Number.parseFloat || parseFloat;
+
 // String
 /** Provides support for String.trim in IE8 and earlier.
     Taken from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/Trim */
