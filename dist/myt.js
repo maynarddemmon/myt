@@ -3454,15 +3454,34 @@ Number.parseFloat = Number.parseFloat || parseFloat;
     Taken from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/Trim */
 if (!String.prototype.trim) {
     String.prototype.trim = function() {
-        return this.replace(/^\s+|\s+$/g,'')
+        return this.replace(/^\s+|\s+$/g,'');
     };
     String.prototype.trimLeft = function() {
-        return this.replace(/^\s+/,'')
+        return this.replace(/^\s+/,'');
     };
     String.prototype.trimRight = function() {
-        return this.replace(/\s+$/,'')
+        return this.replace(/\s+$/,'');
     };
 };
+
+if (!String.prototype.endsWith) {
+    String.prototype.endsWith = function(searchString, position) {
+        var subjectString = this.toString();
+        if (position === undefined || position > subjectString.length) {
+            position = subjectString.length;
+        }
+        position -= searchString.length;
+        var lastIndex = subjectString.indexOf(searchString, position);
+        return lastIndex !== -1 && lastIndex === position;
+    };
+};
+
+if (!String.prototype.startsWith) {
+    String.prototype.startsWith = function(searchString, position) {
+        position = position || 0;
+        return this.indexOf(searchString, position) === position;
+    };
+}
 
 // Date
 /** Provides support for Date.now in IE8 and ealier.
@@ -4004,7 +4023,7 @@ JS.Singleton = new JS.Class('Singleton', {
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20150908.1119,
+    version:20150908.1447,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
