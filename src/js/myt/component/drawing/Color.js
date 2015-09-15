@@ -104,6 +104,21 @@ myt.Color = new JS.Class('Color', {
             green = this.cleanChannelValue(green);
             blue = this.cleanChannelValue(blue);
             return (red << 16) + (green << 8) + blue;
+        },
+        
+        /** Creates a new myt.Color object that is a blend of the two provided
+            colors.
+            @param fromColor:myt.Color The first color to blend.
+            @param toColor:myt.Color The second color to blend.
+            @param percent:number The blend percent between the two colors
+                where 0 is the fromColor and 1.0 is the toColor.
+            @returns myt.Color */
+        makeBlendedColor: function(fromColor, toColor, percent) {
+            return new myt.Color(
+                fromColor.red + (percent * (toColor.red - fromColor.red)),
+                fromColor.green + (percent * (toColor.green - fromColor.green)),
+                fromColor.blue + (percent * (toColor.blue - fromColor.blue))
+            );
         }
     },
     
@@ -227,5 +242,14 @@ myt.Color = new JS.Class('Color', {
         @returns myt.Color A copy of this myt.Color. */
     clone: function() {
         return new myt.Color(this.red, this.green, this.blue);
+    },
+    
+    /** Determine if this color has the same value as another color.
+        @returns boolean True if this color has the same color values as
+            this provided color, false otherwise. */
+    equals: function(obj) {
+        if (obj === this) return true;
+        if (obj && obj.isA && obj.isA(myt.Color) && obj.red === this.red && obj.green === this.green && obj.blue === this.blue) return true;
+        return false;
     }
 });
