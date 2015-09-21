@@ -204,5 +204,65 @@ myt.Geometry = {
             Math.sin(lat1) * Math.sin(lat2) + 
             Math.cos(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1)
         );
+    },
+    
+    /** Convert from polar to cartesian coordinates.
+        @param radius:number The radius of the point to convert relative to
+            the circle.
+        @param degrees:number The angle coordinate of the point to convert.
+        @param cx:number (optional) The x coordinate of the center of the 
+            circle.
+        @param cy:number (optional) The y coordinate of the center of the 
+            circle.
+        @returns array where index 0 is the x coordinate and index 1 is the
+            y coordinate. */
+    polarToCartesian: function(radius, degrees, cx, cy) {
+        if (cx == null) cx = 0;
+        if (cy == null) cy = 0;
+        degrees = degrees % 360;
+        
+        var x, y;
+        if (degrees === 0) {
+            x = radius;
+            y = 0;
+        } else if (degrees === 90) {
+            x = 0;
+            y = radius;
+        } else if (degrees === 180) {
+            x = -radius;
+            y = 0;
+        } else if (degrees === 270) {
+            x = 0;
+            y = -radius;
+        } else {
+            var radians = this.degreesToRadians(degrees);
+            x = radius * Math.cos(radians);
+            y = radius * Math.sin(radians);
+        }
+        
+        return [cx + x, cy + y];
+    },
+    
+    /** Convert from cartesian to polar coordinates.
+        @param x:number The x coordinate to transform.
+        @param y:number The y coordinate to transform.
+        @param cx:number (optional) The x coordinate of the center of the
+            circle.
+        @param cy:number (optional) The y coordinate of the center of the
+            circle.
+        @param useRadians:boolean (optional) If true the angle returned will
+            be in radians otherwise it will be degrees.
+        @return array where index 0 is the radius and index 1 is angle
+            in degrees (or radians if userRadians is true). */
+    cartesianToPolar: function(x, y, cx, cy, useRadians) {
+        if (cx == null) cx = 0;
+        if (cy == null) cy = 0;
+        
+        var diffX = x - cx,
+            diffY = y - cy,
+            radius = Math.sqrt(diffX*diffX + diffY*diffY),
+            radians = Math.atan2(diffY, diffX);
+        if (radians < 0) radians += 2 * Math.PI;
+        return [radius, useRadians ? radians : this.radiansToDegrees(radians)];
     }
 };
