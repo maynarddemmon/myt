@@ -17,6 +17,18 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
     },
     
     
+    // Attributes //////////////////////////////////////////////////////////////
+    setWidth: function(v, supressEvent) {
+        this.callSuper(v, supressEvent);
+        if (this.inited) this.updateImageSize();
+    },
+    
+    setHeight: function(v, supressEvent) {
+        this.callSuper(v, supressEvent);
+        if (this.inited) this.updateImageSize();
+    },
+    
+    
     // Methods /////////////////////////////////////////////////////////////////
     filterFiles: function(file) {
         if (!myt.ImageUploader.isImageFile(file)) return false;
@@ -33,7 +45,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
     addFile: function(file) {
         this.callSuper(file);
         
-        var image = this.getImageToReadInto();
+        var image = this.image = this.getImageToReadInto();
         if (image) {
             image.file = file;
             this.readImageInto(file, image);
@@ -106,12 +118,23 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
     },
     
     updateImage: function(file, image, src) {
-        var size = this.scaleToFit(this.width, this.height, file.width, file.height),
-            w = Math.round(size[0]), 
-            h = Math.round(size[1]);
-        image.setImageSize(w + 'px ' + h + 'px');
-        image.setWidth(w);
-        image.setHeight(h);
+        this.nativeWidth = file.width;
+        this.nativeHeight = file.height;
+        
+        this.updateImageSize();
+        
         image.setImageUrl(src);
+    },
+    
+    updateImageSize: function() {
+        var image = this.image;
+        if (image && !image.destroyed) {
+            var size = this.scaleToFit(this.width, this.height, this.nativeWidth, this.nativeHeight),
+                w = Math.round(size[0]), 
+                h = Math.round(size[1]);
+            image.setImageSize(w + 'px ' + h + 'px');
+            image.setWidth(w);
+            image.setHeight(h);
+        }
     }
 });
