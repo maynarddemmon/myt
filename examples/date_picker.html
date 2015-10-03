@@ -1,0 +1,40 @@
+<!doctype html><html><head>
+<title>Myt Framework : Date Picker Example</title>
+<link rel="stylesheet" href="../src/css/myt.css"/>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="../src/js/jquery/jquery-1.11.1.min.js">\x3C/script>');</script>
+<script src="../src/js/boilerplate.js"></script>
+<script src="../dist/myt.min.js"></script>
+</head><body>
+<script>
+    var rootView = new myt.View(null, {bgColor:'#eeeeee'}, [myt.SizeToWindow]);
+    
+    new myt.Dialog(rootView, {name:'dialog'});
+    
+    new myt.SimpleButton(rootView, {
+        x:10, y:10, width:50, height:20,
+        activeColor:'#999999', hoverColor:'#bbbbbb', readyColor:'#aaaaaa'
+    }, [{
+        doActivated: function() {
+            this.parent.dialog.showDatePicker(
+                function(action, color) {
+                    switch(action) {
+                        case 'closeBtn':
+                            console.log("cancelled");
+                            break;
+                        case 'cancelBtn':
+                            console.log("cancelled");
+                            break;
+                        case 'confirmBtn':
+                            console.log("confirmed", color);
+                            break;
+                    }
+                },{
+                    initialDate:new Date()
+                }
+            );
+            this.callSuper();
+        }
+    }]);
+</script>
+</body></html>

@@ -6,7 +6,7 @@
     Attributes:
         displayMode:string (read only) Indicates what kind of dialog this 
             component is currently configured as. Allowed values are: 'blank',
-            'message', 'spinner', 'color_picker' and 'confirm'.
+            'message', 'spinner', 'color_picker', 'date_picker' and 'confirm'.
         callbackFunction:function (read only) A function that gets called when 
             the dialog is about to be closed. A single argument is passed in 
             that indicates the UI element interacted with that should close the 
@@ -51,6 +51,14 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             cancelTxt:'Cancel',
             confirmTxt:'Choose',
             titleText:'Choose a Color',
+            color:'#000000'
+        },
+        
+        /** Defaults used in a date picker dialog. */
+        DATE_PICKER_DEFAULTS: {
+            cancelTxt:'Cancel',
+            confirmTxt:'Choose',
+            titleText:'Choose a Date',
             color:'#000000'
         },
         
@@ -431,6 +439,72 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     
     _spectrumCallback: function(spectrum) {
         this._spectrum = spectrum;
+    },
+    
+    showDatePicker: function(callbackFunction, opts) {
+        var MP = myt.ModalPanel, content = this.content;
+        
+        opts = myt.extend({}, myt.Dialog.DATE_PICKER_DEFAULTS, opts);
+        
+        this.__destroyContent();
+        
+        content.sizeToChildren.setPaddingX(0);
+        
+        var wrappedCallbackFunction = function(action) {
+            switch(action) {
+                case 'closeBtn':
+                case 'cancelBtn':
+                    callbackFunction.call(this, action);
+                    break;
+                case 'confirmBtn':
+                    callbackFunction.call(this, action, this._pickedDateTime);
+                    break;
+            }
+        };
+        this.setCallbackFunction(wrappedCallbackFunction);
+        
+        // Build Picker
+        var picker = new myt.View(content, {
+            name:'picker',
+            x:MP.DEFAULT_PADDING_X,
+            y:MP.DEFAULT_PADDING_Y + 24,
+            width:225,
+            height:185
+        });
+        var pickerView = new myt.View(picker, {});
+        
+        $(pickerView.domElement).dtpicker({
+            current:opts.initialDate || Date.now(),
+            dialog:this
+        });
+        
+        this.show();
+        
+        var closeBtn = content.closeBtn;
+        closeBtn.setVisible(true);
+        closeBtn.focus();
+        
+        this.__setupConfirmButtons(picker, opts);
+        
+        var r = myt.Dialog.DEFAULT_RADIUS;
+        var bg = new myt.View(content, {
+            ignoreLayout:true,
+            x:0, y:0,
+            width:content.width, height:24,
+            bgColor:'#eeeeee',
+            roundedTopLeftCorner:r,
+            roundedTopRightCorner:r
+        });
+        bg.sendToBack();
+        new myt.Text(content, {
+            name:'title', x:r, y:4, text:opts.titleText, fontWeight:'bold'
+        });
+        
+        this.setDisplayMode('date_picker');
+    },
+    
+    _dtpickerCallback: function(dtpicker) {
+        this._pickedDateTime = dtpicker;
     },
     
     showConfirm: function(msg, callbackFunction, opts) {
