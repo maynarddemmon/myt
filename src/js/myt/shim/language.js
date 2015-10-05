@@ -143,7 +143,14 @@ Date.prototype.format = Date.prototype.format || (function() {
         m: function() {return (this.getMonth() < 9 ? '0' : '') + (this.getMonth() + 1);},
         M: function() {return Date.shortMonths[this.getMonth()];},
         n: function() {return this.getMonth() + 1;},
-        t: function() {var d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 0).getDate()}, // Fixed now, gets #days of date
+        t: function() {
+            var year = this.getFullYear(), nextMonth = this.getMonth() + 1;
+            if (nextMonth === 12) {
+                year = year++;
+                nextMonth = 0;
+            }
+            return new Date(year, nextMonth, 0).getDate();
+        },
         // Year
         L: function() {var year = this.getFullYear(); return (year % 400 == 0 || (year % 100 != 0 && year % 4 == 0));}, // Fixed now
         o: function() {var d  = new Date(this.valueOf());  d.setDate(d.getDate() - ((this.getDay() + 6) % 7) + 3); return d.getFullYear();}, //Fixed now
