@@ -110,11 +110,11 @@ myt.FontAwesome = new JS.Class('FontAwesome', myt.Markup, {
     }
 });
 
-myt.loadScript('//ajax.googleapis.com/ajax/libs/webfont/1.5.10/webfont.js', function() {
+myt.loadScript('//ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js', function() {
     WebFont.load({
         custom: {
             families: ['FontAwesome'],
-            urls: ['//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css'],
+            urls: ['//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css'],
             testStrings: {'FontAwesome':'\uf00c\uf000'}
         },
         fontactive: function(familyName, fvd) {
