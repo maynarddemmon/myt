@@ -124,6 +124,10 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
         return new Blob([new Uint8Array(array)], {type: dataTYPE});
     },
     
+    getDataURL: function(mimeType, opt) {
+        return this.__canvas.toDataURL(mimeType, opt);
+    },
+    
     getImageFile: function(imageType, filename, opt) {
         var extension;
         switch (imageType) {
@@ -140,7 +144,7 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
                 extension = imageType.toLowerCase();
         }
         var mimeType = 'image/' + extension,
-            blob = this.dataURItoBlob(this.__canvas.toDataURL(mimeType, opt), mimeType);
+            blob = this.dataURItoBlob(this.getDataURL(mimeType, opt), mimeType);
         if (filename) blob.name = filename + '.' + extension;
         return blob;
     },
