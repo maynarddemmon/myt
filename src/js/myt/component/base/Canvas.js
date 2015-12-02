@@ -117,6 +117,34 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
         ctx.restore();
     },
     
+    dataURItoBlob: function(dataURI, dataTYPE) {
+        var binary = atob(dataURI.split(',')[1]), 
+            array = [];
+        for (var i = 0; i < binary.length; i++) array.push(binary.charCodeAt(i));
+        return new Blob([new Uint8Array(array)], {type: dataTYPE});
+    },
+    
+    getImageFile: function(imageType, filename, opt) {
+        var extension;
+        switch (imageType) {
+            case 'png': case 'PNG':
+                extension = 'png';
+                break;
+            case 'jpg': case 'JPG': case 'jpeg': case 'JPEG':
+                extension = 'jpeg';
+                // opt should be a quality number between 0.0 (worst) and 1.0 (best)
+                if (opt == null) opt = 0.5;
+                break;
+            default:
+                console.warn('Unexpected image type: ', imageType);
+                extension = imageType.toLowerCase();
+        }
+        var mimeType = 'image/' + extension,
+            blob = this.dataURItoBlob(this.__canvas.toDataURL(mimeType, opt), mimeType);
+        if (filename) blob.name = filename + '.' + extension;
+        return blob;
+    },
+    
     /** Draws a circle
         @param x:number the x location of the center of the circle.
         @param y:number the y location of the center of the circle.
