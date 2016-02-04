@@ -468,13 +468,14 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             name:'picker',
             x:MP.DEFAULT_PADDING_X,
             y:MP.DEFAULT_PADDING_Y + 24,
-            width:225,
+            width:opts.dateOnly ? 180 : 225,
             height:185
         });
         var pickerView = new myt.View(picker, {});
         
         $(pickerView.domElement).dtpicker({
             current:opts.initialDate || Date.now(),
+            dateOnly:opts.dateOnly || false,
             dialog:this
         });
         

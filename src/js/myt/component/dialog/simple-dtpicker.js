@@ -437,6 +437,7 @@
 		if ($picker.data("dateOnly") === true) {
 			/* dateOnly mode */
 			$timelist.css("display", "none");
+			$calendar.css("border-right", '0px');
 		} else {
 			/* Timelist ----- */
 			$timelist.children().remove();
