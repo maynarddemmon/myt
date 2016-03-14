@@ -280,18 +280,17 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
     
     /** Should only be called from the TabSliderContainer.
         @private */
-    collapse: function(targetHeight) {
+    collapse: function() {
         this.setExpansionState('collapsing');
         
-        var wrapper = this.wrapper,
-            to = targetHeight - this.getCollapsedHeight();
+        var wrapper = this.wrapper;
         
         wrapper.stopActiveAnimators();
         
-        if (wrapper.height !== to) {
+        if (wrapper.height !== 0) {
             var self = this;
             wrapper.animate({
-                attribute:'height', to:to, 
+                attribute:'height', to:0, 
                 duration:myt.TabSlider.DEFAULT_ANIMATION_MILLIS
             }).next(function(success) {self.setExpansionState('collapsed');});
         } else {

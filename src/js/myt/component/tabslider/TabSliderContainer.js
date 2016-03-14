@@ -89,7 +89,7 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
     /** @private */
     __updateLayout: function() {
         var tabSliders = this._tabSliders, i = tabSliders.length, tabSlider,
-            min = 0, preferred = 0, visCount = 0;
+            min = 0, preferred = 0, visCount = 0, collapsedHeight;
         
         while (i) {
             tabSlider = tabSliders[--i];
@@ -100,8 +100,9 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
                     min += tabSlider.getMinimumExpandedHeight();
                     preferred += tabSlider.getPreferredExpandedHeight();
                 } else {
-                    min += tabSlider.getCollapsedHeight();
-                    preferred += tabSlider.getCollapsedHeight();
+                    collapsedHeight = tabSlider.getCollapsedHeight();
+                    min += collapsedHeight;
+                    preferred += collapsedHeight;
                 }
             }
         }
@@ -124,7 +125,7 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
             if (tabSlider.visible) {
                 if (tabSlider.selected) {
                     if (minIsOver) {
-                        tabSlider.expand(tabSlider.getMinimumExpandedHeight());
+                        newVal = tabSlider.getMinimumExpandedHeight();
                     } else if (preferredIsOver) {
                         tabPreferred = tabSlider.getPreferredExpandedHeight();
                         tabMin = tabSlider.getMinimumExpandedHeight();
@@ -136,13 +137,12 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
                         } else {
                             overage = 0;
                         }
-                        
-                        tabSlider.expand(newVal);
                     } else {
-                        tabSlider.expand(tabSlider.getPreferredExpandedHeight());
+                        newVal = tabSlider.getPreferredExpandedHeight();
                     }
+                    tabSlider.expand(newVal);
                 } else {
-                    tabSlider.collapse(tabSlider.getCollapsedHeight());
+                    tabSlider.collapse();
                 }
             }
         }
