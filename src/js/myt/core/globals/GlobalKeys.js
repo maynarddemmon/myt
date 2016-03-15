@@ -129,9 +129,11 @@ new JS.Singleton('GlobalKeys', {
     // Constructor /////////////////////////////////////////////////////////////
     initialize: function() {
         // Constants
+        this.KEYCODE_TAB = 9;
         this.KEYCODE_SHIFT = 16;
         this.KEYCODE_CONTROL = 17;
         this.KEYCODE_ALT = 18;
+        this.KEYCODE_Z = 90;
         var isFirefox = BrowserDetect.browser === 'Firefox';
         this.KEYCODE_COMMAND = isFirefox ? 224 : 91;
         this.KEYCODE_RIGHT_COMMAND = isFirefox ? 224 : 93;
@@ -216,24 +218,14 @@ new JS.Singleton('GlobalKeys', {
         // Keyup events do not fire when command key is down so fire a keyup
         // event immediately. Not an issue for other meta keys: shift, ctrl 
         // and option.
-        if (this.isCommandKeyDown() && keyCode !== 16 && keyCode !== 17 && keyCode !== 18) {
+        if (this.isCommandKeyDown() && keyCode !== this.KEYCODE_SHIFT && keyCode !== this.KEYCODE_CONTROL && keyCode !== this.KEYCODE_ALT) {
             this.fireNewEvent('keydown', keyCode);
             this.fireNewEvent('keyup', keyCode);
-            
-            // Assume command key goes back up since it is common for the page
-            // to lose focus after the command key is used. Do this for every 
-            // key other than 'z' since repeated undo/redo is 
-            // nice to have and doesn't typically result in loss of focus 
-            // to the page.
-            if (keyCode !== 90) {
-                this.fireNewEvent('keyup', this.KEYCODE_COMMAND);
-                this.__keysDown[this.KEYCODE_COMMAND] = false;
-            }
         } else {
             this.__keysDown[keyCode] = true;
             
             // Check for 'tab' key and do focus traversal.
-            if (keyCode === 9) {
+            if (keyCode === this.KEYCODE_TAB) {
                 var ift = this.ignoreFocusTrap(), gf = myt.global.focus;
                 if (this.isShiftKeyDown()) {
                     gf.prev(ift);
