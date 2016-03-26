@@ -669,6 +669,75 @@ myt.View = new JS.Class('View', myt.Node, {
         this.deStyle.boxShadow = v;
     },
     
+    /** Sets the CSS liner-gradient or radial-gradient property. Setting this
+        property will take the place of any bgColor used in the view.
+        @param v:array where:
+            index 0: is the gradient type: linear or radial
+            index 1: is the geometry of the gradient.
+                radial: The value "cover" / "farthest-corner" or 
+                    "contain" / "closest-side"
+                linear: A number will be interpreted as the degrees or a
+                    string must be one of: top, top right, right, bottom right,
+                        bottom, bottom left, left, top left
+            index 3+: Are the color stops which must be a valid CSS color. If
+                the first and second color stops will default to the textColor
+                and bgColor properties of this view if not provided. Use of the
+                rgba(0-255,0-255,0-255,0-1) syntax is a good way to designate 
+                colors since it will let you use an opacity. For a more 
+                comprehensive description of how to specify color stops see: 
+                https://developer.mozilla.org/en-US/docs/Web/CSS/linear-gradient
+        @returns void */
+    setGradient: function(v) {
+        var s = this.deStyle;
+        if (v) {
+            // Determine type
+            var type = v[0];
+            if (type === 'linear' || type === 'radial') {
+                v.shift();
+            } else {
+                type = 'linear';
+            }
+            
+            // Determine geometry of the gradient
+            var geometry = v[0];
+            if (type === 'radial') {
+                if (geometry !== undefined) {
+                    if (geometry === 'cover' || geometry === 'farthest-corner') {
+                        geometry = 'farthest-corner';
+                    } else {
+                        geometry = 'closest-side';
+                    }
+                    v.shift();
+                } else {
+                    geometry = 'closest-side';
+                }
+                geometry = 'circle ' + geometry;
+            } else {
+                if (typeof geometry === 'number') {
+                    geometry = geometry + 'deg';
+                    v.shift();
+                } else if (geometry) {
+                    geometry = 'to ' + geometry;
+                    v.shift();
+                } else {
+                    geometry = '0deg';
+                }
+            }
+            
+            // Use colors that may have already been configured if less
+            // than 2 color stops are provided
+            function pushColor(color) {
+                v.push(color && color !== 'inherit' ? color : 'transparent');
+            };
+            if (v.length < 2) pushColor(this.textColor);
+            if (v.length < 2) pushColor(this.bgColor);
+            
+            s.background = type + '-gradient(' + geometry + ',' + v.join(',') + ')';
+        } else {
+            s.background = 'none';
+        }
+    },
+    
     
     // Methods /////////////////////////////////////////////////////////////////
     /** Checks if this view is visible and each view in the parent chain to

@@ -4030,7 +4030,7 @@ JS.Singleton = new JS.Class('Singleton', {
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20151127.1431,
+    version:20160325.1735,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -6283,9 +6283,11 @@ new JS.Singleton('GlobalKeys', {
     // Constructor /////////////////////////////////////////////////////////////
     initialize: function() {
         // Constants
+        this.KEYCODE_TAB = 9;
         this.KEYCODE_SHIFT = 16;
         this.KEYCODE_CONTROL = 17;
         this.KEYCODE_ALT = 18;
+        this.KEYCODE_Z = 90;
         var isFirefox = BrowserDetect.browser === 'Firefox';
         this.KEYCODE_COMMAND = isFirefox ? 224 : 91;
         this.KEYCODE_RIGHT_COMMAND = isFirefox ? 224 : 93;
@@ -6370,24 +6372,14 @@ new JS.Singleton('GlobalKeys', {
         // Keyup events do not fire when command key is down so fire a keyup
         // event immediately. Not an issue for other meta keys: shift, ctrl 
         // and option.
-        if (this.isCommandKeyDown() && keyCode !== 16 && keyCode !== 17 && keyCode !== 18) {
+        if (this.isCommandKeyDown() && keyCode !== this.KEYCODE_SHIFT && keyCode !== this.KEYCODE_CONTROL && keyCode !== this.KEYCODE_ALT) {
             this.fireNewEvent('keydown', keyCode);
             this.fireNewEvent('keyup', keyCode);
-            
-            // Assume command key goes back up since it is common for the page
-            // to lose focus after the command key is used. Do this for every 
-            // key other than 'z' since repeated undo/redo is 
-            // nice to have and doesn't typically result in loss of focus 
-            // to the page.
-            if (keyCode !== 90) {
-                this.fireNewEvent('keyup', this.KEYCODE_COMMAND);
-                this.__keysDown[this.KEYCODE_COMMAND] = false;
-            }
         } else {
             this.__keysDown[keyCode] = true;
             
             // Check for 'tab' key and do focus traversal.
-            if (keyCode === 9) {
+            if (keyCode === this.KEYCODE_TAB) {
                 var ift = this.ignoreFocusTrap(), gf = myt.global.focus;
                 if (this.isShiftKeyDown()) {
                     gf.prev(ift);
@@ -9395,6 +9387,75 @@ myt.View = new JS.Class('View', myt.Node, {
             v = 'none';
         }
         this.deStyle.boxShadow = v;
+    },
+    
+    /** Sets the CSS liner-gradient or radial-gradient property. Setting this
+        property will take the place of any bgColor used in the view.
+        @param v:array where:
+            index 0: is the gradient type: linear or radial
+            index 1: is the geometry of the gradient.
+                radial: The value "cover" / "farthest-corner" or 
+                    "contain" / "closest-side"
+                linear: A number will be interpreted as the degrees or a
+                    string must be one of: top, top right, right, bottom right,
+                        bottom, bottom left, left, top left
+            index 3+: Are the color stops which must be a valid CSS color. If
+                the first and second color stops will default to the textColor
+                and bgColor properties of this view if not provided. Use of the
+                rgba(0-255,0-255,0-255,0-1) syntax is a good way to designate 
+                colors since it will let you use an opacity. For a more 
+                comprehensive description of how to specify color stops see: 
+                https://developer.mozilla.org/en-US/docs/Web/CSS/linear-gradient
+        @returns void */
+    setGradient: function(v) {
+        var s = this.deStyle;
+        if (v) {
+            // Determine type
+            var type = v[0];
+            if (type === 'linear' || type === 'radial') {
+                v.shift();
+            } else {
+                type = 'linear';
+            }
+            
+            // Determine geometry of the gradient
+            var geometry = v[0];
+            if (type === 'radial') {
+                if (geometry !== undefined) {
+                    if (geometry === 'cover' || geometry === 'farthest-corner') {
+                        geometry = 'farthest-corner';
+                    } else {
+                        geometry = 'closest-side';
+                    }
+                    v.shift();
+                } else {
+                    geometry = 'closest-side';
+                }
+                geometry = 'circle ' + geometry;
+            } else {
+                if (typeof geometry === 'number') {
+                    geometry = geometry + 'deg';
+                    v.shift();
+                } else if (geometry) {
+                    geometry = 'to ' + geometry;
+                    v.shift();
+                } else {
+                    geometry = '0deg';
+                }
+            }
+            
+            // Use colors that may have already been configured if less
+            // than 2 color stops are provided
+            function pushColor(color) {
+                v.push(color && color !== 'inherit' ? color : 'transparent');
+            };
+            if (v.length < 2) pushColor(this.textColor);
+            if (v.length < 2) pushColor(this.bgColor);
+            
+            s.background = type + '-gradient(' + geometry + ',' + v.join(',') + ')';
+        } else {
+            s.background = 'none';
+        }
     },
     
     
@@ -13819,6 +13880,38 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.clearRect(0, 0, this.width, this.height);
         ctx.restore();
+    },
+    
+    dataURItoBlob: function(dataURI, dataTYPE) {
+        var binary = atob(dataURI.split(',')[1]), 
+            array = [];
+        for (var i = 0; i < binary.length; i++) array.push(binary.charCodeAt(i));
+        return new Blob([new Uint8Array(array)], {type: dataTYPE});
+    },
+    
+    getDataURL: function(mimeType, opt) {
+        return this.__canvas.toDataURL(mimeType, opt);
+    },
+    
+    getImageFile: function(imageType, filename, opt) {
+        var extension;
+        switch (imageType) {
+            case 'png': case 'PNG':
+                extension = 'png';
+                break;
+            case 'jpg': case 'JPG': case 'jpeg': case 'JPEG':
+                extension = 'jpeg';
+                // opt should be a quality number between 0.0 (worst) and 1.0 (best)
+                if (opt == null) opt = 0.5;
+                break;
+            default:
+                console.warn('Unexpected image type: ', imageType);
+                extension = imageType.toLowerCase();
+        }
+        var mimeType = 'image/' + extension,
+            blob = this.dataURItoBlob(this.getDataURL(mimeType, opt), mimeType);
+        if (filename) blob.name = filename + '.' + extension;
+        return blob;
     },
     
     /** Draws a circle
@@ -18587,7 +18680,7 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
     /** @private */
     __updateLayout: function() {
         var tabSliders = this._tabSliders, i = tabSliders.length, tabSlider,
-            min = 0, preferred = 0, visCount = 0;
+            min = 0, preferred = 0, visCount = 0, collapsedHeight;
         
         while (i) {
             tabSlider = tabSliders[--i];
@@ -18598,8 +18691,9 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
                     min += tabSlider.getMinimumExpandedHeight();
                     preferred += tabSlider.getPreferredExpandedHeight();
                 } else {
-                    min += tabSlider.getCollapsedHeight();
-                    preferred += tabSlider.getCollapsedHeight();
+                    collapsedHeight = tabSlider.getCollapsedHeight();
+                    min += collapsedHeight;
+                    preferred += collapsedHeight;
                 }
             }
         }
@@ -18622,7 +18716,7 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
             if (tabSlider.visible) {
                 if (tabSlider.selected) {
                     if (minIsOver) {
-                        tabSlider.expand(tabSlider.getMinimumExpandedHeight());
+                        newVal = tabSlider.getMinimumExpandedHeight();
                     } else if (preferredIsOver) {
                         tabPreferred = tabSlider.getPreferredExpandedHeight();
                         tabMin = tabSlider.getMinimumExpandedHeight();
@@ -18634,13 +18728,12 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
                         } else {
                             overage = 0;
                         }
-                        
-                        tabSlider.expand(newVal);
                     } else {
-                        tabSlider.expand(tabSlider.getPreferredExpandedHeight());
+                        newVal = tabSlider.getPreferredExpandedHeight();
                     }
+                    tabSlider.expand(newVal);
                 } else {
-                    tabSlider.collapse(tabSlider.getCollapsedHeight());
+                    tabSlider.collapse();
                 }
             }
         }
@@ -18930,18 +19023,17 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
     
     /** Should only be called from the TabSliderContainer.
         @private */
-    collapse: function(targetHeight) {
+    collapse: function() {
         this.setExpansionState('collapsing');
         
-        var wrapper = this.wrapper,
-            to = targetHeight - this.getCollapsedHeight();
+        var wrapper = this.wrapper;
         
         wrapper.stopActiveAnimators();
         
-        if (wrapper.height !== to) {
+        if (wrapper.height !== 0) {
             var self = this;
             wrapper.animate({
-                attribute:'height', to:to, 
+                attribute:'height', to:0, 
                 duration:myt.TabSlider.DEFAULT_ANIMATION_MILLIS
             }).next(function(success) {self.setExpansionState('collapsed');});
         } else {
@@ -22215,6 +22307,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
 		if ($picker.data("dateOnly") === true) {
 			/* dateOnly mode */
 			$timelist.css("display", "none");
+			$calendar.css("border-right", '0px');
 		} else {
 			/* Timelist ----- */
 			$timelist.children().remove();
@@ -23303,13 +23396,14 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             name:'picker',
             x:MP.DEFAULT_PADDING_X,
             y:MP.DEFAULT_PADDING_Y + 24,
-            width:225,
+            width:opts.dateOnly ? 180 : 225,
             height:185
         });
         var pickerView = new myt.View(picker, {});
         
         $(pickerView.domElement).dtpicker({
             current:opts.initialDate || Date.now(),
+            dateOnly:opts.dateOnly || false,
             dialog:this
         });
         

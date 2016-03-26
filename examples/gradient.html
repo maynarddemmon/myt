@@ -1,0 +1,33 @@
+<!doctype html><html><head>
+<title>Myt Framework : Gradient Example</title>
+<link rel="stylesheet" href="../src/css/myt.css"/>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="../src/js/jquery/jquery-1.11.1.min.js">\x3C/script>');</script>
+<script src="../src/js/boilerplate.js"></script>
+<script src="../dist/myt.min.js"></script>
+</head><body>
+<script>
+    var rootView = new myt.View(null, {
+        imageUrl:'./img/transparent_pattern.png',
+        imageRepeat:'both'
+    }, [myt.SizeToWindow, myt.ImageSupport]);
+    
+    new myt.View(rootView, {
+        width:100, height:100,
+        gradient:[0, 'rgba(255,0,0,0.25)','rgba(0,255,0,1)']
+    });
+    
+    new myt.View(rootView, {
+        width:100, height:100,
+        bgColor:'#ffffff',
+        gradient:[0, 'rgba(255,0,0,0.5)','rgba(0,255,0,0.5)']
+    });
+    
+    new myt.View(rootView, {
+        width:100, height:100,
+        gradient:['radial', 0, 'rgba(255,0,0,0.5) 25%','rgba(0,255,0,1) 75%']
+    });
+    
+    new myt.SpacedLayout(rootView, {axis:'y', spacing:1});
+</script>
+</body></html>
