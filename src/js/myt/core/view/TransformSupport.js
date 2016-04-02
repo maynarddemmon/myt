@@ -198,21 +198,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
 /** Setup style keys for myt.TransformSupport one time only based on the
     browser being used. */
 (function() {
-    var prefix;
-    switch (BrowserDetect.browser) {
-        case 'Chrome': case 'Safari': case 'OmniWeb': 
-            prefix = 'webkit';
-            break;
-        case 'MSIE': 
-            prefix = 'ms';
-            break;
-        case 'Opera': 
-            prefix = 'o';
-            break;
-        case 'Firefox': default: 
-            prefix = '';
-    }
-    
-    this._styleKey = prefix ? prefix + 'Transform' : 'transform';
+    var BD = BrowserDetect;
+    this._styleKey = BD.browser === 'Firefox' ? 'transform' : BD.prefix.lowercase + 'Transform';
     this._styleOriginKey = this._styleKey + 'Origin';
 }).call(myt.TransformSupport);
