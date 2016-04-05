@@ -18,6 +18,7 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
         var e = this.callSuper(parent);
         
         var canvas = this.__canvas = document.createElement('canvas');
+        canvas.className = 'mytUnselectable';
         e.appendChild(canvas);
         canvas.style.position = 'absolute';
         

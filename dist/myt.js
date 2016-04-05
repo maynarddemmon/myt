@@ -27,27 +27,46 @@ BrowserDetect = (function() {
         
         userAgent = navigator.userAgent, 
         platform = navigator.platform, 
-        unknown = 'UNKNOWN';
+        unknown = 'UNKNOWN',
+        
+        retval = {
+            browser:searchString([
+                {prop:window.opera,                   id:"Opera",    ver:"Version"},
+                {str:navigator.vendor, sub:"Apple",   id:"Safari",   ver:"Version"},
+                {str:userAgent,        sub:"Firefox", id:"Firefox"},
+                {str:userAgent,        sub:"Chrome",  id:"Chrome"},
+                {str:userAgent,        sub:"MSIE",    id:"Explorer", ver:"MSIE"}
+            ]) || unknown,
+            
+            version:searchVersion(userAgent) || searchVersion(navigator.appVersion) || unknown,
+            
+            os:searchString([
+                {str:userAgent, sub:"iPhone", id:"iPhone/iPod"},
+                {str:platform,  sub:"Linux",  id:"Linux"},
+                {str:platform,  sub:"Mac",    id:"Mac"},
+                {str:platform,  sub:"Win",    id:"Windows"}
+            ]) || unknown
+        },
+        dom,
+        pre;
     
-    return {
-        browser:searchString([
-            {str:userAgent,        sub:"OmniWeb", id:"OmniWeb",  ver:"OmniWeb/"},
-            {prop:window.opera,                   id:"Opera",    ver:"Version"},
-            {str:navigator.vendor, sub:"Apple",   id:"Safari",   ver:"Version"},
-            {str:userAgent,        sub:"Firefox", id:"Firefox"},
-            {str:userAgent,        sub:"Chrome",  id:"Chrome"},
-            {str:userAgent,        sub:"MSIE",    id:"Explorer", ver:"MSIE"}
-        ]) || unknown,
-        
-        version:searchVersion(userAgent) || searchVersion(navigator.appVersion) || unknown,
-        
-        os:searchString([
-            {str:userAgent, sub:"iPhone", id:"iPhone/iPod"},
-            {str:platform,  sub:"Linux",  id:"Linux"},
-            {str:platform,  sub:"Mac",    id:"Mac"},
-            {str:platform,  sub:"Win",    id:"Windows"}
-        ]) || unknown,
+    switch (retval.browser) {
+        case 'Chrome': case 'Safari': dom = 'WebKit'; break;
+        case 'Explorer': dom = 'MS'; break;
+        case 'Firefox': dom = 'Moz'; break;
+        case 'Opera': dom = 'O'; break;
+        default: dom = unknown; break;
+    }
+    pre = dom.toLowerCase();
+    
+    retval.prefix = {
+        dom:dom,
+        lowercase:pre,
+        css:'-' + pre + '-',
+        js:pre[0].toUpperCase() + pre.substr(1)
     };
+    
+    return retval;
 })();
 
 
@@ -4030,7 +4049,7 @@ JS.Singleton = new JS.Class('Singleton', {
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20160325.1735,
+    version:20160405.1534,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -10006,22 +10025,8 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
 /** Setup style keys for myt.TransformSupport one time only based on the
     browser being used. */
 (function() {
-    var prefix;
-    switch (BrowserDetect.browser) {
-        case 'Chrome': case 'Safari': case 'OmniWeb': 
-            prefix = 'webkit';
-            break;
-        case 'MSIE': 
-            prefix = 'ms';
-            break;
-        case 'Opera': 
-            prefix = 'o';
-            break;
-        case 'Firefox': default: 
-            prefix = '';
-    }
-    
-    this._styleKey = prefix ? prefix + 'Transform' : 'transform';
+    var BD = BrowserDetect;
+    this._styleKey = BD.browser === 'Firefox' ? 'transform' : BD.prefix.lowercase + 'Transform';
     this._styleOriginKey = this._styleKey + 'Origin';
 }).call(myt.TransformSupport);
 
@@ -10344,6 +10349,7 @@ myt.Text = new JS.Class('Text', myt.View, {
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
         if (attrs.whiteSpace === undefined) attrs.whiteSpace = 'nowrap';
+        if (attrs.userUnselectable === undefined) attrs.userUnselectable = true;
         
         this.callSuper(parent, attrs);
     },
@@ -13783,6 +13789,7 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
         var e = this.callSuper(parent);
         
         var canvas = this.__canvas = document.createElement('canvas');
+        canvas.className = 'mytUnselectable';
         e.appendChild(canvas);
         canvas.style.position = 'absolute';
         
@@ -15468,7 +15475,7 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         // Setup textView
         attrs = {
             name:'textView', whiteSpace:'nowrap', text:this.text, 
-            domClass:'mytButtonText mytUnselectable'
+            domClass:'myt-Text mytButtonText'
         };
         if (typeof textY === 'string') {
             attrs.valign = textY;
@@ -17622,7 +17629,7 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
             attrs = {
                 name:'textView', 
                 whiteSpace: this.shrinkToFit ? 'nowrap' : 'normal', 
-                text:this.text, domClass:'myt-Text mytButtonText mytUnselectable'
+                text:this.text, domClass:'myt-Text mytButtonText'
             };
         if (typeof textY === 'string') {
             attrs.valign = textY;
@@ -19092,7 +19099,7 @@ myt.TextTabSlider = new JS.Class('TextTabSlider', myt.TabSlider, {
         this.callSuper(parent, attrs);
         
         new myt.Text(this.button, {
-            name:'label', domClass:'mytTextTabSliderLabel', ignorePlacement:true,
+            name:'label', domClass:'myt-Text mytTextTabSliderLabel', ignorePlacement:true,
             text:this.text, align:'center', valign:'middle', 
             textColor:this.__getTextColor()
         });

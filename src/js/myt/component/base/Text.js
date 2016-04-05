@@ -10,6 +10,7 @@ myt.Text = new JS.Class('Text', myt.View, {
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
         if (attrs.whiteSpace === undefined) attrs.whiteSpace = 'nowrap';
+        if (attrs.userUnselectable === undefined) attrs.userUnselectable = true;
         
         this.callSuper(parent, attrs);
     },

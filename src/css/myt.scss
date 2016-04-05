@@ -9,6 +9,13 @@ select.mytNativeInput{margin:0px;}
 
 .mytUnselectable{-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;}
 
+/* For some reason placeholder text is selectable if you click and drag just
+   right. These rules prevent that. */
+::-webkit-input-placeholder{-webkit-user-select:none;}
+:-moz-placeholder{-moz-user-select:none;}
+::-moz-placeholder{-moz-user-select:none;}
+:-ms-input-placeholder{-ms-user-select:none;}
+
 /*** START: Spectrum Colorpicker v1.4.1
             https://github.com/bgrins/spectrum
             Author: Brian Grinstead

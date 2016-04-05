@@ -25,7 +25,7 @@ myt.TextTabSlider = new JS.Class('TextTabSlider', myt.TabSlider, {
         this.callSuper(parent, attrs);
         
         new myt.Text(this.button, {
-            name:'label', domClass:'mytTextTabSliderLabel', ignorePlacement:true,
+            name:'label', domClass:'myt-Text mytTextTabSliderLabel', ignorePlacement:true,
             text:this.text, align:'center', valign:'middle', 
             textColor:this.__getTextColor()
         });

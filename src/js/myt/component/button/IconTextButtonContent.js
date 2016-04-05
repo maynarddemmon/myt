@@ -76,7 +76,7 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         // Setup textView
         attrs = {
             name:'textView', whiteSpace:'nowrap', text:this.text, 
-            domClass:'mytButtonText mytUnselectable'
+            domClass:'myt-Text mytButtonText'
         };
         if (typeof textY === 'string') {
             attrs.valign = textY;
