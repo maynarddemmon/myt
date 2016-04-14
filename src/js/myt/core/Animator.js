@@ -89,6 +89,7 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
             
             if (!this.paused) {
                 if (v) {
+                    this.__isColorAttr();
                     this.attachTo(myt.global.idle, '__update', 'idle');
                 } else {
                     if (this.__temporaryFrom) this.from = undefined;
@@ -154,6 +155,17 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** @private */
+    __isColorAttr: function() {
+        var target = this.__getTarget();
+        this.__isColorAnim = (target && typeof target.isColorAttr === 'function') ? target.isColorAttr(this.attribute) : undefined;
+    },
+    
+    /** @private */
+    __getTarget: function() {
+        return this.target || this.parent;
+    },
+    
     /** A convienence method to set the callback to run when the animator
         stops running. If a callback already exists the provided callback
         will be executed after the existing one.
@@ -215,8 +227,7 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         if (this.running && !this.paused) {
             var reverse = this.reverse, 
                 duration = this.duration, 
-                repeat = this.repeat, 
-                attr = this.attribute;
+                repeat = this.repeat;
             
             // An animation in reverse is like time going backward.
             if (reverse) timeDiff = timeDiff * -1;
@@ -242,26 +253,9 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
                 if (0 > --this.__loopCount && repeat > 0) remainderTime = 0;
             }
             
-            var target = this.target || this.parent;
+            var target = this.__getTarget();
             if (target) {
-                // Apply to attribute
-                if (this.from == null) {
-                    this.__temporaryFrom = true;
-                    this.from = this.relative ? 0 : target.get(attr);
-                }
-                var from = this.from,
-                    attrDiff = this.to - from,
-                    newValue = this.easingFunction(this.__progress, attrDiff, duration);
-                if (this.relative) {
-                    // Need to calculate old value since it's possible for
-                    // multiple animators to be animating the same attribute
-                    // at one time.
-                    var oldValue = this.easingFunction(oldProgress, attrDiff, duration),
-                        curValue = target.get(attr);
-                    target.set(attr, curValue + newValue - oldValue);
-                } else {
-                    target.set(attr, from + newValue);
-                }
+                this.__updateTarget(target, this.__progress, oldProgress);
                 
                 if (
                     (!reverse && this.__loopCount === repeat) || // Forward check
@@ -284,6 +278,39 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
                 if (this.callback) this.callback.call(this, false);
             }
         }
+    },
+    
+    /** @private */
+    __updateTarget: function(target, progress, oldProgress) {
+        var relative = this.relative,
+            duration = this.duration,
+            attr = this.attribute,
+            progressPercent = Math.max(0, progress / duration), 
+            oldProgressPercent = Math.max(0, oldProgress / duration);
+        
+        // Determine what "from" to use if none was provided.
+        if (this.from == null) {
+            this.__temporaryFrom = true;
+            this.from = relative ? (this.__isColorAnim ? 'black' : 0) : target.get(attr);
+        }
+        
+        var motionValue = this.easingFunction(progressPercent) - (relative ? this.easingFunction(oldProgressPercent) : 0),
+            value = relative ? target.get(attr) : this.from,
+            to = this.to;
+        
+        target.set(attr, this.__isColorAnim ? this.__getColorValue(this.from, to, motionValue, relative, value) : value + ((to - this.from) * motionValue));
+    },
+    
+    /** @private */
+    __getColorValue: function(from, to, motionValue, relative, value) {
+        var C = myt.Color,
+            fromColor = C.makeColorFromHexString(from),
+            toColor = C.makeColorFromHexString(to),
+            colorObj = relative ? C.makeColorFromHexString(value) : fromColor;
+        colorObj.setRed(colorObj.red + ((toColor.red - fromColor.red) * motionValue));
+        colorObj.setGreen(colorObj.green + ((toColor.green - fromColor.green) * motionValue));
+        colorObj.setBlue(colorObj.blue + ((toColor.blue - fromColor.blue) * motionValue));
+        return colorObj.getHtmlHexString();
     }
 });
 
@@ -329,150 +356,97 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
  * ============================================================
  */
 myt.Animator.easingFunctions = {
-    linear:function(t, c, d) {
-        return c*(t/d);
+    linear:function(t){return t;},
+    easeInQuad:function(t){return t*t;},
+    easeOutQuad:function(t){return -t*(t-2);},
+    easeInOutQuad:function(t){return (t/=0.5) < 1 ? 0.5*t*t : -0.5 * ((--t)*(t-2) - 1);},
+    easeInCubic:function(t){return t*t*t;},
+    easeOutCubic:function(t){return ((t=t-1)*t*t + 1);},
+    easeInOutCubic:function(t){return (t/=0.5) < 1 ? 0.5*t*t*t : 1 /2*((t-=2)*t*t + 2);},
+    easeInQuart:function(t){return t*t*t*t;},
+    easeOutQuart:function(t){return -((t=t-1)*t*t*t - 1);},
+    easeInOutQuart:function(t){return (t/=0.5) < 1 ? 0.5*t*t*t*t : -0.5 * ((t-=2)*t*t*t - 2);},
+    easeInQuint:function(t){return t*t*t*t*t;},
+    easeOutQuint:function(t){return ((t=t-1)*t*t*t*t + 1);},
+    easeInOutQuint:function(t){return (t/=0.5) < 1 ? 0.5*t*t*t*t*t : 0.5*((t-=2)*t*t*t*t + 2);},
+    easeInSine:function(t){return - Math.cos(t * (Math.PI/2)) + 1;},
+    easeOutSine:function(t){return Math.sin(t * (Math.PI/2));},
+    easeInOutSine:function(t){return -0.5 * (Math.cos(Math.PI*t) - 1);},
+    easeInExpo:function(t){return (t==0)? 0: Math.pow(2, 10 * (t - 1));},
+    easeOutExpo:function(t){return (t==1)? 1: (-Math.pow(2, -10 * t) + 1);},
+    easeInCirc:function(t){return - (Math.sqrt(1 - t*t) - 1);},
+    easeOutCirc:function(t){return Math.sqrt(1 - (t=t-1)*t);},
+    easeInOutCirc:function(t){return (t/=0.5) < 1? -0.5 * (Math.sqrt(1 - t*t) - 1): 0.5 * (Math.sqrt(1 - (t-=2)*t) + 1);},
+    easeInOutExpo:function(t){
+        if (t==0) return 0;
+        if (t==1) return 1;
+        if ((t/=0.5) < 1) return 0.5 * Math.pow(2, 10 * (t - 1));
+        return 0.5 * (-Math.pow(2, -10 * --t) + 2);
     },
-    easeInQuad:function(t, c, d) {
-        return c*(t/=d)*t;
-    },
-    easeOutQuad:function(t, c, d) {
-        return -c *(t/=d)*(t-2);
-    },
-    easeInOutQuad:function(t, c, d) {
-        if ((t/=d/2) < 1) return c/2*t*t;
-        return -c/2 * ((--t)*(t-2) - 1);
-    },
-    easeInCubic:function(t, c, d) {
-        return c*(t/=d)*t*t;
-    },
-    easeOutCubic:function(t, c, d) {
-        return c*((t=t/d-1)*t*t + 1);
-    },
-    easeInOutCubic:function(t, c, d) {
-        if ((t/=d/2) < 1) return c/2*t*t*t;
-        return c/2*((t-=2)*t*t + 2);
-    },
-    easeInQuart:function(t, c, d) {
-        return c*(t/=d)*t*t*t;
-    },
-    easeOutQuart:function(t, c, d) {
-        return -c * ((t=t/d-1)*t*t*t - 1);
-    },
-    easeInOutQuart:function(t, c, d) {
-        if ((t/=d/2) < 1) return c/2*t*t*t*t;
-        return -c/2 * ((t-=2)*t*t*t - 2);
-    },
-    easeInQuint:function(t, c, d) {
-        return c*(t/=d)*t*t*t*t;
-    },
-    easeOutQuint:function(t, c, d) {
-        return c*((t=t/d-1)*t*t*t*t + 1);
-    },
-    easeInOutQuint:function(t, c, d) {
-        if ((t/=d/2) < 1) return c/2*t*t*t*t*t;
-        return c/2*((t-=2)*t*t*t*t + 2);
-    },
-    easeInSine: function (t, c, d) {
-        return -c * Math.cos(t/d * (Math.PI/2)) + c;
-    },
-    easeOutSine: function (t, c, d) {
-        return c * Math.sin(t/d * (Math.PI/2));
-    },
-    easeInOutSine: function (t, c, d) {
-        return -c/2 * (Math.cos(Math.PI*t/d) - 1);
-    },
-    easeInExpo: function (t, c, d) {
-        return (t===0) ? 0 : c * Math.pow(2, 10 * (t/d - 1));
-    },
-    easeOutExpo: function (t, c, d) {
-        return (t===d) ? c : c * (-Math.pow(2, -10 * t/d) + 1);
-    },
-    easeInOutExpo: function (t, c, d) {
-        if (t===0) return 0;
-        if (t===d) return c;
-        if ((t/=d/2) < 1) return c/2 * Math.pow(2, 10 * (t - 1));
-        return c/2 * (-Math.pow(2, -10 * --t) + 2);
-    },
-    easeInCirc: function (t, c, d) {
-        return -c * (Math.sqrt(1 - (t/=d)*t) - 1);
-    },
-    easeOutCirc: function (t, c, d) {
-        return c * Math.sqrt(1 - (t=t/d-1)*t);
-    },
-    easeInOutCirc: function (t, c, d) {
-        if ((t/=d/2) < 1) return -c/2 * (Math.sqrt(1 - t*t) - 1);
-        return c/2 * (Math.sqrt(1 - (t-=2)*t) + 1);
-    },
-    easeInElastic: function (t, c, d) {
-        var s = 1.70158, p = 0, a = c;
-        if (t===0) return 0;
-        if ((t/=d)===1) return c;
-        if (!p) p = d*.3;
-        if (a < Math.abs(c)) {
-            //a = c;
-            s = p/4;
+    easeInElastic:function(t){
+        var s=1.70158, p=0, a=1;
+        if (t==0) return 0;
+        if (t==1) return 1;
+        if (!p) p=0.3;
+        if (a < 1) {
+            a=1; var s=p/4;
         } else {
-            s = p/(2*Math.PI) * Math.asin(c/a);
+            var s = p/(2*Math.PI) * Math.asin (1/a);
         }
-        return -(a*Math.pow(2,10*(t-=1)) * Math.sin((t*d-s)*(2*Math.PI)/p));
+        return -(a*Math.pow(2,10*(t-=1)) * Math.sin( (t*1-s)*(2*Math.PI)/p));
     },
-    easeOutElastic: function (t, c, d) {
-        var s = 1.70158, p = 0, a = c;
-        if (t===0) return 0;
-        if ((t/=d)===1) return c;
-        if (!p) p = d*.3;
-        if (a < Math.abs(c)) {
-            //a = c;
-            s = p/4;
+    easeOutElastic:function(t){
+        var s=1.70158, p=0, a=1;
+        if (t==0) return 0;
+        if (t==1) return 1;
+        if (!p) p=1*0.3;
+        if (a < 1) {
+            a=1; var s=p/4;
         } else {
-            s = p/(2*Math.PI) * Math.asin(c/a);
+            var s = p/(2*Math.PI) * Math.asin (1/a);
         }
-        return a*Math.pow(2,-10*t) * Math.sin((t*d-s)*(2*Math.PI)/p) + c;
+        return a*Math.pow(2,-10*t) * Math.sin((t*1-s)*(2*Math.PI)/p) + 1;
     },
-    easeInOutElastic: function (t, c, d) {
-        var s = 1.70158, p = 0, a = c;
-        if (t===0) return 0;
-        if ((t/=d/2)===2) return c;
-        if (!p) p = d*(.3*1.5);
-        if (a < Math.abs(c)) {
-            //a = c;
-            s = p/4;
+    easeInOutElastic:function(t){
+        var s=1.70158, p=0, a=1;
+        if (t==0) return 0;
+        if ((t/=0.5)==2) return 1;
+        if (!p) p=(0.3*1.5);
+        if (a < 1) {
+            a=1; var s=p/4;
         } else {
-            s = p/(2*Math.PI) * Math.asin(c/a);
+            var s = p/(2*Math.PI) * Math.asin (1/a);
         }
-        if (t < 1) return -.5*(a*Math.pow(2,10*(t-=1)) * Math.sin((t*d-s)*(2*Math.PI)/p));
-        return a*Math.pow(2,-10*(t-=1)) * Math.sin((t*d-s)*(2*Math.PI)/p)*.5 + c;
+        if (t < 1) return -.5*(a*Math.pow(2,10*(t-=1)) * Math.sin((t*1-s)*(2*Math.PI)/p));
+        return a*Math.pow(2,-10*(t-=1)) * Math.sin((t*1-s)*(2*Math.PI)/p)*0.5 + 1;
     },
-    easeInBack: function (t, c, d, s) {
-        if (s === undefined) s = 1.70158;
-        return c*(t/=d)*t*((s+1)*t - s);
+    easeInBack:function(t, s){
+        if (s == undefined) s = 1.70158;
+        return (t/=1)*t*((s+1)*t - s);
     },
-    easeOutBack: function (t, c, d, s) {
-        if (s === undefined) s = 1.70158;
-        return c*((t=t/d-1)*t*((s+1)*t + s) + 1);
+    easeOutBack:function(t, s){
+        if (s == undefined) s = 1.70158;
+        return ((t=t/1-1)*t*((s+1)*t + s) + 1);
     },
-    easeInOutBack: function (t, c, d, s) {
-        if (s === undefined) s = 1.70158; 
-        if ((t/=d/2) < 1) return c/2*(t*t*(((s*=(1.525))+1)*t - s));
-        return c/2*((t-=2)*t*(((s*=(1.525))+1)*t + s) + 2);
+    easeInOutBack:function(t, s){
+        if (s == undefined) s = 1.70158;
+        if ((t/=0.5) < 1) return 0.5*(t*t*(((s*=(1.525))+1)*t - s));
+        return 0.5*((t-=2)*t*(((s*=(1.525))+1)*t + s) + 2);
     },
-    easeInBounce: function (t, c, d) {
-        return c - myt.Animator.easingFunctions.easeOutBounce(d-t, c, d);
-    },
-    easeOutBounce: function (t, c, d) {
-        if ((t/=d) < (1/2.75)) {
-            return c*(7.5625*t*t);
+    easeInBounce:function(t){return 1 - myt.Animator.easingFunctions.easeOutBounce(1-t);},
+    easeOutBounce:function(t){
+        if (t < (1/2.75)) {
+            return (7.5625*t*t);
         } else if (t < (2/2.75)) {
-            return c*(7.5625*(t-=(1.5/2.75))*t + .75);
+            return (7.5625*(t-=(1.5/2.75))*t + 0.75);
         } else if (t < (2.5/2.75)) {
-            return c*(7.5625*(t-=(2.25/2.75))*t + .9375);
-        } else {
-            return c*(7.5625*(t-=(2.625/2.75))*t + .984375);
+            return (7.5625*(t-=(2.25/2.75))*t + 0.9375);
         }
+        return (7.5625*(t-=(2.625/2.75))*t + .984375);
     },
-    easeInOutBounce: function (t, c, d) {
-        if (t < d/2) return myt.Animator.easingFunctions.easeInBounce(t*2, c, d) * .5;
-        return myt.Animator.easingFunctions.easeOutBounce(t*2-d, c, d) * .5 + c*.5;
+    easeInOutBounce:function(t){
+        if (t < 0.5) return myt.Animator.easingFunctions.easeInBounce(t*2) * 0.5;
+        return myt.Animator.easingFunctions.easeOutBounce(t*2-1) * 0.5 + 0.5;
     }
 };
 

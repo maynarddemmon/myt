@@ -59,7 +59,7 @@
             x:140, y:10,
             
             radius:96,
-            thickness:4,
+            thickness:6,
             startAngle:0,
             endAngle:270,
             endCapRounding:true,
@@ -71,15 +71,16 @@
             x:141, y:11,
             
             radius:97,
-            thickness:2,
+            thickness:4,
             startAngle:0,
             endAngle:0,
             endCapRounding:true,
             startCapRounding:true,
-            color:'#990000'
+            color:'#009900'
         });
         
         c.animate('endAngle', 270, 0, false, null, 3000, false, 10, 'easeInBounce');
+        c.animate('color', '#990000', '#009900', false, null, 3000, false, 10, 'easeInBounce');
     });
 </script>
 </body></html>

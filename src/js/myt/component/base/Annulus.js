@@ -183,6 +183,11 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
         }
     },
     
+    /** @overrides myt.View */
+    isColorAttr: function(attrName) {
+        return attrName === 'color' || this.callSuper(attrName);
+    },
+    
     /** Ensures the size of the view exactly fits the annulus.
         @private */
     _updateSize: function() {

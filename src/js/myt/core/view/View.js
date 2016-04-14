@@ -1082,5 +1082,11 @@ myt.View = new JS.Class('View', myt.Node, {
     getEffectiveScale: function() {
         this.calculateEffectiveScale();
         return this.__effectiveScale;
+    },
+    
+    /** Used by myt.Animator to determine if an attribute is a color attribute
+        or not. */
+    isColorAttr: function(attrName) {
+        return attrName === 'bgColor' || attrName === 'textColor';
     }
 });
