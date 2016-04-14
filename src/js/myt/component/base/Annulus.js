@@ -1,5 +1,82 @@
 /** An annulus component. */
 myt.Annulus = new JS.Class('Annulus', myt.View, {
+    // Class Methods and Attributes ////////////////////////////////////////////
+    extend: {
+        /** Draws an annulus using the provided path.
+            @param path:svg path object
+            @param startAngle:number The start angle in radians.
+            @param endAngle:number The end angle in radians.
+            @param thickness:number The difference between the inner and outer
+                radius.
+            @param r1:number The inner radius.
+            @param c:number The center of the annulus
+            @param color:hex string The color to fill with.
+            @param startCapRounding:boolean If true the starting cap will
+                be drawn as a semicircle.
+            @param endCapRounding:boolean If true the ending cap will be
+                drawn as a semicircle.
+            @returns void */
+        draw: function(path, startAngle, endAngle, thickness, r1, c, color, startCapRounding, endCapRounding) {
+            // Ensure endAngle is greater than or equal to startAngle
+            if (startAngle > endAngle) {
+                var tmp = startAngle;
+                startAngle = endAngle;
+                endAngle = tmp;
+            }
+            
+            var r2 = r1 + thickness,
+                PI = Math.PI,
+                angleDiff = endAngle - startAngle,
+                isFull = angleDiff >= 2 * PI;
+            
+            // Will use two arcs for a full circle
+            if (isFull) {
+                startAngle = 0;
+                endAngle = PI;
+            }
+            
+            var COS = Math.cos,
+                SIN = Math.sin,
+                points = [
+                    [c + r2 * COS(startAngle), c + r2 * SIN(startAngle)],
+                    [c + r2 * COS(endAngle),   c + r2 * SIN(endAngle)],
+                    [c + r1 * COS(endAngle),   c + r1 * SIN(endAngle)],
+                    [c + r1 * COS(startAngle), c + r1 * SIN(startAngle)]
+                ],
+                commands = [];
+            
+            commands.push("M" + points[0].join());
+            if (isFull) {
+                commands.push("A" + [r2, r2, 0, 1, 1, points[1]].join());
+                commands.push("A" + [r2, r2, 0, 1, 1, points[0]].join());
+                commands.push("L" + points[2].join());
+                commands.push("A" + [r1, r1, 0, 1, 0, points[3]].join());
+                commands.push("A" + [r1, r1, 0, 1, 0, points[2]].join());
+            } else {
+                var largeArc = (angleDiff % (2 * PI)) > PI ? 1 : 0;
+                commands.push("A" + [r2, r2, 0, largeArc, 1, points[1]].join());
+                if (endCapRounding) {
+                    commands.push("A" + [thickness / 2, thickness / 2, 0, 0, 1, points[2]].join());
+                } else {
+                    commands.push("L" + points[2].join());
+                }
+                commands.push("A" + [r1, r1, 0, largeArc, 0, points[3]].join());
+                if (startCapRounding) commands.push("A" + [thickness / 2, thickness / 2, 0, 0, 1, points[0]].join());
+            }
+            commands.push("z");
+            
+            path.setAttribute('d', commands.join(' '));
+            path.setAttribute('fill', color);
+        },
+        
+        makeSVG: function(elementName, parentElem) {
+            var svgElem = document.createElementNS("http://www.w3.org/2000/svg", elementName);
+            if (parentElem) parentElem.appendChild(svgElem);
+            return svgElem;
+        }
+    },
+    
+    
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
         this.radius = this.thickness = this.startAngle = this.endAngle = 0;
@@ -13,11 +90,8 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
     /** @overrides myt.View */
     createOurDomElement: function(parent) {
         var e = this.callSuper(parent),
-            namespace = "http://www.w3.org/2000/svg",
-            svg = this.__svg = document.createElementNS(namespace, 'svg'),
-            path = this.__path = document.createElementNS(namespace, 'path');
-        svg.appendChild(path);
-        e.appendChild(svg);
+            MSVG = myt.Annulus.makeSVG;
+        this.__path = MSVG('path', this.__svg = MSVG('svg', e));
         return e;
     },
     
@@ -109,7 +183,8 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
         }
     },
     
-    /** @private */
+    /** Ensures the size of the view exactly fits the annulus.
+        @private */
     _updateSize: function() {
         var size = 2*(this.radius + this.thickness);
         this.setWidth(size);
@@ -125,60 +200,18 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
     
     /** @private */
     _redraw: function() {
-        var startAngle = myt.Geometry.degreesToRadians(this.startAngle),
-            endAngle = myt.Geometry.degreesToRadians(this.endAngle),
-            thickness = this.thickness,
-            r1 = this.radius,
-            r2 = r1 + thickness,
-            c = this.width / 2;
-        
-        if (startAngle > endAngle) {
-            var tmp = startAngle;
-            startAngle = endAngle;
-            endAngle = tmp;
-        }
-        
-        var angleDiff = endAngle - startAngle,
-            isFull = angleDiff >= 2 * Math.PI;
-        
-        if (isFull) {
-            startAngle = 0;
-            endAngle = Math.PI;
-        }
-        
-        var points = [
-                [c + r2 * Math.cos(startAngle), c + r2 * Math.sin(startAngle)],
-                [c + r2 * Math.cos(endAngle),   c + r2 * Math.sin(endAngle)],
-                [c + r1 * Math.cos(endAngle),   c + r1 * Math.sin(endAngle)],
-                [c + r1 * Math.cos(startAngle), c + r1 * Math.sin(startAngle)]
-            ],
-            commands = [];
-        
-        commands.push("M" + points[0].join());
-        if (isFull) {
-            commands.push("A" + [r2, r2, 0, 1, 1, points[1]].join());
-            commands.push("A" + [r2, r2, 0, 1, 1, points[0]].join());
-            commands.push("L" + points[2].join());
-            commands.push("A" + [r1, r1, 0, 1, 0, points[3]].join());
-            commands.push("A" + [r1, r1, 0, 1, 0, points[2]].join());
-        } else {
-            var largeArc = (angleDiff % (2 * Math.PI)) > Math.PI ? 1 : 0;
-            commands.push("A" + [r2, r2, 0, largeArc, 1, points[1]].join());
-            if (this.endCapRounding) {
-                commands.push("A" + [thickness / 2, thickness / 2, 0, 0, 1, points[2]].join());
-            } else {
-                commands.push("L" + points[2].join());
-            }
-            commands.push("A" + [r1, r1, 0, largeArc, 0, points[3]].join());
-            if (this.startCapRounding) {
-                commands.push("A" + [thickness / 2, thickness / 2, 0, 0, 1, points[0]].join());
-            }
-        }
-        commands.push("z");
-        
-        var path = this.__path;
-        path.setAttribute('d', commands.join(' '));
-        path.setAttribute('fill', this.color);
+        var DTR = myt.Geometry.degreesToRadians;
+        myt.Annulus.draw(
+            this.__path, 
+            DTR(this.startAngle), 
+            DTR(this.endAngle), 
+            this.thickness, 
+            this.radius, 
+            this.width / 2, 
+            this.color, 
+            this.startCapRounding, 
+            this.endCapRounding
+        );
     }
 });
 
