@@ -96,11 +96,12 @@ JS.Packages(function() {with(this) {
     var MYT_COMPONENT_ROOT = MYT_ROOT + 'component/';
     
     // Component : Base
-    file(MYT_COMPONENT_ROOT + 'base/Text.js'  ).provides('myt.Text'  ).requires('myt.TextSupport');
-    file(MYT_COMPONENT_ROOT + 'base/Markup.js').provides('myt.Markup').requires('myt.SizeToDom');
-    file(MYT_COMPONENT_ROOT + 'base/Canvas.js').provides('myt.Canvas').requires('myt.View');
-    file(MYT_COMPONENT_ROOT + 'base/Frame.js' ).provides('myt.Frame' ).requires('myt.View');
-    file(MYT_COMPONENT_ROOT + 'base/Image.js' ).provides('myt.Image' ).requires('myt.ImageSupport');
+    file(MYT_COMPONENT_ROOT + 'base/Annulus.js').provides('myt.Annulus').requires('myt.View');
+    file(MYT_COMPONENT_ROOT + 'base/Text.js'   ).provides('myt.Text'   ).requires('myt.TextSupport');
+    file(MYT_COMPONENT_ROOT + 'base/Markup.js' ).provides('myt.Markup' ).requires('myt.SizeToDom');
+    file(MYT_COMPONENT_ROOT + 'base/Canvas.js' ).provides('myt.Canvas' ).requires('myt.View');
+    file(MYT_COMPONENT_ROOT + 'base/Frame.js'  ).provides('myt.Frame'  ).requires('myt.View');
+    file(MYT_COMPONENT_ROOT + 'base/Image.js'  ).provides('myt.Image'  ).requires('myt.ImageSupport');
     
     // Component : Behavior
     file(MYT_COMPONENT_ROOT + 'behavior/Activateable.js'    ).provides('myt.Activateable'    ).requires('myt');
@@ -373,6 +374,7 @@ JS.Packages(function() {with(this) {
         'myt.Grid','myt.SimpleGridColumnHeader',
         'myt.PanelStack',
         'myt.DropTarget','myt.DropSource','myt.AutoScroller',
-        'myt.Eventable'
+        'myt.Eventable',
+        'myt.Annulus'
     );
 }});
