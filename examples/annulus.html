@@ -79,6 +79,16 @@
             color:'#009900'
         });
         
+        new myt.Annulus(innerView, {
+            x:191, y:61,
+            
+            radius:0,
+            thickness:50,
+            startAngle:90,
+            endAngle:300,
+            color:'#666666'
+        });
+        
         c.animate('endAngle', 270, 0, false, null, 3000, false, 10, 'easeInBounce');
         c.animate('color', '#990000', '#009900', false, null, 3000, false, 10, 'easeInBounce');
     });
