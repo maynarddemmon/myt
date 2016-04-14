@@ -3,6 +3,7 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
         this.radius = this.thickness = this.startAngle = this.endAngle = 0;
+        this.startCapRounding = this.endCapRounding = false;
         
         this.callSuper(parent, attrs);
         
@@ -62,6 +63,26 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
         }
     },
     
+    setStartCapRounding: function(v) {
+        if (this.startCapRounding !== v) {
+            this.startCapRounding = v;
+            if (this.inited) {
+                this._redraw();
+                this.fireNewEvent('startCapRounding', v);
+            }
+        }
+    },
+    
+    setEndCapRounding: function(v) {
+        if (this.endCapRounding !== v) {
+            this.endCapRounding = v;
+            if (this.inited) {
+                this._redraw();
+                this.fireNewEvent('endCapRounding', v);
+            }
+        }
+    },
+    
     setColor: function(v) {
         if (this.color !== v) {
             this.color = v;
@@ -106,8 +127,9 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
     _redraw: function() {
         var startAngle = myt.Geometry.degreesToRadians(this.startAngle),
             endAngle = myt.Geometry.degreesToRadians(this.endAngle),
+            thickness = this.thickness,
             r1 = this.radius,
-            r2 = r1 + this.thickness,
+            r2 = r1 + thickness,
             c = this.width / 2;
         
         if (startAngle > endAngle) {
@@ -142,8 +164,15 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
         } else {
             var largeArc = (angleDiff % (2 * Math.PI)) > Math.PI ? 1 : 0;
             commands.push("A" + [r2, r2, 0, largeArc, 1, points[1]].join());
-            commands.push("L" + points[2].join());
+            if (this.endCapRounding) {
+                commands.push("A" + [thickness / 2, thickness / 2, 0, 0, 1, points[2]].join());
+            } else {
+                commands.push("L" + points[2].join());
+            }
             commands.push("A" + [r1, r1, 0, largeArc, 0, points[3]].join());
+            if (this.startCapRounding) {
+                commands.push("A" + [thickness / 2, thickness / 2, 0, 0, 1, points[0]].join());
+            }
         }
         commands.push("z");
         

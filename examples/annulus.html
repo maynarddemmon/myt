@@ -54,6 +54,32 @@
         a.animate('endAngle', 360, 0, true, null, 3000, false, 10, 'linear');
         
         b.animate('startAngle', 270, 360 + 270, false, null, 3000, false, 10, 'linear');
+        
+        new myt.Annulus(innerView, {
+            x:140, y:10,
+            
+            radius:96,
+            thickness:4,
+            startAngle:0,
+            endAngle:270,
+            endCapRounding:true,
+            startCapRounding:true,
+            color:'#ffffff'
+        });
+        
+        var c = new myt.Annulus(innerView, {
+            x:141, y:11,
+            
+            radius:97,
+            thickness:2,
+            startAngle:0,
+            endAngle:0,
+            endCapRounding:true,
+            startCapRounding:true,
+            color:'#990000'
+        });
+        
+        c.animate('endAngle', 270, 0, false, null, 3000, false, 10, 'easeInBounce');
     });
 </script>
 </body></html>
