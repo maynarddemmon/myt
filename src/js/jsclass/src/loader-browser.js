@@ -436,7 +436,7 @@ Package.BrowserLoader = {
     xhr.onreadystatechange = function() {
       if (xhr.readyState !== 4) return;
       xhr.onreadystatechange = self._K;
-      source.succeed(xhr.responseText + '\n//@ sourceURL=' + originalPath);
+      source.succeed(xhr.responseText + '\n//# sourceURL=' + originalPath);
       xhr = null;
     };
     xhr.send(null);
