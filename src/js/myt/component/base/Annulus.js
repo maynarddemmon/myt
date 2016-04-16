@@ -27,7 +27,7 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
             var r2 = r1 + thickness,
                 PI = Math.PI,
                 angleDiff = endAngle - startAngle,
-                isFull = angleDiff >= 2 * PI;
+                isFull = angleDiff + 0.0001 >= 2 * PI; // 0.0001 is to handle floating point errors
             
             // Will use two arcs for a full circle
             if (isFull) {
@@ -90,11 +90,12 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
     /** @overrides myt.View */
     createOurDomElement: function(parent) {
         var e = this.callSuper(parent),
-            MSVG = myt.Annulus.makeSVG;
-        this.__path = MSVG('path', this.__svg = MSVG('svg', e));
+            MSVG = myt.Annulus.makeSVG,
+            svg = this.__svg = MSVG('svg', e);
+        this.__path = MSVG('path', svg);
         
         // Let the view handle mouse events
-        this.__svg.style.pointerEvents = 'none';
+        svg.style.pointerEvents = 'none';
         
         return e;
     },
