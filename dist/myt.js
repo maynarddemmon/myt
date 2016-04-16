@@ -30428,6 +30428,10 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
         var e = this.callSuper(parent),
             MSVG = myt.Annulus.makeSVG;
         this.__path = MSVG('path', this.__svg = MSVG('svg', e));
+        
+        // Let the view handle mouse events
+        this.__svg.style.pointerEvents = 'none';
+        
         return e;
     },
     
