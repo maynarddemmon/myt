@@ -349,6 +349,9 @@ JS.Packages(function() {with(this) {
                                                                                                                                          'myt.global.idle','myt.KDTree','myt.Disableable',
                                                                                                                                          'myt.MouseOver','myt.SelectionManager');
     
+    // Component : WebSocket
+    file(MYT_COMPONENT_ROOT + 'websocket/WebSocket.js').provides('myt.WebSocket').requires('myt.Node');
+    
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
         'myt.Cookie',
@@ -375,6 +378,7 @@ JS.Packages(function() {with(this) {
         'myt.PanelStack',
         'myt.DropTarget','myt.DropSource','myt.AutoScroller',
         'myt.Eventable',
-        'myt.Annulus'
+        'myt.Annulus',
+        'myt.WebSocket'
     );
 }});

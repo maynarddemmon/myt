@@ -1,0 +1,106 @@
+<!doctype html><html><head>
+<title>Myt Framework : WebSocket Example</title>
+<link rel="stylesheet" href="../src/css/myt.css"/>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="../src/js/jquery/jquery-1.11.1.min.js">\x3C/script>');</script>
+
+<script>var ROOT = '../src/js/';</script>
+<script src="../src/js/boilerplate.js"></script>
+<script src="../src/js/jsclass/min/loader-browser.js"></script>
+<script src="../src/js/myt/manifest.js"></script>
+
+</head><body>
+<script>
+    // This example works with wsrelay.
+    JS.require('myt.all', function() {
+        var rootView = new myt.View(null, {bgColor:'#000000', textColor:'#00cc00'}, [myt.SizeToWindow]);
+        var btnsView = new myt.View(rootView, {percentOfParentWidth:100, height:28, bgColor:'#333333'}, [myt.SizeToParent]);
+        var connectBtn = new myt.SimpleButton(btnsView, {y:4, height:20, text:'connect', shrinkToFit:true, inset:6, outset:6,
+            activeColor:'#222222', hoverColor:'#555555', readyColor:'#444444', roundedCorners:2
+        }, [myt.TextButtonContent, {
+            doActivated:function() {
+                ws.connect('ws://localhost:8124');
+            }
+        }]);
+        var msgView = new myt.InputText(btnsView, {y:4, height:20, bgColor:'#000000',
+            roundedCorners:4, border:[1,'solid','#006600'], textColor:'#00cc00', layoutHint:1,
+            disabled:true
+        }, [{
+            initNode: function(parent, attrs) {
+                this.callSuper(parent, attrs);
+                
+                this.attachToDom(this, 'handleKeyDown', 'keydown');
+            },
+            handleKeyDown: function(event) {
+                if (myt.KeyObservable.getKeyCodeFromEvent(event) === 13) sendBtn.doActivated();
+            }
+        }]);
+        var sendBtn = new myt.SimpleButton(btnsView, {y:4, height:20, text:'send', shrinkToFit:true, inset:6, outset:6,
+            activeColor:'#222222', hoverColor:'#555555', readyColor:'#444444', roundedCorners:2,
+            disabled:true
+        }, [myt.TextButtonContent, {
+            doActivated:function() {
+                logView.setText(logView.text + '<font color="#999900">&gt; ' + msgView.value + '</font><br/>');
+                ws.send(msgView.value);
+            }
+        }]);
+        var clearBtn = new myt.SimpleButton(btnsView, {y:4, height:20, text:'clear text', shrinkToFit:true, inset:6, outset:6,
+            activeColor:'#222222', hoverColor:'#555555', readyColor:'#444444', roundedCorners:2
+        }, [myt.TextButtonContent, {
+            doActivated:function() {
+                logView.setText('');
+            }
+        }]);
+        var disconnectBtn = new myt.SimpleButton(btnsView, {y:4, height:20, text:'disconnect', shrinkToFit:true, inset:6, outset:6,
+            activeColor:'#222222', hoverColor:'#555555', readyColor:'#444444', roundedCorners:2,
+            disabled:true
+        }, [myt.TextButtonContent, {
+            doActivated:function() {
+                ws.close();
+            }
+        }]);
+        new myt.ResizeLayout(btnsView, {inset:4, spacing:4, outset:4});
+        
+        var logView = new myt.Text(rootView, {
+            x:10, y:30, percentOfParentWidth:100, percentOfParentWidthOffset:-20, text:'', fontSize:'12px', fontFamily:'monospace'
+        }, [myt.SizeToParent]);
+        
+        var ws = new myt.WebSocket(rootView, {}, [{
+            setStatus:function(v) {
+                this.callSuper(v);
+                switch (this.status) {
+                    case 'open':
+                        connectBtn.setDisabled(true);
+                        sendBtn.setDisabled(false);
+                        msgView.setDisabled(false);
+                        disconnectBtn.setDisabled(false);
+                        break;
+                    case 'closed':
+                    case 'disconnected':
+                        connectBtn.setDisabled(false);
+                        sendBtn.setDisabled(true);
+                        msgView.setDisabled(true);
+                        disconnectBtn.setDisabled(true);
+                    default:
+                }
+            },
+            onOpen: function(event) {
+                this.callSuper(event);
+                logView.setText(logView.text + '<b>OPENED</b><br/>');
+            },
+            onError: function(event) {
+                this.callSuper(event);
+                logView.setText(logView.text + '<b>ERROR</b><br/>' + event.data + '<br/>');
+            },
+            onMessage: function(event) {
+                this.callSuper(event);
+                logView.setText(logView.text + '< ' + event.data + '<br/>');
+            },
+            onClose: function(event) {
+                this.callSuper(event);
+                logView.setText(logView.text + '<b>CLOSED</b><br/>');
+            }
+        }]);
+    });
+</script>
+</body></html>
