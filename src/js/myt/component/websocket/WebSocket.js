@@ -3,6 +3,7 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
         this.status = 'disconnected';
+        this.useJSON = true;
         this.callSuper();
     },
     
@@ -13,6 +14,13 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
+    setUseJSON: function(v) {
+        if (this.useJSON !== v) {
+            this.useJSON = v;
+            if (this.inited) this.fireNewEvent('useJSON', v);
+        }
+    },
+    
     setStatus: function(v) {
         if (this.status !== v) {
             this.status = v;
@@ -36,7 +44,7 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
                 ws.onmessage = this.onMessage.bind(this);
                 ws.onclose = this.onClose.bind(this);
             } catch (ex) {
-                this._onError(ex);
+                this.onError(ex);
             }
         }
     },
@@ -44,6 +52,13 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
     send: function(msg) {
         var ws = this._ws;
         if (ws && this.status === 'open') {
+            if (this.useJSON) {
+                try {
+                    msg = JSON.stringify(msg);
+                } catch (ex) {
+                    this.onError(ex);
+                }
+            }
             ws.send(msg);
             return true;
         }
@@ -60,19 +75,30 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
     
     onOpen: function(event) {
         this.setStatus('open');
-        console.log('open', event); // FIXME
     },
     
     onError: function(event) {
-        console.log('error', event); // FIXME
+        console.error(event);
+        
+        var ws = this._ws;
+        if (ws && ws.readyState !== 1) this.close();
     },
     
     onMessage: function(event) {
-        console.log('message', event); // FIXME
+        var msg = event.data;
+        
+        if (this.useJSON) {
+            try {
+                msg = JSON.parse(msg);
+            } catch (ex) {
+                this.onError(ex);
+            }
+        }
+        
+        return msg; // Useful for subclassing
     },
     
     onClose: function(event) {
         this.setStatus('closed');
-        console.log('close', event); // FIXME
     }
 });

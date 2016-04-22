@@ -351,6 +351,7 @@ JS.Packages(function() {with(this) {
     
     // Component : WebSocket
     file(MYT_COMPONENT_ROOT + 'websocket/WebSocket.js').provides('myt.WebSocket').requires('myt.Node');
+    file(MYT_COMPONENT_ROOT + 'websocket/MessageTypeWebSocket.js').provides('myt.MessageTypeWebSocket').requires('myt.WebSocket');
     
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
@@ -379,6 +380,6 @@ JS.Packages(function() {with(this) {
         'myt.DropTarget','myt.DropSource','myt.AutoScroller',
         'myt.Eventable',
         'myt.Annulus',
-        'myt.WebSocket'
+        'myt.MessageTypeWebSocket'
     );
 }});
