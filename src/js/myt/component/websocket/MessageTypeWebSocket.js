@@ -135,9 +135,9 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
         @param type:string The type of the message to send.
         @param msg:* The message value. Must be convertible to JSON.
         @returns The sent message. */
-    sendTypedMessage: function(type, msg) {
+    sendTypedMessage: function(type, msg, doNotTryToConnect) {
         msg = this.createMessage(type, msg);
-        if (msg) return this.send(msg);
+        if (msg) return this.send(msg, doNotTryToConnect);
     },
     
     /** Creates a new message to be sent. May be overridden by subclasses, but

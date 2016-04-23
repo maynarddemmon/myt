@@ -19,12 +19,15 @@
             activeColor:'#222222', hoverColor:'#555555', readyColor:'#444444', roundedCorners:2
         }, [myt.TextButtonContent, {
             doActivated:function() {
-                ws.connect('ws://localhost:8124');
+                if (ws.status === 'closed') {
+                    ws.connect();
+                } else {
+                    ws.close();
+                }
             }
         }]);
         var msgView = new myt.InputText(btnsView, {y:4, height:20, bgColor:'#000000',
-            roundedCorners:4, border:[1,'solid','#006600'], textColor:'#00cc00', layoutHint:1,
-            disabled:true
+            roundedCorners:4, border:[1,'solid','#006600'], textColor:'#00cc00', layoutHint:1
         }, [{
             initNode: function(parent, attrs) {
                 this.callSuper(parent, attrs);
@@ -36,8 +39,7 @@
             }
         }]);
         var sendBtn = new myt.SimpleButton(btnsView, {y:4, height:20, text:'send', shrinkToFit:true, inset:6, outset:6,
-            activeColor:'#222222', hoverColor:'#555555', readyColor:'#444444', roundedCorners:2,
-            disabled:true
+            activeColor:'#222222', hoverColor:'#555555', readyColor:'#444444', roundedCorners:2
         }, [myt.TextButtonContent, {
             doActivated:function() {
                 var msg = msgView.value;
@@ -51,13 +53,11 @@
                         console.error(ex);
                     }
                 }
-                //ws.send(msg);
                 ws.sendTypedMessage('message', msg);
             }
         }]);
         var sendActionBtn = new myt.SimpleButton(btnsView, {y:4, height:20, text:'action', shrinkToFit:true, inset:6, outset:6,
-            activeColor:'#222222', hoverColor:'#555555', readyColor:'#444444', roundedCorners:2,
-            disabled:true
+            activeColor:'#222222', hoverColor:'#555555', readyColor:'#444444', roundedCorners:2
         }, [myt.TextButtonContent, {
             doActivated:function() {
                 var msg = msgView.value;
@@ -81,80 +81,21 @@
                 logView.setText('');
             }
         }]);
-        var disconnectBtn = new myt.SimpleButton(btnsView, {y:4, height:20, text:'disconnect', shrinkToFit:true, inset:6, outset:6,
-            activeColor:'#222222', hoverColor:'#555555', readyColor:'#444444', roundedCorners:2,
-            disabled:true
-        }, [myt.TextButtonContent, {
-            doActivated:function() {
-                ws.close();
-            }
-        }]);
         new myt.ResizeLayout(btnsView, {inset:4, spacing:4, outset:4});
         
         var logView = new myt.Text(rootView, {
             x:10, y:30, percentOfParentWidth:100, percentOfParentWidthOffset:-20, text:'', fontSize:'12px', fontFamily:'monospace'
         }, [myt.SizeToParent]);
         
-        /*var ws = new myt.WebSocket(rootView, {}, [{
+        var ws = new myt.MessageTypeWebSocket(rootView, {url:'ws://localhost:8124'}, [{
             setStatus:function(v) {
                 this.callSuper(v);
                 switch (this.status) {
                     case 'open':
-                        connectBtn.setDisabled(true);
-                        sendBtn.setDisabled(false);
-                        msgView.setDisabled(false);
-                        disconnectBtn.setDisabled(false);
+                        connectBtn.setText('disconnect');
                         break;
                     case 'closed':
-                    case 'disconnected':
-                        connectBtn.setDisabled(false);
-                        sendBtn.setDisabled(true);
-                        msgView.setDisabled(true);
-                        disconnectBtn.setDisabled(true);
-                    default:
-                }
-            },
-            onOpen: function(event) {
-                this.callSuper(event);
-                logView.setText(logView.text + '<b>OPENED</b><br/>');
-            },
-            onError: function(event) {
-                this.callSuper(event);
-                logView.setText(logView.text + '<b>ERROR</b><br/>' + event + '<br/>');
-            },
-            onMessage: function(event) {
-                var msg = this.callSuper(event);
-                if (typeof msg !== 'string') {
-                    console.log(msg);
-                    logView.setText(logView.text + '<font color="#0099ff">< ' + msg + '</font><br/>');
-                } else {
-                    logView.setText(logView.text + '< ' + msg + '<br/>');
-                }
-            },
-            onClose: function(event) {
-                this.callSuper(event);
-                logView.setText(logView.text + '<b>CLOSED</b><br/>');
-            }
-        }]);*/
-        
-        var ws = new myt.MessageTypeWebSocket(rootView, {}, [{
-            setStatus:function(v) {
-                this.callSuper(v);
-                switch (this.status) {
-                    case 'open':
-                        connectBtn.setDisabled(true);
-                        sendBtn.setDisabled(false);
-                        sendActionBtn.setDisabled(false);
-                        msgView.setDisabled(false);
-                        disconnectBtn.setDisabled(false);
-                        break;
-                    case 'closed':
-                    case 'disconnected':
-                        connectBtn.setDisabled(false);
-                        sendBtn.setDisabled(true);
-                        sendActionBtn.setDisabled(true);
-                        msgView.setDisabled(true);
-                        disconnectBtn.setDisabled(true);
+                        connectBtn.setText('connect');
                     default:
                 }
             },
