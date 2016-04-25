@@ -30675,11 +30675,7 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
             occurring. Defaults to "close".
         @returns void */
     close: function(code, reason) {
-        var ws = this._ws;
-        if (ws) {
-            ws.close(code || 1000, reason || 'close');
-            delete this._ws;
-        }
+        if (this._ws) this._ws.close(code || 1000, reason || 'close');
     },
     
     /** Invoked when after the WebSocket is opened.
@@ -30720,6 +30716,7 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
         @param event:Event The close event fired by the WebSocket.
         @returns void */
     onClose: function(event) {
+        if (this._ws) delete this._ws;
         this.setStatus('closed');
     }
 });
