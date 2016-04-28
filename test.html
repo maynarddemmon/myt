@@ -1,0 +1,21 @@
+<!doctype html>
+<html><head><title>Test</title></head><body>
+<p>Does not 2-finger scroll when mouse is over the left most 50px of div B. 
+  Found in Chrome 49.0.2623.75+. Works in Chrome 48.0.2564.103-.</p>
+<p>The z-index, border-radius and overflow rules on div A are essential. 
+  If you remove either of them things will work again.</p>
+<p>The area of non-functional scroll behavior "b" is in direct proportion to distance "a" the
+  left position of div B. If you change that to 25px the non-functional area
+  will be reduced. If you change it to 0px the problem will not be apparent.</p>
+<div     style="position:absolute;top:200px;left: 0px;width:300px;height:100px;background-color:#999999;overflow:hidden;z-index:0;border-radius:4px;">A.
+  <div   style="position:absolute;top:  0px;left:80px;width:200px;height:100px;background-color:#bbbbbb;overflow:auto;">B.
+    <div style="position:absolute;top:  0px;left:25px;width:175px;height:200px;background-color:#dddddd;">C.
+    </div>
+  </div>
+</div>
+
+<!-- Visual indicators of bad good and bad horizontal region. -->
+<div style="position:absolute;top:300px;left:00px;width:80px;height:25px;background-color:#ffff00;">a. 80px </div>
+<div style="position:absolute;top:300px;left:80px;width:80px;height:25px;background-color:#ff0000;">b. 80px bad</div>
+<div style="position:absolute;top:300px;left:160px;width:120px;height:25px;background-color:#00ff00;">c. 120px good</div>
+</body></html>
