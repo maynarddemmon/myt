@@ -189,12 +189,11 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
             if (!this.paused) {
                 if (v) {
                     this.__isColorAttr();
-                    this.attachTo(myt.global.idle, '__update', 'idle');
                 } else {
                     if (this.__temporaryFrom) this.from = undefined;
                     this.__reset();
-                    this.detachFrom(myt.global.idle, '__update', 'idle');
                 }
+                this[v ? 'attachTo' : 'detachFrom'](myt.global.idle, '__update', 'idle');
             }
         }
     },
@@ -203,14 +202,7 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         if (this.paused !== v) {
             this.paused = v;
             if (this.inited) this.fireNewEvent('paused', v);
-            
-            if (this.running) {
-                if (v) {
-                    this.detachFrom(myt.global.idle, '__update', 'idle');
-                } else {
-                    this.attachTo(myt.global.idle, '__update', 'idle');
-                }
-            }
+            if (this.running) this[v ? 'detachFrom' : 'attachTo'](myt.global.idle, '__update', 'idle');
         }
     },
     
@@ -218,7 +210,6 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         if (this.reverse !== v) {
             this.reverse = v;
             if (this.inited) this.fireNewEvent('reverse', v);
-            
             if (!this.running) this.__reset();
         }
     },
@@ -390,7 +381,7 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         // Determine what "from" to use if none was provided.
         if (this.from == null) {
             this.__temporaryFrom = true;
-            this.from = relative ? (this.__isColorAnim ? 'black' : 0) : target.get(attr);
+            this.from = relative ? (this.__isColorAnim ? '#000000' : 0) : target.get(attr);
         }
         
         var motionValue = this.easingFunction(progressPercent) - (relative ? this.easingFunction(oldProgressPercent) : 0),
