@@ -1,6 +1,6 @@
 Myt: A simple javascript UI framework
 http://github.com/maynarddemmon/myt
-Copyright (c) 2012-2015 Maynard Demmon and contributors
+Copyright (c) 2012-2016 Maynard Demmon and contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -27,10 +27,6 @@ Parts of the Software incorporates code from the following open-source projects:
 *   Spectrum Colorpicker v1.4.1, Copyright (c) Brian Grinstead https://github.com/bgrins/spectrum
 *   date.format Date:03/10/15, Copyright (c) 2005 Jacob Wright https://github.com/jacwright/date.format
 *   jquery-simple-datetimepicker v1.12.0, Copyright (c) 2014 Masanori Ohgita https://github.com/mugifly/jquery-simple-datetimepicker
-*
-* BSD License
-*   Easing Functions, Copyright (c) 2001 Robert Penner
-*   jQuery Easing v1.3, Copyright (c) 2008 George McGinley Smith
 *
 * New BSD License
 *   History.js, Copyright (c) 2010-2011 Benjamin Arthur Lupton <contact@balupton.com>

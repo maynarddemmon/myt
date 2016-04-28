@@ -82,10 +82,11 @@ myt.ScatterGraphPoint = new JS.Class('ScatterGraphPoint', {
         this._progress += timeDiff;
         if (this._progress > 1000) this._progress = 1000;
         
-        var easingFunc = this.config.easingFunction || myt.Animator.DEFAULT_EASING_FUNCTION;
+        var easingFunc = this.config.easingFunction || myt.Animator.DEFAULT_EASING_FUNCTION,
+            percent = this._progress / 1000;
         
-        this.x = this._origX + easingFunc(this._progress, this._xAttrDiff, 1000);
-        this.y = this._origY + easingFunc(this._progress, this._yAttrDiff, 1000);
+        this.x = this._origX + this._xAttrDiff * easingFunc(percent);
+        this.y = this._origY + this._yAttrDiff * easingFunc(percent);
         return true;
     }
 });

@@ -11226,6 +11226,105 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
     include: [myt.Reusable],
     
     
+    // Class Methods and Attributes ////////////////////////////////////////////
+    extend: {
+        easingFunctions: {
+            linear:function(t){return t;},
+            easeInQuad:function(t){return t*t;},
+            easeOutQuad:function(t){return -t*(t-2);},
+            easeInOutQuad:function(t){return (t/=0.5) < 1 ? 0.5*t*t : -0.5 * ((--t)*(t-2) - 1);},
+            easeInCubic:function(t){return t*t*t;},
+            easeOutCubic:function(t){return ((t=t-1)*t*t + 1);},
+            easeInOutCubic:function(t){return (t/=0.5) < 1 ? 0.5*t*t*t : 1 /2*((t-=2)*t*t + 2);},
+            easeInQuart:function(t){return t*t*t*t;},
+            easeOutQuart:function(t){return -((t=t-1)*t*t*t - 1);},
+            easeInOutQuart:function(t){return (t/=0.5) < 1 ? 0.5*t*t*t*t : -0.5 * ((t-=2)*t*t*t - 2);},
+            easeInQuint:function(t){return t*t*t*t*t;},
+            easeOutQuint:function(t){return ((t=t-1)*t*t*t*t + 1);},
+            easeInOutQuint:function(t){return (t/=0.5) < 1 ? 0.5*t*t*t*t*t : 0.5*((t-=2)*t*t*t*t + 2);},
+            easeInSine:function(t){return - Math.cos(t * (Math.PI/2)) + 1;},
+            easeOutSine:function(t){return Math.sin(t * (Math.PI/2));},
+            easeInOutSine:function(t){return -0.5 * (Math.cos(Math.PI*t) - 1);},
+            easeInExpo:function(t){return (t==0)? 0: Math.pow(2, 10 * (t - 1));},
+            easeOutExpo:function(t){return (t==1)? 1: (-Math.pow(2, -10 * t) + 1);},
+            easeInCirc:function(t){return - (Math.sqrt(1 - t*t) - 1);},
+            easeOutCirc:function(t){return Math.sqrt(1 - (t=t-1)*t);},
+            easeInOutCirc:function(t){return (t/=0.5) < 1? -0.5 * (Math.sqrt(1 - t*t) - 1): 0.5 * (Math.sqrt(1 - (t-=2)*t) + 1);},
+            easeInOutExpo:function(t){
+                if (t==0) return 0;
+                if (t==1) return 1;
+                if ((t/=0.5) < 1) return 0.5 * Math.pow(2, 10 * (t - 1));
+                return 0.5 * (-Math.pow(2, -10 * --t) + 2);
+            },
+            easeInElastic:function(t){
+                var s=1.70158, p=0, a=1;
+                if (t==0) return 0;
+                if (t==1) return 1;
+                if (!p) p=0.3;
+                if (a < 1) {
+                    a=1; var s=p/4;
+                } else {
+                    var s = p/(2*Math.PI) * Math.asin (1/a);
+                }
+                return -(a*Math.pow(2,10*(t-=1)) * Math.sin( (t*1-s)*(2*Math.PI)/p));
+            },
+            easeOutElastic:function(t){
+                var s=1.70158, p=0, a=1;
+                if (t==0) return 0;
+                if (t==1) return 1;
+                if (!p) p=1*0.3;
+                if (a < 1) {
+                    a=1; var s=p/4;
+                } else {
+                    var s = p/(2*Math.PI) * Math.asin (1/a);
+                }
+                return a*Math.pow(2,-10*t) * Math.sin((t*1-s)*(2*Math.PI)/p) + 1;
+            },
+            easeInOutElastic:function(t){
+                var s=1.70158, p=0, a=1;
+                if (t==0) return 0;
+                if ((t/=0.5)==2) return 1;
+                if (!p) p=(0.3*1.5);
+                if (a < 1) {
+                    a=1; var s=p/4;
+                } else {
+                    var s = p/(2*Math.PI) * Math.asin (1/a);
+                }
+                if (t < 1) return -.5*(a*Math.pow(2,10*(t-=1)) * Math.sin((t*1-s)*(2*Math.PI)/p));
+                return a*Math.pow(2,-10*(t-=1)) * Math.sin((t*1-s)*(2*Math.PI)/p)*0.5 + 1;
+            },
+            easeInBack:function(t, s){
+                if (s == undefined) s = 1.70158;
+                return (t/=1)*t*((s+1)*t - s);
+            },
+            easeOutBack:function(t, s){
+                if (s == undefined) s = 1.70158;
+                return ((t=t/1-1)*t*((s+1)*t + s) + 1);
+            },
+            easeInOutBack:function(t, s){
+                if (s == undefined) s = 1.70158;
+                if ((t/=0.5) < 1) return 0.5*(t*t*(((s*=(1.525))+1)*t - s));
+                return 0.5*((t-=2)*t*(((s*=(1.525))+1)*t + s) + 2);
+            },
+            easeInBounce:function(t){return 1 - myt.Animator.easingFunctions.easeOutBounce(1-t);},
+            easeOutBounce:function(t){
+                if (t < (1/2.75)) {
+                    return (7.5625*t*t);
+                } else if (t < (2/2.75)) {
+                    return (7.5625*(t-=(1.5/2.75))*t + 0.75);
+                } else if (t < (2.5/2.75)) {
+                    return (7.5625*(t-=(2.25/2.75))*t + 0.9375);
+                }
+                return (7.5625*(t-=(2.625/2.75))*t + .984375);
+            },
+            easeInOutBounce:function(t){
+                if (t < 0.5) return myt.Animator.easingFunctions.easeInBounce(t*2) * 0.5;
+                return myt.Animator.easingFunctions.easeOutBounce(t*2-1) * 0.5 + 0.5;
+            }
+        }
+    },
+    
+    
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Node */
     initNode: function(parent, attrs) {
@@ -11472,142 +11571,6 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         return colorObj.getHtmlHexString();
     }
 });
-
-
-/*
- * TERMS OF USE - EASING EQUATIONS
- * 
- * Open source under the BSD License. 
- * 
- * Copyright © 2001 Robert Penner
- * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without modification, 
- * are permitted provided that the following conditions are met:
- * 
- * Redistributions of source code must retain the above copyright notice, this list of 
- * conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright notice, this list 
- * of conditions and the following disclaimer in the documentation and/or other materials 
- * provided with the distribution.
- * 
- * Neither the name of the author nor the names of contributors may be used to endorse 
- * or promote products derived from this software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
- * GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED 
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED 
- * OF THE POSSIBILITY OF SUCH DAMAGE. 
- *
- * ============================================================
- * jQuery Easing v1.3 - http://gsgd.co.uk/sandbox/jquery/easing/
- *
- * Open source under the BSD License.
- *
- * Copyright © 2008 George McGinley Smith
- * All rights reserved.
- * https://raw.github.com/danro/jquery-easing/master/LICENSE
- * ============================================================
- */
-myt.Animator.easingFunctions = {
-    linear:function(t){return t;},
-    easeInQuad:function(t){return t*t;},
-    easeOutQuad:function(t){return -t*(t-2);},
-    easeInOutQuad:function(t){return (t/=0.5) < 1 ? 0.5*t*t : -0.5 * ((--t)*(t-2) - 1);},
-    easeInCubic:function(t){return t*t*t;},
-    easeOutCubic:function(t){return ((t=t-1)*t*t + 1);},
-    easeInOutCubic:function(t){return (t/=0.5) < 1 ? 0.5*t*t*t : 1 /2*((t-=2)*t*t + 2);},
-    easeInQuart:function(t){return t*t*t*t;},
-    easeOutQuart:function(t){return -((t=t-1)*t*t*t - 1);},
-    easeInOutQuart:function(t){return (t/=0.5) < 1 ? 0.5*t*t*t*t : -0.5 * ((t-=2)*t*t*t - 2);},
-    easeInQuint:function(t){return t*t*t*t*t;},
-    easeOutQuint:function(t){return ((t=t-1)*t*t*t*t + 1);},
-    easeInOutQuint:function(t){return (t/=0.5) < 1 ? 0.5*t*t*t*t*t : 0.5*((t-=2)*t*t*t*t + 2);},
-    easeInSine:function(t){return - Math.cos(t * (Math.PI/2)) + 1;},
-    easeOutSine:function(t){return Math.sin(t * (Math.PI/2));},
-    easeInOutSine:function(t){return -0.5 * (Math.cos(Math.PI*t) - 1);},
-    easeInExpo:function(t){return (t==0)? 0: Math.pow(2, 10 * (t - 1));},
-    easeOutExpo:function(t){return (t==1)? 1: (-Math.pow(2, -10 * t) + 1);},
-    easeInCirc:function(t){return - (Math.sqrt(1 - t*t) - 1);},
-    easeOutCirc:function(t){return Math.sqrt(1 - (t=t-1)*t);},
-    easeInOutCirc:function(t){return (t/=0.5) < 1? -0.5 * (Math.sqrt(1 - t*t) - 1): 0.5 * (Math.sqrt(1 - (t-=2)*t) + 1);},
-    easeInOutExpo:function(t){
-        if (t==0) return 0;
-        if (t==1) return 1;
-        if ((t/=0.5) < 1) return 0.5 * Math.pow(2, 10 * (t - 1));
-        return 0.5 * (-Math.pow(2, -10 * --t) + 2);
-    },
-    easeInElastic:function(t){
-        var s=1.70158, p=0, a=1;
-        if (t==0) return 0;
-        if (t==1) return 1;
-        if (!p) p=0.3;
-        if (a < 1) {
-            a=1; var s=p/4;
-        } else {
-            var s = p/(2*Math.PI) * Math.asin (1/a);
-        }
-        return -(a*Math.pow(2,10*(t-=1)) * Math.sin( (t*1-s)*(2*Math.PI)/p));
-    },
-    easeOutElastic:function(t){
-        var s=1.70158, p=0, a=1;
-        if (t==0) return 0;
-        if (t==1) return 1;
-        if (!p) p=1*0.3;
-        if (a < 1) {
-            a=1; var s=p/4;
-        } else {
-            var s = p/(2*Math.PI) * Math.asin (1/a);
-        }
-        return a*Math.pow(2,-10*t) * Math.sin((t*1-s)*(2*Math.PI)/p) + 1;
-    },
-    easeInOutElastic:function(t){
-        var s=1.70158, p=0, a=1;
-        if (t==0) return 0;
-        if ((t/=0.5)==2) return 1;
-        if (!p) p=(0.3*1.5);
-        if (a < 1) {
-            a=1; var s=p/4;
-        } else {
-            var s = p/(2*Math.PI) * Math.asin (1/a);
-        }
-        if (t < 1) return -.5*(a*Math.pow(2,10*(t-=1)) * Math.sin((t*1-s)*(2*Math.PI)/p));
-        return a*Math.pow(2,-10*(t-=1)) * Math.sin((t*1-s)*(2*Math.PI)/p)*0.5 + 1;
-    },
-    easeInBack:function(t, s){
-        if (s == undefined) s = 1.70158;
-        return (t/=1)*t*((s+1)*t - s);
-    },
-    easeOutBack:function(t, s){
-        if (s == undefined) s = 1.70158;
-        return ((t=t/1-1)*t*((s+1)*t + s) + 1);
-    },
-    easeInOutBack:function(t, s){
-        if (s == undefined) s = 1.70158;
-        if ((t/=0.5) < 1) return 0.5*(t*t*(((s*=(1.525))+1)*t - s));
-        return 0.5*((t-=2)*t*(((s*=(1.525))+1)*t + s) + 2);
-    },
-    easeInBounce:function(t){return 1 - myt.Animator.easingFunctions.easeOutBounce(1-t);},
-    easeOutBounce:function(t){
-        if (t < (1/2.75)) {
-            return (7.5625*t*t);
-        } else if (t < (2/2.75)) {
-            return (7.5625*(t-=(1.5/2.75))*t + 0.75);
-        } else if (t < (2.5/2.75)) {
-            return (7.5625*(t-=(2.25/2.75))*t + 0.9375);
-        }
-        return (7.5625*(t-=(2.625/2.75))*t + .984375);
-    },
-    easeInOutBounce:function(t){
-        if (t < 0.5) return myt.Animator.easingFunctions.easeInBounce(t*2) * 0.5;
-        return myt.Animator.easingFunctions.easeOutBounce(t*2-1) * 0.5 + 0.5;
-    }
-};
 
 /** Setup the default easing function. */
 myt.Animator.DEFAULT_EASING_FUNCTION = myt.Animator.easingFunctions.easeInOutQuad;
@@ -25814,10 +25777,11 @@ myt.ScatterGraphPoint = new JS.Class('ScatterGraphPoint', {
         this._progress += timeDiff;
         if (this._progress > 1000) this._progress = 1000;
         
-        var easingFunc = this.config.easingFunction || myt.Animator.DEFAULT_EASING_FUNCTION;
+        var easingFunc = this.config.easingFunction || myt.Animator.DEFAULT_EASING_FUNCTION,
+            percent = this._progress / 1000;
         
-        this.x = this._origX + easingFunc(this._progress, this._xAttrDiff, 1000);
-        this.y = this._origY + easingFunc(this._progress, this._yAttrDiff, 1000);
+        this.x = this._origX + this._xAttrDiff * easingFunc(percent);
+        this.y = this._origY + this._yAttrDiff * easingFunc(percent);
         return true;
     }
 });
