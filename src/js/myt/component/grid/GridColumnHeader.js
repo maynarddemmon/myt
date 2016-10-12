@@ -38,7 +38,8 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        var GCH = myt.GridColumnHeader;
+        var M = myt,
+            GCH = M.GridColumnHeader;
         if (attrs.minValue === undefined) attrs.minValue = GCH.DEFAULT_MIN_VALUE;
         if (attrs.maxValue === undefined) attrs.maxValue = GCH.DEFAULT_MAX_VALUE;
         if (attrs.resizable === undefined) attrs.resizable = true;
@@ -54,11 +55,11 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
         
         this.callSuper(parent, attrs);
         
-        new myt.View(this, {
+        new M.View(this, {
             name:'resizer', cursor:'col-resize', width:10, zIndex:1,
             percentOfParentHeight:100, align:'right', alignOffset:-5,
             draggableAllowBubble:false
-        }, [myt.SizeToParent, myt.Draggable, {
+        }, [M.SizeToParent, M.Draggable, {
             requestDragPosition: function(x, y) {
                 var p = this.parent, gc = p.gridController,
                     diff = x - this.x;

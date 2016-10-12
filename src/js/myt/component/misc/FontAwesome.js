@@ -61,6 +61,7 @@ myt.FontAwesome = new JS.Class('FontAwesome', myt.Markup, {
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
         this.size = 0;
+        this.icon = '';
         
         this.callSuper(parent, attrs);
         

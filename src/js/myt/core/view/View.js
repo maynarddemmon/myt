@@ -1021,11 +1021,28 @@ myt.View = new JS.Class('View', myt.Node, {
         @returns void */
     sortSubviews: function(sortFunc) {
         // Sort subviews
-        var svs = this.getSubviews(), i = svs.length;
+        var svs = this.getSubviews(), self = this;
         svs.sort(sortFunc);
         
         // Rearrange dom to match new sort order.
-        while (i) this.sendSubviewToBack(svs[--i]);
+        myt.View.retainFocusDuringDomUpdate(this, function() {
+            var len = svs.length,
+                i = 0,
+                de = self.domElement,
+                nextDe = de.nextSibling,
+                parentElem = de.parentNode;
+            // Remove this dom element from the dom
+            if (parentElem) parentElem.removeChild(de);
+            
+            // Copy the dom elements in the correct order to a document
+            // fragment and then add that fragment back to the dom.
+            var fragment = document.createDocumentFragment();
+            for (; len > i;) fragment.appendChild(svs[i++].domElement);
+            de.appendChild(fragment);
+            
+            // Put this dom element back in the dom
+            if (parentElem) parentElem.insertBefore(de, nextDe);
+        });
     },
     
     // Hit Testing //

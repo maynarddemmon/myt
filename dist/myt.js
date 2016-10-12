@@ -4049,7 +4049,7 @@ JS.Singleton = new JS.Class('Singleton', {
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20160916.1324,
+    version:20161011.2238,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -9765,11 +9765,28 @@ myt.View = new JS.Class('View', myt.Node, {
         @returns void */
     sortSubviews: function(sortFunc) {
         // Sort subviews
-        var svs = this.getSubviews(), i = svs.length;
+        var svs = this.getSubviews(), self = this;
         svs.sort(sortFunc);
         
         // Rearrange dom to match new sort order.
-        while (i) this.sendSubviewToBack(svs[--i]);
+        myt.View.retainFocusDuringDomUpdate(this, function() {
+            var len = svs.length,
+                i = 0,
+                de = self.domElement,
+                nextDe = de.nextSibling,
+                parentElem = de.parentNode;
+            // Remove this dom element from the dom
+            if (parentElem) parentElem.removeChild(de);
+            
+            // Copy the dom elements in the correct order to a document
+            // fragment and then add that fragment back to the dom.
+            var fragment = document.createDocumentFragment();
+            for (; len > i;) fragment.appendChild(svs[i++].domElement);
+            de.appendChild(fragment);
+            
+            // Put this dom element back in the dom
+            if (parentElem) parentElem.insertBefore(de, nextDe);
+        });
     },
     
     // Hit Testing //
@@ -12068,132 +12085,6 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
         }
     }
 });
-
-
-/** An adapter for FontAwesome.
-    
-    Attributes:
-        icon:string The name of the FA icon to set.
-        size:number A number from 0 to 5 with 0 being normal size and 5 being
-            the largest size.
-        propeties:string || array A space separated string or list of FA
-            CSS classes to set.
-*/
-myt.FontAwesome = new JS.Class('FontAwesome', myt.Markup, {
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        FA_SIZE_CLASSES: ['','fa-lg','fa-2x','fa-3x','fa-4x','fa-5x'],
-        
-        makeTag: function(props) {
-            if (Array.isArray(props)) {
-                var len = props.length;
-                if (len > 0) {
-                    props.unshift('fa');
-                    ++len;
-                    
-                    if (props[1].indexOf('fa-') !== 0) props[1] = 'fa-' + props[1];
-                    
-                    if (len >= 3) props[2] = this.FA_SIZE_CLASSES[props[2]] || '';
-                    
-                    if (len > 3) {
-                        var prop, i = 3;
-                        for (; len > i; ++i) {
-                            prop = props[i];
-                            if (prop.indexOf('fa-') !== 0) props[i] = 'fa-' + prop;
-                        }
-                    }
-                    
-                    return '<i class="' + props.join(' ') + '"></i>';
-                }
-            }
-            
-            myt.dumpStack('Error making tag');
-            console.error(props);
-            return '';
-        },
-        
-        targets: [],
-        active: false,
-        
-        registerForNotification: function(fa) {
-            if (!this.active) this.targets.push(fa);
-        },
-        
-        notifyActive: function(active) {
-            this.active = active;
-            if (active) {
-                var targets = this.targets;
-                while (targets.length) targets.pop().sizeViewToDom();
-            }
-        }
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.View */
-    initNode: function(parent, attrs) {
-        this.size = 0;
-        
-        this.callSuper(parent, attrs);
-        
-        this.__update();
-        
-        myt.FontAwesome.registerForNotification(this);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setIcon: function(v) {
-        var existing = this.icon;
-        this.set('icon', v, true);
-        if (this.inited && existing !== v) this.__update();
-    },
-    
-    setSize: function(v) {
-        var existing = this.size;
-        this.set('size', v, true);
-        if (this.inited && existing !== v) this.__update();
-    },
-    
-    setProperties: function(v) {
-        this.properties = v;
-        this.fireNewEvent('properties', v);
-        if (this.inited) this.__update();
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
-    __update: function() {
-        var props = this.properties;
-        if (props) {
-            if (typeof props === 'string') {
-                props = props.split(' ');
-            } else {
-                props = props.concat();
-            }
-            props.unshift(this.size);
-            props.unshift(this.icon);
-        } else {
-            props = [this.icon, this.size];
-        }
-        
-        this.setHtml(myt.FontAwesome.makeTag(props));
-    }
-});
-
-myt.loadScript('//ajax.googleapis.com/ajax/libs/webfont/1.6.16/webfont.js', function() {
-    WebFont.load({
-        custom: {
-            families: ['FontAwesome'],
-            urls: ['//maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css'],
-            testStrings: {'FontAwesome':'\uf00c\uf000'}
-        },
-        fontactive: function(familyName, fvd) {
-            myt.FontAwesome.notifyActive(true);
-        }
-    });
-}, true);
 
 
 /** Objects that can be replicated should include this mixin and implemment
@@ -28621,7 +28512,8 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        var GCH = myt.GridColumnHeader;
+        var M = myt,
+            GCH = M.GridColumnHeader;
         if (attrs.minValue === undefined) attrs.minValue = GCH.DEFAULT_MIN_VALUE;
         if (attrs.maxValue === undefined) attrs.maxValue = GCH.DEFAULT_MAX_VALUE;
         if (attrs.resizable === undefined) attrs.resizable = true;
@@ -28637,11 +28529,11 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
         
         this.callSuper(parent, attrs);
         
-        new myt.View(this, {
+        new M.View(this, {
             name:'resizer', cursor:'col-resize', width:10, zIndex:1,
             percentOfParentHeight:100, align:'right', alignOffset:-5,
             draggableAllowBubble:false
-        }, [myt.SizeToParent, myt.Draggable, {
+        }, [M.SizeToParent, M.Draggable, {
             requestDragPosition: function(x, y) {
                 var p = this.parent, gc = p.gridController,
                     diff = x - this.x;
@@ -29472,6 +29364,133 @@ myt.Grid = new JS.Class('Grid', myt.View, {
 });
 
 
+/** An adapter for FontAwesome.
+    
+    Attributes:
+        icon:string The name of the FA icon to set.
+        size:number A number from 0 to 5 with 0 being normal size and 5 being
+            the largest size.
+        propeties:string || array A space separated string or list of FA
+            CSS classes to set.
+*/
+myt.FontAwesome = new JS.Class('FontAwesome', myt.Markup, {
+    // Class Methods and Attributes ////////////////////////////////////////////
+    extend: {
+        FA_SIZE_CLASSES: ['','fa-lg','fa-2x','fa-3x','fa-4x','fa-5x'],
+        
+        makeTag: function(props) {
+            if (Array.isArray(props)) {
+                var len = props.length;
+                if (len > 0) {
+                    props.unshift('fa');
+                    ++len;
+                    
+                    if (props[1].indexOf('fa-') !== 0) props[1] = 'fa-' + props[1];
+                    
+                    if (len >= 3) props[2] = this.FA_SIZE_CLASSES[props[2]] || '';
+                    
+                    if (len > 3) {
+                        var prop, i = 3;
+                        for (; len > i; ++i) {
+                            prop = props[i];
+                            if (prop.indexOf('fa-') !== 0) props[i] = 'fa-' + prop;
+                        }
+                    }
+                    
+                    return '<i class="' + props.join(' ') + '"></i>';
+                }
+            }
+            
+            myt.dumpStack('Error making tag');
+            console.error(props);
+            return '';
+        },
+        
+        targets: [],
+        active: false,
+        
+        registerForNotification: function(fa) {
+            if (!this.active) this.targets.push(fa);
+        },
+        
+        notifyActive: function(active) {
+            this.active = active;
+            if (active) {
+                var targets = this.targets;
+                while (targets.length) targets.pop().sizeViewToDom();
+            }
+        }
+    },
+    
+    
+    // Life Cycle //////////////////////////////////////////////////////////////
+    /** @overrides myt.View */
+    initNode: function(parent, attrs) {
+        this.size = 0;
+        this.icon = '';
+        
+        this.callSuper(parent, attrs);
+        
+        this.__update();
+        
+        myt.FontAwesome.registerForNotification(this);
+    },
+    
+    
+    // Accessors ///////////////////////////////////////////////////////////////
+    setIcon: function(v) {
+        var existing = this.icon;
+        this.set('icon', v, true);
+        if (this.inited && existing !== v) this.__update();
+    },
+    
+    setSize: function(v) {
+        var existing = this.size;
+        this.set('size', v, true);
+        if (this.inited && existing !== v) this.__update();
+    },
+    
+    setProperties: function(v) {
+        this.properties = v;
+        this.fireNewEvent('properties', v);
+        if (this.inited) this.__update();
+    },
+    
+    
+    // Methods /////////////////////////////////////////////////////////////////
+    /** @private */
+    __update: function() {
+        var props = this.properties;
+        if (props) {
+            if (typeof props === 'string') {
+                props = props.split(' ');
+            } else {
+                props = props.concat();
+            }
+            props.unshift(this.size);
+            props.unshift(this.icon);
+        } else {
+            props = [this.icon, this.size];
+        }
+        
+        this.setHtml(myt.FontAwesome.makeTag(props));
+    }
+});
+
+myt.loadScript('//ajax.googleapis.com/ajax/libs/webfont/1.6.16/webfont.js', function() {
+    WebFont.load({
+        custom: {
+            families: ['FontAwesome'],
+            urls: ['//maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css'],
+            testStrings: {'FontAwesome':'\uf00c\uf000'}
+        },
+        fontactive: function(familyName, fvd) {
+            myt.FontAwesome.notifyActive(true);
+        }
+    });
+}, true);
+
+
 /** A simple implementation of a grid column header.
     
     Attributes:
@@ -29496,22 +29515,32 @@ myt.SimpleGridColumnHeader = new JS.Class('SimpleGridColumnHeader', myt.SimpleIc
         if (attrs.contentAlign === undefined) attrs.contentAlign = 'left';
         if (attrs.sortIconColor === undefined) attrs.sortIconColor = '#666666';
         
-        
         this.callSuper(parent, attrs);
-        
-        if (this.sortable) this.setOutset(14);
         
         this.setDisabled(!this.sortable);
         this._updateTextWidth();
-        this._drawSortIcon();
+        this._updateSortIcon();
     },
     
     /** @overrides myt.View */
     doAfterAdoption: function() {
-        new myt.Canvas(this, {
-            name:'sortIcon', align:'right', alignOffset:3, width:8, height:10,
-            y:Math.floor((this.height - 10) / 2)
-        });
+        new myt.FontAwesome(this, {
+            name:'sortIcon', align:'right', alignOffset:3, valign:'middle',
+            textColor:this.sortIconColor
+        }, [{
+            initNode: function(parent, attrs) {
+                this.callSuper(parent, attrs);
+                this.deStyle.fontSize = '0.7em'; // Looks better a bit smaller.
+            },
+            
+            sizeViewToDom:function() {
+                this.callSuper();
+                
+                var p = this.parent;
+                p.setOutset(this.width + 2);
+                p._updateTextWidth();
+            }
+        }]);
         
         this.callSuper();
         
@@ -29520,7 +29549,10 @@ myt.SimpleGridColumnHeader = new JS.Class('SimpleGridColumnHeader', myt.SimpleIc
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setSortIconColor: function(v) {this.sortIconColor = v;},
+    setSortIconColor: function(v) {
+        this.sortIconColor = v;
+        if (this.sortIcon) this.sortIcon.setTextColor(v);
+    },
     
     /** @overrides myt.GridColumnHeader */
     setSortable: function(v) {
@@ -29529,7 +29561,7 @@ myt.SimpleGridColumnHeader = new JS.Class('SimpleGridColumnHeader', myt.SimpleIc
         if (this.inited) {
             if (v) this.setOutset(14);
             this.setDisabled(!v);
-            this._drawSortIcon();
+            this._updateSortIcon();
         }
     },
     
@@ -29537,7 +29569,7 @@ myt.SimpleGridColumnHeader = new JS.Class('SimpleGridColumnHeader', myt.SimpleIc
     setSortState: function(v) {
         this.callSuper(v);
         
-        if (this.inited) this._drawSortIcon();
+        if (this.inited) this._updateSortIcon();
     },
     
     /** @overrides myt.View */
@@ -29550,47 +29582,26 @@ myt.SimpleGridColumnHeader = new JS.Class('SimpleGridColumnHeader', myt.SimpleIc
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @private */
-    _drawSortIcon: function() {
-        var canvas = this.sortIcon;
-        canvas.clear();
-        
+    _updateSortIcon: function() {
+        var glyph = '';
         if (this.sortable) {
-            canvas.beginPath();
-            
-            var fillColor;
             switch (this.sortState) {
                 case 'ascending':
-                    fillColor = this.sortIconColor;
-                    canvas.moveTo(0,10);
-                    canvas.lineTo(4,0);
-                    canvas.lineTo(8,10);
+                    glyph = 'chevron-up';
                     break;
                 case 'descending':
-                    fillColor = this.sortIconColor;
-                    canvas.moveTo(0,0);
-                    canvas.lineTo(4,10);
-                    canvas.lineTo(8,0);
-                    break;
-                case 'none':
-                    fillColor = this.activeColor;
-                    canvas.moveTo(0,5);
-                    canvas.lineTo(4,10);
-                    canvas.lineTo(8,5);
-                    canvas.lineTo(4,0);
+                    glyph = 'chevron-down';
                     break;
             }
-            
-            canvas.closePath();
-            canvas.setFillStyle(fillColor);
-            canvas.fill();
         }
+        this.sortIcon.setIcon(glyph);
     },
     
     /** @private */
     _updateTextWidth: function() {
         if (this.contentAlign === 'left') {
             var tv = this.textView;
-            tv.setWidth(this.width - this.outset - tv.x);
+            if (tv) tv.setWidth(this.width - this.outset - tv.x);
         }
     },
     

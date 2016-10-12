@@ -22,22 +22,32 @@ myt.SimpleGridColumnHeader = new JS.Class('SimpleGridColumnHeader', myt.SimpleIc
         if (attrs.contentAlign === undefined) attrs.contentAlign = 'left';
         if (attrs.sortIconColor === undefined) attrs.sortIconColor = '#666666';
         
-        
         this.callSuper(parent, attrs);
-        
-        if (this.sortable) this.setOutset(14);
         
         this.setDisabled(!this.sortable);
         this._updateTextWidth();
-        this._drawSortIcon();
+        this._updateSortIcon();
     },
     
     /** @overrides myt.View */
     doAfterAdoption: function() {
-        new myt.Canvas(this, {
-            name:'sortIcon', align:'right', alignOffset:3, width:8, height:10,
-            y:Math.floor((this.height - 10) / 2)
-        });
+        new myt.FontAwesome(this, {
+            name:'sortIcon', align:'right', alignOffset:3, valign:'middle',
+            textColor:this.sortIconColor
+        }, [{
+            initNode: function(parent, attrs) {
+                this.callSuper(parent, attrs);
+                this.deStyle.fontSize = '0.7em'; // Looks better a bit smaller.
+            },
+            
+            sizeViewToDom:function() {
+                this.callSuper();
+                
+                var p = this.parent;
+                p.setOutset(this.width + 2);
+                p._updateTextWidth();
+            }
+        }]);
         
         this.callSuper();
         
@@ -46,7 +56,10 @@ myt.SimpleGridColumnHeader = new JS.Class('SimpleGridColumnHeader', myt.SimpleIc
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setSortIconColor: function(v) {this.sortIconColor = v;},
+    setSortIconColor: function(v) {
+        this.sortIconColor = v;
+        if (this.sortIcon) this.sortIcon.setTextColor(v);
+    },
     
     /** @overrides myt.GridColumnHeader */
     setSortable: function(v) {
@@ -55,7 +68,7 @@ myt.SimpleGridColumnHeader = new JS.Class('SimpleGridColumnHeader', myt.SimpleIc
         if (this.inited) {
             if (v) this.setOutset(14);
             this.setDisabled(!v);
-            this._drawSortIcon();
+            this._updateSortIcon();
         }
     },
     
@@ -63,7 +76,7 @@ myt.SimpleGridColumnHeader = new JS.Class('SimpleGridColumnHeader', myt.SimpleIc
     setSortState: function(v) {
         this.callSuper(v);
         
-        if (this.inited) this._drawSortIcon();
+        if (this.inited) this._updateSortIcon();
     },
     
     /** @overrides myt.View */
@@ -76,47 +89,26 @@ myt.SimpleGridColumnHeader = new JS.Class('SimpleGridColumnHeader', myt.SimpleIc
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @private */
-    _drawSortIcon: function() {
-        var canvas = this.sortIcon;
-        canvas.clear();
-        
+    _updateSortIcon: function() {
+        var glyph = '';
         if (this.sortable) {
-            canvas.beginPath();
-            
-            var fillColor;
             switch (this.sortState) {
                 case 'ascending':
-                    fillColor = this.sortIconColor;
-                    canvas.moveTo(0,10);
-                    canvas.lineTo(4,0);
-                    canvas.lineTo(8,10);
+                    glyph = 'chevron-up';
                     break;
                 case 'descending':
-                    fillColor = this.sortIconColor;
-                    canvas.moveTo(0,0);
-                    canvas.lineTo(4,10);
-                    canvas.lineTo(8,0);
-                    break;
-                case 'none':
-                    fillColor = this.activeColor;
-                    canvas.moveTo(0,5);
-                    canvas.lineTo(4,10);
-                    canvas.lineTo(8,5);
-                    canvas.lineTo(4,0);
+                    glyph = 'chevron-down';
                     break;
             }
-            
-            canvas.closePath();
-            canvas.setFillStyle(fillColor);
-            canvas.fill();
         }
+        this.sortIcon.setIcon(glyph);
     },
     
     /** @private */
     _updateTextWidth: function() {
         if (this.contentAlign === 'left') {
             var tv = this.textView;
-            tv.setWidth(this.width - this.outset - tv.x);
+            if (tv) tv.setWidth(this.width - this.outset - tv.x);
         }
     },
     

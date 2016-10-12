@@ -218,7 +218,7 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'grid/Grid.js'            ).provides('myt.Grid'            ).requires('myt.GridController');
     
     file(MYT_COMPONENT_ROOT + 'grid/SimpleGridColumnHeader.js').provides('myt.SimpleGridColumnHeader').requires(
-        'myt.GridColumnHeader','myt.SimpleIconTextButton'
+        'myt.GridColumnHeader','myt.SimpleIconTextButton','myt.FontAwesome'
     );
     
     // Component : Floating Panel
@@ -360,7 +360,6 @@ JS.Packages(function() {with(this) {
         'myt.Text','myt.Markup','myt.Frame','myt.SizeWidthToDom','myt.SizeHeightToDom','myt.SizeToParent',
         'myt.SizeToWindowWidth','myt.SizeToWindowHeight',
         'myt.Animator','myt.Callback','myt.RepeatableTimer','myt.StateMachine',
-        'myt.FontAwesome',
         'myt.Replicator',
         'myt.WrappingLayout','myt.ResizeLayout','myt.AlignedLayout','myt.ThreePanel',
         'myt.DrawButton','myt.SimpleIconTextButton','myt.IconTextPanelButton','myt.DelayedMethodCall',
