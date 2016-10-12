@@ -17,5 +17,10 @@ myt.ListViewItemMixin = new JS.Module('ListViewItemMixin', {
         @returns number */
     getMinimumWidth: function() {
         return 0;
-    }
+    },
+    
+    /** Part of a performance optimization. Called from ListView.__updateItems
+        after the items have been inserted into the dom. Now we can actually
+        measure text width. */
+    syncToDom: function() {}
 });

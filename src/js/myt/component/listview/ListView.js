@@ -116,6 +116,12 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
         i = layoutLen;
         while (i) layouts[--i].incrementLockedCounter();
         
+        // Performance: Remove from dom while doing inserts
+        var de = contentView.domElement,
+            nextDe = de.nextSibling,
+            parentElem = de.parentNode;
+        parentElem.removeChild(de);
+        
         // Reconfigure list
         for (i = 0; cfgLen > i; ++i) {
             cfgItem = cfg[i];
@@ -133,12 +139,19 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
             // Create a new item if no item exists
             if (!item) item = items[i] = new cfgClass(contentView, {listView:this});
             
-            // Apply config to item and measure width
-            if (item) {
-                item.callSetters(cfgAttrs);
-                minItemWidth = item.getMinimumWidth();
-                if (minItemWidth > minWidth) minWidth = minItemWidth;
-            }
+            // Apply config to item
+            if (item) item.callSetters(cfgAttrs);
+        }
+        
+        // Performance: Put back in dom.
+        parentElem.insertBefore(de, nextDe);
+        
+        // Measure width. Must be in dom at this point.
+        for (i = 0; cfgLen > i; ++i) {
+            item = items[i];
+            item.syncToDom();
+            minItemWidth = item.getMinimumWidth();
+            if (minItemWidth > minWidth) minWidth = minItemWidth;
         }
         
         // Delete any remaining items

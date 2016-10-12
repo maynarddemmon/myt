@@ -4049,7 +4049,7 @@ JS.Singleton = new JS.Class('Singleton', {
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20161011.2238,
+    version:20161012.1145,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -16695,7 +16695,12 @@ myt.ListViewItemMixin = new JS.Module('ListViewItemMixin', {
         @returns number */
     getMinimumWidth: function() {
         return 0;
-    }
+    },
+    
+    /** Part of a performance optimization. Called from ListView.__updateItems
+        after the items have been inserted into the dom. Now we can actually
+        measure text width. */
+    syncToDom: function() {}
 });
 
 
@@ -16730,6 +16735,11 @@ myt.ListViewItem = new JS.Class('ListViewItem', myt.SimpleIconTextButton, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** @overrides myt.ListViewItemMixin */
+    syncToDom: function() {
+        this.textView.sizeViewToDom();
+    },
+    
     /** @overrides myt.ListViewItemMixin */
     getMinimumWidth: function() {
         var iconView = this.iconView,
@@ -16920,6 +16930,12 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
         i = layoutLen;
         while (i) layouts[--i].incrementLockedCounter();
         
+        // Performance: Remove from dom while doing inserts
+        var de = contentView.domElement,
+            nextDe = de.nextSibling,
+            parentElem = de.parentNode;
+        parentElem.removeChild(de);
+        
         // Reconfigure list
         for (i = 0; cfgLen > i; ++i) {
             cfgItem = cfg[i];
@@ -16937,12 +16953,19 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
             // Create a new item if no item exists
             if (!item) item = items[i] = new cfgClass(contentView, {listView:this});
             
-            // Apply config to item and measure width
-            if (item) {
-                item.callSetters(cfgAttrs);
-                minItemWidth = item.getMinimumWidth();
-                if (minItemWidth > minWidth) minWidth = minItemWidth;
-            }
+            // Apply config to item
+            if (item) item.callSetters(cfgAttrs);
+        }
+        
+        // Performance: Put back in dom.
+        parentElem.insertBefore(de, nextDe);
+        
+        // Measure width. Must be in dom at this point.
+        for (i = 0; cfgLen > i; ++i) {
+            item = items[i];
+            item.syncToDom();
+            minItemWidth = item.getMinimumWidth();
+            if (minItemWidth > minWidth) minWidth = minItemWidth;
         }
         
         // Delete any remaining items

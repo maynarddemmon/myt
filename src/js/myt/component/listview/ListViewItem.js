@@ -30,6 +30,11 @@ myt.ListViewItem = new JS.Class('ListViewItem', myt.SimpleIconTextButton, {
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.ListViewItemMixin */
+    syncToDom: function() {
+        this.textView.sizeViewToDom();
+    },
+    
+    /** @overrides myt.ListViewItemMixin */
     getMinimumWidth: function() {
         var iconView = this.iconView,
             textView = this.textView,
