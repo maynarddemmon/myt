@@ -59,6 +59,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             cancelTxt:'Cancel',
             confirmTxt:'Choose',
             titleText:'Choose a Date',
+            timeOnlyTitleText:'Choose a Time',
             color:'#000000'
         },
         
@@ -442,9 +443,12 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     },
     
     showDatePicker: function(callbackFunction, opts) {
-        var MP = myt.ModalPanel, content = this.content;
+        var M = myt,
+            MP = M.ModalPanel, 
+            V = M.View,
+            content = this.content;
         
-        opts = myt.extend({}, myt.Dialog.DATE_PICKER_DEFAULTS, opts);
+        opts = M.extend({}, M.Dialog.DATE_PICKER_DEFAULTS, opts);
         
         this.__destroyContent();
         
@@ -464,18 +468,19 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         this.setCallbackFunction(wrappedCallbackFunction);
         
         // Build Picker
-        var picker = new myt.View(content, {
+        var picker = new V(content, {
             name:'picker',
             x:MP.DEFAULT_PADDING_X,
             y:MP.DEFAULT_PADDING_Y + 24,
-            width:opts.dateOnly ? 180 : 225,
+            width:opts.dateOnly ? 180 : (opts.timeOnly ? 150 : 225),
             height:185
         });
-        var pickerView = new myt.View(picker, {});
+        var pickerView = new V(picker, {});
         
         $(pickerView.domElement).dtpicker({
             current:opts.initialDate || Date.now(),
             dateOnly:opts.dateOnly || false,
+            timeOnly:opts.timeOnly || false,
             dialog:this
         });
         
@@ -487,8 +492,8 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         
         this.__setupConfirmButtons(picker, opts);
         
-        var r = myt.Dialog.DEFAULT_RADIUS;
-        var bg = new myt.View(content, {
+        var r = M.Dialog.DEFAULT_RADIUS;
+        var bg = new V(content, {
             ignoreLayout:true,
             x:0, y:0,
             width:content.width, height:24,
@@ -497,8 +502,12 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             roundedTopRightCorner:r
         });
         bg.sendToBack();
-        new myt.Text(content, {
-            name:'title', x:r, y:4, text:opts.titleText, fontWeight:'bold'
+        new M.Text(content, {
+            name:'title', 
+            x:r, 
+            y:4, 
+            text:opts.timeOnly ? opts.timeOnlyTitleText : opts.titleText, 
+            fontWeight:'bold'
         });
         
         this.setDisplayMode('date_picker');

@@ -254,183 +254,188 @@
 		/* New timelist  */
 		var timelist_activeTimeCell_offsetTop = -1;
 
-		/* Header ----- */
-		$header.children().remove();
-
-		var cDate = new Date(date.getTime());
-		cDate.setMinutes(59);
-		cDate.setHours(23);
-		cDate.setSeconds(59);
-		cDate.setDate(0); // last day of previous month
-
-		var $link_before_month = null;
-		if ((!isFutureOnly || !isCurrentMonth) && ((minDate == null) || (minDate < cDate.getTime()))) {
-			$link_before_month = $('<a>');
-			$link_before_month.text('<');
-			$link_before_month.prop('alt', translate(locale,'prevMonth'));
-			$link_before_month.prop('title', translate(locale,'prevMonth') );
-			$link_before_month.click(function() {
-				beforeMonth($picker);
-			});
-			$picker.data('stateAllowBeforeMonth', true);
+		if ($picker.data("timeOnly") === true) {
+			$calendar.css("border-right", '0px');
+			$timelist.css("width", '130px');
 		} else {
-			$picker.data('stateAllowBeforeMonth', false);
-		}
-
-		cDate.setMinutes(0);
-		cDate.setHours(0);
-		cDate.setSeconds(0);
-		cDate.setDate(1); // First day of next month
-		cDate.setMonth(date.getMonth() + 1);
-
-		var $now_month = $('<span>');
-		$now_month.text(date.getFullYear() + " " + translate(locale, 'sep') + " " + translate(locale, 'months')[date.getMonth()]);
-
-		var $link_next_month = null;
-		if ((maxDate == null) || (maxDate > cDate.getTime())) {
-			$link_next_month = $('<a>');
-			$link_next_month.text('>');
-			$link_next_month.prop('alt', translate(locale,'nextMonth'));
-			$link_next_month.prop('title', translate(locale,'nextMonth'));
-			$link_next_month.click(function() {
-				nextMonth($picker);
-			});
-		}
-
-		if (isTodayButton) {
-			var $link_today = $('<a/>');
-			/* This icon resource from a part of "FontAwesome" by Dave Gandy - http://fontawesome.io".
-				http://fortawesome.github.io/Font-Awesome/license/
-				Thankyou. */
-			$link_today.html(decodeURIComponent('%3c%3fxml%20version%3d%221%2e0%22%20encoding%3d%22UTF%2d8%22%20standalone%3d%22no%22%3f%3e%3csvg%20%20xmlns%3adc%3d%22http%3a%2f%2fpurl%2eorg%2fdc%2felements%2f1%2e1%2f%22%20%20xmlns%3acc%3d%22http%3a%2f%2fcreativecommons%2eorg%2fns%23%22%20xmlns%3ardf%3d%22http%3a%2f%2fwww%2ew3%2eorg%2f1999%2f02%2f22%2drdf%2dsyntax%2dns%23%22%20%20xmlns%3asvg%3d%22http%3a%2f%2fwww%2ew3%2eorg%2f2000%2fsvg%22%20xmlns%3d%22http%3a%2f%2fwww%2ew3%2eorg%2f2000%2fsvg%22%20%20version%3d%221%2e1%22%20%20width%3d%22100%25%22%20%20height%3d%22100%25%22%20viewBox%3d%220%200%2010%2010%22%3e%3cg%20transform%3d%22translate%28%2d5%2e5772299%2c%2d26%2e54581%29%22%3e%3cpath%20d%3d%22m%2014%2e149807%2c31%2e130932%20c%200%2c%2d0%2e01241%200%2c%2d0%2e02481%20%2d0%2e0062%2c%2d0%2e03721%20L%2010%2e57723%2c28%2e153784%207%2e0108528%2c31%2e093719%20c%200%2c0%2e01241%20%2d0%2e0062%2c0%2e02481%20%2d0%2e0062%2c0%2e03721%20l%200%2c2%2e97715%20c%200%2c0%2e217084%200%2e1798696%2c0%2e396953%200%2e3969534%2c0%2e396953%20l%202%2e3817196%2c0%200%2c%2d2%2e38172%201%2e5878132%2c0%200%2c2%2e38172%202%2e381719%2c0%20c%200%2e217084%2c0%200%2e396953%2c%2d0%2e179869%200%2e396953%2c%2d0%2e396953%20l%200%2c%2d2%2e97715%20m%201%2e383134%2c%2d0%2e427964%20c%200%2e06823%2c%2d0%2e08063%200%2e05582%2c%2d0%2e210882%20%2d0%2e02481%2c%2d0%2e279108%20l%20%2d1%2e358324%2c%2d1%2e128837%200%2c%2d2%2e530576%20c%200%2c%2d0%2e111643%20%2d0%2e08683%2c%2d0%2e198477%20%2d0%2e198477%2c%2d0%2e198477%20l%20%2d1%2e190859%2c0%20c%20%2d0%2e111643%2c0%20%2d0%2e198477%2c0%2e08683%20%2d0%2e198477%2c0%2e198477%20l%200%2c1%2e209467%20%2d1%2e513384%2c%2d1%2e265289%20c%20%2d0%2e2605%2c%2d0%2e217083%20%2d0%2e682264%2c%2d0%2e217083%20%2d0%2e942764%2c0%20L%205%2e6463253%2c30%2e42386%20c%20%2d0%2e080631%2c0%2e06823%20%2d0%2e093036%2c0%2e198476%20%2d0%2e024809%2c0%2e279108%20l%200%2e3845485%2c0%2e458976%20c%200%2e031012%2c0%2e03721%200%2e080631%2c0%2e06203%200%2e1302503%2c0%2e06823%200%2e055821%2c0%2e0062%200%2e1054407%2c%2d0%2e01241%200%2e1488574%2c%2d0%2e04342%20l%204%2e2920565%2c%2d3%2e578782%204%2e292058%2c3%2e578782%20c%200%2e03721%2c0%2e03101%200%2e08063%2c0%2e04342%200%2e13025%2c0%2e04342%200%2e0062%2c0%200%2e01241%2c0%200%2e01861%2c0%200%2e04962%2c%2d0%2e0062%200%2e09924%2c%2d0%2e03101%200%2e130251%2c%2d0%2e06823%20l%200%2e384549%2c%2d0%2e458976%22%20%2f%3e%3c%2fg%3e%3c%2fsvg%3e') );
-			$link_today.addClass('icon-home');
-			$link_today.prop('alt', translate(locale,'today'));
-			$link_today.prop('title', translate(locale,'today'));
-			$link_today.click(function() {
-				var date = new Date();
-				draw(getParentPickerObject($picker), date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes());
-			});
-			$header.append($link_today);
-		}
-
-		if ($link_before_month != null) $header.append($link_before_month);
-		$header.append($now_month);
-		if ($link_next_month != null) $header.append($link_next_month);
-
-		/* Calendar > Table ----- */
-		$table.children().remove();
-		var $tr = $('<tr>');
-		$table.append($tr);
-
-		/* Output wday cells */
-		var firstDayDiff = 7 + firstDayOfWeek;
-		var daysOfWeek = translate(locale,'days');
-		var $td;
-		for (var i = 0; i < 7; i++) {
-			$td = $('<th>');
-			$td.text(daysOfWeek[((i + firstDayDiff) % 7)]);
-			$tr.append($td);
-		}
-
-		/* Output day cells */
-		var cellNum = Math.ceil((firstWday + lastDay) / 7) * 7;
-		i = 0;
-		if (firstWday < 0) i = -7;
-		
-		var realDayObj =  new Date(date.getTime());
-		realDayObj.setHours(0);
-		realDayObj.setMinutes(0);
-		realDayObj.setSeconds(0);
-		for (var zz = 0; i < cellNum; i++) {
-			var realDay = i + 1 - firstWday;
-
-			var isPast = isPastMonth || (isCurrentMonth && realDay < todayDate.getDate());
-
-			if (i % 7 === 0) {
-				$tr = $('<tr>');
-				$table.append($tr);
-			}
-
-			$td = $('<td>');
-			$td.data("day", realDay);
-
-			$tr.append($td);
-
-			if (firstWday > i) {/* Before months day */
-				$td.text(beforeMonthLastDay + realDay);
-				$td.addClass('day_another_month');
-				$td.data("dateStr", dateBeforeMonth.getFullYear() + "/" + (dateBeforeMonth.getMonth() + 1) + "/" + (beforeMonthLastDay + realDay));
-				realDayObj.setDate(beforeMonthLastDay + realDay);
-				realDayObj.setMonth(dateBeforeMonth.getMonth());
-				realDayObj.setYear(dateBeforeMonth.getFullYear());
-			} else if (i < firstWday + lastDay) {/* Now months day */
-				$td.text(realDay);
-				$td.data("dateStr", (date.getFullYear()) + "/" + (date.getMonth() + 1) + "/" + realDay);
-				realDayObj.setDate(realDay);
-				realDayObj.setMonth(date.getMonth());
-				realDayObj.setYear(date.getFullYear());
-			} else {/* Next months day */
-				$td.text(realDay - lastDay);
-				$td.addClass('day_another_month');
-				$td.data("dateStr", dateNextMonth.getFullYear() + "/" + (dateNextMonth.getMonth() + 1) + "/" + (realDay - lastDay));
-				realDayObj.setDate(realDay - lastDay);
-				realDayObj.setMonth(dateNextMonth.getMonth());
-				realDayObj.setYear(dateNextMonth.getFullYear());
-			}
-
-			/* Check a wday */
-			var wday = ((i + firstDayDiff) % 7);
-			if(allowWdays != null) {
-				if ($.inArray(wday, allowWdays) == -1) {
-					$td.addClass('day_in_unallowed');
-					continue; // Skip
-				}
-			} else if (wday === 0) {/* Sunday */
-				$td.addClass('wday_sun');
-			} else if (wday == 6) {/* Saturday */
-				$td.addClass('wday_sat');
-			}
-
-			/* Set a special mark class */
-			if (realDay == date.getDate()) $td.addClass('active');
-
-			if (isCurrentMonth && realDay == todayDate.getDate()) $td.addClass('today');
-
-			var realDayObjMN =  new Date(realDayObj.getTime());
-			realDayObjMN.setHours(23);
-			realDayObjMN.setMinutes(59);
-			realDayObjMN.setSeconds(59);
-
-			if (
-				// compare to 23:59:59 on the current day (if MIN is 1pm, then we still need to show this day
-				((minDate != null) && (minDate > realDayObjMN.getTime())) || ((maxDate != null) && (maxDate < realDayObj.getTime())) // compare to 00:00:00
-			) { // Out of range day
-				$td.addClass('out_of_range');
-			} else if (isFutureOnly && isPast) { // Past day
-				$td.addClass('day_in_past');
+			/* Header ----- */
+			$header.children().remove();
+	
+			var cDate = new Date(date.getTime());
+			cDate.setMinutes(59);
+			cDate.setHours(23);
+			cDate.setSeconds(59);
+			cDate.setDate(0); // last day of previous month
+	
+			var $link_before_month = null;
+			if ((!isFutureOnly || !isCurrentMonth) && ((minDate == null) || (minDate < cDate.getTime()))) {
+				$link_before_month = $('<a>');
+				$link_before_month.text('<');
+				$link_before_month.prop('alt', translate(locale,'prevMonth'));
+				$link_before_month.prop('title', translate(locale,'prevMonth') );
+				$link_before_month.click(function() {
+					beforeMonth($picker);
+				});
+				$picker.data('stateAllowBeforeMonth', true);
 			} else {
-				/* Set event-handler to day cell */
-				$td.click(function() {
-					if ($(this).hasClass('hover')) {
-						$(this).removeClass('hover');
-					}
-					$(this).addClass('active');
-
-					var $picker = getParentPickerObject($(this));
-					var targetDate = new Date($(this).data("dateStr"));
-					var selectedDate = getPickedDate($picker);
-					draw($picker, targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), selectedDate.getHours(), selectedDate.getMinutes());
+				$picker.data('stateAllowBeforeMonth', false);
+			}
+	
+			cDate.setMinutes(0);
+			cDate.setHours(0);
+			cDate.setSeconds(0);
+			cDate.setDate(1); // First day of next month
+			cDate.setMonth(date.getMonth() + 1);
+	
+			var $now_month = $('<span>');
+			$now_month.text(date.getFullYear() + " " + translate(locale, 'sep') + " " + translate(locale, 'months')[date.getMonth()]);
+	
+			var $link_next_month = null;
+			if ((maxDate == null) || (maxDate > cDate.getTime())) {
+				$link_next_month = $('<a>');
+				$link_next_month.text('>');
+				$link_next_month.prop('alt', translate(locale,'nextMonth'));
+				$link_next_month.prop('title', translate(locale,'nextMonth'));
+				$link_next_month.click(function() {
+					nextMonth($picker);
 				});
-
-				$td.hover(function() {
-					if (! $(this).hasClass('active')) {
-						$(this).addClass('hover');
-					}
-				}, function() {
-					if ($(this).hasClass('hover')) {
-						$(this).removeClass('hover');
-					}
+			}
+	
+			if (isTodayButton) {
+				var $link_today = $('<a/>');
+				/* This icon resource from a part of "FontAwesome" by Dave Gandy - http://fontawesome.io".
+					http://fortawesome.github.io/Font-Awesome/license/
+					Thankyou. */
+				$link_today.html(decodeURIComponent('%3c%3fxml%20version%3d%221%2e0%22%20encoding%3d%22UTF%2d8%22%20standalone%3d%22no%22%3f%3e%3csvg%20%20xmlns%3adc%3d%22http%3a%2f%2fpurl%2eorg%2fdc%2felements%2f1%2e1%2f%22%20%20xmlns%3acc%3d%22http%3a%2f%2fcreativecommons%2eorg%2fns%23%22%20xmlns%3ardf%3d%22http%3a%2f%2fwww%2ew3%2eorg%2f1999%2f02%2f22%2drdf%2dsyntax%2dns%23%22%20%20xmlns%3asvg%3d%22http%3a%2f%2fwww%2ew3%2eorg%2f2000%2fsvg%22%20xmlns%3d%22http%3a%2f%2fwww%2ew3%2eorg%2f2000%2fsvg%22%20%20version%3d%221%2e1%22%20%20width%3d%22100%25%22%20%20height%3d%22100%25%22%20viewBox%3d%220%200%2010%2010%22%3e%3cg%20transform%3d%22translate%28%2d5%2e5772299%2c%2d26%2e54581%29%22%3e%3cpath%20d%3d%22m%2014%2e149807%2c31%2e130932%20c%200%2c%2d0%2e01241%200%2c%2d0%2e02481%20%2d0%2e0062%2c%2d0%2e03721%20L%2010%2e57723%2c28%2e153784%207%2e0108528%2c31%2e093719%20c%200%2c0%2e01241%20%2d0%2e0062%2c0%2e02481%20%2d0%2e0062%2c0%2e03721%20l%200%2c2%2e97715%20c%200%2c0%2e217084%200%2e1798696%2c0%2e396953%200%2e3969534%2c0%2e396953%20l%202%2e3817196%2c0%200%2c%2d2%2e38172%201%2e5878132%2c0%200%2c2%2e38172%202%2e381719%2c0%20c%200%2e217084%2c0%200%2e396953%2c%2d0%2e179869%200%2e396953%2c%2d0%2e396953%20l%200%2c%2d2%2e97715%20m%201%2e383134%2c%2d0%2e427964%20c%200%2e06823%2c%2d0%2e08063%200%2e05582%2c%2d0%2e210882%20%2d0%2e02481%2c%2d0%2e279108%20l%20%2d1%2e358324%2c%2d1%2e128837%200%2c%2d2%2e530576%20c%200%2c%2d0%2e111643%20%2d0%2e08683%2c%2d0%2e198477%20%2d0%2e198477%2c%2d0%2e198477%20l%20%2d1%2e190859%2c0%20c%20%2d0%2e111643%2c0%20%2d0%2e198477%2c0%2e08683%20%2d0%2e198477%2c0%2e198477%20l%200%2c1%2e209467%20%2d1%2e513384%2c%2d1%2e265289%20c%20%2d0%2e2605%2c%2d0%2e217083%20%2d0%2e682264%2c%2d0%2e217083%20%2d0%2e942764%2c0%20L%205%2e6463253%2c30%2e42386%20c%20%2d0%2e080631%2c0%2e06823%20%2d0%2e093036%2c0%2e198476%20%2d0%2e024809%2c0%2e279108%20l%200%2e3845485%2c0%2e458976%20c%200%2e031012%2c0%2e03721%200%2e080631%2c0%2e06203%200%2e1302503%2c0%2e06823%200%2e055821%2c0%2e0062%200%2e1054407%2c%2d0%2e01241%200%2e1488574%2c%2d0%2e04342%20l%204%2e2920565%2c%2d3%2e578782%204%2e292058%2c3%2e578782%20c%200%2e03721%2c0%2e03101%200%2e08063%2c0%2e04342%200%2e13025%2c0%2e04342%200%2e0062%2c0%200%2e01241%2c0%200%2e01861%2c0%200%2e04962%2c%2d0%2e0062%200%2e09924%2c%2d0%2e03101%200%2e130251%2c%2d0%2e06823%20l%200%2e384549%2c%2d0%2e458976%22%20%2f%3e%3c%2fg%3e%3c%2fsvg%3e') );
+				$link_today.addClass('icon-home');
+				$link_today.prop('alt', translate(locale,'today'));
+				$link_today.prop('title', translate(locale,'today'));
+				$link_today.click(function() {
+					var date = new Date();
+					draw(getParentPickerObject($picker), date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes());
 				});
+				$header.append($link_today);
+			}
+	
+			if ($link_before_month != null) $header.append($link_before_month);
+			$header.append($now_month);
+			if ($link_next_month != null) $header.append($link_next_month);
+	
+			/* Calendar > Table ----- */
+			$table.children().remove();
+			var $tr = $('<tr>');
+			$table.append($tr);
+	
+			/* Output wday cells */
+			var firstDayDiff = 7 + firstDayOfWeek;
+			var daysOfWeek = translate(locale,'days');
+			var $td;
+			for (var i = 0; i < 7; i++) {
+				$td = $('<th>');
+				$td.text(daysOfWeek[((i + firstDayDiff) % 7)]);
+				$tr.append($td);
+			}
+	
+			/* Output day cells */
+			var cellNum = Math.ceil((firstWday + lastDay) / 7) * 7;
+			i = 0;
+			if (firstWday < 0) i = -7;
+			
+			var realDayObj =  new Date(date.getTime());
+			realDayObj.setHours(0);
+			realDayObj.setMinutes(0);
+			realDayObj.setSeconds(0);
+			for (var zz = 0; i < cellNum; i++) {
+				var realDay = i + 1 - firstWday;
+	
+				var isPast = isPastMonth || (isCurrentMonth && realDay < todayDate.getDate());
+	
+				if (i % 7 === 0) {
+					$tr = $('<tr>');
+					$table.append($tr);
+				}
+	
+				$td = $('<td>');
+				$td.data("day", realDay);
+	
+				$tr.append($td);
+	
+				if (firstWday > i) {/* Before months day */
+					$td.text(beforeMonthLastDay + realDay);
+					$td.addClass('day_another_month');
+					$td.data("dateStr", dateBeforeMonth.getFullYear() + "/" + (dateBeforeMonth.getMonth() + 1) + "/" + (beforeMonthLastDay + realDay));
+					realDayObj.setDate(beforeMonthLastDay + realDay);
+					realDayObj.setMonth(dateBeforeMonth.getMonth());
+					realDayObj.setYear(dateBeforeMonth.getFullYear());
+				} else if (i < firstWday + lastDay) {/* Now months day */
+					$td.text(realDay);
+					$td.data("dateStr", (date.getFullYear()) + "/" + (date.getMonth() + 1) + "/" + realDay);
+					realDayObj.setDate(realDay);
+					realDayObj.setMonth(date.getMonth());
+					realDayObj.setYear(date.getFullYear());
+				} else {/* Next months day */
+					$td.text(realDay - lastDay);
+					$td.addClass('day_another_month');
+					$td.data("dateStr", dateNextMonth.getFullYear() + "/" + (dateNextMonth.getMonth() + 1) + "/" + (realDay - lastDay));
+					realDayObj.setDate(realDay - lastDay);
+					realDayObj.setMonth(dateNextMonth.getMonth());
+					realDayObj.setYear(dateNextMonth.getFullYear());
+				}
+	
+				/* Check a wday */
+				var wday = ((i + firstDayDiff) % 7);
+				if(allowWdays != null) {
+					if ($.inArray(wday, allowWdays) == -1) {
+						$td.addClass('day_in_unallowed');
+						continue; // Skip
+					}
+				} else if (wday === 0) {/* Sunday */
+					$td.addClass('wday_sun');
+				} else if (wday == 6) {/* Saturday */
+					$td.addClass('wday_sat');
+				}
+	
+				/* Set a special mark class */
+				if (realDay == date.getDate()) $td.addClass('active');
+	
+				if (isCurrentMonth && realDay == todayDate.getDate()) $td.addClass('today');
+	
+				var realDayObjMN =  new Date(realDayObj.getTime());
+				realDayObjMN.setHours(23);
+				realDayObjMN.setMinutes(59);
+				realDayObjMN.setSeconds(59);
+	
+				if (
+					// compare to 23:59:59 on the current day (if MIN is 1pm, then we still need to show this day
+					((minDate != null) && (minDate > realDayObjMN.getTime())) || ((maxDate != null) && (maxDate < realDayObj.getTime())) // compare to 00:00:00
+				) { // Out of range day
+					$td.addClass('out_of_range');
+				} else if (isFutureOnly && isPast) { // Past day
+					$td.addClass('day_in_past');
+				} else {
+					/* Set event-handler to day cell */
+					$td.click(function() {
+						if ($(this).hasClass('hover')) {
+							$(this).removeClass('hover');
+						}
+						$(this).addClass('active');
+	
+						var $picker = getParentPickerObject($(this));
+						var targetDate = new Date($(this).data("dateStr"));
+						var selectedDate = getPickedDate($picker);
+						draw($picker, targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), selectedDate.getHours(), selectedDate.getMinutes());
+					});
+	
+					$td.hover(function() {
+						if (! $(this).hasClass('active')) {
+							$(this).addClass('hover');
+						}
+					}, function() {
+						if ($(this).hasClass('hover')) {
+							$(this).removeClass('hover');
+						}
+					});
+				}
 			}
 		}
 		
@@ -521,6 +526,7 @@
 			"firstDayOfWeek": 0,
 			"todayButton": true,
 			"dateOnly": false,
+			"timeOnly": false,
 			"futureOnly": false,
 			"minDate" : null,
 			"maxDate" : null,
@@ -540,6 +546,7 @@
 
 		/* Set options data to container object  */
 		$picker.data("dateOnly", opt.dateOnly);
+		$picker.data("timeOnly", opt.timeOnly);
 		$picker.data("locale", opt.locale);
 		$picker.data("firstDayOfWeek", opt.firstDayOfWeek);
 		$picker.data("todayButton", opt.todayButton);
