@@ -15,10 +15,11 @@ JS.Packages(function() {with(this) {
     
     // Util
     var UTIL_ROOT = MYT_ROOT + 'util/';
-    file(UTIL_ROOT + 'Cookie.js'  ).provides('myt.Cookie'  ).requires('myt');
-    file(UTIL_ROOT + 'URI.js'     ).provides('myt.URI'     ).requires('myt');
-    file(UTIL_ROOT + 'XML.js'     ).provides('myt.XML'     ).requires('myt');
-    file(UTIL_ROOT + 'Geometry.js').provides('myt.Geometry').requires('myt');
+    file(UTIL_ROOT + 'Cookie.js'      ).provides('myt.Cookie'      ).requires('myt');
+    file(UTIL_ROOT + 'LocalStorage.js').provides('myt.LocalStorage').requires('myt');
+    file(UTIL_ROOT + 'URI.js'         ).provides('myt.URI'         ).requires('myt');
+    file(UTIL_ROOT + 'XML.js'         ).provides('myt.XML'         ).requires('myt');
+    file(UTIL_ROOT + 'Geometry.js'    ).provides('myt.Geometry'    ).requires('myt');
     
     // Core
     var MYT_CORE_ROOT = MYT_ROOT + 'core/';
@@ -355,7 +356,7 @@ JS.Packages(function() {with(this) {
     
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
-        'myt.Cookie',
+        'myt.Cookie','myt.LocalStorage',
         'myt.global.error','myt.global.keys','myt.global.touch','myt.global.history',
         'myt.Text','myt.Markup','myt.Frame','myt.SizeWidthToDom','myt.SizeHeightToDom','myt.SizeToParent',
         'myt.SizeToWindowWidth','myt.SizeToWindowHeight',
