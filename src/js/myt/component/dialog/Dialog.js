@@ -478,7 +478,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         var pickerView = new V(picker, {});
         
         $(pickerView.domElement).dtpicker({
-            current:opts.initialDate || Date.now(),
+            current:new Date(opts.initialDate || Date.now()),
             dateOnly:opts.dateOnly || false,
             timeOnly:opts.timeOnly || false,
             dialog:this
