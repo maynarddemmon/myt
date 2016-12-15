@@ -4049,7 +4049,7 @@ JS.Singleton = new JS.Class('Singleton', {
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20161018.1549,
+    version:20161215.1343,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -4679,7 +4679,6 @@ myt.LocalStorage = (function() {
         };
     
     return {
-        // Methods /////////////////////////////////////////////////////////////////
         /** Check if data has been stored under the key and storage id.
             @param key:string the key to look for.
             @param storeId:string (optional) id of the data store to look in. If
@@ -23484,7 +23483,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         var pickerView = new V(picker, {});
         
         $(pickerView.domElement).dtpicker({
-            current:opts.initialDate || Date.now(),
+            current:new Date(opts.initialDate || Date.now()),
             dateOnly:opts.dateOnly || false,
             timeOnly:opts.timeOnly || false,
             dialog:this
@@ -29727,11 +29726,11 @@ myt.FontAwesome = new JS.Class('FontAwesome', myt.Markup, {
     }
 });
 
-myt.loadScript('//ajax.googleapis.com/ajax/libs/webfont/1.6.16/webfont.js', function() {
+myt.loadScript('//ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js', function() {
     WebFont.load({
         custom: {
             families: ['FontAwesome'],
-            urls: ['//maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css'],
+            urls: ['//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css'],
             testStrings: {'FontAwesome':'\uf00c\uf000'}
         },
         fontactive: function(familyName, fvd) {
