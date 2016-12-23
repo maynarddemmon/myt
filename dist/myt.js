@@ -4049,7 +4049,7 @@ JS.Singleton = new JS.Class('Singleton', {
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20161215.1343,
+    version:20161223.0104,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -17164,7 +17164,14 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
             if (!item) item = items[i] = new cfgClass(contentView, {listView:this});
             
             // Apply config to item
-            if (item) item.callSetters(cfgAttrs);
+            if (item) {
+                item.callSetters(cfgAttrs);
+                
+                // Create an item index to sort the layout subviews on. This
+                // is necessary when the class of list items change so that the
+                // newly created items don't end up out of order.
+                item.__LAYOUT_IDX = i;
+            }
         }
         
         // Performance: Put back in dom.
@@ -17190,6 +17197,7 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
         i = layoutLen;
         while (i) {
             layout = layouts[--i];
+            layout.sortSubviews(function(a, b) {return a.__LAYOUT_IDX - b.__LAYOUT_IDX;});
             layout.decrementLockedCounter();
             layout.update();
         }
