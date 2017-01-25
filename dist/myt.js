@@ -4049,7 +4049,7 @@ JS.Singleton = new JS.Class('Singleton', {
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20170124.1909,
+    version:20170124.1951,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -20722,7 +20722,7 @@ myt.FormElement = new JS.Module('FormElement', {
     
     /** @overrides myt.Form */
     verifyChangedState: function(subformToIgnore) {
-        var isChanged = this.value !== this.rollbackValue;
+        var isChanged = this.getValue() !== this.getRollbackValue();
         this.setIsChanged(isChanged);
         return isChanged;
     },
@@ -20732,7 +20732,7 @@ myt.FormElement = new JS.Module('FormElement', {
         this._lockCascade = true;
         
         // Reset values to uninitialized state to make repeated calls to
-        // setup behave identically.
+        // setup behave identically. Otherwise values could bleed through.
         this.defaultValue = undefined;
         this.rollbackValue = undefined;
         this.value = undefined;

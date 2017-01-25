@@ -154,7 +154,7 @@ myt.FormElement = new JS.Module('FormElement', {
     
     /** @overrides myt.Form */
     verifyChangedState: function(subformToIgnore) {
-        var isChanged = this.value !== this.rollbackValue;
+        var isChanged = this.getValue() !== this.getRollbackValue();
         this.setIsChanged(isChanged);
         return isChanged;
     },
@@ -164,7 +164,7 @@ myt.FormElement = new JS.Module('FormElement', {
         this._lockCascade = true;
         
         // Reset values to uninitialized state to make repeated calls to
-        // setup behave identically.
+        // setup behave identically. Otherwise values could bleed through.
         this.defaultValue = undefined;
         this.rollbackValue = undefined;
         this.value = undefined;
