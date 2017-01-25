@@ -17,7 +17,7 @@
             this select list.
 */
 myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
-    include: [myt.SizeHeightToDom],
+    include: [myt.SizeToDom],
     
     
     // Life Cycle //////////////////////////////////////////////////////////////

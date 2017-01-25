@@ -4010,7 +4010,7 @@ JS.Singleton = new JS.Class('Singleton', {
 /**
  * Myt: A simple javascript UI framework
  * http://github.com/maynarddemmon/myt
- * Copyright (c) 2012-2016 Maynard Demmon and contributors
+ * Copyright (c) 2012-2017 Maynard Demmon and contributors
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -4049,7 +4049,7 @@ JS.Singleton = new JS.Class('Singleton', {
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20161223.0104,
+    version:20170124.1909,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -24431,7 +24431,7 @@ myt.UseOtherFieldIfEmptyValueProcessor = new JS.Class('UseOtherFieldIfEmptyValue
             this select list.
 */
 myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
-    include: [myt.SizeHeightToDom],
+    include: [myt.SizeToDom],
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
