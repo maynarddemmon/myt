@@ -103,20 +103,20 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    addTransition: function(transition, from, to) {
+    addTransition: function(transitionName, from, to) {
         var map = this.map;
         
-        if (!from) {
-            from = [myt.StateMachine.WILDCARD];
-        } else {
+        if (from) {
             from = Array.isArray(from) ? from : [from];
+        } else {
+            from = [myt.StateMachine.WILDCARD];
         }
         
         var i = from.length, mapEntry;
         while (i) {
             mapEntry = map[from[--i]];
             if (!mapEntry) mapEntry = map[from[i]] = {};
-            mapEntry[transition] = to;
+            mapEntry[transitionName] = to;
         }
     },
     
@@ -148,7 +148,7 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
         }
         
         var async = args.shift(),
-            transition = args.shift();
+            transitionName = args.shift();
         
         // Invalid to start a transition if one is still pending.
         var SM = myt.StateMachine;
@@ -160,10 +160,10 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
             return SM.NO_TRANSITION;
         }
         
-        var to = this.map[this.current][transition];
-        if (!to) to = this.map[SM.WILDCARD][transition];
+        var to = this.map[this.current][transitionName];
+        if (!to) to = this.map[SM.WILDCARD][transitionName];
         if (to) {
-            this.__pendingTransition = transition;
+            this.__pendingTransition = transitionName;
             this.__transitionDestinationState = to;
             this.__additionalArgs = args;
             return this.resumeTransition(async);
@@ -174,34 +174,34 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
     },
     
     resumeTransition: function(async) {
-        var transition = this.__pendingTransition;
+        var transitionName = this.__pendingTransition;
         
         // Invalid to resume a transition if none is pending.
         var SM = myt.StateMachine;
-        if (!transition) return SM.INVALID;
+        if (!transitionName) return SM.INVALID;
         
         var current = this.current,
             to = this.__transitionDestinationState,
             args = this.__additionalArgs,
-            eventValue = {name:transition, from:current, to:to, args:args};
+            eventValue = {name:transitionName, from:current, to:to, args:args};
         
         switch (this.__transitionStage) {
             case 'leaveState':
-                var result = this.doLeaveState(transition, current, to, args);
+                var result = this.doLeaveState(transitionName, current, to, args);
                 if (result === false) {
                     this.__resetTransitionProgress();
                     this.__doDeferredTransitions();
                     return SM.CANCELLED;
                 } else if (result === SM.ASYNC || async === SM.ASYNC) {
                     this.__transitionStage = 'enterState';
-                    this.fireNewEvent('start' + transition, eventValue);
+                    this.fireNewEvent('start' + transitionName, eventValue);
                     this.fireNewEvent('start', eventValue);
                     this.fireNewEvent('leave' + current, eventValue);
                     this.fireNewEvent('leave', eventValue);
                     this.__doDeferredTransitions(); // FIXME: Is there a bug here if a transition starts in the middle of an async transition?
                     return SM.PENDING;
                 } else {
-                    this.fireNewEvent('start' + transition, eventValue);
+                    this.fireNewEvent('start' + transitionName, eventValue);
                     this.fireNewEvent('start', eventValue);
                     this.fireNewEvent('leave' + current, eventValue);
                     this.fireNewEvent('leave', eventValue);
@@ -210,10 +210,10 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
             case 'enterState':
                 this.current = to;
                 this.__resetTransitionProgress();
-                this.doEnterState(transition, current, to, args);
+                this.doEnterState(transitionName, current, to, args);
                 this.fireNewEvent('enter' + to, eventValue);
                 this.fireNewEvent('enter', eventValue);
-                this.fireNewEvent('end' + transition, eventValue);
+                this.fireNewEvent('end' + transitionName, eventValue);
                 this.fireNewEvent('end', eventValue);
                 if (this.isFinished()) this.fireNewEvent('finished', eventValue);
         }
@@ -234,11 +234,11 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
         }
     },
     
-    doLeaveState: function(transition, from, to, args) {
+    doLeaveState: function(transitionName, from, to, args) {
         // Subclasses to implement as needed.
     },
     
-    doEnterState: function(transition, from, to, args) {
+    doEnterState: function(transitionName, from, to, args) {
         // Subclasses to implement as needed.
     },
     
@@ -266,11 +266,11 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
         }
     },
     
-    can: function(transition) {
-        if (this.map[this.current][transition] !== undefined) {
+    can: function(transitionName) {
+        if (this.map[this.current][transitionName] !== undefined) {
             return true;
         } else {
-            return this.map[myt.StateMachine.WILDCARD][transition] !== undefined;
+            return this.map[myt.StateMachine.WILDCARD][transitionName] !== undefined;
         }
     }
 });

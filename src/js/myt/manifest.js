@@ -270,8 +270,11 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'tab/SimpleTab.js'       ).provides('myt.SimpleTab'       ).requires('myt.SimpleIconTextButton','myt.TabMixin');
     
     // Component : Panel Stack
-    file(MYT_COMPONENT_ROOT + 'panelstack/StackablePanel.js').provides('myt.StackablePanel').requires('myt.SelectionManager');
-    file(MYT_COMPONENT_ROOT + 'panelstack/PanelStack.js'    ).provides('myt.PanelStack'    ).requires('myt.StackablePanel','myt.View');
+    file(MYT_COMPONENT_ROOT + 'panelstack/StackablePanel.js'           ).provides('myt.StackablePanel'           ).requires('myt.SelectionManager');
+    file(MYT_COMPONENT_ROOT + 'panelstack/PanelStackTransition.js'     ).provides('myt.PanelStackTransition'     ).requires('myt.Node');
+    file(MYT_COMPONENT_ROOT + 'panelstack/PanelStackFadeTransition.js' ).provides('myt.PanelStackFadeTransition' ).requires('myt.PanelStackTransition');
+    file(MYT_COMPONENT_ROOT + 'panelstack/PanelStackSlideTransition.js').provides('myt.PanelStackSlideTransition').requires('myt.PanelStackTransition');
+    file(MYT_COMPONENT_ROOT + 'panelstack/PanelStack.js'               ).provides('myt.PanelStack'               ).requires('myt.StackablePanel','myt.PanelStackFadeTransition','myt.PanelStackSlideTransition','myt.View');
     
     // Component : Input
     file(MYT_COMPONENT_ROOT + 'input/InputObservable.js'   ).provides('myt.InputObservable'   ).requires('myt.DomObservable');

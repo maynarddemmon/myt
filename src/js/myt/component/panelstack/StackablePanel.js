@@ -28,6 +28,11 @@ myt.StackablePanel = new JS.Module('StackablePanel', {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setPanelStack: function(v) {this.panelStack = v;},
+    
+    getPanelStack: function() {
+        return this.panelStack || this.parent;
+    },
+    
     setPanelId: function(v) {this.panelId = v;},
     
     /** @overrides myt.Selectable */
@@ -45,6 +50,6 @@ myt.StackablePanel = new JS.Module('StackablePanel', {
         method.
         @returns void */
     doStackTransition: function() {
-        (this.panelStack || this.parent).doStackTransition(this);
+        this.getPanelStack().doStackTransition(this);
     }
 });

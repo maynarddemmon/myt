@@ -29,6 +29,10 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
     },
     
     
+    // Accessors ///////////////////////////////////////////////////////////////
+    setTransition: function(transition) {this.set('transition', transition, true);},
+    
+    
     // Methods /////////////////////////////////////////////////////////////////
     /** @private */
     __updateWidth: function(event) {
@@ -66,12 +70,54 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
     },
     
     /** Called by a panel when it transitions between selected states. Should
-        not be called directly.
+        not be called directly. Instead change the panel selection.
         @param panel:myt.StackablePanel The panel that is transitioning.
         @returns void */
     doStackTransition: function(panel) {
-        var selected = panel.selected;
-        if (selected) panel.makeHighestZIndex();
-        panel.setVisible(selected);
-    }
+        this['doStackTransition' + (panel.selected ? 'To' : 'From')](panel);
+    },
+    
+    /** Called by PanelStack.doStackTransition when the provided panel will be 
+        the newly selected panel in the stack. Should not be called directly. 
+        Instead change the panel selection.
+        @param panel:myt.StackablePanel The panel that is transitioning.
+        @returns void */
+    doStackTransitionTo: function(panel) {
+        this.doBeforeTransitionTo(panel);
+        
+        var transition = this.transition;
+        if (transition) {
+            var self = this;
+            transition.to(panel).next(function() {self.doAfterTransitionTo(panel)});
+        } else {
+            panel.makeHighestZIndex();
+            panel.setVisible(true);
+            
+            this.doAfterTransitionTo(panel);
+        }
+    },
+    
+    doBeforeTransitionTo: function(panel) {},
+    doAfterTransitionTo: function(panel) {},
+    
+    /** Called by PanelStack.doStackTransition when the provided panel will be 
+        the newly deselected panel in the stack. Should not be called directly. 
+        Instead change the panel selection.
+        @param panel:myt.StackablePanel The panel that is transitioning.
+        @returns void */
+    doStackTransitionFrom: function(panel) {
+        this.doBeforeTransitionFrom(panel);
+        
+        var transition = this.transition;
+        if (transition) {
+            var self = this;
+            transition.from(panel).next(function() {self.doAfterTransitionFrom(panel)});
+        } else {
+            panel.setVisible(false);
+            this.doAfterTransitionFrom(panel);
+        }
+    },
+    
+    doBeforeTransitionFrom: function(panel) {},
+    doAfterTransitionFrom: function(panel) {},
 });

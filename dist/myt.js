@@ -4049,7 +4049,7 @@ JS.Singleton = new JS.Class('Singleton', {
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20170124.1951,
+    version:20170125.1634,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -12124,20 +12124,20 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    addTransition: function(transition, from, to) {
+    addTransition: function(transitionName, from, to) {
         var map = this.map;
         
-        if (!from) {
-            from = [myt.StateMachine.WILDCARD];
-        } else {
+        if (from) {
             from = Array.isArray(from) ? from : [from];
+        } else {
+            from = [myt.StateMachine.WILDCARD];
         }
         
         var i = from.length, mapEntry;
         while (i) {
             mapEntry = map[from[--i]];
             if (!mapEntry) mapEntry = map[from[i]] = {};
-            mapEntry[transition] = to;
+            mapEntry[transitionName] = to;
         }
     },
     
@@ -12169,7 +12169,7 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
         }
         
         var async = args.shift(),
-            transition = args.shift();
+            transitionName = args.shift();
         
         // Invalid to start a transition if one is still pending.
         var SM = myt.StateMachine;
@@ -12181,10 +12181,10 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
             return SM.NO_TRANSITION;
         }
         
-        var to = this.map[this.current][transition];
-        if (!to) to = this.map[SM.WILDCARD][transition];
+        var to = this.map[this.current][transitionName];
+        if (!to) to = this.map[SM.WILDCARD][transitionName];
         if (to) {
-            this.__pendingTransition = transition;
+            this.__pendingTransition = transitionName;
             this.__transitionDestinationState = to;
             this.__additionalArgs = args;
             return this.resumeTransition(async);
@@ -12195,34 +12195,34 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
     },
     
     resumeTransition: function(async) {
-        var transition = this.__pendingTransition;
+        var transitionName = this.__pendingTransition;
         
         // Invalid to resume a transition if none is pending.
         var SM = myt.StateMachine;
-        if (!transition) return SM.INVALID;
+        if (!transitionName) return SM.INVALID;
         
         var current = this.current,
             to = this.__transitionDestinationState,
             args = this.__additionalArgs,
-            eventValue = {name:transition, from:current, to:to, args:args};
+            eventValue = {name:transitionName, from:current, to:to, args:args};
         
         switch (this.__transitionStage) {
             case 'leaveState':
-                var result = this.doLeaveState(transition, current, to, args);
+                var result = this.doLeaveState(transitionName, current, to, args);
                 if (result === false) {
                     this.__resetTransitionProgress();
                     this.__doDeferredTransitions();
                     return SM.CANCELLED;
                 } else if (result === SM.ASYNC || async === SM.ASYNC) {
                     this.__transitionStage = 'enterState';
-                    this.fireNewEvent('start' + transition, eventValue);
+                    this.fireNewEvent('start' + transitionName, eventValue);
                     this.fireNewEvent('start', eventValue);
                     this.fireNewEvent('leave' + current, eventValue);
                     this.fireNewEvent('leave', eventValue);
                     this.__doDeferredTransitions(); // FIXME: Is there a bug here if a transition starts in the middle of an async transition?
                     return SM.PENDING;
                 } else {
-                    this.fireNewEvent('start' + transition, eventValue);
+                    this.fireNewEvent('start' + transitionName, eventValue);
                     this.fireNewEvent('start', eventValue);
                     this.fireNewEvent('leave' + current, eventValue);
                     this.fireNewEvent('leave', eventValue);
@@ -12231,10 +12231,10 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
             case 'enterState':
                 this.current = to;
                 this.__resetTransitionProgress();
-                this.doEnterState(transition, current, to, args);
+                this.doEnterState(transitionName, current, to, args);
                 this.fireNewEvent('enter' + to, eventValue);
                 this.fireNewEvent('enter', eventValue);
-                this.fireNewEvent('end' + transition, eventValue);
+                this.fireNewEvent('end' + transitionName, eventValue);
                 this.fireNewEvent('end', eventValue);
                 if (this.isFinished()) this.fireNewEvent('finished', eventValue);
         }
@@ -12255,11 +12255,11 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
         }
     },
     
-    doLeaveState: function(transition, from, to, args) {
+    doLeaveState: function(transitionName, from, to, args) {
         // Subclasses to implement as needed.
     },
     
-    doEnterState: function(transition, from, to, args) {
+    doEnterState: function(transitionName, from, to, args) {
         // Subclasses to implement as needed.
     },
     
@@ -12287,11 +12287,11 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
         }
     },
     
-    can: function(transition) {
-        if (this.map[this.current][transition] !== undefined) {
+    can: function(transitionName) {
+        if (this.map[this.current][transitionName] !== undefined) {
             return true;
         } else {
-            return this.map[myt.StateMachine.WILDCARD][transition] !== undefined;
+            return this.map[myt.StateMachine.WILDCARD][transitionName] !== undefined;
         }
     }
 });
@@ -29916,6 +29916,11 @@ myt.StackablePanel = new JS.Module('StackablePanel', {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setPanelStack: function(v) {this.panelStack = v;},
+    
+    getPanelStack: function() {
+        return this.panelStack || this.parent;
+    },
+    
     setPanelId: function(v) {this.panelId = v;},
     
     /** @overrides myt.Selectable */
@@ -29933,7 +29938,189 @@ myt.StackablePanel = new JS.Module('StackablePanel', {
         method.
         @returns void */
     doStackTransition: function() {
-        (this.panelStack || this.parent).doStackTransition(this);
+        this.getPanelStack().doStackTransition(this);
+    }
+});
+
+
+/** Use this to implement more complex transitions in a PanelStack. */
+myt.PanelStackTransition = new JS.Class('PanelStackTransition', myt.Node, {
+    // Methods /////////////////////////////////////////////////////////////////
+    /** Called when transitioning to the provided panel.
+        @param panel:myt.StackablePanel
+        @returns a promise object that has a next function. */
+    to: function(panel) {
+        // Default implementation keeps the promise right away.
+        var promise = this._makePromise(panel);
+        promise.keep();
+        return promise;
+    },
+    
+    /** Called when transitioning from the provided panel.
+        @param panel:myt.StackablePanel
+        @returns a promise object that has a next function. */
+    from: function(panel) {
+        // Default implementation keeps the promise right away.
+        var promise = this._makePromise(panel);
+        promise.keep();
+        return promise;
+    },
+    
+    /** @private */
+    _makePromise: function(panel) {
+        var promise = {
+            next:function(nextFunc) {
+                if (promise.kept) {
+                    // Execute next immediately since the promise has
+                    // already been kept
+                    nextFunc(panel);
+                } else {
+                    // Store the next function so it can be called later once
+                    // the promise is kept
+                    promise._nextFunc = nextFunc;
+                }
+            },
+            
+            keep:function() {
+                promise.kept = true;
+                
+                // If a next function exists then execute it since now the
+                // promise has been kept.
+                if (promise._nextFunc) promise._nextFunc(panel);
+            }
+        };
+        return promise;
+    }
+});
+
+
+/** A PanelStackTransition that fades the opacity between the two panels. */
+myt.PanelStackFadeTransition = new JS.Class('PanelStackFadeTransition', myt.PanelStackTransition, {
+    // Life Cycle //////////////////////////////////////////////////////////////
+    /** @overrides */
+    initNode: function(parent, attrs) {
+        if (attrs.duration == null) attrs.duration = 1000;
+        
+        this.callSuper(parent, attrs);
+    },
+    
+    
+    // Accessors ///////////////////////////////////////////////////////////////
+    setDuration: function(duration) {this.duration = duration;},
+    
+    
+    // Methods /////////////////////////////////////////////////////////////////
+    to: function(panel) {
+        var promise = this._makePromise(panel);
+        
+        panel.stopActiveAnimators('opacity');
+        panel.setVisible(true);
+        panel.animate({attribute:'opacity', to:1, duration:this.duration}).next(function(success) {
+            panel.makeHighestZIndex();
+            promise.keep();
+        });
+        
+        return promise;
+    },
+    
+    from: function(panel) {
+        var promise = this._makePromise(panel);
+        
+        panel.stopActiveAnimators('opacity');
+        panel.animate({attribute:'opacity', to:0, duration:this.duration}).next(function(success) {
+            panel.setVisible(false);
+            promise.keep();
+        });
+        
+        return promise;
+    }
+});
+
+
+/** A PanelStackTransition that slides between the from and to panel. */
+myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.PanelStackTransition, {
+    // Life Cycle //////////////////////////////////////////////////////////////
+    /** @overrides */
+    initNode: function(parent, attrs) {
+        if (attrs.duration == null) attrs.duration = 1000;
+        if (attrs.direction == null) attrs.direction = 'right';
+        
+        this.callSuper(parent, attrs);
+    },
+    
+    
+    // Accessors ///////////////////////////////////////////////////////////////
+    setDuration: function(duration) {this.duration = duration;},
+    setDirection: function(direction) {this.direction = direction;},
+    
+    
+    // Methods /////////////////////////////////////////////////////////////////
+    to: function(panel) {
+        var promise = this._makePromise(panel);
+        
+        var panelStack = panel.getPanelStack(),
+            toValue, axis;
+        switch (this.direction) {
+            case 'left':
+                axis = 'x';
+                toValue = panelStack.width;
+                break;
+            case 'right':
+                axis = 'x';
+                toValue = -panelStack.width;
+                break;
+            case 'up':
+                axis = 'y';
+                toValue = panelStack.height;
+                break;
+            case 'down':
+                axis = 'y';
+                toValue = -panelStack.height;
+                break;
+        }
+        
+        panel.stopActiveAnimators(axis);
+        panel.set(axis, toValue);
+        panel.setVisible(true);
+        panel.animate({attribute:axis, to:0, duration:this.duration}).next(function(success) {
+            panel.makeHighestZIndex();
+            promise.keep();
+        });
+        
+        return promise;
+    },
+    
+    from: function(panel) {
+        var promise = this._makePromise(panel);
+        
+        var panelStack = panel.getPanelStack(),
+            toValue, axis;
+        switch (this.direction) {
+            case 'left':
+                axis = 'x';
+                toValue = -panelStack.width;
+                break;
+            case 'right':
+                axis = 'x';
+                toValue = panelStack.width;
+                break;
+            case 'up':
+                axis = 'y';
+                toValue = -panelStack.height;
+                break;
+            case 'down':
+                axis = 'y';
+                toValue = panelStack.height;
+                break;
+        }
+        
+        panel.stopActiveAnimators(axis);
+        panel.animate({attribute:axis, to:toValue, duration:this.duration}).next(function(success) {
+            panel.setVisible(false);
+            promise.keep();
+        });
+        
+        return promise;
     }
 });
 
@@ -29967,6 +30154,10 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
         this.syncTo(this, '__updateHeight', 'height');
         this.syncTo(this, '__updateWidth', 'width');
     },
+    
+    
+    // Accessors ///////////////////////////////////////////////////////////////
+    setTransition: function(transition) {this.set('transition', transition, true);},
     
     
     // Methods /////////////////////////////////////////////////////////////////
@@ -30006,14 +30197,56 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
     },
     
     /** Called by a panel when it transitions between selected states. Should
-        not be called directly.
+        not be called directly. Instead change the panel selection.
         @param panel:myt.StackablePanel The panel that is transitioning.
         @returns void */
     doStackTransition: function(panel) {
-        var selected = panel.selected;
-        if (selected) panel.makeHighestZIndex();
-        panel.setVisible(selected);
-    }
+        this['doStackTransition' + (panel.selected ? 'To' : 'From')](panel);
+    },
+    
+    /** Called by PanelStack.doStackTransition when the provided panel will be 
+        the newly selected panel in the stack. Should not be called directly. 
+        Instead change the panel selection.
+        @param panel:myt.StackablePanel The panel that is transitioning.
+        @returns void */
+    doStackTransitionTo: function(panel) {
+        this.doBeforeTransitionTo(panel);
+        
+        var transition = this.transition;
+        if (transition) {
+            var self = this;
+            transition.to(panel).next(function() {self.doAfterTransitionTo(panel)});
+        } else {
+            panel.makeHighestZIndex();
+            panel.setVisible(true);
+            
+            this.doAfterTransitionTo(panel);
+        }
+    },
+    
+    doBeforeTransitionTo: function(panel) {},
+    doAfterTransitionTo: function(panel) {},
+    
+    /** Called by PanelStack.doStackTransition when the provided panel will be 
+        the newly deselected panel in the stack. Should not be called directly. 
+        Instead change the panel selection.
+        @param panel:myt.StackablePanel The panel that is transitioning.
+        @returns void */
+    doStackTransitionFrom: function(panel) {
+        this.doBeforeTransitionFrom(panel);
+        
+        var transition = this.transition;
+        if (transition) {
+            var self = this;
+            transition.from(panel).next(function() {self.doAfterTransitionFrom(panel)});
+        } else {
+            panel.setVisible(false);
+            this.doAfterTransitionFrom(panel);
+        }
+    },
+    
+    doBeforeTransitionFrom: function(panel) {},
+    doAfterTransitionFrom: function(panel) {},
 });
 
 
