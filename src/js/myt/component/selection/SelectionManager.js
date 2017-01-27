@@ -93,7 +93,7 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
         @param item:object The item to select.
         @returns void */
     select: function(item) {
-        if (!this.isSelected(item) && this.canSelect(item)) {
+        if (item && !this.isSelected(item) && this.canSelect(item)) {
             item.setSelected(true);
             this.__selected[item[this.itemSelectionId]] = item;
             this.setSelectedCount(this.selectedCount + 1);
