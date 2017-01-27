@@ -736,6 +736,10 @@ myt.View = new JS.Class('View', myt.Node, {
         } else {
             s.background = 'none';
         }
+        
+        // Wipe the bgColor property since setting style.background replaces 
+        // the bgColor.
+        this.bgColor = undefined;
     },
     
     
