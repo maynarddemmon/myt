@@ -203,6 +203,27 @@ myt.LocalStorage = (function() {
             @returns void */
         clear: function() {
             global.localStorage.clear();
+        },
+        
+        // Aliases for better API compatibility with some libraries.
+        /** An alias for getItem. */
+        get: function(key) {
+            return myt.LocalStorage.getItem(key);
+        },
+        
+        /** An alias for setItem. */
+        set: function(key, value) {
+            myt.LocalStorage.setItem(key, value);
+        },
+        
+        /** An alias for removeItem. */
+        remove: function(key) {
+            myt.LocalStorage.removeItem(key);
+        },
+        
+        /** An alias for clear. */
+        clearAll: function() {
+            myt.LocalStorage.clear();
         }
     };
 })();

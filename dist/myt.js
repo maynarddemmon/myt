@@ -4049,7 +4049,7 @@ JS.Singleton = new JS.Class('Singleton', {
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20170126.1409,
+    version:20170307.2015,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -4858,6 +4858,27 @@ myt.LocalStorage = (function() {
             @returns void */
         clear: function() {
             global.localStorage.clear();
+        },
+        
+        // Aliases for better API compatibility with some libraries.
+        /** An alias for getItem. */
+        get: function(key) {
+            return myt.LocalStorage.getItem(key);
+        },
+        
+        /** An alias for setItem. */
+        set: function(key, value) {
+            myt.LocalStorage.setItem(key, value);
+        },
+        
+        /** An alias for removeItem. */
+        remove: function(key) {
+            myt.LocalStorage.removeItem(key);
+        },
+        
+        /** An alias for clear. */
+        clearAll: function() {
+            myt.LocalStorage.clear();
         }
     };
 })();
