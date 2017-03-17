@@ -4049,7 +4049,7 @@ JS.Singleton = new JS.Class('Singleton', {
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20170307.2015,
+    version:20170317.1547,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -30187,10 +30187,16 @@ myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.Pa
         panel.stopActiveAnimators(axis);
         panel.set(axis, toValue);
         panel.setVisible(true);
-        panel.animate({attribute:axis, to:0, duration:this.duration}).next(function(success) {
+        var nextFunc = function(success) {
             panel.makeHighestZIndex();
             promise.keep();
-        });
+        };
+        if (this.duration > 0) {
+            panel.animate({attribute:axis, to:0, duration:this.duration}).next(nextFunc);
+        } else {
+            panel.set(axis, 0);
+            nextFunc();
+        }
         
         return promise;
     },
@@ -30220,10 +30226,16 @@ myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.Pa
         }
         
         panel.stopActiveAnimators(axis);
-        panel.animate({attribute:axis, to:toValue, duration:this.duration}).next(function(success) {
+        var nextFunc = function(success) {
             panel.setVisible(false);
             promise.keep();
-        });
+        };
+        if (this.duration > 0) {
+            panel.animate({attribute:axis, to:toValue, duration:this.duration}).next(nextFunc);
+        } else {
+            panel.set(axis, toValue);
+            nextFunc();
+        }
         
         return promise;
     }

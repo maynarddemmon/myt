@@ -43,10 +43,16 @@ myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.Pa
         panel.stopActiveAnimators(axis);
         panel.set(axis, toValue);
         panel.setVisible(true);
-        panel.animate({attribute:axis, to:0, duration:this.duration}).next(function(success) {
+        var nextFunc = function(success) {
             panel.makeHighestZIndex();
             promise.keep();
-        });
+        };
+        if (this.duration > 0) {
+            panel.animate({attribute:axis, to:0, duration:this.duration}).next(nextFunc);
+        } else {
+            panel.set(axis, 0);
+            nextFunc();
+        }
         
         return promise;
     },
@@ -76,10 +82,16 @@ myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.Pa
         }
         
         panel.stopActiveAnimators(axis);
-        panel.animate({attribute:axis, to:toValue, duration:this.duration}).next(function(success) {
+        var nextFunc = function(success) {
             panel.setVisible(false);
             promise.keep();
-        });
+        };
+        if (this.duration > 0) {
+            panel.animate({attribute:axis, to:toValue, duration:this.duration}).next(nextFunc);
+        } else {
+            panel.set(axis, toValue);
+            nextFunc();
+        }
         
         return promise;
     }
