@@ -129,21 +129,23 @@ new JS.Singleton('GlobalKeys', {
     // Constructor /////////////////////////////////////////////////////////////
     initialize: function() {
         // Constants
-        this.KEYCODE_TAB = 9;
-        this.KEYCODE_SHIFT = 16;
-        this.KEYCODE_CONTROL = 17;
-        this.KEYCODE_ALT = 18;
-        this.KEYCODE_Z = 90;
-        var isFirefox = BrowserDetect.browser === 'Firefox';
-        this.KEYCODE_COMMAND = isFirefox ? 224 : 91;
-        this.KEYCODE_RIGHT_COMMAND = isFirefox ? 224 : 93;
+        var self = this,
+            g = myt.global,
+            isFirefox = BrowserDetect.browser === 'Firefox';
+        self.KEYCODE_TAB = 9;
+        self.KEYCODE_SHIFT = 16;
+        self.KEYCODE_CONTROL = 17;
+        self.KEYCODE_ALT = 18;
+        self.KEYCODE_Z = 90;
+        self.KEYCODE_COMMAND = isFirefox ? 224 : 91;
+        self.KEYCODE_RIGHT_COMMAND = isFirefox ? 224 : 93;
         
-        this.setDomElement(document);
-        this.attachTo(myt.global.focus, '__handleFocused', 'focused');
-        this.__keysDown = {};
-        this.__listenToDocument();
+        self.setDomElement(document);
+        self.attachTo(g.focus, '__handleFocused', 'focused');
+        self.__keysDown = {};
+        self.__listenToDocument();
         
-        myt.global.register('keys', this);
+        g.register('keys', self);
     },
     
     
@@ -176,65 +178,64 @@ new JS.Singleton('GlobalKeys', {
     
     /** @private */
     __handleFocused: function(event) {
-        var focused = event.value;
+        var self = this,
+            focused = event.value;
         if (focused) {
-            this.__unlistenToDocument();
+            // unlisten to document
+            self.detachFromDom(self, '__handleKeyDown', 'keydown');
+            self.detachFromDom(self, '__handleKeyPress', 'keypress');
+            self.detachFromDom(self, '__handleKeyUp', 'keyup');
             
-            this.attachToDom(focused, '__handleKeyDown', 'keydown');
-            this.attachToDom(focused, '__handleKeyPress', 'keypress');
-            this.attachToDom(focused, '__handleKeyUp', 'keyup');
+            self.attachToDom(focused, '__handleKeyDown', 'keydown');
+            self.attachToDom(focused, '__handleKeyPress', 'keypress');
+            self.attachToDom(focused, '__handleKeyUp', 'keyup');
         } else {
             var prevFocused = myt.global.focus.prevFocusedView;
             if (prevFocused) {
-                this.detachFromDom(prevFocused, '__handleKeyDown', 'keydown');
-                this.detachFromDom(prevFocused, '__handleKeyPress', 'keypress');
-                this.detachFromDom(prevFocused, '__handleKeyUp', 'keyup');
+                self.detachFromDom(prevFocused, '__handleKeyDown', 'keydown');
+                self.detachFromDom(prevFocused, '__handleKeyPress', 'keypress');
+                self.detachFromDom(prevFocused, '__handleKeyUp', 'keyup');
             }
             
-            this.__listenToDocument();
+            self.__listenToDocument();
         }
     },
     
     /** @private */
     __listenToDocument: function() {
-        this.attachToDom(this, '__handleKeyDown', 'keydown');
-        this.attachToDom(this, '__handleKeyPress', 'keypress');
-        this.attachToDom(this, '__handleKeyUp', 'keyup');
-    },
-    
-    /** @private */
-    __unlistenToDocument: function() {
-        this.detachFromDom(this, '__handleKeyDown', 'keydown');
-        this.detachFromDom(this, '__handleKeyPress', 'keypress');
-        this.detachFromDom(this, '__handleKeyUp', 'keyup');
+        var self = this;
+        self.attachToDom(self, '__handleKeyDown', 'keydown');
+        self.attachToDom(self, '__handleKeyPress', 'keypress');
+        self.attachToDom(self, '__handleKeyUp', 'keyup');
     },
     
     /** @private */
     __handleKeyDown: function(event) {
-        var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event),
+        var self = this,
+            keyCode = myt.KeyObservable.getKeyCodeFromEvent(event),
             domEvent = event.value;
-        if (this.__shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
+        if (self.__shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
         
         // Keyup events do not fire when command key is down so fire a keyup
         // event immediately. Not an issue for other meta keys: shift, ctrl 
         // and option.
-        if (this.isCommandKeyDown() && keyCode !== this.KEYCODE_SHIFT && keyCode !== this.KEYCODE_CONTROL && keyCode !== this.KEYCODE_ALT) {
-            this.fireNewEvent('keydown', keyCode);
-            this.fireNewEvent('keyup', keyCode);
+        if (self.isCommandKeyDown() && keyCode !== self.KEYCODE_SHIFT && keyCode !== self.KEYCODE_CONTROL && keyCode !== self.KEYCODE_ALT) {
+            self.fireNewEvent('keydown', keyCode);
+            self.fireNewEvent('keyup', keyCode);
         } else {
-            this.__keysDown[keyCode] = true;
+            self.__keysDown[keyCode] = true;
             
             // Check for 'tab' key and do focus traversal.
-            if (keyCode === this.KEYCODE_TAB) {
-                var ift = this.ignoreFocusTrap(), gf = myt.global.focus;
-                if (this.isShiftKeyDown()) {
+            if (keyCode === self.KEYCODE_TAB) {
+                var ift = self.ignoreFocusTrap(), gf = myt.global.focus;
+                if (self.isShiftKeyDown()) {
                     gf.prev(ift);
                 } else {
                     gf.next(ift);
                 }
             }
             
-            this.fireNewEvent('keydown', keyCode);
+            self.fireNewEvent('keydown', keyCode);
         }
     },
     

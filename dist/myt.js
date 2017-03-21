@@ -4049,7 +4049,7 @@ JS.Singleton = new JS.Class('Singleton', {
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20170317.1547,
+    version:20170320.1831,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -6538,21 +6538,23 @@ new JS.Singleton('GlobalKeys', {
     // Constructor /////////////////////////////////////////////////////////////
     initialize: function() {
         // Constants
-        this.KEYCODE_TAB = 9;
-        this.KEYCODE_SHIFT = 16;
-        this.KEYCODE_CONTROL = 17;
-        this.KEYCODE_ALT = 18;
-        this.KEYCODE_Z = 90;
-        var isFirefox = BrowserDetect.browser === 'Firefox';
-        this.KEYCODE_COMMAND = isFirefox ? 224 : 91;
-        this.KEYCODE_RIGHT_COMMAND = isFirefox ? 224 : 93;
+        var self = this,
+            g = myt.global,
+            isFirefox = BrowserDetect.browser === 'Firefox';
+        self.KEYCODE_TAB = 9;
+        self.KEYCODE_SHIFT = 16;
+        self.KEYCODE_CONTROL = 17;
+        self.KEYCODE_ALT = 18;
+        self.KEYCODE_Z = 90;
+        self.KEYCODE_COMMAND = isFirefox ? 224 : 91;
+        self.KEYCODE_RIGHT_COMMAND = isFirefox ? 224 : 93;
         
-        this.setDomElement(document);
-        this.attachTo(myt.global.focus, '__handleFocused', 'focused');
-        this.__keysDown = {};
-        this.__listenToDocument();
+        self.setDomElement(document);
+        self.attachTo(g.focus, '__handleFocused', 'focused');
+        self.__keysDown = {};
+        self.__listenToDocument();
         
-        myt.global.register('keys', this);
+        g.register('keys', self);
     },
     
     
@@ -6585,65 +6587,64 @@ new JS.Singleton('GlobalKeys', {
     
     /** @private */
     __handleFocused: function(event) {
-        var focused = event.value;
+        var self = this,
+            focused = event.value;
         if (focused) {
-            this.__unlistenToDocument();
+            // unlisten to document
+            self.detachFromDom(self, '__handleKeyDown', 'keydown');
+            self.detachFromDom(self, '__handleKeyPress', 'keypress');
+            self.detachFromDom(self, '__handleKeyUp', 'keyup');
             
-            this.attachToDom(focused, '__handleKeyDown', 'keydown');
-            this.attachToDom(focused, '__handleKeyPress', 'keypress');
-            this.attachToDom(focused, '__handleKeyUp', 'keyup');
+            self.attachToDom(focused, '__handleKeyDown', 'keydown');
+            self.attachToDom(focused, '__handleKeyPress', 'keypress');
+            self.attachToDom(focused, '__handleKeyUp', 'keyup');
         } else {
             var prevFocused = myt.global.focus.prevFocusedView;
             if (prevFocused) {
-                this.detachFromDom(prevFocused, '__handleKeyDown', 'keydown');
-                this.detachFromDom(prevFocused, '__handleKeyPress', 'keypress');
-                this.detachFromDom(prevFocused, '__handleKeyUp', 'keyup');
+                self.detachFromDom(prevFocused, '__handleKeyDown', 'keydown');
+                self.detachFromDom(prevFocused, '__handleKeyPress', 'keypress');
+                self.detachFromDom(prevFocused, '__handleKeyUp', 'keyup');
             }
             
-            this.__listenToDocument();
+            self.__listenToDocument();
         }
     },
     
     /** @private */
     __listenToDocument: function() {
-        this.attachToDom(this, '__handleKeyDown', 'keydown');
-        this.attachToDom(this, '__handleKeyPress', 'keypress');
-        this.attachToDom(this, '__handleKeyUp', 'keyup');
-    },
-    
-    /** @private */
-    __unlistenToDocument: function() {
-        this.detachFromDom(this, '__handleKeyDown', 'keydown');
-        this.detachFromDom(this, '__handleKeyPress', 'keypress');
-        this.detachFromDom(this, '__handleKeyUp', 'keyup');
+        var self = this;
+        self.attachToDom(self, '__handleKeyDown', 'keydown');
+        self.attachToDom(self, '__handleKeyPress', 'keypress');
+        self.attachToDom(self, '__handleKeyUp', 'keyup');
     },
     
     /** @private */
     __handleKeyDown: function(event) {
-        var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event),
+        var self = this,
+            keyCode = myt.KeyObservable.getKeyCodeFromEvent(event),
             domEvent = event.value;
-        if (this.__shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
+        if (self.__shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
         
         // Keyup events do not fire when command key is down so fire a keyup
         // event immediately. Not an issue for other meta keys: shift, ctrl 
         // and option.
-        if (this.isCommandKeyDown() && keyCode !== this.KEYCODE_SHIFT && keyCode !== this.KEYCODE_CONTROL && keyCode !== this.KEYCODE_ALT) {
-            this.fireNewEvent('keydown', keyCode);
-            this.fireNewEvent('keyup', keyCode);
+        if (self.isCommandKeyDown() && keyCode !== self.KEYCODE_SHIFT && keyCode !== self.KEYCODE_CONTROL && keyCode !== self.KEYCODE_ALT) {
+            self.fireNewEvent('keydown', keyCode);
+            self.fireNewEvent('keyup', keyCode);
         } else {
-            this.__keysDown[keyCode] = true;
+            self.__keysDown[keyCode] = true;
             
             // Check for 'tab' key and do focus traversal.
-            if (keyCode === this.KEYCODE_TAB) {
-                var ift = this.ignoreFocusTrap(), gf = myt.global.focus;
-                if (this.isShiftKeyDown()) {
+            if (keyCode === self.KEYCODE_TAB) {
+                var ift = self.ignoreFocusTrap(), gf = myt.global.focus;
+                if (self.isShiftKeyDown()) {
                     gf.prev(ift);
                 } else {
                     gf.next(ift);
                 }
             }
             
-            this.fireNewEvent('keydown', keyCode);
+            self.fireNewEvent('keydown', keyCode);
         }
     },
     
@@ -6813,6 +6814,12 @@ if (!global.mytNoHistoryShim) { // FIXME: remove conditional once old code has b
 myt.AccessorSupport = new JS.Module('AccessorSupport', {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
+        /** Caches getter names. */
+        GETTER_NAMES:{},
+        
+        /** Caches setter names. */
+        SETTER_NAMES:{},
+        
         /** Generate a setter name for an attribute.
             @returns string */
         generateSetterName: function(attrName) {
@@ -6855,13 +6862,7 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
             target[getterName] = function() {
                 return target[attrName];
             };
-        },
-        
-        /** Caches getter names. */
-        GETTER_NAMES:{},
-        
-        /** Caches setter names. */
-        SETTER_NAMES:{}
+        }
     },
     
     
@@ -6875,8 +6876,9 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
         @param attrs:object a map of attributes to set.
         @returns void. */
     callSetters: function(attrs) {
-        var earlyAttrs = this.earlyAttrs,
-            lateAttrs = this.lateAttrs,
+        var self = this,
+            earlyAttrs = self.earlyAttrs,
+            lateAttrs = self.lateAttrs,
             attrName, extractedLateAttrs, i, len;
         if (earlyAttrs || lateAttrs) {
             // Make a shallow copy of attrs since we can't guarantee that
@@ -6892,7 +6894,7 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
                 while (len > i) {
                     attrName = earlyAttrs[i++];
                     if (attrName in attrs) {
-                        this.set(attrName, attrs[attrName]);
+                        self.set(attrName, attrs[attrName]);
                         delete attrs[attrName];
                     }
                 }
@@ -6914,13 +6916,13 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
         }
         
         // Do normal setters
-        for (var attrName in attrs) this.set(attrName, attrs[attrName]);
+        for (attrName in attrs) self.set(attrName, attrs[attrName]);
         
         // Do late setters
         if (extractedLateAttrs) {
             i = 0;
             len = extractedLateAttrs.length;
-            while (len > i) this.set(extractedLateAttrs[i++], extractedLateAttrs[i++]);
+            while (len > i) self.set(extractedLateAttrs[i++], extractedLateAttrs[i++]);
         }
     },
     
@@ -6944,14 +6946,17 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
             setter behavior. Defaults to undefined which is equivalent to false.
         @returns void */
     set: function(attrName, v, skipSetter) {
+        var self = this,
+            setterName;
+        
         if (!skipSetter) {
-            var setterName = myt.AccessorSupport.generateSetterName(attrName);
-            if (this[setterName]) return this[setterName](v);
+            setterName = myt.AccessorSupport.generateSetterName(attrName);
+            if (self[setterName]) return self[setterName](v);
         }
         
-        if (this[attrName] !== v) {
-            this[attrName] = v;
-            if (this.inited !== false && this.fireNewEvent) this.fireNewEvent(attrName, v); // !== false allows this to work with non-nodes.
+        if (self[attrName] !== v) {
+            self[attrName] = v;
+            if (self.inited !== false && self.fireNewEvent) self.fireNewEvent(attrName, v); // !== false allows this to work with non-nodes.
         }
     },
     
@@ -6998,21 +7003,22 @@ myt.Destructible = new JS.Module('Destructible', {
         // See http://perfectionkills.com/understanding-delete/ for details
         // on how delete works. This is why we use Object.keys below since it
         // avoids iterating over many of the properties that are not deletable.
-        var keys, i;
+        var self = this,
+            keys, i,
+            meta = self.__meta__;
         
         // OPTIMIZATION: Improve garbage collection for JS.Class
-        var meta = this.__meta__;
         if (meta) {
             keys = Object.keys(meta);
             i = keys.length;
             while (i) delete meta[keys[--i]];
         }
         
-        keys = Object.keys(this);
+        keys = Object.keys(self);
         i = keys.length;
-        while (i) delete this[keys[--i]];
+        while (i) delete self[keys[--i]];
         
-        this.destroyed = true;
+        self.destroyed = true;
     }
 });
 
@@ -7319,14 +7325,15 @@ myt.Node = new JS.Class('Node', {
             var params = Array.prototype.slice.call(arguments),
                 target = params.shift(),
                 methodName = params.shift(),
-                delay = params.shift();
+                delay = params.shift(),
+                method;
             
-            if (target) {
-                var method = target[methodName];
-                if (method) {
-                    params.unshift(target);
-                    return setTimeout(method.bind.apply(method, params), delay >= 0 ? delay : 0);
-                }
+            if (target && (method = target[methodName])) {
+                params.unshift(target);
+                return setTimeout(
+                    method.bind.apply(method, params), 
+                    delay >= 0 ? delay : 0
+                );
             }
         }
     },
@@ -7342,20 +7349,19 @@ myt.Node = new JS.Class('Node', {
             the new instance.
         @returns void */
     initialize: function(parent, attrs, mixins) {
+        var self = this;
         if (mixins) {
-            var i = 0, len = mixins.length, mixin;
-            for (; len > i;) {
-                mixin = mixins[i++];
-                if (mixin) {
-                    this.extend(mixin);
+            for (var i = 0, len = mixins.length, mixin; len > i;) {
+                if (mixin = mixins[i++]) {
+                    self.extend(mixin);
                 } else {
-                    console.warn("Undefined mixin in initialization of: " + this.klass.__displayName);
+                    console.warn("Missing mixin in:" + self.klass.__displayName);
                 }
             }
         }
         
-        this.inited = false;
-        this.initNode(parent, attrs || {});
+        self.inited = false;
+        self.initNode(parent, attrs || {});
     },
     
     
@@ -7368,13 +7374,14 @@ myt.Node = new JS.Class('Node', {
         @param attrs:object A map of attribute names and values.
         @returns void */
     initNode: function(parent, attrs) {
-        this.callSetters(attrs);
+        var self = this;
+        self.callSetters(attrs);
         
-        this.doBeforeAdoption();
-        this.setParent(parent);
-        this.doAfterAdoption();
+        self.doBeforeAdoption();
+        self.setParent(parent);
+        self.doAfterAdoption();
         
-        this.inited = true;
+        self.inited = true;
     },
     
     /** Provides a hook for subclasses to do things before this Node has its
@@ -7393,26 +7400,29 @@ myt.Node = new JS.Class('Node', {
     
     /** @overrides myt.Destructible. */
     destroy: function() {
+        var self = this,
+            subs = self.subnodes,
+            i;
+        
         // Allows descendants to know destruction is in process
-        this.isBeingDestroyed = true;
+        self.isBeingDestroyed = true;
         
         // Destroy subnodes depth first
-        var subs = this.subnodes;
         if (subs) {
-            var i = subs.length;
+            i = subs.length;
             while (i) subs[--i].destroy();
         }
         
-        if (this.__animPool) {
-            this.stopActiveAnimators();
-            this.__animPool.destroy();
+        if (self.__animPool) {
+            self.stopActiveAnimators();
+            self.__animPool.destroy();
         }
         
-        this.destroyBeforeOrphaning();
-        if (this.parent) this.setParent(null);
-        this.destroyAfterOrphaning();
+        self.destroyBeforeOrphaning();
+        if (self.parent) self.setParent(null);
+        self.destroyAfterOrphaning();
         
-        this.callSuper();
+        self.callSuper();
     },
     
     /** Provides a hook for subclasses to do destruction of their internals.
@@ -7442,38 +7452,40 @@ myt.Node = new JS.Class('Node', {
         most direct method to do reparenting. You can also use the addSubnode
         method but it's just a wrapper around this setter. */
     setParent: function(newParent) {
+        var self = this;
+        
         // Use placement if indicated
-        if (newParent && !this.ignorePlacement) {
-            var placement = this.placement || newParent.defaultPlacement;
-            if (placement) newParent = newParent.determinePlacement(placement, this);
+        if (newParent && !self.ignorePlacement) {
+            var placement = self.placement || newParent.defaultPlacement;
+            if (placement) newParent = newParent.determinePlacement(placement, self);
         }
         
-        if (this.parent !== newParent) {
+        if (self.parent !== newParent) {
             // Abort if the new parent is in the destroyed life-cycle state.
             if (newParent && newParent.destroyed) return;
             
             // Remove ourselves from our existing parent if we have one.
-            var curParent = this.parent;
+            var curParent = self.parent;
             if (curParent) {
-                var idx = curParent.getSubnodeIndex(this);
+                var idx = curParent.getSubnodeIndex(self);
                 if (idx !== -1) {
-                    if (this.name) curParent.__removeNameRef(this);
+                    if (self.name) curParent.__removeNameRef(self);
                     curParent.subnodes.splice(idx, 1);
-                    curParent.subnodeRemoved(this);
+                    curParent.subnodeRemoved(self);
                 }
             }
             
-            this.parent = newParent;
+            self.parent = newParent;
             
             // Add ourselves to our new parent
             if (newParent) {
-                newParent.getSubnodes().push(this);
-                if (this.name) newParent.__addNameRef(this);
-                newParent.subnodeAdded(this);
+                newParent.getSubnodes().push(self);
+                if (self.name) newParent.__addNameRef(self);
+                newParent.subnodeAdded(self);
             }
             
             // Fire an event
-            if (this.inited) this.fireNewEvent('parent', newParent);
+            if (self.inited) self.fireNewEvent('parent', newParent);
         }
     },
     
@@ -7482,15 +7494,17 @@ myt.Node = new JS.Class('Node', {
         Node stored in the var 'bar' would be referenced like this: bar.foo or
         bar['foo']. */
     setName: function(name) {
-        if (this.name !== name) {
+        var self = this;
+        
+        if (self.name !== name) {
             // Remove "name" reference from parent.
-            var p = this.parent;
-            if (p && this.name) p.__removeNameRef(this);
+            var p = self.parent;
+            if (p && self.name) p.__removeNameRef(self);
             
-            this.name = name;
+            self.name = name;
             
             // Add "name" reference to parent.
-            if (p && name) p.__addNameRef(this);
+            if (p && name) p.__addNameRef(self);
         }
     },
     
@@ -7582,15 +7596,15 @@ myt.Node = new JS.Class('Node', {
         node itself.
         @returns boolean */
     isDescendantOf: function(node) {
+        var self = this;
+        
         if (node) {
-            if (node === this) return true;
-            if (this.parent) {
+            if (node === self) return true;
+            if (self.parent) {
                 // Optimization: use the dom element contains function if 
                 // both nodes are DomElementProxy instances.
-                if (this.domElement && node.domElement) {
-                    return node.domElement.contains(this.domElement);
-                }
-                return this.parent.isDescendantOf(node);
+                if (self.domElement && node.domElement) return node.domElement.contains(self.domElement);
+                return self.parent.isDescendantOf(node);
             }
         }
         return false;
@@ -7733,10 +7747,8 @@ myt.Node = new JS.Class('Node', {
         @param easingFunction:function (optional)
         @returns The Animator being run. */
     animate: function(attribute, to, from, relative, callback, duration, reverse, repeat, easingFunction) {
-        var animPool = this.__getAnimPool();
-        
-        // ignorePlacement ensures the animator is directly attached to this node
-        var anim = animPool.getInstance({ignorePlacement:true});
+        var animPool = this.__getAnimPool(),
+            anim = animPool.getInstance({ignorePlacement:true}); // ignorePlacement ensures the animator is directly attached to this node
         
         if (typeof attribute === 'object') {
             // Handle a single map argument if provided
@@ -9133,22 +9145,24 @@ myt.View = new JS.Class('View', myt.Node, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Node */
     initNode: function(parent, attrs) {
-        this.x = this.y = this.width = this.height = 0;
-        this.opacity = 1;
-        this.visible = true;
+        var self = this;
         
-        this.setDomElement(this.createOurDomElement(parent));
+        self.x = self.y = self.width = self.height = 0;
+        self.opacity = 1;
+        self.visible = true;
+        
+        self.setDomElement(self.createOurDomElement(parent));
         
         // Necessary since x and y of 0 won't update deStyle so this gets
         // things initialized correctly. Without this RootViews will have
         // an incorrect initial position for x or y of 0.
-        this.deStyle.left = this.deStyle.top = '0px';
+        self.deStyle.left = self.deStyle.top = '0px';
         
-        this.callSuper(parent, attrs);
+        self.callSuper(parent, attrs);
         
         // Set default bgcolor afterwards if still undefined. This allows 
         // BaseInputText to override the default for input:text via attrs.
-        if (this.bgColor === undefined) this.bgColor = 'transparent';
+        if (self.bgColor === undefined) self.bgColor = 'transparent';
     },
     
     /** Creates the dom element we will be a proxy for. Called during View
@@ -9179,25 +9193,29 @@ myt.View = new JS.Class('View', myt.Node, {
     
     /** @overrides myt.Node */
     destroyAfterOrphaning: function() {
-        this.callSuper();
+        var self = this;
         
-        this.detachFromAllDomSources();
-        this.detachAllDomObservers();
-        this.disposeOfDomElement();
+        self.callSuper();
+        
+        self.detachFromAllDomSources();
+        self.detachAllDomObservers();
+        self.disposeOfDomElement();
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
     /** @overrides myt.Node */
     setParent: function(parent) {
-        if (this.parent !== parent) {
-            if (this.inited) {
-                this.__teardownAlignConstraint();
-                this.__teardownValignConstraint();
+        var self = this;
+        
+        if (self.parent !== parent) {
+            if (self.inited) {
+                self.__teardownAlignConstraint();
+                self.__teardownValignConstraint();
             }
-            this.callSuper(parent);
-            this.__setupAlignConstraint();
-            this.__setupValignConstraint();
+            self.callSuper(parent);
+            self.__setupAlignConstraint();
+            self.__setupValignConstraint();
         }
     },
     
@@ -9234,22 +9252,24 @@ myt.View = new JS.Class('View', myt.Node, {
     },
     
     setIgnoreLayout: function(v) {
-        if (this.ignoreLayout !== v) {
+        var self = this;
+        
+        if (self.ignoreLayout !== v) {
             // Add or remove ourselves from any layouts on our parent.
-            var ready = this.inited && this.parent, layouts, i;
+            var ready = self.inited && self.parent, layouts, i;
             if (v) {
                 if (ready) {
-                    layouts = this.parent.getLayouts();
+                    layouts = self.parent.getLayouts();
                     i = layouts.length;
-                    while (i) layouts[--i].removeSubview(this);
+                    while (i) layouts[--i].removeSubview(self);
                 }
-                this.ignoreLayout = v;
+                self.ignoreLayout = v;
             } else {
-                this.ignoreLayout = v;
+                self.ignoreLayout = v;
                 if (ready) {
-                    layouts = this.parent.getLayouts();
+                    layouts = self.parent.getLayouts();
                     i = layouts.length;
-                    while (i) layouts[--i].addSubview(this);
+                    while (i) layouts[--i].addSubview(self);
                 }
             }
         }
@@ -10004,7 +10024,7 @@ myt.View = new JS.Class('View', myt.Node, {
         svs.sort(sortFunc);
         
         // Rearrange dom to match new sort order.
-        myt.View.retainFocusDuringDomUpdate(this, function() {
+        myt.View.retainFocusDuringDomUpdate(self, function() {
             var len = svs.length,
                 i = 0,
                 de = self.domElement,
@@ -11585,48 +11605,56 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Node */
     initNode: function(parent, attrs) {
-        this.duration = 1000;
-        this.relative = this.reverse = this.running = this.paused = false;
-        this.repeat = 1;
-        this.easingFunction = myt.Animator.DEFAULT_EASING_FUNCTION;
+        var self = this;
         
-        this.callSuper(parent, attrs);
+        self.duration = 1000;
+        self.relative = self.reverse = self.running = self.paused = false;
+        self.repeat = 1;
+        self.easingFunction = myt.Animator.DEFAULT_EASING_FUNCTION;
         
-        this.__reset();
+        self.callSuper(parent, attrs);
+        
+        self.__reset();
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
     setRunning: function(v) {
-        if (this.running !== v) {
-            this.running = v;
-            if (this.inited) this.fireNewEvent('running', v);
+        var self = this;
+        
+        if (self.running !== v) {
+            self.running = v;
+            if (self.inited) self.fireNewEvent('running', v);
             
-            if (!this.paused) {
+            if (!self.paused) {
                 if (v) {
-                    this.__isColorAttr();
+                    self.__isColorAttr();
                 } else {
-                    if (this.__temporaryFrom) this.from = undefined;
-                    this.__reset();
+                    if (self.__temporaryFrom) self.from = undefined;
+                    self.__reset();
                 }
-                this[v ? 'attachTo' : 'detachFrom'](myt.global.idle, '__update', 'idle');
+                self[v ? 'attachTo' : 'detachFrom'](myt.global.idle, '__update', 'idle');
             }
         }
     },
     
     setPaused: function(v) {
-        if (this.paused !== v) {
-            this.paused = v;
-            if (this.inited) this.fireNewEvent('paused', v);
-            if (this.running) this[v ? 'detachFrom' : 'attachTo'](myt.global.idle, '__update', 'idle');
+        var self = this;
+        
+        if (self.paused !== v) {
+            self.paused = v;
+            if (self.inited) self.fireNewEvent('paused', v);
+            if (self.running) self[v ? 'detachFrom' : 'attachTo'](myt.global.idle, '__update', 'idle');
         }
     },
     
     setReverse: function(v) {
-        if (this.reverse !== v) {
-            this.reverse = v;
-            if (this.inited) this.fireNewEvent('reverse', v);
-            if (!this.running) this.__reset();
+        var self = this;
+        
+        if (self.reverse !== v) {
+            self.reverse = v;
+            if (self.inited) self.fireNewEvent('reverse', v);
+            if (!self.running) self.__reset();
         }
     },
     
@@ -11697,30 +11725,36 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
             it exists, will be executed.
         @returns void */
     reset: function(executeCallback) {
-        this.__reset();
+        var self = this;
         
-        this.setRunning(false);
-        this.setPaused(false);
+        self.__reset();
         
-        if (executeCallback && this.callback) this.callback.call(this, false);
+        self.setRunning(false);
+        self.setPaused(false);
+        
+        if (executeCallback && self.callback) self.callback.call(self, false);
     },
     
     /** @overrides myt.Reusable */
     clean: function() {
-        this.to = this.from = this.attribute = this.callback = undefined;
-        this.duration = 1000;
-        this.relative = this.reverse = false;
-        this.repeat = 1;
-        this.easingFunction = myt.Animator.DEFAULT_EASING_FUNCTION;
+        var self = this;
         
-        this.reset(false);
+        self.to = self.from = self.attribute = self.callback = undefined;
+        self.duration = 1000;
+        self.relative = self.reverse = false;
+        self.repeat = 1;
+        self.easingFunction = myt.Animator.DEFAULT_EASING_FUNCTION;
+        
+        self.reset(false);
     },
     
     /** @private */
     __reset: function() {
-        this.__temporaryFrom = false;
-        this.__loopCount = this.reverse ? this.repeat - 1 : 0;
-        this.__progress = this.reverse ? this.duration : 0;
+        var self = this;
+        
+        self.__temporaryFrom = false;
+        self.__loopCount = self.reverse ? self.repeat - 1 : 0;
+        self.__progress = self.reverse ? self.duration : 0;
     },
     
     /** @private */
@@ -11730,81 +11764,84 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
     
     /** @private */
     __advance: function(timeDiff) {
-        if (this.running && !this.paused) {
-            var reverse = this.reverse, 
-                duration = this.duration, 
-                repeat = this.repeat;
+        var self = this;
+        
+        if (self.running && !self.paused) {
+            var reverse = self.reverse, 
+                duration = self.duration, 
+                repeat = self.repeat;
             
             // An animation in reverse is like time going backward.
             if (reverse) timeDiff = timeDiff * -1;
             
             // Determine how much time to move forward by.
-            var oldProgress = this.__progress;
-            this.__progress += timeDiff;
+            var oldProgress = self.__progress;
+            self.__progress += timeDiff;
             
             // Check for overage
             var remainderTime = 0;
-            if (this.__progress > duration) {
-                remainderTime = this.__progress - duration;
-                this.__progress = duration;
+            if (self.__progress > duration) {
+                remainderTime = self.__progress - duration;
+                self.__progress = duration;
                 
                 // Increment loop count and halt looping if necessary
-                if (++this.__loopCount === repeat) remainderTime = 0;
-            } else if (0 > this.__progress) {
+                if (++self.__loopCount === repeat) remainderTime = 0;
+            } else if (0 > self.__progress) {
                 // Reverse case
-                remainderTime = -this.__progress; // Flip reverse time back to forward time
-                this.__progress = 0;
+                remainderTime = -self.__progress; // Flip reverse time back to forward time
+                self.__progress = 0;
                 
                 // Decrement loop count and halt looping if necessary
-                if (0 > --this.__loopCount && repeat > 0) remainderTime = 0;
+                if (0 > --self.__loopCount && repeat > 0) remainderTime = 0;
             }
             
-            var target = this.__getTarget();
+            var target = self.__getTarget();
             if (target) {
-                this.__updateTarget(target, this.__progress, oldProgress);
+                self.__updateTarget(target, self.__progress, oldProgress);
                 
                 if (
-                    (!reverse && this.__loopCount === repeat) || // Forward check
-                    (reverse && 0 > this.__loopCount && repeat > 0) // Reverse check
+                    (!reverse && self.__loopCount === repeat) || // Forward check
+                    (reverse && 0 > self.__loopCount && repeat > 0) // Reverse check
                 ) {
                     // Stop animation since loop count exceeded repeat count.
-                    this.setRunning(false);
-                    if (this.callback) this.callback.call(this, true);
+                    self.setRunning(false);
+                    if (self.callback) self.callback.call(self, true);
                 } else if (remainderTime > 0) {
                     // Advance again if time is remaining. This occurs when
                     // the timeDiff provided was greater than the animation
                     // duration and the animation loops.
-                    this.fireNewEvent('repeat', this.__loopCount);
-                    this.__progress = reverse ? duration : 0;
-                    this.__advance(remainderTime);
+                    self.fireNewEvent('repeat', self.__loopCount);
+                    self.__progress = reverse ? duration : 0;
+                    self.__advance(remainderTime);
                 }
             } else {
-                console.log("No target found for animator.", this);
-                this.setRunning(false);
-                if (this.callback) this.callback.call(this, false);
+                console.log("No target found for animator.", self);
+                self.setRunning(false);
+                if (self.callback) self.callback.call(self, false);
             }
         }
     },
     
     /** @private */
     __updateTarget: function(target, progress, oldProgress) {
-        var relative = this.relative,
-            duration = this.duration,
-            attr = this.attribute,
+        var self = this,
+            relative = self.relative,
+            duration = self.duration,
+            attr = self.attribute,
             progressPercent = Math.max(0, progress / duration), 
             oldProgressPercent = Math.max(0, oldProgress / duration);
         
         // Determine what "from" to use if none was provided.
-        if (this.from == null) {
-            this.__temporaryFrom = true;
-            this.from = relative ? (this.__isColorAnim ? '#000000' : 0) : target.get(attr);
+        if (self.from == null) {
+            self.__temporaryFrom = true;
+            self.from = relative ? (self.__isColorAnim ? '#000000' : 0) : target.get(attr);
         }
         
-        var motionValue = this.easingFunction(progressPercent) - (relative ? this.easingFunction(oldProgressPercent) : 0),
-            value = relative ? target.get(attr) : this.from,
-            to = this.to;
+        var motionValue = self.easingFunction(progressPercent) - (relative ? self.easingFunction(oldProgressPercent) : 0),
+            value = relative ? target.get(attr) : self.from,
+            to = self.to;
         
-        target.set(attr, this.__isColorAnim ? this.__getColorValue(this.from, to, motionValue, relative, value) : value + ((to - this.from) * motionValue));
+        target.set(attr, self.__isColorAnim ? self.__getColorValue(self.from, to, motionValue, relative, value) : value + ((to - self.from) * motionValue));
     },
     
     /** @private */
@@ -30882,12 +30919,19 @@ myt.Eventable = new JS.Class('Eventable', {
             the new instance.
         @returns void */
     initialize: function(attrs, mixins) {
+        var self = this;
         if (mixins) {
-            for (var i = 0, len = mixins.length; len > i;) this.extend(mixins[i++]);
+            for (var i = 0, len = mixins.length, mixin; len > i;) {
+                if (mixin = mixins[i++]) {
+                    self.extend(mixin);
+                } else {
+                    console.warn("Missing mixin in:" + self.klass.__displayName);
+                }
+            }
         }
         
-        this.inited = false;
-        this.init(attrs || {});
+        self.inited = false;
+        self.init(attrs || {});
     },
     
     
@@ -30903,11 +30947,12 @@ myt.Eventable = new JS.Class('Eventable', {
     
     /** @overrides myt.Destructible. */
     destroy: function() {
-        this.releaseAllConstraints();
-        this.detachFromAllObservables();
-        this.detachAllObservers();
+        var self = this;
+        self.releaseAllConstraints();
+        self.detachFromAllObservables();
+        self.detachAllObservers();
         
-        this.callSuper();
+        self.callSuper();
     }
 });
 

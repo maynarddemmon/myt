@@ -80,14 +80,15 @@ myt.Node = new JS.Class('Node', {
             var params = Array.prototype.slice.call(arguments),
                 target = params.shift(),
                 methodName = params.shift(),
-                delay = params.shift();
+                delay = params.shift(),
+                method;
             
-            if (target) {
-                var method = target[methodName];
-                if (method) {
-                    params.unshift(target);
-                    return setTimeout(method.bind.apply(method, params), delay >= 0 ? delay : 0);
-                }
+            if (target && (method = target[methodName])) {
+                params.unshift(target);
+                return setTimeout(
+                    method.bind.apply(method, params), 
+                    delay >= 0 ? delay : 0
+                );
             }
         }
     },
@@ -103,20 +104,19 @@ myt.Node = new JS.Class('Node', {
             the new instance.
         @returns void */
     initialize: function(parent, attrs, mixins) {
+        var self = this;
         if (mixins) {
-            var i = 0, len = mixins.length, mixin;
-            for (; len > i;) {
-                mixin = mixins[i++];
-                if (mixin) {
-                    this.extend(mixin);
+            for (var i = 0, len = mixins.length, mixin; len > i;) {
+                if (mixin = mixins[i++]) {
+                    self.extend(mixin);
                 } else {
-                    console.warn("Undefined mixin in initialization of: " + this.klass.__displayName);
+                    console.warn("Missing mixin in:" + self.klass.__displayName);
                 }
             }
         }
         
-        this.inited = false;
-        this.initNode(parent, attrs || {});
+        self.inited = false;
+        self.initNode(parent, attrs || {});
     },
     
     
@@ -129,13 +129,14 @@ myt.Node = new JS.Class('Node', {
         @param attrs:object A map of attribute names and values.
         @returns void */
     initNode: function(parent, attrs) {
-        this.callSetters(attrs);
+        var self = this;
+        self.callSetters(attrs);
         
-        this.doBeforeAdoption();
-        this.setParent(parent);
-        this.doAfterAdoption();
+        self.doBeforeAdoption();
+        self.setParent(parent);
+        self.doAfterAdoption();
         
-        this.inited = true;
+        self.inited = true;
     },
     
     /** Provides a hook for subclasses to do things before this Node has its
@@ -154,26 +155,29 @@ myt.Node = new JS.Class('Node', {
     
     /** @overrides myt.Destructible. */
     destroy: function() {
+        var self = this,
+            subs = self.subnodes,
+            i;
+        
         // Allows descendants to know destruction is in process
-        this.isBeingDestroyed = true;
+        self.isBeingDestroyed = true;
         
         // Destroy subnodes depth first
-        var subs = this.subnodes;
         if (subs) {
-            var i = subs.length;
+            i = subs.length;
             while (i) subs[--i].destroy();
         }
         
-        if (this.__animPool) {
-            this.stopActiveAnimators();
-            this.__animPool.destroy();
+        if (self.__animPool) {
+            self.stopActiveAnimators();
+            self.__animPool.destroy();
         }
         
-        this.destroyBeforeOrphaning();
-        if (this.parent) this.setParent(null);
-        this.destroyAfterOrphaning();
+        self.destroyBeforeOrphaning();
+        if (self.parent) self.setParent(null);
+        self.destroyAfterOrphaning();
         
-        this.callSuper();
+        self.callSuper();
     },
     
     /** Provides a hook for subclasses to do destruction of their internals.
@@ -203,38 +207,40 @@ myt.Node = new JS.Class('Node', {
         most direct method to do reparenting. You can also use the addSubnode
         method but it's just a wrapper around this setter. */
     setParent: function(newParent) {
+        var self = this;
+        
         // Use placement if indicated
-        if (newParent && !this.ignorePlacement) {
-            var placement = this.placement || newParent.defaultPlacement;
-            if (placement) newParent = newParent.determinePlacement(placement, this);
+        if (newParent && !self.ignorePlacement) {
+            var placement = self.placement || newParent.defaultPlacement;
+            if (placement) newParent = newParent.determinePlacement(placement, self);
         }
         
-        if (this.parent !== newParent) {
+        if (self.parent !== newParent) {
             // Abort if the new parent is in the destroyed life-cycle state.
             if (newParent && newParent.destroyed) return;
             
             // Remove ourselves from our existing parent if we have one.
-            var curParent = this.parent;
+            var curParent = self.parent;
             if (curParent) {
-                var idx = curParent.getSubnodeIndex(this);
+                var idx = curParent.getSubnodeIndex(self);
                 if (idx !== -1) {
-                    if (this.name) curParent.__removeNameRef(this);
+                    if (self.name) curParent.__removeNameRef(self);
                     curParent.subnodes.splice(idx, 1);
-                    curParent.subnodeRemoved(this);
+                    curParent.subnodeRemoved(self);
                 }
             }
             
-            this.parent = newParent;
+            self.parent = newParent;
             
             // Add ourselves to our new parent
             if (newParent) {
-                newParent.getSubnodes().push(this);
-                if (this.name) newParent.__addNameRef(this);
-                newParent.subnodeAdded(this);
+                newParent.getSubnodes().push(self);
+                if (self.name) newParent.__addNameRef(self);
+                newParent.subnodeAdded(self);
             }
             
             // Fire an event
-            if (this.inited) this.fireNewEvent('parent', newParent);
+            if (self.inited) self.fireNewEvent('parent', newParent);
         }
     },
     
@@ -243,15 +249,17 @@ myt.Node = new JS.Class('Node', {
         Node stored in the var 'bar' would be referenced like this: bar.foo or
         bar['foo']. */
     setName: function(name) {
-        if (this.name !== name) {
+        var self = this;
+        
+        if (self.name !== name) {
             // Remove "name" reference from parent.
-            var p = this.parent;
-            if (p && this.name) p.__removeNameRef(this);
+            var p = self.parent;
+            if (p && self.name) p.__removeNameRef(self);
             
-            this.name = name;
+            self.name = name;
             
             // Add "name" reference to parent.
-            if (p && name) p.__addNameRef(this);
+            if (p && name) p.__addNameRef(self);
         }
     },
     
@@ -343,15 +351,15 @@ myt.Node = new JS.Class('Node', {
         node itself.
         @returns boolean */
     isDescendantOf: function(node) {
+        var self = this;
+        
         if (node) {
-            if (node === this) return true;
-            if (this.parent) {
+            if (node === self) return true;
+            if (self.parent) {
                 // Optimization: use the dom element contains function if 
                 // both nodes are DomElementProxy instances.
-                if (this.domElement && node.domElement) {
-                    return node.domElement.contains(this.domElement);
-                }
-                return this.parent.isDescendantOf(node);
+                if (self.domElement && node.domElement) return node.domElement.contains(self.domElement);
+                return self.parent.isDescendantOf(node);
             }
         }
         return false;
@@ -494,10 +502,8 @@ myt.Node = new JS.Class('Node', {
         @param easingFunction:function (optional)
         @returns The Animator being run. */
     animate: function(attribute, to, from, relative, callback, duration, reverse, repeat, easingFunction) {
-        var animPool = this.__getAnimPool();
-        
-        // ignorePlacement ensures the animator is directly attached to this node
-        var anim = animPool.getInstance({ignorePlacement:true});
+        var animPool = this.__getAnimPool(),
+            anim = animPool.getInstance({ignorePlacement:true}); // ignorePlacement ensures the animator is directly attached to this node
         
         if (typeof attribute === 'object') {
             // Handle a single map argument if provided

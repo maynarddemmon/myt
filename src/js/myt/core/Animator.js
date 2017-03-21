@@ -169,48 +169,56 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Node */
     initNode: function(parent, attrs) {
-        this.duration = 1000;
-        this.relative = this.reverse = this.running = this.paused = false;
-        this.repeat = 1;
-        this.easingFunction = myt.Animator.DEFAULT_EASING_FUNCTION;
+        var self = this;
         
-        this.callSuper(parent, attrs);
+        self.duration = 1000;
+        self.relative = self.reverse = self.running = self.paused = false;
+        self.repeat = 1;
+        self.easingFunction = myt.Animator.DEFAULT_EASING_FUNCTION;
         
-        this.__reset();
+        self.callSuper(parent, attrs);
+        
+        self.__reset();
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
     setRunning: function(v) {
-        if (this.running !== v) {
-            this.running = v;
-            if (this.inited) this.fireNewEvent('running', v);
+        var self = this;
+        
+        if (self.running !== v) {
+            self.running = v;
+            if (self.inited) self.fireNewEvent('running', v);
             
-            if (!this.paused) {
+            if (!self.paused) {
                 if (v) {
-                    this.__isColorAttr();
+                    self.__isColorAttr();
                 } else {
-                    if (this.__temporaryFrom) this.from = undefined;
-                    this.__reset();
+                    if (self.__temporaryFrom) self.from = undefined;
+                    self.__reset();
                 }
-                this[v ? 'attachTo' : 'detachFrom'](myt.global.idle, '__update', 'idle');
+                self[v ? 'attachTo' : 'detachFrom'](myt.global.idle, '__update', 'idle');
             }
         }
     },
     
     setPaused: function(v) {
-        if (this.paused !== v) {
-            this.paused = v;
-            if (this.inited) this.fireNewEvent('paused', v);
-            if (this.running) this[v ? 'detachFrom' : 'attachTo'](myt.global.idle, '__update', 'idle');
+        var self = this;
+        
+        if (self.paused !== v) {
+            self.paused = v;
+            if (self.inited) self.fireNewEvent('paused', v);
+            if (self.running) self[v ? 'detachFrom' : 'attachTo'](myt.global.idle, '__update', 'idle');
         }
     },
     
     setReverse: function(v) {
-        if (this.reverse !== v) {
-            this.reverse = v;
-            if (this.inited) this.fireNewEvent('reverse', v);
-            if (!this.running) this.__reset();
+        var self = this;
+        
+        if (self.reverse !== v) {
+            self.reverse = v;
+            if (self.inited) self.fireNewEvent('reverse', v);
+            if (!self.running) self.__reset();
         }
     },
     
@@ -281,30 +289,36 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
             it exists, will be executed.
         @returns void */
     reset: function(executeCallback) {
-        this.__reset();
+        var self = this;
         
-        this.setRunning(false);
-        this.setPaused(false);
+        self.__reset();
         
-        if (executeCallback && this.callback) this.callback.call(this, false);
+        self.setRunning(false);
+        self.setPaused(false);
+        
+        if (executeCallback && self.callback) self.callback.call(self, false);
     },
     
     /** @overrides myt.Reusable */
     clean: function() {
-        this.to = this.from = this.attribute = this.callback = undefined;
-        this.duration = 1000;
-        this.relative = this.reverse = false;
-        this.repeat = 1;
-        this.easingFunction = myt.Animator.DEFAULT_EASING_FUNCTION;
+        var self = this;
         
-        this.reset(false);
+        self.to = self.from = self.attribute = self.callback = undefined;
+        self.duration = 1000;
+        self.relative = self.reverse = false;
+        self.repeat = 1;
+        self.easingFunction = myt.Animator.DEFAULT_EASING_FUNCTION;
+        
+        self.reset(false);
     },
     
     /** @private */
     __reset: function() {
-        this.__temporaryFrom = false;
-        this.__loopCount = this.reverse ? this.repeat - 1 : 0;
-        this.__progress = this.reverse ? this.duration : 0;
+        var self = this;
+        
+        self.__temporaryFrom = false;
+        self.__loopCount = self.reverse ? self.repeat - 1 : 0;
+        self.__progress = self.reverse ? self.duration : 0;
     },
     
     /** @private */
@@ -314,81 +328,84 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
     
     /** @private */
     __advance: function(timeDiff) {
-        if (this.running && !this.paused) {
-            var reverse = this.reverse, 
-                duration = this.duration, 
-                repeat = this.repeat;
+        var self = this;
+        
+        if (self.running && !self.paused) {
+            var reverse = self.reverse, 
+                duration = self.duration, 
+                repeat = self.repeat;
             
             // An animation in reverse is like time going backward.
             if (reverse) timeDiff = timeDiff * -1;
             
             // Determine how much time to move forward by.
-            var oldProgress = this.__progress;
-            this.__progress += timeDiff;
+            var oldProgress = self.__progress;
+            self.__progress += timeDiff;
             
             // Check for overage
             var remainderTime = 0;
-            if (this.__progress > duration) {
-                remainderTime = this.__progress - duration;
-                this.__progress = duration;
+            if (self.__progress > duration) {
+                remainderTime = self.__progress - duration;
+                self.__progress = duration;
                 
                 // Increment loop count and halt looping if necessary
-                if (++this.__loopCount === repeat) remainderTime = 0;
-            } else if (0 > this.__progress) {
+                if (++self.__loopCount === repeat) remainderTime = 0;
+            } else if (0 > self.__progress) {
                 // Reverse case
-                remainderTime = -this.__progress; // Flip reverse time back to forward time
-                this.__progress = 0;
+                remainderTime = -self.__progress; // Flip reverse time back to forward time
+                self.__progress = 0;
                 
                 // Decrement loop count and halt looping if necessary
-                if (0 > --this.__loopCount && repeat > 0) remainderTime = 0;
+                if (0 > --self.__loopCount && repeat > 0) remainderTime = 0;
             }
             
-            var target = this.__getTarget();
+            var target = self.__getTarget();
             if (target) {
-                this.__updateTarget(target, this.__progress, oldProgress);
+                self.__updateTarget(target, self.__progress, oldProgress);
                 
                 if (
-                    (!reverse && this.__loopCount === repeat) || // Forward check
-                    (reverse && 0 > this.__loopCount && repeat > 0) // Reverse check
+                    (!reverse && self.__loopCount === repeat) || // Forward check
+                    (reverse && 0 > self.__loopCount && repeat > 0) // Reverse check
                 ) {
                     // Stop animation since loop count exceeded repeat count.
-                    this.setRunning(false);
-                    if (this.callback) this.callback.call(this, true);
+                    self.setRunning(false);
+                    if (self.callback) self.callback.call(self, true);
                 } else if (remainderTime > 0) {
                     // Advance again if time is remaining. This occurs when
                     // the timeDiff provided was greater than the animation
                     // duration and the animation loops.
-                    this.fireNewEvent('repeat', this.__loopCount);
-                    this.__progress = reverse ? duration : 0;
-                    this.__advance(remainderTime);
+                    self.fireNewEvent('repeat', self.__loopCount);
+                    self.__progress = reverse ? duration : 0;
+                    self.__advance(remainderTime);
                 }
             } else {
-                console.log("No target found for animator.", this);
-                this.setRunning(false);
-                if (this.callback) this.callback.call(this, false);
+                console.log("No target found for animator.", self);
+                self.setRunning(false);
+                if (self.callback) self.callback.call(self, false);
             }
         }
     },
     
     /** @private */
     __updateTarget: function(target, progress, oldProgress) {
-        var relative = this.relative,
-            duration = this.duration,
-            attr = this.attribute,
+        var self = this,
+            relative = self.relative,
+            duration = self.duration,
+            attr = self.attribute,
             progressPercent = Math.max(0, progress / duration), 
             oldProgressPercent = Math.max(0, oldProgress / duration);
         
         // Determine what "from" to use if none was provided.
-        if (this.from == null) {
-            this.__temporaryFrom = true;
-            this.from = relative ? (this.__isColorAnim ? '#000000' : 0) : target.get(attr);
+        if (self.from == null) {
+            self.__temporaryFrom = true;
+            self.from = relative ? (self.__isColorAnim ? '#000000' : 0) : target.get(attr);
         }
         
-        var motionValue = this.easingFunction(progressPercent) - (relative ? this.easingFunction(oldProgressPercent) : 0),
-            value = relative ? target.get(attr) : this.from,
-            to = this.to;
+        var motionValue = self.easingFunction(progressPercent) - (relative ? self.easingFunction(oldProgressPercent) : 0),
+            value = relative ? target.get(attr) : self.from,
+            to = self.to;
         
-        target.set(attr, this.__isColorAnim ? this.__getColorValue(this.from, to, motionValue, relative, value) : value + ((to - this.from) * motionValue));
+        target.set(attr, self.__isColorAnim ? self.__getColorValue(self.from, to, motionValue, relative, value) : value + ((to - self.from) * motionValue));
     },
     
     /** @private */

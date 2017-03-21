@@ -20,12 +20,19 @@ myt.Eventable = new JS.Class('Eventable', {
             the new instance.
         @returns void */
     initialize: function(attrs, mixins) {
+        var self = this;
         if (mixins) {
-            for (var i = 0, len = mixins.length; len > i;) this.extend(mixins[i++]);
+            for (var i = 0, len = mixins.length, mixin; len > i;) {
+                if (mixin = mixins[i++]) {
+                    self.extend(mixin);
+                } else {
+                    console.warn("Missing mixin in:" + self.klass.__displayName);
+                }
+            }
         }
         
-        this.inited = false;
-        this.init(attrs || {});
+        self.inited = false;
+        self.init(attrs || {});
     },
     
     
@@ -41,10 +48,11 @@ myt.Eventable = new JS.Class('Eventable', {
     
     /** @overrides myt.Destructible. */
     destroy: function() {
-        this.releaseAllConstraints();
-        this.detachFromAllObservables();
-        this.detachAllObservers();
+        var self = this;
+        self.releaseAllConstraints();
+        self.detachFromAllObservables();
+        self.detachAllObservers();
         
-        this.callSuper();
+        self.callSuper();
     }
 });

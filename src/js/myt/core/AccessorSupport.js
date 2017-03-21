@@ -10,6 +10,12 @@
 myt.AccessorSupport = new JS.Module('AccessorSupport', {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
+        /** Caches getter names. */
+        GETTER_NAMES:{},
+        
+        /** Caches setter names. */
+        SETTER_NAMES:{},
+        
         /** Generate a setter name for an attribute.
             @returns string */
         generateSetterName: function(attrName) {
@@ -52,13 +58,7 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
             target[getterName] = function() {
                 return target[attrName];
             };
-        },
-        
-        /** Caches getter names. */
-        GETTER_NAMES:{},
-        
-        /** Caches setter names. */
-        SETTER_NAMES:{}
+        }
     },
     
     
@@ -72,8 +72,9 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
         @param attrs:object a map of attributes to set.
         @returns void. */
     callSetters: function(attrs) {
-        var earlyAttrs = this.earlyAttrs,
-            lateAttrs = this.lateAttrs,
+        var self = this,
+            earlyAttrs = self.earlyAttrs,
+            lateAttrs = self.lateAttrs,
             attrName, extractedLateAttrs, i, len;
         if (earlyAttrs || lateAttrs) {
             // Make a shallow copy of attrs since we can't guarantee that
@@ -89,7 +90,7 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
                 while (len > i) {
                     attrName = earlyAttrs[i++];
                     if (attrName in attrs) {
-                        this.set(attrName, attrs[attrName]);
+                        self.set(attrName, attrs[attrName]);
                         delete attrs[attrName];
                     }
                 }
@@ -111,13 +112,13 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
         }
         
         // Do normal setters
-        for (var attrName in attrs) this.set(attrName, attrs[attrName]);
+        for (attrName in attrs) self.set(attrName, attrs[attrName]);
         
         // Do late setters
         if (extractedLateAttrs) {
             i = 0;
             len = extractedLateAttrs.length;
-            while (len > i) this.set(extractedLateAttrs[i++], extractedLateAttrs[i++]);
+            while (len > i) self.set(extractedLateAttrs[i++], extractedLateAttrs[i++]);
         }
     },
     
@@ -141,14 +142,17 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
             setter behavior. Defaults to undefined which is equivalent to false.
         @returns void */
     set: function(attrName, v, skipSetter) {
+        var self = this,
+            setterName;
+        
         if (!skipSetter) {
-            var setterName = myt.AccessorSupport.generateSetterName(attrName);
-            if (this[setterName]) return this[setterName](v);
+            setterName = myt.AccessorSupport.generateSetterName(attrName);
+            if (self[setterName]) return self[setterName](v);
         }
         
-        if (this[attrName] !== v) {
-            this[attrName] = v;
-            if (this.inited !== false && this.fireNewEvent) this.fireNewEvent(attrName, v); // !== false allows this to work with non-nodes.
+        if (self[attrName] !== v) {
+            self[attrName] = v;
+            if (self.inited !== false && self.fireNewEvent) self.fireNewEvent(attrName, v); // !== false allows this to work with non-nodes.
         }
     },
     

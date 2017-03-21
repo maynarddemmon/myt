@@ -158,22 +158,24 @@ myt.View = new JS.Class('View', myt.Node, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Node */
     initNode: function(parent, attrs) {
-        this.x = this.y = this.width = this.height = 0;
-        this.opacity = 1;
-        this.visible = true;
+        var self = this;
         
-        this.setDomElement(this.createOurDomElement(parent));
+        self.x = self.y = self.width = self.height = 0;
+        self.opacity = 1;
+        self.visible = true;
+        
+        self.setDomElement(self.createOurDomElement(parent));
         
         // Necessary since x and y of 0 won't update deStyle so this gets
         // things initialized correctly. Without this RootViews will have
         // an incorrect initial position for x or y of 0.
-        this.deStyle.left = this.deStyle.top = '0px';
+        self.deStyle.left = self.deStyle.top = '0px';
         
-        this.callSuper(parent, attrs);
+        self.callSuper(parent, attrs);
         
         // Set default bgcolor afterwards if still undefined. This allows 
         // BaseInputText to override the default for input:text via attrs.
-        if (this.bgColor === undefined) this.bgColor = 'transparent';
+        if (self.bgColor === undefined) self.bgColor = 'transparent';
     },
     
     /** Creates the dom element we will be a proxy for. Called during View
@@ -204,25 +206,29 @@ myt.View = new JS.Class('View', myt.Node, {
     
     /** @overrides myt.Node */
     destroyAfterOrphaning: function() {
-        this.callSuper();
+        var self = this;
         
-        this.detachFromAllDomSources();
-        this.detachAllDomObservers();
-        this.disposeOfDomElement();
+        self.callSuper();
+        
+        self.detachFromAllDomSources();
+        self.detachAllDomObservers();
+        self.disposeOfDomElement();
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
     /** @overrides myt.Node */
     setParent: function(parent) {
-        if (this.parent !== parent) {
-            if (this.inited) {
-                this.__teardownAlignConstraint();
-                this.__teardownValignConstraint();
+        var self = this;
+        
+        if (self.parent !== parent) {
+            if (self.inited) {
+                self.__teardownAlignConstraint();
+                self.__teardownValignConstraint();
             }
-            this.callSuper(parent);
-            this.__setupAlignConstraint();
-            this.__setupValignConstraint();
+            self.callSuper(parent);
+            self.__setupAlignConstraint();
+            self.__setupValignConstraint();
         }
     },
     
@@ -259,22 +265,24 @@ myt.View = new JS.Class('View', myt.Node, {
     },
     
     setIgnoreLayout: function(v) {
-        if (this.ignoreLayout !== v) {
+        var self = this;
+        
+        if (self.ignoreLayout !== v) {
             // Add or remove ourselves from any layouts on our parent.
-            var ready = this.inited && this.parent, layouts, i;
+            var ready = self.inited && self.parent, layouts, i;
             if (v) {
                 if (ready) {
-                    layouts = this.parent.getLayouts();
+                    layouts = self.parent.getLayouts();
                     i = layouts.length;
-                    while (i) layouts[--i].removeSubview(this);
+                    while (i) layouts[--i].removeSubview(self);
                 }
-                this.ignoreLayout = v;
+                self.ignoreLayout = v;
             } else {
-                this.ignoreLayout = v;
+                self.ignoreLayout = v;
                 if (ready) {
-                    layouts = this.parent.getLayouts();
+                    layouts = self.parent.getLayouts();
                     i = layouts.length;
-                    while (i) layouts[--i].addSubview(this);
+                    while (i) layouts[--i].addSubview(self);
                 }
             }
         }
@@ -1029,7 +1037,7 @@ myt.View = new JS.Class('View', myt.Node, {
         svs.sort(sortFunc);
         
         // Rearrange dom to match new sort order.
-        myt.View.retainFocusDuringDomUpdate(this, function() {
+        myt.View.retainFocusDuringDomUpdate(self, function() {
             var len = svs.length,
                 i = 0,
                 de = self.domElement,
