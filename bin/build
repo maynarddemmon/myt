@@ -31,9 +31,28 @@ exec(cmd, function (error, stdout, stderr) {
     
     // Then use closure compiler to compress the combined file and optionally
     // output a source map
-    var minifiedFileName = targetFile.substring(0, targetFile.length - 2) + 'min.js',
-        cmd = 'java -Xmx256m -jar bin/closure-compiler/compiler.jar --js ' + targetFile + ' --js_output_file ' + minifiedFileName +
-            (outputSourceMap ? ' --source_map_format=V3 --create_source_map ' + minifiedFileName + '.map' : '');
+    var minifiedFilePath = targetFile.substring(0, targetFile.length - 2) + 'min.js',
+        sourceMapOpts = '';
+    
+    if (outputSourceMap) {
+        // Get just the filename without any leading directories
+        var parts = minifiedFilePath.split('/');
+        sourceMapOpts = ' --source_map_format=V3 --create_source_map ' + minifiedFilePath + '.map' + 
+            ' --output_wrapper "%output%\n//# sourceMappingURL=./' + parts[parts.length - 1] + '.map"';
+    }
+    
+    var cmd = 'java -Xmx256m -jar bin/closure-compiler/compiler.jar --js ' + targetFile + 
+        ' --js_output_file ' + minifiedFilePath + sourceMapOpts;
     console.error("Executing: " + cmd);
-    exec(cmd, handleResults);
+    exec(cmd, function (error, stdout, stderr) {
+        handleResults(error, stdout, stderr);
+        
+        // Inject a sourceRoot into the source map file.
+        if (outputSourceMap) {
+            var fs = require('fs'),
+                src = minifiedFilePath + '.map',
+                fileData = fs.readFileSync(src, 'utf8');
+            fs.writeFileSync(src, '{\n"sourceRoot":"../",' + fileData.substring(1), {"encoding":'utf8'});
+        }
+    });
 });
