@@ -1,31 +1,23 @@
 #!/usr/bin/env node
 
+// Gather Arguments
 var exec = require('child_process').exec,
     arguments = process.argv.splice(2),
     manifestFile = arguments[0],
     targetFile = arguments[1],
     rootPath = arguments[2],
-    requiredFiles = arguments.splice(3);
+    outputSourceMap = arguments[3] === 'true',
+    requiredFiles = arguments.splice(4);
 
-if (!manifestFile) {
-    console.error('No manifest file provided.');
-    return;
-}
-if (!targetFile) {
-    console.error('No target file provided.');
-    return;
-}
-if (!rootPath) {
-    console.error('No root path provided.');
-    return;
-}
-if (!requiredFiles.length > 0) {
-    console.error('No required file provided.');
-    return;
-}
+// Basic argument validation
+if (!manifestFile) return console.error('No manifest file provided.');
+if (!targetFile) return console.error('No target file provided.');
+if (!rootPath) return console.error('No root path provided.');
+if (!requiredFiles.length > 0) return console.error('No required file provided.');
 
-// First use jsbuild to combine files
-// -P option removes the Package system from JS.Class
+// Now use jsbuild to combine files
+// The -P option removes the Package system from JS.Class which is not needed
+// because we're combining everything together now.
 var handleResults = function (error, stdout, stderr) {
         if (stdout) console.error('stdout: ' + stdout);
         if (stderr) console.error('stderr: ' + stderr);
@@ -37,10 +29,11 @@ console.error("Executing: " + cmd);
 exec(cmd, function (error, stdout, stderr) {
     handleResults(error, stdout, stderr);
     
-    // Then use closure compiler to compress the combined file
-    var cmd = 'java -Xmx256m -jar bin/closure-compiler/compiler.jar --js ' + 
-        targetFile + ' --js_output_file ' + 
-        targetFile.substring(0, targetFile.length - 2) + 'min.js';
+    // Then use closure compiler to compress the combined file and optionally
+    // output a source map
+    var minifiedFileName = targetFile.substring(0, targetFile.length - 2) + 'min.js',
+        cmd = 'java -Xmx256m -jar bin/closure-compiler/compiler.jar --js ' + targetFile + ' --js_output_file ' + minifiedFileName +
+            (outputSourceMap ? ' --source_map_format=V3 --create_source_map ' + minifiedFileName + '.map' : '');
     console.error("Executing: " + cmd);
     exec(cmd, handleResults);
 });
