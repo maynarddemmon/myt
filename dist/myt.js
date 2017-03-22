@@ -4049,7 +4049,7 @@ JS.Singleton = new JS.Class('Singleton', {
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20170320.1831,
+    version:20170322.1153,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -4064,20 +4064,18 @@ myt = {
         return ++this.__GUID_COUNTER;
     },
     
-    /** Event listener code Adapted from:
-            http://javascript.about.com/library/bllisten.htm
-        A more robust solution can be found here:
-            http://msdn.microsoft.com/en-us/magazine/ff728624.aspx */
+    /*  Event listener code Adapted from: http://javascript.about.com/library/bllisten.htm
+        A more robust solution can be found here: http://msdn.microsoft.com/en-us/magazine/ff728624.aspx */
+    /** Adds an event listener to a dom element. 
+        @param elem:DomElement the dom element to listen to.
+        @param type:string the name of the event to listen to.
+        @param callback:function the callback function that will be
+            registered for the event.
+        @param capture:boolean (optional) indicates if the listener is 
+            registered during the capture phase or bubble phase.
+        @returns void */
     addEventListener: function() {
         if (window.addEventListener) {
-            /** Adds an event listener to a dom element. 
-                @param elem:DomElement the dom element to listen to.
-                @param type:string the name of the event to listen to.
-                @param callback:function the callback function that will be
-                    registered for the event.
-                @param capture:boolean (optional) indicates if the listener is 
-                    registered during the capture phase or bubble phase.
-                @returns void */
             return function(elem, type, callback, capture) {
                 elem.addEventListener(type, callback, capture || false);
             };

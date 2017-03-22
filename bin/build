@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 
-var arguments = process.argv.splice(2);
-var manifestFile = arguments[0];
-var targetFile = arguments[1];
-var rootPath = arguments[2];
-var requiredFiles = arguments.splice(3);
+var exec = require('child_process').exec,
+    arguments = process.argv.splice(2),
+    manifestFile = arguments[0],
+    targetFile = arguments[1],
+    rootPath = arguments[2],
+    requiredFiles = arguments.splice(3);
 
 if (!manifestFile) {
     console.error('No manifest file provided.');
@@ -23,36 +24,23 @@ if (!requiredFiles.length > 0) {
     return;
 }
 
-// Compression function
-var compressor = require('yuicompressor');
-var compressFunc = function (error, stdout, stderr) {
-    if (stdout) console.error('stdout: ' + stdout);
-    if (stderr) console.error('stderr: ' + stderr);
-    if (error) console.error('exec error: ' + error);
-    
-    // Compress file
-    console.error("COMPRESSING: " + targetFile);
-    compressor.compress(targetFile, {
-        charset: 'utf8', type: 'js'
-    }, function(err, data, extra) {
-        if (err) {
-            // An error occured
-            console.error(err);
-        } else {
-            // The compressed data.
-            console.log(data);
-        }
-        
-        // Warnings
-        if (extra) console.error(extra);
-    });
-};
-
-// jsbuild to combine files
+// First use jsbuild to combine files
 // -P option removes the Package system from JS.Class
-var exec = require('child_process').exec;
-var cmd = 'jsbuild -m ' + manifestFile + ' -P -r ' + rootPath + ' ' + requiredFiles.join(' ') + ' > ' + targetFile;
-console.error("RUNNING: " + cmd);
-var child = exec(cmd, compressFunc);
-
-
+var handleResults = function (error, stdout, stderr) {
+        if (stdout) console.error('stdout: ' + stdout);
+        if (stderr) console.error('stderr: ' + stderr);
+        if (error) console.error('exec error: ' + error);
+    },
+    cmd = 'jsbuild -m ' + manifestFile + ' -P -r ' + rootPath + ' ' + 
+        requiredFiles.join(' ') + ' > ' + targetFile;
+console.error("Executing: " + cmd);
+exec(cmd, function (error, stdout, stderr) {
+    handleResults(error, stdout, stderr);
+    
+    // Then use closure compiler to compress the combined file
+    var cmd = 'java -Xmx256m -jar bin/closure-compiler/compiler.jar --js ' + 
+        targetFile + ' --js_output_file ' + 
+        targetFile.substring(0, targetFile.length - 2) + 'min.js';
+    console.error("Executing: " + cmd);
+    exec(cmd, handleResults);
+});
