@@ -3,11 +3,8 @@ Examples can be found here: http://maynarddemmon.github.io/myt/examples/
 To create the dist files run the following from the myt root dir:
   > bin/build src/js/myt/manifest.js dist/myt.js ./src/js false myt.all
 
-If you want to output a source map too do change the "false" to "true":
+If you want to output a source map too, change "false" to "true":
   > bin/build src/js/myt/manifest.js dist/myt.js ./src/js true myt.all
-
-To build a single javascript file run the following from the myt root dir:
-  > jsbuild -m src/js/myt/manifest.js -P -r ./src/js false myt.SimpleListView
 
 Starting up JSTestDriver from the myt dir:
   > nohup java -jar src/test/jstestdriver/JsTestDriver.jar --port 8081 >dev/null>&1 &

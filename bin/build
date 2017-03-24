@@ -2,6 +2,7 @@
 
 // Gather Arguments
 var exec = require('child_process').exec,
+    fs = require('fs'),
     arguments = process.argv.splice(2),
     manifestFile = arguments[0],
     targetFile = arguments[1],
@@ -15,19 +16,109 @@ if (!targetFile) return console.error('No target file provided.');
 if (!rootPath) return console.error('No root path provided.');
 if (!requiredFiles.length > 0) return console.error('No required file provided.');
 
+// JS Build
+var jsBuild = function(manifest, root, include, callback) {
+    var http = require('http'),
+        https = require('https'),
+        url = require('url'),
+        path = require('path'),
+        HTTP_REGEX = /^https?:/i,
+        die = function(msg) {
+            if (msg) console.error(' [ERROR] ' + msg);
+            process.exit(1);
+        },
+        P = require('./package');
+    
+    P.ROOT = path.resolve(root);
+    P.ENV.JS = P;
+    P.ENV.JSCLASS_PATH = path.dirname(manifest);
+    
+    // Pull in the manifest file
+    require(path.resolve(manifest));
+    
+    // Creates the list of packages needed for the include list. Resolves
+    // the depends and uses information so that the resulting packages list
+    // is in dependency order.
+    var packages = [];
+    include.forEach(function(inc) {
+        var expand = function(Package, name, deps) {
+            var pkg = Package._getByName(name);
+            pkg._deps.list.forEach(function(p) {expand(Package, p, deps)});
+            if (deps.indexOf(pkg) === -1) deps.push(pkg);
+            pkg._uses.list.forEach(function(p) {expand(Package, p, deps)});
+        }
+        expand(P.Package, inc, packages);
+    });
+    
+    // Extract the file paths out of the packages list. This is necessary
+    // because each file() declaration in the manifest file can declare more
+    // than one file.
+    var includedFiles = [];
+    packages.forEach(function(pkg) {
+        var paths = pkg._loader;
+        if (!(paths instanceof Array)) die('Cannot bundle ' + pkg + ': no path specified in your manifest');
+        paths = paths.filter(function(p) {return !HTTP_REGEX.test(p)});
+        paths.forEach(function(loader) {includedFiles.push(loader)});
+    });
+    
+    var read = function(file, readCallback) {
+        console.error(' [READ] ' + file);
+        if (HTTP_REGEX.test(file)) {
+            var uri     = url.parse(file),
+                client  = (uri.protocol === 'https:') ? https : http,
+                port    = uri.port || (client === https ? '443' : '80'),
+                options = {host:uri.hostname, port:port, path:uri.pathname},
+                chunks  = [],
+                length  = 0;
+            
+            client.get(options, function(response) {
+                if (response.statusCode < 200 || response.statusCode >= 300) die('Request unsuccessful: ' + file);
+                
+                response.addListener('data', function(chunk) {
+                    chunks.push(chunk)
+                    length += chunk.length
+                });
+                response.addListener('end', function() {
+                    var offset = 0,
+                        body = new Buffer(length);
+                    chunks.forEach(function(chunk) {
+                        chunk.copy(body, offset);
+                        offset += chunk.length;
+                    });
+                    readCallback(body)
+                });
+            }).on('error', function() {
+                die('Request unsuccessful: ' + file);
+            });
+        } else {
+            fs.readFile(file, function(error, content) {
+                if (error) die('Cannot find file ' + file + ', please check your --root setting');
+                readCallback(content);
+            })
+        }
+    }
+    
+    // Iterate over the included files in order reading each one in and
+    // ultimately concatenating them all together and ultimately execute the
+    // callback function
+    var source = [];
+    var bundle = function(root, files, i) {
+        if (i >= files.length) {
+            callback(source.join('\n\n'));
+        } else {
+            read(files[i], function(code) {
+                source.push(code.toString('utf8'));
+                bundle(root, files, i + 1);
+            })
+        }
+    };
+    bundle(P.ROOT, includedFiles, 0);
+};
+
 // Now use jsbuild to combine files
-// The -P option removes the Package system from JS.Class which is not needed
-// because we're combining everything together now.
-var handleResults = function (error, stdout, stderr) {
-        if (stdout) console.error('stdout: ' + stdout);
-        if (stderr) console.error('stderr: ' + stderr);
-        if (error) console.error('exec error: ' + error);
-    },
-    cmd = 'jsbuild -m ' + manifestFile + ' -P -r ' + rootPath + ' ' + 
-        requiredFiles.join(' ') + ' > ' + targetFile;
-console.error("Executing: " + cmd);
-exec(cmd, function (error, stdout, stderr) {
-    handleResults(error, stdout, stderr);
+console.error("Concatenating files:");
+jsBuild(manifestFile, rootPath, requiredFiles, function(concatenatedData) {
+    fs.writeFileSync(targetFile, concatenatedData, {"encoding":'utf8'});
     
     // Then use closure compiler to compress the combined file and optionally
     // output a source map
@@ -45,12 +136,13 @@ exec(cmd, function (error, stdout, stderr) {
         ' --js_output_file ' + minifiedFilePath + sourceMapOpts;
     console.error("Executing: " + cmd);
     exec(cmd, function (error, stdout, stderr) {
-        handleResults(error, stdout, stderr);
+        if (stdout) console.error('stdout: ' + stdout);
+        if (stderr) console.error('stderr: ' + stderr);
+        if (error) console.error('exec error: ' + error);
         
         // Inject a sourceRoot into the source map file.
         if (outputSourceMap) {
-            var fs = require('fs'),
-                src = minifiedFilePath + '.map',
+            var src = minifiedFilePath + '.map',
                 fileData = fs.readFileSync(src, 'utf8');
             fs.writeFileSync(src, '{\n"sourceRoot":"../",' + fileData.substring(1), {"encoding":'utf8'});
         }
