@@ -40,7 +40,7 @@
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20170322.1153,
+    version:20170324.1209,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -431,6 +431,16 @@ myt = {
         return true;
     },
     
+    /** Tests if two objects are shallowly equal. */
+    areObjectsEqual: function(a, b) {
+        if (a !== b) {
+            if (a == null || b == null) return false;
+            for (var key in a) if (a[key] !== b[key]) return false;
+            for (key in b) if (a[key] !== b[key]) return false;
+        }
+        return true;
+    },
+    
     // DOM
     /** Gets the dom element of the provided tagname and index.
         @param tagname:string (optional) the name of the tag to search for.
@@ -443,21 +453,6 @@ myt = {
     },
     
     // Misc
-    /** Make a deep or shallow copy of an object.
-        @param obj:object the object to copy.
-        @param shallow:boolean (optional) If true is provided a shallow copy
-            will be created in a more performant way than a deep copy.
-        @returns object a copy of the object. */
-    clone: function(obj, shallow) {
-        if (shallow) {
-            var tmp = function(){};
-            tmp.prototype = obj;
-            return new tmp();
-        } else {
-            return JSON.parse(JSON.stringify(obj));
-        }
-    },
-    
     /** Memoize a function.
         @param f:function The function to memoize
         @returns function: The memoized function. */
