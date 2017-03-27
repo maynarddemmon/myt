@@ -58,10 +58,10 @@ new JS.Singleton('GlobalHistory', {
 
 if (!global.mytNoHistoryShim) { // FIXME: remove conditional once old code has been updated.
     History.Adapter.bind(window, 'statechange', function(event) {
-        myt.global.history.fireNewEvent('statechange', History.getState());
+        myt.global.history.fireEvent('statechange', History.getState());
     });
     
     History.Adapter.bind(window, 'anchorchange', function(event) {
-        myt.global.history.fireNewEvent('anchorchange', History.getState());
+        myt.global.history.fireEvent('anchorchange', History.getState());
     });
 }

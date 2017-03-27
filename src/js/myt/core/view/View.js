@@ -293,7 +293,7 @@ myt.View = new JS.Class('View', myt.Node, {
     setDomClass: function(v) {
         if (this.domClass !== v) {
             this.callSuper(v);
-            if (this.inited) this.fireNewEvent('domClass', v);
+            if (this.inited) this.fireEvent('domClass', v);
         }
     },
     
@@ -301,7 +301,7 @@ myt.View = new JS.Class('View', myt.Node, {
     setDomId: function(v) {
         if (this.domId !== v) {
             this.callSuper(v);
-            if (this.inited) this.fireNewEvent('domId', v);
+            if (this.inited) this.fireEvent('domId', v);
         }
     },
     
@@ -309,7 +309,7 @@ myt.View = new JS.Class('View', myt.Node, {
     setAlignOffset: function(v) {
         if (this.alignOffset !== v) {
             this.alignOffset = v;
-            if (this.inited) this.fireNewEvent('alignOffset', v);
+            if (this.inited) this.fireEvent('alignOffset', v);
             if (this.parent && this.align === 'left') this.setX(v);
         }
     },
@@ -319,7 +319,7 @@ myt.View = new JS.Class('View', myt.Node, {
             if (this.inited) this.__teardownAlignConstraint();
             this.align = v;
             if (this.inited) {
-                this.fireNewEvent('align', v);
+                this.fireEvent('align', v);
                 this.__setupAlignConstraint();
             }
         }
@@ -367,7 +367,7 @@ myt.View = new JS.Class('View', myt.Node, {
     setValignOffset: function(v) {
         if (this.valignOffset !== v) {
             this.valignOffset = v;
-            if (this.inited) this.fireNewEvent('valignOffset', v);
+            if (this.inited) this.fireEvent('valignOffset', v);
             if (this.parent && this.valign === 'top') this.setY(v);
         }
     },
@@ -377,7 +377,7 @@ myt.View = new JS.Class('View', myt.Node, {
             if (this.inited) this.__teardownValignConstraint();
             this.valign = v;
             if (this.inited) {
-                this.fireNewEvent('valign', v);
+                this.fireEvent('valign', v);
                 this.__setupValignConstraint();
             }
         }
@@ -427,7 +427,7 @@ myt.View = new JS.Class('View', myt.Node, {
         if (this.x !== v) {
             this.x = v;
             if (this.visible) this.deStyle.left = v + 'px';
-            if (this.inited) this.fireNewEvent('x', v);
+            if (this.inited) this.fireEvent('x', v);
         }
     },
     
@@ -435,7 +435,7 @@ myt.View = new JS.Class('View', myt.Node, {
         if (this.y !== v) {
             this.y = v;
             if (this.visible) this.deStyle.top = v + 'px';
-            if (this.inited) this.fireNewEvent('y', v);
+            if (this.inited) this.fireEvent('y', v);
         }
     },
     
@@ -448,7 +448,7 @@ myt.View = new JS.Class('View', myt.Node, {
             this.deStyle.width = v + 'px';
             if (this.inited) {
                 this.__updateBounds(v, this.height);
-                if (!supressEvent) this.fireNewEvent('width', v);
+                if (!supressEvent) this.fireEvent('width', v);
             }
         }
     },
@@ -462,7 +462,7 @@ myt.View = new JS.Class('View', myt.Node, {
             this.deStyle.height = v + 'px';
             if (this.inited) {
                 this.__updateBounds(this.width, v);
-                if (!supressEvent) this.fireNewEvent('height', v);
+                if (!supressEvent) this.fireEvent('height', v);
             }
         }
     },
@@ -471,21 +471,21 @@ myt.View = new JS.Class('View', myt.Node, {
         if (this.textColor !== v) {
             this.textColor = v;
             this.deStyle.color = v || 'inherit';
-            if (this.inited) this.fireNewEvent('textColor', v);
+            if (this.inited) this.fireEvent('textColor', v);
         }
     },
     
     setBgColor: function(v) {
         if (this.bgColor !== v) {
             this.deStyle.backgroundColor = this.bgColor = v;
-            if (this.inited) this.fireNewEvent('bgColor', v);
+            if (this.inited) this.fireEvent('bgColor', v);
         }
     },
     
     setOpacity: function(v) {
         if (this.opacity !== v) {
             this.deStyle.opacity = this.opacity = v;
-            if (this.inited) this.fireNewEvent('opacity', v);
+            if (this.inited) this.fireEvent('opacity', v);
         }
     },
     
@@ -506,7 +506,7 @@ myt.View = new JS.Class('View', myt.Node, {
                 s.overflow = v || 'visible';
             }
             
-            if (this.inited) this.fireNewEvent('overflow', v);
+            if (this.inited) this.fireEvent('overflow', v);
         }
     },
     
@@ -523,7 +523,7 @@ myt.View = new JS.Class('View', myt.Node, {
             s.left = v ? this.x + 'px' : '-100000px';
             s.top = v ? this.y + 'px' : '-100000px';
             
-            if (this.inited) this.fireNewEvent('visible', v);
+            if (this.inited) this.fireEvent('visible', v);
         }
     },
     
@@ -531,7 +531,7 @@ myt.View = new JS.Class('View', myt.Node, {
         if (this.pointerEvents !== v) {
             this.pointerEvents = v;
             this.deStyle.pointerEvents = v || 'auto';
-            if (this.inited) this.fireNewEvent('pointerEvents', v);
+            if (this.inited) this.fireEvent('pointerEvents', v);
         }
     },
     
@@ -539,7 +539,7 @@ myt.View = new JS.Class('View', myt.Node, {
         if (this.cursor !== v) {
             this.cursor = v;
             this.deStyle.cursor = v || 'auto';
-            if (this.inited) this.fireNewEvent('cursor', v);
+            if (this.inited) this.fireEvent('cursor', v);
         }
     },
     
@@ -551,12 +551,12 @@ myt.View = new JS.Class('View', myt.Node, {
     __updateBounds: function(w, h) {
         if (this.boundsWidth !== w) {
             this.boundsWidth = w;
-            this.fireNewEvent('boundsWidth', w);
+            this.fireEvent('boundsWidth', w);
         }
         
         if (this.boundsHeight !== h) {
             this.boundsHeight = h;
-            this.fireNewEvent('boundsHeight', h);
+            this.fireEvent('boundsHeight', h);
         }
     },
     
@@ -780,11 +780,11 @@ myt.View = new JS.Class('View', myt.Node, {
         if (node instanceof myt.View) {
             this.domElement.appendChild(node.domElement);
             this.getSubviews().push(node);
-            this.fireNewEvent('subviewAdded', node);
+            this.fireEvent('subviewAdded', node);
             this.subviewAdded(node);
         } else if (node instanceof myt.Layout) {
             this.getLayouts().push(node);
-            this.fireNewEvent('layoutAdded', node);
+            this.fireEvent('layoutAdded', node);
             this.layoutAdded(node);
         }
     },
@@ -800,7 +800,7 @@ myt.View = new JS.Class('View', myt.Node, {
         if (node instanceof myt.View) {
             idx = this.getSubviewIndex(node);
             if (idx !== -1) {
-                this.fireNewEvent('subviewRemoved', node);
+                this.fireEvent('subviewRemoved', node);
                 node.removeDomElement();
                 this.subviews.splice(idx, 1);
                 this.subviewRemoved(node);
@@ -808,7 +808,7 @@ myt.View = new JS.Class('View', myt.Node, {
         } else if (node instanceof myt.Layout) {
             idx = this.getLayoutIndex(node);
             if (idx !== -1) {
-                this.fireNewEvent('layoutRemoved', node);
+                this.fireEvent('layoutRemoved', node);
                 this.layouts.splice(idx, 1);
                 this.layoutRemoved(node);
             }

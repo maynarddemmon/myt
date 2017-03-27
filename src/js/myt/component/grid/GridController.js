@@ -27,17 +27,19 @@
 myt.GridController = new JS.Module('GridController', {
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        this.columnHeaders = [];
-        this.rows = [];
+        var self = this;
         
-        this.maxWidth = this.minWidth = this.gridWidth = 0;
-        this.fitToWidth = this.locked = true;
+        self.columnHeaders = [];
+        self.rows = [];
         
-        this.callSuper(parent, attrs);
+        self.maxWidth = self.minWidth = self.gridWidth = 0;
+        self.fitToWidth = self.locked = true;
         
-        this._fitToWidth();
-        this._notifyHeadersOfSortState();
-        if (!this.locked) this.doSort();
+        self.callSuper(parent, attrs);
+        
+        self._fitToWidth();
+        self._notifyHeadersOfSortState();
+        if (!self.locked) self.doSort();
     },
     
     
@@ -46,7 +48,7 @@ myt.GridController = new JS.Module('GridController', {
         if (!myt.areArraysEqual(v, this.sort)) {
             this.sort = v;
             if (this.inited) {
-                this.fireNewEvent('sort', v);
+                this.fireEvent('sort', v);
                 this._notifyHeadersOfSortState();
                 if (!this.locked) this.doSort();
             }

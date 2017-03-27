@@ -20,7 +20,7 @@ myt.global = new JS.Singleton('Global', {
             this.unregister(key);
         }
         this[key] = v;
-        this.fireNewEvent('register' + key, v);
+        this.fireEvent('register' + key, v);
     },
     
     /** Unegisters the global for the provided key. Fires an unregister<key>
@@ -30,7 +30,7 @@ myt.global = new JS.Singleton('Global', {
         if (this.hasOwnProperty(key)) {
             var v = this[key];
             delete this[key];
-            this.fireNewEvent('unregister' + key, v);
+            this.fireEvent('unregister' + key, v);
         } else {
             console.log("Warning: myt.global key not in use: ", key);
         }

@@ -22,30 +22,32 @@ myt.HorizontalThreePanel = new JS.Module('HorizontalThreePanel', {
     },
     
     doBeforeAdoption: function() {
-        this.callSuper();
+        var self = this;
+        
+        self.callSuper();
         
         var m = myt;
-        new m.Image(this, {
-            name:'first', imageUrl:this.firstImageUrl, ignoreLayout:true
+        new m.Image(self, {
+            name:'first', imageUrl:self.firstImageUrl, ignoreLayout:true
         });
         
-        var second = new m.Image(this, {
-            name:'second', layoutHint:1, imageUrl:this.secondImageUrl, 
+        var second = new m.Image(self, {
+            name:'second', layoutHint:1, imageUrl:self.secondImageUrl, 
             ignoreLayout:true, useNaturalSize:false, calculateNaturalSize:true
         });
-        this.attachTo(second, '__updateSize', 'naturalHeight');
-        this.attachTo(second, '__updateImageSize', 'width');
+        self.attachTo(second, '__updateSize', 'naturalHeight');
+        self.attachTo(second, '__updateImageSize', 'width');
         
-        new m.Image(this, {
-            name:'third', imageUrl:this.thirdImageUrl, ignoreLayout:true
+        new m.Image(self, {
+            name:'third', imageUrl:self.thirdImageUrl, ignoreLayout:true
         });
         
         var ignoreMixin = [m.ThreePanel.IGNORE_FUNCTION_MIXIN];
-        new m.ResizeLayout(this, {name:'resizeLayout'}, ignoreMixin);
-        new m.SizeToChildren(this, {axis:'y'}, ignoreMixin);
+        new m.ResizeLayout(self, {name:'resizeLayout'}, ignoreMixin);
+        new m.SizeToChildren(self, {axis:'y'}, ignoreMixin);
         
-        this.__updateRepeat();
-        this.__updateSize();
+        self.__updateRepeat();
+        self.__updateSize();
     },
     
     
@@ -75,7 +77,7 @@ myt.HorizontalThreePanel = new JS.Module('HorizontalThreePanel', {
         if (this.repeat !== v) {
             this.repeat = v;
             if (this.inited) {
-                this.fireNewEvent('repeat', v);
+                this.fireEvent('repeat', v);
                 this.__updateRepeat();
             }
         }

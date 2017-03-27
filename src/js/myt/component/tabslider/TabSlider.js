@@ -53,23 +53,23 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
         attrs.percentOfParentWidth = 100;
         attrs.expansionState = 'collapsed';
         
-        if (attrs.tabId === undefined) attrs.tabId = myt.generateGuid();
-        if (attrs.tabContainer === undefined) attrs.tabContainer = parent;
+        if (attrs.tabId == null) attrs.tabId = myt.generateGuid();
+        if (attrs.tabContainer == null) attrs.tabContainer = parent;
         
-        if (attrs.selected === undefined) attrs.selected = false;
-        if (attrs.buttonClass === undefined) attrs.buttonClass = myt.DrawButton;
-        if (attrs.drawingMethodClassname === undefined) attrs.drawingMethodClassname = 'myt.TabSliderDrawingMethod';
-        if (attrs.zIndex === undefined) attrs.zIndex = 0;
+        if (attrs.selected == null) attrs.selected = false;
+        if (attrs.buttonClass == null) attrs.buttonClass = myt.DrawButton;
+        if (attrs.drawingMethodClassname == null) attrs.drawingMethodClassname = 'myt.TabSliderDrawingMethod';
+        if (attrs.zIndex == null) attrs.zIndex = 0;
         
         var TS = myt.TabSlider;
-        if (attrs.edgeColor === undefined) attrs.edgeColor = TS.DEFAULT_EDGE_COLOR;
-        if (attrs.edgeSize === undefined) attrs.edgeSize = TS.DEFAULT_EDGE_SIZE;
-        if (attrs.buttonHeight === undefined) attrs.buttonHeight = TS.DEFAULT_BUTTON_HEIGHT;
-        if (attrs.fillColorSelected === undefined) attrs.fillColorSelected = TS.DEFAULT_FILL_COLOR_SELECTED;
-        if (attrs.fillColorHover === undefined) attrs.fillColorHover = TS.DEFAULT_FILL_COLOR_HOVER;
-        if (attrs.fillColorActive === undefined) attrs.fillColorActive = TS.DEFAULT_FILL_COLOR_ACTIVE;
-        if (attrs.fillColorReady === undefined) attrs.fillColorReady = TS.DEFAULT_FILL_COLOR_READY;
-        if (attrs.minContainerHeight === undefined) attrs.minContainerHeight = TS.DEFAULT_MINIMUM_CONTAINER_HEIGHT;
+        if (attrs.edgeColor == null) attrs.edgeColor = TS.DEFAULT_EDGE_COLOR;
+        if (attrs.edgeSize == null) attrs.edgeSize = TS.DEFAULT_EDGE_SIZE;
+        if (attrs.buttonHeight == null) attrs.buttonHeight = TS.DEFAULT_BUTTON_HEIGHT;
+        if (attrs.fillColorSelected == null) attrs.fillColorSelected = TS.DEFAULT_FILL_COLOR_SELECTED;
+        if (attrs.fillColorHover == null) attrs.fillColorHover = TS.DEFAULT_FILL_COLOR_HOVER;
+        if (attrs.fillColorActive == null) attrs.fillColorActive = TS.DEFAULT_FILL_COLOR_ACTIVE;
+        if (attrs.fillColorReady == null) attrs.fillColorReady = TS.DEFAULT_FILL_COLOR_READY;
+        if (attrs.minContainerHeight == null) attrs.minContainerHeight = TS.DEFAULT_MINIMUM_CONTAINER_HEIGHT;
         
         // Selection must be done via the select method on the tabContainer
         if (attrs.selected) {
@@ -219,7 +219,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
     setExpansionState: function(v) {
         if (this.expansionState !== v) {
             this.expansionState = v;
-            if (this.inited) this.fireNewEvent('expansionState', v);
+            if (this.inited) this.fireEvent('expansionState', v);
             
             var wrapper = this.wrapper;
             if (wrapper) {

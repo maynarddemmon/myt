@@ -63,7 +63,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
         if (this.focused !== v) {
             this.focused = v;
             if (this.inited) {
-                this.fireNewEvent('focused', v);
+                this.fireEvent('focused', v);
                 var gf = myt.global.focus;
                 if (v) {
                     gf.notifyFocus(this);
@@ -89,7 +89,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
                 this.detachFromDom(this, '__doBlur', 'blur');
             }
             
-            if (this.inited) this.fireNewEvent('focusable', v);
+            if (this.inited) this.fireEvent('focusable', v);
         }
     },
     

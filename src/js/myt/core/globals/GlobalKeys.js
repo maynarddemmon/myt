@@ -220,8 +220,8 @@ new JS.Singleton('GlobalKeys', {
         // event immediately. Not an issue for other meta keys: shift, ctrl 
         // and option.
         if (self.isCommandKeyDown() && keyCode !== self.KEYCODE_SHIFT && keyCode !== self.KEYCODE_CONTROL && keyCode !== self.KEYCODE_ALT) {
-            self.fireNewEvent('keydown', keyCode);
-            self.fireNewEvent('keyup', keyCode);
+            self.fireEvent('keydown', keyCode);
+            self.fireEvent('keyup', keyCode);
         } else {
             self.__keysDown[keyCode] = true;
             
@@ -235,7 +235,7 @@ new JS.Singleton('GlobalKeys', {
                 }
             }
             
-            self.fireNewEvent('keydown', keyCode);
+            self.fireEvent('keydown', keyCode);
         }
     },
     
@@ -246,7 +246,7 @@ new JS.Singleton('GlobalKeys', {
     /** @private */
     __handleKeyPress: function(event) {
         var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
-        this.fireNewEvent('keypress', keyCode);
+        this.fireEvent('keypress', keyCode);
     },
     
     /** @private */
@@ -255,7 +255,7 @@ new JS.Singleton('GlobalKeys', {
             domEvent = event.value;
         if (this.__shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
         this.__keysDown[keyCode] = false;
-        this.fireNewEvent('keyup', keyCode);
+        this.fireEvent('keyup', keyCode);
     },
     
     /** @private */

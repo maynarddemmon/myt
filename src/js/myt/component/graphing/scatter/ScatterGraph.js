@@ -66,44 +66,49 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        this._pointTemplates = {};
-        this._animating = [];
-        this._maxTemplateSizeSquared = 0;
+        var self = this;
         
-        this.drawnCount = this.drawnAnimatingCount = this.drawnCountTotal = 0;
+        self._pointTemplates = {};
+        self._animating = [];
+        self._maxTemplateSizeSquared = 0;
         
-        if (attrs.data === undefined) attrs.data = [];
+        self.drawnCount = self.drawnAnimatingCount = self.drawnCountTotal = 0;
         
-        if (attrs.scaleDataX === undefined) attrs.scaleDataX = 1;
-        if (attrs.scaleDataY === undefined) attrs.scaleDataY = 1;
-        if (attrs.originX === undefined) attrs.originX = 0;
-        if (attrs.originY === undefined) attrs.originY = 0;
+        if (attrs.data == null) attrs.data = [];
+        
+        if (attrs.scaleDataX == null) attrs.scaleDataX = 1;
+        if (attrs.scaleDataY == null) attrs.scaleDataY = 1;
+        if (attrs.originX == null) attrs.originX = 0;
+        if (attrs.originY == null) attrs.originY = 0;
         
         var SG = myt.ScatterGraph;
-        if (attrs.xConversionFuncPxToV === undefined) attrs.xConversionFuncPxToV = SG.convertXPixelToValue;
-        if (attrs.yConversionFuncPxToV === undefined) attrs.yConversionFuncPxToV = SG.convertYPixelToValue;
-        if (attrs.xConversionFuncVToPx === undefined) attrs.xConversionFuncVToPx = SG.convertXValueToPixel;
-        if (attrs.yConversionFuncVToPx === undefined) attrs.yConversionFuncVToPx = SG.convertYValueToPixel;
+        if (attrs.xConversionFuncPxToV == null) attrs.xConversionFuncPxToV = SG.convertXPixelToValue;
+        if (attrs.yConversionFuncPxToV == null) attrs.yConversionFuncPxToV = SG.convertYPixelToValue;
+        if (attrs.xConversionFuncVToPx == null) attrs.xConversionFuncVToPx = SG.convertXValueToPixel;
+        if (attrs.yConversionFuncVToPx == null) attrs.yConversionFuncVToPx = SG.convertYValueToPixel;
         
-        if (attrs.highlightColor === undefined) attrs.highlightColor = '#000000';
-        if (attrs.highlightSelectedColor === undefined) attrs.highlightSelectedColor = '#000000';
-        if (attrs.highlightWidth === undefined) attrs.highlightWidth = 1;
-        if (attrs.highlightOffset === undefined) attrs.highlightOffset = 2;
+        if (attrs.highlightColor == null) attrs.highlightColor = '#000000';
+        if (attrs.highlightSelectedColor == null) attrs.highlightSelectedColor = '#000000';
+        if (attrs.highlightWidth == null) attrs.highlightWidth = 1;
+        if (attrs.highlightOffset == null) attrs.highlightOffset = 2;
         
-        if (attrs.allowSelection === undefined) attrs.allowSelection = true;
+        if (attrs.allowSelection == null) attrs.allowSelection = true;
         
-        this.callSuper(parent, attrs);
+        self.callSuper(parent, attrs);
         
-        var w = this.width, h = this.height, al = this.animationLayer, hl = this.highlightLayer;
+        var w = self.width, 
+            h = self.height, 
+            al = self.animationLayer, 
+            hl = self.highlightLayer;
         al.setWidth(w);
         hl.setWidth(w);
         al.setHeight(h);
         hl.setHeight(h);
         
-        this.redrawPointsDelayed();
-        this.redrawAnimatingPointsDelayed();
+        self.redrawPointsDelayed();
+        self.redrawAnimatingPointsDelayed();
         
-        this.attachToDom(this, '_doMouseMove', 'mousemove');
+        self.attachToDom(self, '_doMouseMove', 'mousemove');
     },
     
     doBeforeAdoption: function() {
@@ -138,7 +143,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     setAllowSelection: function(v) {
         if (this.allowSelection === v) return;
         this.allowSelection = v;
-        if (this.inited) this.fireNewEvent('allowSelection', v);
+        if (this.inited) this.fireEvent('allowSelection', v);
         
         if (v) {
             this.attachToDom(this, '_doClick', 'click');
@@ -156,7 +161,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         if (this.scaleDataX === v) return;
         this.scaleDataX = v;
         if (this.inited) {
-            this.fireNewEvent('scaleDataX', v);
+            this.fireEvent('scaleDataX', v);
             this.redrawPointsDelayed();
             this.redrawAnimatingPointsDelayed();
         }
@@ -166,7 +171,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         if (this.scaleDataY === v) return;
         this.scaleDataY = v;
         if (this.inited) {
-            this.fireNewEvent('scaleDataY', v);
+            this.fireEvent('scaleDataY', v);
             this.redrawPointsDelayed();
             this.redrawAnimatingPointsDelayed();
         }
@@ -176,7 +181,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         if (this.originX === v) return;
         this.originX = v;
         if (this.inited) {
-            this.fireNewEvent('originX', v);
+            this.fireEvent('originX', v);
             this.redrawPointsDelayed();
             this.redrawAnimatingPointsDelayed();
         }
@@ -186,35 +191,36 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         if (this.originY === v) return;
         this.originY = v;
         if (this.inited) {
-            this.fireNewEvent('originY', v);
+            this.fireEvent('originY', v);
             this.redrawPointsDelayed();
             this.redrawAnimatingPointsDelayed();
         }
     },
     
     setScaleAndOrigin: function(scaleDataX, scaleDataY, originX, originY) {
-        var changed = false;
+        var self = this,
+            changed = false;
         
-        if (this.scaleDataX !== scaleDataX) {
-            this.scaleDataX = scaleDataX;
+        if (self.scaleDataX !== scaleDataX) {
+            self.scaleDataX = scaleDataX;
             changed = true;
         }
-        if (this.scaleDataY !== scaleDataY) {
-            this.scaleDataY = scaleDataY;
+        if (self.scaleDataY !== scaleDataY) {
+            self.scaleDataY = scaleDataY;
             changed = true;
         }
-        if (this.originX !== originX) {
-            this.originX = originX;
+        if (self.originX !== originX) {
+            self.originX = originX;
             changed = true;
         }
-        if (this.originY !== originY) {
-            this.originY = originY;
+        if (self.originY !== originY) {
+            self.originY = originY;
             changed = true;
         }
         
         if (changed) {
-            this.redrawPoints();
-            this.redrawAnimatingPoints();
+            self.redrawPoints();
+            self.redrawAnimatingPoints();
         }
     },
     
@@ -240,7 +246,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         if (this.highlightedPoint === v) return;
         this.highlightedPoint = v;
         if (this.inited) {
-            this.fireNewEvent('highlightedPoint', v);
+            this.fireEvent('highlightedPoint', v);
             this.drawHighlightedPoint();
         }
     },

@@ -86,7 +86,7 @@ myt.FontAwesome = new JS.Class('FontAwesome', myt.Markup, {
     
     setProperties: function(v) {
         this.properties = v;
-        this.fireNewEvent('properties', v);
+        this.fireEvent('properties', v);
         if (this.inited) this.__update();
     },
     

@@ -29,7 +29,7 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
         if (this.collapseParent !== v) {
             this.collapseParent = v;
             if (this.inited) {
-                this.fireNewEvent('collapseParent', v);
+                this.fireEvent('collapseParent', v);
                 this.update();
             }
         }
@@ -39,7 +39,7 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
         if (this.reverse !== v) {
             this.reverse = v;
             if (this.inited) {
-                this.fireNewEvent('reverse', v);
+                this.fireEvent('reverse', v);
                 this.update();
             }
         }

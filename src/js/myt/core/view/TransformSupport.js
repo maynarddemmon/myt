@@ -91,7 +91,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
             myt.TransformSupport.setTransformOrigin(this.deStyle, v);
             if (this.inited) {
                 this.__updateBounds(this.width, this.height);
-                this.fireNewEvent('transformOrigin', v);
+                this.fireEvent('transformOrigin', v);
             }
         }
     },
@@ -102,7 +102,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
             myt.TransformSupport.addTransform(this.deStyle, 'rotate', (v || 0) + 'deg');
             if (this.inited) {
                 this.__updateBounds(this.width, this.height);
-                this.fireNewEvent('rotation', v);
+                this.fireEvent('rotation', v);
             }
         }
     },
@@ -116,8 +116,8 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
         
         if (this.inited) {
             if (doUpdateX || doUpdateY) this.__updateBounds(this.width, this.height);
-            if (doUpdateX) this.fireNewEvent('scaleX', v);
-            if (doUpdateY) this.fireNewEvent('scaleY', v);
+            if (doUpdateX) this.fireEvent('scaleX', v);
+            if (doUpdateY) this.fireEvent('scaleY', v);
         }
     },
     
@@ -126,7 +126,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
             this.__applyScale('scaleX', this.scaleX = v);
             if (this.inited) {
                 this.__updateBounds(this.width, this.height);
-                this.fireNewEvent('scaleX', v);
+                this.fireEvent('scaleX', v);
             }
         }
     },
@@ -136,7 +136,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
             this.__applyScale('scaleY', this.scaleY = v);
             if (this.inited) {
                 this.__updateBounds(this.width, this.height);
-                this.fireNewEvent('scaleY', v);
+                this.fireEvent('scaleY', v);
             }
         }
     },
@@ -156,7 +156,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
             myt.TransformSupport.addTransform(this.deStyle, 'skewX', v || 0);
             if (this.inited) {
                 this.__updateBounds(this.width, this.height);
-                this.fireNewEvent('skewX', v);
+                this.fireEvent('skewX', v);
             }
         }
     },
@@ -167,7 +167,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
             myt.TransformSupport.addTransform(this.deStyle, 'skewY', v || 0);
             if (this.inited) {
                 this.__updateBounds(this.width, this.height);
-                this.fireNewEvent('skewY', v);
+                this.fireEvent('skewY', v);
             }
         }
     },

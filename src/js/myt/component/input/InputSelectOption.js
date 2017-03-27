@@ -41,14 +41,14 @@ myt.InputSelectOption = new JS.Class('InputSelectOption', myt.View, {
         if (this.value !== v) {
             this.value = v;
             if (this.domElement.value !== v) this.domElement.value = v;
-            if (this.inited) this.fireNewEvent('value', v);
+            if (this.inited) this.fireEvent('value', v);
         }
     },
     
     setLabel: function(v) {
         if (this.label !== v) {
             this.domElement.textContent = this.label = v;
-            if (this.inited) this.fireNewEvent('label', v);
+            if (this.inited) this.fireEvent('label', v);
         }
     },
     

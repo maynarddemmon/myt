@@ -60,7 +60,7 @@ new JS.Singleton('GlobalDragManager', {
             i = targets.length;
             while (i) targets[--i][funcName](dv);
             
-            this.fireNewEvent(eventName, v);
+            this.fireEvent(eventName, v);
         }
     },
     
@@ -71,7 +71,7 @@ new JS.Singleton('GlobalDragManager', {
             if (cur) {
                 cur.notifyDragLeave(dv);
                 dv.notifyDragLeave(cur);
-                this.fireNewEvent('dragLeave', cur);
+                this.fireEvent('dragLeave', cur);
             }
             
             this.overView = v;
@@ -79,7 +79,7 @@ new JS.Singleton('GlobalDragManager', {
             if (v) {
                 v.notifyDragEnter(dv);
                 dv.notifyDragEnter(v);
-                this.fireNewEvent('dragEnter', cur);
+                this.fireEvent('dragEnter', cur);
             }
         }
     },
@@ -145,7 +145,7 @@ new JS.Singleton('GlobalDragManager', {
         this.setOverView();
         this.setDragView();
         
-        if (overView && !isAbort) this.fireNewEvent('drop', [dropable, overView]);
+        if (overView && !isAbort) this.fireEvent('drop', [dropable, overView]);
     },
     
     /** Called by a myt.Dropable during dragging.

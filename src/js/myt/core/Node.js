@@ -240,7 +240,7 @@ myt.Node = new JS.Class('Node', {
             }
             
             // Fire an event
-            if (self.inited) self.fireNewEvent('parent', newParent);
+            if (self.inited) self.fireEvent('parent', newParent);
         }
     },
     

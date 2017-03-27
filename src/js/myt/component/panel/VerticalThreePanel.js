@@ -22,30 +22,32 @@ myt.VerticalThreePanel = new JS.Class('VerticalThreePanel', {
     },
     
     doBeforeAdoption: function() {
-        this.callSuper();
+        var self = this,
+            m = myt;
+            
+        self.callSuper();
         
-        var m = myt;
-        new m.Image(this, {
-            name:'first', imageUrl:this.firstImageUrl, ignoreLayout:true
+        new m.Image(self, {
+            name:'first', imageUrl:self.firstImageUrl, ignoreLayout:true
         });
         
-        var second = new m.Image(this, {
-            name:'second', layoutHint:1, imageUrl:this.secondImageUrl, 
+        var second = new m.Image(self, {
+            name:'second', layoutHint:1, imageUrl:self.secondImageUrl, 
             ignoreLayout:true, useNaturalSize:false, calculateNaturalSize:true
         });
-        this.attachTo(second, '__updateSize', 'naturalWidth');
-        this.attachTo(second, '__updateImageSize', 'height');
+        self.attachTo(second, '__updateSize', 'naturalWidth');
+        self.attachTo(second, '__updateImageSize', 'height');
         
-        new m.Image(this, {
-            name:'third', imageUrl:this.thirdImageUrl, ignoreLayout:true
+        new m.Image(self, {
+            name:'third', imageUrl:self.thirdImageUrl, ignoreLayout:true
         });
         
         var ignoreMixin = [m.ThreePanel.IGNORE_FUNCTION_MIXIN];
-        new m.ResizeLayout(this, {name:'resizeLayout', axis:'y'}, ignoreMixin);
-        new m.SizeToChildren(this, {axis:'x'}, ignoreMixin);
+        new m.ResizeLayout(self, {name:'resizeLayout', axis:'y'}, ignoreMixin);
+        new m.SizeToChildren(self, {axis:'x'}, ignoreMixin);
         
-        this.__updateRepeat();
-        this.__updateSize();
+        self.__updateRepeat();
+        self.__updateSize();
     },
     
     
@@ -75,7 +77,7 @@ myt.VerticalThreePanel = new JS.Class('VerticalThreePanel', {
         if (this.repeat !== v) {
             this.repeat = v;
             if (this.inited) {
-                this.fireNewEvent('repeat', v);
+                this.fireEvent('repeat', v);
                 this.__updateRepeat();
             }
         }

@@ -22,14 +22,16 @@ myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.VariableLayout */
     initNode: function(parent, attrs) {
-        this.targetAttrName = this.axis = 'x';
-        this.setterName = 'setX';
-        this.measureAttrName = 'boundsWidth';
-        this.measureAttrBaseName = 'width';
-        this.parentSetterName = 'setWidth';
-        this.targetValue = this.spacing = this.inset = this.outset = 0;
+        var self = this;
         
-        this.callSuper(parent, attrs);
+        self.targetAttrName = self.axis = 'x';
+        self.setterName = 'setX';
+        self.measureAttrName = 'boundsWidth';
+        self.measureAttrBaseName = 'width';
+        self.parentSetterName = 'setWidth';
+        self.targetValue = self.spacing = self.inset = self.outset = 0;
+        
+        self.callSuper(parent, attrs);
     },
     
     
@@ -56,7 +58,7 @@ myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
         if (this.spacing !== v) {
             this.spacing = v;
             if (this.inited) {
-                this.fireNewEvent('spacing', v);
+                this.fireEvent('spacing', v);
                 this.update();
             }
         }
@@ -66,7 +68,7 @@ myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
         if (this.outset !== v) {
             this.outset = v;
             if (this.inited) {
-                this.fireNewEvent('outset', v);
+                this.fireEvent('outset', v);
                 this.update();
             }
         }

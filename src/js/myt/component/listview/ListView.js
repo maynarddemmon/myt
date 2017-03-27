@@ -22,10 +22,10 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
         this.maxHeight = -1;
         this.minWidth = 0;
         
-        if (attrs.defaultItemClass === undefined) attrs.defaultItemClass = myt.ListViewItem;
-        if (attrs.overflow === undefined) attrs.overflow = 'autoy';
-        if (attrs.bgColor === undefined) attrs.bgColor = '#cccccc';
-        if (attrs.boxShadow === undefined) attrs.boxShadow = myt.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE;
+        if (attrs.defaultItemClass == null) attrs.defaultItemClass = myt.ListViewItem;
+        if (attrs.overflow == null) attrs.overflow = 'autoy';
+        if (attrs.bgColor == null) attrs.bgColor = '#cccccc';
+        if (attrs.boxShadow == null) attrs.boxShadow = myt.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE;
         
         this.callSuper(parent, attrs);
         
@@ -54,7 +54,7 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
         if (this.maxHeight !== v) {
             this.maxHeight = v;
             if (this.inited) {
-                this.fireNewEvent('maxHeight', v);
+                this.fireEvent('maxHeight', v);
                 this.setHeight(this.height);
             }
         }

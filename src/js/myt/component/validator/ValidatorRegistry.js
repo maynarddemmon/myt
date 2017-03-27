@@ -19,15 +19,18 @@ new JS.Singleton('GlobalValidatorRegistry', {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initialize: function() {
-        this.__c = {};
+        var self = this,
+            m = myt;
         
-        myt.global.register('validators', this);
+        self.__c = {};
+        
+        m.global.register('validators', self);
         
         // Register a few common Validators
-        this.register(new myt.RequiredFieldValidator('required'));
-        this.register(new myt.EqualsIgnoreCaseValidator('equalsIgnoreCase'));
-        this.register(new myt.URLValidator('url'));
-        this.register(new myt.JSONValidator('json'));
+        self.register(new m.RequiredFieldValidator('required'));
+        self.register(new m.EqualsIgnoreCaseValidator('equalsIgnoreCase'));
+        self.register(new m.URLValidator('url'));
+        self.register(new m.JSONValidator('json'));
     },
     
     
@@ -49,7 +52,7 @@ new JS.Singleton('GlobalValidatorRegistry', {
             var id = validator.id;
             if (id) {
                 this.__c[id] = validator;
-                this.fireNewEvent('validatorAdded', validator);
+                this.fireEvent('validatorAdded', validator);
             } else {
                 myt.dumpStack("No ID");
             }
@@ -70,7 +73,7 @@ new JS.Singleton('GlobalValidatorRegistry', {
                 
                 if (validator) {
                     delete this.__c[id];
-                    this.fireNewEvent('validatorRemoved', validator);
+                    this.fireEvent('validatorRemoved', validator);
                     return true;
                 }
             } else {

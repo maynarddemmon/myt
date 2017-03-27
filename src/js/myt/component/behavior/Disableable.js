@@ -25,7 +25,7 @@ myt.Disableable = new JS.Module('Disableable', {
     setDisabled: function(v) {
         if (this.disabled !== v) {
             this.disabled = v;
-            if (this.inited) this.fireNewEvent('disabled', v);
+            if (this.inited) this.fireEvent('disabled', v);
             
             this.doDisabled();
         }

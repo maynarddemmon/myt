@@ -154,13 +154,13 @@ test("Fire an event.", function() {
     
     // Fire event once before attachment just to make sure the observer
     // is not somehow registered or being notified on attach.
-    observable.fireNewEvent('foo', 'bar');
+    observable.fireEvent('foo', 'bar');
     
     ok(observer.fooEventCount === 0, "Ensure observer initialization of fooEventCount was correct.");
     ok(observer.lastFooEvent === null, "Ensure observer initialization lastFooEvent was correct.");
     
     observable.attachObserver(observer, 'handleFooEvent', 'foo');
-    observable.fireNewEvent('foo', 'bar');
+    observable.fireEvent('foo', 'bar');
     
     ok(observer.fooEventCount === 1, "One event should have been fired.");
     ok(observer.lastFooEvent != null, "Last foo event should exist now.");
@@ -200,7 +200,7 @@ test("Generate and fire an event.", function() {
     ok(event.type === 'foo', "Type of event should be 'foo'.");
     ok(event.value === 'bar', "Value of event should be 'bar'.");
     
-    observable.fireEvent(event);
+    observable.fireExistingEvent(event);
     
     ok(observer.fooEventCount === 1, "One event should have been fired.");
     ok(observer.lastFooEvent === event, "Last foo event should be the event we generated.");
@@ -210,7 +210,7 @@ test("Generate and fire an event.", function() {
     
     // Attach to a second observable and fire an event on that observable
     observable2.attachObserver(observer, 'handleFooEvent', 'foo');
-    observable2.fireNewEvent('foo', 'bar');
+    observable2.fireEvent('foo', 'bar');
     
     ok(observer.fooEventCount === 2, "Two events should have been fired.");
     ok(observer.lastFooEvent !== event, "Last foo event should no longer be the first generated event.");
@@ -219,7 +219,7 @@ test("Generate and fire an event.", function() {
     ok(observer.lastFooEvent.value === 'bar', "Value of event should be 'bar'.");
     
     // Firing generated event off of wrong observable should go nowhere
-    observable2.fireEvent(event);
+    observable2.fireExistingEvent(event);
     
     ok(observer.fooEventCount === 2, "Two events should have been fired.");
     ok(observer.lastFooEvent !== event, "Last foo event should no longer be the first generated event.");
@@ -243,7 +243,7 @@ test("Verify infinite event loop protection.", function() {
             this.fooEventCount++;
             this.lastFooEvent = e;
             
-            this.fireNewEvent('foo','bar');
+            this.fireEvent('foo','bar');
         }
     }]);
     
@@ -260,7 +260,7 @@ test("Verify infinite event loop protection.", function() {
             this.fooEventCount++;
             this.lastFooEvent = e;
             
-            this.fireNewEvent('foo','bar');
+            this.fireEvent('foo','bar');
         },
         
         handleEventLoop: function(e) {
@@ -278,7 +278,7 @@ test("Verify infinite event loop protection.", function() {
     ok(n2.lastFooEvent === null, "Ensure observer initialization lastFooEvent was correct.");
     
     // Fire an event to trigger the loop
-    n1.fireNewEvent('foo', 'bar');
+    n1.fireEvent('foo', 'bar');
     
     ok(n1.fooEventCount === 1, "One event should have been fired.");
     ok(n2.fooEventCount === 1, "One event should have been fired.");
@@ -324,12 +324,12 @@ test("Fire an event to a specific list of observers.", function() {
     ok(observer2.lastFooEvent === null, "Ensure observer initialization lastFooEvent was correct.");
     
     // Fire an event
-    observable.fireNewEvent('foo', 'bar');
+    observable.fireEvent('foo', 'bar');
     ok(observer1.fooEventCount === 1, "One event should have been fired to observer 1.");
     ok(observer2.fooEventCount === 0, "No event should have been fired to observer 2.");
     
     // Fire again to specific list
-    observable.fireNewEvent('foo', 'bar', ['handleFooEvent', observer2]);
+    observable.fireEvent('foo', 'bar', ['handleFooEvent', observer2]);
     ok(observer1.fooEventCount === 1, "No event should have been fired to observer 1.");
     ok(observer2.fooEventCount === 1, "One event should have been fired to observer 2.");
     
@@ -418,7 +418,7 @@ test("Provide a function instead of a method name", function() {
     ok(event.type === 'foo', "Type of event should be 'foo'.");
     ok(event.value === 'bar', "Value of event should be 'bar'.");
     
-    observable.fireEvent(event);
+    observable.fireExistingEvent(event);
     
     ok(observer.fooEventCount === 1, "One event should have been fired.");
     ok(observer.lastFooEvent === event, "Last foo event should be the event we generated.");
@@ -428,7 +428,7 @@ test("Provide a function instead of a method name", function() {
     
     // Attach to a second observable and fire an event on that observable
     observable2.attachObserver(observer, observer.handleFooEvent, 'foo');
-    observable2.fireNewEvent('foo', 'bar');
+    observable2.fireEvent('foo', 'bar');
     
     ok(observer.fooEventCount === 2, "Two events should have been fired.");
     ok(observer.lastFooEvent !== event, "Last foo event should no longer be the first generated event.");
@@ -437,7 +437,7 @@ test("Provide a function instead of a method name", function() {
     ok(observer.lastFooEvent.value === 'bar', "Value of event should be 'bar'.");
     
     // Firing generated event off of wrong observable should go nowhere
-    observable2.fireEvent(event);
+    observable2.fireExistingEvent(event);
     
     ok(observer.fooEventCount === 2, "Two events should have been fired.");
     ok(observer.lastFooEvent !== event, "Last foo event should no longer be the first generated event.");

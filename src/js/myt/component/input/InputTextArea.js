@@ -14,8 +14,8 @@ myt.InputTextArea = new JS.Class('InputTextArea', myt.BaseInputText, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.BaseInputText */
     initNode: function(parent, attrs) {
-        if (attrs.resize === undefined) attrs.resize = 'none';
-        if (attrs.wrap === undefined) attrs.wrap = 'soft';
+        if (attrs.resize == null) attrs.resize = 'none';
+        if (attrs.wrap == null) attrs.wrap = 'soft';
         
         this.callSuper(parent, attrs);
     },
@@ -32,14 +32,14 @@ myt.InputTextArea = new JS.Class('InputTextArea', myt.BaseInputText, {
     setResize: function(v) {
         if (this.resize !== v) {
             this.resize = this.deStyle.resize = v || 'none';
-            if (this.inited) this.fireNewEvent('resize', v);
+            if (this.inited) this.fireEvent('resize', v);
         }
     },
     
     setWrap: function(v) {
         if (this.wrap !== v) {
             this.wrap = this.domElement.wrap = v;
-            if (this.inited) this.fireNewEvent('wrap', v);
+            if (this.inited) this.fireEvent('wrap', v);
         }
     }
 });

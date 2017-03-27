@@ -21,8 +21,8 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.BaseInputText */
     initNode: function(parent, attrs) {
-        if (attrs.whiteSpace === undefined) attrs.whiteSpace = 'pre';
-        if (attrs.contentEditable === undefined) attrs.contentEditable = true;
+        if (attrs.whiteSpace == null) attrs.whiteSpace = 'pre';
+        if (attrs.contentEditable == null) attrs.contentEditable = true;
         
         this.callSuper(parent, attrs);
         
@@ -66,7 +66,7 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
             this[propName] = v;
             this.deStyle[propName] = v + 'px';
             if (this.inited) {
-                this.fireNewEvent(propName, v);
+                this.fireEvent(propName, v);
                 this.sizeViewToDom();
             }
         }
@@ -75,7 +75,7 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     setContentEditable: function(v) {
         if (this.contentEditable !== v) {
             this.contentEditable = this.domElement.contentEditable = v;
-            if (this.inited) this.fireNewEvent('contentEditable', v);
+            if (this.inited) this.fireEvent('contentEditable', v);
         }
     },
     

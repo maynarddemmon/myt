@@ -87,7 +87,7 @@ myt.Ajax = new JS.Class('Ajax', myt.Node, {
         @param status: String the response status
         @param jqxhr: The request object */
     handleSuccess: function(data, status, jqxhr) {
-        this.fireNewEvent('success', {data:data, status:status, xhr:jqxhr});
+        this.fireEvent('success', {data:data, status:status, xhr:jqxhr});
     },
     
     /** Handles request failures.
@@ -95,6 +95,6 @@ myt.Ajax = new JS.Class('Ajax', myt.Node, {
         @param status: String the response status
         @param exception: XMLHttpRequestException */
     handleFailure: function(jqxhr, status, exception) {
-        this.fireNewEvent('failure', {exception:exception, status:status, xhr:jqxhr});
+        this.fireEvent('failure', {exception:exception, status:status, xhr:jqxhr});
     }
 });

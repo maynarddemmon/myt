@@ -44,20 +44,20 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
-        this.files = [];
-        
-        // Modify attrs so setter gets called.
-        if (attrs.requestFileParam === undefined) attrs.requestFileParam = 'file';
-        if (attrs.maxFiles === undefined) attrs.maxFiles = -1;
-        
-        this.callSuper(parent, attrs);
-        
         var self = this;
         
+        self.files = [];
+        
+        // Modify attrs so setter gets called.
+        if (attrs.requestFileParam == null) attrs.requestFileParam = 'file';
+        if (attrs.maxFiles == null) attrs.maxFiles = -1;
+        
+        self.callSuper(parent, attrs);
+        
         // Support click to upload too.
-        new myt.NativeInputWrapper(this, {
+        new myt.NativeInputWrapper(self, {
             name:'fileInput', percentOfParentWidth:100, percentOfParentHeight:100,
-            opacity:0.01, disabled:this.disabled, overflow:'hidden'
+            opacity:0.01, disabled:self.disabled, overflow:'hidden'
         }, [myt.SizeToParent, {
             initNode: function(parent, attrs) {
                 this.inputType = 'file';
@@ -104,7 +104,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     setMaxFiles: function(v) {
         if (this.maxFiles !== v) {
             this.maxFiles = v;
-            if (this.inited) this.fireNewEvent('maxFiles', v);
+            if (this.inited) this.fireEvent('maxFiles', v);
             if (this.fileInput) this.fileInput.domElement.multiple = v > 1;
         }
     },
@@ -198,7 +198,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     addFile: function(file) {
         this.files.push(file);
         this.updateValueFromFiles();
-        this.fireNewEvent('addFile', file);
+        this.fireEvent('addFile', file);
     },
     
     removeFile: function(file) {
@@ -207,7 +207,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
             if (myt.Uploader.isSameFile(files[--i], file)) {
                 files.splice(i, 1);
                 this.updateValueFromFiles();
-                this.fireNewEvent('removeFile', file);
+                this.fireEvent('removeFile', file);
                 break;
             }
         }
@@ -226,7 +226,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         this.verifyChangedState(); // FIXME: mimics what happens in myt.FormElement setValue
         if (this.form) this.form.notifyValueChanged(this); // FIXME: mimics what happens in myt.Form setValue
         
-        this.fireNewEvent('value', this.value);
+        this.fireEvent('value', this.value);
     },
     
     clearFiles: function() {

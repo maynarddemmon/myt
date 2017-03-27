@@ -38,29 +38,33 @@
 myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        this.textY = this.iconY = 'middle';
-        this.iconSpacing = 2;
-        this.inset = this.outset = 0;
+        var self = this;
+        
+        self.textY = self.iconY = 'middle';
+        self.iconSpacing = 2;
+        self.inset = self.outset = 0;
         
         if (attrs.shrinkToFit === undefined) attrs.shrinkToFit = false;
         if (attrs.contentAlign === undefined) attrs.contentAlign = 'center';
         
-        this.callSuper(parent, attrs);
+        self.callSuper(parent, attrs);
         
         // Setup the constraint after inited since the textView won't have
         // been sized to the dom until it's added in.
-        var iconView = this.iconView, textView = this.textView;
-        this.applyConstraint('__updateContentPosition', [
-            this, 'inset', this, 'outset',
-            this, 'width', this, 'shrinkToFit', this, 'iconSpacing',
-            this, 'contentAlign',
+        var iconView = self.iconView, textView = self.textView;
+        self.applyConstraint('__updateContentPosition', [
+            self, 'inset', self, 'outset',
+            self, 'width', self, 'shrinkToFit', self, 'iconSpacing',
+            self, 'contentAlign',
             iconView, 'width', iconView, 'visible',
             textView, 'visible', textView, 'width'
         ]);
     },
     
     doAfterAdoption: function() {
-        var attrs, iconY = this.iconY, textY = this.textY;
+        var attrs,
+            iconY = this.iconY,
+            textY = this.textY;
         
         // Setup iconView
         attrs = {
@@ -75,7 +79,9 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         
         // Setup textView
         attrs = {
-            name:'textView', whiteSpace:'nowrap', text:this.text, 
+            name:'textView',
+            whiteSpace:'nowrap',
+            text:this.text, 
             domClass:'myt-Text mytButtonText'
         };
         if (typeof textY === 'string') {
@@ -96,7 +102,7 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         
         if (this.inset !== v) {
             this.inset = v;
-            if (this.inited) this.fireNewEvent('inset', v);
+            if (this.inited) this.fireEvent('inset', v);
         }
     },
     
@@ -106,7 +112,7 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         
         if (this.outset !== v) {
             this.outset = v;
-            if (this.inited) this.fireNewEvent('outset', v);
+            if (this.inited) this.fireEvent('outset', v);
         }
     },
     
@@ -115,7 +121,7 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
             this.text = v;
             if (this.inited) {
                 this.textView.setText(v);
-                this.fireNewEvent('text', v);
+                this.fireEvent('text', v);
             }
         }
     },
@@ -123,14 +129,14 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
     setShrinkToFit: function(v) {
         if (this.shrinkToFit !== v) {
             this.shrinkToFit = v;
-            if (this.inited) this.fireNewEvent('shrinkToFit', v);
+            if (this.inited) this.fireEvent('shrinkToFit', v);
         }
     },
     
     setContentAlign: function(v) {
         if (this.contentAlign !== v) {
             this.contentAlign = v;
-            if (this.inited) this.fireNewEvent('contentAlign', v);
+            if (this.inited) this.fireEvent('contentAlign', v);
         }
     },
     
@@ -138,7 +144,7 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         if (this.iconUrl !== v) {
             this.iconUrl = v;
             if (this.inited) {
-                this.fireNewEvent('iconUrl', v);
+                this.fireEvent('iconUrl', v);
                 this.iconView.setImageUrl(v);
             }
         }
@@ -148,7 +154,7 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         if (this.iconY !== v) {
             this.iconY = v;
             if (this.inited) {
-                this.fireNewEvent('iconY', v);
+                this.fireEvent('iconY', v);
                 if (typeof v === 'string') {
                     this.iconView.setValign(v);
                 } else {
@@ -161,7 +167,7 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
     setIconSpacing: function(v) {
         if (this.iconSpacing !== v) {
             this.iconSpacing = v;
-            if (this.inited) this.fireNewEvent('iconSpacing', v);
+            if (this.inited) this.fireEvent('iconSpacing', v);
         }
     },
     
@@ -169,7 +175,7 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         if (this.textY !== v) {
             this.textY = v;
             if (this.inited) {
-                this.fireNewEvent('textY', v);
+                this.fireEvent('textY', v);
                 if (typeof v === 'string') {
                     this.textView.setValign(v);
                 } else {
@@ -184,36 +190,38 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
     // Methods /////////////////////////////////////////////////////////////////
     /** @private */
     __updateContentPosition: function(v) {
-        if (this.__updateContentPositionLoopBlock || this.destroyed) return;
+        var self = this;
         
-        var inset = this.inset,
-            outset = this.outset,
-            iconView = this.iconView,
-            textView = this.textView,
-            textViewVisible = textView.visible && this.text,
+        if (self.__updateContentPositionLoopBlock || self.destroyed) return;
+        
+        var inset = self.inset,
+            outset = self.outset,
+            iconView = self.iconView,
+            textView = self.textView,
+            textViewVisible = textView.visible && self.text,
             iconWidth = iconView.visible ? iconView.width : 0,
-            iconExtent = iconWidth + (textViewVisible && iconWidth > 0 ? this.iconSpacing : 0),
+            iconExtent = iconWidth + (textViewVisible && iconWidth > 0 ? self.iconSpacing : 0),
             textWidth = textViewVisible ? textView.width : 0;
         
-        if (this.shrinkToFit) {
+        if (self.shrinkToFit) {
             var totalWidth = inset;
             iconView.setX(totalWidth);
             totalWidth += iconExtent;
             textView.setX(totalWidth);
             totalWidth += textWidth + outset;
             
-            this.__updateContentPositionLoopBlock = true;
-            this.setWidth(totalWidth);
-            this.__updateContentPositionLoopBlock = false;
+            self.__updateContentPositionLoopBlock = true;
+            self.setWidth(totalWidth);
+            self.__updateContentPositionLoopBlock = false;
         } else {
             var leftPos;
-            if (this.contentAlign === 'left') {
+            if (self.contentAlign === 'left') {
                 leftPos = inset;
-            } else if (this.contentAlign === 'center') {
-                var extraWidth = this.width - inset - iconExtent - textWidth - outset;
+            } else if (self.contentAlign === 'center') {
+                var extraWidth = self.width - inset - iconExtent - textWidth - outset;
                 leftPos = inset + (extraWidth / 2);
             } else {
-                leftPos = this.width - iconExtent - textWidth - outset;
+                leftPos = self.width - iconExtent - textWidth - outset;
             }
             
             iconView.setX(leftPos);

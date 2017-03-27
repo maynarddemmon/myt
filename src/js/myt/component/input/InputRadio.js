@@ -30,7 +30,7 @@ myt.InputRadio = new JS.Class('InputRadio', myt.NativeInputWrapper, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.NativeInputWrapper */
     initNode: function(parent, attrs) {
-        if (attrs.groupId === undefined) attrs.groupId = myt.generateGuid();
+        if (attrs.groupId == null) attrs.groupId = myt.generateGuid();
         
         this.inputType = 'radio';
         
@@ -45,21 +45,21 @@ myt.InputRadio = new JS.Class('InputRadio', myt.NativeInputWrapper, {
     setChecked: function(v) {
         if (this.checked !== v) {
             this.checked = this.domElement.checked = v;
-            if (this.inited) this.fireNewEvent('checked', v);
+            if (this.inited) this.fireEvent('checked', v);
         }
     },
     
     setGroupId: function(v) {
         if (this.groupId !== v) {
             this.groupId = this.domElement.name = v;
-            if (this.inited) this.fireNewEvent('groupId', v);
+            if (this.inited) this.fireEvent('groupId', v);
         }
     },
     
     setOptionValue: function(v) {
         if (this.optionValue !== v) {
             this.optionValue = this.domElement.value = v;
-            if (this.inited) this.fireNewEvent('optionValue', v);
+            if (this.inited) this.fireEvent('optionValue', v);
         }
     },
     

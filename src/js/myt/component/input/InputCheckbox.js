@@ -28,7 +28,7 @@ myt.InputCheckbox = new JS.Class('InputCheckbox', myt.NativeInputWrapper, {
     setChecked: function(v) {
         if (this.checked !== v) {
             this.checked = this.domElement.checked = v;
-            if (this.inited) this.fireNewEvent('checked', v);
+            if (this.inited) this.fireEvent('checked', v);
         }
     },
     

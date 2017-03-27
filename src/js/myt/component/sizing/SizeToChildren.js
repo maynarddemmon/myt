@@ -32,7 +32,7 @@ myt.SizeToChildren = new JS.Class('SizeToChildren', myt.Layout, {
                 this.stopMonitoringAllSubviews();
                 this.axis = v;
                 this.startMonitoringAllSubviews();
-                this.fireNewEvent('axis', v);
+                this.fireEvent('axis', v);
                 this.update();
             } else {
                 this.axis = v;
@@ -44,7 +44,7 @@ myt.SizeToChildren = new JS.Class('SizeToChildren', myt.Layout, {
         if (this.paddingX !== v) {
             this.paddingX = v;
             if (this.inited) {
-                this.fireNewEvent('paddingX', v);
+                this.fireEvent('paddingX', v);
                 this.update();
             }
         }
@@ -54,7 +54,7 @@ myt.SizeToChildren = new JS.Class('SizeToChildren', myt.Layout, {
         if (this.paddingY !== v) {
             this.paddingY = v;
             if (this.inited) {
-                this.fireNewEvent('paddingY', v);
+                this.fireEvent('paddingY', v);
                 this.update();
             }
         }

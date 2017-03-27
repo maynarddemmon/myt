@@ -65,7 +65,7 @@ myt.ThresholdCounter = new JS.Class('ThresholdCounter', {
                 
                 if (curValue !== value) {
                     this[counterAttrName] = value;
-                    this.fireNewEvent(counterAttrName, value);
+                    this.fireEvent(counterAttrName, value);
                     this.set(exceededAttrName, value >= this[thresholdAttrName]); // Check threshold
                 }
             };
@@ -85,7 +85,7 @@ myt.ThresholdCounter = new JS.Class('ThresholdCounter', {
             mod[thresholdSetterName] = function(v) {
                 if (this[thresholdAttrName] === v) return;
                 this[thresholdAttrName] = v;
-                this.fireNewEvent(thresholdAttrName, v);
+                this.fireEvent(thresholdAttrName, v);
                 this.set(exceededAttrName, this[counterAttrName] >= v); // Check threshold
             };
             
@@ -153,7 +153,7 @@ myt.ThresholdCounter = new JS.Class('ThresholdCounter', {
             mod[incrName] = function() {
                 var value = this[counterAttrName] + 1;
                 this[counterAttrName] = value;
-                this.fireNewEvent(counterAttrName, value);
+                this.fireEvent(counterAttrName, value);
                 if (value === thresholdValue) this.set(exceededAttrName, true);
             };
             
@@ -164,7 +164,7 @@ myt.ThresholdCounter = new JS.Class('ThresholdCounter', {
                 if (curValue === 0) return;
                 var value = curValue - 1;
                 this[counterAttrName] = value;
-                this.fireNewEvent(counterAttrName, value);
+                this.fireEvent(counterAttrName, value);
                 if (curValue === thresholdValue) this.set(exceededAttrName, false);
             };
             

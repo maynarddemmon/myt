@@ -44,7 +44,7 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
             target[setterName] = function(v) {
                 if (target[attrName] !== v) {
                     target[attrName] = v;
-                    if (target.inited) target.fireNewEvent(attrName, v);
+                    if (target.inited) target.fireEvent(attrName, v);
                 }
             };
         },
@@ -133,7 +133,7 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
     
     /** A generic setter function that can be called to set a value on this
         object. Will defer to a defined setter if it exists. The implementation
-        assumes this object is an Observable so it will have a 'fireNewEvent'
+        assumes this object is an Observable so it will have a 'fireEvent'
         method.
         @param attrName:string The name of the attribute to set.
         @param v:* The value to set.
@@ -152,7 +152,7 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
         
         if (self[attrName] !== v) {
             self[attrName] = v;
-            if (self.inited !== false && self.fireNewEvent) self.fireNewEvent(attrName, v); // !== false allows this to work with non-nodes.
+            if (self.inited !== false && self.fireEvent) self.fireEvent(attrName, v); // !== false allows this to work with non-nodes.
         }
     },
     

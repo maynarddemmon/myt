@@ -54,8 +54,8 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Node */
     initNode: function(parent, attrs) {
-        if (attrs.imageRepeat === undefined) attrs.imageRepeat = 'no-repeat';
-        if (attrs.imageAttachment === undefined) attrs.imageAttachment = 'scroll';
+        if (attrs.imageRepeat == null) attrs.imageRepeat = 'no-repeat';
+        if (attrs.imageAttachment == null) attrs.imageAttachment = 'scroll';
         
         this.callSuper(parent, attrs);
     },
@@ -67,7 +67,7 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
             this.imageUrl = v;
             this.deStyle.backgroundImage = v ? 'url("' + v + '")' : 'none';
             if (this.inited) {
-                this.fireNewEvent('imageUrl', v);
+                this.fireEvent('imageUrl', v);
                 this.setNaturalWidth(undefined);
                 this.setNaturalHeight(undefined);
                 
@@ -87,35 +87,35 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
         if (this.imageSize !== v) {
             this.imageSize = v;
             this.deStyle.backgroundSize = v || 'auto';
-            if (this.inited) this.fireNewEvent('imageSize', v);
+            if (this.inited) this.fireEvent('imageSize', v);
         }
     },
     
     setImageRepeat: function(v) {
         if (this.imageRepeat !== v) {
             this.deStyle.backgroundRepeat = this.imageRepeat = v;
-            if (this.inited) this.fireNewEvent('imageRepeat', v);
+            if (this.inited) this.fireEvent('imageRepeat', v);
         }
     },
     
     setImagePosition: function(v) {
         if (this.imagePosition !== v) {
             this.deStyle.backgroundPosition = this.imagePosition = v;
-            if (this.inited) this.fireNewEvent('imagePosition', v);
+            if (this.inited) this.fireEvent('imagePosition', v);
         }
     },
     
     setImageAttachment: function(v) {
         if (this.imageAttachment !== v) {
             this.deStyle.backgroundAttachment = this.imageAttachment = v;
-            if (this.inited) this.fireNewEvent('imageAttachment', v);
+            if (this.inited) this.fireEvent('imageAttachment', v);
         }
     },
     
     setCalculateNaturalSize: function(v) {
         if (this.calculateNaturalSize !== v) {
             this.calculateNaturalSize = v;
-            if (this.inited) this.fireNewEvent('calculateNaturalSize', v);
+            if (this.inited) this.fireEvent('calculateNaturalSize', v);
             this.__calculateNaturalSize();
         }
     },
@@ -123,7 +123,7 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
     setNaturalWidth: function(v) {
         if (this.naturalWidth !== v) {
             this.naturalWidth = v;
-            if (this.inited) this.fireNewEvent('naturalWidth', v);
+            if (this.inited) this.fireEvent('naturalWidth', v);
             if (this.useNaturalSize && v) this.setWidth(v);
         }
     },
@@ -131,7 +131,7 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
     setNaturalHeight: function(v) {
         if (this.naturalHeight !== v) {
             this.naturalHeight = v;
-            if (this.inited) this.fireNewEvent('naturalHeight', v);
+            if (this.inited) this.fireEvent('naturalHeight', v);
             if (this.useNaturalSize && v) this.setHeight(v);
         }
     },
@@ -139,7 +139,7 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
     setUseNaturalSize: function(v) {
         if (this.useNaturalSize !== v) {
             this.useNaturalSize = v;
-            if (this.inited) this.fireNewEvent('useNaturalSize', v);
+            if (this.inited) this.fireEvent('useNaturalSize', v);
             
             // Sync width and height
             if (v) {

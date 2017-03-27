@@ -51,7 +51,7 @@ new JS.Singleton('GlobalValueProcessorRegistry', {
             var id = processor.id;
             if (id) {
                 this.__c[id] = processor;
-                this.fireNewEvent('processorAdded', processor);
+                this.fireEvent('processorAdded', processor);
             } else {
                 myt.dumpStack("No ID");
             }
@@ -72,7 +72,7 @@ new JS.Singleton('GlobalValueProcessorRegistry', {
                 
                 if (processor) {
                     delete this.__c[id];
-                    this.fireNewEvent('processorRemoved', processor);
+                    this.fireEvent('processorRemoved', processor);
                     return true;
                 }
             } else {

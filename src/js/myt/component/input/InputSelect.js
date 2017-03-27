@@ -23,8 +23,8 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.NativeInputWrapper */
     initNode: function(parent, attrs) {
-        if (attrs.multiple === undefined) attrs.multiple = false;
-        if (attrs.size === undefined) attrs.size = attrs.multiple ? 4 : 1;
+        if (attrs.multiple == null) attrs.multiple = false;
+        if (attrs.size == null) attrs.size = attrs.multiple ? 4 : 1;
         
         this.callSuper(parent, attrs);
         
@@ -46,14 +46,14 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     setMultiple: function(v) {
         if (this.multiple !== v) {
             this.multiple = this.domElement.multiple = v;
-            if (this.inited) this.fireNewEvent('multiple', v);
+            if (this.inited) this.fireEvent('multiple', v);
         }
     },
     
     setSize: function(v) {
         if (this.size !== v) {
             this.size = this.domElement.size = v;
-            if (this.inited) this.fireNewEvent('size', v);
+            if (this.inited) this.fireEvent('size', v);
         }
     },
     
@@ -78,7 +78,7 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
         
         if (this.value !== v) {
             this.value = v;
-            if (this.inited) this.fireNewEvent('value', v);
+            if (this.inited) this.fireEvent('value', v);
         }
     },
     

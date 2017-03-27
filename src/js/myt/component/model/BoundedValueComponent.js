@@ -19,7 +19,7 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
     initNode: function(parent, attrs) {
         this.appendToEarlyAttrs('snapToInt','minValue','maxValue');
         
-        if (attrs.snapToInt === undefined) attrs.snapToInt = true;
+        if (attrs.snapToInt == null) attrs.snapToInt = true;
         
         if (!attrs.valueFilter) {
             var self = this;
@@ -43,7 +43,7 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
         if (this.snapToInt !== v) {
             this.snapToInt = v;
             if (this.inited) {
-                this.fireNewEvent('snapToInt', v);
+                this.fireEvent('snapToInt', v);
                 
                 // Update min, max and value since snap has been turned on
                 if (v) {
@@ -65,7 +65,7 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
             if (this.minValue !== v) {
                 this.minValue = v;
                 if (this.inited) {
-                    this.fireNewEvent('minValue', v);
+                    this.fireEvent('minValue', v);
                     
                     // Rerun setValue since the filter has changed.
                     this.setValue(this.value);
@@ -84,7 +84,7 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
             if (this.maxValue !== v) {
                 this.maxValue = v;
                 if (this.inited) {
-                    this.fireNewEvent('maxValue', v);
+                    this.fireEvent('maxValue', v);
                     
                     // Rerun setValue since the filter has changed.
                     this.setValue(this.value);

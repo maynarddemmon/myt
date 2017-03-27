@@ -27,16 +27,18 @@
 myt.Form = new JS.Module('Form', {
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        this.isChanged = this._lockCascade = false;
-        this.isValid = true;
+        var self = this;
         
-        this.__sf = {};
-        this.__v = [];
-        this.__acc = {};
+        self.isChanged = self._lockCascade = false;
+        self.isValid = true;
         
-        this.callSuper(parent, attrs);
+        self.__sf = {};
+        self.__v = [];
+        self.__acc = {};
         
-        if (this.form) this.form.addSubForm(this);
+        self.callSuper(parent, attrs);
+        
+        if (self.form) self.form.addSubForm(self);
     },
     
     /** @overrides myt.Node. */
@@ -77,7 +79,7 @@ myt.Form = new JS.Module('Form', {
         // invalid may have changed so we want an event to fire so any new
         // error messages can be shown.
         this.isValid = v;
-        if (this.inited) this.fireNewEvent('isValid', v);
+        if (this.inited) this.fireEvent('isValid', v);
         
         var form = this.form;
         if (form && !this._lockCascade) {
@@ -92,7 +94,7 @@ myt.Form = new JS.Module('Form', {
     setIsChanged: function(v) {
         if (this.isChanged !== v) {
             this.isChanged = v;
-            if (this.inited) this.fireNewEvent('isChanged', v);
+            if (this.inited) this.fireEvent('isChanged', v);
             
             var form = this.form;
             if (form && !this._lockCascade) {

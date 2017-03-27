@@ -75,7 +75,7 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
             if (this.width !== w) {
                 this.width = w;
                 if (this.inited) this.__updateBounds(w, this.height);
-                this.fireNewEvent('width', w);
+                this.fireEvent('width', w);
             }
         }
         
@@ -92,7 +92,7 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
             if (this.height !== h) {
                 this.height = h;
                 if (this.inited) this.__updateBounds(this.width, h);
-                this.fireNewEvent('height', h);
+                this.fireEvent('height', h);
             }
         }
     }

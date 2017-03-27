@@ -32,28 +32,28 @@ myt.TooltipMixin = new JS.Module('TooltipMixin', {
     setTooltip: function(v) {
         if (this.tooltip !== v) {
             this.tooltip = v;
-            if (this.inited) this.fireNewEvent('tooltip', v);
+            if (this.inited) this.fireEvent('tooltip', v);
         }
     },
     
     setTipAlign: function(v) {
         if (this.tipAlign !== v) {
             this.tipAlign = v;
-            if (this.inited) this.fireNewEvent('tipAlign', v);
+            if (this.inited) this.fireEvent('tipAlign', v);
         }
     },
     
     setTipValign: function(v) {
         if (this.tipValign !== v) {
             this.tipValign = v;
-            if (this.inited) this.fireNewEvent('tipValign', v);
+            if (this.inited) this.fireEvent('tipValign', v);
         }
     },
     
     setTipClass: function(v) {
         if (this.tipClass !== v) {
             this.tipClass = v;
-            if (this.inited) this.fireNewEvent('tipClass', v);
+            if (this.inited) this.fireEvent('tipClass', v);
         }
     },
     

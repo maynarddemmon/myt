@@ -86,7 +86,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
             // embed formatting markup.
             this.domElement.innerHTML = this.text = v;
             if (this.inited) {
-                this.fireNewEvent('text', v);
+                this.fireEvent('text', v);
                 this.sizeViewToDom();
             }
         }
@@ -97,7 +97,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
         if (this.textOverflow !== v) {
             this.textOverflow = v;
             this.deStyle.textOverflow = v || 'inherit';
-            if (this.inited) this.fireNewEvent('textOverflow', v);
+            if (this.inited) this.fireEvent('textOverflow', v);
         }
     },
     
@@ -105,7 +105,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
         if (this.textAlign !== v) {
             this.textAlign = v;
             this.deStyle.textAlign = v || 'inherit';
-            if (this.inited) this.fireNewEvent('textAlign', v);
+            if (this.inited) this.fireEvent('textAlign', v);
         }
     },
     
@@ -133,7 +133,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
             this[attrName] = v;
             this.deStyle[attrName] = v || defaultValue || 'inherit';
             if (this.inited) {
-                this.fireNewEvent(attrName, v);
+                this.fireEvent(attrName, v);
                 this.sizeViewToDom();
             }
         }
@@ -144,7 +144,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
             this.userUnselectable = v;
             this[v ? 'addDomClass' : 'removeDomClass']('mytUnselectable');
             this.setCursor(v ? 'default' : 'text');
-            if (this.inited) this.fireNewEvent('userUnselectable', v);
+            if (this.inited) this.fireEvent('userUnselectable', v);
         }
     },
     

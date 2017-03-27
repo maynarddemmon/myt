@@ -46,35 +46,37 @@ myt.ThreePanel = new JS.Module('ThreePanel', {
     },
     
     doBeforeAdoption: function() {
-        this.callSuper();
+        var self = this;
+        
+        self.callSuper();
         
         var m = myt;
-        new m.Image(this, {
-            name:'first', imageUrl:this.firstImageUrl, ignoreLayout:true
+        new m.Image(self, {
+            name:'first', imageUrl:self.firstImageUrl, ignoreLayout:true
         });
         
-        var second = new m.Image(this, {
-            name:'second', layoutHint:1, imageUrl:this.secondImageUrl, 
+        var second = new m.Image(self, {
+            name:'second', layoutHint:1, imageUrl:self.secondImageUrl, 
             ignoreLayout:true, useNaturalSize:false, calculateNaturalSize:true,
         });
-        this.attachTo(second, '__updateSize', 'naturalWidth');
-        this.attachTo(second, '__updateSize', 'naturalHeight');
-        this.attachTo(second, '__updateImageSize', 'width');
-        this.attachTo(second, '__updateImageSize', 'height');
+        self.attachTo(second, '__updateSize', 'naturalWidth');
+        self.attachTo(second, '__updateSize', 'naturalHeight');
+        self.attachTo(second, '__updateImageSize', 'width');
+        self.attachTo(second, '__updateImageSize', 'height');
         
-        new m.Image(this, {
-            name:'third', imageUrl:this.thirdImageUrl, ignoreLayout:true
+        new m.Image(self, {
+            name:'third', imageUrl:self.thirdImageUrl, ignoreLayout:true
         });
         
-        var axis = this.axis,
+        var axis = self.axis,
             otherAxis = axis === 'x' ? 'y' : 'x',
             ignoreMixin = [m.ThreePanel.IGNORE_FUNCTION_MIXIN];
-        new m.ResizeLayout(this, {name:'resizeLayout', axis:axis}, ignoreMixin);
-        new m.SizeToChildren(this, {name:'sizeToChildren', axis:otherAxis}, ignoreMixin);
+        new m.ResizeLayout(self, {name:'resizeLayout', axis:axis}, ignoreMixin);
+        new m.SizeToChildren(self, {name:'sizeToChildren', axis:otherAxis}, ignoreMixin);
         
-        this.__updateRepeat();
-        this.__updateSize();
-        this.__updateImageSize();
+        self.__updateRepeat();
+        self.__updateSize();
+        self.__updateImageSize();
     },
     
     
@@ -104,7 +106,7 @@ myt.ThreePanel = new JS.Module('ThreePanel', {
         if (this.repeat !== v) {
             this.repeat = v;
             if (this.inited) {
-                this.fireNewEvent('repeat', v);
+                this.fireEvent('repeat', v);
                 this.__updateRepeat();
             }
         }
@@ -128,7 +130,7 @@ myt.ThreePanel = new JS.Module('ThreePanel', {
                 this.__updateSize();
                 this.resizeLayout.setAxis(v);
                 this.sizeToChildren.setAxis(v === 'x' ? 'y' : 'x');
-                this.fireNewEvent('axis', v);
+                this.fireEvent('axis', v);
             }
         }
     },

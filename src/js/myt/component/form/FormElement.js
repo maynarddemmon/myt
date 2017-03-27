@@ -54,7 +54,7 @@ myt.FormElement = new JS.Module('FormElement', {
     setDefaultValue: function(value) {
         if (this.defaultValue !== value) {
             this.defaultValue = value;
-            if (this.inited) this.fireNewEvent('defaultValue', value);
+            if (this.inited) this.fireEvent('defaultValue', value);
             this.verifyChangedState();
         }
         return value;
@@ -70,7 +70,7 @@ myt.FormElement = new JS.Module('FormElement', {
         if (value === undefined) value = this.getDefaultValue();
         if (this.rollbackValue !== value) {
             this.rollbackValue = value;
-            if (this.inited) this.fireNewEvent('rollbackValue', value);
+            if (this.inited) this.fireEvent('rollbackValue', value);
             this.verifyChangedState();
         }
         return value;

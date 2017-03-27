@@ -166,13 +166,13 @@ test("Fire an event after observer has attached.", function() {
     
     // Fire event once before attachment just to make sure the observer
     // is not somehow registered or being notified on attach.
-    observable.fireNewEvent('foo', 'bar');
+    observable.fireEvent('foo', 'bar');
     
     ok(observer.fooEventCount === 0, "Ensure observer initialization of fooEventCount was correct.");
     ok(observer.lastFooEvent === null, "Ensure observer initialization lastFooEvent was correct.");
     
     observer.attachTo(observable, 'handleFooEvent', 'foo');
-    observable.fireNewEvent('foo', 'bar');
+    observable.fireEvent('foo', 'bar');
     
     ok(observer.fooEventCount === 1, "One event should have been fired.");
     ok(observer.lastFooEvent != null, "Last foo event should exist now.");
@@ -201,7 +201,7 @@ test("Attach once.", function() {
     
     // Fire event once before attachment just to make sure the observer
     // is not somehow registered or being notified on attach.
-    observable.fireNewEvent('foo', 'bar');
+    observable.fireEvent('foo', 'bar');
     
     ok(observer.fooEventCount === 0, "Ensure observer initialization of fooEventCount was correct.");
     ok(observer.lastFooEvent === null, "Ensure observer initialization lastFooEvent was correct.");
@@ -217,7 +217,7 @@ test("Attach once.", function() {
     ok(observer.isAttachedTo(observable, 'handleFooEvent', 'foo') === false, "Observer should still no be attached to handleFooEvent.");
     ok(observer.isAttachedTo(observable, '__DO_ONCE_0', 'foo') === true, "Observer should now be attached to __DO_ONCE_0.");
     
-    observable.fireNewEvent('foo', 'bar');
+    observable.fireEvent('foo', 'bar');
     
     ok(observer.isAttachedTo(observable, 'handleFooEvent', 'foo') === false, "Observer should still no be attached to handleFooEvent.");
     ok(observer.isAttachedTo(observable, '__DO_ONCE_0', 'foo') === false, "Observer should no longer be attached to __DO_ONCE_0.");
@@ -232,7 +232,7 @@ test("Attach once.", function() {
     ok(observer.isAttachedTo(observable, 'handleFooEvent', 'foo') === false, "Observer should still no be attached to handleFooEvent.");
     ok(observer.isAttachedTo(observable, '__DO_ONCE_1', 'foo') === true, "Observer should now be attached to __DO_ONCE_1.");
     
-    observable.fireNewEvent('foo', 'bar');
+    observable.fireEvent('foo', 'bar');
     
     ok(observer.isAttachedTo(observable, 'handleFooEvent', 'foo') === false, "Observer should still no be attached to handleFooEvent.");
     ok(observer.isAttachedTo(observable, '__DO_ONCE_1', 'foo') === false, "Observer should no longer be attached to __DO_ONCE_1.");

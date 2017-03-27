@@ -83,9 +83,9 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
             this.current = this.initial = v;
             this.doEnterState('', '', v, args);
             var eventValue = {name:'', from:'', to:v, args:args};
-            this.fireNewEvent('enter' + v, eventValue);
-            this.fireNewEvent('enter', eventValue);
-            if (this.isFinished()) this.fireNewEvent('finished', eventValue);
+            this.fireEvent('enter' + v, eventValue);
+            this.fireEvent('enter', eventValue);
+            if (this.isFinished()) this.fireEvent('finished', eventValue);
         }
     },
     
@@ -194,28 +194,28 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
                     return SM.CANCELLED;
                 } else if (result === SM.ASYNC || async === SM.ASYNC) {
                     this.__transitionStage = 'enterState';
-                    this.fireNewEvent('start' + transitionName, eventValue);
-                    this.fireNewEvent('start', eventValue);
-                    this.fireNewEvent('leave' + current, eventValue);
-                    this.fireNewEvent('leave', eventValue);
+                    this.fireEvent('start' + transitionName, eventValue);
+                    this.fireEvent('start', eventValue);
+                    this.fireEvent('leave' + current, eventValue);
+                    this.fireEvent('leave', eventValue);
                     this.__doDeferredTransitions(); // FIXME: Is there a bug here if a transition starts in the middle of an async transition?
                     return SM.PENDING;
                 } else {
-                    this.fireNewEvent('start' + transitionName, eventValue);
-                    this.fireNewEvent('start', eventValue);
-                    this.fireNewEvent('leave' + current, eventValue);
-                    this.fireNewEvent('leave', eventValue);
+                    this.fireEvent('start' + transitionName, eventValue);
+                    this.fireEvent('start', eventValue);
+                    this.fireEvent('leave' + current, eventValue);
+                    this.fireEvent('leave', eventValue);
                     // Synchronous so fall through to 'enterState' case.
                 }
             case 'enterState':
                 this.current = to;
                 this.__resetTransitionProgress();
                 this.doEnterState(transitionName, current, to, args);
-                this.fireNewEvent('enter' + to, eventValue);
-                this.fireNewEvent('enter', eventValue);
-                this.fireNewEvent('end' + transitionName, eventValue);
-                this.fireNewEvent('end', eventValue);
-                if (this.isFinished()) this.fireNewEvent('finished', eventValue);
+                this.fireEvent('enter' + to, eventValue);
+                this.fireEvent('enter', eventValue);
+                this.fireEvent('end' + transitionName, eventValue);
+                this.fireEvent('end', eventValue);
+                if (this.isFinished()) this.fireEvent('finished', eventValue);
         }
         
         this.__doDeferredTransitions();

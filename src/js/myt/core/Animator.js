@@ -188,7 +188,7 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         
         if (self.running !== v) {
             self.running = v;
-            if (self.inited) self.fireNewEvent('running', v);
+            if (self.inited) self.fireEvent('running', v);
             
             if (!self.paused) {
                 if (v) {
@@ -207,7 +207,7 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         
         if (self.paused !== v) {
             self.paused = v;
-            if (self.inited) self.fireNewEvent('paused', v);
+            if (self.inited) self.fireEvent('paused', v);
             if (self.running) self[v ? 'detachFrom' : 'attachTo'](myt.global.idle, '__update', 'idle');
         }
     },
@@ -217,7 +217,7 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         
         if (self.reverse !== v) {
             self.reverse = v;
-            if (self.inited) self.fireNewEvent('reverse', v);
+            if (self.inited) self.fireEvent('reverse', v);
             if (!self.running) self.__reset();
         }
     },
@@ -231,21 +231,21 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         
         if (this.easingFunction !== v) {
             this.easingFunction = v;
-            if (this.inited) this.fireNewEvent('easingFunction', v);
+            if (this.inited) this.fireEvent('easingFunction', v);
         }
     },
     
     setFrom: function(v) {
         if (this.from !== v) {
             this.from = v;
-            if (this.inited) this.fireNewEvent('from', v);
+            if (this.inited) this.fireEvent('from', v);
         }
     },
     
     setTo: function(v) {
         if (this.to !== v) {
             this.to = v;
-            if (this.inited) this.fireNewEvent('to', v);
+            if (this.inited) this.fireEvent('to', v);
         }
     },
     
@@ -374,7 +374,7 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
                     // Advance again if time is remaining. This occurs when
                     // the timeDiff provided was greater than the animation
                     // duration and the animation loops.
-                    self.fireNewEvent('repeat', self.__loopCount);
+                    self.fireEvent('repeat', self.__loopCount);
                     self.__progress = reverse ? duration : 0;
                     self.__advance(remainderTime);
                 }

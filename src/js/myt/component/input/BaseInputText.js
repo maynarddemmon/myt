@@ -23,8 +23,8 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.NativeInputWrapper */
     initNode: function(parent, attrs) {
-        if (attrs.bgColor === undefined) attrs.bgColor = 'transparent';
-        if (attrs.spellcheck === undefined) attrs.spellcheck = false;
+        if (attrs.bgColor == null) attrs.bgColor = 'transparent';
+        if (attrs.spellcheck == null) attrs.spellcheck = false;
         
         this.callSuper(parent, attrs);
         
@@ -48,7 +48,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     setSpellcheck: function(v) {
         if (this.spellcheck !== v) {
             this.spellcheck = this.domElement.spellcheck = v;
-            if (this.inited) this.fireNewEvent('spellcheck', v);
+            if (this.inited) this.fireEvent('spellcheck', v);
         }
     },
     
@@ -57,7 +57,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
         
         if (this.maxLength !== v) {
             this.maxLength = this.domElement.maxLength = v;
-            if (this.inited) this.fireNewEvent('maxLength', v);
+            if (this.inited) this.fireEvent('maxLength', v);
         }
     },
     
@@ -66,7 +66,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     setPlaceholder: function(v) {
         if (this.placeholder !== v) {
             this.domElement.placeholder = this.placeholder = v;
-            if (this.inited) this.fireNewEvent('placeholder', v);
+            if (this.inited) this.fireEvent('placeholder', v);
         }
     },
     

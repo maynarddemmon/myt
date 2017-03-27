@@ -126,7 +126,7 @@ myt.Observable = new JS.Module('Observable', {
         @param observers:array (Optional) If provided the event will
             be sent to this specific list of observers and no others.
         @return void */
-    fireEvent: function(event, observers) {
+    fireExistingEvent: function(event, observers) {
         if (event && event.source === this) {
             // Determine observers to use
             var type = event.type;
@@ -144,12 +144,17 @@ myt.Observable = new JS.Module('Observable', {
         @param observers:array (Optional) If provided the event will
             be sent to this specific list of observers and no others.
         @returns void */
-    fireNewEvent: function(type, value, observers) {
+    fireEvent: function(type, value, observers) {
         // Determine observers to use
         observers = observers || (this.hasObservers(type) ? this.__obsbt[type] : null);
         
         // Fire event
         if (observers) this.__fireEvent({source:this, type:type, value:value}, observers); // Inlined from this.createEvent
+    },
+    
+    /** @deprecated */
+    fireNewEvent: function(type, value, observers) {
+        this.fireEvent(type, value, observers);
     },
     
     /** Creates a new event with the type and value and using this as 
@@ -158,7 +163,7 @@ myt.Observable = new JS.Module('Observable', {
         @param value:* The event value.
         @returns An event object consisting of source, type and value. */
     createEvent: function(type, value) {
-        return {source:this, type:type, value:value}; // Inlined in this.fireNewEvent
+        return {source:this, type:type, value:value}; // Inlined in this.fireEvent
     },
     
     /** Fire the event to the observers.

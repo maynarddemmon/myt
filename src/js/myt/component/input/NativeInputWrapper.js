@@ -18,7 +18,7 @@ myt.NativeInputWrapper = new JS.Class('NativeInputWrapper', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
-        if (attrs.focusable === undefined) attrs.focusable = true;
+        if (attrs.focusable == null) attrs.focusable = true;
         
         this.callSuper(parent, attrs);
         
@@ -48,7 +48,7 @@ myt.NativeInputWrapper = new JS.Class('NativeInputWrapper', myt.View, {
         if (this.value !== v) {
             this.value = v;
             this.setDomValue(v);
-            if (this.inited) this.fireNewEvent('value', v);
+            if (this.inited) this.fireEvent('value', v);
         }
     },
     

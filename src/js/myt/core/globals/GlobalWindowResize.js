@@ -21,16 +21,18 @@ new JS.Singleton('GlobalWindowResize', {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initialize: function() {
+        var self = this;
+        
         // The common browser resize event that gets reused.
-        this.EVENT = {
-            source:this, type:'resize', 
-            value:{w:this.getWidth(), h:this.getHeight()}
+        self.EVENT = {
+            source:self,
+            type:'resize', 
+            value:{w:self.getWidth(), h:self.getHeight()}
         };
         
-        var self = this;
         myt.addEventListener(window, 'resize', function(domEvent) {self.__handleEvent(domEvent);});
         
-        myt.global.register('windowResize', this);
+        myt.global.register('windowResize', self);
     },
     
     
@@ -71,6 +73,6 @@ new JS.Singleton('GlobalWindowResize', {
             isChanged = true;
         }
         
-        if (isChanged) this.fireEvent(event);
+        if (isChanged) this.fireExistingEvent(event);
     }
 });

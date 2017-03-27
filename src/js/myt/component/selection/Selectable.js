@@ -14,7 +14,7 @@ myt.Selectable = new JS.Module('Selectable', {
         
         if (this.selected !== v) {
             this.selected = v;
-            if (this.inited && this.fireNewEvent) this.fireNewEvent('selected', v);
+            if (this.inited && this.fireEvent) this.fireEvent('selected', v);
         }
     },
     

@@ -39,7 +39,7 @@ myt.Frame = new JS.Class('Frame', myt.View, {
     setSrc: function(v) {
         if (this.src !== v) {
             this.src = this.domElement.src = v;
-            if (this.inited) this.fireNewEvent('src', v);
+            if (this.inited) this.fireEvent('src', v);
         }
     },
     

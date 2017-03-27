@@ -28,21 +28,23 @@
 myt.TextButtonContent = new JS.Module('TextButtonContent', {
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        this.inset = this.outset = 0;
+        var self = this;
+        
+        self.inset = self.outset = 0;
         
         if (attrs.shrinkToFit === undefined) attrs.shrinkToFit = false;
         
         // Use appropriate default based on mutliline text or not.
-        this.textY = attrs.shrinkToFit ? 'middle' : 0;
+        self.textY = attrs.shrinkToFit ? 'middle' : 0;
         
-        this.callSuper(parent, attrs);
+        self.callSuper(parent, attrs);
         
         // Setup the constraint after adoption since the textView won't have
         // been sized to the dom until it's added in.
-        var textView = this.textView;
-        this.applyConstraint('__updateContentPosition', [
-            this, 'inset', this, 'outset',
-            this, 'width', this, 'shrinkToFit',
+        var textView = self.textView;
+        self.applyConstraint('__updateContentPosition', [
+            self, 'inset', self, 'outset',
+            self, 'width', self, 'shrinkToFit',
             textView, 'visible', textView, 'width',
             textView, 'height', textView, 'y'
         ]);
@@ -76,7 +78,7 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
         
         if (this.inset !== v) {
             this.inset = v;
-            if (this.inited) this.fireNewEvent('inset', v);
+            if (this.inited) this.fireEvent('inset', v);
         }
     },
     
@@ -86,7 +88,7 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
         
         if (this.outset !== v) {
             this.outset = v;
-            if (this.inited) this.fireNewEvent('outset', v);
+            if (this.inited) this.fireEvent('outset', v);
         }
     },
     
@@ -95,7 +97,7 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
             this.text = v;
             if (this.inited) {
                 this.textView.setText(v);
-                this.fireNewEvent('text', v);
+                this.fireEvent('text', v);
             }
         }
     },
@@ -105,7 +107,7 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
             this.shrinkToFit = v;
             if (this.inited) {
                 if (this.textView) this.textView.setWhiteSpace(v ? 'nowrap' : 'normal');
-                this.fireNewEvent('shrinkToFit', v);
+                this.fireEvent('shrinkToFit', v);
             }
         }
     },
@@ -114,7 +116,7 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
         if (this.textY !== v) {
             this.textY = v;
             if (this.inited) {
-                this.fireNewEvent('textY', v);
+                this.fireEvent('textY', v);
                 if (typeof v === 'string') {
                     this.textView.setValign(v);
                 } else {
@@ -128,24 +130,26 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
     
     // Methods /////////////////////////////////////////////////////////////////
     __updateContentPosition: function(v) {
-        if (this.__updateContentPositionLoopBlock || this.destroyed) return;
+        var self = this;
         
-        var inset = this.inset, 
-            outset = this.outset, 
-            textView = this.textView,
-            textViewVisible = textView.visible && this.text;
+        if (self.__updateContentPositionLoopBlock || self.destroyed) return;
         
-        this.__updateContentPositionLoopBlock = true;
-        if (this.shrinkToFit) {
+        var inset = self.inset, 
+            outset = self.outset, 
+            textView = self.textView,
+            textViewVisible = textView.visible && self.text;
+        
+        self.__updateContentPositionLoopBlock = true;
+        if (self.shrinkToFit) {
             textView.setX(inset);
-            this.setWidth(inset + (textViewVisible ? textView.width : 0) + outset);
-            this.setHeight(this.__origHeight);
+            self.setWidth(inset + (textViewVisible ? textView.width : 0) + outset);
+            self.setHeight(self.__origHeight);
         } else {
             textView.setHeight('auto');
-            textView.setWidth(this.width - inset - outset);
+            textView.setWidth(self.width - inset - outset);
             textView.setX(inset);
-            this.setHeight(textViewVisible ? textView.y + textView.height : this.__origHeight);
+            self.setHeight(textViewVisible ? textView.y + textView.height : self.__origHeight);
         }
-        this.__updateContentPositionLoopBlock = false;
+        self.__updateContentPositionLoopBlock = false;
     }
 });

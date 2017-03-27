@@ -42,7 +42,7 @@ new JS.Singleton('GlobalIdle', {
                 var event = self.__event;
                 event.delta = time - lastTime;
                 event.time = time;
-                self.fireNewEvent('idle', event);
+                self.fireEvent('idle', event);
             }
             self.lastTime = time;
         };

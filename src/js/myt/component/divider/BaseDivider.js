@@ -33,16 +33,16 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        if (attrs.drawingMethodClassname === undefined) attrs.drawingMethodClassname = 'myt.DividerDrawingMethod';
-        if (attrs.axis === undefined) attrs.axis = 'x';
-        if (attrs.inset === undefined) attrs.inset = 2;
-        if (attrs.minValue === undefined) attrs.minValue = -attrs.inset;
-        if (attrs.value === undefined) attrs.value = attrs.minValue;
-        if (attrs.focusEmbellishment === undefined) attrs.focusEmbellishment = false;
-        if (attrs.repeatKeyDown === undefined) attrs.repeatKeyDown = true;
-        if (attrs.expansionState === undefined) attrs.expansionState = 2;
+        if (attrs.drawingMethodClassname == null) attrs.drawingMethodClassname = 'myt.DividerDrawingMethod';
+        if (attrs.axis == null) attrs.axis = 'x';
+        if (attrs.inset == null) attrs.inset = 2;
+        if (attrs.minValue == null) attrs.minValue = -attrs.inset;
+        if (attrs.value == null) attrs.value = attrs.minValue;
+        if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
+        if (attrs.repeatKeyDown == null) attrs.repeatKeyDown = true;
+        if (attrs.expansionState == null) attrs.expansionState = 2;
         
-        if (attrs.activationKeys === undefined) {
+        if (attrs.activationKeys == null) {
             attrs.activationKeys = [
                 37, // left arrow
                 38, // up arrow
@@ -54,11 +54,11 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
         }
         
         if (attrs.axis === 'y') {
-            if (attrs.height === undefined) attrs.height = 8;
-            if (attrs.cursor === undefined) attrs.cursor = 'row-resize';
+            if (attrs.height == null) attrs.height = 8;
+            if (attrs.cursor == null) attrs.cursor = 'row-resize';
         } else {
-            if (attrs.width === undefined) attrs.width = 8;
-            if (attrs.cursor === undefined) attrs.cursor = 'col-resize';
+            if (attrs.width == null) attrs.width = 8;
+            if (attrs.cursor == null) attrs.cursor = 'col-resize';
         }
         
         // Controls acceleration of the nudge amount
@@ -68,9 +68,9 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
         
         // Do afterwards since value might have been constrained from the
         // value provided in attrs.
-        if (attrs.restoreValue === undefined) this.setRestoreValue(this.value);
+        if (attrs.restoreValue == null) this.setRestoreValue(this.value);
         
-        if (this.limitToParent !== undefined) this.__updateLimitToParentConstraint();
+        if (this.limitToParent != null) this.__updateLimitToParentConstraint();
         
         this.attachDomObserver(this, 'doPrimaryAction', 'dblclick');
     },
@@ -84,9 +84,9 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
         if (this.limitToParent !== v) {
             this.limitToParent = v;
             if (this.inited) {
-                this.fireNewEvent('limitToParent', v);
+                this.fireEvent('limitToParent', v);
                 
-                if (v === undefined) {
+                if (v == null) {
                     this.releaseConstraint('__limitToParent');
                 } else {
                     this.__updateLimitToParentConstraint();
@@ -99,7 +99,7 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
         if (this.inset !== v) {
             this.inset = v;
             if (this.inited) {
-                this.fireNewEvent('inset', v);
+                this.fireEvent('inset', v);
                 this.updateUI();
             }
         }

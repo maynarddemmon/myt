@@ -30,7 +30,7 @@ myt.ValueComponent = new JS.Module('ValueComponent', {
         
         if (this.value !== v) {
             this.value = v;
-            if (this.inited) this.fireNewEvent('value', this.getValue());
+            if (this.inited) this.fireEvent('value', this.getValue());
         }
     },
     

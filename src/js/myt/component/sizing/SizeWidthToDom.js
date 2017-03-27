@@ -54,7 +54,7 @@ myt.SizeWidthToDom = new JS.Module('SizeWidthToDom', {
             if (this.width !== w) {
                 this.width = w;
                 if (this.inited) this.__updateBounds(w, this.height);
-                this.fireNewEvent('width', w);
+                this.fireEvent('width', w);
             }
         }
     }

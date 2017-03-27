@@ -19,7 +19,7 @@ myt.ConstantLayout = new JS.Class('ConstantLayout', myt.Layout, {
             this.targetAttrName = v;
             this.setterName = myt.AccessorSupport.generateSetterName(v);
             if (this.inited) {
-                this.fireNewEvent('targetAttrName', v);
+                this.fireEvent('targetAttrName', v);
                 this.update();
             }
         }
@@ -29,7 +29,7 @@ myt.ConstantLayout = new JS.Class('ConstantLayout', myt.Layout, {
         if (this.targetValue !== v) {
             this.targetValue = v;
             if (this.inited) {
-                this.fireNewEvent('targetValue', v);
+                this.fireEvent('targetValue', v);
                 this.update();
             }
         }

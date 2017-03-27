@@ -38,7 +38,7 @@ new JS.Singleton('GlobalRootViewRegistry', {
         @returns void */
     addRoot: function(r) {
         this.__roots.push(r);
-        this.fireNewEvent('rootAdded', r);
+        this.fireEvent('rootAdded', r);
     },
     
     /** Remove a rootable from the global list of root views.
@@ -50,7 +50,7 @@ new JS.Singleton('GlobalRootViewRegistry', {
             root = roots[--i];
             if (root === r) {
                 roots.splice(i, 1);
-                this.fireNewEvent('rootRemoved', root);
+                this.fireEvent('rootRemoved', root);
                 break;
             }
         }

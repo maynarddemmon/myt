@@ -22,9 +22,9 @@ myt.RadioMixin = new JS.Module('RadioMixin', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides */
     initNode: function(parent, attrs) {
-        if (attrs.selected === undefined) attrs.selected = false;
-        if (attrs.groupId === undefined) attrs.groupId = myt.generateGuid();
-        if (attrs.drawingMethodClassname === undefined) attrs.drawingMethodClassname = 'myt.RadioDrawingMethod';
+        if (attrs.selected == null) attrs.selected = false;
+        if (attrs.groupId == null) attrs.groupId = myt.generateGuid();
+        if (attrs.drawingMethodClassname == null) attrs.drawingMethodClassname = 'myt.RadioDrawingMethod';
         
         this.callSuper(parent, attrs);
         
@@ -66,7 +66,7 @@ myt.RadioMixin = new JS.Module('RadioMixin', {
         if (this.selected !== v) {
             this.selected = v;
             if (this.inited) {
-                this.fireNewEvent('selected', v);
+                this.fireEvent('selected', v);
                 this.redraw();
             }
         }
@@ -78,7 +78,7 @@ myt.RadioMixin = new JS.Module('RadioMixin', {
             this.groupId = v;
             if (oldGroupId) this.removeFromBAG('selected', oldGroupId);
             if (v) this.addToBAG('selected', v);
-            if (this.inited) this.fireNewEvent('groupId', v);
+            if (this.inited) this.fireEvent('groupId', v);
         }
     },
     

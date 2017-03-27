@@ -79,12 +79,14 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        this.radius = this.thickness = this.startAngle = this.endAngle = 0;
-        this.startCapRounding = this.endCapRounding = false;
+        var self = this;
         
-        this.callSuper(parent, attrs);
+        self.radius = self.thickness = self.startAngle = self.endAngle = 0;
+        self.startCapRounding = self.endCapRounding = false;
         
-        this._updateSize();
+        self.callSuper(parent, attrs);
+        
+        self._updateSize();
     },
     
     /** @overrides myt.View */
@@ -107,7 +109,7 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
             this.radius = v = Math.max(0, v);
             if (this.inited) {
                 this._updateSize();
-                this.fireNewEvent('radius', v);
+                this.fireEvent('radius', v);
             }
         }
     },
@@ -117,7 +119,7 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
             this.thickness = v = Math.max(0, v);
             if (this.inited) {
                 this._updateSize();
-                this.fireNewEvent('thickness', v);
+                this.fireEvent('thickness', v);
             }
         }
     },
@@ -127,7 +129,7 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
             this.startAngle = v;
             if (this.inited) {
                 this._redraw();
-                this.fireNewEvent('startAngle', v);
+                this.fireEvent('startAngle', v);
             }
         }
     },
@@ -137,7 +139,7 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
             this.endAngle = v;
             if (this.inited) {
                 this._redraw();
-                this.fireNewEvent('endAngle', v);
+                this.fireEvent('endAngle', v);
             }
         }
     },
@@ -147,7 +149,7 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
             this.startCapRounding = v;
             if (this.inited) {
                 this._redraw();
-                this.fireNewEvent('startCapRounding', v);
+                this.fireEvent('startCapRounding', v);
             }
         }
     },
@@ -157,7 +159,7 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
             this.endCapRounding = v;
             if (this.inited) {
                 this._redraw();
-                this.fireNewEvent('endCapRounding', v);
+                this.fireEvent('endCapRounding', v);
             }
         }
     },
@@ -167,7 +169,7 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
             this.color = v;
             if (this.inited) {
                 this._redraw();
-                this.fireNewEvent('color', v);
+                this.fireEvent('color', v);
             }
         }
     },
@@ -210,17 +212,18 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
     
     /** @private */
     _redraw: function() {
-        var DTR = myt.Geometry.degreesToRadians;
+        var self = this,
+            DTR = myt.Geometry.degreesToRadians;
         myt.Annulus.draw(
-            this.__path, 
-            DTR(this.startAngle), 
-            DTR(this.endAngle), 
-            this.thickness, 
-            this.radius, 
-            this.width / 2, 
-            this.color, 
-            this.startCapRounding, 
-            this.endCapRounding
+            self.__path, 
+            DTR(self.startAngle), 
+            DTR(self.endAngle), 
+            self.thickness, 
+            self.radius, 
+            self.width / 2, 
+            self.color, 
+            self.startCapRounding, 
+            self.endCapRounding
         );
     }
 });

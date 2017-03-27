@@ -54,7 +54,7 @@ myt.SizeHeightToDom = new JS.Module('SizeHeightToDom', {
             if (this.height !== h) {
                 this.height = h;
                 if (this.inited) this.__updateBounds(this.width, h);
-                this.fireNewEvent('height', h);
+                this.fireEvent('height', h);
             }
         }
     }

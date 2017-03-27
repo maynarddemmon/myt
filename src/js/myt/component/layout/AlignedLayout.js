@@ -13,15 +13,17 @@ myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.VariableLayout */
     initNode: function(parent, attrs) {
-        this.align = 'middle';
-        this.targetAttrName = 'y';
-        this.setterName = 'setY';
-        this.measureAttrName = 'boundsHeight';
-        this.measureAttrBaseName = 'height';
-        this.parentSetterName = 'setHeight';
-        this.targetValue = 0;
+        var self = this;
         
-        this.callSuper(parent, attrs);
+        self.align = 'middle';
+        self.targetAttrName = 'y';
+        self.setterName = 'setY';
+        self.measureAttrName = 'boundsHeight';
+        self.measureAttrBaseName = 'height';
+        self.parentSetterName = 'setHeight';
+        self.targetValue = 0;
+        
+        self.callSuper(parent, attrs);
     },
     
     
@@ -52,7 +54,7 @@ myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
             this.locked = isLocked;
             
             if (this.inited) {
-                this.fireNewEvent('align', v);
+                this.fireEvent('align', v);
                 this.update();
             }
         }

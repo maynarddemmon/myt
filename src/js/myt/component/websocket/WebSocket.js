@@ -17,14 +17,14 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
     setUseJSON: function(v) {
         if (this.useJSON !== v) {
             this.useJSON = v;
-            if (this.inited) this.fireNewEvent('useJSON', v);
+            if (this.inited) this.fireEvent('useJSON', v);
         }
     },
     
     setStatus: function(v) {
         if (this.status !== v) {
             this.status = v;
-            if (this.inited) this.fireNewEvent('status', v);
+            if (this.inited) this.fireEvent('status', v);
         }
     },
     

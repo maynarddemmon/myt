@@ -9,17 +9,19 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.VariableLayout */
     initNode: function(parent, attrs) {
-        this.targetAttrName = this.axis = 'x';
-        this.setterName = 'setX';
-        this.otherSetterName = 'setY';
-        this.measureAttrName = 'boundsWidth';
-        this.measureAttrBaseName = 'width';
-        this.otherMeasureAttrName = 'boundsHeight';
-        this.otherMeasureAttrBaseName = 'height';
-        this.parentSetterName = 'setHeight';
-        this.targetValue = this.spacing = this.inset = this.outset = this.lineSpacing = this.lineInset = this.lineOutset = 0;
+        var self = this;
         
-        this.callSuper(parent, attrs);
+        self.targetAttrName = self.axis = 'x';
+        self.setterName = 'setX';
+        self.otherSetterName = 'setY';
+        self.measureAttrName = 'boundsWidth';
+        self.measureAttrBaseName = 'width';
+        self.otherMeasureAttrName = 'boundsHeight';
+        self.otherMeasureAttrBaseName = 'height';
+        self.parentSetterName = 'setHeight';
+        self.targetValue = self.spacing = self.inset = self.outset = self.lineSpacing = self.lineInset = self.lineOutset = 0;
+        
+        self.callSuper(parent, attrs);
     },
     
     
@@ -65,7 +67,7 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
         if (this.spacing !== v) {
             this.spacing = v;
             if (this.inited) {
-                this.fireNewEvent('spacing', v);
+                this.fireEvent('spacing', v);
                 this.update();
             }
         }
@@ -75,7 +77,7 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
         if (this.outset !== v) {
             this.outset = v;
             if (this.inited) {
-                this.fireNewEvent('outset', v);
+                this.fireEvent('outset', v);
                 this.update();
             }
         }
@@ -85,7 +87,7 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
         if (this.lineSpacing !== v) {
             this.lineSpacing = v;
             if (this.inited) {
-                this.fireNewEvent('lineSpacing', v);
+                this.fireEvent('lineSpacing', v);
                 this.update();
             }
         }
@@ -95,7 +97,7 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
         if (this.lineInset !== v) {
             this.lineInset = v;
             if (this.inited) {
-                this.fireNewEvent('lineInset', v);
+                this.fireEvent('lineInset', v);
                 this.update();
             }
         }
@@ -105,7 +107,7 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
         if (this.lineOutset !== v) {
             this.lineOutset = v;
             if (this.inited) {
-                this.fireNewEvent('lineOutset', v);
+                this.fireEvent('lineOutset', v);
                 this.update();
             }
         }

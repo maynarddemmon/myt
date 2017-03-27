@@ -9,11 +9,12 @@ myt.Markup = new JS.Class('Markup', myt.View, {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setHtml: function(v) {
-        if (this.html !== v) {
-            this.domElement.innerHTML = this.html = v;
-            if (this.inited) {
-                this.fireNewEvent('html', v);
-                this.sizeViewToDom();
+        var self = this;
+        if (self.html !== v) {
+            self.domElement.innerHTML = self.html = v;
+            if (self.inited) {
+                self.fireEvent('html', v);
+                self.sizeViewToDom();
             }
         }
     }

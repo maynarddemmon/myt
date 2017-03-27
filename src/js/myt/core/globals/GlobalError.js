@@ -59,7 +59,7 @@ new JS.Singleton('GlobalError', {
         if (!err) err = new Error(msg || eventType);
         var stacktrace = err.stack || err.stacktrace;
         
-        this.fireNewEvent(eventType || 'error', {msg:msg, stacktrace:stacktrace});
+        this.fireEvent(eventType || 'error', {msg:msg, stacktrace:stacktrace});
         if (this.consoleLogging && consoleFuncName) console[consoleFuncName](stacktrace);
     }
 });

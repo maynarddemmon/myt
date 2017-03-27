@@ -47,7 +47,7 @@ new JS.Singleton('GlobalFocus', {
             this.prevFocusedView = this.focusedView; // Remember previous focus
             this.focusedView = v;
             if (v) this.focusedDom = null; // Wipe this since we have actual focus now.
-            this.fireNewEvent('focused', v);
+            this.fireEvent('focused', v);
         }
     },
     

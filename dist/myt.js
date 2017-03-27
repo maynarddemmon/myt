@@ -4049,7 +4049,7 @@ JS.Singleton = new JS.Class('Singleton', {
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20170324.1209,
+    version:20170326.2144,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -5005,7 +5005,7 @@ myt.Observable = new JS.Module('Observable', {
         @param observers:array (Optional) If provided the event will
             be sent to this specific list of observers and no others.
         @return void */
-    fireEvent: function(event, observers) {
+    fireExistingEvent: function(event, observers) {
         if (event && event.source === this) {
             // Determine observers to use
             var type = event.type;
@@ -5023,12 +5023,17 @@ myt.Observable = new JS.Module('Observable', {
         @param observers:array (Optional) If provided the event will
             be sent to this specific list of observers and no others.
         @returns void */
-    fireNewEvent: function(type, value, observers) {
+    fireEvent: function(type, value, observers) {
         // Determine observers to use
         observers = observers || (this.hasObservers(type) ? this.__obsbt[type] : null);
         
         // Fire event
         if (observers) this.__fireEvent({source:this, type:type, value:value}, observers); // Inlined from this.createEvent
+    },
+    
+    /** @deprecated */
+    fireNewEvent: function(type, value, observers) {
+        this.fireEvent(type, value, observers);
     },
     
     /** Creates a new event with the type and value and using this as 
@@ -5037,7 +5042,7 @@ myt.Observable = new JS.Module('Observable', {
         @param value:* The event value.
         @returns An event object consisting of source, type and value. */
     createEvent: function(type, value) {
-        return {source:this, type:type, value:value}; // Inlined in this.fireNewEvent
+        return {source:this, type:type, value:value}; // Inlined in this.fireEvent
     },
     
     /** Fire the event to the observers.
@@ -5446,7 +5451,7 @@ myt.global = new JS.Singleton('Global', {
             this.unregister(key);
         }
         this[key] = v;
-        this.fireNewEvent('register' + key, v);
+        this.fireEvent('register' + key, v);
     },
     
     /** Unegisters the global for the provided key. Fires an unregister<key>
@@ -5456,7 +5461,7 @@ myt.global = new JS.Singleton('Global', {
         if (this.hasOwnProperty(key)) {
             var v = this[key];
             delete this[key];
-            this.fireNewEvent('unregister' + key, v);
+            this.fireEvent('unregister' + key, v);
         } else {
             console.log("Warning: myt.global key not in use: ", key);
         }
@@ -5525,7 +5530,7 @@ new JS.Singleton('GlobalError', {
         if (!err) err = new Error(msg || eventType);
         var stacktrace = err.stack || err.stacktrace;
         
-        this.fireNewEvent(eventType || 'error', {msg:msg, stacktrace:stacktrace});
+        this.fireEvent(eventType || 'error', {msg:msg, stacktrace:stacktrace});
         if (this.consoleLogging && consoleFuncName) console[consoleFuncName](stacktrace);
     }
 });
@@ -6224,7 +6229,7 @@ new JS.Singleton('GlobalFocus', {
             this.prevFocusedView = this.focusedView; // Remember previous focus
             this.focusedView = v;
             if (v) this.focusedDom = null; // Wipe this since we have actual focus now.
-            this.fireNewEvent('focused', v);
+            this.fireEvent('focused', v);
         }
     },
     
@@ -6622,8 +6627,8 @@ new JS.Singleton('GlobalKeys', {
         // event immediately. Not an issue for other meta keys: shift, ctrl 
         // and option.
         if (self.isCommandKeyDown() && keyCode !== self.KEYCODE_SHIFT && keyCode !== self.KEYCODE_CONTROL && keyCode !== self.KEYCODE_ALT) {
-            self.fireNewEvent('keydown', keyCode);
-            self.fireNewEvent('keyup', keyCode);
+            self.fireEvent('keydown', keyCode);
+            self.fireEvent('keyup', keyCode);
         } else {
             self.__keysDown[keyCode] = true;
             
@@ -6637,7 +6642,7 @@ new JS.Singleton('GlobalKeys', {
                 }
             }
             
-            self.fireNewEvent('keydown', keyCode);
+            self.fireEvent('keydown', keyCode);
         }
     },
     
@@ -6648,7 +6653,7 @@ new JS.Singleton('GlobalKeys', {
     /** @private */
     __handleKeyPress: function(event) {
         var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
-        this.fireNewEvent('keypress', keyCode);
+        this.fireEvent('keypress', keyCode);
     },
     
     /** @private */
@@ -6657,7 +6662,7 @@ new JS.Singleton('GlobalKeys', {
             domEvent = event.value;
         if (this.__shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
         this.__keysDown[keyCode] = false;
-        this.fireNewEvent('keyup', keyCode);
+        this.fireEvent('keyup', keyCode);
     },
     
     /** @private */
@@ -6786,11 +6791,11 @@ new JS.Singleton('GlobalHistory', {
 
 if (!global.mytNoHistoryShim) { // FIXME: remove conditional once old code has been updated.
     History.Adapter.bind(window, 'statechange', function(event) {
-        myt.global.history.fireNewEvent('statechange', History.getState());
+        myt.global.history.fireEvent('statechange', History.getState());
     });
     
     History.Adapter.bind(window, 'anchorchange', function(event) {
-        myt.global.history.fireNewEvent('anchorchange', History.getState());
+        myt.global.history.fireEvent('anchorchange', History.getState());
     });
 }
 
@@ -6841,7 +6846,7 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
             target[setterName] = function(v) {
                 if (target[attrName] !== v) {
                     target[attrName] = v;
-                    if (target.inited) target.fireNewEvent(attrName, v);
+                    if (target.inited) target.fireEvent(attrName, v);
                 }
             };
         },
@@ -6930,7 +6935,7 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
     
     /** A generic setter function that can be called to set a value on this
         object. Will defer to a defined setter if it exists. The implementation
-        assumes this object is an Observable so it will have a 'fireNewEvent'
+        assumes this object is an Observable so it will have a 'fireEvent'
         method.
         @param attrName:string The name of the attribute to set.
         @param v:* The value to set.
@@ -6949,7 +6954,7 @@ myt.AccessorSupport = new JS.Module('AccessorSupport', {
         
         if (self[attrName] !== v) {
             self[attrName] = v;
-            if (self.inited !== false && self.fireNewEvent) self.fireNewEvent(attrName, v); // !== false allows this to work with non-nodes.
+            if (self.inited !== false && self.fireEvent) self.fireEvent(attrName, v); // !== false allows this to work with non-nodes.
         }
     },
     
@@ -7478,7 +7483,7 @@ myt.Node = new JS.Class('Node', {
             }
             
             // Fire an event
-            if (self.inited) self.fireNewEvent('parent', newParent);
+            if (self.inited) self.fireEvent('parent', newParent);
         }
     },
     
@@ -7902,7 +7907,7 @@ myt.ThresholdCounter = new JS.Class('ThresholdCounter', {
                 
                 if (curValue !== value) {
                     this[counterAttrName] = value;
-                    this.fireNewEvent(counterAttrName, value);
+                    this.fireEvent(counterAttrName, value);
                     this.set(exceededAttrName, value >= this[thresholdAttrName]); // Check threshold
                 }
             };
@@ -7922,7 +7927,7 @@ myt.ThresholdCounter = new JS.Class('ThresholdCounter', {
             mod[thresholdSetterName] = function(v) {
                 if (this[thresholdAttrName] === v) return;
                 this[thresholdAttrName] = v;
-                this.fireNewEvent(thresholdAttrName, v);
+                this.fireEvent(thresholdAttrName, v);
                 this.set(exceededAttrName, this[counterAttrName] >= v); // Check threshold
             };
             
@@ -7990,7 +7995,7 @@ myt.ThresholdCounter = new JS.Class('ThresholdCounter', {
             mod[incrName] = function() {
                 var value = this[counterAttrName] + 1;
                 this[counterAttrName] = value;
-                this.fireNewEvent(counterAttrName, value);
+                this.fireEvent(counterAttrName, value);
                 if (value === thresholdValue) this.set(exceededAttrName, true);
             };
             
@@ -8001,7 +8006,7 @@ myt.ThresholdCounter = new JS.Class('ThresholdCounter', {
                 if (curValue === 0) return;
                 var value = curValue - 1;
                 this[counterAttrName] = value;
-                this.fireNewEvent(counterAttrName, value);
+                this.fireEvent(counterAttrName, value);
                 if (curValue === thresholdValue) this.set(exceededAttrName, false);
             };
             
@@ -8479,7 +8484,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
         if (this.focused !== v) {
             this.focused = v;
             if (this.inited) {
-                this.fireNewEvent('focused', v);
+                this.fireEvent('focused', v);
                 var gf = myt.global.focus;
                 if (v) {
                     gf.notifyFocus(this);
@@ -8505,7 +8510,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
                 this.detachFromDom(this, '__doBlur', 'blur');
             }
             
-            if (this.inited) this.fireNewEvent('focusable', v);
+            if (this.inited) this.fireEvent('focusable', v);
         }
     },
     
@@ -9273,7 +9278,7 @@ myt.View = new JS.Class('View', myt.Node, {
     setDomClass: function(v) {
         if (this.domClass !== v) {
             this.callSuper(v);
-            if (this.inited) this.fireNewEvent('domClass', v);
+            if (this.inited) this.fireEvent('domClass', v);
         }
     },
     
@@ -9281,7 +9286,7 @@ myt.View = new JS.Class('View', myt.Node, {
     setDomId: function(v) {
         if (this.domId !== v) {
             this.callSuper(v);
-            if (this.inited) this.fireNewEvent('domId', v);
+            if (this.inited) this.fireEvent('domId', v);
         }
     },
     
@@ -9289,7 +9294,7 @@ myt.View = new JS.Class('View', myt.Node, {
     setAlignOffset: function(v) {
         if (this.alignOffset !== v) {
             this.alignOffset = v;
-            if (this.inited) this.fireNewEvent('alignOffset', v);
+            if (this.inited) this.fireEvent('alignOffset', v);
             if (this.parent && this.align === 'left') this.setX(v);
         }
     },
@@ -9299,7 +9304,7 @@ myt.View = new JS.Class('View', myt.Node, {
             if (this.inited) this.__teardownAlignConstraint();
             this.align = v;
             if (this.inited) {
-                this.fireNewEvent('align', v);
+                this.fireEvent('align', v);
                 this.__setupAlignConstraint();
             }
         }
@@ -9347,7 +9352,7 @@ myt.View = new JS.Class('View', myt.Node, {
     setValignOffset: function(v) {
         if (this.valignOffset !== v) {
             this.valignOffset = v;
-            if (this.inited) this.fireNewEvent('valignOffset', v);
+            if (this.inited) this.fireEvent('valignOffset', v);
             if (this.parent && this.valign === 'top') this.setY(v);
         }
     },
@@ -9357,7 +9362,7 @@ myt.View = new JS.Class('View', myt.Node, {
             if (this.inited) this.__teardownValignConstraint();
             this.valign = v;
             if (this.inited) {
-                this.fireNewEvent('valign', v);
+                this.fireEvent('valign', v);
                 this.__setupValignConstraint();
             }
         }
@@ -9407,7 +9412,7 @@ myt.View = new JS.Class('View', myt.Node, {
         if (this.x !== v) {
             this.x = v;
             if (this.visible) this.deStyle.left = v + 'px';
-            if (this.inited) this.fireNewEvent('x', v);
+            if (this.inited) this.fireEvent('x', v);
         }
     },
     
@@ -9415,7 +9420,7 @@ myt.View = new JS.Class('View', myt.Node, {
         if (this.y !== v) {
             this.y = v;
             if (this.visible) this.deStyle.top = v + 'px';
-            if (this.inited) this.fireNewEvent('y', v);
+            if (this.inited) this.fireEvent('y', v);
         }
     },
     
@@ -9428,7 +9433,7 @@ myt.View = new JS.Class('View', myt.Node, {
             this.deStyle.width = v + 'px';
             if (this.inited) {
                 this.__updateBounds(v, this.height);
-                if (!supressEvent) this.fireNewEvent('width', v);
+                if (!supressEvent) this.fireEvent('width', v);
             }
         }
     },
@@ -9442,7 +9447,7 @@ myt.View = new JS.Class('View', myt.Node, {
             this.deStyle.height = v + 'px';
             if (this.inited) {
                 this.__updateBounds(this.width, v);
-                if (!supressEvent) this.fireNewEvent('height', v);
+                if (!supressEvent) this.fireEvent('height', v);
             }
         }
     },
@@ -9451,21 +9456,21 @@ myt.View = new JS.Class('View', myt.Node, {
         if (this.textColor !== v) {
             this.textColor = v;
             this.deStyle.color = v || 'inherit';
-            if (this.inited) this.fireNewEvent('textColor', v);
+            if (this.inited) this.fireEvent('textColor', v);
         }
     },
     
     setBgColor: function(v) {
         if (this.bgColor !== v) {
             this.deStyle.backgroundColor = this.bgColor = v;
-            if (this.inited) this.fireNewEvent('bgColor', v);
+            if (this.inited) this.fireEvent('bgColor', v);
         }
     },
     
     setOpacity: function(v) {
         if (this.opacity !== v) {
             this.deStyle.opacity = this.opacity = v;
-            if (this.inited) this.fireNewEvent('opacity', v);
+            if (this.inited) this.fireEvent('opacity', v);
         }
     },
     
@@ -9486,7 +9491,7 @@ myt.View = new JS.Class('View', myt.Node, {
                 s.overflow = v || 'visible';
             }
             
-            if (this.inited) this.fireNewEvent('overflow', v);
+            if (this.inited) this.fireEvent('overflow', v);
         }
     },
     
@@ -9503,7 +9508,7 @@ myt.View = new JS.Class('View', myt.Node, {
             s.left = v ? this.x + 'px' : '-100000px';
             s.top = v ? this.y + 'px' : '-100000px';
             
-            if (this.inited) this.fireNewEvent('visible', v);
+            if (this.inited) this.fireEvent('visible', v);
         }
     },
     
@@ -9511,7 +9516,7 @@ myt.View = new JS.Class('View', myt.Node, {
         if (this.pointerEvents !== v) {
             this.pointerEvents = v;
             this.deStyle.pointerEvents = v || 'auto';
-            if (this.inited) this.fireNewEvent('pointerEvents', v);
+            if (this.inited) this.fireEvent('pointerEvents', v);
         }
     },
     
@@ -9519,7 +9524,7 @@ myt.View = new JS.Class('View', myt.Node, {
         if (this.cursor !== v) {
             this.cursor = v;
             this.deStyle.cursor = v || 'auto';
-            if (this.inited) this.fireNewEvent('cursor', v);
+            if (this.inited) this.fireEvent('cursor', v);
         }
     },
     
@@ -9531,12 +9536,12 @@ myt.View = new JS.Class('View', myt.Node, {
     __updateBounds: function(w, h) {
         if (this.boundsWidth !== w) {
             this.boundsWidth = w;
-            this.fireNewEvent('boundsWidth', w);
+            this.fireEvent('boundsWidth', w);
         }
         
         if (this.boundsHeight !== h) {
             this.boundsHeight = h;
-            this.fireNewEvent('boundsHeight', h);
+            this.fireEvent('boundsHeight', h);
         }
     },
     
@@ -9760,11 +9765,11 @@ myt.View = new JS.Class('View', myt.Node, {
         if (node instanceof myt.View) {
             this.domElement.appendChild(node.domElement);
             this.getSubviews().push(node);
-            this.fireNewEvent('subviewAdded', node);
+            this.fireEvent('subviewAdded', node);
             this.subviewAdded(node);
         } else if (node instanceof myt.Layout) {
             this.getLayouts().push(node);
-            this.fireNewEvent('layoutAdded', node);
+            this.fireEvent('layoutAdded', node);
             this.layoutAdded(node);
         }
     },
@@ -9780,7 +9785,7 @@ myt.View = new JS.Class('View', myt.Node, {
         if (node instanceof myt.View) {
             idx = this.getSubviewIndex(node);
             if (idx !== -1) {
-                this.fireNewEvent('subviewRemoved', node);
+                this.fireEvent('subviewRemoved', node);
                 node.removeDomElement();
                 this.subviews.splice(idx, 1);
                 this.subviewRemoved(node);
@@ -9788,7 +9793,7 @@ myt.View = new JS.Class('View', myt.Node, {
         } else if (node instanceof myt.Layout) {
             idx = this.getLayoutIndex(node);
             if (idx !== -1) {
-                this.fireNewEvent('layoutRemoved', node);
+                this.fireEvent('layoutRemoved', node);
                 this.layouts.splice(idx, 1);
                 this.layoutRemoved(node);
             }
@@ -10194,7 +10199,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
             myt.TransformSupport.setTransformOrigin(this.deStyle, v);
             if (this.inited) {
                 this.__updateBounds(this.width, this.height);
-                this.fireNewEvent('transformOrigin', v);
+                this.fireEvent('transformOrigin', v);
             }
         }
     },
@@ -10205,7 +10210,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
             myt.TransformSupport.addTransform(this.deStyle, 'rotate', (v || 0) + 'deg');
             if (this.inited) {
                 this.__updateBounds(this.width, this.height);
-                this.fireNewEvent('rotation', v);
+                this.fireEvent('rotation', v);
             }
         }
     },
@@ -10219,8 +10224,8 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
         
         if (this.inited) {
             if (doUpdateX || doUpdateY) this.__updateBounds(this.width, this.height);
-            if (doUpdateX) this.fireNewEvent('scaleX', v);
-            if (doUpdateY) this.fireNewEvent('scaleY', v);
+            if (doUpdateX) this.fireEvent('scaleX', v);
+            if (doUpdateY) this.fireEvent('scaleY', v);
         }
     },
     
@@ -10229,7 +10234,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
             this.__applyScale('scaleX', this.scaleX = v);
             if (this.inited) {
                 this.__updateBounds(this.width, this.height);
-                this.fireNewEvent('scaleX', v);
+                this.fireEvent('scaleX', v);
             }
         }
     },
@@ -10239,7 +10244,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
             this.__applyScale('scaleY', this.scaleY = v);
             if (this.inited) {
                 this.__updateBounds(this.width, this.height);
-                this.fireNewEvent('scaleY', v);
+                this.fireEvent('scaleY', v);
             }
         }
     },
@@ -10259,7 +10264,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
             myt.TransformSupport.addTransform(this.deStyle, 'skewX', v || 0);
             if (this.inited) {
                 this.__updateBounds(this.width, this.height);
-                this.fireNewEvent('skewX', v);
+                this.fireEvent('skewX', v);
             }
         }
     },
@@ -10270,7 +10275,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
             myt.TransformSupport.addTransform(this.deStyle, 'skewY', v || 0);
             if (this.inited) {
                 this.__updateBounds(this.width, this.height);
-                this.fireNewEvent('skewY', v);
+                this.fireEvent('skewY', v);
             }
         }
     },
@@ -10384,7 +10389,7 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
             if (this.width !== w) {
                 this.width = w;
                 if (this.inited) this.__updateBounds(w, this.height);
-                this.fireNewEvent('width', w);
+                this.fireEvent('width', w);
             }
         }
         
@@ -10401,7 +10406,7 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
             if (this.height !== h) {
                 this.height = h;
                 if (this.inited) this.__updateBounds(this.width, h);
-                this.fireNewEvent('height', h);
+                this.fireEvent('height', h);
             }
         }
     }
@@ -10496,7 +10501,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
             // embed formatting markup.
             this.domElement.innerHTML = this.text = v;
             if (this.inited) {
-                this.fireNewEvent('text', v);
+                this.fireEvent('text', v);
                 this.sizeViewToDom();
             }
         }
@@ -10507,7 +10512,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
         if (this.textOverflow !== v) {
             this.textOverflow = v;
             this.deStyle.textOverflow = v || 'inherit';
-            if (this.inited) this.fireNewEvent('textOverflow', v);
+            if (this.inited) this.fireEvent('textOverflow', v);
         }
     },
     
@@ -10515,7 +10520,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
         if (this.textAlign !== v) {
             this.textAlign = v;
             this.deStyle.textAlign = v || 'inherit';
-            if (this.inited) this.fireNewEvent('textAlign', v);
+            if (this.inited) this.fireEvent('textAlign', v);
         }
     },
     
@@ -10543,7 +10548,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
             this[attrName] = v;
             this.deStyle[attrName] = v || defaultValue || 'inherit';
             if (this.inited) {
-                this.fireNewEvent(attrName, v);
+                this.fireEvent(attrName, v);
                 this.sizeViewToDom();
             }
         }
@@ -10554,7 +10559,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
             this.userUnselectable = v;
             this[v ? 'addDomClass' : 'removeDomClass']('mytUnselectable');
             this.setCursor(v ? 'default' : 'text');
-            if (this.inited) this.fireNewEvent('userUnselectable', v);
+            if (this.inited) this.fireEvent('userUnselectable', v);
         }
     },
     
@@ -10661,11 +10666,12 @@ myt.Markup = new JS.Class('Markup', myt.View, {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setHtml: function(v) {
-        if (this.html !== v) {
-            this.domElement.innerHTML = this.html = v;
-            if (this.inited) {
-                this.fireNewEvent('html', v);
-                this.sizeViewToDom();
+        var self = this;
+        if (self.html !== v) {
+            self.domElement.innerHTML = self.html = v;
+            if (self.inited) {
+                self.fireEvent('html', v);
+                self.sizeViewToDom();
             }
         }
     }
@@ -10713,7 +10719,7 @@ myt.Frame = new JS.Class('Frame', myt.View, {
     setSrc: function(v) {
         if (this.src !== v) {
             this.src = this.domElement.src = v;
-            if (this.inited) this.fireNewEvent('src', v);
+            if (this.inited) this.fireEvent('src', v);
         }
     },
     
@@ -10790,7 +10796,7 @@ myt.SizeWidthToDom = new JS.Module('SizeWidthToDom', {
             if (this.width !== w) {
                 this.width = w;
                 if (this.inited) this.__updateBounds(w, this.height);
-                this.fireNewEvent('width', w);
+                this.fireEvent('width', w);
             }
         }
     }
@@ -10853,7 +10859,7 @@ myt.SizeHeightToDom = new JS.Module('SizeHeightToDom', {
             if (this.height !== h) {
                 this.height = h;
                 if (this.inited) this.__updateBounds(this.width, h);
-                this.fireNewEvent('height', h);
+                this.fireEvent('height', h);
             }
         }
     }
@@ -10907,7 +10913,7 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
         if (this.percentOfParentWidthOffset !== v) {
             this.percentOfParentWidthOffset = v;
             if (this.inited) {
-                this.fireNewEvent('percentOfParentWidthOffset', v);
+                this.fireEvent('percentOfParentWidthOffset', v);
                 this.__doPercentOfParentWidth();
             }
         }
@@ -10917,7 +10923,7 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
         if (this.percentOfParentWidth !== v) {
             if (this.inited) this.__teardownPercentOfParentWidthConstraint();
             this.percentOfParentWidth = v;
-            if (this.inited) this.fireNewEvent('percentOfParentWidth', v);
+            if (this.inited) this.fireEvent('percentOfParentWidth', v);
             this.__setupPercentOfParentWidthConstraint();
         }
     },
@@ -10926,7 +10932,7 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
         if (this.percentOfParentHeightOffset !== v) {
             this.percentOfParentHeightOffset = v;
             if (this.inited) {
-                this.fireNewEvent('percentOfParentHeightOffset', v);
+                this.fireEvent('percentOfParentHeightOffset', v);
                 this.__doPercentOfParentHeight();
             }
         }
@@ -10936,7 +10942,7 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
         if (this.percentOfParentHeight !== v) {
             if (this.inited) this.__teardownPercentOfParentHeightConstraint();
             this.percentOfParentHeight = v;
-            if (this.inited) this.fireNewEvent('percentOfParentHeight', v);
+            if (this.inited) this.fireEvent('percentOfParentHeight', v);
             this.__setupPercentOfParentHeightConstraint();
         }
     },
@@ -10959,7 +10965,7 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
         this.setWidth((this.percentOfParentWidthOffset || 0) + Math.round(this.parent.width * (this.percentOfParentWidth / 100)));
         // Force width event if not inited yet so that align constraint
         // in myt.View will work.
-        if (!this.inited) this.fireNewEvent('width', this.width);
+        if (!this.inited) this.fireEvent('width', this.width);
     },
     
     /** @private */
@@ -10978,7 +10984,7 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
         this.setHeight((this.percentOfParentHeightOffset || 0) + Math.round(this.parent.height * (this.percentOfParentHeight / 100)));
         // Force height event if not inited yet so that valign constraint
         // in myt.View will work.
-        if (!this.inited) this.fireNewEvent('height', this.height);
+        if (!this.inited) this.fireEvent('height', this.height);
     }
 });
 
@@ -11023,7 +11029,7 @@ new JS.Singleton('GlobalRootViewRegistry', {
         @returns void */
     addRoot: function(r) {
         this.__roots.push(r);
-        this.fireNewEvent('rootAdded', r);
+        this.fireEvent('rootAdded', r);
     },
     
     /** Remove a rootable from the global list of root views.
@@ -11035,7 +11041,7 @@ new JS.Singleton('GlobalRootViewRegistry', {
             root = roots[--i];
             if (root === r) {
                 roots.splice(i, 1);
-                this.fireNewEvent('rootRemoved', root);
+                this.fireEvent('rootRemoved', root);
                 break;
             }
         }
@@ -11197,16 +11203,18 @@ new JS.Singleton('GlobalWindowResize', {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initialize: function() {
+        var self = this;
+        
         // The common browser resize event that gets reused.
-        this.EVENT = {
-            source:this, type:'resize', 
-            value:{w:this.getWidth(), h:this.getHeight()}
+        self.EVENT = {
+            source:self,
+            type:'resize', 
+            value:{w:self.getWidth(), h:self.getHeight()}
         };
         
-        var self = this;
         myt.addEventListener(window, 'resize', function(domEvent) {self.__handleEvent(domEvent);});
         
-        myt.global.register('windowResize', this);
+        myt.global.register('windowResize', self);
     },
     
     
@@ -11247,7 +11255,7 @@ new JS.Singleton('GlobalWindowResize', {
             isChanged = true;
         }
         
-        if (isChanged) this.fireEvent(event);
+        if (isChanged) this.fireExistingEvent(event);
     }
 });
 
@@ -11388,7 +11396,7 @@ new JS.Singleton('GlobalIdle', {
                 var event = self.__event;
                 event.delta = time - lastTime;
                 event.time = time;
-                self.fireNewEvent('idle', event);
+                self.fireEvent('idle', event);
             }
             self.lastTime = time;
         };
@@ -11617,7 +11625,7 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         
         if (self.running !== v) {
             self.running = v;
-            if (self.inited) self.fireNewEvent('running', v);
+            if (self.inited) self.fireEvent('running', v);
             
             if (!self.paused) {
                 if (v) {
@@ -11636,7 +11644,7 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         
         if (self.paused !== v) {
             self.paused = v;
-            if (self.inited) self.fireNewEvent('paused', v);
+            if (self.inited) self.fireEvent('paused', v);
             if (self.running) self[v ? 'detachFrom' : 'attachTo'](myt.global.idle, '__update', 'idle');
         }
     },
@@ -11646,7 +11654,7 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         
         if (self.reverse !== v) {
             self.reverse = v;
-            if (self.inited) self.fireNewEvent('reverse', v);
+            if (self.inited) self.fireEvent('reverse', v);
             if (!self.running) self.__reset();
         }
     },
@@ -11660,21 +11668,21 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
         
         if (this.easingFunction !== v) {
             this.easingFunction = v;
-            if (this.inited) this.fireNewEvent('easingFunction', v);
+            if (this.inited) this.fireEvent('easingFunction', v);
         }
     },
     
     setFrom: function(v) {
         if (this.from !== v) {
             this.from = v;
-            if (this.inited) this.fireNewEvent('from', v);
+            if (this.inited) this.fireEvent('from', v);
         }
     },
     
     setTo: function(v) {
         if (this.to !== v) {
             this.to = v;
-            if (this.inited) this.fireNewEvent('to', v);
+            if (this.inited) this.fireEvent('to', v);
         }
     },
     
@@ -11803,7 +11811,7 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
                     // Advance again if time is remaining. This occurs when
                     // the timeDiff provided was greater than the animation
                     // duration and the animation loops.
-                    self.fireNewEvent('repeat', self.__loopCount);
+                    self.fireEvent('repeat', self.__loopCount);
                     self.__progress = reverse ? duration : 0;
                     self.__advance(remainderTime);
                 }
@@ -12159,9 +12167,9 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
             this.current = this.initial = v;
             this.doEnterState('', '', v, args);
             var eventValue = {name:'', from:'', to:v, args:args};
-            this.fireNewEvent('enter' + v, eventValue);
-            this.fireNewEvent('enter', eventValue);
-            if (this.isFinished()) this.fireNewEvent('finished', eventValue);
+            this.fireEvent('enter' + v, eventValue);
+            this.fireEvent('enter', eventValue);
+            if (this.isFinished()) this.fireEvent('finished', eventValue);
         }
     },
     
@@ -12270,28 +12278,28 @@ myt.StateMachine = new JS.Class('StateMachine', myt.Node, {
                     return SM.CANCELLED;
                 } else if (result === SM.ASYNC || async === SM.ASYNC) {
                     this.__transitionStage = 'enterState';
-                    this.fireNewEvent('start' + transitionName, eventValue);
-                    this.fireNewEvent('start', eventValue);
-                    this.fireNewEvent('leave' + current, eventValue);
-                    this.fireNewEvent('leave', eventValue);
+                    this.fireEvent('start' + transitionName, eventValue);
+                    this.fireEvent('start', eventValue);
+                    this.fireEvent('leave' + current, eventValue);
+                    this.fireEvent('leave', eventValue);
                     this.__doDeferredTransitions(); // FIXME: Is there a bug here if a transition starts in the middle of an async transition?
                     return SM.PENDING;
                 } else {
-                    this.fireNewEvent('start' + transitionName, eventValue);
-                    this.fireNewEvent('start', eventValue);
-                    this.fireNewEvent('leave' + current, eventValue);
-                    this.fireNewEvent('leave', eventValue);
+                    this.fireEvent('start' + transitionName, eventValue);
+                    this.fireEvent('start', eventValue);
+                    this.fireEvent('leave' + current, eventValue);
+                    this.fireEvent('leave', eventValue);
                     // Synchronous so fall through to 'enterState' case.
                 }
             case 'enterState':
                 this.current = to;
                 this.__resetTransitionProgress();
                 this.doEnterState(transitionName, current, to, args);
-                this.fireNewEvent('enter' + to, eventValue);
-                this.fireNewEvent('enter', eventValue);
-                this.fireNewEvent('end' + transitionName, eventValue);
-                this.fireNewEvent('end', eventValue);
-                if (this.isFinished()) this.fireNewEvent('finished', eventValue);
+                this.fireEvent('enter' + to, eventValue);
+                this.fireEvent('enter', eventValue);
+                this.fireEvent('end' + transitionName, eventValue);
+                this.fireEvent('end', eventValue);
+                if (this.isFinished()) this.fireEvent('finished', eventValue);
         }
         
         this.__doDeferredTransitions();
@@ -12593,7 +12601,7 @@ myt.ConstantLayout = new JS.Class('ConstantLayout', myt.Layout, {
             this.targetAttrName = v;
             this.setterName = myt.AccessorSupport.generateSetterName(v);
             if (this.inited) {
-                this.fireNewEvent('targetAttrName', v);
+                this.fireEvent('targetAttrName', v);
                 this.update();
             }
         }
@@ -12603,7 +12611,7 @@ myt.ConstantLayout = new JS.Class('ConstantLayout', myt.Layout, {
         if (this.targetValue !== v) {
             this.targetValue = v;
             if (this.inited) {
-                this.fireNewEvent('targetValue', v);
+                this.fireEvent('targetValue', v);
                 this.update();
             }
         }
@@ -12659,7 +12667,7 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
         if (this.collapseParent !== v) {
             this.collapseParent = v;
             if (this.inited) {
-                this.fireNewEvent('collapseParent', v);
+                this.fireEvent('collapseParent', v);
                 this.update();
             }
         }
@@ -12669,7 +12677,7 @@ myt.VariableLayout = new JS.Class('VariableLayout', myt.ConstantLayout, {
         if (this.reverse !== v) {
             this.reverse = v;
             if (this.inited) {
-                this.fireNewEvent('reverse', v);
+                this.fireEvent('reverse', v);
                 this.update();
             }
         }
@@ -12788,17 +12796,19 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.VariableLayout */
     initNode: function(parent, attrs) {
-        this.targetAttrName = this.axis = 'x';
-        this.setterName = 'setX';
-        this.otherSetterName = 'setY';
-        this.measureAttrName = 'boundsWidth';
-        this.measureAttrBaseName = 'width';
-        this.otherMeasureAttrName = 'boundsHeight';
-        this.otherMeasureAttrBaseName = 'height';
-        this.parentSetterName = 'setHeight';
-        this.targetValue = this.spacing = this.inset = this.outset = this.lineSpacing = this.lineInset = this.lineOutset = 0;
+        var self = this;
         
-        this.callSuper(parent, attrs);
+        self.targetAttrName = self.axis = 'x';
+        self.setterName = 'setX';
+        self.otherSetterName = 'setY';
+        self.measureAttrName = 'boundsWidth';
+        self.measureAttrBaseName = 'width';
+        self.otherMeasureAttrName = 'boundsHeight';
+        self.otherMeasureAttrBaseName = 'height';
+        self.parentSetterName = 'setHeight';
+        self.targetValue = self.spacing = self.inset = self.outset = self.lineSpacing = self.lineInset = self.lineOutset = 0;
+        
+        self.callSuper(parent, attrs);
     },
     
     
@@ -12844,7 +12854,7 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
         if (this.spacing !== v) {
             this.spacing = v;
             if (this.inited) {
-                this.fireNewEvent('spacing', v);
+                this.fireEvent('spacing', v);
                 this.update();
             }
         }
@@ -12854,7 +12864,7 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
         if (this.outset !== v) {
             this.outset = v;
             if (this.inited) {
-                this.fireNewEvent('outset', v);
+                this.fireEvent('outset', v);
                 this.update();
             }
         }
@@ -12864,7 +12874,7 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
         if (this.lineSpacing !== v) {
             this.lineSpacing = v;
             if (this.inited) {
-                this.fireNewEvent('lineSpacing', v);
+                this.fireEvent('lineSpacing', v);
                 this.update();
             }
         }
@@ -12874,7 +12884,7 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
         if (this.lineInset !== v) {
             this.lineInset = v;
             if (this.inited) {
-                this.fireNewEvent('lineInset', v);
+                this.fireEvent('lineInset', v);
                 this.update();
             }
         }
@@ -12884,7 +12894,7 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
         if (this.lineOutset !== v) {
             this.lineOutset = v;
             if (this.inited) {
-                this.fireNewEvent('lineOutset', v);
+                this.fireEvent('lineOutset', v);
                 this.update();
             }
         }
@@ -12996,14 +13006,16 @@ myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.VariableLayout */
     initNode: function(parent, attrs) {
-        this.targetAttrName = this.axis = 'x';
-        this.setterName = 'setX';
-        this.measureAttrName = 'boundsWidth';
-        this.measureAttrBaseName = 'width';
-        this.parentSetterName = 'setWidth';
-        this.targetValue = this.spacing = this.inset = this.outset = 0;
+        var self = this;
         
-        this.callSuper(parent, attrs);
+        self.targetAttrName = self.axis = 'x';
+        self.setterName = 'setX';
+        self.measureAttrName = 'boundsWidth';
+        self.measureAttrBaseName = 'width';
+        self.parentSetterName = 'setWidth';
+        self.targetValue = self.spacing = self.inset = self.outset = 0;
+        
+        self.callSuper(parent, attrs);
     },
     
     
@@ -13030,7 +13042,7 @@ myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
         if (this.spacing !== v) {
             this.spacing = v;
             if (this.inited) {
-                this.fireNewEvent('spacing', v);
+                this.fireEvent('spacing', v);
                 this.update();
             }
         }
@@ -13040,7 +13052,7 @@ myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
         if (this.outset !== v) {
             this.outset = v;
             if (this.inited) {
-                this.fireNewEvent('outset', v);
+                this.fireEvent('outset', v);
                 this.update();
             }
         }
@@ -13226,15 +13238,17 @@ myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.VariableLayout */
     initNode: function(parent, attrs) {
-        this.align = 'middle';
-        this.targetAttrName = 'y';
-        this.setterName = 'setY';
-        this.measureAttrName = 'boundsHeight';
-        this.measureAttrBaseName = 'height';
-        this.parentSetterName = 'setHeight';
-        this.targetValue = 0;
+        var self = this;
         
-        this.callSuper(parent, attrs);
+        self.align = 'middle';
+        self.targetAttrName = 'y';
+        self.setterName = 'setY';
+        self.measureAttrName = 'boundsHeight';
+        self.measureAttrBaseName = 'height';
+        self.parentSetterName = 'setHeight';
+        self.targetValue = 0;
+        
+        self.callSuper(parent, attrs);
     },
     
     
@@ -13265,7 +13279,7 @@ myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
             this.locked = isLocked;
             
             if (this.inited) {
-                this.fireNewEvent('align', v);
+                this.fireEvent('align', v);
                 this.update();
             }
         }
@@ -13377,8 +13391,8 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Node */
     initNode: function(parent, attrs) {
-        if (attrs.imageRepeat === undefined) attrs.imageRepeat = 'no-repeat';
-        if (attrs.imageAttachment === undefined) attrs.imageAttachment = 'scroll';
+        if (attrs.imageRepeat == null) attrs.imageRepeat = 'no-repeat';
+        if (attrs.imageAttachment == null) attrs.imageAttachment = 'scroll';
         
         this.callSuper(parent, attrs);
     },
@@ -13390,7 +13404,7 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
             this.imageUrl = v;
             this.deStyle.backgroundImage = v ? 'url("' + v + '")' : 'none';
             if (this.inited) {
-                this.fireNewEvent('imageUrl', v);
+                this.fireEvent('imageUrl', v);
                 this.setNaturalWidth(undefined);
                 this.setNaturalHeight(undefined);
                 
@@ -13410,35 +13424,35 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
         if (this.imageSize !== v) {
             this.imageSize = v;
             this.deStyle.backgroundSize = v || 'auto';
-            if (this.inited) this.fireNewEvent('imageSize', v);
+            if (this.inited) this.fireEvent('imageSize', v);
         }
     },
     
     setImageRepeat: function(v) {
         if (this.imageRepeat !== v) {
             this.deStyle.backgroundRepeat = this.imageRepeat = v;
-            if (this.inited) this.fireNewEvent('imageRepeat', v);
+            if (this.inited) this.fireEvent('imageRepeat', v);
         }
     },
     
     setImagePosition: function(v) {
         if (this.imagePosition !== v) {
             this.deStyle.backgroundPosition = this.imagePosition = v;
-            if (this.inited) this.fireNewEvent('imagePosition', v);
+            if (this.inited) this.fireEvent('imagePosition', v);
         }
     },
     
     setImageAttachment: function(v) {
         if (this.imageAttachment !== v) {
             this.deStyle.backgroundAttachment = this.imageAttachment = v;
-            if (this.inited) this.fireNewEvent('imageAttachment', v);
+            if (this.inited) this.fireEvent('imageAttachment', v);
         }
     },
     
     setCalculateNaturalSize: function(v) {
         if (this.calculateNaturalSize !== v) {
             this.calculateNaturalSize = v;
-            if (this.inited) this.fireNewEvent('calculateNaturalSize', v);
+            if (this.inited) this.fireEvent('calculateNaturalSize', v);
             this.__calculateNaturalSize();
         }
     },
@@ -13446,7 +13460,7 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
     setNaturalWidth: function(v) {
         if (this.naturalWidth !== v) {
             this.naturalWidth = v;
-            if (this.inited) this.fireNewEvent('naturalWidth', v);
+            if (this.inited) this.fireEvent('naturalWidth', v);
             if (this.useNaturalSize && v) this.setWidth(v);
         }
     },
@@ -13454,7 +13468,7 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
     setNaturalHeight: function(v) {
         if (this.naturalHeight !== v) {
             this.naturalHeight = v;
-            if (this.inited) this.fireNewEvent('naturalHeight', v);
+            if (this.inited) this.fireEvent('naturalHeight', v);
             if (this.useNaturalSize && v) this.setHeight(v);
         }
     },
@@ -13462,7 +13476,7 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
     setUseNaturalSize: function(v) {
         if (this.useNaturalSize !== v) {
             this.useNaturalSize = v;
-            if (this.inited) this.fireNewEvent('useNaturalSize', v);
+            if (this.inited) this.fireEvent('useNaturalSize', v);
             
             // Sync width and height
             if (v) {
@@ -13595,7 +13609,7 @@ myt.SizeToChildren = new JS.Class('SizeToChildren', myt.Layout, {
                 this.stopMonitoringAllSubviews();
                 this.axis = v;
                 this.startMonitoringAllSubviews();
-                this.fireNewEvent('axis', v);
+                this.fireEvent('axis', v);
                 this.update();
             } else {
                 this.axis = v;
@@ -13607,7 +13621,7 @@ myt.SizeToChildren = new JS.Class('SizeToChildren', myt.Layout, {
         if (this.paddingX !== v) {
             this.paddingX = v;
             if (this.inited) {
-                this.fireNewEvent('paddingX', v);
+                this.fireEvent('paddingX', v);
                 this.update();
             }
         }
@@ -13617,7 +13631,7 @@ myt.SizeToChildren = new JS.Class('SizeToChildren', myt.Layout, {
         if (this.paddingY !== v) {
             this.paddingY = v;
             if (this.inited) {
-                this.fireNewEvent('paddingY', v);
+                this.fireEvent('paddingY', v);
                 this.update();
             }
         }
@@ -13750,35 +13764,37 @@ myt.ThreePanel = new JS.Module('ThreePanel', {
     },
     
     doBeforeAdoption: function() {
-        this.callSuper();
+        var self = this;
+        
+        self.callSuper();
         
         var m = myt;
-        new m.Image(this, {
-            name:'first', imageUrl:this.firstImageUrl, ignoreLayout:true
+        new m.Image(self, {
+            name:'first', imageUrl:self.firstImageUrl, ignoreLayout:true
         });
         
-        var second = new m.Image(this, {
-            name:'second', layoutHint:1, imageUrl:this.secondImageUrl, 
+        var second = new m.Image(self, {
+            name:'second', layoutHint:1, imageUrl:self.secondImageUrl, 
             ignoreLayout:true, useNaturalSize:false, calculateNaturalSize:true,
         });
-        this.attachTo(second, '__updateSize', 'naturalWidth');
-        this.attachTo(second, '__updateSize', 'naturalHeight');
-        this.attachTo(second, '__updateImageSize', 'width');
-        this.attachTo(second, '__updateImageSize', 'height');
+        self.attachTo(second, '__updateSize', 'naturalWidth');
+        self.attachTo(second, '__updateSize', 'naturalHeight');
+        self.attachTo(second, '__updateImageSize', 'width');
+        self.attachTo(second, '__updateImageSize', 'height');
         
-        new m.Image(this, {
-            name:'third', imageUrl:this.thirdImageUrl, ignoreLayout:true
+        new m.Image(self, {
+            name:'third', imageUrl:self.thirdImageUrl, ignoreLayout:true
         });
         
-        var axis = this.axis,
+        var axis = self.axis,
             otherAxis = axis === 'x' ? 'y' : 'x',
             ignoreMixin = [m.ThreePanel.IGNORE_FUNCTION_MIXIN];
-        new m.ResizeLayout(this, {name:'resizeLayout', axis:axis}, ignoreMixin);
-        new m.SizeToChildren(this, {name:'sizeToChildren', axis:otherAxis}, ignoreMixin);
+        new m.ResizeLayout(self, {name:'resizeLayout', axis:axis}, ignoreMixin);
+        new m.SizeToChildren(self, {name:'sizeToChildren', axis:otherAxis}, ignoreMixin);
         
-        this.__updateRepeat();
-        this.__updateSize();
-        this.__updateImageSize();
+        self.__updateRepeat();
+        self.__updateSize();
+        self.__updateImageSize();
     },
     
     
@@ -13808,7 +13824,7 @@ myt.ThreePanel = new JS.Module('ThreePanel', {
         if (this.repeat !== v) {
             this.repeat = v;
             if (this.inited) {
-                this.fireNewEvent('repeat', v);
+                this.fireEvent('repeat', v);
                 this.__updateRepeat();
             }
         }
@@ -13832,7 +13848,7 @@ myt.ThreePanel = new JS.Module('ThreePanel', {
                 this.__updateSize();
                 this.resizeLayout.setAxis(v);
                 this.sizeToChildren.setAxis(v === 'x' ? 'y' : 'x');
-                this.fireNewEvent('axis', v);
+                this.fireEvent('axis', v);
             }
         }
     },
@@ -14128,7 +14144,7 @@ myt.Disableable = new JS.Module('Disableable', {
     setDisabled: function(v) {
         if (this.disabled !== v) {
             this.disabled = v;
-            if (this.inited) this.fireNewEvent('disabled', v);
+            if (this.inited) this.fireEvent('disabled', v);
             
             this.doDisabled();
         }
@@ -15532,29 +15548,33 @@ myt.SimpleButton = new JS.Class('SimpleButton', myt.View, {
 myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        this.textY = this.iconY = 'middle';
-        this.iconSpacing = 2;
-        this.inset = this.outset = 0;
+        var self = this;
+        
+        self.textY = self.iconY = 'middle';
+        self.iconSpacing = 2;
+        self.inset = self.outset = 0;
         
         if (attrs.shrinkToFit === undefined) attrs.shrinkToFit = false;
         if (attrs.contentAlign === undefined) attrs.contentAlign = 'center';
         
-        this.callSuper(parent, attrs);
+        self.callSuper(parent, attrs);
         
         // Setup the constraint after inited since the textView won't have
         // been sized to the dom until it's added in.
-        var iconView = this.iconView, textView = this.textView;
-        this.applyConstraint('__updateContentPosition', [
-            this, 'inset', this, 'outset',
-            this, 'width', this, 'shrinkToFit', this, 'iconSpacing',
-            this, 'contentAlign',
+        var iconView = self.iconView, textView = self.textView;
+        self.applyConstraint('__updateContentPosition', [
+            self, 'inset', self, 'outset',
+            self, 'width', self, 'shrinkToFit', self, 'iconSpacing',
+            self, 'contentAlign',
             iconView, 'width', iconView, 'visible',
             textView, 'visible', textView, 'width'
         ]);
     },
     
     doAfterAdoption: function() {
-        var attrs, iconY = this.iconY, textY = this.textY;
+        var attrs,
+            iconY = this.iconY,
+            textY = this.textY;
         
         // Setup iconView
         attrs = {
@@ -15569,7 +15589,9 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         
         // Setup textView
         attrs = {
-            name:'textView', whiteSpace:'nowrap', text:this.text, 
+            name:'textView',
+            whiteSpace:'nowrap',
+            text:this.text, 
             domClass:'myt-Text mytButtonText'
         };
         if (typeof textY === 'string') {
@@ -15590,7 +15612,7 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         
         if (this.inset !== v) {
             this.inset = v;
-            if (this.inited) this.fireNewEvent('inset', v);
+            if (this.inited) this.fireEvent('inset', v);
         }
     },
     
@@ -15600,7 +15622,7 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         
         if (this.outset !== v) {
             this.outset = v;
-            if (this.inited) this.fireNewEvent('outset', v);
+            if (this.inited) this.fireEvent('outset', v);
         }
     },
     
@@ -15609,7 +15631,7 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
             this.text = v;
             if (this.inited) {
                 this.textView.setText(v);
-                this.fireNewEvent('text', v);
+                this.fireEvent('text', v);
             }
         }
     },
@@ -15617,14 +15639,14 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
     setShrinkToFit: function(v) {
         if (this.shrinkToFit !== v) {
             this.shrinkToFit = v;
-            if (this.inited) this.fireNewEvent('shrinkToFit', v);
+            if (this.inited) this.fireEvent('shrinkToFit', v);
         }
     },
     
     setContentAlign: function(v) {
         if (this.contentAlign !== v) {
             this.contentAlign = v;
-            if (this.inited) this.fireNewEvent('contentAlign', v);
+            if (this.inited) this.fireEvent('contentAlign', v);
         }
     },
     
@@ -15632,7 +15654,7 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         if (this.iconUrl !== v) {
             this.iconUrl = v;
             if (this.inited) {
-                this.fireNewEvent('iconUrl', v);
+                this.fireEvent('iconUrl', v);
                 this.iconView.setImageUrl(v);
             }
         }
@@ -15642,7 +15664,7 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         if (this.iconY !== v) {
             this.iconY = v;
             if (this.inited) {
-                this.fireNewEvent('iconY', v);
+                this.fireEvent('iconY', v);
                 if (typeof v === 'string') {
                     this.iconView.setValign(v);
                 } else {
@@ -15655,7 +15677,7 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
     setIconSpacing: function(v) {
         if (this.iconSpacing !== v) {
             this.iconSpacing = v;
-            if (this.inited) this.fireNewEvent('iconSpacing', v);
+            if (this.inited) this.fireEvent('iconSpacing', v);
         }
     },
     
@@ -15663,7 +15685,7 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         if (this.textY !== v) {
             this.textY = v;
             if (this.inited) {
-                this.fireNewEvent('textY', v);
+                this.fireEvent('textY', v);
                 if (typeof v === 'string') {
                     this.textView.setValign(v);
                 } else {
@@ -15678,36 +15700,38 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
     // Methods /////////////////////////////////////////////////////////////////
     /** @private */
     __updateContentPosition: function(v) {
-        if (this.__updateContentPositionLoopBlock || this.destroyed) return;
+        var self = this;
         
-        var inset = this.inset,
-            outset = this.outset,
-            iconView = this.iconView,
-            textView = this.textView,
-            textViewVisible = textView.visible && this.text,
+        if (self.__updateContentPositionLoopBlock || self.destroyed) return;
+        
+        var inset = self.inset,
+            outset = self.outset,
+            iconView = self.iconView,
+            textView = self.textView,
+            textViewVisible = textView.visible && self.text,
             iconWidth = iconView.visible ? iconView.width : 0,
-            iconExtent = iconWidth + (textViewVisible && iconWidth > 0 ? this.iconSpacing : 0),
+            iconExtent = iconWidth + (textViewVisible && iconWidth > 0 ? self.iconSpacing : 0),
             textWidth = textViewVisible ? textView.width : 0;
         
-        if (this.shrinkToFit) {
+        if (self.shrinkToFit) {
             var totalWidth = inset;
             iconView.setX(totalWidth);
             totalWidth += iconExtent;
             textView.setX(totalWidth);
             totalWidth += textWidth + outset;
             
-            this.__updateContentPositionLoopBlock = true;
-            this.setWidth(totalWidth);
-            this.__updateContentPositionLoopBlock = false;
+            self.__updateContentPositionLoopBlock = true;
+            self.setWidth(totalWidth);
+            self.__updateContentPositionLoopBlock = false;
         } else {
             var leftPos;
-            if (this.contentAlign === 'left') {
+            if (self.contentAlign === 'left') {
                 leftPos = inset;
-            } else if (this.contentAlign === 'center') {
-                var extraWidth = this.width - inset - iconExtent - textWidth - outset;
+            } else if (self.contentAlign === 'center') {
+                var extraWidth = self.width - inset - iconExtent - textWidth - outset;
                 leftPos = inset + (extraWidth / 2);
             } else {
-                leftPos = this.width - iconExtent - textWidth - outset;
+                leftPos = self.width - iconExtent - textWidth - outset;
             }
             
             iconView.setX(leftPos);
@@ -16142,28 +16166,28 @@ myt.TooltipMixin = new JS.Module('TooltipMixin', {
     setTooltip: function(v) {
         if (this.tooltip !== v) {
             this.tooltip = v;
-            if (this.inited) this.fireNewEvent('tooltip', v);
+            if (this.inited) this.fireEvent('tooltip', v);
         }
     },
     
     setTipAlign: function(v) {
         if (this.tipAlign !== v) {
             this.tipAlign = v;
-            if (this.inited) this.fireNewEvent('tipAlign', v);
+            if (this.inited) this.fireEvent('tipAlign', v);
         }
     },
     
     setTipValign: function(v) {
         if (this.tipValign !== v) {
             this.tipValign = v;
-            if (this.inited) this.fireNewEvent('tipValign', v);
+            if (this.inited) this.fireEvent('tipValign', v);
         }
     },
     
     setTipClass: function(v) {
         if (this.tipClass !== v) {
             this.tipClass = v;
-            if (this.inited) this.fireNewEvent('tipClass', v);
+            if (this.inited) this.fireEvent('tipClass', v);
         }
     },
     
@@ -16344,30 +16368,32 @@ myt.HorizontalThreePanel = new JS.Module('HorizontalThreePanel', {
     },
     
     doBeforeAdoption: function() {
-        this.callSuper();
+        var self = this;
+        
+        self.callSuper();
         
         var m = myt;
-        new m.Image(this, {
-            name:'first', imageUrl:this.firstImageUrl, ignoreLayout:true
+        new m.Image(self, {
+            name:'first', imageUrl:self.firstImageUrl, ignoreLayout:true
         });
         
-        var second = new m.Image(this, {
-            name:'second', layoutHint:1, imageUrl:this.secondImageUrl, 
+        var second = new m.Image(self, {
+            name:'second', layoutHint:1, imageUrl:self.secondImageUrl, 
             ignoreLayout:true, useNaturalSize:false, calculateNaturalSize:true
         });
-        this.attachTo(second, '__updateSize', 'naturalHeight');
-        this.attachTo(second, '__updateImageSize', 'width');
+        self.attachTo(second, '__updateSize', 'naturalHeight');
+        self.attachTo(second, '__updateImageSize', 'width');
         
-        new m.Image(this, {
-            name:'third', imageUrl:this.thirdImageUrl, ignoreLayout:true
+        new m.Image(self, {
+            name:'third', imageUrl:self.thirdImageUrl, ignoreLayout:true
         });
         
         var ignoreMixin = [m.ThreePanel.IGNORE_FUNCTION_MIXIN];
-        new m.ResizeLayout(this, {name:'resizeLayout'}, ignoreMixin);
-        new m.SizeToChildren(this, {axis:'y'}, ignoreMixin);
+        new m.ResizeLayout(self, {name:'resizeLayout'}, ignoreMixin);
+        new m.SizeToChildren(self, {axis:'y'}, ignoreMixin);
         
-        this.__updateRepeat();
-        this.__updateSize();
+        self.__updateRepeat();
+        self.__updateSize();
     },
     
     
@@ -16397,7 +16423,7 @@ myt.HorizontalThreePanel = new JS.Module('HorizontalThreePanel', {
         if (this.repeat !== v) {
             this.repeat = v;
             if (this.inited) {
-                this.fireNewEvent('repeat', v);
+                this.fireEvent('repeat', v);
                 this.__updateRepeat();
             }
         }
@@ -17101,10 +17127,10 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
         this.maxHeight = -1;
         this.minWidth = 0;
         
-        if (attrs.defaultItemClass === undefined) attrs.defaultItemClass = myt.ListViewItem;
-        if (attrs.overflow === undefined) attrs.overflow = 'autoy';
-        if (attrs.bgColor === undefined) attrs.bgColor = '#cccccc';
-        if (attrs.boxShadow === undefined) attrs.boxShadow = myt.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE;
+        if (attrs.defaultItemClass == null) attrs.defaultItemClass = myt.ListViewItem;
+        if (attrs.overflow == null) attrs.overflow = 'autoy';
+        if (attrs.bgColor == null) attrs.bgColor = '#cccccc';
+        if (attrs.boxShadow == null) attrs.boxShadow = myt.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE;
         
         this.callSuper(parent, attrs);
         
@@ -17133,7 +17159,7 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
         if (this.maxHeight !== v) {
             this.maxHeight = v;
             if (this.inited) {
-                this.fireNewEvent('maxHeight', v);
+                this.fireEvent('maxHeight', v);
                 this.setHeight(this.height);
             }
         }
@@ -17529,7 +17555,7 @@ myt.ValueComponent = new JS.Module('ValueComponent', {
         
         if (this.value !== v) {
             this.value = v;
-            if (this.inited) this.fireNewEvent('value', this.getValue());
+            if (this.inited) this.fireEvent('value', this.getValue());
         }
     },
     
@@ -17730,21 +17756,23 @@ myt.Checkbox = new JS.Class('Checkbox', myt.DrawButton, {
 myt.TextButtonContent = new JS.Module('TextButtonContent', {
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        this.inset = this.outset = 0;
+        var self = this;
+        
+        self.inset = self.outset = 0;
         
         if (attrs.shrinkToFit === undefined) attrs.shrinkToFit = false;
         
         // Use appropriate default based on mutliline text or not.
-        this.textY = attrs.shrinkToFit ? 'middle' : 0;
+        self.textY = attrs.shrinkToFit ? 'middle' : 0;
         
-        this.callSuper(parent, attrs);
+        self.callSuper(parent, attrs);
         
         // Setup the constraint after adoption since the textView won't have
         // been sized to the dom until it's added in.
-        var textView = this.textView;
-        this.applyConstraint('__updateContentPosition', [
-            this, 'inset', this, 'outset',
-            this, 'width', this, 'shrinkToFit',
+        var textView = self.textView;
+        self.applyConstraint('__updateContentPosition', [
+            self, 'inset', self, 'outset',
+            self, 'width', self, 'shrinkToFit',
             textView, 'visible', textView, 'width',
             textView, 'height', textView, 'y'
         ]);
@@ -17778,7 +17806,7 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
         
         if (this.inset !== v) {
             this.inset = v;
-            if (this.inited) this.fireNewEvent('inset', v);
+            if (this.inited) this.fireEvent('inset', v);
         }
     },
     
@@ -17788,7 +17816,7 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
         
         if (this.outset !== v) {
             this.outset = v;
-            if (this.inited) this.fireNewEvent('outset', v);
+            if (this.inited) this.fireEvent('outset', v);
         }
     },
     
@@ -17797,7 +17825,7 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
             this.text = v;
             if (this.inited) {
                 this.textView.setText(v);
-                this.fireNewEvent('text', v);
+                this.fireEvent('text', v);
             }
         }
     },
@@ -17807,7 +17835,7 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
             this.shrinkToFit = v;
             if (this.inited) {
                 if (this.textView) this.textView.setWhiteSpace(v ? 'nowrap' : 'normal');
-                this.fireNewEvent('shrinkToFit', v);
+                this.fireEvent('shrinkToFit', v);
             }
         }
     },
@@ -17816,7 +17844,7 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
         if (this.textY !== v) {
             this.textY = v;
             if (this.inited) {
-                this.fireNewEvent('textY', v);
+                this.fireEvent('textY', v);
                 if (typeof v === 'string') {
                     this.textView.setValign(v);
                 } else {
@@ -17830,25 +17858,27 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
     
     // Methods /////////////////////////////////////////////////////////////////
     __updateContentPosition: function(v) {
-        if (this.__updateContentPositionLoopBlock || this.destroyed) return;
+        var self = this;
         
-        var inset = this.inset, 
-            outset = this.outset, 
-            textView = this.textView,
-            textViewVisible = textView.visible && this.text;
+        if (self.__updateContentPositionLoopBlock || self.destroyed) return;
         
-        this.__updateContentPositionLoopBlock = true;
-        if (this.shrinkToFit) {
+        var inset = self.inset, 
+            outset = self.outset, 
+            textView = self.textView,
+            textViewVisible = textView.visible && self.text;
+        
+        self.__updateContentPositionLoopBlock = true;
+        if (self.shrinkToFit) {
             textView.setX(inset);
-            this.setWidth(inset + (textViewVisible ? textView.width : 0) + outset);
-            this.setHeight(this.__origHeight);
+            self.setWidth(inset + (textViewVisible ? textView.width : 0) + outset);
+            self.setHeight(self.__origHeight);
         } else {
             textView.setHeight('auto');
-            textView.setWidth(this.width - inset - outset);
+            textView.setWidth(self.width - inset - outset);
             textView.setX(inset);
-            this.setHeight(textViewVisible ? textView.y + textView.height : this.__origHeight);
+            self.setHeight(textViewVisible ? textView.y + textView.height : self.__origHeight);
         }
-        this.__updateContentPositionLoopBlock = false;
+        self.__updateContentPositionLoopBlock = false;
     }
 });
 
@@ -18279,9 +18309,9 @@ myt.RadioMixin = new JS.Module('RadioMixin', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides */
     initNode: function(parent, attrs) {
-        if (attrs.selected === undefined) attrs.selected = false;
-        if (attrs.groupId === undefined) attrs.groupId = myt.generateGuid();
-        if (attrs.drawingMethodClassname === undefined) attrs.drawingMethodClassname = 'myt.RadioDrawingMethod';
+        if (attrs.selected == null) attrs.selected = false;
+        if (attrs.groupId == null) attrs.groupId = myt.generateGuid();
+        if (attrs.drawingMethodClassname == null) attrs.drawingMethodClassname = 'myt.RadioDrawingMethod';
         
         this.callSuper(parent, attrs);
         
@@ -18323,7 +18353,7 @@ myt.RadioMixin = new JS.Module('RadioMixin', {
         if (this.selected !== v) {
             this.selected = v;
             if (this.inited) {
-                this.fireNewEvent('selected', v);
+                this.fireEvent('selected', v);
                 this.redraw();
             }
         }
@@ -18335,7 +18365,7 @@ myt.RadioMixin = new JS.Module('RadioMixin', {
             this.groupId = v;
             if (oldGroupId) this.removeFromBAG('selected', oldGroupId);
             if (v) this.addToBAG('selected', v);
-            if (this.inited) this.fireNewEvent('groupId', v);
+            if (this.inited) this.fireEvent('groupId', v);
         }
     },
     
@@ -18456,7 +18486,7 @@ myt.Selectable = new JS.Module('Selectable', {
         
         if (this.selected !== v) {
             this.selected = v;
-            if (this.inited && this.fireNewEvent) this.fireNewEvent('selected', v);
+            if (this.inited && this.fireEvent) this.fireEvent('selected', v);
         }
     },
     
@@ -18536,8 +18566,8 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
         
         attrs.selectedCount = 0;
         
-        if (attrs.itemSelectionId === undefined) attrs.itemSelectionId = 'id';
-        if (attrs.maxSelected === undefined) attrs.maxSelected = -1;
+        if (attrs.itemSelectionId == null) attrs.itemSelectionId = 'id';
+        if (attrs.maxSelected == null) attrs.maxSelected = -1;
         
         this.callSuper(parent, attrs);
     },
@@ -18550,7 +18580,7 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
     setSelectedCount: function(v) {
         if (this.selectedCount !== v) {
             this.selectedCount = v;
-            if (this.inited) this.fireNewEvent('selectedCount', v);
+            if (this.inited) this.fireEvent('selectedCount', v);
         }
     },
     
@@ -18586,7 +18616,7 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
             this.__lastSelectedItem = item;
             
             this.doSelected(item);
-            this.fireNewEvent('itemSelected', item);
+            this.fireEvent('itemSelected', item);
         }
     },
     
@@ -18642,7 +18672,7 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
             if (this.__lastSelectedItem === item) this.__lastSelectedItem = null;
             
             this.doDeselected(item);
-            this.fireNewEvent('itemDeselected', item);
+            this.fireEvent('itemDeselected', item);
         }
     },
     
@@ -18929,23 +18959,23 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
         attrs.percentOfParentWidth = 100;
         attrs.expansionState = 'collapsed';
         
-        if (attrs.tabId === undefined) attrs.tabId = myt.generateGuid();
-        if (attrs.tabContainer === undefined) attrs.tabContainer = parent;
+        if (attrs.tabId == null) attrs.tabId = myt.generateGuid();
+        if (attrs.tabContainer == null) attrs.tabContainer = parent;
         
-        if (attrs.selected === undefined) attrs.selected = false;
-        if (attrs.buttonClass === undefined) attrs.buttonClass = myt.DrawButton;
-        if (attrs.drawingMethodClassname === undefined) attrs.drawingMethodClassname = 'myt.TabSliderDrawingMethod';
-        if (attrs.zIndex === undefined) attrs.zIndex = 0;
+        if (attrs.selected == null) attrs.selected = false;
+        if (attrs.buttonClass == null) attrs.buttonClass = myt.DrawButton;
+        if (attrs.drawingMethodClassname == null) attrs.drawingMethodClassname = 'myt.TabSliderDrawingMethod';
+        if (attrs.zIndex == null) attrs.zIndex = 0;
         
         var TS = myt.TabSlider;
-        if (attrs.edgeColor === undefined) attrs.edgeColor = TS.DEFAULT_EDGE_COLOR;
-        if (attrs.edgeSize === undefined) attrs.edgeSize = TS.DEFAULT_EDGE_SIZE;
-        if (attrs.buttonHeight === undefined) attrs.buttonHeight = TS.DEFAULT_BUTTON_HEIGHT;
-        if (attrs.fillColorSelected === undefined) attrs.fillColorSelected = TS.DEFAULT_FILL_COLOR_SELECTED;
-        if (attrs.fillColorHover === undefined) attrs.fillColorHover = TS.DEFAULT_FILL_COLOR_HOVER;
-        if (attrs.fillColorActive === undefined) attrs.fillColorActive = TS.DEFAULT_FILL_COLOR_ACTIVE;
-        if (attrs.fillColorReady === undefined) attrs.fillColorReady = TS.DEFAULT_FILL_COLOR_READY;
-        if (attrs.minContainerHeight === undefined) attrs.minContainerHeight = TS.DEFAULT_MINIMUM_CONTAINER_HEIGHT;
+        if (attrs.edgeColor == null) attrs.edgeColor = TS.DEFAULT_EDGE_COLOR;
+        if (attrs.edgeSize == null) attrs.edgeSize = TS.DEFAULT_EDGE_SIZE;
+        if (attrs.buttonHeight == null) attrs.buttonHeight = TS.DEFAULT_BUTTON_HEIGHT;
+        if (attrs.fillColorSelected == null) attrs.fillColorSelected = TS.DEFAULT_FILL_COLOR_SELECTED;
+        if (attrs.fillColorHover == null) attrs.fillColorHover = TS.DEFAULT_FILL_COLOR_HOVER;
+        if (attrs.fillColorActive == null) attrs.fillColorActive = TS.DEFAULT_FILL_COLOR_ACTIVE;
+        if (attrs.fillColorReady == null) attrs.fillColorReady = TS.DEFAULT_FILL_COLOR_READY;
+        if (attrs.minContainerHeight == null) attrs.minContainerHeight = TS.DEFAULT_MINIMUM_CONTAINER_HEIGHT;
         
         // Selection must be done via the select method on the tabContainer
         if (attrs.selected) {
@@ -19095,7 +19125,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
     setExpansionState: function(v) {
         if (this.expansionState !== v) {
             this.expansionState = v;
-            if (this.inited) this.fireNewEvent('expansionState', v);
+            if (this.inited) this.fireEvent('expansionState', v);
             
             var wrapper = this.wrapper;
             if (wrapper) {
@@ -19827,7 +19857,7 @@ myt.NativeInputWrapper = new JS.Class('NativeInputWrapper', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
-        if (attrs.focusable === undefined) attrs.focusable = true;
+        if (attrs.focusable == null) attrs.focusable = true;
         
         this.callSuper(parent, attrs);
         
@@ -19857,7 +19887,7 @@ myt.NativeInputWrapper = new JS.Class('NativeInputWrapper', myt.View, {
         if (this.value !== v) {
             this.value = v;
             this.setDomValue(v);
-            if (this.inited) this.fireNewEvent('value', v);
+            if (this.inited) this.fireEvent('value', v);
         }
     },
     
@@ -20078,7 +20108,7 @@ myt.Ajax = new JS.Class('Ajax', myt.Node, {
         @param status: String the response status
         @param jqxhr: The request object */
     handleSuccess: function(data, status, jqxhr) {
-        this.fireNewEvent('success', {data:data, status:status, xhr:jqxhr});
+        this.fireEvent('success', {data:data, status:status, xhr:jqxhr});
     },
     
     /** Handles request failures.
@@ -20086,7 +20116,7 @@ myt.Ajax = new JS.Class('Ajax', myt.Node, {
         @param status: String the response status
         @param exception: XMLHttpRequestException */
     handleFailure: function(jqxhr, status, exception) {
-        this.fireNewEvent('failure', {exception:exception, status:status, xhr:jqxhr});
+        this.fireEvent('failure', {exception:exception, status:status, xhr:jqxhr});
     }
 });
 
@@ -20120,16 +20150,18 @@ myt.Ajax = new JS.Class('Ajax', myt.Node, {
 myt.Form = new JS.Module('Form', {
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        this.isChanged = this._lockCascade = false;
-        this.isValid = true;
+        var self = this;
         
-        this.__sf = {};
-        this.__v = [];
-        this.__acc = {};
+        self.isChanged = self._lockCascade = false;
+        self.isValid = true;
         
-        this.callSuper(parent, attrs);
+        self.__sf = {};
+        self.__v = [];
+        self.__acc = {};
         
-        if (this.form) this.form.addSubForm(this);
+        self.callSuper(parent, attrs);
+        
+        if (self.form) self.form.addSubForm(self);
     },
     
     /** @overrides myt.Node. */
@@ -20170,7 +20202,7 @@ myt.Form = new JS.Module('Form', {
         // invalid may have changed so we want an event to fire so any new
         // error messages can be shown.
         this.isValid = v;
-        if (this.inited) this.fireNewEvent('isValid', v);
+        if (this.inited) this.fireEvent('isValid', v);
         
         var form = this.form;
         if (form && !this._lockCascade) {
@@ -20185,7 +20217,7 @@ myt.Form = new JS.Module('Form', {
     setIsChanged: function(v) {
         if (this.isChanged !== v) {
             this.isChanged = v;
-            if (this.inited) this.fireNewEvent('isChanged', v);
+            if (this.inited) this.fireEvent('isChanged', v);
             
             var form = this.form;
             if (form && !this._lockCascade) {
@@ -20677,7 +20709,7 @@ myt.FormElement = new JS.Module('FormElement', {
     setDefaultValue: function(value) {
         if (this.defaultValue !== value) {
             this.defaultValue = value;
-            if (this.inited) this.fireNewEvent('defaultValue', value);
+            if (this.inited) this.fireEvent('defaultValue', value);
             this.verifyChangedState();
         }
         return value;
@@ -20693,7 +20725,7 @@ myt.FormElement = new JS.Module('FormElement', {
         if (value === undefined) value = this.getDefaultValue();
         if (this.rollbackValue !== value) {
             this.rollbackValue = value;
-            if (this.inited) this.fireNewEvent('rollbackValue', value);
+            if (this.inited) this.fireEvent('rollbackValue', value);
             this.verifyChangedState();
         }
         return value;
@@ -20887,20 +20919,20 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
-        this.files = [];
-        
-        // Modify attrs so setter gets called.
-        if (attrs.requestFileParam === undefined) attrs.requestFileParam = 'file';
-        if (attrs.maxFiles === undefined) attrs.maxFiles = -1;
-        
-        this.callSuper(parent, attrs);
-        
         var self = this;
         
+        self.files = [];
+        
+        // Modify attrs so setter gets called.
+        if (attrs.requestFileParam == null) attrs.requestFileParam = 'file';
+        if (attrs.maxFiles == null) attrs.maxFiles = -1;
+        
+        self.callSuper(parent, attrs);
+        
         // Support click to upload too.
-        new myt.NativeInputWrapper(this, {
+        new myt.NativeInputWrapper(self, {
             name:'fileInput', percentOfParentWidth:100, percentOfParentHeight:100,
-            opacity:0.01, disabled:this.disabled, overflow:'hidden'
+            opacity:0.01, disabled:self.disabled, overflow:'hidden'
         }, [myt.SizeToParent, {
             initNode: function(parent, attrs) {
                 this.inputType = 'file';
@@ -20947,7 +20979,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     setMaxFiles: function(v) {
         if (this.maxFiles !== v) {
             this.maxFiles = v;
-            if (this.inited) this.fireNewEvent('maxFiles', v);
+            if (this.inited) this.fireEvent('maxFiles', v);
             if (this.fileInput) this.fileInput.domElement.multiple = v > 1;
         }
     },
@@ -21041,7 +21073,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     addFile: function(file) {
         this.files.push(file);
         this.updateValueFromFiles();
-        this.fireNewEvent('addFile', file);
+        this.fireEvent('addFile', file);
     },
     
     removeFile: function(file) {
@@ -21050,7 +21082,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
             if (myt.Uploader.isSameFile(files[--i], file)) {
                 files.splice(i, 1);
                 this.updateValueFromFiles();
-                this.fireNewEvent('removeFile', file);
+                this.fireEvent('removeFile', file);
                 break;
             }
         }
@@ -21069,7 +21101,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         this.verifyChangedState(); // FIXME: mimics what happens in myt.FormElement setValue
         if (this.form) this.form.notifyValueChanged(this); // FIXME: mimics what happens in myt.Form setValue
         
-        this.fireNewEvent('value', this.value);
+        this.fireEvent('value', this.value);
     },
     
     clearFiles: function() {
@@ -24134,15 +24166,18 @@ new JS.Singleton('GlobalValidatorRegistry', {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initialize: function() {
-        this.__c = {};
+        var self = this,
+            m = myt;
         
-        myt.global.register('validators', this);
+        self.__c = {};
+        
+        m.global.register('validators', self);
         
         // Register a few common Validators
-        this.register(new myt.RequiredFieldValidator('required'));
-        this.register(new myt.EqualsIgnoreCaseValidator('equalsIgnoreCase'));
-        this.register(new myt.URLValidator('url'));
-        this.register(new myt.JSONValidator('json'));
+        self.register(new m.RequiredFieldValidator('required'));
+        self.register(new m.EqualsIgnoreCaseValidator('equalsIgnoreCase'));
+        self.register(new m.URLValidator('url'));
+        self.register(new m.JSONValidator('json'));
     },
     
     
@@ -24164,7 +24199,7 @@ new JS.Singleton('GlobalValidatorRegistry', {
             var id = validator.id;
             if (id) {
                 this.__c[id] = validator;
-                this.fireNewEvent('validatorAdded', validator);
+                this.fireEvent('validatorAdded', validator);
             } else {
                 myt.dumpStack("No ID");
             }
@@ -24185,7 +24220,7 @@ new JS.Singleton('GlobalValidatorRegistry', {
                 
                 if (validator) {
                     delete this.__c[id];
-                    this.fireNewEvent('validatorRemoved', validator);
+                    this.fireEvent('validatorRemoved', validator);
                     return true;
                 }
             } else {
@@ -24485,7 +24520,7 @@ new JS.Singleton('GlobalValueProcessorRegistry', {
             var id = processor.id;
             if (id) {
                 this.__c[id] = processor;
-                this.fireNewEvent('processorAdded', processor);
+                this.fireEvent('processorAdded', processor);
             } else {
                 myt.dumpStack("No ID");
             }
@@ -24506,7 +24541,7 @@ new JS.Singleton('GlobalValueProcessorRegistry', {
                 
                 if (processor) {
                     delete this.__c[id];
-                    this.fireNewEvent('processorRemoved', processor);
+                    this.fireEvent('processorRemoved', processor);
                     return true;
                 }
             } else {
@@ -24572,8 +24607,8 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.NativeInputWrapper */
     initNode: function(parent, attrs) {
-        if (attrs.multiple === undefined) attrs.multiple = false;
-        if (attrs.size === undefined) attrs.size = attrs.multiple ? 4 : 1;
+        if (attrs.multiple == null) attrs.multiple = false;
+        if (attrs.size == null) attrs.size = attrs.multiple ? 4 : 1;
         
         this.callSuper(parent, attrs);
         
@@ -24595,14 +24630,14 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     setMultiple: function(v) {
         if (this.multiple !== v) {
             this.multiple = this.domElement.multiple = v;
-            if (this.inited) this.fireNewEvent('multiple', v);
+            if (this.inited) this.fireEvent('multiple', v);
         }
     },
     
     setSize: function(v) {
         if (this.size !== v) {
             this.size = this.domElement.size = v;
-            if (this.inited) this.fireNewEvent('size', v);
+            if (this.inited) this.fireEvent('size', v);
         }
     },
     
@@ -24627,7 +24662,7 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
         
         if (this.value !== v) {
             this.value = v;
-            if (this.inited) this.fireNewEvent('value', v);
+            if (this.inited) this.fireEvent('value', v);
         }
     },
     
@@ -24830,14 +24865,14 @@ myt.InputSelectOption = new JS.Class('InputSelectOption', myt.View, {
         if (this.value !== v) {
             this.value = v;
             if (this.domElement.value !== v) this.domElement.value = v;
-            if (this.inited) this.fireNewEvent('value', v);
+            if (this.inited) this.fireEvent('value', v);
         }
     },
     
     setLabel: function(v) {
         if (this.label !== v) {
             this.domElement.textContent = this.label = v;
-            if (this.inited) this.fireNewEvent('label', v);
+            if (this.inited) this.fireEvent('label', v);
         }
     },
     
@@ -25205,8 +25240,8 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.NativeInputWrapper */
     initNode: function(parent, attrs) {
-        if (attrs.bgColor === undefined) attrs.bgColor = 'transparent';
-        if (attrs.spellcheck === undefined) attrs.spellcheck = false;
+        if (attrs.bgColor == null) attrs.bgColor = 'transparent';
+        if (attrs.spellcheck == null) attrs.spellcheck = false;
         
         this.callSuper(parent, attrs);
         
@@ -25230,7 +25265,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     setSpellcheck: function(v) {
         if (this.spellcheck !== v) {
             this.spellcheck = this.domElement.spellcheck = v;
-            if (this.inited) this.fireNewEvent('spellcheck', v);
+            if (this.inited) this.fireEvent('spellcheck', v);
         }
     },
     
@@ -25239,7 +25274,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
         
         if (this.maxLength !== v) {
             this.maxLength = this.domElement.maxLength = v;
-            if (this.inited) this.fireNewEvent('maxLength', v);
+            if (this.inited) this.fireEvent('maxLength', v);
         }
     },
     
@@ -25248,7 +25283,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     setPlaceholder: function(v) {
         if (this.placeholder !== v) {
             this.domElement.placeholder = this.placeholder = v;
-            if (this.inited) this.fireNewEvent('placeholder', v);
+            if (this.inited) this.fireEvent('placeholder', v);
         }
     },
     
@@ -25677,8 +25712,8 @@ myt.InputTextArea = new JS.Class('InputTextArea', myt.BaseInputText, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.BaseInputText */
     initNode: function(parent, attrs) {
-        if (attrs.resize === undefined) attrs.resize = 'none';
-        if (attrs.wrap === undefined) attrs.wrap = 'soft';
+        if (attrs.resize == null) attrs.resize = 'none';
+        if (attrs.wrap == null) attrs.wrap = 'soft';
         
         this.callSuper(parent, attrs);
     },
@@ -25695,14 +25730,14 @@ myt.InputTextArea = new JS.Class('InputTextArea', myt.BaseInputText, {
     setResize: function(v) {
         if (this.resize !== v) {
             this.resize = this.deStyle.resize = v || 'none';
-            if (this.inited) this.fireNewEvent('resize', v);
+            if (this.inited) this.fireEvent('resize', v);
         }
     },
     
     setWrap: function(v) {
         if (this.wrap !== v) {
             this.wrap = this.domElement.wrap = v;
-            if (this.inited) this.fireNewEvent('wrap', v);
+            if (this.inited) this.fireEvent('wrap', v);
         }
     }
 });
@@ -25754,8 +25789,8 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.BaseInputText */
     initNode: function(parent, attrs) {
-        if (attrs.whiteSpace === undefined) attrs.whiteSpace = 'pre';
-        if (attrs.contentEditable === undefined) attrs.contentEditable = true;
+        if (attrs.whiteSpace == null) attrs.whiteSpace = 'pre';
+        if (attrs.contentEditable == null) attrs.contentEditable = true;
         
         this.callSuper(parent, attrs);
         
@@ -25799,7 +25834,7 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
             this[propName] = v;
             this.deStyle[propName] = v + 'px';
             if (this.inited) {
-                this.fireNewEvent(propName, v);
+                this.fireEvent(propName, v);
                 this.sizeViewToDom();
             }
         }
@@ -25808,7 +25843,7 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     setContentEditable: function(v) {
         if (this.contentEditable !== v) {
             this.contentEditable = this.domElement.contentEditable = v;
-            if (this.inited) this.fireNewEvent('contentEditable', v);
+            if (this.inited) this.fireEvent('contentEditable', v);
         }
     },
     
@@ -26562,44 +26597,49 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        this._pointTemplates = {};
-        this._animating = [];
-        this._maxTemplateSizeSquared = 0;
+        var self = this;
         
-        this.drawnCount = this.drawnAnimatingCount = this.drawnCountTotal = 0;
+        self._pointTemplates = {};
+        self._animating = [];
+        self._maxTemplateSizeSquared = 0;
         
-        if (attrs.data === undefined) attrs.data = [];
+        self.drawnCount = self.drawnAnimatingCount = self.drawnCountTotal = 0;
         
-        if (attrs.scaleDataX === undefined) attrs.scaleDataX = 1;
-        if (attrs.scaleDataY === undefined) attrs.scaleDataY = 1;
-        if (attrs.originX === undefined) attrs.originX = 0;
-        if (attrs.originY === undefined) attrs.originY = 0;
+        if (attrs.data == null) attrs.data = [];
+        
+        if (attrs.scaleDataX == null) attrs.scaleDataX = 1;
+        if (attrs.scaleDataY == null) attrs.scaleDataY = 1;
+        if (attrs.originX == null) attrs.originX = 0;
+        if (attrs.originY == null) attrs.originY = 0;
         
         var SG = myt.ScatterGraph;
-        if (attrs.xConversionFuncPxToV === undefined) attrs.xConversionFuncPxToV = SG.convertXPixelToValue;
-        if (attrs.yConversionFuncPxToV === undefined) attrs.yConversionFuncPxToV = SG.convertYPixelToValue;
-        if (attrs.xConversionFuncVToPx === undefined) attrs.xConversionFuncVToPx = SG.convertXValueToPixel;
-        if (attrs.yConversionFuncVToPx === undefined) attrs.yConversionFuncVToPx = SG.convertYValueToPixel;
+        if (attrs.xConversionFuncPxToV == null) attrs.xConversionFuncPxToV = SG.convertXPixelToValue;
+        if (attrs.yConversionFuncPxToV == null) attrs.yConversionFuncPxToV = SG.convertYPixelToValue;
+        if (attrs.xConversionFuncVToPx == null) attrs.xConversionFuncVToPx = SG.convertXValueToPixel;
+        if (attrs.yConversionFuncVToPx == null) attrs.yConversionFuncVToPx = SG.convertYValueToPixel;
         
-        if (attrs.highlightColor === undefined) attrs.highlightColor = '#000000';
-        if (attrs.highlightSelectedColor === undefined) attrs.highlightSelectedColor = '#000000';
-        if (attrs.highlightWidth === undefined) attrs.highlightWidth = 1;
-        if (attrs.highlightOffset === undefined) attrs.highlightOffset = 2;
+        if (attrs.highlightColor == null) attrs.highlightColor = '#000000';
+        if (attrs.highlightSelectedColor == null) attrs.highlightSelectedColor = '#000000';
+        if (attrs.highlightWidth == null) attrs.highlightWidth = 1;
+        if (attrs.highlightOffset == null) attrs.highlightOffset = 2;
         
-        if (attrs.allowSelection === undefined) attrs.allowSelection = true;
+        if (attrs.allowSelection == null) attrs.allowSelection = true;
         
-        this.callSuper(parent, attrs);
+        self.callSuper(parent, attrs);
         
-        var w = this.width, h = this.height, al = this.animationLayer, hl = this.highlightLayer;
+        var w = self.width, 
+            h = self.height, 
+            al = self.animationLayer, 
+            hl = self.highlightLayer;
         al.setWidth(w);
         hl.setWidth(w);
         al.setHeight(h);
         hl.setHeight(h);
         
-        this.redrawPointsDelayed();
-        this.redrawAnimatingPointsDelayed();
+        self.redrawPointsDelayed();
+        self.redrawAnimatingPointsDelayed();
         
-        this.attachToDom(this, '_doMouseMove', 'mousemove');
+        self.attachToDom(self, '_doMouseMove', 'mousemove');
     },
     
     doBeforeAdoption: function() {
@@ -26634,7 +26674,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     setAllowSelection: function(v) {
         if (this.allowSelection === v) return;
         this.allowSelection = v;
-        if (this.inited) this.fireNewEvent('allowSelection', v);
+        if (this.inited) this.fireEvent('allowSelection', v);
         
         if (v) {
             this.attachToDom(this, '_doClick', 'click');
@@ -26652,7 +26692,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         if (this.scaleDataX === v) return;
         this.scaleDataX = v;
         if (this.inited) {
-            this.fireNewEvent('scaleDataX', v);
+            this.fireEvent('scaleDataX', v);
             this.redrawPointsDelayed();
             this.redrawAnimatingPointsDelayed();
         }
@@ -26662,7 +26702,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         if (this.scaleDataY === v) return;
         this.scaleDataY = v;
         if (this.inited) {
-            this.fireNewEvent('scaleDataY', v);
+            this.fireEvent('scaleDataY', v);
             this.redrawPointsDelayed();
             this.redrawAnimatingPointsDelayed();
         }
@@ -26672,7 +26712,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         if (this.originX === v) return;
         this.originX = v;
         if (this.inited) {
-            this.fireNewEvent('originX', v);
+            this.fireEvent('originX', v);
             this.redrawPointsDelayed();
             this.redrawAnimatingPointsDelayed();
         }
@@ -26682,35 +26722,36 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         if (this.originY === v) return;
         this.originY = v;
         if (this.inited) {
-            this.fireNewEvent('originY', v);
+            this.fireEvent('originY', v);
             this.redrawPointsDelayed();
             this.redrawAnimatingPointsDelayed();
         }
     },
     
     setScaleAndOrigin: function(scaleDataX, scaleDataY, originX, originY) {
-        var changed = false;
+        var self = this,
+            changed = false;
         
-        if (this.scaleDataX !== scaleDataX) {
-            this.scaleDataX = scaleDataX;
+        if (self.scaleDataX !== scaleDataX) {
+            self.scaleDataX = scaleDataX;
             changed = true;
         }
-        if (this.scaleDataY !== scaleDataY) {
-            this.scaleDataY = scaleDataY;
+        if (self.scaleDataY !== scaleDataY) {
+            self.scaleDataY = scaleDataY;
             changed = true;
         }
-        if (this.originX !== originX) {
-            this.originX = originX;
+        if (self.originX !== originX) {
+            self.originX = originX;
             changed = true;
         }
-        if (this.originY !== originY) {
-            this.originY = originY;
+        if (self.originY !== originY) {
+            self.originY = originY;
             changed = true;
         }
         
         if (changed) {
-            this.redrawPoints();
-            this.redrawAnimatingPoints();
+            self.redrawPoints();
+            self.redrawAnimatingPoints();
         }
     },
     
@@ -26736,7 +26777,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         if (this.highlightedPoint === v) return;
         this.highlightedPoint = v;
         if (this.inited) {
-            this.fireNewEvent('highlightedPoint', v);
+            this.fireEvent('highlightedPoint', v);
             this.drawHighlightedPoint();
         }
     },
@@ -27325,7 +27366,7 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
     initNode: function(parent, attrs) {
         this.appendToEarlyAttrs('snapToInt','minValue','maxValue');
         
-        if (attrs.snapToInt === undefined) attrs.snapToInt = true;
+        if (attrs.snapToInt == null) attrs.snapToInt = true;
         
         if (!attrs.valueFilter) {
             var self = this;
@@ -27349,7 +27390,7 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
         if (this.snapToInt !== v) {
             this.snapToInt = v;
             if (this.inited) {
-                this.fireNewEvent('snapToInt', v);
+                this.fireEvent('snapToInt', v);
                 
                 // Update min, max and value since snap has been turned on
                 if (v) {
@@ -27371,7 +27412,7 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
             if (this.minValue !== v) {
                 this.minValue = v;
                 if (this.inited) {
-                    this.fireNewEvent('minValue', v);
+                    this.fireEvent('minValue', v);
                     
                     // Rerun setValue since the filter has changed.
                     this.setValue(this.value);
@@ -27390,7 +27431,7 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
             if (this.maxValue !== v) {
                 this.maxValue = v;
                 if (this.inited) {
-                    this.fireNewEvent('maxValue', v);
+                    this.fireEvent('maxValue', v);
                     
                     // Rerun setValue since the filter has changed.
                     this.setValue(this.value);
@@ -27468,7 +27509,7 @@ new JS.Singleton('GlobalDragManager', {
             i = targets.length;
             while (i) targets[--i][funcName](dv);
             
-            this.fireNewEvent(eventName, v);
+            this.fireEvent(eventName, v);
         }
     },
     
@@ -27479,7 +27520,7 @@ new JS.Singleton('GlobalDragManager', {
             if (cur) {
                 cur.notifyDragLeave(dv);
                 dv.notifyDragLeave(cur);
-                this.fireNewEvent('dragLeave', cur);
+                this.fireEvent('dragLeave', cur);
             }
             
             this.overView = v;
@@ -27487,7 +27528,7 @@ new JS.Singleton('GlobalDragManager', {
             if (v) {
                 v.notifyDragEnter(dv);
                 dv.notifyDragEnter(v);
-                this.fireNewEvent('dragEnter', cur);
+                this.fireEvent('dragEnter', cur);
             }
         }
     },
@@ -27553,7 +27594,7 @@ new JS.Singleton('GlobalDragManager', {
         this.setOverView();
         this.setDragView();
         
-        if (overView && !isAbort) this.fireNewEvent('drop', [dropable, overView]);
+        if (overView && !isAbort) this.fireEvent('drop', [dropable, overView]);
     },
     
     /** Called by a myt.Dropable during dragging.
@@ -27665,43 +27706,50 @@ myt.Draggable = new JS.Module('Draggable', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
-        this.isDraggable = this.isDragging = false;
-        this.draggableAllowBubble = true;
-        this.distanceBeforeDrag = this.dragOffsetX = this.dragOffsetY = 0;
+        var self = this,
+            isDraggable = true;
+        
+        self.isDraggable = self.isDragging = false;
+        self.draggableAllowBubble = true;
+        self.distanceBeforeDrag = self.dragOffsetX = self.dragOffsetY = 0;
         
         // Will be set after init since the draggable subview probably
         // doesn't exist yet.
-        var isDraggable = true;
-        if (attrs.isDraggable !== undefined) {
+        if (attrs.isDraggable != null) {
             isDraggable = attrs.isDraggable;
             delete attrs.isDraggable;
         }
         
-        this.callSuper(parent, attrs);
+        self.callSuper(parent, attrs);
         
-        this.setIsDraggable(isDraggable);
+        self.setIsDraggable(isDraggable);
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
     setIsDraggable: function(v) {
-        if (this.isDraggable !== v) {
-            this.isDraggable = v;
+        var self = this,
+            func,
+            dragviews,
+            dragview,
+            i;
+        if (self.isDraggable !== v) {
+            self.isDraggable = v;
             // No event needed.
             
-            var func;
             if (v) {
-                func = this.attachToDom;
-            } else if (this.inited) {
-                func = this.detachFromDom;
+                func = self.attachToDom;
+            } else if (self.inited) {
+                func = self.detachFromDom;
             }
             
             if (func) {
-                var dvs = this.getDragViews(), dragview, i = dvs.length;
+                dragviews = self.getDragViews();
+                i = dragviews.length;
                 while (i) {
-                    dragview = dvs[--i];
-                    func.call(this, dragview, '__doMouseDown', 'mousedown');
-                    func.call(this, dragview, '__doContextMenu', 'contextmenu');
+                    dragview = dragviews[--i];
+                    func.call(self, dragview, '__doMouseDown', 'mousedown');
+                    func.call(self, dragview, '__doContextMenu', 'contextmenu');
                 }
             }
         }
@@ -27710,7 +27758,7 @@ myt.Draggable = new JS.Module('Draggable', {
     setIsDragging: function(v) {
         if (this.isDragging !== v) {
             this.isDragging = v;
-            if (this.inited) this.fireNewEvent('isDragging', v);
+            if (this.inited) this.fireEvent('isDragging', v);
         }
     },
     
@@ -27750,20 +27798,21 @@ myt.Draggable = new JS.Module('Draggable', {
     
     /** @private */
     __doMouseDown: function(event) {
-        var pos = myt.MouseObservable.getMouseFromEvent(event);
-        this.dragInitX = pos.x - this.x;
-        this.dragInitY = pos.y - this.y;
+        var self = this,
+            pos = myt.MouseObservable.getMouseFromEvent(event),
+            gm = myt.global.mouse;
+        self.dragInitX = pos.x - self.x;
+        self.dragInitY = pos.y - self.y;
         
-        var gm = myt.global.mouse;
-        this.attachToDom(gm, '__doMouseUp', 'mouseup', true);
-        if (this.distanceBeforeDrag > 0) {
-            this.attachToDom(gm, '__doDragCheck', 'mousemove', true);
+        self.attachToDom(gm, '__doMouseUp', 'mouseup', true);
+        if (self.distanceBeforeDrag > 0) {
+            self.attachToDom(gm, '__doDragCheck', 'mousemove', true);
         } else {
-            this.startDrag(event);
+            self.startDrag(event);
         }
         
         event.value.preventDefault();
-        return this.draggableAllowBubble;
+        return self.draggableAllowBubble;
     },
     
     /** @private */
@@ -27799,17 +27848,19 @@ myt.Draggable = new JS.Module('Draggable', {
         @param event:event The event the mouse event when the drag started.
         @returns void */
     startDrag: function(event) {
-        if (this.centerOnMouse) {
-            this.syncTo(this, '__updateDragInitX', 'width');
-            this.syncTo(this, '__updateDragInitY', 'height');
+        var self = this,
+            g = myt.global;
+        
+        if (self.centerOnMouse) {
+            self.syncTo(self, '__updateDragInitX', 'width');
+            self.syncTo(self, '__updateDragInitY', 'height');
         }
         
-        var g = myt.global;
-        if (this.allowAbort) this.attachTo(g.keys, '__watchForAbort', 'keyup');
+        if (self.allowAbort) self.attachTo(g.keys, '__watchForAbort', 'keyup');
         
-        this.setIsDragging(true);
-        this.attachToDom(g.mouse, 'updateDrag', 'mousemove', true);
-        this.updateDrag(event);
+        self.setIsDragging(true);
+        self.attachToDom(g.mouse, 'updateDrag', 'mousemove', true);
+        self.updateDrag(event);
     },
     
     /** Called on every mousemove event while dragging.
@@ -27844,15 +27895,17 @@ myt.Draggable = new JS.Module('Draggable', {
             aborted.
         @returns void */
     stopDrag: function(event, isAbort) {
-        var g = myt.global, gm = g.mouse;
-        this.detachFromDom(gm, '__doMouseUp', 'mouseup', true);
-        this.detachFromDom(gm, 'updateDrag', 'mousemove', true);
-        if (this.centerOnMouse) {
-            this.detachFrom(this, '__updateDragInitX', 'width');
-            this.detachFrom(this, '__updateDragInitY', 'height');
+        var self = this,
+            g = myt.global,
+            gm = g.mouse;
+        self.detachFromDom(gm, '__doMouseUp', 'mouseup', true);
+        self.detachFromDom(gm, 'updateDrag', 'mousemove', true);
+        if (self.centerOnMouse) {
+            self.detachFrom(self, '__updateDragInitX', 'width');
+            self.detachFrom(self, '__updateDragInitY', 'height');
         }
-        if (this.allowAbort) this.detachFrom(g.keys, '__watchForAbort', 'keyup');
-        this.setIsDragging(false);
+        if (self.allowAbort) self.detachFrom(g.keys, '__watchForAbort', 'keyup');
+        self.setIsDragging(false);
     },
     
     /** Repositions the view to the provided values. The default implementation
@@ -28285,9 +28338,9 @@ myt.RangeComponent = new JS.Module('RangeComponent', {
             
             this.value = v;
             if (this.inited) {
-                this.fireNewEvent('value', this.getValue());
-                if (v.lower !== existingLower) this.fireNewEvent('lowerValue', v.lower);
-                if (v.upper !== existingUpper) this.fireNewEvent('upperValue', v.upper);
+                this.fireEvent('value', this.getValue());
+                if (v.lower !== existingLower) this.fireEvent('lowerValue', v.lower);
+                if (v.upper !== existingUpper) this.fireEvent('upperValue', v.upper);
             }
         } else {
             this.callSuper(v);
@@ -28629,16 +28682,16 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        if (attrs.drawingMethodClassname === undefined) attrs.drawingMethodClassname = 'myt.DividerDrawingMethod';
-        if (attrs.axis === undefined) attrs.axis = 'x';
-        if (attrs.inset === undefined) attrs.inset = 2;
-        if (attrs.minValue === undefined) attrs.minValue = -attrs.inset;
-        if (attrs.value === undefined) attrs.value = attrs.minValue;
-        if (attrs.focusEmbellishment === undefined) attrs.focusEmbellishment = false;
-        if (attrs.repeatKeyDown === undefined) attrs.repeatKeyDown = true;
-        if (attrs.expansionState === undefined) attrs.expansionState = 2;
+        if (attrs.drawingMethodClassname == null) attrs.drawingMethodClassname = 'myt.DividerDrawingMethod';
+        if (attrs.axis == null) attrs.axis = 'x';
+        if (attrs.inset == null) attrs.inset = 2;
+        if (attrs.minValue == null) attrs.minValue = -attrs.inset;
+        if (attrs.value == null) attrs.value = attrs.minValue;
+        if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
+        if (attrs.repeatKeyDown == null) attrs.repeatKeyDown = true;
+        if (attrs.expansionState == null) attrs.expansionState = 2;
         
-        if (attrs.activationKeys === undefined) {
+        if (attrs.activationKeys == null) {
             attrs.activationKeys = [
                 37, // left arrow
                 38, // up arrow
@@ -28650,11 +28703,11 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
         }
         
         if (attrs.axis === 'y') {
-            if (attrs.height === undefined) attrs.height = 8;
-            if (attrs.cursor === undefined) attrs.cursor = 'row-resize';
+            if (attrs.height == null) attrs.height = 8;
+            if (attrs.cursor == null) attrs.cursor = 'row-resize';
         } else {
-            if (attrs.width === undefined) attrs.width = 8;
-            if (attrs.cursor === undefined) attrs.cursor = 'col-resize';
+            if (attrs.width == null) attrs.width = 8;
+            if (attrs.cursor == null) attrs.cursor = 'col-resize';
         }
         
         // Controls acceleration of the nudge amount
@@ -28664,9 +28717,9 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
         
         // Do afterwards since value might have been constrained from the
         // value provided in attrs.
-        if (attrs.restoreValue === undefined) this.setRestoreValue(this.value);
+        if (attrs.restoreValue == null) this.setRestoreValue(this.value);
         
-        if (this.limitToParent !== undefined) this.__updateLimitToParentConstraint();
+        if (this.limitToParent != null) this.__updateLimitToParentConstraint();
         
         this.attachDomObserver(this, 'doPrimaryAction', 'dblclick');
     },
@@ -28680,9 +28733,9 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
         if (this.limitToParent !== v) {
             this.limitToParent = v;
             if (this.inited) {
-                this.fireNewEvent('limitToParent', v);
+                this.fireEvent('limitToParent', v);
                 
-                if (v === undefined) {
+                if (v == null) {
                     this.releaseConstraint('__limitToParent');
                 } else {
                     this.__updateLimitToParentConstraint();
@@ -28695,7 +28748,7 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
         if (this.inset !== v) {
             this.inset = v;
             if (this.inited) {
-                this.fireNewEvent('inset', v);
+                this.fireEvent('inset', v);
                 this.updateUI();
             }
         }
@@ -29259,17 +29312,19 @@ myt.GridRow = new JS.Module('GridRow', {
 myt.GridController = new JS.Module('GridController', {
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        this.columnHeaders = [];
-        this.rows = [];
+        var self = this;
         
-        this.maxWidth = this.minWidth = this.gridWidth = 0;
-        this.fitToWidth = this.locked = true;
+        self.columnHeaders = [];
+        self.rows = [];
         
-        this.callSuper(parent, attrs);
+        self.maxWidth = self.minWidth = self.gridWidth = 0;
+        self.fitToWidth = self.locked = true;
         
-        this._fitToWidth();
-        this._notifyHeadersOfSortState();
-        if (!this.locked) this.doSort();
+        self.callSuper(parent, attrs);
+        
+        self._fitToWidth();
+        self._notifyHeadersOfSortState();
+        if (!self.locked) self.doSort();
     },
     
     
@@ -29278,7 +29333,7 @@ myt.GridController = new JS.Module('GridController', {
         if (!myt.areArraysEqual(v, this.sort)) {
             this.sort = v;
             if (this.inited) {
-                this.fireNewEvent('sort', v);
+                this.fireEvent('sort', v);
                 this._notifyHeadersOfSortState();
                 if (!this.locked) this.doSort();
             }
@@ -29844,7 +29899,7 @@ myt.FontAwesome = new JS.Class('FontAwesome', myt.Markup, {
     
     setProperties: function(v) {
         this.properties = v;
-        this.fireNewEvent('properties', v);
+        this.fireEvent('properties', v);
         if (this.inited) this.__update();
     },
     
@@ -31031,12 +31086,14 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        this.radius = this.thickness = this.startAngle = this.endAngle = 0;
-        this.startCapRounding = this.endCapRounding = false;
+        var self = this;
         
-        this.callSuper(parent, attrs);
+        self.radius = self.thickness = self.startAngle = self.endAngle = 0;
+        self.startCapRounding = self.endCapRounding = false;
         
-        this._updateSize();
+        self.callSuper(parent, attrs);
+        
+        self._updateSize();
     },
     
     /** @overrides myt.View */
@@ -31059,7 +31116,7 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
             this.radius = v = Math.max(0, v);
             if (this.inited) {
                 this._updateSize();
-                this.fireNewEvent('radius', v);
+                this.fireEvent('radius', v);
             }
         }
     },
@@ -31069,7 +31126,7 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
             this.thickness = v = Math.max(0, v);
             if (this.inited) {
                 this._updateSize();
-                this.fireNewEvent('thickness', v);
+                this.fireEvent('thickness', v);
             }
         }
     },
@@ -31079,7 +31136,7 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
             this.startAngle = v;
             if (this.inited) {
                 this._redraw();
-                this.fireNewEvent('startAngle', v);
+                this.fireEvent('startAngle', v);
             }
         }
     },
@@ -31089,7 +31146,7 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
             this.endAngle = v;
             if (this.inited) {
                 this._redraw();
-                this.fireNewEvent('endAngle', v);
+                this.fireEvent('endAngle', v);
             }
         }
     },
@@ -31099,7 +31156,7 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
             this.startCapRounding = v;
             if (this.inited) {
                 this._redraw();
-                this.fireNewEvent('startCapRounding', v);
+                this.fireEvent('startCapRounding', v);
             }
         }
     },
@@ -31109,7 +31166,7 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
             this.endCapRounding = v;
             if (this.inited) {
                 this._redraw();
-                this.fireNewEvent('endCapRounding', v);
+                this.fireEvent('endCapRounding', v);
             }
         }
     },
@@ -31119,7 +31176,7 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
             this.color = v;
             if (this.inited) {
                 this._redraw();
-                this.fireNewEvent('color', v);
+                this.fireEvent('color', v);
             }
         }
     },
@@ -31162,17 +31219,18 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
     
     /** @private */
     _redraw: function() {
-        var DTR = myt.Geometry.degreesToRadians;
+        var self = this,
+            DTR = myt.Geometry.degreesToRadians;
         myt.Annulus.draw(
-            this.__path, 
-            DTR(this.startAngle), 
-            DTR(this.endAngle), 
-            this.thickness, 
-            this.radius, 
-            this.width / 2, 
-            this.color, 
-            this.startCapRounding, 
-            this.endCapRounding
+            self.__path, 
+            DTR(self.startAngle), 
+            DTR(self.endAngle), 
+            self.thickness, 
+            self.radius, 
+            self.width / 2, 
+            self.color, 
+            self.startCapRounding, 
+            self.endCapRounding
         );
     }
 });
@@ -31198,14 +31256,14 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
     setUseJSON: function(v) {
         if (this.useJSON !== v) {
             this.useJSON = v;
-            if (this.inited) this.fireNewEvent('useJSON', v);
+            if (this.inited) this.fireEvent('useJSON', v);
         }
     },
     
     setStatus: function(v) {
         if (this.status !== v) {
             this.status = v;
-            if (this.inited) this.fireNewEvent('status', v);
+            if (this.inited) this.fireEvent('status', v);
         }
     },
     

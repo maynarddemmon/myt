@@ -51,8 +51,8 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
         
         attrs.selectedCount = 0;
         
-        if (attrs.itemSelectionId === undefined) attrs.itemSelectionId = 'id';
-        if (attrs.maxSelected === undefined) attrs.maxSelected = -1;
+        if (attrs.itemSelectionId == null) attrs.itemSelectionId = 'id';
+        if (attrs.maxSelected == null) attrs.maxSelected = -1;
         
         this.callSuper(parent, attrs);
     },
@@ -65,7 +65,7 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
     setSelectedCount: function(v) {
         if (this.selectedCount !== v) {
             this.selectedCount = v;
-            if (this.inited) this.fireNewEvent('selectedCount', v);
+            if (this.inited) this.fireEvent('selectedCount', v);
         }
     },
     
@@ -101,7 +101,7 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
             this.__lastSelectedItem = item;
             
             this.doSelected(item);
-            this.fireNewEvent('itemSelected', item);
+            this.fireEvent('itemSelected', item);
         }
     },
     
@@ -157,7 +157,7 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
             if (this.__lastSelectedItem === item) this.__lastSelectedItem = null;
             
             this.doDeselected(item);
-            this.fireNewEvent('itemDeselected', item);
+            this.fireEvent('itemDeselected', item);
         }
     },
     

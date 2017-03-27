@@ -37,43 +37,50 @@ myt.Draggable = new JS.Module('Draggable', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
-        this.isDraggable = this.isDragging = false;
-        this.draggableAllowBubble = true;
-        this.distanceBeforeDrag = this.dragOffsetX = this.dragOffsetY = 0;
+        var self = this,
+            isDraggable = true;
+        
+        self.isDraggable = self.isDragging = false;
+        self.draggableAllowBubble = true;
+        self.distanceBeforeDrag = self.dragOffsetX = self.dragOffsetY = 0;
         
         // Will be set after init since the draggable subview probably
         // doesn't exist yet.
-        var isDraggable = true;
-        if (attrs.isDraggable !== undefined) {
+        if (attrs.isDraggable != null) {
             isDraggable = attrs.isDraggable;
             delete attrs.isDraggable;
         }
         
-        this.callSuper(parent, attrs);
+        self.callSuper(parent, attrs);
         
-        this.setIsDraggable(isDraggable);
+        self.setIsDraggable(isDraggable);
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
     setIsDraggable: function(v) {
-        if (this.isDraggable !== v) {
-            this.isDraggable = v;
+        var self = this,
+            func,
+            dragviews,
+            dragview,
+            i;
+        if (self.isDraggable !== v) {
+            self.isDraggable = v;
             // No event needed.
             
-            var func;
             if (v) {
-                func = this.attachToDom;
-            } else if (this.inited) {
-                func = this.detachFromDom;
+                func = self.attachToDom;
+            } else if (self.inited) {
+                func = self.detachFromDom;
             }
             
             if (func) {
-                var dvs = this.getDragViews(), dragview, i = dvs.length;
+                dragviews = self.getDragViews();
+                i = dragviews.length;
                 while (i) {
-                    dragview = dvs[--i];
-                    func.call(this, dragview, '__doMouseDown', 'mousedown');
-                    func.call(this, dragview, '__doContextMenu', 'contextmenu');
+                    dragview = dragviews[--i];
+                    func.call(self, dragview, '__doMouseDown', 'mousedown');
+                    func.call(self, dragview, '__doContextMenu', 'contextmenu');
                 }
             }
         }
@@ -82,7 +89,7 @@ myt.Draggable = new JS.Module('Draggable', {
     setIsDragging: function(v) {
         if (this.isDragging !== v) {
             this.isDragging = v;
-            if (this.inited) this.fireNewEvent('isDragging', v);
+            if (this.inited) this.fireEvent('isDragging', v);
         }
     },
     
@@ -122,20 +129,21 @@ myt.Draggable = new JS.Module('Draggable', {
     
     /** @private */
     __doMouseDown: function(event) {
-        var pos = myt.MouseObservable.getMouseFromEvent(event);
-        this.dragInitX = pos.x - this.x;
-        this.dragInitY = pos.y - this.y;
+        var self = this,
+            pos = myt.MouseObservable.getMouseFromEvent(event),
+            gm = myt.global.mouse;
+        self.dragInitX = pos.x - self.x;
+        self.dragInitY = pos.y - self.y;
         
-        var gm = myt.global.mouse;
-        this.attachToDom(gm, '__doMouseUp', 'mouseup', true);
-        if (this.distanceBeforeDrag > 0) {
-            this.attachToDom(gm, '__doDragCheck', 'mousemove', true);
+        self.attachToDom(gm, '__doMouseUp', 'mouseup', true);
+        if (self.distanceBeforeDrag > 0) {
+            self.attachToDom(gm, '__doDragCheck', 'mousemove', true);
         } else {
-            this.startDrag(event);
+            self.startDrag(event);
         }
         
         event.value.preventDefault();
-        return this.draggableAllowBubble;
+        return self.draggableAllowBubble;
     },
     
     /** @private */
@@ -171,17 +179,19 @@ myt.Draggable = new JS.Module('Draggable', {
         @param event:event The event the mouse event when the drag started.
         @returns void */
     startDrag: function(event) {
-        if (this.centerOnMouse) {
-            this.syncTo(this, '__updateDragInitX', 'width');
-            this.syncTo(this, '__updateDragInitY', 'height');
+        var self = this,
+            g = myt.global;
+        
+        if (self.centerOnMouse) {
+            self.syncTo(self, '__updateDragInitX', 'width');
+            self.syncTo(self, '__updateDragInitY', 'height');
         }
         
-        var g = myt.global;
-        if (this.allowAbort) this.attachTo(g.keys, '__watchForAbort', 'keyup');
+        if (self.allowAbort) self.attachTo(g.keys, '__watchForAbort', 'keyup');
         
-        this.setIsDragging(true);
-        this.attachToDom(g.mouse, 'updateDrag', 'mousemove', true);
-        this.updateDrag(event);
+        self.setIsDragging(true);
+        self.attachToDom(g.mouse, 'updateDrag', 'mousemove', true);
+        self.updateDrag(event);
     },
     
     /** Called on every mousemove event while dragging.
@@ -216,15 +226,17 @@ myt.Draggable = new JS.Module('Draggable', {
             aborted.
         @returns void */
     stopDrag: function(event, isAbort) {
-        var g = myt.global, gm = g.mouse;
-        this.detachFromDom(gm, '__doMouseUp', 'mouseup', true);
-        this.detachFromDom(gm, 'updateDrag', 'mousemove', true);
-        if (this.centerOnMouse) {
-            this.detachFrom(this, '__updateDragInitX', 'width');
-            this.detachFrom(this, '__updateDragInitY', 'height');
+        var self = this,
+            g = myt.global,
+            gm = g.mouse;
+        self.detachFromDom(gm, '__doMouseUp', 'mouseup', true);
+        self.detachFromDom(gm, 'updateDrag', 'mousemove', true);
+        if (self.centerOnMouse) {
+            self.detachFrom(self, '__updateDragInitX', 'width');
+            self.detachFrom(self, '__updateDragInitY', 'height');
         }
-        if (this.allowAbort) this.detachFrom(g.keys, '__watchForAbort', 'keyup');
-        this.setIsDragging(false);
+        if (self.allowAbort) self.detachFrom(g.keys, '__watchForAbort', 'keyup');
+        self.setIsDragging(false);
     },
     
     /** Repositions the view to the provided values. The default implementation
