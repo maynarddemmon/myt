@@ -11862,226 +11862,6 @@ myt.Animator = new JS.Class('Animator', myt.Node, {
 myt.Animator.DEFAULT_EASING_FUNCTION = myt.Animator.easingFunctions.easeInOutQuad;
 
 
-/** Stores a function name and a context to call that function on along with 
-    zero or more callback parameters.
-    
-    Events:
-        None
-    
-    Attributes:
-        context:object The context to call the method/function on.
-        methodName:string The name of the function to call on the context.
-        extraArgs:array An array of additional args to pass to the function. 
-            These are appended to the args passed into the 'execute' method.
-*/
-myt.Callback = new JS.Class('Callback', {
-    // Constructor /////////////////////////////////////////////////////////////
-    /** Create a new Callback.
-        @param methodName:String the name of the method to call.
-        @param context:Object the object to call the method on.
-        @param extraArgs:Array (Optional) args to be passed to the method. */
-    initialize: function(methodName, context, extraArgs) {
-        this.setContext(context);
-        this.setMethodName(methodName);
-        this.setExtraArgs(extraArgs);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setContext: function(context) {this.context = context;},
-    setMethodName: function(methodName) {this.methodName = methodName;},
-    setExtraArgs: function(extraArgs) {this.extraArgs = extraArgs;},
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Calls the callback method using the provided arguments 
-        "array" and any extraArgs.
-        @param arguments:arguments The arguments passed to the callback
-            function when it is executed.
-        @returns void */
-    execute: function() {
-        var args = Array.prototype.slice.call(arguments),
-            ctx = this.context,
-            ea = this.extraArgs;
-        
-        // Concat extraArgs if they exist.
-        if (ea && ea.length > 0) args = args.concat(ea);
-        
-        // Call the method
-        ctx[this.methodName].apply(ctx, args);
-    }
-});
-
-
-/** A utility class that will call a myt.Callback or function after a 
-    specified time.
-    
-    Events:
-        None
-    
-    Attributes:
-        callback:myt.Callback|function The callback to get executed when the
-            timer completes.
-        timerId:number The "timer" ID returned by setTimeout. The initial value 
-            is undefined.
-*/
-myt.Timer = new JS.Class('Timer', {
-    // Constructor /////////////////////////////////////////////////////////////
-    /** Creates a new Timer. If a callback and delay are provided
-        the timer is started.
-        @param callback:myt.Callback/function the callback to execute when the
-            timer completes.
-        @param delayInMillis:Number the length of time to delay for. */
-    initialize: function(callback, delayInMillis) {
-        this.reset(callback, delayInMillis);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setCallback: function(callback) {this.callback = callback;},
-    setTimerId: function(timerId) {this.timerId = timerId;},
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Stops the timer and clears the callback.
-        @returns void */
-    clear: function() {
-        if (this.isRunning()) {
-            clearTimeout(this.timerId);
-            this.setTimerId();
-        }
-        this.setCallback();
-    },
-    
-    /** Stops the Timer and restarts it with the callback and delay if
-        they are provided.
-        @returns void */
-    reset: function(callback, delayInMillis) {
-        this.clear();
-        this.setCallback(callback);
-        this.run(delayInMillis);
-    },
-    
-    /** Start the timer.
-        @returns void */
-    run: function(delayInMillis) {
-        if (this.callback && delayInMillis >= 0) {
-            var self = this;
-            var func = function() {
-                self.setTimerId();
-                if (self.callback.execute) {
-                    self.callback.execute();
-                } else {
-                    self.callback.call(this);
-                }
-            };
-            
-            this.setTimerId(
-                BrowserDetect.browser === 'Firefox' ? this.__setTimeout(func, delayInMillis) : setTimeout(func, delayInMillis)
-            );
-        }
-    },
-    
-    /** Indicates if the Timer is currently running or not.
-        @returns boolean */
-    isRunning: function() {
-        return this.timerId !== undefined;
-    },
-    
-    /** Fix for firefox since that browser often executes setTimeout early.
-        @private */
-    __setTimeout: function(f, t) {
-        var self = this,
-            endTime = Date.now() + t;
-        return setTimeout(function() {
-            var now = Date.now();
-            if (now < endTime) {
-                self.setTimerId(self.__setTimeout(f, endTime - now));
-            } else {
-                f();
-            }
-        }, t);
-    }
-});
-
-
-/** A Timer that can be repeated as well as provide a value to execute.
-    
-    Events:
-        None
-    
-    Attributes:
-        value:* An optional value to be passed to the callbacks execute method.
-        repeatDelayInMillis:number If this value is greater than zero the 
-            timer will repeat using this value as the delay.
-*/
-myt.RepeatableTimer = new JS.Class('RepeatableTimer', myt.Timer, {
-    // Constructor /////////////////////////////////////////////////////////////
-    /** Creates a new Timer. If a callback and delay are provided
-        the timer is started.
-        @overrides
-        @param callback:Callback the Callback to execute when the timer
-            completes.
-        @param delayInMillis:Number the length of time to delay for.
-        @param value:* (Optional) value to be passed to the callback when
-            the timer fires.
-        @param repeatDelayInMillis:Number (Optional) the length of time in
-            millis between repeated calls of this timer. If less than zero the
-            timer will not be repeated. */
-    initialize: function(callback, delayInMillis, value, repeatDelayInMillis) {
-        this.reset(callback, delayInMillis, value, repeatDelayInMillis);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setValue: function(value) {this.value = value;},
-    setRepeatDelayInMillis: function(repeatDelayInMillis) {this.repeatDelayInMillis = repeatDelayInMillis;},
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Stops the timer and clears the callback, value and repeat delay.
-        @overrides
-        @returns void */
-    clear: function() {
-        this.callSuper();
-        this.setValue();
-        this.setRepeatDelayInMillis();
-    },
-    
-    /** Stops the Timer and restarts it with the callback and delay if
-        they are provided.
-        @overrides
-        @returns void */
-    reset: function(callback, delayInMillis, value, repeatDelayInMillis) {
-        this.clear();
-        this.setCallback(callback);
-        this.setValue(value);
-        this.setRepeatDelayInMillis(repeatDelayInMillis);
-        this.run(delayInMillis);
-    },
-    
-    /** @overrides myt.Timer */
-    run: function(delayInMillis) {
-        if (this.callback && delayInMillis >= 0) {
-            var self = this;
-            this.setTimerId(setTimeout(function() {
-                var repeatDelay = self.repeatDelayInMillis,
-                    isRepeating = repeatDelay !== undefined && repeatDelay >= 0;
-                if (!isRepeating) self.setTimerId();
-                
-                if (self.value === undefined) {
-                    self.callback.execute();
-                } else {
-                    self.callback.execute(self.value);
-                }
-                
-                if (isRepeating) self.run(repeatDelay);
-            }, delayInMillis));
-        }
-    }
-});
-
-
 /** An implementation of a finite state machine.
     
     Events:
@@ -15754,11 +15534,8 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
             the tooltip.
     
     Private Attributes:
-        __checkTipCallback:myt.Callback The callback invoked by 
-            the __checkTipTimer.
-        __checkTipTimer:myt.Timer The timer that shows the tooltip if the
-            mouse is still over the TooltipMixin view when the delay time
-            has passed.
+        __checkTipTimerId:number The timer ID used internally for delaying
+            when the tip gets shown.
 */
 myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     include: [myt.RootView],
@@ -15779,12 +15556,9 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
         this.tipDelay = this.nextTipDelay = BTT.DEFAULT_TIP_DELAY;
         this.tipHideDelay = BTT.DEFAULT_TIP_HIDE_DELAY;
         
-        if (attrs.visible === undefined) attrs.visible = false;
+        if (attrs.visible == null) attrs.visible = false;
         
         this.callSuper(parent, attrs);
-        
-        this.__checkTipCallback = new myt.Callback('__checkTip', this);
-        this.__checkTipTimer = new myt.Timer();
     },
     
     
@@ -15812,15 +15586,28 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     // Methods /////////////////////////////////////////////////////////////////
     /** @private */
     __checkMouseMovement: function(event) {
-        this._lastPos = myt.MouseObservable.getMouseFromEvent(event);
-        if (this.__checkIn()) this.__checkTipTimer.reset(this.__checkTipCallback, this.nextTipDelay);
+        var self = this;
+        self._lastPos = myt.MouseObservable.getMouseFromEvent(event);
+        if (self.__checkIn()) {
+            self.__clearTimeout();
+            self.__checkTipTimerId = setTimeout(
+                function() {
+                    delete self.__checkTipTimerId;
+                    
+                    // If the mouse rests in the tip's parent, show the tip.
+                    if (self.__checkIn()) self.showTip();
+                },
+                self.nextTipDelay
+            );
+        }
     },
     
-    /** If the mouse rests in the tip's parent, show the tip.
-        @private
-        @returns void */
-    __checkTip: function() {
-        if (this.__checkIn()) this.showTip();
+    /** @private */
+    __clearTimeout: function() {
+        if (this.__checkTipTimerId) {
+            clearTimeout(this.__checkTipTimerId);
+            delete this.__checkTipTimerId;
+        }
     },
     
     /** Checks if the last mouse position is inside the tip's parent.
@@ -15840,7 +15627,7 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     /** Called when the tip will be hidden.
         @returns boolean */
     hideTip: function(event) {
-        this.__checkTipTimer.clear();
+        this.__clearTimeout();
         
         var ttp = this.tooltip.parent;
         this.detachFromDom(ttp, 'hideTip', 'mousedown', true);
@@ -16511,8 +16298,7 @@ myt.DelayedMethodCall = new JS.Class('DelayedMethodCall', {
         createDelayedMethodCall: function(scope, millis, methodName) {
             var genNameFunc = myt.AccessorSupport.generateName,
                 delayedMethodName = genNameFunc('delayed', methodName),
-                timerName = genNameFunc('timer', methodName),
-                callbackName = genNameFunc('callback', methodName),
+                timerId = genNameFunc('timer', methodName),
                 isModuleOrClass = typeof scope === 'function' || scope instanceof JS.Module;
             
             // Prevent clobbering
@@ -16520,12 +16306,8 @@ myt.DelayedMethodCall = new JS.Class('DelayedMethodCall', {
                 console.warn("Can't clobber existing property during setup of delayed method function.", delayedMethodName, scope);
                 return false;
             }
-            if ((isModuleOrClass ? scope.instanceMethod(timerName) : scope[timerName]) !== undefined) {
-                console.warn("Can't clobber existing property during setup of delayed method timer reference.", timerName, scope);
-                return false;
-            }
-            if ((isModuleOrClass ? scope.instanceMethod(callbackName) : scope[callbackName]) !== undefined) {
-                console.warn("Can't clobber existing property during setup of delayed method callback reference.", callbackName, scope);
+            if ((isModuleOrClass ? scope.instanceMethod(timerId) : scope[timerId]) !== undefined) {
+                console.warn("Can't clobber existing property during setup of delayed method timer ID.", timerId, scope);
                 return false;
             }
             
@@ -16536,15 +16318,20 @@ myt.DelayedMethodCall = new JS.Class('DelayedMethodCall', {
                 this method is called again before the timer has finished.
                 @returns void */
             mod[delayedMethodName] = function() {
-                var callback = this[callbackName];
-                if (!callback) callback = this[callbackName] = new myt.Callback(methodName, this);
-                
-                var timer = this[timerName];
-                if (timer) {
-                    timer.reset(callback, millis);
-                } else {
-                    this[timerName] = new myt.Timer(callback, millis);
+                var self = this,
+                    timerId = self[timerId];
+                if (timerId) {
+                    clearTimeout(timerId);
+                    delete self[timerId];
                 }
+                
+                self[timerId] = setTimeout(
+                    function() {
+                        self[methodName].apply(self);
+                        delete self[timerId];
+                    },
+                    millis
+                );
             };
             
             // Mixin in the "module"

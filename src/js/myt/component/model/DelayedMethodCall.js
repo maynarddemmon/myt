@@ -13,8 +13,7 @@ myt.DelayedMethodCall = new JS.Class('DelayedMethodCall', {
         createDelayedMethodCall: function(scope, millis, methodName) {
             var genNameFunc = myt.AccessorSupport.generateName,
                 delayedMethodName = genNameFunc('delayed', methodName),
-                timerName = genNameFunc('timer', methodName),
-                callbackName = genNameFunc('callback', methodName),
+                timerId = genNameFunc('timer', methodName),
                 isModuleOrClass = typeof scope === 'function' || scope instanceof JS.Module;
             
             // Prevent clobbering
@@ -22,12 +21,8 @@ myt.DelayedMethodCall = new JS.Class('DelayedMethodCall', {
                 console.warn("Can't clobber existing property during setup of delayed method function.", delayedMethodName, scope);
                 return false;
             }
-            if ((isModuleOrClass ? scope.instanceMethod(timerName) : scope[timerName]) !== undefined) {
-                console.warn("Can't clobber existing property during setup of delayed method timer reference.", timerName, scope);
-                return false;
-            }
-            if ((isModuleOrClass ? scope.instanceMethod(callbackName) : scope[callbackName]) !== undefined) {
-                console.warn("Can't clobber existing property during setup of delayed method callback reference.", callbackName, scope);
+            if ((isModuleOrClass ? scope.instanceMethod(timerId) : scope[timerId]) !== undefined) {
+                console.warn("Can't clobber existing property during setup of delayed method timer ID.", timerId, scope);
                 return false;
             }
             
@@ -38,15 +33,20 @@ myt.DelayedMethodCall = new JS.Class('DelayedMethodCall', {
                 this method is called again before the timer has finished.
                 @returns void */
             mod[delayedMethodName] = function() {
-                var callback = this[callbackName];
-                if (!callback) callback = this[callbackName] = new myt.Callback(methodName, this);
-                
-                var timer = this[timerName];
-                if (timer) {
-                    timer.reset(callback, millis);
-                } else {
-                    this[timerName] = new myt.Timer(callback, millis);
+                var self = this,
+                    timerId = self[timerId];
+                if (timerId) {
+                    clearTimeout(timerId);
+                    delete self[timerId];
                 }
+                
+                self[timerId] = setTimeout(
+                    function() {
+                        self[methodName].apply(self);
+                        delete self[timerId];
+                    },
+                    millis
+                );
             };
             
             // Mixin in the "module"

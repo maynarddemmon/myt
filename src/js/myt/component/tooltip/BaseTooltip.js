@@ -11,11 +11,8 @@
             the tooltip.
     
     Private Attributes:
-        __checkTipCallback:myt.Callback The callback invoked by 
-            the __checkTipTimer.
-        __checkTipTimer:myt.Timer The timer that shows the tooltip if the
-            mouse is still over the TooltipMixin view when the delay time
-            has passed.
+        __checkTipTimerId:number The timer ID used internally for delaying
+            when the tip gets shown.
 */
 myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     include: [myt.RootView],
@@ -36,12 +33,9 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
         this.tipDelay = this.nextTipDelay = BTT.DEFAULT_TIP_DELAY;
         this.tipHideDelay = BTT.DEFAULT_TIP_HIDE_DELAY;
         
-        if (attrs.visible === undefined) attrs.visible = false;
+        if (attrs.visible == null) attrs.visible = false;
         
         this.callSuper(parent, attrs);
-        
-        this.__checkTipCallback = new myt.Callback('__checkTip', this);
-        this.__checkTipTimer = new myt.Timer();
     },
     
     
@@ -69,15 +63,28 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     // Methods /////////////////////////////////////////////////////////////////
     /** @private */
     __checkMouseMovement: function(event) {
-        this._lastPos = myt.MouseObservable.getMouseFromEvent(event);
-        if (this.__checkIn()) this.__checkTipTimer.reset(this.__checkTipCallback, this.nextTipDelay);
+        var self = this;
+        self._lastPos = myt.MouseObservable.getMouseFromEvent(event);
+        if (self.__checkIn()) {
+            self.__clearTimeout();
+            self.__checkTipTimerId = setTimeout(
+                function() {
+                    delete self.__checkTipTimerId;
+                    
+                    // If the mouse rests in the tip's parent, show the tip.
+                    if (self.__checkIn()) self.showTip();
+                },
+                self.nextTipDelay
+            );
+        }
     },
     
-    /** If the mouse rests in the tip's parent, show the tip.
-        @private
-        @returns void */
-    __checkTip: function() {
-        if (this.__checkIn()) this.showTip();
+    /** @private */
+    __clearTimeout: function() {
+        if (this.__checkTipTimerId) {
+            clearTimeout(this.__checkTipTimerId);
+            delete this.__checkTipTimerId;
+        }
     },
     
     /** Checks if the last mouse position is inside the tip's parent.
@@ -97,7 +104,7 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     /** Called when the tip will be hidden.
         @returns boolean */
     hideTip: function(event) {
-        this.__checkTipTimer.clear();
+        this.__clearTimeout();
         
         var ttp = this.tooltip.parent;
         this.detachFromDom(ttp, 'hideTip', 'mousedown', true);

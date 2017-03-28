@@ -131,7 +131,6 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'layout/AlignedLayout.js' ).provides('myt.AlignedLayout' ).requires('myt.VariableLayout');
     
     // Component : Utilities
-    file(MYT_COMPONENT_ROOT + 'util/Callback.js'    ).provides('myt.Callback'    ).requires('myt');
     file(MYT_COMPONENT_ROOT + 'util/StateMachine.js').provides('myt.StateMachine').requires('myt.Node');
     
     // Component : Misc
@@ -151,10 +150,6 @@ JS.Packages(function() {with(this) {
     
     // Component : IO
     file(MYT_COMPONENT_ROOT + 'io/Ajax.js'  ).provides('myt.Ajax').requires('myt.Node');
-    
-    // Component : Timer
-    file(MYT_COMPONENT_ROOT + 'timer/Timer.js'          ).provides('myt.Timer'          ).requires('myt.Callback');
-    file(MYT_COMPONENT_ROOT + 'timer/RepeatableTimer.js').provides('myt.RepeatableTimer').requires('myt.Timer');
     
     // Component : Replicator
     file(MYT_COMPONENT_ROOT + 'replicator/Replicable.js').provides('myt.Replicable').requires('myt.Reusable');
@@ -199,7 +194,7 @@ JS.Packages(function() {with(this) {
     // Component : Model
     file(MYT_COMPONENT_ROOT + 'model/BAGMembership.js'        ).provides('myt.BAGMembership'        ).requires('myt.Node');
     file(MYT_COMPONENT_ROOT + 'model/BAG.js'                  ).provides('myt.BAG'                  ).requires('myt.BAGMembership');
-    file(MYT_COMPONENT_ROOT + 'model/DelayedMethodCall.js'    ).provides('myt.DelayedMethodCall'    ).requires('myt.AccessorSupport','myt.Timer');
+    file(MYT_COMPONENT_ROOT + 'model/DelayedMethodCall.js'    ).provides('myt.DelayedMethodCall'    ).requires('myt.AccessorSupport');
     file(MYT_COMPONENT_ROOT + 'model/ValueComponent.js'       ).provides('myt.ValueComponent'       ).requires('myt');
     file(MYT_COMPONENT_ROOT + 'model/BoundedValueComponent.js').provides('myt.BoundedValueComponent').requires('myt.ValueComponent');
     file(MYT_COMPONENT_ROOT + 'model/RangeComponent.js'       ).provides('myt.RangeComponent'       ).requires('myt.ValueComponent');
@@ -363,7 +358,7 @@ JS.Packages(function() {with(this) {
         'myt.global.error','myt.global.keys','myt.global.touch','myt.global.history',
         'myt.Text','myt.Markup','myt.Frame','myt.SizeWidthToDom','myt.SizeHeightToDom','myt.SizeToParent',
         'myt.SizeToWindowWidth','myt.SizeToWindowHeight',
-        'myt.Animator','myt.Callback','myt.RepeatableTimer','myt.StateMachine',
+        'myt.Animator','myt.StateMachine',
         'myt.Replicator',
         'myt.WrappingLayout','myt.ResizeLayout','myt.AlignedLayout','myt.ThreePanel',
         'myt.DrawButton','myt.SimpleIconTextButton','myt.IconTextPanelButton','myt.DelayedMethodCall',
