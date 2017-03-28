@@ -8,7 +8,7 @@
         @author Mircea Pricop <pricop@ubilabs.net>, 2012
         @author Martin Kleppe <kleppe@ubilabs.net>, 2012
         @author Ubilabs http://ubilabs.net, 2012
-        @license MIT License <http://www.opensource.org/licenses/mit-license.php>
+        MIT License <http://www.opensource.org/licenses/mit-license.php>
 */
 myt.KDTreeNode = new JS.Class('KDTreeNode', {
     // Constructor /////////////////////////////////////////////////////////////

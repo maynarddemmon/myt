@@ -572,8 +572,8 @@ if (!global.mytNoHistoryShim) { // FIXME: remove conditional once old code has b
     /**
      * History.js Native Adapter
      * @author Benjamin Arthur Lupton <contact@balupton.com>
-     * @copyright 2010-2011 Benjamin Arthur Lupton <contact@balupton.com>
-     * @license New BSD License <http://creativecommons.org/licenses/BSD/>
+     * copyright 2010-2011 Benjamin Arthur Lupton <contact@balupton.com>
+     * New BSD License <http://creativecommons.org/licenses/BSD/>
      */
     // Closure
     (function(window,undefined){
@@ -694,8 +694,8 @@ if (!global.mytNoHistoryShim) { // FIXME: remove conditional once old code has b
      * History.js HTML4 Support
      * Depends on the HTML5 Support
      * @author Benjamin Arthur Lupton <contact@balupton.com>
-     * @copyright 2010-2011 Benjamin Arthur Lupton <contact@balupton.com>
-     * @license New BSD License <http://creativecommons.org/licenses/BSD/>
+     * copyright 2010-2011 Benjamin Arthur Lupton <contact@balupton.com>
+     * New BSD License <http://creativecommons.org/licenses/BSD/>
      */
     (function(window,undefined){
         "use strict";
@@ -1378,8 +1378,8 @@ if (!global.mytNoHistoryShim) { // FIXME: remove conditional once old code has b
     /**
      * History.js Core
      * @author Benjamin Arthur Lupton <contact@balupton.com>
-     * @copyright 2010-2011 Benjamin Arthur Lupton <contact@balupton.com>
-     * @license New BSD License <http://creativecommons.org/licenses/BSD/>
+     * copyright 2010-2011 Benjamin Arthur Lupton <contact@balupton.com>
+     * New BSD License <http://creativecommons.org/licenses/BSD/>
      */
     (function(window,undefined){
         "use strict";
@@ -1628,7 +1628,7 @@ if (!global.mytNoHistoryShim) { // FIXME: remove conditional once old code has b
              * History.getInternetExplorerMajorVersion()
              * Get's the major version of Internet Explorer
              * @return {integer}
-             * @license Public Domain
+             * Public Domain
              * @author Benjamin Arthur Lupton <contact@balupton.com>
              * @author James Padolsey <https://gist.github.com/527683>
              */
@@ -1651,7 +1651,7 @@ if (!global.mytNoHistoryShim) { // FIXME: remove conditional once old code has b
              * History.isInternetExplorer()
              * Are we using Internet Explorer?
              * @return {boolean}
-             * @license Public Domain
+             * Public Domain
              * @author Benjamin Arthur Lupton <contact@balupton.com>
              */
             History.isInternetExplorer = function(){
@@ -4008,25 +4008,14 @@ JS.Singleton = new JS.Class('Singleton', {
 });
 
 /**
- * Myt: A simple javascript UI framework
  * http://github.com/maynarddemmon/myt
- * Copyright (c) 2012-2017 Maynard Demmon and contributors
+ * Maynard Demmon <maynarddemmon@gmail.com.
+ * @copyright Copyright (c) 2012-2017 Maynard Demmon and contributors
+ * Myt: A simple javascript UI framework
+ * Version: 20170326.2144
+ * MIT License
  * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- * 
- * Parts of the Software incorporates code and/or design patterns from various
- * public domain sources and has been noted as such in the source.
- * 
- * Parts of the Software incorporates code from the following open-source 
- * projects:
+ * Parts of the Software incorporates code from the following open-source projects:
  * * JS.Class, (c) 2007-2012 James Coglan and contributors (MIT License)
  * * Easing Functions, (c) 2001 Robert Penner (BSD License)
  * * jQuery Easing v1.3, (c) 2008 George McGinley Smith (BSD License)
@@ -4037,14 +4026,7 @@ JS.Singleton = new JS.Class('Singleton', {
  * * k-d Tree JavaScript - v1.0 (c) Mircea Pricop <pricop@ubilabs.net>,
  *                                  Martin Kleppe <kleppe@ubilabs.net>,
  *                                  Ubilabs http://ubilabs.net (MIT License)
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * * History.js (c) 2010-2011 Benjamin Arthur Lupton <contact@balupton.com> (BSD License)
  */
 myt = {
     /** A version number based on the time this distribution of myt was
@@ -25898,7 +25880,7 @@ myt.ScatterGraphPoint = new JS.Class('ScatterGraphPoint', {
         @author Mircea Pricop <pricop@ubilabs.net>, 2012
         @author Martin Kleppe <kleppe@ubilabs.net>, 2012
         @author Ubilabs http://ubilabs.net, 2012
-        @license MIT License <http://www.opensource.org/licenses/mit-license.php>
+        MIT License <http://www.opensource.org/licenses/mit-license.php>
 */
 myt.KDTreeNode = new JS.Class('KDTreeNode', {
     // Constructor /////////////////////////////////////////////////////////////

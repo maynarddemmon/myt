@@ -2,8 +2,8 @@ if (!global.mytNoHistoryShim) { // FIXME: remove conditional once old code has b
     /**
      * History.js Native Adapter
      * @author Benjamin Arthur Lupton <contact@balupton.com>
-     * @copyright 2010-2011 Benjamin Arthur Lupton <contact@balupton.com>
-     * @license New BSD License <http://creativecommons.org/licenses/BSD/>
+     * copyright 2010-2011 Benjamin Arthur Lupton <contact@balupton.com>
+     * New BSD License <http://creativecommons.org/licenses/BSD/>
      */
     // Closure
     (function(window,undefined){
@@ -124,8 +124,8 @@ if (!global.mytNoHistoryShim) { // FIXME: remove conditional once old code has b
      * History.js HTML4 Support
      * Depends on the HTML5 Support
      * @author Benjamin Arthur Lupton <contact@balupton.com>
-     * @copyright 2010-2011 Benjamin Arthur Lupton <contact@balupton.com>
-     * @license New BSD License <http://creativecommons.org/licenses/BSD/>
+     * copyright 2010-2011 Benjamin Arthur Lupton <contact@balupton.com>
+     * New BSD License <http://creativecommons.org/licenses/BSD/>
      */
     (function(window,undefined){
         "use strict";
@@ -808,8 +808,8 @@ if (!global.mytNoHistoryShim) { // FIXME: remove conditional once old code has b
     /**
      * History.js Core
      * @author Benjamin Arthur Lupton <contact@balupton.com>
-     * @copyright 2010-2011 Benjamin Arthur Lupton <contact@balupton.com>
-     * @license New BSD License <http://creativecommons.org/licenses/BSD/>
+     * copyright 2010-2011 Benjamin Arthur Lupton <contact@balupton.com>
+     * New BSD License <http://creativecommons.org/licenses/BSD/>
      */
     (function(window,undefined){
         "use strict";
@@ -1058,7 +1058,7 @@ if (!global.mytNoHistoryShim) { // FIXME: remove conditional once old code has b
              * History.getInternetExplorerMajorVersion()
              * Get's the major version of Internet Explorer
              * @return {integer}
-             * @license Public Domain
+             * Public Domain
              * @author Benjamin Arthur Lupton <contact@balupton.com>
              * @author James Padolsey <https://gist.github.com/527683>
              */
@@ -1081,7 +1081,7 @@ if (!global.mytNoHistoryShim) { // FIXME: remove conditional once old code has b
              * History.isInternetExplorer()
              * Are we using Internet Explorer?
              * @return {boolean}
-             * @license Public Domain
+             * Public Domain
              * @author Benjamin Arthur Lupton <contact@balupton.com>
              */
             History.isInternetExplorer = function(){
