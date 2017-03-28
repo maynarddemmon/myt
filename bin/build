@@ -55,10 +55,9 @@ var jsBuild = function(manifest, root, include, callback) {
     // than one file.
     var includedFiles = [];
     packages.forEach(function(pkg) {
-        var paths = pkg._loader;
-        if (!(paths instanceof Array)) die('Cannot bundle ' + pkg + ': no path specified in your manifest');
-        paths = paths.filter(function(p) {return !HTTP_REGEX.test(p)});
-        paths.forEach(function(loader) {includedFiles.push(loader)});
+        pkg._loader.forEach(function(loader) {
+            includedFiles.push(loader)
+        });
     });
     
     var read = function(file, readCallback) {
