@@ -93,6 +93,15 @@
             this.callSuper(v);
             
             highlightInfo.setText(v ? 'point: ' + v.id : '');
+        },
+        _doClick: function(event) {
+            var retval = this.callSuper(event);
+            
+            var hp = this.highlightedPoint;
+            if (hp && hp.isSelected()) {
+                this.removeDataPointById(hp.id);
+            }
+            return retval;
         }
     }]);
     graph.addPointTemplate('red', myt.ScatterGraph.createCircleTemplate(16, '#ff0000', 0.25, 0.5, null, 1));

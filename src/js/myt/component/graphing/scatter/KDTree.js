@@ -1,7 +1,7 @@
 /** A k-d Tree implementation.
     
     Ported from:
-        k-d Tree JavaScript - V 1.0
+        k-d Tree JavaScript - V 1.01 on 04/10/17
         
         https://github.com/ubilabs/kd-tree-javascript
         
@@ -12,7 +12,6 @@
 */
 myt.KDTreeNode = new JS.Class('KDTreeNode', {
     // Constructor /////////////////////////////////////////////////////////////
-    /** Create a new Path. */
     initialize: function(obj, dimension, parent) {
         this.obj = obj;
         this.left = null;
@@ -26,7 +25,6 @@ myt.KDTreeNode = new JS.Class('KDTreeNode', {
     http://eloquentjavascript.net/appendix2.html */
 myt.BinaryHeap = new JS.Class('BinaryHeap', {
     // Constructor /////////////////////////////////////////////////////////////
-    /** Create a new Path. */
     initialize: function(scoreFunction) {
         this.content = [];
         this.scoreFunction = scoreFunction;
@@ -37,19 +35,22 @@ myt.BinaryHeap = new JS.Class('BinaryHeap', {
     push: function(element) {
         // Add the new element to the end of the array.
         this.content.push(element);
+        
         // Allow it to bubble up.
         this.bubbleUp(this.content.length - 1);
     },
     
     pop: function() {
         // Store the first element so we can return it later.
-        var result = this.content[0];
-        // Get the element at the end of the array.
-        var end = this.content.pop();
+        var content = this.content,
+            result = content[0],
+            // Get the element at the end of the array.
+            end = content.pop();
+        
         // If there are any elements left, put the end element at the
         // start, and let it sink down.
-        if (this.content.length > 0) {
-            this.content[0] = end;
+        if (content.length > 0) {
+            content[0] = end;
             this.sinkDown(0);
         }
         return result;
@@ -60,15 +61,17 @@ myt.BinaryHeap = new JS.Class('BinaryHeap', {
     },
     
     remove: function(node) {
-        var len = this.content.length;
+        var content = this.content,
+            len = content.length,
+            i = 0, end;
         // To remove a value, we must search through the array to find it.
-        for (var i = 0; i < len; i++) {
-            if (this.content[i] == node) {
+        for (; i < len;) {
+            if (content[i++] == node) {
                 // When it is found, the process seen in 'pop' is repeated
                 // to fill up the hole.
-                var end = this.content.pop();
+                end = content.pop();
                 if (i != len - 1) {
-                    this.content[i] = end;
+                    content[i] = end;
                     if (this.scoreFunction(end) < this.scoreFunction(node)) {
                         this.bubbleUp(i);
                     } else {
@@ -87,16 +90,20 @@ myt.BinaryHeap = new JS.Class('BinaryHeap', {
     
     bubbleUp: function(n) {
         // Fetch the element that has to be moved.
-        var element = this.content[n];
+        var content = this.content,
+            element = content[n],
+            parentN, parent;
+        
         // When at 0, an element can not go up any further.
         while (n > 0) {
             // Compute the parent element's index, and fetch it.
-            var parentN = Math.floor((n + 1) / 2) - 1,
-            parent = this.content[parentN];
+            parentN = Math.floor((n + 1) / 2) - 1;
+            parent = content[parentN];
+            
             // Swap the elements if the parent is greater.
             if (this.scoreFunction(element) < this.scoreFunction(parent)) {
-                this.content[parentN] = element;
-                this.content[n] = parent;
+                content[parentN] = element;
+                content[n] = parent;
                 // Update 'n' to continue at the new position.
                 n = parentN;
             } else {
@@ -108,35 +115,35 @@ myt.BinaryHeap = new JS.Class('BinaryHeap', {
     
     sinkDown: function(n) {
         // Look up the target element and its score.
-        var length = this.content.length,
-            element = this.content[n],
+        var content = this.content,
+            length = content.length,
+            element = content[n],
             elemScore = this.scoreFunction(element);
         
-        while(true) {
+        while (true) {
             // Compute the indices of the child elements.
             var child2N = (n + 1) * 2, child1N = child2N - 1;
-            // This is used to store the new position of the element,
-            // if any.
+            // This is used to store the new position of the element, if any.
             var swap = null;
             // If the first child exists (is inside the array)...
             if (child1N < length) {
                 // Look it up and compute its score.
-                var child1 = this.content[child1N],
+                var child1 = content[child1N],
                     child1Score = this.scoreFunction(child1);
                 // If the score is less than our element's, we need to swap.
                 if (child1Score < elemScore) swap = child1N;
             }
             // Do the same checks for the other child.
             if (child2N < length) {
-                var child2 = this.content[child2N],
+                var child2 = content[child2N],
                     child2Score = this.scoreFunction(child2);
                 if (child2Score < (swap == null ? elemScore : child1Score)) swap = child2N;
             }
             
             // If the element needs to be moved, swap it, and continue.
             if (swap != null) {
-                this.content[n] = this.content[swap];
-                this.content[swap] = element;
+                content[n] = content[swap];
+                content[swap] = element;
                 n = swap;
             } else {
                 // Otherwise, we are done.
@@ -173,7 +180,9 @@ myt.KDTree = new JS.Class('KDTree', {
     
     buildTree: function(points, depth, parent) {
         var dimensions = this.dimensions,
-            dim = depth % dimensions.length, median, node;
+            dim = depth % dimensions.length, 
+            median, 
+            node;
         
         if (points.length === 0) return null;
         if (points.length === 1) return new myt.KDTreeNode(points[0], dim, parent);
@@ -191,20 +200,22 @@ myt.KDTree = new JS.Class('KDTree', {
     },
     
     insert: function(point) {
-        var dimensions = this.dimensions;
+        var dimensions = this.dimensions,
+            newNode,
+            dimension;
         
-        function innerSearch(node, parent, point) {
+        function innerSearch(node, parent) {
             if (node === null) return parent;
             
             var dimension = dimensions[node.dimension];
             if (point[dimension] < node.obj[dimension]) {
-                return innerSearch(node.left, node, point);
+                return innerSearch(node.left, node);
             } else {
-                return innerSearch(node.right, node, point);
+                return innerSearch(node.right, node);
             }
         }
         
-        var insertPosition = innerSearch(this.root, null, point), newNode, dimension;
+        var insertPosition = innerSearch(this.root, null);
         
         if (insertPosition === null) {
             this.root = new myt.KDTreeNode(point, 0, null);
@@ -221,11 +232,12 @@ myt.KDTree = new JS.Class('KDTree', {
         }
     },
     
-    /*remove: function(point) {
-console.log("remove", point);
+    /*
+    As of 1.0.1 remove still doesn't work in all cases.
+    remove: function(point) {
         var node, dimensions = this.dimensions, self = this;
         
-        function nodeSearch(node, point) {
+        function nodeSearch(node) {
             if (node === null) return null;
             
             if (node.obj === point) return node;
@@ -233,35 +245,14 @@ console.log("remove", point);
             var dimension = dimensions[node.dimension];
             
             if (point[dimension] < node.obj[dimension]) {
-                return nodeSearch(node.left, point);
+                return nodeSearch(node.left);
             } else {
-                return nodeSearch(node.right, point);
+                return nodeSearch(node.right);
             }
         }
         
         function removeNode(node) {
             var nextNode, nextObj, pDimension;
-            
-            function findMax(node, dim) {
-                var dimension, own, left, right, max;
-                
-                if (node === null) return null;
-                
-                dimension = dimensions[dim];
-                if (node.dimension === dim) {
-                    if (node.right !== null) return findMax(node.right, dim);
-                    return node;
-                }
-                
-                own = node.obj[dimension];
-                left = findMax(node.left, dim);
-                right = findMax(node.right, dim);
-                max = node;
-                
-                if (left !== null && left.obj[dimension] > own) max = left;
-                if (right !== null && right.obj[dimension] > max.obj[dimension]) max = right;
-                return max;
-            }
             
             function findMin(node, dim) {
                 var dimension, own, left, right, min;
@@ -301,19 +292,25 @@ console.log("remove", point);
                 return;
             }
             
-            if (node.left !== null) {
-                nextNode = findMax(node.left, node.dimension);
-            } else {
+            // If the right subtree is not empty, swap with the minimum element on the
+            // node's dimension. If it is empty, we swap the left and right subtrees and
+            // do the same.
+            if (node.right !== null) {
                 nextNode = findMin(node.right, node.dimension);
+                nextObj = nextNode.obj;
+                removeNode(nextNode);
+                node.obj = nextObj;
+            } else {
+                nextNode = findMin(node.left, node.dimension);
+                nextObj = nextNode.obj;
+                removeNode(nextNode);
+                node.right = node.left;
+                node.left = null;
+                node.obj = nextObj;
             }
-            
-            nextObj = nextNode.obj;
-            removeNode(nextNode);
-            node.obj = nextObj;
         }
         
-        node = nodeSearch(this.root, point);
-console.log("found", node ? node.obj : null);
+        node = nodeSearch(this.root);
         if (node !== null) removeNode(node);
     },*/
     
@@ -393,7 +390,7 @@ console.log("found", node ? node.obj : null);
         
         result = [];
         
-        for (i = 0; i < maxNodes; i += 1) {
+        for (i = 0; i < Math.min(maxNodes, bestNodes.content.length); i += 1) {
             if (bestNodes.content[i][0]) {
                 result.push([bestNodes.content[i][0].obj, bestNodes.content[i][1]]);
             }
@@ -415,12 +412,5 @@ console.log("found", node ? node.obj : null);
         }
         
         return height(self.root) / (Math.log(count(self.root)) / Math.log(2));
-    },
-    
-    dump: function() {this._dump(this.root, '  ', 'root');},
-    _dump: function(node, depth, label) {
-        console.log(depth + label + ' ' + node.dimension + ': ' + node.obj.id + ' x:' + node.obj.x + ' y:' + node.obj.y);
-        if (node.left) this._dump(node.left, depth + '  ', 'L');
-        if (node.right) this._dump(node.right, depth + '  ', 'R');
     }
 });
