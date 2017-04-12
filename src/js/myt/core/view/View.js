@@ -101,6 +101,9 @@
             'outset', 'inherit'.
         borderColor:string Sets the color of the CSS border. If null or 
             undefined is provided '#000000' will be used.
+        tooltip:string Sets a tooltip for this view. The basic implementation
+            uses domElement.title. For a richer tooltip display use the
+            myt.TooltipMixin.
     
     Private Attributes:
         subviews:array The array of child myt.Views for this view. Should 
@@ -748,6 +751,16 @@ myt.View = new JS.Class('View', myt.Node, {
         // Wipe the bgColor property since setting style.background replaces 
         // the bgColor.
         this.bgColor = undefined;
+    },
+    
+    /** Sets the tooltip.
+        @param v:string
+        @return void */
+    setTooltip: function(v) {
+        if (this.tooltip !== v) {
+            this.tooltip = this.domElement.title = v;
+            if (this.inited) this.fireEvent('tooltip', v);
+        }
     },
     
     

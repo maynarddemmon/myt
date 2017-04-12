@@ -6,15 +6,15 @@ myt.SimpleSliderThumb = new JS.Class('SimpleSliderThumb', myt.SimpleButton, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.SimpleButton */
     initNode: function(parent, attrs) {
-        if (attrs.activeColor === undefined) attrs.activeColor = '#bbbbbb';
-        if (attrs.readyColor === undefined) attrs.readyColor = '#cccccc';
-        if (attrs.hoverColor === undefined) attrs.hoverColor = '#dddddd';
+        if (attrs.activeColor == null) attrs.activeColor = '#bbbbbb';
+        if (attrs.readyColor == null) attrs.readyColor = '#cccccc';
+        if (attrs.hoverColor == null) attrs.hoverColor = '#dddddd';
         
-        if (attrs.boxShadow === undefined) attrs.boxShadow = [0, 0, 4, '#666666'];
+        if (attrs.boxShadow == null) attrs.boxShadow = [0, 0, 4, '#666666'];
         
         this.callSuper(parent, attrs);
         
-        if (attrs.roundedCorners === undefined) this.setRoundedCorners(Math.min(this.height, this.width) / 2);
+        if (attrs.roundedCorners == null) this.setRoundedCorners(Math.min(this.height, this.width) / 2);
     },
     
     

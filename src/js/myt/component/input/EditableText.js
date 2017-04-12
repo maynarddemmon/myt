@@ -21,17 +21,19 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.BaseInputText */
     initNode: function(parent, attrs) {
+        var self = this;
+        
         if (attrs.whiteSpace == null) attrs.whiteSpace = 'pre';
         if (attrs.contentEditable == null) attrs.contentEditable = true;
         
-        this.callSuper(parent, attrs);
+        self.callSuper(parent, attrs);
         
-        this.attachToDom(this, '__cleanInput', 'keydown');
+        self.attachToDom(self, '__cleanInput', 'keydown');
         
-        this.attachToDom(this, '__userInteraction', 'keyup');
-        this.attachToDom(this, '__userInteraction', 'mouseup');
+        self.attachToDom(self, '__userInteraction', 'keyup');
+        self.attachToDom(self, '__userInteraction', 'mouseup');
         
-        this.setCaretToEnd();
+        self.setCaretToEnd();
     },
     
     /** @overrides myt.NativeInputWrapper */
@@ -145,7 +147,7 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     
     /** @overrides myt.BaseInputText */
     setCaretPosition: function(start, end) {
-        if (end === undefined || start === end) {
+        if (end == null || start === end) {
             // Don't update if the current position already matches.
             if (this.getCaretPosition() === start) return;
             

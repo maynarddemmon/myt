@@ -75,21 +75,23 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
     },
     
     setFocusable: function(v) {
-        if (this.focusable !== v) {
-            var wasFocusable = this.focusable;
-            this.focusable = v;
+        var self = this;
+        
+        if (self.focusable !== v) {
+            var wasFocusable = self.focusable;
+            self.focusable = v;
             
             if (v) {
-                this.domElement.tabIndex = 0; // Make focusable. -1 is programtic only
-                this.attachToDom(this, '__doFocus', 'focus');
-                this.attachToDom(this, '__doBlur', 'blur');
+                self.domElement.tabIndex = 0; // Make focusable. -1 is programtic only
+                self.attachToDom(self, '__doFocus', 'focus');
+                self.attachToDom(self, '__doBlur', 'blur');
             } else if (wasFocusable) {
-                this.domElement.removeAttribute('tabIndex'); // Make unfocusable
-                this.detachFromDom(this, '__doFocus', 'focus');
-                this.detachFromDom(this, '__doBlur', 'blur');
+                self.domElement.removeAttribute('tabIndex'); // Make unfocusable
+                self.detachFromDom(self, '__doFocus', 'focus');
+                self.detachFromDom(self, '__doBlur', 'blur');
             }
             
-            if (this.inited) this.fireEvent('focusable', v);
+            if (self.inited) self.fireEvent('focusable', v);
         }
     },
     
@@ -139,8 +141,10 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
             if (noScroll) {
                 // Maintain scrollTop/scrollLeft
                 var ancestors = myt.DomElementProxy.getAncestorArray(de),
-                    len = ancestors.length, i = len, ancestor,
-                    scrollPositions = [], scrollPosition;
+                    len = ancestors.length, 
+                    i = len, ancestor,
+                    scrollPositions = [], 
+                    scrollPosition;
                 while (i) {
                     ancestor = ancestors[--i];
                     scrollPositions.unshift({scrollTop:ancestor.scrollTop, scrollLeft:ancestor.scrollLeft});

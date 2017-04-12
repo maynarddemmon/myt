@@ -44,8 +44,8 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         self.iconSpacing = 2;
         self.inset = self.outset = 0;
         
-        if (attrs.shrinkToFit === undefined) attrs.shrinkToFit = false;
-        if (attrs.contentAlign === undefined) attrs.contentAlign = 'center';
+        if (attrs.shrinkToFit == null) attrs.shrinkToFit = false;
+        if (attrs.contentAlign == null) attrs.contentAlign = 'center';
         
         self.callSuper(parent, attrs);
         
@@ -68,7 +68,8 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         
         // Setup iconView
         attrs = {
-            name:'iconView', imageUrl:this.iconUrl
+            name:'iconView',
+            imageUrl:this.iconUrl
         };
         if (typeof iconY === 'string') {
             attrs.valign = iconY;
@@ -98,22 +99,16 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
     // Accessors ///////////////////////////////////////////////////////////////
     setInset: function(v) {
         // Adapt to event from syncTo
-        if (v !== null && typeof v === 'object') v = v.value;
+        if (v != null && typeof v === 'object') v = v.value;
         
-        if (this.inset !== v) {
-            this.inset = v;
-            if (this.inited) this.fireEvent('inset', v);
-        }
+        this.set('inset', v, true);
     },
     
     setOutset: function(v) {
         // Adapt to event from syncTo
-        if (v !== null && typeof v === 'object') v = v.value;
+        if (v != null && typeof v === 'object') v = v.value;
         
-        if (this.outset !== v) {
-            this.outset = v;
-            if (this.inited) this.fireEvent('outset', v);
-        }
+        this.set('outset', v, true);
     },
     
     setText: function(v) {
@@ -126,19 +121,8 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         }
     },
     
-    setShrinkToFit: function(v) {
-        if (this.shrinkToFit !== v) {
-            this.shrinkToFit = v;
-            if (this.inited) this.fireEvent('shrinkToFit', v);
-        }
-    },
-    
-    setContentAlign: function(v) {
-        if (this.contentAlign !== v) {
-            this.contentAlign = v;
-            if (this.inited) this.fireEvent('contentAlign', v);
-        }
-    },
+    setShrinkToFit: function(v) {this.set('shrinkToFit', v, true);},
+    setContentAlign: function(v) {this.set('contentAlign', v, true);},
     
     setIconUrl: function(v) {
         if (this.iconUrl !== v) {
@@ -158,18 +142,13 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
                 if (typeof v === 'string') {
                     this.iconView.setValign(v);
                 } else {
-                   this.iconView.setY(v);
+                    this.iconView.setY(v);
                 }
             }
         }
     },
     
-    setIconSpacing: function(v) {
-        if (this.iconSpacing !== v) {
-            this.iconSpacing = v;
-            if (this.inited) this.fireEvent('iconSpacing', v);
-        }
-    },
+    setIconSpacing: function(v) {this.set('iconSpacing', v, true);},
     
     setTextY: function(v) {
         if (this.textY !== v) {

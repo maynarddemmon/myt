@@ -16,11 +16,11 @@ myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Checkbox */
     initNode: function(parent, attrs) {
-        if (attrs.width === undefined) attrs.width = parent.thumbWidth;
-        if (attrs.height === undefined) attrs.height = parent.thumbHeight;
+        if (attrs.width == null) attrs.width = parent.thumbWidth;
+        if (attrs.height == null) attrs.height = parent.thumbHeight;
         
-        if (attrs.repeatKeyDown === undefined) attrs.repeatKeyDown = true;
-        if (attrs.activationKeys === undefined) {
+        if (attrs.repeatKeyDown == null) attrs.repeatKeyDown = true;
+        if (attrs.activationKeys == null) {
             attrs.activationKeys = [
                 37, // left arrow
                 38, // up arrow
@@ -47,7 +47,7 @@ myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
     /** @overrides myt.Disableable */
     setDisabled: function(v) {
         // Adapt to event from syncTo
-        if (v !== null && typeof v === 'object') v = v.value;
+        if (v != null && typeof v === 'object') v = v.value;
         
         this.callSuper(v);
     },

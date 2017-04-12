@@ -23,16 +23,18 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.NativeInputWrapper */
     initNode: function(parent, attrs) {
+        var self = this;
+        
         if (attrs.bgColor == null) attrs.bgColor = 'transparent';
         if (attrs.spellcheck == null) attrs.spellcheck = false;
         
-        this.callSuper(parent, attrs);
+        self.callSuper(parent, attrs);
         
-        this.attachToDom(this, '__syncToDom', 'input');
+        self.attachToDom(self, '__syncToDom', 'input');
         
         // Allow filtering of input
-        this.attachToDom(this, '__filterInputPress', 'keypress');
-        this.attachToDom(this, '__filterInput', 'keyup');
+        self.attachToDom(self, '__filterInputPress', 'keypress');
+        self.attachToDom(self, '__filterInput', 'keyup');
     },
     
     
@@ -147,7 +149,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
         @param end:int (optional) the end of the selection.
         @returns void */
     setCaretPosition: function(start, end) {
-        if (end === undefined || start === end) {
+        if (end == null || start === end) {
             // Don't update if the current position already matches.
             if (this.getCaretPosition() === start) return;
             

@@ -62,37 +62,38 @@ myt.ModalPanel = new JS.Class('ModalPanel', myt.Dimmer, {
     },
     
     doBeforeAdoption: function() {
-        this.callSuper();
-        
-        var M = myt,
+        var self = this,
+            M = myt,
             V = M.View,
             viewAttrs = {name:'content', ignorePlacement:true},
             centeredViewAttrs = M.extend(viewAttrs, {align:'center', valign:'middle'});
         
-        switch (this.sizingStrategy) {
+        self.callSuper();
+        
+        switch (self.sizingStrategy) {
             case 'children':
-                new M.SizeToChildren(new V(this, centeredViewAttrs), {
+                new M.SizeToChildren(new V(self, centeredViewAttrs), {
                     name:'sizeToChildren', axis:'both',
-                    paddingX:this.paddingX, 
-                    paddingY:this.paddingY
+                    paddingX:self.paddingX, 
+                    paddingY:self.paddingY
                 });
                 break;
             case 'parent':
-                new V(this, M.extend(viewAttrs, {
-                    x:this.marginLeft,
-                    y:this.marginTop,
-                    percentOfParentWidthOffset:-this.marginLeft - this.marginRight,
-                    percentOfParentHeightOffset:-this.marginTop - this.marginBottom,
+                new V(self, M.extend(viewAttrs, {
+                    x:self.marginLeft,
+                    y:self.marginTop,
+                    percentOfParentWidthOffset:-self.marginLeft - self.marginRight,
+                    percentOfParentHeightOffset:-self.marginTop - self.marginBottom,
                     percentOfParentWidth:100,
                     percentOfParentHeight:100,
                 }), [M.SizeToParent]);
                 break;
             case 'basic':
-                new V(this, centeredViewAttrs);
+                new V(self, centeredViewAttrs);
                 break;
             case 'none':
             default:
-                new V(this, viewAttrs);
+                new V(self, viewAttrs);
         }
     },
     

@@ -15,7 +15,7 @@ myt.Disableable = new JS.Module('Disableable', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides */
     initNode: function(parent, attrs) {
-        if (attrs.disabled === undefined) attrs.disabled = false;
+        if (attrs.disabled == null) attrs.disabled = false;
         
         this.callSuper(parent, attrs);
     },

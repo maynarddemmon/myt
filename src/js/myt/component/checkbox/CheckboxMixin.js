@@ -16,8 +16,8 @@ myt.CheckboxMixin = new JS.Module('CheckboxMixin', {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        if (attrs.value === undefined) attrs.value = false;
-        if (attrs.drawingMethodClassname === undefined) attrs.drawingMethodClassname = 'myt.CheckboxDrawingMethod';
+        if (attrs.value == null) attrs.value = false;
+        if (attrs.drawingMethodClassname == null) attrs.drawingMethodClassname = 'myt.CheckboxDrawingMethod';
         
         this.callSuper(parent, attrs);
     },

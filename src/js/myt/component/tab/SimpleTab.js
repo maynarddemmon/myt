@@ -26,19 +26,19 @@ myt.SimpleTab = new JS.Class('SimpleTab', myt.SimpleIconTextButton, {
         var T = myt.Tab;
         
         // myt.IconTextButtonContent
-        if (attrs.inset === undefined) attrs.inset = T.DEFAULT_INSET;
-        if (attrs.outset === undefined) attrs.outset = T.DEFAULT_OUTSET;
+        if (attrs.inset == null) attrs.inset = T.DEFAULT_INSET;
+        if (attrs.outset == null) attrs.outset = T.DEFAULT_OUTSET;
         
         // myt.Tab
-        if (attrs.selectedColor === undefined) attrs.selectedColor = T.DEFAULT_FILL_COLOR_SELECTED;
-        if (attrs.hoverColor === undefined) attrs.hoverColor = T.DEFAULT_FILL_COLOR_HOVER;
-        if (attrs.activeColor === undefined) attrs.activeColor = T.DEFAULT_FILL_COLOR_ACTIVE;
-        if (attrs.readyColor === undefined) attrs.readyColor = T.DEFAULT_FILL_COLOR_READY;
-        if (attrs.labelTextSelectedColor === undefined) attrs.labelTextSelectedColor = T.DEFAULT_LABEL_TEXT_COLOR_SELECTED;
+        if (attrs.selectedColor == null) attrs.selectedColor = T.DEFAULT_FILL_COLOR_SELECTED;
+        if (attrs.hoverColor == null) attrs.hoverColor = T.DEFAULT_FILL_COLOR_HOVER;
+        if (attrs.activeColor == null) attrs.activeColor = T.DEFAULT_FILL_COLOR_ACTIVE;
+        if (attrs.readyColor == null) attrs.readyColor = T.DEFAULT_FILL_COLOR_READY;
+        if (attrs.labelTextSelectedColor == null) attrs.labelTextSelectedColor = T.DEFAULT_LABEL_TEXT_COLOR_SELECTED;
         
         // Other
-        if (attrs.height === undefined) attrs.height = T.DEFAULT_HEIGHT;
-        if (attrs.focusEmbellishment === undefined) attrs.focusEmbellishment = false;
+        if (attrs.height == null) attrs.height = T.DEFAULT_HEIGHT;
+        if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
         
         this.callSuper(parent, attrs);
         
@@ -80,23 +80,24 @@ myt.SimpleTab = new JS.Class('SimpleTab', myt.SimpleIconTextButton, {
     
     /** @private */
     __updateCornerRadius: function() {
-        var r = this.cornerRadius != null ? this.cornerRadius : myt.TabDrawingMethod.DEFAULT_RADIUS;
-        switch (this.tabContainer.location) {
+        var self = this,
+            r = self.cornerRadius != null ? self.cornerRadius : myt.TabDrawingMethod.DEFAULT_RADIUS;
+        switch (self.tabContainer.location) {
             case 'top':
-                this.setRoundedTopLeftCorner(r);
-                this.setRoundedTopRightCorner(r);
+                self.setRoundedTopLeftCorner(r);
+                self.setRoundedTopRightCorner(r);
                 break;
             case 'bottom':
-                this.setRoundedBottomLeftCorner(r);
-                this.setRoundedBottomRightCorner(r);
+                self.setRoundedBottomLeftCorner(r);
+                self.setRoundedBottomRightCorner(r);
                 break;
             case 'left':
-                this.setRoundedTopLeftCorner(r);
-                this.setRoundedBottomLeftCorner(r);
+                self.setRoundedTopLeftCorner(r);
+                self.setRoundedBottomLeftCorner(r);
                 break;
             case 'right':
-                this.setRoundedTopRightCorner(r);
-                this.setRoundedBottomRightCorner(r);
+                self.setRoundedTopRightCorner(r);
+                self.setRoundedBottomRightCorner(r);
                 break;
         }
     },

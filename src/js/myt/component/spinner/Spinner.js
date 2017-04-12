@@ -22,21 +22,23 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
-        this.lines = 12;
-        this.length = 7;
-        this.lineWidth = 5;
-        this.radius = 10;
-        this.corners = 1;
-        this.lineColor = '#000000';
-        this.direction = this.speed = 1;
-        this.trail = 100;
-        this.lineOpacity = 0.25;
+        var self = this;
         
-        if (attrs.visible === undefined) attrs.visible = false;
+        self.lines = 12;
+        self.length = 7;
+        self.lineWidth = 5;
+        self.radius = 10;
+        self.corners = 1;
+        self.lineColor = '#000000';
+        self.direction = self.speed = 1;
+        self.trail = 100;
+        self.lineOpacity = 0.25;
         
-        this.callSuper(parent, attrs);
+        if (attrs.visible == null) attrs.visible = false;
         
-        if (this.visible) this.__show();
+        self.callSuper(parent, attrs);
+        
+        if (self.visible) self.__show();
     },
     
     /** @overrides myt.View */
@@ -80,24 +82,25 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     // Methods /////////////////////////////////////////////////////////////////
     /** @private */
     __show: function() {
-        var spinner = this.__spinner || (this.__spinner = new myt.Spinner.FACTORY({
-            lines:this.lines, 
-            length:this.length, 
-            width:this.lineWidth, 
-            radius:this.radius, 
-            corners:this.corners,
-            color:this.lineColor,
-            direction:this.direction,
-            speed:this.speed,
-            trail:this.trail,
-            opacity:this.lineOpacity
-        }));
+        var self = this,
+            spinner = self.__spinner || (self.__spinner = new myt.Spinner.FACTORY({
+                lines:self.lines, 
+                length:self.length, 
+                width:self.lineWidth, 
+                radius:self.radius, 
+                corners:self.corners,
+                color:self.lineColor,
+                direction:self.direction,
+                speed:self.speed,
+                trail:self.trail,
+                opacity:self.lineOpacity
+            }));
         
-        var size = this.getSize();
-        this.setWidth(size);
-        this.setHeight(size);
+        var size = self.getSize();
+        self.setWidth(size);
+        self.setHeight(size);
         
-        spinner.spin(this.domElement);
+        spinner.spin(self.domElement);
     },
     
     /** @private */

@@ -1,6 +1,6 @@
 /** An myt.PanelButton with contents that consist of an icon and text. */
 myt.IconTextPanelButton = new JS.Class('IconTextPanelButton', myt.PanelButton, {
-    include: [myt.IconTextButtonContent, myt.TooltipMixin],
+    include: [myt.IconTextButtonContent],
     
     
     // Life Cycle //////////////////////////////////////////////////////////////

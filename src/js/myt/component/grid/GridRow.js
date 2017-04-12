@@ -11,7 +11,7 @@ myt.GridRow = new JS.Module('GridRow', {
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
         // Ensure participation in determinePlacement method of myt.Grid
-        if (attrs.placement === undefined) attrs.placement = '*';
+        if (attrs.placement == null) attrs.placement = '*';
         
         this.callSuper(parent, attrs);
         

@@ -13,7 +13,7 @@ myt.FormRadioGroup = new JS.Class('FormRadioGroup', myt.Node, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides */
     initNode: function(parent, attrs) {
-        if (attrs.groupId === undefined) attrs.groupId = myt.generateGuid();
+        if (attrs.groupId == null) attrs.groupId = myt.generateGuid();
         
         this.callSuper(parent, attrs);
         

@@ -40,18 +40,18 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
     initNode: function(parent, attrs) {
         var M = myt,
             GCH = M.GridColumnHeader;
-        if (attrs.minValue === undefined) attrs.minValue = GCH.DEFAULT_MIN_VALUE;
-        if (attrs.maxValue === undefined) attrs.maxValue = GCH.DEFAULT_MAX_VALUE;
-        if (attrs.resizable === undefined) attrs.resizable = true;
-        if (attrs.flex === undefined) attrs.flex = 0;
-        if (attrs.cellXAdj === undefined) attrs.cellXAdj = 0;
-        if (attrs.cellWidthAdj === undefined) attrs.cellWidthAdj = 0;
+        if (attrs.minValue == null) attrs.minValue = GCH.DEFAULT_MIN_VALUE;
+        if (attrs.maxValue == null) attrs.maxValue = GCH.DEFAULT_MAX_VALUE;
+        if (attrs.resizable == null) attrs.resizable = true;
+        if (attrs.flex == null) attrs.flex = 0;
+        if (attrs.cellXAdj == null) attrs.cellXAdj = 0;
+        if (attrs.cellWidthAdj == null) attrs.cellWidthAdj = 0;
         
-        if (attrs.sortable === undefined) attrs.sortable = true;
-        if (attrs.sortState === undefined) attrs.sortState = 'none';
+        if (attrs.sortable == null) attrs.sortable = true;
+        if (attrs.sortState == null) attrs.sortState = 'none';
         
         // Ensure participation in determinePlacement method of myt.Grid
-        if (attrs.placement === undefined) attrs.placement = '*';
+        if (attrs.placement == null) attrs.placement = '*';
         
         this.callSuper(parent, attrs);
         

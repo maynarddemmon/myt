@@ -23,13 +23,13 @@ myt.ComboBox = new JS.Class('ComboBox', myt.InputText, {
     initNode: function(parent, attrs) {
         this.filterItems = true;
         
-        if (attrs.activationKeys === undefined) attrs.activationKeys = [13,27,38,40];
-        if (attrs.bgColor === undefined) attrs.bgColor = '#ffffff';
-        if (attrs.borderWidth === undefined) attrs.borderWidth = 1;
-        if (attrs.borderStyle === undefined) attrs.borderStyle = 'solid';
-        if (attrs.floatingAlignOffset === undefined) attrs.floatingAlignOffset = attrs.borderWidth;
-        if (attrs.listViewAttrs === undefined) attrs.listViewAttrs = {maxHeight:99};
-        if (attrs.fullItemConfig === undefined) attrs.fullItemConfig = [];
+        if (attrs.activationKeys == null) attrs.activationKeys = [13,27,38,40];
+        if (attrs.bgColor == null) attrs.bgColor = '#ffffff';
+        if (attrs.borderWidth == null) attrs.borderWidth = 1;
+        if (attrs.borderStyle == null) attrs.borderStyle = 'solid';
+        if (attrs.floatingAlignOffset == null) attrs.floatingAlignOffset = attrs.borderWidth;
+        if (attrs.listViewAttrs == null) attrs.listViewAttrs = {maxHeight:99};
+        if (attrs.fullItemConfig == null) attrs.fullItemConfig = [];
         
         this.callSuper(parent, attrs);
     },

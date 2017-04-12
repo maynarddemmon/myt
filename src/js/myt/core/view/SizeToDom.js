@@ -60,39 +60,41 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
         element would have occurred.
         @returns void */
     sizeViewToDom: function() {
-        var bounds, scaling;
+        var self = this,
+            bounds,
+            scaling;
         
-        if (!this.__hasSetWidth) {
-            bounds = this.domElement.getBoundingClientRect();
+        if (!self.__hasSetWidth) {
+            bounds = self.domElement.getBoundingClientRect();
             var w = bounds.width;
             
             // Bounding rect doesn't factor in scaling so we need to calculate
             // this ourselves.
-            scaling = myt.TransformSupport.getEffectiveScale(this);
+            scaling = myt.TransformSupport.getEffectiveScale(self);
             w /= scaling.scaleX;
             
             // Circumvent setter
-            if (this.width !== w) {
-                this.width = w;
-                if (this.inited) this.__updateBounds(w, this.height);
-                this.fireEvent('width', w);
+            if (self.width !== w) {
+                self.width = w;
+                if (self.inited) self.__updateBounds(w, self.height);
+                self.fireEvent('width', w);
             }
         }
         
-        if (!this.__hasSetHeight) {
-            if (!bounds) bounds = this.domElement.getBoundingClientRect();
+        if (!self.__hasSetHeight) {
+            if (!bounds) bounds = self.domElement.getBoundingClientRect();
             var h = bounds.height;
             
             // Bounding rect doesn't factor in scaling so we need to calculate
             // this ourselves.
-            if (!scaling) scaling = myt.TransformSupport.getEffectiveScale(this);
+            if (!scaling) scaling = myt.TransformSupport.getEffectiveScale(self);
             h /= scaling.scaleY;
             
             // Circumvent setter
-            if (this.height !== h) {
-                this.height = h;
-                if (this.inited) this.__updateBounds(this.width, h);
-                this.fireEvent('height', h);
+            if (self.height !== h) {
+                self.height = h;
+                if (self.inited) self.__updateBounds(self.width, h);
+                self.fireEvent('height', h);
             }
         }
     }

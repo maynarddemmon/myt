@@ -25,27 +25,27 @@ myt.BaseSlider = new JS.Class('BaseSlider', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
-        if (attrs.axis === undefined) attrs.axis = 'x';
+        if (attrs.axis == null) attrs.axis = 'x';
         if (attrs.axis === 'x') {
-            if (attrs.width === undefined) attrs.width = 100;
-            if (attrs.height === undefined) attrs.height = 18;
+            if (attrs.width == null) attrs.width = 100;
+            if (attrs.height == null) attrs.height = 18;
         } else {
-            if (attrs.width === undefined) attrs.width = 18;
-            if (attrs.height === undefined) attrs.height = 100;
+            if (attrs.width == null) attrs.width = 18;
+            if (attrs.height == null) attrs.height = 100;
         }
         
-        if (attrs.bgColor === undefined) attrs.bgColor = '#999999';
-        if (attrs.roundedCorners === undefined) attrs.roundedCorners = 9;
+        if (attrs.bgColor == null) attrs.bgColor = '#999999';
+        if (attrs.roundedCorners == null) attrs.roundedCorners = 9;
         
-        if (attrs.trackInset === undefined) attrs.trackInset = 9;
-        if (attrs.trackOutset === undefined) attrs.trackOutset = 9;
-        if (attrs.thumbWidth === undefined) attrs.thumbWidth = 16;
-        if (attrs.thumbHeight === undefined) attrs.thumbHeight = 16;
-        if (attrs.thumbOffset === undefined) attrs.thumbOffset = 1;
+        if (attrs.trackInset == null) attrs.trackInset = 9;
+        if (attrs.trackOutset == null) attrs.trackOutset = 9;
+        if (attrs.thumbWidth == null) attrs.thumbWidth = 16;
+        if (attrs.thumbHeight == null) attrs.thumbHeight = 16;
+        if (attrs.thumbOffset == null) attrs.thumbOffset = 1;
         
-        if (attrs.nudgeAmount === undefined) attrs.nudgeAmount = 1;
+        if (attrs.nudgeAmount == null) attrs.nudgeAmount = 1;
         
-        if (attrs.thumbClass === undefined) attrs.thumbClass = myt.SimpleSliderThumb;
+        if (attrs.thumbClass == null) attrs.thumbClass = myt.SimpleSliderThumb;
         
         this.callSuper(parent, attrs);
     },
@@ -64,16 +64,18 @@ myt.BaseSlider = new JS.Class('BaseSlider', myt.View, {
     
     // Methods /////////////////////////////////////////////////////////////////
     convertValueToPixels: function(v) {
-        var minV = this.minValue, ti = this.trackInset,
-            pxRange = (this.axis === 'x' ? this.width : this.height) - ti - this.trackOutset,
-            valueRange = this.maxValue - minV;
+        var self = this,
+            minV = self.minValue, ti = self.trackInset,
+            pxRange = (self.axis === 'x' ? self.width : self.height) - ti - self.trackOutset,
+            valueRange = self.maxValue - minV;
         return ti + ((v - minV) * (pxRange / valueRange));
     },
     
     convertPixelsToValue: function(px) {
-        var minV = this.minValue, ti = this.trackInset,
-            pxRange = (this.axis === 'x' ? this.width : this.height) - ti - this.trackOutset,
-            valueRange = this.maxValue - minV;
+        var self = this,
+            minV = self.minValue, ti = self.trackInset,
+            pxRange = (self.axis === 'x' ? self.width : self.height) - ti - self.trackOutset,
+            valueRange = self.maxValue - minV;
         return ((px - ti) * (valueRange / pxRange)) + minV;
     },
     

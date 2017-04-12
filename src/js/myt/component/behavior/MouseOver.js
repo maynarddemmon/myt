@@ -21,7 +21,7 @@ myt.MouseOver = new JS.Module('MouseOver', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides */
     initNode: function(parent, attrs) {
-        if (attrs.mouseOver === undefined) attrs.mouseOver = false;
+        if (attrs.mouseOver == null) attrs.mouseOver = false;
         
         this.callSuper(parent, attrs);
         

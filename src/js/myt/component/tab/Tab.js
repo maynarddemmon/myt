@@ -43,24 +43,24 @@ myt.Tab = new JS.Class('Tab', myt.DrawButton, {
         var T = myt.Tab;
         
         // myt.DrawButton
-        if (attrs.drawingMethodClassname === undefined) attrs.drawingMethodClassname = 'myt.TabDrawingMethod';
+        if (attrs.drawingMethodClassname == null) attrs.drawingMethodClassname = 'myt.TabDrawingMethod';
         
         // myt.IconTextButtonContent
-        if (attrs.inset === undefined) attrs.inset = T.DEFAULT_INSET;
-        if (attrs.outset === undefined) attrs.outset = T.DEFAULT_OUTSET;
+        if (attrs.inset == null) attrs.inset = T.DEFAULT_INSET;
+        if (attrs.outset == null) attrs.outset = T.DEFAULT_OUTSET;
         
         // myt.Tab
-        if (attrs.edgeColor === undefined) attrs.edgeColor = T.DEFAULT_EDGE_COLOR;
-        if (attrs.edgeSize === undefined) attrs.edgeSize = T.DEFAULT_EDGE_SIZE;
-        if (attrs.fillColorSelected === undefined) attrs.fillColorSelected = T.DEFAULT_FILL_COLOR_SELECTED;
-        if (attrs.fillColorHover === undefined) attrs.fillColorHover = T.DEFAULT_FILL_COLOR_HOVER;
-        if (attrs.fillColorActive === undefined) attrs.fillColorActive = T.DEFAULT_FILL_COLOR_ACTIVE;
-        if (attrs.fillColorReady === undefined) attrs.fillColorReady = T.DEFAULT_FILL_COLOR_READY;
-        if (attrs.labelTextColorSelected === undefined) attrs.labelTextColorSelected = T.DEFAULT_LABEL_TEXT_COLOR_SELECTED;
+        if (attrs.edgeColor == null) attrs.edgeColor = T.DEFAULT_EDGE_COLOR;
+        if (attrs.edgeSize == null) attrs.edgeSize = T.DEFAULT_EDGE_SIZE;
+        if (attrs.fillColorSelected == null) attrs.fillColorSelected = T.DEFAULT_FILL_COLOR_SELECTED;
+        if (attrs.fillColorHover == null) attrs.fillColorHover = T.DEFAULT_FILL_COLOR_HOVER;
+        if (attrs.fillColorActive == null) attrs.fillColorActive = T.DEFAULT_FILL_COLOR_ACTIVE;
+        if (attrs.fillColorReady == null) attrs.fillColorReady = T.DEFAULT_FILL_COLOR_READY;
+        if (attrs.labelTextColorSelected == null) attrs.labelTextColorSelected = T.DEFAULT_LABEL_TEXT_COLOR_SELECTED;
         
         // Other
-        if (attrs.height === undefined) attrs.height = T.DEFAULT_HEIGHT;
-        if (attrs.focusEmbellishment === undefined) attrs.focusEmbellishment = false;
+        if (attrs.height == null) attrs.height = T.DEFAULT_HEIGHT;
+        if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
         
         this.callSuper(parent, attrs);
     },
@@ -99,27 +99,28 @@ myt.Tab = new JS.Class('Tab', myt.DrawButton, {
     
     /** @overrides myt.DrawButton */
     getDrawConfig: function(state) {
-        var config = this.callSuper(state);
+        var self = this,
+            config = self.callSuper(state);
         
-        config.selected = this.selected;
-        config.location = this.tabContainer.location;
-        config.cornerRadius = this.cornerRadius;
-        config.edgeColor = this.edgeColor;
-        config.edgeSize = this.edgeSize;
+        config.selected = self.selected;
+        config.location = self.tabContainer.location;
+        config.cornerRadius = self.cornerRadius;
+        config.edgeColor = self.edgeColor;
+        config.edgeSize = self.edgeSize;
         
-        if (this.selected) {
-            config.fillColor = this.fillColorSelected;
+        if (self.selected) {
+            config.fillColor = self.fillColorSelected;
         } else {
             switch (state) {
                 case 'hover':
-                    config.fillColor = this.fillColorHover;
+                    config.fillColor = self.fillColorHover;
                     break;
                 case 'active':
-                    config.fillColor = this.fillColorActive;
+                    config.fillColor = self.fillColorActive;
                     break;
                 case 'disabled':
                 case 'ready':
-                    config.fillColor = this.focused ? this.fillColorHover : this.fillColorReady;
+                    config.fillColor = self.focused ? self.fillColorHover : self.fillColorReady;
                     break;
                 default:
             }

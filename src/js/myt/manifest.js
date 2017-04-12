@@ -170,8 +170,7 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'button/SimpleButton.js'         ).provides('myt.SimpleButton'         ).requires('myt.View','myt.Button');
     file(MYT_COMPONENT_ROOT + 'button/IconTextButtonContent.js').provides('myt.IconTextButtonContent').requires('myt.Image','myt.Text');
     file(MYT_COMPONENT_ROOT + 'button/TextButtonContent.js'    ).provides('myt.TextButtonContent'    ).requires('myt.Text');
-    file(MYT_COMPONENT_ROOT + 'button/SimpleIconTextButton.js' ).provides('myt.SimpleIconTextButton' ).requires('myt.SimpleButton','myt.IconTextButtonContent',
-                                                                                                                'myt.TooltipMixin');
+    file(MYT_COMPONENT_ROOT + 'button/SimpleIconTextButton.js' ).provides('myt.SimpleIconTextButton' ).requires('myt.SimpleButton','myt.IconTextButtonContent');
     
     // Component : Panel
     file(MYT_COMPONENT_ROOT + 'panel/ThreePanel.js'          ).provides('myt.ThreePanel'          ).requires('myt.View','myt.Image','myt.ResizeLayout','myt.SizeToChildren');
@@ -183,7 +182,7 @@ JS.Packages(function() {with(this) {
     
     // Component : Panel Button
     file(MYT_COMPONENT_ROOT + 'panelbutton/PanelButton.js'        ).provides('myt.PanelButton'        ).requires('myt.MouseableH3Panel');
-    file(MYT_COMPONENT_ROOT + 'panelbutton/IconTextPanelButton.js').provides('myt.IconTextPanelButton').requires('myt.PanelButton','myt.TooltipMixin','myt.IconTextButtonContent');
+    file(MYT_COMPONENT_ROOT + 'panelbutton/IconTextPanelButton.js').provides('myt.IconTextPanelButton').requires('myt.PanelButton','myt.IconTextButtonContent');
     
     // Component : Drawing Method
     file(MYT_COMPONENT_ROOT + 'drawingmethod/DrawingMethod.js').provides('myt.DrawingMethod').requires('myt','myt.DrawingUtil');
@@ -233,13 +232,13 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'checkbox/CheckboxStyleMixin.js'   ).provides('myt.CheckboxStyleMixin'   ).requires('myt.DrawButton');
     file(MYT_COMPONENT_ROOT + 'checkbox/CheckboxMixin.js'        ).provides('myt.CheckboxMixin'        ).requires('myt.CheckboxStyleMixin','myt.ValueComponent','myt.CheckboxDrawingMethod');
     file(MYT_COMPONENT_ROOT + 'checkbox/Checkbox.js'             ).provides('myt.Checkbox'             ).requires('myt.CheckboxMixin');
-    file(MYT_COMPONENT_ROOT + 'checkbox/TextCheckbox.js'         ).provides('myt.TextCheckbox'         ).requires('myt.Checkbox','myt.TextButtonContent','myt.TooltipMixin');
+    file(MYT_COMPONENT_ROOT + 'checkbox/TextCheckbox.js'         ).provides('myt.TextCheckbox'         ).requires('myt.Checkbox','myt.TextButtonContent');
     
     // Component : Radio
     file(MYT_COMPONENT_ROOT + 'radio/RadioDrawingMethod.js').provides('myt.RadioDrawingMethod').requires('myt.DrawingMethod');
     file(MYT_COMPONENT_ROOT + 'radio/RadioMixin.js'        ).provides('myt.RadioMixin'        ).requires('myt.CheckboxStyleMixin','myt.ValueComponent','myt.RadioDrawingMethod','myt.BAG');
     file(MYT_COMPONENT_ROOT + 'radio/Radio.js'             ).provides('myt.Radio'             ).requires('myt.DrawButton','myt.RadioMixin');
-    file(MYT_COMPONENT_ROOT + 'radio/TextRadio.js'         ).provides('myt.TextRadio'         ).requires('myt.Radio','myt.TextButtonContent','myt.TooltipMixin');
+    file(MYT_COMPONENT_ROOT + 'radio/TextRadio.js'         ).provides('myt.TextRadio'         ).requires('myt.Radio','myt.TextButtonContent');
     
     // Component : Slider
     file(MYT_COMPONENT_ROOT + 'slider/SliderThumbMixin.js'     ).provides('myt.SliderThumbMixin'     ).requires('myt.View','myt.Draggable');
@@ -378,6 +377,7 @@ JS.Packages(function() {with(this) {
         'myt.DropTarget','myt.DropSource','myt.AutoScroller',
         'myt.Eventable',
         'myt.Annulus',
-        'myt.MessageTypeWebSocket'
+        'myt.MessageTypeWebSocket',
+        'myt.TooltipMixin'
     );
 }});

@@ -3,7 +3,7 @@ myt.SimpleSliderRangeFill = new JS.Class('SimpleSliderRangeFill', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Checkbox */
     initNode: function(parent, attrs) {
-        if (attrs.bgColor === undefined) attrs.bgColor = '#666666';
+        if (attrs.bgColor == null) attrs.bgColor = '#666666';
         
         this.callSuper(parent, attrs);
         

@@ -13,7 +13,7 @@ myt.MouseDown = new JS.Module('MouseDown', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides */
     initNode: function(parent, attrs) {
-        if (attrs.mouseDown === undefined) attrs.mouseDown = false;
+        if (attrs.mouseDown == null) attrs.mouseDown = false;
         
         this.callSuper(parent, attrs);
         

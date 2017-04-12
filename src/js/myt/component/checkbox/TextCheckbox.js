@@ -1,6 +1,6 @@
 /** A checkbox component with a text label. */
 myt.TextCheckbox = new JS.Class('TextCheckbox', myt.Checkbox, {
-    include: [myt.TextButtonContent, myt.TooltipMixin],
+    include: [myt.TextButtonContent],
     
     
     // Class Methods and Attributes ////////////////////////////////////////////
@@ -14,12 +14,14 @@ myt.TextCheckbox = new JS.Class('TextCheckbox', myt.Checkbox, {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     doAfterAdoption: function() {
-        var TC = myt.TextCheckbox, padX = TC.DEFAULT_PAD_X;
-        this.setInset(this.getIconExtentX() + padX);
-        this.setOutset(padX);
+        var self = this,
+            TC = myt.TextCheckbox,
+            padX = TC.DEFAULT_PAD_X;
+        self.setInset(self.getIconExtentX() + padX);
+        self.setOutset(padX);
         
-        if (!this.shrinkToFit) this.setTextY(TC.DEFAULT_MULTILINE_PAD_Y);
+        if (!self.shrinkToFit) self.setTextY(TC.DEFAULT_MULTILINE_PAD_Y);
         
-        this.callSuper();
+        self.callSuper();
     }
 });

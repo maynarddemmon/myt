@@ -398,8 +398,8 @@
         }
 
         function option(optionName, optionValue) {
-            if (optionName === undefined) return myt.extend({}, opts);
-            if (optionValue === undefined) return opts[optionName];
+            if (optionName == null) return myt.extend({}, opts);
+            if (optionValue == null) return opts[optionName];
 
             opts[optionName] = optionValue;
             applyOptions();

@@ -16,7 +16,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.BaseSlider */
     initNode: function(parent, attrs) {
-        if (attrs.rangeFillClass === undefined) attrs.rangeFillClass = myt.SimpleSliderRangeFill;
+        if (attrs.rangeFillClass == null) attrs.rangeFillClass = myt.SimpleSliderRangeFill;
         
         this.callSuper(parent, attrs);
     },

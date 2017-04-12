@@ -11,16 +11,16 @@ myt.SimpleGridColumnHeader = new JS.Class('SimpleGridColumnHeader', myt.SimpleIc
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
-        if (attrs.activeColor === undefined) attrs.activeColor = '#999999';
-        if (attrs.hoverColor === undefined) attrs.hoverColor = '#bbbbbb';
-        if (attrs.readyColor === undefined) attrs.readyColor = '#aaaaaa';
-        if (attrs.inset === undefined) attrs.inset = 2;
-        if (attrs.outset === undefined) attrs.outset = 2;
+        if (attrs.activeColor == null) attrs.activeColor = '#999999';
+        if (attrs.hoverColor == null) attrs.hoverColor = '#bbbbbb';
+        if (attrs.readyColor == null) attrs.readyColor = '#aaaaaa';
+        if (attrs.inset == null) attrs.inset = 2;
+        if (attrs.outset == null) attrs.outset = 2;
         
-        if (attrs.height === undefined) attrs.height = 18;
+        if (attrs.height == null) attrs.height = 18;
         
-        if (attrs.contentAlign === undefined) attrs.contentAlign = 'left';
-        if (attrs.sortIconColor === undefined) attrs.sortIconColor = '#666666';
+        if (attrs.contentAlign == null) attrs.contentAlign = 'left';
+        if (attrs.sortIconColor == null) attrs.sortIconColor = '#666666';
         
         this.callSuper(parent, attrs);
         

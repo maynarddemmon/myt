@@ -12,8 +12,8 @@ myt.ListViewSeparator = new JS.Class('ListViewSeparator', myt.View, {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        if (attrs.height === undefined) attrs.height = 1;
-        if (attrs.bgColor === undefined) attrs.bgColor = '#666666';
+        if (attrs.height == null) attrs.height = 1;
+        if (attrs.bgColor == null) attrs.bgColor = '#666666';
         
         this.callSuper(parent, attrs);
     },

@@ -94,11 +94,10 @@ myt.DrawButton = new JS.Class('DrawButton', myt.Canvas, {
     
     redraw: function(state) {
         // Used if redrawing for focus changes
-        if (state === undefined) state = this.__lastState;
+        if (state == null) state = this.__lastState;
         this.__lastState = state;
         
-        var dm = this.drawingMethod || this;
-        dm.draw(this, this.getDrawConfig(state));
+        (this.drawingMethod || this).draw(this, this.getDrawConfig(state));
     },
     
     /** Used if no drawing method is found. */

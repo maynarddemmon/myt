@@ -34,8 +34,8 @@ myt.Button = new JS.Module('Button', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides */
     initNode: function(parent, attrs) {
-        if (attrs.focusable === undefined) attrs.focusable = true;
-        if (attrs.cursor === undefined) attrs.cursor = 'pointer';
+        if (attrs.focusable == null) attrs.focusable = true;
+        if (attrs.cursor == null) attrs.cursor = 'pointer';
         
         this.callSuper(parent, attrs);
     },
@@ -44,9 +44,10 @@ myt.Button = new JS.Module('Button', {
     // Accessors ///////////////////////////////////////////////////////////////
     /** @overrides myt.FocusObservable */
     setFocused: function(v) {
-        var existing = this.focused;
-        this.callSuper(v);
-        if (this.inited && this.focused !== existing) this.updateUI();
+        var self = this,
+            existing = self.focused;
+        self.callSuper(v);
+        if (self.inited && self.focused !== existing) self.updateUI();
     },
     
     
@@ -71,27 +72,29 @@ myt.Button = new JS.Module('Button', {
     
     /** @overrides myt.UpdateableUI. */
     updateUI: function() {
-        if (this.disabled) {
+        var self = this;
+        
+        if (self.disabled) {
             // Remember the cursor to change back to, but don't re-remember
             // if we're already remembering one.
-            if (this.__restoreCursor == null) this.__restoreCursor = this.cursor;
-            this.setCursor('not-allowed');
-            this.drawDisabledState();
+            if (self.__restoreCursor == null) self.__restoreCursor = self.cursor;
+            self.setCursor('not-allowed');
+            self.drawDisabledState();
         } else {
-            var rc = this.__restoreCursor;
+            var rc = self.__restoreCursor;
             if (rc) {
-                this.setCursor(rc);
-                this.__restoreCursor = null;
+                self.setCursor(rc);
+                self.__restoreCursor = null;
             }
             
-            if (this.activateKeyDown !== -1 || this.mouseDown) {
-                this.drawActiveState();
-            } else if (this.focused) {
-                this.drawFocusedState();
-            } else if (this.mouseOver) {
-                this.drawHoverState();
+            if (self.activateKeyDown !== -1 || self.mouseDown) {
+                self.drawActiveState();
+            } else if (self.focused) {
+                self.drawFocusedState();
+            } else if (self.mouseOver) {
+                self.drawHoverState();
             } else {
-                this.drawReadyState();
+                self.drawReadyState();
             }
         }
     },

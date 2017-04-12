@@ -23,10 +23,10 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
         
         attrs.defaultPlacement = 'container';
         
-        if (attrs.spacing === undefined) attrs.spacing = myt.TabSliderContainer.DEFAULT_SPACING;
-        if (attrs.overflow === undefined) attrs.overflow = 'autoy';
-        if (attrs.itemSelectionId === undefined) attrs.itemSelectionId = 'tabId';
-        if (attrs.maxSelected === undefined) attrs.maxSelected = 1;
+        if (attrs.spacing == null) attrs.spacing = myt.TabSliderContainer.DEFAULT_SPACING;
+        if (attrs.overflow == null) attrs.overflow = 'autoy';
+        if (attrs.itemSelectionId == null) attrs.itemSelectionId = 'tabId';
+        if (attrs.maxSelected == null) attrs.maxSelected = 1;
         
         myt.DelayedMethodCall.createDelayedMethodCall(this, 0, '__updateLayout');
         
@@ -37,7 +37,7 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
         var self = this,
             M = myt,
             TS = M.TabSlider;
-        var container = new M.View(this, {
+        var container = new M.View(self, {
             name:'container', ignorePlacement:true, percentOfParentWidth:100
         }, [M.SizeToParent, {
             /** @overrides myt.View */
@@ -64,11 +64,11 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
                 this.callSuper(node);
             }
         }]);
-        new M.SpacedLayout(container, {name:'layout', axis:'y', spacing:this.spacing, collapseParent:true});
+        new M.SpacedLayout(container, {name:'layout', axis:'y', spacing:self.spacing, collapseParent:true});
         
-        this.attachTo(this, 'updateLayout', 'height');
+        self.attachTo(self, 'updateLayout', 'height');
         
-        this.callSuper();
+        self.callSuper();
     },
     
     
@@ -88,8 +88,13 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
     
     /** @private */
     __updateLayout: function() {
-        var tabSliders = this._tabSliders, i = tabSliders.length, tabSlider,
-            min = 0, preferred = 0, visCount = 0, collapsedHeight;
+        var tabSliders = this._tabSliders, 
+            i = tabSliders.length, 
+            tabSlider,
+            min = 0, 
+            preferred = 0, 
+            visCount = 0, 
+            collapsedHeight;
         
         while (i) {
             tabSlider = tabSliders[--i];

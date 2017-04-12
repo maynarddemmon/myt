@@ -12,17 +12,17 @@ myt.ListViewItem = new JS.Class('ListViewItem', myt.SimpleIconTextButton, {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        if (attrs.height === undefined) attrs.height = 24;
+        if (attrs.height == null) attrs.height = 24;
         
-        if (attrs.activeColor === undefined) attrs.activeColor = '#bbbbbb';
-        if (attrs.hoverColor === undefined) attrs.hoverColor = '#ffffff';
-        if (attrs.readyColor === undefined) attrs.readyColor = '#eeeeee';
+        if (attrs.activeColor == null) attrs.activeColor = '#bbbbbb';
+        if (attrs.hoverColor == null) attrs.hoverColor = '#ffffff';
+        if (attrs.readyColor == null) attrs.readyColor = '#eeeeee';
         
-        if (attrs.contentAlign === undefined) attrs.contentAlign = 'left';
-        if (attrs.inset === undefined) attrs.inset = 8;
-        if (attrs.outset === undefined) attrs.outset = 8;
+        if (attrs.contentAlign == null) attrs.contentAlign = 'left';
+        if (attrs.inset == null) attrs.inset = 8;
+        if (attrs.outset == null) attrs.outset = 8;
         
-        if (attrs.activationKeys === undefined) attrs.activationKeys = [13,27,32,37,38,39,40];
+        if (attrs.activationKeys == null) attrs.activationKeys = [13,27,32,37,38,39,40];
         
         this.callSuper(parent, attrs);
     },
@@ -36,13 +36,14 @@ myt.ListViewItem = new JS.Class('ListViewItem', myt.SimpleIconTextButton, {
     
     /** @overrides myt.ListViewItemMixin */
     getMinimumWidth: function() {
-        var iconView = this.iconView,
-            textView = this.textView,
-            textViewVisible = textView.visible && this.text,
+        var self = this,
+            iconView = self.iconView,
+            textView = self.textView,
+            textViewVisible = textView.visible && self.text,
             iconWidth = iconView.visible ? iconView.width : 0,
-            iconExtent = iconWidth + (textViewVisible && iconWidth > 0 ? this.iconSpacing : 0),
+            iconExtent = iconWidth + (textViewVisible && iconWidth > 0 ? self.iconSpacing : 0),
             textWidth = textViewVisible ? Math.ceil(textView.width) : 0;
-        return this.inset + iconExtent + textWidth + this.outset;
+        return self.inset + iconExtent + textWidth + self.outset;
     },
     
     /** @overrides myt.Button */

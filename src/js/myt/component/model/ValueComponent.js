@@ -50,7 +50,7 @@ myt.ValueComponent = new JS.Module('ValueComponent', {
         if (existingFilter) {
             if (where === 'last') {
                 chainedFilter = function(v) {return filter(existingFilter(v));};
-            } else if (where === 'first' || where === undefined) {
+            } else if (where === 'first' || where == null) {
                 chainedFilter = function(v) {return existingFilter(filter(v));};
             }
         }

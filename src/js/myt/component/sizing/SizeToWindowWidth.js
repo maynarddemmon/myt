@@ -6,7 +6,7 @@ myt.SizeToWindowWidth = new JS.Module('SizeToWindowWidth', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.SizeToWindow */
     initNode: function(parent, attrs) {
-        if (attrs.resizeDimension === undefined) attrs.resizeDimension = 'width';
+        if (attrs.resizeDimension == null) attrs.resizeDimension = 'width';
         
         this.callSuper(parent, attrs);
     }

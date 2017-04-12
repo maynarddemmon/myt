@@ -17,7 +17,7 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
     initNode: function(parent, attrs) {
         this._listeners = [];
         
-        if (attrs.protocols === undefined) attrs.protocols = 'typedMessage';
+        if (attrs.protocols == null) attrs.protocols = 'typedMessage';
         
         this.callSuper();
     },
@@ -107,7 +107,7 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
             matcherFunc = funcsByKey[matcher] || (funcsByKey[matcher] = function(type) {return type === matcher;});
         } else if (typeof matcher === 'function') {
             matcherFunc = matcher;
-        } else if (matcher === undefined) {
+        } else if (matcher == null) {
             // Use a unique match anything function
             matcherFunc = myt.MessageTypeWebSocket.MATCH_ANYTHING;
         } else {

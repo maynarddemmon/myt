@@ -30,18 +30,18 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides */
     initNode: function(parent, attrs) {
-        this.activateKeyDown = -1;
+        var self = this;
         
-        if (attrs.activationKeys === undefined) {
-            attrs.activationKeys = myt.KeyActivation.DEFAULT_ACTIVATION_KEYS;
-        }
+        self.activateKeyDown = -1;
         
-        this.callSuper(parent, attrs);
+        if (attrs.activationKeys == null) attrs.activationKeys = myt.KeyActivation.DEFAULT_ACTIVATION_KEYS;
         
-        this.attachToDom(this, '__handleKeyDown', 'keydown');
-        this.attachToDom(this, '__handleKeyPress', 'keypress');
-        this.attachToDom(this, '__handleKeyUp', 'keyup');
-        this.attachToDom(this, '__doDomBlur', 'blur');
+        self.callSuper(parent, attrs);
+        
+        self.attachToDom(self, '__handleKeyDown', 'keydown');
+        self.attachToDom(self, '__handleKeyPress', 'keypress');
+        self.attachToDom(self, '__handleKeyUp', 'keyup');
+        self.attachToDom(self, '__doDomBlur', 'blur');
     },
     
     

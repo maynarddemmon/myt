@@ -18,42 +18,49 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
         // Allows horizontal scrolling if the grid columns are too wide.
-        if (attrs.overflow === undefined) attrs.overflow = 'autox';
+        if (attrs.overflow == null) attrs.overflow = 'autox';
         
-        if (attrs.bgColor === undefined) attrs.bgColor = '#cccccc';
-        if (attrs.rowSpacing === undefined) attrs.rowSpacing = 1;
-        if (attrs.columnSpacing === undefined) attrs.columnSpacing = 1;
+        if (attrs.bgColor == null) attrs.bgColor = '#cccccc';
+        if (attrs.rowSpacing == null) attrs.rowSpacing = 1;
+        if (attrs.columnSpacing == null) attrs.columnSpacing = 1;
         
         this.callSuper(parent, attrs);
     },
     
     /** @overrides myt.View */
     doAfterAdoption: function() {
-        var shtr = this.sizeHeightToRows, m = myt;
+        var self = this,
+            M = myt,
+            V = M.View,
+            SL = M.SpacedLayout,
+            sizeHeightToRows = self.sizeHeightToRows;
         
-        var header = new m.View(this, {name:'header', overflow:'hidden'});
-        new m.SpacedLayout(header, {
-            name:'xLayout', locked:true, axis:'x', collapseParent:true, 
-            spacing:this.columnSpacing
+        var header = new V(self, {name:'header', overflow:'hidden'});
+        new SL(header, {
+            name:'xLayout', locked:true, collapseParent:true, 
+            spacing:self.columnSpacing
         });
-        new m.SizeToChildren(header, {name:'yLayout', locked:true, axis:'y'});
+        new M.SizeToChildren(header, {name:'yLayout', locked:true, axis:'y'});
         
-        var content = new m.View(this, {name:'content', overflow:shtr ? 'hidden' : 'autoy'});
-        new m.SpacedLayout(content, {
-            name:'yLayout', locked:true, axis:'y', spacing:this.rowSpacing,
-            collapseParent:shtr
+        var content = new V(self, {
+            name:'content', 
+            overflow:sizeHeightToRows ? 'hidden' : 'autoy'
+        });
+        new SL(content, {
+            name:'yLayout', locked:true, axis:'y', spacing:self.rowSpacing,
+            collapseParent:sizeHeightToRows
         });
         
-        this.syncTo(this, 'setGridWidth', 'width');
-        this.syncTo(header, '_updateContentWidth', 'width');
+        self.syncTo(self, 'setGridWidth', 'width');
+        self.syncTo(header, '_updateContentWidth', 'width');
         
-        this.applyConstraint('_updateContentHeight', [
-            shtr ? content : this, 'height', 
+        self.applyConstraint('_updateContentHeight', [
+            sizeHeightToRows ? content : self, 'height', 
             header, 'height', 
             header, 'y'
         ]);
         
-        this.callSuper();
+        self.callSuper();
     },
     
     
@@ -106,14 +113,16 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     },
     
     _updateContentHeight: function(event) {
-        var header = this.header, content = this.content,
+        var self = this,
+            header = self.header, 
+            content = self.content,
             y = header.y + header.height;
         content.setY(y);
         
-        if (this.sizeHeightToRows) {
-            this.setHeight(y + content.height);
+        if (self.sizeHeightToRows) {
+            self.setHeight(y + content.height);
         } else {
-            content.setHeight(this.height - y);
+            content.setHeight(self.height - y);
         }
     },
     

@@ -102,7 +102,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
                 name:'closeBtn', width:16, height:16, y:4,
                 roundedCorners:8, tooltip:'Close Dialog.',
                 ignoreLayout:true, align:'right', alignOffset:4
-            }, [myt.TooltipMixin, {
+            }, [{
                 doActivated: function() {callbackTarget.doCallback(this);},
                 
                 draw: function(canvas, config) {
@@ -199,10 +199,14 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     __destroyContent: function() {
         this.__hideSpinner();
         
-        var content = this.content, MP = myt.ModalPanel, MD = myt.Dialog,
+        var M = myt,
+            MP = M.ModalPanel, 
+            MD = M.Dialog,
+            content = this.content, 
             stc = content.sizeToChildren,
             svs = content.getSubviews(), 
-            i = svs.length, sv;
+            i = svs.length,
+            sv;
         
         // Destroy all children except the close button since that gets reused.
         while (i) {
@@ -210,17 +214,17 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             if (sv.name !== 'closeBtn') sv.destroy();
         }
         
-        // Blank sets this.
+        // The blank dialog sets this.
         content.setVisible(true);
-        this.overlay.setBgColor(myt.Dimmer.DEFAULT_COLOR);
+        this.overlay.setBgColor(M.Dimmer.DEFAULT_COLOR);
         
         // Message and Confirm dialogs set this.
         this.setCallbackFunction();
         
-        // Confirm dialog modifies this.
+        // The confirm dialog modifies this.
         stc.setPaddingY(MP.DEFAULT_PADDING_Y);
         
-        // Confirm content dialog modifies this.
+        // The confirm content dialog modifies this.
         stc.setPaddingX(MP.DEFAULT_PADDING_X);
         
         // Any opts could modify this
@@ -266,14 +270,19 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             displayed. Supports: fontWeight, whiteSpace, wordWrap and width.
         @returns void */
     showMessage: function(msg, callbackFunction, opts) {
-        opts = myt.extend({}, myt.Dialog.WRAP_TEXT_DEFAULTS, opts);
-        var content = this.content, MP = myt.ModalPanel;
+        var self = this,
+            M = myt,
+            MP = M.ModalPanel,
+            content = self.content, 
+            closeBtn = content.closeBtn;
         
-        this.__destroyContent();
+        opts = M.extend({}, M.Dialog.WRAP_TEXT_DEFAULTS, opts);
         
-        this.setCallbackFunction(callbackFunction);
+        self.__destroyContent();
         
-        new myt.Text(content, {
+        self.setCallbackFunction(callbackFunction);
+        
+        new M.Text(content, {
             name:'msg',
             text:msg,
             whiteSpace:opts.whiteSpace,
@@ -284,22 +293,23 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             width:opts.width
         });
         
-        this.show();
+        self.show();
         
-        var closeBtn = content.closeBtn;
         closeBtn.setVisible(true);
         closeBtn.focus();
         
-        this.setDisplayMode('message');
+        self.setDisplayMode('message');
     },
     
     showSimple: function(contentBuilderFunc, callbackFunction, opts) {
-        var content = this.content,
+        var self = this,
+            M = myt,
+            content = self.content,
             closeBtn = content.closeBtn,
             opts = opts || {},
             maxHeight = opts.maxContainerHeight;
         
-        this.__destroyContent();
+        self.__destroyContent();
         
         if (opts.bgColor) content.setBgColor(opts.bgColor);
         if (opts.roundedCorners) content.setRoundedCorners(opts.roundedCorners);
@@ -307,9 +317,9 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         if (opts.border) content.setBorder(opts.border);
         
         content.sizeToChildren.setPaddingX(1);
-        this.setCallbackFunction(callbackFunction);
+        self.setCallbackFunction(callbackFunction);
         
-        var contentContainer = new myt.View(content, {
+        var contentContainer = new M.View(content, {
             name:'contentContainer', x:1, y:25, overflow:'auto'
         }, [{
             setHeight: function(v) {
@@ -318,16 +328,16 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             }
         }]);
         
-        contentBuilderFunc.call(this, contentContainer);
+        contentBuilderFunc.call(self, contentContainer);
         
-        new myt.SizeToChildren(contentContainer, {axis:'both'});
+        new M.SizeToChildren(contentContainer, {axis:'both'});
         
-        this.show();
+        self.show();
         
         closeBtn.setVisible(true);
         closeBtn.focus();
         
-        this.setDisplayMode('content');
+        self.setDisplayMode('content');
         
         // Set initial focus
         if (contentContainer.initialFocus) contentContainer.initialFocus.focus();
@@ -340,18 +350,22 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             Supports: fontWeight, whiteSpace, wordWrap and width.
         @returns void */
     showSpinner: function(msg, opts) {
-        opts = myt.extend({}, myt.Dialog.NO_WRAP_TEXT_DEFAULTS, opts);
-        var content = this.content, MP = myt.ModalPanel;
+        var self = this,
+            M = myt,
+            MP = M.ModalPanel,
+            content = self.content;
         
-        this.__destroyContent();
+        opts = M.extend({}, M.Dialog.NO_WRAP_TEXT_DEFAULTS, opts);
         
-        var spinner = this.spinner = new myt.Spinner(content, {
+        self.__destroyContent();
+        
+        var spinner = self.spinner = new M.Spinner(content, {
             align:'center', visible:true,
             radius:10, lines:12, length:14, lineWidth:3,
             y:MP.DEFAULT_PADDING_Y
         });
         if (msg) {
-            new myt.Text(content, {
+            new M.Text(content, {
                 text:msg,
                 whiteSpace:opts.whiteSpace,
                 wordWrap:opts.wordWrap,
@@ -362,22 +376,29 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             });
         }
         
-        this.show();
+        self.show();
         
         content.closeBtn.setVisible(false);
-        this.focus(); // Focus on the dimmer itself to prevent user interaction.
+        self.focus(); // Focus on the dimmer itself to prevent user interaction.
         
-        this.setDisplayMode('spinner');
+        self.setDisplayMode('spinner');
     },
     
     showColorPicker: function(callbackFunction, opts) {
-        var MP = myt.ModalPanel, content = this.content;
+        var self = this,
+            M = myt,
+            V = M.View,
+            MP = M.ModalPanel,
+            content = self.content,
+            closeBtn = content.closeBtn,
+            r = M.Dialog.DEFAULT_RADIUS;
         
-        opts = myt.extend({}, myt.Dialog.PICKER_DEFAULTS, opts);
+        opts = M.extend({}, M.Dialog.PICKER_DEFAULTS, opts);
         
-        this.__destroyContent();
+        self.__destroyContent();
         
-        var wrappedCallbackFunction = function(action) {
+        // Set the callback function to one wrapped to handle each button type.
+        self.setCallbackFunction(function(action) {
             switch(action) {
                 case 'closeBtn':
                 case 'cancelBtn':
@@ -390,52 +411,45 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
                     break;
             }
             this._spectrum.destroy();
-        };
-        
-        
-        this.setCallbackFunction(wrappedCallbackFunction);
+        });
         
         // Build Picker
-        var picker = new myt.View(content, {
+        var picker = new V(content, {
             name:'picker',
             x:MP.DEFAULT_PADDING_X,
             y:MP.DEFAULT_PADDING_Y + 24,
             width:337,
             height:177
         });
-        var spectrumView = new myt.View(picker, {});
-        
+        var spectrumView = new V(picker);
         $(spectrumView.domElement).spectrum({
             color:opts.color,
             palette: [['#000000','#111111','#222222','#333333','#444444','#555555','#666666','#777777'],
                       ['#888888','#999999','#aaaaaa','#bbbbbb','#cccccc','#dddddd','#eeeeee','#ffffff']],
             localStorageKey: "myt.default",
-            dialog:this
+            dialog:self
         });
         
-        this.show();
+        self.show();
         
-        var closeBtn = content.closeBtn;
         closeBtn.setVisible(true);
         closeBtn.focus();
         
-        this.__setupConfirmButtons(picker, opts);
+        self.__setupConfirmButtons(picker, opts);
         
-        var r = myt.Dialog.DEFAULT_RADIUS;
-        var bg = new myt.View(content, {
+        (new V(content, {
             ignoreLayout:true,
-            x:0, y:0,
             width:content.width, height:24,
             bgColor:'#eeeeee',
             roundedTopLeftCorner:r,
             roundedTopRightCorner:r
-        });
-        bg.sendToBack();
-        new myt.Text(content, {
+        })).sendToBack();
+        
+        new M.Text(content, {
             name:'title', x:r, y:4, text:opts.titleText, fontWeight:'bold'
         });
         
-        this.setDisplayMode('color_picker');
+        self.setDisplayMode('color_picker');
     },
     
     _spectrumCallback: function(spectrum) {
@@ -443,18 +457,22 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     },
     
     showDatePicker: function(callbackFunction, opts) {
-        var M = myt,
+        var self = this,
+            M = myt,
             MP = M.ModalPanel, 
             V = M.View,
-            content = this.content;
+            content = self.content,
+            closeBtn = content.closeBtn,
+            r = M.Dialog.DEFAULT_RADIUS;
         
         opts = M.extend({}, M.Dialog.DATE_PICKER_DEFAULTS, opts);
         
-        this.__destroyContent();
+        self.__destroyContent();
         
         content.sizeToChildren.setPaddingX(0);
         
-        var wrappedCallbackFunction = function(action) {
+        // Set the callback function to one wrapped to handle each button type.
+        self.setCallbackFunction(function(action) {
             switch(action) {
                 case 'closeBtn':
                 case 'cancelBtn':
@@ -464,8 +482,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
                     callbackFunction.call(this, action, this._pickedDateTime);
                     break;
             }
-        };
-        this.setCallbackFunction(wrappedCallbackFunction);
+        });
         
         // Build Picker
         var picker = new V(content, {
@@ -475,33 +492,31 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             width:opts.dateOnly ? 180 : (opts.timeOnly ? 150 : 225),
             height:185
         });
-        var pickerView = new V(picker, {});
+        var pickerView = new V(picker);
         
         $(pickerView.domElement).dtpicker({
             current:new Date(opts.initialDate || Date.now()),
             dateOnly:opts.dateOnly || false,
             timeOnly:opts.timeOnly || false,
-            dialog:this
+            dialog:self
         });
         
-        this.show();
+        self.show();
         
-        var closeBtn = content.closeBtn;
         closeBtn.setVisible(true);
         closeBtn.focus();
         
-        this.__setupConfirmButtons(picker, opts);
+        self.__setupConfirmButtons(picker, opts);
         
-        var r = M.Dialog.DEFAULT_RADIUS;
-        var bg = new V(content, {
+        (new V(content, {
             ignoreLayout:true,
             x:0, y:0,
             width:content.width, height:24,
             bgColor:'#eeeeee',
             roundedTopLeftCorner:r,
             roundedTopRightCorner:r
-        });
-        bg.sendToBack();
+        })).sendToBack();
+        
         new M.Text(content, {
             name:'title', 
             x:r, 
@@ -510,7 +525,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             fontWeight:'bold'
         });
         
-        this.setDisplayMode('date_picker');
+        self.setDisplayMode('date_picker');
     },
     
     _dtpickerCallback: function(dtpicker) {
@@ -528,56 +543,55 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     },
     
     showContentConfirm: function(contentBuilderFunc, callbackFunction, opts) {
-        var content = this.content;
+        var self = this,
+            M = myt,
+            V = M.View,
+            content = self.content,
+            closeBtn = content.closeBtn,
+            r = M.Dialog.DEFAULT_RADIUS,
+            maxHeight = opts.maxContainerHeight;
         
-        opts = myt.extend({}, myt.Dialog.CONFIRM_DEFAULTS, opts);
+        opts = M.extend({}, M.Dialog.CONFIRM_DEFAULTS, opts);
         
-        this.__destroyContent();
+        self.__destroyContent();
         
         content.sizeToChildren.setPaddingX(1);
-        this.setCallbackFunction(callbackFunction);
+        self.setCallbackFunction(callbackFunction);
         
         // Setup form
-        var maxHeight = opts.maxContainerHeight;
-        var contentContainer = new myt.View(content, {
-            name:'contentContainer',
-            x:1, y:25, overflow:'auto'
+        var contentContainer = new V(content, {
+            name:'contentContainer', x:1, y:25, overflow:'auto'
         }, [{
             setHeight: function(v) {
-                if (v > maxHeight) v = maxHeight;
-                this.callSuper(v);
+                this.callSuper(v > maxHeight ? maxHeight : v);
             }
         }]);
         
-        contentBuilderFunc.call(this, contentContainer);
+        contentBuilderFunc.call(self, contentContainer);
         
-        new myt.SizeToChildren(contentContainer, {axis:'both'});
+        new M.SizeToChildren(contentContainer, {axis:'both'});
         
-        this.show();
+        self.show();
         
-        var closeBtn = content.closeBtn;
         closeBtn.setVisible(true);
         closeBtn.focus();
         
-        this.__setupConfirmButtons(contentContainer, opts);
+        self.__setupConfirmButtons(contentContainer, opts);
         
-        var r = myt.Dialog.DEFAULT_RADIUS;
-        var bg = new myt.View(content, {
+        // Make background view
+        (new V(content, {
             ignoreLayout:true,
-            x:0, y:0,
             width:content.width, height:24,
             bgColor:'#eeeeee',
             roundedTopLeftCorner:r,
             roundedTopRightCorner:r
-        });
-        bg.sendToBack();
+        })).sendToBack();
         
-        new myt.Text(content, {
-            name:'title', x:r, y:4, text:opts.titleText,
-            fontWeight:'bold'
+        new M.Text(content, {
+            name:'title', x:r, y:4, text:opts.titleText, fontWeight:'bold'
         });
         
-        this.setDisplayMode('content');
+        self.setDisplayMode('content');
         
         // Set initial focus
         if (contentContainer.initialFocus) contentContainer.initialFocus.focus();
@@ -585,10 +599,14 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     
     /** @private */
     __setupConfirmButtons: function(mainView, opts) {
-        var self = this, content = this.content, 
-            DPY = myt.ModalPanel.DEFAULT_PADDING_Y;
+        var self = this,
+            M = myt,
+            V = M.View,
+            content = this.content, 
+            DPY = M.ModalPanel.DEFAULT_PADDING_Y,
+            r = M.Dialog.DEFAULT_RADIUS;
         
-        var btnContainer = new myt.View(content, {
+        var btnContainer = new V(content, {
             y:mainView.y + mainView.height + DPY, align:'center'
         });
         
@@ -600,24 +618,24 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             hoverColor:'#dddddd',
             readyColor:'#cccccc'
         };
-        if (opts.activeColor !== undefined) attrs.activeColor = opts.activeColor;
-        if (opts.hoverColor !== undefined) attrs.hoverColor = opts.hoverColor;
-        if (opts.readyColor !== undefined) attrs.readyColor = opts.readyColor;
-        if (opts.textColor !== undefined) attrs.textColor = opts.textColor;
+        if (opts.activeColor != null) attrs.activeColor = opts.activeColor;
+        if (opts.hoverColor != null) attrs.hoverColor = opts.hoverColor;
+        if (opts.readyColor != null) attrs.readyColor = opts.readyColor;
+        if (opts.textColor != null) attrs.textColor = opts.textColor;
         
-        new myt.SimpleIconTextButton(btnContainer, attrs, [{
+        new M.SimpleIconTextButton(btnContainer, attrs, [{
             doActivated: function() {self.doCallback(this);}
         }]);
         
         // Confirm Button
         attrs.name = 'confirmBtn';
         attrs.text = opts.confirmTxt;
-        if (opts.activeColorConfirm !== undefined) attrs.activeColor = opts.activeColorConfirm;
-        if (opts.hoverColorConfirm !== undefined) attrs.hoverColor = opts.hoverColorConfirm;
-        if (opts.readyColorConfirm !== undefined) attrs.readyColor = opts.readyColorConfirm;
-        if (opts.textColorConfirm !== undefined) attrs.textColor = opts.textColorConfirm;
+        if (opts.activeColorConfirm != null) attrs.activeColor = opts.activeColorConfirm;
+        if (opts.hoverColorConfirm != null) attrs.hoverColor = opts.hoverColorConfirm;
+        if (opts.readyColorConfirm != null) attrs.readyColor = opts.readyColorConfirm;
+        if (opts.textColorConfirm != null) attrs.textColor = opts.textColorConfirm;
         
-        new myt.SimpleIconTextButton(btnContainer, attrs, [{
+        new M.SimpleIconTextButton(btnContainer, attrs, [{
             doActivated: function() {self.doCallback(this);}
         }]);
         
@@ -637,28 +655,26 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
                 if (attrs.readyColor == null) attrs.readyColor = '#cccccc';
                 if (attrs.textColor == null) attrs.textColor = '#000000';
                 
-                new myt.SimpleIconTextButton(btnContainer, attrs, [{
+                new M.SimpleIconTextButton(btnContainer, attrs, [{
                     doActivated: function() {self.doCallback(this);}
                 }]);
             }
         }
         
-        new myt.SizeToChildren(btnContainer, {axis:'y'});
-        new myt.SpacedLayout(btnContainer, {spacing:4, axis:'x', collapseParent:true});
+        new M.SizeToChildren(btnContainer, {axis:'y'});
+        new M.SpacedLayout(btnContainer, {spacing:4, collapseParent:true});
         
         content.sizeToChildren.setPaddingY(DPY / 2);
         
-        var r = myt.Dialog.DEFAULT_RADIUS;
-        var bg = new myt.View(content, {
+        var bg = new V(content, {
             ignoreLayout:true,
-            x:0,
             y:btnContainer.y - (DPY / 2),
             width:content.width,
             bgColor:'#eeeeee',
             roundedBottomLeftCorner:r,
             roundedBottomRightCorner:r
         });
-        bg.setHeight(content.height - bg.y);
+        bg.setHeight(content.height - bg.y); // WHY: is this not in the attrs?
         bg.sendToBack();
     }
 });

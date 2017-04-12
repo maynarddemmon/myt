@@ -23,8 +23,8 @@ myt.DropSource = new JS.Module('DropSource', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides */
     initNode: function(parent, attrs) {
-        if (attrs.distanceBeforeDrag === undefined) attrs.distanceBeforeDrag = 2;
-        if (attrs.dropParent === undefined) attrs.dropParent = parent.getRoot();
+        if (attrs.distanceBeforeDrag == null) attrs.distanceBeforeDrag = 2;
+        if (attrs.dropParent == null) attrs.dropParent = parent.getRoot();
         
         this.callSuper(parent, attrs);
     },

@@ -39,26 +39,28 @@ myt.FormInputTextMixin = new JS.Module('FormInputTextMixin', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Input */
     initNode: function(parent, attrs) {
-        this.acceleratorScope = 'element';
-        this.validateWhen = 'key';
-        this.errorColor = '#ff9999';
-        this.actionRequiredColor = '#996666';
-        this.normalColor = '#999999';
+        var self = this;
         
-        if (attrs.bgColor === undefined) attrs.bgColor = '#ffffff';
-        if (attrs.borderWidth === undefined) attrs.borderWidth = 1;
-        if (attrs.borderStyle === undefined) attrs.borderStyle = 'solid';
-        if (attrs.focusEmbellishment === undefined) attrs.focusEmbellishment = true;
+        self.acceleratorScope = 'element';
+        self.validateWhen = 'key';
+        self.errorColor = '#ff9999';
+        self.actionRequiredColor = '#996666';
+        self.normalColor = '#999999';
         
-        this.callSuper(parent, attrs);
+        if (attrs.bgColor == null) attrs.bgColor = '#ffffff';
+        if (attrs.borderWidth == null) attrs.borderWidth = 1;
+        if (attrs.borderStyle == null) attrs.borderStyle = 'solid';
+        if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = true;
         
-        this.addValueProcessor(myt.global.valueProcessors.getValueProcessor('undefToEmpty'));
+        self.callSuper(parent, attrs);
         
-        this.attachToDom(this, '__handleKeyDown', 'keydown');
-        this.attachToDom(this, '__handleKeyUp', 'keyup');
+        self.addValueProcessor(myt.global.valueProcessors.getValueProcessor('undefToEmpty'));
         
-        this.addAccelerator('accept', this.doAccept);
-        this.addAccelerator('reject', this.doReject);
+        self.attachToDom(self, '__handleKeyDown', 'keydown');
+        self.attachToDom(self, '__handleKeyUp', 'keyup');
+        
+        self.addAccelerator('accept', self.doAccept);
+        self.addAccelerator('reject', self.doReject);
     },
     
     

@@ -27,13 +27,13 @@ myt.TabContainer = new JS.Module('TabContainer', {
         this.__tabs = [];
         
         var TC = myt.TabContainer;
-        if (attrs.spacing === undefined) attrs.spacing = TC.DEFAULT_SPACING;
-        if (attrs.inset === undefined) attrs.inset = TC.DEFAULT_INSET;
+        if (attrs.spacing == null) attrs.spacing = TC.DEFAULT_SPACING;
+        if (attrs.inset == null) attrs.inset = TC.DEFAULT_INSET;
         
-        if (attrs.location === undefined) attrs.location = 'top';
+        if (attrs.location == null) attrs.location = 'top';
         
-        if (attrs.itemSelectionId === undefined) attrs.itemSelectionId = 'tabId';
-        if (attrs.maxSelected === undefined) attrs.maxSelected = 1;
+        if (attrs.itemSelectionId == null) attrs.itemSelectionId = 'tabId';
+        if (attrs.maxSelected == null) attrs.maxSelected = 1;
         
         this.callSuper(parent, attrs);
         

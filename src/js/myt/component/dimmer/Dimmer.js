@@ -25,41 +25,44 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
-        this.restoreFocus = true;
+        var self = this;
+        
+        self.restoreFocus = true;
         
         attrs.focusable = attrs.focusCage = true;
         
-        if (attrs.percentOfParentWidth === undefined) attrs.percentOfParentWidth = 100;
-        if (attrs.percentOfParentHeight === undefined) attrs.percentOfParentHeight = 100;
-        if (attrs.visible === undefined) attrs.visible = false;
-        if (attrs.ignoreLayout === undefined) attrs.ignoreLayout = true;
+        if (attrs.percentOfParentWidth == null) attrs.percentOfParentWidth = 100;
+        if (attrs.percentOfParentHeight == null) attrs.percentOfParentHeight = 100;
+        if (attrs.visible == null) attrs.visible = false;
+        if (attrs.ignoreLayout == null) attrs.ignoreLayout = true;
         
-        this.callSuper(parent, attrs);
+        self.callSuper(parent, attrs);
         
         // Eat mouse events
-        this.attachDomObserver(this, 'eatMouseEvent', 'mouseover');
-        this.attachDomObserver(this, 'eatMouseEvent', 'mouseout');
-        this.attachDomObserver(this, 'eatMouseEvent', 'mousedown');
-        this.attachDomObserver(this, 'eatMouseEvent', 'mouseup');
-        this.attachDomObserver(this, 'eatMouseEvent', 'click');
-        this.attachDomObserver(this, 'eatMouseEvent', 'dblclick');
-        this.attachDomObserver(this, 'eatMouseEvent', 'mousemove');
+        self.attachDomObserver(self, 'eatMouseEvent', 'mouseover');
+        self.attachDomObserver(self, 'eatMouseEvent', 'mouseout');
+        self.attachDomObserver(self, 'eatMouseEvent', 'mousedown');
+        self.attachDomObserver(self, 'eatMouseEvent', 'mouseup');
+        self.attachDomObserver(self, 'eatMouseEvent', 'click');
+        self.attachDomObserver(self, 'eatMouseEvent', 'dblclick');
+        self.attachDomObserver(self, 'eatMouseEvent', 'mousemove');
         
-        myt.RootView.setupCaptureDrop(this);
+        myt.RootView.setupCaptureDrop(self);
     },
     
     /** @overrides myt.View */
     doBeforeAdoption: function() {
         this.callSuper();
         
-        var D = myt.Dimmer;
-        new myt.View(this, {
+        var M = myt,
+            D = M.Dimmer;
+        new M.View(this, {
             name:'overlay', ignorePlacement:true, 
             opacity:D.DEFAULT_OPACITY,
             bgColor:D.DEFAULT_COLOR,
             percentOfParentWidth:100,
             percentOfParentHeight:100
-        }, [myt.SizeToParent]);
+        }, [M.SizeToParent]);
     },
     
     /** @overrides myt.View */
@@ -84,15 +87,16 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
     /** Shows the dimmer and remembers the focus location.
         @returns void */
     show: function() {
-        var gf = myt.global.focus;
-        this.prevFocus = gf.focusedView || gf.focusedDom;
+        var self = this,
+            gf = myt.global.focus;
+        self.prevFocus = gf.focusedView || gf.focusedDom;
         
-        this.makeHighestZIndex();
+        self.makeHighestZIndex();
         
         // Prevent focus traversing
-        if (this.focusable) this.focus();
+        if (self.focusable) self.focus();
         
-        this.setVisible(true);
+        self.setVisible(true);
     },
     
     /** Hides the dimmer and restores focus if necessary.

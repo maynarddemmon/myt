@@ -29,71 +29,53 @@ myt.TooltipMixin = new JS.Module('TooltipMixin', {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setTooltip: function(v) {
-        if (this.tooltip !== v) {
-            this.tooltip = v;
-            if (this.inited) this.fireEvent('tooltip', v);
-        }
-    },
-    
-    setTipAlign: function(v) {
-        if (this.tipAlign !== v) {
-            this.tipAlign = v;
-            if (this.inited) this.fireEvent('tipAlign', v);
-        }
-    },
-    
-    setTipValign: function(v) {
-        if (this.tipValign !== v) {
-            this.tipValign = v;
-            if (this.inited) this.fireEvent('tipValign', v);
-        }
-    },
-    
-    setTipClass: function(v) {
-        if (this.tipClass !== v) {
-            this.tipClass = v;
-            if (this.inited) this.fireEvent('tipClass', v);
-        }
-    },
+    setTooltip: function(v) {this.set('tooltip', v, true);},
+    setTipAlign: function(v) {this.set('tipAlign', v, true);},
+    setTipValign: function(v) {this.set('tipValign', v, true);},
+    setTipClass: function(v) {this.set('tipClass', v, true);},
     
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.MouseOver. */
     doSmoothMouseOver: function(isOver) {
-        this.callSuper(isOver);
+        var self = this,
+            M = myt,
+            g = M.global,
+            tooltip = self.tooltip;
         
-        if (isOver && this.tooltip) {
+        self.callSuper(isOver);
+        
+        if (isOver && tooltip) {
             // Use configured class or default if none defined.
-            var tipClass = this.tipClass || myt.TooltipMixin.DEFAULT_TIP_CLASS,
-                g = myt.global, 
-                ttv = g.tooltipView;
+            var tipClass = self.tipClass || M.TooltipMixin.DEFAULT_TIP_CLASS,
+                tooltipView = g.tooltipView;
             
             // Destroy tip if it's not the correct class.
-            if (ttv && !(ttv instanceof tipClass)) {
+            if (tooltipView && !(tooltipView instanceof tipClass)) {
                 g.unregister('tooltipView');
-                ttv.destroy();
-                ttv = null;
+                tooltipView.destroy();
+                tooltipView = null;
             }
             
             // Create new instance.
-            if (!ttv) {
+            if (!tooltipView) {
                 // Create tooltip div if necessary
                 var elem = document.getElementById("tooltipDiv");
                 if (!elem) {
-                    elem = myt.DomElementProxy.createDomElement('div', {position:'absolute'});
-                    myt.getElement().appendChild(elem);
+                    elem = M.DomElementProxy.createDomElement('div', {position:'absolute'});
+                    
+                    // Make the div a child of the body element so it can be
+                    // in front of pretty much anything in the document.
+                    M.getElement().appendChild(elem);
                 }
-                
-                ttv = new tipClass(elem, {domId:'tooltipDiv'});
-                g.register('tooltipView', ttv);
+                g.register('tooltipView', tooltipView = new tipClass(elem, {domId:'tooltipDiv'}));
             }
             
-            ttv.setTooltip({
-                parent:this, 
-                text:this.tooltip, 
-                tipalign:this.tipAlign || 'left', 
-                tipvalign:this.tipValign || 'above'
+            tooltipView.setTooltip({
+                parent:self, 
+                text:tooltip, 
+                tipalign:self.tipAlign || 'left', 
+                tipvalign:self.tipValign || 'above'
             });
         }
     }

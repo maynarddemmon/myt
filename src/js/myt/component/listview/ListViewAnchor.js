@@ -17,15 +17,13 @@ myt.ListViewAnchor = new JS.Module('ListViewAnchor', {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        if (attrs.listViewClass === undefined) attrs.listViewClass = myt.ListView;
-        if (attrs.listViewAttrs === undefined) attrs.listViewAttrs = {};
-        if (attrs.itemConfig === undefined) attrs.itemConfig = [];
+        if (attrs.listViewClass == null) attrs.listViewClass = myt.ListView;
+        if (attrs.listViewAttrs == null) attrs.listViewAttrs = {};
+        if (attrs.itemConfig == null) attrs.itemConfig = [];
         
         // Assume this will be mixed onto something that implements 
         // myt.KeyActivation since it probably will.
-        if (attrs.activationKeys === undefined) {
-            attrs.activationKeys = [13,27,32,37,38,39,40];
-        }
+        if (attrs.activationKeys == null) attrs.activationKeys = [13,27,32,37,38,39,40];
         
         this.callSuper(parent, attrs);
     },

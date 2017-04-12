@@ -40,7 +40,7 @@ myt.AutoScroller = new JS.Module('AutoScroller', {
         this.scrollAmount = 2;
         this.scrollAcceleration = 7;
         
-        if (attrs.overflow === undefined) attrs.overflow = 'auto';
+        if (attrs.overflow == null) attrs.overflow = 'auto';
         
         this.callSuper(parent, attrs);
         
@@ -87,43 +87,44 @@ myt.AutoScroller = new JS.Module('AutoScroller', {
     
     /** @private */
     __handleMouseMove: function(event) {
-        var mousePos = event.value, 
+        var self = this,
+            mousePos = event.value, 
             mouseX = mousePos.pageX, 
             mouseY = mousePos.pageY;
         
-        if (this.containsPoint(mouseX, mouseY)) {
-            var pos = this.getPagePosition(), 
-                scrollBorder = this.scrollBorder;
+        if (self.containsPoint(mouseX, mouseY)) {
+            var pos = self.getPagePosition(), 
+                scrollBorder = self.scrollBorder;
             
             mouseX -= pos.x;
             mouseY -= pos.y;
             
             if (mouseY < scrollBorder) {
-                this.__isAutoscrollUp = true;
-                this.__amountscrollUp = this.__calculateAmount((scrollBorder - mouseY) / scrollBorder);
-                if (!this.__timerIdAutoscrollUp) this.__doAutoScrollAdj('scrollUp', -1);
-            } else if (this.height - mouseY < scrollBorder) {
-                this.__isAutoscrollDown = true;
-                this.__amountscrollDown = this.__calculateAmount((scrollBorder - (this.height - mouseY)) / scrollBorder);
-                if (!this.__timerIdAutoscrollDown) this.__doAutoScrollAdj('scrollDown', 1);
+                self.__isAutoscrollUp = true;
+                self.__amountscrollUp = self.__calculateAmount((scrollBorder - mouseY) / scrollBorder);
+                if (!self.__timerIdAutoscrollUp) self.__doAutoScrollAdj('scrollUp', -1);
+            } else if (self.height - mouseY < scrollBorder) {
+                self.__isAutoscrollDown = true;
+                self.__amountscrollDown = self.__calculateAmount((scrollBorder - (self.height - mouseY)) / scrollBorder);
+                if (!self.__timerIdAutoscrollDown) self.__doAutoScrollAdj('scrollDown', 1);
             } else {
-                this.__resetVScroll();
+                self.__resetVScroll();
             }
             
             if (mouseX < scrollBorder) {
-                this.__isAutoscrollLeft = true;
-                this.__amountscrollLeft = this.__calculateAmount((scrollBorder - mouseX) / scrollBorder);
-                if (!this.__timerIdAutoscrollLeft) this.__doAutoScrollAdj('scrollLeft', -1);
-            } else if (this.width - mouseX < scrollBorder) {
-                this.__isAutoscrollRight = true;
-                this.__amountscrollRight = this.__calculateAmount((scrollBorder - (this.width - mouseX)) / scrollBorder);
-                if (!this.__timerIdAutoscrollRight) this.__doAutoScrollAdj('scrollRight', 1);
+                self.__isAutoscrollLeft = true;
+                self.__amountscrollLeft = self.__calculateAmount((scrollBorder - mouseX) / scrollBorder);
+                if (!self.__timerIdAutoscrollLeft) self.__doAutoScrollAdj('scrollLeft', -1);
+            } else if (self.width - mouseX < scrollBorder) {
+                self.__isAutoscrollRight = true;
+                self.__amountscrollRight = self.__calculateAmount((scrollBorder - (self.width - mouseX)) / scrollBorder);
+                if (!self.__timerIdAutoscrollRight) self.__doAutoScrollAdj('scrollRight', 1);
             } else {
-                this.__resetHScroll();
+                self.__resetHScroll();
             }
         } else {
-            this.__resetVScroll();
-            this.__resetHScroll();
+            self.__resetVScroll();
+            self.__resetHScroll();
         }
     },
     
@@ -134,29 +135,26 @@ myt.AutoScroller = new JS.Module('AutoScroller', {
     
     /** @private */
     __resetVScroll: function() {
-        this.__isAutoscrollUp = false;
-        this.__timerIdAutoscrollUp = null;
-        this.__isAutoscrollDown = false;
-        this.__timerIdAutoscrollDown = null;
+        this.__isAutoscrollUp = this.__isAutoscrollDown = false;
+        this.__timerIdAutoscrollUp = this.__timerIdAutoscrollDown = null;
     },
     
     /** @private */
     __resetHScroll: function() {
-        this.__isAutoscrollLeft = false;
-        this.__timerIdAutoscrollLeft = null;
-        this.__isAutoscrollRight = false;
-        this.__timerIdAutoscrollRight = null;
+        this.__isAutoscrollLeft = this.__isAutoscrollRight = false;
+        this.__timerIdAutoscrollLeft = this.__timerIdAutoscrollRight = null;
     },
     
     /** @private */
     __doAutoScrollAdj: function(dir, amt) {
-        if (this['__isAuto' + dir]) {
-            this.domElement[dir === 'scrollUp' || dir === 'scrollDown' ? 'scrollTop' : 'scrollLeft'] += amt * this['__amount' + dir];
+        var self = this;
+        
+        if (self['__isAuto' + dir]) {
+            self.domElement[dir === 'scrollUp' || dir === 'scrollDown' ? 'scrollTop' : 'scrollLeft'] += amt * self['__amount' + dir];
             
-            var self = this;
-            this['__timerIdAuto' + dir] = setTimeout(function() {
+            self['__timerIdAuto' + dir] = setTimeout(function() {
                 self.__doAutoScrollAdj(dir, amt);
-            }, this.scrollFrequency);
+            }, self.scrollFrequency);
         }
     }
 });

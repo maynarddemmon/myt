@@ -9,8 +9,8 @@ myt.Text = new JS.Class('Text', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
-        if (attrs.whiteSpace === undefined) attrs.whiteSpace = 'nowrap';
-        if (attrs.userUnselectable === undefined) attrs.userUnselectable = true;
+        if (attrs.whiteSpace == null) attrs.whiteSpace = 'nowrap';
+        if (attrs.userUnselectable == null) attrs.userUnselectable = true;
         
         this.callSuper(parent, attrs);
     },
@@ -26,7 +26,8 @@ myt.Text = new JS.Class('Text', myt.View, {
         
         // Temporarily set wrapping to 'nowrap', take measurement and
         // then restore wrapping.
-        var s = this.deStyle, oldValue = s.whiteSpace;
+        var s = this.deStyle,
+            oldValue = s.whiteSpace;
         s.whiteSpace = 'nowrap';
         var measuredWidth = this.domElement.getBoundingClientRect().width;
         s.whiteSpace = oldValue;

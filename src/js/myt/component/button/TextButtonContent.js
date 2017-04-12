@@ -32,7 +32,7 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
         
         self.inset = self.outset = 0;
         
-        if (attrs.shrinkToFit === undefined) attrs.shrinkToFit = false;
+        if (attrs.shrinkToFit == null) attrs.shrinkToFit = false;
         
         // Use appropriate default based on mutliline text or not.
         self.textY = attrs.shrinkToFit ? 'middle' : 0;
@@ -74,22 +74,16 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
     // Accessors ///////////////////////////////////////////////////////////////
     setInset: function(v) {
         // Adapt to event from syncTo
-        if (v !== null && typeof v === 'object') v = v.value;
+        if (v != null && typeof v === 'object') v = v.value;
         
-        if (this.inset !== v) {
-            this.inset = v;
-            if (this.inited) this.fireEvent('inset', v);
-        }
+        this.set('inset', v, true);
     },
     
     setOutset: function(v) {
         // Adapt to event from syncTo
-        if (v !== null && typeof v === 'object') v = v.value;
+        if (v != null && typeof v === 'object') v = v.value;
         
-        if (this.outset !== v) {
-            this.outset = v;
-            if (this.inited) this.fireEvent('outset', v);
-        }
+        this.set('outset', v, true);
     },
     
     setText: function(v) {

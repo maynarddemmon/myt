@@ -31,17 +31,17 @@ myt.CheckboxStyleMixin = new JS.Module('CheckboxStyleMixin', {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        if (attrs.width === undefined) attrs.width = this.getIconExtentX();
-        if (attrs.height === undefined) attrs.height = this.getIconExtentY();
-        if (attrs.focusEmbellishment === undefined) attrs.focusEmbellishment = false;
+        if (attrs.width == null) attrs.width = this.getIconExtentX();
+        if (attrs.height == null) attrs.height = this.getIconExtentY();
+        if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
         
         var CSM = myt.CheckboxStyleMixin;
-        if (attrs.fillColorChecked === undefined) attrs.fillColorChecked = CSM.DEFAULT_FILL_COLOR_CHECKED;
-        if (attrs.fillColorHover === undefined) attrs.fillColorHover = CSM.DEFAULT_FILL_COLOR_HOVER;
-        if (attrs.fillColorActive === undefined) attrs.fillColorActive = CSM.DEFAULT_FILL_COLOR_ACTIVE;
-        if (attrs.fillColorReady === undefined) attrs.fillColorReady = CSM.DEFAULT_FILL_COLOR_READY;
-        if (attrs.edgeColor === undefined) attrs.edgeColor = CSM.DEFAULT_EDGE_COLOR;
-        if (attrs.edgeSize === undefined) attrs.edgeSize = CSM.DEFAULT_EDGE_SIZE;
+        if (attrs.fillColorChecked == null) attrs.fillColorChecked = CSM.DEFAULT_FILL_COLOR_CHECKED;
+        if (attrs.fillColorHover == null) attrs.fillColorHover = CSM.DEFAULT_FILL_COLOR_HOVER;
+        if (attrs.fillColorActive == null) attrs.fillColorActive = CSM.DEFAULT_FILL_COLOR_ACTIVE;
+        if (attrs.fillColorReady == null) attrs.fillColorReady = CSM.DEFAULT_FILL_COLOR_READY;
+        if (attrs.edgeColor == null) attrs.edgeColor = CSM.DEFAULT_EDGE_COLOR;
+        if (attrs.edgeSize == null) attrs.edgeSize = CSM.DEFAULT_EDGE_SIZE;
         
         this.callSuper(parent, attrs);
     },
@@ -64,7 +64,8 @@ myt.CheckboxStyleMixin = new JS.Module('CheckboxStyleMixin', {
     
     /** @overrides myt.DrawButton */
     getDrawBounds: function() {
-        var bounds = this.drawBounds, CSM = myt.CheckboxStyleMixin;
+        var bounds = this.drawBounds,
+            CSM = myt.CheckboxStyleMixin;
         bounds.x = CSM.DEFAULT_PAD_X;
         bounds.y = CSM.DEFAULT_PAD_Y;
         bounds.w = CSM.DEFAULT_WIDTH;
@@ -74,21 +75,22 @@ myt.CheckboxStyleMixin = new JS.Module('CheckboxStyleMixin', {
     
     /** @overrides myt.DrawButton */
     getDrawConfig: function(state) {
-        var config = this.callSuper(state);
-        config.checkedColor = this.fillColorChecked;
-        config.edgeColor = this.edgeColor;
-        config.edgeSize = this.edgeSize;
+        var self = this,
+            config = self.callSuper(state);
+        config.checkedColor = self.fillColorChecked;
+        config.edgeColor = self.edgeColor;
+        config.edgeSize = self.edgeSize;
         
         switch (state) {
             case 'hover':
-                config.fillColor = this.fillColorHover;
+                config.fillColor = self.fillColorHover;
                 break;
             case 'active':
-                config.fillColor = this.fillColorActive;
+                config.fillColor = self.fillColorActive;
                 break;
             case 'disabled':
             case 'ready':
-                config.fillColor = this.fillColorReady;
+                config.fillColor = self.fillColorReady;
                 break;
             default:
         }

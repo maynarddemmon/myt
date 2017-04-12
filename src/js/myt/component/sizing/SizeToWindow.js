@@ -19,7 +19,7 @@ myt.SizeToWindow = new JS.Module('SizeToWindow', {
     /** @overrides */
     initNode: function(parent, attrs) {
         this.minWidth = this.minHeight = 0;
-        if (attrs.resizeDimension === undefined) attrs.resizeDimension = 'both';
+        if (attrs.resizeDimension == null) attrs.resizeDimension = 'both';
         
         this.attachTo(myt.global.windowResize, '__handleResize', 'resize');
         this.callSuper(parent, attrs);

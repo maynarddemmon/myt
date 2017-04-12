@@ -17,8 +17,8 @@ myt.TabMixin = new JS.Module('TabMixin', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides */
     initNode: function(parent, attrs) {
-        if (attrs.tabId === undefined) attrs.tabId = myt.generateGuid();
-        if (attrs.tabContainer === undefined) attrs.tabContainer = parent;
+        if (attrs.tabId == null) attrs.tabId = myt.generateGuid();
+        if (attrs.tabContainer == null) attrs.tabContainer = parent;
         
         // Selection must be done via the select method on the tabContainer
         var initiallySelected;

@@ -19,8 +19,8 @@ myt.TextTabSlider = new JS.Class('TextTabSlider', myt.TabSlider, {
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
         var TTS = myt.TextTabSlider;
-        if (attrs.labelTextColorChecked === undefined) attrs.labelTextColorChecked = TTS.DEFAULT_LABEL_TEXT_COLOR_CHECKED;
-        if (attrs.labelTextColor === undefined) attrs.labelTextColor = TTS.DEFAULT_LABEL_TEXT_COLOR;
+        if (attrs.labelTextColorChecked == null) attrs.labelTextColorChecked = TTS.DEFAULT_LABEL_TEXT_COLOR_CHECKED;
+        if (attrs.labelTextColor == null) attrs.labelTextColor = TTS.DEFAULT_LABEL_TEXT_COLOR;
         
         this.callSuper(parent, attrs);
         

@@ -19,8 +19,8 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
     initNode: function(parent, attrs) {
         attrs.overflow = 'hidden';
         
-        if (attrs.itemSelectionId === undefined) attrs.itemSelectionId = 'panelId';
-        if (attrs.maxSelected === undefined) attrs.maxSelected = 1;
+        if (attrs.itemSelectionId == null) attrs.itemSelectionId = 'panelId';
+        if (attrs.maxSelected == null) attrs.maxSelected = 1;
         
         this.callSuper(parent, attrs);
         

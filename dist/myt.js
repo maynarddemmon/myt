@@ -4031,7 +4031,7 @@ JS.Singleton = new JS.Class('Singleton', {
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20170326.2144,
+    version:20170412.1328,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -8478,21 +8478,23 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
     },
     
     setFocusable: function(v) {
-        if (this.focusable !== v) {
-            var wasFocusable = this.focusable;
-            this.focusable = v;
+        var self = this;
+        
+        if (self.focusable !== v) {
+            var wasFocusable = self.focusable;
+            self.focusable = v;
             
             if (v) {
-                this.domElement.tabIndex = 0; // Make focusable. -1 is programtic only
-                this.attachToDom(this, '__doFocus', 'focus');
-                this.attachToDom(this, '__doBlur', 'blur');
+                self.domElement.tabIndex = 0; // Make focusable. -1 is programtic only
+                self.attachToDom(self, '__doFocus', 'focus');
+                self.attachToDom(self, '__doBlur', 'blur');
             } else if (wasFocusable) {
-                this.domElement.removeAttribute('tabIndex'); // Make unfocusable
-                this.detachFromDom(this, '__doFocus', 'focus');
-                this.detachFromDom(this, '__doBlur', 'blur');
+                self.domElement.removeAttribute('tabIndex'); // Make unfocusable
+                self.detachFromDom(self, '__doFocus', 'focus');
+                self.detachFromDom(self, '__doBlur', 'blur');
             }
             
-            if (this.inited) this.fireEvent('focusable', v);
+            if (self.inited) self.fireEvent('focusable', v);
         }
     },
     
@@ -8542,8 +8544,10 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
             if (noScroll) {
                 // Maintain scrollTop/scrollLeft
                 var ancestors = myt.DomElementProxy.getAncestorArray(de),
-                    len = ancestors.length, i = len, ancestor,
-                    scrollPositions = [], scrollPosition;
+                    len = ancestors.length, 
+                    i = len, ancestor,
+                    scrollPositions = [], 
+                    scrollPosition;
                 while (i) {
                     ancestor = ancestors[--i];
                     scrollPositions.unshift({scrollTop:ancestor.scrollTop, scrollLeft:ancestor.scrollLeft});
@@ -9068,6 +9072,9 @@ myt.Geometry = {
             'outset', 'inherit'.
         borderColor:string Sets the color of the CSS border. If null or 
             undefined is provided '#000000' will be used.
+        tooltip:string Sets a tooltip for this view. The basic implementation
+            uses domElement.title. For a richer tooltip display use the
+            myt.TooltipMixin.
     
     Private Attributes:
         subviews:array The array of child myt.Views for this view. Should 
@@ -9717,6 +9724,16 @@ myt.View = new JS.Class('View', myt.Node, {
         this.bgColor = undefined;
     },
     
+    /** Sets the tooltip.
+        @param v:string
+        @return void */
+    setTooltip: function(v) {
+        if (this.tooltip !== v) {
+            this.tooltip = this.domElement.title = v;
+            if (this.inited) this.fireEvent('tooltip', v);
+        }
+    },
+    
     
     // Methods /////////////////////////////////////////////////////////////////
     /** Checks if this view is visible and each view in the parent chain to
@@ -10356,39 +10373,41 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
         element would have occurred.
         @returns void */
     sizeViewToDom: function() {
-        var bounds, scaling;
+        var self = this,
+            bounds,
+            scaling;
         
-        if (!this.__hasSetWidth) {
-            bounds = this.domElement.getBoundingClientRect();
+        if (!self.__hasSetWidth) {
+            bounds = self.domElement.getBoundingClientRect();
             var w = bounds.width;
             
             // Bounding rect doesn't factor in scaling so we need to calculate
             // this ourselves.
-            scaling = myt.TransformSupport.getEffectiveScale(this);
+            scaling = myt.TransformSupport.getEffectiveScale(self);
             w /= scaling.scaleX;
             
             // Circumvent setter
-            if (this.width !== w) {
-                this.width = w;
-                if (this.inited) this.__updateBounds(w, this.height);
-                this.fireEvent('width', w);
+            if (self.width !== w) {
+                self.width = w;
+                if (self.inited) self.__updateBounds(w, self.height);
+                self.fireEvent('width', w);
             }
         }
         
-        if (!this.__hasSetHeight) {
-            if (!bounds) bounds = this.domElement.getBoundingClientRect();
+        if (!self.__hasSetHeight) {
+            if (!bounds) bounds = self.domElement.getBoundingClientRect();
             var h = bounds.height;
             
             // Bounding rect doesn't factor in scaling so we need to calculate
             // this ourselves.
-            if (!scaling) scaling = myt.TransformSupport.getEffectiveScale(this);
+            if (!scaling) scaling = myt.TransformSupport.getEffectiveScale(self);
             h /= scaling.scaleY;
             
             // Circumvent setter
-            if (this.height !== h) {
-                this.height = h;
-                if (this.inited) this.__updateBounds(this.width, h);
-                this.fireEvent('height', h);
+            if (self.height !== h) {
+                self.height = h;
+                if (self.inited) self.__updateBounds(self.width, h);
+                self.fireEvent('height', h);
             }
         }
     }
@@ -10611,8 +10630,8 @@ myt.Text = new JS.Class('Text', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
-        if (attrs.whiteSpace === undefined) attrs.whiteSpace = 'nowrap';
-        if (attrs.userUnselectable === undefined) attrs.userUnselectable = true;
+        if (attrs.whiteSpace == null) attrs.whiteSpace = 'nowrap';
+        if (attrs.userUnselectable == null) attrs.userUnselectable = true;
         
         this.callSuper(parent, attrs);
     },
@@ -10628,7 +10647,8 @@ myt.Text = new JS.Class('Text', myt.View, {
         
         // Temporarily set wrapping to 'nowrap', take measurement and
         // then restore wrapping.
-        var s = this.deStyle, oldValue = s.whiteSpace;
+        var s = this.deStyle,
+            oldValue = s.whiteSpace;
         s.whiteSpace = 'nowrap';
         var measuredWidth = this.domElement.getBoundingClientRect().width;
         s.whiteSpace = oldValue;
@@ -11263,7 +11283,7 @@ myt.SizeToWindow = new JS.Module('SizeToWindow', {
     /** @overrides */
     initNode: function(parent, attrs) {
         this.minWidth = this.minHeight = 0;
-        if (attrs.resizeDimension === undefined) attrs.resizeDimension = 'both';
+        if (attrs.resizeDimension == null) attrs.resizeDimension = 'both';
         
         this.attachTo(myt.global.windowResize, '__handleResize', 'resize');
         this.callSuper(parent, attrs);
@@ -11312,7 +11332,7 @@ myt.SizeToWindowWidth = new JS.Module('SizeToWindowWidth', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.SizeToWindow */
     initNode: function(parent, attrs) {
-        if (attrs.resizeDimension === undefined) attrs.resizeDimension = 'width';
+        if (attrs.resizeDimension == null) attrs.resizeDimension = 'width';
         
         this.callSuper(parent, attrs);
     }
@@ -11327,7 +11347,7 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.SizeToWindow */
     initNode: function(parent, attrs) {
-        if (attrs.resizeDimension === undefined) attrs.resizeDimension = 'height';
+        if (attrs.resizeDimension == null) attrs.resizeDimension = 'height';
         
         this.callSuper(parent, attrs);
     }
@@ -13330,7 +13350,7 @@ myt.Image = new JS.Class('Image', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
-        if (attrs.useNaturalSize === undefined) attrs.useNaturalSize = true;
+        if (attrs.useNaturalSize == null) attrs.useNaturalSize = true;
         
         this.callSuper(parent, attrs);
     }
@@ -13896,7 +13916,7 @@ myt.Disableable = new JS.Module('Disableable', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides */
     initNode: function(parent, attrs) {
-        if (attrs.disabled === undefined) attrs.disabled = false;
+        if (attrs.disabled == null) attrs.disabled = false;
         
         this.callSuper(parent, attrs);
     },
@@ -13968,7 +13988,7 @@ myt.MouseOver = new JS.Module('MouseOver', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides */
     initNode: function(parent, attrs) {
-        if (attrs.mouseOver === undefined) attrs.mouseOver = false;
+        if (attrs.mouseOver == null) attrs.mouseOver = false;
         
         this.callSuper(parent, attrs);
         
@@ -14053,7 +14073,7 @@ myt.MouseDown = new JS.Module('MouseDown', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides */
     initNode: function(parent, attrs) {
-        if (attrs.mouseDown === undefined) attrs.mouseDown = false;
+        if (attrs.mouseDown == null) attrs.mouseDown = false;
         
         this.callSuper(parent, attrs);
         
@@ -14184,18 +14204,18 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides */
     initNode: function(parent, attrs) {
-        this.activateKeyDown = -1;
+        var self = this;
         
-        if (attrs.activationKeys === undefined) {
-            attrs.activationKeys = myt.KeyActivation.DEFAULT_ACTIVATION_KEYS;
-        }
+        self.activateKeyDown = -1;
         
-        this.callSuper(parent, attrs);
+        if (attrs.activationKeys == null) attrs.activationKeys = myt.KeyActivation.DEFAULT_ACTIVATION_KEYS;
         
-        this.attachToDom(this, '__handleKeyDown', 'keydown');
-        this.attachToDom(this, '__handleKeyPress', 'keypress');
-        this.attachToDom(this, '__handleKeyUp', 'keyup');
-        this.attachToDom(this, '__doDomBlur', 'blur');
+        self.callSuper(parent, attrs);
+        
+        self.attachToDom(self, '__handleKeyDown', 'keydown');
+        self.attachToDom(self, '__handleKeyPress', 'keypress');
+        self.attachToDom(self, '__handleKeyUp', 'keyup');
+        self.attachToDom(self, '__doDomBlur', 'blur');
     },
     
     
@@ -14335,8 +14355,8 @@ myt.Button = new JS.Module('Button', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides */
     initNode: function(parent, attrs) {
-        if (attrs.focusable === undefined) attrs.focusable = true;
-        if (attrs.cursor === undefined) attrs.cursor = 'pointer';
+        if (attrs.focusable == null) attrs.focusable = true;
+        if (attrs.cursor == null) attrs.cursor = 'pointer';
         
         this.callSuper(parent, attrs);
     },
@@ -14345,9 +14365,10 @@ myt.Button = new JS.Module('Button', {
     // Accessors ///////////////////////////////////////////////////////////////
     /** @overrides myt.FocusObservable */
     setFocused: function(v) {
-        var existing = this.focused;
-        this.callSuper(v);
-        if (this.inited && this.focused !== existing) this.updateUI();
+        var self = this,
+            existing = self.focused;
+        self.callSuper(v);
+        if (self.inited && self.focused !== existing) self.updateUI();
     },
     
     
@@ -14372,27 +14393,29 @@ myt.Button = new JS.Module('Button', {
     
     /** @overrides myt.UpdateableUI. */
     updateUI: function() {
-        if (this.disabled) {
+        var self = this;
+        
+        if (self.disabled) {
             // Remember the cursor to change back to, but don't re-remember
             // if we're already remembering one.
-            if (this.__restoreCursor == null) this.__restoreCursor = this.cursor;
-            this.setCursor('not-allowed');
-            this.drawDisabledState();
+            if (self.__restoreCursor == null) self.__restoreCursor = self.cursor;
+            self.setCursor('not-allowed');
+            self.drawDisabledState();
         } else {
-            var rc = this.__restoreCursor;
+            var rc = self.__restoreCursor;
             if (rc) {
-                this.setCursor(rc);
-                this.__restoreCursor = null;
+                self.setCursor(rc);
+                self.__restoreCursor = null;
             }
             
-            if (this.activateKeyDown !== -1 || this.mouseDown) {
-                this.drawActiveState();
-            } else if (this.focused) {
-                this.drawFocusedState();
-            } else if (this.mouseOver) {
-                this.drawHoverState();
+            if (self.activateKeyDown !== -1 || self.mouseDown) {
+                self.drawActiveState();
+            } else if (self.focused) {
+                self.drawFocusedState();
+            } else if (self.mouseOver) {
+                self.drawHoverState();
             } else {
-                this.drawReadyState();
+                self.drawReadyState();
             }
         }
     },
@@ -15174,11 +15197,10 @@ myt.DrawButton = new JS.Class('DrawButton', myt.Canvas, {
     
     redraw: function(state) {
         // Used if redrawing for focus changes
-        if (state === undefined) state = this.__lastState;
+        if (state == null) state = this.__lastState;
         this.__lastState = state;
         
-        var dm = this.drawingMethod || this;
-        dm.draw(this, this.getDrawConfig(state));
+        (this.drawingMethod || this).draw(this, this.getDrawConfig(state));
     },
     
     /** Used if no drawing method is found. */
@@ -15316,8 +15338,8 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         self.iconSpacing = 2;
         self.inset = self.outset = 0;
         
-        if (attrs.shrinkToFit === undefined) attrs.shrinkToFit = false;
-        if (attrs.contentAlign === undefined) attrs.contentAlign = 'center';
+        if (attrs.shrinkToFit == null) attrs.shrinkToFit = false;
+        if (attrs.contentAlign == null) attrs.contentAlign = 'center';
         
         self.callSuper(parent, attrs);
         
@@ -15340,7 +15362,8 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         
         // Setup iconView
         attrs = {
-            name:'iconView', imageUrl:this.iconUrl
+            name:'iconView',
+            imageUrl:this.iconUrl
         };
         if (typeof iconY === 'string') {
             attrs.valign = iconY;
@@ -15370,22 +15393,16 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
     // Accessors ///////////////////////////////////////////////////////////////
     setInset: function(v) {
         // Adapt to event from syncTo
-        if (v !== null && typeof v === 'object') v = v.value;
+        if (v != null && typeof v === 'object') v = v.value;
         
-        if (this.inset !== v) {
-            this.inset = v;
-            if (this.inited) this.fireEvent('inset', v);
-        }
+        this.set('inset', v, true);
     },
     
     setOutset: function(v) {
         // Adapt to event from syncTo
-        if (v !== null && typeof v === 'object') v = v.value;
+        if (v != null && typeof v === 'object') v = v.value;
         
-        if (this.outset !== v) {
-            this.outset = v;
-            if (this.inited) this.fireEvent('outset', v);
-        }
+        this.set('outset', v, true);
     },
     
     setText: function(v) {
@@ -15398,19 +15415,8 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
         }
     },
     
-    setShrinkToFit: function(v) {
-        if (this.shrinkToFit !== v) {
-            this.shrinkToFit = v;
-            if (this.inited) this.fireEvent('shrinkToFit', v);
-        }
-    },
-    
-    setContentAlign: function(v) {
-        if (this.contentAlign !== v) {
-            this.contentAlign = v;
-            if (this.inited) this.fireEvent('contentAlign', v);
-        }
-    },
+    setShrinkToFit: function(v) {this.set('shrinkToFit', v, true);},
+    setContentAlign: function(v) {this.set('contentAlign', v, true);},
     
     setIconUrl: function(v) {
         if (this.iconUrl !== v) {
@@ -15430,18 +15436,13 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
                 if (typeof v === 'string') {
                     this.iconView.setValign(v);
                 } else {
-                   this.iconView.setY(v);
+                    this.iconView.setY(v);
                 }
             }
         }
     },
     
-    setIconSpacing: function(v) {
-        if (this.iconSpacing !== v) {
-            this.iconSpacing = v;
-            if (this.inited) this.fireEvent('iconSpacing', v);
-        }
-    },
+    setIconSpacing: function(v) {this.set('iconSpacing', v, true);},
     
     setTextY: function(v) {
         if (this.textY !== v) {
@@ -15503,509 +15504,9 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
 });
 
 
-/** A base class for tooltip classes.
-    
-    Events:
-        None
-    
-    Attributes:
-        tooltip:object The tooltip configuration assigned to this tooltip
-            when the mouse has moved over a view with TooltipMixin.
-        tipDelay:number The time in millis to wait before showing the tooltip.
-        tipHideDelay:number The time in millis to wait before hiding 
-            the tooltip.
-    
-    Private Attributes:
-        __checkTipTimerId:number The timer ID used internally for delaying
-            when the tip gets shown.
-*/
-myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
-    include: [myt.RootView],
-    
-    
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        /** The length of time in millis before the tip is shown. */
-        DEFAULT_TIP_DELAY:500,
-        /** The length of time in millis before the tip is hidden. */
-        DEFAULT_TIP_HIDE_DELAY:100
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        var BTT = myt.BaseTooltip;
-        this.tipDelay = this.nextTipDelay = BTT.DEFAULT_TIP_DELAY;
-        this.tipHideDelay = BTT.DEFAULT_TIP_HIDE_DELAY;
-        
-        if (attrs.visible == null) attrs.visible = false;
-        
-        this.callSuper(parent, attrs);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** Sets the tooltip info that will be displayed. 
-        @param v:object with the following keys:
-            parent:myt.View The view to show the tip for.
-            text:string The tip text.
-            tipalign:string Tip alignment, 'left' or 'right'.
-            tipvalign:string Tip vertical alignment, 'above' or 'below'. */
-    setTooltip: function(v) {
-        if (this.inited) {
-            this.tooltip = v;
-            if (v) {
-                this.attachToDom(myt.global.mouse, '__checkMouseMovement', 'mousemove', true);
-                
-                var ttp = v.parent;
-                this.attachToDom(ttp, 'hideTip', 'mousedown', true);
-                this.attachToDom(ttp, 'hideTip', 'mouseup', true);
-            }
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
-    __checkMouseMovement: function(event) {
-        var self = this;
-        self._lastPos = myt.MouseObservable.getMouseFromEvent(event);
-        if (self.__checkIn()) {
-            self.__clearTimeout();
-            self.__checkTipTimerId = setTimeout(
-                function() {
-                    delete self.__checkTipTimerId;
-                    
-                    // If the mouse rests in the tip's parent, show the tip.
-                    if (self.__checkIn()) self.showTip();
-                },
-                self.nextTipDelay
-            );
-        }
-    },
-    
-    /** @private */
-    __clearTimeout: function() {
-        if (this.__checkTipTimerId) {
-            clearTimeout(this.__checkTipTimerId);
-            delete this.__checkTipTimerId;
-        }
-    },
-    
-    /** Checks if the last mouse position is inside the tip's parent.
-        If not inside the tip will also get hidden.
-        @private
-        @returns boolean: false if the tip got hidden, true otherwise. */
-    __checkIn: function() {
-        var tt = this.tooltip;
-        if (tt) {
-            var pos = this._lastPos;
-            if (tt.parent.containsPoint(pos.x, pos.y)) return true;
-        }
-        this.hideTip();
-        return false;
-    },
-    
-    /** Called when the tip will be hidden.
-        @returns boolean */
-    hideTip: function(event) {
-        this.__clearTimeout();
-        
-        var ttp = this.tooltip.parent;
-        this.detachFromDom(ttp, 'hideTip', 'mousedown', true);
-        this.detachFromDom(ttp, 'hideTip', 'mouseup', true);
-        this.detachFromDom(myt.global.mouse, '__checkMouseMovement', 'mousemove', true);
-        
-        this.nextTipDelay = this.tipDelay;
-        this.setVisible(false);
-        
-        // Don't consume mouse event since we just want to close the tip
-        // as a side effect of the user action. The typical case for this is
-        // the user clicking on a button while the tooltip for that button
-        // is shown.
-        return true;
-    },
-    
-    /** Called when the tip will be shown.
-        @returns void */
-    showTip: function() {
-        // Don't show tooltips while doing drag and drop since they're
-        // distracting while this is going on.
-        if (!myt.global.dragManager.dragView) {
-            this.nextTipDelay = this.tipHideDelay;
-            this.bringToFront();
-            this.setVisible(true);
-        }
-    }
-});
-
-
-/** An implementation of a tooltip.
-    
-    Events:
-        None
-    
-    Attributes:
-        edgeWidth:number the width of the "edge" of the tip background.
-        pointerInset:number The inset of the "pointer" from the left/right 
-            edge of the tip.
-        insetH:number The horizontal inset of the text from the edge.
-        insetTop:number The top inset of the text from the edge.
-        insetBottom:number The bottom inset of the text from the edge.
-        shadowWidth:number The width of the shadow.
-        maxTextWidth:number The maximum width for the text view in the tooltip.
-        tipBgColor:string The color to use for the tip background.
-        edgeColor:string The color used for the edge.
-        shadowColor:string The color of the shadow.
-    
-    Private Attributes:
-        __tipWidth:number The width of the tip text view.
-*/
-myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        DEFAULT_POINTER_WIDTH:7,
-        DEFAULT_POINTER_HEIGHT:4,
-        DEFAULT_EDGE_WIDTH:1,
-        DEFAULT_POINTER_INSET:2,
-        DEFAULT_HORIZONTAL_INSET:4,
-        DEFAULT_TOP_INSET:2,
-        DEFAULT_BOTTOM_INSET:3,
-        DEFAULT_SHADOW_WIDTH:2,
-        DEFAULT_MAX_TEXT_WIDTH:280,
-        DEFAULT_TIP_BG_COLOR:'#dddddd',
-        DEFAULT_EDGE_COLOR:'#666666',
-        DEFAULT_SHADOW_COLOR:'#000000'
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        var T = myt.Tooltip;
-        if (attrs.pointerWidth === undefined) attrs.pointerWidth = T.DEFAULT_POINTER_WIDTH;
-        if (attrs.pointerHeight === undefined) attrs.pointerHeight = T.DEFAULT_POINTER_HEIGHT;
-        if (attrs.edgeWidth === undefined) attrs.edgeWidth = T.DEFAULT_EDGE_WIDTH;
-        if (attrs.pointerInset === undefined) attrs.pointerInset = T.DEFAULT_POINTER_INSET;
-        if (attrs.insetH === undefined) attrs.insetH = T.DEFAULT_HORIZONTAL_INSET;
-        if (attrs.insetTop === undefined) attrs.insetTop = T.DEFAULT_TOP_INSET;
-        if (attrs.insetBottom === undefined) attrs.insetBottom = T.DEFAULT_BOTTOM_INSET;
-        if (attrs.shadowWidth === undefined) attrs.shadowWidth = T.DEFAULT_SHADOW_WIDTH;
-        if (attrs.maxTextWidth === undefined) attrs.maxTextWidth = T.DEFAULT_MAX_TEXT_WIDTH;
-        if (attrs.tipBgColor === undefined) attrs.tipBgColor = T.DEFAULT_TIP_BG_COLOR;
-        if (attrs.edgeColor === undefined) attrs.edgeColor = T.DEFAULT_EDGE_COLOR;
-        if (attrs.shadowColor === undefined) attrs.shadowColor = T.DEFAULT_SHADOW_COLOR;
-        
-        this.__tipWidth = 0;
-        
-        this.callSuper(parent, attrs);
-        
-        new myt.Canvas(this, {
-            name:'_bg', percentOfParentWidth:100, percentOfParentHeight:100
-        }, [myt.SizeToParent]);
-        new myt.Text(this, {
-            name:'_tipText', fontSize:'12px',
-            x:this.edgeWidth + this.insetH, whiteSpace:'inherit'
-        });
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setPointerWidth: function(v) {this.pointerWidth = v;},
-    setPointerHeight: function(v) {this.pointerHeight = v;},
-    setEdgeWidth: function(v) {this.edgeWidth = v;},
-    setPointerInset: function(v) {this.pointerInset = v;},
-    setInsetH: function(v) {this.insetH = v;},
-    setInsetTop: function(v) {this.insetTop = v;},
-    setInsetBottom: function(v) {this.insetBottom = v;},
-    setShadowWidth: function(v) {this.shadowWidth = v;},
-    setMaxTextWidth: function(v) {this.maxTextWidth = v;},
-    setTipBgColor: function(v) {this.tipBgColor = v;},
-    setEdgeColor: function(v) {this.edgeColor = v;},
-    setShadowColor: function(v) {this.shadowColor = v;},
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.BaseTooltip. */
-    showTip: function() {
-        var tt = this.tooltip,
-            txt = tt.text,
-            ttp = tt.parent,
-            tipText = this._tipText,
-            insetTop = this.insetTop,
-            shadowWidth = this.shadowWidth;
-        
-        // Set tip text
-        if (tipText.text !== txt) tipText.setText(txt);
-        
-        // Get floating boundary
-        var gwr = myt.global.windowResize,
-            bounds = {x:0, y:0, width:gwr.getWidth(), height:gwr.getHeight()},
-            boundsXOffset = 0, boundsYOffset = 0;
-        
-        // Get position of parent
-        var parentPos = ttp.getPagePosition(),
-            tipX = parentPos.x,
-            tipParentY = parentPos.y;
-        
-        // Determine X position
-        tipText.setWidth('auto');
-        var tipTextWidth = Math.min(tipText.measureNoWrapWidth(), this.maxTextWidth),
-            pointerX = tipText.x;
-        this.__tipWidth = 2 * pointerX + tipTextWidth;
-        tipText.setWidth(tipTextWidth);
-        tipText.sizeViewToDom();
-        
-        if (tt.tipalign === 'right') {
-            tipX += ttp.width - this.__tipWidth;
-            pointerX += tipText.width - this.pointerInset - this.pointerWidth;
-        } else {
-            pointerX += this.pointerInset;
-        }
-        
-        // Prevent out-of-bounds to the left
-        var diff;
-        if (boundsXOffset > tipX) {
-            diff = boundsXOffset - tipX;
-            tipX += diff;
-            pointerX -= diff;
-        }
-        
-        // Prevent out-of-bounds to the right
-        if (tipX + this.__tipWidth > boundsXOffset + bounds.width) {
-            diff = (tipX + this.__tipWidth) - (boundsXOffset + bounds.width);
-            tipX -= diff;
-            pointerX += diff;
-        }
-        
-        // Determine Y position
-        var tipHeight = 2*this.edgeWidth + insetTop + this.insetBottom + tipText.height + this.pointerHeight,
-            tipParentHeight = ttp.height,
-            pointerOnTop, tipY;
-        switch (tt.tipvalign) {
-            case "below":
-                tipY = tipParentY + tipParentHeight;
-                pointerOnTop = true;
-                
-                if (tipY + tipHeight > boundsYOffset + bounds.height) {
-                    tipY = tipParentY - tipHeight;
-                    pointerOnTop = false;
-                }
-                break;
-            
-            case "above":
-            default:
-                tipY = tipParentY - tipHeight;
-                pointerOnTop = false;
-                
-                if (boundsYOffset > tipY) {
-                    tipY = tipParentY + tipParentHeight;
-                    pointerOnTop = true;
-                }
-                break;
-        }
-        
-        // Apply values
-        this.setX(Math.round(tipX));
-        this.setY(Math.round(tipY));
-        tipText.setY(insetTop + this.edgeWidth + (pointerOnTop ? this.pointerHeight : 0));
-        
-        this.setWidth(this.__tipWidth + shadowWidth);
-        this.setHeight(tipHeight + shadowWidth);
-        
-        this.__redraw(pointerX, pointerOnTop);
-        
-        this.callSuper();
-    },
-    
-    /** @private */
-    __redraw: function(pointerX, pointerOnTop) {
-        var canvas = this._bg,
-            right = this.__tipWidth,
-            top = pointerOnTop ? this.pointerHeight : 0,
-            bottom = 2*this.edgeWidth + this.insetTop + this.insetBottom + this._tipText.height + top,
-            pointerWidth = this.pointerWidth,
-            pointerXCtr = pointerX + pointerWidth / 2,
-            pointerXRt = pointerX + pointerWidth,
-            pointerHeight = this.pointerHeight,
-            shadowWidth = this.shadowWidth,
-            edgeWidth = this.edgeWidth,
-            lineTo = canvas.lineTo.bind(canvas);
-        
-        canvas.clear();
-        
-        // Draw Shadow
-        canvas.beginPath();
-        canvas.moveTo(shadowWidth, top + shadowWidth);
-        lineTo(right + shadowWidth, top + shadowWidth);
-        lineTo(right + shadowWidth, bottom + shadowWidth);
-        lineTo(shadowWidth, bottom + shadowWidth);
-        canvas.closePath();
-        canvas.setGlobalAlpha(0.3);
-        canvas.setFillStyle(this.shadowColor);
-        canvas.fill();
-        
-        canvas.setGlobalAlpha(1);
-        
-        // Draw Edge
-        canvas.beginPath();
-        canvas.moveTo(0, top);
-        
-        if (pointerOnTop) {
-            lineTo(pointerX, top);
-            lineTo(pointerXCtr, top - pointerHeight);
-            lineTo(pointerXRt, top);
-        }
-        
-        lineTo(right, top);
-        lineTo(right, bottom);
-        
-        if (!pointerOnTop) {
-            lineTo(pointerXRt, bottom);
-            lineTo(pointerXCtr, bottom + pointerHeight);
-            lineTo(pointerX, bottom);
-        }
-        
-        lineTo(0, bottom);
-        canvas.closePath();
-        canvas.setFillStyle(this.edgeColor);
-        canvas.fill();
-        
-        // Draw Fill
-        right -= edgeWidth;
-        top += edgeWidth;
-        bottom -= edgeWidth;
-        
-        canvas.beginPath();
-        canvas.moveTo(edgeWidth, top);
-        
-        if (pointerOnTop) {
-            lineTo(pointerX, top);
-            lineTo(pointerXCtr, top - pointerHeight);
-            lineTo(pointerXRt, top);
-        }
-        
-        lineTo(right, top);
-        lineTo(right, bottom);
-        
-        if (!pointerOnTop) {
-            lineTo(pointerXRt, bottom);
-            lineTo(pointerXCtr, bottom + pointerHeight);
-            lineTo(pointerX, bottom);
-        }
-        
-        lineTo(edgeWidth, bottom);
-        canvas.closePath();
-        canvas.setFillStyle(this.tipBgColor);
-        canvas.fill();
-    }
-});
-
-
-/** A mixin that adds tooltip support to a view.
-    
-    Requires:
-        myt.MouseOver
-    
-    Events:
-        tooltip:string
-        tipAlign:string
-        tipValign:string
-        tipClass:JS.Class
-    
-    Attributes:
-        tooltip:string The tip text to display.
-        tipAlign:string The horizontal alignment of the tooltip relative to
-            the view the tip is being shown for. Supported values are 'left'
-            and 'right'. Defaults to 'left'.
-        tipValign:string The vertical alignment of the tooltip relative to
-            the view the tip is being shown for. Supported values are 'above'
-            and 'below'. Defaults to 'above'.
-        tipClass:JS.Class The class to use to instantiate the tooltip.
-*/
-myt.TooltipMixin = new JS.Module('TooltipMixin', {
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        /** The default class to use for tooltip views. If a project wants to use
-            a special tip class everywhere it should override this. */
-        DEFAULT_TIP_CLASS:myt.Tooltip
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setTooltip: function(v) {
-        if (this.tooltip !== v) {
-            this.tooltip = v;
-            if (this.inited) this.fireEvent('tooltip', v);
-        }
-    },
-    
-    setTipAlign: function(v) {
-        if (this.tipAlign !== v) {
-            this.tipAlign = v;
-            if (this.inited) this.fireEvent('tipAlign', v);
-        }
-    },
-    
-    setTipValign: function(v) {
-        if (this.tipValign !== v) {
-            this.tipValign = v;
-            if (this.inited) this.fireEvent('tipValign', v);
-        }
-    },
-    
-    setTipClass: function(v) {
-        if (this.tipClass !== v) {
-            this.tipClass = v;
-            if (this.inited) this.fireEvent('tipClass', v);
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.MouseOver. */
-    doSmoothMouseOver: function(isOver) {
-        this.callSuper(isOver);
-        
-        if (isOver && this.tooltip) {
-            // Use configured class or default if none defined.
-            var tipClass = this.tipClass || myt.TooltipMixin.DEFAULT_TIP_CLASS,
-                g = myt.global, 
-                ttv = g.tooltipView;
-            
-            // Destroy tip if it's not the correct class.
-            if (ttv && !(ttv instanceof tipClass)) {
-                g.unregister('tooltipView');
-                ttv.destroy();
-                ttv = null;
-            }
-            
-            // Create new instance.
-            if (!ttv) {
-                // Create tooltip div if necessary
-                var elem = document.getElementById("tooltipDiv");
-                if (!elem) {
-                    elem = myt.DomElementProxy.createDomElement('div', {position:'absolute'});
-                    myt.getElement().appendChild(elem);
-                }
-                
-                ttv = new tipClass(elem, {domId:'tooltipDiv'});
-                g.register('tooltipView', ttv);
-            }
-            
-            ttv.setTooltip({
-                parent:this, 
-                text:this.tooltip, 
-                tipalign:this.tipAlign || 'left', 
-                tipvalign:this.tipValign || 'above'
-            });
-        }
-    }
-});
-
-
 /** A simple button with support for an icon and text and tooltip support. */
 myt.SimpleIconTextButton = new JS.Class('SimpleIconTextButton', myt.SimpleButton, {
-    include: [myt.IconTextButtonContent, myt.TooltipMixin]
+    include: [myt.IconTextButtonContent]
 });
 
 
@@ -16033,7 +15534,7 @@ myt.BaseMouseablePanel = new JS.Module('BaseMouseablePanel', {
         // @overrides behavior from HorizontalThreePanel and VerticalThreePanel
         // mixins which will be used with this mixin in MouseableH3Panel
         // and MouseableV3Panel respectively.
-        if (attrs.repeat === undefined) attrs.repeat = false;
+        if (attrs.repeat == null) attrs.repeat = false;
         
         this.callSuper(parent, attrs);
     },
@@ -16252,7 +15753,7 @@ myt.PanelButton = new JS.Class('PanelButton', myt.View, {
 
 /** An myt.PanelButton with contents that consist of an icon and text. */
 myt.IconTextPanelButton = new JS.Class('IconTextPanelButton', myt.PanelButton, {
-    include: [myt.IconTextButtonContent, myt.TooltipMixin],
+    include: [myt.IconTextButtonContent],
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
@@ -16778,17 +16279,17 @@ myt.ListViewItem = new JS.Class('ListViewItem', myt.SimpleIconTextButton, {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        if (attrs.height === undefined) attrs.height = 24;
+        if (attrs.height == null) attrs.height = 24;
         
-        if (attrs.activeColor === undefined) attrs.activeColor = '#bbbbbb';
-        if (attrs.hoverColor === undefined) attrs.hoverColor = '#ffffff';
-        if (attrs.readyColor === undefined) attrs.readyColor = '#eeeeee';
+        if (attrs.activeColor == null) attrs.activeColor = '#bbbbbb';
+        if (attrs.hoverColor == null) attrs.hoverColor = '#ffffff';
+        if (attrs.readyColor == null) attrs.readyColor = '#eeeeee';
         
-        if (attrs.contentAlign === undefined) attrs.contentAlign = 'left';
-        if (attrs.inset === undefined) attrs.inset = 8;
-        if (attrs.outset === undefined) attrs.outset = 8;
+        if (attrs.contentAlign == null) attrs.contentAlign = 'left';
+        if (attrs.inset == null) attrs.inset = 8;
+        if (attrs.outset == null) attrs.outset = 8;
         
-        if (attrs.activationKeys === undefined) attrs.activationKeys = [13,27,32,37,38,39,40];
+        if (attrs.activationKeys == null) attrs.activationKeys = [13,27,32,37,38,39,40];
         
         this.callSuper(parent, attrs);
     },
@@ -16802,13 +16303,14 @@ myt.ListViewItem = new JS.Class('ListViewItem', myt.SimpleIconTextButton, {
     
     /** @overrides myt.ListViewItemMixin */
     getMinimumWidth: function() {
-        var iconView = this.iconView,
-            textView = this.textView,
-            textViewVisible = textView.visible && this.text,
+        var self = this,
+            iconView = self.iconView,
+            textView = self.textView,
+            textViewVisible = textView.visible && self.text,
             iconWidth = iconView.visible ? iconView.width : 0,
-            iconExtent = iconWidth + (textViewVisible && iconWidth > 0 ? this.iconSpacing : 0),
+            iconExtent = iconWidth + (textViewVisible && iconWidth > 0 ? self.iconSpacing : 0),
             textWidth = textViewVisible ? Math.ceil(textView.width) : 0;
-        return this.inset + iconExtent + textWidth + this.outset;
+        return self.inset + iconExtent + textWidth + self.outset;
     },
     
     /** @overrides myt.Button */
@@ -16857,8 +16359,8 @@ myt.ListViewSeparator = new JS.Class('ListViewSeparator', myt.View, {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        if (attrs.height === undefined) attrs.height = 1;
-        if (attrs.bgColor === undefined) attrs.bgColor = '#666666';
+        if (attrs.height == null) attrs.height = 1;
+        if (attrs.bgColor == null) attrs.bgColor = '#666666';
         
         this.callSuper(parent, attrs);
     },
@@ -17074,15 +16576,13 @@ myt.ListViewAnchor = new JS.Module('ListViewAnchor', {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        if (attrs.listViewClass === undefined) attrs.listViewClass = myt.ListView;
-        if (attrs.listViewAttrs === undefined) attrs.listViewAttrs = {};
-        if (attrs.itemConfig === undefined) attrs.itemConfig = [];
+        if (attrs.listViewClass == null) attrs.listViewClass = myt.ListView;
+        if (attrs.listViewAttrs == null) attrs.listViewAttrs = {};
+        if (attrs.itemConfig == null) attrs.itemConfig = [];
         
         // Assume this will be mixed onto something that implements 
         // myt.KeyActivation since it probably will.
-        if (attrs.activationKeys === undefined) {
-            attrs.activationKeys = [13,27,32,37,38,39,40];
-        }
+        if (attrs.activationKeys == null) attrs.activationKeys = [13,27,32,37,38,39,40];
         
         this.callSuper(parent, attrs);
     },
@@ -17210,17 +16710,17 @@ myt.CheckboxStyleMixin = new JS.Module('CheckboxStyleMixin', {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        if (attrs.width === undefined) attrs.width = this.getIconExtentX();
-        if (attrs.height === undefined) attrs.height = this.getIconExtentY();
-        if (attrs.focusEmbellishment === undefined) attrs.focusEmbellishment = false;
+        if (attrs.width == null) attrs.width = this.getIconExtentX();
+        if (attrs.height == null) attrs.height = this.getIconExtentY();
+        if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
         
         var CSM = myt.CheckboxStyleMixin;
-        if (attrs.fillColorChecked === undefined) attrs.fillColorChecked = CSM.DEFAULT_FILL_COLOR_CHECKED;
-        if (attrs.fillColorHover === undefined) attrs.fillColorHover = CSM.DEFAULT_FILL_COLOR_HOVER;
-        if (attrs.fillColorActive === undefined) attrs.fillColorActive = CSM.DEFAULT_FILL_COLOR_ACTIVE;
-        if (attrs.fillColorReady === undefined) attrs.fillColorReady = CSM.DEFAULT_FILL_COLOR_READY;
-        if (attrs.edgeColor === undefined) attrs.edgeColor = CSM.DEFAULT_EDGE_COLOR;
-        if (attrs.edgeSize === undefined) attrs.edgeSize = CSM.DEFAULT_EDGE_SIZE;
+        if (attrs.fillColorChecked == null) attrs.fillColorChecked = CSM.DEFAULT_FILL_COLOR_CHECKED;
+        if (attrs.fillColorHover == null) attrs.fillColorHover = CSM.DEFAULT_FILL_COLOR_HOVER;
+        if (attrs.fillColorActive == null) attrs.fillColorActive = CSM.DEFAULT_FILL_COLOR_ACTIVE;
+        if (attrs.fillColorReady == null) attrs.fillColorReady = CSM.DEFAULT_FILL_COLOR_READY;
+        if (attrs.edgeColor == null) attrs.edgeColor = CSM.DEFAULT_EDGE_COLOR;
+        if (attrs.edgeSize == null) attrs.edgeSize = CSM.DEFAULT_EDGE_SIZE;
         
         this.callSuper(parent, attrs);
     },
@@ -17243,7 +16743,8 @@ myt.CheckboxStyleMixin = new JS.Module('CheckboxStyleMixin', {
     
     /** @overrides myt.DrawButton */
     getDrawBounds: function() {
-        var bounds = this.drawBounds, CSM = myt.CheckboxStyleMixin;
+        var bounds = this.drawBounds,
+            CSM = myt.CheckboxStyleMixin;
         bounds.x = CSM.DEFAULT_PAD_X;
         bounds.y = CSM.DEFAULT_PAD_Y;
         bounds.w = CSM.DEFAULT_WIDTH;
@@ -17253,21 +16754,22 @@ myt.CheckboxStyleMixin = new JS.Module('CheckboxStyleMixin', {
     
     /** @overrides myt.DrawButton */
     getDrawConfig: function(state) {
-        var config = this.callSuper(state);
-        config.checkedColor = this.fillColorChecked;
-        config.edgeColor = this.edgeColor;
-        config.edgeSize = this.edgeSize;
+        var self = this,
+            config = self.callSuper(state);
+        config.checkedColor = self.fillColorChecked;
+        config.edgeColor = self.edgeColor;
+        config.edgeSize = self.edgeSize;
         
         switch (state) {
             case 'hover':
-                config.fillColor = this.fillColorHover;
+                config.fillColor = self.fillColorHover;
                 break;
             case 'active':
-                config.fillColor = this.fillColorActive;
+                config.fillColor = self.fillColorActive;
                 break;
             case 'disabled':
             case 'ready':
-                config.fillColor = this.fillColorReady;
+                config.fillColor = self.fillColorReady;
                 break;
             default:
         }
@@ -17344,7 +16846,7 @@ myt.ValueComponent = new JS.Module('ValueComponent', {
         if (existingFilter) {
             if (where === 'last') {
                 chainedFilter = function(v) {return filter(existingFilter(v));};
-            } else if (where === 'first' || where === undefined) {
+            } else if (where === 'first' || where == null) {
                 chainedFilter = function(v) {return existingFilter(filter(v));};
             }
         }
@@ -17455,8 +16957,8 @@ myt.CheckboxMixin = new JS.Module('CheckboxMixin', {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        if (attrs.value === undefined) attrs.value = false;
-        if (attrs.drawingMethodClassname === undefined) attrs.drawingMethodClassname = 'myt.CheckboxDrawingMethod';
+        if (attrs.value == null) attrs.value = false;
+        if (attrs.drawingMethodClassname == null) attrs.drawingMethodClassname = 'myt.CheckboxDrawingMethod';
         
         this.callSuper(parent, attrs);
     },
@@ -17529,7 +17031,7 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
         
         self.inset = self.outset = 0;
         
-        if (attrs.shrinkToFit === undefined) attrs.shrinkToFit = false;
+        if (attrs.shrinkToFit == null) attrs.shrinkToFit = false;
         
         // Use appropriate default based on mutliline text or not.
         self.textY = attrs.shrinkToFit ? 'middle' : 0;
@@ -17571,22 +17073,16 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
     // Accessors ///////////////////////////////////////////////////////////////
     setInset: function(v) {
         // Adapt to event from syncTo
-        if (v !== null && typeof v === 'object') v = v.value;
+        if (v != null && typeof v === 'object') v = v.value;
         
-        if (this.inset !== v) {
-            this.inset = v;
-            if (this.inited) this.fireEvent('inset', v);
-        }
+        this.set('inset', v, true);
     },
     
     setOutset: function(v) {
         // Adapt to event from syncTo
-        if (v !== null && typeof v === 'object') v = v.value;
+        if (v != null && typeof v === 'object') v = v.value;
         
-        if (this.outset !== v) {
-            this.outset = v;
-            if (this.inited) this.fireEvent('outset', v);
-        }
+        this.set('outset', v, true);
     },
     
     setText: function(v) {
@@ -17654,7 +17150,7 @@ myt.TextButtonContent = new JS.Module('TextButtonContent', {
 
 /** A checkbox component with a text label. */
 myt.TextCheckbox = new JS.Class('TextCheckbox', myt.Checkbox, {
-    include: [myt.TextButtonContent, myt.TooltipMixin],
+    include: [myt.TextButtonContent],
     
     
     // Class Methods and Attributes ////////////////////////////////////////////
@@ -17668,13 +17164,15 @@ myt.TextCheckbox = new JS.Class('TextCheckbox', myt.Checkbox, {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     doAfterAdoption: function() {
-        var TC = myt.TextCheckbox, padX = TC.DEFAULT_PAD_X;
-        this.setInset(this.getIconExtentX() + padX);
-        this.setOutset(padX);
+        var self = this,
+            TC = myt.TextCheckbox,
+            padX = TC.DEFAULT_PAD_X;
+        self.setInset(self.getIconExtentX() + padX);
+        self.setOutset(padX);
         
-        if (!this.shrinkToFit) this.setTextY(TC.DEFAULT_MULTILINE_PAD_Y);
+        if (!self.shrinkToFit) self.setTextY(TC.DEFAULT_MULTILINE_PAD_Y);
         
-        this.callSuper();
+        self.callSuper();
     }
 });
 
@@ -18184,18 +17682,21 @@ myt.Radio = new JS.Class('Radio', myt.DrawButton, {
 
 /** A radio button component with a text label. */
 myt.TextRadio = new JS.Class('TextRadio', myt.Radio, {
-    include: [myt.TextButtonContent, myt.TooltipMixin],
+    include: [myt.TextButtonContent],
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
     doAfterAdoption: function() {
-        var TC = myt.TextCheckbox, padX = TC.DEFAULT_PAD_X;
-        this.setInset(this.getIconExtentX() + padX);
-        this.setOutset(padX);
+        var self = this,
+            TC = myt.TextCheckbox,
+            padX = TC.DEFAULT_PAD_X;
         
-        if (!this.shrinkToFit) this.setTextY(TC.DEFAULT_MULTILINE_PAD_Y);
+        self.setInset(self.getIconExtentX() + padX);
+        self.setOutset(padX);
         
-        this.callSuper();
+        if (!self.shrinkToFit) self.setTextY(TC.DEFAULT_MULTILINE_PAD_Y);
+        
+        self.callSuper();
     }
 });
 
@@ -18546,10 +18047,10 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
         
         attrs.defaultPlacement = 'container';
         
-        if (attrs.spacing === undefined) attrs.spacing = myt.TabSliderContainer.DEFAULT_SPACING;
-        if (attrs.overflow === undefined) attrs.overflow = 'autoy';
-        if (attrs.itemSelectionId === undefined) attrs.itemSelectionId = 'tabId';
-        if (attrs.maxSelected === undefined) attrs.maxSelected = 1;
+        if (attrs.spacing == null) attrs.spacing = myt.TabSliderContainer.DEFAULT_SPACING;
+        if (attrs.overflow == null) attrs.overflow = 'autoy';
+        if (attrs.itemSelectionId == null) attrs.itemSelectionId = 'tabId';
+        if (attrs.maxSelected == null) attrs.maxSelected = 1;
         
         myt.DelayedMethodCall.createDelayedMethodCall(this, 0, '__updateLayout');
         
@@ -18560,7 +18061,7 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
         var self = this,
             M = myt,
             TS = M.TabSlider;
-        var container = new M.View(this, {
+        var container = new M.View(self, {
             name:'container', ignorePlacement:true, percentOfParentWidth:100
         }, [M.SizeToParent, {
             /** @overrides myt.View */
@@ -18587,11 +18088,11 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
                 this.callSuper(node);
             }
         }]);
-        new M.SpacedLayout(container, {name:'layout', axis:'y', spacing:this.spacing, collapseParent:true});
+        new M.SpacedLayout(container, {name:'layout', axis:'y', spacing:self.spacing, collapseParent:true});
         
-        this.attachTo(this, 'updateLayout', 'height');
+        self.attachTo(self, 'updateLayout', 'height');
         
-        this.callSuper();
+        self.callSuper();
     },
     
     
@@ -18611,8 +18112,13 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
     
     /** @private */
     __updateLayout: function() {
-        var tabSliders = this._tabSliders, i = tabSliders.length, tabSlider,
-            min = 0, preferred = 0, visCount = 0, collapsedHeight;
+        var tabSliders = this._tabSliders, 
+            i = tabSliders.length, 
+            tabSlider,
+            min = 0, 
+            preferred = 0, 
+            visCount = 0, 
+            collapsedHeight;
         
         while (i) {
             tabSlider = tabSliders[--i];
@@ -19018,8 +18524,8 @@ myt.TextTabSlider = new JS.Class('TextTabSlider', myt.TabSlider, {
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
         var TTS = myt.TextTabSlider;
-        if (attrs.labelTextColorChecked === undefined) attrs.labelTextColorChecked = TTS.DEFAULT_LABEL_TEXT_COLOR_CHECKED;
-        if (attrs.labelTextColor === undefined) attrs.labelTextColor = TTS.DEFAULT_LABEL_TEXT_COLOR;
+        if (attrs.labelTextColorChecked == null) attrs.labelTextColorChecked = TTS.DEFAULT_LABEL_TEXT_COLOR_CHECKED;
+        if (attrs.labelTextColor == null) attrs.labelTextColor = TTS.DEFAULT_LABEL_TEXT_COLOR;
         
         this.callSuper(parent, attrs);
         
@@ -19085,7 +18591,7 @@ myt.TabDrawingMethod = new JS.Class('TabDrawingMethod', myt.DrawingMethod, {
         var inset = config.edgeSize, twiceInset = 2 * inset,
             rTL = 0, rTR = 0, rBL = 0, rBR = 0,
             irTL = 0, irTR = 0, irBL = 0, irBR = 0,
-            r = config.cornerRadius === undefined ? myt.TabDrawingMethod.DEFAULT_RADIUS : config.cornerRadius,
+            r = config.cornerRadius == null ? myt.TabDrawingMethod.DEFAULT_RADIUS : config.cornerRadius,
             ir = r - inset,
             x2 = x + inset, y2 = y + inset, 
             w2 = w - twiceInset, h2 = h - twiceInset,
@@ -19168,13 +18674,13 @@ myt.TabContainer = new JS.Module('TabContainer', {
         this.__tabs = [];
         
         var TC = myt.TabContainer;
-        if (attrs.spacing === undefined) attrs.spacing = TC.DEFAULT_SPACING;
-        if (attrs.inset === undefined) attrs.inset = TC.DEFAULT_INSET;
+        if (attrs.spacing == null) attrs.spacing = TC.DEFAULT_SPACING;
+        if (attrs.inset == null) attrs.inset = TC.DEFAULT_INSET;
         
-        if (attrs.location === undefined) attrs.location = 'top';
+        if (attrs.location == null) attrs.location = 'top';
         
-        if (attrs.itemSelectionId === undefined) attrs.itemSelectionId = 'tabId';
-        if (attrs.maxSelected === undefined) attrs.maxSelected = 1;
+        if (attrs.itemSelectionId == null) attrs.itemSelectionId = 'tabId';
+        if (attrs.maxSelected == null) attrs.maxSelected = 1;
         
         this.callSuper(parent, attrs);
         
@@ -19284,8 +18790,8 @@ myt.TabMixin = new JS.Module('TabMixin', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides */
     initNode: function(parent, attrs) {
-        if (attrs.tabId === undefined) attrs.tabId = myt.generateGuid();
-        if (attrs.tabContainer === undefined) attrs.tabContainer = parent;
+        if (attrs.tabId == null) attrs.tabId = myt.generateGuid();
+        if (attrs.tabContainer == null) attrs.tabContainer = parent;
         
         // Selection must be done via the select method on the tabContainer
         var initiallySelected;
@@ -19358,24 +18864,24 @@ myt.Tab = new JS.Class('Tab', myt.DrawButton, {
         var T = myt.Tab;
         
         // myt.DrawButton
-        if (attrs.drawingMethodClassname === undefined) attrs.drawingMethodClassname = 'myt.TabDrawingMethod';
+        if (attrs.drawingMethodClassname == null) attrs.drawingMethodClassname = 'myt.TabDrawingMethod';
         
         // myt.IconTextButtonContent
-        if (attrs.inset === undefined) attrs.inset = T.DEFAULT_INSET;
-        if (attrs.outset === undefined) attrs.outset = T.DEFAULT_OUTSET;
+        if (attrs.inset == null) attrs.inset = T.DEFAULT_INSET;
+        if (attrs.outset == null) attrs.outset = T.DEFAULT_OUTSET;
         
         // myt.Tab
-        if (attrs.edgeColor === undefined) attrs.edgeColor = T.DEFAULT_EDGE_COLOR;
-        if (attrs.edgeSize === undefined) attrs.edgeSize = T.DEFAULT_EDGE_SIZE;
-        if (attrs.fillColorSelected === undefined) attrs.fillColorSelected = T.DEFAULT_FILL_COLOR_SELECTED;
-        if (attrs.fillColorHover === undefined) attrs.fillColorHover = T.DEFAULT_FILL_COLOR_HOVER;
-        if (attrs.fillColorActive === undefined) attrs.fillColorActive = T.DEFAULT_FILL_COLOR_ACTIVE;
-        if (attrs.fillColorReady === undefined) attrs.fillColorReady = T.DEFAULT_FILL_COLOR_READY;
-        if (attrs.labelTextColorSelected === undefined) attrs.labelTextColorSelected = T.DEFAULT_LABEL_TEXT_COLOR_SELECTED;
+        if (attrs.edgeColor == null) attrs.edgeColor = T.DEFAULT_EDGE_COLOR;
+        if (attrs.edgeSize == null) attrs.edgeSize = T.DEFAULT_EDGE_SIZE;
+        if (attrs.fillColorSelected == null) attrs.fillColorSelected = T.DEFAULT_FILL_COLOR_SELECTED;
+        if (attrs.fillColorHover == null) attrs.fillColorHover = T.DEFAULT_FILL_COLOR_HOVER;
+        if (attrs.fillColorActive == null) attrs.fillColorActive = T.DEFAULT_FILL_COLOR_ACTIVE;
+        if (attrs.fillColorReady == null) attrs.fillColorReady = T.DEFAULT_FILL_COLOR_READY;
+        if (attrs.labelTextColorSelected == null) attrs.labelTextColorSelected = T.DEFAULT_LABEL_TEXT_COLOR_SELECTED;
         
         // Other
-        if (attrs.height === undefined) attrs.height = T.DEFAULT_HEIGHT;
-        if (attrs.focusEmbellishment === undefined) attrs.focusEmbellishment = false;
+        if (attrs.height == null) attrs.height = T.DEFAULT_HEIGHT;
+        if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
         
         this.callSuper(parent, attrs);
     },
@@ -19414,27 +18920,28 @@ myt.Tab = new JS.Class('Tab', myt.DrawButton, {
     
     /** @overrides myt.DrawButton */
     getDrawConfig: function(state) {
-        var config = this.callSuper(state);
+        var self = this,
+            config = self.callSuper(state);
         
-        config.selected = this.selected;
-        config.location = this.tabContainer.location;
-        config.cornerRadius = this.cornerRadius;
-        config.edgeColor = this.edgeColor;
-        config.edgeSize = this.edgeSize;
+        config.selected = self.selected;
+        config.location = self.tabContainer.location;
+        config.cornerRadius = self.cornerRadius;
+        config.edgeColor = self.edgeColor;
+        config.edgeSize = self.edgeSize;
         
-        if (this.selected) {
-            config.fillColor = this.fillColorSelected;
+        if (self.selected) {
+            config.fillColor = self.fillColorSelected;
         } else {
             switch (state) {
                 case 'hover':
-                    config.fillColor = this.fillColorHover;
+                    config.fillColor = self.fillColorHover;
                     break;
                 case 'active':
-                    config.fillColor = this.fillColorActive;
+                    config.fillColor = self.fillColorActive;
                     break;
                 case 'disabled':
                 case 'ready':
-                    config.fillColor = this.focused ? this.fillColorHover : this.fillColorReady;
+                    config.fillColor = self.focused ? self.fillColorHover : self.fillColorReady;
                     break;
                 default:
             }
@@ -19479,19 +18986,19 @@ myt.SimpleTab = new JS.Class('SimpleTab', myt.SimpleIconTextButton, {
         var T = myt.Tab;
         
         // myt.IconTextButtonContent
-        if (attrs.inset === undefined) attrs.inset = T.DEFAULT_INSET;
-        if (attrs.outset === undefined) attrs.outset = T.DEFAULT_OUTSET;
+        if (attrs.inset == null) attrs.inset = T.DEFAULT_INSET;
+        if (attrs.outset == null) attrs.outset = T.DEFAULT_OUTSET;
         
         // myt.Tab
-        if (attrs.selectedColor === undefined) attrs.selectedColor = T.DEFAULT_FILL_COLOR_SELECTED;
-        if (attrs.hoverColor === undefined) attrs.hoverColor = T.DEFAULT_FILL_COLOR_HOVER;
-        if (attrs.activeColor === undefined) attrs.activeColor = T.DEFAULT_FILL_COLOR_ACTIVE;
-        if (attrs.readyColor === undefined) attrs.readyColor = T.DEFAULT_FILL_COLOR_READY;
-        if (attrs.labelTextSelectedColor === undefined) attrs.labelTextSelectedColor = T.DEFAULT_LABEL_TEXT_COLOR_SELECTED;
+        if (attrs.selectedColor == null) attrs.selectedColor = T.DEFAULT_FILL_COLOR_SELECTED;
+        if (attrs.hoverColor == null) attrs.hoverColor = T.DEFAULT_FILL_COLOR_HOVER;
+        if (attrs.activeColor == null) attrs.activeColor = T.DEFAULT_FILL_COLOR_ACTIVE;
+        if (attrs.readyColor == null) attrs.readyColor = T.DEFAULT_FILL_COLOR_READY;
+        if (attrs.labelTextSelectedColor == null) attrs.labelTextSelectedColor = T.DEFAULT_LABEL_TEXT_COLOR_SELECTED;
         
         // Other
-        if (attrs.height === undefined) attrs.height = T.DEFAULT_HEIGHT;
-        if (attrs.focusEmbellishment === undefined) attrs.focusEmbellishment = false;
+        if (attrs.height == null) attrs.height = T.DEFAULT_HEIGHT;
+        if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
         
         this.callSuper(parent, attrs);
         
@@ -19533,23 +19040,24 @@ myt.SimpleTab = new JS.Class('SimpleTab', myt.SimpleIconTextButton, {
     
     /** @private */
     __updateCornerRadius: function() {
-        var r = this.cornerRadius != null ? this.cornerRadius : myt.TabDrawingMethod.DEFAULT_RADIUS;
-        switch (this.tabContainer.location) {
+        var self = this,
+            r = self.cornerRadius != null ? self.cornerRadius : myt.TabDrawingMethod.DEFAULT_RADIUS;
+        switch (self.tabContainer.location) {
             case 'top':
-                this.setRoundedTopLeftCorner(r);
-                this.setRoundedTopRightCorner(r);
+                self.setRoundedTopLeftCorner(r);
+                self.setRoundedTopRightCorner(r);
                 break;
             case 'bottom':
-                this.setRoundedBottomLeftCorner(r);
-                this.setRoundedBottomRightCorner(r);
+                self.setRoundedBottomLeftCorner(r);
+                self.setRoundedBottomRightCorner(r);
                 break;
             case 'left':
-                this.setRoundedTopLeftCorner(r);
-                this.setRoundedBottomLeftCorner(r);
+                self.setRoundedTopLeftCorner(r);
+                self.setRoundedBottomLeftCorner(r);
                 break;
             case 'right':
-                this.setRoundedTopRightCorner(r);
-                this.setRoundedBottomRightCorner(r);
+                self.setRoundedTopRightCorner(r);
+                self.setRoundedBottomRightCorner(r);
                 break;
         }
     },
@@ -21422,8 +20930,8 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         }
 
         function option(optionName, optionValue) {
-            if (optionName === undefined) return myt.extend({}, opts);
-            if (optionValue === undefined) return opts[optionName];
+            if (optionName == null) return myt.extend({}, opts);
+            if (optionValue == null) return opts[optionName];
 
             opts[optionName] = optionValue;
             applyOptions();
@@ -22474,41 +21982,44 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
-        this.restoreFocus = true;
+        var self = this;
+        
+        self.restoreFocus = true;
         
         attrs.focusable = attrs.focusCage = true;
         
-        if (attrs.percentOfParentWidth === undefined) attrs.percentOfParentWidth = 100;
-        if (attrs.percentOfParentHeight === undefined) attrs.percentOfParentHeight = 100;
-        if (attrs.visible === undefined) attrs.visible = false;
-        if (attrs.ignoreLayout === undefined) attrs.ignoreLayout = true;
+        if (attrs.percentOfParentWidth == null) attrs.percentOfParentWidth = 100;
+        if (attrs.percentOfParentHeight == null) attrs.percentOfParentHeight = 100;
+        if (attrs.visible == null) attrs.visible = false;
+        if (attrs.ignoreLayout == null) attrs.ignoreLayout = true;
         
-        this.callSuper(parent, attrs);
+        self.callSuper(parent, attrs);
         
         // Eat mouse events
-        this.attachDomObserver(this, 'eatMouseEvent', 'mouseover');
-        this.attachDomObserver(this, 'eatMouseEvent', 'mouseout');
-        this.attachDomObserver(this, 'eatMouseEvent', 'mousedown');
-        this.attachDomObserver(this, 'eatMouseEvent', 'mouseup');
-        this.attachDomObserver(this, 'eatMouseEvent', 'click');
-        this.attachDomObserver(this, 'eatMouseEvent', 'dblclick');
-        this.attachDomObserver(this, 'eatMouseEvent', 'mousemove');
+        self.attachDomObserver(self, 'eatMouseEvent', 'mouseover');
+        self.attachDomObserver(self, 'eatMouseEvent', 'mouseout');
+        self.attachDomObserver(self, 'eatMouseEvent', 'mousedown');
+        self.attachDomObserver(self, 'eatMouseEvent', 'mouseup');
+        self.attachDomObserver(self, 'eatMouseEvent', 'click');
+        self.attachDomObserver(self, 'eatMouseEvent', 'dblclick');
+        self.attachDomObserver(self, 'eatMouseEvent', 'mousemove');
         
-        myt.RootView.setupCaptureDrop(this);
+        myt.RootView.setupCaptureDrop(self);
     },
     
     /** @overrides myt.View */
     doBeforeAdoption: function() {
         this.callSuper();
         
-        var D = myt.Dimmer;
-        new myt.View(this, {
+        var M = myt,
+            D = M.Dimmer;
+        new M.View(this, {
             name:'overlay', ignorePlacement:true, 
             opacity:D.DEFAULT_OPACITY,
             bgColor:D.DEFAULT_COLOR,
             percentOfParentWidth:100,
             percentOfParentHeight:100
-        }, [myt.SizeToParent]);
+        }, [M.SizeToParent]);
     },
     
     /** @overrides myt.View */
@@ -22533,15 +22044,16 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
     /** Shows the dimmer and remembers the focus location.
         @returns void */
     show: function() {
-        var gf = myt.global.focus;
-        this.prevFocus = gf.focusedView || gf.focusedDom;
+        var self = this,
+            gf = myt.global.focus;
+        self.prevFocus = gf.focusedView || gf.focusedDom;
         
-        this.makeHighestZIndex();
+        self.makeHighestZIndex();
         
         // Prevent focus traversing
-        if (this.focusable) this.focus();
+        if (self.focusable) self.focus();
         
-        this.setVisible(true);
+        self.setVisible(true);
     },
     
     /** Hides the dimmer and restores focus if necessary.
@@ -22618,37 +22130,38 @@ myt.ModalPanel = new JS.Class('ModalPanel', myt.Dimmer, {
     },
     
     doBeforeAdoption: function() {
-        this.callSuper();
-        
-        var M = myt,
+        var self = this,
+            M = myt,
             V = M.View,
             viewAttrs = {name:'content', ignorePlacement:true},
             centeredViewAttrs = M.extend(viewAttrs, {align:'center', valign:'middle'});
         
-        switch (this.sizingStrategy) {
+        self.callSuper();
+        
+        switch (self.sizingStrategy) {
             case 'children':
-                new M.SizeToChildren(new V(this, centeredViewAttrs), {
+                new M.SizeToChildren(new V(self, centeredViewAttrs), {
                     name:'sizeToChildren', axis:'both',
-                    paddingX:this.paddingX, 
-                    paddingY:this.paddingY
+                    paddingX:self.paddingX, 
+                    paddingY:self.paddingY
                 });
                 break;
             case 'parent':
-                new V(this, M.extend(viewAttrs, {
-                    x:this.marginLeft,
-                    y:this.marginTop,
-                    percentOfParentWidthOffset:-this.marginLeft - this.marginRight,
-                    percentOfParentHeightOffset:-this.marginTop - this.marginBottom,
+                new V(self, M.extend(viewAttrs, {
+                    x:self.marginLeft,
+                    y:self.marginTop,
+                    percentOfParentWidthOffset:-self.marginLeft - self.marginRight,
+                    percentOfParentHeightOffset:-self.marginTop - self.marginBottom,
                     percentOfParentWidth:100,
                     percentOfParentHeight:100,
                 }), [M.SizeToParent]);
                 break;
             case 'basic':
-                new V(this, centeredViewAttrs);
+                new V(self, centeredViewAttrs);
                 break;
             case 'none':
             default:
-                new V(this, viewAttrs);
+                new V(self, viewAttrs);
         }
     },
     
@@ -22690,21 +22203,23 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
-        this.lines = 12;
-        this.length = 7;
-        this.lineWidth = 5;
-        this.radius = 10;
-        this.corners = 1;
-        this.lineColor = '#000000';
-        this.direction = this.speed = 1;
-        this.trail = 100;
-        this.lineOpacity = 0.25;
+        var self = this;
         
-        if (attrs.visible === undefined) attrs.visible = false;
+        self.lines = 12;
+        self.length = 7;
+        self.lineWidth = 5;
+        self.radius = 10;
+        self.corners = 1;
+        self.lineColor = '#000000';
+        self.direction = self.speed = 1;
+        self.trail = 100;
+        self.lineOpacity = 0.25;
         
-        this.callSuper(parent, attrs);
+        if (attrs.visible == null) attrs.visible = false;
         
-        if (this.visible) this.__show();
+        self.callSuper(parent, attrs);
+        
+        if (self.visible) self.__show();
     },
     
     /** @overrides myt.View */
@@ -22748,24 +22263,25 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     // Methods /////////////////////////////////////////////////////////////////
     /** @private */
     __show: function() {
-        var spinner = this.__spinner || (this.__spinner = new myt.Spinner.FACTORY({
-            lines:this.lines, 
-            length:this.length, 
-            width:this.lineWidth, 
-            radius:this.radius, 
-            corners:this.corners,
-            color:this.lineColor,
-            direction:this.direction,
-            speed:this.speed,
-            trail:this.trail,
-            opacity:this.lineOpacity
-        }));
+        var self = this,
+            spinner = self.__spinner || (self.__spinner = new myt.Spinner.FACTORY({
+                lines:self.lines, 
+                length:self.length, 
+                width:self.lineWidth, 
+                radius:self.radius, 
+                corners:self.corners,
+                color:self.lineColor,
+                direction:self.direction,
+                speed:self.speed,
+                trail:self.trail,
+                opacity:self.lineOpacity
+            }));
         
-        var size = this.getSize();
-        this.setWidth(size);
-        this.setHeight(size);
+        var size = self.getSize();
+        self.setWidth(size);
+        self.setHeight(size);
         
-        spinner.spin(this.domElement);
+        spinner.spin(self.domElement);
     },
     
     /** @private */
@@ -23051,7 +22567,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
                 name:'closeBtn', width:16, height:16, y:4,
                 roundedCorners:8, tooltip:'Close Dialog.',
                 ignoreLayout:true, align:'right', alignOffset:4
-            }, [myt.TooltipMixin, {
+            }, [{
                 doActivated: function() {callbackTarget.doCallback(this);},
                 
                 draw: function(canvas, config) {
@@ -23148,10 +22664,14 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     __destroyContent: function() {
         this.__hideSpinner();
         
-        var content = this.content, MP = myt.ModalPanel, MD = myt.Dialog,
+        var M = myt,
+            MP = M.ModalPanel, 
+            MD = M.Dialog,
+            content = this.content, 
             stc = content.sizeToChildren,
             svs = content.getSubviews(), 
-            i = svs.length, sv;
+            i = svs.length,
+            sv;
         
         // Destroy all children except the close button since that gets reused.
         while (i) {
@@ -23159,17 +22679,17 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             if (sv.name !== 'closeBtn') sv.destroy();
         }
         
-        // Blank sets this.
+        // The blank dialog sets this.
         content.setVisible(true);
-        this.overlay.setBgColor(myt.Dimmer.DEFAULT_COLOR);
+        this.overlay.setBgColor(M.Dimmer.DEFAULT_COLOR);
         
         // Message and Confirm dialogs set this.
         this.setCallbackFunction();
         
-        // Confirm dialog modifies this.
+        // The confirm dialog modifies this.
         stc.setPaddingY(MP.DEFAULT_PADDING_Y);
         
-        // Confirm content dialog modifies this.
+        // The confirm content dialog modifies this.
         stc.setPaddingX(MP.DEFAULT_PADDING_X);
         
         // Any opts could modify this
@@ -23215,14 +22735,19 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             displayed. Supports: fontWeight, whiteSpace, wordWrap and width.
         @returns void */
     showMessage: function(msg, callbackFunction, opts) {
-        opts = myt.extend({}, myt.Dialog.WRAP_TEXT_DEFAULTS, opts);
-        var content = this.content, MP = myt.ModalPanel;
+        var self = this,
+            M = myt,
+            MP = M.ModalPanel,
+            content = self.content, 
+            closeBtn = content.closeBtn;
         
-        this.__destroyContent();
+        opts = M.extend({}, M.Dialog.WRAP_TEXT_DEFAULTS, opts);
         
-        this.setCallbackFunction(callbackFunction);
+        self.__destroyContent();
         
-        new myt.Text(content, {
+        self.setCallbackFunction(callbackFunction);
+        
+        new M.Text(content, {
             name:'msg',
             text:msg,
             whiteSpace:opts.whiteSpace,
@@ -23233,22 +22758,23 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             width:opts.width
         });
         
-        this.show();
+        self.show();
         
-        var closeBtn = content.closeBtn;
         closeBtn.setVisible(true);
         closeBtn.focus();
         
-        this.setDisplayMode('message');
+        self.setDisplayMode('message');
     },
     
     showSimple: function(contentBuilderFunc, callbackFunction, opts) {
-        var content = this.content,
+        var self = this,
+            M = myt,
+            content = self.content,
             closeBtn = content.closeBtn,
             opts = opts || {},
             maxHeight = opts.maxContainerHeight;
         
-        this.__destroyContent();
+        self.__destroyContent();
         
         if (opts.bgColor) content.setBgColor(opts.bgColor);
         if (opts.roundedCorners) content.setRoundedCorners(opts.roundedCorners);
@@ -23256,9 +22782,9 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         if (opts.border) content.setBorder(opts.border);
         
         content.sizeToChildren.setPaddingX(1);
-        this.setCallbackFunction(callbackFunction);
+        self.setCallbackFunction(callbackFunction);
         
-        var contentContainer = new myt.View(content, {
+        var contentContainer = new M.View(content, {
             name:'contentContainer', x:1, y:25, overflow:'auto'
         }, [{
             setHeight: function(v) {
@@ -23267,16 +22793,16 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             }
         }]);
         
-        contentBuilderFunc.call(this, contentContainer);
+        contentBuilderFunc.call(self, contentContainer);
         
-        new myt.SizeToChildren(contentContainer, {axis:'both'});
+        new M.SizeToChildren(contentContainer, {axis:'both'});
         
-        this.show();
+        self.show();
         
         closeBtn.setVisible(true);
         closeBtn.focus();
         
-        this.setDisplayMode('content');
+        self.setDisplayMode('content');
         
         // Set initial focus
         if (contentContainer.initialFocus) contentContainer.initialFocus.focus();
@@ -23289,18 +22815,22 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             Supports: fontWeight, whiteSpace, wordWrap and width.
         @returns void */
     showSpinner: function(msg, opts) {
-        opts = myt.extend({}, myt.Dialog.NO_WRAP_TEXT_DEFAULTS, opts);
-        var content = this.content, MP = myt.ModalPanel;
+        var self = this,
+            M = myt,
+            MP = M.ModalPanel,
+            content = self.content;
         
-        this.__destroyContent();
+        opts = M.extend({}, M.Dialog.NO_WRAP_TEXT_DEFAULTS, opts);
         
-        var spinner = this.spinner = new myt.Spinner(content, {
+        self.__destroyContent();
+        
+        var spinner = self.spinner = new M.Spinner(content, {
             align:'center', visible:true,
             radius:10, lines:12, length:14, lineWidth:3,
             y:MP.DEFAULT_PADDING_Y
         });
         if (msg) {
-            new myt.Text(content, {
+            new M.Text(content, {
                 text:msg,
                 whiteSpace:opts.whiteSpace,
                 wordWrap:opts.wordWrap,
@@ -23311,22 +22841,29 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             });
         }
         
-        this.show();
+        self.show();
         
         content.closeBtn.setVisible(false);
-        this.focus(); // Focus on the dimmer itself to prevent user interaction.
+        self.focus(); // Focus on the dimmer itself to prevent user interaction.
         
-        this.setDisplayMode('spinner');
+        self.setDisplayMode('spinner');
     },
     
     showColorPicker: function(callbackFunction, opts) {
-        var MP = myt.ModalPanel, content = this.content;
+        var self = this,
+            M = myt,
+            V = M.View,
+            MP = M.ModalPanel,
+            content = self.content,
+            closeBtn = content.closeBtn,
+            r = M.Dialog.DEFAULT_RADIUS;
         
-        opts = myt.extend({}, myt.Dialog.PICKER_DEFAULTS, opts);
+        opts = M.extend({}, M.Dialog.PICKER_DEFAULTS, opts);
         
-        this.__destroyContent();
+        self.__destroyContent();
         
-        var wrappedCallbackFunction = function(action) {
+        // Set the callback function to one wrapped to handle each button type.
+        self.setCallbackFunction(function(action) {
             switch(action) {
                 case 'closeBtn':
                 case 'cancelBtn':
@@ -23339,52 +22876,45 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
                     break;
             }
             this._spectrum.destroy();
-        };
-        
-        
-        this.setCallbackFunction(wrappedCallbackFunction);
+        });
         
         // Build Picker
-        var picker = new myt.View(content, {
+        var picker = new V(content, {
             name:'picker',
             x:MP.DEFAULT_PADDING_X,
             y:MP.DEFAULT_PADDING_Y + 24,
             width:337,
             height:177
         });
-        var spectrumView = new myt.View(picker, {});
-        
+        var spectrumView = new V(picker);
         $(spectrumView.domElement).spectrum({
             color:opts.color,
             palette: [['#000000','#111111','#222222','#333333','#444444','#555555','#666666','#777777'],
                       ['#888888','#999999','#aaaaaa','#bbbbbb','#cccccc','#dddddd','#eeeeee','#ffffff']],
             localStorageKey: "myt.default",
-            dialog:this
+            dialog:self
         });
         
-        this.show();
+        self.show();
         
-        var closeBtn = content.closeBtn;
         closeBtn.setVisible(true);
         closeBtn.focus();
         
-        this.__setupConfirmButtons(picker, opts);
+        self.__setupConfirmButtons(picker, opts);
         
-        var r = myt.Dialog.DEFAULT_RADIUS;
-        var bg = new myt.View(content, {
+        (new V(content, {
             ignoreLayout:true,
-            x:0, y:0,
             width:content.width, height:24,
             bgColor:'#eeeeee',
             roundedTopLeftCorner:r,
             roundedTopRightCorner:r
-        });
-        bg.sendToBack();
-        new myt.Text(content, {
+        })).sendToBack();
+        
+        new M.Text(content, {
             name:'title', x:r, y:4, text:opts.titleText, fontWeight:'bold'
         });
         
-        this.setDisplayMode('color_picker');
+        self.setDisplayMode('color_picker');
     },
     
     _spectrumCallback: function(spectrum) {
@@ -23392,18 +22922,22 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     },
     
     showDatePicker: function(callbackFunction, opts) {
-        var M = myt,
+        var self = this,
+            M = myt,
             MP = M.ModalPanel, 
             V = M.View,
-            content = this.content;
+            content = self.content,
+            closeBtn = content.closeBtn,
+            r = M.Dialog.DEFAULT_RADIUS;
         
         opts = M.extend({}, M.Dialog.DATE_PICKER_DEFAULTS, opts);
         
-        this.__destroyContent();
+        self.__destroyContent();
         
         content.sizeToChildren.setPaddingX(0);
         
-        var wrappedCallbackFunction = function(action) {
+        // Set the callback function to one wrapped to handle each button type.
+        self.setCallbackFunction(function(action) {
             switch(action) {
                 case 'closeBtn':
                 case 'cancelBtn':
@@ -23413,8 +22947,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
                     callbackFunction.call(this, action, this._pickedDateTime);
                     break;
             }
-        };
-        this.setCallbackFunction(wrappedCallbackFunction);
+        });
         
         // Build Picker
         var picker = new V(content, {
@@ -23424,33 +22957,31 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             width:opts.dateOnly ? 180 : (opts.timeOnly ? 150 : 225),
             height:185
         });
-        var pickerView = new V(picker, {});
+        var pickerView = new V(picker);
         
         $(pickerView.domElement).dtpicker({
             current:new Date(opts.initialDate || Date.now()),
             dateOnly:opts.dateOnly || false,
             timeOnly:opts.timeOnly || false,
-            dialog:this
+            dialog:self
         });
         
-        this.show();
+        self.show();
         
-        var closeBtn = content.closeBtn;
         closeBtn.setVisible(true);
         closeBtn.focus();
         
-        this.__setupConfirmButtons(picker, opts);
+        self.__setupConfirmButtons(picker, opts);
         
-        var r = M.Dialog.DEFAULT_RADIUS;
-        var bg = new V(content, {
+        (new V(content, {
             ignoreLayout:true,
             x:0, y:0,
             width:content.width, height:24,
             bgColor:'#eeeeee',
             roundedTopLeftCorner:r,
             roundedTopRightCorner:r
-        });
-        bg.sendToBack();
+        })).sendToBack();
+        
         new M.Text(content, {
             name:'title', 
             x:r, 
@@ -23459,7 +22990,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             fontWeight:'bold'
         });
         
-        this.setDisplayMode('date_picker');
+        self.setDisplayMode('date_picker');
     },
     
     _dtpickerCallback: function(dtpicker) {
@@ -23477,56 +23008,55 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     },
     
     showContentConfirm: function(contentBuilderFunc, callbackFunction, opts) {
-        var content = this.content;
+        var self = this,
+            M = myt,
+            V = M.View,
+            content = self.content,
+            closeBtn = content.closeBtn,
+            r = M.Dialog.DEFAULT_RADIUS,
+            maxHeight = opts.maxContainerHeight;
         
-        opts = myt.extend({}, myt.Dialog.CONFIRM_DEFAULTS, opts);
+        opts = M.extend({}, M.Dialog.CONFIRM_DEFAULTS, opts);
         
-        this.__destroyContent();
+        self.__destroyContent();
         
         content.sizeToChildren.setPaddingX(1);
-        this.setCallbackFunction(callbackFunction);
+        self.setCallbackFunction(callbackFunction);
         
         // Setup form
-        var maxHeight = opts.maxContainerHeight;
-        var contentContainer = new myt.View(content, {
-            name:'contentContainer',
-            x:1, y:25, overflow:'auto'
+        var contentContainer = new V(content, {
+            name:'contentContainer', x:1, y:25, overflow:'auto'
         }, [{
             setHeight: function(v) {
-                if (v > maxHeight) v = maxHeight;
-                this.callSuper(v);
+                this.callSuper(v > maxHeight ? maxHeight : v);
             }
         }]);
         
-        contentBuilderFunc.call(this, contentContainer);
+        contentBuilderFunc.call(self, contentContainer);
         
-        new myt.SizeToChildren(contentContainer, {axis:'both'});
+        new M.SizeToChildren(contentContainer, {axis:'both'});
         
-        this.show();
+        self.show();
         
-        var closeBtn = content.closeBtn;
         closeBtn.setVisible(true);
         closeBtn.focus();
         
-        this.__setupConfirmButtons(contentContainer, opts);
+        self.__setupConfirmButtons(contentContainer, opts);
         
-        var r = myt.Dialog.DEFAULT_RADIUS;
-        var bg = new myt.View(content, {
+        // Make background view
+        (new V(content, {
             ignoreLayout:true,
-            x:0, y:0,
             width:content.width, height:24,
             bgColor:'#eeeeee',
             roundedTopLeftCorner:r,
             roundedTopRightCorner:r
-        });
-        bg.sendToBack();
+        })).sendToBack();
         
-        new myt.Text(content, {
-            name:'title', x:r, y:4, text:opts.titleText,
-            fontWeight:'bold'
+        new M.Text(content, {
+            name:'title', x:r, y:4, text:opts.titleText, fontWeight:'bold'
         });
         
-        this.setDisplayMode('content');
+        self.setDisplayMode('content');
         
         // Set initial focus
         if (contentContainer.initialFocus) contentContainer.initialFocus.focus();
@@ -23534,10 +23064,14 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     
     /** @private */
     __setupConfirmButtons: function(mainView, opts) {
-        var self = this, content = this.content, 
-            DPY = myt.ModalPanel.DEFAULT_PADDING_Y;
+        var self = this,
+            M = myt,
+            V = M.View,
+            content = this.content, 
+            DPY = M.ModalPanel.DEFAULT_PADDING_Y,
+            r = M.Dialog.DEFAULT_RADIUS;
         
-        var btnContainer = new myt.View(content, {
+        var btnContainer = new V(content, {
             y:mainView.y + mainView.height + DPY, align:'center'
         });
         
@@ -23549,24 +23083,24 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             hoverColor:'#dddddd',
             readyColor:'#cccccc'
         };
-        if (opts.activeColor !== undefined) attrs.activeColor = opts.activeColor;
-        if (opts.hoverColor !== undefined) attrs.hoverColor = opts.hoverColor;
-        if (opts.readyColor !== undefined) attrs.readyColor = opts.readyColor;
-        if (opts.textColor !== undefined) attrs.textColor = opts.textColor;
+        if (opts.activeColor != null) attrs.activeColor = opts.activeColor;
+        if (opts.hoverColor != null) attrs.hoverColor = opts.hoverColor;
+        if (opts.readyColor != null) attrs.readyColor = opts.readyColor;
+        if (opts.textColor != null) attrs.textColor = opts.textColor;
         
-        new myt.SimpleIconTextButton(btnContainer, attrs, [{
+        new M.SimpleIconTextButton(btnContainer, attrs, [{
             doActivated: function() {self.doCallback(this);}
         }]);
         
         // Confirm Button
         attrs.name = 'confirmBtn';
         attrs.text = opts.confirmTxt;
-        if (opts.activeColorConfirm !== undefined) attrs.activeColor = opts.activeColorConfirm;
-        if (opts.hoverColorConfirm !== undefined) attrs.hoverColor = opts.hoverColorConfirm;
-        if (opts.readyColorConfirm !== undefined) attrs.readyColor = opts.readyColorConfirm;
-        if (opts.textColorConfirm !== undefined) attrs.textColor = opts.textColorConfirm;
+        if (opts.activeColorConfirm != null) attrs.activeColor = opts.activeColorConfirm;
+        if (opts.hoverColorConfirm != null) attrs.hoverColor = opts.hoverColorConfirm;
+        if (opts.readyColorConfirm != null) attrs.readyColor = opts.readyColorConfirm;
+        if (opts.textColorConfirm != null) attrs.textColor = opts.textColorConfirm;
         
-        new myt.SimpleIconTextButton(btnContainer, attrs, [{
+        new M.SimpleIconTextButton(btnContainer, attrs, [{
             doActivated: function() {self.doCallback(this);}
         }]);
         
@@ -23586,28 +23120,26 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
                 if (attrs.readyColor == null) attrs.readyColor = '#cccccc';
                 if (attrs.textColor == null) attrs.textColor = '#000000';
                 
-                new myt.SimpleIconTextButton(btnContainer, attrs, [{
+                new M.SimpleIconTextButton(btnContainer, attrs, [{
                     doActivated: function() {self.doCallback(this);}
                 }]);
             }
         }
         
-        new myt.SizeToChildren(btnContainer, {axis:'y'});
-        new myt.SpacedLayout(btnContainer, {spacing:4, axis:'x', collapseParent:true});
+        new M.SizeToChildren(btnContainer, {axis:'y'});
+        new M.SpacedLayout(btnContainer, {spacing:4, collapseParent:true});
         
         content.sizeToChildren.setPaddingY(DPY / 2);
         
-        var r = myt.Dialog.DEFAULT_RADIUS;
-        var bg = new myt.View(content, {
+        var bg = new V(content, {
             ignoreLayout:true,
-            x:0,
             y:btnContainer.y - (DPY / 2),
             width:content.width,
             bgColor:'#eeeeee',
             roundedBottomLeftCorner:r,
             roundedBottomRightCorner:r
         });
-        bg.setHeight(content.height - bg.y);
+        bg.setHeight(content.height - bg.y); // WHY: is this not in the attrs?
         bg.sendToBack();
     }
 });
@@ -24713,7 +24245,7 @@ myt.FormRadioGroup = new JS.Class('FormRadioGroup', myt.Node, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides */
     initNode: function(parent, attrs) {
-        if (attrs.groupId === undefined) attrs.groupId = myt.generateGuid();
+        if (attrs.groupId == null) attrs.groupId = myt.generateGuid();
         
         this.callSuper(parent, attrs);
         
@@ -24870,26 +24402,28 @@ myt.FormInputTextMixin = new JS.Module('FormInputTextMixin', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Input */
     initNode: function(parent, attrs) {
-        this.acceleratorScope = 'element';
-        this.validateWhen = 'key';
-        this.errorColor = '#ff9999';
-        this.actionRequiredColor = '#996666';
-        this.normalColor = '#999999';
+        var self = this;
         
-        if (attrs.bgColor === undefined) attrs.bgColor = '#ffffff';
-        if (attrs.borderWidth === undefined) attrs.borderWidth = 1;
-        if (attrs.borderStyle === undefined) attrs.borderStyle = 'solid';
-        if (attrs.focusEmbellishment === undefined) attrs.focusEmbellishment = true;
+        self.acceleratorScope = 'element';
+        self.validateWhen = 'key';
+        self.errorColor = '#ff9999';
+        self.actionRequiredColor = '#996666';
+        self.normalColor = '#999999';
         
-        this.callSuper(parent, attrs);
+        if (attrs.bgColor == null) attrs.bgColor = '#ffffff';
+        if (attrs.borderWidth == null) attrs.borderWidth = 1;
+        if (attrs.borderStyle == null) attrs.borderStyle = 'solid';
+        if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = true;
         
-        this.addValueProcessor(myt.global.valueProcessors.getValueProcessor('undefToEmpty'));
+        self.callSuper(parent, attrs);
         
-        this.attachToDom(this, '__handleKeyDown', 'keydown');
-        this.attachToDom(this, '__handleKeyUp', 'keyup');
+        self.addValueProcessor(myt.global.valueProcessors.getValueProcessor('undefToEmpty'));
         
-        this.addAccelerator('accept', this.doAccept);
-        this.addAccelerator('reject', this.doReject);
+        self.attachToDom(self, '__handleKeyDown', 'keydown');
+        self.attachToDom(self, '__handleKeyUp', 'keyup');
+        
+        self.addAccelerator('accept', self.doAccept);
+        self.addAccelerator('reject', self.doReject);
     },
     
     
@@ -25009,16 +24543,18 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.NativeInputWrapper */
     initNode: function(parent, attrs) {
+        var self = this;
+        
         if (attrs.bgColor == null) attrs.bgColor = 'transparent';
         if (attrs.spellcheck == null) attrs.spellcheck = false;
         
-        this.callSuper(parent, attrs);
+        self.callSuper(parent, attrs);
         
-        this.attachToDom(this, '__syncToDom', 'input');
+        self.attachToDom(self, '__syncToDom', 'input');
         
         // Allow filtering of input
-        this.attachToDom(this, '__filterInputPress', 'keypress');
-        this.attachToDom(this, '__filterInput', 'keyup');
+        self.attachToDom(self, '__filterInputPress', 'keypress');
+        self.attachToDom(self, '__filterInput', 'keyup');
     },
     
     
@@ -25133,7 +24669,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
         @param end:int (optional) the end of the selection.
         @returns void */
     setCaretPosition: function(start, end) {
-        if (end === undefined || start === end) {
+        if (end == null || start === end) {
             // Don't update if the current position already matches.
             if (this.getCaretPosition() === start) return;
             
@@ -25250,13 +24786,13 @@ myt.ComboBox = new JS.Class('ComboBox', myt.InputText, {
     initNode: function(parent, attrs) {
         this.filterItems = true;
         
-        if (attrs.activationKeys === undefined) attrs.activationKeys = [13,27,38,40];
-        if (attrs.bgColor === undefined) attrs.bgColor = '#ffffff';
-        if (attrs.borderWidth === undefined) attrs.borderWidth = 1;
-        if (attrs.borderStyle === undefined) attrs.borderStyle = 'solid';
-        if (attrs.floatingAlignOffset === undefined) attrs.floatingAlignOffset = attrs.borderWidth;
-        if (attrs.listViewAttrs === undefined) attrs.listViewAttrs = {maxHeight:99};
-        if (attrs.fullItemConfig === undefined) attrs.fullItemConfig = [];
+        if (attrs.activationKeys == null) attrs.activationKeys = [13,27,38,40];
+        if (attrs.bgColor == null) attrs.bgColor = '#ffffff';
+        if (attrs.borderWidth == null) attrs.borderWidth = 1;
+        if (attrs.borderStyle == null) attrs.borderStyle = 'solid';
+        if (attrs.floatingAlignOffset == null) attrs.floatingAlignOffset = attrs.borderWidth;
+        if (attrs.listViewAttrs == null) attrs.listViewAttrs = {maxHeight:99};
+        if (attrs.fullItemConfig == null) attrs.fullItemConfig = [];
         
         this.callSuper(parent, attrs);
     },
@@ -25558,17 +25094,19 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.BaseInputText */
     initNode: function(parent, attrs) {
+        var self = this;
+        
         if (attrs.whiteSpace == null) attrs.whiteSpace = 'pre';
         if (attrs.contentEditable == null) attrs.contentEditable = true;
         
-        this.callSuper(parent, attrs);
+        self.callSuper(parent, attrs);
         
-        this.attachToDom(this, '__cleanInput', 'keydown');
+        self.attachToDom(self, '__cleanInput', 'keydown');
         
-        this.attachToDom(this, '__userInteraction', 'keyup');
-        this.attachToDom(this, '__userInteraction', 'mouseup');
+        self.attachToDom(self, '__userInteraction', 'keyup');
+        self.attachToDom(self, '__userInteraction', 'mouseup');
         
-        this.setCaretToEnd();
+        self.setCaretToEnd();
     },
     
     /** @overrides myt.NativeInputWrapper */
@@ -25682,7 +25220,7 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     
     /** @overrides myt.BaseInputText */
     setCaretPosition: function(start, end) {
-        if (end === undefined || start === end) {
+        if (end == null || start === end) {
             // Don't update if the current position already matches.
             if (this.getCaretPosition() === start) return;
             
@@ -27700,11 +27238,11 @@ myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Checkbox */
     initNode: function(parent, attrs) {
-        if (attrs.width === undefined) attrs.width = parent.thumbWidth;
-        if (attrs.height === undefined) attrs.height = parent.thumbHeight;
+        if (attrs.width == null) attrs.width = parent.thumbWidth;
+        if (attrs.height == null) attrs.height = parent.thumbHeight;
         
-        if (attrs.repeatKeyDown === undefined) attrs.repeatKeyDown = true;
-        if (attrs.activationKeys === undefined) {
+        if (attrs.repeatKeyDown == null) attrs.repeatKeyDown = true;
+        if (attrs.activationKeys == null) {
             attrs.activationKeys = [
                 37, // left arrow
                 38, // up arrow
@@ -27731,7 +27269,7 @@ myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
     /** @overrides myt.Disableable */
     setDisabled: function(v) {
         // Adapt to event from syncTo
-        if (v !== null && typeof v === 'object') v = v.value;
+        if (v != null && typeof v === 'object') v = v.value;
         
         this.callSuper(v);
     },
@@ -27817,15 +27355,15 @@ myt.SimpleSliderThumb = new JS.Class('SimpleSliderThumb', myt.SimpleButton, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.SimpleButton */
     initNode: function(parent, attrs) {
-        if (attrs.activeColor === undefined) attrs.activeColor = '#bbbbbb';
-        if (attrs.readyColor === undefined) attrs.readyColor = '#cccccc';
-        if (attrs.hoverColor === undefined) attrs.hoverColor = '#dddddd';
+        if (attrs.activeColor == null) attrs.activeColor = '#bbbbbb';
+        if (attrs.readyColor == null) attrs.readyColor = '#cccccc';
+        if (attrs.hoverColor == null) attrs.hoverColor = '#dddddd';
         
-        if (attrs.boxShadow === undefined) attrs.boxShadow = [0, 0, 4, '#666666'];
+        if (attrs.boxShadow == null) attrs.boxShadow = [0, 0, 4, '#666666'];
         
         this.callSuper(parent, attrs);
         
-        if (attrs.roundedCorners === undefined) this.setRoundedCorners(Math.min(this.height, this.width) / 2);
+        if (attrs.roundedCorners == null) this.setRoundedCorners(Math.min(this.height, this.width) / 2);
     },
     
     
@@ -27871,27 +27409,27 @@ myt.BaseSlider = new JS.Class('BaseSlider', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
-        if (attrs.axis === undefined) attrs.axis = 'x';
+        if (attrs.axis == null) attrs.axis = 'x';
         if (attrs.axis === 'x') {
-            if (attrs.width === undefined) attrs.width = 100;
-            if (attrs.height === undefined) attrs.height = 18;
+            if (attrs.width == null) attrs.width = 100;
+            if (attrs.height == null) attrs.height = 18;
         } else {
-            if (attrs.width === undefined) attrs.width = 18;
-            if (attrs.height === undefined) attrs.height = 100;
+            if (attrs.width == null) attrs.width = 18;
+            if (attrs.height == null) attrs.height = 100;
         }
         
-        if (attrs.bgColor === undefined) attrs.bgColor = '#999999';
-        if (attrs.roundedCorners === undefined) attrs.roundedCorners = 9;
+        if (attrs.bgColor == null) attrs.bgColor = '#999999';
+        if (attrs.roundedCorners == null) attrs.roundedCorners = 9;
         
-        if (attrs.trackInset === undefined) attrs.trackInset = 9;
-        if (attrs.trackOutset === undefined) attrs.trackOutset = 9;
-        if (attrs.thumbWidth === undefined) attrs.thumbWidth = 16;
-        if (attrs.thumbHeight === undefined) attrs.thumbHeight = 16;
-        if (attrs.thumbOffset === undefined) attrs.thumbOffset = 1;
+        if (attrs.trackInset == null) attrs.trackInset = 9;
+        if (attrs.trackOutset == null) attrs.trackOutset = 9;
+        if (attrs.thumbWidth == null) attrs.thumbWidth = 16;
+        if (attrs.thumbHeight == null) attrs.thumbHeight = 16;
+        if (attrs.thumbOffset == null) attrs.thumbOffset = 1;
         
-        if (attrs.nudgeAmount === undefined) attrs.nudgeAmount = 1;
+        if (attrs.nudgeAmount == null) attrs.nudgeAmount = 1;
         
-        if (attrs.thumbClass === undefined) attrs.thumbClass = myt.SimpleSliderThumb;
+        if (attrs.thumbClass == null) attrs.thumbClass = myt.SimpleSliderThumb;
         
         this.callSuper(parent, attrs);
     },
@@ -27910,16 +27448,18 @@ myt.BaseSlider = new JS.Class('BaseSlider', myt.View, {
     
     // Methods /////////////////////////////////////////////////////////////////
     convertValueToPixels: function(v) {
-        var minV = this.minValue, ti = this.trackInset,
-            pxRange = (this.axis === 'x' ? this.width : this.height) - ti - this.trackOutset,
-            valueRange = this.maxValue - minV;
+        var self = this,
+            minV = self.minValue, ti = self.trackInset,
+            pxRange = (self.axis === 'x' ? self.width : self.height) - ti - self.trackOutset,
+            valueRange = self.maxValue - minV;
         return ti + ((v - minV) * (pxRange / valueRange));
     },
     
     convertPixelsToValue: function(px) {
-        var minV = this.minValue, ti = this.trackInset,
-            pxRange = (this.axis === 'x' ? this.width : this.height) - ti - this.trackOutset,
-            valueRange = this.maxValue - minV;
+        var self = this,
+            minV = self.minValue, ti = self.trackInset,
+            pxRange = (self.axis === 'x' ? self.width : self.height) - ti - self.trackOutset,
+            valueRange = self.maxValue - minV;
         return ((px - ti) * (valueRange / pxRange)) + minV;
     },
     
@@ -28083,10 +27623,10 @@ myt.RangeComponent = new JS.Module('RangeComponent', {
             if (v.lower === existingLower && v.upper === existingUpper) return;
             
             // Assign upper to lower if no lower was provided.
-            if (v.lower === undefined) v.lower = v.upper;
+            if (v.lower == null) v.lower = v.upper;
             
             // Assign lower to upper if no upper was provided.
-            if (v.upper === undefined) v.upper = v.lower;
+            if (v.upper == null) v.upper = v.lower;
             
             // Swap lower and upper if they are in the wrong order
             if (v.lower !== undefined && v.upper !== undefined && v.lower > v.upper) {
@@ -28155,7 +27695,7 @@ myt.SimpleSliderRangeFill = new JS.Class('SimpleSliderRangeFill', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Checkbox */
     initNode: function(parent, attrs) {
-        if (attrs.bgColor === undefined) attrs.bgColor = '#666666';
+        if (attrs.bgColor == null) attrs.bgColor = '#666666';
         
         this.callSuper(parent, attrs);
         
@@ -28191,7 +27731,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.BaseSlider */
     initNode: function(parent, attrs) {
-        if (attrs.rangeFillClass === undefined) attrs.rangeFillClass = myt.SimpleSliderRangeFill;
+        if (attrs.rangeFillClass == null) attrs.rangeFillClass = myt.SimpleSliderRangeFill;
         
         this.callSuper(parent, attrs);
     },
@@ -28718,18 +28258,18 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
     initNode: function(parent, attrs) {
         var M = myt,
             GCH = M.GridColumnHeader;
-        if (attrs.minValue === undefined) attrs.minValue = GCH.DEFAULT_MIN_VALUE;
-        if (attrs.maxValue === undefined) attrs.maxValue = GCH.DEFAULT_MAX_VALUE;
-        if (attrs.resizable === undefined) attrs.resizable = true;
-        if (attrs.flex === undefined) attrs.flex = 0;
-        if (attrs.cellXAdj === undefined) attrs.cellXAdj = 0;
-        if (attrs.cellWidthAdj === undefined) attrs.cellWidthAdj = 0;
+        if (attrs.minValue == null) attrs.minValue = GCH.DEFAULT_MIN_VALUE;
+        if (attrs.maxValue == null) attrs.maxValue = GCH.DEFAULT_MAX_VALUE;
+        if (attrs.resizable == null) attrs.resizable = true;
+        if (attrs.flex == null) attrs.flex = 0;
+        if (attrs.cellXAdj == null) attrs.cellXAdj = 0;
+        if (attrs.cellWidthAdj == null) attrs.cellWidthAdj = 0;
         
-        if (attrs.sortable === undefined) attrs.sortable = true;
-        if (attrs.sortState === undefined) attrs.sortState = 'none';
+        if (attrs.sortable == null) attrs.sortable = true;
+        if (attrs.sortState == null) attrs.sortState = 'none';
         
         // Ensure participation in determinePlacement method of myt.Grid
-        if (attrs.placement === undefined) attrs.placement = '*';
+        if (attrs.placement == null) attrs.placement = '*';
         
         this.callSuper(parent, attrs);
         
@@ -29003,7 +28543,7 @@ myt.GridRow = new JS.Module('GridRow', {
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
         // Ensure participation in determinePlacement method of myt.Grid
-        if (attrs.placement === undefined) attrs.placement = '*';
+        if (attrs.placement == null) attrs.placement = '*';
         
         this.callSuper(parent, attrs);
         
@@ -29414,42 +28954,49 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
         // Allows horizontal scrolling if the grid columns are too wide.
-        if (attrs.overflow === undefined) attrs.overflow = 'autox';
+        if (attrs.overflow == null) attrs.overflow = 'autox';
         
-        if (attrs.bgColor === undefined) attrs.bgColor = '#cccccc';
-        if (attrs.rowSpacing === undefined) attrs.rowSpacing = 1;
-        if (attrs.columnSpacing === undefined) attrs.columnSpacing = 1;
+        if (attrs.bgColor == null) attrs.bgColor = '#cccccc';
+        if (attrs.rowSpacing == null) attrs.rowSpacing = 1;
+        if (attrs.columnSpacing == null) attrs.columnSpacing = 1;
         
         this.callSuper(parent, attrs);
     },
     
     /** @overrides myt.View */
     doAfterAdoption: function() {
-        var shtr = this.sizeHeightToRows, m = myt;
+        var self = this,
+            M = myt,
+            V = M.View,
+            SL = M.SpacedLayout,
+            sizeHeightToRows = self.sizeHeightToRows;
         
-        var header = new m.View(this, {name:'header', overflow:'hidden'});
-        new m.SpacedLayout(header, {
-            name:'xLayout', locked:true, axis:'x', collapseParent:true, 
-            spacing:this.columnSpacing
+        var header = new V(self, {name:'header', overflow:'hidden'});
+        new SL(header, {
+            name:'xLayout', locked:true, collapseParent:true, 
+            spacing:self.columnSpacing
         });
-        new m.SizeToChildren(header, {name:'yLayout', locked:true, axis:'y'});
+        new M.SizeToChildren(header, {name:'yLayout', locked:true, axis:'y'});
         
-        var content = new m.View(this, {name:'content', overflow:shtr ? 'hidden' : 'autoy'});
-        new m.SpacedLayout(content, {
-            name:'yLayout', locked:true, axis:'y', spacing:this.rowSpacing,
-            collapseParent:shtr
+        var content = new V(self, {
+            name:'content', 
+            overflow:sizeHeightToRows ? 'hidden' : 'autoy'
+        });
+        new SL(content, {
+            name:'yLayout', locked:true, axis:'y', spacing:self.rowSpacing,
+            collapseParent:sizeHeightToRows
         });
         
-        this.syncTo(this, 'setGridWidth', 'width');
-        this.syncTo(header, '_updateContentWidth', 'width');
+        self.syncTo(self, 'setGridWidth', 'width');
+        self.syncTo(header, '_updateContentWidth', 'width');
         
-        this.applyConstraint('_updateContentHeight', [
-            shtr ? content : this, 'height', 
+        self.applyConstraint('_updateContentHeight', [
+            sizeHeightToRows ? content : self, 'height', 
             header, 'height', 
             header, 'y'
         ]);
         
-        this.callSuper();
+        self.callSuper();
     },
     
     
@@ -29502,14 +29049,16 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     },
     
     _updateContentHeight: function(event) {
-        var header = this.header, content = this.content,
+        var self = this,
+            header = self.header, 
+            content = self.content,
             y = header.y + header.height;
         content.setY(y);
         
-        if (this.sizeHeightToRows) {
-            this.setHeight(y + content.height);
+        if (self.sizeHeightToRows) {
+            self.setHeight(y + content.height);
         } else {
-            content.setHeight(this.height - y);
+            content.setHeight(self.height - y);
         }
     },
     
@@ -29710,16 +29259,16 @@ myt.SimpleGridColumnHeader = new JS.Class('SimpleGridColumnHeader', myt.SimpleIc
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
-        if (attrs.activeColor === undefined) attrs.activeColor = '#999999';
-        if (attrs.hoverColor === undefined) attrs.hoverColor = '#bbbbbb';
-        if (attrs.readyColor === undefined) attrs.readyColor = '#aaaaaa';
-        if (attrs.inset === undefined) attrs.inset = 2;
-        if (attrs.outset === undefined) attrs.outset = 2;
+        if (attrs.activeColor == null) attrs.activeColor = '#999999';
+        if (attrs.hoverColor == null) attrs.hoverColor = '#bbbbbb';
+        if (attrs.readyColor == null) attrs.readyColor = '#aaaaaa';
+        if (attrs.inset == null) attrs.inset = 2;
+        if (attrs.outset == null) attrs.outset = 2;
         
-        if (attrs.height === undefined) attrs.height = 18;
+        if (attrs.height == null) attrs.height = 18;
         
-        if (attrs.contentAlign === undefined) attrs.contentAlign = 'left';
-        if (attrs.sortIconColor === undefined) attrs.sortIconColor = '#666666';
+        if (attrs.contentAlign == null) attrs.contentAlign = 'left';
+        if (attrs.sortIconColor == null) attrs.sortIconColor = '#666666';
         
         this.callSuper(parent, attrs);
         
@@ -29854,8 +29403,8 @@ myt.StackablePanel = new JS.Module('StackablePanel', {
     initNode: function(parent, attrs) {
         attrs.visible = attrs.selected = false;
         
-        if (attrs.bgColor === undefined) attrs.bgColor = '#ffffff';
-        if (attrs.panelId === undefined) attrs.panelId = attrs.name;
+        if (attrs.bgColor == null) attrs.bgColor = '#ffffff';
+        if (attrs.panelId == null) attrs.panelId = attrs.name;
         
         this.callSuper(parent, attrs);
         
@@ -30107,8 +29656,8 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
     initNode: function(parent, attrs) {
         attrs.overflow = 'hidden';
         
-        if (attrs.itemSelectionId === undefined) attrs.itemSelectionId = 'panelId';
-        if (attrs.maxSelected === undefined) attrs.maxSelected = 1;
+        if (attrs.itemSelectionId == null) attrs.itemSelectionId = 'panelId';
+        if (attrs.maxSelected == null) attrs.maxSelected = 1;
         
         this.callSuper(parent, attrs);
         
@@ -30479,8 +30028,8 @@ myt.DropSource = new JS.Module('DropSource', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides */
     initNode: function(parent, attrs) {
-        if (attrs.distanceBeforeDrag === undefined) attrs.distanceBeforeDrag = 2;
-        if (attrs.dropParent === undefined) attrs.dropParent = parent.getRoot();
+        if (attrs.distanceBeforeDrag == null) attrs.distanceBeforeDrag = 2;
+        if (attrs.dropParent == null) attrs.dropParent = parent.getRoot();
         
         this.callSuper(parent, attrs);
     },
@@ -30582,7 +30131,7 @@ myt.AutoScroller = new JS.Module('AutoScroller', {
         this.scrollAmount = 2;
         this.scrollAcceleration = 7;
         
-        if (attrs.overflow === undefined) attrs.overflow = 'auto';
+        if (attrs.overflow == null) attrs.overflow = 'auto';
         
         this.callSuper(parent, attrs);
         
@@ -30629,43 +30178,44 @@ myt.AutoScroller = new JS.Module('AutoScroller', {
     
     /** @private */
     __handleMouseMove: function(event) {
-        var mousePos = event.value, 
+        var self = this,
+            mousePos = event.value, 
             mouseX = mousePos.pageX, 
             mouseY = mousePos.pageY;
         
-        if (this.containsPoint(mouseX, mouseY)) {
-            var pos = this.getPagePosition(), 
-                scrollBorder = this.scrollBorder;
+        if (self.containsPoint(mouseX, mouseY)) {
+            var pos = self.getPagePosition(), 
+                scrollBorder = self.scrollBorder;
             
             mouseX -= pos.x;
             mouseY -= pos.y;
             
             if (mouseY < scrollBorder) {
-                this.__isAutoscrollUp = true;
-                this.__amountscrollUp = this.__calculateAmount((scrollBorder - mouseY) / scrollBorder);
-                if (!this.__timerIdAutoscrollUp) this.__doAutoScrollAdj('scrollUp', -1);
-            } else if (this.height - mouseY < scrollBorder) {
-                this.__isAutoscrollDown = true;
-                this.__amountscrollDown = this.__calculateAmount((scrollBorder - (this.height - mouseY)) / scrollBorder);
-                if (!this.__timerIdAutoscrollDown) this.__doAutoScrollAdj('scrollDown', 1);
+                self.__isAutoscrollUp = true;
+                self.__amountscrollUp = self.__calculateAmount((scrollBorder - mouseY) / scrollBorder);
+                if (!self.__timerIdAutoscrollUp) self.__doAutoScrollAdj('scrollUp', -1);
+            } else if (self.height - mouseY < scrollBorder) {
+                self.__isAutoscrollDown = true;
+                self.__amountscrollDown = self.__calculateAmount((scrollBorder - (self.height - mouseY)) / scrollBorder);
+                if (!self.__timerIdAutoscrollDown) self.__doAutoScrollAdj('scrollDown', 1);
             } else {
-                this.__resetVScroll();
+                self.__resetVScroll();
             }
             
             if (mouseX < scrollBorder) {
-                this.__isAutoscrollLeft = true;
-                this.__amountscrollLeft = this.__calculateAmount((scrollBorder - mouseX) / scrollBorder);
-                if (!this.__timerIdAutoscrollLeft) this.__doAutoScrollAdj('scrollLeft', -1);
-            } else if (this.width - mouseX < scrollBorder) {
-                this.__isAutoscrollRight = true;
-                this.__amountscrollRight = this.__calculateAmount((scrollBorder - (this.width - mouseX)) / scrollBorder);
-                if (!this.__timerIdAutoscrollRight) this.__doAutoScrollAdj('scrollRight', 1);
+                self.__isAutoscrollLeft = true;
+                self.__amountscrollLeft = self.__calculateAmount((scrollBorder - mouseX) / scrollBorder);
+                if (!self.__timerIdAutoscrollLeft) self.__doAutoScrollAdj('scrollLeft', -1);
+            } else if (self.width - mouseX < scrollBorder) {
+                self.__isAutoscrollRight = true;
+                self.__amountscrollRight = self.__calculateAmount((scrollBorder - (self.width - mouseX)) / scrollBorder);
+                if (!self.__timerIdAutoscrollRight) self.__doAutoScrollAdj('scrollRight', 1);
             } else {
-                this.__resetHScroll();
+                self.__resetHScroll();
             }
         } else {
-            this.__resetVScroll();
-            this.__resetHScroll();
+            self.__resetVScroll();
+            self.__resetHScroll();
         }
     },
     
@@ -30676,29 +30226,26 @@ myt.AutoScroller = new JS.Module('AutoScroller', {
     
     /** @private */
     __resetVScroll: function() {
-        this.__isAutoscrollUp = false;
-        this.__timerIdAutoscrollUp = null;
-        this.__isAutoscrollDown = false;
-        this.__timerIdAutoscrollDown = null;
+        this.__isAutoscrollUp = this.__isAutoscrollDown = false;
+        this.__timerIdAutoscrollUp = this.__timerIdAutoscrollDown = null;
     },
     
     /** @private */
     __resetHScroll: function() {
-        this.__isAutoscrollLeft = false;
-        this.__timerIdAutoscrollLeft = null;
-        this.__isAutoscrollRight = false;
-        this.__timerIdAutoscrollRight = null;
+        this.__isAutoscrollLeft = this.__isAutoscrollRight = false;
+        this.__timerIdAutoscrollLeft = this.__timerIdAutoscrollRight = null;
     },
     
     /** @private */
     __doAutoScrollAdj: function(dir, amt) {
-        if (this['__isAuto' + dir]) {
-            this.domElement[dir === 'scrollUp' || dir === 'scrollDown' ? 'scrollTop' : 'scrollLeft'] += amt * this['__amount' + dir];
+        var self = this;
+        
+        if (self['__isAuto' + dir]) {
+            self.domElement[dir === 'scrollUp' || dir === 'scrollDown' ? 'scrollTop' : 'scrollLeft'] += amt * self['__amount' + dir];
             
-            var self = this;
-            this['__timerIdAuto' + dir] = setTimeout(function() {
+            self['__timerIdAuto' + dir] = setTimeout(function() {
                 self.__doAutoScrollAdj(dir, amt);
-            }, this.scrollFrequency);
+            }, self.scrollFrequency);
         }
     }
 });
@@ -31174,7 +30721,7 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
     initNode: function(parent, attrs) {
         this._listeners = [];
         
-        if (attrs.protocols === undefined) attrs.protocols = 'typedMessage';
+        if (attrs.protocols == null) attrs.protocols = 'typedMessage';
         
         this.callSuper();
     },
@@ -31264,7 +30811,7 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
             matcherFunc = funcsByKey[matcher] || (funcsByKey[matcher] = function(type) {return type === matcher;});
         } else if (typeof matcher === 'function') {
             matcherFunc = matcher;
-        } else if (matcher === undefined) {
+        } else if (matcher == null) {
             // Use a unique match anything function
             matcherFunc = myt.MessageTypeWebSocket.MATCH_ANYTHING;
         } else {
@@ -31336,6 +30883,492 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
         while (i) listeners[--i](msg);
         
         return msg;
+    }
+});
+
+
+/** A base class for tooltip classes.
+    
+    Events:
+        None
+    
+    Attributes:
+        tooltip:object The tooltip configuration assigned to this tooltip
+            when the mouse has moved over a view with TooltipMixin.
+        tipDelay:number The time in millis to wait before showing the tooltip.
+        tipHideDelay:number The time in millis to wait before hiding 
+            the tooltip.
+    
+    Private Attributes:
+        __checkTipTimerId:number The timer ID used internally for delaying
+            when the tip gets shown.
+*/
+myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
+    include: [myt.RootView],
+    
+    
+    // Class Methods and Attributes ////////////////////////////////////////////
+    extend: {
+        /** The length of time in millis before the tip is shown. */
+        DEFAULT_TIP_DELAY:500,
+        /** The length of time in millis before the tip is hidden. */
+        DEFAULT_TIP_HIDE_DELAY:100
+    },
+    
+    
+    // Life Cycle //////////////////////////////////////////////////////////////
+    initNode: function(parent, attrs) {
+        var BTT = myt.BaseTooltip;
+        this.tipDelay = this.nextTipDelay = BTT.DEFAULT_TIP_DELAY;
+        this.tipHideDelay = BTT.DEFAULT_TIP_HIDE_DELAY;
+        
+        if (attrs.visible == null) attrs.visible = false;
+        
+        this.callSuper(parent, attrs);
+    },
+    
+    
+    // Accessors ///////////////////////////////////////////////////////////////
+    /** Sets the tooltip info that will be displayed. 
+        @param v:object with the following keys:
+            parent:myt.View The view to show the tip for.
+            text:string The tip text.
+            tipalign:string Tip alignment, 'left' or 'right'.
+            tipvalign:string Tip vertical alignment, 'above' or 'below'. */
+    setTooltip: function(v) {
+        if (this.inited) {
+            this.tooltip = v;
+            if (v) {
+                this.attachToDom(myt.global.mouse, '__checkMouseMovement', 'mousemove', true);
+                
+                var ttp = v.parent;
+                this.attachToDom(ttp, 'hideTip', 'mousedown', true);
+                this.attachToDom(ttp, 'hideTip', 'mouseup', true);
+            }
+        }
+    },
+    
+    
+    // Methods /////////////////////////////////////////////////////////////////
+    /** @private */
+    __checkMouseMovement: function(event) {
+        var self = this;
+        self._lastPos = myt.MouseObservable.getMouseFromEvent(event);
+        if (self.__checkIn()) {
+            self.__clearTimeout();
+            self.__checkTipTimerId = setTimeout(
+                function() {
+                    delete self.__checkTipTimerId;
+                    
+                    // If the mouse rests in the tip's parent, show the tip.
+                    if (self.__checkIn()) self.showTip();
+                },
+                self.nextTipDelay
+            );
+        }
+    },
+    
+    /** @private */
+    __clearTimeout: function() {
+        if (this.__checkTipTimerId) {
+            clearTimeout(this.__checkTipTimerId);
+            delete this.__checkTipTimerId;
+        }
+    },
+    
+    /** Checks if the last mouse position is inside the tip's parent.
+        If not inside the tip will also get hidden.
+        @private
+        @returns boolean: false if the tip got hidden, true otherwise. */
+    __checkIn: function() {
+        var tt = this.tooltip;
+        if (tt) {
+            var pos = this._lastPos;
+            if (tt.parent.containsPoint(pos.x, pos.y)) return true;
+        }
+        this.hideTip();
+        return false;
+    },
+    
+    /** Called when the tip will be hidden.
+        @returns boolean */
+    hideTip: function(event) {
+        this.__clearTimeout();
+        
+        var ttp = this.tooltip.parent;
+        this.detachFromDom(ttp, 'hideTip', 'mousedown', true);
+        this.detachFromDom(ttp, 'hideTip', 'mouseup', true);
+        this.detachFromDom(myt.global.mouse, '__checkMouseMovement', 'mousemove', true);
+        
+        this.nextTipDelay = this.tipDelay;
+        this.setVisible(false);
+        
+        // Don't consume mouse event since we just want to close the tip
+        // as a side effect of the user action. The typical case for this is
+        // the user clicking on a button while the tooltip for that button
+        // is shown.
+        return true;
+    },
+    
+    /** Called when the tip will be shown.
+        @returns void */
+    showTip: function() {
+        // Don't show tooltips while doing drag and drop since they're
+        // distracting while this is going on.
+        if (!myt.global.dragManager.dragView) {
+            this.nextTipDelay = this.tipHideDelay;
+            this.bringToFront();
+            this.setVisible(true);
+        }
+    }
+});
+
+
+/** An implementation of a tooltip.
+    
+    Events:
+        None
+    
+    Attributes:
+        edgeWidth:number the width of the "edge" of the tip background.
+        pointerInset:number The inset of the "pointer" from the left/right 
+            edge of the tip.
+        insetH:number The horizontal inset of the text from the edge.
+        insetTop:number The top inset of the text from the edge.
+        insetBottom:number The bottom inset of the text from the edge.
+        shadowWidth:number The width of the shadow.
+        maxTextWidth:number The maximum width for the text view in the tooltip.
+        tipBgColor:string The color to use for the tip background.
+        edgeColor:string The color used for the edge.
+        shadowColor:string The color of the shadow.
+    
+    Private Attributes:
+        __tipWidth:number The width of the tip text view.
+*/
+myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
+    // Class Methods and Attributes ////////////////////////////////////////////
+    extend: {
+        DEFAULT_POINTER_WIDTH:7,
+        DEFAULT_POINTER_HEIGHT:4,
+        DEFAULT_EDGE_WIDTH:1,
+        DEFAULT_POINTER_INSET:2,
+        DEFAULT_HORIZONTAL_INSET:4,
+        DEFAULT_TOP_INSET:2,
+        DEFAULT_BOTTOM_INSET:3,
+        DEFAULT_SHADOW_WIDTH:2,
+        DEFAULT_MAX_TEXT_WIDTH:280,
+        DEFAULT_TIP_BG_COLOR:'#dddddd',
+        DEFAULT_EDGE_COLOR:'#666666',
+        DEFAULT_SHADOW_COLOR:'#000000'
+    },
+    
+    
+    // Life Cycle //////////////////////////////////////////////////////////////
+    initNode: function(parent, attrs) {
+        var self = this,
+            M = myt,
+            T = M.Tooltip;
+        if (attrs.pointerWidth == null) attrs.pointerWidth = T.DEFAULT_POINTER_WIDTH;
+        if (attrs.pointerHeight == null) attrs.pointerHeight = T.DEFAULT_POINTER_HEIGHT;
+        if (attrs.edgeWidth == null) attrs.edgeWidth = T.DEFAULT_EDGE_WIDTH;
+        if (attrs.pointerInset == null) attrs.pointerInset = T.DEFAULT_POINTER_INSET;
+        if (attrs.insetH == null) attrs.insetH = T.DEFAULT_HORIZONTAL_INSET;
+        if (attrs.insetTop == null) attrs.insetTop = T.DEFAULT_TOP_INSET;
+        if (attrs.insetBottom == null) attrs.insetBottom = T.DEFAULT_BOTTOM_INSET;
+        if (attrs.shadowWidth == null) attrs.shadowWidth = T.DEFAULT_SHADOW_WIDTH;
+        if (attrs.maxTextWidth == null) attrs.maxTextWidth = T.DEFAULT_MAX_TEXT_WIDTH;
+        if (attrs.tipBgColor == null) attrs.tipBgColor = T.DEFAULT_TIP_BG_COLOR;
+        if (attrs.edgeColor == null) attrs.edgeColor = T.DEFAULT_EDGE_COLOR;
+        if (attrs.shadowColor == null) attrs.shadowColor = T.DEFAULT_SHADOW_COLOR;
+        
+        self.__tipWidth = 0;
+        
+        self.callSuper(parent, attrs);
+        
+        new M.Canvas(self, {
+            name:'_bg', percentOfParentWidth:100, percentOfParentHeight:100
+        }, [M.SizeToParent]);
+        new M.Text(self, {
+            name:'_tipText', fontSize:'12px',
+            x:self.edgeWidth + self.insetH, whiteSpace:'inherit'
+        });
+    },
+    
+    
+    // Accessors ///////////////////////////////////////////////////////////////
+    setPointerWidth: function(v) {this.pointerWidth = v;},
+    setPointerHeight: function(v) {this.pointerHeight = v;},
+    setEdgeWidth: function(v) {this.edgeWidth = v;},
+    setPointerInset: function(v) {this.pointerInset = v;},
+    setInsetH: function(v) {this.insetH = v;},
+    setInsetTop: function(v) {this.insetTop = v;},
+    setInsetBottom: function(v) {this.insetBottom = v;},
+    setShadowWidth: function(v) {this.shadowWidth = v;},
+    setMaxTextWidth: function(v) {this.maxTextWidth = v;},
+    setTipBgColor: function(v) {this.tipBgColor = v;},
+    setEdgeColor: function(v) {this.edgeColor = v;},
+    setShadowColor: function(v) {this.shadowColor = v;},
+    
+    
+    // Methods /////////////////////////////////////////////////////////////////
+    /** @overrides myt.BaseTooltip. */
+    showTip: function() {
+        var self = this,
+            tt = self.tooltip,
+            txt = tt.text,
+            ttp = tt.parent,
+            tipText = self._tipText,
+            insetTop = self.insetTop,
+            shadowWidth = self.shadowWidth;
+        
+        // Set tip text
+        if (tipText.text !== txt) tipText.setText(txt);
+        
+        // Get floating boundary
+        var gwr = myt.global.windowResize,
+            bounds = {x:0, y:0, width:gwr.getWidth(), height:gwr.getHeight()},
+            boundsXOffset = 0, boundsYOffset = 0;
+        
+        // Get position of parent
+        var parentPos = ttp.getPagePosition(),
+            tipX = parentPos.x,
+            tipParentY = parentPos.y;
+        
+        // Determine X position
+        tipText.setWidth('auto');
+        var tipTextWidth = Math.min(tipText.measureNoWrapWidth(), self.maxTextWidth),
+            pointerX = tipText.x;
+        self.__tipWidth = 2 * pointerX + tipTextWidth;
+        tipText.setWidth(tipTextWidth);
+        tipText.sizeViewToDom();
+        
+        if (tt.tipalign === 'right') {
+            tipX += ttp.width - self.__tipWidth;
+            pointerX += tipText.width - self.pointerInset - self.pointerWidth;
+        } else {
+            pointerX += self.pointerInset;
+        }
+        
+        // Prevent out-of-bounds to the left
+        var diff;
+        if (boundsXOffset > tipX) {
+            diff = boundsXOffset - tipX;
+            tipX += diff;
+            pointerX -= diff;
+        }
+        
+        // Prevent out-of-bounds to the right
+        if (tipX + self.__tipWidth > boundsXOffset + bounds.width) {
+            diff = (tipX + self.__tipWidth) - (boundsXOffset + bounds.width);
+            tipX -= diff;
+            pointerX += diff;
+        }
+        
+        // Determine Y position
+        var tipHeight = 2*self.edgeWidth + insetTop + self.insetBottom + tipText.height + self.pointerHeight,
+            tipParentHeight = ttp.height,
+            pointerOnTop, tipY;
+        switch (tt.tipvalign) {
+            case "below":
+                tipY = tipParentY + tipParentHeight;
+                pointerOnTop = true;
+                
+                if (tipY + tipHeight > boundsYOffset + bounds.height) {
+                    tipY = tipParentY - tipHeight;
+                    pointerOnTop = false;
+                }
+                break;
+            
+            case "above":
+            default:
+                tipY = tipParentY - tipHeight;
+                pointerOnTop = false;
+                
+                if (boundsYOffset > tipY) {
+                    tipY = tipParentY + tipParentHeight;
+                    pointerOnTop = true;
+                }
+                break;
+        }
+        
+        // Apply values
+        self.setX(Math.round(tipX));
+        self.setY(Math.round(tipY));
+        tipText.setY(insetTop + self.edgeWidth + (pointerOnTop ? self.pointerHeight : 0));
+        
+        self.setWidth(self.__tipWidth + shadowWidth);
+        self.setHeight(tipHeight + shadowWidth);
+        
+        self.__redraw(pointerX, pointerOnTop);
+        
+        self.callSuper();
+    },
+    
+    /** @private */
+    __redraw: function(pointerX, pointerOnTop) {
+        var self = this,
+            canvas = self._bg,
+            right = self.__tipWidth,
+            top = pointerOnTop ? self.pointerHeight : 0,
+            bottom = 2*self.edgeWidth + self.insetTop + self.insetBottom + self._tipText.height + top,
+            pointerWidth = self.pointerWidth,
+            pointerXCtr = pointerX + pointerWidth / 2,
+            pointerXRt = pointerX + pointerWidth,
+            pointerHeight = self.pointerHeight,
+            shadowWidth = self.shadowWidth,
+            edgeWidth = self.edgeWidth,
+            lineTo = canvas.lineTo.bind(canvas);
+        
+        canvas.clear();
+        
+        // Draw Shadow
+        canvas.beginPath();
+        canvas.moveTo(shadowWidth, top + shadowWidth);
+        lineTo(right + shadowWidth, top + shadowWidth);
+        lineTo(right + shadowWidth, bottom + shadowWidth);
+        lineTo(shadowWidth, bottom + shadowWidth);
+        canvas.closePath();
+        canvas.setGlobalAlpha(0.3);
+        canvas.setFillStyle(self.shadowColor);
+        canvas.fill();
+        
+        canvas.setGlobalAlpha(1);
+        
+        // Draw Edge
+        canvas.beginPath();
+        canvas.moveTo(0, top);
+        
+        if (pointerOnTop) {
+            lineTo(pointerX, top);
+            lineTo(pointerXCtr, top - pointerHeight);
+            lineTo(pointerXRt, top);
+        }
+        
+        lineTo(right, top);
+        lineTo(right, bottom);
+        
+        if (!pointerOnTop) {
+            lineTo(pointerXRt, bottom);
+            lineTo(pointerXCtr, bottom + pointerHeight);
+            lineTo(pointerX, bottom);
+        }
+        
+        lineTo(0, bottom);
+        canvas.closePath();
+        canvas.setFillStyle(self.edgeColor);
+        canvas.fill();
+        
+        // Draw Fill
+        right -= edgeWidth;
+        top += edgeWidth;
+        bottom -= edgeWidth;
+        
+        canvas.beginPath();
+        canvas.moveTo(edgeWidth, top);
+        
+        if (pointerOnTop) {
+            lineTo(pointerX, top);
+            lineTo(pointerXCtr, top - pointerHeight);
+            lineTo(pointerXRt, top);
+        }
+        
+        lineTo(right, top);
+        lineTo(right, bottom);
+        
+        if (!pointerOnTop) {
+            lineTo(pointerXRt, bottom);
+            lineTo(pointerXCtr, bottom + pointerHeight);
+            lineTo(pointerX, bottom);
+        }
+        
+        lineTo(edgeWidth, bottom);
+        canvas.closePath();
+        canvas.setFillStyle(self.tipBgColor);
+        canvas.fill();
+    }
+});
+
+
+/** A mixin that adds tooltip support to a view.
+    
+    Requires:
+        myt.MouseOver
+    
+    Events:
+        tooltip:string
+        tipAlign:string
+        tipValign:string
+        tipClass:JS.Class
+    
+    Attributes:
+        tooltip:string The tip text to display.
+        tipAlign:string The horizontal alignment of the tooltip relative to
+            the view the tip is being shown for. Supported values are 'left'
+            and 'right'. Defaults to 'left'.
+        tipValign:string The vertical alignment of the tooltip relative to
+            the view the tip is being shown for. Supported values are 'above'
+            and 'below'. Defaults to 'above'.
+        tipClass:JS.Class The class to use to instantiate the tooltip.
+*/
+myt.TooltipMixin = new JS.Module('TooltipMixin', {
+    // Class Methods and Attributes ////////////////////////////////////////////
+    extend: {
+        /** The default class to use for tooltip views. If a project wants to use
+            a special tip class everywhere it should override this. */
+        DEFAULT_TIP_CLASS:myt.Tooltip
+    },
+    
+    
+    // Accessors ///////////////////////////////////////////////////////////////
+    setTooltip: function(v) {this.set('tooltip', v, true);},
+    setTipAlign: function(v) {this.set('tipAlign', v, true);},
+    setTipValign: function(v) {this.set('tipValign', v, true);},
+    setTipClass: function(v) {this.set('tipClass', v, true);},
+    
+    
+    // Methods /////////////////////////////////////////////////////////////////
+    /** @overrides myt.MouseOver. */
+    doSmoothMouseOver: function(isOver) {
+        var self = this,
+            M = myt,
+            g = M.global,
+            tooltip = self.tooltip;
+        
+        self.callSuper(isOver);
+        
+        if (isOver && tooltip) {
+            // Use configured class or default if none defined.
+            var tipClass = self.tipClass || M.TooltipMixin.DEFAULT_TIP_CLASS,
+                tooltipView = g.tooltipView;
+            
+            // Destroy tip if it's not the correct class.
+            if (tooltipView && !(tooltipView instanceof tipClass)) {
+                g.unregister('tooltipView');
+                tooltipView.destroy();
+                tooltipView = null;
+            }
+            
+            // Create new instance.
+            if (!tooltipView) {
+                // Create tooltip div if necessary
+                var elem = document.getElementById("tooltipDiv");
+                if (!elem) {
+                    elem = M.DomElementProxy.createDomElement('div', {position:'absolute'});
+                    
+                    // Make the div a child of the body element so it can be
+                    // in front of pretty much anything in the document.
+                    M.getElement().appendChild(elem);
+                }
+                g.register('tooltipView', tooltipView = new tipClass(elem, {domId:'tooltipDiv'}));
+            }
+            
+            tooltipView.setTooltip({
+                parent:self, 
+                text:tooltip, 
+                tipalign:self.tipAlign || 'left', 
+                tipvalign:self.tipValign || 'above'
+            });
+        }
     }
 });
 

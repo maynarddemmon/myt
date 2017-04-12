@@ -7,7 +7,7 @@ myt.Image = new JS.Class('Image', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
-        if (attrs.useNaturalSize === undefined) attrs.useNaturalSize = true;
+        if (attrs.useNaturalSize == null) attrs.useNaturalSize = true;
         
         this.callSuper(parent, attrs);
     }
