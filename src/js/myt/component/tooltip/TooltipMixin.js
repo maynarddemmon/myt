@@ -29,7 +29,12 @@ myt.TooltipMixin = new JS.Module('TooltipMixin', {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setTooltip: function(v) {this.set('tooltip', v, true);},
+    setTooltip: function(v) {
+        // Supresses the myt.View tooltip behavior.
+        this.callSuper('');
+        
+        this.set('tooltip', v, true);
+    },
     setTipAlign: function(v) {this.set('tipAlign', v, true);},
     setTipValign: function(v) {this.set('tipValign', v, true);},
     setTipClass: function(v) {this.set('tipClass', v, true);},
