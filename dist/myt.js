@@ -81,493 +81,6 @@ if (typeof console !== 'object') {
 }
 
 
-/** json2.js
-    2012-10-08
-
-    Public Domain.
-
-    NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
-
-    See http://www.JSON.org/js.html
-
-
-    This code should be minified before deployment.
-    See http://javascript.crockford.com/jsmin.html
-
-    USE YOUR OWN COPY. IT IS EXTREMELY UNWISE TO LOAD CODE FROM SERVERS YOU DO
-    NOT CONTROL.
-
-
-    This file creates a global JSON object containing two methods: stringify
-    and parse.
-
-        JSON.stringify(value, replacer, space)
-            value       any JavaScript value, usually an object or array.
-
-            replacer    an optional parameter that determines how object
-                        values are stringified for objects. It can be a
-                        function or an array of strings.
-
-            space       an optional parameter that specifies the indentation
-                        of nested structures. If it is omitted, the text will
-                        be packed without extra whitespace. If it is a number,
-                        it will specify the number of spaces to indent at each
-                        level. If it is a string (such as '\t' or '&nbsp;'),
-                        it contains the characters used to indent at each level.
-
-            This method produces a JSON text from a JavaScript value.
-
-            When an object value is found, if the object contains a toJSON
-            method, its toJSON method will be called and the result will be
-            stringified. A toJSON method does not serialize: it returns the
-            value represented by the name/value pair that should be serialized,
-            or undefined if nothing should be serialized. The toJSON method
-            will be passed the key associated with the value, and this will be
-            bound to the value
-
-            For example, this would serialize Dates as ISO strings.
-
-                Date.prototype.toJSON = function (key) {
-                    function f(n) {
-                        // Format integers to have at least two digits.
-                        return n < 10 ? '0' + n : n;
-                    }
-
-                    return this.getUTCFullYear()   + '-' +
-                         f(this.getUTCMonth() + 1) + '-' +
-                         f(this.getUTCDate())      + 'T' +
-                         f(this.getUTCHours())     + ':' +
-                         f(this.getUTCMinutes())   + ':' +
-                         f(this.getUTCSeconds())   + 'Z';
-                };
-
-            You can provide an optional replacer method. It will be passed the
-            key and value of each member, with this bound to the containing
-            object. The value that is returned from your method will be
-            serialized. If your method returns undefined, then the member will
-            be excluded from the serialization.
-
-            If the replacer parameter is an array of strings, then it will be
-            used to select the members to be serialized. It filters the results
-            such that only members with keys listed in the replacer array are
-            stringified.
-
-            Values that do not have JSON representations, such as undefined or
-            functions, will not be serialized. Such values in objects will be
-            dropped; in arrays they will be replaced with null. You can use
-            a replacer function to replace those with JSON values.
-            JSON.stringify(undefined) returns undefined.
-
-            The optional space parameter produces a stringification of the
-            value that is filled with line breaks and indentation to make it
-            easier to read.
-
-            If the space parameter is a non-empty string, then that string will
-            be used for indentation. If the space parameter is a number, then
-            the indentation will be that many spaces.
-
-            Example:
-
-            text = JSON.stringify(['e', {pluribus: 'unum'}]);
-            // text is '["e",{"pluribus":"unum"}]'
-
-
-            text = JSON.stringify(['e', {pluribus: 'unum'}], null, '\t');
-            // text is '[\n\t"e",\n\t{\n\t\t"pluribus": "unum"\n\t}\n]'
-
-            text = JSON.stringify([new Date()], function (key, value) {
-                return this[key] instanceof Date ?
-                    'Date(' + this[key] + ')' : value;
-            });
-            // text is '["Date(---current time---)"]'
-
-
-        JSON.parse(text, reviver)
-            This method parses a JSON text to produce an object or array.
-            It can throw a SyntaxError exception.
-
-            The optional reviver parameter is a function that can filter and
-            transform the results. It receives each of the keys and values,
-            and its return value is used instead of the original value.
-            If it returns what it received, then the structure is not modified.
-            If it returns undefined then the member is deleted.
-
-            Example:
-
-            // Parse the text. Values that look like ISO date strings will
-            // be converted to Date objects.
-
-            myData = JSON.parse(text, function (key, value) {
-                var a;
-                if (typeof value === 'string') {
-                    a =
-/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/.exec(value);
-                    if (a) {
-                        return new Date(Date.UTC(+a[1], +a[2] - 1, +a[3], +a[4],
-                            +a[5], +a[6]));
-                    }
-                }
-                return value;
-            });
-
-            myData = JSON.parse('["Date(09/09/2001)"]', function (key, value) {
-                var d;
-                if (typeof value === 'string' &&
-                        value.slice(0, 5) === 'Date(' &&
-                        value.slice(-1) === ')') {
-                    d = new Date(value.slice(5, -1));
-                    if (d) {
-                        return d;
-                    }
-                }
-                return value;
-            });
-
-
-    This is a reference implementation. You are free to copy, modify, or
-    redistribute.
-*/
-
-/*jslint evil: true, regexp: true */
-
-/*members "", "\b", "\t", "\n", "\f", "\r", "\"", JSON, "\\", apply,
-    call, charCodeAt, getUTCDate, getUTCFullYear, getUTCHours,
-    getUTCMinutes, getUTCMonth, getUTCSeconds, hasOwnProperty, join,
-    lastIndex, length, parse, prototype, push, replace, slice, stringify,
-    test, toJSON, toString, valueOf
-*/
-
-
-// Create a JSON object only if one does not already exist. We create the
-// methods in a closure to avoid creating global variables.
-
-if (typeof JSON !== 'object') {
-    JSON = {};
-}
-
-(function () {
-    'use strict';
-
-    function f(n) {
-        // Format integers to have at least two digits.
-        return n < 10 ? '0' + n : n;
-    }
-
-    if (typeof Date.prototype.toJSON !== 'function') {
-
-        Date.prototype.toJSON = function (key) {
-
-            return isFinite(this.valueOf())
-                ? this.getUTCFullYear()     + '-' +
-                    f(this.getUTCMonth() + 1) + '-' +
-                    f(this.getUTCDate())      + 'T' +
-                    f(this.getUTCHours())     + ':' +
-                    f(this.getUTCMinutes())   + ':' +
-                    f(this.getUTCSeconds())   + 'Z'
-                : null;
-        };
-
-        String.prototype.toJSON      =
-            Number.prototype.toJSON  =
-            Boolean.prototype.toJSON = function (key) {
-                return this.valueOf();
-            };
-    }
-
-    var cx = /[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
-        escapable = /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
-        gap,
-        indent,
-        meta = {    // table of character substitutions
-            '\b': '\\b',
-            '\t': '\\t',
-            '\n': '\\n',
-            '\f': '\\f',
-            '\r': '\\r',
-            '"' : '\\"',
-            '\\': '\\\\'
-        },
-        rep;
-
-
-    function quote(string) {
-
-// If the string contains no control characters, no quote characters, and no
-// backslash characters, then we can safely slap some quotes around it.
-// Otherwise we must also replace the offending characters with safe escape
-// sequences.
-
-        escapable.lastIndex = 0;
-        return escapable.test(string) ? '"' + string.replace(escapable, function (a) {
-            var c = meta[a];
-            return typeof c === 'string'
-                ? c
-                : '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
-        }) + '"' : '"' + string + '"';
-    }
-
-
-    function str(key, holder) {
-
-// Produce a string from holder[key].
-
-        var i,          // The loop counter.
-            k,          // The member key.
-            v,          // The member value.
-            length,
-            mind = gap,
-            partial,
-            value = holder[key];
-
-// If the value has a toJSON method, call it to obtain a replacement value.
-
-        if (value && typeof value === 'object' &&
-                typeof value.toJSON === 'function') {
-            value = value.toJSON(key);
-        }
-
-// If we were called with a replacer function, then call the replacer to
-// obtain a replacement value.
-
-        if (typeof rep === 'function') {
-            value = rep.call(holder, key, value);
-        }
-
-// What happens next depends on the value's type.
-
-        switch (typeof value) {
-        case 'string':
-            return quote(value);
-
-        case 'number':
-
-// JSON numbers must be finite. Encode non-finite numbers as null.
-
-            return isFinite(value) ? String(value) : 'null';
-
-        case 'boolean':
-        case 'null':
-
-// If the value is a boolean or null, convert it to a string. Note:
-// typeof null does not produce 'null'. The case is included here in
-// the remote chance that this gets fixed someday.
-
-            return String(value);
-
-// If the type is 'object', we might be dealing with an object or an array or
-// null.
-
-        case 'object':
-
-// Due to a specification blunder in ECMAScript, typeof null is 'object',
-// so watch out for that case.
-
-            if (!value) {
-                return 'null';
-            }
-
-// Make an array to hold the partial results of stringifying this object value.
-
-            gap += indent;
-            partial = [];
-
-// Is the value an array?
-
-            if (Object.prototype.toString.apply(value) === '[object Array]') {
-
-// The value is an array. Stringify every element. Use null as a placeholder
-// for non-JSON values.
-
-                length = value.length;
-                for (i = 0; i < length; i += 1) {
-                    partial[i] = str(i, value) || 'null';
-                }
-
-// Join all of the elements together, separated with commas, and wrap them in
-// brackets.
-
-                v = partial.length === 0
-                    ? '[]'
-                    : gap
-                    ? '[\n' + gap + partial.join(',\n' + gap) + '\n' + mind + ']'
-                    : '[' + partial.join(',') + ']';
-                gap = mind;
-                return v;
-            }
-
-// If the replacer is an array, use it to select the members to be stringified.
-
-            if (rep && typeof rep === 'object') {
-                length = rep.length;
-                for (i = 0; i < length; i += 1) {
-                    if (typeof rep[i] === 'string') {
-                        k = rep[i];
-                        v = str(k, value);
-                        if (v) {
-                            partial.push(quote(k) + (gap ? ': ' : ':') + v);
-                        }
-                    }
-                }
-            } else {
-
-// Otherwise, iterate through all of the keys in the object.
-
-                for (k in value) {
-                    if (Object.prototype.hasOwnProperty.call(value, k)) {
-                        v = str(k, value);
-                        if (v) {
-                            partial.push(quote(k) + (gap ? ': ' : ':') + v);
-                        }
-                    }
-                }
-            }
-
-// Join all of the member texts together, separated with commas,
-// and wrap them in braces.
-
-            v = partial.length === 0
-                ? '{}'
-                : gap
-                ? '{\n' + gap + partial.join(',\n' + gap) + '\n' + mind + '}'
-                : '{' + partial.join(',') + '}';
-            gap = mind;
-            return v;
-        }
-    }
-
-// If the JSON object does not yet have a stringify method, give it one.
-
-    if (typeof JSON.stringify !== 'function') {
-        JSON.stringify = function (value, replacer, space) {
-
-// The stringify method takes a value and an optional replacer, and an optional
-// space parameter, and returns a JSON text. The replacer can be a function
-// that can replace values, or an array of strings that will select the keys.
-// A default replacer method can be provided. Use of the space parameter can
-// produce text that is more easily readable.
-
-            var i;
-            gap = '';
-            indent = '';
-
-// If the space parameter is a number, make an indent string containing that
-// many spaces.
-
-            if (typeof space === 'number') {
-                for (i = 0; i < space; i += 1) {
-                    indent += ' ';
-                }
-
-// If the space parameter is a string, it will be used as the indent string.
-
-            } else if (typeof space === 'string') {
-                indent = space;
-            }
-
-// If there is a replacer, it must be a function or an array.
-// Otherwise, throw an error.
-
-            rep = replacer;
-            if (replacer && typeof replacer !== 'function' &&
-                    (typeof replacer !== 'object' ||
-                    typeof replacer.length !== 'number')) {
-                throw new Error('JSON.stringify');
-            }
-
-// Make a fake root object containing our value under the key of ''.
-// Return the result of stringifying the value.
-
-            return str('', {'': value});
-        };
-    }
-
-
-// If the JSON object does not yet have a parse method, give it one.
-
-    if (typeof JSON.parse !== 'function') {
-        JSON.parse = function (text, reviver) {
-
-// The parse method takes a text and an optional reviver function, and returns
-// a JavaScript value if the text is a valid JSON text.
-
-            var j;
-
-            function walk(holder, key) {
-
-// The walk method is used to recursively walk the resulting structure so
-// that modifications can be made.
-
-                var k, v, value = holder[key];
-                if (value && typeof value === 'object') {
-                    for (k in value) {
-                        if (Object.prototype.hasOwnProperty.call(value, k)) {
-                            v = walk(value, k);
-                            if (v !== undefined) {
-                                value[k] = v;
-                            } else {
-                                delete value[k];
-                            }
-                        }
-                    }
-                }
-                return reviver.call(holder, key, value);
-            }
-
-
-// Parsing happens in four stages. In the first stage, we replace certain
-// Unicode characters with escape sequences. JavaScript handles many characters
-// incorrectly, either silently deleting them, or treating them as line endings.
-
-            text = String(text);
-            cx.lastIndex = 0;
-            if (cx.test(text)) {
-                text = text.replace(cx, function (a) {
-                    return '\\u' +
-                        ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
-                });
-            }
-
-// In the second stage, we run the text against regular expressions that look
-// for non-JSON patterns. We are especially concerned with '()' and 'new'
-// because they can cause invocation, and '=' because it can cause mutation.
-// But just to be safe, we want to reject all unexpected forms.
-
-// We split the second stage into 4 regexp operations in order to work around
-// crippling inefficiencies in IE's and Safari's regexp engines. First we
-// replace the JSON backslash pairs with '@' (a non-JSON character). Second, we
-// replace all simple value tokens with ']' characters. Third, we delete all
-// open brackets that follow a colon or comma or that begin the text. Finally,
-// we look to see that the remaining characters are only whitespace or ']' or
-// ',' or ':' or '{' or '}'. If that is so, then the text is safe for eval.
-
-            if (/^[\],:{}\s]*$/
-                    .test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, '@')
-                        .replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']')
-                        .replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
-
-// In the third stage we use the eval function to compile the text into a
-// JavaScript structure. The '{' operator is subject to a syntactic ambiguity
-// in JavaScript: it can begin a block or an object literal. We wrap the text
-// in parens to eliminate the ambiguity.
-
-                j = eval('(' + text + ')');
-
-// In the optional fourth stage, we recursively walk the new structure, passing
-// each name/value pair to a reviver function for possible transformation.
-
-                return typeof reviver === 'function'
-                    ? walk({'': j}, '')
-                    : j;
-            }
-
-// If the text is not JSON parseable, then a SyntaxError is thrown.
-
-            throw new SyntaxError('JSON.parse');
-        };
-    }
-}());
-
-
 if (!global.mytNoHistoryShim) { // FIXME: remove conditional once old code has been updated.
     /**
      * History.js Native Adapter
@@ -3421,60 +2934,10 @@ if (!global.mytNoHistoryShim) { // FIXME: remove conditional once old code has b
 }
 
 
-// Object
-/** Provides support for Object.keys in IE8 and earlier.
-    Taken from: http://whattheheadsaid.com/2010/10/a-safer-object-keys-compatibility-implementation */
-Object.keys = Object.keys || (function() {
-    var hasOwnProperty = Object.prototype.hasOwnProperty,
-        hasDontEnumBug = !{toString:null}.propertyIsEnumerable("toString"),
-        DontEnums = [
-            'toString',
-            'toLocaleString',
-            'valueOf',
-            'hasOwnProperty',
-            'isPrototypeOf',
-            'propertyIsEnumerable',
-            'constructor'
-        ],
-        DontEnumsLength = DontEnums.length;
-    
-    return function(o) {
-        if (typeof o !== "object" && typeof o !== "function" || o === null)
-            throw new TypeError("Object.keys called on non-object");
-        
-        var result = [], n;
-        for (n in o) {
-            if (hasOwnProperty.call(o, n)) result.push(n);
-        }
-        
-        if (hasDontEnumBug) {
-            for (var i = 0; i < DontEnumsLength; ++i) {
-                if (hasOwnProperty.call(o, DontEnums[i])) result.push(DontEnums[i]);
-            }
-        }
-        
-        return result
-    }
-})();
-
-// Array
-/** Provides support for Array.isArray in IE8 and earlier.
-    Taken from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray */
-Array.isArray = Array.isArray || function(v) {
-    return Object.prototype.toString.call(v) === "[object Array]"
-};
-
-// Number
-Number.parseInt = Number.parseInt || parseInt;
-Number.parseFloat = Number.parseFloat || parseFloat;
-
 // String
-/** Provides support for String.trim in IE8 and earlier.
+/** Provides support for String.trimLeft and String.trimRight in IE.
     Taken from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/Trim */
-if (!String.prototype.trim) {
-    String.prototype.trim = function() {
-        return this.replace(/^\s+|\s+$/g,'');
-    };
+if (!String.prototype.trimLeft) {
     String.prototype.trimLeft = function() {
         return this.replace(/^\s+/,'');
     };
@@ -3503,12 +2966,6 @@ if (!String.prototype.startsWith) {
 }
 
 // Date
-/** Provides support for Date.now in IE8 and ealier.
-    Taken from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/now */
-Date.now = Date.now || function() {
-    return new Date().getTime()
-};
-
 /** Formats a date using a pattern.
   * Implementation from: https://github.com/jacwright/date.format
   * 
@@ -3559,7 +3016,8 @@ Date.prototype.format = Date.prototype.format || (function() {
             if (target.getDay() !== 4) {
                 target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
             }
-            return 1 + Math.ceil((firstThursday - target) / 604800000);
+            var retVal = 1 + Math.ceil((firstThursday - target) / 604800000);
+            return (retVal < 10 ? '0' + retVal : retVal);
         },
         // Month
         F: function() {return Date.longMonths[this.getMonth()];},
@@ -3597,7 +3055,6 @@ Date.prototype.format = Date.prototype.format || (function() {
                 for (var i = 0; i < 12; ++i) {
                     var d = new Date(this.getFullYear(), i, 1);
                     var offset = d.getTimezoneOffset();
-
                     if (DST === null) {
                         DST = offset;
                     } else if (offset < DST) {
@@ -3608,12 +3065,12 @@ Date.prototype.format = Date.prototype.format || (function() {
                 }
                 return (this.getTimezoneOffset() == DST) | 0;
             },
-        O: function() {return (-this.getTimezoneOffset() < 0 ? '-' : '+') + (Math.abs(this.getTimezoneOffset() / 60) < 10 ? '0' : '') + (Math.abs(this.getTimezoneOffset() / 60)) + '00';},
-        P: function() {return (-this.getTimezoneOffset() < 0 ? '-' : '+') + (Math.abs(this.getTimezoneOffset() / 60) < 10 ? '0' : '') + (Math.abs(this.getTimezoneOffset() / 60)) + ':00';}, // Fixed now
+        O: function() {return (-this.getTimezoneOffset() < 0 ? '-' : '+') + (Math.abs(this.getTimezoneOffset() / 60) < 10 ? '0' : '') + Math.floor(Math.abs(this.getTimezoneOffset() / 60)) + (Math.abs(this.getTimezoneOffset() % 60) == 0 ? '00' : ((Math.abs(this.getTimezoneOffset() % 60) < 10 ? '0' : '')) + (Math.abs(this.getTimezoneOffset() % 60)));},
+        P: function() {return (-this.getTimezoneOffset() < 0 ? '-' : '+') + (Math.abs(this.getTimezoneOffset() / 60) < 10 ? '0' : '') + Math.floor(Math.abs(this.getTimezoneOffset() / 60)) + ':' + (Math.abs(this.getTimezoneOffset() % 60) == 0 ? '00' : ((Math.abs(this.getTimezoneOffset() % 60) < 10 ? '0' : '')) + (Math.abs(this.getTimezoneOffset() % 60)));},
         T: function() {return this.toTimeString().replace(/^.+ \(?([^\)]+)\)?$/, '$1');},
         Z: function() {return -this.getTimezoneOffset() * 60;},
         // Full Date/Time
-        c: function() {return this.format("Y-m-d\\TH:i:sP");}, // Fixed now
+        c: function() {return this.format("Y-m-d\\TH:i:sP");},
         r: function() {return this.toString();},
         U: function() {return this.getTime() / 1000;}
     };
@@ -4857,6 +4314,408 @@ myt.LocalStorage = (function() {
         }
     };
 })();
+
+
+/** Models a URI and provides parsing of strings into URIs.
+    
+    Makes use of:
+        parseUri 1.2.2
+        (c) Steven Levithan <stevenlevithan.com>
+        MIT License
+        See: http://blog.stevenlevithan.com/archives/parseuri
+        
+    When more complex URI parsing is needed, perhaps try URI.js which can be
+    found at: http://medialize.github.io/URI.js/
+*/
+myt.URI = new JS.Class('URI', {
+    // Constructor /////////////////////////////////////////////////////////////
+    initialize: function(str, loose) {
+        if (str) this.parse(str, loose);
+    },
+    
+    
+    // Attributes and Setters/Getters //////////////////////////////////////////
+    setSource: function(v) {this.source = v;},
+    setProtocol: function(v) {this.protocol = v;},
+    setAuthority: function(v) {this.authority = v;},
+    setUserInfo: function(v) {this.userInfo = v;},
+    setUser: function(v) {this.user = v;},
+    setPassword: function(v) {this.password = v;},
+    setHost: function(v) {this.host = v;},
+    setPort: function(v) {this.port = v;},
+    setRelative: function(v) {this.relative = v;},
+    setPath: function(v) {this.path = v;},
+    setDirectory: function(v) {this.directory = v;},
+    setFile: function(v) {this.file = v;},
+    setQuery: function(v) {this.query = v;},
+    setAnchor: function(v) {this.anchor = v;},
+    
+    
+    // Methods /////////////////////////////////////////////////////////////////
+    parse: function(str, loose) {
+        // match order: "source", "protocol", "authority", "userInfo", "user",
+        //              "password", "host", "port", "relative", "path", 
+        //              "directory", "file", "query", "anchor".
+        var m = myt.URI[loose ? "_looseParser" : "_strictParser"].exec(str);
+        
+        this.setSource(m[0] || "");
+        
+        this.setProtocol(m[1] || "");
+        this.setAuthority(m[2] || "");
+        this.setUserInfo(m[3] || "");
+        this.setUser(m[4] || "");
+        this.setPassword(m[5] || "");
+        this.setHost(m[6] || "");
+        this.setPort(m[7] || "");
+        this.setRelative(m[8] || "");
+        this.setPath(m[9] || "");
+        this.setDirectory(m[10] || "");
+        this.setFile(m[11] || "");
+        this.setQuery(m[12] || "");
+        this.setAnchor(m[13] || "");
+        
+        this.queryPairs = {};
+        
+        var self = this;
+        this.query.replace(myt.URI._queryParser, function ($0, $1, $2) {
+            if ($1) self.queryPairs[$1] = $2;
+        });
+    },
+    
+    /** Unescape a query param value. */
+    decodeQueryParam: function(v) {
+        v = decodeURIComponent(v);
+        return v.replace('+', ' ');
+    },
+    
+    getQuery: function() {
+        var pairs = this.queryPairs, parts = [], key, s;
+        for (key in pairs) {
+            parts.push(key + '=' + encodeURIComponent(pairs[key]));
+        }
+        s = parts.join('&');
+        return s.length > 0 ? '?' + s : s;
+    },
+    
+    getQueryParam: function(name) {
+        var v = this.queryPairs[name];
+        return v == null ? undefined : this.decodeQueryParam(v);
+    },
+    
+    getPathParts: function(allowEmpties) {
+        var parts = this.path.split('/');
+        
+        if (!allowEmpties) {
+            var i = parts.length;
+            while (i) if (parts[--i].length === 0) parts.splice(i, 1);
+        }
+        
+        return parts;
+    },
+    
+    toString: function() {
+        var protocol = this.protocol,
+            host = this.host,
+            userInfo = this.userInfo,
+            port = this.port,
+            path = this.path,
+            query = this.getQuery(),
+            anchor = this.anchor,
+            s = '';
+        
+        if (protocol) s += protocol + '://';
+        if (userInfo && host) s += userInfo + '@';
+        
+        if (host) {
+            s += host;
+            if (port) s += ':' + port;
+        }
+        
+        if (path) {
+            s += path;
+        } else if (host && (query || anchor)) {
+            s += '/';
+        }
+        
+        if (query) s += query;
+        if (anchor) s += '#' + anchor;
+        
+        return s;
+    }
+});
+myt.URI._queryParser = /(?:^|&)([^&=]*)=?([^&]*)/g;
+myt.URI._strictParser = /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/;
+myt.URI._looseParser = /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/;
+
+
+/** Provides common geometry related functions. */
+myt.Geometry = {
+    // Methods /////////////////////////////////////////////////////////////////
+    /** Get the closest point on a line to a given point.
+        @param Ax:number The x-coordinate of the first point that defines 
+            the line.
+        @param Ay:number The y-coordinate of the first point that defines 
+            the line.
+        @param Bx:number The x-coordinate of the second point that defines 
+            the line.
+        @param By:number The y-coordinate of the second point that defines 
+            the line.
+        @param Px:number The x-coordinate of the point.
+        @param Py:number The y-coordinate of the point.
+        @returns object: A position object with x and y properties. */
+    getClosestPointOnALineToAPoint: function(Ax, Ay, Bx, By, Px, Py) {
+        var APx = Px - Ax,
+            APy = Py - Ay,
+            ABx = Bx - Ax,
+            ABy = By - Ay,
+            magAB2 = ABx * ABx + ABy * ABy,
+            ABdotAP = ABx * APx + ABy * APy,
+            t = ABdotAP / magAB2;
+        return {x:Ax + ABx * t, y:Ay + ABy * t};
+    },
+    
+    /** Get the closest point on a segment to a given point.
+        @param Ax:number The x-coordinate of the first endpoint that defines 
+            the segment.
+        @param Ay:number The y-coordinate of the first endpoint that defines 
+            the segment.
+        @param Bx:number The x-coordinate of the second endpoint that defines 
+            the segment.
+        @param By:number The y-coordinate of the second endpoint that defines 
+            the segment.
+        @param Px:number The x-coordinate of the point.
+        @param Py:number The y-coordinate of the point.
+        @returns object: A position object with x and y properties. */
+    getClosestPointOnASegmentToAPoint: function(Ax, Ay, Bx, By, Px, Py) {
+        var APx = Px - Ax,
+            APy = Py - Ay,
+            ABx = Bx - Ax,
+            ABy = By - Ay,
+            magAB2 = ABx * ABx + ABy * ABy,
+            ABdotAP = ABx * APx + ABy * APy,
+            t = ABdotAP / magAB2;
+        if (t < 0) {
+            return {x:Ax, y:Ay};
+        } else if (t > 1) {
+            return {x:Bx, y:By};
+        }
+        return {x:Ax + ABx * t, y:Ay + ABy * t};
+    },
+    
+    /** Tests if the provided point is inside this path.
+        @param x:number the x coordinate to test.
+        @param y:number the y coordinate to test.
+        @param boundingBox:object a bounding box object that bounds the path.
+        @param path:array an array of points where the index 0,2,4,... are
+            the x values and index 1,3,5,... are the y values.
+        
+        Alternate params:
+        @param x:object A point object with x and y properties.
+        
+        @return true if inside, false otherwise. */
+    isPointInPath: function(x, y, boundingBox, path) {
+        if (typeof x === 'object') {
+            path = boundingBox;
+            boundingBox = y;
+            y = x.y;
+            x = x.x;
+        }
+        
+        // First test bounding box
+        if (this.rectContainsPoint(x, y, boundingBox)) {
+            // Test using Jordan Curve Theorem
+            var len = path.length;
+            
+            // Must at least be a triangle to have an inside.
+            if (len >= 6) {
+                var c = false, x1 = path[0], y1 = path[1], x2, y2;
+                while (len) {
+                    y2 = path[--len];
+                    x2 = path[--len];
+                    if (((y2 > y) !== (y1 > y)) && (x < (x1 - x2) * (y - y2) / (y1 - y2) + x2)) c = !c;
+                    x1 = x2;
+                    y1 = y2;
+                }
+                return c;
+            }
+        }
+        return false;
+    },
+    
+    /** Checks if the provided point is inside or on the edge of the provided 
+        rectangle.
+        @param pX:number the x coordinate of the point to test.
+        @param pY:number the y coordinate of the point to test.
+        @param rX:number the x coordinate of the rectangle.
+        @param rY:number the y coordinate of the rectangle.
+        @param rW:number the width of the rectangle.
+        @param rH:number the height of the rectangle.
+        
+        Alternate Params:
+        @param pX:object a point object with properties x and y.
+        @param rX:object a rect object with properties x, y, width and height.
+        
+        @returns boolean True if the point is inside or on the rectangle. */
+    rectContainsPoint: function(pX, pY, rX, rY, rW, rH) {
+        if (typeof pX === 'object') {
+            rH = rW;
+            rW = rY;
+            rY = rX;
+            rX = pY;
+            pY = pX.y;
+            pX = pX.x;
+        }
+        
+        if (typeof rX === 'object') {
+            rH = rX.height;
+            rW = rX.width;
+            rY = rX.y;
+            rX = rX.x;
+        }
+        
+        return pX >= rX && pY >= rY && pX <= rX + rW && pY <= rY + rH;
+    },
+    
+    /** Checks if the provided point lies inside or on the edge of the
+        provided circle.
+        @param pX:number the x coordinate of the point to test.
+        @param pY:number the y coordinate of the point to test.
+        @param cX:number the x coordinate of the center of the circle.
+        @param cY:number the y coordinate of the center of the circle.
+        @param cR:number the radius of the circle.
+        @return boolean True if the point is inside or on the circle. */
+    circleContainsPoint: function(pX, pY, cX, cY, cR) {
+        return this.measureDistance(pX, pY, cX, cY, true) <= cR * cR;
+    },
+    
+    /** Measure the distance between two points.
+        @param x1:number the x position of the first point.
+        @param y1:number the y position of the first point.
+        @param x2:number the x position of the second point.
+        @param y2:number the y position of the second point.
+        @param squared:boolean (optional) If true, the squared distance will
+            be returned.
+        @returns number the distance between the two points. */
+    measureDistance: function(x1, y1, x2, y2, squared) {
+        var diffX = x2 - x1, 
+            diffY = y2 - y1, 
+            diffSquared = diffX * diffX + diffY * diffY;
+        return squared ? diffSquared : Math.sqrt(diffSquared);
+    },
+    
+    /** Convert radians to degrees.
+        @param deg:number degrees.
+        @returns number: radians. */
+    degreesToRadians: function(deg) {
+        return deg * Math.PI / 180;
+    },
+    
+    /** Convert degrees to radians.
+        @param rad:number radians.
+        @returns number: degrees. */
+    radiansToDegrees: function(rad) {
+        return rad * 180 / Math.PI;
+    },
+    
+    // Geometry on a sphere
+    /** Checks if the provided lat/lng point lies inside or on the edge of the
+        provided circle.
+        @param pLat:number the latitude of the point to test.
+        @param pLng:number the longitude of the point to test.
+        @param cLat:number the latitude of the center of the circle.
+        @param cLng:number the longitude of the center of the circle.
+        @param cR:number the radius of the circle in kilometers.
+        @param sphereRadius:number (optional) the radius of the sphere the
+            measurement is being taken on in kilometers. If not provided the
+            radius of the earth is used.
+        @return boolean True if the point is inside or on the circle. */
+    circleContainsLatLng: function(pLat, pLng, cLat, cLng, cR, sphereRadius) {
+        return this.measureLatLngDistance(pLat, pLng, cLat, cLng, sphereRadius) <= cR;
+    },
+    
+    /** Measures the distance between two points on a sphere using latitude
+        and longitude.
+        @param lat1:number the latitude of the first point.
+        @param lng1:number the longitude of the first point.
+        @param lat2:number the latitude of the second point.
+        @param lng2:number the longitude of the second point.
+        @param sphereRadius:number (optional) the radius of the sphere the
+            measurement is being taken on in kilometers. If not provided the
+            radius of the earth is used.
+        @returns number the distance between the points in kilometers. */
+    measureLatLngDistance: function(lat1, lng1, lat2, lng2, sphereRadius) {
+        // Taken from: http://www.movable-type.co.uk/scripts/latlong.html
+        if (sphereRadius === undefined) sphereRadius = 6371; // kilometers for earth
+        lat1 = this.degreesToRadians(lat1);
+        lng1 = this.degreesToRadians(lng1);
+        lat2 = this.degreesToRadians(lat2);
+        lng2 = this.degreesToRadians(lng2);
+        return sphereRadius * Math.acos(
+            Math.sin(lat1) * Math.sin(lat2) + 
+            Math.cos(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1)
+        );
+    },
+    
+    /** Convert from polar to cartesian coordinates.
+        @param radius:number The radius of the point to convert relative to
+            the circle.
+        @param degrees:number The angle coordinate of the point to convert.
+        @param cx:number (optional) The x coordinate of the center of the 
+            circle.
+        @param cy:number (optional) The y coordinate of the center of the 
+            circle.
+        @returns array where index 0 is the x coordinate and index 1 is the
+            y coordinate. */
+    polarToCartesian: function(radius, degrees, cx, cy) {
+        if (cx == null) cx = 0;
+        if (cy == null) cy = 0;
+        degrees = degrees % 360;
+        
+        var x, y;
+        if (degrees === 0) {
+            x = radius;
+            y = 0;
+        } else if (degrees === 90) {
+            x = 0;
+            y = radius;
+        } else if (degrees === 180) {
+            x = -radius;
+            y = 0;
+        } else if (degrees === 270) {
+            x = 0;
+            y = -radius;
+        } else {
+            var radians = this.degreesToRadians(degrees);
+            x = radius * Math.cos(radians);
+            y = radius * Math.sin(radians);
+        }
+        
+        return [cx + x, cy + y];
+    },
+    
+    /** Convert from cartesian to polar coordinates.
+        @param x:number The x coordinate to transform.
+        @param y:number The y coordinate to transform.
+        @param cx:number (optional) The x coordinate of the center of the
+            circle.
+        @param cy:number (optional) The y coordinate of the center of the
+            circle.
+        @param useRadians:boolean (optional) If true the angle returned will
+            be in radians otherwise it will be degrees.
+        @return array where index 0 is the radius and index 1 is angle
+            in degrees (or radians if userRadians is true). */
+    cartesianToPolar: function(x, y, cx, cy, useRadians) {
+        if (cx == null) cx = 0;
+        if (cy == null) cy = 0;
+        
+        var diffX = x - cx,
+            diffY = y - cy,
+            radius = Math.sqrt(diffX*diffX + diffY*diffY),
+            radians = Math.atan2(diffY, diffX);
+        if (radians < 0) radians += 2 * Math.PI;
+        return [radius, useRadians ? radians : this.radiansToDegrees(radians)];
+    }
+};
 
 
 /** Apply this mixin to any Object that needs to fire events.
@@ -8697,276 +8556,6 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             this.callSuper(domObserver, methodName, type);
     }
 });
-
-
-/** Provides common geometry related functions. */
-myt.Geometry = {
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Get the closest point on a line to a given point.
-        @param Ax:number The x-coordinate of the first point that defines 
-            the line.
-        @param Ay:number The y-coordinate of the first point that defines 
-            the line.
-        @param Bx:number The x-coordinate of the second point that defines 
-            the line.
-        @param By:number The y-coordinate of the second point that defines 
-            the line.
-        @param Px:number The x-coordinate of the point.
-        @param Py:number The y-coordinate of the point.
-        @returns object: A position object with x and y properties. */
-    getClosestPointOnALineToAPoint: function(Ax, Ay, Bx, By, Px, Py) {
-        var APx = Px - Ax,
-            APy = Py - Ay,
-            ABx = Bx - Ax,
-            ABy = By - Ay,
-            magAB2 = ABx * ABx + ABy * ABy,
-            ABdotAP = ABx * APx + ABy * APy,
-            t = ABdotAP / magAB2;
-        return {x:Ax + ABx * t, y:Ay + ABy * t};
-    },
-    
-    /** Get the closest point on a segment to a given point.
-        @param Ax:number The x-coordinate of the first endpoint that defines 
-            the segment.
-        @param Ay:number The y-coordinate of the first endpoint that defines 
-            the segment.
-        @param Bx:number The x-coordinate of the second endpoint that defines 
-            the segment.
-        @param By:number The y-coordinate of the second endpoint that defines 
-            the segment.
-        @param Px:number The x-coordinate of the point.
-        @param Py:number The y-coordinate of the point.
-        @returns object: A position object with x and y properties. */
-    getClosestPointOnASegmentToAPoint: function(Ax, Ay, Bx, By, Px, Py) {
-        var APx = Px - Ax,
-            APy = Py - Ay,
-            ABx = Bx - Ax,
-            ABy = By - Ay,
-            magAB2 = ABx * ABx + ABy * ABy,
-            ABdotAP = ABx * APx + ABy * APy,
-            t = ABdotAP / magAB2;
-        if (t < 0) {
-            return {x:Ax, y:Ay};
-        } else if (t > 1) {
-            return {x:Bx, y:By};
-        }
-        return {x:Ax + ABx * t, y:Ay + ABy * t};
-    },
-    
-    /** Tests if the provided point is inside this path.
-        @param x:number the x coordinate to test.
-        @param y:number the y coordinate to test.
-        @param boundingBox:object a bounding box object that bounds the path.
-        @param path:array an array of points where the index 0,2,4,... are
-            the x values and index 1,3,5,... are the y values.
-        
-        Alternate params:
-        @param x:object A point object with x and y properties.
-        
-        @return true if inside, false otherwise. */
-    isPointInPath: function(x, y, boundingBox, path) {
-        if (typeof x === 'object') {
-            path = boundingBox;
-            boundingBox = y;
-            y = x.y;
-            x = x.x;
-        }
-        
-        // First test bounding box
-        if (this.rectContainsPoint(x, y, boundingBox)) {
-            // Test using Jordan Curve Theorem
-            var len = path.length;
-            
-            // Must at least be a triangle to have an inside.
-            if (len >= 6) {
-                var c = false, x1 = path[0], y1 = path[1], x2, y2;
-                while (len) {
-                    y2 = path[--len];
-                    x2 = path[--len];
-                    if (((y2 > y) !== (y1 > y)) && (x < (x1 - x2) * (y - y2) / (y1 - y2) + x2)) c = !c;
-                    x1 = x2;
-                    y1 = y2;
-                }
-                return c;
-            }
-        }
-        return false;
-    },
-    
-    /** Checks if the provided point is inside or on the edge of the provided 
-        rectangle.
-        @param pX:number the x coordinate of the point to test.
-        @param pY:number the y coordinate of the point to test.
-        @param rX:number the x coordinate of the rectangle.
-        @param rY:number the y coordinate of the rectangle.
-        @param rW:number the width of the rectangle.
-        @param rH:number the height of the rectangle.
-        
-        Alternate Params:
-        @param pX:object a point object with properties x and y.
-        @param rX:object a rect object with properties x, y, width and height.
-        
-        @returns boolean True if the point is inside or on the rectangle. */
-    rectContainsPoint: function(pX, pY, rX, rY, rW, rH) {
-        if (typeof pX === 'object') {
-            rH = rW;
-            rW = rY;
-            rY = rX;
-            rX = pY;
-            pY = pX.y;
-            pX = pX.x;
-        }
-        
-        if (typeof rX === 'object') {
-            rH = rX.height;
-            rW = rX.width;
-            rY = rX.y;
-            rX = rX.x;
-        }
-        
-        return pX >= rX && pY >= rY && pX <= rX + rW && pY <= rY + rH;
-    },
-    
-    /** Checks if the provided point lies inside or on the edge of the
-        provided circle.
-        @param pX:number the x coordinate of the point to test.
-        @param pY:number the y coordinate of the point to test.
-        @param cX:number the x coordinate of the center of the circle.
-        @param cY:number the y coordinate of the center of the circle.
-        @param cR:number the radius of the circle.
-        @return boolean True if the point is inside or on the circle. */
-    circleContainsPoint: function(pX, pY, cX, cY, cR) {
-        return this.measureDistance(pX, pY, cX, cY, true) <= cR * cR;
-    },
-    
-    /** Measure the distance between two points.
-        @param x1:number the x position of the first point.
-        @param y1:number the y position of the first point.
-        @param x2:number the x position of the second point.
-        @param y2:number the y position of the second point.
-        @param squared:boolean (optional) If true, the squared distance will
-            be returned.
-        @returns number the distance between the two points. */
-    measureDistance: function(x1, y1, x2, y2, squared) {
-        var diffX = x2 - x1, 
-            diffY = y2 - y1, 
-            diffSquared = diffX * diffX + diffY * diffY;
-        return squared ? diffSquared : Math.sqrt(diffSquared);
-    },
-    
-    /** Convert radians to degrees.
-        @param deg:number degrees.
-        @returns number: radians. */
-    degreesToRadians: function(deg) {
-        return deg * Math.PI / 180;
-    },
-    
-    /** Convert degrees to radians.
-        @param rad:number radians.
-        @returns number: degrees. */
-    radiansToDegrees: function(rad) {
-        return rad * 180 / Math.PI;
-    },
-    
-    // Geometry on a sphere
-    /** Checks if the provided lat/lng point lies inside or on the edge of the
-        provided circle.
-        @param pLat:number the latitude of the point to test.
-        @param pLng:number the longitude of the point to test.
-        @param cLat:number the latitude of the center of the circle.
-        @param cLng:number the longitude of the center of the circle.
-        @param cR:number the radius of the circle in kilometers.
-        @param sphereRadius:number (optional) the radius of the sphere the
-            measurement is being taken on in kilometers. If not provided the
-            radius of the earth is used.
-        @return boolean True if the point is inside or on the circle. */
-    circleContainsLatLng: function(pLat, pLng, cLat, cLng, cR, sphereRadius) {
-        return this.measureLatLngDistance(pLat, pLng, cLat, cLng, sphereRadius) <= cR;
-    },
-    
-    /** Measures the distance between two points on a sphere using latitude
-        and longitude.
-        @param lat1:number the latitude of the first point.
-        @param lng1:number the longitude of the first point.
-        @param lat2:number the latitude of the second point.
-        @param lng2:number the longitude of the second point.
-        @param sphereRadius:number (optional) the radius of the sphere the
-            measurement is being taken on in kilometers. If not provided the
-            radius of the earth is used.
-        @returns number the distance between the points in kilometers. */
-    measureLatLngDistance: function(lat1, lng1, lat2, lng2, sphereRadius) {
-        // Taken from: http://www.movable-type.co.uk/scripts/latlong.html
-        if (sphereRadius === undefined) sphereRadius = 6371; // kilometers for earth
-        lat1 = this.degreesToRadians(lat1);
-        lng1 = this.degreesToRadians(lng1);
-        lat2 = this.degreesToRadians(lat2);
-        lng2 = this.degreesToRadians(lng2);
-        return sphereRadius * Math.acos(
-            Math.sin(lat1) * Math.sin(lat2) + 
-            Math.cos(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1)
-        );
-    },
-    
-    /** Convert from polar to cartesian coordinates.
-        @param radius:number The radius of the point to convert relative to
-            the circle.
-        @param degrees:number The angle coordinate of the point to convert.
-        @param cx:number (optional) The x coordinate of the center of the 
-            circle.
-        @param cy:number (optional) The y coordinate of the center of the 
-            circle.
-        @returns array where index 0 is the x coordinate and index 1 is the
-            y coordinate. */
-    polarToCartesian: function(radius, degrees, cx, cy) {
-        if (cx == null) cx = 0;
-        if (cy == null) cy = 0;
-        degrees = degrees % 360;
-        
-        var x, y;
-        if (degrees === 0) {
-            x = radius;
-            y = 0;
-        } else if (degrees === 90) {
-            x = 0;
-            y = radius;
-        } else if (degrees === 180) {
-            x = -radius;
-            y = 0;
-        } else if (degrees === 270) {
-            x = 0;
-            y = -radius;
-        } else {
-            var radians = this.degreesToRadians(degrees);
-            x = radius * Math.cos(radians);
-            y = radius * Math.sin(radians);
-        }
-        
-        return [cx + x, cy + y];
-    },
-    
-    /** Convert from cartesian to polar coordinates.
-        @param x:number The x coordinate to transform.
-        @param y:number The y coordinate to transform.
-        @param cx:number (optional) The x coordinate of the center of the
-            circle.
-        @param cy:number (optional) The y coordinate of the center of the
-            circle.
-        @param useRadians:boolean (optional) If true the angle returned will
-            be in radians otherwise it will be degrees.
-        @return array where index 0 is the radius and index 1 is angle
-            in degrees (or radians if userRadians is true). */
-    cartesianToPolar: function(x, y, cx, cy, useRadians) {
-        if (cx == null) cx = 0;
-        if (cy == null) cy = 0;
-        
-        var diffX = x - cx,
-            diffY = y - cy,
-            radius = Math.sqrt(diffX*diffX + diffY*diffY),
-            radians = Math.atan2(diffY, diffX);
-        if (radians < 0) radians += 2 * Math.PI;
-        return [radius, useRadians ? radians : this.radiansToDegrees(radians)];
-    }
-};
 
 
 /** A Node that can be viewed. Instances of view are typically backed by
@@ -23281,138 +22870,6 @@ myt.RequiredFieldValidator = new JS.Class('RequiredFieldValidator', myt.Validato
         return true;
     }
 });
-
-
-/** Models a URI and provides parsing of strings into URIs.
-    
-    Makes use of:
-        parseUri 1.2.2
-        (c) Steven Levithan <stevenlevithan.com>
-        MIT License
-        See: http://blog.stevenlevithan.com/archives/parseuri
-        
-    When more complex URI parsing is needed, perhaps try URI.js which can be
-    found at: http://medialize.github.io/URI.js/
-*/
-myt.URI = new JS.Class('URI', {
-    // Constructor /////////////////////////////////////////////////////////////
-    initialize: function(str, loose) {
-        if (str) this.parse(str, loose);
-    },
-    
-    
-    // Attributes and Setters/Getters //////////////////////////////////////////
-    setSource: function(v) {this.source = v;},
-    setProtocol: function(v) {this.protocol = v;},
-    setAuthority: function(v) {this.authority = v;},
-    setUserInfo: function(v) {this.userInfo = v;},
-    setUser: function(v) {this.user = v;},
-    setPassword: function(v) {this.password = v;},
-    setHost: function(v) {this.host = v;},
-    setPort: function(v) {this.port = v;},
-    setRelative: function(v) {this.relative = v;},
-    setPath: function(v) {this.path = v;},
-    setDirectory: function(v) {this.directory = v;},
-    setFile: function(v) {this.file = v;},
-    setQuery: function(v) {this.query = v;},
-    setAnchor: function(v) {this.anchor = v;},
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    parse: function(str, loose) {
-        // match order: "source", "protocol", "authority", "userInfo", "user",
-        //              "password", "host", "port", "relative", "path", 
-        //              "directory", "file", "query", "anchor".
-        var m = myt.URI[loose ? "_looseParser" : "_strictParser"].exec(str);
-        
-        this.setSource(m[0] || "");
-        
-        this.setProtocol(m[1] || "");
-        this.setAuthority(m[2] || "");
-        this.setUserInfo(m[3] || "");
-        this.setUser(m[4] || "");
-        this.setPassword(m[5] || "");
-        this.setHost(m[6] || "");
-        this.setPort(m[7] || "");
-        this.setRelative(m[8] || "");
-        this.setPath(m[9] || "");
-        this.setDirectory(m[10] || "");
-        this.setFile(m[11] || "");
-        this.setQuery(m[12] || "");
-        this.setAnchor(m[13] || "");
-        
-        this.queryPairs = {};
-        
-        var self = this;
-        this.query.replace(myt.URI._queryParser, function ($0, $1, $2) {
-            if ($1) self.queryPairs[$1] = $2;
-        });
-    },
-    
-    /** Unescape a query param value. */
-    decodeQueryParam: function(v) {
-        v = decodeURIComponent(v);
-        return v.replace('+', ' ');
-    },
-    
-    getQuery: function() {
-        var pairs = this.queryPairs, parts = [], key, s;
-        for (key in pairs) {
-            parts.push(key + '=' + encodeURIComponent(pairs[key]));
-        }
-        s = parts.join('&');
-        return s.length > 0 ? '?' + s : s;
-    },
-    
-    getQueryParam: function(name) {
-        var v = this.queryPairs[name];
-        return v == null ? undefined : this.decodeQueryParam(v);
-    },
-    
-    getPathParts: function(allowEmpties) {
-        var parts = this.path.split('/');
-        
-        if (!allowEmpties) {
-            var i = parts.length;
-            while (i) if (parts[--i].length === 0) parts.splice(i, 1);
-        }
-        
-        return parts;
-    },
-    
-    toString: function() {
-        var protocol = this.protocol,
-            host = this.host,
-            userInfo = this.userInfo,
-            port = this.port,
-            path = this.path,
-            query = this.getQuery(),
-            anchor = this.anchor,
-            s = '';
-        
-        if (protocol) s += protocol + '://';
-        if (userInfo && host) s += userInfo + '@';
-        
-        if (host) {
-            s += host;
-            if (port) s += ':' + port;
-        }
-        
-        if (path) {
-            s += path;
-        } else if (host && (query || anchor)) {
-            s += '/';
-        }
-        
-        if (query) s += query;
-        if (anchor) s += '#' + anchor;
-        
-        return s;
-    }
-});
-myt.URI._queryParser = /(?:^|&)([^&=]*)=?([^&]*)/g;
-myt.URI._strictParser = /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/;
-myt.URI._looseParser = /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/;
 
 
 /** Verifies that a value is in the form of a URL. */

@@ -3,35 +3,27 @@ JS.Packages(function() {with(this) {
     var MYT_ROOT = global.MYT_ROOT || '../js/myt/';
     
     // JS.Class
-    file(MYT_ROOT + '../jsclass/core.js').provides('JS.Class','JS.Module','JS.Singleton');
+    file(MYT_ROOT+'../jsclass/core.js').provides('JS.Class','JS.Module','JS.Singleton');
     
     // Shims and Polyfills
-    var MYT_SHIM_ROOT = MYT_ROOT + 'shim/';
-    file(MYT_SHIM_ROOT + 'BrowserDetect.js').provides('BrowserDetect');
-    file(MYT_SHIM_ROOT + 'Console.js'      ).provides('console');
-    file(MYT_SHIM_ROOT + 'json2.js'        ).provides('JSON');
-    file(MYT_SHIM_ROOT + 'history.js'      ).provides('History','History.Adapter').requires('JSON');
-    file(MYT_SHIM_ROOT + 'language.js'     ).provides('Object.keys','Array.isArray','String.prototype.trim','Date.now','Date.prototype.format');
+    var MYT_SHIM_ROOT = MYT_ROOT+'shim/';
+    file(MYT_SHIM_ROOT + 'BrowserDetect.js',MYT_SHIM_ROOT + 'Console.js',MYT_SHIM_ROOT + 'history.js',MYT_SHIM_ROOT + 'language.js')
+    .provides('BrowserDetect','console','History','History.Adapter','String.prototype.trimLeft','Date.prototype.format');
     
     // Util
-    var UTIL_ROOT = MYT_ROOT + 'util/';
-    file(UTIL_ROOT + 'Cookie.js'      ).provides('myt.Cookie'      ).requires('myt');
-    file(UTIL_ROOT + 'LocalStorage.js').provides('myt.LocalStorage').requires('myt');
-    file(UTIL_ROOT + 'URI.js'         ).provides('myt.URI'         ).requires('myt');
-    file(UTIL_ROOT + 'XML.js'         ).provides('myt.XML'         ).requires('myt');
-    file(UTIL_ROOT + 'Geometry.js'    ).provides('myt.Geometry'    ).requires('myt');
+    var UTIL_ROOT = MYT_ROOT+'util/';
+    file(UTIL_ROOT + 'Cookie.js',UTIL_ROOT + 'LocalStorage.js',UTIL_ROOT + 'URI.js',UTIL_ROOT + 'Geometry.js')
+    .provides('myt.Cookie','myt.LocalStorage','myt.URI','myt.Geometry')
+    .requires('myt');
     
     // Core
     var MYT_CORE_ROOT = MYT_ROOT + 'core/';
-    file(MYT_CORE_ROOT + 'myt.js'            ).provides('myt'                ).requires('BrowserDetect','console','JSON','History','History.Adapter',
-                                                                                        'Object.keys','Array.isArray','String.prototype.trim','Date.now','Date.prototype.format',
-                                                                                        'JS.Class','JS.Module','JS.Singleton');
+    file(MYT_CORE_ROOT + 'myt.js').provides('myt').requires('BrowserDetect','console','String.prototype.trimLeft','Date.prototype.format','JS.Class','JS.Module','JS.Singleton');
+    
     file(MYT_CORE_ROOT + 'Destructible.js'   ).provides('myt.Destructible'   ).requires('myt');
     file(MYT_CORE_ROOT + 'AccessorSupport.js').provides('myt.AccessorSupport').requires('myt');
-    file(MYT_CORE_ROOT + 'Eventable.js'      ).provides('myt.Eventable'      ).requires('myt.AccessorSupport','myt.Destructible',
-                                                                                        'myt.Constrainable','myt.TrackActivesPool');
-    file(MYT_CORE_ROOT + 'Node.js'           ).provides('myt.Node'           ).requires('myt.AccessorSupport','myt.Destructible',
-                                                                                        'myt.Constrainable','myt.TrackActivesPool');
+    file(MYT_CORE_ROOT + 'Eventable.js'      ).provides('myt.Eventable'      ).requires('myt.AccessorSupport','myt.Destructible','myt.Constrainable');
+    file(MYT_CORE_ROOT + 'Node.js'           ).provides('myt.Node'           ).requires('myt.AccessorSupport','myt.Destructible','myt.Constrainable','myt.TrackActivesPool');
     file(MYT_CORE_ROOT + 'Animator.js'       ).provides('myt.Animator'       ).requires('myt.Node','myt.global.idle','myt.Reusable');
     
     // Core : Events
@@ -303,7 +295,7 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'validator/validators/NumericRangeValidator.js'    ).provides('myt.NumericRangeValidator'    ).requires('myt.Validator');
     file(MYT_COMPONENT_ROOT + 'validator/validators/RequiredFieldValidator.js'   ).provides('myt.RequiredFieldValidator'   ).requires('myt.Validator');
     file(MYT_COMPONENT_ROOT + 'validator/validators/URLValidator.js'             ).provides('myt.URLValidator'             ).requires('myt.Validator','myt.URI');
-    file(MYT_COMPONENT_ROOT + 'validator/validators/JSONValidator.js'            ).provides('myt.JSONValidator'            ).requires('myt.Validator','JSON');
+    file(MYT_COMPONENT_ROOT + 'validator/validators/JSONValidator.js'            ).provides('myt.JSONValidator'            ).requires('myt.Validator');
     
     file(MYT_COMPONENT_ROOT + 'validator/ValidatorRegistry.js').provides('myt.global.validators').requires('myt.global','myt.Observable','myt.CompoundValidator',
                                                                                                            'myt.EqualsIgnoreCaseValidator','myt.RequiredFieldValidator',

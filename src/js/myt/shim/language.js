@@ -1,57 +1,7 @@
-// Object
-/** Provides support for Object.keys in IE8 and earlier.
-    Taken from: http://whattheheadsaid.com/2010/10/a-safer-object-keys-compatibility-implementation */
-Object.keys = Object.keys || (function() {
-    var hasOwnProperty = Object.prototype.hasOwnProperty,
-        hasDontEnumBug = !{toString:null}.propertyIsEnumerable("toString"),
-        DontEnums = [
-            'toString',
-            'toLocaleString',
-            'valueOf',
-            'hasOwnProperty',
-            'isPrototypeOf',
-            'propertyIsEnumerable',
-            'constructor'
-        ],
-        DontEnumsLength = DontEnums.length;
-    
-    return function(o) {
-        if (typeof o !== "object" && typeof o !== "function" || o === null)
-            throw new TypeError("Object.keys called on non-object");
-        
-        var result = [], n;
-        for (n in o) {
-            if (hasOwnProperty.call(o, n)) result.push(n);
-        }
-        
-        if (hasDontEnumBug) {
-            for (var i = 0; i < DontEnumsLength; ++i) {
-                if (hasOwnProperty.call(o, DontEnums[i])) result.push(DontEnums[i]);
-            }
-        }
-        
-        return result
-    }
-})();
-
-// Array
-/** Provides support for Array.isArray in IE8 and earlier.
-    Taken from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray */
-Array.isArray = Array.isArray || function(v) {
-    return Object.prototype.toString.call(v) === "[object Array]"
-};
-
-// Number
-Number.parseInt = Number.parseInt || parseInt;
-Number.parseFloat = Number.parseFloat || parseFloat;
-
 // String
-/** Provides support for String.trim in IE8 and earlier.
+/** Provides support for String.trimLeft and String.trimRight in IE.
     Taken from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/Trim */
-if (!String.prototype.trim) {
-    String.prototype.trim = function() {
-        return this.replace(/^\s+|\s+$/g,'');
-    };
+if (!String.prototype.trimLeft) {
     String.prototype.trimLeft = function() {
         return this.replace(/^\s+/,'');
     };
@@ -80,12 +30,6 @@ if (!String.prototype.startsWith) {
 }
 
 // Date
-/** Provides support for Date.now in IE8 and ealier.
-    Taken from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/now */
-Date.now = Date.now || function() {
-    return new Date().getTime()
-};
-
 /** Formats a date using a pattern.
   * Implementation from: https://github.com/jacwright/date.format
   * 
@@ -136,7 +80,8 @@ Date.prototype.format = Date.prototype.format || (function() {
             if (target.getDay() !== 4) {
                 target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
             }
-            return 1 + Math.ceil((firstThursday - target) / 604800000);
+            var retVal = 1 + Math.ceil((firstThursday - target) / 604800000);
+            return (retVal < 10 ? '0' + retVal : retVal);
         },
         // Month
         F: function() {return Date.longMonths[this.getMonth()];},
@@ -174,7 +119,6 @@ Date.prototype.format = Date.prototype.format || (function() {
                 for (var i = 0; i < 12; ++i) {
                     var d = new Date(this.getFullYear(), i, 1);
                     var offset = d.getTimezoneOffset();
-
                     if (DST === null) {
                         DST = offset;
                     } else if (offset < DST) {
@@ -185,12 +129,12 @@ Date.prototype.format = Date.prototype.format || (function() {
                 }
                 return (this.getTimezoneOffset() == DST) | 0;
             },
-        O: function() {return (-this.getTimezoneOffset() < 0 ? '-' : '+') + (Math.abs(this.getTimezoneOffset() / 60) < 10 ? '0' : '') + (Math.abs(this.getTimezoneOffset() / 60)) + '00';},
-        P: function() {return (-this.getTimezoneOffset() < 0 ? '-' : '+') + (Math.abs(this.getTimezoneOffset() / 60) < 10 ? '0' : '') + (Math.abs(this.getTimezoneOffset() / 60)) + ':00';}, // Fixed now
+        O: function() {return (-this.getTimezoneOffset() < 0 ? '-' : '+') + (Math.abs(this.getTimezoneOffset() / 60) < 10 ? '0' : '') + Math.floor(Math.abs(this.getTimezoneOffset() / 60)) + (Math.abs(this.getTimezoneOffset() % 60) == 0 ? '00' : ((Math.abs(this.getTimezoneOffset() % 60) < 10 ? '0' : '')) + (Math.abs(this.getTimezoneOffset() % 60)));},
+        P: function() {return (-this.getTimezoneOffset() < 0 ? '-' : '+') + (Math.abs(this.getTimezoneOffset() / 60) < 10 ? '0' : '') + Math.floor(Math.abs(this.getTimezoneOffset() / 60)) + ':' + (Math.abs(this.getTimezoneOffset() % 60) == 0 ? '00' : ((Math.abs(this.getTimezoneOffset() % 60) < 10 ? '0' : '')) + (Math.abs(this.getTimezoneOffset() % 60)));},
         T: function() {return this.toTimeString().replace(/^.+ \(?([^\)]+)\)?$/, '$1');},
         Z: function() {return -this.getTimezoneOffset() * 60;},
         // Full Date/Time
-        c: function() {return this.format("Y-m-d\\TH:i:sP");}, // Fixed now
+        c: function() {return this.format("Y-m-d\\TH:i:sP");},
         r: function() {return this.toString();},
         U: function() {return this.getTime() / 1000;}
     };
