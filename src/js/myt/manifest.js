@@ -3,7 +3,7 @@ JS.Packages(function() {with(this) {
     var MYT_ROOT = global.MYT_ROOT || '../js/myt/';
     
     // JS.Class
-    file(MYT_ROOT + '../jsclass/src/core.js').provides('JS.Class','JS.Module','JS.Singleton');
+    file(MYT_ROOT + '../jsclass/core.js').provides('JS.Class','JS.Module','JS.Singleton');
     
     // Shims and Polyfills
     var MYT_SHIM_ROOT = MYT_ROOT + 'shim/';
