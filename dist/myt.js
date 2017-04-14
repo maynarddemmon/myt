@@ -22147,64 +22147,23 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         createCloseButton: function(
             targetView, callbackTarget, hoverColor, activeColor, readyColor, iconColor
         ) {
-            hoverColor = hoverColor || '#666666';
-            activeColor = activeColor || '#000000';
-            readyColor = readyColor || '#333333';
-            iconColor = iconColor || '#ffffff';
-            
-            return new myt.DrawButton(targetView, {
-                name:'closeBtn', width:16, height:16, y:4,
-                roundedCorners:8, tooltip:'Close Dialog.',
-                ignoreLayout:true, align:'right', alignOffset:4
+            var btnView = new myt.SimpleButton(targetView, {
+                name:'closeBtn', tooltip:'Close Dialog.',
+                ignoreLayout:true, width:16, height:16, y:4, align:'right', alignOffset:4,
+                roundedCorners:8,
+                activeColor:activeColor || '#000000',
+                hoverColor:hoverColor || '#666666',
+                readyColor:readyColor || '#333333'
             }, [{
-                doActivated: function() {callbackTarget.doCallback(this);},
-                
-                draw: function(canvas, config) {
-                    canvas.clear();
-                    
-                    var b = config.bounds;
-                    if (b.w == 0 || b.h == 0) return;
-                    
-                    var fillColor;
-                    switch (config.state) {
-                        case 'hover':
-                            fillColor = hoverColor;
-                            break;
-                        case 'active':
-                            fillColor = activeColor;
-                            break;
-                        case 'ready':
-                        case 'disabled':
-                        default:
-                            fillColor = readyColor;
-                            break;
-                    }
-                    
-                    canvas.beginPath();
-                    canvas.circle(8, 8, 8);
-                    canvas.closePath();
-                    canvas.setFillStyle(fillColor);
-                    canvas.fill();
-                    
-                    // Draw white X
-                    canvas.beginPath();
-                    canvas.moveTo(8,6);
-                    canvas.lineTo(11,3);
-                    canvas.lineTo(13,5);
-                    canvas.lineTo(10,8);
-                    canvas.lineTo(13,11);
-                    canvas.lineTo(11,13);
-                    canvas.lineTo(8,10);
-                    canvas.lineTo(5,13);
-                    canvas.lineTo(3,11);
-                    canvas.lineTo(6,8);
-                    canvas.lineTo(3,5);
-                    canvas.lineTo(5,3);
-                    canvas.closePath();
-                    canvas.setFillStyle(iconColor);
-                    canvas.fill();
-                }
+                doActivated: function() {callbackTarget.doCallback(this);}
             }]);
+            
+            var iconView = new myt.FontAwesome(btnView, {
+                textColor:iconColor || '#ffffff', icon:'close', x:3.29, y:1
+            });
+            iconView.deStyle.fontSize = '12px';
+            
+            return btnView;
         }
     },
     
