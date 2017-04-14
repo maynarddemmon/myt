@@ -7676,7 +7676,7 @@ myt.Node = new JS.Class('Node', {
     doOnceLater: function() {
         var params = Array.prototype.slice.call(arguments);
         params.unshift(this);
-        return myt.Node.doOnceLater.apply(this, arguments);
+        return myt.Node.doOnceLater.apply(this, params);
     }
 });
 
@@ -21833,13 +21833,15 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     
     /** @overrides myt.View */
     setVisible: function(v) {
-        this.callSuper(v);
-        
-        if (this.inited) {
-            if (this.visible) {
-                this.__show();
-            } else {
-                this.__hide();
+        if (this.visible !== v) {
+            this.callSuper(v);
+            
+            if (this.inited) {
+                if (this.visible) {
+                    this.__show();
+                } else {
+                    this.__hide();
+                }
             }
         }
     },
@@ -21864,9 +21866,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 speed:self.speed,
                 trail:self.trail,
                 opacity:self.lineOpacity
-            }));
-        
-        var size = self.getSize();
+            })),
+            size = self.getSize();
         self.setWidth(size);
         self.setHeight(size);
         

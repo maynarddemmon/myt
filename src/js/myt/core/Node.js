@@ -592,6 +592,6 @@ myt.Node = new JS.Class('Node', {
     doOnceLater: function() {
         var params = Array.prototype.slice.call(arguments);
         params.unshift(this);
-        return myt.Node.doOnceLater.apply(this, arguments);
+        return myt.Node.doOnceLater.apply(this, params);
     }
 });
