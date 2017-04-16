@@ -3,258 +3,272 @@
 <link rel="stylesheet" href="../src/css/myt.css"/>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script>window.jQuery || document.write('<script src="../src/js/jquery/jquery-1.12.4.min.js">\x3C/script>');</script>
+<script>var ROOT = '../src/js/';</script>
 <script src="../src/js/boilerplate.js"></script>
-<script src="../dist/myt.min.js"></script>
+<script src="../src/js/jsclass/loader-browser.js"></script>
+<script src="../src/js/myt/manifest.js"></script>
 </head><body>
 <script>
-    var rootView = new myt.View(null, {bgColor:'#ffffff'}, [myt.SizeToWindow, {
-        /** Apply the state to the app. */
-        handleStateChange: function(event) {
-            var data = event.value.data;
-            this._lockUpdateState = true;
-            topTab.selectById(data.topId || 'two');
-            left.selectById(data.leftId || 'seven');
-            right.selectById(data.rightId || 'eleven');
-            this._lockUpdateState = false;
-        },
-        
-        /** Record the state of the app. */
-        updateState: function() {
-            if (this._lockUpdateState) return;
+    JS.require('myt.all', function() {
+        var rootView = new myt.View(null, {bgColor:'#ffffff'}, [myt.SizeToWindow, {
+            /** Apply the state to the app. */
+            handleStateChange: function(event) {
+                var data = event.value.data;
+                this._lockUpdateState = true;
+                topTab.selectById(data.topId || 'two');
+                left.selectById(data.leftId || 'seven');
+                right.selectById(data.rightId || 'eleven');
+                this._lockUpdateState = false;
+            },
             
-            var topId = topTab.getSelected()[0].tabId,
-                leftId = left.getSelected()[0].tabId,
-                rightId = right.getSelected()[0].tabId;
-            myt.global.history.updateState(
-                {topId:topId, leftId:leftId, rightId:rightId}, 
-                "Tab " + topId + " " + leftId + " " + rightId, 
-                "?topId=" + topId + "&leftId=" + leftId + "&rightId=" + rightId
-            );
-        }
-    }]);
-    
-    
-    // PanelStack
-    var Panel = new JS.Class('Panel', myt.View, {
-        include: [myt.StackablePanel],
+            /** Record the state of the app. */
+            updateState: function() {
+                if (this._lockUpdateState) return;
+                
+                var topId = topTab.getSelected()[0].tabId,
+                    leftId = left.getSelected()[0].tabId,
+                    rightId = right.getSelected()[0].tabId;
+                myt.global.history.updateState(
+                    {topId:topId, leftId:leftId, rightId:rightId}, 
+                    "Tab " + topId + " " + leftId + " " + rightId, 
+                    "?topId=" + topId + "&leftId=" + leftId + "&rightId=" + rightId
+                );
+            }
+        }]);
         
-        initNode: function(parent, attrs) {
-            this.callSuper(parent, attrs);
+        
+        // PanelStack
+        var Panel = new JS.Class('Panel', myt.View, {
+            include: [myt.StackablePanel],
             
-            new myt.Text(this, {x:10, y:10, text:this.panelId});
-        }
-    });
-    var panelStack = new myt.PanelStack(rootView, {x:310, y:30, width:300, height:170, bgColor:'#999999'});
-    new Panel(panelStack, {panelId:'one',   bgColor:'#ffccff'});
-    new Panel(panelStack, {panelId:'two',   bgColor:'#ffffcc'});
-    new Panel(panelStack, {panelId:'three', bgColor:'#ccffff'});
-    new Panel(panelStack, {panelId:'four'});
-    new Panel(panelStack, {panelId:'five'});
-    new Panel(panelStack, {panelId:'six'});
-    new Panel(panelStack, {panelId:'seven'});
-    new Panel(panelStack, {panelId:'eight'});
-    new Panel(panelStack, {panelId:'nine'});
-    new Panel(panelStack, {panelId:'ten'});
-    new Panel(panelStack, {panelId:'eleven'});
-    new Panel(panelStack, {panelId:'twelve'});
-    
-    // Tabs
-    var MyTab = new JS.Class('MyTab', myt.SimpleTab, {
-        setSelected: function(v) {
-            this.callSuper(v);
-            if (this.selected) panelStack.selectById(this.tabId);
-        }
-    });
-    
-    // Tab : top
-    var topTab = new myt.View(rootView, {
-        x:310, height:30, bgColor:'#eeeeee'
-    }, [myt.TabContainer, {
-        doSelected: function(item) {rootView.updateState();}
-    }]);
-    
-    var topTabAttrs = {
-        shrinkToFit:true,
-        tabContainer:topTab
-    };
-    
-    topTabAttrs.tabId = 'one';
-    topTabAttrs.text = 'Tab One';
-    var tt1 = new MyTab(topTab, topTabAttrs);
-    topTabAttrs.tabId = 'two';
-    topTabAttrs.text = 'Tab Two';
-    var tt2 = new MyTab(topTab, topTabAttrs);
-    topTabAttrs.tabId = 'three';
-    topTabAttrs.text = 'Tab Three';
-    var tt3 = new MyTab(topTab, topTabAttrs);
-    
-    // Tab : bottom
-    var bottom = new myt.View(rootView, {
-        x:310, y:200, height:30, bgColor:'#000000', location:'bottom'
-    }, [myt.TabContainer]);
-    
-    var bottomTabAttrs = {
-        hoverColor: '#777777',
-        activeColor: '#333333',
-        readyColor: '#444444',
-        selectedColor: '#999999',
-        labelTextSelectedColor:'#ffffff',
-        textColor:'#eeeeee',
+            initNode: function(parent, attrs) {
+                this.callSuper(parent, attrs);
+                
+                new myt.Text(this, {x:10, y:10, text:this.panelId});
+            }
+        });
+        var panelStack = new myt.PanelStack(rootView, {
+            x:310, y:30, width:300, height:170, bgColor:'#999999',
+            transition:new myt.PanelStackSlideTransition()
+        }, [{
+            doAfterTransitionTo: function(panel) {
+                console.log('changed to panel: ' + panel.panelId);
+            },
+            doAfterTransitionFrom: function(panel) {
+                console.log('changed from panel: ' + panel.panelId);
+            }
+        }]);
+        new Panel(panelStack, {panelId:'one',   bgColor:'#ffccff'});
+        new Panel(panelStack, {panelId:'two',   bgColor:'#ffffcc'});
+        new Panel(panelStack, {panelId:'three', bgColor:'#ccffff'});
+        new Panel(panelStack, {panelId:'four'});
+        new Panel(panelStack, {panelId:'five'});
+        new Panel(panelStack, {panelId:'six'});
+        new Panel(panelStack, {panelId:'seven'});
+        new Panel(panelStack, {panelId:'eight'});
+        new Panel(panelStack, {panelId:'nine'});
+        new Panel(panelStack, {panelId:'ten'});
+        new Panel(panelStack, {panelId:'eleven'});
+        new Panel(panelStack, {panelId:'twelve'});
         
-        text:'tab text bot',
-        shrinkToFit:true
-    };
-    
-    var tb1 = new myt.SimpleTab(bottom, bottomTabAttrs);
-    bottomTabAttrs.selected = true;
-    var tb2 = new myt.SimpleTab(bottom, bottomTabAttrs);
-    bottomTabAttrs.selected = false;
-    var tb3 = new myt.SimpleTab(bottom, bottomTabAttrs);
-    
-    // Tab : left
-    var left = new myt.View(rootView, {
-        x:210, y:60, width:100, bgColor:'#eeeeee', location:'left'
-    }, [myt.TabContainer, {
-        doSelected: function(item) {rootView.updateState();}
-    }]);
-    
-    var leftTabAttrs = {
-        text:'tab text left',
-        shrinkToFit:true,
-        tabContainer:left
-    };
-    
-    leftTabAttrs.tabId = 'seven';
-    var tl1 = new myt.Tab(left, leftTabAttrs);
-    leftTabAttrs.tabId = 'eight';
-    var tl2 = new myt.Tab(left, leftTabAttrs);
-    tl2.setDisabled(true);
-    leftTabAttrs.tabId = 'nine';
-    var tl3 = new myt.Tab(left, leftTabAttrs);
-    
-    // Tab : right
-    var right = new myt.View(rootView, {
-        x:610, y:60, width:100, bgColor:'#eeeeee', location:'right'
-    }, [myt.TabContainer, {
-        doSelected: function(item) {rootView.updateState();}
-    }]);
-    
-    var rightTabAttrs = {
-        text:'tab text right',
-        shrinkToFit:true,
-        tabContainer:right
-    };
-    
-    rightTabAttrs.tabId = 'ten';
-    var tr1 = new myt.Tab(right, rightTabAttrs);
-    rightTabAttrs.tabId = 'eleven';
-    var tr2 = new myt.Tab(right, rightTabAttrs);
-    rightTabAttrs.tabId = 'twelve';
-    var tr3 = new myt.Tab(right, rightTabAttrs);
-    
-    // TabSlider
-    var sliderLeft = new myt.View(rootView, {
-        width:200, bgColor:'#eeeeee', percentOfParentHeight:100,
-        maxSelected:-1
-    }, [myt.TabSliderContainer, myt.SizeToParent, {
-        updateWidth: function(event) {
-            this.setWidth(event.value + event.source.inset);
-        },
-        updateY: function(event) {
-            var v = event.value + event.source.height - event.source.inset;
-            this.setPercentOfParentHeightOffset(-v);
-            this.setY(v);
-        },
-    }]);
-    
-    var ts1 = new myt.TextTabSlider(sliderLeft, {text:'Tab Slider One'});
-    ts1.setText('foo bar');
-    new myt.View(ts1, {width:100, height:50, bgColor:'#ff0000'});
-    
-    var ts2 = new myt.TextTabSlider(sliderLeft, {text:'Tab Slider Two'});
-    new myt.View(ts2, {width:100, height:150, bgColor:'#ffff00'});
-    
-    var ts3 = new myt.TextTabSlider(sliderLeft, {text:'Tab Slider Three'});
-    new myt.View(ts3, {width:100, height:250, bgColor:'#ff00ff'});
-    
-    var ts4 = new myt.TextTabSlider(sliderLeft, {text:'Tab Slider Four'});
-    sliderLeft.select(ts4);
-    new myt.View(ts4, {width:100, height:50, bgColor:'#ff0f0f'});
-    
-    var ts5 = new myt.TextTabSlider(sliderLeft, {text:'Tab Slider Five'});
-    new myt.View(ts5, {width:100, height:350, bgColor:'#fff0f0'});
-    
-    var ts6 = new myt.TextTabSlider(sliderLeft, {text:'Tab Slider Six'});
-    ts6.setDisabled(true);
-    new myt.View(ts6, {width:100, height:150, bgColor:'#fff0f0'});
-    
-    var ts7 = new myt.TextTabSlider(sliderLeft, {text:'Tab Slider Seven'});
-    new myt.View(ts7, {width:100, height:150, bgColor:'#fff0f0'});
-    new myt.Text(ts7, {text:'This is some text that is quite long.'});
-    new myt.View(ts7, {width:100, height:50, bgColor:'#fff0f0'});
-    new myt.Text(ts7, {text:'abcd.'});
-    new myt.SpacedLayout(ts7, {axis:'y'});
-    
-    var ts8 = new myt.TextTabSlider(sliderLeft, {text:'Tab Slider Eight'});
-    new myt.View(ts8, {width:100, height:350, bgColor:'#fff0f0'});
-    
-    
-    // TabSlider on right
-    var sliderRight = new myt.View(rootView, {
-        width:200, bgColor:'#eeeeee', percentOfParentHeight:100,
-        align:'right'
-    }, [myt.TabSliderContainer, myt.SizeToParent, {
-        updateY: function(event) {
-            var v = event.value + event.source.height - event.source.inset;
-            this.setPercentOfParentHeightOffset(-v);
-            this.setY(v);
-        },
-    }]);
-    
-    var tsr1 = new myt.TextTabSlider(sliderRight, {text:'Tab Slider One'});
-    tsr1.setText('foo bar');
-    new myt.View(tsr1, {width:100, height:50, bgColor:'#ff0000'});
-    
-    var tsr2 = new myt.TextTabSlider(sliderRight, {text:'Tab Slider Two'});
-    new myt.View(tsr2, {width:100, height:150, bgColor:'#ffff00'});
-    
-    var tsr3 = new myt.TextTabSlider(sliderRight, {text:'Tab Slider Three'});
-    new myt.View(tsr3, {width:100, height:250, bgColor:'#ff00ff'});
-    
-    var tsr4 = new myt.TextTabSlider(sliderRight, {text:'Tab Slider Four'});
-    sliderRight.select(tsr4);
-    new myt.View(tsr4, {width:100, height:50, bgColor:'#ff0f0f'});
-    
-    var tsr5 = new myt.TextTabSlider(sliderRight, {text:'Tab Slider Five'});
-    new myt.View(tsr5, {width:100, height:350, bgColor:'#fff0f0'});
-    
-    var tsr6 = new myt.TextTabSlider(sliderRight, {text:'Tab Slider Six'});
-    tsr6.setDisabled(true);
-    new myt.View(tsr6, {width:100, height:150, bgColor:'#fff0f0'});
-    
-    var tsr7 = new myt.TextTabSlider(sliderRight, {text:'Tab Slider Seven'});
-    new myt.View(tsr7, {width:100, height:150, bgColor:'#fff0f0'});
-    new myt.Text(tsr7, {text:'This is some text that is quite long.'});
-    new myt.View(tsr7, {width:100, height:50, bgColor:'#fff0f0'});
-    new myt.Text(tsr7, {text:'abcd.'});
-    new myt.SpacedLayout(tsr7, {axis:'y'});
-    
-    var tsr8 = new myt.TextTabSlider(sliderRight, {text:'Tab Slider Eight'});
-    new myt.View(tsr8, {width:100, height:350, bgColor:'#fff0f0'});
-    
-    // Dividers
-    var hDivider = new myt.HorizontalDivider(rootView, {
-        percentOfParentHeight:100, limitToParent:0, minValue:198
-    }, [myt.SizeToParent]);
-    sliderLeft.syncTo(hDivider, 'updateWidth', 'value');
-    
-    var vDivider = new myt.VerticalDivider(rootView, {
-        percentOfParentWidth:100, limitToParent:100
-    }, [myt.SizeToParent]);
-    sliderLeft.syncTo(vDivider, 'updateY', 'value');
-    sliderRight.syncTo(vDivider, 'updateY', 'value');
-    
-    myt.global.history.startMonitoringState(rootView);
-    rootView.updateState(); // Make the initial selection for the "top" view.
+        // Tabs
+        var MyTab = new JS.Class('MyTab', myt.SimpleTab, {
+            setSelected: function(v) {
+                this.callSuper(v);
+                if (this.selected) panelStack.selectById(this.tabId);
+            }
+        });
+        
+        // Tab : top
+        var topTab = new myt.View(rootView, {
+            x:310, height:30, bgColor:'#eeeeee'
+        }, [myt.TabContainer, {
+            doSelected: function(item) {rootView.updateState();}
+        }]);
+        
+        var topTabAttrs = {
+            shrinkToFit:true,
+            tabContainer:topTab
+        };
+        
+        topTabAttrs.tabId = 'one';
+        topTabAttrs.text = 'Tab One';
+        var tt1 = new MyTab(topTab, topTabAttrs);
+        topTabAttrs.tabId = 'two';
+        topTabAttrs.text = 'Tab Two';
+        var tt2 = new MyTab(topTab, topTabAttrs);
+        topTabAttrs.tabId = 'three';
+        topTabAttrs.text = 'Tab Three';
+        var tt3 = new MyTab(topTab, topTabAttrs);
+        
+        // Tab : bottom
+        var bottom = new myt.View(rootView, {
+            x:310, y:200, height:30, bgColor:'#000000', location:'bottom'
+        }, [myt.TabContainer]);
+        
+        var bottomTabAttrs = {
+            hoverColor: '#777777',
+            activeColor: '#333333',
+            readyColor: '#444444',
+            selectedColor: '#999999',
+            labelTextSelectedColor:'#ffffff',
+            textColor:'#eeeeee',
+            
+            text:'tab text bot',
+            shrinkToFit:true
+        };
+        
+        var tb1 = new myt.SimpleTab(bottom, bottomTabAttrs);
+        bottomTabAttrs.selected = true;
+        var tb2 = new myt.SimpleTab(bottom, bottomTabAttrs);
+        bottomTabAttrs.selected = false;
+        var tb3 = new myt.SimpleTab(bottom, bottomTabAttrs);
+        
+        // Tab : left
+        var left = new myt.View(rootView, {
+            x:210, y:60, width:100, bgColor:'#eeeeee', location:'left'
+        }, [myt.TabContainer, {
+            doSelected: function(item) {rootView.updateState();}
+        }]);
+        
+        var leftTabAttrs = {
+            text:'tab text left',
+            shrinkToFit:true,
+            tabContainer:left
+        };
+        
+        leftTabAttrs.tabId = 'seven';
+        var tl1 = new myt.Tab(left, leftTabAttrs);
+        leftTabAttrs.tabId = 'eight';
+        var tl2 = new myt.Tab(left, leftTabAttrs);
+        tl2.setDisabled(true);
+        leftTabAttrs.tabId = 'nine';
+        var tl3 = new myt.Tab(left, leftTabAttrs);
+        
+        // Tab : right
+        var right = new myt.View(rootView, {
+            x:610, y:60, width:100, bgColor:'#eeeeee', location:'right'
+        }, [myt.TabContainer, {
+            doSelected: function(item) {rootView.updateState();}
+        }]);
+        
+        var rightTabAttrs = {
+            text:'tab text right',
+            shrinkToFit:true,
+            tabContainer:right
+        };
+        
+        rightTabAttrs.tabId = 'ten';
+        var tr1 = new myt.Tab(right, rightTabAttrs);
+        rightTabAttrs.tabId = 'eleven';
+        var tr2 = new myt.Tab(right, rightTabAttrs);
+        rightTabAttrs.tabId = 'twelve';
+        var tr3 = new myt.Tab(right, rightTabAttrs);
+        
+        // TabSlider
+        var sliderLeft = new myt.View(rootView, {
+            width:200, bgColor:'#cccccc', percentOfParentHeight:100,
+            maxSelected:-1
+        }, [myt.TabSliderContainer, myt.SizeToParent, {
+            updateWidth: function(event) {
+                this.setWidth(event.value + event.source.inset);
+            },
+            updateY: function(event) {
+                var v = event.value + event.source.height - event.source.inset;
+                this.setPercentOfParentHeightOffset(-v);
+                this.setY(v);
+            },
+        }]);
+        
+        var ts1 = new myt.TextTabSlider(sliderLeft, {text:'Tab Slider One'});
+        ts1.setText('foo bar');
+        new myt.View(ts1, {width:100, height:50, bgColor:'#ff0000'});
+        
+        var ts2 = new myt.TextTabSlider(sliderLeft, {text:'Tab Slider Two'});
+        new myt.View(ts2, {width:100, height:150, bgColor:'#ffff00'});
+        
+        var ts3 = new myt.TextTabSlider(sliderLeft, {text:'Tab Slider Three'});
+        new myt.View(ts3, {width:100, height:250, bgColor:'#ff00ff'});
+        
+        var ts4 = new myt.TextTabSlider(sliderLeft, {text:'Tab Slider Four'});
+        sliderLeft.select(ts4);
+        new myt.View(ts4, {width:100, height:50, bgColor:'#ff0f0f'});
+        
+        var ts5 = new myt.TextTabSlider(sliderLeft, {text:'Tab Slider Five'});
+        new myt.View(ts5, {width:100, height:350, bgColor:'#fff0f0'});
+        
+        var ts6 = new myt.TextTabSlider(sliderLeft, {text:'Tab Slider Six'});
+        ts6.setDisabled(true);
+        new myt.View(ts6, {width:100, height:150, bgColor:'#fff0f0'});
+        
+        var ts7 = new myt.TextTabSlider(sliderLeft, {text:'Tab Slider Seven'});
+        new myt.View(ts7, {width:100, height:150, bgColor:'#fff0f0'});
+        new myt.Text(ts7, {text:'This is some text that is quite long.'});
+        new myt.View(ts7, {width:100, height:50, bgColor:'#fff0f0'});
+        new myt.Text(ts7, {text:'abcd.'});
+        new myt.SpacedLayout(ts7, {axis:'y'});
+        
+        var ts8 = new myt.TextTabSlider(sliderLeft, {text:'Tab Slider Eight'});
+        new myt.View(ts8, {width:100, height:350, bgColor:'#fff0f0'});
+        
+        
+        // TabSlider on right
+        var sliderRight = new myt.View(rootView, {
+            width:200, bgColor:'#cccccc', percentOfParentHeight:100,
+            align:'right'
+        }, [myt.TabSliderContainer, myt.SizeToParent, {
+            updateY: function(event) {
+                var v = event.value + event.source.height - event.source.inset;
+                this.setPercentOfParentHeightOffset(-v);
+                this.setY(v);
+            },
+        }]);
+        
+        var tsr1 = new myt.TextTabSlider(sliderRight, {text:'Tab Slider One'});
+        tsr1.setText('foo bar');
+        new myt.View(tsr1, {width:100, height:50, bgColor:'#ff0000'});
+        
+        var tsr2 = new myt.TextTabSlider(sliderRight, {text:'Tab Slider Two'});
+        new myt.View(tsr2, {width:100, height:150, bgColor:'#ffff00'});
+        
+        var tsr3 = new myt.TextTabSlider(sliderRight, {text:'Tab Slider Three'});
+        new myt.View(tsr3, {width:100, height:250, bgColor:'#ff00ff'});
+        
+        var tsr4 = new myt.TextTabSlider(sliderRight, {text:'Tab Slider Four'});
+        sliderRight.select(tsr4);
+        new myt.View(tsr4, {width:100, height:50, bgColor:'#ff0f0f'});
+        
+        var tsr5 = new myt.TextTabSlider(sliderRight, {text:'Tab Slider Five'});
+        new myt.View(tsr5, {width:100, height:350, bgColor:'#fff0f0'});
+        
+        var tsr6 = new myt.TextTabSlider(sliderRight, {text:'Tab Slider Six'});
+        tsr6.setDisabled(true);
+        new myt.View(tsr6, {width:100, height:150, bgColor:'#fff0f0'});
+        
+        var tsr7 = new myt.TextTabSlider(sliderRight, {text:'Tab Slider Seven'});
+        new myt.View(tsr7, {width:100, height:150, bgColor:'#fff0f0'});
+        new myt.Text(tsr7, {text:'This is some text that is quite long.'});
+        new myt.View(tsr7, {width:100, height:50, bgColor:'#fff0f0'});
+        new myt.Text(tsr7, {text:'abcd.'});
+        new myt.SpacedLayout(tsr7, {axis:'y'});
+        
+        var tsr8 = new myt.TextTabSlider(sliderRight, {text:'Tab Slider Eight'});
+        new myt.View(tsr8, {width:100, height:350, bgColor:'#fff0f0'});
+        
+        // Dividers
+        var hDivider = new myt.HorizontalDivider(rootView, {
+            percentOfParentHeight:100, limitToParent:0, minValue:198
+        }, [myt.SizeToParent]);
+        sliderLeft.syncTo(hDivider, 'updateWidth', 'value');
+        
+        var vDivider = new myt.VerticalDivider(rootView, {
+            percentOfParentWidth:100, limitToParent:100
+        }, [myt.SizeToParent]);
+        sliderLeft.syncTo(vDivider, 'updateY', 'value');
+        sliderRight.syncTo(vDivider, 'updateY', 'value');
+        
+        myt.global.history.startMonitoringState(rootView);
+        rootView.updateState(); // Make the initial selection for the "top" view.
+    });
 </script>
 </body></html>

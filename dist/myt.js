@@ -3952,6 +3952,36 @@ myt = {
             }
         }
         return result
+    },
+    
+    promise: function() {
+        var promise = {
+            args:arguments,
+            
+            next:function(nextFunc) {
+                if (promise.kept) {
+                    // Execute next immediately since the promise has
+                    // already been kept
+                    nextFunc.apply(null, promise.args);
+                } else {
+                    // Store the next function so it can be called later once
+                    // the promise is kept
+                    promise._nextFunc = nextFunc;
+                }
+                return promise;
+            },
+            
+            keep:function() {
+                promise.kept = true;
+                
+                // If a next function exists then execute it since now the
+                // promise has been kept.
+                if (promise._nextFunc) promise._nextFunc.apply(null, promise.args);
+                
+                return promise;
+            }
+        };
+        return promise;
     }
 };
 
@@ -12706,551 +12736,6 @@ myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
 });
 
 
-/** Adds support for image display to a View.
-    
-    Events:
-        imageUrl:string
-        imageSize:string
-        imageRepeat:string
-        imagePosition:string
-        imageAttachment:string
-        calculateNaturalSize:boolean
-        naturalWidth:number
-        naturalHeight:number
-        useNaturalSize:boolean
-        imageLoadingError:boolean
-    
-    Attributes:
-        imageUrl:string The URL to load the image data from.
-        imageSize:string Determines the size of the image. Allowed values
-            are: 'auto', 'cover', 'contain', absolute ('20px 10px') and 
-            percentage ('100% 50%').
-        imageRepeat:string Determines if an image is repeated or not.
-            Allowed values: 'repeat', 'repeat-x', 'repeat-y', 'no-repeat', 
-            'inherit'. Defaults to 'no-repeat'.
-        imagePosition:string Determines where an image is positioned.
-        imageAttachment:string Determines how an image is attached to the view.
-            Allowed values are: 'scroll', 'fixed', 'inherit'. The default
-            value is 'scroll'.
-        calculateNaturalSize:boolean Determines if the natural size should be 
-            automatically calculated or not. Defaults to undefined which is
-            equivalent to false.
-        naturalWidth:number The natural width of the image. Only set if
-            calculateNaturalWidth is true.
-        naturalHeight:number The natural height of the image. Only set if
-            calculateNaturalWidth is true.
-        useNaturalSize:boolean If true this image view will be sized to the
-            naturalWidth and naturalHeight and calculateNaturalSize will be
-            set to true.
-        imageLoadingError:boolean Gets set to true when an error occurs
-            loading the image. The image will be loaded whenever the
-            calculateNaturalSize attribute is set to true.
-*/
-myt.ImageSupport = new JS.Module('ImageSupport', {
-    // Class Methods ///////////////////////////////////////////////////////////
-    extend: {
-        /** Stores widths and heights of images by URL so we don't have to
-            reload them to get sizes. */
-        SIZE_CACHE:{},
-        
-        /** Tracks requests to get the width and height of an image. Used to
-            prevent multiple requests being made for the same image URL. */
-        OPEN_SIZE_QUERIES:{}
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Node */
-    initNode: function(parent, attrs) {
-        if (attrs.imageRepeat == null) attrs.imageRepeat = 'no-repeat';
-        if (attrs.imageAttachment == null) attrs.imageAttachment = 'scroll';
-        
-        this.callSuper(parent, attrs);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setImageUrl: function(v) {
-        if (this.imageUrl !== v) {
-            this.imageUrl = v;
-            this.deStyle.backgroundImage = v ? 'url("' + v + '")' : 'none';
-            if (this.inited) {
-                this.fireEvent('imageUrl', v);
-                this.setNaturalWidth(undefined);
-                this.setNaturalHeight(undefined);
-                
-                // Collapse size if no url and we are using natural size
-                if (!v && this.useNaturalSize) {
-                    this.setWidth(0);
-                    this.setHeight(0);
-                }
-            }
-            this.__calculateNaturalSize();
-        }
-    },
-    
-    setImageLoadingError: function(v) {this.set('imageLoadingError', v, true);},
-    
-    setImageSize: function(v) {
-        if (this.imageSize !== v) {
-            this.imageSize = v;
-            this.deStyle.backgroundSize = v || 'auto';
-            if (this.inited) this.fireEvent('imageSize', v);
-        }
-    },
-    
-    setImageRepeat: function(v) {
-        if (this.imageRepeat !== v) {
-            this.deStyle.backgroundRepeat = this.imageRepeat = v;
-            if (this.inited) this.fireEvent('imageRepeat', v);
-        }
-    },
-    
-    setImagePosition: function(v) {
-        if (this.imagePosition !== v) {
-            this.deStyle.backgroundPosition = this.imagePosition = v;
-            if (this.inited) this.fireEvent('imagePosition', v);
-        }
-    },
-    
-    setImageAttachment: function(v) {
-        if (this.imageAttachment !== v) {
-            this.deStyle.backgroundAttachment = this.imageAttachment = v;
-            if (this.inited) this.fireEvent('imageAttachment', v);
-        }
-    },
-    
-    setCalculateNaturalSize: function(v) {
-        if (this.calculateNaturalSize !== v) {
-            this.calculateNaturalSize = v;
-            if (this.inited) this.fireEvent('calculateNaturalSize', v);
-            this.__calculateNaturalSize();
-        }
-    },
-    
-    setNaturalWidth: function(v) {
-        if (this.naturalWidth !== v) {
-            this.naturalWidth = v;
-            if (this.inited) this.fireEvent('naturalWidth', v);
-            if (this.useNaturalSize && v) this.setWidth(v);
-        }
-    },
-    
-    setNaturalHeight: function(v) {
-        if (this.naturalHeight !== v) {
-            this.naturalHeight = v;
-            if (this.inited) this.fireEvent('naturalHeight', v);
-            if (this.useNaturalSize && v) this.setHeight(v);
-        }
-    },
-    
-    setUseNaturalSize: function(v) {
-        if (this.useNaturalSize !== v) {
-            this.useNaturalSize = v;
-            if (this.inited) this.fireEvent('useNaturalSize', v);
-            
-            // Sync width and height
-            if (v) {
-                if (this.naturalWidth) this.setWidth(this.naturalWidth);
-                if (this.naturalHeight) this.setHeight(this.naturalHeight);
-            }
-            
-            // Turn on calculation of natural size if we're going to use
-            // natural size.
-            if (v && !this.calculateNaturalSize) this.setCalculateNaturalSize(true);
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Loads an image to measure its size.
-        @private
-        @returns void */
-    __calculateNaturalSize: function() {
-        var imgUrl = this.imageUrl;
-        if (this.calculateNaturalSize && imgUrl) {
-            var sizeCache = myt.ImageSupport.SIZE_CACHE,
-                cachedSize = sizeCache[imgUrl];
-            if (cachedSize) {
-                // Cache hit
-                this.setNaturalWidth(cachedSize.width);
-                this.setNaturalHeight(cachedSize.height);
-            } else {
-                // Cache miss
-                var openQueryCache = myt.ImageSupport.OPEN_SIZE_QUERIES,
-                    openQuery = openQueryCache[imgUrl];
-                if (!openQuery) {
-                    // Lazy instantiate the open query array.
-                    openQueryCache[imgUrl] = openQuery = [];
-                    
-                    // Start a size query
-                    var img = new Image();
-                    img.onerror = function(err) {
-                        // Notify all ImageSupport instances that are waiting
-                        // for a natural size that an error has occurred.
-                        var openQueries = openQueryCache[imgUrl];
-                        if (openQueries) {
-                            var i = openQueries.length;
-                            while (i) openQueries[--i].setImageLoadingError(true);
-                            
-                            // Cleanup
-                            openQueries.length = 0;
-                            delete openQueryCache[imgUrl];
-                        }
-                    };
-                    img.onload = function() {
-                        var w = this.width, h = this.height;
-                        
-                        // Notify all ImageSupport instances that are waiting
-                        // for a natural size.
-                        var openQueries = openQueryCache[imgUrl];
-                        if (openQueries) {
-                            var i = openQueries.length, imageSupportInstance;
-                            while (i) {
-                                imageSupportInstance = openQueries[--i];
-                                imageSupportInstance.setNaturalWidth(w);
-                                imageSupportInstance.setNaturalHeight(h);
-                            }
-                            
-                            // Cleanup
-                            openQueries.length = 0;
-                            delete openQueryCache[imgUrl];
-                        }
-                        
-                        // Store size in cache.
-                        sizeCache[imgUrl] = {width:w, height:h};
-                    };
-                    img.src = imgUrl;
-                }
-                
-                openQuery.push(this);
-            }
-        }
-    }
-});
-
-
-/** A view that displays an image. By default useNaturalSize is set to true
-    so the Image will take on the size of the image data. */
-myt.Image = new JS.Class('Image', myt.View, {
-    include: [myt.ImageSupport],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.View */
-    initNode: function(parent, attrs) {
-        if (attrs.useNaturalSize == null) attrs.useNaturalSize = true;
-        
-        this.callSuper(parent, attrs);
-    }
-});
-
-
-/** A special "layout" that resizes the parent to fit the children rather than
-    laying out the children.
-    
-    Events:
-        axis:string
-        paddingX:number
-        paddingY:number
-    
-    Attributes:
-        axis:string The axis along which to resize this view to fit its
-            children. Supported values are 'x', 'y' and 'both'. Defaults to 'x'.
-        paddingX:number Additional space added on the child extent along the
-            x-axis. Defaults to 0.
-        paddingY:number Additional space added on the child extent along the
-            y-axis. Defaults to 0.
-*/
-myt.SizeToChildren = new JS.Class('SizeToChildren', myt.Layout, {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Node */
-    initNode: function(parent, attrs) {
-        this.axis = 'x';
-        this.paddingX = this.paddingY = 0;
-        
-        this.callSuper(parent, attrs);
-    },
-    
-    
-    // Acessors ////////////////////////////////////////////////////////////////
-    setAxis: function(v) {
-        if (this.axis !== v) {
-            if (this.inited) {
-                this.stopMonitoringAllSubviews();
-                this.axis = v;
-                this.startMonitoringAllSubviews();
-                this.fireEvent('axis', v);
-                this.update();
-            } else {
-                this.axis = v;
-            }
-        }
-    },
-    
-    setPaddingX: function(v) {
-        if (this.paddingX !== v) {
-            this.paddingX = v;
-            if (this.inited) {
-                this.fireEvent('paddingX', v);
-                this.update();
-            }
-        }
-    },
-    
-    setPaddingY: function(v) {
-        if (this.paddingY !== v) {
-            this.paddingY = v;
-            if (this.inited) {
-                this.fireEvent('paddingY', v);
-                this.update();
-            }
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.ConstantLayout */
-    update: function() {
-        if (this.canUpdate()) {
-            // Prevent inadvertent loops
-            this.incrementLockedCounter();
-            
-            var p = this.parent;
-            
-            if (!p.isBeingDestroyed) {
-                var svs = this.subviews, len = svs.length, i, sv,
-                    max, bound,
-                    axis = this.axis,
-                    maxFunc = Math.max;
-                if (axis !== 'y') {
-                    i = len;
-                    max = 0;
-                    while(i) {
-                        sv = svs[--i];
-                        if (sv.visible) {
-                            bound = sv.boundsWidth;
-                            bound = bound > 0 ? bound : 0;
-                            max = maxFunc(max, sv.x + bound);
-                        }
-                    }
-                    p.setWidth(max + this.paddingX);
-                }
-                if (axis !== 'x') {
-                    i = len;
-                    max = 0;
-                    while(i) {
-                        sv = svs[--i];
-                        if (sv.visible) {
-                            bound = sv.boundsHeight;
-                            bound = bound > 0 ? bound : 0;
-                            max = maxFunc(max, sv.y + bound);
-                        }
-                    }
-                    p.setHeight(max + this.paddingY);
-                }
-            }
-            
-            this.decrementLockedCounter();
-        }
-    },
-    
-    /** @overrides myt.Layout
-        Provides a default implementation that calls update when the
-        visibility of a subview changes. */
-    startMonitoringSubview: function(sv) {
-        this.__updateMonitoringSubview(sv, this.attachTo);
-    },
-    
-    /** @overrides myt.Layout
-        Provides a default implementation that calls update when the
-        visibility of a subview changes. */
-    stopMonitoringSubview: function(sv) {
-        this.__updateMonitoringSubview(sv, this.detachFrom);
-    },
-    
-    /** Wrapped by startMonitoringSubview and stopMonitoringSubview.
-        @private */
-    __updateMonitoringSubview: function(sv, func) {
-        var axis = this.axis;
-        func = func.bind(this);
-        if (axis !== 'y') {
-            func(sv, 'update', 'x');
-            func(sv, 'update', 'boundsWidth');
-        }
-        if (axis !== 'x') {
-            func(sv, 'update', 'y');
-            func(sv, 'update', 'boundsHeight');
-        }
-        func(sv, 'update', 'visible');
-    }
-});
-
-
-/** Must be mixed onto a View.
-    
-    A set of three images where the middle images resizes to fill the
-    available space. If you only need support for a single axis you should
-    instead use HorizontalThreePanel or VerticalThreePanel since they are
-    a bit more optimized.
-    
-    Events:
-        axis:string
-        repeat:boolean
-    
-    Attributes:
-        firstImageUrl:string
-        secondImageUrl:string
-        thirdImageUrl:string
-        axis:string Determines if the views are layed out along the x-axis or 
-            y-axis. This value can be changed at runtime and the component 
-            will update itself. You will need to setWidth/setHeight 
-            appropriately for the new axis. The default axis is 'x'.
-        repeat:boolean If true the image on the middle view will be repeated 
-            rather than stretched. The default is stretched(false).
-*/
-myt.ThreePanel = new JS.Module('ThreePanel', {
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        /** The common ignore function used in the myt.ResizeLayout and 
-            myt.SizeToChildren in all myt.ThreePanel, myt.HorizontalThreePanel 
-            and myt.VerticalThreePanel instances. */
-        IGNORE_FUNCTION_MIXIN: {
-            ignore: function(sv) {
-                switch (sv.name) {
-                    case 'first': case 'second': case 'third': return false;
-                    default: return true;
-                }
-            }
-        }
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        this.axis = 'x';
-        this.repeat = false;
-        
-        this.callSuper(parent, attrs);
-    },
-    
-    doBeforeAdoption: function() {
-        var self = this;
-        
-        self.callSuper();
-        
-        var m = myt;
-        new m.Image(self, {
-            name:'first', imageUrl:self.firstImageUrl, ignoreLayout:true
-        });
-        
-        var second = new m.Image(self, {
-            name:'second', layoutHint:1, imageUrl:self.secondImageUrl, 
-            ignoreLayout:true, useNaturalSize:false, calculateNaturalSize:true,
-        });
-        self.attachTo(second, '__updateSize', 'naturalWidth');
-        self.attachTo(second, '__updateSize', 'naturalHeight');
-        self.attachTo(second, '__updateImageSize', 'width');
-        self.attachTo(second, '__updateImageSize', 'height');
-        
-        new m.Image(self, {
-            name:'third', imageUrl:self.thirdImageUrl, ignoreLayout:true
-        });
-        
-        var axis = self.axis,
-            otherAxis = axis === 'x' ? 'y' : 'x',
-            ignoreMixin = [m.ThreePanel.IGNORE_FUNCTION_MIXIN];
-        new m.ResizeLayout(self, {name:'resizeLayout', axis:axis}, ignoreMixin);
-        new m.SizeToChildren(self, {name:'sizeToChildren', axis:otherAxis}, ignoreMixin);
-        
-        self.__updateRepeat();
-        self.__updateSize();
-        self.__updateImageSize();
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setFirstImageUrl: function(v) {
-        if (this.firstImageUrl !== v) {
-            this.firstImageUrl = v;
-            if (this.inited) this.first.setImageUrl(v);
-        }
-    },
-    
-    setSecondImageUrl: function(v) {
-        if (this.secondImageUrl !== v) {
-            this.secondImageUrl = v;
-            if (this.inited) this.second.setImageUrl(v);
-        }
-    },
-    
-    setThirdImageUrl: function(v) {
-        if (this.thirdImageUrl !== v) {
-            this.thirdImageUrl = v;
-            if (this.inited) this.third.setImageUrl(v);
-        }
-    },
-    
-    setRepeat: function(v) {
-        if (this.repeat !== v) {
-            this.repeat = v;
-            if (this.inited) {
-                this.fireEvent('repeat', v);
-                this.__updateRepeat();
-            }
-        }
-    },
-    
-    setAxis: function(v) {
-        if (this.axis !== v) {
-            this.axis = v;
-            
-            if (this.inited) {
-                this.__updateRepeat();
-                if (v === 'x') {
-                    this.first.setY(0);
-                    this.second.setY(0);
-                    this.third.setY(0);
-                } else {
-                    this.first.setX(0);
-                    this.second.setX(0);
-                    this.third.setX(0);
-                }
-                this.__updateSize();
-                this.resizeLayout.setAxis(v);
-                this.sizeToChildren.setAxis(v === 'x' ? 'y' : 'x');
-                this.fireEvent('axis', v);
-            }
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
-    __updateSize: function(event) {
-        var v = this.second;
-        if (this.axis === 'x') {
-            v.setHeight(v.naturalHeight);
-        } else {
-            v.setWidth(v.naturalWidth);
-        }
-    },
-    
-    /** @private */
-    __updateImageSize: function(event) {
-        var v = this.second;
-        v.setImageSize(this.repeat ? undefined : v.width + 'px ' + v.height + 'px');
-    },
-    
-    /** @private */
-    __updateRepeat: function(event) {
-        this.second.setImageRepeat(
-            this.repeat ? (this.axis === 'x' ? 'repeat-x' : 'repeat-y') : 'no-repeat'
-        );
-    }
-});
-
-
 /** A view for programatic drawing. This view is backed by an html 
     canvas element.
     
@@ -14076,7 +13561,7 @@ myt.Color = new JS.Class('Color', {
             @param value:number/string The number or string to convert.
             @returns string: A two character hex string such as: '0c' or 'c9'. */
         toHex: function(value) {
-            value = Math.round(Number(value)).toString(16);
+            value = this.cleanChannelValue(value).toString(16);
             return value.length === 1 ? '0' + value : value;
         },
         
@@ -14089,7 +13574,7 @@ myt.Color = new JS.Class('Color', {
                 will be prepended to the return value.
             @returns string: Something like: '#ff9c02' or 'ff9c02' */
         rgbToHex: function(red, green, blue, prependHash) {
-            var toHex = this.toHex;
+            var toHex = this.toHex.bind(this);
             return [prependHash ? '#' : '', toHex(red), toHex(green), toHex(blue)].join('');
         },
         
@@ -14097,11 +13582,7 @@ myt.Color = new JS.Class('Color', {
             @param value:number the channel value to clean up.
             @returns number */
         cleanChannelValue: function(value) {
-            value = Math.round(value);
-            
-            if (value > 255) return 255;
-            if (value < 0) return 0;
-            return value;
+            return Math.min(255, Math.max(0, Math.round(value)));
         },
         
         /** Gets the red channel from a "color" number.
@@ -14252,10 +13733,7 @@ myt.Color = new JS.Class('Color', {
         @param diff:object the color diff to apply.
         @returns this myt.Color to facilitate method chaining. */
     applyDiff: function(diff) {
-        this.setRed(this.red + diff.red);
-        this.setGreen(this.green + diff.green);
-        this.setBlue(this.blue + diff.blue);
-        return this;
+        return this.add(diff);
     },
     
     /** Adds the provided color to this color.
@@ -14308,9 +13786,11 @@ myt.Color = new JS.Class('Color', {
         @returns boolean True if this color has the same color values as
             this provided color, false otherwise. */
     equals: function(obj) {
-        if (obj === this) return true;
-        if (obj && obj.isA && obj.isA(myt.Color) && obj.red === this.red && obj.green === this.green && obj.blue === this.blue) return true;
-        return false;
+        return obj === this || (obj && obj.isA && 
+            obj.isA(myt.Color) && 
+            obj.red === this.red && 
+            obj.green === this.green && 
+            obj.blue === this.blue);
     }
 });
 
@@ -14881,6 +14361,246 @@ myt.SimpleButton = new JS.Class('SimpleButton', myt.View, {
 });
 
 
+/** Adds support for image display to a View.
+    
+    Events:
+        imageUrl:string
+        imageSize:string
+        imageRepeat:string
+        imagePosition:string
+        imageAttachment:string
+        calculateNaturalSize:boolean
+        naturalWidth:number
+        naturalHeight:number
+        useNaturalSize:boolean
+        imageLoadingError:boolean
+    
+    Attributes:
+        imageUrl:string The URL to load the image data from.
+        imageSize:string Determines the size of the image. Allowed values
+            are: 'auto', 'cover', 'contain', absolute ('20px 10px') and 
+            percentage ('100% 50%').
+        imageRepeat:string Determines if an image is repeated or not.
+            Allowed values: 'repeat', 'repeat-x', 'repeat-y', 'no-repeat', 
+            'inherit'. Defaults to 'no-repeat'.
+        imagePosition:string Determines where an image is positioned.
+        imageAttachment:string Determines how an image is attached to the view.
+            Allowed values are: 'scroll', 'fixed', 'inherit'. The default
+            value is 'scroll'.
+        calculateNaturalSize:boolean Determines if the natural size should be 
+            automatically calculated or not. Defaults to undefined which is
+            equivalent to false.
+        naturalWidth:number The natural width of the image. Only set if
+            calculateNaturalWidth is true.
+        naturalHeight:number The natural height of the image. Only set if
+            calculateNaturalWidth is true.
+        useNaturalSize:boolean If true this image view will be sized to the
+            naturalWidth and naturalHeight and calculateNaturalSize will be
+            set to true.
+        imageLoadingError:boolean Gets set to true when an error occurs
+            loading the image. The image will be loaded whenever the
+            calculateNaturalSize attribute is set to true.
+*/
+myt.ImageSupport = new JS.Module('ImageSupport', {
+    // Class Methods ///////////////////////////////////////////////////////////
+    extend: {
+        /** Stores widths and heights of images by URL so we don't have to
+            reload them to get sizes. */
+        SIZE_CACHE:{},
+        
+        /** Tracks requests to get the width and height of an image. Used to
+            prevent multiple requests being made for the same image URL. */
+        OPEN_SIZE_QUERIES:{}
+    },
+    
+    
+    // Life Cycle //////////////////////////////////////////////////////////////
+    /** @overrides myt.Node */
+    initNode: function(parent, attrs) {
+        if (attrs.imageRepeat == null) attrs.imageRepeat = 'no-repeat';
+        if (attrs.imageAttachment == null) attrs.imageAttachment = 'scroll';
+        
+        this.callSuper(parent, attrs);
+    },
+    
+    
+    // Accessors ///////////////////////////////////////////////////////////////
+    setImageUrl: function(v) {
+        if (this.imageUrl !== v) {
+            this.imageUrl = v;
+            this.deStyle.backgroundImage = v ? 'url("' + v + '")' : 'none';
+            if (this.inited) {
+                this.fireEvent('imageUrl', v);
+                this.setNaturalWidth(undefined);
+                this.setNaturalHeight(undefined);
+                
+                // Collapse size if no url and we are using natural size
+                if (!v && this.useNaturalSize) {
+                    this.setWidth(0);
+                    this.setHeight(0);
+                }
+            }
+            this.__calculateNaturalSize();
+        }
+    },
+    
+    setImageLoadingError: function(v) {this.set('imageLoadingError', v, true);},
+    
+    setImageSize: function(v) {
+        if (this.imageSize !== v) {
+            this.imageSize = v;
+            this.deStyle.backgroundSize = v || 'auto';
+            if (this.inited) this.fireEvent('imageSize', v);
+        }
+    },
+    
+    setImageRepeat: function(v) {
+        if (this.imageRepeat !== v) {
+            this.deStyle.backgroundRepeat = this.imageRepeat = v;
+            if (this.inited) this.fireEvent('imageRepeat', v);
+        }
+    },
+    
+    setImagePosition: function(v) {
+        if (this.imagePosition !== v) {
+            this.deStyle.backgroundPosition = this.imagePosition = v;
+            if (this.inited) this.fireEvent('imagePosition', v);
+        }
+    },
+    
+    setImageAttachment: function(v) {
+        if (this.imageAttachment !== v) {
+            this.deStyle.backgroundAttachment = this.imageAttachment = v;
+            if (this.inited) this.fireEvent('imageAttachment', v);
+        }
+    },
+    
+    setCalculateNaturalSize: function(v) {
+        if (this.calculateNaturalSize !== v) {
+            this.calculateNaturalSize = v;
+            if (this.inited) this.fireEvent('calculateNaturalSize', v);
+            this.__calculateNaturalSize();
+        }
+    },
+    
+    setNaturalWidth: function(v) {
+        if (this.naturalWidth !== v) {
+            this.naturalWidth = v;
+            if (this.inited) this.fireEvent('naturalWidth', v);
+            if (this.useNaturalSize && v) this.setWidth(v);
+        }
+    },
+    
+    setNaturalHeight: function(v) {
+        if (this.naturalHeight !== v) {
+            this.naturalHeight = v;
+            if (this.inited) this.fireEvent('naturalHeight', v);
+            if (this.useNaturalSize && v) this.setHeight(v);
+        }
+    },
+    
+    setUseNaturalSize: function(v) {
+        if (this.useNaturalSize !== v) {
+            this.useNaturalSize = v;
+            if (this.inited) this.fireEvent('useNaturalSize', v);
+            
+            // Sync width and height
+            if (v) {
+                if (this.naturalWidth) this.setWidth(this.naturalWidth);
+                if (this.naturalHeight) this.setHeight(this.naturalHeight);
+            }
+            
+            // Turn on calculation of natural size if we're going to use
+            // natural size.
+            if (v && !this.calculateNaturalSize) this.setCalculateNaturalSize(true);
+        }
+    },
+    
+    
+    // Methods /////////////////////////////////////////////////////////////////
+    /** Loads an image to measure its size.
+        @private
+        @returns void */
+    __calculateNaturalSize: function() {
+        var imgUrl = this.imageUrl;
+        if (this.calculateNaturalSize && imgUrl) {
+            var sizeCache = myt.ImageSupport.SIZE_CACHE,
+                cachedSize = sizeCache[imgUrl];
+            if (cachedSize) {
+                // Cache hit
+                this.setNaturalWidth(cachedSize.width);
+                this.setNaturalHeight(cachedSize.height);
+            } else {
+                // Cache miss
+                var openQueryCache = myt.ImageSupport.OPEN_SIZE_QUERIES,
+                    openQuery = openQueryCache[imgUrl];
+                if (!openQuery) {
+                    // Lazy instantiate the open query array.
+                    openQueryCache[imgUrl] = openQuery = [];
+                    
+                    // Start a size query
+                    var img = new Image();
+                    img.onerror = function(err) {
+                        // Notify all ImageSupport instances that are waiting
+                        // for a natural size that an error has occurred.
+                        var openQueries = openQueryCache[imgUrl];
+                        if (openQueries) {
+                            var i = openQueries.length;
+                            while (i) openQueries[--i].setImageLoadingError(true);
+                            
+                            // Cleanup
+                            openQueries.length = 0;
+                            delete openQueryCache[imgUrl];
+                        }
+                    };
+                    img.onload = function() {
+                        var w = this.width, h = this.height;
+                        
+                        // Notify all ImageSupport instances that are waiting
+                        // for a natural size.
+                        var openQueries = openQueryCache[imgUrl];
+                        if (openQueries) {
+                            var i = openQueries.length, imageSupportInstance;
+                            while (i) {
+                                imageSupportInstance = openQueries[--i];
+                                imageSupportInstance.setNaturalWidth(w);
+                                imageSupportInstance.setNaturalHeight(h);
+                            }
+                            
+                            // Cleanup
+                            openQueries.length = 0;
+                            delete openQueryCache[imgUrl];
+                        }
+                        
+                        // Store size in cache.
+                        sizeCache[imgUrl] = {width:w, height:h};
+                    };
+                    img.src = imgUrl;
+                }
+                
+                openQuery.push(this);
+            }
+        }
+    }
+});
+
+
+/** A view that displays an image. By default useNaturalSize is set to true
+    so the Image will take on the size of the image data. */
+myt.Image = new JS.Class('Image', myt.View, {
+    include: [myt.ImageSupport],
+    
+    
+    // Life Cycle //////////////////////////////////////////////////////////////
+    /** @overrides myt.View */
+    initNode: function(parent, attrs) {
+        if (attrs.useNaturalSize == null) attrs.useNaturalSize = true;
+        
+        this.callSuper(parent, attrs);
+    }
+});
+
+
 /** A mixin that adds an icon and text to the inside of a button.
     
     Events:
@@ -15096,262 +14816,6 @@ myt.IconTextButtonContent = new JS.Module('IconTextButtonContent', {
 /** A simple button with support for an icon and text and tooltip support. */
 myt.SimpleIconTextButton = new JS.Class('SimpleIconTextButton', myt.SimpleButton, {
     include: [myt.IconTextButtonContent]
-});
-
-
-/** A base class for MouseableH3Panel and MouseableV3Panel.
-    Includes the myt.Button mixin.
-    
-    Events:
-        None
-    
-    Attributes:
-        imageRoot:string The path to the directory with the images.
-        extension:string The file extension for the images.
-        firstPrefix:string The filename for the top/left panel image.
-        secondPrefix:string The filename for the middle/center panel image.
-        thirdPrefix:string The filename for the bottom/right panel image.
-*/
-myt.BaseMouseablePanel = new JS.Module('BaseMouseablePanel', {
-    include: [myt.Button],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        this.extension = 'png';
-        
-        // @overrides behavior from HorizontalThreePanel and VerticalThreePanel
-        // mixins which will be used with this mixin in MouseableH3Panel
-        // and MouseableV3Panel respectively.
-        if (attrs.repeat == null) attrs.repeat = false;
-        
-        this.callSuper(parent, attrs);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setImageRoot: function(v) {
-        if (this.imageRoot !== v) {
-            this.imageRoot = v;
-            if (this.inited) updateUI();
-        }
-    },
-    
-    setExtension: function(v) {
-        if (this.extension !== v) {
-            this.extension = v;
-            if (this.inited) updateUI();
-        }
-    },
-    
-    setFirstPrefix: function(v) {
-        if (this.firstPrefix !== v) {
-            this.firstPrefix = v;
-            if (this.inited) updateUI();
-        }
-    },
-    
-    setSecondPrefix: function(v) {
-        if (this.secondPrefix !== v) {
-            this.secondPrefix = v;
-            if (this.inited) updateUI();
-        }
-    },
-    
-    setThirdPrefix: function(v) {
-        if (this.thirdPrefix !== v) {
-            this.thirdPrefix = v;
-            if (this.inited) updateUI();
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.Button */
-    drawDisabledState: function() {
-        this.setOpacity(myt.Button.DEFAULT_DISABLED_OPACITY);
-        this.__updateImageUrls('up');
-    },
-    
-    /** @overrides myt.Button */
-    drawHoverState: function() {
-        this.setOpacity(1);
-        this.__updateImageUrls('mo');
-    },
-    
-    /** @overrides myt.Button */
-    drawActiveState: function() {
-        this.setOpacity(1);
-        this.__updateImageUrls('dn');
-    },
-    
-    /** @overrides myt.Button */
-    drawReadyState: function() {
-        this.setOpacity(1);
-        this.__updateImageUrls('up');
-    },
-    
-    /** @private */
-    __updateImageUrls: function(mouseState) {
-        var suffix = '_' + mouseState + '.' + this.extension,
-            imageRoot = this.imageRoot;
-        
-        this.first.setImageUrl(imageRoot + this.firstPrefix + suffix);
-        this.second.setImageUrl(imageRoot + this.secondPrefix + suffix);
-        this.third.setImageUrl(imageRoot + this.thirdPrefix + suffix);
-    }
-});
-
-
-/** Must be mixed onto a View.
-    
-    A set of three images where the middle images resizes to fill the
-    available space. This component lays out the views horizontally.
-    
-    Events:
-        repeat:boolean
-    
-    Attributes:
-        firstImageUrl:string
-        secondImageUrl:string
-        thirdImageUrl:string
-        repeat:boolean Determines if the second image is stretched(false) or 
-            repeated(true). Defaults to true.
-*/
-myt.HorizontalThreePanel = new JS.Module('HorizontalThreePanel', {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        this.repeat = true;
-        
-        this.callSuper(parent, attrs);
-    },
-    
-    doBeforeAdoption: function() {
-        var self = this;
-        
-        self.callSuper();
-        
-        var m = myt;
-        new m.Image(self, {
-            name:'first', imageUrl:self.firstImageUrl, ignoreLayout:true
-        });
-        
-        var second = new m.Image(self, {
-            name:'second', layoutHint:1, imageUrl:self.secondImageUrl, 
-            ignoreLayout:true, useNaturalSize:false, calculateNaturalSize:true
-        });
-        self.attachTo(second, '__updateSize', 'naturalHeight');
-        self.attachTo(second, '__updateImageSize', 'width');
-        
-        new m.Image(self, {
-            name:'third', imageUrl:self.thirdImageUrl, ignoreLayout:true
-        });
-        
-        var ignoreMixin = [m.ThreePanel.IGNORE_FUNCTION_MIXIN];
-        new m.ResizeLayout(self, {name:'resizeLayout'}, ignoreMixin);
-        new m.SizeToChildren(self, {axis:'y'}, ignoreMixin);
-        
-        self.__updateRepeat();
-        self.__updateSize();
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setFirstImageUrl: function(v) {
-        if (this.firstImageUrl !== v) {
-            this.firstImageUrl = v;
-            if (this.inited) this.first.setImageUrl(v);
-        }
-    },
-    
-    setSecondImageUrl: function(v) {
-        if (this.secondImageUrl !== v) {
-            this.secondImageUrl = v;
-            if (this.inited) this.second.setImageUrl(v);
-        }
-    },
-    
-    setThirdImageUrl: function(v) {
-        if (this.thirdImageUrl !== v) {
-            this.thirdImageUrl = v;
-            if (this.inited) this.third.setImageUrl(v);
-        }
-    },
-    
-    setRepeat: function(v) {
-        if (this.repeat !== v) {
-            this.repeat = v;
-            if (this.inited) {
-                this.fireEvent('repeat', v);
-                this.__updateRepeat();
-            }
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
-    __updateSize: function(event) {
-        var v = this.second;
-        v.setHeight(v.naturalHeight);
-        this.__updateImageSize();
-    },
-    
-    /** @private */
-    __updateImageSize: function(event) {
-        var v = this.second;
-        v.setImageSize(this.repeat ? undefined : v.width + 'px ' + v.height + 'px');
-    },
-    
-    /** @private */
-    __updateRepeat: function() {
-        this.second.setImageRepeat(this.repeat ? 'repeat-x' : 'no-repeat');
-    }
-});
-
-
-/** A mixin that includes HorizontalThreePanel and BaseMouseablePanel. */
-myt.MouseableH3Panel = new JS.Module('MouseableH3Panel', {
-    include: [myt.BaseMouseablePanel, myt.HorizontalThreePanel],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        this.firstPrefix = 'lft';
-        this.secondPrefix = 'ctr';
-        this.thirdPrefix = 'rt';
-        
-        this.callSuper(parent, attrs);
-    }
-});
-
-
-/** A button that uses an myt.MouseableH3Panel. */
-myt.PanelButton = new JS.Class('PanelButton', myt.View, {
-    include: [myt.MouseableH3Panel],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        this.imageRoot = myt.IMAGE_ROOT + 'component/panelbutton/rsrc/';
-        
-        this.callSuper(parent, attrs);
-    }
-});
-
-
-/** An myt.PanelButton with contents that consist of an icon and text. */
-myt.IconTextPanelButton = new JS.Class('IconTextPanelButton', myt.PanelButton, {
-    include: [myt.IconTextButtonContent],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    doAfterAdoption: function() {
-        this.syncTo(this.first, 'setInset', 'width');
-        this.syncTo(this.third, 'setOutset', 'width');
-        
-        this.callSuper();
-    }
 });
 
 
@@ -17290,45 +16754,6 @@ myt.TextRadio = new JS.Class('TextRadio', myt.Radio, {
 });
 
 
-/** Draws a tab slider into an myt.Canvas.
-    
-    Events:
-        None
-    
-    Attributes:
-        None
-*/
-myt.TabSliderDrawingMethod = new JS.Class('TabSliderDrawingMethod', myt.DrawingMethod, {
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.DrawingMethod */
-    draw: function(canvas, config) {
-        var b = config.bounds, x = b.x, y = b.y, w = b.w, h = b.h;
-        
-        canvas.clear();
-        
-        if (w == 0 || h == 0) return;
-        
-        var inset = config.edgeSize, twiceInset = 2 * inset;
-        
-        // Border
-        if (inset > 0) {
-            canvas.beginPath();
-            canvas.rect(x, y, w, h);
-            canvas.closePath();
-            canvas.setFillStyle(config.edgeColor);
-            canvas.fill();
-        }
-        
-        // Fill
-        canvas.beginPath();
-        canvas.rect(x + inset, y + inset, w - twiceInset, h - twiceInset);
-        canvas.closePath();
-        canvas.setFillStyle(config.fillColor);
-        canvas.fill();
-    }
-});
-
-
 /** Makes an object selectable.
     
     Events:
@@ -17779,11 +17204,7 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
         tabContainer:myt.TabSliderContainer The tab slider container that 
             manages this tab.
         buttonClass:JS.Class The class to use for the button portion of the
-            tab slider. Defaults to myt.DrawButton.
-        drawingMethodClassname:string The name of the class to draw the button
-            with.
-        edgeColor:color The color of the edge of the tab slider button.
-        edgeSize:number The size of the edge of the tab slider button.
+            tab slider. Defaults to myt.SimpleButton.
         fillColorSelected:color The color of the button when selected.
         fillColorHover:color The color of the button when moused over.
         fillColorActive:color The color of the button while active.
@@ -17803,22 +17224,24 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
     
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
-        DEFAULT_BUTTON_HEIGHT: 30,
+        DEFAULT_BUTTON_HEIGHT:30,
         /** The minimum height of the container when expanded. */
         DEFAULT_MINIMUM_CONTAINER_HEIGHT:100,
-        DEFAULT_FILL_COLOR_SELECTED: '#666666',
-        DEFAULT_FILL_COLOR_HOVER: '#eeeeee',
-        DEFAULT_FILL_COLOR_ACTIVE: '#cccccc',
-        DEFAULT_FILL_COLOR_READY: '#ffffff',
-        DEFAULT_EDGE_COLOR: '#333333',
-        DEFAULT_EDGE_SIZE: 0.5,
-        DEFAULT_ANIMATION_MILLIS: 500
+        DEFAULT_FILL_COLOR_SELECTED:'#666666',
+        DEFAULT_FILL_COLOR_HOVER:'#eeeeee',
+        DEFAULT_FILL_COLOR_ACTIVE:'#cccccc',
+        DEFAULT_FILL_COLOR_READY:'#ffffff',
+        DEFAULT_ANIMATION_MILLIS:500
     },
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Checkbox */
     initNode: function(parent, attrs) {
+        var self = this,
+            TS = myt.TabSlider,
+            initiallySelected;
+        
         attrs.defaultPlacement = 'wrapper.container';
         attrs.percentOfParentWidth = 100;
         attrs.expansionState = 'collapsed';
@@ -17827,13 +17250,9 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
         if (attrs.tabContainer == null) attrs.tabContainer = parent;
         
         if (attrs.selected == null) attrs.selected = false;
-        if (attrs.buttonClass == null) attrs.buttonClass = myt.DrawButton;
-        if (attrs.drawingMethodClassname == null) attrs.drawingMethodClassname = 'myt.TabSliderDrawingMethod';
+        if (attrs.buttonClass == null) attrs.buttonClass = myt.SimpleButton;
         if (attrs.zIndex == null) attrs.zIndex = 0;
         
-        var TS = myt.TabSlider;
-        if (attrs.edgeColor == null) attrs.edgeColor = TS.DEFAULT_EDGE_COLOR;
-        if (attrs.edgeSize == null) attrs.edgeSize = TS.DEFAULT_EDGE_SIZE;
         if (attrs.buttonHeight == null) attrs.buttonHeight = TS.DEFAULT_BUTTON_HEIGHT;
         if (attrs.fillColorSelected == null) attrs.fillColorSelected = TS.DEFAULT_FILL_COLOR_SELECTED;
         if (attrs.fillColorHover == null) attrs.fillColorHover = TS.DEFAULT_FILL_COLOR_HOVER;
@@ -17843,42 +17262,33 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
         
         // Selection must be done via the select method on the tabContainer
         if (attrs.selected) {
-            var initiallySelected = true;
+            initiallySelected = true;
             delete attrs.selected;
         }
         
-        this.callSuper(parent, attrs);
+        self.callSuper(parent, attrs);
         
-        if (initiallySelected) this.tabContainer.select(this);
-        if (attrs.disabled === true) this.setDisabled(true);
+        if (initiallySelected) self.tabContainer.select(self);
+        if (attrs.disabled === true) self.setDisabled(true);
         
-        this.setHeight(this.getCollapsedHeight());
+        self.setHeight(self.getCollapsedHeight());
     },
     
     doAfterAdoption: function() {
         var self = this, 
-            M = myt,
-            btnClass = this.buttonClass;
-        new btnClass(this, {
+            M = myt
+            V = M.View;
+        new self.buttonClass(self, {
             name:'button', ignorePlacement:true, zIndex:1,
-            height:this.buttonHeight,
+            height:self.buttonHeight,
             focusEmbellishment:true,
-            drawingMethodClassname:this.drawingMethodClassname,
-            groupId:this.parent.parent.groupId,
+            groupId:self.parent.parent.groupId,
             percentOfParentWidth:100,
-            fillColorChecked:this.fillColorChecked,
-            fillColorHover:this.fillColorHover,
-            fillColorActive:this.fillColorActive,
-            fillColorReady:this.fillColorReady,
-            fillBorderColor:this.fillBorderColor,
-            edgeSize:this.edgeSize
+            hoverColor:self.fillColorHover,
+            activeColor:self.fillColorActive,
+            readyColor:self.fillColorReady
         }, [M.SizeToParent, {
-            setFocused: function(v) {
-                this.callSuper(v);
-                if (this.inited) this.redraw();
-            },
-            
-            /** @overrides myt.DrawButton */
+            /** @overrides myt.Button */
             doActivated: function() {
                 var tc = self.tabContainer;
                 if (self.isSelected() && tc.maxSelected !== 1) {
@@ -17888,53 +17298,17 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
                 }
             },
             
-            /** @overrides myt.DrawButton */
-            getDrawConfig: function(state) {
-                var config = this.callSuper(state);
-                
-                config.selected = self.selected;
-                config.edgeColor = self.edgeColor;
-                config.edgeSize = self.edgeSize;
-                
-                if (self.selected && self.tabContainer.maxSelected !== -1) {
-                    config.fillColor = self.fillColorSelected;
-                } else {
-                    switch (state) {
-                        case 'hover':
-                            config.fillColor = self.fillColorHover;
-                            break;
-                        case 'active':
-                            config.fillColor = self.fillColorActive;
-                            break;
-                        case 'disabled':
-                        case 'ready':
-                            config.fillColor = this.focused ? self.fillColorHover : self.fillColorReady;
-                            break;
-                        default:
-                    }
-                }
-                
-                return config;
-            },
-            
-            /** @overrides myt.DrawButton */
-            getDrawBounds: function() {
-                var bounds = this.drawBounds;
-                bounds.w = this.width;
-                bounds.h = this.height;
-                return bounds;
-            },
-            
-            /** @overrides myt.DrawButton */
-            redraw: function(state) {
-                this.callSuper(state);
-                self.notifyButtonRedraw(state);
+            /** @overrides myt.Button. */
+            updateUI: function() {
+                this.callSuper();
+                if (self.selected && self.tabContainer.maxSelected !== -1) this.setBgColor(self.fillColorSelected);
+                self.notifyButtonRedraw();
             }
         }]);
         
-        var wrapper = new M.View(this, {
+        var wrapper = new V(self, {
             name:'wrapper', ignorePlacement:true,
-            y:this.buttonHeight, height:0,
+            y:self.buttonHeight, height:0,
             visible:false, maskFocus:true,
             overflow:'hidden', percentOfParentWidth:100
         }, [M.SizeToParent, {
@@ -17947,12 +17321,12 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
             }
         }]);
         
-        var container = new M.View(wrapper, {name:'container'});
+        var container = new V(wrapper, {name:'container'});
         new M.SizeToChildren(container, {axis:'y'});
         
-        this.applyConstraint('__updateHeight', [wrapper, 'y', wrapper, 'height']);
+        self.applyConstraint('__updateHeight', [wrapper, 'y', wrapper, 'height']);
         
-        this.callSuper();
+        self.callSuper();
     },
     
     
@@ -17960,7 +17334,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
     /** @overrides myt.Selectable */
     setSelected: function(v) {
         this.callSuper(v);
-        if (this.button) this.button.redraw();
+        if (this.button) this.button.updateUI();
     },
     
     setTabId: function(v) {this.tabId = v;},
@@ -17968,9 +17342,6 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
     
     setMinContainerHeight: function(v) {this.minContainerHeight = v;},
     setButtonClass: function(v) {this.buttonClass = v;},
-    setDrawingMethodClassname: function(v) {this.drawingMethodClassname = v;},
-    setEdgeColor: function(v) {this.edgeColor = v;},
-    setEdgeSize: function(v) {this.edgeSize = v;},
     setFillColorSelected: function(v) {this.fillColorSelected = v;},
     setFillColorHover: function(v) {this.fillColorHover = v;},
     setFillColorActive: function(v) {this.fillColorActive = v;},
@@ -18018,9 +17389,8 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
     
     /** Called whenever the button is redrawn. Gives subclasses/instances
         a chance to do additional things when the button is redrawn.
-        @param state:string The state the button is in.
         @returns void */
-    notifyButtonRedraw: function(state) {},
+    notifyButtonRedraw: function() {},
     
     /** @private */
     __updateHeight: function(event) {
@@ -18030,21 +17400,21 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
     /** Should only be called from the TabSliderContainer.
         @private */
     expand: function(targetHeight) {
-        this.setExpansionState('expanding');
+        var self = this,
+            wrapper = self.wrapper,
+            to = targetHeight - self.getCollapsedHeight();
         
-        var wrapper = this.wrapper,
-            to = targetHeight - this.getCollapsedHeight();
+        self.setExpansionState('expanding');
         
         wrapper.stopActiveAnimators();
         
         if (wrapper.height !== to) {
-            var self = this;
             wrapper.animate({
                 attribute:'height', to:to, 
                 duration:myt.TabSlider.DEFAULT_ANIMATION_MILLIS
             }).next(function(success) {self.setExpansionState('expanded');});
         } else {
-            this.setExpansionState('expanded');
+            self.setExpansionState('expanded');
         }
     },
     
@@ -18141,7 +17511,7 @@ myt.TextTabSlider = new JS.Class('TextTabSlider', myt.TabSlider, {
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.TabSlider */
-    notifyButtonRedraw: function(state) {
+    notifyButtonRedraw: function() {
         var label = this.button.label;
         if (label) label.setTextColor(this.__getTextColor());
     },
@@ -21651,6 +21021,147 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
         this.setVisible(false);
         
         if (!ignoreRestoreFocus && this.restoreFocus && this.prevFocus) this.prevFocus.focus();
+    }
+});
+
+
+/** A special "layout" that resizes the parent to fit the children rather than
+    laying out the children.
+    
+    Events:
+        axis:string
+        paddingX:number
+        paddingY:number
+    
+    Attributes:
+        axis:string The axis along which to resize this view to fit its
+            children. Supported values are 'x', 'y' and 'both'. Defaults to 'x'.
+        paddingX:number Additional space added on the child extent along the
+            x-axis. Defaults to 0.
+        paddingY:number Additional space added on the child extent along the
+            y-axis. Defaults to 0.
+*/
+myt.SizeToChildren = new JS.Class('SizeToChildren', myt.Layout, {
+    // Life Cycle //////////////////////////////////////////////////////////////
+    /** @overrides myt.Node */
+    initNode: function(parent, attrs) {
+        this.axis = 'x';
+        this.paddingX = this.paddingY = 0;
+        
+        this.callSuper(parent, attrs);
+    },
+    
+    
+    // Acessors ////////////////////////////////////////////////////////////////
+    setAxis: function(v) {
+        if (this.axis !== v) {
+            if (this.inited) {
+                this.stopMonitoringAllSubviews();
+                this.axis = v;
+                this.startMonitoringAllSubviews();
+                this.fireEvent('axis', v);
+                this.update();
+            } else {
+                this.axis = v;
+            }
+        }
+    },
+    
+    setPaddingX: function(v) {
+        if (this.paddingX !== v) {
+            this.paddingX = v;
+            if (this.inited) {
+                this.fireEvent('paddingX', v);
+                this.update();
+            }
+        }
+    },
+    
+    setPaddingY: function(v) {
+        if (this.paddingY !== v) {
+            this.paddingY = v;
+            if (this.inited) {
+                this.fireEvent('paddingY', v);
+                this.update();
+            }
+        }
+    },
+    
+    
+    // Methods /////////////////////////////////////////////////////////////////
+    /** @overrides myt.ConstantLayout */
+    update: function() {
+        if (this.canUpdate()) {
+            // Prevent inadvertent loops
+            this.incrementLockedCounter();
+            
+            var p = this.parent;
+            
+            if (!p.isBeingDestroyed) {
+                var svs = this.subviews, len = svs.length, i, sv,
+                    max, bound,
+                    axis = this.axis,
+                    maxFunc = Math.max;
+                if (axis !== 'y') {
+                    i = len;
+                    max = 0;
+                    while(i) {
+                        sv = svs[--i];
+                        if (sv.visible) {
+                            bound = sv.boundsWidth;
+                            bound = bound > 0 ? bound : 0;
+                            max = maxFunc(max, sv.x + bound);
+                        }
+                    }
+                    p.setWidth(max + this.paddingX);
+                }
+                if (axis !== 'x') {
+                    i = len;
+                    max = 0;
+                    while(i) {
+                        sv = svs[--i];
+                        if (sv.visible) {
+                            bound = sv.boundsHeight;
+                            bound = bound > 0 ? bound : 0;
+                            max = maxFunc(max, sv.y + bound);
+                        }
+                    }
+                    p.setHeight(max + this.paddingY);
+                }
+            }
+            
+            this.decrementLockedCounter();
+        }
+    },
+    
+    /** @overrides myt.Layout
+        Provides a default implementation that calls update when the
+        visibility of a subview changes. */
+    startMonitoringSubview: function(sv) {
+        this.__updateMonitoringSubview(sv, this.attachTo);
+    },
+    
+    /** @overrides myt.Layout
+        Provides a default implementation that calls update when the
+        visibility of a subview changes. */
+    stopMonitoringSubview: function(sv) {
+        this.__updateMonitoringSubview(sv, this.detachFrom);
+    },
+    
+    /** Wrapped by startMonitoringSubview and stopMonitoringSubview.
+        @private */
+    __updateMonitoringSubview: function(sv, func) {
+        var axis = this.axis;
+        func = func.bind(this);
+        if (axis !== 'y') {
+            func(sv, 'update', 'x');
+            func(sv, 'update', 'boundsWidth');
+        }
+        if (axis !== 'x') {
+            func(sv, 'update', 'y');
+            func(sv, 'update', 'boundsHeight');
+        }
+        func(sv, 'update', 'visible');
     }
 });
 
@@ -28866,9 +28377,7 @@ myt.PanelStackTransition = new JS.Class('PanelStackTransition', myt.Node, {
         @returns a promise object that has a next function. */
     to: function(panel) {
         // Default implementation keeps the promise right away.
-        var promise = this._makePromise(panel);
-        promise.keep();
-        return promise;
+        return myt.promise(panel).keep();
     },
     
     /** Called when transitioning from the provided panel.
@@ -28876,35 +28385,7 @@ myt.PanelStackTransition = new JS.Class('PanelStackTransition', myt.Node, {
         @returns a promise object that has a next function. */
     from: function(panel) {
         // Default implementation keeps the promise right away.
-        var promise = this._makePromise(panel);
-        promise.keep();
-        return promise;
-    },
-    
-    /** @private */
-    _makePromise: function(panel) {
-        var promise = {
-            next:function(nextFunc) {
-                if (promise.kept) {
-                    // Execute next immediately since the promise has
-                    // already been kept
-                    nextFunc(panel);
-                } else {
-                    // Store the next function so it can be called later once
-                    // the promise is kept
-                    promise._nextFunc = nextFunc;
-                }
-            },
-            
-            keep:function() {
-                promise.kept = true;
-                
-                // If a next function exists then execute it since now the
-                // promise has been kept.
-                if (promise._nextFunc) promise._nextFunc(panel);
-            }
-        };
-        return promise;
+        return myt.promise(panel).keep();
     }
 });
 
@@ -28926,7 +28407,7 @@ myt.PanelStackFadeTransition = new JS.Class('PanelStackFadeTransition', myt.Pane
     
     // Methods /////////////////////////////////////////////////////////////////
     to: function(panel) {
-        var promise = this._makePromise(panel);
+        var promise = myt.promise(panel);
         
         panel.stopActiveAnimators('opacity');
         panel.setVisible(true);
@@ -28939,7 +28420,7 @@ myt.PanelStackFadeTransition = new JS.Class('PanelStackFadeTransition', myt.Pane
     },
     
     from: function(panel) {
-        var promise = this._makePromise(panel);
+        var promise = myt.promise(panel);
         
         panel.stopActiveAnimators('opacity');
         panel.animate({attribute:'opacity', to:0, duration:this.duration}).next(function(success) {
@@ -28971,9 +28452,8 @@ myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.Pa
     
     // Methods /////////////////////////////////////////////////////////////////
     to: function(panel) {
-        var promise = this._makePromise(panel);
-        
-        var panelStack = panel.getPanelStack(),
+        var promise = myt.promise(panel),
+            panelStack = panel.getPanelStack(),
             toValue, axis;
         switch (this.direction) {
             case 'left':
@@ -29012,9 +28492,8 @@ myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.Pa
     },
     
     from: function(panel) {
-        var promise = this._makePromise(panel);
-        
-        var panelStack = panel.getPanelStack(),
+        var promise = myt.promise(panel),
+            panelStack = panel.getPanelStack(),
             toValue, axis;
         switch (this.direction) {
             case 'left':
@@ -29142,7 +28621,7 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
         var transition = this.transition;
         if (transition) {
             var self = this;
-            transition.to(panel).next(function() {self.doAfterTransitionTo(panel)});
+            transition.to(panel).next(function(panel) {self.doAfterTransitionTo(panel)});
         } else {
             panel.makeHighestZIndex();
             panel.setVisible(true);
@@ -29165,7 +28644,7 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
         var transition = this.transition;
         if (transition) {
             var self = this;
-            transition.from(panel).next(function() {self.doAfterTransitionFrom(panel)});
+            transition.from(panel).next(function(panel) {self.doAfterTransitionFrom(panel)});
         } else {
             panel.setVisible(false);
             this.doAfterTransitionFrom(panel);

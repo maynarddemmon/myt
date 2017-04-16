@@ -486,5 +486,35 @@ myt = {
             }
         }
         return result
+    },
+    
+    promise: function() {
+        var promise = {
+            args:arguments,
+            
+            next:function(nextFunc) {
+                if (promise.kept) {
+                    // Execute next immediately since the promise has
+                    // already been kept
+                    nextFunc.apply(null, promise.args);
+                } else {
+                    // Store the next function so it can be called later once
+                    // the promise is kept
+                    promise._nextFunc = nextFunc;
+                }
+                return promise;
+            },
+            
+            keep:function() {
+                promise.kept = true;
+                
+                // If a next function exists then execute it since now the
+                // promise has been kept.
+                if (promise._nextFunc) promise._nextFunc.apply(null, promise.args);
+                
+                return promise;
+            }
+        };
+        return promise;
     }
 };

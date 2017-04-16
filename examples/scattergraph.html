@@ -7,9 +7,23 @@
 <script src="../dist/myt.min.js"></script>
 </head><body>
 <script>
+    var BtnClass = new JS.Class('BtnClass2', myt.SimpleIconTextButton, {
+        initNode: function(parent, attrs) {
+            attrs.activeColor = '#666666';
+            attrs.hoverColor = '#cccccc';
+            attrs.readyColor = '#999999';
+            attrs.textColor = '#ffffff';
+            attrs.height = 19;
+            attrs.width = 100;
+            attrs.inset = attrs.outset = 10;
+            
+            this.callSuper(parent, attrs);
+        }
+    });
+    
     var rootView = new myt.View(null, {bgColor:'#eeeeee'}, [myt.SizeToWindow]);
     
-    new myt.IconTextPanelButton(rootView, {x:620, y:10, width:100, text:'zoom in'}, [{
+    new BtnClass(rootView, {x:620, y:10, text:'zoom in'}, [{
         doActivated: function() {
             //graph.setScaleDataX(graph.scaleDataX + 0.025);
             //graph.setScaleDataY(graph.scaleDataY + 0.025);
@@ -40,7 +54,7 @@
         }
     }]);
     
-    new myt.IconTextPanelButton(rootView, {x:620, y:30, width:100, text:'zoom out'}, [{
+    new BtnClass(rootView, {x:620, y:30, text:'zoom out'}, [{
         doActivated: function() {
             //graph.setScaleDataX(graph.scaleDataX - 0.025);
             //graph.setScaleDataY(graph.scaleDataY - 0.025);
@@ -71,13 +85,13 @@
         }
     }]);
     
-    new myt.IconTextPanelButton(rootView, {x:620, y:50, width:100, text:'clear all'}, [{
+    new BtnClass(rootView, {x:620, y:50, text:'clear all'}, [{
         doActivated: function() {
             graph.removeAllDataPoints();
         }
     }]);
     
-    new myt.IconTextPanelButton(rootView, {x:620, y:70, width:100, text:'add pont'}, [{
+    new BtnClass(rootView, {x:620, y:70, text:'add pont'}, [{
         doActivated: function() {
             graph.addDataPoint(new myt.ScatterGraphPoint('id_' + (++i), 
                 myt.getRandomInt(xMin, xMax, func), 

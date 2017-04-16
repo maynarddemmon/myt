@@ -17,9 +17,8 @@ myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.Pa
     
     // Methods /////////////////////////////////////////////////////////////////
     to: function(panel) {
-        var promise = this._makePromise(panel);
-        
-        var panelStack = panel.getPanelStack(),
+        var promise = myt.promise(panel),
+            panelStack = panel.getPanelStack(),
             toValue, axis;
         switch (this.direction) {
             case 'left':
@@ -58,9 +57,8 @@ myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.Pa
     },
     
     from: function(panel) {
-        var promise = this._makePromise(panel);
-        
-        var panelStack = panel.getPanelStack(),
+        var promise = myt.promise(panel),
+            panelStack = panel.getPanelStack(),
             toValue, axis;
         switch (this.direction) {
             case 'left':

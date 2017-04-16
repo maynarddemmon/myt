@@ -15,7 +15,7 @@ myt.PanelStackFadeTransition = new JS.Class('PanelStackFadeTransition', myt.Pane
     
     // Methods /////////////////////////////////////////////////////////////////
     to: function(panel) {
-        var promise = this._makePromise(panel);
+        var promise = myt.promise(panel);
         
         panel.stopActiveAnimators('opacity');
         panel.setVisible(true);
@@ -28,7 +28,7 @@ myt.PanelStackFadeTransition = new JS.Class('PanelStackFadeTransition', myt.Pane
     },
     
     from: function(panel) {
-        var promise = this._makePromise(panel);
+        var promise = myt.promise(panel);
         
         panel.stopActiveAnimators('opacity');
         panel.animate({attribute:'opacity', to:0, duration:this.duration}).next(function(success) {

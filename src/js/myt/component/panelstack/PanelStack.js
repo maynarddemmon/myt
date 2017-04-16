@@ -88,7 +88,7 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
         var transition = this.transition;
         if (transition) {
             var self = this;
-            transition.to(panel).next(function() {self.doAfterTransitionTo(panel)});
+            transition.to(panel).next(function(panel) {self.doAfterTransitionTo(panel)});
         } else {
             panel.makeHighestZIndex();
             panel.setVisible(true);
@@ -111,7 +111,7 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
         var transition = this.transition;
         if (transition) {
             var self = this;
-            transition.from(panel).next(function() {self.doAfterTransitionFrom(panel)});
+            transition.from(panel).next(function(panel) {self.doAfterTransitionFrom(panel)});
         } else {
             panel.setVisible(false);
             this.doAfterTransitionFrom(panel);

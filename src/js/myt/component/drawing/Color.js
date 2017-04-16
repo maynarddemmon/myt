@@ -16,7 +16,7 @@ myt.Color = new JS.Class('Color', {
             @param value:number/string The number or string to convert.
             @returns string: A two character hex string such as: '0c' or 'c9'. */
         toHex: function(value) {
-            value = Math.round(Number(value)).toString(16);
+            value = this.cleanChannelValue(value).toString(16);
             return value.length === 1 ? '0' + value : value;
         },
         
@@ -29,7 +29,7 @@ myt.Color = new JS.Class('Color', {
                 will be prepended to the return value.
             @returns string: Something like: '#ff9c02' or 'ff9c02' */
         rgbToHex: function(red, green, blue, prependHash) {
-            var toHex = this.toHex;
+            var toHex = this.toHex.bind(this);
             return [prependHash ? '#' : '', toHex(red), toHex(green), toHex(blue)].join('');
         },
         
@@ -37,11 +37,7 @@ myt.Color = new JS.Class('Color', {
             @param value:number the channel value to clean up.
             @returns number */
         cleanChannelValue: function(value) {
-            value = Math.round(value);
-            
-            if (value > 255) return 255;
-            if (value < 0) return 0;
-            return value;
+            return Math.min(255, Math.max(0, Math.round(value)));
         },
         
         /** Gets the red channel from a "color" number.
@@ -192,10 +188,7 @@ myt.Color = new JS.Class('Color', {
         @param diff:object the color diff to apply.
         @returns this myt.Color to facilitate method chaining. */
     applyDiff: function(diff) {
-        this.setRed(this.red + diff.red);
-        this.setGreen(this.green + diff.green);
-        this.setBlue(this.blue + diff.blue);
-        return this;
+        return this.add(diff);
     },
     
     /** Adds the provided color to this color.
@@ -248,8 +241,10 @@ myt.Color = new JS.Class('Color', {
         @returns boolean True if this color has the same color values as
             this provided color, false otherwise. */
     equals: function(obj) {
-        if (obj === this) return true;
-        if (obj && obj.isA && obj.isA(myt.Color) && obj.red === this.red && obj.green === this.green && obj.blue === this.blue) return true;
-        return false;
+        return obj === this || (obj && obj.isA && 
+            obj.isA(myt.Color) && 
+            obj.red === this.red && 
+            obj.green === this.green && 
+            obj.blue === this.blue);
     }
 });

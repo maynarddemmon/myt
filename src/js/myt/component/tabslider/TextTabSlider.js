@@ -47,7 +47,7 @@ myt.TextTabSlider = new JS.Class('TextTabSlider', myt.TabSlider, {
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.TabSlider */
-    notifyButtonRedraw: function(state) {
+    notifyButtonRedraw: function() {
         var label = this.button.label;
         if (label) label.setTextColor(this.__getTextColor());
     },

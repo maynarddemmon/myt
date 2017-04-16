@@ -9,11 +9,7 @@
         tabContainer:myt.TabSliderContainer The tab slider container that 
             manages this tab.
         buttonClass:JS.Class The class to use for the button portion of the
-            tab slider. Defaults to myt.DrawButton.
-        drawingMethodClassname:string The name of the class to draw the button
-            with.
-        edgeColor:color The color of the edge of the tab slider button.
-        edgeSize:number The size of the edge of the tab slider button.
+            tab slider. Defaults to myt.SimpleButton.
         fillColorSelected:color The color of the button when selected.
         fillColorHover:color The color of the button when moused over.
         fillColorActive:color The color of the button while active.
@@ -33,22 +29,24 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
     
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
-        DEFAULT_BUTTON_HEIGHT: 30,
+        DEFAULT_BUTTON_HEIGHT:30,
         /** The minimum height of the container when expanded. */
         DEFAULT_MINIMUM_CONTAINER_HEIGHT:100,
-        DEFAULT_FILL_COLOR_SELECTED: '#666666',
-        DEFAULT_FILL_COLOR_HOVER: '#eeeeee',
-        DEFAULT_FILL_COLOR_ACTIVE: '#cccccc',
-        DEFAULT_FILL_COLOR_READY: '#ffffff',
-        DEFAULT_EDGE_COLOR: '#333333',
-        DEFAULT_EDGE_SIZE: 0.5,
-        DEFAULT_ANIMATION_MILLIS: 500
+        DEFAULT_FILL_COLOR_SELECTED:'#666666',
+        DEFAULT_FILL_COLOR_HOVER:'#eeeeee',
+        DEFAULT_FILL_COLOR_ACTIVE:'#cccccc',
+        DEFAULT_FILL_COLOR_READY:'#ffffff',
+        DEFAULT_ANIMATION_MILLIS:500
     },
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Checkbox */
     initNode: function(parent, attrs) {
+        var self = this,
+            TS = myt.TabSlider,
+            initiallySelected;
+        
         attrs.defaultPlacement = 'wrapper.container';
         attrs.percentOfParentWidth = 100;
         attrs.expansionState = 'collapsed';
@@ -57,13 +55,9 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
         if (attrs.tabContainer == null) attrs.tabContainer = parent;
         
         if (attrs.selected == null) attrs.selected = false;
-        if (attrs.buttonClass == null) attrs.buttonClass = myt.DrawButton;
-        if (attrs.drawingMethodClassname == null) attrs.drawingMethodClassname = 'myt.TabSliderDrawingMethod';
+        if (attrs.buttonClass == null) attrs.buttonClass = myt.SimpleButton;
         if (attrs.zIndex == null) attrs.zIndex = 0;
         
-        var TS = myt.TabSlider;
-        if (attrs.edgeColor == null) attrs.edgeColor = TS.DEFAULT_EDGE_COLOR;
-        if (attrs.edgeSize == null) attrs.edgeSize = TS.DEFAULT_EDGE_SIZE;
         if (attrs.buttonHeight == null) attrs.buttonHeight = TS.DEFAULT_BUTTON_HEIGHT;
         if (attrs.fillColorSelected == null) attrs.fillColorSelected = TS.DEFAULT_FILL_COLOR_SELECTED;
         if (attrs.fillColorHover == null) attrs.fillColorHover = TS.DEFAULT_FILL_COLOR_HOVER;
@@ -73,42 +67,33 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
         
         // Selection must be done via the select method on the tabContainer
         if (attrs.selected) {
-            var initiallySelected = true;
+            initiallySelected = true;
             delete attrs.selected;
         }
         
-        this.callSuper(parent, attrs);
+        self.callSuper(parent, attrs);
         
-        if (initiallySelected) this.tabContainer.select(this);
-        if (attrs.disabled === true) this.setDisabled(true);
+        if (initiallySelected) self.tabContainer.select(self);
+        if (attrs.disabled === true) self.setDisabled(true);
         
-        this.setHeight(this.getCollapsedHeight());
+        self.setHeight(self.getCollapsedHeight());
     },
     
     doAfterAdoption: function() {
         var self = this, 
-            M = myt,
-            btnClass = this.buttonClass;
-        new btnClass(this, {
+            M = myt
+            V = M.View;
+        new self.buttonClass(self, {
             name:'button', ignorePlacement:true, zIndex:1,
-            height:this.buttonHeight,
+            height:self.buttonHeight,
             focusEmbellishment:true,
-            drawingMethodClassname:this.drawingMethodClassname,
-            groupId:this.parent.parent.groupId,
+            groupId:self.parent.parent.groupId,
             percentOfParentWidth:100,
-            fillColorChecked:this.fillColorChecked,
-            fillColorHover:this.fillColorHover,
-            fillColorActive:this.fillColorActive,
-            fillColorReady:this.fillColorReady,
-            fillBorderColor:this.fillBorderColor,
-            edgeSize:this.edgeSize
+            hoverColor:self.fillColorHover,
+            activeColor:self.fillColorActive,
+            readyColor:self.fillColorReady
         }, [M.SizeToParent, {
-            setFocused: function(v) {
-                this.callSuper(v);
-                if (this.inited) this.redraw();
-            },
-            
-            /** @overrides myt.DrawButton */
+            /** @overrides myt.Button */
             doActivated: function() {
                 var tc = self.tabContainer;
                 if (self.isSelected() && tc.maxSelected !== 1) {
@@ -118,53 +103,17 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
                 }
             },
             
-            /** @overrides myt.DrawButton */
-            getDrawConfig: function(state) {
-                var config = this.callSuper(state);
-                
-                config.selected = self.selected;
-                config.edgeColor = self.edgeColor;
-                config.edgeSize = self.edgeSize;
-                
-                if (self.selected && self.tabContainer.maxSelected !== -1) {
-                    config.fillColor = self.fillColorSelected;
-                } else {
-                    switch (state) {
-                        case 'hover':
-                            config.fillColor = self.fillColorHover;
-                            break;
-                        case 'active':
-                            config.fillColor = self.fillColorActive;
-                            break;
-                        case 'disabled':
-                        case 'ready':
-                            config.fillColor = this.focused ? self.fillColorHover : self.fillColorReady;
-                            break;
-                        default:
-                    }
-                }
-                
-                return config;
-            },
-            
-            /** @overrides myt.DrawButton */
-            getDrawBounds: function() {
-                var bounds = this.drawBounds;
-                bounds.w = this.width;
-                bounds.h = this.height;
-                return bounds;
-            },
-            
-            /** @overrides myt.DrawButton */
-            redraw: function(state) {
-                this.callSuper(state);
-                self.notifyButtonRedraw(state);
+            /** @overrides myt.Button. */
+            updateUI: function() {
+                this.callSuper();
+                if (self.selected && self.tabContainer.maxSelected !== -1) this.setBgColor(self.fillColorSelected);
+                self.notifyButtonRedraw();
             }
         }]);
         
-        var wrapper = new M.View(this, {
+        var wrapper = new V(self, {
             name:'wrapper', ignorePlacement:true,
-            y:this.buttonHeight, height:0,
+            y:self.buttonHeight, height:0,
             visible:false, maskFocus:true,
             overflow:'hidden', percentOfParentWidth:100
         }, [M.SizeToParent, {
@@ -177,12 +126,12 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
             }
         }]);
         
-        var container = new M.View(wrapper, {name:'container'});
+        var container = new V(wrapper, {name:'container'});
         new M.SizeToChildren(container, {axis:'y'});
         
-        this.applyConstraint('__updateHeight', [wrapper, 'y', wrapper, 'height']);
+        self.applyConstraint('__updateHeight', [wrapper, 'y', wrapper, 'height']);
         
-        this.callSuper();
+        self.callSuper();
     },
     
     
@@ -190,7 +139,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
     /** @overrides myt.Selectable */
     setSelected: function(v) {
         this.callSuper(v);
-        if (this.button) this.button.redraw();
+        if (this.button) this.button.updateUI();
     },
     
     setTabId: function(v) {this.tabId = v;},
@@ -198,9 +147,6 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
     
     setMinContainerHeight: function(v) {this.minContainerHeight = v;},
     setButtonClass: function(v) {this.buttonClass = v;},
-    setDrawingMethodClassname: function(v) {this.drawingMethodClassname = v;},
-    setEdgeColor: function(v) {this.edgeColor = v;},
-    setEdgeSize: function(v) {this.edgeSize = v;},
     setFillColorSelected: function(v) {this.fillColorSelected = v;},
     setFillColorHover: function(v) {this.fillColorHover = v;},
     setFillColorActive: function(v) {this.fillColorActive = v;},
@@ -248,9 +194,8 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
     
     /** Called whenever the button is redrawn. Gives subclasses/instances
         a chance to do additional things when the button is redrawn.
-        @param state:string The state the button is in.
         @returns void */
-    notifyButtonRedraw: function(state) {},
+    notifyButtonRedraw: function() {},
     
     /** @private */
     __updateHeight: function(event) {
@@ -260,21 +205,21 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
     /** Should only be called from the TabSliderContainer.
         @private */
     expand: function(targetHeight) {
-        this.setExpansionState('expanding');
+        var self = this,
+            wrapper = self.wrapper,
+            to = targetHeight - self.getCollapsedHeight();
         
-        var wrapper = this.wrapper,
-            to = targetHeight - this.getCollapsedHeight();
+        self.setExpansionState('expanding');
         
         wrapper.stopActiveAnimators();
         
         if (wrapper.height !== to) {
-            var self = this;
             wrapper.animate({
                 attribute:'height', to:to, 
                 duration:myt.TabSlider.DEFAULT_ANIMATION_MILLIS
             }).next(function(success) {self.setExpansionState('expanded');});
         } else {
-            this.setExpansionState('expanded');
+            self.setExpansionState('expanded');
         }
     },
     

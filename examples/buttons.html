@@ -18,20 +18,19 @@
             }
         });
         var BtnClass = new JS.Class('BtnClass', myt.View, {
-            include: [myt.Button, ActivatedMixin, {
-                drawDisabledState: function() {
-                    this.setBgColor('#999999');
-                },
-                drawHoverState: function() {
-                    this.setBgColor('#ff0000');
-                },
-                drawActiveState: function() {
-                    this.setBgColor('#990000');
-                },
-                drawReadyState: function() {
-                    this.setBgColor('#cc0000');
-                }
-            }]
+            include: [myt.Button, ActivatedMixin],
+            drawDisabledState: function() {
+                this.setBgColor('#999999');
+            },
+            drawHoverState: function() {
+                this.setBgColor('#ff0000');
+            },
+            drawActiveState: function() {
+                this.setBgColor('#990000');
+            },
+            drawReadyState: function() {
+                this.setBgColor('#cc0000');
+            }
         });
         
         new myt.Dialog(rootView, {name:'dialog'});
@@ -149,7 +148,23 @@
             }
         }]);
         
-        var btn7 = new myt.IconTextPanelButton(rootView, {name:'seven', text:'foo', tooltip:'here is a tip', shrinkToFit:true}, [ActivatedMixin, {
+        var BtnClass2 = new JS.Class('BtnClass2', myt.SimpleIconTextButton, {
+            include: [ActivatedMixin],
+            
+            initNode: function(parent, attrs) {
+                attrs.activeColor = '#666666';
+                attrs.hoverColor = '#cccccc';
+                attrs.readyColor = '#999999';
+                attrs.textColor = '#ffffff';
+                attrs.height = 20;
+                attrs.shrinkToFit = true;
+                attrs.inset = attrs.outset = 10;
+                
+                this.callSuper(parent, attrs);
+            }
+        });
+        
+        var btn7 = new BtnClass2(rootView, {name:'seven', text:'foo', tooltip:'here is a tip'}, [{
             doActivated: function() {
                 var dialog = this.parent.dialog;
                 dialog.showSpinner("Here is a message with a spinner.");
@@ -157,8 +172,8 @@
                 dialog.doOnceLater('hide', 1000);
             }
         }]);
-        var btn8 = new myt.IconTextPanelButton(rootView, {name:'eight', text:'bar', shrinkToFit:true, disabled:true}, [ActivatedMixin]);
-        var btn9 = new myt.IconTextPanelButton(rootView, {name:'nine', text:'baz', width:40}, [ActivatedMixin, {
+        var btn8 = new BtnClass2(rootView, {name:'eight', text:'bar', disabled:true});
+        var btn9 = new BtnClass2(rootView, {name:'nine', text:'baz'}, [{
             doActivated: function() {
                 this.parent.dialog.showMessage("Can you confirm or deny that the rumors are true?");
                 this.callSuper();

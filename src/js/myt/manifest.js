@@ -164,18 +164,6 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'button/TextButtonContent.js'    ).provides('myt.TextButtonContent'    ).requires('myt.Text');
     file(MYT_COMPONENT_ROOT + 'button/SimpleIconTextButton.js' ).provides('myt.SimpleIconTextButton' ).requires('myt.SimpleButton','myt.IconTextButtonContent');
     
-    // Component : Panel
-    file(MYT_COMPONENT_ROOT + 'panel/ThreePanel.js'          ).provides('myt.ThreePanel'          ).requires('myt.View','myt.Image','myt.ResizeLayout','myt.SizeToChildren');
-    file(MYT_COMPONENT_ROOT + 'panel/HorizontalThreePanel.js').provides('myt.HorizontalThreePanel').requires('myt.View','myt.Image','myt.ResizeLayout');
-    file(MYT_COMPONENT_ROOT + 'panel/VerticalThreePanel.js'  ).provides('myt.VerticalThreePanel'  ).requires('myt.View','myt.Image','myt.ResizeLayout');
-    file(MYT_COMPONENT_ROOT + 'panel/BaseMouseablePanel.js'  ).provides('myt.BaseMouseablePanel'  ).requires('myt.Button');
-    file(MYT_COMPONENT_ROOT + 'panel/MouseableH3Panel.js'    ).provides('myt.MouseableH3Panel'    ).requires('myt.BaseMouseablePanel','myt.HorizontalThreePanel');
-    file(MYT_COMPONENT_ROOT + 'panel/MouseableV3Panel.js'    ).provides('myt.MouseableV3Panel'    ).requires('myt.BaseMouseablePanel','myt.VerticalThreePanel');
-    
-    // Component : Panel Button
-    file(MYT_COMPONENT_ROOT + 'panelbutton/PanelButton.js'        ).provides('myt.PanelButton'        ).requires('myt.MouseableH3Panel');
-    file(MYT_COMPONENT_ROOT + 'panelbutton/IconTextPanelButton.js').provides('myt.IconTextPanelButton').requires('myt.PanelButton','myt.IconTextButtonContent');
-    
     // Component : Drawing Method
     file(MYT_COMPONENT_ROOT + 'drawingmethod/DrawingMethod.js').provides('myt.DrawingMethod').requires('myt','myt.DrawingUtil');
 
@@ -243,8 +231,7 @@ JS.Packages(function() {with(this) {
     
     // Component : Tab Slider
     file(MYT_COMPONENT_ROOT + 'tabslider/TabSliderContainer.js'    ).provides('myt.TabSliderContainer'    ).requires('myt.SelectionManager','myt.DelayedMethodCall');
-    file(MYT_COMPONENT_ROOT + 'tabslider/TabSliderDrawingMethod.js').provides('myt.TabSliderDrawingMethod').requires('myt.DrawingMethod');
-    file(MYT_COMPONENT_ROOT + 'tabslider/TabSlider.js'             ).provides('myt.TabSlider'             ).requires('myt.Radio','myt.TabSliderDrawingMethod','myt.TabSliderContainer');
+    file(MYT_COMPONENT_ROOT + 'tabslider/TabSlider.js'             ).provides('myt.TabSlider'             ).requires('myt.Radio','myt.TabSliderContainer');
     file(MYT_COMPONENT_ROOT + 'tabslider/TextTabSlider.js'         ).provides('myt.TextTabSlider'         ).requires('myt.TabSlider');
     
     // Component : Tab
@@ -351,8 +338,8 @@ JS.Packages(function() {with(this) {
         'myt.SizeToWindowWidth','myt.SizeToWindowHeight',
         'myt.Animator','myt.StateMachine',
         'myt.Replicator',
-        'myt.WrappingLayout','myt.ResizeLayout','myt.AlignedLayout','myt.ThreePanel',
-        'myt.DrawButton','myt.SimpleIconTextButton','myt.IconTextPanelButton','myt.DelayedMethodCall',
+        'myt.WrappingLayout','myt.ResizeLayout','myt.AlignedLayout',
+        'myt.DrawButton','myt.SimpleIconTextButton','myt.DelayedMethodCall',
         'myt.FloatingPanelAnchor',
         'myt.ListViewAnchor',
         'myt.TextCheckbox','myt.TextRadio','myt.TextTabSlider','myt.Tab','myt.SimpleTab',

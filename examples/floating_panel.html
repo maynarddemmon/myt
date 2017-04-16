@@ -7,6 +7,20 @@
 <script src="../dist/myt.min.js"></script>
 </head><body>
 <script>
+    var BtnClass = new JS.Class('BtnClass2', myt.SimpleIconTextButton, {
+        initNode: function(parent, attrs) {
+            attrs.activeColor = '#666666';
+            attrs.hoverColor = '#cccccc';
+            attrs.readyColor = '#999999';
+            attrs.textColor = '#ffffff';
+            attrs.height = 20;
+            attrs.shrinkToFit = true;
+            attrs.inset = attrs.outset = 10;
+            
+            this.callSuper(parent, attrs);
+        }
+    });
+    
     var BuildPanelMixin = new JS.Module('BuildPanelMixin', {
         doActivated: function() {
             var panelId = 'baz';
@@ -20,10 +34,10 @@
                         return this.btn1;
                     }
                 });
-                new myt.IconTextPanelButton(fp, {name:'btn1', text:'here', width:50}, [{
+                new BtnClass(fp, {name:'btn1', text:'here'}, [{
                     doActivated: function() {this.parent.hide();}
                 }]);
-                new myt.IconTextPanelButton(fp, {text:'there', width:50, y:25}, [{
+                new BtnClass(fp, {text:'there', y:25}, [{
                     doActivated: function() {this.parent.hide();}
                 }]);
             }
@@ -33,8 +47,8 @@
     
     var rootView = new myt.View(null, {bgColor:'#eeeeee'}, [myt.SizeToWindow]);
     
-    global.btn = new myt.IconTextPanelButton(rootView, {
-        name:'btn', text:'baz', width:40, tooltip:'Example tooltip'
+    global.btn = new BtnClass(rootView, {
+        name:'btn', text:'baz', tooltip:'Example tooltip'
     }, [myt.FloatingPanelAnchor, {
         doActivated: function() {
             var panelId = 'foo';
@@ -51,8 +65,8 @@
         }
     }]);
     
-    new myt.IconTextPanelButton(rootView, {
-        name:'btn2', text:'baz', width:40, 
+    new BtnClass(rootView, {
+        name:'btn2', text:'baz',
         floatingAlign:'outsideRight', floatingValign:'insideTop', floatingAlignOffset:2
     }, [myt.FloatingPanelAnchor, {
         doActivated: function() {
@@ -67,16 +81,16 @@
         }
     }]);
     
-    new myt.IconTextPanelButton(rootView, {
-        name:'btn3', text:'baz', width:40
+    new BtnClass(rootView, {
+        name:'btn3', text:'baz'
     }, [myt.FloatingPanelAnchor, BuildPanelMixin]);
     
-    new myt.IconTextPanelButton(rootView, {
-        name:'btn4', text:'baz', width:40
+    new BtnClass(rootView, {
+        name:'btn4', text:'baz'
     }, [myt.FloatingPanelAnchor, BuildPanelMixin]);
     
-    new myt.IconTextPanelButton(rootView, {
-        name:'btn5', text:'baz', width:40, 
+    new BtnClass(rootView, {
+        name:'btn5', text:'baz',
         floatingAlign:'outsideRight', floatingValign:'insideTop', floatingAlignOffset:2
     }, [myt.FloatingPanelAnchor, {
         doActivated: function() {
@@ -91,8 +105,8 @@
         }
     }]);
     
-    new myt.IconTextPanelButton(rootView, {
-        name:'btn6', text:'list view', width:60,
+    new BtnClass(rootView, {
+        name:'btn6', text:'list view',
         floatingPanelId:'listviewTest',
         listViewAttrs:{maxHeight:349}
     }, [myt.ListViewAnchor, {
@@ -142,8 +156,8 @@
         }
     }]);
     
-    new myt.IconTextPanelButton(rootView, {
-        name:'btn7', text:'baz', width:40, 
+    new BtnClass(rootView, {
+        name:'btn7', text:'baz', 
         floatingAlign:'outsideRight', floatingValign:'insideTop', floatingAlignOffset:2
     }, [myt.FloatingPanelAnchor, {
         doActivated: function() {
