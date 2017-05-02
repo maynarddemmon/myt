@@ -810,5 +810,5 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     }
 });
 
-myt.DelayedMethodCall.createDelayedMethodCall(myt.ScatterGraph, 0, 'redrawPoints');
-myt.DelayedMethodCall.createDelayedMethodCall(myt.ScatterGraph, 0, 'redrawAnimatingPoints');
+myt.ScatterGraph.redrawPointsDelayed = myt.debounce(myt.ScatterGraph.redrawPoints);
+myt.ScatterGraph.redrawAnimatingPointsDelayed = myt.debounce(myt.ScatterGraph.redrawAnimatingPoints);

@@ -28,7 +28,7 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
         if (attrs.itemSelectionId == null) attrs.itemSelectionId = 'tabId';
         if (attrs.maxSelected == null) attrs.maxSelected = 1;
         
-        myt.DelayedMethodCall.createDelayedMethodCall(this, 0, '__updateLayout');
+        this.updateLayout = myt.debounce(this.updateLayout);
         
         this.callSuper(parent, attrs);
     },
@@ -83,11 +83,6 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
     
     // Methods /////////////////////////////////////////////////////////////////
     updateLayout: function(event) {
-        this.__updateLayoutDelayed();
-    },
-    
-    /** @private */
-    __updateLayout: function() {
         var tabSliders = this._tabSliders, 
             i = tabSliders.length, 
             tabSlider,

@@ -173,7 +173,6 @@ JS.Packages(function() {with(this) {
     // Component : Model
     file(MYT_COMPONENT_ROOT + 'model/BAGMembership.js'        ).provides('myt.BAGMembership'        ).requires('myt.Node');
     file(MYT_COMPONENT_ROOT + 'model/BAG.js'                  ).provides('myt.BAG'                  ).requires('myt.BAGMembership');
-    file(MYT_COMPONENT_ROOT + 'model/DelayedMethodCall.js'    ).provides('myt.DelayedMethodCall'    ).requires('myt.AccessorSupport');
     file(MYT_COMPONENT_ROOT + 'model/ValueComponent.js'       ).provides('myt.ValueComponent'       ).requires('myt');
     file(MYT_COMPONENT_ROOT + 'model/BoundedValueComponent.js').provides('myt.BoundedValueComponent').requires('myt.ValueComponent');
     file(MYT_COMPONENT_ROOT + 'model/RangeComponent.js'       ).provides('myt.RangeComponent'       ).requires('myt.ValueComponent');
@@ -230,7 +229,7 @@ JS.Packages(function() {with(this) {
                                                                                                                 'myt.SimpleSliderRangeFill');
     
     // Component : Tab Slider
-    file(MYT_COMPONENT_ROOT + 'tabslider/TabSliderContainer.js'    ).provides('myt.TabSliderContainer'    ).requires('myt.SelectionManager','myt.DelayedMethodCall');
+    file(MYT_COMPONENT_ROOT + 'tabslider/TabSliderContainer.js'    ).provides('myt.TabSliderContainer'    ).requires('myt.SelectionManager');
     file(MYT_COMPONENT_ROOT + 'tabslider/TabSlider.js'             ).provides('myt.TabSlider'             ).requires('myt.Radio','myt.TabSliderContainer');
     file(MYT_COMPONENT_ROOT + 'tabslider/TextTabSlider.js'         ).provides('myt.TextTabSlider'         ).requires('myt.TabSlider');
     
@@ -319,7 +318,7 @@ JS.Packages(function() {with(this) {
     // Component : Graphing
     file(MYT_COMPONENT_ROOT + 'graphing/scatter/KDTree.js'           ).provides('myt.KDTreeNode','myt.BinaryHeap','myt.KDTree').requires('myt');
     file(MYT_COMPONENT_ROOT + 'graphing/scatter/ScatterGraphPoint.js').provides('myt.ScatterGraphPoint'                       ).requires('myt','myt.Selectable');
-    file(MYT_COMPONENT_ROOT + 'graphing/scatter/ScatterGraph.js'     ).provides('myt.ScatterGraph'                            ).requires('myt.DelayedMethodCall','myt.Canvas','myt.ScatterGraphPoint',
+    file(MYT_COMPONENT_ROOT + 'graphing/scatter/ScatterGraph.js'     ).provides('myt.ScatterGraph'                            ).requires('myt.Canvas','myt.ScatterGraphPoint',
                                                                                                                                          'myt.global.idle','myt.KDTree','myt.Disableable',
                                                                                                                                          'myt.MouseOver','myt.SelectionManager');
     
@@ -336,7 +335,7 @@ JS.Packages(function() {with(this) {
         'myt.Animator','myt.StateMachine',
         'myt.Replicator',
         'myt.WrappingLayout','myt.ResizeLayout','myt.AlignedLayout',
-        'myt.DrawButton','myt.SimpleIconTextButton','myt.DelayedMethodCall',
+        'myt.DrawButton','myt.SimpleIconTextButton',
         'myt.FloatingPanelAnchor',
         'myt.ListViewAnchor',
         'myt.TextCheckbox','myt.TextRadio','myt.TextTabSlider','myt.Tab',

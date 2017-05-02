@@ -516,5 +516,68 @@ myt = {
             }
         };
         return promise;
+    },
+    
+    /** Returns a function that wraps the provided function and that, as long 
+        as it continues to be invoked, will not invoke the wrapped function. 
+        The wrapped function will be called after the returned function stops 
+        being called for "wait" milliseconds. If "immediate" is passed, the
+        wrapped function will be invoked on the leading edge instead of 
+        the trailing edge.
+        @param func:function The function to wrap.
+        @param wait:number (optional) The time in millis to delay invocation by.
+            If not provided 0 is used.
+        @param immediate:boolean (optional) If true the function will be
+            invoked immediately and then the wait time will be used to block
+            subsequent calls. */
+    debounce: function(func, wait, immediate) {
+        var timeout;
+        return function() {
+            var context = this,
+                args = arguments,
+                later = function() {
+                    timeout = null;
+                    if (!immediate) func.apply(context, args);
+                },
+                callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow) func.apply(context, args);
+        };
+    },
+    
+    /** Mixes a delayed method call function onto the provided scope. The new
+        function will be stored on the scope under the property name
+        methodName + "Delayed". For example "foo" will become "fooDelayed".
+        @param scope:Observable|Class|Module the scope to mix onto.
+        @param millis:number the time to delay the call by.
+        @param methodName:string the name of the method to call after the delay.
+        @returns boolean True if creation succeeded, false otherwise. */
+    createDelayedMethodCall: function(scope, millis, methodName) {
+        var delayedMethodName = this.AccessorSupport.generateName('delayed', methodName),
+            isModuleOrClass = typeof scope === 'function' || scope instanceof JS.Module;
+        
+        // Prevent clobbering
+        if ((isModuleOrClass ? scope.instanceMethod(delayedMethodName) : scope[delayedMethodName]) !== undefined) {
+            console.warn("Can't clobber existing property during setup of delayed method function.", delayedMethodName, scope);
+            return false;
+        }
+        
+        // Define the "module".
+        var mod = {};
+        
+        /** Calls the method after a delay. Resets the delay timer if
+            this method is called again before the timer has finished.
+            @returns void */
+        mod[delayedMethodName] = this.debounce(function() {this[methodName].apply(this);}, millis);
+        
+        // Mixin in the "module"
+        if (isModuleOrClass) {
+            scope.include(mod);
+        } else {
+            scope.extend(mod);
+        }
+        
+        return true;
     }
 };
