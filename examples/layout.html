@@ -130,7 +130,7 @@
             var panelTwo = new PanelClass(panelStack, {panelId:'two', managedLayout:rootView.wrappingLayout});
             var panelThree = new PanelClass(panelStack, {panelId:'three', managedLayout:rootView.spiralLayout});
             
-            var TabClass = new JS.Class('MyTab', myt.SimpleTab, {
+            var TabClass = new JS.Class('MyTab', myt.Tab, {
                 setSelected: function(v) {
                     this.callSuper(v);
                     if (this.selected) panelStack.selectById(this.tabId);

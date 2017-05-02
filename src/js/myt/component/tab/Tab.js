@@ -1,4 +1,4 @@
-/** A tab component.
+/** A simple tab component.
     
     Events:
         None
@@ -8,18 +8,16 @@
         tabContainer:myt.TabContainer The tab container that manages this tab.
         edgeColor:color
         edgeSize:number
-        fillColorSelected:color
-        fillColorHover:color
-        fillColorActive:color
-        fillColorReady:color
+        selectedColor:color
+        
         labelTextColorSelected:color The color to use for the label text when
             this tab is selected.
         cornerRadius:number Passed into the drawing config to determine if
             a rounded corner is drawn or not. Defaults to undefined which
-            causes myt.TabDrawingMethod.DEFAULT_RADIUS to be used.
+            causes myt.Tab.DEFAULT_RADIUS to be used.
 */
-myt.Tab = new JS.Class('Tab', myt.DrawButton, {
-    include: [myt.TabMixin, myt.IconTextButtonContent],
+myt.Tab = new JS.Class('Tab', myt.SimpleIconTextButton, {
+    include: [myt.TabMixin],
     
     
     // Class Methods and Attributes ////////////////////////////////////////////
@@ -32,8 +30,7 @@ myt.Tab = new JS.Class('Tab', myt.DrawButton, {
         DEFAULT_FILL_COLOR_ACTIVE: '#aaaaaa',
         DEFAULT_FILL_COLOR_READY: '#cccccc',
         DEFAULT_LABEL_TEXT_COLOR_SELECTED:'#333333',
-        DEFAULT_EDGE_COLOR: '#333333',
-        DEFAULT_EDGE_SIZE: 0.5
+        DEFAULT_RADIUS:6
     },
     
     
@@ -42,96 +39,86 @@ myt.Tab = new JS.Class('Tab', myt.DrawButton, {
     initNode: function(parent, attrs) {
         var T = myt.Tab;
         
-        // myt.DrawButton
-        if (attrs.drawingMethodClassname == null) attrs.drawingMethodClassname = 'myt.TabDrawingMethod';
-        
         // myt.IconTextButtonContent
         if (attrs.inset == null) attrs.inset = T.DEFAULT_INSET;
         if (attrs.outset == null) attrs.outset = T.DEFAULT_OUTSET;
         
         // myt.Tab
-        if (attrs.edgeColor == null) attrs.edgeColor = T.DEFAULT_EDGE_COLOR;
-        if (attrs.edgeSize == null) attrs.edgeSize = T.DEFAULT_EDGE_SIZE;
-        if (attrs.fillColorSelected == null) attrs.fillColorSelected = T.DEFAULT_FILL_COLOR_SELECTED;
-        if (attrs.fillColorHover == null) attrs.fillColorHover = T.DEFAULT_FILL_COLOR_HOVER;
-        if (attrs.fillColorActive == null) attrs.fillColorActive = T.DEFAULT_FILL_COLOR_ACTIVE;
-        if (attrs.fillColorReady == null) attrs.fillColorReady = T.DEFAULT_FILL_COLOR_READY;
-        if (attrs.labelTextColorSelected == null) attrs.labelTextColorSelected = T.DEFAULT_LABEL_TEXT_COLOR_SELECTED;
+        if (attrs.selectedColor == null) attrs.selectedColor = T.DEFAULT_FILL_COLOR_SELECTED;
+        if (attrs.hoverColor == null) attrs.hoverColor = T.DEFAULT_FILL_COLOR_HOVER;
+        if (attrs.activeColor == null) attrs.activeColor = T.DEFAULT_FILL_COLOR_ACTIVE;
+        if (attrs.readyColor == null) attrs.readyColor = T.DEFAULT_FILL_COLOR_READY;
+        if (attrs.labelTextSelectedColor == null) attrs.labelTextSelectedColor = T.DEFAULT_LABEL_TEXT_COLOR_SELECTED;
         
         // Other
         if (attrs.height == null) attrs.height = T.DEFAULT_HEIGHT;
         if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
         
         this.callSuper(parent, attrs);
+        
+        this.__updateCornerRadius();
+        this.__updateTextColor();
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setEdgeColor: function(v) {this.edgeColor = v;},
-    setEdgeSize: function(v) {this.edgeSize = v;},
-    setFillColorSelected: function(v) {this.fillColorSelected = v;},
-    setFillColorHover: function(v) {this.fillColorHover = v;},
-    setFillColorActive: function(v) {this.fillColorActive = v;},
-    setFillColorReady: function(v) {this.fillColorReady = v;},
+    setSelectedColor: function(v) {this.selectedColor = v;},
+    
+    setCornerRadius: function(v) {
+        this.cornerRadius = v;
+        
+        if (this.inited) this.__updateCornerRadius();
+    },
+    
     setLabelTextColor: function(v) {this.labelTextColor = v;},
-    setLabelTextColorSelected: function(v) {this.labelTextColorSelected = v;},
-    setCornerRadius: function(v) {this.cornerRadius = v;},
+    
+    setLabelTextSelectedColor: function(v) {
+        this.labelTextSelectedColor = v;
+        if (this.inited && this.selected) this.textView.setTextColor(v);
+    },
     
     setSelected: function(v) {
         this.callSuper(v);
-        if (this.inited) this.redraw();
-    },
-    
-    setFocused: function(v) {
-        this.callSuper(v);
-        if (this.inited) this.redraw();
+        if (this.inited) {
+            this.updateUI();
+            this.__updateTextColor();
+        }
     },
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.DrawButton */
-    getDrawBounds: function() {
-        var bounds = this.drawBounds;
-        bounds.w = this.width;
-        bounds.h = this.height;
-        return bounds;
+    /** @private */
+    __updateTextColor: function() {
+        this.textView.setTextColor(this.selected ? this.labelTextSelectedColor : this.labelTextColor);
     },
     
-    /** @overrides myt.DrawButton */
-    getDrawConfig: function(state) {
+    /** @private */
+    __updateCornerRadius: function() {
         var self = this,
-            config = self.callSuper(state);
-        
-        config.selected = self.selected;
-        config.location = self.tabContainer.location;
-        config.cornerRadius = self.cornerRadius;
-        config.edgeColor = self.edgeColor;
-        config.edgeSize = self.edgeSize;
-        
-        if (self.selected) {
-            config.fillColor = self.fillColorSelected;
-        } else {
-            switch (state) {
-                case 'hover':
-                    config.fillColor = self.fillColorHover;
-                    break;
-                case 'active':
-                    config.fillColor = self.fillColorActive;
-                    break;
-                case 'disabled':
-                case 'ready':
-                    config.fillColor = self.focused ? self.fillColorHover : self.fillColorReady;
-                    break;
-                default:
-            }
+            r = self.cornerRadius != null ? self.cornerRadius : myt.Tab.DEFAULT_RADIUS;
+        switch (self.tabContainer.location) {
+            case 'top':
+                self.setRoundedTopLeftCorner(r);
+                self.setRoundedTopRightCorner(r);
+                break;
+            case 'bottom':
+                self.setRoundedBottomLeftCorner(r);
+                self.setRoundedBottomRightCorner(r);
+                break;
+            case 'left':
+                self.setRoundedTopLeftCorner(r);
+                self.setRoundedBottomLeftCorner(r);
+                break;
+            case 'right':
+                self.setRoundedTopRightCorner(r);
+                self.setRoundedBottomRightCorner(r);
+                break;
         }
-        
-        return config;
     },
     
-    /** @overrides myt.DrawButton */
-    redraw: function(state) {
-        this.callSuper(state);
-        this.textView.setTextColor(this.selected ? this.labelTextColorSelected : this.labelTextColor);
+    /** @overrides myt.Button. */
+    updateUI: function() {
+        this.callSuper();
+        if (this.selected) this.setBgColor(this.selectedColor);
     }
 });

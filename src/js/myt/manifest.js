@@ -235,12 +235,9 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'tabslider/TextTabSlider.js'         ).provides('myt.TextTabSlider'         ).requires('myt.TabSlider');
     
     // Component : Tab
-    file(MYT_COMPONENT_ROOT + 'tab/TabContainer.js'    ).provides('myt.TabContainer'    ).requires('myt.SelectionManager');
-    file(MYT_COMPONENT_ROOT + 'tab/TabMixin.js'        ).provides('myt.TabMixin'        ).requires('myt.Selectable','myt.TabContainer');
-    file(MYT_COMPONENT_ROOT + 'tab/TabDrawingMethod.js').provides('myt.TabDrawingMethod').requires('myt.DrawingMethod');
-    file(MYT_COMPONENT_ROOT + 'tab/Tab.js'             ).provides('myt.Tab'             ).requires('myt.DrawButton','myt.IconTextButtonContent',
-                                                                                                   'myt.TabDrawingMethod','myt.TabMixin');
-    file(MYT_COMPONENT_ROOT + 'tab/SimpleTab.js'       ).provides('myt.SimpleTab'       ).requires('myt.SimpleIconTextButton','myt.TabMixin');
+    file(MYT_COMPONENT_ROOT + 'tab/TabContainer.js').provides('myt.TabContainer').requires('myt.SelectionManager');
+    file(MYT_COMPONENT_ROOT + 'tab/TabMixin.js'    ).provides('myt.TabMixin'    ).requires('myt.Selectable','myt.TabContainer');
+    file(MYT_COMPONENT_ROOT + 'tab/Tab.js'         ).provides('myt.Tab'         ).requires('myt.SimpleIconTextButton','myt.TabMixin');
     
     // Component : Panel Stack
     file(MYT_COMPONENT_ROOT + 'panelstack/StackablePanel.js'           ).provides('myt.StackablePanel'           ).requires('myt.SelectionManager');
@@ -342,7 +339,7 @@ JS.Packages(function() {with(this) {
         'myt.DrawButton','myt.SimpleIconTextButton','myt.DelayedMethodCall',
         'myt.FloatingPanelAnchor',
         'myt.ListViewAnchor',
-        'myt.TextCheckbox','myt.TextRadio','myt.TextTabSlider','myt.Tab','myt.SimpleTab',
+        'myt.TextCheckbox','myt.TextRadio','myt.TextTabSlider','myt.Tab',
         'myt.ImageUploader','myt.Dialog',
         'myt.global.validators','myt.EqualFieldsValidator','myt.LengthValidator','myt.NumericRangeValidator',
         'myt.global.valueProcessors','myt.UseOtherFieldIfEmptyValueProcessor',
