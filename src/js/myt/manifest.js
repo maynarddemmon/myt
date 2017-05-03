@@ -122,11 +122,10 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'layout/WrappingLayout.js').provides('myt.WrappingLayout').requires('myt.VariableLayout');
     file(MYT_COMPONENT_ROOT + 'layout/AlignedLayout.js' ).provides('myt.AlignedLayout' ).requires('myt.VariableLayout');
     
-    // Component : Utilities
-    file(MYT_COMPONENT_ROOT + 'util/StateMachine.js').provides('myt.StateMachine').requires('myt.Node');
-    
     // Component : Misc
-    file(MYT_COMPONENT_ROOT + 'misc/FontAwesome.js').provides('myt.FontAwesome').requires('myt.Markup');
+    file(MYT_COMPONENT_ROOT + 'misc/FontAwesome.js' ).provides('myt.FontAwesome' ).requires('myt.Markup');
+    file(MYT_COMPONENT_ROOT + 'misc/Spinner.js'     ).provides('myt.Spinner'     ).requires('myt.View');
+    file(MYT_COMPONENT_ROOT + 'misc/StateMachine.js').provides('myt.StateMachine').requires('myt.Node');
     
     // Component : Drag and Drop
     file(MYT_COMPONENT_ROOT + 'dragdrop/DragGroupSupport.js').provides('myt.DragGroupSupport').requires('myt.View','myt.global.mouse');
@@ -259,9 +258,6 @@ JS.Packages(function() {with(this) {
     // Component : Dimmer
     file(MYT_COMPONENT_ROOT + 'dimmer/Dimmer.js'    ).provides('myt.Dimmer'    ).requires('myt.View');
     file(MYT_COMPONENT_ROOT + 'dimmer/ModalPanel.js').provides('myt.ModalPanel').requires('myt.Dimmer','myt.SizeToChildren');
-    
-    // Component : Spinner
-    file(MYT_COMPONENT_ROOT + 'spinner/Spinner.js').provides('myt.Spinner').requires('myt.View');
     
     // Component : Dialog
     file(MYT_COMPONENT_ROOT + 'dialog/spectrum.js').provides('$.spectrum').requires('myt.Color'); // Requires JQuery 1.7.0+
