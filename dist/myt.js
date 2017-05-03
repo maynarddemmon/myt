@@ -4014,8 +4014,7 @@ myt = {
     
     /** Mixes a delayed method call function onto the provided scope. The new
         function will be stored on the scope under the property name
-        "delayed" + the capitalized method name. For example "foo" will become
-        "delayedFoo".
+        methodName + "Delayed". For example "foo" will become "fooDelayed".
         @param scope:Observable|Class|Module the scope to mix onto.
         @param millis:number the time to delay the call by.
         @param methodName:string the name of the method to call after the delay.
@@ -24587,7 +24586,8 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        var self = this;
+        var self = this,
+            SG = myt.ScatterGraph;
         
         self._pointTemplates = {};
         self._animating = [];
@@ -24602,7 +24602,6 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         if (attrs.originX == null) attrs.originX = 0;
         if (attrs.originY == null) attrs.originY = 0;
         
-        var SG = myt.ScatterGraph;
         if (attrs.xConversionFuncPxToV == null) attrs.xConversionFuncPxToV = SG.convertXPixelToValue;
         if (attrs.yConversionFuncPxToV == null) attrs.yConversionFuncPxToV = SG.convertYPixelToValue;
         if (attrs.xConversionFuncVToPx == null) attrs.xConversionFuncVToPx = SG.convertXValueToPixel;
@@ -24616,6 +24615,9 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         if (attrs.allowSelection == null) attrs.allowSelection = true;
         
         self.callSuper(parent, attrs);
+        
+        self.redrawPointsDelayed = myt.debounce(self.redrawPoints);
+        self.redrawAnimatingPointsDelayed = myt.debounce(self.redrawAnimatingPoints);
         
         var w = self.width, 
             h = self.height, 
@@ -24662,14 +24664,15 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     },
     
     setAllowSelection: function(v) {
-        if (this.allowSelection === v) return;
-        this.allowSelection = v;
-        if (this.inited) this.fireEvent('allowSelection', v);
-        
-        if (v) {
-            this.attachToDom(this, '_doClick', 'click');
-        } else {
-            if (this.inited) this.detachFromDom(this, '_doClick', 'click');
+        if (this.allowSelection !== v) {
+            this.allowSelection = v;
+            if (this.inited) this.fireEvent('allowSelection', v);
+            
+            if (v) {
+                this.attachToDom(this, '_doClick', 'click');
+            } else {
+                if (this.inited) this.detachFromDom(this, '_doClick', 'click');
+            }
         }
     },
     
@@ -24678,43 +24681,20 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     setXConversionFuncVToPx: function(v) {this.xConversionFuncVToPx = v},
     setYConversionFuncVToPx: function(v) {this.yConversionFuncVToPx = v},
     
-    setScaleDataX: function(v) {
-        if (this.scaleDataX === v) return;
-        this.scaleDataX = v;
-        if (this.inited) {
-            this.fireEvent('scaleDataX', v);
-            this.redrawPointsDelayed();
-            this.redrawAnimatingPointsDelayed();
-        }
-    },
+    setScaleDataX: function(v) {this._s('scaleDataX', v);},
+    setScaleDataY: function(v) {this._s('scaleDataY', v);},
+    setOriginX: function(v) {this._s('originX', v);},
+    setOriginY: function(v) {this._s('originY', v);},
     
-    setScaleDataY: function(v) {
-        if (this.scaleDataY === v) return;
-        this.scaleDataY = v;
-        if (this.inited) {
-            this.fireEvent('scaleDataY', v);
-            this.redrawPointsDelayed();
-            this.redrawAnimatingPointsDelayed();
-        }
-    },
-    
-    setOriginX: function(v) {
-        if (this.originX === v) return;
-        this.originX = v;
-        if (this.inited) {
-            this.fireEvent('originX', v);
-            this.redrawPointsDelayed();
-            this.redrawAnimatingPointsDelayed();
-        }
-    },
-    
-    setOriginY: function(v) {
-        if (this.originY === v) return;
-        this.originY = v;
-        if (this.inited) {
-            this.fireEvent('originY', v);
-            this.redrawPointsDelayed();
-            this.redrawAnimatingPointsDelayed();
+    /** @private */
+    _s: function(attrName, v) {
+        if (this[attrName] !== v) {
+            this[attrName] = v;
+            if (this.inited) {
+                this.fireEvent(attrName, v);
+                this.redrawPointsDelayed();
+                this.redrawAnimatingPointsDelayed();
+            }
         }
     },
     
@@ -25330,9 +25310,6 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         }
     }
 });
-
-myt.ScatterGraph.redrawPointsDelayed = myt.debounce(myt.ScatterGraph.redrawPoints);
-myt.ScatterGraph.redrawAnimatingPointsDelayed = myt.debounce(myt.ScatterGraph.redrawAnimatingPoints);
 
 
 /** A numeric value component that stays within a minimum and maximum value.
