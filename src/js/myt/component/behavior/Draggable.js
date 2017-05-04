@@ -87,10 +87,7 @@ myt.Draggable = new JS.Module('Draggable', {
     },
     
     setIsDragging: function(v) {
-        if (this.isDragging !== v) {
-            this.isDragging = v;
-            if (this.inited) this.fireEvent('isDragging', v);
-        }
+        this.set('isDragging', v, true);
     },
     
     setDragOffsetX: function(v, supressUpdate) {
@@ -165,11 +162,13 @@ myt.Draggable = new JS.Module('Draggable', {
     
     /** @private */
     __doDragCheck: function(event) {
-        var pos = myt.MouseObservable.getMouseFromEvent(event),
-            distance = myt.Geometry.measureDistance(pos.x, pos.y, this.dragInitX + this.x, this.dragInitY + this.y);
-        if (distance >= this.distanceBeforeDrag) {
-            this.detachFromDom(myt.global.mouse, '__doDragCheck', 'mousemove', true);
-            this.startDrag(event);
+        var self = this,
+            M = myt,
+            pos = M.MouseObservable.getMouseFromEvent(event),
+            distance = M.Geometry.measureDistance(pos.x, pos.y, self.dragInitX + self.x, self.dragInitY + self.y);
+        if (distance >= self.distanceBeforeDrag) {
+            self.detachFromDom(M.global.mouse, '__doDragCheck', 'mousemove', true);
+            self.startDrag(event);
         }
     },
     
@@ -213,10 +212,11 @@ myt.Draggable = new JS.Module('Draggable', {
     
     /** @private */
     __requestDragPosition: function() {
-        var pos = this.__lastMousePosition;
-        this.requestDragPosition(
-            pos.x - this.dragInitX + this.dragOffsetX, 
-            pos.y - this.dragInitY + this.dragOffsetY
+        var self = this,
+            pos = self.__lastMousePosition;
+        self.requestDragPosition(
+            pos.x - self.dragInitX + self.dragOffsetX, 
+            pos.y - self.dragInitY + self.dragOffsetY
         );
     },
     

@@ -3488,7 +3488,7 @@ JS.Singleton = new JS.Class('Singleton', {
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20170502.1108,
+    version:20170504.1225,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -3564,6 +3564,18 @@ myt = {
             }
         }
         return scope;
+    },
+    
+    /** Resolves a provided string into a JS.Class object. If a non-string 
+        value is provided it is verified to be a JS.Class object.
+        @param value:string:* The value to resolve and/or verify.
+        @returns a JS.Class object or null if the string could not be resolved
+            or the value was not a JS.Class object. */
+    resolveClassname: function(value) {
+        if (typeof value === 'string') value = this.resolveName(value);
+        
+        // Make sure what we found is really a JS.Class otherwise return null.
+        return (value && typeof value.isA === 'function' && value.isA(JS.Class)) ? value : null;
     },
     
     // Text Templating
@@ -14199,10 +14211,8 @@ myt.DrawingMethod = new JS.Class('DrawingMethod', {
             
             // Create the DrawingMethod if it wasn't found in the cache.
             if (!drawingMethod) {
-                var drawingMethodClass = myt.resolveName(classname);
-                if (drawingMethodClass) {
-                    drawingMethods[classname] = drawingMethod = new drawingMethodClass();
-                }
+                var drawingMethodClass = myt.resolveClassname(classname);
+                if (drawingMethodClass) drawingMethods[classname] = drawingMethod = new drawingMethodClass();
             }
             
             return drawingMethod;
@@ -25486,7 +25496,7 @@ new JS.Singleton('GlobalDragManager', {
             var dv = this.dragView;
             if (cur) {
                 cur.notifyDragLeave(dv);
-                dv.notifyDragLeave(cur);
+                if (!dv.destroyed) dv.notifyDragLeave(cur);
                 this.fireEvent('dragLeave', cur);
             }
             
@@ -25494,7 +25504,7 @@ new JS.Singleton('GlobalDragManager', {
             
             if (v) {
                 v.notifyDragEnter(dv);
-                dv.notifyDragEnter(v);
+                if (!dv.destroyed) dv.notifyDragEnter(v);
                 this.fireEvent('dragEnter', cur);
             }
         }
@@ -25555,7 +25565,7 @@ new JS.Singleton('GlobalDragManager', {
         @returns void */
     stopDrag: function(event, dropable, isAbort) {
         var overView = this.overView;
-        dropable.notifyDrop(overView, isAbort);
+        dropable.notifyDropped(overView, isAbort);
         if (overView && !isAbort) overView.notifyDrop(dropable);
         
         this.setOverView();
@@ -25605,24 +25615,28 @@ new JS.Singleton('GlobalDragManager', {
     __filterList: function(dropable, list) {
         var retval;
         
-        if (dropable.acceptAnyDragGroup()) {
-            retval = list;
-        } else {
+        if (dropable.destroyed) {
             retval = [];
-            
-            var dragGroups = dropable.getDragGroups(),
-                i = list.length, 
-                item, targetGroups, dragGroup;
-            while (i) {
-                item = list[--i];
-                if (item.acceptAnyDragGroup()) {
-                    retval.push(item);
-                } else {
-                    targetGroups = item.getDragGroups();
-                    for (dragGroup in dragGroups) {
-                        if (targetGroups[dragGroup]) {
-                            retval.push(item);
-                            break;
+        } else {
+            if (dropable.acceptAnyDragGroup()) {
+                retval = list;
+            } else {
+                retval = [];
+                
+                var dragGroups = dropable.getDragGroups(),
+                    i = list.length, 
+                    item, targetGroups, dragGroup;
+                while (i) {
+                    item = list[--i];
+                    if (item.acceptAnyDragGroup()) {
+                        retval.push(item);
+                    } else {
+                        targetGroups = item.getDragGroups();
+                        for (dragGroup in dragGroups) {
+                            if (targetGroups[dragGroup]) {
+                                retval.push(item);
+                                break;
+                            }
                         }
                     }
                 }
@@ -25630,7 +25644,7 @@ new JS.Singleton('GlobalDragManager', {
         }
         
         return retval;
-    },
+    }
 });
 
 
@@ -25723,10 +25737,7 @@ myt.Draggable = new JS.Module('Draggable', {
     },
     
     setIsDragging: function(v) {
-        if (this.isDragging !== v) {
-            this.isDragging = v;
-            if (this.inited) this.fireEvent('isDragging', v);
-        }
+        this.set('isDragging', v, true);
     },
     
     setDragOffsetX: function(v, supressUpdate) {
@@ -25801,11 +25812,13 @@ myt.Draggable = new JS.Module('Draggable', {
     
     /** @private */
     __doDragCheck: function(event) {
-        var pos = myt.MouseObservable.getMouseFromEvent(event),
-            distance = myt.Geometry.measureDistance(pos.x, pos.y, this.dragInitX + this.x, this.dragInitY + this.y);
-        if (distance >= this.distanceBeforeDrag) {
-            this.detachFromDom(myt.global.mouse, '__doDragCheck', 'mousemove', true);
-            this.startDrag(event);
+        var self = this,
+            M = myt,
+            pos = M.MouseObservable.getMouseFromEvent(event),
+            distance = M.Geometry.measureDistance(pos.x, pos.y, self.dragInitX + self.x, self.dragInitY + self.y);
+        if (distance >= self.distanceBeforeDrag) {
+            self.detachFromDom(M.global.mouse, '__doDragCheck', 'mousemove', true);
+            self.startDrag(event);
         }
     },
     
@@ -25849,10 +25862,11 @@ myt.Draggable = new JS.Module('Draggable', {
     
     /** @private */
     __requestDragPosition: function() {
-        var pos = this.__lastMousePosition;
-        this.requestDragPosition(
-            pos.x - this.dragInitX + this.dragOffsetX, 
-            pos.y - this.dragInitY + this.dragOffsetY
+        var self = this,
+            pos = self.__lastMousePosition;
+        self.requestDragPosition(
+            pos.x - self.dragInitX + self.dragOffsetX, 
+            pos.y - self.dragInitY + self.dragOffsetY
         );
     },
     
@@ -28548,7 +28562,7 @@ myt.Dropable = new JS.Module('Dropable', {
         @param isAbort:boolean Indicates if the drop was the result of an
             abort or a normal drop.
         @returns void */
-    notifyDrop: function(dropTarget, isAbort) {
+    notifyDropped: function(dropTarget, isAbort) {
         this.setDropped(true);
         
         if (!this.dropTarget) this.setDropFailed(true);
@@ -28674,7 +28688,7 @@ myt.DropSource = new JS.Module('DropSource', {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setDropClass: function(v) {this.dropClass = v;},
+    setDropClass: function(v) {this.dropClass = myt.resolveClassname(v);},
     setDropClassAttrs: function(v) {this.dropClassAttrs = v;},
     setDropParent: function(v) {this.dropParent = v;},
     
@@ -28718,7 +28732,7 @@ myt.DropSource = new JS.Module('DropSource', {
             dropParent = this.dropParent;
         if (dropClass && dropParent) {
             var pos = myt.DomElementProxy.getPagePosition(this.domElement, dropParent.domElement),
-                attrs = this.dropClassAttrs || {};
+            attrs = myt.extend({}, this.dropClassAttrs);
             attrs.x = pos.x || 0;
             attrs.y = pos.y || 0;
             return new dropClass(dropParent, attrs);

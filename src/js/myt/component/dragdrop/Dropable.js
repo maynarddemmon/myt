@@ -79,7 +79,7 @@ myt.Dropable = new JS.Module('Dropable', {
         @param isAbort:boolean Indicates if the drop was the result of an
             abort or a normal drop.
         @returns void */
-    notifyDrop: function(dropTarget, isAbort) {
+    notifyDropped: function(dropTarget, isAbort) {
         this.setDropped(true);
         
         if (!this.dropTarget) this.setDropFailed(true);

@@ -14,10 +14,8 @@ myt.DrawingMethod = new JS.Class('DrawingMethod', {
             
             // Create the DrawingMethod if it wasn't found in the cache.
             if (!drawingMethod) {
-                var drawingMethodClass = myt.resolveName(classname);
-                if (drawingMethodClass) {
-                    drawingMethods[classname] = drawingMethod = new drawingMethodClass();
-                }
+                var drawingMethodClass = myt.resolveClassname(classname);
+                if (drawingMethodClass) drawingMethods[classname] = drawingMethod = new drawingMethodClass();
             }
             
             return drawingMethod;

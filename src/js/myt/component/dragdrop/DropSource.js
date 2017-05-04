@@ -31,7 +31,7 @@ myt.DropSource = new JS.Module('DropSource', {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setDropClass: function(v) {this.dropClass = v;},
+    setDropClass: function(v) {this.dropClass = myt.resolveClassname(v);},
     setDropClassAttrs: function(v) {this.dropClassAttrs = v;},
     setDropParent: function(v) {this.dropParent = v;},
     
@@ -75,7 +75,7 @@ myt.DropSource = new JS.Module('DropSource', {
             dropParent = this.dropParent;
         if (dropClass && dropParent) {
             var pos = myt.DomElementProxy.getPagePosition(this.domElement, dropParent.domElement),
-                attrs = this.dropClassAttrs || {};
+            attrs = myt.extend({}, this.dropClassAttrs);
             attrs.x = pos.x || 0;
             attrs.y = pos.y || 0;
             return new dropClass(dropParent, attrs);

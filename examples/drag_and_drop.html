@@ -72,6 +72,11 @@
             this.callSuper();
         },
         
+        notifyDropped: function(dropTarget, isAbort) {
+            console.log('dropped: ' + isAbort);
+            this.callSuper(dropTarget, isAbort);
+        },
+        
         notifyDropAborted: function() {
             console.log('aborted: behave as a drop fail.');
             this.notifyDropFailed();

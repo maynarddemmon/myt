@@ -70,7 +70,7 @@ new JS.Singleton('GlobalDragManager', {
             var dv = this.dragView;
             if (cur) {
                 cur.notifyDragLeave(dv);
-                dv.notifyDragLeave(cur);
+                if (!dv.destroyed) dv.notifyDragLeave(cur);
                 this.fireEvent('dragLeave', cur);
             }
             
@@ -78,7 +78,7 @@ new JS.Singleton('GlobalDragManager', {
             
             if (v) {
                 v.notifyDragEnter(dv);
-                dv.notifyDragEnter(v);
+                if (!dv.destroyed) dv.notifyDragEnter(v);
                 this.fireEvent('dragEnter', cur);
             }
         }
@@ -139,7 +139,7 @@ new JS.Singleton('GlobalDragManager', {
         @returns void */
     stopDrag: function(event, dropable, isAbort) {
         var overView = this.overView;
-        dropable.notifyDrop(overView, isAbort);
+        dropable.notifyDropped(overView, isAbort);
         if (overView && !isAbort) overView.notifyDrop(dropable);
         
         this.setOverView();
@@ -189,24 +189,28 @@ new JS.Singleton('GlobalDragManager', {
     __filterList: function(dropable, list) {
         var retval;
         
-        if (dropable.acceptAnyDragGroup()) {
-            retval = list;
-        } else {
+        if (dropable.destroyed) {
             retval = [];
-            
-            var dragGroups = dropable.getDragGroups(),
-                i = list.length, 
-                item, targetGroups, dragGroup;
-            while (i) {
-                item = list[--i];
-                if (item.acceptAnyDragGroup()) {
-                    retval.push(item);
-                } else {
-                    targetGroups = item.getDragGroups();
-                    for (dragGroup in dragGroups) {
-                        if (targetGroups[dragGroup]) {
-                            retval.push(item);
-                            break;
+        } else {
+            if (dropable.acceptAnyDragGroup()) {
+                retval = list;
+            } else {
+                retval = [];
+                
+                var dragGroups = dropable.getDragGroups(),
+                    i = list.length, 
+                    item, targetGroups, dragGroup;
+                while (i) {
+                    item = list[--i];
+                    if (item.acceptAnyDragGroup()) {
+                        retval.push(item);
+                    } else {
+                        targetGroups = item.getDragGroups();
+                        for (dragGroup in dragGroups) {
+                            if (targetGroups[dragGroup]) {
+                                retval.push(item);
+                                break;
+                            }
                         }
                     }
                 }
@@ -214,5 +218,5 @@ new JS.Singleton('GlobalDragManager', {
         }
         
         return retval;
-    },
+    }
 });

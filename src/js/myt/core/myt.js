@@ -22,7 +22,7 @@
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20170502.1108,
+    version:20170504.1225,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -98,6 +98,18 @@ myt = {
             }
         }
         return scope;
+    },
+    
+    /** Resolves a provided string into a JS.Class object. If a non-string 
+        value is provided it is verified to be a JS.Class object.
+        @param value:string:* The value to resolve and/or verify.
+        @returns a JS.Class object or null if the string could not be resolved
+            or the value was not a JS.Class object. */
+    resolveClassname: function(value) {
+        if (typeof value === 'string') value = this.resolveName(value);
+        
+        // Make sure what we found is really a JS.Class otherwise return null.
+        return (value && typeof value.isA === 'function' && value.isA(JS.Class)) ? value : null;
     },
     
     // Text Templating
