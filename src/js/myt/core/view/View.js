@@ -26,6 +26,10 @@
         layoutRemoved:myt.Layout Fired when a layout is removed from this view.
     
     Attributes:
+        tagName:string Determines the name of the DOM element to create for
+            this instance. This is not a normal attribute. It is only used
+            during initialization and it will be deleted from the attrs object
+            upon use. If no tagName is provided "div" will be used.
         focusTrap:boolean Determines if focus traversal can move above this view
             or not. The default is undefined which is equivalent to false. Can 
             be ignored using a key modifier. The key modifier is 
@@ -167,6 +171,8 @@ myt.View = new JS.Class('View', myt.Node, {
         self.opacity = 1;
         self.visible = true;
         
+        self.tagName = attrs.tagName;
+        if (self.tagName) delete attrs.tagName;
         self.setDomElement(self.createOurDomElement(parent));
         
         // Necessary since x and y of 0 won't update deStyle so this gets
@@ -183,12 +189,14 @@ myt.View = new JS.Class('View', myt.Node, {
     
     /** Creates the dom element we will be a proxy for. Called during View
         initialization. Gives subclasses a change to change how the view is
-        backed.
+        backed. This implementation also looks for a this.tagName property
+        which it will use as the name for the dom element that gets created.
+        If no this.tagName property is found "div" will be used.
         @param parent:dom element The dom element that will be the parent
             of the newly created dom element.
         @returns a dom element */
     createOurDomElement: function(parent) {
-        var elem = document.createElement('div');
+        var elem = document.createElement(this.tagName || 'div');
         elem.style.position = 'absolute';
         
         // Make dom elements easier to location via selectors

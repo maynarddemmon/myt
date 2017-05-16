@@ -76,6 +76,14 @@ test("Create a view without providing a div.", function() {
     
     ok(v.domElement != null, "A dom element should exist for the new root view.");
     ok(v.domElement.parentNode.nodeName === 'BODY', "The dom element should be a child of the body.");
+    ok(v.domElement.nodeName === 'DIV', 'The new dom element should have a nodeName of "DIV".');
+    
+    v.destroy();
+});
+
+test("Create a view with a specific tagName.", function() {
+    var v = new myt.View(null, {tagName:'foo'}, [myt.RootView]);
+    ok(v.domElement.nodeName === 'FOO', 'The dom element should have a nodeName of "FOO".');
     
     v.destroy();
 });
