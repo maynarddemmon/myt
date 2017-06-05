@@ -262,6 +262,9 @@ test("Test getSubviews, getSiblingViews, getLayouts", function() {
     ok(siblings[0] === child2, "First sibling should be the second child added.");
     ok(siblings[1] === child3, "Second sibling should be the last child added.");
     
+    siblings = v.getSiblingViews();
+    ok(siblings === undefined, "getSiblingViews of an orphaned/root view should return undefined");
+    
     // Destroy it
     v.destroy();
 });

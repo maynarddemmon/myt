@@ -3488,7 +3488,7 @@ JS.Singleton = new JS.Class('Singleton', {
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20170515.1832,
+    version:20170604.1722,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -8914,17 +8914,18 @@ myt.View = new JS.Class('View', myt.Node, {
     },
     
     /** Gets the views that are our siblings.
-        @returns array of myt.View or null if this view is orphaned. */
+        @returns array of myt.View or undefined if this view is orphaned. */
     getSiblingViews: function() {
-        if (!this.parent) return null;
-        
-        // Get a copy of the subviews since we will filter it.
-        var svs = this.parent.getSubviews().concat();
-        
-        // Filter out ourself
-        myt.filterArray(svs, this);
-        
-        return svs;
+        if (this.parent) {
+            // Get a copy of the subviews since we will filter it and thus
+            // do not want to modify the original array.
+            var svs = this.parent.getSubviews().concat();
+            
+            // Filter out ourself
+            myt.filterArray(svs, this);
+            
+            return svs;
+        }
     },
     
     // Focus Attributes //
