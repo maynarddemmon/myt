@@ -3488,7 +3488,7 @@ JS.Singleton = new JS.Class('Singleton', {
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20170604.1722,
+    version:20170609.1302,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -21797,7 +21797,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             name:'picker',
             x:MP.DEFAULT_PADDING_X,
             y:MP.DEFAULT_PADDING_Y + 24,
-            width:opts.dateOnly ? 180 : (opts.timeOnly ? 150 : 225),
+            width:opts.dateOnly ? 195 : (opts.timeOnly ? 150 : 240),
             height:185
         });
         var pickerView = new V(picker);

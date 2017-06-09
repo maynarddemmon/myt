@@ -269,7 +269,7 @@ select.mytNativeInput{margin:0px;}
 ***/
 .datepicker {
 	display:inline-block;
-	font:15px/1.5 "Helvetica Neue", mplus-2c, Helvetica, Arial, "Hiragino Kaku Gothic Pro", Meiryo, sans-serif;
+	font:15px/1.5 Arial, Helvetica, sans-serif;
 	font-weight:300;
 }
 
@@ -279,7 +279,7 @@ select.mytNativeInput{margin:0px;}
 .datepicker > .datepicker_header {
 	color:#3f3f3f;
 	text-align:center;
-	font-size:9pt;
+	font-size:12px;
 	font-weight:bold;
 	user-select:none;
 		-webkit-user-select:none;
@@ -349,17 +349,24 @@ select.mytNativeInput{margin:0px;}
 	border-right:1px solid #c8c8c8;
 }
 
+.datepicker > .datepicker_inner_container > .datepicker_calendar > .datepicker_table {
+	border-spacing:0px;
+}
+
 /*
  * datepicker_inner_container > datepicker_calendar > datepicker_table > tbody > tr > th (WDay-cell)
  */
 .datepicker > .datepicker_inner_container > .datepicker_calendar > .datepicker_table > tbody > tr > th {
 	color:#646464;
-	width:18px;
-	font-size:small;
+	width:25px;
+	height:21px;
+	font-size:12px;
 	font-weight:normal;
 	text-align:center;
+	padding-left:0px;
+	padding-right:0px;
 	padding-top:1px;
-	padding-bottom:2px;
+	padding-bottom:3px;
 }
 
 /*
@@ -367,12 +374,16 @@ select.mytNativeInput{margin:0px;}
  */
 .datepicker > .datepicker_inner_container > .datepicker_calendar > .datepicker_table > tbody > tr > td {
 	color:#000000;
-	font-size:small;
+	width:25px;
+	height:21px;
+	font-size:12px;
 	text-align:center;
 	user-select:none;
 		-webkit-user-select:none;
 		-moz-user-select:none;
 	cursor:pointer;
+	padding-left:0px;
+	padding-right:0px;
 	padding-top:2px;
 	padding-bottom:2px;
 }
@@ -431,9 +442,10 @@ select.mytNativeInput{margin:0px;}
 .datepicker > .datepicker_inner_container > .datepicker_timelist > div.timelist_item {
 	padding-top:3px;
 	padding-bottom:3px;
-	padding-left:7px;
-	padding-right:25px;
-	font-size:small;
+	padding-left:14px;
+	width:50px;
+	height:19px;
+	font-size:12px;
 	user-select:none;
 		-webkit-user-select:none;
 		-moz-user-select:none;

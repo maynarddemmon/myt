@@ -448,7 +448,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             name:'picker',
             x:MP.DEFAULT_PADDING_X,
             y:MP.DEFAULT_PADDING_Y + 24,
-            width:opts.dateOnly ? 180 : (opts.timeOnly ? 150 : 225),
+            width:opts.dateOnly ? 195 : (opts.timeOnly ? 150 : 240),
             height:185
         });
         var pickerView = new V(picker);

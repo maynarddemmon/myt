@@ -3,90 +3,94 @@
 <link rel="stylesheet" href="../src/css/myt.css"/>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script>window.jQuery || document.write('<script src="../src/js/jquery/jquery-1.12.4.min.js">\x3C/script>');</script>
+<script>var ROOT = '../src/js/';</script>
 <script src="../src/js/boilerplate.js"></script>
-<script src="../dist/myt.min.js"></script>
+<script src="../src/js/jsclass/loader-browser.js"></script>
+<script src="../src/js/myt/manifest.js"></script>
 </head><body>
 <script>
-    var rootView = new myt.View(null, {bgColor:'#eeeeee'}, [myt.SizeToWindow]);
-    
-    new myt.Dialog(rootView, {name:'dialog'});
-    
-    new myt.SimpleButton(rootView, {
-        x:10, y:10, width:50, height:20,
-        activeColor:'#999999', hoverColor:'#bbbbbb', readyColor:'#aaaaaa'
-    }, [{
-        doActivated: function() {
-            this.parent.dialog.showDatePicker(
-                function(action, color) {
-                    switch(action) {
-                        case 'closeBtn':
-                            console.log("cancelled");
-                            break;
-                        case 'cancelBtn':
-                            console.log("cancelled");
-                            break;
-                        case 'confirmBtn':
-                            console.log("confirmed", color);
-                            break;
+    JS.require('myt.all', function() {
+        var rootView = new myt.View(null, {bgColor:'#eeeeee'}, [myt.SizeToWindow]);
+        
+        new myt.Dialog(rootView, {name:'dialog'});
+        
+        new myt.SimpleButton(rootView, {
+            x:10, y:10, width:50, height:20,
+            activeColor:'#999999', hoverColor:'#bbbbbb', readyColor:'#aaaaaa'
+        }, [{
+            doActivated: function() {
+                this.parent.dialog.showDatePicker(
+                    function(action, color) {
+                        switch(action) {
+                            case 'closeBtn':
+                                console.log("cancelled");
+                                break;
+                            case 'cancelBtn':
+                                console.log("cancelled");
+                                break;
+                            case 'confirmBtn':
+                                console.log("confirmed", color);
+                                break;
+                        }
+                    },{
+                        initialDate:new Date()
                     }
-                },{
-                    initialDate:new Date()
-                }
-            );
-            this.callSuper();
-        }
-    }]);
-    new myt.SimpleButton(rootView, {
-        x:10, y:40, width:50, height:20,
-        activeColor:'#999999', hoverColor:'#bbbbbb', readyColor:'#aaaaaa'
-    }, [{
-        doActivated: function() {
-            this.parent.dialog.showDatePicker(
-                function(action, color) {
-                    switch(action) {
-                        case 'closeBtn':
-                            console.log("cancelled");
-                            break;
-                        case 'cancelBtn':
-                            console.log("cancelled");
-                            break;
-                        case 'confirmBtn':
-                            console.log("confirmed", color);
-                            break;
+                );
+                this.callSuper();
+            }
+        }]);
+        new myt.SimpleButton(rootView, {
+            x:10, y:40, width:50, height:20,
+            activeColor:'#999999', hoverColor:'#bbbbbb', readyColor:'#aaaaaa'
+        }, [{
+            doActivated: function() {
+                this.parent.dialog.showDatePicker(
+                    function(action, color) {
+                        switch(action) {
+                            case 'closeBtn':
+                                console.log("cancelled");
+                                break;
+                            case 'cancelBtn':
+                                console.log("cancelled");
+                                break;
+                            case 'confirmBtn':
+                                console.log("confirmed", color);
+                                break;
+                        }
+                    },{
+                        initialDate:new Date(),
+                        dateOnly:true
                     }
-                },{
-                    initialDate:new Date(),
-                    dateOnly:true
-                }
-            );
-            this.callSuper();
-        }
-    }]);
-    new myt.SimpleButton(rootView, {
-        x:10, y:70, width:50, height:20,
-        activeColor:'#999999', hoverColor:'#bbbbbb', readyColor:'#aaaaaa'
-    }, [{
-        doActivated: function() {
-            this.parent.dialog.showDatePicker(
-                function(action, color) {
-                    switch(action) {
-                        case 'closeBtn':
-                            console.log("cancelled");
-                            break;
-                        case 'cancelBtn':
-                            console.log("cancelled");
-                            break;
-                        case 'confirmBtn':
-                            console.log("confirmed", color);
-                            break;
+                );
+                this.callSuper();
+            }
+        }]);
+        new myt.SimpleButton(rootView, {
+            x:10, y:70, width:50, height:20,
+            activeColor:'#999999', hoverColor:'#bbbbbb', readyColor:'#aaaaaa'
+        }, [{
+            doActivated: function() {
+                this.parent.dialog.showDatePicker(
+                    function(action, color) {
+                        switch(action) {
+                            case 'closeBtn':
+                                console.log("cancelled");
+                                break;
+                            case 'cancelBtn':
+                                console.log("cancelled");
+                                break;
+                            case 'confirmBtn':
+                                console.log("confirmed", color);
+                                break;
+                        }
+                    },{
+                        initialDate:new Date(),
+                        timeOnly:true
                     }
-                },{
-                    initialDate:new Date(),
-                    timeOnly:true
-                }
-            );
-            this.callSuper();
-        }
-    }]);
+                );
+                this.callSuper();
+            }
+        }]);
+    });
 </script>
 </body></html>
