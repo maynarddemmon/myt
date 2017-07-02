@@ -13016,7 +13016,7 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
     
     fillText: function() {var ctx = this.__ctx; ctx.fillText.apply(ctx, arguments);},
     strokeText: function() {var ctx = this.__ctx; ctx.strokeText.apply(ctx, arguments);},
-    measureText: function() {var ctx = this.__ctx; ctx.measureText.apply(ctx, arguments);},
+    measureText: function() {var ctx = this.__ctx; return ctx.measureText.apply(ctx, arguments);},
     
     drawImage: function() {var ctx = this.__ctx; ctx.drawImage.apply(ctx, arguments);},
     createImageData: function() {var ctx = this.__ctx; ctx.createImageData.apply(ctx, arguments);},
