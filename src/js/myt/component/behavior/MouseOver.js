@@ -16,6 +16,9 @@
             idle event.
         __lastOverIdleValue:boolean Used by the code that smoothes out
             mouseover events. Stores the last mouseOver value.
+        __disabledOver:boolean Tracks mouse over/out state while a view is
+            disabled. This allows correct restoration of mouseOver state if
+            a view becomes enabled while the mouse is already over it.
 */
 myt.MouseOver = new JS.Module('MouseOver', {
     // Life Cycle //////////////////////////////////////////////////////////////
@@ -46,11 +49,20 @@ myt.MouseOver = new JS.Module('MouseOver', {
     
     /** @overrides myt.Disableable */
     setDisabled: function(v) {
-        // When about to disable make sure mouseOver is not true. This 
-        // helps prevent unwanted behavior of a disabled view.
-        if (v && this.mouseOver) this.setMouseOver(false);
-        
         this.callSuper(v);
+        
+        if (this.disabled) {
+            // When disabling make sure exposed mouseOver is not true. This 
+            // helps prevent unwanted behavior of a disabled view such as a
+            // disabled button looking like it is moused over.
+            if (this.mouseOver) {
+                this.__disabledOver = true;
+                this.setMouseOver(false);
+            }
+        } else {
+            // Restore exposed mouse over state when enabling
+            if (this.__disabledOver) this.setMouseOver(true);
+        }
     },
     
     
@@ -80,12 +92,16 @@ myt.MouseOver = new JS.Module('MouseOver', {
     /** Called when the mouse is over this view. Subclasses must call super.
         @returns void */
     doMouseOver: function(event) {
+        this.__disabledOver = true;
+        
         if (!this.disabled) this.setMouseOver(true);
     },
     
     /** Called when the mouse leaves this view. Subclasses must call super.
         @returns void */
     doMouseOut: function(event) {
+        this.__disabledOver = false;
+        
         if (!this.disabled) this.setMouseOver(false);
     }
 });
