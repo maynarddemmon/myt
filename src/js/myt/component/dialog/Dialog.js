@@ -396,17 +396,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         
         self.__setupConfirmButtons(picker, opts);
         
-        (new V(content, {
-            ignoreLayout:true,
-            width:content.width, height:24,
-            bgColor:'#eeeeee',
-            roundedTopLeftCorner:r,
-            roundedTopRightCorner:r
-        })).sendToBack();
-        
-        new M.Text(content, {
-            name:'title', x:r, y:4, text:opts.titleText, fontWeight:'bold'
-        });
+        self.setupTitle(content, opts.titleText, r);
         
         self.setDisplayMode('color_picker');
     },
@@ -467,22 +457,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         
         self.__setupConfirmButtons(picker, opts);
         
-        (new V(content, {
-            ignoreLayout:true,
-            x:0, y:0,
-            width:content.width, height:24,
-            bgColor:'#eeeeee',
-            roundedTopLeftCorner:r,
-            roundedTopRightCorner:r
-        })).sendToBack();
-        
-        new M.Text(content, {
-            name:'title', 
-            x:r, 
-            y:4, 
-            text:opts.timeOnly ? opts.timeOnlyTitleText : opts.titleText, 
-            fontWeight:'bold'
-        });
+        self.setupTitle(content, opts.timeOnly ? opts.timeOnlyTitleText : opts.titleText, r);
         
         self.setDisplayMode('date_picker');
     },
@@ -537,23 +512,27 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         
         self.__setupConfirmButtons(contentContainer, opts);
         
-        // Make background view
-        (new V(content, {
-            ignoreLayout:true,
-            width:content.width, height:24,
-            bgColor:'#eeeeee',
-            roundedTopLeftCorner:r,
-            roundedTopRightCorner:r
-        })).sendToBack();
-        
-        new M.Text(content, {
-            name:'title', x:r, y:4, text:opts.titleText, fontWeight:'bold'
-        });
+        self.setupTitle(content, opts.titleText, r);
         
         self.setDisplayMode('content');
         
         // Set initial focus
         if (contentContainer.initialFocus) contentContainer.initialFocus.focus();
+    },
+    
+    setupTitle: function(content, titleTxt, r) {
+        (new myt.View(content, {
+            ignoreLayout:true,
+            width:content.width,
+            height:24,
+            bgColor:'#eeeeee',
+            roundedTopLeftCorner:r,
+            roundedTopRightCorner:r
+        })).sendToBack();
+        
+        new myt.Text(content, {
+            name:'title', x:r, y:4, text:titleTxt, fontWeight:'bold'
+        });
     },
     
     /** @private */
