@@ -1,3 +1,71 @@
+/** The class used as the DEFAULT_BUTTON_CLASS in myt.Dialog.
+    
+    Events:
+        None
+    
+    Attributes:
+        None
+*/
+myt.DialogButton = new JS.Class('DialogButton', myt.SimpleButton, {
+    // Life Cycle //////////////////////////////////////////////////////////////
+    /** @overrides */
+    initNode: function(parent, attrs) {
+        if (attrs.height == null) attrs.height = 20;
+        if (attrs.shrinkToFit == null) attrs.shrinkToFit = true;
+        if (attrs.inset == null) attrs.inset = 10;
+        if (attrs.outset == null) attrs.outset = 10;
+        if (attrs.textY == null) attrs.textY = 3;
+        if (attrs.roundedCorners == null) attrs.roundedCorners = 5;
+        
+        if (attrs.activeColor == null) attrs.activeColor = '#bbbbbb';
+        if (attrs.hoverColor == null) attrs.hoverColor = '#dddddd';
+        if (attrs.readyColor == null) attrs.readyColor = '#cccccc';
+        if (attrs.textColor == null) attrs.textColor = '#000000';
+        
+        var fontSize = attrs.fontSize,
+            shrinkToFit = attrs.shrinkToFit,
+            text = attrs.text || '';
+        delete attrs.fontSize;
+        delete attrs.shrinkToFit;
+        delete attrs.text;
+        
+        this.callSuper(parent, attrs);
+        
+        var textView = this.textView = new myt.Text(this, {
+            x:this.inset, 
+            y:this.textY, 
+            text:text,
+            fontSize:fontSize,
+            whiteSpace:'nowrap',
+            domClass:'myt-Text mytButtonText'
+        });
+        if (shrinkToFit) this.applyConstraint('__update', [this, 'inset', this, 'outset', textView, 'width']);
+    },
+    
+    
+    // Accessors ///////////////////////////////////////////////////////////////
+    setText: function(v) {
+        if (this.inited) this.textView.setText(v);
+    },
+    
+    setTooltip: function(v) {
+        this.domElement.title = v;
+    },
+    
+    
+    // Methods /////////////////////////////////////////////////////////////////
+    /** @private */
+    __update: function(v) {
+        if (!this.destroyed) {
+            var inset = this.inset,
+                textView = this.textView;
+            textView.setX(inset);
+            this.setWidth(inset + textView.width + this.outset);
+        }
+    }
+});
+
+
 /** A modal panel that contains a Dialog.
     
     Events:
@@ -21,6 +89,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         DEFAULT_SHADOW: [0, 4, 20, '#666666'],
         DEFAULT_BORDER: [1, 'solid', '#ffffff'],
         DEFAULT_BGCOLOR: '#ffffff',
+        DEFAULT_BUTTON_CLASS: myt.DialogButton,
         
         /** Makes the text wrap at 200px and the dialog will be at
             least 200px wide. */
@@ -61,73 +130,79 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             titleText:'Choose a Date',
             timeOnlyTitleText:'Choose a Time',
             color:'#000000'
-        },
-        
-        /** Does basic styling of a dialog and creates a close button.
-            @param dialog:myt.Dialog The dialog to apply the styling to.
-            @returns void */
-        setupDialog: function(dialog) {
-            var content = dialog.content;
-            content.setRoundedCorners(this.DEFAULT_RADIUS);
-            content.setBgColor(this.DEFAULT_BGCOLOR);
-            content.setBoxShadow(this.DEFAULT_SHADOW);
-            content.setBorder(this.DEFAULT_BORDER);
-            content.setFocusCage(true);
-            
-            this.createCloseButton(content, dialog);
-        },
-        
-        /** Creates a close button on the provided targetView.
-            @param targetView:myt.View The view to create the button on.
-            @param callbackTarget:object An object with a doCallback method
-                that will get called when the close button is activated.
-            @param hoverColor:color (optional) The color used when the mouse 
-                hovers over the button. Defaults to '#666666'.
-            @param activeColor:color (optional) The color used when the button 
-                is active. Defaults to '#000000'.
-            @param readyColor:color (optional) The color used when the button 
-                is ready to be activated. Defaults to '#333333'.
-            @param iconColor:color (optional) The color used to draw the 
-                close icon. Defaults to '#ffffff'.
-            @returns myt.Button: The created button. */
-        createCloseButton: function(
-            targetView, callbackTarget, hoverColor, activeColor, readyColor, iconColor
-        ) {
-            var btnView = new myt.SimpleButton(targetView, {
-                name:'closeBtn', tooltip:'Close Dialog.',
-                ignoreLayout:true, width:16, height:16, y:4, align:'right', alignOffset:4,
-                roundedCorners:8,
-                activeColor:activeColor || '#000000',
-                hoverColor:hoverColor || '#666666',
-                readyColor:readyColor || '#333333'
-            }, [{
-                doActivated: function() {callbackTarget.doCallback(this);}
-            }]);
-            
-            var iconView = new myt.FontAwesome(btnView, {
-                textColor:iconColor || '#ffffff', icon:'close', x:3.29, y:1
-            });
-            iconView.deStyle.fontSize = '12px';
-            
-            return btnView;
         }
     },
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
+    /** @overrides */
+    initNode: function(parent, attrs) {
+        if (attrs.buttonClass == null) attrs.buttonClass = myt.Dialog.DEFAULT_BUTTON_CLASS;
+        
+        this.callSuper(parent, attrs);
+    },
+    
     doAfterAdoption: function() {
-        myt.Dialog.setupDialog(this);
+        this.setupDialog();
         
         this.callSuper();
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
+    setButtonClass: function(v) {this.buttonClass = v;},
     setDisplayMode: function(v) {this.displayMode = v;},
     setCallbackFunction: function(v) {this.callbackFunction = v;},
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** Does basic styling of a dialog and creates a close button.
+        @returns void */
+    setupDialog: function() {
+        var D = myt.Dialog,
+            content = this.content;
+        content.setRoundedCorners(D.DEFAULT_RADIUS);
+        content.setBgColor(D.DEFAULT_BGCOLOR);
+        content.setBoxShadow(D.DEFAULT_SHADOW);
+        content.setBorder(D.DEFAULT_BORDER);
+        content.setFocusCage(true);
+        
+        this.createCloseButton(content, this);
+    },
+    
+    /** Creates a close button on the provided targetView.
+        @param targetView:myt.View The view to create the button on.
+        @param callbackTarget:object An object with a doCallback method
+            that will get called when the close button is activated.
+        @param hoverColor:color (optional) The color used when the mouse 
+            hovers over the button. Defaults to '#666666'.
+        @param activeColor:color (optional) The color used when the button 
+            is active. Defaults to '#000000'.
+        @param readyColor:color (optional) The color used when the button 
+            is ready to be activated. Defaults to '#333333'.
+        @param iconColor:color (optional) The color used to draw the 
+            close icon. Defaults to '#ffffff'.
+        @returns myt.Button: The created button. */
+    createCloseButton: function(
+        targetView, callbackTarget, hoverColor, activeColor, readyColor, iconColor
+    ) {
+        return new this.buttonClass(targetView, {
+            name:'closeBtn',
+            ignoreLayout:true, width:16, height:16, y:4, align:'right', alignOffset:4,
+            inset:3, textY:1, shrinkToFit:false,
+            roundedCorners:8,
+            activeColor:activeColor || '#cc0000',
+            hoverColor:hoverColor || '#ff3333',
+            readyColor:readyColor || '#ff0000',
+            textColor:'#ffffff',
+            fontSize:'12.5px',
+            text:myt.FontAwesome.makeTag(['close']),
+            tooltip:'Close Dialog.',
+        }, [{
+            doActivated: function() {callbackTarget.doCallback(this);}
+        }]);
+    },
+    
     /** @overrides myt.Dimmer */
     hide: function(ignoreRestoreFocus) {
         this.__hideSpinner();
@@ -394,8 +469,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         closeBtn.setVisible(true);
         closeBtn.focus();
         
-        self.__setupConfirmButtons(picker, opts);
-        
+        self.setupFooterButtons(picker, opts);
         self.setupTitle(content, opts.titleText, r);
         
         self.setDisplayMode('color_picker');
@@ -455,8 +529,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         closeBtn.setVisible(true);
         closeBtn.focus();
         
-        self.__setupConfirmButtons(picker, opts);
-        
+        self.setupFooterButtons(picker, opts);
         self.setupTitle(content, opts.timeOnly ? opts.timeOnlyTitleText : opts.titleText, r);
         
         self.setDisplayMode('date_picker');
@@ -471,7 +544,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         
         this.showMessage(msg, callbackFunction, opts);
         
-        this.__setupConfirmButtons(this.content.msg, opts);
+        this.setupFooterButtons(this.content.msg, opts);
         
         this.setDisplayMode('confirm');
     },
@@ -510,8 +583,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         closeBtn.setVisible(true);
         closeBtn.focus();
         
-        self.__setupConfirmButtons(contentContainer, opts);
-        
+        self.setupFooterButtons(contentContainer, opts);
         self.setupTitle(content, opts.titleText, r);
         
         self.setDisplayMode('content');
@@ -536,64 +608,48 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     },
     
     /** @private */
-    __setupConfirmButtons: function(mainView, opts) {
+    setupFooterButtons: function(mainView, opts) {
         var self = this,
             M = myt,
             V = M.View,
-            content = this.content, 
+            content = self.content, 
             DPY = M.ModalPanel.DEFAULT_PADDING_Y,
-            r = M.Dialog.DEFAULT_RADIUS;
+            r = M.Dialog.DEFAULT_RADIUS,
+            BUTTON_CLASS = self.buttonClass,
+            attrs,
+            buttons;
         
         var btnContainer = new V(content, {
             y:mainView.y + mainView.height + DPY, align:'center'
         });
         
         // Cancel Button
-        var attrs = {
-            name:'cancelBtn', text:opts.cancelTxt, shrinkToFit:true,
-            height:20, inset:10, outset:10, roundedCorners:5,
-            activeColor:'#bbbbbb',
-            hoverColor:'#dddddd',
-            readyColor:'#cccccc'
-        };
+        attrs = {name:'cancelBtn', text:opts.cancelTxt};
         if (opts.activeColor != null) attrs.activeColor = opts.activeColor;
         if (opts.hoverColor != null) attrs.hoverColor = opts.hoverColor;
         if (opts.readyColor != null) attrs.readyColor = opts.readyColor;
         if (opts.textColor != null) attrs.textColor = opts.textColor;
-        
-        new M.SimpleIconTextButton(btnContainer, attrs, [{
+        new BUTTON_CLASS(btnContainer, attrs, [{
             doActivated: function() {self.doCallback(this);}
         }]);
         
         // Confirm Button
-        attrs.name = 'confirmBtn';
-        attrs.text = opts.confirmTxt;
+        attrs = {name:'confirmBtn', text:opts.confirmTxt};
         if (opts.activeColorConfirm != null) attrs.activeColor = opts.activeColorConfirm;
         if (opts.hoverColorConfirm != null) attrs.hoverColor = opts.hoverColorConfirm;
         if (opts.readyColorConfirm != null) attrs.readyColor = opts.readyColorConfirm;
         if (opts.textColorConfirm != null) attrs.textColor = opts.textColorConfirm;
-        
-        new M.SimpleIconTextButton(btnContainer, attrs, [{
+        new BUTTON_CLASS(btnContainer, attrs, [{
             doActivated: function() {self.doCallback(this);}
         }]);
         
         // Additional Buttons
-        var buttons = opts.buttons;
+        buttons = opts.buttons;
         if (buttons) {
             for (var i = 0, len = buttons.length; len > i; i++) {
                 attrs = buttons[i];
                 if (attrs.name == null) attrs.name = 'btn_' + i;
-                if (attrs.shrinkToFit == null) attrs.shrinkToFit = true;
-                if (attrs.height == null) attrs.height = 20;
-                if (attrs.inset == null) attrs.inset = 10;
-                if (attrs.outset == null) attrs.outset = 10;
-                if (attrs.roundedCorners == null) attrs.roundedCorners = 5;
-                if (attrs.activeColor == null) attrs.activeColor = '#bbbbbb';
-                if (attrs.hoverColor == null) attrs.hoverColor = '#dddddd';
-                if (attrs.readyColor == null) attrs.readyColor = '#cccccc';
-                if (attrs.textColor == null) attrs.textColor = '#000000';
-                
-                new M.SimpleIconTextButton(btnContainer, attrs, [{
+                new BUTTON_CLASS(btnContainer, attrs, [{
                     doActivated: function() {self.doCallback(this);}
                 }]);
             }
