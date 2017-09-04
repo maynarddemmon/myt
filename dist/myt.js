@@ -21687,8 +21687,8 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             whiteSpace:opts.whiteSpace,
             wordWrap:opts.wordWrap,
             fontWeight:opts.fontWeight,
-            x:MP.DEFAULT_PADDING_X,
-            y:MP.DEFAULT_PADDING_Y,
+            x:opts.msgX == null ? MP.DEFAULT_PADDING_X : opts.msgX,
+            y:opts.msgY == null ? MP.DEFAULT_PADDING_Y : opts.msgY,
             width:opts.width
         });
         
@@ -21761,7 +21761,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         var spinner = self.spinner = new M.Spinner(content, {
             align:'center', visible:true,
             radius:10, lines:12, length:14, lineWidth:3,
-            y:MP.DEFAULT_PADDING_Y
+            y:opts.msgY == null ? MP.DEFAULT_PADDING_Y : opts.msgY,
         });
         if (msg) {
             new M.Text(content, {
@@ -21769,7 +21769,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
                 whiteSpace:opts.whiteSpace,
                 wordWrap:opts.wordWrap,
                 fontWeight:opts.fontWeight,
-                x:MP.DEFAULT_PADDING_X,
+                x:opts.msgX == null ? MP.DEFAULT_PADDING_X : opts.msgX,
                 y:spinner.y + spinner.getSize() + MP.DEFAULT_PADDING_Y,
                 width:opts.width
             });
@@ -21989,7 +21989,9 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         });
         
         // Cancel Button
-        attrs = {name:'cancelBtn', text:opts.cancelTxt};
+        attrs = opts.cancelAttrs || {};
+        if (attrs.name == null) attrs.name = 'cancelBtn';
+        if (attrs.text == null) attrs.text = opts.cancelTxt;
         if (opts.activeColor != null) attrs.activeColor = opts.activeColor;
         if (opts.hoverColor != null) attrs.hoverColor = opts.hoverColor;
         if (opts.readyColor != null) attrs.readyColor = opts.readyColor;
@@ -21999,7 +22001,9 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         }]);
         
         // Confirm Button
-        attrs = {name:'confirmBtn', text:opts.confirmTxt};
+        attrs = opts.confirmAttrs || {};
+        if (attrs.name == null) attrs.name = 'confirmBtn';
+        if (attrs.text == null) attrs.text = opts.confirmTxt;
         if (opts.activeColorConfirm != null) attrs.activeColor = opts.activeColorConfirm;
         if (opts.hoverColorConfirm != null) attrs.hoverColor = opts.hoverColorConfirm;
         if (opts.readyColorConfirm != null) attrs.readyColor = opts.readyColorConfirm;
