@@ -540,13 +540,24 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     },
     
     showConfirm: function(msg, callbackFunction, opts) {
-        opts = myt.extend({}, myt.Dialog.CONFIRM_DEFAULTS, opts);
+        var self = this,
+            M = myt,
+            D = M.Dialog,
+            content = self.content;
         
-        this.showMessage(msg, callbackFunction, opts);
+        opts = M.extend({}, D.CONFIRM_DEFAULTS, opts);
         
-        this.setupFooterButtons(this.content.msg, opts);
+        self.showMessage(msg, callbackFunction, opts);
         
-        this.setDisplayMode('confirm');
+        var msg = content.msg;
+        
+        if (opts.titleText) {
+            self.setupTitle(content, opts.titleText, D.DEFAULT_RADIUS);
+            msg.setY(msg.y + 24);
+        }
+        self.setupFooterButtons(msg, opts);
+        
+        self.setDisplayMode('confirm');
     },
     
     showContentConfirm: function(contentBuilderFunc, callbackFunction, opts) {
