@@ -307,16 +307,17 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         var self = this,
             M = myt,
             MP = M.ModalPanel,
+            D = M.Dialog,
             content = self.content, 
             closeBtn = content.closeBtn;
         
-        opts = M.extend({}, M.Dialog.WRAP_TEXT_DEFAULTS, opts);
+        opts = M.extend({}, D.WRAP_TEXT_DEFAULTS, opts);
         
         self.__destroyContent();
         
         self.setCallbackFunction(callbackFunction);
         
-        new M.Text(content, {
+        var msgView = new M.Text(content, {
             name:'msg',
             text:msg,
             whiteSpace:opts.whiteSpace,
@@ -326,6 +327,11 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             y:opts.msgY == null ? MP.DEFAULT_PADDING_Y : opts.msgY,
             width:opts.width
         });
+        
+        if (opts.titleText) {
+            self.setupTitle(content, opts.titleText, D.DEFAULT_RADIUS);
+            msgView.setY(msgView.y + 24);
+        }
         
         self.show();
         
@@ -541,21 +547,12 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     
     showConfirm: function(msg, callbackFunction, opts) {
         var self = this,
-            M = myt,
-            D = M.Dialog,
-            content = self.content;
+            M = myt;
         
-        opts = M.extend({}, D.CONFIRM_DEFAULTS, opts);
+        opts = M.extend({}, M.Dialog.CONFIRM_DEFAULTS, opts);
         
         self.showMessage(msg, callbackFunction, opts);
-        
-        var msg = content.msg;
-        
-        if (opts.titleText) {
-            self.setupTitle(content, opts.titleText, D.DEFAULT_RADIUS);
-            msg.setY(msg.y + 24);
-        }
-        self.setupFooterButtons(msg, opts);
+        self.setupFooterButtons(self.content.msg, opts);
         
         self.setDisplayMode('confirm');
     },
