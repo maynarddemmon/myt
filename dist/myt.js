@@ -8295,7 +8295,7 @@ myt.Layout = new JS.Class('Layout', myt.Node, {
             svs.splice(curIdx, 1);
             if (targetIdx >= 0) {
                 if (curIdx < targetIdx) --targetIdx;
-                svs.splice(targetIdx + after ? 1 : 0, 0, sv);
+                svs.splice(targetIdx + (after ? 1 : 0), 0, sv);
             } else {
                 // Make first or last since target was not found
                 if (after) {
