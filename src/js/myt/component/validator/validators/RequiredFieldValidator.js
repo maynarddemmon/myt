@@ -3,7 +3,7 @@ myt.RequiredFieldValidator = new JS.Class('RequiredFieldValidator', myt.Validato
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.Validator */
     isValid: function(value, config, errorMessages) {
-        if (value == null || value === '') {
+        if (value == null || value === '' || (typeof value === 'string' && value.trim() === '')) {
             if (errorMessages) errorMessages.push("This value is required.");
             return false;
         }
