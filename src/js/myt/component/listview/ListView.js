@@ -30,6 +30,10 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
         this.callSuper(parent, attrs);
         
         this.__updateItems();
+        this.buildLayout();
+    },
+    
+    buildLayout: function() {
         new myt.SpacedLayout(this.getContentView(), {
             axis:'y', spacing:1, collapseParent:true
         });
@@ -103,14 +107,15 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
     
     /** @private */
     __updateItems: function() {
-        var cfg = this.itemConfig || [],
+        var self = this,
+            cfg = self.itemConfig || [],
             cfgLen = cfg.length, cfgItem, cfgClass, cfgAttrs,
-            items = this.items, itemsLen = items.length, item,
-            defaultItemClass = this.defaultItemClass,
-            contentView = this.getContentView(), 
+            items = self.items, itemsLen = items.length, item,
+            defaultItemClass = self.defaultItemClass,
+            contentView = self.getContentView(), 
             layouts = contentView.getLayouts(), layout,
             layoutLen = layouts.length, i,
-            minItemWidth, minWidth = this.minWidth;
+            minItemWidth, minWidth = self.minWidth;
         
         // Lock layouts during reconfiguration
         i = layoutLen;
@@ -137,7 +142,7 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
             }
             
             // Create a new item if no item exists
-            if (!item) item = items[i] = new cfgClass(contentView, {listView:this});
+            if (!item) item = items[i] = new cfgClass(contentView, {listView:self});
             
             // Apply config to item
             if (item) {
@@ -166,8 +171,8 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
         items.length = cfgLen;
         
         // Resize items and contentView
-        for (i = 0; cfgLen > i; ++i) items[i].setWidth(minWidth);
-        contentView.setWidth(minWidth);
+        for (i = 0; cfgLen > i; ++i) self.updateItemWidth(items[i], minWidth);
+        self.updateContentWidth(contentView, minWidth);
         
         // Unlock layouts and update
         i = layoutLen;
@@ -177,5 +182,13 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
             layout.decrementLockedCounter();
             layout.update();
         }
+    },
+    
+    updateItemWidth: function(item, width) {
+        item.setWidth(width);
+    },
+    
+    updateContentWidth: function(contentView, width) {
+        contentView.setWidth(width);
     }
 });
