@@ -6,7 +6,9 @@ myt.DrawingUtil = {
         @param thickness:Number the thickness of the line. If thickness is
             zero or less a fill will be done rather than an outline. */
     drawRoundedRect: function(canvas, r, thickness, left, top, w, h) {
-        var bottom = top + h, right = left + w;
+        var bottom = top + h,
+            right = left + w,
+            PI = Math.PI;
         
         // We create a single path for both an outer and inner rounded rect.
         // The reason for this is that filling looks much better than stroking.
@@ -15,41 +17,41 @@ myt.DrawingUtil = {
         canvas.moveTo(left, top + r);
         
         canvas.lineTo(left, bottom - r);
-        canvas.quadraticCurveTo(left, bottom, left + r, bottom);
+        canvas.arc(left + r, bottom - r, r, PI, PI / 2, true);
         
         canvas.lineTo(right - r, bottom);
-        canvas.quadraticCurveTo(right, bottom, right, bottom - r);
+        canvas.arc(right - r, bottom - r, r, PI / 2, 0, true);
         
         canvas.lineTo(right, top + r);
-        canvas.quadraticCurveTo(right, top, right - r, top);
+        canvas.arc(right - r, top + r, r, 0, PI * 3 / 2, true);
         
         canvas.lineTo(left + r, top);
-        canvas.quadraticCurveTo(left, top, left, top + r);
-        
-        if (thickness > 0) {
-            var ir = r - thickness,
-                ileft = left + thickness,
-                iright = right - thickness,
-                itop = top + thickness,
-                ibottom = bottom - thickness;
-            
-            canvas.lineTo(ileft, itop + ir);
-            
-            canvas.quadraticCurveTo(ileft, itop, ileft + ir, itop);
-            
-            canvas.lineTo(iright - ir, itop);
-            canvas.quadraticCurveTo(iright, itop, iright, itop + ir);
-            
-            canvas.lineTo(iright, ibottom - ir);
-            canvas.quadraticCurveTo(iright, ibottom, iright - ir, ibottom);
-            
-            canvas.lineTo(ileft + ir, ibottom);
-            canvas.quadraticCurveTo(ileft, ibottom, ileft, ibottom - ir);
-            
-            canvas.lineTo(ileft, itop + ir);
-        }
+        canvas.arc(left + r, top + r, r, PI * 3 / 2, PI, true);
         
         canvas.closePath();
+        
+        if (thickness > 0) {
+            r -= thickness;
+            left += thickness;
+            right -= thickness;
+            top += thickness;
+            bottom -= thickness;
+            
+            canvas.moveTo(left, top + r);
+            
+            canvas.arc(left + r, top + r, r, PI, PI * 3 / 2);
+            
+            canvas.lineTo(right - r, top);
+            canvas.arc(right - r, top + r, r, PI * 3 / 2, 0);
+            
+            canvas.lineTo(right, bottom - r);
+            canvas.arc(right - r, bottom - r, r, 0, PI / 2);
+            
+            canvas.lineTo(left + r, bottom);
+            canvas.arc(left + r, bottom - r, r, PI / 2, PI);
+            
+            canvas.closePath();
+        }
     },
     
     /** Draws a rect outline into the provided drawview.
