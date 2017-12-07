@@ -74,10 +74,15 @@ myt.GridController = new JS.Module('GridController', {
             this.__tempLock = false;
             
             var hdrs = this.columnHeaders, i = hdrs.length, hdr;
+            // Reset min/max since notifyColumnHeaderVisibilityChange will
+            // update these values
+            this.setMaxWidth(0);
+            this.setMinWidth(0);
             while (i) {
                 hdr = hdrs[--i];
                 this.notifyColumnHeaderXChange(hdr);
                 this.notifyColumnHeaderWidthChange(hdr);
+                this.notifyColumnHeaderVisibilityChange(hdr);
             }
             
             this.doSort();
@@ -107,6 +112,7 @@ myt.GridController = new JS.Module('GridController', {
         var maxExtent = 0, extent;
         while(i) {
             hdr = hdrs[--i];
+            if (!hdr.visible) continue;
             extent = hdr.x + hdr.width;
             if (extent > maxExtent) maxExtent = extent;
         }
@@ -121,6 +127,7 @@ myt.GridController = new JS.Module('GridController', {
         i = len;
         while(i) {
             hdr = hdrs[--i];
+            if (!hdr.visible) continue;
             if (hdr.resizable && hdr.flex > 0) {
                 limit = (isGrow ? hdr.maxValue : hdr.minValue) - hdr.value;
                 resizeInfo.push({hdr:hdr, limit:limit, amt:0});
@@ -181,6 +188,7 @@ myt.GridController = new JS.Module('GridController', {
             i = len;
             while(i) {
                 hdr = hdrs[--i];
+                if (!hdr.visible) continue;
                 if (hdr.resizable && hdr.flex === 0) {
                     limit = (isGrow ? hdr.maxValue : hdr.minValue) - hdr.value;
                     resizeInfo.push({hdr:hdr, limit:limit, amt:0});
@@ -262,16 +270,44 @@ myt.GridController = new JS.Module('GridController', {
     /** Gets the column header before the provided one.
         @returns myt.GridColumnHeader or null if none exists. */
     getPrevColumnHeader: function(columnHeader) {
-        var idx = this.getColumnHeaderIndex(columnHeader) - 1;
-        return idx >= 0 ? this.columnHeaders[idx] : null;
+        var hdr,
+            hdrs = this.columnHeaders,
+            idx = this.getColumnHeaderIndex(columnHeader);
+        if (idx > 0) {
+            while (idx) {
+                hdr = hdrs[--idx];
+                if (hdr.visible) return hdr;
+            }
+        }
+        return null;
     },
     
     /** Gets the column header after the provided one.
         @returns myt.GridColumnHeader or null if none exists. */
     getNextColumnHeader: function(columnHeader) {
-        var idx = this.getColumnHeaderIndex(columnHeader) + 1;
-        var hdrs = this.columnHeaders;
-        return idx > 0 && idx < hdrs.length ? hdrs[idx] : null;
+        var hdr,
+            hdrs = this.columnHeaders,
+            len = hdrs.length,
+            idx = this.getColumnHeaderIndex(columnHeader) + 1;
+        if (idx > 0 && idx < len) {
+            for (; len > idx; idx++) {
+                hdr = hdrs[idx];
+                if (hdr.visible) return hdr;
+            }
+        }
+        return null;
+    },
+    
+    /** @private */
+    _findLastColumn: function() {
+        var hdrs = this.columnHeaders,
+            i = hdrs.length,
+            hdr;
+        while (i) {
+            hdr = hdrs[--i];
+            if (hdr.visible) return hdr;
+        }
+        return null;
     },
     
     hasColumnHeader: function(columnHeader) {
@@ -285,22 +321,15 @@ myt.GridController = new JS.Module('GridController', {
     notifyAddColumnHeader: function(columnHeader) {
         if (!this.hasColumnHeader(columnHeader)) {
             this.columnHeaders.push(columnHeader);
-            this.setLastColumn(columnHeader);
-            this.setMaxWidth(this.maxWidth + columnHeader.maxValue);
-            this.setMinWidth(this.minWidth + columnHeader.minValue);
-            this._fitToWidth();
+            if (columnHeader.visible) this.setLastColumn(columnHeader);
         }
     },
     
     notifyRemoveColumnHeader: function(columnHeader) {
         var idx = this.getColumnHeaderIndex(columnHeader);
         if (idx >= 0) {
-            var hdrs = this.columnHeaders;
-            hdrs.splice(idx, 1);
-            if (columnHeader.last) this.setLastColumn(hdrs[hdrs.length - 1]);
-            this.setMaxWidth(this.maxWidth - columnHeader.maxValue);
-            this.setMinWidth(this.minWidth - columnHeader.minValue);
-            this._fitToWidth();
+            this.columnHeaders.splice(idx, 1);
+            if (columnHeader.visible && columnHeader.last) this.setLastColumn(this.getPrevColumnHeader(columnHeader));
         }
     },
     
@@ -314,6 +343,24 @@ myt.GridController = new JS.Module('GridController', {
         if (this.locked || this.__tempLock) return;
         var rows = this.rows, i = rows.length;
         while (i) rows[--i].notifyColumnHeaderWidthChange(columnHeader);
+    },
+    
+    notifyColumnHeaderVisibilityChange: function(columnHeader) {
+        if (this.locked || this.__tempLock) return;
+        
+        var rows = this.rows, 
+            i = rows.length;
+        while (i) rows[--i].notifyColumnHeaderVisibilityChange(columnHeader);
+        
+        this.setLastColumn(this._findLastColumn());
+        if (columnHeader.visible) {
+            this.setMaxWidth(this.maxWidth + columnHeader.maxValue);
+            this.setMinWidth(this.minWidth + columnHeader.minValue);
+        } else {
+            this.setMaxWidth(this.maxWidth - columnHeader.maxValue);
+            this.setMinWidth(this.minWidth - columnHeader.minValue);
+        }
+        this._fitToWidth();
     },
     
     // Rows
@@ -336,6 +383,7 @@ myt.GridController = new JS.Module('GridController', {
                     hdr = hdrs[--i];
                     row.notifyColumnHeaderXChange(hdr);
                     row.notifyColumnHeaderWidthChange(hdr);
+                    row.notifyColumnHeaderVisibilityChange(hdr);
                 }
                 
                 this.doSort();

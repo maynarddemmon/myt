@@ -118,6 +118,7 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
         if (gc) {
             gc.notifyAddColumnHeader(this);
             gc.notifyColumnHeaderXChange(this);
+            gc.notifyColumnHeaderVisibilityChange(this);
         }
         this.setWidth(this.value);
         this._updateLast();
@@ -134,6 +135,8 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
     setSortable: function(v) {this.set('sortable', v, true);},
     setSortState: function(v) {this.set('sortState', v, true);},
     
+    setResizable: function(v) {this.set('resizable', v, true);},
+    
     setCellWidthAdj: function(v) {this.cellWidthAdj = v;},
     setCellXAdj: function(v) {this.cellXAdj = v;},
     setFlex: function(v) {this.flex = v;},
@@ -144,8 +147,6 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
         if (this.inited) this._updateLast();
     },
     
-    setResizable: function(v) {this.set('resizable', v, true);},
-    
     setGridController: function(v) {
         var existing = this.gridController;
         if (existing !== v) {
@@ -155,6 +156,7 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
                 v.notifyAddColumnHeader(this);
                 v.notifyColumnHeaderXChange(this);
                 v.notifyColumnHeaderWidthChange(this);
+                v.notifyColumnHeaderVisibilityChange(this);
             }
         }
     },
@@ -162,62 +164,63 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
     /** @overrides myt.BoundedValueComponent */
     setValue: function(v) {
         this.callSuper(v);
-        
         if (this.inited) this.setWidth(this.value);
     },
     
     /** @overrides myt.BoundedValueComponent */
     setMinValue: function(v) {
-        var oldValue = this.minValue || 0, 
-            gc = this.gridController;
-        
-        this.callSuper(v);
-        v = this.minValue;
-        
-        if (this.inited && gc && oldValue !== v) {
-            gc.setMinWidth(gc.minWidth + v - oldValue);
-        }
+        var self = this,
+            oldMinValue = self.minValue || 0, 
+            gc = self.gridController;
+        self.callSuper(v);
+        if (self.inited && gc && oldMinValue !== self.minValue) gc.setMinWidth(gc.minWidth + self.minValue - oldMinValue);
     },
     
     /** @overrides myt.BoundedValueComponent */
     setMaxValue: function(v) {
-        var oldValue = this.maxValue || 0,
-            gc = this.gridController;
-        
+        var self = this,
+            oldMaxValue = self.maxValue || 0,
+            gc = self.gridController;
         if (v == null) v = myt.GridColumnHeader.DEFAULT_MAX_VALUE;
-        
-        this.callSuper(v);
-        v = this.maxValue;
-        
-        if (this.inited && gc && oldValue !== v) {
-            gc.setMaxWidth(gc.maxWidth + v - oldValue);
-        }
+        self.callSuper(v);
+        if (self.inited && gc && oldMaxValue !== self.maxValue) gc.setMaxWidth(gc.maxWidth + self.maxValue - oldMaxValue);
     },
     
     /** @overrides myt.View */
     setWidth: function(v, supressEvent) {
-        var cur = this.width;
-        this.callSuper(v, supressEvent);
-        
-        if (this.inited && cur !== this.width) {
-            var gc = this.gridController;
-            if (gc) gc.notifyColumnHeaderWidthChange(this);
-        }
+        var self = this,
+            cur = self.width;
+        self.callSuper(v, supressEvent);
+        if (self.inited && self.gridController && cur !== self.width) self.gridController.notifyColumnHeaderWidthChange(self);
     },
     
     /** @overrides myt.View */
     setX: function(v) {
-        var cur = this.x;
-        this.callSuper(v);
-        
-        if (this.inited && cur !== this.x) {
-            var gc = this.gridController;
-            if (gc) gc.notifyColumnHeaderXChange(this);
-        }
+        var self = this,
+            cur = self.x;
+        self.callSuper(v);
+        if (self.inited && self.gridController && cur !== self.x) self.gridController.notifyColumnHeaderXChange(self);
+    },
+    
+    /** @overrides myt.View */
+    setVisible: function(v) {
+        var self = this,
+            cur = self.visible;
+        self.callSuper(v);
+        if (self.inited && self.gridController && cur !== self.visible) self.gridController.notifyColumnHeaderVisibilityChange(self);
     },
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    getPrevColumnHeader: function() {
+        return this.gridController ? this.gridController.getPrevColumnHeader(this) : null;
+    },
+    
+    getNextColumnHeader: function() {
+        return this.gridController ? this.gridController.getNextColumnHeader(this) : null;
+    },
+    
+    /** @private */
     _updateLast: function() {
         this.resizer.setVisible(!(this.last && this.gridController.fitToWidth));
     },
@@ -226,7 +229,7 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
         @param diff:number the amount to steal. Will be a negative number.
         @returns number:the amount of width actually stolen. */
     _stealPrevWidth: function(diff) {
-        var hdr = this.gridController.getPrevColumnHeader(this),
+        var hdr = this.getPrevColumnHeader(),
             usedDiff = 0;
         if (hdr) {
             var newValue = hdr.value + diff;
@@ -243,7 +246,7 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
         @param diff:number the amount to give. Will be a positive number.
         @returns number:the amount of width actually given. */
     _givePrevWidth: function(diff) {
-        var hdr = this.gridController.getPrevColumnHeader(this),
+        var hdr = this.getPrevColumnHeader(),
             usedDiff = 0;
         if (hdr) {
             var newValue = hdr.value + diff;
@@ -260,7 +263,7 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
         @param diff:number the amount to steal. Will be a negative number.
         @returns number:the amount of width actually stolen. */
     _stealNextWidth: function(diff) {
-        var hdr = this.gridController.getNextColumnHeader(this);
+        var hdr = this.getNextColumnHeader();
         if (hdr) {
             var newValue = hdr.value + diff;
             if (hdr.resizable) hdr.setValue(newValue);
@@ -273,7 +276,7 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
         @param diff:number the amount to give. Will be a positive number.
         @returns number:the amount of width actually given. */
     _giveNextWidth: function(diff) {
-        var hdr = this.gridController.getNextColumnHeader(this);
+        var hdr = this.getNextColumnHeader();
         if (hdr) {
             var newValue = hdr.value + diff;
             if (hdr.resizable) hdr.setValue(newValue);
@@ -283,30 +286,22 @@ myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
     },
     
     _getGiveLeft: function() {
-        var hdr = this.gridController.getPrevColumnHeader(this),
-            give = 0;
-        if (hdr) give = hdr.maxValue - hdr.value + hdr._getGiveLeft();
-        return give;
+        var hdr = this.getPrevColumnHeader();
+        return hdr ? hdr.maxValue - hdr.value + hdr._getGiveLeft() : 0;
     },
     
     _getGiveRight: function() {
-        var hdr = this.gridController.getNextColumnHeader(this),
-            give = 0;
-        if (hdr) give = hdr.maxValue - hdr.value + hdr._getGiveRight();
-        return give;
+        var hdr = this.getNextColumnHeader();
+        return hdr ? hdr.maxValue - hdr.value + hdr._getGiveRight() : 0;
     },
     
     _getTakeLeft: function() {
-        var hdr = this.gridController.getPrevColumnHeader(this),
-            take = 0;
-        if (hdr) take = hdr.minValue - hdr.value + hdr._getTakeLeft();
-        return take;
+        var hdr = this.getPrevColumnHeader();
+        return hdr ? hdr.minValue - hdr.value + hdr._getTakeLeft() : 0;
     },
     
     _getTakeRight: function() {
-        var hdr = this.gridController.getNextColumnHeader(this),
-            take = 0;
-        if (hdr) take = hdr.minValue - hdr.value + hdr._getTakeRight();
-        return take;
+        var hdr = this.getNextColumnHeader();
+        return hdr ? hdr.minValue - hdr.value + hdr._getTakeRight() : 0;
     }
 });

@@ -46,5 +46,10 @@ myt.GridRow = new JS.Module('GridRow', {
     notifyColumnHeaderWidthChange: function(columnHeader) {
         var sv = this[columnHeader.columnId + 'View'];
         if (sv) sv.setWidth(columnHeader.width + columnHeader.cellWidthAdj);
+    },
+    
+    notifyColumnHeaderVisibilityChange: function(columnHeader) {
+        var sv = this[columnHeader.columnId + 'View'];
+        if (sv) sv.setVisible(columnHeader.visible);
     }
 });
