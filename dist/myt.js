@@ -27673,6 +27673,17 @@ myt.GridController = new JS.Module('GridController', {
         return this.columnHeaders.indexOf(columnHeader);
     },
     
+    getColumnHeaderById: function(columnId) {
+        var hdrs = this.columnHeaders,
+            i = hdrs.length,
+            hdr;
+        while (i) {
+            hdr = hdrs[--i];
+            if (hdr.columnId === columnId) return hdr;
+        }
+        return null;
+    },
+    
     notifyAddColumnHeader: function(columnHeader) {
         if (!this.hasColumnHeader(columnHeader)) {
             this.columnHeaders.push(columnHeader);
