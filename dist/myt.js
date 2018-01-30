@@ -21971,8 +21971,9 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         closeBtn.setVisible(true);
         closeBtn.focus();
         
-        self.setupFooterButtons(contentContainer, opts);
         self.setupTitle(content, opts.titleText, r);
+        contentContainer.setY(self.header.height + 1);
+        self.setupFooterButtons(contentContainer, opts);
         
         self.setDisplayMode('content');
         
@@ -21981,7 +21982,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
     },
     
     setupTitle: function(content, titleTxt, r) {
-        (new myt.View(content, {
+        (this.header = new myt.View(content, {
             ignoreLayout:true,
             width:content.width,
             height:24,
