@@ -27921,6 +27921,7 @@ myt.Grid = new JS.Class('Grid', myt.View, {
         if (sortFunc) {
             var content = this.content, 
                 yLayout = content.yLayout;
+            this.rows.sort(sortFunc);
             content.sortSubviews(sortFunc);
             yLayout.sortSubviews(sortFunc);
             yLayout.update();
