@@ -1,7 +1,7 @@
 /**
  * http://github.com/maynarddemmon/myt
  * Maynard Demmon <maynarddemmon@gmail.com.
- * @copyright Copyright (c) 2012-2017 Maynard Demmon and contributors
+ * @copyright Copyright (c) 2012-2018 Maynard Demmon and contributors
  * Myt: A simple javascript UI framework
  * Version: 20170326.2144
  * MIT License
@@ -22,7 +22,7 @@
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20170903.1744,
+    version:20180303.1437,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */

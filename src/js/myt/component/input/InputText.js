@@ -6,10 +6,13 @@ myt.InputText = new JS.Class('InputText', myt.BaseInputText, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Input */
     initNode: function(parent, attrs) {
-        this.inputType = 'text';
+        this.inputType = attrs.password === true ? 'password' : 'text';
         
         this.callSuper(parent, attrs);
         
         this.setCaretToEnd();
-    }
+    },
+    
+    // Accessors ///////////////////////////////////////////////////////////////
+    setPassword: function(v) {this.password = v;}
 });
