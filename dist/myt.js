@@ -21048,7 +21048,7 @@ myt.ModalPanel = new JS.Class('ModalPanel', myt.Dimmer, {
             M = myt,
             V = M.View,
             viewAttrs = {name:'content', ignorePlacement:true},
-            centeredViewAttrs = M.extend(viewAttrs, {align:'center', valign:'middle'});
+            centeredViewAttrs = M.extend({}, viewAttrs, {align:'center', valign:'middle'});
         
         self.callSuper();
         
