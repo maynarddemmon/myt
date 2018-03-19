@@ -28070,8 +28070,8 @@ myt.FontAwesome = new JS.Class('FontAwesome', myt.Markup, {
 myt.loadScript('//ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js', function() {
     WebFont.load({
         custom: {
-            families: ['FontAwesome'],
-            urls: ['//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css'],
+            families: ['Font Awesome\ 5 Free'],
+            urls: ['//use.fontawesome.com/releases/v5.0.8/css/all.css'],
             testStrings: {'FontAwesome':'\uf00c\uf000'}
         },
         fontactive: function(familyName, fvd) {
