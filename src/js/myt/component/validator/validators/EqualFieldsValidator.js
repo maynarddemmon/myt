@@ -15,7 +15,7 @@ myt.EqualFieldsValidator = new JS.Class('EqualFieldsValidator', myt.Validator, {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.Validator */
     isValid: function(value, config, errorMessages) {
-        if (value && fieldA.getValue() === fieldB.getValue()) return true;
+        if (value && this.fieldA.getValue() === this.fieldB.getValue()) return true;
         
         if (errorMessages) errorMessages.push('Field "' + this.fieldA.key + '" must be equal to field "' + this.fieldB.key + '".');
         return false;
