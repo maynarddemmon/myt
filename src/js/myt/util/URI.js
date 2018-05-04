@@ -38,28 +38,28 @@ myt.URI = new JS.Class('URI', {
         // match order: "source", "protocol", "authority", "userInfo", "user",
         //              "password", "host", "port", "relative", "path", 
         //              "directory", "file", "query", "anchor".
-        var m = myt.URI[loose ? "_looseParser" : "_strictParser"].exec(str);
+        var self = this,
+            m = myt.URI[loose ? "_looseParser" : "_strictParser"].exec(str);
         
-        this.setSource(m[0] || "");
+        self.setSource(m[0] || "");
         
-        this.setProtocol(m[1] || "");
-        this.setAuthority(m[2] || "");
-        this.setUserInfo(m[3] || "");
-        this.setUser(m[4] || "");
-        this.setPassword(m[5] || "");
-        this.setHost(m[6] || "");
-        this.setPort(m[7] || "");
-        this.setRelative(m[8] || "");
-        this.setPath(m[9] || "");
-        this.setDirectory(m[10] || "");
-        this.setFile(m[11] || "");
-        this.setQuery(m[12] || "");
-        this.setAnchor(m[13] || "");
+        self.setProtocol(m[1] || "");
+        self.setAuthority(m[2] || "");
+        self.setUserInfo(m[3] || "");
+        self.setUser(m[4] || "");
+        self.setPassword(m[5] || "");
+        self.setHost(m[6] || "");
+        self.setPort(m[7] || "");
+        self.setRelative(m[8] || "");
+        self.setPath(m[9] || "");
+        self.setDirectory(m[10] || "");
+        self.setFile(m[11] || "");
+        self.setQuery(m[12] || "");
+        self.setAnchor(m[13] || "");
         
-        this.queryPairs = {};
-        
-        var self = this;
-        this.query.replace(myt.URI._queryParser, function ($0, $1, $2) {
+        // Parse the query into pairs
+        self.queryPairs = {};
+        self.query.replace(myt.URI._queryParser, function ($0, $1, $2) {
             if ($1) self.queryPairs[$1] = $2;
         });
     },
@@ -71,10 +71,11 @@ myt.URI = new JS.Class('URI', {
     },
     
     getQuery: function() {
-        var pairs = this.queryPairs, parts = [], key, s;
-        for (key in pairs) {
-            parts.push(key + '=' + encodeURIComponent(pairs[key]));
-        }
+        var pairs = this.queryPairs,
+            parts = [],
+            key,
+            s;
+        for (key in pairs) parts.push(key + '=' + encodeURIComponent(this.getQueryParam(key)));
         s = parts.join('&');
         return s.length > 0 ? '?' + s : s;
     },
@@ -96,13 +97,14 @@ myt.URI = new JS.Class('URI', {
     },
     
     toString: function() {
-        var protocol = this.protocol,
-            host = this.host,
-            userInfo = this.userInfo,
-            port = this.port,
-            path = this.path,
-            query = this.getQuery(),
-            anchor = this.anchor,
+        var self = this,
+            protocol = self.protocol,
+            host = self.host,
+            userInfo = self.userInfo,
+            port = self.port,
+            path = self.path,
+            query = self.getQuery(),
+            anchor = self.anchor,
             s = '';
         
         if (protocol) s += protocol + '://';
