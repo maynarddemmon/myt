@@ -311,13 +311,6 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'uploader/Uploader.js'          ).provides('myt.Uploader'          ).requires('myt.View','myt.NativeInputWrapper','myt.DragDropSupport','myt.Ajax','myt.FormElement');
     file(MYT_COMPONENT_ROOT + 'uploader/ImageUploader.js'     ).provides('myt.ImageUploader'     ).requires('myt.Uploader');
     
-    // Component : Graphing
-    file(MYT_COMPONENT_ROOT + 'graphing/scatter/KDTree.js'           ).provides('myt.KDTreeNode','myt.BinaryHeap','myt.KDTree').requires('myt');
-    file(MYT_COMPONENT_ROOT + 'graphing/scatter/ScatterGraphPoint.js').provides('myt.ScatterGraphPoint'                       ).requires('myt','myt.Selectable');
-    file(MYT_COMPONENT_ROOT + 'graphing/scatter/ScatterGraph.js'     ).provides('myt.ScatterGraph'                            ).requires('myt.Canvas','myt.ScatterGraphPoint',
-                                                                                                                                         'myt.global.idle','myt.KDTree','myt.Disableable',
-                                                                                                                                         'myt.MouseOver','myt.SelectionManager');
-    
     // Component : WebSocket
     file(MYT_COMPONENT_ROOT + 'websocket/WebSocket.js').provides('myt.WebSocket').requires('myt.Node');
     file(MYT_COMPONENT_ROOT + 'websocket/MessageTypeWebSocket.js').provides('myt.MessageTypeWebSocket').requires('myt.WebSocket');
@@ -340,7 +333,6 @@ JS.Packages(function() {with(this) {
         'myt.global.valueProcessors','myt.UseOtherFieldIfEmptyValueProcessor',
         'myt.FormElement','myt.FormInputSelect','myt.FormRadioGroup','myt.FormCheckbox','myt.FormTextCheckbox',
         'myt.FormInputText','myt.FormComboBox','myt.FormInputTextArea','myt.FormEditableText',
-        'myt.ScatterGraph',
         'myt.Slider','myt.RangeSlider',
         'myt.HorizontalDivider','myt.VerticalDivider',
         'myt.Grid','myt.SimpleGridColumnHeader',

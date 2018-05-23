@@ -238,8 +238,8 @@ myt.View = new JS.Class('View', myt.Node, {
                 self.__teardownValignConstraint();
             }
             self.callSuper(parent);
-            self.__setupAlignConstraint();
-            self.__setupValignConstraint();
+            if (self.align) self.__setupAlignConstraint();
+            if (self.valign) self.__setupValignConstraint();
         }
     },
     

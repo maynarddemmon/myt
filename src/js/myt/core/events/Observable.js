@@ -152,11 +152,6 @@ myt.Observable = new JS.Module('Observable', {
         if (observers) this.__fireEvent({source:this, type:type, value:value}, observers); // Inlined from this.createEvent
     },
     
-    /** @deprecated */
-    fireNewEvent: function(type, value, observers) {
-        this.fireEvent(type, value, observers);
-    },
-    
     /** Creates a new event with the type and value and using this as 
         the source.
         @param type:string The event type.
