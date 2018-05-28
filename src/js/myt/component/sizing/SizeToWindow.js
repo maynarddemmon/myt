@@ -52,9 +52,9 @@ myt.SizeToWindow = new JS.Module('SizeToWindow', {
     // Methods /////////////////////////////////////////////////////////////////
     /** @private */
     __handleResize: function(event) {
-        var v = myt.global.windowResize.EVENT.value, // Ignore the provided event.
+        var WR = myt.global.windowResize,
             dim = this.resizeDimension;
-        if (dim === 'width' || dim === 'both') this.setWidth(Math.max(this.minWidth, v.w));
-        if (dim === 'height' || dim === 'both') this.setHeight(Math.max(this.minHeight, v.h));
+        if (dim === 'width' || dim === 'both') this.setWidth(Math.max(this.minWidth, WR.getWidth()));
+        if (dim === 'height' || dim === 'both') this.setHeight(Math.max(this.minHeight, WR.getHeight()));
     }
 });

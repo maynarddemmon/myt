@@ -20,65 +20,6 @@
             one time. */
 myt.Observer = new JS.Module('Observer', {
     // Methods /////////////////////////////////////////////////////////////////
-    /** Does the same thing as this.attachToAndCallbackIfAttrNotEqual with
-        a value of undefined.
-        @param observable:myt.Observable the Observable to attach to.
-        @param methodName:string the method name on this instance to execute.
-        @param eventType:string the event type to attach for.
-        @param attrName:string (optional: the eventType will be used if not
-            provided) the name of the attribute on the Observable
-            to pull the value from.
-        @param once:boolean (optional) if true  this Observer will detach
-            from the Observable after the event is handled once.
-        @returns void */
-    attachToAndCallbackIfAttrExists: function(observable, methodName, eventType, attrName, once) {
-        this.attachToAndCallbackIfAttrNotEqual(observable, methodName, eventType, undefined, attrName, once);
-    },
-    
-    /** Does the same thing as this.attachTo and also immediately calls the
-        method if the provided attrName on the observable is exactly equal to 
-        the provided value.
-        @param observable:myt.Observable the Observable to attach to.
-        @param methodName:string the method name on this instance to execute.
-        @param eventType:string the event type to attach for.
-        @param value:* the value to test equality against.
-        @param attrName:string (optional: the eventType will be used if not
-            provided) the name of the attribute on the Observable
-            to pull the value from.
-        @param once:boolean (optional) if true  this Observer will detach
-            from the Observable after the event is handled once.
-        @returns void */
-    attachToAndCallbackIfAttrEqual: function(observable, methodName, eventType, value, attrName, once) {
-        if (attrName === undefined) attrName = eventType;
-        if (observable.get(attrName) === value) {
-            this.syncTo(observable, methodName, eventType, attrName, once);
-        } else {
-            this.attachTo(observable, methodName, eventType, once);
-        }
-    },
-    
-    /** Does the same thing as this.attachTo and also immediately calls the
-        method if the provided attrName on the observable does not exactly 
-        equal the provided value.
-        @param observable:myt.Observable the Observable to attach to.
-        @param methodName:string the method name on this instance to execute.
-        @param eventType:string the event type to attach for.
-        @param value:* the value to test inequality against.
-        @param attrName:string (optional: the eventType will be used if not
-            provided) the name of the attribute on the Observable
-            to pull the value from.
-        @param once:boolean (optional) if true  this Observer will detach
-            from the Observable after the event is handled once.
-        @returns void */
-    attachToAndCallbackIfAttrNotEqual: function(observable, methodName, eventType, value, attrName, once) {
-        if (attrName === undefined) attrName = eventType;
-        if (observable.get(attrName) !== value) {
-            this.syncTo(observable, methodName, eventType, attrName, once);
-        } else {
-            this.attachTo(observable, methodName, eventType, once);
-        }
-    },
-    
     /** Does the same thing as this.attachTo and also immediately calls the
         method with an event containing the attributes value. If 'once' is
         true no attachment will occur which means this probably isn't the
@@ -230,8 +171,8 @@ myt.Observer = new JS.Module('Observer', {
     detachFromAllObservables: function() {
         var observablesByType = this.__obt;
         if (observablesByType) {
-            var observables, i;
-            for (var eventType in observablesByType) {
+            var observables, i, eventType;
+            for (eventType in observablesByType) {
                 observables = observablesByType[eventType];
                 i = observables.length;
                 while (i) observables[--i].detachObserver(this, observables[--i], eventType);

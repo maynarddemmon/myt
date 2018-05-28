@@ -116,25 +116,13 @@ myt.Observable = new JS.Module('Observable', {
         return observers && observers.length > 0;
     },
     
-    /** Sends the provided Event to all observers for the provided event's type.
-        The named method is called on each observer in the order they were 
-        registered. If the called method returns true the Event is considerd 
-        "consumed" and will not be sent to any other observers. Consuming an 
-        event should be used when more than one observer may be listening for 
-        an Event but only one observer needs to handle the Event.
-        @param event:object The event to fire.
-        @param observers:array (Optional) If provided the event will
-            be sent to this specific list of observers and no others.
-        @return void */
-    fireExistingEvent: function(event, observers) {
-        if (event && event.source === this) {
-            // Determine observers to use
-            var type = event.type;
-            observers = observers || (this.hasObservers(type) ? this.__obsbt[type] : null);
-            
-            // Fire event
-            if (observers) this.__fireEvent(event, observers);
-        }
+    /** Creates a new event with the type and value and using this as 
+        the source.
+        @param type:string The event type.
+        @param value:* The event value.
+        @returns An event object consisting of source, type and value. */
+    createEvent: function(type, value) {
+        return {source:this, type:type, value:value}; // Inlined in this.fireEvent
     },
     
     /** Generates a new event from the provided type and value and fires it
@@ -146,64 +134,50 @@ myt.Observable = new JS.Module('Observable', {
         @returns void */
     fireEvent: function(type, value, observers) {
         // Determine observers to use
-        observers = observers || (this.hasObservers(type) ? this.__obsbt[type] : null);
+        var self = this;
+        observers = observers || (self.hasObservers(type) ? self.__obsbt[type] : null);
         
         // Fire event
-        if (observers) this.__fireEvent({source:this, type:type, value:value}, observers); // Inlined from this.createEvent
-    },
-    
-    /** Creates a new event with the type and value and using this as 
-        the source.
-        @param type:string The event type.
-        @param value:* The event value.
-        @returns An event object consisting of source, type and value. */
-    createEvent: function(type, value) {
-        return {source:this, type:type, value:value}; // Inlined in this.fireEvent
-    },
-    
-    /** Fire the event to the observers.
-        @private
-        @param event:Object The event to fire.
-        @param observers:array An array of method names and contexts to invoke
-            providing the event as the sole argument.
-        @returns void */
-    __fireEvent: function(event, observers) {
-        // Prevent "active" events from being fired again
-        var activeEventTypes = this.__aet || (this.__aet = {}),
-            type = event.type;
-        if (activeEventTypes[type] === true) {
-            myt.global.error.notifyError('eventLoop', "Attempt to refire active event: " + type);
-        } else {
-            // Mark event type as "active"
-            activeEventTypes[type] = true;
-            
-            // Walk through observers backwards so that if the observer is
-            // detached by the event handler the index won't get messed up.
-            // FIXME: If necessary we could queue up detachObserver calls that 
-            // come in during iteration or make some sort of adjustment to 'i'.
-            var i = observers.length, observer, methodName;
-            while (i) {
-                observer = observers[--i]
-                methodName = observers[--i];
+        if (observers) {
+            // Prevent "active" events from being fired again
+            var event = {source:self, type:type, value:value}, // Inlined from this.createEvent
+                activeEventTypes = self.__aet || (self.__aet = {});
+            if (activeEventTypes[type] === true) {
+                myt.global.error.notifyError('eventLoop', "Attempt to refire active event: " + type);
+            } else {
+                // Mark event type as "active"
+                activeEventTypes[type] = true;
                 
-                // Sometimes the list gets shortened by the method we called so
-                // just continue decrementing downwards.
-                if (observer && methodName) {
-                    // Stop firing the event if it was "consumed".
-                    try {
-                        if (typeof methodName === 'function') {
-                            if (methodName.call(observer, event)) break;
-                        } else {
-                            if (observer[methodName](event)) break;
+                // Walk through observers backwards so that if the observer is
+                // detached by the event handler the index won't get messed up.
+                // FIXME: If necessary we could queue up detachObserver calls that 
+                // come in during iteration or make some sort of adjustment to 'i'.
+                var i = observers.length,
+                    observer,
+                    methodName;
+                while (i) {
+                    observer = observers[--i];
+                    methodName = observers[--i];
+                    
+                    // Sometimes the list gets shortened by the method we called so
+                    // just continue decrementing downwards.
+                    if (observer && methodName) {
+                        // Stop firing the event if it was "consumed".
+                        try {
+                            if (typeof methodName === 'function') {
+                                if (methodName.call(observer, event)) break;
+                            } else {
+                                if (observer[methodName](event)) break;
+                            }
+                        } catch (err) {
+                            myt.dumpStack(err);
                         }
-                    } catch (err) {
-                        myt.dumpStack(err);
                     }
                 }
+                
+                // Mark event type as "inactive"
+                activeEventTypes[type] = false;
             }
-            
-            // Mark event type as "inactive"
-            activeEventTypes[type] = false;
         }
     }
 });

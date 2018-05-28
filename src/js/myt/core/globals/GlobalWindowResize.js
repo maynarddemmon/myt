@@ -2,14 +2,13 @@
     as 'windowResize'.
     
     Events:
-        resize:object Fired when the browser window is resized. This is a
-            reused event stored at myt.global.windowResize.EVENT. The type
+        resize:object Fired when the browser window is resized. The type
             is 'resize' and the value is an object containing:
                 w:number the new window width.
                 h:number the new window height.
     
     Attributes:
-        EVENT:object The common resize event that gets fired.
+        None
     
     Private Attributes:
         __windowInnerWidth:number The inner width of the browser window.
@@ -22,13 +21,6 @@ new JS.Singleton('GlobalWindowResize', {
     // Life Cycle //////////////////////////////////////////////////////////////
     initialize: function() {
         var self = this;
-        
-        // The common browser resize event that gets reused.
-        self.EVENT = {
-            source:self,
-            type:'resize', 
-            value:{w:self.getWidth(), h:self.getHeight()}
-        };
         
         myt.addEventListener(window, 'resize', function(domEvent) {self.__handleEvent(domEvent);});
         
@@ -56,23 +48,9 @@ new JS.Singleton('GlobalWindowResize', {
         @param domEvent:object the window resize dom event.
         @returns void */
     __handleEvent: function(domEvent) {
-        if (!domEvent) domEvent = window.event;
-        
-        var event = this.EVENT,
-            value = event.value,
-            isChanged = false,
-            target = domEvent.target,
-            w = target.innerWidth,
-            h = target.innerHeight;
-        if (w !== value.w) {
-            value.w = this.__windowInnerWidth = w;
-            isChanged = true;
-        }
-        if (h !== value.h) {
-            value.h = this.__windowInnerHeight = h;
-            isChanged = true;
-        }
-        
-        if (isChanged) this.fireExistingEvent(event);
+        this.fireEvent('resize', {
+            w:this.__windowInnerWidth = window.innerWidth,
+            h:this.__windowInnerHeight = window.innerHeight
+        });
     }
 });

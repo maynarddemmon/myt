@@ -3488,7 +3488,7 @@ JS.Singleton = new JS.Class('Singleton', {
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20180523.1446,
+    version:20180527.1928,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -4943,25 +4943,13 @@ myt.Observable = new JS.Module('Observable', {
         return observers && observers.length > 0;
     },
     
-    /** Sends the provided Event to all observers for the provided event's type.
-        The named method is called on each observer in the order they were 
-        registered. If the called method returns true the Event is considerd 
-        "consumed" and will not be sent to any other observers. Consuming an 
-        event should be used when more than one observer may be listening for 
-        an Event but only one observer needs to handle the Event.
-        @param event:object The event to fire.
-        @param observers:array (Optional) If provided the event will
-            be sent to this specific list of observers and no others.
-        @return void */
-    fireExistingEvent: function(event, observers) {
-        if (event && event.source === this) {
-            // Determine observers to use
-            var type = event.type;
-            observers = observers || (this.hasObservers(type) ? this.__obsbt[type] : null);
-            
-            // Fire event
-            if (observers) this.__fireEvent(event, observers);
-        }
+    /** Creates a new event with the type and value and using this as 
+        the source.
+        @param type:string The event type.
+        @param value:* The event value.
+        @returns An event object consisting of source, type and value. */
+    createEvent: function(type, value) {
+        return {source:this, type:type, value:value}; // Inlined in this.fireEvent
     },
     
     /** Generates a new event from the provided type and value and fires it
@@ -4973,64 +4961,50 @@ myt.Observable = new JS.Module('Observable', {
         @returns void */
     fireEvent: function(type, value, observers) {
         // Determine observers to use
-        observers = observers || (this.hasObservers(type) ? this.__obsbt[type] : null);
+        var self = this;
+        observers = observers || (self.hasObservers(type) ? self.__obsbt[type] : null);
         
         // Fire event
-        if (observers) this.__fireEvent({source:this, type:type, value:value}, observers); // Inlined from this.createEvent
-    },
-    
-    /** Creates a new event with the type and value and using this as 
-        the source.
-        @param type:string The event type.
-        @param value:* The event value.
-        @returns An event object consisting of source, type and value. */
-    createEvent: function(type, value) {
-        return {source:this, type:type, value:value}; // Inlined in this.fireEvent
-    },
-    
-    /** Fire the event to the observers.
-        @private
-        @param event:Object The event to fire.
-        @param observers:array An array of method names and contexts to invoke
-            providing the event as the sole argument.
-        @returns void */
-    __fireEvent: function(event, observers) {
-        // Prevent "active" events from being fired again
-        var activeEventTypes = this.__aet || (this.__aet = {}),
-            type = event.type;
-        if (activeEventTypes[type] === true) {
-            myt.global.error.notifyError('eventLoop', "Attempt to refire active event: " + type);
-        } else {
-            // Mark event type as "active"
-            activeEventTypes[type] = true;
-            
-            // Walk through observers backwards so that if the observer is
-            // detached by the event handler the index won't get messed up.
-            // FIXME: If necessary we could queue up detachObserver calls that 
-            // come in during iteration or make some sort of adjustment to 'i'.
-            var i = observers.length, observer, methodName;
-            while (i) {
-                observer = observers[--i]
-                methodName = observers[--i];
+        if (observers) {
+            // Prevent "active" events from being fired again
+            var event = {source:self, type:type, value:value}, // Inlined from this.createEvent
+                activeEventTypes = self.__aet || (self.__aet = {});
+            if (activeEventTypes[type] === true) {
+                myt.global.error.notifyError('eventLoop', "Attempt to refire active event: " + type);
+            } else {
+                // Mark event type as "active"
+                activeEventTypes[type] = true;
                 
-                // Sometimes the list gets shortened by the method we called so
-                // just continue decrementing downwards.
-                if (observer && methodName) {
-                    // Stop firing the event if it was "consumed".
-                    try {
-                        if (typeof methodName === 'function') {
-                            if (methodName.call(observer, event)) break;
-                        } else {
-                            if (observer[methodName](event)) break;
+                // Walk through observers backwards so that if the observer is
+                // detached by the event handler the index won't get messed up.
+                // FIXME: If necessary we could queue up detachObserver calls that 
+                // come in during iteration or make some sort of adjustment to 'i'.
+                var i = observers.length,
+                    observer,
+                    methodName;
+                while (i) {
+                    observer = observers[--i]
+                    methodName = observers[--i];
+                    
+                    // Sometimes the list gets shortened by the method we called so
+                    // just continue decrementing downwards.
+                    if (observer && methodName) {
+                        // Stop firing the event if it was "consumed".
+                        try {
+                            if (typeof methodName === 'function') {
+                                if (methodName.call(observer, event)) break;
+                            } else {
+                                if (observer[methodName](event)) break;
+                            }
+                        } catch (err) {
+                            myt.dumpStack(err);
                         }
-                    } catch (err) {
-                        myt.dumpStack(err);
                     }
                 }
+                
+                // Mark event type as "inactive"
+                activeEventTypes[type] = false;
             }
-            
-            // Mark event type as "inactive"
-            activeEventTypes[type] = false;
         }
     }
 });
@@ -5058,65 +5032,6 @@ myt.Observable = new JS.Module('Observable', {
             one time. */
 myt.Observer = new JS.Module('Observer', {
     // Methods /////////////////////////////////////////////////////////////////
-    /** Does the same thing as this.attachToAndCallbackIfAttrNotEqual with
-        a value of undefined.
-        @param observable:myt.Observable the Observable to attach to.
-        @param methodName:string the method name on this instance to execute.
-        @param eventType:string the event type to attach for.
-        @param attrName:string (optional: the eventType will be used if not
-            provided) the name of the attribute on the Observable
-            to pull the value from.
-        @param once:boolean (optional) if true  this Observer will detach
-            from the Observable after the event is handled once.
-        @returns void */
-    attachToAndCallbackIfAttrExists: function(observable, methodName, eventType, attrName, once) {
-        this.attachToAndCallbackIfAttrNotEqual(observable, methodName, eventType, undefined, attrName, once);
-    },
-    
-    /** Does the same thing as this.attachTo and also immediately calls the
-        method if the provided attrName on the observable is exactly equal to 
-        the provided value.
-        @param observable:myt.Observable the Observable to attach to.
-        @param methodName:string the method name on this instance to execute.
-        @param eventType:string the event type to attach for.
-        @param value:* the value to test equality against.
-        @param attrName:string (optional: the eventType will be used if not
-            provided) the name of the attribute on the Observable
-            to pull the value from.
-        @param once:boolean (optional) if true  this Observer will detach
-            from the Observable after the event is handled once.
-        @returns void */
-    attachToAndCallbackIfAttrEqual: function(observable, methodName, eventType, value, attrName, once) {
-        if (attrName === undefined) attrName = eventType;
-        if (observable.get(attrName) === value) {
-            this.syncTo(observable, methodName, eventType, attrName, once);
-        } else {
-            this.attachTo(observable, methodName, eventType, once);
-        }
-    },
-    
-    /** Does the same thing as this.attachTo and also immediately calls the
-        method if the provided attrName on the observable does not exactly 
-        equal the provided value.
-        @param observable:myt.Observable the Observable to attach to.
-        @param methodName:string the method name on this instance to execute.
-        @param eventType:string the event type to attach for.
-        @param value:* the value to test inequality against.
-        @param attrName:string (optional: the eventType will be used if not
-            provided) the name of the attribute on the Observable
-            to pull the value from.
-        @param once:boolean (optional) if true  this Observer will detach
-            from the Observable after the event is handled once.
-        @returns void */
-    attachToAndCallbackIfAttrNotEqual: function(observable, methodName, eventType, value, attrName, once) {
-        if (attrName === undefined) attrName = eventType;
-        if (observable.get(attrName) !== value) {
-            this.syncTo(observable, methodName, eventType, attrName, once);
-        } else {
-            this.attachTo(observable, methodName, eventType, once);
-        }
-    },
-    
     /** Does the same thing as this.attachTo and also immediately calls the
         method with an event containing the attributes value. If 'once' is
         true no attachment will occur which means this probably isn't the
@@ -5268,8 +5183,8 @@ myt.Observer = new JS.Module('Observer', {
     detachFromAllObservables: function() {
         var observablesByType = this.__obt;
         if (observablesByType) {
-            var observables, i;
-            for (var eventType in observablesByType) {
+            var observables, i, eventType;
+            for (eventType in observablesByType) {
                 observables = observablesByType[eventType];
                 i = observables.length;
                 while (i) observables[--i].detachObserver(this, observables[--i], eventType);
@@ -10886,14 +10801,13 @@ myt.RootView = new JS.Module('RootView', {
     as 'windowResize'.
     
     Events:
-        resize:object Fired when the browser window is resized. This is a
-            reused event stored at myt.global.windowResize.EVENT. The type
+        resize:object Fired when the browser window is resized. The type
             is 'resize' and the value is an object containing:
                 w:number the new window width.
                 h:number the new window height.
     
     Attributes:
-        EVENT:object The common resize event that gets fired.
+        None
     
     Private Attributes:
         __windowInnerWidth:number The inner width of the browser window.
@@ -10906,13 +10820,6 @@ new JS.Singleton('GlobalWindowResize', {
     // Life Cycle //////////////////////////////////////////////////////////////
     initialize: function() {
         var self = this;
-        
-        // The common browser resize event that gets reused.
-        self.EVENT = {
-            source:self,
-            type:'resize', 
-            value:{w:self.getWidth(), h:self.getHeight()}
-        };
         
         myt.addEventListener(window, 'resize', function(domEvent) {self.__handleEvent(domEvent);});
         
@@ -10940,24 +10847,10 @@ new JS.Singleton('GlobalWindowResize', {
         @param domEvent:object the window resize dom event.
         @returns void */
     __handleEvent: function(domEvent) {
-        if (!domEvent) domEvent = window.event;
-        
-        var event = this.EVENT,
-            value = event.value,
-            isChanged = false,
-            target = domEvent.target,
-            w = target.innerWidth,
-            h = target.innerHeight;
-        if (w !== value.w) {
-            value.w = this.__windowInnerWidth = w;
-            isChanged = true;
-        }
-        if (h !== value.h) {
-            value.h = this.__windowInnerHeight = h;
-            isChanged = true;
-        }
-        
-        if (isChanged) this.fireExistingEvent(event);
+        this.fireEvent('resize', {
+            w:this.__windowInnerWidth = window.innerWidth,
+            h:this.__windowInnerHeight = window.innerHeight
+        });
     }
 });
 
@@ -11016,10 +10909,10 @@ myt.SizeToWindow = new JS.Module('SizeToWindow', {
     // Methods /////////////////////////////////////////////////////////////////
     /** @private */
     __handleResize: function(event) {
-        var v = myt.global.windowResize.EVENT.value, // Ignore the provided event.
+        var WR = myt.global.windowResize,
             dim = this.resizeDimension;
-        if (dim === 'width' || dim === 'both') this.setWidth(Math.max(this.minWidth, v.w));
-        if (dim === 'height' || dim === 'both') this.setHeight(Math.max(this.minHeight, v.h));
+        if (dim === 'width' || dim === 'both') this.setWidth(Math.max(this.minWidth, WR.getWidth()));
+        if (dim === 'height' || dim === 'both') this.setHeight(Math.max(this.minHeight, WR.getHeight()));
     }
 });
 

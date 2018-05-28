@@ -172,66 +172,6 @@ test("Fire an event.", function() {
     observer.destroy();
 });
 
-test("Generate and fire an event.", function() {
-    var observable = new myt.Node();
-    var observable2 = new myt.Node();
-    
-    var observer = new myt.Node(null, null, [{
-        doBeforeAdoption: function() {
-            this.fooEventCount = 0;
-            this.lastFooEvent = null;
-        },
-        
-        handleFooEvent: function(e) {
-            this.fooEventCount++;
-            this.lastFooEvent = e;
-        }
-    }]);
-    
-    ok(observer.fooEventCount === 0, "Ensure observer initialization of fooEventCount was correct.");
-    ok(observer.lastFooEvent === null, "Ensure observer initialization lastFooEvent was correct.");
-    
-    observable.attachObserver(observer, 'handleFooEvent', 'foo');
-    
-    var event = observable.createEvent('foo', 'bar');
-    
-    ok(event != null, "Event should exist");
-    ok(event.source === observable, "Source of event should be observable Node.");
-    ok(event.type === 'foo', "Type of event should be 'foo'.");
-    ok(event.value === 'bar', "Value of event should be 'bar'.");
-    
-    observable.fireExistingEvent(event);
-    
-    ok(observer.fooEventCount === 1, "One event should have been fired.");
-    ok(observer.lastFooEvent === event, "Last foo event should be the event we generated.");
-    ok(observer.lastFooEvent.source === observable, "Source of event should be observable Node.");
-    ok(observer.lastFooEvent.type === 'foo', "Type of event should be 'foo'.");
-    ok(observer.lastFooEvent.value === 'bar', "Value of event should be 'bar'.");
-    
-    // Attach to a second observable and fire an event on that observable
-    observable2.attachObserver(observer, 'handleFooEvent', 'foo');
-    observable2.fireEvent('foo', 'bar');
-    
-    ok(observer.fooEventCount === 2, "Two events should have been fired.");
-    ok(observer.lastFooEvent !== event, "Last foo event should no longer be the first generated event.");
-    ok(observer.lastFooEvent.source === observable2, "Source of event should be observable2 Node.");
-    ok(observer.lastFooEvent.type === 'foo', "Type of event should be 'foo'.");
-    ok(observer.lastFooEvent.value === 'bar', "Value of event should be 'bar'.");
-    
-    // Firing generated event off of wrong observable should go nowhere
-    observable2.fireExistingEvent(event);
-    
-    ok(observer.fooEventCount === 2, "Two events should have been fired.");
-    ok(observer.lastFooEvent !== event, "Last foo event should no longer be the first generated event.");
-    ok(observer.lastFooEvent.source === observable2, "Source of event should be observable2 Node.");
-    ok(observer.lastFooEvent.type === 'foo', "Type of event should be 'foo'.");
-    ok(observer.lastFooEvent.value === 'bar', "Value of event should be 'bar'.");
-    
-    observable.destroy();
-    observable2.destroy();
-    observer.destroy();
-});
-
 test("Verify infinite event loop protection.", function() {
     var n1 = new myt.Node(null, null, [{
         doBeforeAdoption: function() {
@@ -411,36 +351,11 @@ test("Provide a function instead of a method name", function() {
     // Use a function that wraps another function
     observable.attachObserver(observer, funcHandleFoo, 'foo');
     
-    var event = observable.createEvent('foo', 'bar');
-    
-    ok(event != null, "Event should exist");
-    ok(event.source === observable, "Source of event should be observable Node.");
-    ok(event.type === 'foo', "Type of event should be 'foo'.");
-    ok(event.value === 'bar', "Value of event should be 'bar'.");
-    
-    observable.fireExistingEvent(event);
-    
-    ok(observer.fooEventCount === 1, "One event should have been fired.");
-    ok(observer.lastFooEvent === event, "Last foo event should be the event we generated.");
-    ok(observer.lastFooEvent.source === observable, "Source of event should be observable Node.");
-    ok(observer.lastFooEvent.type === 'foo', "Type of event should be 'foo'.");
-    ok(observer.lastFooEvent.value === 'bar', "Value of event should be 'bar'.");
-    
     // Attach to a second observable and fire an event on that observable
     observable2.attachObserver(observer, observer.handleFooEvent, 'foo');
     observable2.fireEvent('foo', 'bar');
     
-    ok(observer.fooEventCount === 2, "Two events should have been fired.");
-    ok(observer.lastFooEvent !== event, "Last foo event should no longer be the first generated event.");
-    ok(observer.lastFooEvent.source === observable2, "Source of event should be observable2 Node.");
-    ok(observer.lastFooEvent.type === 'foo', "Type of event should be 'foo'.");
-    ok(observer.lastFooEvent.value === 'bar', "Value of event should be 'bar'.");
-    
-    // Firing generated event off of wrong observable should go nowhere
-    observable2.fireExistingEvent(event);
-    
-    ok(observer.fooEventCount === 2, "Two events should have been fired.");
-    ok(observer.lastFooEvent !== event, "Last foo event should no longer be the first generated event.");
+    ok(observer.fooEventCount === 1, "Two events should have been fired.");
     ok(observer.lastFooEvent.source === observable2, "Source of event should be observable2 Node.");
     ok(observer.lastFooEvent.type === 'foo', "Type of event should be 'foo'.");
     ok(observer.lastFooEvent.value === 'bar', "Value of event should be 'bar'.");
