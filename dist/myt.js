@@ -4983,7 +4983,7 @@ myt.Observable = new JS.Module('Observable', {
                     observer,
                     methodName;
                 while (i) {
-                    observer = observers[--i]
+                    observer = observers[--i];
                     methodName = observers[--i];
                     
                     // Sometimes the list gets shortened by the method we called so
@@ -17662,7 +17662,6 @@ myt.Tab = new JS.Class('Tab', myt.SimpleIconTextButton, {
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.DrawButton */
     initNode: function(parent, attrs) {
         var T = myt.Tab;
         
@@ -25229,82 +25228,6 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
 });
 
 
-/** Draws a divider into an myt.Canvas. */
-myt.DividerDrawingMethod = new JS.Class('DividerDrawingMethod', myt.DrawingMethod, {
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.DrawingMethod */
-    draw: function(canvas, config) {
-        var b = config.bounds, x = b.x, y = b.y, w = b.w, h = b.h, 
-            inset = config.inset, fillColor, bumpColor, grd, bumpSize, bumpLength;
-        
-        canvas.clear();
-        
-        if (w == 0 || h == 0) return;
-        
-        // background
-        switch (config.state) {
-            case 'hover':
-                fillColor = config.hoverFillColor || '#d8d8d8';
-                bumpColor = config.hoverBumpColor || '#e8e8e8';
-                break;
-            case 'active':
-                fillColor = config.activeFillColor || '#b8b8b8';
-                bumpColor = config.activeBumpColor || '#c8c8c8';
-                break;
-            case 'ready':
-                fillColor = config.focused ? (config.focusedFillColor || '#d8d8d8') : (config.readyFillColor || '#cccccc');
-                bumpColor = config.focused ? (config.focusedBumpColor || '#e8e8e8') : (config.readyBumpColor || '#dddddd');
-                break;
-            case 'disabled':
-                fillColor = config.readyFillColor || '#cccccc';
-                bumpColor = config.readyBumpColor || '#dddddd';
-                break;
-        }
-        
-        if (config.axis === 'y') {
-            y += inset;
-            h -= 2 * inset;
-            grd = canvas.createLinearGradient(x, y, x + w, y);
-        } else {
-            x += inset;
-            w -= 2 * inset;
-            bumpSize = w / 2;
-            grd = canvas.createLinearGradient(x, y, x, y + h);
-        }
-        
-        canvas.beginPath();
-        canvas.rect(x, y, w, h);
-        canvas.closePath();
-        
-        grd.addColorStop(0, config.readyFillColor || '#cccccc');
-        grd.addColorStop(0.5, fillColor);
-        grd.addColorStop(1, config.readyFillColor || '#cccccc');
-        canvas.setFillStyle(grd);
-        
-        canvas.fill();
-        
-        // Bumps
-        canvas.setFillStyle(bumpColor);
-        if (config.axis === 'y') {
-            bumpSize = h / 2;
-            bumpLength = Math.max(3 * bumpSize, config.bumpMaxLength || 14);
-            x = x + (w - bumpLength) / 2;
-            y = y + bumpSize / 2;
-            
-            myt.DrawingUtil.drawRoundedRect(canvas, bumpSize / 2, 0, x, y, bumpLength, bumpSize);
-        } else {
-            bumpSize = w / 2;
-            bumpLength = Math.max(3 * bumpSize, config.bumpMaxLength || 14);
-            y = y + (h - bumpLength) / 2;
-            x = x + bumpSize / 2;
-            
-            myt.DrawingUtil.drawRoundedRect(canvas, bumpSize / 2, 0, x, y, bumpSize, bumpLength);
-        }
-        canvas.fill();
-    }
-});
-
-
 /** A divider is a UI control that allows the user to resize two area by
     dragging the divider left/right or up/down.
     
@@ -25318,10 +25241,6 @@ myt.DividerDrawingMethod = new JS.Class('DividerDrawingMethod', myt.DrawingMetho
             be set during instantiation.
         limitToParent:number If set, this will constrain the maxValue to the
             appropriate parent view dimension less the limitToParent amount.
-        inset:number Insets the rendered portion of the divider thus allowing
-            the interactive footprint of the component to be larger than the
-            visible footprint. This value will be applied to the top and bottom
-            or left and right edge of the component.
         expansionState:number Used by the "primary" action to update the 
             divider position. Allowed values are:
                 collapsed:0
@@ -25334,20 +25253,25 @@ myt.DividerDrawingMethod = new JS.Class('DividerDrawingMethod', myt.DrawingMetho
     Private Attributes:
         __nudgeAcc:number The multiplier in px per nudge.
 */
-myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
+myt.BaseDivider = new JS.Class('BaseDivider', myt.SimpleButton, {
     include: [myt.BoundedValueComponent, myt.Draggable],
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        if (attrs.drawingMethodClassname == null) attrs.drawingMethodClassname = 'myt.DividerDrawingMethod';
+        var self = this;
+        
+        if (attrs.activeColor == null) attrs.activeColor = '#bbbbbb';
+        if (attrs.hoverColor == null) attrs.hoverColor = '#dddddd';
+        if (attrs.readyColor == null) attrs.readyColor = '#cccccc';
+        
         if (attrs.axis == null) attrs.axis = 'x';
-        if (attrs.inset == null) attrs.inset = 2;
-        if (attrs.minValue == null) attrs.minValue = -attrs.inset;
+        if (attrs.minValue == null) attrs.minValue = 0;
         if (attrs.value == null) attrs.value = attrs.minValue;
+        if (attrs.expansionState == null) attrs.expansionState = 2;
+        
         if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
         if (attrs.repeatKeyDown == null) attrs.repeatKeyDown = true;
-        if (attrs.expansionState == null) attrs.expansionState = 2;
         
         if (attrs.activationKeys == null) {
             attrs.activationKeys = [
@@ -25361,25 +25285,25 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
         }
         
         if (attrs.axis === 'y') {
-            if (attrs.height == null) attrs.height = 8;
+            if (attrs.height == null) attrs.height = 6;
             if (attrs.cursor == null) attrs.cursor = 'row-resize';
         } else {
-            if (attrs.width == null) attrs.width = 8;
+            if (attrs.width == null) attrs.width = 6;
             if (attrs.cursor == null) attrs.cursor = 'col-resize';
         }
         
         // Controls acceleration of the nudge amount
-        this.__nudgeAcc = 1;
+        self.__nudgeAcc = 1;
         
-        this.callSuper(parent, attrs);
+        self.callSuper(parent, attrs);
         
         // Do afterwards since value might have been constrained from the
         // value provided in attrs.
-        if (attrs.restoreValue == null) this.setRestoreValue(this.value);
+        if (attrs.restoreValue == null) self.setRestoreValue(self.value);
         
-        if (this.limitToParent != null) this.__updateLimitToParentConstraint();
+        if (self.limitToParent != null) self.__updateLimitToParentConstraint();
         
-        this.attachDomObserver(this, 'doPrimaryAction', 'dblclick');
+        self.attachDomObserver(self, 'doPrimaryAction', 'dblclick');
     },
     
     
@@ -25388,37 +25312,28 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
     setRestoreValue: function(v) {this.restoreValue = v;},
     
     setLimitToParent: function(v) {
-        if (this.limitToParent !== v) {
-            this.limitToParent = v;
-            if (this.inited) {
-                this.fireEvent('limitToParent', v);
+        var self = this;
+        
+        if (self.limitToParent !== v) {
+            self.limitToParent = v;
+            if (self.inited) {
+                self.fireEvent('limitToParent', v);
                 
                 if (v == null) {
-                    this.releaseConstraint('__limitToParent');
+                    self.releaseConstraint('__limitToParent');
                 } else {
-                    this.__updateLimitToParentConstraint();
+                    self.__updateLimitToParentConstraint();
                 }
-            }
-        }
-    },
-    
-    setInset: function(v) {
-        if (this.inset !== v) {
-            this.inset = v;
-            if (this.inited) {
-                this.fireEvent('inset', v);
-                this.updateUI();
             }
         }
     },
     
     setAxis: function(v) {
         if (this.inited) {
-            myt.dumpStack("Axis may not be updated after instantiation.");
-            return;
+            console.warn("Axis may not be updated after instantiation.");
+        } else {
+            this.axis = v;
         }
-        
-        this.axis = v;
     },
     
     /** Update the x or y position of the component as the value changes.
@@ -25438,62 +25353,62 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
         if (restoreValueAlso) this.setRestoreValue(v);
     },
     
-    /** Ensure the component gets redrawn when it gains and loses focus.
-        @overrides myt.FocusObservable. */
-    setFocused: function(v) {
-        this.callSuper(v);
-        
-        if (this.inited) this.redraw();
-    },
-    
     
     // Methods /////////////////////////////////////////////////////////////////
     /** Setup the limitToParent constraint.
         @private */
     __updateLimitToParentConstraint: function() {
-        var dim = this.axis === 'y' ? 'height' : 'width';
-        this.applyConstraint('__limitToParent', [this, 'limitToParent', this, 'inset', this, dim, this.parent, dim]);
+        var self = this,
+            dim = self.axis === 'y' ? 'height' : 'width';
+        self.applyConstraint('__limitToParent', [self, 'limitToParent', self, dim, self.parent, dim]);
     },
     
     /** Do the limitToParent constraint.
         @private */
     __limitToParent: function(event) {
-        var dim = this.axis === 'y' ? 'height' : 'width';
-        this.setMaxValue(this.parent[dim] - this.limitToParent - this[dim] + this.inset);
+        var self = this,
+            dim = self.axis === 'y' ? 'height' : 'width';
+        self.setMaxValue(self.parent[dim] - self.limitToParent - self[dim]);
     },
     
     /** Nudge the divider when the arrow keys are used. Nudging accelerates
         up to a limit if the key is held down.
         @overrides myt.Button. */
     doActivationKeyDown: function(key, isRepeat) {
-        this.callSuper(key, isRepeat);
+        var self = this,
+            dir = 0;
+        
+        self.callSuper(key, isRepeat);
         
         // Determine nudge direction
-        var dir = 0;
         switch (key) {
             case 37: case 38: dir = -1; break;
             case 39: case 40: dir = 1; break;
             case 13: case 32: default:
-                this.doPrimaryAction();
+                self.doPrimaryAction();
                 return;
         }
         
         // Update nudge amount, but never nudge more than 64.
-        this.__nudgeAcc = isRepeat ? Math.min(this.__nudgeAcc + 1, 64) : 1;
+        self.__nudgeAcc = isRepeat ? Math.min(self.__nudgeAcc + 1, 64) : 1;
         
-        this.setValue(this.value + dir * this.__nudgeAcc, true);
-        this.setExpansionState(2);
+        self.setValue(self.value + dir * self.__nudgeAcc, true);
+        self.setExpansionState(2);
     },
     
     doPrimaryAction: function() {
-        var toValue, rv = this.restoreValue, maxV = this.maxValue, minV = this.minValue;
-        switch (this.expansionState) {
+        var self = this,
+            toValue, 
+            rv = self.restoreValue, 
+            maxV = self.maxValue, 
+            minV = self.minValue;
+        switch (self.expansionState) {
             case 0:
                 if (rv != null) {
-                    this.setExpansionState(1);
+                    self.setExpansionState(1);
                     if (rv === minV) {
                         // Prevent infinite loop if there's nowhere to animate to.
-                        if (rv !== maxV) this.doPrimaryAction();
+                        if (rv !== maxV) self.doPrimaryAction();
                     } else {
                         toValue = rv;
                     }
@@ -25501,9 +25416,9 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
                 break;
             case 1:
                 if (maxV != null) {
-                    this.setExpansionState(3);
-                    if (this.value === maxV) {
-                        this.doPrimaryAction();
+                    self.setExpansionState(3);
+                    if (self.value === maxV) {
+                        self.doPrimaryAction();
                     } else {
                         toValue = maxV;
                     }
@@ -25511,9 +25426,9 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
                 break;
             case 2:
                 if (minV != null) {
-                    this.setExpansionState(0);
-                    if (this.value === minV) {
-                        this.doPrimaryAction();
+                    self.setExpansionState(0);
+                    if (self.value === minV) {
+                        self.doPrimaryAction();
                     } else {
                         toValue = minV;
                     }
@@ -25521,9 +25436,9 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
                 break;
             case 3:
                 if (rv != null) {
-                    this.setExpansionState(2);
+                    self.setExpansionState(2);
                     if (rv === maxV) {
-                        this.doPrimaryAction();
+                        self.doPrimaryAction();
                     } else {
                         toValue = rv;
                     }
@@ -25531,8 +25446,8 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
                 break;
         }
         if (toValue != null) {
-            this.stopActiveAnimators('value');
-            this.animateOnce('value', toValue, null, 250);
+            self.stopActiveAnimators('value');
+            self.animateOnce('value', toValue, null, 250);
         }
     },
     
@@ -25543,15 +25458,7 @@ myt.BaseDivider = new JS.Class('BaseDivider', myt.DrawButton, {
             this.setValue(this.axis === 'y' ? y : x, true);
             this.setExpansionState(2);
         }
-    },
-    
-    /** @overrides myt.DrawButton */
-    getDrawConfig: function(state) {
-        var cfg = this.callSuper(state);
-        cfg.axis = this.axis;
-        cfg.inset = this.inset;
-        return cfg;
-    },
+    }
 });
 
 

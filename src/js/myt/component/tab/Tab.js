@@ -35,7 +35,6 @@ myt.Tab = new JS.Class('Tab', myt.SimpleIconTextButton, {
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.DrawButton */
     initNode: function(parent, attrs) {
         var T = myt.Tab;
         

@@ -93,7 +93,7 @@
         // Grid
         var grid = new M.Grid(rootView, {y:24, percentOfParentHeight:100, percentOfParentHeightOffset:-24}, [M.SizeToParent, {
             updateWidth: function(event) {
-                this.setWidth(event.value + event.source.inset - this.x);
+                this.setWidth(event.value - this.x);
             }
         }]);
         
