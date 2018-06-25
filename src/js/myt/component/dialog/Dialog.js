@@ -401,8 +401,8 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         
         var spinner = self.spinner = new M.Spinner(content, {
             align:'center', visible:true,
-            radius:10, lines:12, length:14, lineWidth:3,
-            y:opts.msgY == null ? MP.DEFAULT_PADDING_Y : opts.msgY,
+            borderColor:'#cccccc',
+            size:50, y:opts.msgY == null ? MP.DEFAULT_PADDING_Y : opts.msgY,
         });
         if (msg) {
             new M.Text(content, {
@@ -411,7 +411,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
                 wordWrap:opts.wordWrap,
                 fontWeight:opts.fontWeight,
                 x:opts.msgX == null ? MP.DEFAULT_PADDING_X : opts.msgX,
-                y:spinner.y + spinner.getSize() + MP.DEFAULT_PADDING_Y,
+                y:spinner.y + spinner.size + MP.DEFAULT_PADDING_Y,
                 width:opts.width
             });
         }

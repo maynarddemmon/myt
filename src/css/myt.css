@@ -22,6 +22,10 @@ select.mytNativeInput{margin:0px;}
 ::-moz-placeholder{-moz-user-select:none;}
 :-ms-input-placeholder{-ms-user-select:none;}
 
+/* Spinner */
+@keyframes centerspin {0% {transform:rotate(0deg);} 100% {transform:rotate(360deg);}}
+.mytCenterSpin {animation:centerspin 2s linear infinite;}
+
 /*** START: Spectrum Colorpicker v1.4.1
             https://github.com/bgrins/spectrum
             Author: Brian Grinstead

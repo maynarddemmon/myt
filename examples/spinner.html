@@ -4,16 +4,23 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
 <script>window.jQuery || document.write('<script src="../src/js/jquery/jquery-1.12.4.min.js">\x3C/script>');</script>
 <script src="../src/js/boilerplate.js"></script>
-<script src="../dist/myt.min.js"></script>
+<script src="../src/js/jsclass/loader-browser.js"></script>
+<script src="../src/js/myt/manifest.js"></script>
 </head><body>
 <script>
-    var rootView = new myt.View(null, {bgColor:'#eeeeee'}, [myt.SizeToWindow]);
+    JS.require('myt.all', function() {this.init();});
     
-    new myt.Spinner(rootView, {x:10, y:10, radius:10, length:40, lines:16, lineWidth:4, bgColor:'#dddddd', visible:true});
-    var foo = new myt.Spinner(rootView, {x:120, y:10, radius:25, length:25, lines:24, lineWidth:4, bgColor:'#dddddd'});
-    var bar = new myt.Spinner(rootView, {x:230, y:10, radius:10, length:10, lineWidth:4});
-    
-    foo.setVisible(true);
-    bar.setVisible(true);
+    function init() {
+        var rootView = new myt.View(null, {bgColor:'#eeeeee'}, [myt.SizeToWindow]);
+        
+        new myt.Spinner(rootView, {size:100, bgColor:'#dddddd', visible:true});
+        var foo = new myt.Spinner(rootView, {x:120, y:10, size:50, bgColor:'#dddddd'});
+        
+        var container = new myt.View(rootView, {x:150, y:150, width:130, height:130, bgColor:'#999999'});
+        var bar = new myt.Spinner(container, {align:'center', valign:'middle', size:100, spinColor:'#ff0000', borderWidth:10});
+        
+        foo.setVisible(true);
+        bar.setVisible(true);
+    }
 </script>
 </body></html>

@@ -3488,7 +3488,7 @@ JS.Singleton = new JS.Class('Singleton', {
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20180527.1928,
+    version:20180625.1641,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -20982,25 +20982,18 @@ myt.ModalPanel = new JS.Class('ModalPanel', myt.Dimmer, {
 });
 
 
-/** A spinner. Makes use of Spin.js.
+/** A spinner that uses the CSS border property and a CSS rotation animation
+        to create the appearance of a spinner.
     
     Events:
-        None
+        spinColor
     
     Attributes:
-        lines:number
-        length:number
-        lineWidth:number
-        radius:number
-        corners:number
-        lineColor:string
-        direction:number
-        speed:number
-        trail:number
-        lineOpacity:number
+        size:number The width and height of the spinner.
+        spinColor:color_string The color spinning quarter of the border.
     
     Private Attributes:
-        __spinner:Spinner the Spin.js spinner.
+        None
 */
 myt.Spinner = new JS.Class('Spinner', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
@@ -21008,263 +21001,73 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     initNode: function(parent, attrs) {
         var self = this;
         
-        self.lines = 12;
-        self.length = 7;
-        self.lineWidth = 5;
-        self.radius = 10;
-        self.corners = 1;
-        self.lineColor = '#000000';
-        self.direction = self.speed = 1;
-        self.trail = 100;
-        self.lineOpacity = 0.25;
+        self.lateAttrs = ['spinColor'];
         
         if (attrs.visible == null) attrs.visible = false;
+        if (attrs.borderWidth == null) attrs.borderWidth = 5;
+        if (attrs.borderColor == null) attrs.borderColor = '#ffffff';
+        if (attrs.borderStyle == null) attrs.borderStyle = 'solid';
+        if (attrs.spinColor == null) attrs.spinColor = '#000000';
         
         self.callSuper(parent, attrs);
         
-        if (self.visible) self.__show();
-    },
-    
-    /** @overrides myt.View */
-    destroyBeforeOrphaning: function() {
-        this.__hide();
+        self.deStyle.borderRadius = '50%';
         
-        this.callSuper();
+        self._updateSize();
+        self._spin();
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    setLines: function(v) {this.lines = v;},
-    setLength: function(v) {this.length = v;},
-    setLineWidth: function(v) {this.lineWidth = v;},
-    setRadius: function(v) {this.radius = v;},
-    setCorners: function(v) {this.corners = v;},
-    setLineColor: function(v) {this.lineColor = v;},
-    setDirection: function(v) {this.direction = v;},
-    setSpeed: function(v) {this.speed = v;},
-    setTrail: function(v) {this.trail = v;},
-    setLineOpacity: function(v) {this.lineOpacity = v;},
+    setSize: function(v) {
+        if (this.size !== v) {
+            this.size = v;
+            if (this.inited) this._updateSize();
+        }
+    },
+    
+    setSpinColor: function(v) {
+        if (this.spinColor !== v) {
+            this.deStyle.borderTopColor = this.spinColor = v;
+            if (this.inited) this.fireEvent('spinColor', v);
+        }
+    },
+    
+    /** @overrides myt.View */
+    setBorderWidth: function(v) {
+        if (this.borderWidth !== v) {
+            this.callSuper(v);
+            if (this.inited) this._updateSize();
+        }
+    },
     
     /** @overrides myt.View */
     setVisible: function(v) {
         if (this.visible !== v) {
             this.callSuper(v);
-            
-            if (this.inited) {
-                if (this.visible) {
-                    this.__show();
-                } else {
-                    this.__hide();
-                }
-            }
+            if (this.inited) this._spin();
         }
-    },
-    
-    getSize: function() {
-        return 2 * (this.radius + this.length + this.lineWidth);
     },
     
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @private */
-    __show: function() {
-        var self = this,
-            spinner = self.__spinner || (self.__spinner = new myt.Spinner.FACTORY({
-                lines:self.lines, 
-                length:self.length, 
-                width:self.lineWidth, 
-                radius:self.radius, 
-                corners:self.corners,
-                color:self.lineColor,
-                direction:self.direction,
-                speed:self.speed,
-                trail:self.trail,
-                opacity:self.lineOpacity
-            })),
-            size = self.getSize();
-        self.setWidth(size);
-        self.setHeight(size);
-        
-        spinner.spin(self.domElement);
+    _spin: function() {
+        this[this.visible ? 'addDomClass' : 'removeDomClass']('mytCenterSpin');
     },
     
-    /** @private */
-    __hide: function() {
-        var spinner = this.__spinner;
-        if (spinner) spinner.stop();
+    /** Remove the border from the dom element width and height so that the
+        spinner doesn't take up more space that the size.
+        @private */
+    _updateSize: function() {
+        var self = this,
+            size = self.size,
+            deStyle = self.deStyle;
+        self.setWidth(size);
+        self.setHeight(size);
+        deStyle.width = deStyle.height = (size - 2*self.borderWidth) + 'px';
     }
 });
-
-/**
- * Copyright (c) 2011-2013 Felix Gnass
- * Licensed under the MIT license
- * 
- * fgnass.github.com/spin.js#v1.3
- */
-myt.Spinner.FACTORY = function() {
-  var prefixes = ['webkit', 'Moz', 'ms', 'O'] /* Vendor prefixes */
-    , animations = {} /* Animation rules keyed by their name */
-    , useCssAnimations /* Whether to use CSS animations or setTimeout */
-
-  /**
-   * Utility function to create elements. If no tag name is given,
-   * a DIV is created. Optionally properties can be passed.
-   */
-  function createEl(tag, prop) {
-    var el = document.createElement(tag || 'div')
-      , n
-
-    for(n in prop) el[n] = prop[n]
-    return el
-  }
-
-  /**
-   * Appends children and returns the parent.
-   */
-  function ins(parent /* child1, child2, ...*/) {
-    for (var i=1, n=arguments.length; i<n; i++)
-      parent.appendChild(arguments[i])
-
-    return parent
-  }
-
-  /**
-   * Insert a new stylesheet to hold the @keyframe or VML rules.
-   */
-  var sheet = (function() {
-    var el = createEl('style', {type : 'text/css'})
-    ins(myt.getElement('head'), el)
-    return el.sheet || el.styleSheet
-  }())
-
-  /**
-   * Creates an opacity keyframe animation rule and returns its name.
-   * Since most mobile Webkits have timing issues with animation-delay,
-   * we create separate rules for each line/segment.
-   */
-  function addAnimation(alpha, trail, i, lines) {
-    var name = ['opacity', trail, ~~(alpha*100), i, lines].join('-')
-      , start = 0.01 + i/lines * 100
-      , z = Math.max(1 - (1-alpha) / trail * (100-start), alpha)
-      , prefix = useCssAnimations.substring(0, useCssAnimations.indexOf('Animation')).toLowerCase()
-      , pre = prefix && '-' + prefix + '-' || ''
-
-    if (!animations[name]) {
-      sheet.insertRule(
-        '@' + pre + 'keyframes ' + name + '{' +
-        '0%{opacity:' + z + '}' +
-        start + '%{opacity:' + alpha + '}' +
-        (start+0.01) + '%{opacity:1}' +
-        (start+trail) % 100 + '%{opacity:' + alpha + '}' +
-        '100%{opacity:' + z + '}' +
-        '}', sheet.cssRules.length)
-
-      animations[name] = 1
-    }
-
-    return name
-  }
-
-  /**
-   * Tries various vendor prefixes and returns the first supported property.
-   */
-  function vendor(el, prop) {
-    var s = el.style
-      , pp
-      , i
-
-    if(s[prop] !== undefined) return prop
-    prop = prop.charAt(0).toUpperCase() + prop.slice(1)
-    for(i=0; i<prefixes.length; i++) {
-      pp = prefixes[i]+prop
-      if(s[pp] !== undefined) return pp
-    }
-  }
-
-  /**
-   * Sets multiple style properties at once.
-   */
-  function css(el, prop) {
-    for (var n in prop)
-      el.style[vendor(el, n)||n] = prop[n]
-
-    return el
-  }
-
-  /** The constructor */
-  function Spinner(o) {
-    this.opts = o;
-  }
-
-  /**
-   * Adds the spinner to the given target element. If this instance is already
-   * spinning, it is automatically removed from its previous target b calling
-   * stop() internally.
-   */
-  Spinner.prototype.spin = function(target) {
-    this.stop()
-    var el = this.el = css(createEl(), {
-      position:'relative',
-      left:(target.offsetWidth >> 1) + 'px',
-      top:(target.offsetHeight >> 1) + 'px'
-    })
-    target.insertBefore(el, null)
-    this.lines(el, this.opts)
-    return this
-  }
-  
-  /**
-   * Stops and removes the Spinner.
-   */
-  Spinner.prototype.stop = function() {
-    var el = this.el
-    if (el) {
-      if (el.parentNode) el.parentNode.removeChild(el)
-      this.el = undefined
-    }
-    return this
-  }
-  
-  /**
-   * Internal method that draws the individual lines. Will be overwritten
-   * in VML fallback mode below.
-   */
-  Spinner.prototype.lines = function(el, o) {
-    var i = 0
-      , start = (o.lines - 1) * (1 - o.direction) / 2
-      , seg
-    
-    function fill(color) {
-      return css(createEl(), {
-        position: 'absolute',
-        width: (o.length+o.width) + 'px',
-        height: o.width + 'px',
-        background: color,
-        transformOrigin: 'left',
-        transform: 'rotate(' + ~~(360/o.lines*i) + 'deg) translate(' + o.radius+'px' +',0)',
-        borderRadius: (o.corners * o.width>>1) + 'px'
-      })
-    }
-    
-    for (; i < o.lines; i++) {
-      seg = css(createEl(), {
-        position: 'absolute',
-        top: 1+~(o.width/2) + 'px',
-        transform: o.hwaccel ? 'translate3d(0,0,0)' : '',
-        opacity: o.opacity,
-        animation: useCssAnimations && addAnimation(o.opacity, o.trail, start + i * o.direction, o.lines) + ' ' + 1/o.speed + 's linear infinite'
-      })
-      
-      ins(el, ins(seg, fill(o.color)))
-    }
-    return el
-  }
-
-  var probe = css(createEl('group'))
-  useCssAnimations = vendor(probe, 'animation')
-
-  return Spinner
-}();
 
 
 /** The class used as the DEFAULT_BUTTON_CLASS in myt.Dialog.
@@ -21670,8 +21473,8 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         
         var spinner = self.spinner = new M.Spinner(content, {
             align:'center', visible:true,
-            radius:10, lines:12, length:14, lineWidth:3,
-            y:opts.msgY == null ? MP.DEFAULT_PADDING_Y : opts.msgY,
+            borderColor:'#cccccc',
+            size:50, y:opts.msgY == null ? MP.DEFAULT_PADDING_Y : opts.msgY,
         });
         if (msg) {
             new M.Text(content, {
@@ -21680,7 +21483,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
                 wordWrap:opts.wordWrap,
                 fontWeight:opts.fontWeight,
                 x:opts.msgX == null ? MP.DEFAULT_PADDING_X : opts.msgX,
-                y:spinner.y + spinner.getSize() + MP.DEFAULT_PADDING_Y,
+                y:spinner.y + spinner.size + MP.DEFAULT_PADDING_Y,
                 width:opts.width
             });
         }
@@ -25233,7 +25036,6 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
     
     Events:
         limitToParent:number
-        inset:number
     
     Attributes:
         axis:string Indicates if the divider should be constrained horizontally
