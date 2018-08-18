@@ -7,8 +7,8 @@ JS.Packages(function() {with(this) {
     
     // Shims and Polyfills
     var MYT_SHIM_ROOT = MYT_ROOT+'shim/';
-    file(MYT_SHIM_ROOT + 'BrowserDetect.js',MYT_SHIM_ROOT + 'Console.js',MYT_SHIM_ROOT + 'history.js',MYT_SHIM_ROOT + 'language.js')
-    .provides('BrowserDetect','console','History','History.Adapter','String.prototype.trimLeft','Date.prototype.format');
+    file(MYT_SHIM_ROOT + 'BrowserDetect.js',MYT_SHIM_ROOT + 'Console.js',MYT_SHIM_ROOT + 'language.js')
+    .provides('BrowserDetect','console','String.prototype.trimLeft','Date.prototype.format');
     
     // Util
     var UTIL_ROOT = MYT_ROOT+'util/';
@@ -68,7 +68,6 @@ JS.Packages(function() {with(this) {
     var MYT_GLOBALS_ROOT = MYT_CORE_ROOT + 'globals/';
     file(MYT_GLOBALS_ROOT + 'Global.js'                ).provides('myt.global'             ).requires('myt.Constrainable');
     file(MYT_GLOBALS_ROOT + 'GlobalError.js'           ).provides('myt.global.error'       ).requires('myt.global','myt.Observable');
-    file(MYT_GLOBALS_ROOT + 'GlobalHistory.js'         ).provides('myt.global.history'     ).requires('myt.global','myt.Observable','History','History.Adapter');
     file(MYT_GLOBALS_ROOT + 'GlobalIdle.js'            ).provides('myt.global.idle'        ).requires('myt.global','myt.Observable');
     file(MYT_GLOBALS_ROOT + 'GlobalMouse.js'           ).provides('myt.global.mouse'       ).requires('myt.global','myt.DomObservable','myt.MouseObservable');
     file(MYT_GLOBALS_ROOT + 'GlobalTouch.js'           ).provides('myt.global.touch'       ).requires('myt.global','myt.DomObservable','myt.TouchObservable');
@@ -316,7 +315,7 @@ JS.Packages(function() {with(this) {
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
         'myt.Cookie','myt.LocalStorage',
-        'myt.global.error','myt.global.keys','myt.global.touch','myt.global.history',
+        'myt.global.error','myt.global.keys','myt.global.touch',
         'myt.Text','myt.Markup','myt.Frame','myt.SizeWidthToDom','myt.SizeHeightToDom','myt.SizeToParent',
         'myt.SizeToWindowWidth','myt.SizeToWindowHeight',
         'myt.Animator','myt.StateMachine',
