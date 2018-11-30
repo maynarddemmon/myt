@@ -10,31 +10,7 @@
 </head><body>
 <script>
     JS.require('myt.all', function() {
-        var rootView = new myt.View(null, {bgColor:'#ffffff'}, [myt.SizeToWindow, {
-            /** Apply the state to the app. */
-            handleStateChange: function(event) {
-                var data = event.value.data;
-                this._lockUpdateState = true;
-                topTab.selectById(data.topId || 'two');
-                left.selectById(data.leftId || 'seven');
-                right.selectById(data.rightId || 'eleven');
-                this._lockUpdateState = false;
-            },
-            
-            /** Record the state of the app. */
-            updateState: function() {
-                if (this._lockUpdateState) return;
-                
-                var topId = topTab.getSelected()[0].tabId,
-                    leftId = left.getSelected()[0].tabId,
-                    rightId = right.getSelected()[0].tabId;
-                myt.global.history.updateState(
-                    {topId:topId, leftId:leftId, rightId:rightId}, 
-                    "Tab " + topId + " " + leftId + " " + rightId, 
-                    "?topId=" + topId + "&leftId=" + leftId + "&rightId=" + rightId
-                );
-            }
-        }]);
+        var rootView = new myt.View(null, {bgColor:'#ffffff'}, [myt.SizeToWindow]);
         
         
         // PanelStack
@@ -82,9 +58,7 @@
         // Tab : top
         var topTab = new myt.View(rootView, {
             x:310, height:30, bgColor:'#eeeeee'
-        }, [myt.TabContainer, {
-            doSelected: function(item) {rootView.updateState();}
-        }]);
+        }, [myt.TabContainer]);
         
         var topTabAttrs = {
             shrinkToFit:true,
@@ -127,9 +101,7 @@
         // Tab : left
         var left = new myt.View(rootView, {
             x:210, y:60, width:100, bgColor:'#eeeeee', location:'left'
-        }, [myt.TabContainer, {
-            doSelected: function(item) {rootView.updateState();}
-        }]);
+        }, [myt.TabContainer]);
         
         var leftTabAttrs = {
             text:'tab text left',
@@ -148,9 +120,7 @@
         // Tab : right
         var right = new myt.View(rootView, {
             x:610, y:60, width:100, bgColor:'#eeeeee', location:'right'
-        }, [myt.TabContainer, {
-            doSelected: function(item) {rootView.updateState();}
-        }]);
+        }, [myt.TabContainer]);
         
         var rightTabAttrs = {
             text:'tab text right',
@@ -266,9 +236,6 @@
         }, [myt.SizeToParent]);
         sliderLeft.syncTo(vDivider, 'updateY', 'value');
         sliderRight.syncTo(vDivider, 'updateY', 'value');
-        
-        myt.global.history.startMonitoringState(rootView);
-        rootView.updateState(); // Make the initial selection for the "top" view.
     });
 </script>
 </body></html>

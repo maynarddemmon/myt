@@ -34,7 +34,7 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
     setWidth: function(v, supressEvent) {
         if (v === 'auto') {
             this.__hasSetWidth = false;
-            this.deStyle.width = 'auto';
+            this.getOuterDomStyle().width = 'auto';
             this.sizeViewToDom();
         } else {
             this.__hasSetWidth = true;
@@ -46,7 +46,7 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
     setHeight: function(v, supressEvent) {
         if (v === 'auto') {
             this.__hasSetHeight = false;
-            this.deStyle.height = 'auto';
+            this.getOuterDomStyle().height = 'auto';
             this.sizeViewToDom();
         } else {
             this.__hasSetHeight = true;
@@ -65,7 +65,7 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
             scaling;
         
         if (!self.__hasSetWidth) {
-            bounds = self.domElement.getBoundingClientRect();
+            bounds = self.getOuterDomElement().getBoundingClientRect();
             var w = bounds.width;
             
             // Bounding rect doesn't factor in scaling so we need to calculate
@@ -82,7 +82,7 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
         }
         
         if (!self.__hasSetHeight) {
-            if (!bounds) bounds = self.domElement.getBoundingClientRect();
+            if (!bounds) bounds = self.getOuterDomElement().getBoundingClientRect();
             var h = bounds.height;
             
             // Bounding rect doesn't factor in scaling so we need to calculate

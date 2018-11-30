@@ -21,7 +21,7 @@
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20180817.2322,
+    version:20181206.1546,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -270,77 +270,6 @@ myt = {
             err = null;
         }
         myt.global.error.notify(type || 'error', null, msg, err);
-    },
-    
-    // Collection Utilities
-    /** Removes an item or items from the provided array that matches based 
-        on the provided search function.
-        @param arr:array the array to search.
-        @param search:function|object (optional) the function used to determine
-            a match or an object to search for. If not provided all undefined
-            array values will be removed. The search function takes two
-            arguments: the first is the index of the item in the array and
-            the second is the item to match against, and should return true 
-            if the item should be removed.
-        @param multiple:boolean (optional) if true all items matching the
-            search will be removed and returned. Defaults to false.
-        @returns the removed item or null if not found, or an array of removed
-            items if multiple is true. */
-    filterArray: function(arr, search, multiple) {
-        var retval = multiple ? [] : null;
-        
-        if (Array.isArray(arr)) {
-            var i = arr.length, value,
-                matchFunc = (search == null || typeof search !== 'function') ? function(i, v) {return v === search;} : search;
-            while (i) {
-                value = arr[--i];
-                if (matchFunc(i, value)) {
-                    arr.splice(i, 1);
-                    if (multiple) {
-                        retval.push(value);
-                    } else {
-                        return value;
-                    }
-                }
-            }
-        }
-        
-        return retval;
-    },
-    
-    /** Removes an item or items from the provided object that matches based 
-        on the provided search function.
-        @param obj:object the object to search.
-        @param search:function|object (optional) the function used to determine
-            a match or an object to search for. If not provided all undefined
-            object values will be removed. The search function takes two 
-            arguments, the object and the value for that key, and should 
-            return true if the item should be removed.
-        @param multiple:boolean (optional) if true all items matching the
-            search will be removed and returned. Defaults to false.
-        @returns the removed item or null if not found, or an array of removed
-            items if multiple is true. */
-    filterObject: function(obj, search, multiple) {
-        var retval = multiple ? [] : null;
-        
-        if (obj && typeof obj === 'object') {
-            var keys = Object.keys(obj), i = keys.length, key, value,
-                matchFunc = (search == null || typeof search !== 'function') ? function(k, v) {return v === search;} : search;
-            while (i) {
-                key = keys[--i];
-                value = obj[key];
-                if (matchFunc(key, value)) {
-                    delete obj[key];
-                    if (multiple) {
-                        retval.push(value);
-                    } else {
-                        return value;
-                    }
-                }
-            }
-        }
-        
-        return retval;
     },
     
     // Random numbers

@@ -215,23 +215,51 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    /** Sets the dom element to the provided one. */
+    getInnerDomElement: function() {
+        return this.domElement;
+    },
+    
+    getOuterDomElement: function() {
+        return this.__outerElem;
+    },
+    
+    getInnerDomStyle: function() {
+        return this.deStyle;
+    },
+    
+    getOuterDomStyle: function() {
+        return this.__outerStyle;
+    },
+    
+    /** Sets the dom element(s) to the provided one. */
     setDomElement: function(v) {
-        this.domElement = v;
+        // Support an inner and outer dom element if an array of elements is
+        // provided.
+        var outerElem, innerElem;
+        if (Array.isArray(v)) {
+            outerElem = v[0];
+            innerElem = v[1];
+        } else {
+            outerElem = innerElem = v;
+        }
+        
+        this.domElement = innerElem;
+        this.__outerElem = outerElem;
         
         // Store a reference to domElement.style since it is accessed often.
-        this.deStyle = v.style;
+        this.deStyle = innerElem.style;
+        this.__outerStyle = outerElem.style;
         
         // Setup a reference from the domElement to this model. This will allow
         // access to the model from code that uses JQuery or some other
         // mechanism to select dom elements.
-        v.model = this;
+        innerElem.model = outerElem.model = this;
     },
     
     /** Removes this DomElementProxy's dom element from its parent node.
         @returns void */
     removeDomElement: function() {
-        var de = this.domElement;
+        var de = this.getOuterDomElement();
         de.parentNode.removeChild(de);
     },
     
@@ -241,6 +269,10 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
         delete this.domElement.model;
         delete this.deStyle;
         delete this.domElement;
+        
+        delete this.__outerElem.model;
+        delete this.__outerStyle;
+        delete this.__outerElem;
     },
     
     /** Sets the dom "class" attribute on the dom element.
