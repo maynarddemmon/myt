@@ -137,7 +137,9 @@ myt.View = new JS.Class('View', myt.Node, {
             @returns void */
         retainFocusDuringDomUpdate: function(viewBeingRemoved, wrappedFunc) {
             var restoreFocus = myt.global.focus.focusedView, 
-                elem = viewBeingRemoved.domElement, restoreScrollTop, restoreScrollLeft;
+                elem = viewBeingRemoved.getInnerDomElement(), 
+                restoreScrollTop, 
+                restoreScrollLeft;
             if (restoreFocus === viewBeingRemoved || (restoreFocus && restoreFocus.isDescendantOf(viewBeingRemoved))) {
                 restoreFocus._ignoreFocus = true;
             }
@@ -178,7 +180,8 @@ myt.View = new JS.Class('View', myt.Node, {
         // Necessary since x and y of 0 won't update deStyle so this gets
         // things initialized correctly. Without this RootViews will have
         // an incorrect initial position for x or y of 0.
-        self.deStyle.left = self.deStyle.top = '0px';
+        var s = self.getOuterDomStyle();
+        s.left = s.top = '0px';
         
         self.callSuper(parent, attrs);
         
@@ -252,12 +255,18 @@ myt.View = new JS.Class('View', myt.Node, {
         @returns array of myt.View or undefined if this view is orphaned. */
     getSiblingViews: function() {
         if (this.parent) {
-            // Get a copy of the subviews since we will filter it and thus
-            // do not want to modify the original array.
-            var svs = this.parent.getSubviews().concat();
+            // Get a copy of the subviews since we will modify it and do not
+            // want to modify the original array.
+            var svs = this.parent.getSubviews().concat(),
+                i = svs.length;
             
-            // Filter out ourself
-            myt.filterArray(svs, this);
+            // Remove ourselves from the subviews since we only want siblings.
+            while (i) {
+                if (svs[--i] === this) {
+                    svs.splice(i, 1);
+                    break;
+                }
+            }
             
             return svs;
         }
@@ -438,7 +447,7 @@ myt.View = new JS.Class('View', myt.Node, {
     setX: function(v) {
         if (this.x !== v) {
             this.x = v;
-            if (this.visible) this.deStyle.left = v + 'px';
+            if (this.visible) this.getOuterDomStyle().left = v + 'px';
             if (this.inited) this.fireEvent('x', v);
         }
     },
@@ -446,7 +455,7 @@ myt.View = new JS.Class('View', myt.Node, {
     setY: function(v) {
         if (this.y !== v) {
             this.y = v;
-            if (this.visible) this.deStyle.top = v + 'px';
+            if (this.visible) this.getOuterDomStyle().top = v + 'px';
             if (this.inited) this.fireEvent('y', v);
         }
     },
@@ -457,7 +466,7 @@ myt.View = new JS.Class('View', myt.Node, {
         
         if (this.width !== v) {
             this.width = v;
-            this.deStyle.width = v + 'px';
+            this.getOuterDomStyle().width = v + 'px';
             if (this.inited) {
                 this.__updateBounds(v, this.height);
                 if (!supressEvent) this.fireEvent('width', v);
@@ -471,7 +480,7 @@ myt.View = new JS.Class('View', myt.Node, {
         
         if (this.height !== v) {
             this.height = v;
-            this.deStyle.height = v + 'px';
+            this.getOuterDomStyle().height = v + 'px';
             if (this.inited) {
                 this.__updateBounds(this.width, v);
                 if (!supressEvent) this.fireEvent('height', v);
@@ -482,21 +491,21 @@ myt.View = new JS.Class('View', myt.Node, {
     setTextColor: function(v) {
         if (this.textColor !== v) {
             this.textColor = v;
-            this.deStyle.color = v || 'inherit';
+            this.getOuterDomStyle().color = v || 'inherit';
             if (this.inited) this.fireEvent('textColor', v);
         }
     },
     
     setBgColor: function(v) {
         if (this.bgColor !== v) {
-            this.deStyle.backgroundColor = this.bgColor = v;
+            this.getOuterDomStyle().backgroundColor = this.bgColor = v;
             if (this.inited) this.fireEvent('bgColor', v);
         }
     },
     
     setOpacity: function(v) {
         if (this.opacity !== v) {
-            this.deStyle.opacity = this.opacity = v;
+            this.getOuterDomStyle().opacity = this.opacity = v;
             if (this.inited) this.fireEvent('opacity', v);
         }
     },
@@ -506,7 +515,7 @@ myt.View = new JS.Class('View', myt.Node, {
         if (existing !== v) {
             this.overflow = v;
             
-            var s = this.deStyle;
+            var s = this.getInnerDomStyle();
             if (v === 'autox') {
                 s.overflowX = 'auto';
                 s.overflowY = 'hidden';
@@ -523,26 +532,27 @@ myt.View = new JS.Class('View', myt.Node, {
     },
     
     setVisible: function(v) {
-        if (this.visible !== v) {
-            this.visible = v;
+        var self = this;
+        if (self.visible !== v) {
+            self.visible = v;
             
-            var s = this.deStyle;
+            var s = self.getOuterDomStyle();
             s.visibility = v ? 'inherit' : 'hidden';
             
             // Move invisible elements to a very negative location so they won't
             // effect scrollable area. Ideally we could use display:none but we
             // can't because that makes measuring bounds not work.
-            s.left = v ? this.x + 'px' : '-100000px';
-            s.top = v ? this.y + 'px' : '-100000px';
+            s.left = v ? self.x + 'px' : '-100000px';
+            s.top = v ? self.y + 'px' : '-100000px';
             
-            if (this.inited) this.fireEvent('visible', v);
+            if (self.inited) self.fireEvent('visible', v);
         }
     },
     
     setPointerEvents: function(v) {
         if (this.pointerEvents !== v) {
             this.pointerEvents = v;
-            this.deStyle.pointerEvents = v || 'auto';
+            this.getOuterDomStyle().pointerEvents = v || 'auto';
             if (this.inited) this.fireEvent('pointerEvents', v);
         }
     },
@@ -550,7 +560,7 @@ myt.View = new JS.Class('View', myt.Node, {
     setCursor: function(v) {
         if (this.cursor !== v) {
             this.cursor = v;
-            this.deStyle.cursor = v || 'auto';
+            this.getOuterDomStyle().cursor = v || 'auto';
             if (this.inited) this.fireEvent('cursor', v);
         }
     },
@@ -767,7 +777,7 @@ myt.View = new JS.Class('View', myt.Node, {
         @return void */
     setTooltip: function(v) {
         if (this.tooltip !== v) {
-            this.tooltip = this.domElement.title = v;
+            this.tooltip = this.getOuterDomElement().title = v;
             if (this.inited) this.fireEvent('tooltip', v);
         }
     },
@@ -800,7 +810,7 @@ myt.View = new JS.Class('View', myt.Node, {
         @fires layoutAdded event with the provided node if it's a Layout. */
     subnodeAdded: function(node) {
         if (node instanceof myt.View) {
-            this.domElement.appendChild(node.domElement);
+            this.getInnerDomElement().appendChild(node.getOuterDomElement());
             this.getSubviews().push(node);
             this.fireEvent('subviewAdded', node);
             this.subviewAdded(node);
@@ -868,7 +878,7 @@ myt.View = new JS.Class('View', myt.Node, {
         @returns myt.View: The next sibling view or null if none exists. */
     getNextSibling: function() {
         if (this.parent) {
-            var nextDomElement = this.domElement.nextElementSibling;
+            var nextDomElement = this.getOuterDomElement().nextElementSibling;
             if (nextDomElement) return nextDomElement.model;
         }
         return null;
@@ -878,7 +888,7 @@ myt.View = new JS.Class('View', myt.Node, {
         @returns myt.View: The previous sibling view or null if none exists. */
     getPrevSibling: function() {
         if (this.parent) {
-            var prevDomElement = this.domElement.previousElementSibling;
+            var prevDomElement = this.getOuterDomElement().previousElementSibling;
             if (prevDomElement) return prevDomElement.model;
         }
         return null;
@@ -943,10 +953,10 @@ myt.View = new JS.Class('View', myt.Node, {
             if (checkZIndex) {
                 var commonAncestor = this.getLeastCommonAncestor(view);
                 if (commonAncestor) {
-                    var commonAncestorElem = commonAncestor.domElement,
+                    var commonAncestorElem = commonAncestor.getInnerDomElement(),
                         DEP = myt.DomElementProxy,
-                        zIdx = DEP.getZIndexRelativeToAncestor(this.domElement, commonAncestorElem),
-                        otherZIdx = DEP.getZIndexRelativeToAncestor(view.domElement, commonAncestorElem);
+                        zIdx = DEP.getZIndexRelativeToAncestor(this.getOuterDomElement(), commonAncestorElem),
+                        otherZIdx = DEP.getZIndexRelativeToAncestor(view.getOuterDomElement(), commonAncestorElem);
                     
                     // Reverse comparison order
                     if (front) {
@@ -969,7 +979,7 @@ myt.View = new JS.Class('View', myt.Node, {
             // DOCUMENT_POSITION_CONTAINS 8
             // DOCUMENT_POSITION_CONTAINED_BY 16
             // DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC 32
-            var rel = this.domElement.compareDocumentPosition(view.domElement);
+            var rel = this.getOuterDomElement().compareDocumentPosition(view.getOuterDomElement());
             return front ? rel === 2 || rel === 10 : rel === 4 || rel === 20;
         } else {
             return false;
@@ -1001,10 +1011,10 @@ myt.View = new JS.Class('View', myt.Node, {
         @returns void */
     bringSubviewToFront: function(sv) {
         if (sv && sv.parent === this) {
-            var de = this.domElement;
-            if (sv.domElement !== de.lastChild) {
+            var innerElem = this.getInnerDomElement();
+            if (sv.getOuterDomElement() !== innerElem.lastChild) {
                 myt.View.retainFocusDuringDomUpdate(sv, function() {
-                    de.appendChild(sv.domElement);
+                    innerElem.appendChild(sv.getOuterDomElement());
                 });
             }
         }
@@ -1015,10 +1025,10 @@ myt.View = new JS.Class('View', myt.Node, {
         @returns void */
     sendSubviewToBack: function(sv) {
         if (sv && sv.parent === this) {
-            var de = this.domElement;
-            if (sv.domElement !== de.firstChild) {
+            var innerElem = this.getInnerDomElement();
+            if (sv.getOuterDomElement() !== innerElem.firstChild) {
                 myt.View.retainFocusDuringDomUpdate(sv, function() {
-                    de.insertBefore(sv.domElement, de.firstChild);
+                    innerElem.insertBefore(sv.getOuterDomElement(), innerElem.firstChild);
                 });
             }
         }
@@ -1030,9 +1040,9 @@ myt.View = new JS.Class('View', myt.Node, {
         @returns void */
     sendSubviewBehind: function(sv, existing) {
         if (sv && existing && sv.parent === this && existing.parent === this) {
-            var de = this.domElement;
+            var innerElem = this.getInnerDomElement();
             myt.View.retainFocusDuringDomUpdate(sv, function() {
-                de.insertBefore(sv.domElement, existing.domElement);
+                innerElem.insertBefore(sv.getOuterDomElement(), existing.getOuterDomElement());
             });
         }
     },
@@ -1055,27 +1065,29 @@ myt.View = new JS.Class('View', myt.Node, {
         @returns void */
     sortSubviews: function(sortFunc) {
         // Sort subviews
-        var svs = this.getSubviews(), self = this;
+        var self = this,
+            svs = self.getSubviews();
         svs.sort(sortFunc);
         
         // Rearrange dom to match new sort order.
         myt.View.retainFocusDuringDomUpdate(self, function() {
             var len = svs.length,
                 i = 0,
-                de = self.domElement,
-                nextDe = de.nextSibling,
-                parentElem = de.parentNode;
+                outerElem = self.getOuterDomElement(),
+                innerElem = self.getInnerDomElement(),
+                nextDe = outerElem.nextSibling,
+                parentElem = outerElem.parentNode;
             // Remove this dom element from the dom
-            if (parentElem) parentElem.removeChild(de);
+            if (parentElem) parentElem.removeChild(outerElem);
             
             // Copy the dom elements in the correct order to a document
             // fragment and then add that fragment back to the dom.
             var fragment = document.createDocumentFragment();
-            for (; len > i;) fragment.appendChild(svs[i++].domElement);
-            de.appendChild(fragment);
+            for (; len > i;) fragment.appendChild(svs[i++].getOuterDomElement());
+            innerElem.appendChild(fragment);
             
             // Put this dom element back in the dom
-            if (parentElem) parentElem.insertBefore(de, nextDe);
+            if (parentElem) parentElem.insertBefore(outerElem, nextDe);
         });
     },
     
@@ -1089,10 +1101,10 @@ myt.View = new JS.Class('View', myt.Node, {
         @returns boolean True if the location is inside this view, false 
             if not. */
     containsPoint: function(locX, locY, referenceFrameDomElem) {
-        var de = this.domElement;
-        if (!de) return false;
+        var outerElem = this.getOuterDomElement();
+        if (!outerElem) return false;
         
-        var pos = myt.DomElementProxy.getPagePosition(de, referenceFrameDomElem);
+        var pos = myt.DomElementProxy.getPagePosition(outerElem, referenceFrameDomElem);
         return myt.Geometry.rectContainsPoint(locX, locY, pos.x, pos.y, this.width, this.height);
     },
     
@@ -1112,7 +1124,8 @@ myt.View = new JS.Class('View', myt.Node, {
         if (myt.Geometry.rectContainsPoint(x, y, 0, 0, this.width * effectiveScale, this.height * effectiveScale)) {
             var p = this.parent;
             if (p) {
-                var de = p.domElement, pScale = p.__effectiveScale;
+                var de = p.getOuterDomElement(), 
+                    pScale = p.__effectiveScale;
                 return p.__isPointVisible(x + (this.x - de.scrollLeft) * pScale, y + (this.y - de.scrollTop) * pScale);
             }
             return true;

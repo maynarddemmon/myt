@@ -49,10 +49,12 @@ JS.Packages(function() {with(this) {
                                                                                         'myt.ScrollObservable','myt.Geometry');
     file(MYT_VIEW_ROOT + 'RootView.js'       ).provides('myt.RootView'       ).requires('myt.View','myt.global.roots');
     
-    file(MYT_VIEW_ROOT + 'ImageSupport.js'    ).provides('myt.ImageSupport'    ).requires('myt.View');
-    file(MYT_VIEW_ROOT + 'TransformSupport.js').provides('myt.TransformSupport').requires('myt.View');
-    file(MYT_VIEW_ROOT + 'SizeToDom.js'       ).provides('myt.SizeToDom'       ).requires('myt.TransformSupport');
-    file(MYT_VIEW_ROOT + 'TextSupport.js'     ).provides('myt.TextSupport'     ).requires('myt.SizeToDom');
+    file(MYT_VIEW_ROOT + 'ImageSupport.js'       ).provides('myt.ImageSupport'       ).requires('myt.View');
+    file(MYT_VIEW_ROOT + 'TransformSupport.js'   ).provides('myt.TransformSupport'   ).requires('myt.View');
+    file(MYT_VIEW_ROOT + 'SizeToDom.js'          ).provides('myt.SizeToDom'          ).requires('myt.TransformSupport');
+    file(MYT_VIEW_ROOT + 'TextSupport.js'        ).provides('myt.TextSupport'        ).requires('myt.SizeToDom');
+    file(MYT_VIEW_ROOT + 'FlexBoxSupport.js'     ).provides('myt.FlexBoxSupport'     ).requires('myt');
+    file(MYT_VIEW_ROOT + 'FlexBoxChildSupport.js').provides('myt.FlexBoxChildSupport').requires('myt');
     
     // Core : Dom Events
     var MYT_DOM_EVENTS_ROOT = MYT_CORE_ROOT + 'dom_events/';
@@ -94,6 +96,7 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'base/Canvas.js' ).provides('myt.Canvas' ).requires('myt.View');
     file(MYT_COMPONENT_ROOT + 'base/Frame.js'  ).provides('myt.Frame'  ).requires('myt.View');
     file(MYT_COMPONENT_ROOT + 'base/Image.js'  ).provides('myt.Image'  ).requires('myt.ImageSupport');
+    file(MYT_COMPONENT_ROOT + 'base/FlexBox.js').provides('myt.FlexBox').requires('myt.View','myt.FlexBoxSupport');
     
     // Component : Behavior
     file(MYT_COMPONENT_ROOT + 'behavior/Activateable.js'    ).provides('myt.Activateable'    ).requires('myt');
@@ -316,7 +319,8 @@ JS.Packages(function() {with(this) {
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
         'myt.Cookie','myt.LocalStorage',
         'myt.global.error','myt.global.keys','myt.global.touch',
-        'myt.Text','myt.Markup','myt.Frame','myt.SizeWidthToDom','myt.SizeHeightToDom','myt.SizeToParent',
+        'myt.FlexBoxChildSupport','myt.FlexBox','myt.Text','myt.Image','myt.Markup','myt.Frame',
+        'myt.SizeWidthToDom','myt.SizeHeightToDom','myt.SizeToParent',
         'myt.SizeToWindowWidth','myt.SizeToWindowHeight',
         'myt.Animator','myt.StateMachine',
         'myt.Replicator',

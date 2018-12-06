@@ -634,7 +634,7 @@ JS.Singleton = new JS.Class('Singleton', {
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20180817.2322,
+    version:20181206.1546,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -883,77 +883,6 @@ myt = {
             err = null;
         }
         myt.global.error.notify(type || 'error', null, msg, err);
-    },
-    
-    // Collection Utilities
-    /** Removes an item or items from the provided array that matches based 
-        on the provided search function.
-        @param arr:array the array to search.
-        @param search:function|object (optional) the function used to determine
-            a match or an object to search for. If not provided all undefined
-            array values will be removed. The search function takes two
-            arguments: the first is the index of the item in the array and
-            the second is the item to match against, and should return true 
-            if the item should be removed.
-        @param multiple:boolean (optional) if true all items matching the
-            search will be removed and returned. Defaults to false.
-        @returns the removed item or null if not found, or an array of removed
-            items if multiple is true. */
-    filterArray: function(arr, search, multiple) {
-        var retval = multiple ? [] : null;
-        
-        if (Array.isArray(arr)) {
-            var i = arr.length, value,
-                matchFunc = (search == null || typeof search !== 'function') ? function(i, v) {return v === search;} : search;
-            while (i) {
-                value = arr[--i];
-                if (matchFunc(i, value)) {
-                    arr.splice(i, 1);
-                    if (multiple) {
-                        retval.push(value);
-                    } else {
-                        return value;
-                    }
-                }
-            }
-        }
-        
-        return retval;
-    },
-    
-    /** Removes an item or items from the provided object that matches based 
-        on the provided search function.
-        @param obj:object the object to search.
-        @param search:function|object (optional) the function used to determine
-            a match or an object to search for. If not provided all undefined
-            object values will be removed. The search function takes two 
-            arguments, the object and the value for that key, and should 
-            return true if the item should be removed.
-        @param multiple:boolean (optional) if true all items matching the
-            search will be removed and returned. Defaults to false.
-        @returns the removed item or null if not found, or an array of removed
-            items if multiple is true. */
-    filterObject: function(obj, search, multiple) {
-        var retval = multiple ? [] : null;
-        
-        if (obj && typeof obj === 'object') {
-            var keys = Object.keys(obj), i = keys.length, key, value,
-                matchFunc = (search == null || typeof search !== 'function') ? function(k, v) {return v === search;} : search;
-            while (i) {
-                key = keys[--i];
-                value = obj[key];
-                if (matchFunc(key, value)) {
-                    delete obj[key];
-                    if (multiple) {
-                        retval.push(value);
-                    } else {
-                        return value;
-                    }
-                }
-            }
-        }
-        
-        return retval;
     },
     
     // Random numbers
@@ -2757,23 +2686,51 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    /** Sets the dom element to the provided one. */
+    getInnerDomElement: function() {
+        return this.domElement;
+    },
+    
+    getOuterDomElement: function() {
+        return this.__outerElem;
+    },
+    
+    getInnerDomStyle: function() {
+        return this.deStyle;
+    },
+    
+    getOuterDomStyle: function() {
+        return this.__outerStyle;
+    },
+    
+    /** Sets the dom element(s) to the provided one. */
     setDomElement: function(v) {
-        this.domElement = v;
+        // Support an inner and outer dom element if an array of elements is
+        // provided.
+        var outerElem, innerElem;
+        if (Array.isArray(v)) {
+            outerElem = v[0];
+            innerElem = v[1];
+        } else {
+            outerElem = innerElem = v;
+        }
+        
+        this.domElement = innerElem;
+        this.__outerElem = outerElem;
         
         // Store a reference to domElement.style since it is accessed often.
-        this.deStyle = v.style;
+        this.deStyle = innerElem.style;
+        this.__outerStyle = outerElem.style;
         
         // Setup a reference from the domElement to this model. This will allow
         // access to the model from code that uses JQuery or some other
         // mechanism to select dom elements.
-        v.model = this;
+        innerElem.model = outerElem.model = this;
     },
     
     /** Removes this DomElementProxy's dom element from its parent node.
         @returns void */
     removeDomElement: function() {
-        var de = this.domElement;
+        var de = this.getOuterDomElement();
         de.parentNode.removeChild(de);
     },
     
@@ -2783,6 +2740,10 @@ myt.DomElementProxy = new JS.Module('DomElementProxy', {
         delete this.domElement.model;
         delete this.deStyle;
         delete this.domElement;
+        
+        delete this.__outerElem.model;
+        delete this.__outerStyle;
+        delete this.__outerElem;
     },
     
     /** Sets the dom "class" attribute on the dom element.
@@ -3735,6 +3696,121 @@ new JS.Singleton('GlobalTouch', {
 });
 
 
+/** Adds support for flex box child behavior to a myt.View.
+    
+    Events:
+        flexGrow
+        flexShrink
+        alignSelf
+    
+    Attributes:
+        flexGrow
+        flexShrink
+        alignSelf
+*/
+myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
+    // Accessors ///////////////////////////////////////////////////////////////
+    /** @overrides
+        Keep outer dom element's width in sync with the inner dom element. */
+    setWidth: function(v, supressEvent) {
+        if (v == null || v === '') {
+            this.getOuterDomStyle().width = '';
+            this.__syncModelToOuterBoundsWidth();
+        } else {
+            this.callSuper(v, supressEvent);
+        }
+        this.__syncInnerWidthToOuterWidth();
+    },
+    
+    /** @overrides
+        Keep outer dom element's height in sync with the inner dom element. */
+    setHeight: function(v, supressEvent) {
+        if (v == null || v === '') {
+            this.getOuterDomStyle().height = '';
+            this.__syncModelToOuterBoundsHeight();
+        } else {
+            this.callSuper(v, supressEvent);
+        }
+        this.__syncInnerHeightToOuterHeight();
+    },
+    
+    // Flex Box Attrs
+    setFlexGrow: function(v) {
+        if (this.flexGrow !== v) {
+            this.getOuterDomStyle().flexGrow = this.flexGrow = v;
+            if (this.inited) this.fireEvent('flexGrow', v);
+        }
+    },
+    
+    setFlexShrink: function(v) {
+        if (this.flexShrink !== v) {
+            this.getOuterDomStyle().flexShrink = this.flexShrink = v;
+            if (this.inited) this.fireEvent('flexShrink', v);
+        }
+    },
+    
+    setAlignSelf: function(v) {
+        if (this.alignSelf !== v) {
+            this.getOuterDomStyle().alignSelf = this.alignSelf = v;
+            if (this.inited) this.fireEvent('alignSelf', v);
+        }
+    },
+    
+    
+    // Methods /////////////////////////////////////////////////////////////////
+    syncModelToOuterBounds: function() {
+        var bounds = this.getOuterDomElement().getBoundingClientRect();
+        this.__syncModelToOuterBoundsWidth(bounds);
+        this.__syncModelToOuterBoundsHeight(bounds);
+    },
+    
+    /** @private */
+    __syncModelToOuterBoundsWidth: function(bounds) {
+        if (!bounds) bounds = this.getOuterDomElement().getBoundingClientRect();
+        this.fireEvent('width', this.width = bounds.width);
+    },
+    
+    /** @private */
+    __syncModelToOuterBoundsHeight: function(bounds) {
+        if (!bounds) bounds = this.getOuterDomElement().getBoundingClientRect();
+        this.fireEvent('height', this.height = bounds.height);
+    },
+    
+    syncInnerToOuter: function() {
+        this.__syncInnerWidthToOuterWidth();
+        this.__syncInnerHeightToOuterHeight();
+    },
+    
+    /** @private */
+    __syncInnerWidthToOuterWidth: function() {
+        this.__syncInnerToOuter('width');
+    },
+    
+    /** @private */
+    __syncInnerHeightToOuterHeight: function() {
+        this.__syncInnerToOuter('height');
+    },
+    
+    /** @private */
+    __syncInnerToOuter: function(propName) {
+        this.getInnerDomStyle()[propName] = myt.DomElementProxy.getComputedStyle(this.getOuterDomElement())[propName];
+    },
+    
+    /** @overrides */
+    createOurDomElement: function(parent) {
+        var outerElem = this.callSuper(parent);
+        
+        // We need an inner dom element that is position relative to mask the
+        // flex box behavior for descendants of this flex box child.
+        var innerElem = document.createElement('div');
+        innerElem.style.position = 'relative';
+        outerElem.appendChild(innerElem);
+        
+        return [outerElem, innerElem];
+    }
+});
+
+
 /** Provides support for getter and setter functions on an object.
     
     Events:
@@ -4242,32 +4318,6 @@ myt.Node = new JS.Class('Node', {
             @returns Node or null if no match is found. */
         getMatchingAncestor: function(n, matcherFunc) {
             return this.getMatchingAncestorOrSelf(n ? n.parent : null, matcherFunc);
-        },
-        
-        /** A convienence method to execute a method once after a delay.
-            @param target:object The object to call the method on.
-            @param methodName:string The name of the method on this object
-                to execute.
-            @param delay:number (optional) The time to wait in millis. Defaults 
-                to 0.
-            @param arguments Remaining arguments will be passed to the called
-                method in the order provided.
-            @returns number: The timer ID if the timer is started, othewise
-                undefined is returned. */
-        doOnceLater: function() {
-            var params = Array.prototype.slice.call(arguments),
-                target = params.shift(),
-                methodName = params.shift(),
-                delay = params.shift(),
-                method;
-            
-            if (target && (method = target[methodName])) {
-                params.unshift(target);
-                return setTimeout(
-                    method.bind.apply(method, params), 
-                    delay >= 0 ? delay : 0
-                );
-            }
         }
     },
     
@@ -4756,21 +4806,6 @@ myt.Node = new JS.Class('Node', {
         @returns void */
     doOnceOnIdle: function(methodName) {
         this.attachTo(myt.global.idle, methodName, 'idle', true);
-    },
-    
-    /** A convienence method to execute a method once after a delay.
-        @param methodName:string The name of the method on this object
-            to execute.
-        @param delay:number (optional) The time to wait in millis. Defaults 
-            to 0.
-        @param arguments Remaining arguments will be passed to the called
-            method in the order provided.
-        @returns number: The timer ID if the timer is started, othewise
-            undefined is returned. */
-    doOnceLater: function() {
-        var params = Array.prototype.slice.call(arguments);
-        params.unshift(this);
-        return myt.Node.doOnceLater.apply(this, params);
     }
 });
 
@@ -5791,7 +5826,9 @@ myt.View = new JS.Class('View', myt.Node, {
             @returns void */
         retainFocusDuringDomUpdate: function(viewBeingRemoved, wrappedFunc) {
             var restoreFocus = myt.global.focus.focusedView, 
-                elem = viewBeingRemoved.domElement, restoreScrollTop, restoreScrollLeft;
+                elem = viewBeingRemoved.getInnerDomElement(), 
+                restoreScrollTop, 
+                restoreScrollLeft;
             if (restoreFocus === viewBeingRemoved || (restoreFocus && restoreFocus.isDescendantOf(viewBeingRemoved))) {
                 restoreFocus._ignoreFocus = true;
             }
@@ -5832,7 +5869,8 @@ myt.View = new JS.Class('View', myt.Node, {
         // Necessary since x and y of 0 won't update deStyle so this gets
         // things initialized correctly. Without this RootViews will have
         // an incorrect initial position for x or y of 0.
-        self.deStyle.left = self.deStyle.top = '0px';
+        var s = self.getOuterDomStyle();
+        s.left = s.top = '0px';
         
         self.callSuper(parent, attrs);
         
@@ -5906,12 +5944,18 @@ myt.View = new JS.Class('View', myt.Node, {
         @returns array of myt.View or undefined if this view is orphaned. */
     getSiblingViews: function() {
         if (this.parent) {
-            // Get a copy of the subviews since we will filter it and thus
-            // do not want to modify the original array.
-            var svs = this.parent.getSubviews().concat();
+            // Get a copy of the subviews since we will modify it and do not
+            // want to modify the original array.
+            var svs = this.parent.getSubviews().concat(),
+                i = svs.length;
             
-            // Filter out ourself
-            myt.filterArray(svs, this);
+            // Remove ourselves from the subviews since we only want siblings.
+            while (i) {
+                if (svs[--i] === this) {
+                    svs.splice(i, 1);
+                    break;
+                }
+            }
             
             return svs;
         }
@@ -6092,7 +6136,7 @@ myt.View = new JS.Class('View', myt.Node, {
     setX: function(v) {
         if (this.x !== v) {
             this.x = v;
-            if (this.visible) this.deStyle.left = v + 'px';
+            if (this.visible) this.getOuterDomStyle().left = v + 'px';
             if (this.inited) this.fireEvent('x', v);
         }
     },
@@ -6100,7 +6144,7 @@ myt.View = new JS.Class('View', myt.Node, {
     setY: function(v) {
         if (this.y !== v) {
             this.y = v;
-            if (this.visible) this.deStyle.top = v + 'px';
+            if (this.visible) this.getOuterDomStyle().top = v + 'px';
             if (this.inited) this.fireEvent('y', v);
         }
     },
@@ -6111,7 +6155,7 @@ myt.View = new JS.Class('View', myt.Node, {
         
         if (this.width !== v) {
             this.width = v;
-            this.deStyle.width = v + 'px';
+            this.getOuterDomStyle().width = v + 'px';
             if (this.inited) {
                 this.__updateBounds(v, this.height);
                 if (!supressEvent) this.fireEvent('width', v);
@@ -6125,7 +6169,7 @@ myt.View = new JS.Class('View', myt.Node, {
         
         if (this.height !== v) {
             this.height = v;
-            this.deStyle.height = v + 'px';
+            this.getOuterDomStyle().height = v + 'px';
             if (this.inited) {
                 this.__updateBounds(this.width, v);
                 if (!supressEvent) this.fireEvent('height', v);
@@ -6136,21 +6180,21 @@ myt.View = new JS.Class('View', myt.Node, {
     setTextColor: function(v) {
         if (this.textColor !== v) {
             this.textColor = v;
-            this.deStyle.color = v || 'inherit';
+            this.getOuterDomStyle().color = v || 'inherit';
             if (this.inited) this.fireEvent('textColor', v);
         }
     },
     
     setBgColor: function(v) {
         if (this.bgColor !== v) {
-            this.deStyle.backgroundColor = this.bgColor = v;
+            this.getOuterDomStyle().backgroundColor = this.bgColor = v;
             if (this.inited) this.fireEvent('bgColor', v);
         }
     },
     
     setOpacity: function(v) {
         if (this.opacity !== v) {
-            this.deStyle.opacity = this.opacity = v;
+            this.getOuterDomStyle().opacity = this.opacity = v;
             if (this.inited) this.fireEvent('opacity', v);
         }
     },
@@ -6160,7 +6204,7 @@ myt.View = new JS.Class('View', myt.Node, {
         if (existing !== v) {
             this.overflow = v;
             
-            var s = this.deStyle;
+            var s = this.getInnerDomStyle();
             if (v === 'autox') {
                 s.overflowX = 'auto';
                 s.overflowY = 'hidden';
@@ -6177,26 +6221,27 @@ myt.View = new JS.Class('View', myt.Node, {
     },
     
     setVisible: function(v) {
-        if (this.visible !== v) {
-            this.visible = v;
+        var self = this;
+        if (self.visible !== v) {
+            self.visible = v;
             
-            var s = this.deStyle;
+            var s = self.getOuterDomStyle();
             s.visibility = v ? 'inherit' : 'hidden';
             
             // Move invisible elements to a very negative location so they won't
             // effect scrollable area. Ideally we could use display:none but we
             // can't because that makes measuring bounds not work.
-            s.left = v ? this.x + 'px' : '-100000px';
-            s.top = v ? this.y + 'px' : '-100000px';
+            s.left = v ? self.x + 'px' : '-100000px';
+            s.top = v ? self.y + 'px' : '-100000px';
             
-            if (this.inited) this.fireEvent('visible', v);
+            if (self.inited) self.fireEvent('visible', v);
         }
     },
     
     setPointerEvents: function(v) {
         if (this.pointerEvents !== v) {
             this.pointerEvents = v;
-            this.deStyle.pointerEvents = v || 'auto';
+            this.getOuterDomStyle().pointerEvents = v || 'auto';
             if (this.inited) this.fireEvent('pointerEvents', v);
         }
     },
@@ -6204,7 +6249,7 @@ myt.View = new JS.Class('View', myt.Node, {
     setCursor: function(v) {
         if (this.cursor !== v) {
             this.cursor = v;
-            this.deStyle.cursor = v || 'auto';
+            this.getOuterDomStyle().cursor = v || 'auto';
             if (this.inited) this.fireEvent('cursor', v);
         }
     },
@@ -6421,7 +6466,7 @@ myt.View = new JS.Class('View', myt.Node, {
         @return void */
     setTooltip: function(v) {
         if (this.tooltip !== v) {
-            this.tooltip = this.domElement.title = v;
+            this.tooltip = this.getOuterDomElement().title = v;
             if (this.inited) this.fireEvent('tooltip', v);
         }
     },
@@ -6454,7 +6499,7 @@ myt.View = new JS.Class('View', myt.Node, {
         @fires layoutAdded event with the provided node if it's a Layout. */
     subnodeAdded: function(node) {
         if (node instanceof myt.View) {
-            this.domElement.appendChild(node.domElement);
+            this.getInnerDomElement().appendChild(node.getOuterDomElement());
             this.getSubviews().push(node);
             this.fireEvent('subviewAdded', node);
             this.subviewAdded(node);
@@ -6522,7 +6567,7 @@ myt.View = new JS.Class('View', myt.Node, {
         @returns myt.View: The next sibling view or null if none exists. */
     getNextSibling: function() {
         if (this.parent) {
-            var nextDomElement = this.domElement.nextElementSibling;
+            var nextDomElement = this.getOuterDomElement().nextElementSibling;
             if (nextDomElement) return nextDomElement.model;
         }
         return null;
@@ -6532,7 +6577,7 @@ myt.View = new JS.Class('View', myt.Node, {
         @returns myt.View: The previous sibling view or null if none exists. */
     getPrevSibling: function() {
         if (this.parent) {
-            var prevDomElement = this.domElement.previousElementSibling;
+            var prevDomElement = this.getOuterDomElement().previousElementSibling;
             if (prevDomElement) return prevDomElement.model;
         }
         return null;
@@ -6597,10 +6642,10 @@ myt.View = new JS.Class('View', myt.Node, {
             if (checkZIndex) {
                 var commonAncestor = this.getLeastCommonAncestor(view);
                 if (commonAncestor) {
-                    var commonAncestorElem = commonAncestor.domElement,
+                    var commonAncestorElem = commonAncestor.getInnerDomElement(),
                         DEP = myt.DomElementProxy,
-                        zIdx = DEP.getZIndexRelativeToAncestor(this.domElement, commonAncestorElem),
-                        otherZIdx = DEP.getZIndexRelativeToAncestor(view.domElement, commonAncestorElem);
+                        zIdx = DEP.getZIndexRelativeToAncestor(this.getOuterDomElement(), commonAncestorElem),
+                        otherZIdx = DEP.getZIndexRelativeToAncestor(view.getOuterDomElement(), commonAncestorElem);
                     
                     // Reverse comparison order
                     if (front) {
@@ -6623,7 +6668,7 @@ myt.View = new JS.Class('View', myt.Node, {
             // DOCUMENT_POSITION_CONTAINS 8
             // DOCUMENT_POSITION_CONTAINED_BY 16
             // DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC 32
-            var rel = this.domElement.compareDocumentPosition(view.domElement);
+            var rel = this.getOuterDomElement().compareDocumentPosition(view.getOuterDomElement());
             return front ? rel === 2 || rel === 10 : rel === 4 || rel === 20;
         } else {
             return false;
@@ -6655,10 +6700,10 @@ myt.View = new JS.Class('View', myt.Node, {
         @returns void */
     bringSubviewToFront: function(sv) {
         if (sv && sv.parent === this) {
-            var de = this.domElement;
-            if (sv.domElement !== de.lastChild) {
+            var innerElem = this.getInnerDomElement();
+            if (sv.getOuterDomElement() !== innerElem.lastChild) {
                 myt.View.retainFocusDuringDomUpdate(sv, function() {
-                    de.appendChild(sv.domElement);
+                    innerElem.appendChild(sv.getOuterDomElement());
                 });
             }
         }
@@ -6669,10 +6714,10 @@ myt.View = new JS.Class('View', myt.Node, {
         @returns void */
     sendSubviewToBack: function(sv) {
         if (sv && sv.parent === this) {
-            var de = this.domElement;
-            if (sv.domElement !== de.firstChild) {
+            var innerElem = this.getInnerDomElement();
+            if (sv.getOuterDomElement() !== innerElem.firstChild) {
                 myt.View.retainFocusDuringDomUpdate(sv, function() {
-                    de.insertBefore(sv.domElement, de.firstChild);
+                    innerElem.insertBefore(sv.getOuterDomElement(), innerElem.firstChild);
                 });
             }
         }
@@ -6684,9 +6729,9 @@ myt.View = new JS.Class('View', myt.Node, {
         @returns void */
     sendSubviewBehind: function(sv, existing) {
         if (sv && existing && sv.parent === this && existing.parent === this) {
-            var de = this.domElement;
+            var innerElem = this.getInnerDomElement();
             myt.View.retainFocusDuringDomUpdate(sv, function() {
-                de.insertBefore(sv.domElement, existing.domElement);
+                innerElem.insertBefore(sv.getOuterDomElement(), existing.getOuterDomElement());
             });
         }
     },
@@ -6709,27 +6754,29 @@ myt.View = new JS.Class('View', myt.Node, {
         @returns void */
     sortSubviews: function(sortFunc) {
         // Sort subviews
-        var svs = this.getSubviews(), self = this;
+        var self = this,
+            svs = self.getSubviews();
         svs.sort(sortFunc);
         
         // Rearrange dom to match new sort order.
         myt.View.retainFocusDuringDomUpdate(self, function() {
             var len = svs.length,
                 i = 0,
-                de = self.domElement,
-                nextDe = de.nextSibling,
-                parentElem = de.parentNode;
+                outerElem = self.getOuterDomElement(),
+                innerElem = self.getInnerDomElement(),
+                nextDe = outerElem.nextSibling,
+                parentElem = outerElem.parentNode;
             // Remove this dom element from the dom
-            if (parentElem) parentElem.removeChild(de);
+            if (parentElem) parentElem.removeChild(outerElem);
             
             // Copy the dom elements in the correct order to a document
             // fragment and then add that fragment back to the dom.
             var fragment = document.createDocumentFragment();
-            for (; len > i;) fragment.appendChild(svs[i++].domElement);
-            de.appendChild(fragment);
+            for (; len > i;) fragment.appendChild(svs[i++].getOuterDomElement());
+            innerElem.appendChild(fragment);
             
             // Put this dom element back in the dom
-            if (parentElem) parentElem.insertBefore(de, nextDe);
+            if (parentElem) parentElem.insertBefore(outerElem, nextDe);
         });
     },
     
@@ -6743,10 +6790,10 @@ myt.View = new JS.Class('View', myt.Node, {
         @returns boolean True if the location is inside this view, false 
             if not. */
     containsPoint: function(locX, locY, referenceFrameDomElem) {
-        var de = this.domElement;
-        if (!de) return false;
+        var outerElem = this.getOuterDomElement();
+        if (!outerElem) return false;
         
-        var pos = myt.DomElementProxy.getPagePosition(de, referenceFrameDomElem);
+        var pos = myt.DomElementProxy.getPagePosition(outerElem, referenceFrameDomElem);
         return myt.Geometry.rectContainsPoint(locX, locY, pos.x, pos.y, this.width, this.height);
     },
     
@@ -6766,7 +6813,8 @@ myt.View = new JS.Class('View', myt.Node, {
         if (myt.Geometry.rectContainsPoint(x, y, 0, 0, this.width * effectiveScale, this.height * effectiveScale)) {
             var p = this.parent;
             if (p) {
-                var de = p.domElement, pScale = p.__effectiveScale;
+                var de = p.getOuterDomElement(), 
+                    pScale = p.__effectiveScale;
                 return p.__isPointVisible(x + (this.x - de.scrollLeft) * pScale, y + (this.y - de.scrollTop) * pScale);
             }
             return true;
@@ -6794,6 +6842,125 @@ myt.View = new JS.Class('View', myt.Node, {
     isColorAttr: function(attrName) {
         return attrName === 'bgColor' || attrName === 'textColor';
     }
+});
+
+
+/** Adds support for flex box to a myt.View.
+    
+    Events:
+        flexDirection
+        flexWrap
+        justifyContent
+        alignItems
+        alignContent
+    
+    Attributes:
+        flexDirection
+        flexWrap
+        justifyContent
+        alignItems
+        alignContent
+*/
+myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
+    // Life Cycle //////////////////////////////////////////////////////////////
+    /** @overrides */
+    initNode: function(parent, attrs) {
+        this.callSuper(parent, attrs);
+        this.__syncSubviews();
+    },
+    
+    
+    // Accessors ///////////////////////////////////////////////////////////////
+    /** @overrides */
+    setWidth: function(v, supressEvent) {
+        this.callSuper(v, supressEvent);
+        if (this.inited) this.__syncSubviews();
+    },
+    
+    /** @overrides */
+    setHeight: function(v, supressEvent) {
+        this.callSuper(v, supressEvent);
+        if (this.inited) this.__syncSubviews();
+    },
+    
+    setFlexDirection: function(v) {
+        if (this.flexDirection !== v) {
+            this.getInnerDomStyle().flexDirection = this.flexDirection = v;
+            if (this.inited) this.fireEvent('flexDirection', v);
+        }
+    },
+    
+    setFlexWrap: function(v) {
+        if (this.flexWrap !== v) {
+            this.getInnerDomStyle().flexWrap = this.flexWrap = v;
+            if (this.inited) this.fireEvent('flexWrap', v);
+        }
+    },
+    
+    setJustifyContent: function(v) {
+        if (this.justifyContent !== v) {
+            this.getInnerDomStyle().justifyContent = this.justifyContent = v;
+            if (this.inited) this.fireEvent('justifyContent', v);
+        }
+    },
+    
+    setAlignItems: function(v) {
+        if (this.alignItems !== v) {
+            this.getInnerDomStyle().alignItems = this.alignItems = v;
+            if (this.inited) this.fireEvent('alignItems', v);
+        }
+    },
+    
+    setAlignContent: function(v) {
+        if (this.alignContent !== v) {
+            this.getInnerDomStyle().alignContent = this.alignContent = v;
+            if (this.inited) this.fireEvent('alignContent', v);
+        }
+    },
+    
+    
+    // Methods /////////////////////////////////////////////////////////////////
+    /** @overrides */
+    createOurDomElement: function(parent) {
+        var elem = this.callSuper(parent);
+        elem.style.display = 'flex';
+        return elem;
+    },
+    
+    /** @overrides myt.View
+        Allow the child views to be managed by the flex box.*/
+    subviewAdded: function(sv) {
+        if (sv) {
+            sv.getOuterDomStyle().position = '';
+            if (this.inited) this.__syncSubview(sv);
+        }
+    },
+    
+    /** @private */
+    __syncSubviews: function() {
+        var svs = this.getSubviews();
+        svs.forEach(sv => this.__syncSubview(sv));
+    },
+    
+    /** @private */
+    __syncSubview: function(sv) {
+        if (sv && sv.syncInnerToOuter) {
+            sv.syncInnerToOuter();
+            sv.syncModelToOuterBounds();
+        }
+    },
+    
+    /** @overrides myt.View
+        Allow the child views to be managed by the flex box.*/
+    subviewRemoved: function(sv) {
+        if (sv && !sv.destroyed) sv.getOuterDomStyle().position = 'absolute';
+    }
+});
+
+
+/** A base class for flex box views. */
+myt.FlexBox = new JS.Class('FlexBox', myt.View, {
+    include: [myt.FlexBoxSupport]
 });
 
 
@@ -7039,7 +7206,7 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
     setWidth: function(v, supressEvent) {
         if (v === 'auto') {
             this.__hasSetWidth = false;
-            this.deStyle.width = 'auto';
+            this.getOuterDomStyle().width = 'auto';
             this.sizeViewToDom();
         } else {
             this.__hasSetWidth = true;
@@ -7051,7 +7218,7 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
     setHeight: function(v, supressEvent) {
         if (v === 'auto') {
             this.__hasSetHeight = false;
-            this.deStyle.height = 'auto';
+            this.getOuterDomStyle().height = 'auto';
             this.sizeViewToDom();
         } else {
             this.__hasSetHeight = true;
@@ -7070,7 +7237,7 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
             scaling;
         
         if (!self.__hasSetWidth) {
-            bounds = self.domElement.getBoundingClientRect();
+            bounds = self.getOuterDomElement().getBoundingClientRect();
             var w = bounds.width;
             
             // Bounding rect doesn't factor in scaling so we need to calculate
@@ -7087,7 +7254,7 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
         }
         
         if (!self.__hasSetHeight) {
-            if (!bounds) bounds = self.domElement.getBoundingClientRect();
+            if (!bounds) bounds = self.getOuterDomElement().getBoundingClientRect();
             var h = bounds.height;
             
             // Bounding rect doesn't factor in scaling so we need to calculate
@@ -7345,6 +7512,246 @@ myt.Text = new JS.Class('Text', myt.View, {
         var measuredWidth = this.domElement.getBoundingClientRect().width;
         s.whiteSpace = oldValue;
         return measuredWidth;
+    }
+});
+
+
+/** Adds support for image display to a View.
+    
+    Events:
+        imageUrl:string
+        imageSize:string
+        imageRepeat:string
+        imagePosition:string
+        imageAttachment:string
+        calculateNaturalSize:boolean
+        naturalWidth:number
+        naturalHeight:number
+        useNaturalSize:boolean
+        imageLoadingError:boolean
+    
+    Attributes:
+        imageUrl:string The URL to load the image data from.
+        imageSize:string Determines the size of the image. Allowed values
+            are: 'auto', 'cover', 'contain', absolute ('20px 10px') and 
+            percentage ('100% 50%').
+        imageRepeat:string Determines if an image is repeated or not.
+            Allowed values: 'repeat', 'repeat-x', 'repeat-y', 'no-repeat', 
+            'inherit'. Defaults to 'no-repeat'.
+        imagePosition:string Determines where an image is positioned.
+        imageAttachment:string Determines how an image is attached to the view.
+            Allowed values are: 'scroll', 'fixed', 'inherit'. The default
+            value is 'scroll'.
+        calculateNaturalSize:boolean Determines if the natural size should be 
+            automatically calculated or not. Defaults to undefined which is
+            equivalent to false.
+        naturalWidth:number The natural width of the image. Only set if
+            calculateNaturalWidth is true.
+        naturalHeight:number The natural height of the image. Only set if
+            calculateNaturalWidth is true.
+        useNaturalSize:boolean If true this image view will be sized to the
+            naturalWidth and naturalHeight and calculateNaturalSize will be
+            set to true.
+        imageLoadingError:boolean Gets set to true when an error occurs
+            loading the image. The image will be loaded whenever the
+            calculateNaturalSize attribute is set to true.
+*/
+myt.ImageSupport = new JS.Module('ImageSupport', {
+    // Class Methods ///////////////////////////////////////////////////////////
+    extend: {
+        /** Stores widths and heights of images by URL so we don't have to
+            reload them to get sizes. */
+        SIZE_CACHE:{},
+        
+        /** Tracks requests to get the width and height of an image. Used to
+            prevent multiple requests being made for the same image URL. */
+        OPEN_SIZE_QUERIES:{}
+    },
+    
+    
+    // Life Cycle //////////////////////////////////////////////////////////////
+    /** @overrides myt.Node */
+    initNode: function(parent, attrs) {
+        if (attrs.imageRepeat == null) attrs.imageRepeat = 'no-repeat';
+        if (attrs.imageAttachment == null) attrs.imageAttachment = 'scroll';
+        
+        this.callSuper(parent, attrs);
+    },
+    
+    
+    // Accessors ///////////////////////////////////////////////////////////////
+    setImageUrl: function(v) {
+        if (this.imageUrl !== v) {
+            this.imageUrl = v;
+            this.deStyle.backgroundImage = v ? 'url("' + v + '")' : 'none';
+            if (this.inited) {
+                this.fireEvent('imageUrl', v);
+                this.setNaturalWidth(undefined);
+                this.setNaturalHeight(undefined);
+                
+                // Collapse size if no url and we are using natural size
+                if (!v && this.useNaturalSize) {
+                    this.setWidth(0);
+                    this.setHeight(0);
+                }
+            }
+            this.__calculateNaturalSize();
+        }
+    },
+    
+    setImageLoadingError: function(v) {this.set('imageLoadingError', v, true);},
+    
+    setImageSize: function(v) {
+        if (this.imageSize !== v) {
+            this.imageSize = v;
+            this.deStyle.backgroundSize = v || 'auto';
+            if (this.inited) this.fireEvent('imageSize', v);
+        }
+    },
+    
+    setImageRepeat: function(v) {
+        if (this.imageRepeat !== v) {
+            this.deStyle.backgroundRepeat = this.imageRepeat = v;
+            if (this.inited) this.fireEvent('imageRepeat', v);
+        }
+    },
+    
+    setImagePosition: function(v) {
+        if (this.imagePosition !== v) {
+            this.deStyle.backgroundPosition = this.imagePosition = v;
+            if (this.inited) this.fireEvent('imagePosition', v);
+        }
+    },
+    
+    setImageAttachment: function(v) {
+        if (this.imageAttachment !== v) {
+            this.deStyle.backgroundAttachment = this.imageAttachment = v;
+            if (this.inited) this.fireEvent('imageAttachment', v);
+        }
+    },
+    
+    setCalculateNaturalSize: function(v) {
+        if (this.calculateNaturalSize !== v) {
+            this.calculateNaturalSize = v;
+            if (this.inited) this.fireEvent('calculateNaturalSize', v);
+            this.__calculateNaturalSize();
+        }
+    },
+    
+    setNaturalWidth: function(v) {
+        if (this.naturalWidth !== v) {
+            this.naturalWidth = v;
+            if (this.inited) this.fireEvent('naturalWidth', v);
+            if (this.useNaturalSize && v) this.setWidth(v);
+        }
+    },
+    
+    setNaturalHeight: function(v) {
+        if (this.naturalHeight !== v) {
+            this.naturalHeight = v;
+            if (this.inited) this.fireEvent('naturalHeight', v);
+            if (this.useNaturalSize && v) this.setHeight(v);
+        }
+    },
+    
+    setUseNaturalSize: function(v) {
+        if (this.useNaturalSize !== v) {
+            this.useNaturalSize = v;
+            if (this.inited) this.fireEvent('useNaturalSize', v);
+            
+            // Sync width and height
+            if (v) {
+                if (this.naturalWidth) this.setWidth(this.naturalWidth);
+                if (this.naturalHeight) this.setHeight(this.naturalHeight);
+            }
+            
+            // Turn on calculation of natural size if we're going to use
+            // natural size.
+            if (v && !this.calculateNaturalSize) this.setCalculateNaturalSize(true);
+        }
+    },
+    
+    
+    // Methods /////////////////////////////////////////////////////////////////
+    /** Loads an image to measure its size.
+        @private
+        @returns void */
+    __calculateNaturalSize: function() {
+        var imgUrl = this.imageUrl;
+        if (this.calculateNaturalSize && imgUrl) {
+            var sizeCache = myt.ImageSupport.SIZE_CACHE,
+                cachedSize = sizeCache[imgUrl];
+            if (cachedSize) {
+                // Cache hit
+                this.setNaturalWidth(cachedSize.width);
+                this.setNaturalHeight(cachedSize.height);
+            } else {
+                // Cache miss
+                var openQueryCache = myt.ImageSupport.OPEN_SIZE_QUERIES,
+                    openQuery = openQueryCache[imgUrl];
+                if (!openQuery) {
+                    // Lazy instantiate the open query array.
+                    openQueryCache[imgUrl] = openQuery = [];
+                    
+                    // Start a size query
+                    var img = new Image();
+                    img.onerror = function(err) {
+                        // Notify all ImageSupport instances that are waiting
+                        // for a natural size that an error has occurred.
+                        var openQueries = openQueryCache[imgUrl];
+                        if (openQueries) {
+                            var i = openQueries.length;
+                            while (i) openQueries[--i].setImageLoadingError(true);
+                            
+                            // Cleanup
+                            openQueries.length = 0;
+                            delete openQueryCache[imgUrl];
+                        }
+                    };
+                    img.onload = function() {
+                        var w = this.width, h = this.height;
+                        
+                        // Notify all ImageSupport instances that are waiting
+                        // for a natural size.
+                        var openQueries = openQueryCache[imgUrl];
+                        if (openQueries) {
+                            var i = openQueries.length, imageSupportInstance;
+                            while (i) {
+                                imageSupportInstance = openQueries[--i];
+                                imageSupportInstance.setNaturalWidth(w);
+                                imageSupportInstance.setNaturalHeight(h);
+                            }
+                            
+                            // Cleanup
+                            openQueries.length = 0;
+                            delete openQueryCache[imgUrl];
+                        }
+                        
+                        // Store size in cache.
+                        sizeCache[imgUrl] = {width:w, height:h};
+                    };
+                    img.src = imgUrl;
+                }
+                
+                openQuery.push(this);
+            }
+        }
+    }
+});
+
+
+/** A view that displays an image. By default useNaturalSize is set to true
+    so the Image will take on the size of the image data. */
+myt.Image = new JS.Class('Image', myt.View, {
+    include: [myt.ImageSupport],
+    
+    
+    // Life Cycle //////////////////////////////////////////////////////////////
+    /** @overrides myt.View */
+    initNode: function(parent, attrs) {
+        if (attrs.useNaturalSize == null) attrs.useNaturalSize = true;
+        
+        this.callSuper(parent, attrs);
     }
 });
 
@@ -11424,246 +11831,6 @@ myt.SimpleButton = new JS.Class('SimpleButton', myt.View, {
     drawReadyState: function() {
         this.setOpacity(1);
         this.setBgColor(this.readyColor);
-    }
-});
-
-
-/** Adds support for image display to a View.
-    
-    Events:
-        imageUrl:string
-        imageSize:string
-        imageRepeat:string
-        imagePosition:string
-        imageAttachment:string
-        calculateNaturalSize:boolean
-        naturalWidth:number
-        naturalHeight:number
-        useNaturalSize:boolean
-        imageLoadingError:boolean
-    
-    Attributes:
-        imageUrl:string The URL to load the image data from.
-        imageSize:string Determines the size of the image. Allowed values
-            are: 'auto', 'cover', 'contain', absolute ('20px 10px') and 
-            percentage ('100% 50%').
-        imageRepeat:string Determines if an image is repeated or not.
-            Allowed values: 'repeat', 'repeat-x', 'repeat-y', 'no-repeat', 
-            'inherit'. Defaults to 'no-repeat'.
-        imagePosition:string Determines where an image is positioned.
-        imageAttachment:string Determines how an image is attached to the view.
-            Allowed values are: 'scroll', 'fixed', 'inherit'. The default
-            value is 'scroll'.
-        calculateNaturalSize:boolean Determines if the natural size should be 
-            automatically calculated or not. Defaults to undefined which is
-            equivalent to false.
-        naturalWidth:number The natural width of the image. Only set if
-            calculateNaturalWidth is true.
-        naturalHeight:number The natural height of the image. Only set if
-            calculateNaturalWidth is true.
-        useNaturalSize:boolean If true this image view will be sized to the
-            naturalWidth and naturalHeight and calculateNaturalSize will be
-            set to true.
-        imageLoadingError:boolean Gets set to true when an error occurs
-            loading the image. The image will be loaded whenever the
-            calculateNaturalSize attribute is set to true.
-*/
-myt.ImageSupport = new JS.Module('ImageSupport', {
-    // Class Methods ///////////////////////////////////////////////////////////
-    extend: {
-        /** Stores widths and heights of images by URL so we don't have to
-            reload them to get sizes. */
-        SIZE_CACHE:{},
-        
-        /** Tracks requests to get the width and height of an image. Used to
-            prevent multiple requests being made for the same image URL. */
-        OPEN_SIZE_QUERIES:{}
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Node */
-    initNode: function(parent, attrs) {
-        if (attrs.imageRepeat == null) attrs.imageRepeat = 'no-repeat';
-        if (attrs.imageAttachment == null) attrs.imageAttachment = 'scroll';
-        
-        this.callSuper(parent, attrs);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setImageUrl: function(v) {
-        if (this.imageUrl !== v) {
-            this.imageUrl = v;
-            this.deStyle.backgroundImage = v ? 'url("' + v + '")' : 'none';
-            if (this.inited) {
-                this.fireEvent('imageUrl', v);
-                this.setNaturalWidth(undefined);
-                this.setNaturalHeight(undefined);
-                
-                // Collapse size if no url and we are using natural size
-                if (!v && this.useNaturalSize) {
-                    this.setWidth(0);
-                    this.setHeight(0);
-                }
-            }
-            this.__calculateNaturalSize();
-        }
-    },
-    
-    setImageLoadingError: function(v) {this.set('imageLoadingError', v, true);},
-    
-    setImageSize: function(v) {
-        if (this.imageSize !== v) {
-            this.imageSize = v;
-            this.deStyle.backgroundSize = v || 'auto';
-            if (this.inited) this.fireEvent('imageSize', v);
-        }
-    },
-    
-    setImageRepeat: function(v) {
-        if (this.imageRepeat !== v) {
-            this.deStyle.backgroundRepeat = this.imageRepeat = v;
-            if (this.inited) this.fireEvent('imageRepeat', v);
-        }
-    },
-    
-    setImagePosition: function(v) {
-        if (this.imagePosition !== v) {
-            this.deStyle.backgroundPosition = this.imagePosition = v;
-            if (this.inited) this.fireEvent('imagePosition', v);
-        }
-    },
-    
-    setImageAttachment: function(v) {
-        if (this.imageAttachment !== v) {
-            this.deStyle.backgroundAttachment = this.imageAttachment = v;
-            if (this.inited) this.fireEvent('imageAttachment', v);
-        }
-    },
-    
-    setCalculateNaturalSize: function(v) {
-        if (this.calculateNaturalSize !== v) {
-            this.calculateNaturalSize = v;
-            if (this.inited) this.fireEvent('calculateNaturalSize', v);
-            this.__calculateNaturalSize();
-        }
-    },
-    
-    setNaturalWidth: function(v) {
-        if (this.naturalWidth !== v) {
-            this.naturalWidth = v;
-            if (this.inited) this.fireEvent('naturalWidth', v);
-            if (this.useNaturalSize && v) this.setWidth(v);
-        }
-    },
-    
-    setNaturalHeight: function(v) {
-        if (this.naturalHeight !== v) {
-            this.naturalHeight = v;
-            if (this.inited) this.fireEvent('naturalHeight', v);
-            if (this.useNaturalSize && v) this.setHeight(v);
-        }
-    },
-    
-    setUseNaturalSize: function(v) {
-        if (this.useNaturalSize !== v) {
-            this.useNaturalSize = v;
-            if (this.inited) this.fireEvent('useNaturalSize', v);
-            
-            // Sync width and height
-            if (v) {
-                if (this.naturalWidth) this.setWidth(this.naturalWidth);
-                if (this.naturalHeight) this.setHeight(this.naturalHeight);
-            }
-            
-            // Turn on calculation of natural size if we're going to use
-            // natural size.
-            if (v && !this.calculateNaturalSize) this.setCalculateNaturalSize(true);
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Loads an image to measure its size.
-        @private
-        @returns void */
-    __calculateNaturalSize: function() {
-        var imgUrl = this.imageUrl;
-        if (this.calculateNaturalSize && imgUrl) {
-            var sizeCache = myt.ImageSupport.SIZE_CACHE,
-                cachedSize = sizeCache[imgUrl];
-            if (cachedSize) {
-                // Cache hit
-                this.setNaturalWidth(cachedSize.width);
-                this.setNaturalHeight(cachedSize.height);
-            } else {
-                // Cache miss
-                var openQueryCache = myt.ImageSupport.OPEN_SIZE_QUERIES,
-                    openQuery = openQueryCache[imgUrl];
-                if (!openQuery) {
-                    // Lazy instantiate the open query array.
-                    openQueryCache[imgUrl] = openQuery = [];
-                    
-                    // Start a size query
-                    var img = new Image();
-                    img.onerror = function(err) {
-                        // Notify all ImageSupport instances that are waiting
-                        // for a natural size that an error has occurred.
-                        var openQueries = openQueryCache[imgUrl];
-                        if (openQueries) {
-                            var i = openQueries.length;
-                            while (i) openQueries[--i].setImageLoadingError(true);
-                            
-                            // Cleanup
-                            openQueries.length = 0;
-                            delete openQueryCache[imgUrl];
-                        }
-                    };
-                    img.onload = function() {
-                        var w = this.width, h = this.height;
-                        
-                        // Notify all ImageSupport instances that are waiting
-                        // for a natural size.
-                        var openQueries = openQueryCache[imgUrl];
-                        if (openQueries) {
-                            var i = openQueries.length, imageSupportInstance;
-                            while (i) {
-                                imageSupportInstance = openQueries[--i];
-                                imageSupportInstance.setNaturalWidth(w);
-                                imageSupportInstance.setNaturalHeight(h);
-                            }
-                            
-                            // Cleanup
-                            openQueries.length = 0;
-                            delete openQueryCache[imgUrl];
-                        }
-                        
-                        // Store size in cache.
-                        sizeCache[imgUrl] = {width:w, height:h};
-                    };
-                    img.src = imgUrl;
-                }
-                
-                openQuery.push(this);
-            }
-        }
-    }
-});
-
-
-/** A view that displays an image. By default useNaturalSize is set to true
-    so the Image will take on the size of the image data. */
-myt.Image = new JS.Class('Image', myt.View, {
-    include: [myt.ImageSupport],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.View */
-    initNode: function(parent, attrs) {
-        if (attrs.useNaturalSize == null) attrs.useNaturalSize = true;
-        
-        this.callSuper(parent, attrs);
     }
 });
 
