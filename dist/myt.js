@@ -70,49 +70,6 @@ BrowserDetect = (function() {
 })();
 
 
-/** Creates a console object on old versions of IE to prevent errors. It
-    doesn't actually do anything. */
-if (typeof console !== 'object') {
-    console = {
-        log: function(v) {},
-        warn: function(v) {},
-        error: function(v) {}
-    };
-}
-
-
-// String
-/** Provides support for String.trimLeft and String.trimRight in IE.
-    Taken from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/Trim */
-if (!String.prototype.trimLeft) {
-    String.prototype.trimLeft = function() {
-        return this.replace(/^\s+/,'');
-    };
-    String.prototype.trimRight = function() {
-        return this.replace(/\s+$/,'');
-    };
-};
-
-if (!String.prototype.endsWith) {
-    String.prototype.endsWith = function(searchString, position) {
-        var subjectString = this.toString();
-        if (position === undefined || position > subjectString.length) {
-            position = subjectString.length;
-        }
-        position -= searchString.length;
-        var lastIndex = subjectString.indexOf(searchString, position);
-        return lastIndex !== -1 && lastIndex === position;
-    };
-};
-
-if (!String.prototype.startsWith) {
-    String.prototype.startsWith = function(searchString, position) {
-        position = position || 0;
-        return this.indexOf(searchString, position) === position;
-    };
-}
-
-// Date
 /** Formats a date using a pattern.
   * Implementation from: https://github.com/jacwright/date.format
   * 
@@ -634,7 +591,7 @@ JS.Singleton = new JS.Class('Singleton', {
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20181206.1546,
+    version:20181214.1308,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -19176,10 +19133,7 @@ myt.JSONValidator = new JS.Class('JSONValidator', myt.Validator, {
     places easily.
     
     Events:
-        validatorAdded:myt.Validator Fired when a validator is added to
-            this registry.
-        validatorRemoved:myt.Validator Fired when a validator is removed
-            from this registry.
+        None
     
     Attributes:
         None
@@ -19188,9 +19142,6 @@ myt.JSONValidator = new JS.Class('JSONValidator', myt.Validator, {
         __c:object A map of myt.Validators by ID.
 */
 new JS.Singleton('GlobalValidatorRegistry', {
-    include: [myt.Observable],
-    
-    
     // Life Cycle //////////////////////////////////////////////////////////////
     initialize: function() {
         var self = this,
@@ -19219,14 +19170,13 @@ new JS.Singleton('GlobalValidatorRegistry', {
     
     // Methods /////////////////////////////////////////////////////////////////
     /** Adds a Validator to this registry.
-        @param validator:myt.Validator the Validator to add.
+        @param identifiable:myt.Validator the Validator to add.
         @returns void */
-    register: function(validator) {
-        if (validator) {
-            var id = validator.id;
+    register: function(identifiable) {
+        if (identifiable) {
+            var id = identifiable.id;
             if (id) {
-                this.__c[id] = validator;
-                this.fireEvent('validatorAdded', validator);
+                this.__c[id] = identifiable;
             } else {
                 myt.dumpStack("No ID");
             }
@@ -19236,27 +19186,20 @@ new JS.Singleton('GlobalValidatorRegistry', {
     },
     
     /** Removes a Validator from this registery.
-        @param validator:myt.Validator the Validator to remove.
-        @returns boolean true if removal succeeds, false otherwise. */
-    unregister: function(validator) {
-        if (validator) {
-            var id = validator.id;
+        @param identifiable:myt.Validator the Validator to remove.
+        @returns void */
+    unregister: function(identifiable) {
+        if (identifiable) {
+            var id = identifiable.id;
             if (id) {
-                // Make sure it's in the repository.
-                validator = this.getValidator(id);
-                
-                if (validator) {
-                    delete this.__c[id];
-                    this.fireEvent('validatorRemoved', validator);
-                    return true;
-                }
+                // Make sure it's in the repository then delete.
+                if (this.getValidator(id)) delete this.__c[id];
             } else {
                 myt.dumpStack("No ID");
             }
         } else {
             myt.dumpStack("No validator");
         }
-        return false;
     }
 });
 
@@ -19459,12 +19402,16 @@ myt.TrimValueProcessor = new JS.Class('TrimValueProcessor', myt.ValueProcessor, 
     /** @overrides myt.ValueProcessor */
     process: function(v) {
         v += '';
-        if (this.trim === 'left') {
-            return v.trimLeft();
-        } else if (this.trim === 'right') {
-            return v.trimRight();
+        switch (this.trim) {
+            case 'start':
+            case 'left':
+                return v.trimStart();
+            case 'end':
+            case 'right':
+                return v.trimEnd();
+            default:
+                return v.trim();
         }
-        return v.trim();
     }
 });
 
@@ -19498,10 +19445,7 @@ myt.UndefinedValueProcessor = new JS.Class('UndefinedValueProcessor', myt.ValueP
     places easily.
     
     Events:
-        processorAdded:myt.ValueProcessor Fired when a processor is registered
-            with the registry.
-        processorRemoved:myt.ValueProcessor Fired when a processor is 
-            unregistered from the registry.
+        None
     
     Attributes:
         None
@@ -19510,22 +19454,21 @@ myt.UndefinedValueProcessor = new JS.Class('UndefinedValueProcessor', myt.ValueP
         __c:object A map of myt.ValueProcessors by ID.
 */
 new JS.Singleton('GlobalValueProcessorRegistry', {
-    include: [myt.Observable],
-    
-    
     // Life Cycle //////////////////////////////////////////////////////////////
     initialize: function() {
-        this.__c = {};
+        var self = this,
+            m = myt;
         
-        var m = myt;
-        m.global.register('valueProcessors', this);
+        self.__c = {};
+        
+        m.global.register('valueProcessors', self);
         
         // Register a few common ValueProcessors
-        this.register(new m.UndefinedValueProcessor('undefToEmpty', true, true, true, ''));
-        this.register(new m.ToNumberValueProcessor('toNumber', true, true, true));
-        this.register(new m.TrimValueProcessor('trimLeft', true, true, true, 'left'));
-        this.register(new m.TrimValueProcessor('trimRight', true, true, true, 'right'));
-        this.register(new m.TrimValueProcessor('trimBoth', true, true, true, 'both'));
+        self.register(new m.UndefinedValueProcessor('undefToEmpty', true, true, true, ''));
+        self.register(new m.ToNumberValueProcessor('toNumber', true, true, true));
+        self.register(new m.TrimValueProcessor('trimLeft', true, true, true, 'left'));
+        self.register(new m.TrimValueProcessor('trimRight', true, true, true, 'right'));
+        self.register(new m.TrimValueProcessor('trimBoth', true, true, true, 'both'));
     },
     
     
@@ -19540,14 +19483,13 @@ new JS.Singleton('GlobalValueProcessorRegistry', {
     
     // Methods /////////////////////////////////////////////////////////////////
     /** Adds a ValueProcessor to this registry.
-        @param processor:myt.ValueProcessor the ValueProcessor to add.
+        @param identifiable:myt.ValueProcessor the ValueProcessor to add.
         @returns void */
-    register: function(processor) {
-        if (processor) {
-            var id = processor.id;
+    register: function(identifiable) {
+        if (identifiable) {
+            var id = identifiable.id;
             if (id) {
-                this.__c[id] = processor;
-                this.fireEvent('processorAdded', processor);
+                this.__c[id] = identifiable;
             } else {
                 myt.dumpStack("No ID");
             }
@@ -19557,27 +19499,20 @@ new JS.Singleton('GlobalValueProcessorRegistry', {
     },
     
     /** Removes a ValueProcessor from this registery.
-        @param processor:myt.ValueProcessor the ValueProcessor to remove.
-        @returns boolean true if removal succeeds, false otherwise. */
-    unregister: function(processor) {
-        if (processor) {
-            var id = processor.id;
+        @param identifiable:myt.ValueProcessor the ValueProcessor to remove.
+        @returns void */
+    unregister: function(identifiable) {
+        if (identifiable) {
+            var id = identifiable.id;
             if (id) {
-                // Make sure it's in the repository.
-                processor = this.getValueProcessor(id);
-                
-                if (processor) {
-                    delete this.__c[id];
-                    this.fireEvent('processorRemoved', processor);
-                    return true;
-                }
+                // Make sure it's in the repository and then delete
+                if (this.getValueProcessor(id)) delete this.__c[id];
             } else {
                 myt.dumpStack("No ID");
             }
         } else {
             myt.dumpStack("No processor");
         }
-        return false;
     }
 });
 

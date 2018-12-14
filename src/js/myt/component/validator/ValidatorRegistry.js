@@ -2,10 +2,7 @@
     places easily.
     
     Events:
-        validatorAdded:myt.Validator Fired when a validator is added to
-            this registry.
-        validatorRemoved:myt.Validator Fired when a validator is removed
-            from this registry.
+        None
     
     Attributes:
         None
@@ -14,9 +11,6 @@
         __c:object A map of myt.Validators by ID.
 */
 new JS.Singleton('GlobalValidatorRegistry', {
-    include: [myt.Observable],
-    
-    
     // Life Cycle //////////////////////////////////////////////////////////////
     initialize: function() {
         var self = this,
@@ -45,14 +39,13 @@ new JS.Singleton('GlobalValidatorRegistry', {
     
     // Methods /////////////////////////////////////////////////////////////////
     /** Adds a Validator to this registry.
-        @param validator:myt.Validator the Validator to add.
+        @param identifiable:myt.Validator the Validator to add.
         @returns void */
-    register: function(validator) {
-        if (validator) {
-            var id = validator.id;
+    register: function(identifiable) {
+        if (identifiable) {
+            var id = identifiable.id;
             if (id) {
-                this.__c[id] = validator;
-                this.fireEvent('validatorAdded', validator);
+                this.__c[id] = identifiable;
             } else {
                 myt.dumpStack("No ID");
             }
@@ -62,26 +55,19 @@ new JS.Singleton('GlobalValidatorRegistry', {
     },
     
     /** Removes a Validator from this registery.
-        @param validator:myt.Validator the Validator to remove.
-        @returns boolean true if removal succeeds, false otherwise. */
-    unregister: function(validator) {
-        if (validator) {
-            var id = validator.id;
+        @param identifiable:myt.Validator the Validator to remove.
+        @returns void */
+    unregister: function(identifiable) {
+        if (identifiable) {
+            var id = identifiable.id;
             if (id) {
-                // Make sure it's in the repository.
-                validator = this.getValidator(id);
-                
-                if (validator) {
-                    delete this.__c[id];
-                    this.fireEvent('validatorRemoved', validator);
-                    return true;
-                }
+                // Make sure it's in the repository then delete.
+                if (this.getValidator(id)) delete this.__c[id];
             } else {
                 myt.dumpStack("No ID");
             }
         } else {
             myt.dumpStack("No validator");
         }
-        return false;
     }
 });

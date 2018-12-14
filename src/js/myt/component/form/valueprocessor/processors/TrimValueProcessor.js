@@ -21,11 +21,15 @@ myt.TrimValueProcessor = new JS.Class('TrimValueProcessor', myt.ValueProcessor, 
     /** @overrides myt.ValueProcessor */
     process: function(v) {
         v += '';
-        if (this.trim === 'left') {
-            return v.trimLeft();
-        } else if (this.trim === 'right') {
-            return v.trimRight();
+        switch (this.trim) {
+            case 'start':
+            case 'left':
+                return v.trimStart();
+            case 'end':
+            case 'right':
+                return v.trimEnd();
+            default:
+                return v.trim();
         }
-        return v.trim();
     }
 });

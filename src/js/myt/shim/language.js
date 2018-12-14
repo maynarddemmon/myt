@@ -1,35 +1,3 @@
-// String
-/** Provides support for String.trimLeft and String.trimRight in IE.
-    Taken from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/Trim */
-if (!String.prototype.trimLeft) {
-    String.prototype.trimLeft = function() {
-        return this.replace(/^\s+/,'');
-    };
-    String.prototype.trimRight = function() {
-        return this.replace(/\s+$/,'');
-    };
-};
-
-if (!String.prototype.endsWith) {
-    String.prototype.endsWith = function(searchString, position) {
-        var subjectString = this.toString();
-        if (position === undefined || position > subjectString.length) {
-            position = subjectString.length;
-        }
-        position -= searchString.length;
-        var lastIndex = subjectString.indexOf(searchString, position);
-        return lastIndex !== -1 && lastIndex === position;
-    };
-};
-
-if (!String.prototype.startsWith) {
-    String.prototype.startsWith = function(searchString, position) {
-        position = position || 0;
-        return this.indexOf(searchString, position) === position;
-    };
-}
-
-// Date
 /** Formats a date using a pattern.
   * Implementation from: https://github.com/jacwright/date.format
   * 

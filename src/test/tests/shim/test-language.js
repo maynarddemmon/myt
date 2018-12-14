@@ -11,8 +11,3 @@ test("Date.format API exists.", function() {
     date.setSeconds(45);
     ok(date.format("Y-m-d H:i:s") === '2015-04-09 16:30:45', "Format a date.");
 });
-
-test("String trim functions should exist.", function() {
-    ok(" foo  ".trimLeft() === "foo  ", "String.prototype.trimLeft should exist and work.");
-    ok(" foo  ".trimRight() === " foo", "String.prototype.trimRight should exist and work.");
-});
