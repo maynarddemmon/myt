@@ -484,40 +484,5 @@ myt = {
             timeout = setTimeout(later, wait);
             if (callNow) func.apply(context, args);
         };
-    },
-    
-    /** Mixes a delayed method call function onto the provided scope. The new
-        function will be stored on the scope under the property name
-        methodName + "Delayed". For example "foo" will become "fooDelayed".
-        @param scope:Observable|Class|Module the scope to mix onto.
-        @param millis:number the time to delay the call by.
-        @param methodName:string the name of the method to call after the delay.
-        @returns boolean True if creation succeeded, false otherwise. */
-    createDelayedMethodCall: function(scope, millis, methodName) {
-        var delayedMethodName = this.AccessorSupport.generateName('delayed', methodName),
-            isModuleOrClass = typeof scope === 'function' || scope instanceof JS.Module;
-        
-        // Prevent clobbering
-        if ((isModuleOrClass ? scope.instanceMethod(delayedMethodName) : scope[delayedMethodName]) !== undefined) {
-            console.warn("Can't clobber existing property during setup of delayed method function.", delayedMethodName, scope);
-            return false;
-        }
-        
-        // Define the "module".
-        var mod = {};
-        
-        /** Calls the method after a delay. Resets the delay timer if
-            this method is called again before the timer has finished.
-            @returns void */
-        mod[delayedMethodName] = this.debounce(function() {this[methodName].apply(this);}, millis);
-        
-        // Mixin in the "module"
-        if (isModuleOrClass) {
-            scope.include(mod);
-        } else {
-            scope.extend(mod);
-        }
-        
-        return true;
     }
 };
