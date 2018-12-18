@@ -23,6 +23,9 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.NativeInputWrapper */
     initNode: function(parent, attrs) {
+        if (attrs.tagName == null) attrs.tagName = 'select';
+        attrs.inputType = null;
+        
         if (attrs.multiple == null) attrs.multiple = false;
         if (attrs.size == null) attrs.size = attrs.multiple ? 4 : 1;
         
@@ -34,25 +37,18 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
         this.__syncToDom();
     },
     
-    /** @overrides myt.NativeInputWrapper */
-    createOurDomElement: function(parent) {
-        var elem = document.createElement('select');
-        elem.style.position = 'absolute';
-        return elem;
-    },
-    
     
     // Accessors ///////////////////////////////////////////////////////////////
     setMultiple: function(v) {
         if (this.multiple !== v) {
-            this.multiple = this.domElement.multiple = v;
+            this.multiple = this.getInnerDomElement().multiple = v;
             if (this.inited) this.fireEvent('multiple', v);
         }
     },
     
     setSize: function(v) {
         if (this.size !== v) {
-            this.size = this.domElement.size = v;
+            this.size = this.getInnerDomElement().size = v;
             if (this.inited) this.fireEvent('size', v);
         }
     },

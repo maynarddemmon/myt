@@ -68,7 +68,7 @@ myt.AutoScroller = new JS.Module('AutoScroller', {
         @param dropable:myt.Dropable The dropable being dragged.
         @returns void */
     notifyDragStart: function(dropable) {
-        var de = this.domElement;
+        var de = this.getInnerDomElement();
         if (de.scrollHeight > de.clientHeight || de.scrollWidth > de.clientWidth) {
             this.attachToDom(myt.global.mouse, '__handleMouseMove', 'mousemove', true);
         }
@@ -150,7 +150,7 @@ myt.AutoScroller = new JS.Module('AutoScroller', {
         var self = this;
         
         if (self['__isAuto' + dir]) {
-            self.domElement[dir === 'scrollUp' || dir === 'scrollDown' ? 'scrollTop' : 'scrollLeft'] += amt * self['__amount' + dir];
+            self.getInnerDomElement()[dir === 'scrollUp' || dir === 'scrollDown' ? 'scrollTop' : 'scrollLeft'] += amt * self['__amount' + dir];
             
             self['__timerIdAuto' + dir] = setTimeout(function() {
                 self.__doAutoScrollAdj(dir, amt);

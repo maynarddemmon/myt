@@ -18,6 +18,8 @@ myt.Frame = new JS.Class('Frame', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
+        if (attrs.tagName == null) attrs.tagName = 'iframe';
+        
         this.callSuper(parent, attrs);
         
         var gm = myt.global.mouse;
@@ -27,18 +29,22 @@ myt.Frame = new JS.Class('Frame', myt.View, {
     
     /** @overrides myt.View */
     createOurDomElement: function(parent) {
-        var elem = document.createElement('iframe'),
-            s = elem.style;
-        s.position = 'absolute';
-        s.border = '0px';
-        return elem;
+        var elements = this.callSuper(parent),
+            innerElem;
+        if (Array.isArray(elements)) {
+            innerElem = elements[1];
+        } else {
+            innerElem = elements;
+        }
+        innerElem.style.border = '0px';
+        return elements;
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
     setSrc: function(v) {
         if (this.src !== v) {
-            this.src = this.domElement.src = v;
+            this.src = this.getInnerDomElement().src = v;
             if (this.inited) this.fireEvent('src', v);
         }
     },

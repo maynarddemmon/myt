@@ -84,7 +84,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
         if (this.text !== v) {
             // Use innerHTML rather than textContent since this allows us to
             // embed formatting markup.
-            this.domElement.innerHTML = this.text = v;
+            this.getInnerDomElement().innerHTML = this.text = v;
             if (this.inited) {
                 this.fireEvent('text', v);
                 this.sizeViewToDom();
@@ -96,7 +96,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
     setTextOverflow: function(v) {
         if (this.textOverflow !== v) {
             this.textOverflow = v;
-            this.deStyle.textOverflow = v || 'inherit';
+            this.getInnerDomStyle().textOverflow = v || 'inherit';
             if (this.inited) this.fireEvent('textOverflow', v);
         }
     },
@@ -104,7 +104,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
     setTextAlign: function(v) {
         if (this.textAlign !== v) {
             this.textAlign = v;
-            this.deStyle.textAlign = v || 'inherit';
+            this.getInnerDomStyle().textAlign = v || 'inherit';
             if (this.inited) this.fireEvent('textAlign', v);
         }
     },
@@ -131,7 +131,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
     __s: function(v, attrName, defaultValue) {
         if (this[attrName] !== v) {
             this[attrName] = v;
-            this.deStyle[attrName] = v || defaultValue || 'inherit';
+            this.getInnerDomStyle()[attrName] = v || defaultValue || 'inherit';
             if (this.inited) {
                 this.fireEvent(attrName, v);
                 this.sizeViewToDom();
@@ -192,12 +192,12 @@ myt.TextSupport = new JS.Module('TextSupport', {
             shadow = value.join(',');
         }
         
-        this.deStyle.textShadow = shadow;
+        this.getInnerDomStyle().textShadow = shadow;
     },
     
     /** Turns off a text shadow.
         @returns void */
     hideTextShadow: function() {
-        this.deStyle.textShadow = 'none';
+        this.getInnerDomStyle().textShadow = 'none';
     }
 });

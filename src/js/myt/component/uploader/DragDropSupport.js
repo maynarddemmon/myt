@@ -18,7 +18,7 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
     /** @overrides myt.Disableable */
     setDisabled: function(v) {
         if (this.disabled !== v) {
-            this.domElement.disabled = v;
+            this.getInnerDomElement().disabled = v;
             this.callSuper(v);
             
             if (this.inited) {

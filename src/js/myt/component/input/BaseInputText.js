@@ -49,7 +49,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     
     setSpellcheck: function(v) {
         if (this.spellcheck !== v) {
-            this.spellcheck = this.domElement.spellcheck = v;
+            this.spellcheck = this.getInnerDomElement().spellcheck = v;
             if (this.inited) this.fireEvent('spellcheck', v);
         }
     },
@@ -58,7 +58,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
         if (v == null || 0 > v) v = undefined;
         
         if (this.maxLength !== v) {
-            this.maxLength = this.domElement.maxLength = v;
+            this.maxLength = this.getInnerDomElement().maxLength = v;
             if (this.inited) this.fireEvent('maxLength', v);
         }
     },
@@ -67,7 +67,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     
     setPlaceholder: function(v) {
         if (this.placeholder !== v) {
-            this.domElement.placeholder = this.placeholder = v;
+            this.getInnerDomElement().placeholder = this.placeholder = v;
             if (this.inited) this.fireEvent('placeholder', v);
         }
     },
@@ -140,7 +140,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
             return selection.text.length;
         }
         
-        return this.domElement.selectionStart || 0;
+        return this.getInnerDomElement().selectionStart || 0;
     },
     
     /** Sets the caret and selection.
@@ -155,7 +155,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
             
             end = start;
         }
-        var elem = this.domElement;
+        var elem = this.getInnerDomElement();
         
         if (elem.setSelectionRange) {
             elem.setSelectionRange(start, end);
@@ -184,11 +184,11 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     /** Selects all the text in the input element.
         @returns void */
     selectAll: function() {
-        this.domElement.select();
+        this.getInnerDomElement().select();
     },
     
     getSelection: function() {
-        var de = this.domElement;
+        var de = this.getInnerDomElement();
         return {
             start:de.selectionStart,
             startElem:de,

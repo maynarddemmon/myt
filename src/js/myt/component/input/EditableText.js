@@ -23,6 +23,9 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     initNode: function(parent, attrs) {
         var self = this;
         
+        if (attrs.tagName == null) attrs.tagName = 'div';
+        attrs.inputType = null;
+        
         if (attrs.whiteSpace == null) attrs.whiteSpace = 'pre';
         if (attrs.contentEditable == null) attrs.contentEditable = true;
         
@@ -34,13 +37,6 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
         self.attachToDom(self, '__userInteraction', 'mouseup');
         
         self.setCaretToEnd();
-    },
-    
-    /** @overrides myt.NativeInputWrapper */
-    createOurDomElement: function(parent) {
-        var elem = document.createElement('div');
-        elem.style.position = 'absolute';
-        return elem;
     },
     
     
@@ -76,7 +72,7 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     
     setContentEditable: function(v) {
         if (this.contentEditable !== v) {
-            this.contentEditable = this.domElement.contentEditable = v;
+            this.contentEditable = this.getInnerDomElement().contentEditable = v;
             if (this.inited) this.fireEvent('contentEditable', v);
         }
     },
@@ -94,12 +90,12 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     
     /** @overrides myt.NativeInputWrapper */
     getDomValue: function() {
-        return this.domElement.innerHTML;
+        return this.getInnerDomElement().innerHTML;
     },
     
     /** @overrides myt.NativeInputWrapper */
     setDomValue: function(v) {
-        var de = this.domElement;
+        var de = this.getInnerDomElement();
         if (de.innerHTML !== v) {
             de.innerHTML = v;
             this.sizeViewToDom();
@@ -131,7 +127,7 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     
     // Caret handling
     getCharacterCount: function() {
-        var elem = this.domElement.firstChild;
+        var elem = this.getInnerDomElement().firstChild;
         return elem ? elem.length : 0;
     },
     
@@ -155,9 +151,9 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
         }
         this.saveSelection({
             start:start,
-            startElem:this.domElement.firstChild,
+            startElem:this.getInnerDomElement().firstChild,
             end:end,
-            endElem:this.domElement.firstChild
+            endElem:this.getInnerDomElement().firstChild
         });
     },
     
@@ -181,7 +177,7 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
             var sel = window.getSelection();
             if (sel.rangeCount > 0) {
                 // Sometimes when deleting we get an unexpected node
-                if (sel.extentNode === this.domElement) return null;
+                if (sel.extentNode === this.getInnerDomElement()) return null;
                 
                 range = sel.getRangeAt(0);
             }
@@ -191,9 +187,9 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
         
         return {
             start:range ? range.startOffset : 0,
-            startElem:range ? range.startContainer : this.domElement.firstChild,
+            startElem:range ? range.startContainer : this.getInnerDomElement().firstChild,
             end:range ? range.endOffset : 0,
-            endElem:range ? range.endContainer : this.domElement.firstChild
+            endElem:range ? range.endContainer : this.getInnerDomElement().firstChild
         };
     },
     

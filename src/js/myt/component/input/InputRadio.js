@@ -44,21 +44,21 @@ myt.InputRadio = new JS.Class('InputRadio', myt.NativeInputWrapper, {
     // Accessors ///////////////////////////////////////////////////////////////
     setChecked: function(v) {
         if (this.checked !== v) {
-            this.checked = this.domElement.checked = v;
+            this.checked = this.getInnerDomElement().checked = v;
             if (this.inited) this.fireEvent('checked', v);
         }
     },
     
     setGroupId: function(v) {
         if (this.groupId !== v) {
-            this.groupId = this.domElement.name = v;
+            this.groupId = this.getInnerDomElement().name = v;
             if (this.inited) this.fireEvent('groupId', v);
         }
     },
     
     setOptionValue: function(v) {
         if (this.optionValue !== v) {
-            this.optionValue = this.domElement.value = v;
+            this.optionValue = this.getInnerDomElement().value = v;
             if (this.inited) this.fireEvent('optionValue', v);
         }
     },
@@ -91,7 +91,7 @@ myt.InputRadio = new JS.Class('InputRadio', myt.NativeInputWrapper, {
     
     /** @private */
     __syncToDom: function(event) {
-        if (this.domElement.checked) {
+        if (this.getInnerDomElement().checked) {
             // Get last checked and deselect
             var groupId = this.groupId, 
                 cache = myt.InputRadio.lastChecked,

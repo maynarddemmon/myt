@@ -14,31 +14,27 @@ myt.InputTextArea = new JS.Class('InputTextArea', myt.BaseInputText, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.BaseInputText */
     initNode: function(parent, attrs) {
+        if (attrs.tagName == null) attrs.tagName = 'textarea';
+        attrs.inputType = null;
+        
         if (attrs.resize == null) attrs.resize = 'none';
         if (attrs.wrap == null) attrs.wrap = 'soft';
         
         this.callSuper(parent, attrs);
     },
     
-    /** @overrides myt.NativeInputWrapper */
-    createOurDomElement: function(parent) {
-        var elem = document.createElement('textarea');
-        elem.style.position = 'absolute';
-        return elem;
-    },
-    
     
     // Accessors ///////////////////////////////////////////////////////////////
     setResize: function(v) {
         if (this.resize !== v) {
-            this.resize = this.deStyle.resize = v || 'none';
+            this.resize = this.getInnerDomStyle().resize = v || 'none';
             if (this.inited) this.fireEvent('resize', v);
         }
     },
     
     setWrap: function(v) {
         if (this.wrap !== v) {
-            this.wrap = this.domElement.wrap = v;
+            this.wrap = this.getInnerDomElement().wrap = v;
             if (this.inited) this.fireEvent('wrap', v);
         }
     }

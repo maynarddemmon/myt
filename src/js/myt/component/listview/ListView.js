@@ -122,7 +122,7 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
         while (i) layouts[--i].incrementLockedCounter();
         
         // Performance: Remove from dom while doing inserts
-        var de = contentView.domElement,
+        var de = contentView.getOuterDomElement(),
             nextDe = de.nextSibling,
             parentElem = de.parentNode;
         parentElem.removeChild(de);

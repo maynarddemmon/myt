@@ -38,7 +38,20 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
     
     setFlexDirection: function(v) {
         if (this.flexDirection !== v) {
-            this.getInnerDomStyle().flexDirection = this.flexDirection = v;
+            this.flexDirection = v;
+            
+            // Alias common unexpected values when assigning to the dom
+            var domValue = v;
+            switch (domValue) {
+                case 'rowReverse':
+                    domValue = 'row-reverse';
+                    break;
+                case 'columnReverse':
+                    domValue = 'column-reverse';
+                    break;
+            }
+            this.getInnerDomStyle().flexDirection = domValue;
+            
             if (this.inited) this.fireEvent('flexDirection', v);
         }
     },
@@ -52,14 +65,52 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
     
     setJustifyContent: function(v) {
         if (this.justifyContent !== v) {
-            this.getInnerDomStyle().justifyContent = this.justifyContent = v;
+            this.justifyContent = v;
+            
+            // Alias common unexpected values when assigning to the dom
+            var domValue = v;
+            switch (domValue) {
+                case 'start':
+                    domValue = 'flex-start';
+                    break;
+                case 'end':
+                    domValue = 'flex-end';
+                    break;
+                case 'spaceBetween':
+                case 'between':
+                    domValue = 'space-between';
+                    break;
+                case 'spaceAround':
+                case 'around':
+                    domValue = 'space-around';
+                    break;
+                case 'spaceEvenly':
+                case 'evenly':
+                    domValue = 'space-evenly';
+                    break;
+            }
+            this.getInnerDomStyle().justifyContent = domValue;
+            
             if (this.inited) this.fireEvent('justifyContent', v);
         }
     },
     
     setAlignItems: function(v) {
         if (this.alignItems !== v) {
-            this.getInnerDomStyle().alignItems = this.alignItems = v;
+            this.alignItems = v;
+            
+            // Alias common unexpected values when assigning to the dom
+            var domValue = v;
+            switch (domValue) {
+                case 'start':
+                    domValue = 'flex-start';
+                    break;
+                case 'end':
+                    domValue = 'flex-end';
+                    break;
+            }
+            this.getInnerDomStyle().alignItems = domValue;
+            
             if (this.inited) this.fireEvent('alignItems', v);
         }
     },
@@ -75,15 +126,21 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides */
     createOurDomElement: function(parent) {
-        var elem = this.callSuper(parent);
-        elem.style.display = 'flex';
-        return elem;
+        var elements = this.callSuper(parent),
+            innerElem;
+        if (Array.isArray(elements)) {
+            innerElem = elements[1];
+        } else {
+            innerElem = elements;
+        }
+        innerElem.style.display = 'flex';
+        return elements;
     },
     
     /** @overrides myt.View
         Allow the child views to be managed by the flex box.*/
     subviewAdded: function(sv) {
-        if (sv) {
+        if (sv && !sv.ignoreFlex) {
             sv.getOuterDomStyle().position = '';
             if (this.inited) this.__syncSubview(sv);
         }
@@ -97,7 +154,7 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
     
     /** @private */
     __syncSubview: function(sv) {
-        if (sv && sv.syncInnerToOuter) {
+        if (sv && sv.syncInnerToOuter && !sv.ignoreFlex) {
             sv.syncInnerToOuter();
             sv.syncModelToOuterBounds();
         }
@@ -106,6 +163,6 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
     /** @overrides myt.View
         Allow the child views to be managed by the flex box.*/
     subviewRemoved: function(sv) {
-        if (sv && !sv.destroyed) sv.getOuterDomStyle().position = 'absolute';
+        if (sv && !sv.destroyed && !sv.ignoreFlex) sv.getOuterDomStyle().position = 'absolute';
     }
 });

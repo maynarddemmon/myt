@@ -15,15 +15,22 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     createOurDomElement: function(parent) {
-        var e = this.callSuper(parent);
+        var elements = this.callSuper(parent),
+            innerElem;
+        if (Array.isArray(elements)) {
+            innerElem = elements[1];
+        } else {
+            innerElem = elements;
+        }
         
         var canvas = this.__canvas = document.createElement('canvas');
         canvas.className = 'mytUnselectable';
-        e.appendChild(canvas);
+        innerElem.appendChild(canvas);
         canvas.style.position = 'absolute';
         
         this.__ctx = canvas.getContext('2d');
-        return e;
+        
+        return elements;
     },
     
     

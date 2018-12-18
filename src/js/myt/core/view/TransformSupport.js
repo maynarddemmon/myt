@@ -186,7 +186,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
             w = this.height;
             h = this.width;
         } else {
-            var b = this.domElement.getBoundingClientRect();
+            var b = this.getOuterDomElement().getBoundingClientRect();
             w = b.width;
             h = b.height;
         }

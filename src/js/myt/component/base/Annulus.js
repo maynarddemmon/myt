@@ -91,15 +91,23 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
     
     /** @overrides myt.View */
     createOurDomElement: function(parent) {
-        var e = this.callSuper(parent),
+        var elements = this.callSuper(parent),
             MSVG = myt.Annulus.makeSVG,
-            svg = this.__svg = MSVG('svg', e);
+            svg,
+            innerElem;
+        if (Array.isArray(elements)) {
+            innerElem = elements[1];
+        } else {
+            innerElem = elements;
+        }
+        
+        svg = this.__svg = MSVG('svg', innerElem);
         this.__path = MSVG('path', svg);
         
         // Let the view handle mouse events
         svg.style.pointerEvents = 'none';
         
-        return e;
+        return elements;
     },
     
     

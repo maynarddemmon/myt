@@ -11,7 +11,7 @@ myt.Markup = new JS.Class('Markup', myt.View, {
     setHtml: function(v) {
         var self = this;
         if (self.html !== v) {
-            self.domElement.innerHTML = self.html = v;
+            self.getInnerDomElement().innerHTML = self.html = v;
             if (self.inited) {
                 self.fireEvent('html', v);
                 self.sizeViewToDom();

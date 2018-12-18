@@ -49,7 +49,7 @@ myt.DialogButton = new JS.Class('DialogButton', myt.SimpleButton, {
     },
     
     setTooltip: function(v) {
-        this.domElement.title = v;
+        this.getInnerDomElement().title = v;
     },
     
     
@@ -462,7 +462,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             height:177
         });
         var spectrumView = new V(picker);
-        $(spectrumView.domElement).spectrum({
+        $(spectrumView.getInnerDomElement()).spectrum({
             color:opts.color,
             palette: [['#000000','#111111','#222222','#333333','#444444','#555555','#666666','#777777'],
                       ['#888888','#999999','#aaaaaa','#bbbbbb','#cccccc','#dddddd','#eeeeee','#ffffff']],
@@ -523,7 +523,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         });
         var pickerView = new V(picker);
         
-        $(pickerView.domElement).dtpicker({
+        $(pickerView.getInnerDomElement()).dtpicker({
             current:new Date(opts.initialDate || Date.now()),
             dateOnly:opts.dateOnly || false,
             timeOnly:opts.timeOnly || false,

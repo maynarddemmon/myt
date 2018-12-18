@@ -53,7 +53,20 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
     
     setAlignSelf: function(v) {
         if (this.alignSelf !== v) {
-            this.getOuterDomStyle().alignSelf = this.alignSelf = v;
+            this.alignSelf = v;
+            
+            // Alias common unexpected values when assigning to the dom
+            var domValue = v;
+            switch (domValue) {
+                case 'start':
+                    domValue = 'flex-start';
+                    break;
+                case 'end':
+                    domValue = 'flex-end';
+                    break;
+            }
+            this.getOuterDomStyle().alignSelf = domValue;
+            
             if (this.inited) this.fireEvent('alignSelf', v);
         }
     },

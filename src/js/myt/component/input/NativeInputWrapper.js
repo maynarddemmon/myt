@@ -18,6 +18,7 @@ myt.NativeInputWrapper = new JS.Class('NativeInputWrapper', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
+        if (attrs.tagName == null) attrs.tagName = 'input';
         if (attrs.focusable == null) attrs.focusable = true;
         
         this.callSuper(parent, attrs);
@@ -28,10 +29,17 @@ myt.NativeInputWrapper = new JS.Class('NativeInputWrapper', myt.View, {
     
     /** @overrides myt.View */
     createOurDomElement: function(parent) {
-        var elem = document.createElement('input');
-        elem.style.position = 'absolute';
-        elem.type = this.inputType;
-        return elem;
+        var elements = this.callSuper(parent),
+            innerElem;
+        if (this.inputType) {
+            if (Array.isArray(elements)) {
+                innerElem = elements[1];
+            } else {
+                innerElem = elements;
+            }
+            innerElem.type = this.inputType;
+        }
+        return elements;
     },
     
     
@@ -39,7 +47,7 @@ myt.NativeInputWrapper = new JS.Class('NativeInputWrapper', myt.View, {
     /** @overrides myt.Disableable */
     setDisabled: function(v) {
         if (this.disabled !== v) {
-            this.domElement.disabled = v;
+            this.getInnerDomElement().disabled = v;
             this.callSuper(v);
         }
     },
@@ -57,14 +65,14 @@ myt.NativeInputWrapper = new JS.Class('NativeInputWrapper', myt.View, {
     /** Gets the value from the DOM.
         @returns * The value */
     getDomValue: function() {
-        return this.domElement.value;
+        return this.getInnerDomElement().value;
     },
     
     /** Sets the value on the DOM.
         @param v:* The value to set.
         @returns void */
     setDomValue: function(v) {
-        var de = this.domElement;
+        var de = this.getInnerDomElement();
         if (de.value !== v) de.value = v;
     }
 });
