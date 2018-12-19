@@ -3660,20 +3660,43 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
     setFlexGrow: function(v) {
         if (this.flexGrow !== v) {
             this.getOuterDomStyle().flexGrow = this.flexGrow = v;
-            if (this.inited) this.fireEvent('flexGrow', v);
+            if (this.inited) {
+                this.fireEvent('flexGrow', v);
+                if (this.parent && this.parent.__syncSubviews) {
+                    this.parent.__syncSubviews();
+                }
+            }
         }
     },
     
     setFlexShrink: function(v) {
         if (this.flexShrink !== v) {
             this.getOuterDomStyle().flexShrink = this.flexShrink = v;
-            if (this.inited) this.fireEvent('flexShrink', v);
+            if (this.inited) {
+                this.fireEvent('flexShrink', v);
+                if (this.parent && this.parent.__syncSubviews) {
+                    this.parent.__syncSubviews();
+                }
+            }
         }
     },
     
     setAlignSelf: function(v) {
         if (this.alignSelf !== v) {
-            this.getOuterDomStyle().alignSelf = this.alignSelf = v;
+            this.alignSelf = v;
+            
+            // Alias common unexpected values when assigning to the dom
+            var domValue = v;
+            switch (domValue) {
+                case 'start':
+                    domValue = 'flex-start';
+                    break;
+                case 'end':
+                    domValue = 'flex-end';
+                    break;
+            }
+            this.getOuterDomStyle().alignSelf = domValue;
+            
             if (this.inited) this.fireEvent('alignSelf', v);
         }
     },
@@ -5395,11 +5418,11 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
             self.focusable = v;
             
             if (v) {
-                self.domElement.tabIndex = 0; // Make focusable. -1 is programtic only
+                self.getInnerDomElement().tabIndex = 0; // Make focusable. -1 is programtic only
                 self.attachToDom(self, '__doFocus', 'focus');
                 self.attachToDom(self, '__doBlur', 'blur');
             } else if (wasFocusable) {
-                self.domElement.removeAttribute('tabIndex'); // Make unfocusable
+                self.getInnerDomElement().removeAttribute('tabIndex'); // Make unfocusable
                 self.detachFromDom(self, '__doFocus', 'focus');
                 self.detachFromDom(self, '__doBlur', 'blur');
             }
@@ -5450,7 +5473,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
         @returns void */
     focus: function(noScroll) {
         if (this.isFocusable()) {
-            var de = this.domElement;
+            var de = this.getInnerDomElement();
             if (noScroll) {
                 // Maintain scrollTop/scrollLeft
                 var ancestors = myt.DomElementProxy.getAncestorArray(de),
@@ -5483,7 +5506,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
         @private
         @returns void */
     blur: function() {
-        this.domElement.blur();
+        this.getInnerDomElement().blur();
     },
     
     /** @private */
@@ -5516,10 +5539,10 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
     
     showFocusEmbellishment: function() {
         // IE
-        this.domElement.hideFocus = false;
+        this.getInnerDomElement().hideFocus = false;
         
         // Mozilla and Webkit
-        var s = this.deStyle;
+        var s = this.getInnerDomStyle();
         s.outlineWidth = 'thin';
         s.outlineColor = '#88bbff';
         s.outlineStyle = 'solid';
@@ -5533,10 +5556,10 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
     /** Hides the browser's default focus embellishment. */
     hideDefaultFocusEmbellishment: function() {
         // IE
-        this.domElement.hideFocus = true;
+        this.getInnerDomElement().hideFocus = true;
         
         // Mozilla and Webkit
-        this.deStyle.outlineStyle = 'none';
+        this.getInnerDomStyle().outlineStyle = 'none';
     },
     
     /** @overrides myt.DomObservable */
@@ -6807,7 +6830,20 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
     
     setFlexDirection: function(v) {
         if (this.flexDirection !== v) {
-            this.getInnerDomStyle().flexDirection = this.flexDirection = v;
+            this.flexDirection = v;
+            
+            // Alias common unexpected values when assigning to the dom
+            var domValue = v;
+            switch (domValue) {
+                case 'rowReverse':
+                    domValue = 'row-reverse';
+                    break;
+                case 'columnReverse':
+                    domValue = 'column-reverse';
+                    break;
+            }
+            this.getInnerDomStyle().flexDirection = domValue;
+            
             if (this.inited) this.fireEvent('flexDirection', v);
         }
     },
@@ -6821,14 +6857,52 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
     
     setJustifyContent: function(v) {
         if (this.justifyContent !== v) {
-            this.getInnerDomStyle().justifyContent = this.justifyContent = v;
+            this.justifyContent = v;
+            
+            // Alias common unexpected values when assigning to the dom
+            var domValue = v;
+            switch (domValue) {
+                case 'start':
+                    domValue = 'flex-start';
+                    break;
+                case 'end':
+                    domValue = 'flex-end';
+                    break;
+                case 'spaceBetween':
+                case 'between':
+                    domValue = 'space-between';
+                    break;
+                case 'spaceAround':
+                case 'around':
+                    domValue = 'space-around';
+                    break;
+                case 'spaceEvenly':
+                case 'evenly':
+                    domValue = 'space-evenly';
+                    break;
+            }
+            this.getInnerDomStyle().justifyContent = domValue;
+            
             if (this.inited) this.fireEvent('justifyContent', v);
         }
     },
     
     setAlignItems: function(v) {
         if (this.alignItems !== v) {
-            this.getInnerDomStyle().alignItems = this.alignItems = v;
+            this.alignItems = v;
+            
+            // Alias common unexpected values when assigning to the dom
+            var domValue = v;
+            switch (domValue) {
+                case 'start':
+                    domValue = 'flex-start';
+                    break;
+                case 'end':
+                    domValue = 'flex-end';
+                    break;
+            }
+            this.getInnerDomStyle().alignItems = domValue;
+            
             if (this.inited) this.fireEvent('alignItems', v);
         }
     },
@@ -6844,17 +6918,23 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides */
     createOurDomElement: function(parent) {
-        var elem = this.callSuper(parent);
-        elem.style.display = 'flex';
-        return elem;
+        var elements = this.callSuper(parent),
+            innerElem;
+        if (Array.isArray(elements)) {
+            innerElem = elements[1];
+        } else {
+            innerElem = elements;
+        }
+        innerElem.style.display = 'flex';
+        return elements;
     },
     
     /** @overrides myt.View
         Allow the child views to be managed by the flex box.*/
     subviewAdded: function(sv) {
-        if (sv) {
+        if (sv && !sv.ignoreFlex) {
             sv.getOuterDomStyle().position = '';
-            if (this.inited) this.__syncSubview(sv);
+            if (this.inited) this.__syncSubviews();
         }
     },
     
@@ -6866,7 +6946,7 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
     
     /** @private */
     __syncSubview: function(sv) {
-        if (sv && sv.syncInnerToOuter) {
+        if (sv && sv.syncInnerToOuter && !sv.ignoreFlex) {
             sv.syncInnerToOuter();
             sv.syncModelToOuterBounds();
         }
@@ -6875,7 +6955,7 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
     /** @overrides myt.View
         Allow the child views to be managed by the flex box.*/
     subviewRemoved: function(sv) {
-        if (sv && !sv.destroyed) sv.getOuterDomStyle().position = 'absolute';
+        if (sv && !sv.destroyed && !sv.ignoreFlex) sv.getOuterDomStyle().position = 'absolute';
     }
 });
 
@@ -7074,7 +7154,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
             w = this.height;
             h = this.width;
         } else {
-            var b = this.domElement.getBoundingClientRect();
+            var b = this.getOuterDomElement().getBoundingClientRect();
             w = b.width;
             h = b.height;
         }
@@ -7281,7 +7361,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
         if (this.text !== v) {
             // Use innerHTML rather than textContent since this allows us to
             // embed formatting markup.
-            this.domElement.innerHTML = this.text = v;
+            this.getInnerDomElement().innerHTML = this.text = v;
             if (this.inited) {
                 this.fireEvent('text', v);
                 this.sizeViewToDom();
@@ -7293,7 +7373,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
     setTextOverflow: function(v) {
         if (this.textOverflow !== v) {
             this.textOverflow = v;
-            this.deStyle.textOverflow = v || 'inherit';
+            this.getInnerDomStyle().textOverflow = v || 'inherit';
             if (this.inited) this.fireEvent('textOverflow', v);
         }
     },
@@ -7301,7 +7381,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
     setTextAlign: function(v) {
         if (this.textAlign !== v) {
             this.textAlign = v;
-            this.deStyle.textAlign = v || 'inherit';
+            this.getInnerDomStyle().textAlign = v || 'inherit';
             if (this.inited) this.fireEvent('textAlign', v);
         }
     },
@@ -7328,7 +7408,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
     __s: function(v, attrName, defaultValue) {
         if (this[attrName] !== v) {
             this[attrName] = v;
-            this.deStyle[attrName] = v || defaultValue || 'inherit';
+            this.getInnerDomStyle()[attrName] = v || defaultValue || 'inherit';
             if (this.inited) {
                 this.fireEvent(attrName, v);
                 this.sizeViewToDom();
@@ -7389,13 +7469,13 @@ myt.TextSupport = new JS.Module('TextSupport', {
             shadow = value.join(',');
         }
         
-        this.deStyle.textShadow = shadow;
+        this.getInnerDomStyle().textShadow = shadow;
     },
     
     /** Turns off a text shadow.
         @returns void */
     hideTextShadow: function() {
-        this.deStyle.textShadow = 'none';
+        this.getInnerDomStyle().textShadow = 'none';
     }
 });
 
@@ -7431,7 +7511,7 @@ myt.Text = new JS.Class('Text', myt.View, {
         var s = this.deStyle,
             oldValue = s.whiteSpace;
         s.whiteSpace = 'nowrap';
-        var measuredWidth = this.domElement.getBoundingClientRect().width;
+        var measuredWidth = this.getOuterDomElement().getBoundingClientRect().width;
         s.whiteSpace = oldValue;
         return measuredWidth;
     }
@@ -7691,7 +7771,7 @@ myt.Markup = new JS.Class('Markup', myt.View, {
     setHtml: function(v) {
         var self = this;
         if (self.html !== v) {
-            self.domElement.innerHTML = self.html = v;
+            self.getInnerDomElement().innerHTML = self.html = v;
             if (self.inited) {
                 self.fireEvent('html', v);
                 self.sizeViewToDom();
@@ -7721,6 +7801,8 @@ myt.Frame = new JS.Class('Frame', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
+        if (attrs.tagName == null) attrs.tagName = 'iframe';
+        
         this.callSuper(parent, attrs);
         
         var gm = myt.global.mouse;
@@ -7730,18 +7812,22 @@ myt.Frame = new JS.Class('Frame', myt.View, {
     
     /** @overrides myt.View */
     createOurDomElement: function(parent) {
-        var elem = document.createElement('iframe'),
-            s = elem.style;
-        s.position = 'absolute';
-        s.border = '0px';
-        return elem;
+        var elements = this.callSuper(parent),
+            innerElem;
+        if (Array.isArray(elements)) {
+            innerElem = elements[1];
+        } else {
+            innerElem = elements;
+        }
+        innerElem.style.border = '0px';
+        return elements;
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
     setSrc: function(v) {
         if (this.src !== v) {
-            this.src = this.domElement.src = v;
+            this.src = this.getInnerDomElement().src = v;
             if (this.inited) this.fireEvent('src', v);
         }
     },
@@ -7813,7 +7899,7 @@ myt.SizeWidthToDom = new JS.Module('SizeWidthToDom', {
             // this ourselves.
             var scaling = myt.TransformSupport.getEffectiveScale(this);
             
-            var w = this.domElement.getBoundingClientRect().width / scaling.scaleX;
+            var w = this.getOuterDomElement().getBoundingClientRect().width / scaling.scaleX;
             
             // Circumvent setter
             if (this.width !== w) {
@@ -7876,7 +7962,7 @@ myt.SizeHeightToDom = new JS.Module('SizeHeightToDom', {
             // this ourselves.
             var scaling = myt.TransformSupport.getEffectiveScale(this);
             
-            var h = this.domElement.getBoundingClientRect().height / scaling.scaleY;
+            var h = this.getOuterDomElement().getBoundingClientRect().height / scaling.scaleY;
             
             // Circumvent setter
             if (this.height !== h) {
@@ -10133,15 +10219,22 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     createOurDomElement: function(parent) {
-        var e = this.callSuper(parent);
+        var elements = this.callSuper(parent),
+            innerElem;
+        if (Array.isArray(elements)) {
+            innerElem = elements[1];
+        } else {
+            innerElem = elements;
+        }
         
         var canvas = this.__canvas = document.createElement('canvas');
         canvas.className = 'mytUnselectable';
-        e.appendChild(canvas);
+        innerElem.appendChild(canvas);
         canvas.style.position = 'absolute';
         
         this.__ctx = canvas.getContext('2d');
-        return e;
+        
+        return elements;
     },
     
     
@@ -12637,7 +12730,7 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
         while (i) layouts[--i].incrementLockedCounter();
         
         // Performance: Remove from dom while doing inserts
-        var de = contentView.domElement,
+        var de = contentView.getOuterDomElement(),
             nextDe = de.nextSibling,
             parentElem = de.parentNode;
         parentElem.removeChild(de);
@@ -14962,6 +15055,7 @@ myt.NativeInputWrapper = new JS.Class('NativeInputWrapper', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
+        if (attrs.tagName == null) attrs.tagName = 'input';
         if (attrs.focusable == null) attrs.focusable = true;
         
         this.callSuper(parent, attrs);
@@ -14972,10 +15066,17 @@ myt.NativeInputWrapper = new JS.Class('NativeInputWrapper', myt.View, {
     
     /** @overrides myt.View */
     createOurDomElement: function(parent) {
-        var elem = document.createElement('input');
-        elem.style.position = 'absolute';
-        elem.type = this.inputType;
-        return elem;
+        var elements = this.callSuper(parent),
+            innerElem;
+        if (this.inputType) {
+            if (Array.isArray(elements)) {
+                innerElem = elements[1];
+            } else {
+                innerElem = elements;
+            }
+            innerElem.type = this.inputType;
+        }
+        return elements;
     },
     
     
@@ -14983,7 +15084,7 @@ myt.NativeInputWrapper = new JS.Class('NativeInputWrapper', myt.View, {
     /** @overrides myt.Disableable */
     setDisabled: function(v) {
         if (this.disabled !== v) {
-            this.domElement.disabled = v;
+            this.getInnerDomElement().disabled = v;
             this.callSuper(v);
         }
     },
@@ -15001,14 +15102,14 @@ myt.NativeInputWrapper = new JS.Class('NativeInputWrapper', myt.View, {
     /** Gets the value from the DOM.
         @returns * The value */
     getDomValue: function() {
-        return this.domElement.value;
+        return this.getInnerDomElement().value;
     },
     
     /** Sets the value on the DOM.
         @param v:* The value to set.
         @returns void */
     setDomValue: function(v) {
-        var de = this.domElement;
+        var de = this.getInnerDomElement();
         if (de.value !== v) de.value = v;
     }
 });
@@ -15062,7 +15163,7 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
     /** @overrides myt.Disableable */
     setDisabled: function(v) {
         if (this.disabled !== v) {
-            this.domElement.disabled = v;
+            this.getInnerDomElement().disabled = v;
             this.callSuper(v);
             
             if (this.inited) {
@@ -18287,7 +18388,7 @@ myt.DialogButton = new JS.Class('DialogButton', myt.SimpleButton, {
     },
     
     setTooltip: function(v) {
-        this.domElement.title = v;
+        this.getInnerDomElement().title = v;
     },
     
     
@@ -18700,7 +18801,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             height:177
         });
         var spectrumView = new V(picker);
-        $(spectrumView.domElement).spectrum({
+        $(spectrumView.getInnerDomElement()).spectrum({
             color:opts.color,
             palette: [['#000000','#111111','#222222','#333333','#444444','#555555','#666666','#777777'],
                       ['#888888','#999999','#aaaaaa','#bbbbbb','#cccccc','#dddddd','#eeeeee','#ffffff']],
@@ -18761,7 +18862,7 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
         });
         var pickerView = new V(picker);
         
-        $(pickerView.domElement).dtpicker({
+        $(pickerView.getInnerDomElement()).dtpicker({
             current:new Date(opts.initialDate || Date.now()),
             dateOnly:opts.dateOnly || false,
             timeOnly:opts.timeOnly || false,
@@ -19534,6 +19635,9 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.NativeInputWrapper */
     initNode: function(parent, attrs) {
+        if (attrs.tagName == null) attrs.tagName = 'select';
+        attrs.inputType = null;
+        
         if (attrs.multiple == null) attrs.multiple = false;
         if (attrs.size == null) attrs.size = attrs.multiple ? 4 : 1;
         
@@ -19545,25 +19649,18 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
         this.__syncToDom();
     },
     
-    /** @overrides myt.NativeInputWrapper */
-    createOurDomElement: function(parent) {
-        var elem = document.createElement('select');
-        elem.style.position = 'absolute';
-        return elem;
-    },
-    
     
     // Accessors ///////////////////////////////////////////////////////////////
     setMultiple: function(v) {
         if (this.multiple !== v) {
-            this.multiple = this.domElement.multiple = v;
+            this.multiple = this.getInnerDomElement().multiple = v;
             if (this.inited) this.fireEvent('multiple', v);
         }
     },
     
     setSize: function(v) {
         if (this.size !== v) {
-            this.size = this.domElement.size = v;
+            this.size = this.getInnerDomElement().size = v;
             if (this.inited) this.fireEvent('size', v);
         }
     },
@@ -19776,14 +19873,14 @@ myt.InputSelectOption = new JS.Class('InputSelectOption', myt.View, {
         // Adapt to event from syncTo
         if (v !== null && typeof v === 'object') v = v.value;
         
-        var de = this.domElement;
+        var de = this.getInnerDomElement();
         if (de.selected !== v) de.selected = v;
     },
     
     /** @overrides myt.Disableable */
     setDisabled: function(v) {
         if (this.disabled !== v) {
-            this.domElement.disabled = v;
+            this.getInnerDomElement().disabled = v;
             this.callSuper(v);
         }
     },
@@ -19791,14 +19888,14 @@ myt.InputSelectOption = new JS.Class('InputSelectOption', myt.View, {
     setValue: function(v) {
         if (this.value !== v) {
             this.value = v;
-            if (this.domElement.value !== v) this.domElement.value = v;
+            if (this.getInnerDomElement().value !== v) this.getInnerDomElement().value = v;
             if (this.inited) this.fireEvent('value', v);
         }
     },
     
     setLabel: function(v) {
         if (this.label !== v) {
-            this.domElement.textContent = this.label = v;
+            this.getInnerDomElement().textContent = this.label = v;
             if (this.inited) this.fireEvent('label', v);
         }
     },
@@ -19807,17 +19904,17 @@ myt.InputSelectOption = new JS.Class('InputSelectOption', myt.View, {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrideds myt.Selectable */
     isSelected: function() {
-        return this.domElement.selected;
+        return this.getInnerDomElement().selected;
     },
     
     /** @overrideds myt.Selectable */
     canSelect: function(selectionManager) {
-        return !this.disabled && !this.domElement.selected && this.parent === selectionManager;
+        return !this.disabled && !this.getInnerDomElement().selected && this.parent === selectionManager;
     },
     
     /** @overrideds myt.Selectable */
     canDeselect: function(selectionManager) {
-        return !this.disabled && this.domElement.selected && this.parent === selectionManager;
+        return !this.disabled && this.getInnerDomElement().selected && this.parent === selectionManager;
     }
 });
 
@@ -20195,7 +20292,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     
     setSpellcheck: function(v) {
         if (this.spellcheck !== v) {
-            this.spellcheck = this.domElement.spellcheck = v;
+            this.spellcheck = this.getInnerDomElement().spellcheck = v;
             if (this.inited) this.fireEvent('spellcheck', v);
         }
     },
@@ -20204,7 +20301,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
         if (v == null || 0 > v) v = undefined;
         
         if (this.maxLength !== v) {
-            this.maxLength = this.domElement.maxLength = v;
+            this.maxLength = this.getInnerDomElement().maxLength = v;
             if (this.inited) this.fireEvent('maxLength', v);
         }
     },
@@ -20213,7 +20310,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     
     setPlaceholder: function(v) {
         if (this.placeholder !== v) {
-            this.domElement.placeholder = this.placeholder = v;
+            this.getInnerDomElement().placeholder = this.placeholder = v;
             if (this.inited) this.fireEvent('placeholder', v);
         }
     },
@@ -20286,7 +20383,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
             return selection.text.length;
         }
         
-        return this.domElement.selectionStart || 0;
+        return this.getInnerDomElement().selectionStart || 0;
     },
     
     /** Sets the caret and selection.
@@ -20301,7 +20398,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
             
             end = start;
         }
-        var elem = this.domElement;
+        var elem = this.getInnerDomElement();
         
         if (elem.setSelectionRange) {
             elem.setSelectionRange(start, end);
@@ -20330,11 +20427,11 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     /** Selects all the text in the input element.
         @returns void */
     selectAll: function() {
-        this.domElement.select();
+        this.getInnerDomElement().select();
     },
     
     getSelection: function() {
-        var de = this.domElement;
+        var de = this.getInnerDomElement();
         return {
             start:de.selectionStart,
             startElem:de,
@@ -20646,31 +20743,27 @@ myt.InputTextArea = new JS.Class('InputTextArea', myt.BaseInputText, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.BaseInputText */
     initNode: function(parent, attrs) {
+        if (attrs.tagName == null) attrs.tagName = 'textarea';
+        attrs.inputType = null;
+        
         if (attrs.resize == null) attrs.resize = 'none';
         if (attrs.wrap == null) attrs.wrap = 'soft';
         
         this.callSuper(parent, attrs);
     },
     
-    /** @overrides myt.NativeInputWrapper */
-    createOurDomElement: function(parent) {
-        var elem = document.createElement('textarea');
-        elem.style.position = 'absolute';
-        return elem;
-    },
-    
     
     // Accessors ///////////////////////////////////////////////////////////////
     setResize: function(v) {
         if (this.resize !== v) {
-            this.resize = this.deStyle.resize = v || 'none';
+            this.resize = this.getInnerDomStyle().resize = v || 'none';
             if (this.inited) this.fireEvent('resize', v);
         }
     },
     
     setWrap: function(v) {
         if (this.wrap !== v) {
-            this.wrap = this.domElement.wrap = v;
+            this.wrap = this.getInnerDomElement().wrap = v;
             if (this.inited) this.fireEvent('wrap', v);
         }
     }
@@ -20725,6 +20818,9 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     initNode: function(parent, attrs) {
         var self = this;
         
+        if (attrs.tagName == null) attrs.tagName = 'div';
+        attrs.inputType = null;
+        
         if (attrs.whiteSpace == null) attrs.whiteSpace = 'pre';
         if (attrs.contentEditable == null) attrs.contentEditable = true;
         
@@ -20736,13 +20832,6 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
         self.attachToDom(self, '__userInteraction', 'mouseup');
         
         self.setCaretToEnd();
-    },
-    
-    /** @overrides myt.NativeInputWrapper */
-    createOurDomElement: function(parent) {
-        var elem = document.createElement('div');
-        elem.style.position = 'absolute';
-        return elem;
     },
     
     
@@ -20778,7 +20867,7 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     
     setContentEditable: function(v) {
         if (this.contentEditable !== v) {
-            this.contentEditable = this.domElement.contentEditable = v;
+            this.contentEditable = this.getInnerDomElement().contentEditable = v;
             if (this.inited) this.fireEvent('contentEditable', v);
         }
     },
@@ -20796,12 +20885,12 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     
     /** @overrides myt.NativeInputWrapper */
     getDomValue: function() {
-        return this.domElement.innerHTML;
+        return this.getInnerDomElement().innerHTML;
     },
     
     /** @overrides myt.NativeInputWrapper */
     setDomValue: function(v) {
-        var de = this.domElement;
+        var de = this.getInnerDomElement();
         if (de.innerHTML !== v) {
             de.innerHTML = v;
             this.sizeViewToDom();
@@ -20833,7 +20922,7 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     
     // Caret handling
     getCharacterCount: function() {
-        var elem = this.domElement.firstChild;
+        var elem = this.getInnerDomElement().firstChild;
         return elem ? elem.length : 0;
     },
     
@@ -20857,9 +20946,9 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
         }
         this.saveSelection({
             start:start,
-            startElem:this.domElement.firstChild,
+            startElem:this.getInnerDomElement().firstChild,
             end:end,
-            endElem:this.domElement.firstChild
+            endElem:this.getInnerDomElement().firstChild
         });
     },
     
@@ -20883,7 +20972,7 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
             var sel = window.getSelection();
             if (sel.rangeCount > 0) {
                 // Sometimes when deleting we get an unexpected node
-                if (sel.extentNode === this.domElement) return null;
+                if (sel.extentNode === this.getInnerDomElement()) return null;
                 
                 range = sel.getRangeAt(0);
             }
@@ -20893,9 +20982,9 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
         
         return {
             start:range ? range.startOffset : 0,
-            startElem:range ? range.startContainer : this.domElement.firstChild,
+            startElem:range ? range.startContainer : this.getInnerDomElement().firstChild,
             end:range ? range.endOffset : 0,
-            endElem:range ? range.endContainer : this.domElement.firstChild
+            endElem:range ? range.endContainer : this.getInnerDomElement().firstChild
         };
     },
     
@@ -24319,7 +24408,7 @@ myt.DropSource = new JS.Module('DropSource', {
         var dropClass = this.dropClass,
             dropParent = this.dropParent;
         if (dropClass && dropParent) {
-            var pos = myt.DomElementProxy.getPagePosition(this.domElement, dropParent.domElement),
+            var pos = myt.DomElementProxy.getPagePosition(this.getInnerDomElement(), dropParent.getInnerDomElement()),
             attrs = myt.extend({}, this.dropClassAttrs);
             attrs.x = pos.x || 0;
             attrs.y = pos.y || 0;
@@ -24399,7 +24488,7 @@ myt.AutoScroller = new JS.Module('AutoScroller', {
         @param dropable:myt.Dropable The dropable being dragged.
         @returns void */
     notifyDragStart: function(dropable) {
-        var de = this.domElement;
+        var de = this.getInnerDomElement();
         if (de.scrollHeight > de.clientHeight || de.scrollWidth > de.clientWidth) {
             this.attachToDom(myt.global.mouse, '__handleMouseMove', 'mousemove', true);
         }
@@ -24481,7 +24570,7 @@ myt.AutoScroller = new JS.Module('AutoScroller', {
         var self = this;
         
         if (self['__isAuto' + dir]) {
-            self.domElement[dir === 'scrollUp' || dir === 'scrollDown' ? 'scrollTop' : 'scrollLeft'] += amt * self['__amount' + dir];
+            self.getInnerDomElement()[dir === 'scrollUp' || dir === 'scrollDown' ? 'scrollTop' : 'scrollLeft'] += amt * self['__amount' + dir];
             
             self['__timerIdAuto' + dir] = setTimeout(function() {
                 self.__doAutoScrollAdj(dir, amt);
@@ -24644,15 +24733,23 @@ myt.Annulus = new JS.Class('Annulus', myt.View, {
     
     /** @overrides myt.View */
     createOurDomElement: function(parent) {
-        var e = this.callSuper(parent),
+        var elements = this.callSuper(parent),
             MSVG = myt.Annulus.makeSVG,
-            svg = this.__svg = MSVG('svg', e);
+            svg,
+            innerElem;
+        if (Array.isArray(elements)) {
+            innerElem = elements[1];
+        } else {
+            innerElem = elements;
+        }
+        
+        svg = this.__svg = MSVG('svg', innerElem);
         this.__path = MSVG('path', svg);
         
         // Let the view handle mouse events
         svg.style.pointerEvents = 'none';
         
-        return e;
+        return elements;
     },
     
     

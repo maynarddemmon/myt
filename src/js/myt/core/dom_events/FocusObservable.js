@@ -82,11 +82,11 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
             self.focusable = v;
             
             if (v) {
-                self.domElement.tabIndex = 0; // Make focusable. -1 is programtic only
+                self.getInnerDomElement().tabIndex = 0; // Make focusable. -1 is programtic only
                 self.attachToDom(self, '__doFocus', 'focus');
                 self.attachToDom(self, '__doBlur', 'blur');
             } else if (wasFocusable) {
-                self.domElement.removeAttribute('tabIndex'); // Make unfocusable
+                self.getInnerDomElement().removeAttribute('tabIndex'); // Make unfocusable
                 self.detachFromDom(self, '__doFocus', 'focus');
                 self.detachFromDom(self, '__doBlur', 'blur');
             }
@@ -137,7 +137,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
         @returns void */
     focus: function(noScroll) {
         if (this.isFocusable()) {
-            var de = this.domElement;
+            var de = this.getInnerDomElement();
             if (noScroll) {
                 // Maintain scrollTop/scrollLeft
                 var ancestors = myt.DomElementProxy.getAncestorArray(de),
@@ -170,7 +170,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
         @private
         @returns void */
     blur: function() {
-        this.domElement.blur();
+        this.getInnerDomElement().blur();
     },
     
     /** @private */
@@ -203,10 +203,10 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
     
     showFocusEmbellishment: function() {
         // IE
-        this.domElement.hideFocus = false;
+        this.getInnerDomElement().hideFocus = false;
         
         // Mozilla and Webkit
-        var s = this.deStyle;
+        var s = this.getInnerDomStyle();
         s.outlineWidth = 'thin';
         s.outlineColor = '#88bbff';
         s.outlineStyle = 'solid';
@@ -220,10 +220,10 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
     /** Hides the browser's default focus embellishment. */
     hideDefaultFocusEmbellishment: function() {
         // IE
-        this.domElement.hideFocus = true;
+        this.getInnerDomElement().hideFocus = true;
         
         // Mozilla and Webkit
-        this.deStyle.outlineStyle = 'none';
+        this.getInnerDomStyle().outlineStyle = 'none';
     },
     
     /** @overrides myt.DomObservable */

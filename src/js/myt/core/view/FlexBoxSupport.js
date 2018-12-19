@@ -142,7 +142,7 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
     subviewAdded: function(sv) {
         if (sv && !sv.ignoreFlex) {
             sv.getOuterDomStyle().position = '';
-            if (this.inited) this.__syncSubview(sv);
+            if (this.inited) this.__syncSubviews();
         }
     },
     

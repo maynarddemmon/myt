@@ -40,14 +40,24 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
     setFlexGrow: function(v) {
         if (this.flexGrow !== v) {
             this.getOuterDomStyle().flexGrow = this.flexGrow = v;
-            if (this.inited) this.fireEvent('flexGrow', v);
+            if (this.inited) {
+                this.fireEvent('flexGrow', v);
+                if (this.parent && this.parent.__syncSubviews) {
+                    this.parent.__syncSubviews();
+                }
+            }
         }
     },
     
     setFlexShrink: function(v) {
         if (this.flexShrink !== v) {
             this.getOuterDomStyle().flexShrink = this.flexShrink = v;
-            if (this.inited) this.fireEvent('flexShrink', v);
+            if (this.inited) {
+                this.fireEvent('flexShrink', v);
+                if (this.parent && this.parent.__syncSubviews) {
+                    this.parent.__syncSubviews();
+                }
+            }
         }
     },
     
