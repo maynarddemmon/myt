@@ -58,7 +58,19 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
     
     setFlexWrap: function(v) {
         if (this.flexWrap !== v) {
-            this.getInnerDomStyle().flexWrap = this.flexWrap = v;
+            this.flexWrap = v;
+            
+            // Alias common unexpected values when assigning to the dom
+            var domValue = v;
+            switch (domValue) {
+                case 'wrapReverse':
+                case 'reverse':
+                    domValue = 'wrap-reverse';
+                    break;
+            }
+            this.getInnerDomStyle().flexWrap = domValue;
+            
+            
             if (this.inited) this.fireEvent('flexWrap', v);
         }
     },
@@ -117,7 +129,28 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
     
     setAlignContent: function(v) {
         if (this.alignContent !== v) {
-            this.getInnerDomStyle().alignContent = this.alignContent = v;
+            this.alignContent = v;
+            
+            // Alias common unexpected values when assigning to the dom
+            var domValue = v;
+            switch (domValue) {
+                case 'start':
+                    domValue = 'flex-start';
+                    break;
+                case 'end':
+                    domValue = 'flex-end';
+                    break;
+                case 'spaceBetween':
+                case 'between':
+                    domValue = 'space-between';
+                    break;
+                case 'spaceAround':
+                case 'around':
+                    domValue = 'space-around';
+                    break;
+            }
+            this.getInnerDomStyle().alignContent = domValue;
+            
             if (this.inited) this.fireEvent('alignContent', v);
         }
     },
