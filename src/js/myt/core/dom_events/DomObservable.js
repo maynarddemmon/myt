@@ -40,7 +40,7 @@ myt.DomObservable = new JS.Module('DomObservable', {
                     domObservers.push(domObserver, methodName, methodRef, capture);
                 }
                 
-                myt.addEventListener(this.domElement, type, methodRef, capture);
+                myt.addEventListener(this.getInnerDomElement(), type, methodRef, capture);
                 
                 return true;
             }
@@ -113,7 +113,9 @@ myt.DomObservable = new JS.Module('DomObservable', {
                 var domObservers = domObserversByType[type];
                 if (domObservers) {
                     // Remove dom observer
-                    var retval = false, domElement = this.domElement, i = domObservers.length;
+                    var retval = false, 
+                        domElement = this.getInnerDomElement(), 
+                        i = domObservers.length;
                     while (i) {
                         i -= 4;
                         if (domObserver === domObservers[i] && 
@@ -135,7 +137,7 @@ myt.DomObservable = new JS.Module('DomObservable', {
     /** Detaches all dom observers from this DomObservable.
         @returns void */
     detachAllDomObservers: function() {
-        var domElement = this.domElement;
+        var domElement = this.getInnerDomElement();
         if (domElement) {
             var domObserversByType = this.__dobsbt;
             if (domObserversByType) {
