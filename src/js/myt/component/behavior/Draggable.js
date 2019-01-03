@@ -128,9 +128,10 @@ myt.Draggable = new JS.Module('Draggable', {
     __doMouseDown: function(event) {
         var self = this,
             pos = myt.MouseObservable.getMouseFromEvent(event),
-            gm = myt.global.mouse;
-        self.dragInitX = pos.x - self.x;
-        self.dragInitY = pos.y - self.y;
+            gm = myt.global.mouse,
+            de = self.getOuterDomElement();
+        self.dragInitX = pos.x - de.offsetLeft;
+        self.dragInitY = pos.y - de.offsetTop;
         
         self.attachToDom(gm, '__doMouseUp', 'mouseup', true);
         if (self.distanceBeforeDrag > 0) {
