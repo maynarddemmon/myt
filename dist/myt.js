@@ -3634,6 +3634,27 @@ new JS.Singleton('GlobalTouch', {
 */
 myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
     // Accessors ///////////////////////////////////////////////////////////////
+    /** @overrides */
+    setParent: function(v) {
+        var self = this,
+            oldParentIsFlexBox = self.isChildOfFlexBox();
+        
+        self.callSuper(v);
+        
+        // When reparenting from a flexbox parent to a non-flexbox parent we
+        // may need to resync the dom to the model.
+        if (self.inited && oldParentIsFlexBox && !self.isChildOfFlexBox()) self._syncDomToModel();
+    },
+    
+    /** @private */
+    _syncDomToModel: function() {
+        var self = this,
+            s = self.getOuterDomStyle();
+        s.width = self.width + 'px';
+        s.height = self.height + 'px';
+        self.syncInnerToOuter();
+    },
+    
     /** @overrides
         Keep outer dom element's width in sync with the inner dom element. */
     setWidth: function(v, supressEvent) {
@@ -3705,22 +3726,28 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    isChildOfFlexBox: function() {
+        return this.parent && this.parent.isA(myt.FlexBoxSupport);
+    },
+    
     syncModelToOuterBounds: function() {
-        var bounds = this.getOuterDomElement().getBoundingClientRect();
-        this.__syncModelToOuterBoundsWidth(bounds);
-        this.__syncModelToOuterBoundsHeight(bounds);
+        var de = this.getOuterDomElement();
+        this.__syncModelToOuterBoundsWidth(de);
+        this.__syncModelToOuterBoundsHeight(de);
     },
     
     /** @private */
-    __syncModelToOuterBoundsWidth: function(bounds) {
-        if (!bounds) bounds = this.getOuterDomElement().getBoundingClientRect();
-        this.fireEvent('width', this.width = bounds.width);
+    __syncModelToOuterBoundsWidth: function(de) {
+        if (!de) de = this.getOuterDomElement();
+        this.getInnerDomStyle().width = de.offsetWidth + 'px';
+        this.fireEvent('width', this.width = de.offsetWidth);
     },
     
     /** @private */
-    __syncModelToOuterBoundsHeight: function(bounds) {
-        if (!bounds) bounds = this.getOuterDomElement().getBoundingClientRect();
-        this.fireEvent('height', this.height = bounds.height);
+    __syncModelToOuterBoundsHeight: function(de) {
+        if (!de) de = this.getOuterDomElement();
+        this.getInnerDomStyle().height = de.offsetHeight + 'px';
+        this.fireEvent('height', this.height = de.offsetHeight);
     },
     
     syncInnerToOuter: function() {
@@ -3730,17 +3757,12 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
     
     /** @private */
     __syncInnerWidthToOuterWidth: function() {
-        this.__syncInnerToOuter('width');
+        this.getInnerDomStyle().width = this.getOuterDomStyle().width;
     },
     
     /** @private */
     __syncInnerHeightToOuterHeight: function() {
-        this.__syncInnerToOuter('height');
-    },
-    
-    /** @private */
-    __syncInnerToOuter: function(propName) {
-        this.getInnerDomStyle()[propName] = myt.DomElementProxy.getComputedStyle(this.getOuterDomElement())[propName];
+        this.getInnerDomStyle().height = this.getOuterDomStyle().height;
     },
     
     /** @overrides */
@@ -6846,7 +6868,10 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
             }
             this.getInnerDomStyle().flexDirection = domValue;
             
-            if (this.inited) this.fireEvent('flexDirection', v);
+            if (this.inited) {
+                this.fireEvent('flexDirection', v);
+                this.__syncSubviews();
+            }
         }
     },
     
@@ -6865,7 +6890,10 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
             this.getInnerDomStyle().flexWrap = domValue;
             
             
-            if (this.inited) this.fireEvent('flexWrap', v);
+            if (this.inited) {
+                this.fireEvent('flexWrap', v);
+                this.__syncSubviews();
+            }
         }
     },
     
@@ -6897,7 +6925,10 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
             }
             this.getInnerDomStyle().justifyContent = domValue;
             
-            if (this.inited) this.fireEvent('justifyContent', v);
+            if (this.inited) {
+                this.fireEvent('justifyContent', v);
+                this.__syncSubviews();
+            }
         }
     },
     
@@ -6917,7 +6948,10 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
             }
             this.getInnerDomStyle().alignItems = domValue;
             
-            if (this.inited) this.fireEvent('alignItems', v);
+            if (this.inited) {
+                this.fireEvent('alignItems', v);
+                this.__syncSubviews();
+            }
         }
     },
     
@@ -6945,7 +6979,10 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
             }
             this.getInnerDomStyle().alignContent = domValue;
             
-            if (this.inited) this.fireEvent('alignContent', v);
+            if (this.inited) {
+                this.fireEvent('alignContent', v);
+                this.__syncSubviews();
+            }
         }
     },
     
@@ -7270,12 +7307,12 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
         @returns void */
     sizeViewToDom: function() {
         var self = this,
-            bounds,
+            de,
             scaling;
         
         if (!self.__hasSetWidth) {
-            bounds = self.getOuterDomElement().getBoundingClientRect();
-            var w = bounds.width;
+            de = self.getOuterDomElement();
+            var w = de.offsetWidth;
             
             // Bounding rect doesn't factor in scaling so we need to calculate
             // this ourselves.
@@ -7291,8 +7328,8 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
         }
         
         if (!self.__hasSetHeight) {
-            if (!bounds) bounds = self.getOuterDomElement().getBoundingClientRect();
-            var h = bounds.height;
+            if (!de) de = self.getOuterDomElement();
+            var h = de.offsetHeight;
             
             // Bounding rect doesn't factor in scaling so we need to calculate
             // this ourselves.
@@ -7546,7 +7583,7 @@ myt.Text = new JS.Class('Text', myt.View, {
         var s = this.deStyle,
             oldValue = s.whiteSpace;
         s.whiteSpace = 'nowrap';
-        var measuredWidth = this.getOuterDomElement().getBoundingClientRect().width;
+        var measuredWidth = this.getOuterDomElement().offsetWidth;
         s.whiteSpace = oldValue;
         return measuredWidth;
     }
@@ -7934,7 +7971,7 @@ myt.SizeWidthToDom = new JS.Module('SizeWidthToDom', {
             // this ourselves.
             var scaling = myt.TransformSupport.getEffectiveScale(this);
             
-            var w = this.getOuterDomElement().getBoundingClientRect().width / scaling.scaleX;
+            var w = this.getOuterDomElement().offsetWidth / scaling.scaleX;
             
             // Circumvent setter
             if (this.width !== w) {
@@ -7997,7 +8034,7 @@ myt.SizeHeightToDom = new JS.Module('SizeHeightToDom', {
             // this ourselves.
             var scaling = myt.TransformSupport.getEffectiveScale(this);
             
-            var h = this.getOuterDomElement().getBoundingClientRect().height / scaling.scaleY;
+            var h = this.getOuterDomElement().offsetHeight / scaling.scaleY;
             
             // Circumvent setter
             if (this.height !== h) {

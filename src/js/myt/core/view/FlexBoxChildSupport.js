@@ -12,6 +12,27 @@
 */
 myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
     // Accessors ///////////////////////////////////////////////////////////////
+    /** @overrides */
+    setParent: function(v) {
+        var self = this,
+            oldParentIsFlexBox = self.isChildOfFlexBox();
+        
+        self.callSuper(v);
+        
+        // When reparenting from a flexbox parent to a non-flexbox parent we
+        // may need to resync the dom to the model.
+        if (self.inited && oldParentIsFlexBox && !self.isChildOfFlexBox()) self._syncDomToModel();
+    },
+    
+    /** @private */
+    _syncDomToModel: function() {
+        var self = this,
+            s = self.getOuterDomStyle();
+        s.width = self.width + 'px';
+        s.height = self.height + 'px';
+        self.syncInnerToOuter();
+    },
+    
     /** @overrides
         Keep outer dom element's width in sync with the inner dom element. */
     setWidth: function(v, supressEvent) {
@@ -83,22 +104,28 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    isChildOfFlexBox: function() {
+        return this.parent && this.parent.isA(myt.FlexBoxSupport);
+    },
+    
     syncModelToOuterBounds: function() {
-        var bounds = this.getOuterDomElement().getBoundingClientRect();
-        this.__syncModelToOuterBoundsWidth(bounds);
-        this.__syncModelToOuterBoundsHeight(bounds);
+        var de = this.getOuterDomElement();
+        this.__syncModelToOuterBoundsWidth(de);
+        this.__syncModelToOuterBoundsHeight(de);
     },
     
     /** @private */
-    __syncModelToOuterBoundsWidth: function(bounds) {
-        if (!bounds) bounds = this.getOuterDomElement().getBoundingClientRect();
-        this.fireEvent('width', this.width = bounds.width);
+    __syncModelToOuterBoundsWidth: function(de) {
+        if (!de) de = this.getOuterDomElement();
+        this.getInnerDomStyle().width = de.offsetWidth + 'px';
+        this.fireEvent('width', this.width = de.offsetWidth);
     },
     
     /** @private */
-    __syncModelToOuterBoundsHeight: function(bounds) {
-        if (!bounds) bounds = this.getOuterDomElement().getBoundingClientRect();
-        this.fireEvent('height', this.height = bounds.height);
+    __syncModelToOuterBoundsHeight: function(de) {
+        if (!de) de = this.getOuterDomElement();
+        this.getInnerDomStyle().height = de.offsetHeight + 'px';
+        this.fireEvent('height', this.height = de.offsetHeight);
     },
     
     syncInnerToOuter: function() {
@@ -108,17 +135,12 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
     
     /** @private */
     __syncInnerWidthToOuterWidth: function() {
-        this.__syncInnerToOuter('width');
+        this.getInnerDomStyle().width = this.getOuterDomStyle().width;
     },
     
     /** @private */
     __syncInnerHeightToOuterHeight: function() {
-        this.__syncInnerToOuter('height');
-    },
-    
-    /** @private */
-    __syncInnerToOuter: function(propName) {
-        this.getInnerDomStyle()[propName] = myt.DomElementProxy.getComputedStyle(this.getOuterDomElement())[propName];
+        this.getInnerDomStyle().height = this.getOuterDomStyle().height;
     },
     
     /** @overrides */

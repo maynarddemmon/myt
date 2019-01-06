@@ -52,7 +52,10 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
             }
             this.getInnerDomStyle().flexDirection = domValue;
             
-            if (this.inited) this.fireEvent('flexDirection', v);
+            if (this.inited) {
+                this.fireEvent('flexDirection', v);
+                this.__syncSubviews();
+            }
         }
     },
     
@@ -71,7 +74,10 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
             this.getInnerDomStyle().flexWrap = domValue;
             
             
-            if (this.inited) this.fireEvent('flexWrap', v);
+            if (this.inited) {
+                this.fireEvent('flexWrap', v);
+                this.__syncSubviews();
+            }
         }
     },
     
@@ -103,7 +109,10 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
             }
             this.getInnerDomStyle().justifyContent = domValue;
             
-            if (this.inited) this.fireEvent('justifyContent', v);
+            if (this.inited) {
+                this.fireEvent('justifyContent', v);
+                this.__syncSubviews();
+            }
         }
     },
     
@@ -123,7 +132,10 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
             }
             this.getInnerDomStyle().alignItems = domValue;
             
-            if (this.inited) this.fireEvent('alignItems', v);
+            if (this.inited) {
+                this.fireEvent('alignItems', v);
+                this.__syncSubviews();
+            }
         }
     },
     
@@ -151,7 +163,10 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
             }
             this.getInnerDomStyle().alignContent = domValue;
             
-            if (this.inited) this.fireEvent('alignContent', v);
+            if (this.inited) {
+                this.fireEvent('alignContent', v);
+                this.__syncSubviews();
+            }
         }
     },
     

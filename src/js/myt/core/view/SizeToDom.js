@@ -61,12 +61,12 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
         @returns void */
     sizeViewToDom: function() {
         var self = this,
-            bounds,
+            de,
             scaling;
         
         if (!self.__hasSetWidth) {
-            bounds = self.getOuterDomElement().getBoundingClientRect();
-            var w = bounds.width;
+            de = self.getOuterDomElement();
+            var w = de.offsetWidth;
             
             // Bounding rect doesn't factor in scaling so we need to calculate
             // this ourselves.
@@ -82,8 +82,8 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
         }
         
         if (!self.__hasSetHeight) {
-            if (!bounds) bounds = self.getOuterDomElement().getBoundingClientRect();
-            var h = bounds.height;
+            if (!de) de = self.getOuterDomElement();
+            var h = de.offsetHeight;
             
             // Bounding rect doesn't factor in scaling so we need to calculate
             // this ourselves.

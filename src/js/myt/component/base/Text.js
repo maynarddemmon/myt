@@ -29,7 +29,7 @@ myt.Text = new JS.Class('Text', myt.View, {
         var s = this.deStyle,
             oldValue = s.whiteSpace;
         s.whiteSpace = 'nowrap';
-        var measuredWidth = this.getOuterDomElement().getBoundingClientRect().width;
+        var measuredWidth = this.getOuterDomElement().offsetWidth;
         s.whiteSpace = oldValue;
         return measuredWidth;
     }
