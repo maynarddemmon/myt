@@ -88,7 +88,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
     setTransformOrigin: function(v) {
         if (this.transformOrigin !== v) {
             this.transformOrigin = v;
-            myt.TransformSupport.setTransformOrigin(this.deStyle, v);
+            myt.TransformSupport.setTransformOrigin(this.getOuterDomStyle(), v);
             if (this.inited) {
                 this.__updateBounds(this.width, this.height);
                 this.fireEvent('transformOrigin', v);
@@ -99,7 +99,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
     setRotation: function(v) {
         if (this.rotation !== v) {
             this.rotation = v;
-            myt.TransformSupport.addTransform(this.deStyle, 'rotate', (v || 0) + 'deg');
+            myt.TransformSupport.addTransform(this.getOuterDomStyle(), 'rotate', (v || 0) + 'deg');
             if (this.inited) {
                 this.__updateBounds(this.width, this.height);
                 this.fireEvent('rotation', v);
@@ -144,16 +144,16 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
     /** @private */
     __applyScale: function(axis, v) {
         if (v == null) {
-            myt.TransformSupport.removeTransform(this.deStyle, axis);
+            myt.TransformSupport.removeTransform(this.getOuterDomStyle(), axis);
         } else {
-            myt.TransformSupport.addTransform(this.deStyle, axis, v || 1); // Also converts 0 to 1.
+            myt.TransformSupport.addTransform(this.getOuterDomStyle(), axis, v || 1); // Also converts 0 to 1.
         }
     },
     
     setSkewX: function(v) {
         if (this.skewX !== v) {
             this.skewX = v;
-            myt.TransformSupport.addTransform(this.deStyle, 'skewX', v || 0);
+            myt.TransformSupport.addTransform(this.getOuterDomStyle(), 'skewX', v || 0);
             if (this.inited) {
                 this.__updateBounds(this.width, this.height);
                 this.fireEvent('skewX', v);
@@ -164,7 +164,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
     setSkewY: function(v) {
         if (this.skewY !== v) {
             this.skewY = v;
-            myt.TransformSupport.addTransform(this.deStyle, 'skewY', v || 0);
+            myt.TransformSupport.addTransform(this.getOuterDomStyle(), 'skewY', v || 0);
             if (this.inited) {
                 this.__updateBounds(this.width, this.height);
                 this.fireEvent('skewY', v);
