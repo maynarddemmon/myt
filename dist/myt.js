@@ -7071,7 +7071,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
             @param v:string the transformOrigin to set.
             @returns void */
         setTransformOrigin: function(s, v) {
-            s[this._styleOriginKey] = v || '50% 50% 0';
+            s.transformOrigin = v || '50% 50% 0';
         },
         
         /** Adds an entry to the 'transform' style property of the provided
@@ -7083,7 +7083,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
             @returns void */
         addTransform: function(s, type, v) {
             var cur = this.removeTransform(s, type);
-            s[this._styleKey] = cur + (cur.length === 0 ? '' : ' ') + type + '(' + v + ')';
+            s.transform = cur + (cur.length === 0 ? '' : ' ') + type + '(' + v + ')';
         },
         
         /** Removes an entry from the 'transform' style property of the provided
@@ -7094,11 +7094,12 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
             @returns string: the new transform value after the removal has been
                 applied. */
         removeTransform: function(s, type) {
-            var key = this._styleKey, value = s[key];
+            var value = s.transform;
             
             if (!value || value.length === 0) return '';
             
-            var parts = value.split(' '), i = parts.length;
+            var parts = value.split(' '),
+                i = parts.length;
             while (i) {
                 if (parts[--i].indexOf(type) === 0) {
                     parts.splice(i, 1);
@@ -7106,7 +7107,7 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
                 }
             }
             
-            return s[key] = parts.join(' ');
+            return s.transform = parts.join(' ');
         },
         
         /** Gets the total scaling being applied to an element. Walks up the
@@ -7217,7 +7218,10 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
     /** @overrides myt.View
         @private */
     __updateBounds: function(w, h) {
-        var r = this.rotation, sx = this.scaleX, sy = this.scaleY, notScaled = false;
+        var r = this.rotation,
+            sx = this.scaleX,
+            sy = this.scaleY,
+            notScaled = false;
         if ((sx === undefined || sx === 1) && (sy === undefined || sy === 1)) notScaled = true;
         
         if (notScaled && (r === undefined || r === 0 || r === 180)) {
@@ -7234,14 +7238,6 @@ myt.TransformSupport = new JS.Module('TransformSupport', {
         this.callSuper(w, h);
     }
 });
-
-/** Setup style keys for myt.TransformSupport one time only based on the
-    browser being used. */
-(function() {
-    var BD = BrowserDetect;
-    this._styleKey = BD.browser === 'Firefox' ? 'transform' : BD.prefix.lowercase + 'Transform';
-    this._styleOriginKey = this._styleKey + 'Origin';
-}).call(myt.TransformSupport);
 
 
 /** A mixin that sizes the view to the width and height of the dom element.
