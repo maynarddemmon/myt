@@ -4729,8 +4729,8 @@ myt.Node = new JS.Class('Node', {
     
     /** Gets an array of the currently running animators that were created
         by calls to the animate method.
-        @param filterFunc:function/string a function that filters which 
-            animations get stopped. The filter should return true for 
+        @param filterFunc:function/string (optional) a function that filters
+            which animations get stopped. The filter should return true for 
             functions to be included. If the provided values is a string it will
             be used as a matching attribute name.
         @returns an array of active animators. */
@@ -4743,19 +4743,24 @@ myt.Node = new JS.Class('Node', {
     },
     
     /** Stops all active animations.
-        @param filterFunc:function/string a function that filters which 
-            animations get stopped. The filter should return true for 
+        @param filterFunc:function/string (optional) a function that filters 
+            which animations get stopped. The filter should return true for 
             functions to be stopped. If the provided values is a string it will
             be used as a matching attribute name.
+        @param executeCallbacks:boolean (optional) if true animator 
+            callbacks will be executed if they exist.
         @returns void */
-    stopActiveAnimators: function(filterFunc) {
-        var activeAnims = this.getActiveAnimators(filterFunc), i = activeAnims.length, anim;
+    stopActiveAnimators: function(filterFunc, executeCallbacks=false) {
+        var activeAnims = this.getActiveAnimators(filterFunc),
+            i = activeAnims.length,
+            anim,
+            animPool;
         if (i > 0) {
-            var animPool = this.__getAnimPool();
+            animPool = this.__getAnimPool();
             while (i) {
                 anim = activeAnims[--i];
-                anim.reset(false);
-                animPool.putInstance(anim);
+                anim.reset(executeCallbacks);
+                if (!executeCallbacks) animPool.putInstance(anim);
             }
         }
     },
