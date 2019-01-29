@@ -52,6 +52,16 @@ myt.Form = new JS.Module('Form', {
     // Accessors ///////////////////////////////////////////////////////////////
     setErrorMessages: function(v) {this.errorMessages = v;},
     
+    getFullId: function() {
+        var ids = [this.id],
+            form = this.form;
+        while (form && form.id) {
+            ids.unshift(form.id);
+            form = form.form;
+        }
+        return ids.join('.');
+    },
+    
     setId: function(v) {
         if (this.id !== v) {
             var existingId = this.id;
@@ -321,6 +331,28 @@ myt.Form = new JS.Module('Form', {
         @returns myt.Form or undefined if not found. */
     getSubForm: function(id) {
         return this.__sf[id];
+    },
+    
+    getSubForms: function() {
+        return this.__sf;
+    },
+    
+    getInvalidSubformIds: function(doValidation) {
+        if (doValidation) this.doValidation();
+        
+        var FE = myt.FormElement,
+            retval = [];
+        (function inspect(subform) {
+            if (subform.isA(FE)) {
+                if (!subform.isValid) retval.push(subform.getFullId());
+            } else {
+                var subforms = subform.getSubForms(),
+                    key;
+                for (key in subforms) inspect(subforms[key]);
+            }
+        })(this);
+        
+        return retval;
     },
     
     /** Gets all error messages from the entire form tree.

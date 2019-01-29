@@ -591,7 +591,7 @@ JS.Singleton = new JS.Class('Singleton', {
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20181214.1308,
+    version:20190129.1239,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -602,9 +602,7 @@ myt = {
     
     /** Generates a globally unique id, (GUID).
         @return number */
-    generateGuid: function() {
-        return ++this.__GUID_COUNTER;
-    },
+    generateGuid: () => ++myt.__GUID_COUNTER,
     
     /*  Event listener code Adapted from: http://javascript.about.com/library/bllisten.htm
         A more robust solution can be found here: http://msdn.microsoft.com/en-us/magazine/ff728624.aspx */
@@ -616,34 +614,34 @@ myt = {
         @param capture:boolean (optional) indicates if the listener is 
             registered during the capture phase or bubble phase.
         @returns void */
-    addEventListener: function() {
+    addEventListener: (() => {
         if (window.addEventListener) {
-            return function(elem, type, callback, capture) {
+            return (elem, type, callback, capture) => {
                 elem.addEventListener(type, callback, capture || false);
             };
         } else {
-            return function(elem, type, callback) {
+            return (elem, type, callback) => {
                 var prop = type + callback;
                 elem['e' + prop] = callback;
-                elem[prop] = function(){elem['e' + prop](window.event);}
+                elem[prop] = () => {elem['e' + prop](window.event);}
                 elem.attachEvent('on' + type, elem[prop]);
             };
         }
-    }(),
-    removeEventListener: function() {
+    })(),
+    removeEventListener: (() => {
         if (window.addEventListener) {
-            return function(elem, type, callback, capture) {
+            return (elem, type, callback, capture) => {
                 elem.removeEventListener(type, callback, capture || false);
             };
         } else {
-            return function(elem, type, callback) {
+            return (elem, type, callback) => {
                 var prop = type + callback;
                 elem.detachEvent('on' + type, elem[prop]);
                 elem[prop] = null;
                 elem["e" + prop] = null;
             };
         }
-    }(),
+    })(),
     
     /** Takes a '.' separated string such as "foo.bar.baz" and resolves it
         into the value found at that location relative to a starting scope.
@@ -653,7 +651,7 @@ myt = {
         @param scope:Object (optional) The scope to resolve from. If not
             provided global scope is used.
         @returns The referenced object or undefined if resolution failed. */
-    resolveName: function(objName, scope) {
+    resolveName: (objName, scope) => {
         if (!objName || objName.length === 0) return undefined;
         
         var scope = scope || global,
@@ -674,8 +672,8 @@ myt = {
         @param value:string:* The value to resolve and/or verify.
         @returns a JS.Class object or null if the string could not be resolved
             or the value was not a JS.Class object. */
-    resolveClassname: function(value) {
-        if (typeof value === 'string') value = this.resolveName(value);
+    resolveClassname: (value) => {
+        if (typeof value === 'string') value = myt.resolveName(value);
         
         // Make sure what we found is really a JS.Class otherwise return null.
         return (value && typeof value.isA === 'function' && value.isA(JS.Class)) ? value : null;
@@ -694,7 +692,7 @@ myt = {
         @param (remaining args):(coerced to string) The parameters for the
             template.
         @returns A populated string. */
-    fillTextTemplate: function() {
+    fillTextTemplate: () => {
         var params = Array.prototype.slice.call(arguments),
             template = params.shift();
         
@@ -720,13 +718,13 @@ myt = {
         @param data:object (optional) Data that will be serialized as JSON
             and provided to the link handler.
         @returns void */
-    generateLink: function(text, callbackMethodName, attrs, data) {
+    generateLink: (text, callbackMethodName, attrs, data) => {
         var optAttrs = '';
         if (attrs) {
             for (var name in attrs) optAttrs += ' ' + name + '="' + attrs[name] + '"';
         }
         
-        return this.fillTextTemplate(
+        return myt.fillTextTemplate(
             '<a href="#" onclick=\'myt.__handleGeneratedLink(this, "{0}", &apos;{3}&apos;); return false;\'{2}>{1}</a>', 
             callbackMethodName, text, optAttrs, JSON.stringify(data)
         );
@@ -735,7 +733,7 @@ myt = {
     /** See myt.generateLink for documentation.
         @private
         @returns void */
-    __handleGeneratedLink: function(elem, callbackMethodName, data) {
+    __handleGeneratedLink: (elem, callbackMethodName, data) => {
         var model;
         while (elem) {
             model = elem.model;
@@ -833,7 +831,7 @@ myt = {
             Allowed values are 'error', 'warn', 'log' and 'debug'. Defaults to
             'error'.
         @returns void */
-    dumpStack: function(err, type) {
+    dumpStack: (err, type) => {
         var msg;
         if (typeof err === 'string') {
             msg = err;
@@ -852,7 +850,7 @@ myt = {
                 - function(v) {return 0.9999999999 - v * v;} will skew the 
                   value towards a value very close to 1.
         @returns number: a random number between 0 and almost 1. */
-    getRandom: function(func) {
+    getRandom: (func) => {
         var v = Math.random();
         if (func) {
             v = func(v);
@@ -872,13 +870,13 @@ myt = {
         @param max:number the maximum value returned.
         @param func:function a skew function. See myt.getRandom for more info.
         @returns number: between min and max. */
-    getRandomArbitrary: function(min, max, func) {
+    getRandomArbitrary: (min, max, func) => {
         if (min > max) {
             var tmp = min;
             min = max;
             max = tmp;
         }
-        return this.getRandom(func) * (max - min) + min;
+        return myt.getRandom(func) * (max - min) + min;
     },
     
     /** @returns a random integer between min (inclusive) and max (inclusive)
@@ -886,13 +884,13 @@ myt = {
         @param max:number the maximum value returned.
         @param func:function a skew function. See myt.getRandom for more info.
         @returns number: an integer between min and max. */
-    getRandomInt: function(min, max, func) {
+    getRandomInt: (min, max, func) => {
         if (min > max) {
             var tmp = min;
             min = max;
             max = tmp;
         }
-        return Math.floor(this.getRandom(func) * (max - min + 1) + min);
+        return Math.floor(myt.getRandom(func) * (max - min + 1) + min);
     },
     
     // Equality
@@ -902,7 +900,7 @@ myt = {
         @param epsilon:float (optional) the percent of difference allowed
             between a and b. Defaults to 0.000001 if not provided.
         @return true if equal, false otherwise. */
-    areFloatsEqual: function(a, b, epsilon) {
+    areFloatsEqual: (a, b, epsilon) => {
         var A = Math.abs(a), B = Math.abs(b);
         epsilon = epsilon ? Math.abs(epsilon) : 0.000001;
         return Math.abs(a - b) <= (A > B ? B : A) * epsilon;
@@ -910,7 +908,7 @@ myt = {
     
     /** Tests if two array are equal. For a more complete deep equal
         implementation use underscore.js */
-    areArraysEqual: function(a, b) {
+    areArraysEqual: (a, b) => {
         if (a !== b) {
             if (a == null || b == null) return false;
             var i = a.length;
@@ -924,7 +922,7 @@ myt = {
     },
     
     /** Tests if two objects are shallowly equal. */
-    areObjectsEqual: function(a, b) {
+    areObjectsEqual: (a, b) => {
         if (a !== b) {
             if (a == null || b == null) return false;
             for (var key in a) if (a[key] !== b[key]) return false;
@@ -940,15 +938,13 @@ myt = {
         @param index:int (optional) the index of the tag to get. Defaults to
             0 if not provided.
         @returns a dom element or undefined if none exist. */
-    getElement: function(tagname, index) {
-        return document.getElementsByTagName(tagname || 'body')[index > 0 ? index : 0];
-    },
+    getElement: (tagname, index) => document.getElementsByTagName(tagname || 'body')[index > 0 ? index : 0],
     
     // Misc
     /** Memoize a function.
         @param f:function The function to memoize
         @returns function: The memoized function. */
-    memoize: function(f) {
+    memoize: (f) => {
         return function() {
             var hash = JSON.stringify(arguments),
                 cache = f.__cache || (f.__cache = {});
@@ -15454,6 +15450,16 @@ myt.Form = new JS.Module('Form', {
     // Accessors ///////////////////////////////////////////////////////////////
     setErrorMessages: function(v) {this.errorMessages = v;},
     
+    getFullId: function() {
+        var ids = [this.id],
+            form = this.form;
+        while (form && form.id) {
+            ids.unshift(form.id);
+            form = form.form;
+        }
+        return ids.join('.');
+    },
+    
     setId: function(v) {
         if (this.id !== v) {
             var existingId = this.id;
@@ -15723,6 +15729,28 @@ myt.Form = new JS.Module('Form', {
         @returns myt.Form or undefined if not found. */
     getSubForm: function(id) {
         return this.__sf[id];
+    },
+    
+    getSubForms: function() {
+        return this.__sf;
+    },
+    
+    getInvalidSubformIds: function(doValidation) {
+        if (doValidation) this.doValidation();
+        
+        var FE = myt.FormElement,
+            retval = [];
+        (function inspect(subform) {
+            if (subform.isA(FE)) {
+                if (!subform.isValid) retval.push(subform.getFullId());
+            } else {
+                var subforms = subform.getSubForms(),
+                    key;
+                for (key in subforms) inspect(subforms[key]);
+            }
+        })(this);
+        
+        return retval;
     },
     
     /** Gets all error messages from the entire form tree.
