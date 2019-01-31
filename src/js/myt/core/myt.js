@@ -21,7 +21,7 @@
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20190129.1239,
+    version:20190130.1148,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -122,7 +122,7 @@ myt = {
         @param (remaining args):(coerced to string) The parameters for the
             template.
         @returns A populated string. */
-    fillTextTemplate: () => {
+    fillTextTemplate: function() {
         var params = Array.prototype.slice.call(arguments),
             template = params.shift();
         
