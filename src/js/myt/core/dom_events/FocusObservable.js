@@ -136,34 +136,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
             will occur when focus is set.
         @returns void */
     focus: function(noScroll) {
-        if (this.isFocusable()) {
-            var de = this.getInnerDomElement();
-            if (noScroll) {
-                // Maintain scrollTop/scrollLeft
-                var ancestors = myt.DomElementProxy.getAncestorArray(de),
-                    len = ancestors.length, 
-                    i = len, ancestor,
-                    scrollPositions = [], 
-                    scrollPosition;
-                while (i) {
-                    ancestor = ancestors[--i];
-                    scrollPositions.unshift({scrollTop:ancestor.scrollTop, scrollLeft:ancestor.scrollLeft});
-                }
-                
-                de.focus();
-                
-                // Restore scrollTop/scrollLeft
-                i = len;
-                while (i) {
-                    ancestor = ancestors[--i];
-                    scrollPosition = scrollPositions[i];
-                    ancestor.scrollTop = scrollPosition.scrollTop;
-                    ancestor.scrollLeft = scrollPosition.scrollLeft;
-                }
-            } else {
-                de.focus();
-            }
-        }
+        if (this.isFocusable()) this.getInnerDomElement().focus({preventScroll:noScroll});
     },
     
     /** Removes the focus from this view. Do not call this method directly.
