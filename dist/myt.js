@@ -591,7 +591,7 @@ JS.Singleton = new JS.Class('Singleton', {
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20190130.1148,
+    version:20190208.1455,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -3422,7 +3422,7 @@ new JS.Singleton('GlobalKeys', {
     initialize: function() {
         // Constants
         var self = this,
-            g = myt.global,
+            G = myt.global,
             isFirefox = BrowserDetect.browser === 'Firefox';
         self.KEYCODE_TAB = 9;
         self.KEYCODE_SHIFT = 16;
@@ -3433,11 +3433,17 @@ new JS.Singleton('GlobalKeys', {
         self.KEYCODE_RIGHT_COMMAND = isFirefox ? 224 : 93;
         
         self.setDomElement(document);
-        self.attachTo(g.focus, '__handleFocused', 'focused');
+        self.attachTo(G.focus, '__handleFocused', 'focused');
         self.__keysDown = {};
         self.__listenToDocument();
         
-        g.register('keys', self);
+        G.register('keys', self);
+        
+        // Clear keys down when the window loses focus. This is necessary when
+        // using keyboard shortcusts to switch apps since that will leave
+        // a key in the down state even though it may no longer be when the
+        // focus is returned to the page.
+        global.onblur = () => {self.__keysDown = {};};
     },
     
     
@@ -3519,7 +3525,8 @@ new JS.Singleton('GlobalKeys', {
             
             // Check for 'tab' key and do focus traversal.
             if (keyCode === self.KEYCODE_TAB) {
-                var ift = self.ignoreFocusTrap(), gf = myt.global.focus;
+                var ift = self.ignoreFocusTrap(),
+                    gf = myt.global.focus;
                 if (self.isShiftKeyDown()) {
                     gf.prev(ift);
                 } else {

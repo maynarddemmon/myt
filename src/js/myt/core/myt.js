@@ -21,7 +21,7 @@
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20190130.1148,
+    version:20190208.1455,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
