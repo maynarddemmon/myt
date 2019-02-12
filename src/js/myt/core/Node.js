@@ -47,7 +47,7 @@ myt.Node = new JS.Class('Node', {
             @param matcher:function the function to test for matching Nodes with.
             @returns Node or null if no match is found. */
         getMatchingAncestorOrSelf: function(n, matcherFunc) {
-            if (n && matcherFunc) {
+            if (matcherFunc) {
                 while (n) {
                     if (matcherFunc(n)) return n;
                     n = n.parent;

@@ -8,7 +8,7 @@
         None
     
     Private Attributes:
-        __objPool:array The array of objects stored in the pool.
+        __op:array The array of objects stored in the pool.
 */
 myt.AbstractPool = new JS.Class('AbstractPool', {
     include: [myt.Destructible],
@@ -22,7 +22,7 @@ myt.AbstractPool = new JS.Class('AbstractPool', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Destructible */
     destroy: function() {
-        var objPool = this.__objPool;
+        var objPool = this.__getObjPool();
         if (objPool) objPool.length = 0;
         
         this.callSuper();
@@ -30,15 +30,20 @@ myt.AbstractPool = new JS.Class('AbstractPool', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** Get the object pool.
+        @param lazy:boolean If true a pool will be lazily instantiated.
+        @private */
+    __getObjPool: function(lazy) {
+        return lazy ? this.__op || (this.__op = []) : this.__op;
+    },
+    
     /** Get an instance from the pool.
         @param arguments:arguments (optional) arguments to be passed to the
             createInstance method. Note: these have no effect if an object
             already exists in the pool.
         @returns object */
     getInstance: function() {
-        var objPool = this.__objPool;
-        if (!objPool) objPool = this.__objPool = [];
-        
+        var objPool = this.__getObjPool(true);
         return objPool.length ? objPool.pop() : this.createInstance.apply(this, arguments);
     },
     
@@ -53,10 +58,7 @@ myt.AbstractPool = new JS.Class('AbstractPool', {
         @param obj:object the object to put in the pool.
         @returns void */
     putInstance: function(obj) {
-        var objPool = this.__objPool;
-        if (!objPool) objPool = this.__objPool = [];
-        
-        objPool.push(this.cleanInstance(obj));
+        this.__getObjPool(true).push(this.cleanInstance(obj));
     },
     
     /** Cleans the object in preparation for putting it back in the pool. The
@@ -73,7 +75,7 @@ myt.AbstractPool = new JS.Class('AbstractPool', {
         have a destroy function.
         @returns void */
     destroyPooledInstances: function() {
-        var objPool = this.__objPool;
+        var objPool = this.__getObjPool();
         if (objPool) {
             var i = objPool.length, obj;
             while (i) {

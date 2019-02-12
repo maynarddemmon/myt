@@ -4025,7 +4025,7 @@ myt.Reusable = new JS.Module('Reusable', {
         None
     
     Private Attributes:
-        __objPool:array The array of objects stored in the pool.
+        __op:array The array of objects stored in the pool.
 */
 myt.AbstractPool = new JS.Class('AbstractPool', {
     include: [myt.Destructible],
@@ -4039,7 +4039,7 @@ myt.AbstractPool = new JS.Class('AbstractPool', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Destructible */
     destroy: function() {
-        var objPool = this.__objPool;
+        var objPool = this.__getObjPool();
         if (objPool) objPool.length = 0;
         
         this.callSuper();
@@ -4047,15 +4047,20 @@ myt.AbstractPool = new JS.Class('AbstractPool', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** Get the object pool.
+        @param lazy:boolean If true a pool will be lazily instantiated.
+        @private */
+    __getObjPool: function(lazy) {
+        return lazy ? this.__op || (this.__op = []) : this.__op;
+    },
+    
     /** Get an instance from the pool.
         @param arguments:arguments (optional) arguments to be passed to the
             createInstance method. Note: these have no effect if an object
             already exists in the pool.
         @returns object */
     getInstance: function() {
-        var objPool = this.__objPool;
-        if (!objPool) objPool = this.__objPool = [];
-        
+        var objPool = this.__getObjPool(true);
         return objPool.length ? objPool.pop() : this.createInstance.apply(this, arguments);
     },
     
@@ -4070,10 +4075,7 @@ myt.AbstractPool = new JS.Class('AbstractPool', {
         @param obj:object the object to put in the pool.
         @returns void */
     putInstance: function(obj) {
-        var objPool = this.__objPool;
-        if (!objPool) objPool = this.__objPool = [];
-        
-        objPool.push(this.cleanInstance(obj));
+        this.__getObjPool(true).push(this.cleanInstance(obj));
     },
     
     /** Cleans the object in preparation for putting it back in the pool. The
@@ -4090,7 +4092,7 @@ myt.AbstractPool = new JS.Class('AbstractPool', {
         have a destroy function.
         @returns void */
     destroyPooledInstances: function() {
-        var objPool = this.__objPool;
+        var objPool = this.__getObjPool();
         if (objPool) {
             var i = objPool.length, obj;
             while (i) {
@@ -4159,7 +4161,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Destructible */
     destroy: function() {
-        var actives = this.__actives;
+        var actives = this.__getActives();
         if (actives) actives.length = 0;
         
         this.callSuper();
@@ -4167,18 +4169,27 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** Get the active objects array.
+        @param lazy:boolean If true a list will be lazily instantiated.
+        @private */
+    __getActives: function(lazy) {
+        return lazy ? this.__actives || (this.__actives = []) : this.__actives;
+    },
+    
     /** @overrides myt.AbstractPool */
     getInstance: function() {
         var instance = this.callSuper();
-        (this.__actives || (this.__actives = [])).push(instance);
+        this.__getActives(true).push(instance);
         return instance;
     },
     
     /** @overrides myt.AbstractPool */
     putInstance: function(obj) {
-        var actives = this.__actives;
+        var actives = this.__getActives(),
+            i,
+            warningType;
         if (actives) {
-            var i = actives.length;
+            i = actives.length;
             while (i) {
                 if (actives[--i] === obj) {
                     actives.splice(i, 1);
@@ -4186,10 +4197,11 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
                     return;
                 }
             }
-            console.warn("Attempt to putInstance for a non-active instance.", obj, this);
+            warningType = "non-active";
         } else {
-            console.warn("Attempt to putInstance when no actives exist.", obj, this);
+            warningType = "non-existant";
         }
+        console.warn("Attempt to put a " + warningType + " instance.", obj, this);
     },
     
     /** Gets an array of the active instances.
@@ -4197,10 +4209,13 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
             results.
         @returns array */
     getActives: function(filterFunc) {
-        var actives = this.__actives;
+        var actives = this.__getActives();
         if (actives) {
             if (filterFunc) {
-                var retval = [], len = actives.length, i = 0, active;
+                var retval = [],
+                    len = actives.length,
+                    i = 0,
+                    active;
                 for (; len > i;) {
                     active = actives[i++];
                     if (filterFunc.call(this, active)) retval.push(active);
@@ -4215,7 +4230,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
     /** Puts all the active instances back in the pool.
         @returns void */
     putActives: function() {
-        var actives = this.__actives;
+        var actives = this.__getActives();
         if (actives) {
             var i = actives.length;
             while (i) this.putInstance(actives[--i]);
@@ -4273,7 +4288,7 @@ myt.Node = new JS.Class('Node', {
             @param matcher:function the function to test for matching Nodes with.
             @returns Node or null if no match is found. */
         getMatchingAncestorOrSelf: function(n, matcherFunc) {
-            if (n && matcherFunc) {
+            if (matcherFunc) {
                 while (n) {
                     if (matcherFunc(n)) return n;
                     n = n.parent;
