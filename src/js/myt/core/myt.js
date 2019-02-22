@@ -46,8 +46,11 @@ myt = {
         @returns void */
     addEventListener: (() => {
         if (window.addEventListener) {
-            return (elem, type, callback, capture) => {
-                elem.addEventListener(type, callback, capture || false);
+            return (elem, type, callback, capture, passive) => {
+                elem.addEventListener(type, callback, {
+                    capture:capture || false,
+                    passive:passive || false
+                });
             };
         } else {
             return (elem, type, callback) => {

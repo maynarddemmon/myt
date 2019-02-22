@@ -22,7 +22,7 @@ myt.DomObservable = new JS.Module('DomObservable', {
             is during capture or bubble phase. Defaults to false, bubble phase.
         @returns boolean True if the observer was successfully registered, 
             false otherwise.*/
-    attachDomObserver: function(domObserver, methodName, type, capture) {
+    attachDomObserver: function(domObserver, methodName, type, capture, passive) {
         if (domObserver && methodName && type) {
             capture = !!capture;
             
@@ -40,7 +40,7 @@ myt.DomObservable = new JS.Module('DomObservable', {
                     domObservers.push(domObserver, methodName, methodRef, capture);
                 }
                 
-                myt.addEventListener(this.getInnerDomElement(), type, methodRef, capture);
+                myt.addEventListener(this.getInnerDomElement(), type, methodRef, capture, passive);
                 
                 return true;
             }

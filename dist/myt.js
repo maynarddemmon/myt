@@ -616,8 +616,11 @@ myt = {
         @returns void */
     addEventListener: (() => {
         if (window.addEventListener) {
-            return (elem, type, callback, capture) => {
-                elem.addEventListener(type, callback, capture || false);
+            return (elem, type, callback, capture, passive) => {
+                elem.addEventListener(type, callback, {
+                    capture:capture || false,
+                    passive:passive || false
+                });
             };
         } else {
             return (elem, type, callback) => {
@@ -2803,7 +2806,7 @@ myt.DomObservable = new JS.Module('DomObservable', {
             is during capture or bubble phase. Defaults to false, bubble phase.
         @returns boolean True if the observer was successfully registered, 
             false otherwise.*/
-    attachDomObserver: function(domObserver, methodName, type, capture) {
+    attachDomObserver: function(domObserver, methodName, type, capture, passive) {
         if (domObserver && methodName && type) {
             capture = !!capture;
             
@@ -2821,7 +2824,7 @@ myt.DomObservable = new JS.Module('DomObservable', {
                     domObservers.push(domObserver, methodName, methodRef, capture);
                 }
                 
-                myt.addEventListener(this.getInnerDomElement(), type, methodRef, capture);
+                myt.addEventListener(this.getInnerDomElement(), type, methodRef, capture, passive);
                 
                 return true;
             }
@@ -2963,7 +2966,7 @@ myt.DomObserver = new JS.Module('DomObserver', {
     /** Attaches this DomObserver to the provided DomObservable for the 
         provided type.
         @returns void */
-    attachToDom: function(observable, methodName, type, capture) {
+    attachToDom: function(observable, methodName, type, capture, passive) {
         if (observable && methodName && type) {
             capture = !!capture;
             
@@ -2972,7 +2975,7 @@ myt.DomObserver = new JS.Module('DomObserver', {
             var observables = observablesByType[type] || (observablesByType[type] = []);
             
             // Attach this DomObserver to the DomObservable
-            if (observable.attachDomObserver(this, methodName, type, capture)) {
+            if (observable.attachDomObserver(this, methodName, type, capture, passive)) {
                 observables.push(capture, methodName, observable);
             }
         }
@@ -3591,7 +3594,8 @@ myt.TouchObservable = new JS.Module('TouchObservable', {
         EVENT_TYPES:{
             touchstart:true,
             touchend:true,
-            touchmove:true
+            touchmove:true,
+            touchcancel:true
         },
         
         /** The common touch event that gets reused. */

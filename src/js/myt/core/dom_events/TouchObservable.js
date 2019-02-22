@@ -9,7 +9,8 @@ myt.TouchObservable = new JS.Module('TouchObservable', {
         EVENT_TYPES:{
             touchstart:true,
             touchend:true,
-            touchmove:true
+            touchmove:true,
+            touchcancel:true
         },
         
         /** The common touch event that gets reused. */
