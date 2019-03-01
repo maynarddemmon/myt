@@ -21,6 +21,11 @@ myt.Destructible = new JS.Module('Destructible', {
             keys, i,
             meta = self.__meta__;
         
+        if (self.destroyed) {
+            console.warn('No destroying the destroyed.');
+            return;
+        }
+        
         // OPTIMIZATION: Improve garbage collection for JS.Class
         if (meta) {
             keys = Object.keys(meta);
