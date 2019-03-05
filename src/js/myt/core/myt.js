@@ -21,7 +21,7 @@
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20190208.1455,
+    version:20190305.1455,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -110,6 +110,14 @@ myt = {
         
         // Make sure what we found is really a JS.Class otherwise return null.
         return (value && typeof value.isA === 'function' && value.isA(JS.Class)) ? value : null;
+    },
+    
+    /** Gets the file extension from a file name.
+        @param fileName:string The filename to extract the extension from.
+        @returns a string of the file extension or null if a falsy fileName
+            argument was provided. */
+    getExtension: function(fileName) {
+        return fileName ? fileName.split('.')[1] : null;
     },
     
     // Text Templating

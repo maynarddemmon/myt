@@ -31,15 +31,12 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
     
     // Methods /////////////////////////////////////////////////////////////////
     filterFiles: function(file) {
-        if (!myt.ImageUploader.isImageFile(file)) return false;
+        if (!myt.ImageUploader.isImageFile(file)) return null;
         
         // Remove existing file
         while (this.files.length > 0) this.removeFile(this.files[0]);
         
-        retval = this.callSuper(file);
-        if (!retval) return false;
-        
-        return true;
+        return this.callSuper(file);
     },
     
     addFile: function(file) {

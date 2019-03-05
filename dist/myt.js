@@ -591,7 +591,7 @@ JS.Singleton = new JS.Class('Singleton', {
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20190208.1455,
+    version:20190305.1455,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -680,6 +680,14 @@ myt = {
         
         // Make sure what we found is really a JS.Class otherwise return null.
         return (value && typeof value.isA === 'function' && value.isA(JS.Class)) ? value : null;
+    },
+    
+    /** Gets the file extension from a file name.
+        @param fileName:string The filename to extract the extension from.
+        @returns a string of the file extension or null if a falsy fileName
+            argument was provided. */
+    getExtension: function(fileName) {
+        return fileName ? fileName.split('.')[1] : null;
     },
     
     // Text Templating
@@ -15282,16 +15290,21 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
         if (files !== undefined) {
             var i = files.length, file;
             while (i) {
-                file = files[--i];
-                if (this.filterFiles(file)) this.handleDroppedFile(file, event);
+                file = this.filterFiles(files[--i]);
+                if (file) this.handleDroppedFile(file, event);
             }
         } else {
             myt.dumpStack("Browser doesn't support the File API");
         }
     },
     
+    /** Provides an opportunity to prevent a file from being handled. The
+        default implementation returns the provided file argument.
+        @param file:File the file to be checked for handleability.
+        @returns file:File the file to be handled (possibly modified by this
+            function) or something falsy if the file should not be handled. */
     filterFiles: function(file) {
-        return true;
+        return file;
     },
     
     handleDroppedFile: function(file, event) {}
@@ -16216,12 +16229,12 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         },
         
         createFile: function(urlStr) {
-            var uri = new myt.URI(urlStr), name = uri.file, ext = name.split('.')[1];
+            var fileName = (new myt.URI(urlStr)).file;
             return {
-                name: name,
+                name: fileName,
                 serverPath: urlStr,
                 size: -1,
-                type: this.MIME_TYPES_BY_EXTENSION[ext]
+                type: this.MIME_TYPES_BY_EXTENSION[myt.getExtension(fileName)]
             };
         }
     },
@@ -16323,10 +16336,8 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     
     /** @overrides myt.DragDropSupport */
     filterFiles: function(file) {
-        var maxFiles = this.maxFiles;
-        if (maxFiles >= 0 && this.files.length >= maxFiles) return false;
-        
-        return true;
+        // Prevent max files from being exceeded.
+        return this.maxFiles >= 0 && this.files.length >= this.maxFiles ? null : file;
     },
     
     uploadFiles: function(url, fileParam) {
@@ -16455,15 +16466,12 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
     
     // Methods /////////////////////////////////////////////////////////////////
     filterFiles: function(file) {
-        if (!myt.ImageUploader.isImageFile(file)) return false;
+        if (!myt.ImageUploader.isImageFile(file)) return null;
         
         // Remove existing file
         while (this.files.length > 0) this.removeFile(this.files[0]);
         
-        retval = this.callSuper(file);
-        if (!retval) return false;
-        
-        return true;
+        return this.callSuper(file);
     },
     
     addFile: function(file) {

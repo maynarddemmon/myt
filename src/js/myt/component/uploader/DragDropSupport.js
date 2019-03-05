@@ -64,16 +64,21 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
         if (files !== undefined) {
             var i = files.length, file;
             while (i) {
-                file = files[--i];
-                if (this.filterFiles(file)) this.handleDroppedFile(file, event);
+                file = this.filterFiles(files[--i]);
+                if (file) this.handleDroppedFile(file, event);
             }
         } else {
             myt.dumpStack("Browser doesn't support the File API");
         }
     },
     
+    /** Provides an opportunity to prevent a file from being handled. The
+        default implementation returns the provided file argument.
+        @param file:File the file to be checked for handleability.
+        @returns file:File the file to be handled (possibly modified by this
+            function) or something falsy if the file should not be handled. */
     filterFiles: function(file) {
-        return true;
+        return file;
     },
     
     handleDroppedFile: function(file, event) {}

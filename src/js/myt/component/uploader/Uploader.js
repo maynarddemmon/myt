@@ -30,12 +30,12 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         },
         
         createFile: function(urlStr) {
-            var uri = new myt.URI(urlStr), name = uri.file, ext = name.split('.')[1];
+            var fileName = (new myt.URI(urlStr)).file;
             return {
-                name: name,
+                name: fileName,
                 serverPath: urlStr,
                 size: -1,
-                type: this.MIME_TYPES_BY_EXTENSION[ext]
+                type: this.MIME_TYPES_BY_EXTENSION[myt.getExtension(fileName)]
             };
         }
     },
@@ -137,10 +137,8 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     
     /** @overrides myt.DragDropSupport */
     filterFiles: function(file) {
-        var maxFiles = this.maxFiles;
-        if (maxFiles >= 0 && this.files.length >= maxFiles) return false;
-        
-        return true;
+        // Prevent max files from being exceeded.
+        return this.maxFiles >= 0 && this.files.length >= this.maxFiles ? null : file;
     },
     
     uploadFiles: function(url, fileParam) {
