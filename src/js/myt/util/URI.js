@@ -96,14 +96,14 @@ myt.URI = new JS.Class('URI', {
         return parts;
     },
     
-    toString: function() {
+    toString: function(originalRawQuery) {
         var self = this,
             protocol = self.protocol,
             host = self.host,
             userInfo = self.userInfo,
             port = self.port,
             path = self.path,
-            query = self.getQuery(),
+            query = originalRawQuery ? self.query : self.getQuery(),
             anchor = self.anchor,
             s = '';
         
