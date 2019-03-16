@@ -3753,15 +3753,33 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
     
     /** @private */
     __syncModelToOuterBoundsWidth: function(de) {
+        var ids = this.getInnerDomStyle();
         if (!de) de = this.getOuterDomElement();
-        this.getInnerDomStyle().width = de.offsetWidth + 'px';
+        if (ids.width === 'auto') {
+            // We're sizing to our contents so first sync the outer dom style 
+            // so we can read the correct offset size below.
+            this.getOuterDomStyle().width = 'auto';
+        } else {
+            // We're using a fixed size so first sync the inner dom style
+            // to the outer dom style.
+            ids.width = de.offsetWidth + 'px';
+        }
         this.fireEvent('width', this.width = de.offsetWidth);
     },
     
     /** @private */
     __syncModelToOuterBoundsHeight: function(de) {
+        var ids = this.getInnerDomStyle();
         if (!de) de = this.getOuterDomElement();
-        this.getInnerDomStyle().height = de.offsetHeight + 'px';
+        if (ids.height === 'auto') {
+            // We're sizing to our contents so first sync the outer dom style 
+            // so we can read the correct offset size below.
+            this.getOuterDomStyle().height = 'auto';
+        } else {
+            // We're using a fixed size so first sync the inner dom style
+            // to the outer dom style.
+            ids.height = de.offsetHeight + 'px';
+        }
         this.fireEvent('height', this.height = de.offsetHeight);
     },
     
