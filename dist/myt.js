@@ -3762,7 +3762,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
         } else {
             // We're using a fixed size so first sync the inner dom style
             // to the outer dom style.
-            ids.width = de.offsetWidth + 'px';
+            this.__setInnerWidth(de.offsetWidth);
         }
         this.fireEvent('width', this.width = de.offsetWidth);
     },
@@ -3778,7 +3778,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
         } else {
             // We're using a fixed size so first sync the inner dom style
             // to the outer dom style.
-            ids.height = de.offsetHeight + 'px';
+            this.__setInnerHeight(de.offsetHeight);
         }
         this.fireEvent('height', this.height = de.offsetHeight);
     },
@@ -3790,12 +3790,22 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
     
     /** @private */
     __syncInnerWidthToOuterWidth: function() {
-        this.getInnerDomStyle().width = this.getOuterDomStyle().width;
+        this.__setInnerWidth(this.getOuterDomElement().offsetWidth);
     },
     
     /** @private */
     __syncInnerHeightToOuterHeight: function() {
-        this.getInnerDomStyle().height = this.getOuterDomStyle().height;
+        this.__setInnerHeight(this.getOuterDomElement().offsetHeight);
+    },
+    
+    /** @private */
+    __setInnerWidth: function(v) {
+        this.getInnerDomStyle().width = v + 'px';
+    },
+    
+    /** @private */
+    __setInnerHeight: function(v) {
+        this.getInnerDomStyle().height = v + 'px';
     },
     
     /** @overrides */
