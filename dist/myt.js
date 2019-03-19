@@ -3656,6 +3656,8 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
         
         self.callSuper(v);
         
+        self._isChildOfFlexBox = self.parent && self.parent.isA(myt.FlexBoxSupport);
+        
         // When reparenting from a flexbox parent to a non-flexbox parent we
         // may need to resync the dom to the model.
         if (self.inited && oldParentIsFlexBox && !self.isChildOfFlexBox()) self._syncDomToModel();
@@ -3742,7 +3744,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
     
     // Methods /////////////////////////////////////////////////////////////////
     isChildOfFlexBox: function() {
-        return this.parent && this.parent.isA(myt.FlexBoxSupport);
+        return this._isChildOfFlexBox;
     },
     
     syncModelToOuterBounds: function() {
