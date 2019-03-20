@@ -6820,14 +6820,15 @@ myt.View = new JS.Class('View', myt.Node, {
     
     /** @private */
     __isPointVisible: function(x, y) {
-        var effectiveScale = this.__effectiveScale;
+        var effectiveScale = this.__effectiveScale,
+            ode = this.getOuterDomElement();
         
-        if (myt.Geometry.rectContainsPoint(x, y, 0, 0, this.width * effectiveScale, this.height * effectiveScale)) {
+        if (myt.Geometry.rectContainsPoint(x, y, 0, 0, ode.offsetWidth * effectiveScale, ode.offsetHeight * effectiveScale)) {
             var p = this.parent;
             if (p) {
                 var de = p.getOuterDomElement(), 
                     pScale = p.__effectiveScale;
-                return p.__isPointVisible(x + (this.x - de.scrollLeft) * pScale, y + (this.y - de.scrollTop) * pScale);
+                return p.__isPointVisible(x + (ode.offsetLeft - de.scrollLeft) * pScale, y + (ode.offsetTop - de.scrollTop) * pScale);
             }
             return true;
         }
