@@ -16506,53 +16506,15 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
     },
     
     addFile: function(file) {
-        this.callSuper(file);
-        
-        var image = this.image = this.getImageToReadInto();
-        if (image) {
-            image.file = file;
-            this.readImageInto(file, image);
-        }
-    },
-    
-    getImageToReadInto: function() {
-        return new myt.Image(this, {
-            useNaturalSize:false, align:'center', valign:'middle'
-        });
-    },
-    
-    scaleToFit: function(boundsWidth, boundsHeight, imgWidth, imgHeight) {
-        var boundsRatio = boundsWidth / boundsHeight;
-        var imgRatio = imgWidth / imgHeight;
-        
-        if (imgRatio > boundsRatio) {
-            return [boundsWidth, imgHeight * boundsWidth / imgWidth];
-        } else {
-            return [imgWidth * boundsHeight / imgHeight, boundsHeight];
-        }
-    },
-    
-    removeFile: function(file) {
-        this.callSuper(file);
-        
-        var images = this.getSubviews(), i = images.length, image;
-        while (i) {
-            image = images[--i];
-            if (myt.Uploader.isSameFile(image.file, file)) {
-                image.destroy();
-                break;
-            }
-        }
-    },
-    
-    handleDroppedFile: function(file, event) {
-        this.callSuper(file, event);
-        
-        this.uploadFile(file, this.uploadUrl);
-    },
-    
-    readImageInto: function(file, image) {
         var self = this;
+        
+        self.callSuper(file);
+        
+        var image = self.image = new myt.Image(self, {useNaturalSize:false, align:'center', valign:'middle'});
+        
+        image.file = file;
+        
+        // Read into image
         if (file.size === -1) {
             var img = new Image();
             img.onload = function() {
@@ -16580,6 +16542,38 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         }
     },
     
+    scaleToFit: function(boundsWidth, boundsHeight, imgWidth, imgHeight) {
+        var boundsRatio = boundsWidth / boundsHeight;
+        var imgRatio = imgWidth / imgHeight;
+        
+        if (imgRatio > boundsRatio) {
+            return [boundsWidth, imgHeight * boundsWidth / imgWidth];
+        } else {
+            return [imgWidth * boundsHeight / imgHeight, boundsHeight];
+        }
+    },
+    
+    removeFile: function(file) {
+        this.callSuper(file);
+        
+        var images = this.getSubviews(),
+            i = images.length,
+            image;
+        while (i) {
+            image = images[--i];
+            if (myt.Uploader.isSameFile(image.file, file)) {
+                image.destroy();
+                break;
+            }
+        }
+    },
+    
+    handleDroppedFile: function(file, event) {
+        this.callSuper(file, event);
+        
+        this.uploadFile(file, this.uploadUrl);
+    },
+    
     updateImage: function(file, image, src) {
         this.nativeWidth = file.width;
         this.nativeHeight = file.height;
@@ -16599,6 +16593,10 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
             image.setWidth(w);
             image.setHeight(h);
         }
+    },
+    
+    getImageSize: function() {
+        return this.files.length ? {width:this.nativeWidth, height:this.nativeHeight} : null;
     }
 });
 
