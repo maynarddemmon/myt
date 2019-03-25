@@ -16451,6 +16451,10 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         var len = value.length;
         this.value = len === 1 ? value[0] : (len === 0 ? undefined : value);
         
+        // Reset the form element if empty. Otherwise uploading the 
+        // same file again won't trigger a change event.
+        if (!this.value) this.fileInput.domElement.value = '';
+        
         this.verifyChangedState(); // FIXME: mimics what happens in myt.FormElement setValue
         if (this.form) this.form.notifyValueChanged(this); // FIXME: mimics what happens in myt.Form setValue
         
