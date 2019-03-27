@@ -155,12 +155,18 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
     
     /** @private */
     __syncInnerWidthToOuterWidth: function() {
-        this.__setInnerWidth(this.getOuterDomElement().offsetWidth);
+        // Don't clobber auto sizing
+        if (this.getInnerDomStyle().width !== 'auto') {
+            this.__setInnerWidth(this.getOuterDomElement().offsetWidth);
+        }
     },
     
     /** @private */
     __syncInnerHeightToOuterHeight: function() {
-        this.__setInnerHeight(this.getOuterDomElement().offsetHeight);
+        // Don't clobber auto sizing
+        if (this.getInnerDomStyle().height !== 'auto') {
+            this.__setInnerHeight(this.getOuterDomElement().offsetHeight);
+        }
     },
     
     /** @private */
