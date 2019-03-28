@@ -3759,14 +3759,14 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
         if (!de) de = this.getOuterDomElement();
         if (ids.width === 'auto') {
             // We're sizing to our contents so first sync the outer dom style 
-            // so we can read the correct offset size below.
+            // so we can read the correct client size below.
             this.getOuterDomStyle().width = 'auto';
         } else {
             // We're using a fixed size so first sync the inner dom style
             // to the outer dom style.
-            this.__setInnerWidth(de.offsetWidth);
+            this.__setInnerWidth(de.clientWidth);
         }
-        this.fireEvent('width', this.width = de.offsetWidth);
+        this.fireEvent('width', this.width = de.clientWidth);
     },
     
     /** @private */
@@ -3775,14 +3775,14 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
         if (!de) de = this.getOuterDomElement();
         if (ids.height === 'auto') {
             // We're sizing to our contents so first sync the outer dom style 
-            // so we can read the correct offset size below.
+            // so we can read the correct client size below.
             this.getOuterDomStyle().height = 'auto';
         } else {
             // We're using a fixed size so first sync the inner dom style
             // to the outer dom style.
-            this.__setInnerHeight(de.offsetHeight);
+            this.__setInnerHeight(de.clientHeight);
         }
-        this.fireEvent('height', this.height = de.offsetHeight);
+        this.fireEvent('height', this.height = de.clientHeight);
     },
     
     syncInnerToOuter: function() {
@@ -3794,7 +3794,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
     __syncInnerWidthToOuterWidth: function() {
         // Don't clobber auto sizing
         if (this.getInnerDomStyle().width !== 'auto') {
-            this.__setInnerWidth(this.getOuterDomElement().offsetWidth);
+            this.__setInnerWidth(this.getOuterDomElement().clientWidth);
         }
     },
     
@@ -3802,7 +3802,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
     __syncInnerHeightToOuterHeight: function() {
         // Don't clobber auto sizing
         if (this.getInnerDomStyle().height !== 'auto') {
-            this.__setInnerHeight(this.getOuterDomElement().offsetHeight);
+            this.__setInnerHeight(this.getOuterDomElement().clientHeight);
         }
     },
     
