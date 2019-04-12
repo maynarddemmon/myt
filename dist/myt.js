@@ -3667,8 +3667,8 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
     _syncDomToModel: function() {
         var self = this,
             s = self.getOuterDomStyle();
-        s.width = self.width + 'px';
-        s.height = self.height + 'px';
+        if (s.width !== 'auto') s.width = self.width + 'px';
+        if (s.height !== 'auto') s.height = self.height + 'px';
         self.syncInnerToOuter();
     },
     
