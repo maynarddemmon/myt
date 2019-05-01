@@ -1974,7 +1974,7 @@ myt.Observable = new JS.Module('Observable', {
             var event = {source:self, type:type, value:value}, // Inlined from this.createEvent
                 activeEventTypes = self.__aet || (self.__aet = {});
             if (activeEventTypes[type] === true) {
-                myt.global.error.notifyError('eventLoop', "Attempt to refire active event: " + type);
+                myt.global.error.notifyWarn('eventLoop', "Attempt to refire active event: " + type);
             } else {
                 // Mark event type as "active"
                 activeEventTypes[type] = true;
