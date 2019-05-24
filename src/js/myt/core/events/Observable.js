@@ -125,6 +125,10 @@ myt.Observable = new JS.Module('Observable', {
         return {source:this, type:type, value:value}; // Inlined in this.fireEvent
     },
     
+    isFiringEvent: function(type) {
+        return (this.__aet || (this.__aet = {}))[type];
+    },
+    
     /** Generates a new event from the provided type and value and fires it
         to the provided observers or the registered observers.
         @param type:string The event type to fire.
