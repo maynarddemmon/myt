@@ -12519,6 +12519,7 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
         @returns void */
     notifyPanelShown: function(panel) {
         // Subclasses to implement as needed.
+        if (this.callSuper) this.callSuper();
     },
     
     /** Called when a floating panel has been hidden for this anchor.
@@ -12526,6 +12527,7 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
         @returns void */
     notifyPanelHidden: function(panel) {
         // Subclasses to implement as needed.
+        if (this.callSuper) this.callSuper();
     },
     
     /** Called by the FloatingPanel to determine where to position itself
