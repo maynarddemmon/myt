@@ -15816,7 +15816,9 @@ myt.Form = new JS.Module('Form', {
     /** Gets all error messages from the entire form tree.
         @returns array of error messages strings. */
     getAllErrorMessages: function() {
-        var msgs = this.errorMessages.concat(), subForms = this.__sf, id;
+        var msgs = (this.errorMessages || []).concat(),
+            subForms = this.__sf,
+            id;
         for (id in subForms) msgs = msgs.concat(subForms[id].getAllErrorMessages());
         return msgs;
     },
