@@ -14208,7 +14208,7 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
         @param item:object The item to select.
         @returns void */
     select: function(item) {
-        if (item && !this.isSelected(item) && this.canSelect(item)) {
+        if (item && !this.isSelectedItem(item) && this.canSelectItem(item)) {
             item.setSelected(true);
             this.__selected[item[this.itemSelectionId]] = item;
             this.setSelectedCount(this.selectedCount + 1);
@@ -14235,7 +14235,7 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
     /** Checks if the item can be selected.
         @param item:object The item to test.
         @returns boolean: True if selection is allowed, false otherwise. */
-    canSelect: function(item) {
+    canSelectItem: function(item) {
         var ms = this.maxSelected, sc = this.selectedCount;
         
         if (ms === 0) {
@@ -14264,7 +14264,7 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
         @param item:object The item to deselect.
         @returns void */
     deselect: function(item) {
-        if (this.isSelected(item) && this.canDeselect(item)) {
+        if (this.isSelectedItem(item) && this.canDeselectItem(item)) {
             item.setSelected(false);
             delete this.__selected[item[this.itemSelectionId]];
             this.setSelectedCount(this.selectedCount - 1);
@@ -14290,7 +14290,7 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
     
     /** Checks if the item can be deselected.
         @returns true if deselection is allowed, false otherwise. */
-    canDeselect: function(item) {
+    canDeselectItem: function(item) {
         return item.canDeselect(this);
     },
     
@@ -14304,7 +14304,7 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
     /** Checks if the item is selected.
         @param item:object The item to test.
         @returns boolean */
-    isSelected: function(item) {
+    isSelectedItem: function(item) {
         return item ? item.isSelected() : false;
     },
     
