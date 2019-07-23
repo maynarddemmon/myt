@@ -6309,15 +6309,15 @@ myt.View = new JS.Class('View', myt.Node, {
     
     setOutlineWidth: function(v) {
         this.outlineWidth = v || 0;
-        this.deStyle.outlineWidth = this.outlineWidth + 'px';
+        this.getOuterDomStyle().outlineWidth = this.outlineWidth + 'px';
     },
     
     setOutlineStyle: function(v) {
-        this.deStyle.outlineStyle = this.outlineStyle = v || 'none';
+        this.getOuterDomStyle().outlineStyle = this.outlineStyle = v || 'none';
     },
     
     setOutlineColor: function(v) {
-        this.deStyle.outlineColor = this.outlineColor = v || '#000000';
+        this.getOuterDomStyle().outlineColor = this.outlineColor = v || '#000000';
     },
     
     // Borders
@@ -6336,15 +6336,15 @@ myt.View = new JS.Class('View', myt.Node, {
     
     setBorderWidth: function(v) {
         this.borderWidth = v || 0;
-        this.deStyle.borderWidth = this.borderWidth + 'px';
+        this.getOuterDomStyle().borderWidth = this.borderWidth + 'px';
     },
     
     setBorderStyle: function(v) {
-        this.deStyle.borderStyle = this.borderStyle = v || 'none';
+        this.getOuterDomStyle().borderStyle = this.borderStyle = v || 'none';
     },
     
     setBorderColor: function(v) {
-        this.deStyle.borderColor = this.borderColor = v || '#000000';
+        this.getOuterDomStyle().borderColor = this.borderColor = v || '#000000';
     },
     
     // Edge treatements
@@ -6352,7 +6352,7 @@ myt.View = new JS.Class('View', myt.Node, {
         @param radius:number the radius of the corners.
         @returns void */
     setRoundedCorners: function(radius) {
-        this.deStyle.borderRadius = radius + 'px';
+        this.getOuterDomStyle().borderRadius = radius + 'px';
     },
     
     /** A convienence method to round the top left corner.
@@ -6389,7 +6389,7 @@ myt.View = new JS.Class('View', myt.Node, {
             'BottomRight'.
         @returns void */
     setRoundedCorner: function(radius, corner) {
-        this.deStyle['border' + corner + 'Radius'] = radius + 'px';
+        this.getOuterDomStyle()['border' + corner + 'Radius'] = radius + 'px';
     },
     
     /** Sets the CSS boxShadow property.
@@ -6407,7 +6407,7 @@ myt.View = new JS.Class('View', myt.Node, {
         } else {
             v = 'none';
         }
-        this.deStyle.boxShadow = v;
+        this.getOuterDomStyle().boxShadow = v;
     },
     
     /** Sets the CSS liner-gradient or radial-gradient property. Setting this
@@ -6429,7 +6429,8 @@ myt.View = new JS.Class('View', myt.Node, {
                 https://developer.mozilla.org/en-US/docs/Web/CSS/linear-gradient
         @returns void */
     setGradient: function(v) {
-        var s = this.deStyle;
+        var self = this,
+            ods = self.getOuterDomStyle();
         if (v) {
             // Determine type
             var type = v[0];
@@ -6470,17 +6471,17 @@ myt.View = new JS.Class('View', myt.Node, {
             function pushColor(color) {
                 v.push(color && color !== 'inherit' ? color : 'transparent');
             };
-            if (v.length < 2) pushColor(this.textColor);
-            if (v.length < 2) pushColor(this.bgColor);
+            if (v.length < 2) pushColor(self.textColor);
+            if (v.length < 2) pushColor(self.bgColor);
             
-            s.background = type + '-gradient(' + geometry + ',' + v.join(',') + ')';
+            ods.background = type + '-gradient(' + geometry + ',' + v.join(',') + ')';
         } else {
-            s.background = 'none';
+            ods.background = 'none';
         }
         
         // Wipe the bgColor property since setting style.background replaces 
         // the bgColor.
-        this.bgColor = undefined;
+        self.bgColor = undefined;
     },
     
     /** Sets the tooltip.
@@ -6500,7 +6501,7 @@ myt.View = new JS.Class('View', myt.Node, {
         checked. If you need to check that use myt.DomElementProxy.isDomElementVisible.
         @returns true if this view is visible, false otherwise. */
     isVisible: function() {
-        return this.searchAncestorsOrSelf(function(v) {return !v.visible;}) === null;
+        return this.searchAncestorsOrSelf((v) => !v.visible) === null;
     },
     
     /** Finds the youngest ancestor (or self) that is a focusTrap or focusCage.
@@ -6508,11 +6509,7 @@ myt.View = new JS.Class('View', myt.Node, {
             ignored.
         @returns a View with focusTrap set to true or null if not found. */
     getFocusTrap: function(ignoreFocusTrap) {
-        return this.searchAncestorsOrSelf(
-            function(v) {
-                return v.focusCage || (v.focusTrap && !ignoreFocusTrap);
-            }
-        );
+        return this.searchAncestorsOrSelf((v) => v.focusCage || (v.focusTrap && !ignoreFocusTrap));
     },
     
     /** @overrides myt.Node
@@ -6724,7 +6721,7 @@ myt.View = new JS.Class('View', myt.Node, {
         if (sv && sv.parent === this) {
             var innerElem = this.getInnerDomElement();
             if (sv.getOuterDomElement() !== innerElem.lastChild) {
-                myt.View.retainFocusDuringDomUpdate(sv, function() {
+                myt.View.retainFocusDuringDomUpdate(sv, () => {
                     innerElem.appendChild(sv.getOuterDomElement());
                 });
             }
@@ -6738,7 +6735,7 @@ myt.View = new JS.Class('View', myt.Node, {
         if (sv && sv.parent === this) {
             var innerElem = this.getInnerDomElement();
             if (sv.getOuterDomElement() !== innerElem.firstChild) {
-                myt.View.retainFocusDuringDomUpdate(sv, function() {
+                myt.View.retainFocusDuringDomUpdate(sv, () => {
                     innerElem.insertBefore(sv.getOuterDomElement(), innerElem.firstChild);
                 });
             }
@@ -6752,7 +6749,7 @@ myt.View = new JS.Class('View', myt.Node, {
     sendSubviewBehind: function(sv, existing) {
         if (sv && existing && sv.parent === this && existing.parent === this) {
             var innerElem = this.getInnerDomElement();
-            myt.View.retainFocusDuringDomUpdate(sv, function() {
+            myt.View.retainFocusDuringDomUpdate(sv, () => {
                 innerElem.insertBefore(sv.getOuterDomElement(), existing.getOuterDomElement());
             });
         }
@@ -6781,7 +6778,7 @@ myt.View = new JS.Class('View', myt.Node, {
         svs.sort(sortFunc);
         
         // Rearrange dom to match new sort order.
-        myt.View.retainFocusDuringDomUpdate(self, function() {
+        myt.View.retainFocusDuringDomUpdate(self, () => {
             var len = svs.length,
                 i = 0,
                 outerElem = self.getOuterDomElement(),
