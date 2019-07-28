@@ -105,8 +105,8 @@ myt.Path = new JS.Class('Path', {
     getCenter: function() {
         var box = this.getBoundingBox();
         return box ? {
-            x:box.x + (box.width - box.x) / 2,
-            y:box.y + (box.height - box.y) / 2
+            x:box.x + box.width / 2,
+            y:box.y + box.height / 2
         } : null;
     },
     
