@@ -191,6 +191,14 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'grid/SimpleGridColumnHeader.js').provides('myt.SimpleGridColumnHeader')
         .requires('myt.GridColumnHeader','myt.SimpleIconTextButton','myt.FontAwesome');
     
+    // Component : Infinite
+    file(MYT_COMPONENT_ROOT + 'infinite/InfiniteListRow.js'                ).provides('myt.InfiniteListRow'                ).requires('myt','myt.Reusable');
+    file(MYT_COMPONENT_ROOT + 'infinite/InfiniteList.js'                   ).provides('myt.InfiniteList'                   ).requires('myt.View','myt.InfiniteListRow');
+    file(MYT_COMPONENT_ROOT + 'infinite/SelectableInfiniteListRow.js'      ).provides('myt.SelectableInfiniteListRow'      ).requires('myt.Selectable','myt.InfiniteListRow');
+    file(MYT_COMPONENT_ROOT + 'infinite/SimpleSelectableInfiniteListRow.js').provides('myt.SimpleSelectableInfiniteListRow').requires('myt.View','myt.SelectableInfiniteListRow');
+    file(MYT_COMPONENT_ROOT + 'infinite/SelectableInfiniteList.js'         ).provides('myt.SelectableInfiniteList'         ).requires('myt.InfiniteList','myt.SelectableInfiniteListRow');
+    //file(MYT_COMPONENT_ROOT + 'infinite/InfiniteGrid.js'                   ).provides('myt.InfiniteGrid'                   ).requires('myt.GridController');
+    
     // Component : Floating Panel
     file(MYT_COMPONENT_ROOT + 'floatingpanel/FloatingPanel.js'      ).provides('myt.FloatingPanel'      ).requires('myt.RootView');
     file(MYT_COMPONENT_ROOT + 'floatingpanel/FloatingPanelAnchor.js').provides('myt.FloatingPanelAnchor').requires('myt.FloatingPanel');
@@ -338,6 +346,8 @@ JS.Packages(function() {with(this) {
         'myt.Slider','myt.RangeSlider',
         'myt.HorizontalDivider','myt.VerticalDivider',
         'myt.Grid','myt.SimpleGridColumnHeader',
+        //'myt.InfiniteGrid',
+        'myt.SelectableInfiniteList','myt.SimpleSelectableInfiniteListRow',
         'myt.PanelStack',
         'myt.DropTarget','myt.DropSource','myt.AutoScroller',
         'myt.Eventable',

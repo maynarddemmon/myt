@@ -51,7 +51,7 @@
         var rootView = new M.View(null, {bgColor:'#eeeeee'}, [M.SizeToWindow]);
         
         // Controls Header
-        var controls = new M.Grid(rootView, {height:24}, [{
+        var controls = new M.View(rootView, {height:24}, [{
             updateWidth: function(event) {
                 this.setWidth(event.value + event.source.inset - this.x);
             }

@@ -4,9 +4,6 @@ input,textarea,select{box-sizing:border-box;-moz-box-sizing:border-box;}
 input.mytNativeInput:not([type=button]), textarea.mytNativeInput{margin:0px;padding:1px;border:0px none;}
 select.mytNativeInput{margin:0px;}
 
-/* Make scrollbars hidden on chrome regardless of OS settings
-   because they're ugly. */
-.myt ::-webkit-scrollbar {width:0px;height:0px}
 /* Hide scrollbars as much as possible in IE. */
 .myt{-ms-overflow-style:-ms-autohiding-scrollbar;}
 

@@ -200,8 +200,10 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
                             var i = openQueries.length, imageSupportInstance;
                             while (i) {
                                 imageSupportInstance = openQueries[--i];
-                                imageSupportInstance.setNaturalWidth(w);
-                                imageSupportInstance.setNaturalHeight(h);
+                                if (imageSupportInstance.imageUrl === imgUrl) {
+                                    imageSupportInstance.setNaturalWidth(w);
+                                    imageSupportInstance.setNaturalHeight(h);
+                                }
                             }
                             
                             // Cleanup

@@ -1,0 +1,95 @@
+<!doctype html><html><head>
+<title>Myt Framework : Infinite Grid Example</title>
+<link rel="stylesheet" href="../src/css/myt.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+<script>window.jQuery || document.write('<script src="../src/js/jquery/jquery-1.12.4.min.js">\x3C/script>');</script>
+<script src="../src/js/boilerplate.js"></script>
+<script src="../src/js/jsclass/loader-browser.js"></script>
+<script src="../src/js/myt/manifest.js"></script>
+</head><body>
+<script>
+    JS.require('myt.all', function() {this.init();});
+    
+    function init() {
+        var M = myt;
+        
+        var collectionModel = new M.Eventable({}, [{
+            init: function(attrs) {
+                this._count = 0;
+                this._data = [];
+                
+                this.callSuper(attrs);
+                
+                var howMany = 1000;
+                while (howMany--) this.addModel(this.createModelForTesting());
+            },
+            
+            getAsSortedList: function(sortFunc) {
+                return this._data.sort(sortFunc);
+            },
+            
+            addModel: function(model) {
+                this._data.push(model);
+            },
+            
+            createModelForTesting: function() {
+                var self = this;
+                return new M.Eventable({}, [{
+                    init: function(attrs) {
+                        var count = attrs.id = self._count++;
+                        attrs.foo = 'foo ' + count;
+                        this.callSuper(attrs);
+                    }
+                }]);
+            }
+        }]);
+        
+        var RowClass = new JS.Class('RowClass', M.View, {
+            initNode: function(parent, attrs) {
+                attrs.height = myt.InfiniteGrid.ROW_HEIGHT;
+                attrs.bgColor = '#ffffff';
+                
+                this.callSuper(parent, attrs);
+                
+                this.idView = new M.Text(this, {x:5, y:5, width:50});
+                this.fooView = new M.Text(this, {x:60, y:5, width:135});
+                
+                this.setModel(this.model);
+            },
+            
+            setInfiniteGridOwner: function(v) {
+                this.infiniteGridOwner = v;
+            },
+            
+            setModel: function(model) {
+                this.model = model;
+                
+                if (this.inited && model) {
+                    this.idView.setText('' + model.id);
+                    this.fooView.setText(model.foo);
+                }
+            }
+        });
+        
+        var rootView = new M.View(null, {bgColor:'#eeeeee'}, [M.SizeToWindow]);
+        
+        // Grid
+        var grid = new M.InfiniteGrid(rootView, {
+            collectionModel:collectionModel,
+            rowClass:RowClass,
+            percentOfParentHeight:100
+        }, [M.SizeToParent, {
+            updateWidth: function(event) {
+                this.setWidth(event.value - this.x);
+            }
+        }]);
+        
+        var divider = new M.HorizontalDivider(rootView, {
+            percentOfParentHeight:100, minValue:25, value:400, limitToParent:0
+        }, [M.SizeToParent]);
+        grid.syncTo(divider, 'updateWidth', 'value');
+        
+        grid.refreshGridData(false);
+    }
+</script>
+</body></html>
