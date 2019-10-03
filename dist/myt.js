@@ -19062,9 +19062,11 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
             content = self.content,
             closeBtn = content.closeBtn,
             r = M.Dialog.DEFAULT_RADIUS,
-            maxHeight = opts.maxContainerHeight;
+            maxHeight;
         
         opts = M.extend({}, M.Dialog.CONFIRM_DEFAULTS, opts);
+        
+        maxHeight = opts.maxContainerHeight;
         
         self.__destroyContent();
         
