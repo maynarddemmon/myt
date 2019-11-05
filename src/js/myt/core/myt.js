@@ -21,7 +21,7 @@
 myt = {
     /** A version number based on the time this distribution of myt was
         created. */
-    version:20190305.1455,
+    version:20191105.1227,
     
     /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
         should be set by the page that includes this script. */
@@ -380,6 +380,44 @@ myt = {
             0 if not provided.
         @returns a dom element or undefined if none exist. */
     getElement: (tagname, index) => document.getElementsByTagName(tagname || 'body')[index > 0 ? index : 0],
+    
+    // CSS
+    loadCSSFonts: fontUrls => {
+        (fontUrls || []).forEach(fontUrl => {
+            var link = document.createElement("link");
+            link.appendChild(document.createTextNode("")); // Webkit workaround
+            link.rel = 'stylesheet';
+            link.href = fontUrl;
+            document.head.appendChild(link);
+        });
+    },
+    
+    createStylesheet: () => {
+        var style = document.createElement("style");
+        style.appendChild(document.createTextNode("")); // Webkit workaround
+        document.head.appendChild(style);
+        return style.sheet;
+    },
+    
+    addCSSRule: (sheet, selector, rules, index) => {
+        if ("insertRule" in sheet) {
+            sheet.insertRule(selector + "{" + rules + "}", index);
+        } else if("addRule" in sheet) {
+            sheet.addRule(selector, rules, index);
+        }
+    },
+    
+    removeCSSRules: (sheet) => {
+        var i = sheet.cssRules.length;
+        while (i) {
+            i--;
+            if ("deleteRule" in sheet) {
+                sheet.deleteRule(i);
+            } else if ("removeRule" in sheet) {
+                sheet.removeRule(i);
+            }
+        }
+    },
     
     // Misc
     /** Memoize a function.
