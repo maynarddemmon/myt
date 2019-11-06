@@ -419,6 +419,40 @@ myt = {
         }
     },
     
+    createInputPlaceholderCSSRule: (view, color, fontFamily) => {
+        // Make sure the view has a dom ID for rule targeting
+        var M = myt,
+            domId = view.getOuterDomElement().id || (view.getOuterDomElement().id = 'id' + M.generateGuid()),
+            sheet = view.__sheet,
+            rules = [];
+        
+        // Clear existing sheet if it exists or create a new sheet
+        if (sheet) {
+            M.removeCSSRules(sheet);
+        } else {
+            sheet = view.__sheet = M.createStylesheet();
+        }
+        
+        // Write rules
+        if (color) rules.push('color:' + color);
+        if (fontFamily) rules.push('font-family:' + fontFamily);
+        rules = rules.join('; ');
+        
+        switch (BrowserDetect.browser) {
+            case 'Chrome':
+            case 'Safari':
+                M.addCSSRule(sheet, '#' + domId + '::-webkit-input-placeholder', rules, 0);
+                break;
+            case 'Firefox':
+                M.addCSSRule(sheet, '#' + domId + ':-moz-placeholder', 'opacity:1; ' + rules, 0);
+                M.addCSSRule(sheet, '#' + domId + '::-moz-placeholder', 'opacity:1; ' + rules, 0);
+                break;
+            case 'Explorer':
+                M.addCSSRule(sheet, '#' + domId + ':-ms-input-placeholder', rules, 0);
+                break;
+        }
+    },
+    
     // Misc
     /** Memoize a function.
         @param f:function The function to memoize
