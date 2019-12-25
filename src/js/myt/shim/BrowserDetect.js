@@ -8,10 +8,10 @@
         version:number The browser version number.
         os:string The operating system.
 */
-BrowserDetect = (function() {
+BrowserDetect = (() => {
     var versionSearchString,
         
-        searchString = function(data) {
+        searchString = (data) => {
             var dataItem, i = data.length;
             while (i) {
                 dataItem = data[--i];
@@ -20,7 +20,7 @@ BrowserDetect = (function() {
             }
         },
         
-        searchVersion = function(dataString) {
+        searchVersion = (dataString) => {
             var index = dataString.indexOf(versionSearchString);
             if (index >= 0) return parseFloat(dataString.substring(index + versionSearchString.length + 1));
         },
@@ -29,7 +29,7 @@ BrowserDetect = (function() {
         platform = navigator.platform, 
         unknown = 'UNKNOWN',
         
-        retval = {
+        exports = {
             browser:searchString([
                 {prop:window.opera,                   id:"Opera",    ver:"Version"},
                 {str:navigator.vendor, sub:"Apple",   id:"Safari",   ver:"Version"},
@@ -50,7 +50,7 @@ BrowserDetect = (function() {
         dom,
         pre;
     
-    switch (retval.browser) {
+    switch (exports.browser) {
         case 'Chrome': case 'Safari': dom = 'WebKit'; break;
         case 'Explorer': dom = 'MS'; break;
         case 'Firefox': dom = 'Moz'; break;
@@ -59,12 +59,12 @@ BrowserDetect = (function() {
     }
     pre = dom.toLowerCase();
     
-    retval.prefix = {
+    exports.prefix = {
         dom:dom,
         lowercase:pre,
         css:'-' + pre + '-',
         js:pre[0].toUpperCase() + pre.substr(1)
     };
     
-    return retval;
+    return exports;
 })();

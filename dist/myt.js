@@ -8,10 +8,10 @@
         version:number The browser version number.
         os:string The operating system.
 */
-BrowserDetect = (function() {
+BrowserDetect = (() => {
     var versionSearchString,
         
-        searchString = function(data) {
+        searchString = (data) => {
             var dataItem, i = data.length;
             while (i) {
                 dataItem = data[--i];
@@ -20,7 +20,7 @@ BrowserDetect = (function() {
             }
         },
         
-        searchVersion = function(dataString) {
+        searchVersion = (dataString) => {
             var index = dataString.indexOf(versionSearchString);
             if (index >= 0) return parseFloat(dataString.substring(index + versionSearchString.length + 1));
         },
@@ -29,7 +29,7 @@ BrowserDetect = (function() {
         platform = navigator.platform, 
         unknown = 'UNKNOWN',
         
-        retval = {
+        exports = {
             browser:searchString([
                 {prop:window.opera,                   id:"Opera",    ver:"Version"},
                 {str:navigator.vendor, sub:"Apple",   id:"Safari",   ver:"Version"},
@@ -50,7 +50,7 @@ BrowserDetect = (function() {
         dom,
         pre;
     
-    switch (retval.browser) {
+    switch (exports.browser) {
         case 'Chrome': case 'Safari': dom = 'WebKit'; break;
         case 'Explorer': dom = 'MS'; break;
         case 'Firefox': dom = 'Moz'; break;
@@ -59,14 +59,14 @@ BrowserDetect = (function() {
     }
     pre = dom.toLowerCase();
     
-    retval.prefix = {
+    exports.prefix = {
         dom:dom,
         lowercase:pre,
         css:'-' + pre + '-',
         js:pre[0].toUpperCase() + pre.substr(1)
     };
     
-    return retval;
+    return exports;
 })();
 
 
@@ -1137,133 +1137,134 @@ myt = {
 };
 
 
-/** Browser cookie utility functions.
-    
-    Ported from:
-        jQuery Cookie Plugin v1.3.1
-        https://github.com/carhartl/jquery-cookie
-        Copyright 2013 Klaus Hartl
-        Released under the MIT license
-*/
-myt.Cookie = {
-    // Attributes //////////////////////////////////////////////////////////////
-    _pluses: /\+/g,
-    
-    /** Default cookie properties and settings. */
-    defaults: {
-        raw:false, // If true, don't use encodeURIComponent/decodeURIComponent
-        json:false // If true, do JSON stringify and parse
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Function to return a raw cookie name/value. */
-    _raw: function(s) {
-        return s;
-    },
-    
-    /** Function to return a URI decoded cookie name/value. */
-    _decoded: function(s) {
-        return decodeURIComponent(s.replace(this._pluses, ' '));
-    },
-    
-    /** Function to convert a stored cookie value into a value that can
-        be returned. */
-    _converted: function(s, useJson) {
-        if (s.indexOf('"') === 0) {
-            // This is a quoted cookie as according to RFC2068, unescape
-            s = s.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
-        }
+((pkg) => {
+    var pluses = /\+/g,
         
-        try {
-            return useJson ? JSON.parse(s) : s;
-        } catch(er) {}
-    },
-    
-    /** Reads a cookie.
-        @param key:string the name of the cookie to read.
-        @param options:object options that determine how the cookie is read
-            and/or parsed. Supported options are:
-                raw:boolean If true the cookie key and value will be used as is.
-                    Otherwise decodeURIComponent will be used.
-                json:boolean If true JSON.parse will be used to parse the
-                    cookie value before it is returned.
-        @returns The cookie value string or a parsed cookie value. */
-    read: function(key, options) {
-        options = myt.extend({}, this.defaults, options);
+        /** Function to return a raw cookie name/value. */
+        raw = (s) => s,
         
-        var decodeFunc = options.raw ? this._raw : this._decoded,
-            useJson = options.json,
-            cookies = document.cookie.split('; '),
-            result = key ? undefined : {},
-            parts, name, cookie, i, len = cookies.length;
-        for (i = 0; i < len; i++) {
-            parts = cookies[i].split('=');
-            name = decodeFunc(parts.shift());
-            cookie = decodeFunc(parts.join('='));
-            
-            if (key && key === name) {
-                result = this._converted(cookie, useJson);
-                break;
+        /** Function to return a URI decoded cookie name/value. */
+        decoded = (s) => decodeURIComponent(s.replace(pluses, ' ')),
+        
+        /** Function to convert a stored cookie value into a value that can
+            be returned. */
+        converted = (s, useJson) => {
+            if (s.indexOf('"') === 0) {
+                // This is a quoted cookie as according to RFC2068, unescape
+                s = s.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
             }
             
-            if (!key) {
-                result[name] = this._converted(cookie, useJson);
+            try {
+                return useJson ? JSON.parse(s) : s;
+            } catch(er) {}
+        },
+        
+        /** Browser cookie utility functions.
+            
+            Ported from:
+                jQuery Cookie Plugin v1.3.1
+                https://github.com/carhartl/jquery-cookie
+                Copyright 2013 Klaus Hartl
+                Released under the MIT license
+        */
+        exports = {
+            // Attributes //////////////////////////////////////////////////////////
+            /** Default cookie properties and settings. */
+            defaults: {
+                raw:false, // If true, don't use encodeURIComponent/decodeURIComponent
+                json:false // If true, do JSON stringify and parse
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////////
+            /** Reads a cookie.
+                @param key:string the name of the cookie to read.
+                @param options:object options that determine how the cookie is read
+                    and/or parsed. Supported options are:
+                        raw:boolean If true the cookie key and value will be used as is.
+                            Otherwise decodeURIComponent will be used.
+                        json:boolean If true JSON.parse will be used to parse the
+                            cookie value before it is returned.
+                @returns The cookie value string or a parsed cookie value. */
+            read: (key, options) => {
+                options = pkg.extend({}, exports.defaults, options);
+                
+                var decodeFunc = options.raw ? raw : decoded,
+                    useJson = options.json,
+                    cookies = document.cookie.split('; '),
+                    result = key ? undefined : {},
+                    parts, 
+                    name, 
+                    cookie, 
+                    i = 0, 
+                    len = cookies.length;
+                for (; i < len;) {
+                    parts = cookies[i++].split('=');
+                    name = decodeFunc(parts.shift());
+                    cookie = decodeFunc(parts.join('='));
+                    
+                    if (key && key === name) {
+                        result = converted(cookie, useJson);
+                        break;
+                    }
+                    
+                    if (!key) result[name] = converted(cookie, useJson);
+                }
+                
+                return result;
+            },
+            
+            /** Stores a cookie.
+                @param key:string the name of the cookie to store.
+                @param value:* the value to store.
+                @param options:object options that determine how the cookie is
+                    written and stored. Supported options are:
+                        expires:number the number of days until the cookie expires.
+                        path:string the path scope for the cookie.
+                        domain:string the domain scope for the cookie.
+                        secure:boolean the cookie must be secure.
+                        raw:boolean If true the cookie key and value will be used as is.
+                            Otherwise encodeURIComponent will be used.
+                        json:boolean If true JSON.stringify will be used to encode
+                            the cookie value.
+                @returns void */
+            write: (key, value, options) => {
+                options = pkg.extend({}, exports.defaults, options);
+                
+                if (typeof options.expires === 'number') {
+                    var days = options.expires,
+                        t = options.expires = new Date();
+                    t.setDate(t.getDate() + days);
+                }
+                
+                value = options.json ? JSON.stringify(value) : String(value);
+                
+                return (document.cookie = [
+                    options.raw ? key : encodeURIComponent(key),
+                    '=',
+                    options.raw ? value : encodeURIComponent(value),
+                    options.expires ? '; expires=' + options.expires.toUTCString() : '', // use expires attribute, max-age is not supported by IE
+                    options.path    ? '; path=' + options.path : '',
+                    options.domain  ? '; domain=' + options.domain : '',
+                    options.secure  ? '; secure' : ''
+                ].join(''));
+            },
+            
+            /** Removes a stored cookie by setting it's expires option to -1 days.
+                @param key:string the name of the cookie to remove.
+                @param options:object options used to read/write the cookie.
+                @returns true if a cookie was removed, false otherwise. */
+            remove: (key, options) => {
+                if (exports.read(key, options) !== undefined) {
+                    // Must not alter options, thus extending a fresh object.
+                    exports.write(key, '', pkg.extend({}, options, {expires: -1}));
+                    return true;
+                }
+                return false;
             }
-        }
-        
-        return result;
-    },
-    
-    /** Stores a cookie.
-        @param key:string the name of the cookie to store.
-        @param value:* the value to store.
-        @param options:object options that determine how the cookie is
-            written and stored. Supported options are:
-                expires:number the number of days until the cookie expires.
-                path:string the path scope for the cookie.
-                domain:string the domain scope for the cookie.
-                secure:boolean the cookie must be secure.
-                raw:boolean If true the cookie key and value will be used as is.
-                    Otherwise encodeURIComponent will be used.
-                json:boolean If true JSON.stringify will be used to encode
-                    the cookie value.
-        @returns void */
-    write: function(key, value, options) {
-        options = myt.extend({}, this.defaults, options);
-        
-        if (typeof options.expires === 'number') {
-            var days = options.expires;
-            var t = options.expires = new Date();
-            t.setDate(t.getDate() + days);
-        }
-        
-        value = options.json ? JSON.stringify(value) : String(value);
-        
-        return (document.cookie = [
-            options.raw ? key : encodeURIComponent(key),
-            '=',
-            options.raw ? value : encodeURIComponent(value),
-            options.expires ? '; expires=' + options.expires.toUTCString() : '', // use expires attribute, max-age is not supported by IE
-            options.path    ? '; path=' + options.path : '',
-            options.domain  ? '; domain=' + options.domain : '',
-            options.secure  ? '; secure' : ''
-        ].join(''));
-    },
-    
-    /** Removes a stored cookie by setting it's expires option to -1 days.
-        @param key:string the name of the cookie to remove.
-        @param options:object options used to read/write the cookie.
-        @returns true if a cookie was removed, false otherwise. */
-    remove: function(key, options) {
-        if (this.read(key, options) !== undefined) {
-            // Must not alter options, thus extending a fresh object.
-            this.write(key, '', myt.extend({}, options, {expires: -1}));
-            return true;
-        }
-        return false;
-    }
-};
+        };
+    pkg.Cookie = exports;
+})(myt);
 
 
 /** Browser local storage utility functions.
@@ -1271,634 +1272,624 @@ myt.Cookie = {
     The Data methods utilize a single JSON object to store multiple values
     under a single local storage item.
 */
-myt.LocalStorage = (function() {
-    var getStoreId = function(storeId) {
-            return storeId = storeId || 'myt';
-        },
-        doFunc = function(func, delay, timerKey) {
+myt.LocalStorage = (() => {
+    var localStorage = global.localStorage,
+        
+        getStoreId = (storeId) => storeId = storeId || 'myt',
+        
+        doFunc = (func, delay, timerKey) => {
             if (delay > 0) {
-                var LS = myt.LocalStorage,
+                var LS = exports,
                     timerIdKey = '__timerId_' + timerKey,
                     timerId = LS[timerIdKey];
                 if (timerId) clearTimeout(timerId);
                 
-                LS[timerIdKey] = setTimeout(function() {
+                LS[timerIdKey] = setTimeout(() => {
                     func();
                     delete LS[timerIdKey];
                 }, delay);
             } else {
                 func();
             }
+        },
+        
+        exports = {
+            /** Check if data has been stored under the key and storage id.
+                @param key:string the key to look for.
+                @param storeId:string (optional) id of the data store to look in. If
+                    not provided the default "myt" storeId will be used.
+                @returns boolean false if an undefined or null value is found,
+                    otherwise true. */
+            hasDatum: (key, storeId) => {
+                if (key) {
+                    var data = exports.getItem(getStoreId(storeId));
+                    if (data) {
+                        try {
+                            return JSON.parse(data)[key] != null;
+                        } catch (e) {
+                            console.error(e);
+                            return false;
+                        }
+                    }
+                }
+                return false;
+            },
+            
+            /** Get the data stored under the key and storage id.
+                @param key:string the key to get data for.
+                @param storeId:string (optional) id of the data store to get data for.
+                    If not provided the default "myt" storeId will be used.
+                @returns the value of the data or undefined if not found. */
+            getDatum: (key, storeId) => {
+                if (key) {
+                    var data = exports.getItem(getStoreId(storeId));
+                    if (data) {
+                        try {
+                            data = JSON.parse(data);
+                            if (typeof data === 'object') return data[key];
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    }
+                }
+            },
+            
+            /** Sets a single entry in a data store.
+                @param key:string The key to store the value under.
+                @param value:* The value to store.
+                @param storeId:string (optional) id of the data store to put data in.
+                    If not provided the default "myt" storeId will be used.
+                @param delay:number (optional) A number of millis to wait before
+                    actually storing the data. This can be useful to prevent excessive
+                    numbers of writes when a value will be set a large number of times
+                    over a short time interval. For example, when saving the position
+                    of a UI control as it is being repositioned or a value the user
+                    is typing.
+                @returns void */
+            setDatum: (key, value, storeId, delay) => {
+                storeId = getStoreId(storeId);
+                doFunc(() => {
+                    var data = exports.getData(storeId);
+                    data[key] = value;
+                    exports.setItem(storeId, JSON.stringify(data));
+                }, delay, storeId + '___' + key);
+            },
+            
+            /** Removes a single entry in a data store.
+                @param key:string The key to remove the entry for.
+                @param storeId:string (optional) id of the data store to remove data 
+                    from. If not provided the default "myt" storeId will be used.
+                @param delay:number (optional) A number of millis to wait before
+                    actually removing the data.
+                @returns void */
+            removeDatum: (key, storeId, delay) => {
+                storeId = getStoreId(storeId);
+                doFunc(() => {
+                    var data = exports.getData(storeId);
+                    delete data[key];
+                    exports.setItem(storeId, JSON.stringify(data));
+                }, delay, storeId + '___' + key);
+            },
+            
+            /** Check if data has been stored under the storage id.
+                @param storeId:string (optional) id of the data store to look in. If
+                    not provided the default "myt" storeId will be used.
+                @returns boolean false if an undefined or null value is found,
+                    otherwise true. */
+            hasData: (storeId) => exports.getItem(getStoreId(storeId)) != null,
+            
+            /** Get the data store stored under storage id.
+                @param storeId:string (optional) id of the data store to get data for.
+                    If not provided the default "myt" storeId will be used.
+                @returns the store object. */
+            getData: (storeId) => {
+                var data = exports.getItem(getStoreId(storeId));
+                if (data) {
+                    try {
+                        return JSON.parse(data);
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+                return {};
+            },
+            
+            /** Store data under the storage id. This replaces an entire data store
+                with the new data object.
+                @param data:object (optional) The data object to store under the 
+                    storage id.
+                @param storeId:string (optional) id of the data store to put data in.
+                    If not provided the default "myt" storeId will be used.
+                @param delay:number (optional) A number of millis to wait before
+                    actually storing the data. This can be useful to prevent excessive
+                    numbers of writes when a value will be set a large number of times
+                    over a short time interval. For example, when saving the position
+                    of a UI control as it is being repositioned or a value the user
+                    is typing.
+                @returns boolean true if the data is of type object false otherwise. */
+            setData: (data, storeId, delay) => {
+                storeId = getStoreId(storeId);
+                
+                if (data == null) data = {};
+                
+                if (typeof data === 'object') {
+                    doFunc(() => {exports.setItem(storeId, JSON.stringify(data));}, delay, storeId);
+                    return true;
+                }
+                
+                return false;
+            },
+            
+            /** Removes a data store.
+                @param storeId:string (optional) id of the data store to remove. If 
+                    not provided the default "myt" storeId will be used.
+                @param delay:number (optional) A number of millis to wait before
+                    actually removing the data.
+                @returns void */
+            removeData: (storeId, delay) => {
+                storeId = getStoreId(storeId);
+                doFunc(() => {exports.removeItem(storeId);}, delay, storeId);
+            },
+            
+            // wrapper functions on localStorage
+            /** @returns The number of data items stored in the Storage object. */
+            getLength: () => localStorage.length,
+            
+            /** @param n:integer The index of the key name to retrieve.
+                @returns The name of the nth key in the storage. */
+            getKey: (n) => localStorage.key(n),
+            
+            /** @param key:string The name of the storage entry to return.
+                @returns The value of the storage entry or null if not found. */
+            getItem: (key) => localStorage.getItem(key),
+            
+            /** Stores the value under the key. If a value already exists for
+                the key the value will be replaced with the new value.
+                @param key:string The key to store the value under.
+                @param value:* The value to store.
+                @returns void */
+            setItem: (key, value) => {
+                localStorage.setItem(key, value);
+            },
+            
+            /** Removes the storage entry for the key.
+                @param key:string The key to remove.
+                @returns void */
+            removeItem: (key) => {
+                localStorage.removeItem(key);
+            },
+            
+            /** Removes all storage entries.
+                @returns void */
+            clear: () => {
+                localStorage.clear();
+            },
+            
+            // Aliases for better API compatibility with some libraries.
+            /** An alias for getItem. */
+            get: (key) => exports.getItem(key),
+            
+            /** An alias for setItem. */
+            set: (key, value) => {
+                exports.setItem(key, value);
+            },
+            
+            /** An alias for removeItem. */
+            remove: (key) => {
+                exports.removeItem(key);
+            },
+            
+            /** An alias for clear. */
+            clearAll: () => {
+                exports.clear();
+            }
         };
     
-    return {
-        /** Check if data has been stored under the key and storage id.
-            @param key:string the key to look for.
-            @param storeId:string (optional) id of the data store to look in. If
-                not provided the default "myt" storeId will be used.
-            @returns boolean false if an undefined or null value is found,
-                otherwise true. */
-        hasDatum: function(key, storeId) {
-            if (key) {
-                var data = myt.LocalStorage.getItem(getStoreId(storeId));
-                if (data) {
-                    try {
-                        return JSON.parse(data)[key] != null;
-                    } catch (e) {
-                        console.error(e);
-                        return false;
-                    }
-                }
-            }
-            return false;
-        },
-        
-        /** Get the data stored under the key and storage id.
-            @param key:string the key to get data for.
-            @param storeId:string (optional) id of the data store to get data for.
-                If not provided the default "myt" storeId will be used.
-            @returns the value of the data or undefined if not found. */
-        getDatum: function(key, storeId) {
-            if (key) {
-                var data = myt.LocalStorage.getItem(getStoreId(storeId));
-                if (data) {
-                    try {
-                        data = JSON.parse(data);
-                        if (typeof data === 'object') return data[key];
-                    } catch (e) {
-                        console.error(e);
-                    }
-                }
-            }
-        },
-        
-        /** Sets a single entry in a data store.
-            @param key:string The key to store the value under.
-            @param value:* The value to store.
-            @param storeId:string (optional) id of the data store to put data in.
-                If not provided the default "myt" storeId will be used.
-            @param delay:number (optional) A number of millis to wait before
-                actually storing the data. This can be useful to prevent excessive
-                numbers of writes when a value will be set a large number of times
-                over a short time interval. For example, when saving the position
-                of a UI control as it is being repositioned or a value the user
-                is typing.
-            @returns void */
-        setDatum: function(key, value, storeId, delay) {
-            storeId = getStoreId(storeId);
-            doFunc(function() {
-                var LS = myt.LocalStorage,
-                    data = LS.getData(storeId);
-                data[key] = value;
-                LS.setItem(storeId, JSON.stringify(data));
-            }, delay, storeId + '___' + key);
-        },
-        
-        /** Removes a single entry in a data store.
-            @param key:string The key to remove the entry for.
-            @param storeId:string (optional) id of the data store to remove data 
-                from. If not provided the default "myt" storeId will be used.
-            @param delay:number (optional) A number of millis to wait before
-                actually removing the data.
-            @returns void */
-        removeDatum: function(key, storeId, delay) {
-            storeId = getStoreId(storeId);
-            doFunc(function() {
-                var LS = myt.LocalStorage,
-                    data = LS.getData(storeId);
-                delete data[key];
-                myt.LocalStorage.setItem(storeId, JSON.stringify(data));
-            }, delay, storeId + '___' + key);
-        },
-        
-        /** Check if data has been stored under the storage id.
-            @param storeId:string (optional) id of the data store to look in. If
-                not provided the default "myt" storeId will be used.
-            @returns boolean false if an undefined or null value is found,
-                otherwise true. */
-        hasData: function(storeId) {
-            return myt.LocalStorage.getItem(getStoreId(storeId)) != null;
-        },
-        
-        /** Get the data store stored under storage id.
-            @param storeId:string (optional) id of the data store to get data for.
-                If not provided the default "myt" storeId will be used.
-            @returns the store object. */
-        getData: function(storeId) {
-            var data = myt.LocalStorage.getItem(getStoreId(storeId));
-            if (data) {
-                try {
-                    return JSON.parse(data);
-                } catch (e) {
-                    console.error(e);
-                }
-            }
-            return {};
-        },
-        
-        /** Store data under the storage id. This replaces an entire data store
-            with the new data object.
-            @param data:object (optional) The data object to store under the 
-                storage id.
-            @param storeId:string (optional) id of the data store to put data in.
-                If not provided the default "myt" storeId will be used.
-            @param delay:number (optional) A number of millis to wait before
-                actually storing the data. This can be useful to prevent excessive
-                numbers of writes when a value will be set a large number of times
-                over a short time interval. For example, when saving the position
-                of a UI control as it is being repositioned or a value the user
-                is typing.
-            @returns boolean true if the data is of type object false otherwise. */
-        setData: function(data, storeId, delay) {
-            storeId = getStoreId(storeId);
-            
-            if (data == null) data = {};
-            
-            if (typeof data === 'object') {
-                doFunc(function() {myt.LocalStorage.setItem(storeId, JSON.stringify(data));}, delay, storeId);
-                return true;
-            }
-            
-            return false;
-        },
-        
-        /** Removes a data store.
-            @param storeId:string (optional) id of the data store to remove. If 
-                not provided the default "myt" storeId will be used.
-            @param delay:number (optional) A number of millis to wait before
-                actually removing the data.
-            @returns void */
-        removeData: function(storeId, delay) {
-            storeId = getStoreId(storeId);
-            doFunc(function() {myt.LocalStorage.removeItem(storeId);}, delay, storeId);
-        },
-        
-        // wrapper functions on localStorage
-        /** @returns The number of data items stored in the Storage object. */
-        getLength: function() {
-            return global.localStorage.length;
-        },
-        
-        /** @param n:integer The index of the key name to retrieve.
-            @returns The name of the nth key in the storage. */
-        getKey: function(n) {
-            return global.localStorage.key(n);
-        },
-        
-        /** @param key:string The name of the storage entry to return.
-            @returns The value of the storage entry or null if not found. */
-        getItem: function(key) {
-            return global.localStorage.getItem(key);
-        },
-        
-        /** Stores the value under the key. If a value already exists for
-            the key the value will be replaced with the new value.
-            @param key:string The key to store the value under.
-            @param value:* The value to store.
-            @returns void */
-        setItem: function(key, value) {
-            global.localStorage.setItem(key, value);
-        },
-        
-        /** Removes the storage entry for the key.
-            @param key:string The key to remove.
-            @returns void */
-        removeItem: function(key) {
-            global.localStorage.removeItem(key);
-        },
-        
-        /** Removes all storage entries.
-            @returns void */
-        clear: function() {
-            global.localStorage.clear();
-        },
-        
-        // Aliases for better API compatibility with some libraries.
-        /** An alias for getItem. */
-        get: function(key) {
-            return myt.LocalStorage.getItem(key);
-        },
-        
-        /** An alias for setItem. */
-        set: function(key, value) {
-            myt.LocalStorage.setItem(key, value);
-        },
-        
-        /** An alias for removeItem. */
-        remove: function(key) {
-            myt.LocalStorage.removeItem(key);
-        },
-        
-        /** An alias for clear. */
-        clearAll: function() {
-            myt.LocalStorage.clear();
-        }
-    };
+    return exports;
 })();
 
 
-/** Models a URI and provides parsing of strings into URIs.
+((pkg) => {
+    var queryParser = /(?:^|&)([^&=]*)=?([^&]*)/g,
+        strictParser = /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/,
+        looseParser = /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/;
     
-    Makes use of:
-        parseUri 1.2.2
-        (c) Steven Levithan <stevenlevithan.com>
-        MIT License
-        See: http://blog.stevenlevithan.com/archives/parseuri
+    /** Models a URI and provides parsing of strings into URIs.
         
-    When more complex URI parsing is needed, perhaps try URI.js which can be
-    found at: http://medialize.github.io/URI.js/
-*/
-myt.URI = new JS.Class('URI', {
-    // Constructor /////////////////////////////////////////////////////////////
-    initialize: function(str, loose) {
-        if (str) this.parse(str, loose);
-    },
-    
-    
-    // Attributes and Setters/Getters //////////////////////////////////////////
-    setSource: function(v) {this.source = v;},
-    setProtocol: function(v) {this.protocol = v;},
-    setAuthority: function(v) {this.authority = v;},
-    setUserInfo: function(v) {this.userInfo = v;},
-    setUser: function(v) {this.user = v;},
-    setPassword: function(v) {this.password = v;},
-    setHost: function(v) {this.host = v;},
-    setPort: function(v) {this.port = v;},
-    setRelative: function(v) {this.relative = v;},
-    setPath: function(v) {this.path = v;},
-    setDirectory: function(v) {this.directory = v;},
-    setFile: function(v) {this.file = v;},
-    setQuery: function(v) {this.query = v;},
-    setAnchor: function(v) {this.anchor = v;},
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    parse: function(str, loose) {
-        // match order: "source", "protocol", "authority", "userInfo", "user",
-        //              "password", "host", "port", "relative", "path", 
-        //              "directory", "file", "query", "anchor".
-        var self = this,
-            m = myt.URI[loose ? "_looseParser" : "_strictParser"].exec(str);
-        
-        self.setSource(m[0] || "");
-        
-        self.setProtocol(m[1] || "");
-        self.setAuthority(m[2] || "");
-        self.setUserInfo(m[3] || "");
-        self.setUser(m[4] || "");
-        self.setPassword(m[5] || "");
-        self.setHost(m[6] || "");
-        self.setPort(m[7] || "");
-        self.setRelative(m[8] || "");
-        self.setPath(m[9] || "");
-        self.setDirectory(m[10] || "");
-        self.setFile(m[11] || "");
-        self.setQuery(m[12] || "");
-        self.setAnchor(m[13] || "");
-        
-        // Parse the query into pairs
-        self.queryPairs = {};
-        self.query.replace(myt.URI._queryParser, function ($0, $1, $2) {
-            if ($1) self.queryPairs[$1] = $2;
-        });
-    },
-    
-    /** Unescape a query param value. */
-    decodeQueryParam: function(v) {
-        v = decodeURIComponent(v);
-        return v.replace('+', ' ');
-    },
-    
-    getQuery: function() {
-        var pairs = this.queryPairs,
-            parts = [],
-            key,
-            s;
-        for (key in pairs) parts.push(key + '=' + encodeURIComponent(this.getQueryParam(key)));
-        s = parts.join('&');
-        return s.length > 0 ? '?' + s : s;
-    },
-    
-    getQueryParam: function(name) {
-        var v = this.queryPairs[name];
-        return v == null ? undefined : this.decodeQueryParam(v);
-    },
-    
-    getPathParts: function(allowEmpties) {
-        var parts = this.path.split('/');
-        
-        if (!allowEmpties) {
-            var i = parts.length;
-            while (i) if (parts[--i].length === 0) parts.splice(i, 1);
-        }
-        
-        return parts;
-    },
-    
-    toString: function(originalRawQuery) {
-        var self = this,
-            protocol = self.protocol,
-            host = self.host,
-            userInfo = self.userInfo,
-            port = self.port,
-            path = self.path,
-            query = originalRawQuery ? (self.query ? '?' + self.query : '') : self.getQuery(),
-            anchor = self.anchor,
-            s = '';
-        
-        if (protocol) s += protocol + '://';
-        if (userInfo && host) s += userInfo + '@';
-        
-        if (host) {
-            s += host;
-            if (port) s += ':' + port;
-        }
-        
-        if (path) {
-            s += path;
-        } else if (host && (query || anchor)) {
-            s += '/';
-        }
-        
-        if (query) s += query;
-        if (anchor) s += '#' + anchor;
-        
-        return s;
-    }
-});
-myt.URI._queryParser = /(?:^|&)([^&=]*)=?([^&]*)/g;
-myt.URI._strictParser = /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/;
-myt.URI._looseParser = /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/;
-
-
-/** Provides common geometry related functions. */
-myt.Geometry = {
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Get the closest point on a line to a given point.
-        @param Ax:number The x-coordinate of the first point that defines 
-            the line.
-        @param Ay:number The y-coordinate of the first point that defines 
-            the line.
-        @param Bx:number The x-coordinate of the second point that defines 
-            the line.
-        @param By:number The y-coordinate of the second point that defines 
-            the line.
-        @param Px:number The x-coordinate of the point.
-        @param Py:number The y-coordinate of the point.
-        @returns object: A position object with x and y properties. */
-    getClosestPointOnALineToAPoint: function(Ax, Ay, Bx, By, Px, Py) {
-        var APx = Px - Ax,
-            APy = Py - Ay,
-            ABx = Bx - Ax,
-            ABy = By - Ay,
-            magAB2 = ABx * ABx + ABy * ABy,
-            ABdotAP = ABx * APx + ABy * APy,
-            t = ABdotAP / magAB2;
-        return {x:Ax + ABx * t, y:Ay + ABy * t};
-    },
-    
-    /** Get the closest point on a segment to a given point.
-        @param Ax:number The x-coordinate of the first endpoint that defines 
-            the segment.
-        @param Ay:number The y-coordinate of the first endpoint that defines 
-            the segment.
-        @param Bx:number The x-coordinate of the second endpoint that defines 
-            the segment.
-        @param By:number The y-coordinate of the second endpoint that defines 
-            the segment.
-        @param Px:number The x-coordinate of the point.
-        @param Py:number The y-coordinate of the point.
-        @returns object: A position object with x and y properties. */
-    getClosestPointOnASegmentToAPoint: function(Ax, Ay, Bx, By, Px, Py) {
-        var APx = Px - Ax,
-            APy = Py - Ay,
-            ABx = Bx - Ax,
-            ABy = By - Ay,
-            magAB2 = ABx * ABx + ABy * ABy,
-            ABdotAP = ABx * APx + ABy * APy,
-            t = ABdotAP / magAB2;
-        if (t < 0) {
-            return {x:Ax, y:Ay};
-        } else if (t > 1) {
-            return {x:Bx, y:By};
-        }
-        return {x:Ax + ABx * t, y:Ay + ABy * t};
-    },
-    
-    /** Tests if the provided point is inside this path.
-        @param x:number the x coordinate to test.
-        @param y:number the y coordinate to test.
-        @param boundingBox:object a bounding box object that bounds the path.
-        @param path:array an array of points where the index 0,2,4,... are
-            the x values and index 1,3,5,... are the y values.
-        
-        Alternate params:
-        @param x:object A point object with x and y properties.
-        
-        @return true if inside, false otherwise. */
-    isPointInPath: function(x, y, boundingBox, path) {
-        if (typeof x === 'object') {
-            path = boundingBox;
-            boundingBox = y;
-            y = x.y;
-            x = x.x;
-        }
-        
-        // First test bounding box
-        if (this.rectContainsPoint(x, y, boundingBox)) {
-            // Test using Jordan Curve Theorem
-            var len = path.length;
+        Makes use of:
+            parseUri 1.2.2
+            (c) Steven Levithan <stevenlevithan.com>
+            MIT License
+            See: http://blog.stevenlevithan.com/archives/parseuri
             
-            // Must at least be a triangle to have an inside.
-            if (len >= 6) {
-                var c = false, x1 = path[0], y1 = path[1], x2, y2;
-                while (len) {
-                    y2 = path[--len];
-                    x2 = path[--len];
-                    if (((y2 > y) !== (y1 > y)) && (x < (x1 - x2) * (y - y2) / (y1 - y2) + x2)) c = !c;
-                    x1 = x2;
-                    y1 = y2;
-                }
-                return c;
+        When more complex URI parsing is needed, perhaps try URI.js which can be
+        found at: http://medialize.github.io/URI.js/
+    */
+    pkg.URI = new JS.Class('URI', {
+        // Constructor /////////////////////////////////////////////////////////////
+        initialize: function(str, loose) {
+            if (str) this.parse(str, loose);
+        },
+        
+        
+        // Attributes and Setters/Getters //////////////////////////////////////////
+        setSource: function(v) {this.source = v;},
+        setProtocol: function(v) {this.protocol = v;},
+        setAuthority: function(v) {this.authority = v;},
+        setUserInfo: function(v) {this.userInfo = v;},
+        setUser: function(v) {this.user = v;},
+        setPassword: function(v) {this.password = v;},
+        setHost: function(v) {this.host = v;},
+        setPort: function(v) {this.port = v;},
+        setRelative: function(v) {this.relative = v;},
+        setPath: function(v) {this.path = v;},
+        setDirectory: function(v) {this.directory = v;},
+        setFile: function(v) {this.file = v;},
+        setQuery: function(v) {this.query = v;},
+        setAnchor: function(v) {this.anchor = v;},
+        
+        
+        // Methods /////////////////////////////////////////////////////////////////
+        parse: function(str, loose) {
+            // match order: "source", "protocol", "authority", "userInfo", "user",
+            //              "password", "host", "port", "relative", "path", 
+            //              "directory", "file", "query", "anchor".
+            var self = this,
+                m = (loose ? looseParser : strictParser).exec(str);
+            
+            self.setSource(m[0] || "");
+            
+            self.setProtocol(m[1] || "");
+            self.setAuthority(m[2] || "");
+            self.setUserInfo(m[3] || "");
+            self.setUser(m[4] || "");
+            self.setPassword(m[5] || "");
+            self.setHost(m[6] || "");
+            self.setPort(m[7] || "");
+            self.setRelative(m[8] || "");
+            self.setPath(m[9] || "");
+            self.setDirectory(m[10] || "");
+            self.setFile(m[11] || "");
+            self.setQuery(m[12] || "");
+            self.setAnchor(m[13] || "");
+            
+            // Parse the query into pairs
+            self.queryPairs = {};
+            self.query.replace(queryParser, ($0, $1, $2) => {
+                if ($1) self.queryPairs[$1] = $2;
+            });
+        },
+        
+        /** Unescape a query param value. */
+        decodeQueryParam: function(v) {
+            v = decodeURIComponent(v);
+            return v.replace('+', ' ');
+        },
+        
+        getQuery: function() {
+            var pairs = this.queryPairs,
+                parts = [],
+                key,
+                s;
+            for (key in pairs) parts.push(key + '=' + encodeURIComponent(this.getQueryParam(key)));
+            s = parts.join('&');
+            return s.length > 0 ? '?' + s : s;
+        },
+        
+        getQueryParam: function(name) {
+            var v = this.queryPairs[name];
+            return v == null ? undefined : this.decodeQueryParam(v);
+        },
+        
+        getPathParts: function(allowEmpties) {
+            var parts = this.path.split('/');
+            
+            if (!allowEmpties) {
+                var i = parts.length;
+                while (i) if (parts[--i].length === 0) parts.splice(i, 1);
             }
+            
+            return parts;
+        },
+        
+        toString: function(originalRawQuery) {
+            var self = this,
+                protocol = self.protocol,
+                host = self.host,
+                userInfo = self.userInfo,
+                port = self.port,
+                path = self.path,
+                query = originalRawQuery ? (self.query ? '?' + self.query : '') : self.getQuery(),
+                anchor = self.anchor,
+                s = '';
+            
+            if (protocol) s += protocol + '://';
+            if (userInfo && host) s += userInfo + '@';
+            
+            if (host) {
+                s += host;
+                if (port) s += ':' + port;
+            }
+            
+            if (path) {
+                s += path;
+            } else if (host && (query || anchor)) {
+                s += '/';
+            }
+            
+            if (query) s += query;
+            if (anchor) s += '#' + anchor;
+            
+            return s;
         }
-        return false;
-    },
-    
-    /** Checks if the provided point is inside or on the edge of the provided 
-        rectangle.
-        @param pX:number the x coordinate of the point to test.
-        @param pY:number the y coordinate of the point to test.
-        @param rX:number the x coordinate of the rectangle.
-        @param rY:number the y coordinate of the rectangle.
-        @param rW:number the width of the rectangle.
-        @param rH:number the height of the rectangle.
+    });
+})(myt);
+
+
+myt.Geometry = (() => {
+    /** Provides common geometry related functions. */
+    var exports = {
+        // Methods /////////////////////////////////////////////////////////////////
+        /** Get the closest point on a line to a given point.
+            @param Ax:number The x-coordinate of the first point that defines 
+                the line.
+            @param Ay:number The y-coordinate of the first point that defines 
+                the line.
+            @param Bx:number The x-coordinate of the second point that defines 
+                the line.
+            @param By:number The y-coordinate of the second point that defines 
+                the line.
+            @param Px:number The x-coordinate of the point.
+            @param Py:number The y-coordinate of the point.
+            @returns object: A position object with x and y properties. */
+        getClosestPointOnALineToAPoint: (Ax, Ay, Bx, By, Px, Py) => {
+            var APx = Px - Ax,
+                APy = Py - Ay,
+                ABx = Bx - Ax,
+                ABy = By - Ay,
+                magAB2 = ABx * ABx + ABy * ABy,
+                ABdotAP = ABx * APx + ABy * APy,
+                t = ABdotAP / magAB2;
+            return {x:Ax + ABx * t, y:Ay + ABy * t};
+        },
         
-        Alternate Params:
-        @param pX:object a point object with properties x and y.
-        @param rX:object a rect object with properties x, y, width and height.
+        /** Get the closest point on a segment to a given point.
+            @param Ax:number The x-coordinate of the first endpoint that defines 
+                the segment.
+            @param Ay:number The y-coordinate of the first endpoint that defines 
+                the segment.
+            @param Bx:number The x-coordinate of the second endpoint that defines 
+                the segment.
+            @param By:number The y-coordinate of the second endpoint that defines 
+                the segment.
+            @param Px:number The x-coordinate of the point.
+            @param Py:number The y-coordinate of the point.
+            @returns object: A position object with x and y properties. */
+        getClosestPointOnASegmentToAPoint: (Ax, Ay, Bx, By, Px, Py) => {
+            var APx = Px - Ax,
+                APy = Py - Ay,
+                ABx = Bx - Ax,
+                ABy = By - Ay,
+                magAB2 = ABx * ABx + ABy * ABy,
+                ABdotAP = ABx * APx + ABy * APy,
+                t = ABdotAP / magAB2;
+            if (t < 0) {
+                return {x:Ax, y:Ay};
+            } else if (t > 1) {
+                return {x:Bx, y:By};
+            }
+            return {x:Ax + ABx * t, y:Ay + ABy * t};
+        },
         
-        @returns boolean True if the point is inside or on the rectangle. */
-    rectContainsPoint: function(pX, pY, rX, rY, rW, rH) {
-        if (typeof pX === 'object') {
-            rH = rW;
-            rW = rY;
-            rY = rX;
-            rX = pY;
-            pY = pX.y;
-            pX = pX.x;
+        /** Tests if the provided point is inside this path.
+            @param x:number the x coordinate to test.
+            @param y:number the y coordinate to test.
+            @param boundingBox:object a bounding box object that bounds the path.
+            @param path:array an array of points where the index 0,2,4,... are
+                the x values and index 1,3,5,... are the y values.
+            
+            Alternate params:
+            @param x:object A point object with x and y properties.
+            
+            @return true if inside, false otherwise. */
+        isPointInPath: (x, y, boundingBox, path) => {
+            if (typeof x === 'object') {
+                path = boundingBox;
+                boundingBox = y;
+                y = x.y;
+                x = x.x;
+            }
+            
+            // First test bounding box
+            if (exports.rectContainsPoint(x, y, boundingBox)) {
+                // Test using Jordan Curve Theorem
+                var len = path.length;
+                
+                // Must at least be a triangle to have an inside.
+                if (len >= 6) {
+                    var c = false, x1 = path[0], y1 = path[1], x2, y2;
+                    while (len) {
+                        y2 = path[--len];
+                        x2 = path[--len];
+                        if (((y2 > y) !== (y1 > y)) && (x < (x1 - x2) * (y - y2) / (y1 - y2) + x2)) c = !c;
+                        x1 = x2;
+                        y1 = y2;
+                    }
+                    return c;
+                }
+            }
+            return false;
+        },
+        
+        /** Checks if the provided point is inside or on the edge of the provided 
+            rectangle.
+            @param pX:number the x coordinate of the point to test.
+            @param pY:number the y coordinate of the point to test.
+            @param rX:number the x coordinate of the rectangle.
+            @param rY:number the y coordinate of the rectangle.
+            @param rW:number the width of the rectangle.
+            @param rH:number the height of the rectangle.
+            
+            Alternate Params:
+            @param pX:object a point object with properties x and y.
+            @param rX:object a rect object with properties x, y, width and height.
+            
+            @returns boolean True if the point is inside or on the rectangle. */
+        rectContainsPoint: (pX, pY, rX, rY, rW, rH) => {
+            if (typeof pX === 'object') {
+                rH = rW;
+                rW = rY;
+                rY = rX;
+                rX = pY;
+                pY = pX.y;
+                pX = pX.x;
+            }
+            
+            if (typeof rX === 'object') {
+                rH = rX.height;
+                rW = rX.width;
+                rY = rX.y;
+                rX = rX.x;
+            }
+            
+            return pX >= rX && pY >= rY && pX <= rX + rW && pY <= rY + rH;
+        },
+        
+        /** Checks if the provided point lies inside or on the edge of the
+            provided circle.
+            @param pX:number the x coordinate of the point to test.
+            @param pY:number the y coordinate of the point to test.
+            @param cX:number the x coordinate of the center of the circle.
+            @param cY:number the y coordinate of the center of the circle.
+            @param cR:number the radius of the circle.
+            @return boolean True if the point is inside or on the circle. */
+        circleContainsPoint: (pX, pY, cX, cY, cR) => exports.measureDistance(pX, pY, cX, cY, true) <= cR * cR,
+        
+        /** Measure the distance between two points.
+            @param x1:number the x position of the first point.
+            @param y1:number the y position of the first point.
+            @param x2:number the x position of the second point.
+            @param y2:number the y position of the second point.
+            @param squared:boolean (optional) If true, the squared distance will
+                be returned.
+            @returns number the distance between the two points. */
+        measureDistance: (x1, y1, x2, y2, squared) => {
+            var diffX = x2 - x1, 
+                diffY = y2 - y1, 
+                diffSquared = diffX * diffX + diffY * diffY;
+            return squared ? diffSquared : Math.sqrt(diffSquared);
+        },
+        
+        /** Convert radians to degrees.
+            @param deg:number degrees.
+            @returns number: radians. */
+        degreesToRadians: (deg) => deg * Math.PI / 180,
+        
+        /** Convert degrees to radians.
+            @param rad:number radians.
+            @returns number: degrees. */
+        radiansToDegrees: (rad) => rad * 180 / Math.PI,
+        
+        // Geometry on a sphere
+        /** Checks if the provided lat/lng point lies inside or on the edge of the
+            provided circle.
+            @param pLat:number the latitude of the point to test.
+            @param pLng:number the longitude of the point to test.
+            @param cLat:number the latitude of the center of the circle.
+            @param cLng:number the longitude of the center of the circle.
+            @param cR:number the radius of the circle in kilometers.
+            @param sphereRadius:number (optional) the radius of the sphere the
+                measurement is being taken on in kilometers. If not provided the
+                radius of the earth is used.
+            @return boolean True if the point is inside or on the circle. */
+        circleContainsLatLng: (pLat, pLng, cLat, cLng, cR, sphereRadius) => exports.measureLatLngDistance(pLat, pLng, cLat, cLng, sphereRadius) <= cR,
+        
+        /** Measures the distance between two points on a sphere using latitude
+            and longitude.
+            @param lat1:number the latitude of the first point.
+            @param lng1:number the longitude of the first point.
+            @param lat2:number the latitude of the second point.
+            @param lng2:number the longitude of the second point.
+            @param sphereRadius:number (optional) the radius of the sphere the
+                measurement is being taken on in kilometers. If not provided the
+                radius of the earth is used.
+            @returns number the distance between the points in kilometers. */
+        measureLatLngDistance: (lat1, lng1, lat2, lng2, sphereRadius) => {
+            // Taken from: http://www.movable-type.co.uk/scripts/latlong.html
+            if (sphereRadius === undefined) sphereRadius = 6371; // kilometers for earth
+            lat1 = exports.degreesToRadians(lat1);
+            lng1 = exports.degreesToRadians(lng1);
+            lat2 = exports.degreesToRadians(lat2);
+            lng2 = exports.degreesToRadians(lng2);
+            return sphereRadius * Math.acos(
+                Math.sin(lat1) * Math.sin(lat2) + 
+                Math.cos(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1)
+            );
+        },
+        
+        /** Convert from polar to cartesian coordinates.
+            @param radius:number The radius of the point to convert relative to
+                the circle.
+            @param degrees:number The angle coordinate of the point to convert.
+            @param cx:number (optional) The x coordinate of the center of the 
+                circle.
+            @param cy:number (optional) The y coordinate of the center of the 
+                circle.
+            @returns array where index 0 is the x coordinate and index 1 is the
+                y coordinate. */
+        polarToCartesian: (radius, degrees, cx, cy) => {
+            if (cx == null) cx = 0;
+            if (cy == null) cy = 0;
+            degrees = degrees % 360;
+            
+            var x, y;
+            if (degrees === 0) {
+                x = radius;
+                y = 0;
+            } else if (degrees === 90) {
+                x = 0;
+                y = radius;
+            } else if (degrees === 180) {
+                x = -radius;
+                y = 0;
+            } else if (degrees === 270) {
+                x = 0;
+                y = -radius;
+            } else {
+                var radians = exports.degreesToRadians(degrees);
+                x = radius * Math.cos(radians);
+                y = radius * Math.sin(radians);
+            }
+            
+            return [cx + x, cy + y];
+        },
+        
+        /** Convert from cartesian to polar coordinates.
+            @param x:number The x coordinate to transform.
+            @param y:number The y coordinate to transform.
+            @param cx:number (optional) The x coordinate of the center of the
+                circle.
+            @param cy:number (optional) The y coordinate of the center of the
+                circle.
+            @param useRadians:boolean (optional) If true the angle returned will
+                be in radians otherwise it will be degrees.
+            @return array where index 0 is the radius and index 1 is angle
+                in degrees (or radians if userRadians is true). */
+        cartesianToPolar: (x, y, cx, cy, useRadians) => {
+            if (cx == null) cx = 0;
+            if (cy == null) cy = 0;
+            
+            var diffX = x - cx,
+                diffY = y - cy,
+                radius = Math.sqrt(diffX*diffX + diffY*diffY),
+                radians = Math.atan2(diffY, diffX);
+            if (radians < 0) radians += 2 * Math.PI;
+            return [radius, useRadians ? radians : exports.radiansToDegrees(radians)];
         }
-        
-        if (typeof rX === 'object') {
-            rH = rX.height;
-            rW = rX.width;
-            rY = rX.y;
-            rX = rX.x;
-        }
-        
-        return pX >= rX && pY >= rY && pX <= rX + rW && pY <= rY + rH;
-    },
+    };
     
-    /** Checks if the provided point lies inside or on the edge of the
-        provided circle.
-        @param pX:number the x coordinate of the point to test.
-        @param pY:number the y coordinate of the point to test.
-        @param cX:number the x coordinate of the center of the circle.
-        @param cY:number the y coordinate of the center of the circle.
-        @param cR:number the radius of the circle.
-        @return boolean True if the point is inside or on the circle. */
-    circleContainsPoint: function(pX, pY, cX, cY, cR) {
-        return this.measureDistance(pX, pY, cX, cY, true) <= cR * cR;
-    },
-    
-    /** Measure the distance between two points.
-        @param x1:number the x position of the first point.
-        @param y1:number the y position of the first point.
-        @param x2:number the x position of the second point.
-        @param y2:number the y position of the second point.
-        @param squared:boolean (optional) If true, the squared distance will
-            be returned.
-        @returns number the distance between the two points. */
-    measureDistance: function(x1, y1, x2, y2, squared) {
-        var diffX = x2 - x1, 
-            diffY = y2 - y1, 
-            diffSquared = diffX * diffX + diffY * diffY;
-        return squared ? diffSquared : Math.sqrt(diffSquared);
-    },
-    
-    /** Convert radians to degrees.
-        @param deg:number degrees.
-        @returns number: radians. */
-    degreesToRadians: function(deg) {
-        return deg * Math.PI / 180;
-    },
-    
-    /** Convert degrees to radians.
-        @param rad:number radians.
-        @returns number: degrees. */
-    radiansToDegrees: function(rad) {
-        return rad * 180 / Math.PI;
-    },
-    
-    // Geometry on a sphere
-    /** Checks if the provided lat/lng point lies inside or on the edge of the
-        provided circle.
-        @param pLat:number the latitude of the point to test.
-        @param pLng:number the longitude of the point to test.
-        @param cLat:number the latitude of the center of the circle.
-        @param cLng:number the longitude of the center of the circle.
-        @param cR:number the radius of the circle in kilometers.
-        @param sphereRadius:number (optional) the radius of the sphere the
-            measurement is being taken on in kilometers. If not provided the
-            radius of the earth is used.
-        @return boolean True if the point is inside or on the circle. */
-    circleContainsLatLng: function(pLat, pLng, cLat, cLng, cR, sphereRadius) {
-        return this.measureLatLngDistance(pLat, pLng, cLat, cLng, sphereRadius) <= cR;
-    },
-    
-    /** Measures the distance between two points on a sphere using latitude
-        and longitude.
-        @param lat1:number the latitude of the first point.
-        @param lng1:number the longitude of the first point.
-        @param lat2:number the latitude of the second point.
-        @param lng2:number the longitude of the second point.
-        @param sphereRadius:number (optional) the radius of the sphere the
-            measurement is being taken on in kilometers. If not provided the
-            radius of the earth is used.
-        @returns number the distance between the points in kilometers. */
-    measureLatLngDistance: function(lat1, lng1, lat2, lng2, sphereRadius) {
-        // Taken from: http://www.movable-type.co.uk/scripts/latlong.html
-        if (sphereRadius === undefined) sphereRadius = 6371; // kilometers for earth
-        lat1 = this.degreesToRadians(lat1);
-        lng1 = this.degreesToRadians(lng1);
-        lat2 = this.degreesToRadians(lat2);
-        lng2 = this.degreesToRadians(lng2);
-        return sphereRadius * Math.acos(
-            Math.sin(lat1) * Math.sin(lat2) + 
-            Math.cos(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1)
-        );
-    },
-    
-    /** Convert from polar to cartesian coordinates.
-        @param radius:number The radius of the point to convert relative to
-            the circle.
-        @param degrees:number The angle coordinate of the point to convert.
-        @param cx:number (optional) The x coordinate of the center of the 
-            circle.
-        @param cy:number (optional) The y coordinate of the center of the 
-            circle.
-        @returns array where index 0 is the x coordinate and index 1 is the
-            y coordinate. */
-    polarToCartesian: function(radius, degrees, cx, cy) {
-        if (cx == null) cx = 0;
-        if (cy == null) cy = 0;
-        degrees = degrees % 360;
-        
-        var x, y;
-        if (degrees === 0) {
-            x = radius;
-            y = 0;
-        } else if (degrees === 90) {
-            x = 0;
-            y = radius;
-        } else if (degrees === 180) {
-            x = -radius;
-            y = 0;
-        } else if (degrees === 270) {
-            x = 0;
-            y = -radius;
-        } else {
-            var radians = this.degreesToRadians(degrees);
-            x = radius * Math.cos(radians);
-            y = radius * Math.sin(radians);
-        }
-        
-        return [cx + x, cy + y];
-    },
-    
-    /** Convert from cartesian to polar coordinates.
-        @param x:number The x coordinate to transform.
-        @param y:number The y coordinate to transform.
-        @param cx:number (optional) The x coordinate of the center of the
-            circle.
-        @param cy:number (optional) The y coordinate of the center of the
-            circle.
-        @param useRadians:boolean (optional) If true the angle returned will
-            be in radians otherwise it will be degrees.
-        @return array where index 0 is the radius and index 1 is angle
-            in degrees (or radians if userRadians is true). */
-    cartesianToPolar: function(x, y, cx, cy, useRadians) {
-        if (cx == null) cx = 0;
-        if (cy == null) cy = 0;
-        
-        var diffX = x - cx,
-            diffY = y - cy,
-            radius = Math.sqrt(diffX*diffX + diffY*diffY),
-            radians = Math.atan2(diffY, diffX);
-        if (radians < 0) radians += 2 * Math.PI;
-        return [radius, useRadians ? radians : this.radiansToDegrees(radians)];
-    }
-};
+    return exports;
+})();
 
 
 /** Apply this mixin to any Object that needs to fire events.
