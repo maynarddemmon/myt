@@ -1,30 +1,29 @@
-/** Browser local storage utility functions.
-    
-    The Data methods utilize a single JSON object to store multiple values
-    under a single local storage item.
-*/
-myt.LocalStorage = (() => {
+((pkg) => {
     var localStorage = global.localStorage,
         
         getStoreId = (storeId) => storeId = storeId || 'myt',
         
         doFunc = (func, delay, timerKey) => {
             if (delay > 0) {
-                var LS = exports,
-                    timerIdKey = '__timerId_' + timerKey,
-                    timerId = LS[timerIdKey];
+                var timerIdKey = '__timerId_' + timerKey,
+                    timerId = LocalStorage[timerIdKey];
                 if (timerId) clearTimeout(timerId);
                 
-                LS[timerIdKey] = setTimeout(() => {
+                LocalStorage[timerIdKey] = setTimeout(() => {
                     func();
-                    delete LS[timerIdKey];
+                    delete LocalStorage[timerIdKey];
                 }, delay);
             } else {
                 func();
             }
         },
         
-        exports = {
+        /** Browser local storage utility functions.
+            
+            The Data methods utilize a single JSON object to store multiple values
+            under a single local storage item.
+        */
+        LocalStorage = pkg.LocalStorage = {
             /** Check if data has been stored under the key and storage id.
                 @param key:string the key to look for.
                 @param storeId:string (optional) id of the data store to look in. If
@@ -33,7 +32,7 @@ myt.LocalStorage = (() => {
                     otherwise true. */
             hasDatum: (key, storeId) => {
                 if (key) {
-                    var data = exports.getItem(getStoreId(storeId));
+                    var data = LocalStorage.getItem(getStoreId(storeId));
                     if (data) {
                         try {
                             return JSON.parse(data)[key] != null;
@@ -53,7 +52,7 @@ myt.LocalStorage = (() => {
                 @returns the value of the data or undefined if not found. */
             getDatum: (key, storeId) => {
                 if (key) {
-                    var data = exports.getItem(getStoreId(storeId));
+                    var data = LocalStorage.getItem(getStoreId(storeId));
                     if (data) {
                         try {
                             data = JSON.parse(data);
@@ -80,9 +79,9 @@ myt.LocalStorage = (() => {
             setDatum: (key, value, storeId, delay) => {
                 storeId = getStoreId(storeId);
                 doFunc(() => {
-                    var data = exports.getData(storeId);
+                    var data = LocalStorage.getData(storeId);
                     data[key] = value;
-                    exports.setItem(storeId, JSON.stringify(data));
+                    LocalStorage.setItem(storeId, JSON.stringify(data));
                 }, delay, storeId + '___' + key);
             },
             
@@ -96,9 +95,9 @@ myt.LocalStorage = (() => {
             removeDatum: (key, storeId, delay) => {
                 storeId = getStoreId(storeId);
                 doFunc(() => {
-                    var data = exports.getData(storeId);
+                    var data = LocalStorage.getData(storeId);
                     delete data[key];
-                    exports.setItem(storeId, JSON.stringify(data));
+                    LocalStorage.setItem(storeId, JSON.stringify(data));
                 }, delay, storeId + '___' + key);
             },
             
@@ -107,14 +106,14 @@ myt.LocalStorage = (() => {
                     not provided the default "myt" storeId will be used.
                 @returns boolean false if an undefined or null value is found,
                     otherwise true. */
-            hasData: (storeId) => exports.getItem(getStoreId(storeId)) != null,
+            hasData: (storeId) => LocalStorage.getItem(getStoreId(storeId)) != null,
             
             /** Get the data store stored under storage id.
                 @param storeId:string (optional) id of the data store to get data for.
                     If not provided the default "myt" storeId will be used.
                 @returns the store object. */
             getData: (storeId) => {
-                var data = exports.getItem(getStoreId(storeId));
+                var data = LocalStorage.getItem(getStoreId(storeId));
                 if (data) {
                     try {
                         return JSON.parse(data);
@@ -144,7 +143,7 @@ myt.LocalStorage = (() => {
                 if (data == null) data = {};
                 
                 if (typeof data === 'object') {
-                    doFunc(() => {exports.setItem(storeId, JSON.stringify(data));}, delay, storeId);
+                    doFunc(() => {LocalStorage.setItem(storeId, JSON.stringify(data));}, delay, storeId);
                     return true;
                 }
                 
@@ -159,7 +158,7 @@ myt.LocalStorage = (() => {
                 @returns void */
             removeData: (storeId, delay) => {
                 storeId = getStoreId(storeId);
-                doFunc(() => {exports.removeItem(storeId);}, delay, storeId);
+                doFunc(() => {LocalStorage.removeItem(storeId);}, delay, storeId);
             },
             
             // wrapper functions on localStorage
@@ -198,23 +197,21 @@ myt.LocalStorage = (() => {
             
             // Aliases for better API compatibility with some libraries.
             /** An alias for getItem. */
-            get: (key) => exports.getItem(key),
+            get: (key) => LocalStorage.getItem(key),
             
             /** An alias for setItem. */
             set: (key, value) => {
-                exports.setItem(key, value);
+                LocalStorage.setItem(key, value);
             },
             
             /** An alias for removeItem. */
             remove: (key) => {
-                exports.removeItem(key);
+                LocalStorage.removeItem(key);
             },
             
             /** An alias for clear. */
             clearAll: () => {
-                exports.clear();
+                LocalStorage.clear();
             }
         };
-    
-    return exports;
-})();
+})(myt);

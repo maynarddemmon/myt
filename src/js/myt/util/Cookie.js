@@ -28,8 +28,8 @@
                 Copyright 2013 Klaus Hartl
                 Released under the MIT license
         */
-        exports = {
-            // Attributes //////////////////////////////////////////////////////////
+        Cookie = pkg.Cookie = {
+            // Attributes //////////////////////////////////////////////////////
             /** Default cookie properties and settings. */
             defaults: {
                 raw:false, // If true, don't use encodeURIComponent/decodeURIComponent
@@ -37,7 +37,7 @@
             },
             
             
-            // Methods /////////////////////////////////////////////////////////////
+            // Methods /////////////////////////////////////////////////////////
             /** Reads a cookie.
                 @param key:string the name of the cookie to read.
                 @param options:object options that determine how the cookie is read
@@ -48,7 +48,7 @@
                             cookie value before it is returned.
                 @returns The cookie value string or a parsed cookie value. */
             read: (key, options) => {
-                options = pkg.extend({}, exports.defaults, options);
+                options = pkg.extend({}, Cookie.defaults, options);
                 
                 var decodeFunc = options.raw ? raw : decoded,
                     useJson = options.json,
@@ -90,7 +90,7 @@
                             the cookie value.
                 @returns void */
             write: (key, value, options) => {
-                options = pkg.extend({}, exports.defaults, options);
+                options = pkg.extend({}, Cookie.defaults, options);
                 
                 if (typeof options.expires === 'number') {
                     var days = options.expires,
@@ -116,13 +116,12 @@
                 @param options:object options used to read/write the cookie.
                 @returns true if a cookie was removed, false otherwise. */
             remove: (key, options) => {
-                if (exports.read(key, options) !== undefined) {
+                if (Cookie.read(key, options) !== undefined) {
                     // Must not alter options, thus extending a fresh object.
-                    exports.write(key, '', pkg.extend({}, options, {expires: -1}));
+                    Cookie.write(key, '', pkg.extend({}, options, {expires: -1}));
                     return true;
                 }
                 return false;
             }
         };
-    pkg.Cookie = exports;
 })(myt);

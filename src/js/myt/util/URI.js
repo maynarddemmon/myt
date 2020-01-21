@@ -15,13 +15,13 @@
         found at: http://medialize.github.io/URI.js/
     */
     pkg.URI = new JS.Class('URI', {
-        // Constructor /////////////////////////////////////////////////////////////
+        // Constructor /////////////////////////////////////////////////////////
         initialize: function(str, loose) {
             if (str) this.parse(str, loose);
         },
         
         
-        // Attributes and Setters/Getters //////////////////////////////////////////
+        // Attributes and Setters/Getters //////////////////////////////////////
         setSource: function(v) {this.source = v;},
         setProtocol: function(v) {this.protocol = v;},
         setAuthority: function(v) {this.authority = v;},
@@ -38,7 +38,7 @@
         setAnchor: function(v) {this.anchor = v;},
         
         
-        // Methods /////////////////////////////////////////////////////////////////
+        // Methods /////////////////////////////////////////////////////////////
         parse: function(str, loose) {
             // match order: "source", "protocol", "authority", "userInfo", "user",
             //              "password", "host", "port", "relative", "path", 

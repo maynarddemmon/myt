@@ -1,6 +1,6 @@
-myt.Geometry = (() => {
+((pkg) => {
     /** Provides common geometry related functions. */
-    var exports = {
+    var Geometry = pkg.Geometry = {
         // Methods /////////////////////////////////////////////////////////////////
         /** Get the closest point on a line to a given point.
             @param Ax:number The x-coordinate of the first point that defines 
@@ -45,11 +45,8 @@ myt.Geometry = (() => {
                 magAB2 = ABx * ABx + ABy * ABy,
                 ABdotAP = ABx * APx + ABy * APy,
                 t = ABdotAP / magAB2;
-            if (t < 0) {
-                return {x:Ax, y:Ay};
-            } else if (t > 1) {
-                return {x:Bx, y:By};
-            }
+            if (t < 0) return {x:Ax, y:Ay};
+            if (t > 1) return {x:Bx, y:By};
             return {x:Ax + ABx * t, y:Ay + ABy * t};
         },
         
@@ -73,13 +70,17 @@ myt.Geometry = (() => {
             }
             
             // First test bounding box
-            if (exports.rectContainsPoint(x, y, boundingBox)) {
+            if (Geometry.rectContainsPoint(x, y, boundingBox)) {
                 // Test using Jordan Curve Theorem
                 var len = path.length;
                 
                 // Must at least be a triangle to have an inside.
                 if (len >= 6) {
-                    var c = false, x1 = path[0], y1 = path[1], x2, y2;
+                    var c = false, 
+                        x1 = path[0], 
+                        y1 = path[1], 
+                        x2, 
+                        y2;
                     while (len) {
                         y2 = path[--len];
                         x2 = path[--len];
@@ -135,7 +136,7 @@ myt.Geometry = (() => {
             @param cY:number the y coordinate of the center of the circle.
             @param cR:number the radius of the circle.
             @return boolean True if the point is inside or on the circle. */
-        circleContainsPoint: (pX, pY, cX, cY, cR) => exports.measureDistance(pX, pY, cX, cY, true) <= cR * cR,
+        circleContainsPoint: (pX, pY, cX, cY, cR) => Geometry.measureDistance(pX, pY, cX, cY, true) <= cR * cR,
         
         /** Measure the distance between two points.
             @param x1:number the x position of the first point.
@@ -174,7 +175,7 @@ myt.Geometry = (() => {
                 measurement is being taken on in kilometers. If not provided the
                 radius of the earth is used.
             @return boolean True if the point is inside or on the circle. */
-        circleContainsLatLng: (pLat, pLng, cLat, cLng, cR, sphereRadius) => exports.measureLatLngDistance(pLat, pLng, cLat, cLng, sphereRadius) <= cR,
+        circleContainsLatLng: (pLat, pLng, cLat, cLng, cR, sphereRadius) => Geometry.measureLatLngDistance(pLat, pLng, cLat, cLng, sphereRadius) <= cR,
         
         /** Measures the distance between two points on a sphere using latitude
             and longitude.
@@ -189,10 +190,10 @@ myt.Geometry = (() => {
         measureLatLngDistance: (lat1, lng1, lat2, lng2, sphereRadius) => {
             // Taken from: http://www.movable-type.co.uk/scripts/latlong.html
             if (sphereRadius === undefined) sphereRadius = 6371; // kilometers for earth
-            lat1 = exports.degreesToRadians(lat1);
-            lng1 = exports.degreesToRadians(lng1);
-            lat2 = exports.degreesToRadians(lat2);
-            lng2 = exports.degreesToRadians(lng2);
+            lat1 = Geometry.degreesToRadians(lat1);
+            lng1 = Geometry.degreesToRadians(lng1);
+            lat2 = Geometry.degreesToRadians(lat2);
+            lng2 = Geometry.degreesToRadians(lng2);
             return sphereRadius * Math.acos(
                 Math.sin(lat1) * Math.sin(lat2) + 
                 Math.cos(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1)
@@ -214,7 +215,7 @@ myt.Geometry = (() => {
             if (cy == null) cy = 0;
             degrees = degrees % 360;
             
-            var x, y;
+            var x, y, radians;
             if (degrees === 0) {
                 x = radius;
                 y = 0;
@@ -228,7 +229,7 @@ myt.Geometry = (() => {
                 x = 0;
                 y = -radius;
             } else {
-                var radians = exports.degreesToRadians(degrees);
+                radians = Geometry.degreesToRadians(degrees);
                 x = radius * Math.cos(radians);
                 y = radius * Math.sin(radians);
             }
@@ -256,9 +257,7 @@ myt.Geometry = (() => {
                 radius = Math.sqrt(diffX*diffX + diffY*diffY),
                 radians = Math.atan2(diffY, diffX);
             if (radians < 0) radians += 2 * Math.PI;
-            return [radius, useRadians ? radians : exports.radiansToDegrees(radians)];
+            return [radius, useRadians ? radians : Geometry.radiansToDegrees(radians)];
         }
     };
-    
-    return exports;
-})();
+})(myt);

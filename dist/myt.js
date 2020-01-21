@@ -1167,8 +1167,8 @@ myt = {
                 Copyright 2013 Klaus Hartl
                 Released under the MIT license
         */
-        exports = {
-            // Attributes //////////////////////////////////////////////////////////
+        Cookie = pkg.Cookie = {
+            // Attributes //////////////////////////////////////////////////////
             /** Default cookie properties and settings. */
             defaults: {
                 raw:false, // If true, don't use encodeURIComponent/decodeURIComponent
@@ -1176,7 +1176,7 @@ myt = {
             },
             
             
-            // Methods /////////////////////////////////////////////////////////////
+            // Methods /////////////////////////////////////////////////////////
             /** Reads a cookie.
                 @param key:string the name of the cookie to read.
                 @param options:object options that determine how the cookie is read
@@ -1187,7 +1187,7 @@ myt = {
                             cookie value before it is returned.
                 @returns The cookie value string or a parsed cookie value. */
             read: (key, options) => {
-                options = pkg.extend({}, exports.defaults, options);
+                options = pkg.extend({}, Cookie.defaults, options);
                 
                 var decodeFunc = options.raw ? raw : decoded,
                     useJson = options.json,
@@ -1229,7 +1229,7 @@ myt = {
                             the cookie value.
                 @returns void */
             write: (key, value, options) => {
-                options = pkg.extend({}, exports.defaults, options);
+                options = pkg.extend({}, Cookie.defaults, options);
                 
                 if (typeof options.expires === 'number') {
                     var days = options.expires,
@@ -1255,45 +1255,43 @@ myt = {
                 @param options:object options used to read/write the cookie.
                 @returns true if a cookie was removed, false otherwise. */
             remove: (key, options) => {
-                if (exports.read(key, options) !== undefined) {
+                if (Cookie.read(key, options) !== undefined) {
                     // Must not alter options, thus extending a fresh object.
-                    exports.write(key, '', pkg.extend({}, options, {expires: -1}));
+                    Cookie.write(key, '', pkg.extend({}, options, {expires: -1}));
                     return true;
                 }
                 return false;
             }
         };
-    pkg.Cookie = exports;
 })(myt);
 
 
-/** Browser local storage utility functions.
-    
-    The Data methods utilize a single JSON object to store multiple values
-    under a single local storage item.
-*/
-myt.LocalStorage = (() => {
+((pkg) => {
     var localStorage = global.localStorage,
         
         getStoreId = (storeId) => storeId = storeId || 'myt',
         
         doFunc = (func, delay, timerKey) => {
             if (delay > 0) {
-                var LS = exports,
-                    timerIdKey = '__timerId_' + timerKey,
-                    timerId = LS[timerIdKey];
+                var timerIdKey = '__timerId_' + timerKey,
+                    timerId = LocalStorage[timerIdKey];
                 if (timerId) clearTimeout(timerId);
                 
-                LS[timerIdKey] = setTimeout(() => {
+                LocalStorage[timerIdKey] = setTimeout(() => {
                     func();
-                    delete LS[timerIdKey];
+                    delete LocalStorage[timerIdKey];
                 }, delay);
             } else {
                 func();
             }
         },
         
-        exports = {
+        /** Browser local storage utility functions.
+            
+            The Data methods utilize a single JSON object to store multiple values
+            under a single local storage item.
+        */
+        LocalStorage = pkg.LocalStorage = {
             /** Check if data has been stored under the key and storage id.
                 @param key:string the key to look for.
                 @param storeId:string (optional) id of the data store to look in. If
@@ -1302,7 +1300,7 @@ myt.LocalStorage = (() => {
                     otherwise true. */
             hasDatum: (key, storeId) => {
                 if (key) {
-                    var data = exports.getItem(getStoreId(storeId));
+                    var data = LocalStorage.getItem(getStoreId(storeId));
                     if (data) {
                         try {
                             return JSON.parse(data)[key] != null;
@@ -1322,7 +1320,7 @@ myt.LocalStorage = (() => {
                 @returns the value of the data or undefined if not found. */
             getDatum: (key, storeId) => {
                 if (key) {
-                    var data = exports.getItem(getStoreId(storeId));
+                    var data = LocalStorage.getItem(getStoreId(storeId));
                     if (data) {
                         try {
                             data = JSON.parse(data);
@@ -1349,9 +1347,9 @@ myt.LocalStorage = (() => {
             setDatum: (key, value, storeId, delay) => {
                 storeId = getStoreId(storeId);
                 doFunc(() => {
-                    var data = exports.getData(storeId);
+                    var data = LocalStorage.getData(storeId);
                     data[key] = value;
-                    exports.setItem(storeId, JSON.stringify(data));
+                    LocalStorage.setItem(storeId, JSON.stringify(data));
                 }, delay, storeId + '___' + key);
             },
             
@@ -1365,9 +1363,9 @@ myt.LocalStorage = (() => {
             removeDatum: (key, storeId, delay) => {
                 storeId = getStoreId(storeId);
                 doFunc(() => {
-                    var data = exports.getData(storeId);
+                    var data = LocalStorage.getData(storeId);
                     delete data[key];
-                    exports.setItem(storeId, JSON.stringify(data));
+                    LocalStorage.setItem(storeId, JSON.stringify(data));
                 }, delay, storeId + '___' + key);
             },
             
@@ -1376,14 +1374,14 @@ myt.LocalStorage = (() => {
                     not provided the default "myt" storeId will be used.
                 @returns boolean false if an undefined or null value is found,
                     otherwise true. */
-            hasData: (storeId) => exports.getItem(getStoreId(storeId)) != null,
+            hasData: (storeId) => LocalStorage.getItem(getStoreId(storeId)) != null,
             
             /** Get the data store stored under storage id.
                 @param storeId:string (optional) id of the data store to get data for.
                     If not provided the default "myt" storeId will be used.
                 @returns the store object. */
             getData: (storeId) => {
-                var data = exports.getItem(getStoreId(storeId));
+                var data = LocalStorage.getItem(getStoreId(storeId));
                 if (data) {
                     try {
                         return JSON.parse(data);
@@ -1413,7 +1411,7 @@ myt.LocalStorage = (() => {
                 if (data == null) data = {};
                 
                 if (typeof data === 'object') {
-                    doFunc(() => {exports.setItem(storeId, JSON.stringify(data));}, delay, storeId);
+                    doFunc(() => {LocalStorage.setItem(storeId, JSON.stringify(data));}, delay, storeId);
                     return true;
                 }
                 
@@ -1428,7 +1426,7 @@ myt.LocalStorage = (() => {
                 @returns void */
             removeData: (storeId, delay) => {
                 storeId = getStoreId(storeId);
-                doFunc(() => {exports.removeItem(storeId);}, delay, storeId);
+                doFunc(() => {LocalStorage.removeItem(storeId);}, delay, storeId);
             },
             
             // wrapper functions on localStorage
@@ -1467,26 +1465,24 @@ myt.LocalStorage = (() => {
             
             // Aliases for better API compatibility with some libraries.
             /** An alias for getItem. */
-            get: (key) => exports.getItem(key),
+            get: (key) => LocalStorage.getItem(key),
             
             /** An alias for setItem. */
             set: (key, value) => {
-                exports.setItem(key, value);
+                LocalStorage.setItem(key, value);
             },
             
             /** An alias for removeItem. */
             remove: (key) => {
-                exports.removeItem(key);
+                LocalStorage.removeItem(key);
             },
             
             /** An alias for clear. */
             clearAll: () => {
-                exports.clear();
+                LocalStorage.clear();
             }
         };
-    
-    return exports;
-})();
+})(myt);
 
 
 ((pkg) => {
@@ -1506,13 +1502,13 @@ myt.LocalStorage = (() => {
         found at: http://medialize.github.io/URI.js/
     */
     pkg.URI = new JS.Class('URI', {
-        // Constructor /////////////////////////////////////////////////////////////
+        // Constructor /////////////////////////////////////////////////////////
         initialize: function(str, loose) {
             if (str) this.parse(str, loose);
         },
         
         
-        // Attributes and Setters/Getters //////////////////////////////////////////
+        // Attributes and Setters/Getters //////////////////////////////////////
         setSource: function(v) {this.source = v;},
         setProtocol: function(v) {this.protocol = v;},
         setAuthority: function(v) {this.authority = v;},
@@ -1529,7 +1525,7 @@ myt.LocalStorage = (() => {
         setAnchor: function(v) {this.anchor = v;},
         
         
-        // Methods /////////////////////////////////////////////////////////////////
+        // Methods /////////////////////////////////////////////////////////////
         parse: function(str, loose) {
             // match order: "source", "protocol", "authority", "userInfo", "user",
             //              "password", "host", "port", "relative", "path", 
@@ -1626,9 +1622,9 @@ myt.LocalStorage = (() => {
 })(myt);
 
 
-myt.Geometry = (() => {
+((pkg) => {
     /** Provides common geometry related functions. */
-    var exports = {
+    var Geometry = pkg.Geometry = {
         // Methods /////////////////////////////////////////////////////////////////
         /** Get the closest point on a line to a given point.
             @param Ax:number The x-coordinate of the first point that defines 
@@ -1673,11 +1669,8 @@ myt.Geometry = (() => {
                 magAB2 = ABx * ABx + ABy * ABy,
                 ABdotAP = ABx * APx + ABy * APy,
                 t = ABdotAP / magAB2;
-            if (t < 0) {
-                return {x:Ax, y:Ay};
-            } else if (t > 1) {
-                return {x:Bx, y:By};
-            }
+            if (t < 0) return {x:Ax, y:Ay};
+            if (t > 1) return {x:Bx, y:By};
             return {x:Ax + ABx * t, y:Ay + ABy * t};
         },
         
@@ -1701,13 +1694,17 @@ myt.Geometry = (() => {
             }
             
             // First test bounding box
-            if (exports.rectContainsPoint(x, y, boundingBox)) {
+            if (Geometry.rectContainsPoint(x, y, boundingBox)) {
                 // Test using Jordan Curve Theorem
                 var len = path.length;
                 
                 // Must at least be a triangle to have an inside.
                 if (len >= 6) {
-                    var c = false, x1 = path[0], y1 = path[1], x2, y2;
+                    var c = false, 
+                        x1 = path[0], 
+                        y1 = path[1], 
+                        x2, 
+                        y2;
                     while (len) {
                         y2 = path[--len];
                         x2 = path[--len];
@@ -1763,7 +1760,7 @@ myt.Geometry = (() => {
             @param cY:number the y coordinate of the center of the circle.
             @param cR:number the radius of the circle.
             @return boolean True if the point is inside or on the circle. */
-        circleContainsPoint: (pX, pY, cX, cY, cR) => exports.measureDistance(pX, pY, cX, cY, true) <= cR * cR,
+        circleContainsPoint: (pX, pY, cX, cY, cR) => Geometry.measureDistance(pX, pY, cX, cY, true) <= cR * cR,
         
         /** Measure the distance between two points.
             @param x1:number the x position of the first point.
@@ -1802,7 +1799,7 @@ myt.Geometry = (() => {
                 measurement is being taken on in kilometers. If not provided the
                 radius of the earth is used.
             @return boolean True if the point is inside or on the circle. */
-        circleContainsLatLng: (pLat, pLng, cLat, cLng, cR, sphereRadius) => exports.measureLatLngDistance(pLat, pLng, cLat, cLng, sphereRadius) <= cR,
+        circleContainsLatLng: (pLat, pLng, cLat, cLng, cR, sphereRadius) => Geometry.measureLatLngDistance(pLat, pLng, cLat, cLng, sphereRadius) <= cR,
         
         /** Measures the distance between two points on a sphere using latitude
             and longitude.
@@ -1817,10 +1814,10 @@ myt.Geometry = (() => {
         measureLatLngDistance: (lat1, lng1, lat2, lng2, sphereRadius) => {
             // Taken from: http://www.movable-type.co.uk/scripts/latlong.html
             if (sphereRadius === undefined) sphereRadius = 6371; // kilometers for earth
-            lat1 = exports.degreesToRadians(lat1);
-            lng1 = exports.degreesToRadians(lng1);
-            lat2 = exports.degreesToRadians(lat2);
-            lng2 = exports.degreesToRadians(lng2);
+            lat1 = Geometry.degreesToRadians(lat1);
+            lng1 = Geometry.degreesToRadians(lng1);
+            lat2 = Geometry.degreesToRadians(lat2);
+            lng2 = Geometry.degreesToRadians(lng2);
             return sphereRadius * Math.acos(
                 Math.sin(lat1) * Math.sin(lat2) + 
                 Math.cos(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1)
@@ -1842,7 +1839,7 @@ myt.Geometry = (() => {
             if (cy == null) cy = 0;
             degrees = degrees % 360;
             
-            var x, y;
+            var x, y, radians;
             if (degrees === 0) {
                 x = radius;
                 y = 0;
@@ -1856,7 +1853,7 @@ myt.Geometry = (() => {
                 x = 0;
                 y = -radius;
             } else {
-                var radians = exports.degreesToRadians(degrees);
+                radians = Geometry.degreesToRadians(degrees);
                 x = radius * Math.cos(radians);
                 y = radius * Math.sin(radians);
             }
@@ -1884,12 +1881,10 @@ myt.Geometry = (() => {
                 radius = Math.sqrt(diffX*diffX + diffY*diffY),
                 radians = Math.atan2(diffY, diffX);
             if (radians < 0) radians += 2 * Math.PI;
-            return [radius, useRadians ? radians : exports.radiansToDegrees(radians)];
+            return [radius, useRadians ? radians : Geometry.radiansToDegrees(radians)];
         }
     };
-    
-    return exports;
-})();
+})(myt);
 
 
 /** Apply this mixin to any Object that needs to fire events.
@@ -8706,431 +8701,417 @@ new JS.Singleton('GlobalIdle', {
 });
 
 
-/** Changes the value of an attribute on a target over time.
-    
-    Events:
-        running:boolean Fired when the animation starts or stops.
-        paused:boolean Fired when the animation is paused or unpaused.
-        reverse:boolean
-        easingFunction:function
-        from:number
-        to:number
-        repeat:Fired when the animation repeats. The value is the current
-            loop count.
+((pkg) => {
+    var getTarget = (animator) => animator.target || animator.parent,
         
-    Attributes:
-        attribute:string The attribute to animate.
-        target:object The object to animate the attribute on. The default is 
-            the parent of this node.
-        from:number The starting value of the attribute. If not specified the 
-            current value on the target will be used.
-        to:number The ending value of the attribute.
-        duration:number The length of time the animation will run in millis.
-            The default value is 1000.
-        easingFunction:string/function Controls the rate of animation.
-            string: See http://easings.net/ for more info. One of the following:
-                linear, 
-                easeInQuad, easeOutQuad, easeInOutQuad(default), 
-                easeInCubic, easeOutCubic, easeInOutCubic, 
-                easeInQuart, easeOutQuart, easeInOutQuart, 
-                easeInQuint, easeOutQuint, easeInOutQuint, 
-                easeInSine, easeOutSine, easeInOutSine,
-                easeInExpo ,easeOutExpo, easeInOutExpo, 
-                easeInCirc, easeOutCirc, easeInOutCirc,
-                easeInElastic ,easeOutElastic, easeInOutElastic, 
-                easeInBack, easeOutBack, easeInOutBack, 
-                easeInBounce, easeOutBounce, easeInOutBounce
+        isColorAttr = (animator) => {
+            var target = getTarget(animator);
+            animator.__isColorAnim = (target && typeof target.isColorAttr === 'function') ? target.isColorAttr(animator.attribute) : undefined;
+        },
+        
+        getColorValue = (from, to, motionValue, relative, value) => {
+            var Color = pkg.Color,
+                fromColor = Color.makeColorFromHexString(from),
+                toColor = Color.makeColorFromHexString(to),
+                colorObj = relative ? Color.makeColorFromHexString(value) : fromColor;
+            colorObj.setRed(colorObj.red + ((toColor.red - fromColor.red) * motionValue));
+            colorObj.setGreen(colorObj.green + ((toColor.green - fromColor.green) * motionValue));
+            colorObj.setBlue(colorObj.blue + ((toColor.blue - fromColor.blue) * motionValue));
+            return colorObj.getHtmlHexString();
+        },
+        
+        updateTarget = (animator, target, progress, oldProgress) => {
+            var relative = animator.relative,
+                duration = animator.duration,
+                attr = animator.attribute,
+                progressPercent = Math.max(0, progress / duration), 
+                oldProgressPercent = Math.max(0, oldProgress / duration);
             
-            function: A function that determines the rate of change of the 
-                attribute. The arguments to the easing function are:
-                t: Animation progress in millis
-                c: Value change (to - from)
-                d: Animation duration in millis
-        relative:boolean Determines if the animated value is set on the target 
-            (false), or added to the exiting value on the target (true). Note
-            that this means the difference between the from and to values
-            will be "added" to the existing value on the target. The default 
-            value is false.
-        repeat:number The number of times to repeat the animation. If negative 
-            the animation will repeat forever. The default value is 1.
-        reverse:boolean If true, the animation is run in reverse.
-        running:boolean Indicates if the animation is currently running. The 
-            default value is false.
-        paused:boolean Indicates if the animation is temporarily paused. The 
-            default value is false.
-        callback:function A function that gets called when the animation
-            completes. A boolean value is passed into the function and will be
-            true if the animation completed successfully or false if not.
-    
-    Private Attributes:
-        __loopCount:number the loop currently being run.
-        __progress:number the number of millis currently used during the
-            current animation loop.
-        __temporaryFrom:boolean Indicates no "from" was set on the animator so 
-            we will have to generate one when needed. We want to reset back to 
-            undefined after the animation completes so that subsequent calls 
-            to start the animation will behave the same.
-*/
-myt.Animator = new JS.Class('Animator', myt.Node, {
-    include: [myt.Reusable],
-    
-    
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        easingFunctions: {
-            linear:function(t){return t;},
-            easeInQuad:function(t){return t*t;},
-            easeOutQuad:function(t){return -t*(t-2);},
-            easeInOutQuad:function(t){return (t/=0.5) < 1 ? 0.5*t*t : -0.5 * ((--t)*(t-2) - 1);},
-            easeInCubic:function(t){return t*t*t;},
-            easeOutCubic:function(t){return ((t=t-1)*t*t + 1);},
-            easeInOutCubic:function(t){return (t/=0.5) < 1 ? 0.5*t*t*t : 1 /2*((t-=2)*t*t + 2);},
-            easeInQuart:function(t){return t*t*t*t;},
-            easeOutQuart:function(t){return -((t=t-1)*t*t*t - 1);},
-            easeInOutQuart:function(t){return (t/=0.5) < 1 ? 0.5*t*t*t*t : -0.5 * ((t-=2)*t*t*t - 2);},
-            easeInQuint:function(t){return t*t*t*t*t;},
-            easeOutQuint:function(t){return ((t=t-1)*t*t*t*t + 1);},
-            easeInOutQuint:function(t){return (t/=0.5) < 1 ? 0.5*t*t*t*t*t : 0.5*((t-=2)*t*t*t*t + 2);},
-            easeInSine:function(t){return - Math.cos(t * (Math.PI/2)) + 1;},
-            easeOutSine:function(t){return Math.sin(t * (Math.PI/2));},
-            easeInOutSine:function(t){return -0.5 * (Math.cos(Math.PI*t) - 1);},
-            easeInExpo:function(t){return (t==0)? 0: Math.pow(2, 10 * (t - 1));},
-            easeOutExpo:function(t){return (t==1)? 1: (-Math.pow(2, -10 * t) + 1);},
-            easeInCirc:function(t){return - (Math.sqrt(1 - t*t) - 1);},
-            easeOutCirc:function(t){return Math.sqrt(1 - (t=t-1)*t);},
-            easeInOutCirc:function(t){return (t/=0.5) < 1? -0.5 * (Math.sqrt(1 - t*t) - 1): 0.5 * (Math.sqrt(1 - (t-=2)*t) + 1);},
-            easeInOutExpo:function(t){
-                if (t==0) return 0;
-                if (t==1) return 1;
-                if ((t/=0.5) < 1) return 0.5 * Math.pow(2, 10 * (t - 1));
-                return 0.5 * (-Math.pow(2, -10 * --t) + 2);
-            },
-            easeInElastic:function(t){
-                var s=1.70158, p=0, a=1;
-                if (t==0) return 0;
-                if (t==1) return 1;
-                if (!p) p=0.3;
-                if (a < 1) {
-                    a=1; var s=p/4;
-                } else {
-                    var s = p/(2*Math.PI) * Math.asin (1/a);
-                }
-                return -(a*Math.pow(2,10*(t-=1)) * Math.sin( (t*1-s)*(2*Math.PI)/p));
-            },
-            easeOutElastic:function(t){
-                var s=1.70158, p=0, a=1;
-                if (t==0) return 0;
-                if (t==1) return 1;
-                if (!p) p=1*0.3;
-                if (a < 1) {
-                    a=1; var s=p/4;
-                } else {
-                    var s = p/(2*Math.PI) * Math.asin (1/a);
-                }
-                return a*Math.pow(2,-10*t) * Math.sin((t*1-s)*(2*Math.PI)/p) + 1;
-            },
-            easeInOutElastic:function(t){
-                var s=1.70158, p=0, a=1;
-                if (t==0) return 0;
-                if ((t/=0.5)==2) return 1;
-                if (!p) p=(0.3*1.5);
-                if (a < 1) {
-                    a=1; var s=p/4;
-                } else {
-                    var s = p/(2*Math.PI) * Math.asin (1/a);
-                }
-                if (t < 1) return -.5*(a*Math.pow(2,10*(t-=1)) * Math.sin((t*1-s)*(2*Math.PI)/p));
-                return a*Math.pow(2,-10*(t-=1)) * Math.sin((t*1-s)*(2*Math.PI)/p)*0.5 + 1;
-            },
-            easeInBack:function(t, s){
-                if (s == undefined) s = 1.70158;
-                return (t/=1)*t*((s+1)*t - s);
-            },
-            easeOutBack:function(t, s){
-                if (s == undefined) s = 1.70158;
-                return ((t=t/1-1)*t*((s+1)*t + s) + 1);
-            },
-            easeInOutBack:function(t, s){
-                if (s == undefined) s = 1.70158;
-                if ((t/=0.5) < 1) return 0.5*(t*t*(((s*=(1.525))+1)*t - s));
-                return 0.5*((t-=2)*t*(((s*=(1.525))+1)*t + s) + 2);
-            },
-            easeInBounce:function(t){return 1 - myt.Animator.easingFunctions.easeOutBounce(1-t);},
-            easeOutBounce:function(t){
-                if (t < (1/2.75)) {
-                    return (7.5625*t*t);
-                } else if (t < (2/2.75)) {
-                    return (7.5625*(t-=(1.5/2.75))*t + 0.75);
-                } else if (t < (2.5/2.75)) {
-                    return (7.5625*(t-=(2.25/2.75))*t + 0.9375);
-                }
-                return (7.5625*(t-=(2.625/2.75))*t + .984375);
-            },
-            easeInOutBounce:function(t){
-                if (t < 0.5) return myt.Animator.easingFunctions.easeInBounce(t*2) * 0.5;
-                return myt.Animator.easingFunctions.easeOutBounce(t*2-1) * 0.5 + 0.5;
-            }
-        }
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Node */
-    initNode: function(parent, attrs) {
-        var self = this;
-        
-        self.duration = 1000;
-        self.relative = self.reverse = self.running = self.paused = false;
-        self.repeat = 1;
-        self.easingFunction = myt.Animator.DEFAULT_EASING_FUNCTION;
-        
-        self.callSuper(parent, attrs);
-        
-        self.__reset();
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setRunning: function(v) {
-        var self = this;
-        
-        if (self.running !== v) {
-            self.running = v;
-            if (self.inited) self.fireEvent('running', v);
-            
-            if (!self.paused) {
-                if (v) {
-                    self.__isColorAttr();
-                } else {
-                    if (self.__temporaryFrom) self.from = undefined;
-                    self.__reset();
-                }
-                self[v ? 'attachTo' : 'detachFrom'](myt.global.idle, '__update', 'idle');
-            }
-        }
-    },
-    
-    setPaused: function(v) {
-        var self = this;
-        
-        if (self.paused !== v) {
-            self.paused = v;
-            if (self.inited) self.fireEvent('paused', v);
-            if (self.running) self[v ? 'detachFrom' : 'attachTo'](myt.global.idle, '__update', 'idle');
-        }
-    },
-    
-    setReverse: function(v) {
-        var self = this;
-        
-        if (self.reverse !== v) {
-            self.reverse = v;
-            if (self.inited) self.fireEvent('reverse', v);
-            if (!self.running) self.__reset();
-        }
-    },
-    
-    setEasingFunction: function(v) {
-        // Lookup easing function if a string is provided.
-        if (typeof v === 'string') v = myt.Animator.easingFunctions[v];
-        
-        // Use default if invalid
-        if (!v) v = myt.Animator.DEFAULT_EASING_FUNCTION;
-        
-        if (this.easingFunction !== v) {
-            this.easingFunction = v;
-            if (this.inited) this.fireEvent('easingFunction', v);
-        }
-    },
-    
-    setFrom: function(v) {
-        if (this.from !== v) {
-            this.from = v;
-            if (this.inited) this.fireEvent('from', v);
-        }
-    },
-    
-    setTo: function(v) {
-        if (this.to !== v) {
-            this.to = v;
-            if (this.inited) this.fireEvent('to', v);
-        }
-    },
-    
-    setCallback: function(v) {this.callback = v;},
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
-    __isColorAttr: function() {
-        var target = this.__getTarget();
-        this.__isColorAnim = (target && typeof target.isColorAttr === 'function') ? target.isColorAttr(this.attribute) : undefined;
-    },
-    
-    /** @private */
-    __getTarget: function() {
-        return this.target || this.parent;
-    },
-    
-    /** A convienence method to set the callback to run when the animator
-        stops running. If a callback already exists the provided callback
-        will be executed after the existing one.
-        @param callback:function the function to run.
-        @param replace:boolean (optional) if true the existing callback will 
-            be replaced with the new callback.
-        @returns void */
-    next: function(callback, replace) {
-        var existingCallback = this.callback;
-        if (existingCallback && !replace) {
-            var anim = this;
-            this.setCallback(function(success) {
-                existingCallback.call(anim, success);
-                callback.call(anim, success);
-            });
-        } else {
-            this.setCallback(callback);
-        }
-    },
-    
-    /** Puts the animator back to an initial configured state.
-        @param executeCallback:boolean (optional) if true the callback, if
-            it exists, will be executed.
-        @returns void */
-    reset: function(executeCallback) {
-        var self = this;
-        
-        self.__reset();
-        
-        self.setRunning(false);
-        self.setPaused(false);
-        
-        if (executeCallback && self.callback) self.callback.call(self, false);
-    },
-    
-    /** @overrides myt.Reusable */
-    clean: function() {
-        var self = this;
-        
-        self.to = self.from = self.attribute = self.callback = undefined;
-        self.duration = 1000;
-        self.relative = self.reverse = false;
-        self.repeat = 1;
-        self.easingFunction = myt.Animator.DEFAULT_EASING_FUNCTION;
-        
-        self.reset(false);
-    },
-    
-    /** @private */
-    __reset: function() {
-        var self = this;
-        
-        self.__temporaryFrom = false;
-        self.__loopCount = self.reverse ? self.repeat - 1 : 0;
-        self.__progress = self.reverse ? self.duration : 0;
-    },
-    
-    /** @private */
-    __update: function(idleEvent) {
-        this.__advance(idleEvent.value.delta);
-    },
-    
-    /** @private */
-    __advance: function(timeDiff) {
-        var self = this;
-        
-        if (self.running && !self.paused) {
-            var reverse = self.reverse, 
-                duration = self.duration, 
-                repeat = self.repeat;
-            
-            // An animation in reverse is like time going backward.
-            if (reverse) timeDiff = timeDiff * -1;
-            
-            // Determine how much time to move forward by.
-            var oldProgress = self.__progress;
-            self.__progress += timeDiff;
-            
-            // Check for overage
-            var remainderTime = 0;
-            if (self.__progress > duration) {
-                remainderTime = self.__progress - duration;
-                self.__progress = duration;
-                
-                // Increment loop count and halt looping if necessary
-                if (++self.__loopCount === repeat) remainderTime = 0;
-            } else if (0 > self.__progress) {
-                // Reverse case
-                remainderTime = -self.__progress; // Flip reverse time back to forward time
-                self.__progress = 0;
-                
-                // Decrement loop count and halt looping if necessary
-                if (0 > --self.__loopCount && repeat > 0) remainderTime = 0;
+            // Determine what "from" to use if none was provided.
+            if (animator.from == null) {
+                animator.__temporaryFrom = true;
+                animator.from = relative ? (animator.__isColorAnim ? '#000000' : 0) : target.get(attr);
             }
             
-            var target = self.__getTarget();
-            if (target) {
-                self.__updateTarget(target, self.__progress, oldProgress);
+            var motionValue = animator.easingFunction(progressPercent) - (relative ? animator.easingFunction(oldProgressPercent) : 0),
+                value = relative ? target.get(attr) : animator.from,
+                to = animator.to;
+            
+            target.set(attr, animator.__isColorAnim ? getColorValue(animator.from, to, motionValue, relative, value) : value + ((to - animator.from) * motionValue));
+        },
+        
+        reset = (animator) => {
+            animator.__temporaryFrom = false;
+            animator.__loopCount = animator.reverse ? animator.repeat - 1 : 0;
+            animator.__progress = animator.reverse ? animator.duration : 0;
+        },
+        
+        advance = (animator, timeDiff) => {
+            if (animator.running && !animator.paused) {
+                var reverse = animator.reverse, 
+                    duration = animator.duration, 
+                    repeat = animator.repeat;
                 
-                if (
-                    (!reverse && self.__loopCount === repeat) || // Forward check
-                    (reverse && 0 > self.__loopCount && repeat > 0) // Reverse check
-                ) {
-                    // Stop animation since loop count exceeded repeat count.
-                    self.setRunning(false);
-                    if (self.callback) self.callback.call(self, true);
-                } else if (remainderTime > 0) {
-                    // Advance again if time is remaining. This occurs when
-                    // the timeDiff provided was greater than the animation
-                    // duration and the animation loops.
-                    self.fireEvent('repeat', self.__loopCount);
-                    self.__progress = reverse ? duration : 0;
-                    self.__advance(remainderTime);
+                // An animation in reverse is like time going backward.
+                if (reverse) timeDiff = timeDiff * -1;
+                
+                // Determine how much time to move forward by.
+                var oldProgress = animator.__progress;
+                animator.__progress += timeDiff;
+                
+                // Check for overage
+                var remainderTime = 0;
+                if (animator.__progress > duration) {
+                    remainderTime = animator.__progress - duration;
+                    animator.__progress = duration;
+                    
+                    // Increment loop count and halt looping if necessary
+                    if (++animator.__loopCount === repeat) remainderTime = 0;
+                } else if (0 > animator.__progress) {
+                    // Reverse case
+                    remainderTime = -animator.__progress; // Flip reverse time back to forward time
+                    animator.__progress = 0;
+                    
+                    // Decrement loop count and halt looping if necessary
+                    if (0 > --animator.__loopCount && repeat > 0) remainderTime = 0;
                 }
-            } else {
-                console.log("No target found for animator.", self);
+                
+                var target = getTarget(animator);
+                if (target) {
+                    updateTarget(animator, target, animator.__progress, oldProgress);
+                    
+                    if (
+                        (!reverse && animator.__loopCount === repeat) || // Forward check
+                        (reverse && 0 > animator.__loopCount && repeat > 0) // Reverse check
+                    ) {
+                        // Stop animation since loop count exceeded repeat count.
+                        animator.setRunning(false);
+                        if (animator.callback) animator.callback.call(animator, true);
+                    } else if (remainderTime > 0) {
+                        // Advance again if time is remaining. This occurs when
+                        // the timeDiff provided was greater than the animation
+                        // duration and the animation loops.
+                        animator.fireEvent('repeat', animator.__loopCount);
+                        animator.__progress = reverse ? duration : 0;
+                        advance(animator, remainderTime);
+                    }
+                } else {
+                    console.log("No target found for animator.", animator);
+                    animator.setRunning(false);
+                    if (animator.callback) animator.callback.call(animator, false);
+                }
+            }
+        },
+        
+        /** Changes the value of an attribute on a target over time.
+            
+            Events:
+                running:boolean Fired when the animation starts or stops.
+                paused:boolean Fired when the animation is paused or unpaused.
+                reverse:boolean
+                easingFunction:function
+                from:number
+                to:number
+                repeat:Fired when the animation repeats. The value is the current
+                    loop count.
+                
+            Attributes:
+                attribute:string The attribute to animate.
+                target:object The object to animate the attribute on. The default is 
+                    the parent of this node.
+                from:number The starting value of the attribute. If not specified the 
+                    current value on the target will be used.
+                to:number The ending value of the attribute.
+                duration:number The length of time the animation will run in millis.
+                    The default value is 1000.
+                easingFunction:string/function Controls the rate of animation.
+                    string: See http://easings.net/ for more info. One of the following:
+                        linear, 
+                        easeInQuad, easeOutQuad, easeInOutQuad(default), 
+                        easeInCubic, easeOutCubic, easeInOutCubic, 
+                        easeInQuart, easeOutQuart, easeInOutQuart, 
+                        easeInQuint, easeOutQuint, easeInOutQuint, 
+                        easeInSine, easeOutSine, easeInOutSine,
+                        easeInExpo ,easeOutExpo, easeInOutExpo, 
+                        easeInCirc, easeOutCirc, easeInOutCirc,
+                        easeInElastic ,easeOutElastic, easeInOutElastic, 
+                        easeInBack, easeOutBack, easeInOutBack, 
+                        easeInBounce, easeOutBounce, easeInOutBounce
+                    
+                    function: A function that determines the rate of change of the 
+                        attribute. The arguments to the easing function are:
+                        t: Animation progress in millis
+                        c: Value change (to - from)
+                        d: Animation duration in millis
+                relative:boolean Determines if the animated value is set on the target 
+                    (false), or added to the exiting value on the target (true). Note
+                    that this means the difference between the from and to values
+                    will be "added" to the existing value on the target. The default 
+                    value is false.
+                repeat:number The number of times to repeat the animation. If negative 
+                    the animation will repeat forever. The default value is 1.
+                reverse:boolean If true, the animation is run in reverse.
+                running:boolean Indicates if the animation is currently running. The 
+                    default value is false.
+                paused:boolean Indicates if the animation is temporarily paused. The 
+                    default value is false.
+                callback:function A function that gets called when the animation
+                    completes. A boolean value is passed into the function and will be
+                    true if the animation completed successfully or false if not.
+            
+            Private Attributes:
+                __loopCount:number the loop currently being run.
+                __progress:number the number of millis currently used during the
+                    current animation loop.
+                __temporaryFrom:boolean Indicates no "from" was set on the animator so 
+                    we will have to generate one when needed. We want to reset back to 
+                    undefined after the animation completes so that subsequent calls 
+                    to start the animation will behave the same.
+                __isColorAnim:boolean Indicates this animator is animating a
+                    color attribute.
+        */
+        Animator = pkg.Animator = new JS.Class('Animator', pkg.Node, {
+            include: [pkg.Reusable],
+            
+            
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                easingFunctions: {
+                    linear:t => t,
+                    easeInQuad:t => t*t,
+                    easeOutQuad:t => -t*(t-2),
+                    easeInOutQuad:t => (t/=0.5) < 1 ? 0.5*t*t : -0.5 * ((--t)*(t-2) - 1),
+                    easeInCubic:t => t*t*t,
+                    easeOutCubic:t => ((t=t-1)*t*t + 1),
+                    easeInOutCubic:t => (t/=0.5) < 1 ? 0.5*t*t*t : 1 /2*((t-=2)*t*t + 2),
+                    easeInQuart:t => t*t*t*t,
+                    easeOutQuart:t => -((t=t-1)*t*t*t - 1),
+                    easeInOutQuart:t => (t/=0.5) < 1 ? 0.5*t*t*t*t : -0.5 * ((t-=2)*t*t*t - 2),
+                    easeInQuint:t => t*t*t*t*t,
+                    easeOutQuint:t => ((t=t-1)*t*t*t*t + 1),
+                    easeInOutQuint:t => (t/=0.5) < 1 ? 0.5*t*t*t*t*t : 0.5*((t-=2)*t*t*t*t + 2),
+                    easeInSine:t => -Math.cos(t * (Math.PI/2)) + 1,
+                    easeOutSine:t => Math.sin(t * (Math.PI/2)),
+                    easeInOutSine:t => -0.5 * (Math.cos(Math.PI*t) - 1),
+                    easeInExpo:t => (t==0)? 0: Math.pow(2, 10 * (t - 1)),
+                    easeOutExpo:t => (t==1)? 1: (-Math.pow(2, -10 * t) + 1),
+                    easeInCirc:t => -(Math.sqrt(1 - t*t) - 1),
+                    easeOutCirc:t => Math.sqrt(1 - (t=t-1)*t),
+                    easeInOutCirc:t => (t/=0.5) < 1? -0.5 * (Math.sqrt(1 - t*t) - 1): 0.5 * (Math.sqrt(1 - (t-=2)*t) + 1),
+                    easeInOutExpo:t => {
+                        if (t==0) return 0;
+                        if (t==1) return 1;
+                        if ((t/=0.5) < 1) return 0.5 * Math.pow(2, 10 * (t - 1));
+                        return 0.5 * (-Math.pow(2, -10 * --t) + 2);
+                    },
+                    easeInElastic:t => {
+                        var s=1.70158, p=0, a=1;
+                        if (t==0) return 0;
+                        if (t==1) return 1;
+                        if (!p) p=0.3;
+                        if (a < 1) {
+                            a=1; var s=p/4;
+                        } else {
+                            var s = p/(2*Math.PI) * Math.asin (1/a);
+                        }
+                        return -(a*Math.pow(2,10*(t-=1)) * Math.sin( (t*1-s)*(2*Math.PI)/p));
+                    },
+                    easeOutElastic:t => {
+                        var s=1.70158, p=0, a=1;
+                        if (t==0) return 0;
+                        if (t==1) return 1;
+                        if (!p) p=1*0.3;
+                        if (a < 1) {
+                            a=1;
+                            s=p/4;
+                        } else {
+                            s = p/(2*Math.PI) * Math.asin(1/a);
+                        }
+                        return a*Math.pow(2,-10*t) * Math.sin((t*1-s)*(2*Math.PI)/p) + 1;
+                    },
+                    easeInOutElastic:t => {
+                        var s=1.70158, p=0, a=1;
+                        if (t==0) return 0;
+                        if ((t/=0.5)==2) return 1;
+                        if (!p) p=(0.3*1.5);
+                        if (a < 1) {
+                            a=1;
+                            s=p/4;
+                        } else {
+                            var s = p/(2*Math.PI) * Math.asin(1/a);
+                        }
+                        if (t < 1) return -.5*(a*Math.pow(2,10*(t-=1)) * Math.sin((t*1-s)*(2*Math.PI)/p));
+                        return a*Math.pow(2,-10*(t-=1)) * Math.sin((t*1-s)*(2*Math.PI)/p)*0.5 + 1;
+                    },
+                    easeInBack:(t, s=1.70158) => (t/=1)*t*((s+1)*t - s),
+                    easeOutBack:(t, s=1.70158) => ((t=t/1-1)*t*((s+1)*t + s) + 1),
+                    easeInOutBack:(t, s=1.70158) => {
+                        if ((t/=0.5) < 1) return 0.5*(t*t*(((s*=(1.525))+1)*t - s));
+                        return 0.5*((t-=2)*t*(((s*=(1.525))+1)*t + s) + 2);
+                    },
+                    easeInBounce:t => 1 - Animator.easingFunctions.easeOutBounce(1-t),
+                    easeOutBounce:t => {
+                        if (t < (1/2.75)) {
+                            return (7.5625*t*t);
+                        } else if (t < (2/2.75)) {
+                            return (7.5625*(t-=(1.5/2.75))*t + 0.75);
+                        } else if (t < (2.5/2.75)) {
+                            return (7.5625*(t-=(2.25/2.75))*t + 0.9375);
+                        }
+                        return (7.5625*(t-=(2.625/2.75))*t + .984375);
+                    },
+                    easeInOutBounce:t => {
+                        if (t < 0.5) return Animator.easingFunctions.easeInBounce(t*2) * 0.5;
+                        return Animator.easingFunctions.easeOutBounce(t*2-1) * 0.5 + 0.5;
+                    }
+                }
+            },
+            
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            /** @overrides myt.Node */
+            initNode: function(parent, attrs) {
+                var self = this;
+                
+                self.duration = 1000;
+                self.relative = self.reverse = self.running = self.paused = false;
+                self.repeat = 1;
+                self.easingFunction = Animator.DEFAULT_EASING_FUNCTION;
+                
+                self.callSuper(parent, attrs);
+                
+                reset(self);
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setRunning: function(v) {
+                var self = this;
+                
+                if (self.running !== v) {
+                    self.running = v;
+                    if (self.inited) self.fireEvent('running', v);
+                    
+                    if (!self.paused) {
+                        if (v) {
+                            isColorAttr(self);
+                        } else {
+                            if (self.__temporaryFrom) self.from = undefined;
+                            reset(self);
+                        }
+                        self[v ? 'attachTo' : 'detachFrom'](pkg.global.idle, '__updateAnim', 'idle');
+                    }
+                }
+            },
+            
+            setPaused: function(v) {
+                var self = this;
+                
+                if (self.paused !== v) {
+                    self.paused = v;
+                    if (self.inited) self.fireEvent('paused', v);
+                    if (self.running) self[v ? 'detachFrom' : 'attachTo'](pkg.global.idle, '__updateAnim', 'idle');
+                }
+            },
+            
+            setReverse: function(v) {
+                var self = this;
+                
+                if (self.reverse !== v) {
+                    self.reverse = v;
+                    if (self.inited) self.fireEvent('reverse', v);
+                    if (!self.running) reset(self);
+                }
+            },
+            
+            setEasingFunction: function(v) {
+                // Lookup easing function if a string is provided.
+                if (typeof v === 'string') v = Animator.easingFunctions[v];
+                
+                // Use default if invalid
+                if (!v) v = Animator.DEFAULT_EASING_FUNCTION;
+                
+                if (this.easingFunction !== v) {
+                    this.easingFunction = v;
+                    if (this.inited) this.fireEvent('easingFunction', v);
+                }
+            },
+            
+            setFrom: function(v) {
+                if (this.from !== v) {
+                    this.from = v;
+                    if (this.inited) this.fireEvent('from', v);
+                }
+            },
+            
+            setTo: function(v) {
+                if (this.to !== v) {
+                    this.to = v;
+                    if (this.inited) this.fireEvent('to', v);
+                }
+            },
+            
+            setCallback: function(v) {this.callback = v;},
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** A convienence method to set the callback to run when the animator
+                stops running. If a callback already exists the provided callback
+                will be executed after the existing one.
+                @param callback:function the function to run.
+                @param replace:boolean (optional) if true the existing callback will 
+                    be replaced with the new callback.
+                @returns void */
+            next: function(callback, replace) {
+                var existingCallback = this.callback;
+                if (existingCallback && !replace) {
+                    var anim = this;
+                    this.setCallback(function(success) {
+                        existingCallback.call(anim, success);
+                        callback.call(anim, success);
+                    });
+                } else {
+                    this.setCallback(callback);
+                }
+            },
+            
+            /** Puts the animator back to an initial configured state.
+                @param executeCallback:boolean (optional) if true the callback, if
+                    it exists, will be executed.
+                @returns void */
+            reset: function(executeCallback) {
+                var self = this;
+                
+                reset(self);
+                
                 self.setRunning(false);
-                if (self.callback) self.callback.call(self, false);
+                self.setPaused(false);
+                
+                if (executeCallback && self.callback) self.callback.call(self, false);
+            },
+            
+            /** @overrides myt.Reusable */
+            clean: function() {
+                var self = this;
+                
+                self.to = self.from = self.attribute = self.callback = undefined;
+                self.duration = 1000;
+                self.relative = self.reverse = false;
+                self.repeat = 1;
+                self.easingFunction = Animator.DEFAULT_EASING_FUNCTION;
+                
+                self.reset(false);
+            },
+            
+            /** @private */
+            __updateAnim: function(idleEvent) {
+                advance(this, idleEvent.value.delta);
             }
-        }
-    },
+        });
     
-    /** @private */
-    __updateTarget: function(target, progress, oldProgress) {
-        var self = this,
-            relative = self.relative,
-            duration = self.duration,
-            attr = self.attribute,
-            progressPercent = Math.max(0, progress / duration), 
-            oldProgressPercent = Math.max(0, oldProgress / duration);
-        
-        // Determine what "from" to use if none was provided.
-        if (self.from == null) {
-            self.__temporaryFrom = true;
-            self.from = relative ? (self.__isColorAnim ? '#000000' : 0) : target.get(attr);
-        }
-        
-        var motionValue = self.easingFunction(progressPercent) - (relative ? self.easingFunction(oldProgressPercent) : 0),
-            value = relative ? target.get(attr) : self.from,
-            to = self.to;
-        
-        target.set(attr, self.__isColorAnim ? self.__getColorValue(self.from, to, motionValue, relative, value) : value + ((to - self.from) * motionValue));
-    },
-    
-    /** @private */
-    __getColorValue: function(from, to, motionValue, relative, value) {
-        var C = myt.Color,
-            fromColor = C.makeColorFromHexString(from),
-            toColor = C.makeColorFromHexString(to),
-            colorObj = relative ? C.makeColorFromHexString(value) : fromColor;
-        colorObj.setRed(colorObj.red + ((toColor.red - fromColor.red) * motionValue));
-        colorObj.setGreen(colorObj.green + ((toColor.green - fromColor.green) * motionValue));
-        colorObj.setBlue(colorObj.blue + ((toColor.blue - fromColor.blue) * motionValue));
-        return colorObj.getHtmlHexString();
-    }
-});
-
-/** Setup the default easing function. */
-myt.Animator.DEFAULT_EASING_FUNCTION = myt.Animator.easingFunctions.easeInOutQuad;
+    /** Setup the default easing function. */
+    Animator.DEFAULT_EASING_FUNCTION = Animator.easingFunctions.easeInOutQuad;
+})(myt);
 
 
 /** An implementation of a finite state machine.
@@ -15070,129 +15051,128 @@ myt.TabMixin = new JS.Module('TabMixin', {
 });
 
 
-/** A simple tab component.
-    
-    Events:
-        None
-    
-    Attributes:
-        tabId:string The unique ID of this tab relative to its tab container.
-        tabContainer:myt.TabContainer The tab container that manages this tab.
-        edgeColor:color
-        edgeSize:number
-        selectedColor:color
+((pkg) => {
+    var
+        updateTextColor = (tab) => {
+            tab.textView.setTextColor(tab.selected ? tab.labelTextSelectedColor : tab.labelTextColor);
+        },
         
-        labelTextColorSelected:color The color to use for the label text when
-            this tab is selected.
-        cornerRadius:number Passed into the drawing config to determine if
-            a rounded corner is drawn or not. Defaults to undefined which
-            causes myt.Tab.DEFAULT_RADIUS to be used.
-*/
-myt.Tab = new JS.Class('Tab', myt.SimpleIconTextButton, {
-    include: [myt.TabMixin],
-    
-    
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        DEFAULT_HEIGHT: 24,
-        DEFAULT_INSET: 8,
-        DEFAULT_OUTSET: 8,
-        DEFAULT_FILL_COLOR_SELECTED: '#ffffff',
-        DEFAULT_FILL_COLOR_HOVER: '#eeeeee',
-        DEFAULT_FILL_COLOR_ACTIVE: '#aaaaaa',
-        DEFAULT_FILL_COLOR_READY: '#cccccc',
-        DEFAULT_LABEL_TEXT_COLOR_SELECTED:'#333333',
-        DEFAULT_RADIUS:6
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        var T = myt.Tab;
+        updateCornerRadius = (tab) => {
+            var r = tab.cornerRadius != null ? tab.cornerRadius : Tab.DEFAULT_RADIUS;
+            switch (tab.tabContainer.location) {
+                case 'top':
+                    tab.setRoundedTopLeftCorner(r);
+                    tab.setRoundedTopRightCorner(r);
+                    break;
+                case 'bottom':
+                    tab.setRoundedBottomLeftCorner(r);
+                    tab.setRoundedBottomRightCorner(r);
+                    break;
+                case 'left':
+                    tab.setRoundedTopLeftCorner(r);
+                    tab.setRoundedBottomLeftCorner(r);
+                    break;
+                case 'right':
+                    tab.setRoundedTopRightCorner(r);
+                    tab.setRoundedBottomRightCorner(r);
+                    break;
+            }
+        },
         
-        // myt.IconTextButtonContent
-        if (attrs.inset == null) attrs.inset = T.DEFAULT_INSET;
-        if (attrs.outset == null) attrs.outset = T.DEFAULT_OUTSET;
-        
-        // myt.Tab
-        if (attrs.selectedColor == null) attrs.selectedColor = T.DEFAULT_FILL_COLOR_SELECTED;
-        if (attrs.hoverColor == null) attrs.hoverColor = T.DEFAULT_FILL_COLOR_HOVER;
-        if (attrs.activeColor == null) attrs.activeColor = T.DEFAULT_FILL_COLOR_ACTIVE;
-        if (attrs.readyColor == null) attrs.readyColor = T.DEFAULT_FILL_COLOR_READY;
-        if (attrs.labelTextSelectedColor == null) attrs.labelTextSelectedColor = T.DEFAULT_LABEL_TEXT_COLOR_SELECTED;
-        
-        // Other
-        if (attrs.height == null) attrs.height = T.DEFAULT_HEIGHT;
-        if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
-        
-        this.callSuper(parent, attrs);
-        
-        this.__updateCornerRadius();
-        this.__updateTextColor();
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setSelectedColor: function(v) {this.selectedColor = v;},
-    
-    setCornerRadius: function(v) {
-        this.cornerRadius = v;
-        
-        if (this.inited) this.__updateCornerRadius();
-    },
-    
-    setLabelTextColor: function(v) {this.labelTextColor = v;},
-    
-    setLabelTextSelectedColor: function(v) {
-        this.labelTextSelectedColor = v;
-        if (this.inited && this.selected) this.textView.setTextColor(v);
-    },
-    
-    setSelected: function(v) {
-        this.callSuper(v);
-        if (this.inited) {
-            this.updateUI();
-            this.__updateTextColor();
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
-    __updateTextColor: function() {
-        this.textView.setTextColor(this.selected ? this.labelTextSelectedColor : this.labelTextColor);
-    },
-    
-    /** @private */
-    __updateCornerRadius: function() {
-        var self = this,
-            r = self.cornerRadius != null ? self.cornerRadius : myt.Tab.DEFAULT_RADIUS;
-        switch (self.tabContainer.location) {
-            case 'top':
-                self.setRoundedTopLeftCorner(r);
-                self.setRoundedTopRightCorner(r);
-                break;
-            case 'bottom':
-                self.setRoundedBottomLeftCorner(r);
-                self.setRoundedBottomRightCorner(r);
-                break;
-            case 'left':
-                self.setRoundedTopLeftCorner(r);
-                self.setRoundedBottomLeftCorner(r);
-                break;
-            case 'right':
-                self.setRoundedTopRightCorner(r);
-                self.setRoundedBottomRightCorner(r);
-                break;
-        }
-    },
-    
-    /** @overrides myt.Button. */
-    updateUI: function() {
-        this.callSuper();
-        if (this.selected) this.setBgColor(this.selectedColor);
-    }
-});
+        /** A simple tab component.
+            
+            Events:
+                None
+            
+            Attributes:
+                tabId:string The unique ID of this tab relative to its 
+                    tab container.
+                tabContainer:myt.TabContainer The tab container that manages 
+                    this tab.
+                edgeColor:color
+                edgeSize:number
+                selectedColor:color
+                
+                labelTextColorSelected:color The color to use for the label 
+                    text when this tab is selected.
+                cornerRadius:number Passed into the drawing config to determine
+                    if a rounded corner is drawn or not. Defaults to undefined 
+                    which causes myt.Tab.DEFAULT_RADIUS to be used.
+        */
+        Tab = pkg.Tab = new JS.Class('Tab', pkg.SimpleIconTextButton, {
+            include: [pkg.TabMixin],
+            
+            
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                DEFAULT_HEIGHT: 24,
+                DEFAULT_INSET: 8,
+                DEFAULT_OUTSET: 8,
+                DEFAULT_FILL_COLOR_SELECTED: '#ffffff',
+                DEFAULT_FILL_COLOR_HOVER: '#eeeeee',
+                DEFAULT_FILL_COLOR_ACTIVE: '#aaaaaa',
+                DEFAULT_FILL_COLOR_READY: '#cccccc',
+                DEFAULT_LABEL_TEXT_COLOR_SELECTED:'#333333',
+                DEFAULT_RADIUS:6
+            },
+            
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            initNode: function(parent, attrs) {
+                // myt.IconTextButtonContent
+                if (attrs.inset == null) attrs.inset = Tab.DEFAULT_INSET;
+                if (attrs.outset == null) attrs.outset = Tab.DEFAULT_OUTSET;
+                
+                // myt.Tab
+                if (attrs.selectedColor == null) attrs.selectedColor = Tab.DEFAULT_FILL_COLOR_SELECTED;
+                if (attrs.hoverColor == null) attrs.hoverColor = Tab.DEFAULT_FILL_COLOR_HOVER;
+                if (attrs.activeColor == null) attrs.activeColor = Tab.DEFAULT_FILL_COLOR_ACTIVE;
+                if (attrs.readyColor == null) attrs.readyColor = Tab.DEFAULT_FILL_COLOR_READY;
+                if (attrs.labelTextSelectedColor == null) attrs.labelTextSelectedColor = Tab.DEFAULT_LABEL_TEXT_COLOR_SELECTED;
+                
+                // Other
+                if (attrs.height == null) attrs.height = Tab.DEFAULT_HEIGHT;
+                if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
+                
+                this.callSuper(parent, attrs);
+                
+                updateCornerRadius(this);
+                updateTextColor(this);
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setSelectedColor: function(v) {this.selectedColor = v;},
+            
+            setCornerRadius: function(v) {
+                this.cornerRadius = v;
+                if (this.inited) updateCornerRadius(this);
+            },
+            
+            setLabelTextColor: function(v) {this.labelTextColor = v;},
+            
+            setLabelTextSelectedColor: function(v) {
+                this.labelTextSelectedColor = v;
+                if (this.inited && this.selected) this.textView.setTextColor(v);
+            },
+            
+            setSelected: function(v) {
+                this.callSuper(v);
+                if (this.inited) {
+                    this.updateUI();
+                    updateTextColor(this);
+                }
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @overrides myt.Button. */
+            updateUI: function() {
+                this.callSuper();
+                if (this.selected) this.setBgColor(this.selectedColor);
+            }
+        });
+})(myt);
 
 
 /** Generates input events and passes them on to one or more event observers.
