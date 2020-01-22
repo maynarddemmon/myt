@@ -88,8 +88,12 @@ JS.Packages(function() {with(this) {
     
     // Component : Misc
     file(MYT_COMPONENT_ROOT + 'Ajax.js'         ).provides('myt.Ajax'         ).requires('myt.Node');
-    file(MYT_COMPONENT_ROOT + 'Divider.js').provides('myt.HorizontalDivider','myt.VerticalDivider')
-        .requires('myt.SimpleButton','myt.BoundedValueComponent','myt.Draggable');
+    file(MYT_COMPONENT_ROOT + 'Button.js'       ).provides(
+            'myt.Button','myt.SimpleButton','myt.SimpleIconTextButton','myt.SimpleTextButton','myt.IconTextButtonContent','myt.TextButtonContent'
+        ).requires(
+            'myt.UpdateableUI','myt.MouseOverAndDown','myt.KeyActivation','myt.Disableable','myt.View','myt.Image','myt.Text'
+        );
+    file(MYT_COMPONENT_ROOT + 'Divider.js'      ).provides('myt.HorizontalDivider','myt.VerticalDivider').requires('myt.SimpleButton','myt.BoundedValueComponent','myt.Draggable');
     file(MYT_COMPONENT_ROOT + 'DrawingMethod.js').provides('myt.DrawingMethod').requires('myt.DrawingUtil');
     file(MYT_COMPONENT_ROOT + 'DrawButton.js'   ).provides('myt.DrawButton'   ).requires('myt.Canvas','myt.Button','myt.DrawingMethod');
     file(MYT_COMPONENT_ROOT + 'FontAwesome.js'  ).provides('myt.FontAwesome'  ).requires('myt.Markup');
@@ -155,14 +159,6 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'tooltip/BaseTooltip.js' ).provides('myt.BaseTooltip' ).requires('myt.RootView');
     file(MYT_COMPONENT_ROOT + 'tooltip/Tooltip.js'     ).provides('myt.Tooltip'     ).requires('myt.Canvas','myt.BaseTooltip');
     file(MYT_COMPONENT_ROOT + 'tooltip/TooltipMixin.js').provides('myt.TooltipMixin').requires('myt.global','myt.Tooltip');
-    
-    // Component : Button
-    file(MYT_COMPONENT_ROOT + 'button/Button.js'               ).provides('myt.Button')
-        .requires('myt.UpdateableUI','myt.MouseOverAndDown','myt.KeyActivation','myt.Disableable');
-    file(MYT_COMPONENT_ROOT + 'button/SimpleButton.js'         ).provides('myt.SimpleButton'         ).requires('myt.View','myt.Button');
-    file(MYT_COMPONENT_ROOT + 'button/IconTextButtonContent.js').provides('myt.IconTextButtonContent').requires('myt.Image','myt.Text');
-    file(MYT_COMPONENT_ROOT + 'button/TextButtonContent.js'    ).provides('myt.TextButtonContent'    ).requires('myt.Text');
-    file(MYT_COMPONENT_ROOT + 'button/SimpleIconTextButton.js' ).provides('myt.SimpleIconTextButton' ).requires('myt.SimpleButton','myt.IconTextButtonContent');
     
     // Component : Model
     file(MYT_COMPONENT_ROOT + 'model/BAGMembership.js'        ).provides('myt.BAGMembership'        ).requires('myt.Node');

@@ -141,10 +141,10 @@
             maxSelected:-1
         }, [myt.TabSliderContainer, myt.SizeToParent, {
             updateWidth: function(event) {
-                this.setWidth(event.value + event.source.inset);
+                this.setWidth(event.value);
             },
             updateY: function(event) {
-                var v = event.value + event.source.height - event.source.inset;
+                var v = event.value + event.source.height;
                 this.setPercentOfParentHeightOffset(-v);
                 this.setY(v);
             },
@@ -188,7 +188,7 @@
             align:'right'
         }, [myt.TabSliderContainer, myt.SizeToParent, {
             updateY: function(event) {
-                var v = event.value + event.source.height - event.source.inset;
+                var v = event.value + event.source.height;
                 this.setPercentOfParentHeightOffset(-v);
                 this.setY(v);
             },

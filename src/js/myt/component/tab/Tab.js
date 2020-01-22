@@ -66,7 +66,7 @@
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                // myt.IconTextButtonContent
+                // myt.SimpleIconTextButton
                 if (attrs.inset == null) attrs.inset = Tab.DEFAULT_INSET;
                 if (attrs.outset == null) attrs.outset = Tab.DEFAULT_OUTSET;
                 
