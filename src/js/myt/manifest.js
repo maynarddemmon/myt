@@ -86,6 +86,16 @@ JS.Packages(function() {with(this) {
     // Component
     var MYT_COMPONENT_ROOT = MYT_ROOT + 'component/';
     
+    // Component : Misc
+    file(MYT_COMPONENT_ROOT + 'Ajax.js'         ).provides('myt.Ajax'         ).requires('myt.Node');
+    file(MYT_COMPONENT_ROOT + 'Divider.js').provides('myt.HorizontalDivider','myt.VerticalDivider')
+        .requires('myt.SimpleButton','myt.BoundedValueComponent','myt.Draggable');
+    file(MYT_COMPONENT_ROOT + 'DrawingMethod.js').provides('myt.DrawingMethod').requires('myt.DrawingUtil');
+    file(MYT_COMPONENT_ROOT + 'DrawButton.js'   ).provides('myt.DrawButton'   ).requires('myt.Canvas','myt.Button','myt.DrawingMethod');
+    file(MYT_COMPONENT_ROOT + 'FontAwesome.js'  ).provides('myt.FontAwesome'  ).requires('myt.Markup');
+    file(MYT_COMPONENT_ROOT + 'Spinner.js'      ).provides('myt.Spinner'      ).requires('myt.View');
+    file(MYT_COMPONENT_ROOT + 'StateMachine.js' ).provides('myt.StateMachine' ).requires('myt.Node');
+    
     // Component : Base
     file(MYT_COMPONENT_ROOT + 'base/Annulus.js').provides('myt.Annulus').requires('myt.View');
     file(MYT_COMPONENT_ROOT + 'base/Text.js'   ).provides('myt.Text'   ).requires('myt.TextSupport');
@@ -121,11 +131,6 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'layout/WrappingLayout.js').provides('myt.WrappingLayout').requires('myt.VariableLayout');
     file(MYT_COMPONENT_ROOT + 'layout/AlignedLayout.js' ).provides('myt.AlignedLayout' ).requires('myt.VariableLayout');
     
-    // Component : Misc
-    file(MYT_COMPONENT_ROOT + 'misc/FontAwesome.js' ).provides('myt.FontAwesome' ).requires('myt.Markup');
-    file(MYT_COMPONENT_ROOT + 'misc/Spinner.js'     ).provides('myt.Spinner'     ).requires('myt.View');
-    file(MYT_COMPONENT_ROOT + 'misc/StateMachine.js').provides('myt.StateMachine').requires('myt.Node');
-    
     // Component : Drag and Drop
     file(MYT_COMPONENT_ROOT + 'dragdrop/DragGroupSupport.js').provides('myt.DragGroupSupport').requires('myt.View','myt.global.mouse');
     file(MYT_COMPONENT_ROOT + 'dragdrop/Dropable.js'        ).provides('myt.Dropable'        ).requires('myt.Draggable','myt.DragGroupSupport');
@@ -137,9 +142,6 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'drawing/Color.js'      ).provides('myt.Color'      ).requires('myt');
     file(MYT_COMPONENT_ROOT + 'drawing/Path.js'       ).provides('myt.Path'       ).requires('myt');
     file(MYT_COMPONENT_ROOT + 'drawing/DrawingUtil.js').provides('myt.DrawingUtil').requires('myt.Color','myt.Path');
-    
-    // Component : IO
-    file(MYT_COMPONENT_ROOT + 'io/Ajax.js'  ).provides('myt.Ajax').requires('myt.Node');
     
     // Component : Replicator
     file(MYT_COMPONENT_ROOT + 'replicator/Replicable.js').provides('myt.Replicable').requires('myt.Reusable');
@@ -162,12 +164,6 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'button/TextButtonContent.js'    ).provides('myt.TextButtonContent'    ).requires('myt.Text');
     file(MYT_COMPONENT_ROOT + 'button/SimpleIconTextButton.js' ).provides('myt.SimpleIconTextButton' ).requires('myt.SimpleButton','myt.IconTextButtonContent');
     
-    // Component : Drawing Method
-    file(MYT_COMPONENT_ROOT + 'drawingmethod/DrawingMethod.js').provides('myt.DrawingMethod').requires('myt','myt.DrawingUtil');
-
-    // Component : Draw Button
-    file(MYT_COMPONENT_ROOT + 'drawbutton/DrawButton.js').provides('myt.DrawButton').requires('myt.Canvas','myt.Button','myt.DrawingMethod');
-    
     // Component : Model
     file(MYT_COMPONENT_ROOT + 'model/BAGMembership.js'        ).provides('myt.BAGMembership'        ).requires('myt.Node');
     file(MYT_COMPONENT_ROOT + 'model/BAG.js'                  ).provides('myt.BAG'                  ).requires('myt.BAGMembership');
@@ -176,18 +172,11 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'model/RangeComponent.js'       ).provides('myt.RangeComponent'       ).requires('myt.ValueComponent');
     file(MYT_COMPONENT_ROOT + 'model/BoundedRangeComponent.js').provides('myt.BoundedRangeComponent').requires('myt.RangeComponent','myt.BoundedValueComponent');
     
-    // Component : Divider
-    file(MYT_COMPONENT_ROOT + 'divider/BaseDivider.js'         ).provides('myt.BaseDivider')
-        .requires('myt.SimpleButton','myt.BoundedValueComponent','myt.Draggable');
-    file(MYT_COMPONENT_ROOT + 'divider/HorizontalDivider.js'   ).provides('myt.HorizontalDivider'   ).requires('myt.BaseDivider');
-    file(MYT_COMPONENT_ROOT + 'divider/VerticalDivider.js'     ).provides('myt.VerticalDivider'     ).requires('myt.BaseDivider');
-    
     // Component : Grid
     file(MYT_COMPONENT_ROOT + 'grid/GridColumnHeader.js').provides('myt.GridColumnHeader').requires('myt.View','myt.BoundedValueComponent');
     file(MYT_COMPONENT_ROOT + 'grid/GridRow.js'         ).provides('myt.GridRow'         ).requires('myt.GridColumnHeader');
     file(MYT_COMPONENT_ROOT + 'grid/GridController.js'  ).provides('myt.GridController'  ).requires('myt.GridRow');
     file(MYT_COMPONENT_ROOT + 'grid/Grid.js'            ).provides('myt.Grid'            ).requires('myt.GridController');
-    
     file(MYT_COMPONENT_ROOT + 'grid/SimpleGridColumnHeader.js').provides('myt.SimpleGridColumnHeader')
         .requires('myt.GridColumnHeader','myt.SimpleIconTextButton','myt.FontAwesome');
     

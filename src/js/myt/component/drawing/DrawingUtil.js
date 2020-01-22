@@ -5,7 +5,7 @@ myt.DrawingUtil = {
         @param r:Number the radius of the corners.
         @param thickness:Number the thickness of the line. If thickness is
             zero or less a fill will be done rather than an outline. */
-    drawRoundedRect: function(canvas, r, thickness, left, top, w, h) {
+    drawRoundedRect: (canvas, r, thickness, left, top, w, h) => {
         var bottom = top + h,
             right = left + w,
             PI = Math.PI;
@@ -56,7 +56,7 @@ myt.DrawingUtil = {
     
     /** Draws a rect outline into the provided drawview.
         @param thickness:Number the thickness of the line. */
-    drawRectOutline: function(canvas, thickness, left, top, w, h) {
+    drawRectOutline: (canvas, thickness, left, top, w, h) => {
         var bottom = top + h, 
             right = left + w,
             ileft = left + thickness,
@@ -86,7 +86,7 @@ myt.DrawingUtil = {
         @param rTR:Number the radius for the top right corner.
         @param rBL:Number the radius for the bottom left corner.
         @param rBR:Number the radius for the bottom right corner. */
-    drawPartiallyRoundedRect: function(canvas, rTL, rTR, rBL, rBR, left, top, w, h) {
+    drawPartiallyRoundedRect: (canvas, rTL, rTR, rBL, rBR, left, top, w, h) => {
         var bottom = top + h, right = left + w;
         
         canvas.beginPath();
@@ -108,7 +108,7 @@ myt.DrawingUtil = {
         canvas.closePath();
     },
     
-    drawGradientArc: function(canvas, centerX, centerY, r, ir, startAngle, endAngle, colors, segments) {
+    drawGradientArc: (canvas, centerX, centerY, r, ir, startAngle, endAngle, colors, segments) => {
         if (segments == null) segments = 60;
         
         var angleDelta = Math.PI / segments,

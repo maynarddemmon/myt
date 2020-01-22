@@ -11197,256 +11197,250 @@ myt.Button = new JS.Module('Button', {
 });
 
 
-/** Models a color as individual color channels.
-    
-    Events:
-        None
-   
-    Attributes:
-        red:int The red channel. Will be an integer between 0 and 255.
-        green:int The green channel. Will be an integer between 0 and 255.
-        blue:int The blue channel. Will be an integer between 0 and 255.
-*/
-myt.Color = new JS.Class('Color', {
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        /** Converts a number or string representation of a number to a 
-            two character hex string.
-            @param value:number/string The number or string to convert.
-            @returns string: A two character hex string such as: '0c' or 'c9'. */
-        toHex: function(value) {
-            value = this.cleanChannelValue(value).toString(16);
-            return value.length === 1 ? '0' + value : value;
-        },
+((pkg) => {
+    /** Models a color as individual color channels.
         
-        /** Converts red, green, and blue color channel numbers to a six 
-            character hex string.
-            @param red:number The red color channel.
-            @param green:number The green color channel.
-            @param blue:number The blue color channel.
-            @param prependHash:boolean (optional) If true a '#' character
-                will be prepended to the return value.
-            @returns string: Something like: '#ff9c02' or 'ff9c02' */
-        rgbToHex: function(red, green, blue, prependHash) {
-            var toHex = this.toHex.bind(this);
-            return [prependHash ? '#' : '', toHex(red), toHex(green), toHex(blue)].join('');
-        },
-        
-        /** Limits a channel value to integers between 0 and 255.
-            @param value:number the channel value to clean up.
-            @returns number */
-        cleanChannelValue: function(value) {
-            return Math.min(255, Math.max(0, Math.round(value)));
-        },
-        
-        /** Gets the red channel from a "color" number.
-            @return number */
-        getRedChannel: function(value) {
-            return (0xff0000 & value) >> 16;
-        },
-        
-        /** Gets the green channel from a "color" number.
-            @returns number */
-        getGreenChannel: function(value) {
-            return (0x00ff00 & value) >> 8;
-        },
-        
-        /** Gets the blue channel from a "color" number.
-            @returns number */
-        getBlueChannel: function(value) {
-            return (0x0000ff & value);
-        },
-        
-        /** Creates an myt.Color from a "color" number.
-            @returns myt.Color */
-        makeColorFromNumber: function(value) {
-            return new myt.Color(
-                this.getRedChannel(value),
-                this.getGreenChannel(value),
-                this.getBlueChannel(value)
-            );
-        },
-        
-        /** Creates an myt.Color from an html color string.
-            @param value:string A hex string representation of a color, such
-                as '#ff339b'.
-            @returns myt.Color or null if no color could be parsed. */
-        makeColorFromHexString: function(value) {
-            if (value && value.indexOf('#') === 0) {
-                return this.makeColorFromNumber(parseInt(value.substring(1), 16));
-            } else {
-                return null;
+        Events:
+            None
+       
+        Attributes:
+            red:int The red channel. Will be an integer between 0 and 255.
+            green:int The green channel. Will be an integer between 0 and 255.
+            blue:int The blue channel. Will be an integer between 0 and 255.
+    */
+    var Color = pkg.Color = new JS.Class('Color', {
+        // Class Methods and Attributes ////////////////////////////////////////
+        extend: {
+            /** Converts a number or string representation of a number to a 
+                two character hex string.
+                @param value:number/string The number or string to convert.
+                @returns string: A two character hex string such as: '0c' or 'c9'. */
+            toHex: function(value) {
+                value = this.cleanChannelValue(value).toString(16);
+                return value.length === 1 ? '0' + value : value;
+            },
+            
+            /** Converts red, green, and blue color channel numbers to a six 
+                character hex string.
+                @param red:number The red color channel.
+                @param green:number The green color channel.
+                @param blue:number The blue color channel.
+                @param prependHash:boolean (optional) If true a '#' character
+                    will be prepended to the return value.
+                @returns string: Something like: '#ff9c02' or 'ff9c02' */
+            rgbToHex: function(red, green, blue, prependHash) {
+                var toHex = this.toHex.bind(this);
+                return [prependHash ? '#' : '', toHex(red), toHex(green), toHex(blue)].join('');
+            },
+            
+            /** Limits a channel value to integers between 0 and 255.
+                @param value:number the channel value to clean up.
+                @returns number */
+            cleanChannelValue: (value) => Math.min(255, Math.max(0, Math.round(value))),
+            
+            /** Gets the red channel from a "color" number.
+                @return number */
+            getRedChannel: (value) => (0xff0000 & value) >> 16,
+            
+            /** Gets the green channel from a "color" number.
+                @returns number */
+            getGreenChannel: (value) => (0x00ff00 & value) >> 8,
+            
+            /** Gets the blue channel from a "color" number.
+                @returns number */
+            getBlueChannel: (value) => (0x0000ff & value),
+            
+            /** Creates an myt.Color from a "color" number.
+                @returns myt.Color */
+            makeColorFromNumber: function(value) {
+                return new Color(
+                    this.getRedChannel(value),
+                    this.getGreenChannel(value),
+                    this.getBlueChannel(value)
+                );
+            },
+            
+            /** Creates an myt.Color from an html color string.
+                @param value:string A hex string representation of a color, such
+                    as '#ff339b'.
+                @returns myt.Color or null if no color could be parsed. */
+            makeColorFromHexString: function(value) {
+                if (value && value.indexOf('#') === 0) {
+                    return this.makeColorFromNumber(parseInt(value.substring(1), 16));
+                } else {
+                    return null;
+                }
+            },
+            
+            /** Returns the lighter of the two provided colors.
+                @param a:number A color number.
+                @param b:number A color number.
+                @returns The number that represents the lighter color. */
+            getLighterColor: function(a, b) {
+                var cA = this.makeColorFromNumber(a),
+                    cB = this.makeColorFromNumber(b);
+                return cA.isLighterThan(cB) ? a : b;
+            },
+            
+            /** Creates a "color" number from the provided color channels.
+                @param red:number the red channel
+                @param green:number the green channel
+                @param blue:number the blue channel
+                @returns number */
+            makeColorNumberFromChannels: function(red, green, blue) {
+                red = this.cleanChannelValue(red);
+                green = this.cleanChannelValue(green);
+                blue = this.cleanChannelValue(blue);
+                return (red << 16) + (green << 8) + blue;
+            },
+            
+            /** Creates a new myt.Color object that is a blend of the two provided
+                colors.
+                @param fromColor:myt.Color The first color to blend.
+                @param toColor:myt.Color The second color to blend.
+                @param percent:number The blend percent between the two colors
+                    where 0 is the fromColor and 1.0 is the toColor.
+                @returns myt.Color */
+            makeBlendedColor: (fromColor, toColor, percent) => {
+                return new Color(
+                    fromColor.red + (percent * (toColor.red - fromColor.red)),
+                    fromColor.green + (percent * (toColor.green - fromColor.green)),
+                    fromColor.blue + (percent * (toColor.blue - fromColor.blue))
+                );
             }
         },
         
-        /** Returns the lighter of the two provided colors.
-            @param a:number A color number.
-            @param b:number A color number.
-            @returns The number that represents the lighter color. */
-        getLighterColor: function(a, b) {
-            var cA = this.makeColorFromNumber(a),
-                cB = this.makeColorFromNumber(b);
-            return cA.isLighterThan(cB) ? a : b;
-        },
         
-        /** Creates a "color" number from the provided color channels.
+        // Constructor /////////////////////////////////////////////////////////
+        /** Create a new Color.
             @param red:number the red channel
             @param green:number the green channel
-            @param blue:number the blue channel
-            @returns number */
-        makeColorNumberFromChannels: function(red, green, blue) {
-            red = this.cleanChannelValue(red);
-            green = this.cleanChannelValue(green);
-            blue = this.cleanChannelValue(blue);
-            return (red << 16) + (green << 8) + blue;
+            @param blue:number the blue channel */
+        initialize: function(red, green, blue) {
+            this.setRed(red);
+            this.setGreen(green);
+            this.setBlue(blue);
         },
         
-        /** Creates a new myt.Color object that is a blend of the two provided
-            colors.
-            @param fromColor:myt.Color The first color to blend.
-            @param toColor:myt.Color The second color to blend.
-            @param percent:number The blend percent between the two colors
-                where 0 is the fromColor and 1.0 is the toColor.
-            @returns myt.Color */
-        makeBlendedColor: function(fromColor, toColor, percent) {
-            return new myt.Color(
-                fromColor.red + (percent * (toColor.red - fromColor.red)),
-                fromColor.green + (percent * (toColor.green - fromColor.green)),
-                fromColor.blue + (percent * (toColor.blue - fromColor.blue))
-            );
-        }
-    },
-    
-    
-    // Constructor /////////////////////////////////////////////////////////////
-    /** Create a new Color.
-        @param red:number the red channel
-        @param green:number the green channel
-        @param blue:number the blue channel */
-    initialize: function(red, green, blue) {
-        this.setRed(red);
-        this.setGreen(green);
-        this.setBlue(blue);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** Sets the red channel value. */
-    setRed: function(red) {
-        this.red = myt.Color.cleanChannelValue(red);
-    },
-    
-    /** Sets the green channel value. */
-    setGreen: function(green) {
-        this.green = myt.Color.cleanChannelValue(green);
-    },
-    
-    /** Sets the blue channel value. */
-    setBlue: function(blue) {
-        this.blue = myt.Color.cleanChannelValue(blue);
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Gets the numerical representation of this color.
-        @returns number: The number that represents this color. */
-    getColorNumber: function() {
-        return (this.red << 16) + (this.green << 8) + this.blue;
-    },
-    
-    /** Gets the hex string representation of this color.
-        @returns string: A hex color such as '#a0bbcc'. */
-    getHtmlHexString: function() {
-        return myt.Color.rgbToHex(this.red, this.green, this.blue, true);
-    },
-    
-    /** Tests if this color is lighter than the provided color.
-        @param c:myt.Color the color to compare to.
-        @returns boolean: True if this color is lighter, false otherwise. */
-    isLighterThan: function(c) {
-        var diff = this.getDiffFrom(c);
         
-        // Sum channel diffs to determine lightest color. A negative diff
-        // means a lighter color.
-        return 0 > (diff.red + diff.green + diff.blue);
-    },
-    
-    /** Gets an object holding color channel diffs.
-        @param c:myt.Color the color to diff from.
-        @returns object containing the diffs for the red, green and blue
-            channels. */
-    getDiffFrom: function(c) {
-        return {
-            red: c.red - this.red,
-            green: c.green - this.green,
-            blue: c.blue - this.blue
-        };
-    },
-    
-    /** Applies the provided diff object to this color.
-        @param diff:object the color diff to apply.
-        @returns this myt.Color to facilitate method chaining. */
-    applyDiff: function(diff) {
-        return this.add(diff);
-    },
-    
-    /** Adds the provided color to this color.
-        @param c:myt.Color the color to add.
-        @returns this myt.Color to facilitate method chaining. */
-    add: function(c) {
-        this.setRed(this.red + c.red);
-        this.setGreen(this.green + c.green);
-        this.setBlue(this.blue + c.blue);
-        return this;
-    },
-    
-    /** Subtracts the provided color from this color.
-        @param c:myt.Color the color to subtract.
-        @returns this myt.Color to facilitate method chaining. */
-    subtract: function(c) {
-        this.setRed(this.red - c.red);
-        this.setGreen(this.green - c.green);
-        this.setBlue(this.blue - c.blue);
-        return this;
-    },
-    
-    /** Multiplys this color by the provided scalar.
-        @param s:number the scaler to multiply by.
-        @returns this myt.Color to facilitate method chaining. */
-    multiply: function(s) {
-        this.setRed(this.red * s);
-        this.setGreen(this.green * s);
-        this.setBlue(this.blue * s);
-        return this;
-    },
-    
-    /** Divides this color by the provided scalar.
-        @param s:number the scaler to divide by.
-        @returns this myt.Color to facilitate method chaining. */
-    divide: function(s) {
-        this.setRed(this.red / s);
-        this.setGreen(this.green / s);
-        this.setBlue(this.blue / s);
-        return this;
-    },
-    
-    /** Clones this Color.
-        @returns myt.Color A copy of this myt.Color. */
-    clone: function() {
-        return new myt.Color(this.red, this.green, this.blue);
-    },
-    
-    /** Determine if this color has the same value as another color.
-        @returns boolean True if this color has the same color values as
-            this provided color, false otherwise. */
-    equals: function(obj) {
-        return obj === this || (obj && obj.isA && 
-            obj.isA(myt.Color) && 
-            obj.red === this.red && 
-            obj.green === this.green && 
-            obj.blue === this.blue);
-    }
-});
+        // Accessors ///////////////////////////////////////////////////////////
+        /** Sets the red channel value. */
+        setRed: function(red) {
+            this.red = Color.cleanChannelValue(red);
+        },
+        
+        /** Sets the green channel value. */
+        setGreen: function(green) {
+            this.green = Color.cleanChannelValue(green);
+        },
+        
+        /** Sets the blue channel value. */
+        setBlue: function(blue) {
+            this.blue = Color.cleanChannelValue(blue);
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Gets the numerical representation of this color.
+            @returns number: The number that represents this color. */
+        getColorNumber: function() {
+            return (this.red << 16) + (this.green << 8) + this.blue;
+        },
+        
+        /** Gets the hex string representation of this color.
+            @returns string: A hex color such as '#a0bbcc'. */
+        getHtmlHexString: function() {
+            return Color.rgbToHex(this.red, this.green, this.blue, true);
+        },
+        
+        /** Tests if this color is lighter than the provided color.
+            @param c:myt.Color the color to compare to.
+            @returns boolean: True if this color is lighter, false otherwise. */
+        isLighterThan: function(c) {
+            var diff = this.getDiffFrom(c);
+            
+            // Sum channel diffs to determine lightest color. A negative diff
+            // means a lighter color.
+            return 0 > (diff.red + diff.green + diff.blue);
+        },
+        
+        /** Gets an object holding color channel diffs.
+            @param c:myt.Color the color to diff from.
+            @returns object containing the diffs for the red, green and blue
+                channels. */
+        getDiffFrom: function(c) {
+            return {
+                red: c.red - this.red,
+                green: c.green - this.green,
+                blue: c.blue - this.blue
+            };
+        },
+        
+        /** Applies the provided diff object to this color.
+            @param diff:object the color diff to apply.
+            @returns this myt.Color to facilitate method chaining. */
+        applyDiff: function(diff) {
+            return this.add(diff);
+        },
+        
+        /** Adds the provided color to this color.
+            @param c:myt.Color the color to add.
+            @returns this myt.Color to facilitate method chaining. */
+        add: function(c) {
+            this.setRed(this.red + c.red);
+            this.setGreen(this.green + c.green);
+            this.setBlue(this.blue + c.blue);
+            return this;
+        },
+        
+        /** Subtracts the provided color from this color.
+            @param c:myt.Color the color to subtract.
+            @returns this myt.Color to facilitate method chaining. */
+        subtract: function(c) {
+            this.setRed(this.red - c.red);
+            this.setGreen(this.green - c.green);
+            this.setBlue(this.blue - c.blue);
+            return this;
+        },
+        
+        /** Multiplys this color by the provided scalar.
+            @param s:number the scaler to multiply by.
+            @returns this myt.Color to facilitate method chaining. */
+        multiply: function(s) {
+            this.setRed(this.red * s);
+            this.setGreen(this.green * s);
+            this.setBlue(this.blue * s);
+            return this;
+        },
+        
+        /** Divides this color by the provided scalar.
+            @param s:number the scaler to divide by.
+            @returns this myt.Color to facilitate method chaining. */
+        divide: function(s) {
+            this.setRed(this.red / s);
+            this.setGreen(this.green / s);
+            this.setBlue(this.blue / s);
+            return this;
+        },
+        
+        /** Clones this Color.
+            @returns myt.Color A copy of this myt.Color. */
+        clone: function() {
+            return new Color(this.red, this.green, this.blue);
+        },
+        
+        /** Determine if this color has the same value as another color.
+            @returns boolean True if this color has the same color values as
+                this provided color, false otherwise. */
+        equals: function(obj) {
+            return obj === this || (obj && obj.isA && 
+                obj.isA(Color) && 
+                obj.red === this.red && 
+                obj.green === this.green && 
+                obj.blue === this.blue);
+        }
+    });
+})(myt);
 
 
 /** An ordered collection of points that can be applied to a canvas.
@@ -11586,7 +11580,7 @@ myt.DrawingUtil = {
         @param r:Number the radius of the corners.
         @param thickness:Number the thickness of the line. If thickness is
             zero or less a fill will be done rather than an outline. */
-    drawRoundedRect: function(canvas, r, thickness, left, top, w, h) {
+    drawRoundedRect: (canvas, r, thickness, left, top, w, h) => {
         var bottom = top + h,
             right = left + w,
             PI = Math.PI;
@@ -11637,7 +11631,7 @@ myt.DrawingUtil = {
     
     /** Draws a rect outline into the provided drawview.
         @param thickness:Number the thickness of the line. */
-    drawRectOutline: function(canvas, thickness, left, top, w, h) {
+    drawRectOutline: (canvas, thickness, left, top, w, h) => {
         var bottom = top + h, 
             right = left + w,
             ileft = left + thickness,
@@ -11667,7 +11661,7 @@ myt.DrawingUtil = {
         @param rTR:Number the radius for the top right corner.
         @param rBL:Number the radius for the bottom left corner.
         @param rBR:Number the radius for the bottom right corner. */
-    drawPartiallyRoundedRect: function(canvas, rTL, rTR, rBL, rBR, left, top, w, h) {
+    drawPartiallyRoundedRect: (canvas, rTL, rTR, rBL, rBR, left, top, w, h) => {
         var bottom = top + h, right = left + w;
         
         canvas.beginPath();
@@ -11689,7 +11683,7 @@ myt.DrawingUtil = {
         canvas.closePath();
     },
     
-    drawGradientArc: function(canvas, centerX, centerY, r, ir, startAngle, endAngle, colors, segments) {
+    drawGradientArc: (canvas, centerX, centerY, r, ir, startAngle, endAngle, colors, segments) => {
         if (segments == null) segments = 60;
         
         var angleDelta = Math.PI / segments,
@@ -22479,257 +22473,255 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
 });
 
 
-/** A divider is a UI control that allows the user to resize two area by
-    dragging the divider left/right or up/down.
-    
-    Events:
-        limitToParent:number
-    
-    Attributes:
-        axis:string Indicates if the divider should be constrained horizontally
-            or vertically. Allowed values: 'x' or 'y'. This value can only
-            be set during instantiation.
-        limitToParent:number If set, this will constrain the maxValue to the
-            appropriate parent view dimension less the limitToParent amount.
-        expansionState:number Used by the "primary" action to update the 
-            divider position. Allowed values are:
-                collapsed:0
-                restored just collapsed:1
-                restored just expanded:2
-                expanded:3
-        restoreValue:number The value used to restore the position in the
-            "primary" action.
-    
-    Private Attributes:
-        __nudgeAcc:number The multiplier in px per nudge.
-*/
-myt.BaseDivider = new JS.Class('BaseDivider', myt.SimpleButton, {
-    include: [myt.BoundedValueComponent, myt.Draggable],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        var self = this;
+((pkg) => {
+    var JSClass = JS.Class,
         
-        if (attrs.activeColor == null) attrs.activeColor = '#bbbbbb';
-        if (attrs.hoverColor == null) attrs.hoverColor = '#dddddd';
-        if (attrs.readyColor == null) attrs.readyColor = '#cccccc';
+        /** Setup the limitToParent constraint. */
+        updateLimitToParentConstraint = (divider) => {
+            var dim = divider.axis === 'y' ? 'height' : 'width';
+            divider.applyConstraint('__limitToParent', [divider, 'limitToParent', divider, dim, divider.parent, dim]);
+        },
         
-        if (attrs.axis == null) attrs.axis = 'x';
-        if (attrs.minValue == null) attrs.minValue = 0;
-        if (attrs.value == null) attrs.value = attrs.minValue;
-        if (attrs.expansionState == null) attrs.expansionState = 2;
-        
-        if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
-        if (attrs.repeatKeyDown == null) attrs.repeatKeyDown = true;
-        
-        if (attrs.activationKeys == null) {
-            attrs.activationKeys = [
-                37, // left arrow
-                38, // up arrow
-                39, // right arrow
-                40, // down arrow
-                13, // enter
-                32  // spacebar
-            ];
-        }
-        
-        if (attrs.axis === 'y') {
-            if (attrs.height == null) attrs.height = 6;
-            if (attrs.cursor == null) attrs.cursor = 'row-resize';
-        } else {
-            if (attrs.width == null) attrs.width = 6;
-            if (attrs.cursor == null) attrs.cursor = 'col-resize';
-        }
-        
-        // Controls acceleration of the nudge amount
-        self.__nudgeAcc = 1;
-        
-        self.callSuper(parent, attrs);
-        
-        // Do afterwards since value might have been constrained from the
-        // value provided in attrs.
-        if (attrs.restoreValue == null) self.setRestoreValue(self.value);
-        
-        if (self.limitToParent != null) self.__updateLimitToParentConstraint();
-        
-        self.attachDomObserver(self, 'doPrimaryAction', 'dblclick');
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setExpansionState: function(v) {this.expansionState = v;},
-    setRestoreValue: function(v) {this.restoreValue = v;},
-    
-    setLimitToParent: function(v) {
-        var self = this;
-        
-        if (self.limitToParent !== v) {
-            self.limitToParent = v;
-            if (self.inited) {
-                self.fireEvent('limitToParent', v);
+        /** A divider is a UI control that allows the user to resize two area by
+            dragging the divider left/right or up/down.
+            
+            Events:
+                limitToParent:number
+            
+            Attributes:
+                axis:string Indicates if the divider should be constrained horizontally
+                    or vertically. Allowed values: 'x' or 'y'. This value can only
+                    be set during instantiation.
+                limitToParent:number If set, this will constrain the maxValue to the
+                    appropriate parent view dimension less the limitToParent amount.
+                expansionState:number Used by the "primary" action to update the 
+                    divider position. Allowed values are:
+                        collapsed:0
+                        restored just collapsed:1
+                        restored just expanded:2
+                        expanded:3
+                restoreValue:number The value used to restore the position in the
+                    "primary" action.
+            
+            Private Attributes:
+                __nudgeAcc:number The multiplier in px per nudge.
+        */
+        BaseDivider = new JSClass('BaseDivider', pkg.SimpleButton, {
+            include: [pkg.BoundedValueComponent, pkg.Draggable],
+            
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            initNode: function(parent, attrs) {
+                var self = this;
                 
-                if (v == null) {
-                    self.releaseConstraint('__limitToParent');
+                if (attrs.activeColor == null) attrs.activeColor = '#bbbbbb';
+                if (attrs.hoverColor == null) attrs.hoverColor = '#dddddd';
+                if (attrs.readyColor == null) attrs.readyColor = '#cccccc';
+                
+                if (attrs.axis == null) attrs.axis = 'x';
+                if (attrs.minValue == null) attrs.minValue = 0;
+                if (attrs.value == null) attrs.value = attrs.minValue;
+                if (attrs.expansionState == null) attrs.expansionState = 2;
+                
+                if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
+                if (attrs.repeatKeyDown == null) attrs.repeatKeyDown = true;
+                
+                if (attrs.activationKeys == null) {
+                    attrs.activationKeys = [
+                        37, // left arrow
+                        38, // up arrow
+                        39, // right arrow
+                        40, // down arrow
+                        13, // enter
+                        32  // spacebar
+                    ];
+                }
+                
+                if (attrs.axis === 'y') {
+                    if (attrs.height == null) attrs.height = 6;
+                    if (attrs.cursor == null) attrs.cursor = 'row-resize';
                 } else {
-                    self.__updateLimitToParentConstraint();
+                    if (attrs.width == null) attrs.width = 6;
+                    if (attrs.cursor == null) attrs.cursor = 'col-resize';
+                }
+                
+                // Controls acceleration of the nudge amount
+                self.__nudgeAcc = 1;
+                
+                self.callSuper(parent, attrs);
+                
+                // Do afterwards since value might have been constrained from the
+                // value provided in attrs.
+                if (attrs.restoreValue == null) self.setRestoreValue(self.value);
+                
+                if (self.limitToParent != null) updateLimitToParentConstraint(self);
+                
+                self.attachDomObserver(self, 'doPrimaryAction', 'dblclick');
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setExpansionState: function(v) {this.expansionState = v;},
+            setRestoreValue: function(v) {this.restoreValue = v;},
+            
+            setLimitToParent: function(v) {
+                var self = this;
+                
+                if (self.limitToParent !== v) {
+                    self.limitToParent = v;
+                    if (self.inited) {
+                        self.fireEvent('limitToParent', v);
+                        
+                        if (v == null) {
+                            self.releaseConstraint('__limitToParent');
+                        } else {
+                            updateLimitToParentConstraint(self);
+                        }
+                    }
+                }
+            },
+            
+            setAxis: function(v) {
+                if (this.inited) {
+                    console.warn("Axis may not be updated after instantiation.");
+                } else {
+                    this.axis = v;
+                }
+            },
+            
+            /** Update the x or y position of the component as the value changes.
+                @param restoreValueAlso:boolean (optional) If true, the restoreValue
+                    will also be updated.
+                @overrides myt.ValueComponent */
+            setValue: function(v, restoreValueAlso) {
+                this.callSuper(v);
+                
+                v = this.value;
+                if (this.axis === 'y') {
+                    this.setY(v);
+                } else {
+                    this.setX(v);
+                }
+                
+                if (restoreValueAlso) this.setRestoreValue(v);
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** Do the limitToParent constraint.
+                @private */
+            __limitToParent: function(event) {
+                var self = this,
+                    dim = self.axis === 'y' ? 'height' : 'width';
+                self.setMaxValue(self.parent[dim] - self.limitToParent - self[dim]);
+            },
+            
+            /** Nudge the divider when the arrow keys are used. Nudging accelerates
+                up to a limit if the key is held down.
+                @overrides myt.Button. */
+            doActivationKeyDown: function(key, isRepeat) {
+                var self = this,
+                    dir = 0;
+                
+                self.callSuper(key, isRepeat);
+                
+                // Determine nudge direction
+                switch (key) {
+                    case 37: case 38: dir = -1; break;
+                    case 39: case 40: dir = 1; break;
+                    case 13: case 32: default:
+                        self.doPrimaryAction();
+                        return;
+                }
+                
+                // Update nudge amount, but never nudge more than 64.
+                self.__nudgeAcc = isRepeat ? Math.min(self.__nudgeAcc + 1, 64) : 1;
+                
+                self.setValue(self.value + dir * self.__nudgeAcc, true);
+                self.setExpansionState(2);
+            },
+            
+            doPrimaryAction: function() {
+                var self = this,
+                    toValue, 
+                    rv = self.restoreValue, 
+                    maxV = self.maxValue, 
+                    minV = self.minValue;
+                switch (self.expansionState) {
+                    case 0:
+                        if (rv != null) {
+                            self.setExpansionState(1);
+                            if (rv === minV) {
+                                // Prevent infinite loop if there's nowhere to animate to.
+                                if (rv !== maxV) self.doPrimaryAction();
+                            } else {
+                                toValue = rv;
+                            }
+                        }
+                        break;
+                    case 1:
+                        if (maxV != null) {
+                            self.setExpansionState(3);
+                            if (self.value === maxV) {
+                                self.doPrimaryAction();
+                            } else {
+                                toValue = maxV;
+                            }
+                        }
+                        break;
+                    case 2:
+                        if (minV != null) {
+                            self.setExpansionState(0);
+                            if (self.value === minV) {
+                                self.doPrimaryAction();
+                            } else {
+                                toValue = minV;
+                            }
+                        }
+                        break;
+                    case 3:
+                        if (rv != null) {
+                            self.setExpansionState(2);
+                            if (rv === maxV) {
+                                self.doPrimaryAction();
+                            } else {
+                                toValue = rv;
+                            }
+                        }
+                        break;
+                }
+                if (toValue != null) {
+                    self.stopActiveAnimators('value');
+                    self.animateOnce('value', toValue, null, 250);
+                }
+            },
+            
+            /** Constrain dragging to horizontal or vertical based on axis.
+                @overrides myt.Draggable */
+            requestDragPosition: function(x, y) {
+                if (!this.disabled) {
+                    this.setValue(this.axis === 'y' ? y : x, true);
+                    this.setExpansionState(2);
                 }
             }
+        });
+    
+    /** A divider that moves left/right. */
+    pkg.HorizontalDivider = new JSClass('HorizontalDivider', BaseDivider, {
+        initNode: function(parent, attrs) {
+            attrs.axis = 'x';
+            this.callSuper(parent, attrs);
         }
-    },
+    });
     
-    setAxis: function(v) {
-        if (this.inited) {
-            console.warn("Axis may not be updated after instantiation.");
-        } else {
-            this.axis = v;
+    /** A divider that moves left/right. */
+    pkg.VerticalDivider = new JSClass('VerticalDivider', BaseDivider, {
+        initNode: function(parent, attrs) {
+            attrs.axis = 'y';
+            this.callSuper(parent, attrs);
         }
-    },
-    
-    /** Update the x or y position of the component as the value changes.
-        @param restoreValueAlso:boolean (optional) If true, the restoreValue
-            will also be updated.
-        @overrides myt.ValueComponent */
-    setValue: function(v, restoreValueAlso) {
-        this.callSuper(v);
-        
-        v = this.value;
-        if (this.axis === 'y') {
-            this.setY(v);
-        } else {
-            this.setX(v);
-        }
-        
-        if (restoreValueAlso) this.setRestoreValue(v);
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Setup the limitToParent constraint.
-        @private */
-    __updateLimitToParentConstraint: function() {
-        var self = this,
-            dim = self.axis === 'y' ? 'height' : 'width';
-        self.applyConstraint('__limitToParent', [self, 'limitToParent', self, dim, self.parent, dim]);
-    },
-    
-    /** Do the limitToParent constraint.
-        @private */
-    __limitToParent: function(event) {
-        var self = this,
-            dim = self.axis === 'y' ? 'height' : 'width';
-        self.setMaxValue(self.parent[dim] - self.limitToParent - self[dim]);
-    },
-    
-    /** Nudge the divider when the arrow keys are used. Nudging accelerates
-        up to a limit if the key is held down.
-        @overrides myt.Button. */
-    doActivationKeyDown: function(key, isRepeat) {
-        var self = this,
-            dir = 0;
-        
-        self.callSuper(key, isRepeat);
-        
-        // Determine nudge direction
-        switch (key) {
-            case 37: case 38: dir = -1; break;
-            case 39: case 40: dir = 1; break;
-            case 13: case 32: default:
-                self.doPrimaryAction();
-                return;
-        }
-        
-        // Update nudge amount, but never nudge more than 64.
-        self.__nudgeAcc = isRepeat ? Math.min(self.__nudgeAcc + 1, 64) : 1;
-        
-        self.setValue(self.value + dir * self.__nudgeAcc, true);
-        self.setExpansionState(2);
-    },
-    
-    doPrimaryAction: function() {
-        var self = this,
-            toValue, 
-            rv = self.restoreValue, 
-            maxV = self.maxValue, 
-            minV = self.minValue;
-        switch (self.expansionState) {
-            case 0:
-                if (rv != null) {
-                    self.setExpansionState(1);
-                    if (rv === minV) {
-                        // Prevent infinite loop if there's nowhere to animate to.
-                        if (rv !== maxV) self.doPrimaryAction();
-                    } else {
-                        toValue = rv;
-                    }
-                }
-                break;
-            case 1:
-                if (maxV != null) {
-                    self.setExpansionState(3);
-                    if (self.value === maxV) {
-                        self.doPrimaryAction();
-                    } else {
-                        toValue = maxV;
-                    }
-                }
-                break;
-            case 2:
-                if (minV != null) {
-                    self.setExpansionState(0);
-                    if (self.value === minV) {
-                        self.doPrimaryAction();
-                    } else {
-                        toValue = minV;
-                    }
-                }
-                break;
-            case 3:
-                if (rv != null) {
-                    self.setExpansionState(2);
-                    if (rv === maxV) {
-                        self.doPrimaryAction();
-                    } else {
-                        toValue = rv;
-                    }
-                }
-                break;
-        }
-        if (toValue != null) {
-            self.stopActiveAnimators('value');
-            self.animateOnce('value', toValue, null, 250);
-        }
-    },
-    
-    /** Constrain dragging to horizontal or vertical based on axis.
-        @overrides myt.Draggable */
-    requestDragPosition: function(x, y) {
-        if (!this.disabled) {
-            this.setValue(this.axis === 'y' ? y : x, true);
-            this.setExpansionState(2);
-        }
-    }
-});
-
-
-/** A divider that moves left/right. */
-myt.HorizontalDivider = new JS.Class('HorizontalDivider', myt.BaseDivider, {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        attrs.axis = 'x';
-        this.callSuper(parent, attrs);
-    }
-});
-
-
-/** A divider that moves left/right. */
-myt.VerticalDivider = new JS.Class('VerticalDivider', myt.BaseDivider, {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        attrs.axis = 'y';
-        this.callSuper(parent, attrs);
-    }
-});
+    });
+})(myt);
 
 
 /** Makes a view behave as a grid column header.
