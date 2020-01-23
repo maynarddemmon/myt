@@ -15409,106 +15409,101 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
 });
 
 
-/** Provides AJAX functionality. This is a wrapper around JQuery's ajax
-    request. */
-myt.Ajax = new JS.Class('Ajax', myt.Node, {
-    // Class Methods ///////////////////////////////////////////////////////////
-    extend: {
+((pkg) => {
+    var 
+        /** A specialized setter function used by the setters. */
+        optsSetter = (ajax, key, value) => {
+            var opts = ajax._opts || (ajax._opts = {});
+            if (value) {
+                opts[key] = value;
+            } else {
+                delete opts[key];
+            }
+        };
+    
+    /** Provides AJAX functionality. This is a wrapper around JQuery's ajax
+        request.
+        
+        Private Attributes:
+            _opts:object Lazily instantiated options object.
+    */
+    pkg.Ajax = new JS.Class('Ajax', pkg.Node, {
+        // Accessors ///////////////////////////////////////////////////////////
+        setUrl: function(v) {
+            optsSetter(this, 'url', v);
+        },
+        
+        /** The request type.
+            Supported values: 'GET' or 'POST'. */
+        setRequestMethod: function(v) {
+            optsSetter(this, 'type', v);
+        },
+        
+        /** A map of name value pairs for the request. */
+        setRequestData: function(v) {
+            optsSetter(this, 'data', v);
+        },
+        
+        /** The response type.
+            Supported values: 'xml', 'html', 'json', 'jsonp', 'script', or 'text'. */
+        setResponseType: function(v) {
+            optsSetter(this, 'datatype', v);
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
         doRequest: function(opts, successCallback, failureCallback) {
-            return $.ajax(opts).done(successCallback).fail(failureCallback);
-        }
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        this.opts = {};
+            return $.ajax(
+                    // Convert from myt.Ajax opts to JQuery.ajax opts.
+                    pkg.extend(
+                        {
+                            context:this,
+                            
+                            // Store url and anything stored under the "callbackData" and
+                            // "requestData" key on the jqxhr so we can read it in response 
+                            // handling code.
+                            beforeSend: (jqxhr, settings) => {
+                                jqxhr.callbackData = opts.callbackData;
+                                jqxhr.requestData = opts.requestData;
+                                jqxhr.requestURL = settings.url;
+                            }
+                        },
+                        this._opts,
+                        opts,
+                        (key, target, source) => {
+                            var targetKey = key;
+                            switch (key) {
+                                case 'requestData': targetKey = 'data'; break;
+                                case 'requestMethod': targetKey = 'type'; break;
+                                case 'responseType': targetKey = 'datatype'; break;
+                            }
+                            target[targetKey] = source[key];
+                        }
+                    )
+                ).done(
+                    successCallback || this.handleSuccess
+                ).fail(
+                    failureCallback || this.handleFailure
+                );
+        },
         
-        this.callSuper();
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setUrl: function(v) {
-        this.__s('url', v);
-    },
-    
-    /** The request type.
-        Supported values: 'GET' or 'POST'. */
-    setRequestMethod: function(v) {
-        this.__s('type', v);
-    },
-    
-    /** A map of name value pairs for the request. */
-    setRequestData: function(v) {
-        this.__s('data', v);
-    },
-    
-    /** The response type.
-        Supported values: 'xml', 'html', 'json', 'jsonp', 'script', or 'text'. */
-    setResponseType: function(v) {
-        this.__s('datatype', v);
-    },
-    
-    /** A specialized setter function used by the setters.
-        @private */
-    __s: function(key, value) {
-        if (value) {
-            this.opts[key] = value;
-        } else {
-            delete this.opts[key];
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    doRequest: function(opts, successCallback, failureCallback) {
-        // Convert from myt.Ajax opts to JQuery.ajax opts.
-        var mappedOpts = myt.extend({
-            context:this,
-            
-            // Store url and anything stored under the "callbackData" and
-            // "requestData" key on the jqxhr so we can read it in response 
-            // handling code.
-            beforeSend: function(jqxhr, settings) {
-                jqxhr.callbackData = opts.callbackData;
-                jqxhr.requestData = opts.requestData;
-                
-                jqxhr.requestURL = settings.url;
-            }
-        }, opts, function(key, target, source) {
-            var targetKey = key;
-            switch (key) {
-                case 'requestData': targetKey = 'data'; break;
-                case 'requestMethod': targetKey = 'type'; break;
-                case 'responseType': targetKey = 'datatype'; break;
-            }
-            target[targetKey] = source[key];
-        });
+        /** Handles request successes.
+            @param data: The response data
+            @param status: String the response status
+            @param jqxhr: The request object */
+        handleSuccess: function(data, status, jqxhr) {
+            this.fireEvent('success', {data:data, status:status, xhr:jqxhr});
+        },
         
-        return myt.Ajax.doRequest(
-            myt.extend({}, this.opts, mappedOpts), 
-            successCallback || this.handleSuccess, 
-            failureCallback || this.handleFailure
-        );
-    },
-    
-    /** Handles request successes.
-        @param data: The response data
-        @param status: String the response status
-        @param jqxhr: The request object */
-    handleSuccess: function(data, status, jqxhr) {
-        this.fireEvent('success', {data:data, status:status, xhr:jqxhr});
-    },
-    
-    /** Handles request failures.
-        @param jqxhr: The request object
-        @param status: String the response status
-        @param exception: XMLHttpRequestException */
-    handleFailure: function(jqxhr, status, exception) {
-        this.fireEvent('failure', {exception:exception, status:status, xhr:jqxhr});
-    }
-});
+        /** Handles request failures.
+            @param jqxhr: The request object
+            @param status: String the response status
+            @param exception: XMLHttpRequestException */
+        handleFailure: function(jqxhr, status, exception) {
+            this.fireEvent('failure', {exception:exception, status:status, xhr:jqxhr});
+        }
+    });
+})(myt);
 
 
 /** Provides "form" functionality to a node. Forms can be nested to build
@@ -19243,365 +19238,338 @@ myt.Dialog = new JS.Class('Dialog', myt.ModalPanel, {
 });
 
 
-/** Tests if a value is "valid" or not.
-    
-    Events:
-        None
-    
-    Attributes:
-        id:string the ideally unique ID for this Validator so it can be
-            stored and retreived from the myt.global.validators registry.
-*/
-myt.Validator = new JS.Class('Validator', {
-    // Constructor /////////////////////////////////////////////////////////////
-    /** Creates a new Validator
-        @param id:string the ideally unique ID for a validator instance. */
-    initialize: function(id) {
-        this.id = id;
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Tests if the value is valid or not.
-        @param value:* the value to test validity for.
-        @param config:Object (optional) A map of configuration values that
-            can be used to augment the validation function as needed. The
-            nature of this config will be specific to each Validator class.
-        @param errorMessages:array (optional) Any error messages arising during
-            validation will be pushed onto thiis array if it is provided.
-        @returns boolean true if the value is valid, false otherwise. */
-    isValid: function(value, config, errorMessages) {
-        return true;
-    },
-    
-    /** Tests if the form is valid or not.
-        @param form:myt.Form the form to test validity for.
-        @param config:Object (optional) A map of configuration values that
-            can be used to augment the validation function as needed. The
-            nature of this config will be specific to each Validator class.
-        @param errorMessages:array (optional) Any error messages arising during
-            validation will be pushed onto thiis array if it is provided.
-        @returns boolean true if the form is valid, false otherwise. */
-    isFormValid: function(form, config, errorMessages) {
-        if (!config) config = {};
-        config.form = form;
+((pkg) => {
+    var JSClass = JS.Class,
         
-        return this.isValid(form.getValue(), config, errorMessages);
-    }
-});
-
-
-/** A Validator composed from multiple Validators.
-    
-    Events:
-        None
-    
-    Attributes:
-        None
-    
-    Private Attributes:
-        __v:array The array of myt.Validators that compose 
-            this Validator.
-*/
-myt.CompoundValidator = new JS.Class('CompoundValidator', myt.Validator, {
-    // Constructor /////////////////////////////////////////////////////////////
-    /** Creates a new CompoundValidator for the ID and 0 or more Validators
-        provided.
-        @param arguments:args ever argument after the first must be a
-            Validator or a Validator ID from the myt.global.validators
-            registry.*/
-    initialize: function(id) {
-        this.callSuper(id);
+        // Safe as a closure var because the registry is a singleton.,
+        validators = {},
         
-        var args = Array.prototype.slice.call(arguments);
-        args.shift();
+        getValidator = (id) => validators[id],
         
-        // Make sure each arg is an myt.Validator
-        var i = args.length, validator;
-        while (i) {
-            validator = args[--i];
-            if (typeof validator === 'string') {
-                args[i] = validator = myt.global.validators.getValidator(validator);
-                if (!validator) args.splice(i, 1);
+        doFuncOnIdentifiable = (identifiable, func) => {
+            if (identifiable) {
+                var id = identifiable.id;
+                if (identifiable.id) {
+                    func(id);
+                } else {
+                    pkg.dumpStack("No ID");
+                }
+            } else {
+                pkg.dumpStack("No validator");
             }
-        }
+        },
         
-        this.__v = args;
-    },
+        register = (identifiable) => {
+            doFuncOnIdentifiable(identifiable, (id) => {validators[id] = identifiable});
+        },
+        
+        /** Tests if a value is "valid" or not.
+            
+            Events:
+                None
+            
+            Attributes:
+                id:string the ideally unique ID for this Validator so it can be
+                    stored and retreived from the myt.global.validators registry.
+        */
+        Validator = pkg.Validator = new JSClass('Validator', {
+            /** Creates a new Validator
+                @param id:string the ideally unique ID for a validator instance. */
+            initialize: function(id) {
+                this.id = id;
+            },
+            
+            /** Tests if the value is valid or not.
+                @param value:* the value to test validity for.
+                @param config:Object (optional) A map of configuration values that
+                    can be used to augment the validation function as needed. The
+                    nature of this config will be specific to each Validator class.
+                @param errorMessages:array (optional) Any error messages arising during
+                    validation will be pushed onto thiis array if it is provided.
+                @returns boolean true if the value is valid, false otherwise. */
+            isValid: (value, config, errorMessages) => true,
+            
+            /** Tests if the form is valid or not.
+                @param form:myt.Form the form to test validity for.
+                @param config:Object (optional) A map of configuration values that
+                    can be used to augment the validation function as needed. The
+                    nature of this config will be specific to each Validator class.
+                @param errorMessages:array (optional) Any error messages arising during
+                    validation will be pushed onto thiis array if it is provided.
+                @returns boolean true if the form is valid, false otherwise. */
+            isFormValid: function(form, config, errorMessages) {
+                if (!config) config = {};
+                config.form = form;
+                return this.isValid(form.getValue(), config, errorMessages);
+            }
+        });
+        
+        
+        /** Tests that a value is not null, undefined or empty. */
+        RequiredFieldValidator = pkg.RequiredFieldValidator = new JSClass('RequiredFieldValidator', Validator, {
+            /** @overrides myt.Validator */
+            isValid: function(value, config, errorMessages) {
+                if (value == null || value === '' || (typeof value === 'string' && value.trim() === '')) {
+                    if (errorMessages) errorMessages.push("This value is required.");
+                    return false;
+                }
+                
+                return true;
+            }
+        }),
+        
+        /** Tests that the value differs from the form rollback value by more than
+            just case. */
+        EqualsIgnoreCaseValidator = pkg.EqualsIgnoreCaseValidator = new JSClass('EqualsIgnoreCaseValidator', Validator, {
+            /** @overrides myt.Validator */
+            isValid: function(value, config, errorMessages) {
+                var rbv = config.form.getRollbackValue();
+                if (value && rbv && value.toLowerCase() === rbv.toLowerCase()) {
+                    if (errorMessages) errorMessages.push("Value must differ by more than just case.");
+                    return false;
+                }
+                
+                return true;
+            }
+        }),
+        
+        /** Verifies that a value is in the form of a URL. */
+        URLValidator = pkg.URLValidator = new JSClass('URLValidator', Validator, {
+            /** @overrides myt.Validator
+                @param originalRawQuery:boolean if true this prevents the query from
+                    being normalized. */
+            initialize: function(id, originalRawQuery) {
+                this.callSuper(id);
+                this.originalRawQuery = originalRawQuery;
+            },
+            
+            /** @overrides myt.Validator */
+            isValid: function(value, config, errorMessages) {
+                var uri = new pkg.URI(value);
+                if (uri.toString(this.originalRawQuery) !== value) {
+                    if (errorMessages) errorMessages.push("Not a valid URL.");
+                    return false;
+                }
+                return true;
+            }
+        }),
+        
+        /** Verifies that a value is JSON. */
+        JSONValidator = pkg.JSONValidator = new JSClass('JSONValidator', Validator, {
+            /** @overrides myt.Validator */
+            isValid: function(value, config, errorMessages) {
+                try {
+                    JSON.parse(value);
+                    return true;
+                } catch(e) {
+                    if (errorMessages) errorMessages.push(e);
+                    return false;
+                }
+            }
+        });
     
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Add a Validator to this CompoundValidator.
-        @param validator:myt.Validator|string The validator to add or a string
-            used to lookup a validator in the validator repository.
-        @returns void */
-    addValidator: function(v) {
-        if (typeof v === 'string') v = myt.global.validators.getValidator(v);
-        if (v) this.__v.push(v);
-    },
-    
-    /** @overrides myt.Validator */
-    isValid: function(value, config, errorMessages) {
-        var isValid = true, validators = this.__v, len = validators.length, i = 0;
-        for (; len > i;) isValid = validators[i++].isValid(value, config, errorMessages) && isValid;
-        return isValid;
-    }
-});
-
-
-/** Tests that the value differs from the form rollback value by more than
-    just case. */
-myt.EqualsIgnoreCaseValidator = new JS.Class('EqualsIgnoreCaseValidator', myt.Validator, {
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.Validator */
-    isValid: function(value, config, errorMessages) {
-        var rbv = config.form.getRollbackValue();
-        if (value && rbv && value.toLowerCase() === rbv.toLowerCase()) {
-            if (errorMessages) errorMessages.push("Value must differ by more than just case.");
+    /** Tests that the value from two fields are equal. */
+    pkg.EqualFieldsValidator = new JSClass('EqualFieldsValidator', Validator, {
+        /** @overrides myt.Validator
+            @param fieldA the first form field to compare.
+            @param fieldB the second form field to compare. */
+        initialize: function(id, fieldA, fieldB) {
+            this.callSuper(id);
+            
+            this.fieldA = fieldA;
+            this.fieldB = fieldB;
+        },
+        
+        /** @overrides myt.Validator */
+        isValid: function(value, config, errorMessages) {
+            if (value && this.fieldA.getValue() === this.fieldB.getValue()) return true;
+            
+            if (errorMessages) errorMessages.push('Field "' + this.fieldA.key + '" must be equal to field "' + this.fieldB.key + '".');
             return false;
         }
-        
-        return true;
-    }
-});
-
-
-/** Tests that a value is not null, undefined or empty. */
-myt.RequiredFieldValidator = new JS.Class('RequiredFieldValidator', myt.Validator, {
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.Validator */
-    isValid: function(value, config, errorMessages) {
-        if (value == null || value === '' || (typeof value === 'string' && value.trim() === '')) {
-            if (errorMessages) errorMessages.push("This value is required.");
-            return false;
-        }
-        
-        return true;
-    }
-});
-
-
-/** Verifies that a value is in the form of a URL. */
-myt.URLValidator = new JS.Class('URLValidator', myt.Validator, {
-    // Constructor /////////////////////////////////////////////////////////////
-    /** @overrides myt.Validator
-        @param originalRawQuery:boolean if true this prevents the query from
-            being normalized. */
-    initialize: function(id, originalRawQuery) {
-        this.callSuper(id);
-        this.originalRawQuery = originalRawQuery;
-    },
+    });
     
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.Validator */
-    isValid: function(value, config, errorMessages) {
-        var uri = new myt.URI(value);
-        if (uri.toString(this.originalRawQuery) !== value) {
-            if (errorMessages) errorMessages.push("Not a valid URL.");
-            return false;
-        }
-        return true;
-    }
-});
-
-
-/** Verifies that a value is JSON. */
-myt.JSONValidator = new JS.Class('JSONValidator', myt.Validator, {
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.Validator */
-    isValid: function(value, config, errorMessages) {
-        try {
-            JSON.parse(value);
+    /** Tests that the value has a length between min and max. */
+    pkg.LengthValidator = new JSClass('LengthValidator', Validator, {
+        /** @overrides myt.Validator
+            @param min:number The minimum length value.
+            @param max:number The maximum length value. */
+        initialize: function(id, min, max) {
+            this.callSuper(id);
+            
+            this.min = min;
+            this.max = max;
+        },
+        
+        /** @overrides myt.Validator */
+        isValid: function(value, config, errorMessages) {
+            var len = value ? value.length : 0,
+                min = this.min,
+                max = this.max;
+            
+            // Test min
+            if (min !== undefined && min > len) {
+                if (errorMessages) errorMessages.push('Value must not be less than ' + min + '.');
+                return false;
+            }
+            
+            // Test max
+            if (max !== undefined && max < len) {
+                if (errorMessages) errorMessages.push('Value must not be greater than ' + max + '.');
+                return false;
+            }
+            
             return true;
-        } catch(e) {
-            if (errorMessages) errorMessages.push(e);
-            return false;
         }
-    }
-});
-
-
-/** Stores myt.Validators by ID so they can be used in multiple
-    places easily.
+    });
     
-    Events:
-        None
-    
-    Attributes:
-        None
-    
-    Private Attributes:
-        __c:object A map of myt.Validators by ID.
-*/
-new JS.Singleton('GlobalValidatorRegistry', {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initialize: function() {
-        var self = this,
-            m = myt;
+    /** Tests that adBinary value is between min and max. */
+    pkg.NumericRangeValidator = new JSClass('NumericRangeValidator', Validator, {
+        /** @overrides myt.Validator
+            @param min:number The minimum value.
+            @param max:number The maximum value. */
+        initialize: function(id, min, max) {
+            this.callSuper(id);
+            
+            this.min = min;
+            this.max = max;
+        },
         
-        self.__c = {};
-        
-        m.global.register('validators', self);
-        
-        // Register a few common Validators
-        self.register(new m.RequiredFieldValidator('required'));
-        self.register(new m.EqualsIgnoreCaseValidator('equalsIgnoreCase'));
-        self.register(new m.URLValidator('url'));
-        self.register(new m.JSONValidator('json'));
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** Gets a Validator for the ID.
-        @param id:string the ID of the Validator to get.
-        @returns an myt.Validator or undefined if not found. */
-    getValidator: function(id) {
-        return this.__c[id];
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Adds a Validator to this registry.
-        @param identifiable:myt.Validator the Validator to add.
-        @returns void */
-    register: function(identifiable) {
-        if (identifiable) {
-            var id = identifiable.id;
-            if (id) {
-                this.__c[id] = identifiable;
-            } else {
-                myt.dumpStack("No ID");
+        /** @overrides myt.Validator */
+        isValid: function(value, config, errorMessages) {
+            // Treat empty values as valid.
+            if (value === "") return true;
+            
+            // Must be a number
+            var numericValue = Number(value), min = this.min, max = this.max;
+            if (isNaN(numericValue)) {
+                if (errorMessages) errorMessages.push("Value is not a number.");
+                return false;
             }
-        } else {
-            myt.dumpStack("No validator");
-        }
-    },
-    
-    /** Removes a Validator from this registery.
-        @param identifiable:myt.Validator the Validator to remove.
-        @returns void */
-    unregister: function(identifiable) {
-        if (identifiable) {
-            var id = identifiable.id;
-            if (id) {
-                // Make sure it's in the repository then delete.
-                if (this.getValidator(id)) delete this.__c[id];
-            } else {
-                myt.dumpStack("No ID");
+            
+            // Test min
+            if (min !== undefined && min > numericValue) {
+                if (errorMessages) errorMessages.push('Value must not be less than ' + min + '.');
+                return false;
             }
-        } else {
-            myt.dumpStack("No validator");
+            
+            // Test max
+            if (max !== undefined && max < numericValue) {
+                if (errorMessages) errorMessages.push('Value must not be greater than ' + max + '.');
+                return false;
+            }
+            
+            return true;
         }
-    }
-});
-
-
-/** Tests that the value from two fields are equal. */
-myt.EqualFieldsValidator = new JS.Class('EqualFieldsValidator', myt.Validator, {
-    // Constructor /////////////////////////////////////////////////////////////
-    /** @overrides myt.Validator
-        @param fieldA the first form field to compare.
-        @param fieldB the second form field to compare. */
-    initialize: function(id, fieldA, fieldB) {
-        this.callSuper(id);
-        
-        this.fieldA = fieldA;
-        this.fieldB = fieldB;
-    },
+    });
     
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.Validator */
-    isValid: function(value, config, errorMessages) {
-        if (value && this.fieldA.getValue() === this.fieldB.getValue()) return true;
+    /** A Validator composed from multiple Validators.
         
-        if (errorMessages) errorMessages.push('Field "' + this.fieldA.key + '" must be equal to field "' + this.fieldB.key + '".');
-        return false;
-    }
-});
-
-
-/** Tests that the value has a length between min and max. */
-myt.LengthValidator = new JS.Class('LengthValidator', myt.Validator, {
-    // Constructor /////////////////////////////////////////////////////////////
-    /** @overrides myt.Validator
-        @param min:number The minimum length value.
-        @param max:number The maximum length value. */
-    initialize: function(id, min, max) {
-        this.callSuper(id);
+        Events:
+            None
         
-        this.min = min;
-        this.max = max;
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.Validator */
-    isValid: function(value, config, errorMessages) {
-        var len = value ? value.length : 0,
-            min = this.min,
-            max = this.max;
+        Attributes:
+            None
         
-        // Test min
-        if (min !== undefined && min > len) {
-            if (errorMessages) errorMessages.push('Value must not be less than ' + min + '.');
-            return false;
+        Private Attributes:
+            __v:array The array of myt.Validators that compose 
+                this Validator.
+    */
+    pkg.CompoundValidator = new JSClass('CompoundValidator', Validator, {
+        // Constructor /////////////////////////////////////////////////////////
+        /** Creates a new CompoundValidator for the ID and 0 or more Validators
+            provided.
+            @param arguments:args ever argument after the first must be a
+                Validator or a Validator ID from the myt.global.validators
+                registry.*/
+        initialize: function(id) {
+            this.callSuper(id);
+            
+            var args = Array.prototype.slice.call(arguments);
+            args.shift();
+            
+            // Make sure each arg is an myt.Validator
+            var i = args.length,
+                validator;
+            while (i) {
+                validator = args[--i];
+                if (typeof validator === 'string') {
+                    args[i] = validator = getValidator(validator);
+                    if (!validator) args.splice(i, 1);
+                }
+            }
+            
+            this.__v = args;
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Add a Validator to this CompoundValidator.
+            @param validator:myt.Validator|string The validator to add or a string
+                used to lookup a validator in the validator repository.
+            @returns void */
+        addValidator: function(v) {
+            if (typeof v === 'string') v = getValidator(v);
+            if (v) this.__v.push(v);
+        },
+        
+        /** @overrides myt.Validator */
+        isValid: function(value, config, errorMessages) {
+            var isValid = true, 
+                validators = this.__v, 
+                len = validators.length, 
+                i = 0;
+            for (; len > i;) isValid = validators[i++].isValid(value, config, errorMessages) && isValid;
+            return isValid;
         }
-        
-        // Test max
-        if (max !== undefined && max < len) {
-            if (errorMessages) errorMessages.push('Value must not be greater than ' + max + '.');
-            return false;
-        }
-        
-        return true;
-    }
-});
-
-
-/** Tests that adBinary value is between min and max. */
-myt.NumericRangeValidator = new JS.Class('NumericRangeValidator', myt.Validator, {
-    // Constructor /////////////////////////////////////////////////////////////
-    /** @overrides myt.Validator
-        @param min:number The minimum value.
-        @param max:number The maximum value. */
-    initialize: function(id, min, max) {
-        this.callSuper(id);
-        
-        this.min = min;
-        this.max = max;
-    },
+    });
     
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.Validator */
-    isValid: function(value, config, errorMessages) {
-        // Treat empty values as valid.
-        if (value === "") return true;
+    /** Stores myt.Validators by ID so they can be used in multiple
+        places easily.
         
-        // Must be a number
-        var numericValue = Number(value), min = this.min, max = this.max;
-        if (isNaN(numericValue)) {
-            if (errorMessages) errorMessages.push("Value is not a number.");
-            return false;
+        Events:
+            None
+        
+        Attributes:
+            None
+    */
+    new JS.Singleton('GlobalValidatorRegistry', {
+        // Life Cycle //////////////////////////////////////////////////////////
+        initialize: function() {
+            // Register a few common Validators
+            register(new RequiredFieldValidator('required'));
+            register(new EqualsIgnoreCaseValidator('equalsIgnoreCase'));
+            register(new URLValidator('url'));
+            register(new JSONValidator('json'));
+            
+            pkg.global.register('validators', this);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** Gets a Validator for the ID.
+            @param id:string the ID of the Validator to get.
+            @returns an myt.Validator or undefined if not found. */
+        getValidator: getValidator,
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Adds a Validator to this registry.
+            @param identifiable:myt.Validator the Validator to add.
+            @returns void */
+        register: register,
+        
+        /** Removes a Validator from this registery.
+            @param identifiable:myt.Validator the Validator to remove.
+            @returns void */
+        unregister: (identifiable) => {
+            doFuncOnIdentifiable(identifiable, (id) => {
+                // Make sure the validator is in the repository then delete.
+                if (getValidator(id)) delete validators[id];
+            });
         }
-        
-        // Test min
-        if (min !== undefined && min > numericValue) {
-            if (errorMessages) errorMessages.push('Value must not be less than ' + min + '.');
-            return false;
-        }
-        
-        // Test max
-        if (max !== undefined && max < numericValue) {
-            if (errorMessages) errorMessages.push('Value must not be greater than ' + max + '.');
-            return false;
-        }
-        
-        return true;
-    }
-});
+    });
+})(myt);
 
 
 /** Modifies a value. Typically used to convert a form element value to its

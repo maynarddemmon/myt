@@ -1,100 +1,95 @@
-/** Provides AJAX functionality. This is a wrapper around JQuery's ajax
-    request. */
-myt.Ajax = new JS.Class('Ajax', myt.Node, {
-    // Class Methods ///////////////////////////////////////////////////////////
-    extend: {
+((pkg) => {
+    var 
+        /** A specialized setter function used by the setters. */
+        optsSetter = (ajax, key, value) => {
+            var opts = ajax._opts || (ajax._opts = {});
+            if (value) {
+                opts[key] = value;
+            } else {
+                delete opts[key];
+            }
+        };
+    
+    /** Provides AJAX functionality. This is a wrapper around JQuery's ajax
+        request.
+        
+        Private Attributes:
+            _opts:object Lazily instantiated options object.
+    */
+    pkg.Ajax = new JS.Class('Ajax', pkg.Node, {
+        // Accessors ///////////////////////////////////////////////////////////
+        setUrl: function(v) {
+            optsSetter(this, 'url', v);
+        },
+        
+        /** The request type.
+            Supported values: 'GET' or 'POST'. */
+        setRequestMethod: function(v) {
+            optsSetter(this, 'type', v);
+        },
+        
+        /** A map of name value pairs for the request. */
+        setRequestData: function(v) {
+            optsSetter(this, 'data', v);
+        },
+        
+        /** The response type.
+            Supported values: 'xml', 'html', 'json', 'jsonp', 'script', or 'text'. */
+        setResponseType: function(v) {
+            optsSetter(this, 'datatype', v);
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
         doRequest: function(opts, successCallback, failureCallback) {
-            return $.ajax(opts).done(successCallback).fail(failureCallback);
-        }
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        this.opts = {};
+            return $.ajax(
+                    // Convert from myt.Ajax opts to JQuery.ajax opts.
+                    pkg.extend(
+                        {
+                            context:this,
+                            
+                            // Store url and anything stored under the "callbackData" and
+                            // "requestData" key on the jqxhr so we can read it in response 
+                            // handling code.
+                            beforeSend: (jqxhr, settings) => {
+                                jqxhr.callbackData = opts.callbackData;
+                                jqxhr.requestData = opts.requestData;
+                                jqxhr.requestURL = settings.url;
+                            }
+                        },
+                        this._opts,
+                        opts,
+                        (key, target, source) => {
+                            var targetKey = key;
+                            switch (key) {
+                                case 'requestData': targetKey = 'data'; break;
+                                case 'requestMethod': targetKey = 'type'; break;
+                                case 'responseType': targetKey = 'datatype'; break;
+                            }
+                            target[targetKey] = source[key];
+                        }
+                    )
+                ).done(
+                    successCallback || this.handleSuccess
+                ).fail(
+                    failureCallback || this.handleFailure
+                );
+        },
         
-        this.callSuper();
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setUrl: function(v) {
-        this.__s('url', v);
-    },
-    
-    /** The request type.
-        Supported values: 'GET' or 'POST'. */
-    setRequestMethod: function(v) {
-        this.__s('type', v);
-    },
-    
-    /** A map of name value pairs for the request. */
-    setRequestData: function(v) {
-        this.__s('data', v);
-    },
-    
-    /** The response type.
-        Supported values: 'xml', 'html', 'json', 'jsonp', 'script', or 'text'. */
-    setResponseType: function(v) {
-        this.__s('datatype', v);
-    },
-    
-    /** A specialized setter function used by the setters.
-        @private */
-    __s: function(key, value) {
-        if (value) {
-            this.opts[key] = value;
-        } else {
-            delete this.opts[key];
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    doRequest: function(opts, successCallback, failureCallback) {
-        // Convert from myt.Ajax opts to JQuery.ajax opts.
-        var mappedOpts = myt.extend({
-            context:this,
-            
-            // Store url and anything stored under the "callbackData" and
-            // "requestData" key on the jqxhr so we can read it in response 
-            // handling code.
-            beforeSend: function(jqxhr, settings) {
-                jqxhr.callbackData = opts.callbackData;
-                jqxhr.requestData = opts.requestData;
-                
-                jqxhr.requestURL = settings.url;
-            }
-        }, opts, function(key, target, source) {
-            var targetKey = key;
-            switch (key) {
-                case 'requestData': targetKey = 'data'; break;
-                case 'requestMethod': targetKey = 'type'; break;
-                case 'responseType': targetKey = 'datatype'; break;
-            }
-            target[targetKey] = source[key];
-        });
+        /** Handles request successes.
+            @param data: The response data
+            @param status: String the response status
+            @param jqxhr: The request object */
+        handleSuccess: function(data, status, jqxhr) {
+            this.fireEvent('success', {data:data, status:status, xhr:jqxhr});
+        },
         
-        return myt.Ajax.doRequest(
-            myt.extend({}, this.opts, mappedOpts), 
-            successCallback || this.handleSuccess, 
-            failureCallback || this.handleFailure
-        );
-    },
-    
-    /** Handles request successes.
-        @param data: The response data
-        @param status: String the response status
-        @param jqxhr: The request object */
-    handleSuccess: function(data, status, jqxhr) {
-        this.fireEvent('success', {data:data, status:status, xhr:jqxhr});
-    },
-    
-    /** Handles request failures.
-        @param jqxhr: The request object
-        @param status: String the response status
-        @param exception: XMLHttpRequestException */
-    handleFailure: function(jqxhr, status, exception) {
-        this.fireEvent('failure', {exception:exception, status:status, xhr:jqxhr});
-    }
-});
+        /** Handles request failures.
+            @param jqxhr: The request object
+            @param status: String the response status
+            @param exception: XMLHttpRequestException */
+        handleFailure: function(jqxhr, status, exception) {
+            this.fireEvent('failure', {exception:exception, status:status, xhr:jqxhr});
+        }
+    });
+})(myt);

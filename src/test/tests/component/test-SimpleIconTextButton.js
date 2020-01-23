@@ -139,7 +139,7 @@ asyncTest("Test x positioning of text and icon", function() {
             shrinkBtn.setText('foo bar baz');
             
             setTimeout(function() {
-                ok(btn.textView.x === 21, "Text should have an x of 21: " + btn.textView.x);
+                ok(btn.textView.x === 21.5, "Text should have an x of 21: " + btn.textView.x);
                 
                 ok(shrinkBtn.textView.x === 0, "Text should still have an x of 0: " + shrinkBtn.textView.x);
                 ok(shrinkBtn.width === 58, "Text should still have an x of 58: " + shrinkBtn.width);

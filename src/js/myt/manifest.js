@@ -89,9 +89,11 @@ JS.Packages(function() {with(this) {
     // Component : Misc
     file(MYT_COMPONENT_ROOT + 'Ajax.js'         ).provides('myt.Ajax'         ).requires('myt.Node');
     file(MYT_COMPONENT_ROOT + 'Button.js'       ).provides(
-            'myt.Button','myt.SimpleButton','myt.SimpleIconTextButton','myt.SimpleTextButton','myt.IconTextButtonContent','myt.TextButtonContent'
+            'myt.Button','myt.SimpleButton','myt.SimpleIconTextButton','myt.SimpleTextButton',
+            'myt.IconTextButtonContent','myt.TextButtonContent'
         ).requires(
-            'myt.UpdateableUI','myt.MouseOverAndDown','myt.KeyActivation','myt.Disableable','myt.View','myt.Image','myt.Text'
+            'myt.UpdateableUI','myt.MouseOverAndDown','myt.KeyActivation','myt.Disableable',
+            'myt.View','myt.Image','myt.Text'
         );
     file(MYT_COMPONENT_ROOT + 'Divider.js'      ).provides('myt.HorizontalDivider','myt.VerticalDivider').requires('myt.SimpleButton','myt.BoundedValueComponent','myt.Draggable');
     file(MYT_COMPONENT_ROOT + 'DrawingMethod.js').provides('myt.DrawingMethod').requires('myt.DrawingUtil');
@@ -99,6 +101,11 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'FontAwesome.js'  ).provides('myt.FontAwesome'  ).requires('myt.Markup');
     file(MYT_COMPONENT_ROOT + 'Spinner.js'      ).provides('myt.Spinner'      ).requires('myt.View');
     file(MYT_COMPONENT_ROOT + 'StateMachine.js' ).provides('myt.StateMachine' ).requires('myt.Node');
+    file(MYT_COMPONENT_ROOT + 'Validator.js'    ).provides(
+            'myt.global.validators','myt.Validator','myt.CompoundValidator',
+            'myt.EqualFieldsValidator','myt.EqualsIgnoreCaseValidator','myt.LengthValidator',
+            'myt.NumericRangeValidator','myt.URLValidator','myt.RequiredFieldValidator','myt.JSONValidator'
+        ).requires('myt.global','myt.URI');
     
     // Component : Base
     file(MYT_COMPONENT_ROOT + 'base/Annulus.js').provides('myt.Annulus').requires('myt.View');
@@ -258,21 +265,6 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'dialog/Dialog.js').provides('myt.Dialog','myt.DialogButton')
         .requires('$.spectrum','$.fn.dtpicker','myt.ModalPanel','myt.Spinner', 'myt.SimpleButton');
     
-    // Component : Validator
-    file(MYT_COMPONENT_ROOT + 'validator/Validator.js'        ).provides('myt.Validator'        ).requires('myt');
-    file(MYT_COMPONENT_ROOT + 'validator/CompoundValidator.js').provides('myt.CompoundValidator').requires('myt.Validator');
-    
-    file(MYT_COMPONENT_ROOT + 'validator/validators/EqualFieldsValidator.js'     ).provides('myt.EqualFieldsValidator'     ).requires('myt.Validator');
-    file(MYT_COMPONENT_ROOT + 'validator/validators/EqualsIgnoreCaseValidator.js').provides('myt.EqualsIgnoreCaseValidator').requires('myt.Validator');
-    file(MYT_COMPONENT_ROOT + 'validator/validators/LengthValidator.js'          ).provides('myt.LengthValidator'          ).requires('myt.Validator');
-    file(MYT_COMPONENT_ROOT + 'validator/validators/NumericRangeValidator.js'    ).provides('myt.NumericRangeValidator'    ).requires('myt.Validator');
-    file(MYT_COMPONENT_ROOT + 'validator/validators/RequiredFieldValidator.js'   ).provides('myt.RequiredFieldValidator'   ).requires('myt.Validator');
-    file(MYT_COMPONENT_ROOT + 'validator/validators/URLValidator.js'             ).provides('myt.URLValidator'             ).requires('myt.Validator','myt.URI');
-    file(MYT_COMPONENT_ROOT + 'validator/validators/JSONValidator.js'            ).provides('myt.JSONValidator'            ).requires('myt.Validator');
-    
-    file(MYT_COMPONENT_ROOT + 'validator/ValidatorRegistry.js').provides('myt.global.validators')
-        .requires('myt.global','myt.CompoundValidator','myt.EqualsIgnoreCaseValidator','myt.RequiredFieldValidator','myt.URLValidator','myt.JSONValidator');
-    
     // Component : Form
     file(MYT_COMPONENT_ROOT + 'form/valueprocessor/ValueProcessor.js').provides('myt.ValueProcessor').requires('myt');
     
@@ -324,7 +316,7 @@ JS.Packages(function() {with(this) {
         'myt.ListViewAnchor',
         'myt.TextCheckbox','myt.TextRadio','myt.TextTabSlider','myt.Tab',
         'myt.ImageUploader','myt.Dialog',
-        'myt.global.validators','myt.EqualFieldsValidator','myt.LengthValidator','myt.NumericRangeValidator',
+        'myt.global.validators',
         'myt.global.valueProcessors','myt.UseOtherFieldIfEmptyValueProcessor',
         'myt.FormElement','myt.FormInputSelect','myt.FormRadioGroup','myt.FormCheckbox','myt.FormTextCheckbox',
         'myt.FormInputText','myt.FormComboBox','myt.FormInputTextArea','myt.FormEditableText',
