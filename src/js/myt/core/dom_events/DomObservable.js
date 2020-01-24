@@ -57,9 +57,7 @@ myt.DomObservable = new JS.Module('DomObservable', {
         @param type:string the type of the event to fire.
         @returns a function to handle the dom event or null if the event
             is not supported. */
-    createDomMethodRef: function(domObserver, methodName, type) {
-        return null;
-    },
+    createDomMethodRef: (domObserver, methodName, type) => null,
     
     /** Used by the createDomMethodRef implementations of submixins of 
         myt.DomObservable to implement the standard methodRef.
@@ -76,7 +74,7 @@ myt.DomObservable = new JS.Module('DomObservable', {
         if (observableClass.EVENT_TYPES[type]) {
             var self = this, 
                 event = observableClass.EVENT;
-            return function(domEvent) {
+            return (domEvent) => {
                 if (!domEvent) var domEvent = window.event;
                 
                 event.source = self;

@@ -26,8 +26,8 @@ myt.DomObserver = new JS.Module('DomObserver', {
             capture = !!capture;
             
             // Lazy instantiate __dobt map.
-            var observablesByType = this.__dobt || (this.__dobt = {});
-            var observables = observablesByType[type] || (observablesByType[type] = []);
+            var observablesByType = this.__dobt || (this.__dobt = {}),
+                observables = observablesByType[type] || (observablesByType[type] = []);
             
             // Attach this DomObserver to the DomObservable
             if (observable.attachDomObserver(this, methodName, type, capture, passive)) {
@@ -49,7 +49,8 @@ myt.DomObserver = new JS.Module('DomObserver', {
                 if (observables) {
                     // Remove all instances of this observer/methodName/type/capture 
                     // from the observable
-                    var retval = false, i = observables.length;
+                    var retval = false, 
+                        i = observables.length;
                     while (i) {
                         i -= 3;
                         if (observable === observables[i + 2] && 
@@ -74,9 +75,11 @@ myt.DomObserver = new JS.Module('DomObserver', {
     /** Detaches this DomObserver from all DomObservables it is attached to.
         @returns void */
     detachFromAllDomSources: function() {
-        var observablesByType = this.__dobt;
+        var observablesByType = this.__dobt,
+            type,
+            observables,
+            i;
         if (observablesByType) {
-            var observables, i, type;
             for (type in observablesByType) {
                 observables = observablesByType[type];
                 i = observables.length;

@@ -126,7 +126,7 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     showTip: function() {
         // Don't show tooltips while doing drag and drop since they're
         // distracting while this is going on.
-        if (!myt.global.dragManager.dragView) {
+        if (!myt.global.dragManager.getDragView()) {
             this.nextTipDelay = this.tipHideDelay;
             this.bringToFront();
             this.setVisible(true);

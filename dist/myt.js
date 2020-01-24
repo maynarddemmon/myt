@@ -2293,8 +2293,8 @@ myt.Constrainable = new JS.Module('Constrainable', {
             }
             
             // Lazy instantiate constraints array.
-            var constraints = this.__cbmn || (this.__cbmn = {});
-            var constraint = constraints[methodName] || (constraints[methodName] = []);
+            var constraints = this.__cbmn || (this.__cbmn = {}),
+                constraint = constraints[methodName] || (constraints[methodName] = []);
             
             // Don't allow a constraint to be clobbered.
             if (constraint.length > 0) {
@@ -2330,7 +2330,9 @@ myt.Constrainable = new JS.Module('Constrainable', {
             if (constraints) {
                 var constraint = constraints[methodName];
                 if (constraint) {
-                    var i = constraint.length, type, observable;
+                    var i = constraint.length, 
+                        type, 
+                        observable;
                     while (i) {
                         type = constraint[--i];
                         observable = constraint[--i];
@@ -2345,9 +2347,10 @@ myt.Constrainable = new JS.Module('Constrainable', {
     /** Removes all constraints.
         @returns void */
     releaseAllConstraints: function() {
-        var constraints = this.__cbmn;
+        var constraints = this.__cbmn,
+            methodName;
         if (constraints) {
-            for (var methodName in constraints) this.releaseConstraint(methodName);
+            for (methodName in constraints) this.releaseConstraint(methodName);
         }
     }
 });
@@ -2911,9 +2914,7 @@ myt.DomObservable = new JS.Module('DomObservable', {
         @param type:string the type of the event to fire.
         @returns a function to handle the dom event or null if the event
             is not supported. */
-    createDomMethodRef: function(domObserver, methodName, type) {
-        return null;
-    },
+    createDomMethodRef: (domObserver, methodName, type) => null,
     
     /** Used by the createDomMethodRef implementations of submixins of 
         myt.DomObservable to implement the standard methodRef.
@@ -2930,7 +2931,7 @@ myt.DomObservable = new JS.Module('DomObservable', {
         if (observableClass.EVENT_TYPES[type]) {
             var self = this, 
                 event = observableClass.EVENT;
-            return function(domEvent) {
+            return (domEvent) => {
                 if (!domEvent) var domEvent = window.event;
                 
                 event.source = self;
@@ -3041,8 +3042,8 @@ myt.DomObserver = new JS.Module('DomObserver', {
             capture = !!capture;
             
             // Lazy instantiate __dobt map.
-            var observablesByType = this.__dobt || (this.__dobt = {});
-            var observables = observablesByType[type] || (observablesByType[type] = []);
+            var observablesByType = this.__dobt || (this.__dobt = {}),
+                observables = observablesByType[type] || (observablesByType[type] = []);
             
             // Attach this DomObserver to the DomObservable
             if (observable.attachDomObserver(this, methodName, type, capture, passive)) {
@@ -3064,7 +3065,8 @@ myt.DomObserver = new JS.Module('DomObserver', {
                 if (observables) {
                     // Remove all instances of this observer/methodName/type/capture 
                     // from the observable
-                    var retval = false, i = observables.length;
+                    var retval = false, 
+                        i = observables.length;
                     while (i) {
                         i -= 3;
                         if (observable === observables[i + 2] && 
@@ -3089,9 +3091,11 @@ myt.DomObserver = new JS.Module('DomObserver', {
     /** Detaches this DomObserver from all DomObservables it is attached to.
         @returns void */
     detachFromAllDomSources: function() {
-        var observablesByType = this.__dobt;
+        var observablesByType = this.__dobt,
+            type,
+            observables,
+            i;
         if (observablesByType) {
-            var observables, i, type;
             for (type in observablesByType) {
                 observables = observablesByType[type];
                 i = observables.length;
@@ -3893,186 +3897,188 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
 });
 
 
-/** Provides support for getter and setter functions on an object.
-    
-    Events:
-        None
-    
-    Attributes:
-        earlyAttrs:array An array of attribute names that will be set first.
-        lateAttrs:array An array of attribute names that will be set last.
-*/
-myt.AccessorSupport = new JS.Module('AccessorSupport', {
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
+((pkg) => {
+    var
         /** Caches getter names. */
-        GETTER_NAMES:{},
-        
+        GETTER_NAMES = {},
+    
         /** Caches setter names. */
-        SETTER_NAMES:{},
+        SETTER_NAMES = {},
         
-        /** Generate a setter name for an attribute.
-            @returns string */
-        generateSetterName: function(attrName) {
-            return this.SETTER_NAMES[attrName] || (this.SETTER_NAMES[attrName] = this.generateName(attrName, 'set'));
-        },
-        
-        /** Generate a getter name for an attribute.
-            @returns string */
-        generateGetterName: function(attrName) {
-            return this.GETTER_NAMES[attrName] || (this.GETTER_NAMES[attrName] = this.generateName(attrName, 'get'));
-        },
-        
-        /** Generates a method name by capitalizing the attrName and
-            prepending the prefix.
-            @returns string */
-        generateName: function(attrName, prefix) {
-            return prefix + attrName.substring(0,1).toUpperCase() + attrName.substring(1);
-        },
-        
-        /** Creates a standard setter function for the provided attrName on the
-            target. This assumes the target is an myt.Observable.
-            @returns void */
-        createSetterFunction: function(target, attrName) {
-            var setterName = this.generateSetterName(attrName);
-            if (target[setterName]) console.log("Overwriting setter", setterName);
-            target[setterName] = function(v) {
-                if (target[attrName] !== v) {
-                    target[attrName] = v;
-                    if (target.inited) target.fireEvent(attrName, v);
-                }
-            };
-        },
-        
-        /** Creates a standard getter function for the provided attrName on the
-            target.
-            @returns void */
-        createGetterFunction: function(target, attrName) {
-            var getterName = this.generateGetterName(attrName);
-            if (target[getterName]) console.log("Overwriting getter", getterName);
-            target[getterName] = function() {
-                return target[attrName];
-            };
-        }
-    },
+        generateName = (attrName, prefix) => prefix + attrName.substring(0,1).toUpperCase() + attrName.substring(1),
+        generateSetterName = (attrName) => SETTER_NAMES[attrName] || (SETTER_NAMES[attrName] = generateName(attrName, 'set')),
+        generateGetterName = (attrName) => GETTER_NAMES[attrName] || (GETTER_NAMES[attrName] = generateName(attrName, 'get'));
     
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    appendToEarlyAttrs: function() {Array.prototype.push.apply(this.earlyAttrs || (this.earlyAttrs = []), arguments);},
-    prependToEarlyAttrs: function() {Array.prototype.unshift.apply(this.earlyAttrs || (this.earlyAttrs = []), arguments);},
-    appendToLateAttrs: function() {Array.prototype.push.apply(this.lateAttrs || (this.lateAttrs = []), arguments);},
-    prependToLateAttrs: function() {Array.prototype.unshift.apply(this.lateAttrs || (this.lateAttrs = []), arguments);},
-    
-    /** Calls a setter function for each attribute in the provided map.
-        @param attrs:object a map of attributes to set.
-        @returns void. */
-    callSetters: function(attrs) {
-        var self = this,
-            earlyAttrs = self.earlyAttrs,
-            lateAttrs = self.lateAttrs,
-            attrName, extractedLateAttrs, i, len;
-        if (earlyAttrs || lateAttrs) {
-            // Make a shallow copy of attrs since we can't guarantee that
-            // attrs won't be reused
-            var copyOfAttrs = {};
-            for (attrName in attrs) copyOfAttrs[attrName] = attrs[attrName];
-            attrs = copyOfAttrs;
+    /** Provides support for getter and setter functions on an object.
+        
+        Events:
+            None
+        
+        Attributes:
+            earlyAttrs:array An array of attribute names that will be set first.
+            lateAttrs:array An array of attribute names that will be set last.
+    */
+    pkg.AccessorSupport = new JS.Module('AccessorSupport', {
+        // Class Methods and Attributes ////////////////////////////////////////
+        extend: {
+            /** Generate a setter name for an attribute.
+                @returns string */
+            generateSetterName: generateSetterName,
             
-            // Do early setters
-            if (earlyAttrs) {
-                i = 0;
-                len = earlyAttrs.length;
-                while (len > i) {
-                    attrName = earlyAttrs[i++];
-                    if (attrName in attrs) {
-                        self.set(attrName, attrs[attrName]);
-                        delete attrs[attrName];
+            /** Generate a getter name for an attribute.
+                @returns string */
+            generateGetterName: generateGetterName,
+            
+            /** Generates a method name by capitalizing the attrName and
+                prepending the prefix.
+                @returns string */
+            generateName: generateName,
+            
+            /** Creates a standard setter function for the provided attrName on the
+                target. This assumes the target is an myt.Observable.
+                @returns void */
+            createSetterFunction: (target, attrName) => {
+                var setterName = generateSetterName(attrName);
+                if (target[setterName]) console.log("Overwriting setter", setterName);
+                target[setterName] = (v) => {
+                    if (target[attrName] !== v) {
+                        target[attrName] = v;
+                        if (target.inited) target.fireEvent(attrName, v);
+                    }
+                };
+            },
+            
+            /** Creates a standard getter function for the provided attrName on the
+                target.
+                @returns void */
+            createGetterFunction: (target, attrName) => {
+                var getterName = generateGetterName(attrName);
+                if (target[getterName]) console.log("Overwriting getter", getterName);
+                target[getterName] = () => target[attrName];
+            }
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        appendToEarlyAttrs: function() {Array.prototype.push.apply(this.earlyAttrs || (this.earlyAttrs = []), arguments);},
+        prependToEarlyAttrs: function() {Array.prototype.unshift.apply(this.earlyAttrs || (this.earlyAttrs = []), arguments);},
+        appendToLateAttrs: function() {Array.prototype.push.apply(this.lateAttrs || (this.lateAttrs = []), arguments);},
+        prependToLateAttrs: function() {Array.prototype.unshift.apply(this.lateAttrs || (this.lateAttrs = []), arguments);},
+        
+        /** Calls a setter function for each attribute in the provided map.
+            @param attrs:object a map of attributes to set.
+            @returns void. */
+        callSetters: function(attrs) {
+            var self = this,
+                earlyAttrs = self.earlyAttrs,
+                lateAttrs = self.lateAttrs,
+                attrName, 
+                extractedLateAttrs, 
+                i, 
+                len;
+            if (earlyAttrs || lateAttrs) {
+                // Make a shallow copy of attrs since we can't guarantee that
+                // attrs won't be reused
+                var copyOfAttrs = {};
+                for (attrName in attrs) copyOfAttrs[attrName] = attrs[attrName];
+                attrs = copyOfAttrs;
+                
+                // Do early setters
+                if (earlyAttrs) {
+                    i = 0;
+                    len = earlyAttrs.length;
+                    while (len > i) {
+                        attrName = earlyAttrs[i++];
+                        if (attrName in attrs) {
+                            self.set(attrName, attrs[attrName]);
+                            delete attrs[attrName];
+                        }
+                    }
+                }
+                
+                // Extract late setters for later execution
+                if (lateAttrs) {
+                    extractedLateAttrs = [];
+                    i = 0;
+                    len = lateAttrs.length;
+                    while (len > i) {
+                        attrName = lateAttrs[i++];
+                        if (attrName in attrs) {
+                            extractedLateAttrs.push(attrName, attrs[attrName]);
+                            delete attrs[attrName];
+                        }
                     }
                 }
             }
             
-            // Extract late setters for later execution
-            if (lateAttrs) {
-                extractedLateAttrs = [];
+            // Do normal setters
+            for (attrName in attrs) self.set(attrName, attrs[attrName]);
+            
+            // Do late setters
+            if (extractedLateAttrs) {
                 i = 0;
-                len = lateAttrs.length;
-                while (len > i) {
-                    attrName = lateAttrs[i++];
-                    if (attrName in attrs) {
-                        extractedLateAttrs.push(attrName, attrs[attrName]);
-                        delete attrs[attrName];
-                    }
-                }
+                len = extractedLateAttrs.length;
+                while (len > i) self.set(extractedLateAttrs[i++], extractedLateAttrs[i++]);
             }
-        }
+        },
         
-        // Do normal setters
-        for (attrName in attrs) self.set(attrName, attrs[attrName]);
+        /** A generic getter function that can be called to get a value from this
+            object. Will defer to a defined getter if it exists.
+            @param attrName:string The name of the attribute to get.
+            @returns the attribute value. */
+        get: function(attrName) {
+            var getterName = generateGetterName(attrName);
+            return this[getterName] ? this[getterName]() : this[attrName];
+        },
         
-        // Do late setters
-        if (extractedLateAttrs) {
-            i = 0;
-            len = extractedLateAttrs.length;
-            while (len > i) self.set(extractedLateAttrs[i++], extractedLateAttrs[i++]);
-        }
-    },
-    
-    /** A generic getter function that can be called to get a value from this
-        object. Will defer to a defined getter if it exists.
-        @param attrName:string The name of the attribute to get.
-        @returns the attribute value. */
-    get: function(attrName) {
-        var getterName = myt.AccessorSupport.generateGetterName(attrName);
-        return this[getterName] ? this[getterName]() : this[attrName];
-    },
-    
-    /** A generic setter function that can be called to set a value on this
-        object. Will defer to a defined setter if it exists. The implementation
-        assumes this object is an Observable so it will have a 'fireEvent'
-        method.
-        @param attrName:string The name of the attribute to set.
-        @param v:* The value to set.
-        @param skipSetter:boolean (optional) If true no attempt will be made to
-            invoke a setter function. Useful when you want to invoke standard 
-            setter behavior. Defaults to undefined which is equivalent to false.
-        @returns void */
-    set: function(attrName, v, skipSetter) {
-        var self = this,
-            setterName;
+        /** A generic setter function that can be called to set a value on this
+            object. Will defer to a defined setter if it exists. The implementation
+            assumes this object is an Observable so it will have a 'fireEvent'
+            method.
+            @param attrName:string The name of the attribute to set.
+            @param v:* The value to set.
+            @param skipSetter:boolean (optional) If true no attempt will be made to
+                invoke a setter function. Useful when you want to invoke standard 
+                setter behavior. Defaults to undefined which is equivalent to false.
+            @returns void */
+        set: function(attrName, v, skipSetter) {
+            var self = this,
+                setterName;
+            
+            if (!skipSetter) {
+                setterName = generateSetterName(attrName);
+                if (self[setterName]) return self[setterName](v);
+            }
+            
+            if (self[attrName] !== v) {
+                self[attrName] = v;
+                if (self.inited !== false && self.fireEvent) self.fireEvent(attrName, v); // !== false allows this to work with non-nodes.
+            }
+        },
         
-        if (!skipSetter) {
-            setterName = myt.AccessorSupport.generateSetterName(attrName);
-            if (self[setterName]) return self[setterName](v);
-        }
+        /** Checks if an attribute is not null or undefined.
+            @param attrName:string The name of the attribute to check.
+            @returns true if the attribute value is not null or undefined. */
+        has: function(attrName) {
+            return this.get(attrName) != null;
+        },
         
-        if (self[attrName] !== v) {
-            self[attrName] = v;
-            if (self.inited !== false && self.fireEvent) self.fireEvent(attrName, v); // !== false allows this to work with non-nodes.
+        /** Checks if an attribute is exactly true.
+            @param attrName:string The name of the attribute to check.
+            @returns true if the attribute value is === true. */
+        is: function(attrName) {
+            return this.get(attrName) === true;
+        },
+        
+        /** Checks if an attribute is not exactly true. Note: this is not the same
+            as testing exactly false.
+            @param attrName:string The name of the attribute to check.
+            @returns true if the attribute value is !== true. */
+        isNot: function(attrName) {
+            return this.get(attrName) !== true;
         }
-    },
-    
-    /** Checks if an attribute is not null or undefined.
-        @param attrName:string The name of the attribute to check.
-        @returns true if the attribute value is not null or undefined. */
-    has: function(attrName) {
-        return this.get(attrName) != null;
-    },
-    
-    /** Checks if an attribute is exactly true.
-        @param attrName:string The name of the attribute to check.
-        @returns true if the attribute value is === true. */
-    is: function(attrName) {
-        return this.get(attrName) === true;
-    },
-    
-    /** Checks if an attribute is not exactly true. Note: this is not the same
-        as testing exactly false.
-        @param attrName:string The name of the attribute to check.
-        @returns true if the attribute value is !== true. */
-    isNot: function(attrName) {
-        return this.get(attrName) !== true;
-    }
-});
+    });
+})(myt);
 
 
 /** Provides a destroy method that can be used as part of an Object creation
@@ -5626,7 +5632,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
             not focus masked, false otherwise. */
     isFocusable: function() {
         return this.focusable && !this.disabled && this.isVisible() && 
-            this.searchAncestorsOrSelf(function(n) {return n.maskFocus === true;}) === null;
+            this.searchAncestorsOrSelf((n) => n.maskFocus === true) === null;
     },
     
     /** Calling this method will set focus onto this view if it is focusable.
@@ -5701,7 +5707,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
     createDomMethodRef: function(domObserver, methodName, type) {
         if (myt.FocusObservable.EVENT_TYPES[type]) {
             var self = this;
-            return function(domEvent) {
+            return (domEvent) => {
                 if (!domEvent) var domEvent = window.event;
                 
                 // OPTIMIZATION: prevent extra focus events under special 
@@ -21329,228 +21335,234 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
 });
 
 
-/** Provides global drag and drop functionality.
-    
-    Events:
-        dragLeave:myt.DropTarget Fired when a myt.Dropable is dragged out of
-            the drop target.
-        dragEnter:myt.DropTarget Fired when a myt.Dropable is dragged over
-            the drop target.
-        startDrag:object Fired when a drag starts. Value is the object
-            being dragged.
-        stopDrag:object Fired when a drag ends. Value is the object 
-            that is no longer being dragged.
-        drop:object Fired when a drag ends over a drop target. The value is
-            an array containing the dropable at index 0 and the drop target
-            at index 1.
-    
-    Attributes:
-        dragView:myt.View The view currently being dragged.
-        overView:myt.View The view currently being dragged over.
-        dropTargets:array The list of myt.DropTargets currently registered
-            for notification when drag and drop events occur.
-        autoScrollers:array The list of myt.AutoScrollers currently registered
-            for notification when drags start and stop.
-*/
-new JS.Singleton('GlobalDragManager', {
-    include: [myt.Observable],
-    
-    
-    // Constructor /////////////////////////////////////////////////////////////
-    initialize: function() {
-        this.dropTargets = [];
-        this.autoScrollers = [];
+((pkg) => {
+    var globalDragManager,
         
-        myt.global.register('dragManager', this);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setDragView: function(v) {
-        var cur = this.dragView;
-        if (cur !== v) {
-            this.dragView = v;
-            
-            var isStart = !!v, targets, i, dv, funcName, eventName;
-            
-            if (isStart) {
-                dv = v;
-                funcName = 'notifyDragStart';
-                eventName = 'startDrag';
-            } else {
-                dv = cur;
-                funcName = 'notifyDragStop';
-                eventName = 'stopDrag';
-            }
-            
-            targets = this.__filterList(dv, this.dropTargets);
-            i = targets.length;
-            while (i) targets[--i][funcName](dv);
-            
-            targets = this.__filterList(dv, this.autoScrollers);
-            i = targets.length;
-            while (i) targets[--i][funcName](dv);
-            
-            this.fireEvent(eventName, v);
-        }
-    },
-    
-    setOverView: function(v) {
-        var cur = this.overView;
-        if (cur !== v) {
-            var dv = this.dragView;
-            if (cur) {
-                cur.notifyDragLeave(dv);
-                if (!dv.destroyed) dv.notifyDragLeave(cur);
-                this.fireEvent('dragLeave', cur);
-            }
-            
-            this.overView = v;
-            
-            if (v) {
-                v.notifyDragEnter(dv);
-                if (!dv.destroyed) dv.notifyDragEnter(v);
-                this.fireEvent('dragEnter', cur);
-            }
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Registers the provided auto scroller to receive notifications.
-        @param autoScroller:myt.AutoScroller The auto scroller to register.
-        @returns void */
-    registerAutoScroller: function(autoScroller) {
-        this.autoScrollers.push(autoScroller);
-    },
-    
-    /** Unregisters the provided auto scroller.
-        @param autoScroller:myt.AutoScroller The auto scroller to unregister.
-        @returns void */
-    unregisterAutoScroller: function(autoScroller) {
-        var autoScrollers = this.autoScrollers, i = autoScrollers.length;
-        while (i) {
-            if (autoScrollers[--i] === autoScroller) {
-                autoScrollers.splice(i, 1);
-                break;
-            }
-        }
-    },
-    
-    /** Registers the provided drop target to receive notifications.
-        @param dropTarget:myt.DropTarget The drop target to register.
-        @returns void */
-    registerDropTarget: function(dropTarget) {
-        this.dropTargets.push(dropTarget);
-    },
-    
-    /** Unregisters the provided drop target.
-        @param dropTarget:myt.DropTarget The drop target to unregister.
-        @returns void */
-    unregisterDropTarget: function(dropTarget) {
-        var dropTargets = this.dropTargets, i = dropTargets.length;
-        while (i) {
-            if (dropTargets[--i] === dropTarget) {
-                dropTargets.splice(i, 1);
-                break;
-            }
-        }
-    },
-    
-    /** Called by a myt.Dropable when a drag starts.
-        @param dropable:myt.Dropable The dropable that started the drag.
-        @returns void */
-    startDrag: function(dropable) {
-        this.setDragView(dropable);
-    },
-    
-    /** Called by a myt.Dropable when a drag stops.
-        @param event:event The mouse event that triggered the stop drag.
-        @param dropable:myt.Dropable The dropable that stopped being dragged.
-        @returns void */
-    stopDrag: function(event, dropable, isAbort) {
-        var overView = this.overView;
-        dropable.notifyDropped(overView, isAbort);
-        if (overView && !isAbort) overView.notifyDrop(dropable);
+        /** The list of myt.AutoScrollers currently registered for notification
+            when drags start and stop. */
+        autoScrollers = [],
         
-        this.setOverView();
-        this.setDragView();
+        /** The list of myt.DropTargets currently registered for notification 
+            when drag and drop events occur. */
+        dropTargets = [],
         
-        if (overView && !isAbort) this.fireEvent('drop', [dropable, overView]);
-    },
-    
-    /** Called by a myt.Dropable during dragging.
-        @param event:event The mousemove event for the drag update.
-        @param dropable:myt.Dropable The dropable that is being dragged.
-        @returns void */
-    updateDrag: function(event, dropable) {
-        // Get the frontmost myt.DropTarget that is registered with this 
-        // manager and is under the current mouse location and has a 
-        // matching drag group.
-        var topDropTarget,
-            dropTargets = this.__filterList(dropable, this.dropTargets);
-            i = dropTargets.length;
+        /** The view currently being dragged. */
+        dragView,
         
-        if (i > 0) {
-            var domMouseEvent = event.value,
-                mouseX = domMouseEvent.pageX,
-                mouseY = domMouseEvent.pageY,
-                dropTarget;
-            
-            while (i) {
-                dropTarget = dropTargets[--i];
-                if (dropTarget.willAcceptDrop(dropable) &&
-                    dropable.willPermitDrop(dropTarget) &&
-                    dropTarget.isPointVisible(mouseX, mouseY) && 
-                    (!topDropTarget || dropTarget.isInFrontOf(topDropTarget))
-                ) {
-                    topDropTarget = dropTarget;
+        /** The view currently being dragged over. */
+        overView,
+        
+        setOverView = (v) => {
+            var existingOverView = overView;
+            if (existingOverView !== v) {
+                if (existingOverView) {
+                    existingOverView.notifyDragLeave(dragView);
+                    if (!dragView.destroyed) dragView.notifyDragLeave(existingOverView);
+                    globalDragManager.fireEvent('dragLeave', existingOverView);
+                }
+                
+                overView = v;
+                
+                if (v) {
+                    v.notifyDragEnter(dragView);
+                    if (!dragView.destroyed) dragView.notifyDragEnter(v);
+                    globalDragManager.fireEvent('dragEnter', existingOverView);
                 }
             }
-        }
+        },
         
-        this.setOverView(topDropTarget);
-    },
-    
-    /** Filters the provided array of myt.DragGroupSupport items for the
-        provided dropable.
-        @private
-        @param dropable:myt.Dropable The dropable to filter for.
-        @returns array: An array of the matching list items. */
-    __filterList: function(dropable, list) {
-        var retval;
-        
-        if (dropable.destroyed) {
-            retval = [];
-        } else {
-            if (dropable.acceptAnyDragGroup()) {
-                retval = list;
-            } else {
-                retval = [];
+        setDragView = (v) => {
+            var existingDragView = dragView,
+                funcName, 
+                eventName,
+                targets,
+                i;
+            if (existingDragView !== v) {
+                dragView = v;
                 
-                var dragGroups = dropable.getDragGroups(),
-                    i = list.length, 
-                    item, targetGroups, dragGroup;
-                while (i) {
-                    item = list[--i];
-                    if (item.acceptAnyDragGroup()) {
-                        retval.push(item);
-                    } else {
-                        targetGroups = item.getDragGroups();
-                        for (dragGroup in dragGroups) {
-                            if (targetGroups[dragGroup]) {
-                                retval.push(item);
-                                break;
+                if (!!v) {
+                    existingDragView = v;
+                    funcName = 'notifyDragStart';
+                    eventName = 'startDrag';
+                } else {
+                    funcName = 'notifyDragStop';
+                    eventName = 'stopDrag';
+                }
+                
+                targets = filterList(existingDragView, dropTargets);
+                i = targets.length;
+                while (i) targets[--i][funcName](existingDragView);
+                
+                targets = filterList(existingDragView, autoScrollers);
+                i = targets.length;
+                while (i) targets[--i][funcName](existingDragView);
+                
+                globalDragManager.fireEvent(eventName, v);
+            }
+        },
+        
+        /** Filters the provided array of myt.DragGroupSupport items for the
+            provided myt.Dropable. Returns an array of the matching list
+            items. */
+        filterList = (dropable, list) => {
+            var retval;
+            
+            if (dropable.destroyed) {
+                retval = [];
+            } else {
+                if (dropable.acceptAnyDragGroup()) {
+                    retval = list;
+                } else {
+                    retval = [];
+                    
+                    var dragGroups = dropable.getDragGroups(),
+                        i = list.length, 
+                        item, targetGroups, dragGroup;
+                    while (i) {
+                        item = list[--i];
+                        if (item.acceptAnyDragGroup()) {
+                            retval.push(item);
+                        } else {
+                            targetGroups = item.getDragGroups();
+                            for (dragGroup in dragGroups) {
+                                if (targetGroups[dragGroup]) {
+                                    retval.push(item);
+                                    break;
+                                }
                             }
                         }
                     }
                 }
             }
-        }
+            
+            return retval;
+        };
+    
+    /** Provides global drag and drop functionality.
         
-        return retval;
-    }
-});
+        Events:
+            dragLeave:myt.DropTarget Fired when a myt.Dropable is dragged out of
+                the drop target.
+            dragEnter:myt.DropTarget Fired when a myt.Dropable is dragged over
+                the drop target.
+            startDrag:object Fired when a drag starts. Value is the object
+                being dragged.
+            stopDrag:object Fired when a drag ends. Value is the object 
+                that is no longer being dragged.
+            drop:object Fired when a drag ends over a drop target. The value is
+                an array containing the dropable at index 0 and the drop target
+                at index 1.
+    */
+    new JS.Singleton('GlobalDragManager', {
+        include: [pkg.Observable],
+        
+        
+        // Constructor /////////////////////////////////////////////////////////
+        initialize: function() {
+            pkg.global.register('dragManager', globalDragManager = this);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        getDragView: () => dragView,
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Registers the provided auto scroller to receive notifications.
+            @param autoScroller:myt.AutoScroller The auto scroller to register.
+            @returns void */
+        registerAutoScroller: (autoScroller) => {
+            autoScrollers.push(autoScroller);
+        },
+        
+        /** Unregisters the provided auto scroller.
+            @param autoScroller:myt.AutoScroller The auto scroller to unregister.
+            @returns void */
+        unregisterAutoScroller: (autoScroller) => {
+            var i = autoScrollers.length;
+            while (i) {
+                if (autoScrollers[--i] === autoScroller) {
+                    autoScrollers.splice(i, 1);
+                    break;
+                }
+            }
+        },
+        
+        /** Registers the provided drop target to receive notifications.
+            @param dropTarget:myt.DropTarget The drop target to register.
+            @returns void */
+        registerDropTarget: (dropTarget) => {
+            dropTargets.push(dropTarget);
+        },
+        
+        /** Unregisters the provided drop target.
+            @param dropTarget:myt.DropTarget The drop target to unregister.
+            @returns void */
+        unregisterDropTarget: (dropTarget) => {
+            var i = dropTargets.length;
+            while (i) {
+                if (dropTargets[--i] === dropTarget) {
+                    dropTargets.splice(i, 1);
+                    break;
+                }
+            }
+        },
+        
+        /** Called by a myt.Dropable when a drag starts.
+            @param dropable:myt.Dropable The dropable that started the drag.
+            @returns void */
+        startDrag: (dropable) => {
+            setDragView(dropable);
+        },
+        
+        /** Called by a myt.Dropable when a drag stops.
+            @param event:event The mouse event that triggered the stop drag.
+            @param dropable:myt.Dropable The dropable that stopped being dragged.
+            @returns void */
+        stopDrag: (event, dropable, isAbort) => {
+            dropable.notifyDropped(overView, isAbort);
+            if (overView && !isAbort) overView.notifyDrop(dropable);
+            
+            setOverView();
+            setDragView();
+            
+            if (overView && !isAbort) globalDragManager.fireEvent('drop', [dropable, overView]);
+        },
+        
+        /** Called by a myt.Dropable during dragging.
+            @param event:event The mousemove event for the drag update.
+            @param dropable:myt.Dropable The dropable that is being dragged.
+            @returns void */
+        updateDrag: (event, dropable) => {
+            // Get the frontmost myt.DropTarget that is registered with this 
+            // manager and is under the current mouse location and has a 
+            // matching drag group.
+            var topDropTarget,
+                filteredDropTargets = filterList(dropable, dropTargets);
+                i = filteredDropTargets.length;
+            
+            if (i > 0) {
+                var domMouseEvent = event.value,
+                    mouseX = domMouseEvent.pageX,
+                    mouseY = domMouseEvent.pageY,
+                    dropTarget;
+                
+                while (i) {
+                    dropTarget = filteredDropTargets[--i];
+                    if (dropTarget.willAcceptDrop(dropable) &&
+                        dropable.willPermitDrop(dropTarget) &&
+                        dropTarget.isPointVisible(mouseX, mouseY) && 
+                        (!topDropTarget || dropTarget.isInFrontOf(topDropTarget))
+                    ) {
+                        topDropTarget = dropTarget;
+                    }
+                }
+            }
+            
+            setOverView(topDropTarget);
+        }
+    });
+})(myt);
 
 
 /** Makes an myt.View draggable via the mouse.
@@ -26135,7 +26147,7 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     showTip: function() {
         // Don't show tooltips while doing drag and drop since they're
         // distracting while this is going on.
-        if (!myt.global.dragManager.dragView) {
+        if (!myt.global.dragManager.getDragView()) {
             this.nextTipDelay = this.tipHideDelay;
             this.bringToFront();
             this.setVisible(true);

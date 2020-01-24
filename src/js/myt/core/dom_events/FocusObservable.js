@@ -128,7 +128,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
             not focus masked, false otherwise. */
     isFocusable: function() {
         return this.focusable && !this.disabled && this.isVisible() && 
-            this.searchAncestorsOrSelf(function(n) {return n.maskFocus === true;}) === null;
+            this.searchAncestorsOrSelf((n) => n.maskFocus === true) === null;
     },
     
     /** Calling this method will set focus onto this view if it is focusable.
@@ -203,7 +203,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
     createDomMethodRef: function(domObserver, methodName, type) {
         if (myt.FocusObservable.EVENT_TYPES[type]) {
             var self = this;
-            return function(domEvent) {
+            return (domEvent) => {
                 if (!domEvent) var domEvent = window.event;
                 
                 // OPTIMIZATION: prevent extra focus events under special 

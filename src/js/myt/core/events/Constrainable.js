@@ -30,8 +30,8 @@ myt.Constrainable = new JS.Module('Constrainable', {
             }
             
             // Lazy instantiate constraints array.
-            var constraints = this.__cbmn || (this.__cbmn = {});
-            var constraint = constraints[methodName] || (constraints[methodName] = []);
+            var constraints = this.__cbmn || (this.__cbmn = {}),
+                constraint = constraints[methodName] || (constraints[methodName] = []);
             
             // Don't allow a constraint to be clobbered.
             if (constraint.length > 0) {
@@ -67,7 +67,9 @@ myt.Constrainable = new JS.Module('Constrainable', {
             if (constraints) {
                 var constraint = constraints[methodName];
                 if (constraint) {
-                    var i = constraint.length, type, observable;
+                    var i = constraint.length, 
+                        type, 
+                        observable;
                     while (i) {
                         type = constraint[--i];
                         observable = constraint[--i];
@@ -82,9 +84,10 @@ myt.Constrainable = new JS.Module('Constrainable', {
     /** Removes all constraints.
         @returns void */
     releaseAllConstraints: function() {
-        var constraints = this.__cbmn;
+        var constraints = this.__cbmn,
+            methodName;
         if (constraints) {
-            for (var methodName in constraints) this.releaseConstraint(methodName);
+            for (methodName in constraints) this.releaseConstraint(methodName);
         }
     }
 });
