@@ -3142,519 +3142,529 @@ myt.KeyObservable = new JS.Module('KeyObservable', {
 });
 
 
-/** Tracks focus and provides global focus events. Registered with myt.global 
-    as 'focus'.
-    
-    Events:
-        focused:View Fired when the focused view changes. The event value is
-            the newly focused view.
-    
-    Attributes:
-        lastTraversalWasForward:boolean indicates if the last traversal was
-            in the forward direction or not. If false this implies the last
-            traversal was in the backward direction. This value is initalized
-            to true.
-        focusedView:View the view that currently has focus.
-        prevFocusedView:View the view that previously had focus.
-        focusedDom:DomElement holds the dom element that has focus when the
-            focus has traversed into a non myt managed area of the dom.
-*/
-/* Dom element types reference:
-    ELEMENT_NODE                :1
-    ATTRIBUTE_NODE              :2
-    TEXT_NODE                   :3
-    CDATA_SECTION_NODE          :4
-    ENTITY_REFERENCE_NODE       :5
-    ENTITY_NODE                 :6
-    PROCESSING_INSTRUCTION_NODE :7
-    COMMENT_NODE                :8
-    DOCUMENT_NODE               :9
-    DOCUMENT_TYPE_NODE          :10
-    DOCUMENT_FRAGMENT_NODE      :11
-    NOTATION_NODE               :12 */
-new JS.Singleton('GlobalFocus', {
-    include: [myt.Observable],
-    
-    
-    // Constructor /////////////////////////////////////////////////////////////
-    initialize: function() {
-        this.lastTraversalWasForward = true;
+((pkg) => {
+    var globalFocus,
         
-        myt.global.register('focus', this);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** Sets the currently focused view. */
-    setFocusedView: function(v) {
-        if (this.focusedView !== v) {
-            this.prevFocusedView = this.focusedView; // Remember previous focus
-            this.focusedView = v;
-            if (v) this.focusedDom = null; // Wipe this since we have actual focus now.
-            this.fireEvent('focused', v);
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Called by a FocusObservable when it has received focus.
-        @param focusable:FocusObservable the view that received focus.
-        @returns void. */
-    notifyFocus: function(focusable) {
-        if (this.focusedView !== focusable) this.setFocusedView(focusable);
-    },
-    
-    /** Called by a FocusObservable when it has lost focus.
-        @param focusable:FocusObservable the view that lost focus.
-        @returns void. */
-    notifyBlur: function(focusable) {
-        if (this.focusedView === focusable) this.setFocusedView(null);
-    },
-    
-    /** Clears the current focus.
-        @returns void */
-    clear: function() {
-        if (this.focusedView) {
-            this.focusedView.blur();
-        } else if (this.focusedDom) {
-            this.focusedDom.blur();
-            this.focusedDom = null;
-        }
-    },
-    
-    // Focus Traversal //
-    /** Move focus to the next focusable element.
-        @param ignoreFocusTrap:boolean If true focus traps will be skipped over.
-        @returns void */
-    next: function(ignoreFocusTrap) {
-        var next = this._traverse(true, ignoreFocusTrap);
-        if (next) next.focus();
-    },
-    
-    /** Move focus to the previous focusable element.
-        @param ignoreFocusTrap:boolean If true focus traps will be skipped over.
-        @returns void */
-    prev: function(ignoreFocusTrap) {
-        var prev = this._traverse(false, ignoreFocusTrap);
-        if (prev) prev.focus();
-    },
-    
-    /** Traverse forward or backward from the currently focused view.
-        @param isForward:boolean indicates forward or backward dom traversal.
-        @param ignoreFocusTrap:boolean indicates if focus traps should be
-            skipped over or not.
-        @returns the new view to give focus to, or null if there is no view
-            to focus on or an unmanaged dom element will receive focus. */
-    _traverse: function(isForward, ignoreFocusTrap) {
-        this.lastTraversalWasForward = isForward;
+        /** Gets the deepest dom element that is a descendant of the provided
+            dom element or the element itself. */
+        getDeepestDescendant = (elem) => {
+            while (elem.lastChild) elem = elem.lastChild;
+            return elem;
+        },
         
-        // Determine root element and starting element for traversal.
-        var activeElem = document.activeElement, 
-            rootElem = document.body,
-            startElem = rootElem,
-            elem = startElem,
-            model, progModel,
-            focusFuncName = isForward ? 'getNextFocus' : 'getPrevFocus';
-        
-        if (activeElem) {
-            elem = startElem = activeElem;
-            model = startElem.model;
-            if (!model) model = this.findModelForDomElement(startElem);
-            if (model) {
-                var focusTrap = model.getFocusTrap(ignoreFocusTrap);
-                if (focusTrap) rootElem = focusTrap.domElement;
+        /** Traverse forward or backward from the currently focused view. 
+            Returns the new view to give focus to, or null if there is no view
+            to focus on or an unmanaged dom element will receive focus.
+                param: isForward:boolean indicates forward or backward dom 
+                    traversal.
+                param: ignoreFocusTrap:boolean indicates if focus traps should 
+                    be skipped over or not. */
+        traverse = (isForward, ignoreFocusTrap) => {
+            globalFocus.lastTraversalWasForward = isForward;
+            
+            // Determine root element and starting element for traversal.
+            var activeElem = document.activeElement, 
+                rootElem = document.body,
+                startElem = rootElem,
+                elem = startElem,
+                model, progModel,
+                focusFuncName = isForward ? 'getNextFocus' : 'getPrevFocus';
+            
+            if (activeElem) {
+                elem = startElem = activeElem;
+                model = startElem.model;
+                if (!model) model = globalFocus.findModelForDomElement(startElem);
+                if (model) {
+                    var focusTrap = model.getFocusTrap(ignoreFocusTrap);
+                    if (focusTrap) rootElem = focusTrap.domElement;
+                }
             }
-        }
-        
-        // Traverse
-        while (elem) {
-            if (elem.model && elem.model[focusFuncName] &&
-                (progModel = elem.model[focusFuncName]())
-            ) {
-                // Programatic traverse
-                elem = progModel.domElement;
-            } else if (isForward) {
-                // Dom traverse forward
-                if (elem.firstChild) {
-                    elem = elem.firstChild;
-                } else if (elem === rootElem) {
-                    return startElem.model; // TODO: why?
-                } else if (elem.nextSibling) {
-                    elem = elem.nextSibling;
-                } else {
-                    // Jump up and maybe over since we're at a local
-                    // deepest last child.
-                    while (elem) {
-                        elem = elem.parentNode;
-                        
-                        if (elem === rootElem) {
-                            break; // TODO: why?
-                        } else if (elem.nextSibling) {
-                            elem = elem.nextSibling;
-                            break;
+            
+            // Traverse
+            while (elem) {
+                if (elem.model && elem.model[focusFuncName] &&
+                    (progModel = elem.model[focusFuncName]())
+                ) {
+                    // Programatic traverse
+                    elem = progModel.domElement;
+                } else if (isForward) {
+                    // Dom traverse forward
+                    if (elem.firstChild) {
+                        elem = elem.firstChild;
+                    } else if (elem === rootElem) {
+                        return startElem.model; // TODO: why?
+                    } else if (elem.nextSibling) {
+                        elem = elem.nextSibling;
+                    } else {
+                        // Jump up and maybe over since we're at a local
+                        // deepest last child.
+                        while (elem) {
+                            elem = elem.parentNode;
+                            
+                            if (elem === rootElem) {
+                                break; // TODO: why?
+                            } else if (elem.nextSibling) {
+                                elem = elem.nextSibling;
+                                break;
+                            }
                         }
                     }
-                }
-            } else {
-                // Dom traverse backward
-                if (elem === rootElem) {
-                    elem = this.__getDeepestDescendant(rootElem);
-                } else if (elem.previousSibling) {
-                    elem = this.__getDeepestDescendant(elem.previousSibling);
                 } else {
-                    elem = elem.parentNode;
+                    // Dom traverse backward
+                    if (elem === rootElem) {
+                        elem = getDeepestDescendant(rootElem);
+                    } else if (elem.previousSibling) {
+                        elem = getDeepestDescendant(elem.previousSibling);
+                    } else {
+                        elem = elem.parentNode;
+                    }
                 }
-            }
-            
-            // If we've looped back around return the starting element.
-            if (elem === startElem) return startElem.model;
-            
-            // Check that the element is focusable and return it if it is.
-            if (elem.nodeType === 1) {
-                model = elem.model;
-                if (model && model instanceof myt.View) {
-                    if (model.isFocusable()) return model;
-                } else {
-                    var nodeName = elem.nodeName;
-                    if (nodeName === 'A' || nodeName === 'AREA' || 
-                        nodeName === 'INPUT' || nodeName === 'TEXTAREA' || 
-                        nodeName === 'SELECT' || nodeName === 'BUTTON'
-                    ) {
-                        if (!elem.disabled && !isNaN(elem.tabIndex) && 
-                            myt.DomElementProxy.isDomElementVisible(elem)
+                
+                // If we've looped back around return the starting element.
+                if (elem === startElem) return startElem.model;
+                
+                // Check that the element is focusable and return it if it is.
+                if (elem.nodeType === 1) {
+                    model = elem.model;
+                    if (model && model instanceof pkg.View) {
+                        if (model.isFocusable()) return model;
+                    } else {
+                        var nodeName = elem.nodeName;
+                        if (nodeName === 'A' || nodeName === 'AREA' || 
+                            nodeName === 'INPUT' || nodeName === 'TEXTAREA' || 
+                            nodeName === 'SELECT' || nodeName === 'BUTTON'
                         ) {
-                            // Make sure the dom element isn't inside a maskFocus
-                            model = this.findModelForDomElement(elem);
-                            if (model && model.searchAncestorsOrSelf(function(n) {return n.maskFocus === true;})) {
-                                // Is a masked dom element so ignore.
-                            } else {
-                                elem.focus();
-                                this.focusedDom = elem;
-                                return null;
+                            if (!elem.disabled && !isNaN(elem.tabIndex) && 
+                                pkg.DomElementProxy.isDomElementVisible(elem)
+                            ) {
+                                // Make sure the dom element isn't inside a maskFocus
+                                model = globalFocus.findModelForDomElement(elem);
+                                if (model && model.searchAncestorsOrSelf((n) => n.maskFocus === true)) {
+                                    // Is a masked dom element so ignore.
+                                } else {
+                                    elem.focus();
+                                    globalFocus.focusedDom = elem;
+                                    return null;
+                                }
                             }
                         }
                     }
                 }
             }
-        }
-        
-        return null;
-    },
-    
-    /** Finds the closest model for the provided dom element.
-        @param elem:domElement to element to start looking from.
-        @returns myt.View or null if not found.
-        @private */
-    findModelForDomElement: function(elem) {
-        var model;
-        while (elem) {
-            model = elem.model;
-            if (model && model instanceof myt.View) return model;
-            elem = elem.parentNode;
-        }
-        return null;
-    },
-    
-    /** Gets the deepest dom element that is a descendant of the provided
-        dom element or the element itself.
-        @param elem:domElement The dom element to search downward from.
-        @returns a dom element.
-        @private */
-    __getDeepestDescendant: function(elem) {
-        while (elem.lastChild) elem = elem.lastChild;
-        return elem;
-    }
-});
-
-
-/** Provides global keyboard events. Registered with myt.global as 'keys'.
-    
-    Also works with GlobalFocus to navigate the focus hierarchy when the 
-    focus traversal keys are used.
-    
-    Events:
-        keydown:number fired when a key is pressed down. The value is the
-            keycode of the key pressed down.
-        keypress:number fired when a key is pressed. The value is the
-            keycode of the key pressed.
-        keyup:number fired when a key is released up. The value is the
-            keycode of the key released up.
-    
-    Private Attributes:
-        __keysDown:object A map of keycodes of the keys currently pressed down.
-    
-    Keycodes:
-        backspace          8
-        tab                9
-        enter             13
-        shift             16
-        ctrl              17
-        alt               18
-        pause/break       19
-        caps lock         20
-        escape            27
-        spacebar          32
-        page up           33
-        page down         34
-        end               35
-        home              36
-        left arrow        37
-        up arrow          38
-        right arrow       39
-        down arrow        40
-        insert            45
-        delete            46
-        0                 48
-        1                 49
-        2                 50
-        3                 51
-        4                 52
-        5                 53
-        6                 54
-        7                 55
-        8                 56
-        9                 57
-        a                 65
-        b                 66
-        c                 67
-        d                 68
-        e                 69
-        f                 70
-        g                 71
-        h                 72
-        i                 73
-        j                 74
-        k                 75
-        l                 76
-        m                 77
-        n                 78
-        o                 79
-        p                 80
-        q                 81
-        r                 82
-        s                 83
-        t                 84
-        u                 85
-        v                 86
-        w                 87
-        x                 88
-        y                 89
-        z                 90
-        left window key   91
-        right window key  92
-        select key        93
-        numpad 0          96
-        numpad 1          97
-        numpad 2          98
-        numpad 3          99
-        numpad 4         100
-        numpad 5         101
-        numpad 6         102
-        numpad 7         103
-        numpad 8         104
-        numpad 9         105
-        multiply         106
-        add              107
-        subtract         109
-        decimal point    110
-        divide           111
-        f1               112
-        f2               113
-        f3               114
-        f4               115
-        f5               116
-        f6               117
-        f7               118
-        f8               119
-        f9               120
-        f10              121
-        f11              122
-        f12              123
-        num lock         144
-        scroll lock      145
-        semi-colon       186
-        equal sign       187
-        comma            188
-        dash             189
-        period           190
-        forward slash    191
-        grave accent     192
-        open bracket     219
-        back slash       220
-        close braket     221
-        single quote     222
-*/
-new JS.Singleton('GlobalKeys', {
-    include: [
-        myt.DomElementProxy, 
-        myt.DomObservable,
-        myt.DomObserver,
-        myt.KeyObservable,
-        myt.Observable,
-        myt.Observer
-    ],
-    
-    
-    // Constructor /////////////////////////////////////////////////////////////
-    initialize: function() {
-        // Constants
-        var self = this,
-            G = myt.global,
-            isFirefox = BrowserDetect.browser === 'Firefox';
-        self.KEYCODE_TAB = 9;
-        self.KEYCODE_SHIFT = 16;
-        self.KEYCODE_CONTROL = 17;
-        self.KEYCODE_ALT = 18;
-        self.KEYCODE_Z = 90;
-        self.KEYCODE_COMMAND = isFirefox ? 224 : 91;
-        self.KEYCODE_RIGHT_COMMAND = isFirefox ? 224 : 93;
-        
-        self.setDomElement(document);
-        self.attachTo(G.focus, '__handleFocused', 'focused');
-        self.__keysDown = {};
-        self.__listenToDocument();
-        
-        G.register('keys', self);
-        
-        // Clear keys down when the window loses focus. This is necessary when
-        // using keyboard shortcusts to switch apps since that will leave
-        // a key in the down state even though it may no longer be when the
-        // focus is returned to the page.
-        global.onblur = () => {self.__keysDown = {};};
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Tests if a key is currently pressed down or not.
-        @param keyCode:number the key to test.
-        @returns true if the key is down, false otherwise. */
-    isKeyDown: function(keyCode) {
-        return !!this.__keysDown[keyCode];
-    },
-    
-    /** Tests if the 'shift' key is down. */
-    isShiftKeyDown: function() {return this.isKeyDown(this.KEYCODE_SHIFT);},
-    
-    /** Tests if the 'control' key is down. */
-    isControlKeyDown: function() {return this.isKeyDown(this.KEYCODE_CONTROL);},
-    
-    /** Tests if the 'alt' key is down. */
-    isAltKeyDown: function() {return this.isKeyDown(this.KEYCODE_ALT);},
-    
-    /** Tests if the 'command' key is down. */
-    isCommandKeyDown: function() {
-        return this.isKeyDown(this.KEYCODE_COMMAND) || this.isKeyDown(this.KEYCODE_RIGHT_COMMAND);
-    },
-    
-    /** Tests if the platform specific "accelerator" key is down. */
-    isAcceleratorKeyDown: function() {
-        return BrowserDetect.os === 'Mac' ? this.isCommandKeyDown() : this.isControlKeyDown();
-    },
-    
-    /** @private */
-    __handleFocused: function(event) {
-        var self = this,
-            focused = event.value;
-        if (focused) {
-            // unlisten to document
-            self.detachFromDom(self, '__handleKeyDown', 'keydown');
-            self.detachFromDom(self, '__handleKeyPress', 'keypress');
-            self.detachFromDom(self, '__handleKeyUp', 'keyup');
             
-            self.attachToDom(focused, '__handleKeyDown', 'keydown');
-            self.attachToDom(focused, '__handleKeyPress', 'keypress');
-            self.attachToDom(focused, '__handleKeyUp', 'keyup');
-        } else {
-            var prevFocused = myt.global.focus.prevFocusedView;
-            if (prevFocused) {
-                self.detachFromDom(prevFocused, '__handleKeyDown', 'keydown');
-                self.detachFromDom(prevFocused, '__handleKeyPress', 'keypress');
-                self.detachFromDom(prevFocused, '__handleKeyUp', 'keyup');
+            return null;
+        };
+    
+    /** Tracks focus and provides global focus events. Registered with myt.global 
+        as 'focus'.
+        
+        Events:
+            focused:View Fired when the focused view changes. The event value is
+                the newly focused view.
+        
+        Attributes:
+            lastTraversalWasForward:boolean indicates if the last traversal was
+                in the forward direction or not. If false this implies the last
+                traversal was in the backward direction. This value is initalized
+                to true.
+            focusedView:View the view that currently has focus.
+            prevFocusedView:View the view that previously had focus.
+            focusedDom:DomElement holds the dom element that has focus when the
+                focus has traversed into a non myt managed area of the dom.
+    */
+    /* Dom element types reference:
+        ELEMENT_NODE                :1
+        ATTRIBUTE_NODE              :2
+        TEXT_NODE                   :3
+        CDATA_SECTION_NODE          :4
+        ENTITY_REFERENCE_NODE       :5
+        ENTITY_NODE                 :6
+        PROCESSING_INSTRUCTION_NODE :7
+        COMMENT_NODE                :8
+        DOCUMENT_NODE               :9
+        DOCUMENT_TYPE_NODE          :10
+        DOCUMENT_FRAGMENT_NODE      :11
+        NOTATION_NODE               :12 */
+    new JS.Singleton('GlobalFocus', {
+        include: [pkg.Observable],
+        
+        
+        // Constructor /////////////////////////////////////////////////////////
+        initialize: function() {
+            this.lastTraversalWasForward = true;
+            
+            pkg.global.register('focus', globalFocus = this);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** Sets the currently focused view. */
+        setFocusedView: (v) => {
+            if (globalFocus.focusedView !== v) {
+                globalFocus.prevFocusedView = globalFocus.focusedView; // Remember previous focus
+                globalFocus.focusedView = v;
+                if (v) globalFocus.focusedDom = null; // Wipe this since we have actual focus now.
+                globalFocus.fireEvent('focused', v);
             }
-            
-            self.__listenToDocument();
-        }
-    },
-    
-    /** @private */
-    __listenToDocument: function() {
-        var self = this;
-        self.attachToDom(self, '__handleKeyDown', 'keydown');
-        self.attachToDom(self, '__handleKeyPress', 'keypress');
-        self.attachToDom(self, '__handleKeyUp', 'keyup');
-    },
-    
-    /** @private */
-    __handleKeyDown: function(event) {
-        var self = this,
-            keyCode = myt.KeyObservable.getKeyCodeFromEvent(event),
-            domEvent = event.value;
-        if (self.__shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
+        },
         
-        // Keyup events do not fire when command key is down so fire a keyup
-        // event immediately. Not an issue for other meta keys: shift, ctrl 
-        // and option.
-        if (self.isCommandKeyDown() && keyCode !== self.KEYCODE_SHIFT && keyCode !== self.KEYCODE_CONTROL && keyCode !== self.KEYCODE_ALT) {
-            self.fireEvent('keydown', keyCode);
-            self.fireEvent('keyup', keyCode);
-        } else {
-            self.__keysDown[keyCode] = true;
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Called by a FocusObservable when it has received focus.
+            @param focusable:FocusObservable the view that received focus.
+            @returns void. */
+        notifyFocus: (focusable) => {
+            if (globalFocus.focusedView !== focusable) globalFocus.setFocusedView(focusable);
+        },
+        
+        /** Called by a FocusObservable when it has lost focus.
+            @param focusable:FocusObservable the view that lost focus.
+            @returns void. */
+        notifyBlur: (focusable) => {
+            if (globalFocus.focusedView === focusable) globalFocus.setFocusedView(null);
+        },
+        
+        /** Clears the current focus.
+            @returns void */
+        clear: () => {
+            if (globalFocus.focusedView) {
+                globalFocus.focusedView.blur();
+            } else if (globalFocus.focusedDom) {
+                globalFocus.focusedDom.blur();
+                globalFocus.focusedDom = null;
+            }
+        },
+        
+        // Focus Traversal //
+        /** Move focus to the next focusable element.
+            @param ignoreFocusTrap:boolean If true focus traps will be skipped over.
+            @returns void */
+        next: (ignoreFocusTrap) => {
+            var next = traverse(true, ignoreFocusTrap);
+            if (next) next.focus();
+        },
+        
+        /** Move focus to the previous focusable element.
+            @param ignoreFocusTrap:boolean If true focus traps will be skipped over.
+            @returns void */
+        prev: (ignoreFocusTrap) => {
+            var prev = traverse(false, ignoreFocusTrap);
+            if (prev) prev.focus();
+        },
+        
+        /** Finds the closest model for the provided dom element.
+            @param elem:domElement to element to start looking from.
+            @returns myt.View or null if not found. */
+        findModelForDomElement: (elem) => {
+            var model;
+            while (elem) {
+                model = elem.model;
+                if (model && model instanceof pkg.View) return model;
+                elem = elem.parentNode;
+            }
+            return null;
+        }
+    });
+})(myt);
+
+
+((pkg) => {
+    var G = pkg.global,
+        globalFocus = G.focus,
+        
+        globalKeys,
+        
+        isFirefox = BrowserDetect.browser === 'Firefox',
+        KEYCODE_TAB = 9,
+        KEYCODE_SHIFT = 16,
+        KEYCODE_CONTROL = 17,
+        KEYCODE_ALT = 18,
+        KEYCODE_Z = 90,
+        KEYCODE_COMMAND = isFirefox ? 224 : 91,
+        KEYCODE_RIGHT_COMMAND = isFirefox ? 224 : 93,
+        
+        /** A map of keycodes of the keys currently pressed down. */
+        keysDown = {},
+        
+        getKeyCodeFromEvent = (event) => pkg.KeyObservable.getKeyCodeFromEvent(event),
+        
+        /** Tests if a key is currently pressed down or not. Returns true if 
+            the key is down, false otherwise.
+                param keyCode:number the key to test. */
+        isKeyDown = (keyCode) => !!keysDown[keyCode],
+        
+        /** Tests if the 'shift' key is down. */
+        isShiftKeyDown = () => isKeyDown(KEYCODE_SHIFT),
+        
+        /** Tests if the 'control' key is down. */
+        isControlKeyDown = () => isKeyDown(KEYCODE_CONTROL),
+        
+        /** Tests if the 'alt' key is down. */
+        isAltKeyDown = () => isKeyDown(KEYCODE_ALT),
+        
+        /** Tests if the 'command' key is down. */
+        isCommandKeyDown = () => isKeyDown(KEYCODE_COMMAND) || isKeyDown(KEYCODE_RIGHT_COMMAND),
+        
+        /** Tests if the platform specific "accelerator" key is down. */
+        isAcceleratorKeyDown = () => BrowserDetect.os === 'Mac' ? isCommandKeyDown() : isControlKeyDown(),
+        
+        ignoreFocusTrap = () => isAltKeyDown(),
+        
+        shouldPreventDefault = (keyCode, targetElem) => {
+            switch (keyCode) {
+                case 8: // Backspace
+                    // Catch backspace since it navigates the history. Allow it to
+                    // go through for text input elements though.
+                    var nodeName = targetElem.nodeName;
+                    if (nodeName === 'TEXTAREA' || 
+                        (nodeName === 'INPUT' && (targetElem.type === 'text' || targetElem.type === 'password')) ||
+                        (nodeName === 'DIV' && targetElem.contentEditable === 'true' && targetElem.firstChild)
+                    ) return false;
+                    
+                    return true;
+                    
+                case 9: // Tab
+                    // Tab navigation is handled by the framework.
+                    return true;
+            }
+            return false;
+        };
+    
+    /** Provides global keyboard events. Registered with myt.global as 'keys'.
+        
+        Also works with GlobalFocus to navigate the focus hierarchy when the 
+        focus traversal keys are used.
+        
+        Events:
+            keydown:number fired when a key is pressed down. The value is the
+                keycode of the key pressed down.
+            keypress:number fired when a key is pressed. The value is the
+                keycode of the key pressed.
+            keyup:number fired when a key is released up. The value is the
+                keycode of the key released up.
+        
+        Keycodes:
+            backspace          8
+            tab                9
+            enter             13
+            shift             16
+            ctrl              17
+            alt               18
+            pause/break       19
+            caps lock         20
+            escape            27
+            spacebar          32
+            page up           33
+            page down         34
+            end               35
+            home              36
+            left arrow        37
+            up arrow          38
+            right arrow       39
+            down arrow        40
+            insert            45
+            delete            46
+            0                 48
+            1                 49
+            2                 50
+            3                 51
+            4                 52
+            5                 53
+            6                 54
+            7                 55
+            8                 56
+            9                 57
+            a                 65
+            b                 66
+            c                 67
+            d                 68
+            e                 69
+            f                 70
+            g                 71
+            h                 72
+            i                 73
+            j                 74
+            k                 75
+            l                 76
+            m                 77
+            n                 78
+            o                 79
+            p                 80
+            q                 81
+            r                 82
+            s                 83
+            t                 84
+            u                 85
+            v                 86
+            w                 87
+            x                 88
+            y                 89
+            z                 90
+            left window key   91
+            right window key  92
+            select key        93
+            numpad 0          96
+            numpad 1          97
+            numpad 2          98
+            numpad 3          99
+            numpad 4         100
+            numpad 5         101
+            numpad 6         102
+            numpad 7         103
+            numpad 8         104
+            numpad 9         105
+            multiply         106
+            add              107
+            subtract         109
+            decimal point    110
+            divide           111
+            f1               112
+            f2               113
+            f3               114
+            f4               115
+            f5               116
+            f6               117
+            f7               118
+            f8               119
+            f9               120
+            f10              121
+            f11              122
+            f12              123
+            num lock         144
+            scroll lock      145
+            semi-colon       186
+            equal sign       187
+            comma            188
+            dash             189
+            period           190
+            forward slash    191
+            grave accent     192
+            open bracket     219
+            back slash       220
+            close braket     221
+            single quote     222
+    */
+    new JS.Singleton('GlobalKeys', {
+        include: [
+            pkg.DomElementProxy, 
+            pkg.DomObservable,
+            pkg.DomObserver,
+            pkg.KeyObservable,
+            pkg.Observable,
+            pkg.Observer
+        ],
+        
+        
+        // Constructor /////////////////////////////////////////////////////////////
+        initialize: function() {
+            G.register('keys', globalKeys = this);
             
-            // Check for 'tab' key and do focus traversal.
-            if (keyCode === self.KEYCODE_TAB) {
-                var ift = self.ignoreFocusTrap(),
-                    gf = myt.global.focus;
-                if (self.isShiftKeyDown()) {
-                    gf.prev(ift);
-                } else {
-                    gf.next(ift);
+            // Constants
+            globalKeys.KEYCODE_TAB = KEYCODE_TAB;
+            globalKeys.KEYCODE_SHIFT = KEYCODE_SHIFT;
+            globalKeys.KEYCODE_CONTROL = KEYCODE_CONTROL;
+            globalKeys.KEYCODE_ALT = KEYCODE_ALT;
+            globalKeys.KEYCODE_Z = KEYCODE_Z;
+            globalKeys.KEYCODE_COMMAND = KEYCODE_COMMAND;
+            globalKeys.KEYCODE_RIGHT_COMMAND = KEYCODE_RIGHT_COMMAND;
+            
+            globalKeys.setDomElement(document);
+            globalKeys.attachTo(globalFocus, '__handleFocused', 'focused');
+            globalKeys.__listenToDocument();
+            
+            // Clear keys down when the window loses focus. This is necessary when
+            // using keyboard shortcusts to switch apps since that will leave
+            // a key in the down state even though it may no longer be when the
+            // focus is returned to the page.
+            global.onblur = () => {keysDown = {};};
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////////
+        isKeyDown: isKeyDown,
+        isShiftKeyDown: isShiftKeyDown,
+        isControlKeyDown: isControlKeyDown,
+        isAltKeyDown: isAltKeyDown,
+        isCommandKeyDown: isCommandKeyDown,
+        isAcceleratorKeyDown: isAcceleratorKeyDown,
+        
+        ignoreFocusTrap: ignoreFocusTrap,
+        
+        /** @private */
+        __handleFocused: (event) => {
+            var focused = event.value;
+            if (focused) {
+                // unlisten to document
+                globalKeys.detachFromDom(globalKeys, '__handleKeyDown', 'keydown');
+                globalKeys.detachFromDom(globalKeys, '__handleKeyPress', 'keypress');
+                globalKeys.detachFromDom(globalKeys, '__handleKeyUp', 'keyup');
+                
+                globalKeys.attachToDom(focused, '__handleKeyDown', 'keydown');
+                globalKeys.attachToDom(focused, '__handleKeyPress', 'keypress');
+                globalKeys.attachToDom(focused, '__handleKeyUp', 'keyup');
+            } else {
+                var prevFocused = globalFocus.prevFocusedView;
+                if (prevFocused) {
+                    globalKeys.detachFromDom(prevFocused, '__handleKeyDown', 'keydown');
+                    globalKeys.detachFromDom(prevFocused, '__handleKeyPress', 'keypress');
+                    globalKeys.detachFromDom(prevFocused, '__handleKeyUp', 'keyup');
                 }
+                
+                globalKeys.__listenToDocument();
             }
+        },
+        
+        /** @private */
+        __listenToDocument: () => {
+            globalKeys.attachToDom(globalKeys, '__handleKeyDown', 'keydown');
+            globalKeys.attachToDom(globalKeys, '__handleKeyPress', 'keypress');
+            globalKeys.attachToDom(globalKeys, '__handleKeyUp', 'keyup');
+        },
+        
+        /** @private */
+        __handleKeyDown: (event) => {
+            var keyCode = getKeyCodeFromEvent(event),
+                domEvent = event.value;
+            if (shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
             
-            self.fireEvent('keydown', keyCode);
-        }
-    },
-    
-    ignoreFocusTrap: function() {
-        return this.isAltKeyDown();
-    },
-    
-    /** @private */
-    __handleKeyPress: function(event) {
-        var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
-        this.fireEvent('keypress', keyCode);
-    },
-    
-    /** @private */
-    __handleKeyUp: function(event) {
-        var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event),
-            domEvent = event.value;
-        if (this.__shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
-        this.__keysDown[keyCode] = false;
-        this.fireEvent('keyup', keyCode);
-    },
-    
-    /** @private */
-    __shouldPreventDefault: function(keyCode, targetElem) {
-        switch (keyCode) {
-            case 8: // Backspace
-                // Catch backspace since it navigates the history. Allow it to
-                // go through for text input elements though.
-                var nodeName = targetElem.nodeName;
-                if (nodeName === 'TEXTAREA' || 
-                    (nodeName === 'INPUT' && (targetElem.type === 'text' || targetElem.type === 'password')) ||
-                    (nodeName === 'DIV' && targetElem.contentEditable === 'true' && targetElem.firstChild)
-                ) return false;
+            // Keyup events do not fire when command key is down so fire a keyup
+            // event immediately. Not an issue for other meta keys: shift, ctrl 
+            // and option.
+            if (isCommandKeyDown() && keyCode !== KEYCODE_SHIFT && keyCode !== KEYCODE_CONTROL && keyCode !== KEYCODE_ALT) {
+                globalKeys.fireEvent('keydown', keyCode);
+                globalKeys.fireEvent('keyup', keyCode);
+            } else {
+                keysDown[keyCode] = true;
                 
-                return true;
+                // Check for 'tab' key and do focus traversal.
+                if (keyCode === KEYCODE_TAB) {
+                    var ift = ignoreFocusTrap();
+                    if (isShiftKeyDown()) {
+                        globalFocus.prev(ift);
+                    } else {
+                        globalFocus.next(ift);
+                    }
+                }
                 
-            case 9: // Tab
-                // Tab navigation is handled by the framework.
-                return true;
+                globalKeys.fireEvent('keydown', keyCode);
+            }
+        },
+        
+        /** @private */
+        __handleKeyPress: (event) => {
+            globalKeys.fireEvent('keypress', getKeyCodeFromEvent(event));
+        },
+        
+        /** @private */
+        __handleKeyUp: (event) => {
+            var keyCode = getKeyCodeFromEvent(event),
+                domEvent = event.value;
+            if (shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
+            keysDown[keyCode] = false;
+            globalKeys.fireEvent('keyup', keyCode);
         }
-        return false;
-    }
-});
+    });
+})(myt);
 
 
 /** Generates Touch Events and passes them on to one or more event observers.
@@ -8283,64 +8293,66 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
 });
 
 
-/** Provides events when a new myt.RootView is created or destroyed.
-    Registered in myt.global as 'roots'.
+((pkg) => {
+    var globalRootViewRegistry,
+        
+        /** Holds an array of RootViews. */
+        roots = [];
     
-    Events:
-        rootAdded:RootView Fired when a RootView is added. The value is the 
-            RootView added.
-        rootRemoved:RootView Fired when a RootView is removed. The value is the 
-            RootView removed.
-    
-    Attributes:
-        None
-    
-    Private Attributes:
-        __roots:array Holds an array of RootViews.
-*/
-new JS.Singleton('GlobalRootViewRegistry', {
-    include: [myt.Observable],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initialize: function() {
-        this.__roots = [];
-        myt.global.register('roots', this);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** Gets the list of global root views.
-        @returns array of RootViews. */
-    getRoots: function() {
-        return this.__roots;
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Add a rootable to the global list of root views.
-        @param r:RootView the RootView to add.
-        @returns void */
-    addRoot: function(r) {
-        this.__roots.push(r);
-        this.fireEvent('rootAdded', r);
-    },
-    
-    /** Remove a rootable from the global list of root views.
-        @param r:RootView the RootView to remove.
-        @returns void */
-    removeRoot: function(r) {
-        var roots = this.__roots, i = roots.length, root;
-        while(i) {
-            root = roots[--i];
-            if (root === r) {
-                roots.splice(i, 1);
-                this.fireEvent('rootRemoved', root);
-                break;
+    /** Provides events when a new myt.RootView is created or destroyed.
+        Registered in myt.global as 'roots'.
+        
+        Events:
+            rootAdded:RootView Fired when a RootView is added. The value is the 
+                RootView added.
+            rootRemoved:RootView Fired when a RootView is removed. The value is the 
+                RootView removed.
+        
+        Attributes:
+            None
+    */
+    new JS.Singleton('GlobalRootViewRegistry', {
+        include: [pkg.Observable],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        initialize: function() {
+            pkg.global.register('roots', globalRootViewRegistry = this);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** Gets the list of global root views.
+            @returns array of RootViews. */
+        getRoots: () => roots,
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Add a rootable to the global list of root views.
+            @param r:RootView the RootView to add.
+            @returns void */
+        addRoot: (r) => {
+            roots.push(r);
+            globalRootViewRegistry.fireEvent('rootAdded', r);
+        },
+        
+        /** Remove a rootable from the global list of root views.
+            @param r:RootView the RootView to remove.
+            @returns void */
+        removeRoot: (r) => {
+            var i = roots.length,
+                root;
+            while(i) {
+                root = roots[--i];
+                if (root === r) {
+                    roots.splice(i, 1);
+                    globalRootViewRegistry.fireEvent('rootRemoved', root);
+                    break;
+                }
             }
         }
-    }
-});
+    });
+})(myt);
 
 
 /** Allows a view to act as a "root" for a view hierarchy. A "root" view is 
@@ -8474,62 +8486,54 @@ myt.RootView = new JS.Module('RootView', {
 });
 
 
-/** Provides events when the window is resized. Registered with myt.global
-    as 'windowResize'.
-    
-    Events:
-        resize:object Fired when the browser window is resized. The type
-            is 'resize' and the value is an object containing:
-                w:number the new window width.
-                h:number the new window height.
-    
-    Attributes:
-        None
-    
-    Private Attributes:
-        __windowInnerWidth:number The inner width of the browser window.
-        __windowInnerHeight:number The inner height of the browser window.
-*/
-new JS.Singleton('GlobalWindowResize', {
-    include: [myt.Observable],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initialize: function() {
-        var self = this;
+((pkg) => {
+    var win = window,
         
-        myt.addEventListener(window, 'resize', function(domEvent) {self.__handleEvent(domEvent);});
+        /** The inner width of the browser window. */
+        innerWidth,
         
-        myt.global.register('windowResize', self);
-    },
+        /** The inner height of the browser window. */
+        innerHeight;
     
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** Gets the window's innerWidth.
-        @returns the current width of the window. */
-    getWidth: function() {
-        return this.__windowInnerWidth || (this.__windowInnerWidth = window.innerWidth);
-    },
-    
-    /** Gets the window's innerHeight.
-        @returns the current height of the window. */
-    getHeight: function() {
-        return this.__windowInnerHeight || (this.__windowInnerHeight = window.innerHeight);
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Handles the window resize event and broadcasts it to the observers.
-        @private
-        @param domEvent:object the window resize dom event.
-        @returns void */
-    __handleEvent: function(domEvent) {
-        this.fireEvent('resize', {
-            w:this.__windowInnerWidth = window.innerWidth,
-            h:this.__windowInnerHeight = window.innerHeight
-        });
-    }
-});
+    /** Provides events when the window is resized. Registered with myt.global
+        as 'windowResize'.
+        
+        Events:
+            resize:object Fired when the browser window is resized. The type
+                is 'resize' and the value is an object containing:
+                    w:number the new window width.
+                    h:number the new window height.
+        
+        Attributes:
+            None
+    */
+    new JS.Singleton('GlobalWindowResize', {
+        include: [pkg.Observable],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        initialize: function() {
+            // Handle the window resize event and broadcast it to the observers.
+            pkg.addEventListener(win, 'resize', 
+                (domEvent) => {
+                    this.fireEvent('resize', {w:innerWidth = win.innerWidth, h:innerHeight = win.innerHeight});
+                }
+            );
+            
+            pkg.global.register('windowResize', this);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** Gets the window's innerWidth.
+            @returns the current width of the window. */
+        getWidth: () => innerWidth || (innerWidth = win.innerWidth),
+        
+        /** Gets the window's innerHeight.
+            @returns the current height of the window. */
+        getHeight: () => innerHeight || (innerHeight = win.innerHeight)
+    });
+})(myt);
 
 
 /** A mixin that sizes a RootView to the window width, height or both.
@@ -8624,87 +8628,93 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
 });
 
 
-/** Provides idle events. Registered with myt.global as 'idle'.
-    
-    Events:
-        idle:object Fired when a browser idle event occurs. The event value is
-            an object containing:
-                delta: The time in millis since the last idle evnet.
-                time: The time in millis of this idle event.
-    
-    Attributes:
-        running:boolean Indicates if idle events are currently being fired
-            or not.
-        lastTime:number The millis of the last idle event fired.
-    
-    Private Attributes:
-        __timerId:number The ID of the last idle event in the browser.
-        __doIdle:function The function that gets executed on idle.
-        __event:object The idle event object that gets reused.
-*/
-new JS.Singleton('GlobalIdle', {
-    include: [myt.Observable],
-    
-    
-    // Constructor /////////////////////////////////////////////////////////////
-    initialize: function() {
-        this.running = false;
+((pkg) => {
+    var win = window,
         
-        var vendor, vendors = ['webkit','moz','ms','o'], win = window;
-        for (var i = 0; i < vendors.length && !win.requestAnimationFrame; ++i) {
-            vendor = vendors[i];
-            win.requestAnimationFrame = win[vendor + 'RequestAnimationFrame'];
-            win.cancelAnimationFrame = win[vendor + 'CancelAnimationFrame'] || win[vendor + 'CancelRequestAnimationFrame'];
-        }
+        /** The idle event object that gets reused. */
+        EVENT = {},
         
-        // Setup callback function
-        var self = this;
-        this.__event = {};
-        this.__doIdle = function doIdle(time) {
-            self.__timerId = win.requestAnimationFrame(doIdle);
-            var lastTime = self.lastTime;
-            if (lastTime !== -1) {
-                time = Math.round(time);
-                var event = self.__event;
-                event.delta = time - lastTime;
-                event.time = time;
-                self.fireEvent('idle', event);
+        /** The ID of the last idle event in the browser. */
+        timerId,
+        
+        /** The function that gets executed on idle. */
+        idleFunc,
+        
+        /** The millis of the last idle event fired. */
+        lastTime,
+        
+        /** Indicates if idle events are currently being fired or not. */
+        running = false;
+    
+    /** Provides idle events. Registered with myt.global as 'idle'.
+        
+        Events:
+            idle:object Fired when a browser idle event occurs. The event value 
+                is an object containing:
+                    delta: The time in millis since the last idle evnet.
+                    time: The time in millis of this idle event.
+    */
+    new JS.Singleton('GlobalIdle', {
+        include: [pkg.Observable],
+        
+        
+        // Constructor /////////////////////////////////////////////////////////
+        initialize: function() {
+            var self = this,
+                vendor, 
+                vendors = ['webkit','moz','ms','o'],
+                i = 0;
+            for (; i < vendors.length && !win.requestAnimationFrame;) {
+                vendor = vendors[i++];
+                win.requestAnimationFrame = win[vendor + 'RequestAnimationFrame'];
+                win.cancelAnimationFrame = win[vendor + 'CancelAnimationFrame'] || win[vendor + 'CancelRequestAnimationFrame'];
             }
-            self.lastTime = time;
-        };
+            
+            // Setup callback function
+            idleFunc = (time) => {
+                timerId = win.requestAnimationFrame(idleFunc);
+                if (lastTime !== -1) {
+                    time = Math.round(time);
+                    EVENT.delta = time - lastTime;
+                    EVENT.time = time;
+                    self.fireEvent('idle', EVENT);
+                }
+                lastTime = time;
+            };
+            
+            pkg.global.register('idle', self);
+        },
         
-        myt.global.register('idle', this);
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.Observable */
-    attachObserver: function(observer, methodName, type) {
-        var retval = this.callSuper(observer, methodName, type);
         
-        // Start firing idle events
-        if (!this.running && this.hasObservers('idle')) {
-            this.running = true;
-            this.lastTime = -1;
-            this.__timerId = window.requestAnimationFrame(this.__doIdle);
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides myt.Observable */
+        attachObserver: function(observer, methodName, type) {
+            var retval = this.callSuper(observer, methodName, type);
+            
+            // Start firing idle events
+            if (!running && this.hasObservers('idle')) {
+                running = true;
+                lastTime = -1;
+                timerId = win.requestAnimationFrame(idleFunc);
+            }
+            
+            return retval;
+        },
+        
+        /** @overrides myt.Observable */
+        detachObserver: function(observer, methodName, type) {
+            var retval = this.callSuper(observer, methodName, type);
+            
+            // Stop firing idle events
+            if (running && !this.hasObservers('idle')) {
+                win.cancelAnimationFrame(timerId);
+                running = false;
+            }
+            
+            return retval;
         }
-        
-        return retval;
-    },
-    
-    /** @overrides myt.Observable */
-    detachObserver: function(observer, methodName, type) {
-        var retval = this.callSuper(observer, methodName, type);
-        
-        // Stop firing idle events
-        if (this.running && !this.hasObservers('idle')) {
-            window.cancelAnimationFrame(this.__timerId);
-            this.running = false;
-        }
-        
-        return retval;
-    }
-});
+    });
+})(myt);
 
 
 ((pkg) => {

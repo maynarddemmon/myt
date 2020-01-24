@@ -1,81 +1,87 @@
-/** Provides idle events. Registered with myt.global as 'idle'.
-    
-    Events:
-        idle:object Fired when a browser idle event occurs. The event value is
-            an object containing:
-                delta: The time in millis since the last idle evnet.
-                time: The time in millis of this idle event.
-    
-    Attributes:
-        running:boolean Indicates if idle events are currently being fired
-            or not.
-        lastTime:number The millis of the last idle event fired.
-    
-    Private Attributes:
-        __timerId:number The ID of the last idle event in the browser.
-        __doIdle:function The function that gets executed on idle.
-        __event:object The idle event object that gets reused.
-*/
-new JS.Singleton('GlobalIdle', {
-    include: [myt.Observable],
-    
-    
-    // Constructor /////////////////////////////////////////////////////////////
-    initialize: function() {
-        this.running = false;
+((pkg) => {
+    var win = window,
         
-        var vendor, vendors = ['webkit','moz','ms','o'], win = window;
-        for (var i = 0; i < vendors.length && !win.requestAnimationFrame; ++i) {
-            vendor = vendors[i];
-            win.requestAnimationFrame = win[vendor + 'RequestAnimationFrame'];
-            win.cancelAnimationFrame = win[vendor + 'CancelAnimationFrame'] || win[vendor + 'CancelRequestAnimationFrame'];
-        }
+        /** The idle event object that gets reused. */
+        EVENT = {},
         
-        // Setup callback function
-        var self = this;
-        this.__event = {};
-        this.__doIdle = function doIdle(time) {
-            self.__timerId = win.requestAnimationFrame(doIdle);
-            var lastTime = self.lastTime;
-            if (lastTime !== -1) {
-                time = Math.round(time);
-                var event = self.__event;
-                event.delta = time - lastTime;
-                event.time = time;
-                self.fireEvent('idle', event);
+        /** The ID of the last idle event in the browser. */
+        timerId,
+        
+        /** The function that gets executed on idle. */
+        idleFunc,
+        
+        /** The millis of the last idle event fired. */
+        lastTime,
+        
+        /** Indicates if idle events are currently being fired or not. */
+        running = false;
+    
+    /** Provides idle events. Registered with myt.global as 'idle'.
+        
+        Events:
+            idle:object Fired when a browser idle event occurs. The event value 
+                is an object containing:
+                    delta: The time in millis since the last idle evnet.
+                    time: The time in millis of this idle event.
+    */
+    new JS.Singleton('GlobalIdle', {
+        include: [pkg.Observable],
+        
+        
+        // Constructor /////////////////////////////////////////////////////////
+        initialize: function() {
+            var self = this,
+                vendor, 
+                vendors = ['webkit','moz','ms','o'],
+                i = 0;
+            for (; i < vendors.length && !win.requestAnimationFrame;) {
+                vendor = vendors[i++];
+                win.requestAnimationFrame = win[vendor + 'RequestAnimationFrame'];
+                win.cancelAnimationFrame = win[vendor + 'CancelAnimationFrame'] || win[vendor + 'CancelRequestAnimationFrame'];
             }
-            self.lastTime = time;
-        };
+            
+            // Setup callback function
+            idleFunc = (time) => {
+                timerId = win.requestAnimationFrame(idleFunc);
+                if (lastTime !== -1) {
+                    time = Math.round(time);
+                    EVENT.delta = time - lastTime;
+                    EVENT.time = time;
+                    self.fireEvent('idle', EVENT);
+                }
+                lastTime = time;
+            };
+            
+            pkg.global.register('idle', self);
+        },
         
-        myt.global.register('idle', this);
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.Observable */
-    attachObserver: function(observer, methodName, type) {
-        var retval = this.callSuper(observer, methodName, type);
         
-        // Start firing idle events
-        if (!this.running && this.hasObservers('idle')) {
-            this.running = true;
-            this.lastTime = -1;
-            this.__timerId = window.requestAnimationFrame(this.__doIdle);
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides myt.Observable */
+        attachObserver: function(observer, methodName, type) {
+            var retval = this.callSuper(observer, methodName, type);
+            
+            // Start firing idle events
+            if (!running && this.hasObservers('idle')) {
+                running = true;
+                lastTime = -1;
+                timerId = win.requestAnimationFrame(idleFunc);
+            }
+            
+            return retval;
+        },
+        
+        /** @overrides myt.Observable */
+        detachObserver: function(observer, methodName, type) {
+            var retval = this.callSuper(observer, methodName, type);
+            
+            // Stop firing idle events
+            if (running && !this.hasObservers('idle')) {
+                win.cancelAnimationFrame(timerId);
+                running = false;
+            }
+            
+            return retval;
         }
-        
-        return retval;
-    },
-    
-    /** @overrides myt.Observable */
-    detachObserver: function(observer, methodName, type) {
-        var retval = this.callSuper(observer, methodName, type);
-        
-        // Stop firing idle events
-        if (this.running && !this.hasObservers('idle')) {
-            window.cancelAnimationFrame(this.__timerId);
-            this.running = false;
-        }
-        
-        return retval;
-    }
-});
+    });
+})(myt);
