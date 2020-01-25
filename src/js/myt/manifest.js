@@ -18,11 +18,13 @@ JS.Packages(function() {with(this) {
     var MYT_CORE_ROOT = MYT_ROOT + 'core/';
     file(MYT_CORE_ROOT + 'myt.js').provides('myt').requires('BrowserDetect','Date.prototype.format','JS.Class','JS.Module','JS.Singleton');
     
-    file(MYT_CORE_ROOT + 'Destructible.js'   ).provides('myt.Destructible'   ).requires('myt');
-    file(MYT_CORE_ROOT + 'AccessorSupport.js').provides('myt.AccessorSupport').requires('myt');
-    file(MYT_CORE_ROOT + 'Eventable.js'      ).provides('myt.Eventable'      ).requires('myt.AccessorSupport','myt.Destructible','myt.Constrainable');
-    file(MYT_CORE_ROOT + 'Node.js'           ).provides('myt.Node'           ).requires('myt.AccessorSupport','myt.Destructible','myt.Constrainable','myt.TrackActivesPool');
-    file(MYT_CORE_ROOT + 'Animator.js'       ).provides('myt.Animator'       ).requires('myt.Node','myt.global.idle','myt.Reusable');
+    file(MYT_CORE_ROOT + 'Destructible.js'    ).provides('myt.Destructible'    ).requires('myt');
+    file(MYT_CORE_ROOT + 'AccessorSupport.js' ).provides('myt.AccessorSupport' ).requires('myt');
+    file(MYT_CORE_ROOT + 'Eventable.js'       ).provides('myt.Eventable'       ).requires('myt.AccessorSupport','myt.Destructible','myt.Constrainable');
+    file(MYT_CORE_ROOT + 'Node.js'            ).provides('myt.Node'            ).requires('myt.AccessorSupport','myt.Destructible','myt.Constrainable','myt.TrackActivesPool');
+    file(MYT_CORE_ROOT + 'Animator.js'        ).provides('myt.Animator'        ).requires('myt.Node','myt.global.idle','myt.Reusable');
+    file(MYT_CORE_ROOT + 'ThresholdCounter.js').provides('myt.ThresholdCounter').requires('myt.AccessorSupport','myt.Destructible','myt.Observable');
+    file(MYT_CORE_ROOT + 'Layout.js'          ).provides('myt.Layout','myt.ConstantLayout','myt.VariableLayout').requires('myt.Node','myt.ThresholdCounter');
     
     // Core : Events
     var MYT_EVENTS_ROOT = MYT_CORE_ROOT + 'events/';
@@ -30,14 +32,12 @@ JS.Packages(function() {with(this) {
     file(MYT_EVENTS_ROOT + 'Observer.js'     ).provides('myt.Observer'     ).requires('myt.Observable');
     file(MYT_EVENTS_ROOT + 'Constrainable.js').provides('myt.Constrainable').requires('myt.Observer');
     
-    // Core : Model
-    var MYT_MODEL_ROOT = MYT_CORE_ROOT + 'model/';
-    file(MYT_MODEL_ROOT + 'ThresholdCounter.js').provides('myt.ThresholdCounter').requires('myt.AccessorSupport','myt.Destructible','myt.Observable');
-    
-    file(MYT_MODEL_ROOT + 'pool/Reusable.js'        ).provides('myt.Reusable'        ).requires('myt');
-    file(MYT_MODEL_ROOT + 'pool/AbstractPool.js'    ).provides('myt.AbstractPool'    ).requires('myt.Destructible','myt.Reusable');
-    file(MYT_MODEL_ROOT + 'pool/SimplePool.js'      ).provides('myt.SimplePool'      ).requires('myt.AbstractPool');
-    file(MYT_MODEL_ROOT + 'pool/TrackActivesPool.js').provides('myt.TrackActivesPool').requires('myt.SimplePool');
+    // Core : Pool
+    var MYT_POOL_ROOT = MYT_CORE_ROOT + 'pool/';
+    file(MYT_POOL_ROOT + 'Reusable.js'        ).provides('myt.Reusable'        ).requires('myt');
+    file(MYT_POOL_ROOT + 'AbstractPool.js'    ).provides('myt.AbstractPool'    ).requires('myt.Destructible','myt.Reusable');
+    file(MYT_POOL_ROOT + 'SimplePool.js'      ).provides('myt.SimplePool'      ).requires('myt.AbstractPool');
+    file(MYT_POOL_ROOT + 'TrackActivesPool.js').provides('myt.TrackActivesPool').requires('myt.SimplePool');
     
     // Core : View
     var MYT_VIEW_ROOT = MYT_CORE_ROOT + 'view/';
@@ -76,12 +76,6 @@ JS.Packages(function() {with(this) {
     file(MYT_GLOBALS_ROOT + 'GlobalDragManager.js'     ).provides('myt.global.dragManager' ).requires('myt.global','myt.Observable');
     file(MYT_GLOBALS_ROOT + 'GlobalWindowResize.js'    ).provides('myt.global.windowResize').requires('myt.global','myt.Observable');
     file(MYT_GLOBALS_ROOT + 'GlobalRootViewRegistry.js').provides('myt.global.roots'       ).requires('myt.global','myt.Observable');
-    
-    // Core : Layout
-    var MYT_LAYOUT_ROOT = MYT_CORE_ROOT + 'layout/';
-    file(MYT_LAYOUT_ROOT + 'Layout.js'        ).provides('myt.Layout'        ).requires('myt.Node','myt.ThresholdCounter');
-    file(MYT_LAYOUT_ROOT + 'ConstantLayout.js').provides('myt.ConstantLayout').requires('myt.Layout');
-    file(MYT_LAYOUT_ROOT + 'VariableLayout.js').provides('myt.VariableLayout').requires('myt.ConstantLayout');
     
     // Component
     var MYT_COMPONENT_ROOT = MYT_ROOT + 'component/';
