@@ -62,15 +62,17 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
     sizeViewToDom: function() {
         var self = this,
             de,
-            scaling;
+            scaling,
+            w,
+            h;
         
         if (!self.__hasSetWidth) {
             de = self.getOuterDomElement();
-            var w = de.offsetWidth;
+            w = de.offsetWidth;
             
             // Bounding rect doesn't factor in scaling so we need to calculate
             // this ourselves.
-            scaling = myt.TransformSupport.getEffectiveScale(self);
+            scaling = self.getEffectiveScale();
             w /= scaling.scaleX;
             
             // Circumvent setter
@@ -83,11 +85,11 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
         
         if (!self.__hasSetHeight) {
             if (!de) de = self.getOuterDomElement();
-            var h = de.offsetHeight;
+            h = de.offsetHeight;
             
             // Bounding rect doesn't factor in scaling so we need to calculate
             // this ourselves.
-            if (!scaling) scaling = myt.TransformSupport.getEffectiveScale(self);
+            if (!scaling) scaling = self.getEffectiveScale();
             h /= scaling.scaleY;
             
             // Circumvent setter

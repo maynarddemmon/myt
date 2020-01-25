@@ -46,9 +46,7 @@ myt.SizeHeightToDom = new JS.Module('SizeHeightToDom', {
         if (!this.__hasSetHeight) {
             // Bounding rect doesn't factor in scaling so we need to calculate
             // this ourselves.
-            var scaling = myt.TransformSupport.getEffectiveScale(this);
-            
-            var h = this.getOuterDomElement().offsetHeight / scaling.scaleY;
+            var h = this.getOuterDomElement().offsetHeight / this.getEffectiveScaleY();
             
             // Circumvent setter
             if (this.height !== h) {

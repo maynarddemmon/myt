@@ -404,7 +404,9 @@
             return getMatchingAncestorOrSelf(this, matcherFunc);
         },
         
-        /** Gets an array of ancestor nodes including the node itself.
+        /** Gets an array of ancestor nodes including the node itself. The
+            oldest ancestor will be at the end of the list and the node will
+            be at the front of the list.
             @returns array: The array of ancestor nodes. */
         getAncestors: function() {
             var ancestors = [],
