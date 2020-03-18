@@ -264,7 +264,7 @@ myt.GridController = new JS.Module('GridController', {
     /** Sorts the rows according to the current sort criteria. Subclasses and
         instances should implement this as needed.
         @returns void */
-    doSort: function() {},
+    doSort: () => {},
     
     // Column Headers
     /** Gets the column header before the provided one.
@@ -381,6 +381,20 @@ myt.GridController = new JS.Module('GridController', {
     
     getRowIndex: function(row) {
         return this.rows.indexOf(row);
+    },
+    
+    getPrevRow: function(row) {
+        var rows = this.rows,
+            idx = this.getRowIndex(row) - 1;
+        if (idx < 0) idx = rows.length - 1;
+        return rows[idx];
+    },
+    
+    getNextRow: function(row) {
+        var rows = this.rows,
+            idx = this.getRowIndex(row) + 1;
+        if (idx >= rows.length) idx = 0;
+        return rows[idx];
     },
     
     notifyAddRow: function(row) {

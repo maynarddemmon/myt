@@ -23386,7 +23386,7 @@ myt.GridController = new JS.Module('GridController', {
     /** Sorts the rows according to the current sort criteria. Subclasses and
         instances should implement this as needed.
         @returns void */
-    doSort: function() {},
+    doSort: () => {},
     
     // Column Headers
     /** Gets the column header before the provided one.
@@ -23503,6 +23503,20 @@ myt.GridController = new JS.Module('GridController', {
     
     getRowIndex: function(row) {
         return this.rows.indexOf(row);
+    },
+    
+    getPrevRow: function(row) {
+        var rows = this.rows,
+            idx = this.getRowIndex(row) - 1;
+        if (idx < 0) idx = rows.length - 1;
+        return rows[idx];
+    },
+    
+    getNextRow: function(row) {
+        var rows = this.rows,
+            idx = this.getRowIndex(row) + 1;
+        if (idx >= rows.length) idx = 0;
+        return rows[idx];
     },
     
     notifyAddRow: function(row) {
@@ -23697,12 +23711,12 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     /** Gets the sort function used to sort the rows. Subclasses and instances
         should implement this as needed.
         @returns function a comparator function used for sorting. */
-    getSortFunction: function(sortColumnId, sortOrder) {
+    getSortFunction: (sortColumnId, sortOrder) => {
         if (sortColumnId) {
             // Default sort function uses the 'text' attribute of the subview.
             var sortNum = sortOrder === 'ascending' ? 1 : -1,
                 columnName = sortColumnId + 'View';
-            return function(a, b) {
+            return (a, b) => {
                 var aValue = a[columnName].text,
                     bValue = b[columnName].text;
                 if (aValue > bValue) {

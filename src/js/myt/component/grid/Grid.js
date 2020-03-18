@@ -164,12 +164,12 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     /** Gets the sort function used to sort the rows. Subclasses and instances
         should implement this as needed.
         @returns function a comparator function used for sorting. */
-    getSortFunction: function(sortColumnId, sortOrder) {
+    getSortFunction: (sortColumnId, sortOrder) => {
         if (sortColumnId) {
             // Default sort function uses the 'text' attribute of the subview.
             var sortNum = sortOrder === 'ascending' ? 1 : -1,
                 columnName = sortColumnId + 'View';
-            return function(a, b) {
+            return (a, b) => {
                 var aValue = a[columnName].text,
                     bValue = b[columnName].text;
                 if (aValue > bValue) {
