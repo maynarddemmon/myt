@@ -23505,6 +23505,14 @@ myt.GridController = new JS.Module('GridController', {
         return this.rows.indexOf(row);
     },
     
+    /** Gets a row for the provided id and matcher function. If no matcher
+        function is provided a default function will be used that assumes
+        each row has a model property and that model property has an id
+        property. */
+    getRowById: function(id, matcherFunc=row => row.model.id === id) {
+        return this.rows.find(matcherFunc);
+    },
+    
     getPrevRow: function(row) {
         var rows = this.rows,
             idx = this.getRowIndex(row) - 1;
