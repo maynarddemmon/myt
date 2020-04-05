@@ -81,7 +81,6 @@ JS.Packages(function() {with(this) {
     var MYT_COMPONENT_ROOT = MYT_ROOT + 'component/';
     
     // Component : Misc
-    file(MYT_COMPONENT_ROOT + 'Ajax.js'         ).provides('myt.Ajax'         ).requires('myt.Node');
     file(MYT_COMPONENT_ROOT + 'Button.js'       ).provides(
             'myt.Button','myt.SimpleButton','myt.SimpleIconTextButton','myt.SimpleTextButton',
             'myt.IconTextButtonContent','myt.TextButtonContent'
@@ -288,7 +287,7 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'uploader/DragDropObservable.js').provides('myt.DragDropObservable').requires('myt.DomObservable');
     file(MYT_COMPONENT_ROOT + 'uploader/DragDropSupport.js'   ).provides('myt.DragDropSupport'   ).requires('myt.DragDropObservable','myt.Disableable');
     file(MYT_COMPONENT_ROOT + 'uploader/Uploader.js'          ).provides('myt.Uploader'          )
-        .requires('myt.View','myt.NativeInputWrapper','myt.DragDropSupport','myt.Ajax','myt.FormElement');
+        .requires('myt.View','myt.NativeInputWrapper','myt.DragDropSupport','myt.FormElement');
     file(MYT_COMPONENT_ROOT + 'uploader/ImageUploader.js'     ).provides('myt.ImageUploader'     ).requires('myt.Uploader');
     
     // Component : WebSocket

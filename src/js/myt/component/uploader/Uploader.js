@@ -149,49 +149,37 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     },
     
     uploadFile: function(file, url, fileParam) {
-        url = url || this.uploadUrl;
-        fileParam = fileParam || this.requestFileParam;
-        
-        var self = this;
-        var ajax = new myt.Ajax(this, {
-            url:url, requestMethod:'post', responseType:'json'
-        }, [{
-            handleSuccess: function(data, status, jqxhr) {
-                this.callSuper(data, status, jqxhr);
-                self.handleUploadSuccess(file, data, status, jqxhr);
+        var self = this,
+            formData = new FormData();
+        formData.append(fileParam || self.requestFileParam, file, file.name);
+        myt.doFetch(
+            url || self.uploadUrl,
+            {
+                method:'POST',
+                body:formData
             },
-            
-            handleFailure: function(jqxhr, status, exception) {
-                this.callSuper(jqxhr, status, exception);
-                self.handleUploadFailure(file, jqxhr, status, exception);
+            false,
+            data => {
+                self.handleUploadSuccess(file, data);
+            },
+            error => {
+                self.handleUploadFailure(file, error);
             }
-        }]);
-        
-        var formData = new FormData();
-        formData.append(fileParam, file, file.name);
-        ajax.setRequestData(formData);
-        
-        ajax.doRequest({
-            contentType:false,
-            cache: false,
-            processData: false
-        });
+        );
     },
     
-    handleUploadSuccess: function(file, data, status, jqxhr) {
-        file[myt.Uploader.FILE_ATTR_SERVER_PATH] = this.parseServerPathFromResponse(data);
+    handleUploadSuccess: function(file, data) {
+        file[myt.Uploader.FILE_ATTR_SERVER_PATH] = this.parseServerPathFromResponse(file, data);
         this.updateValueFromFiles();
     },
     
-    handleUploadFailure: function(file, jqxhr, status, exception) {
-        myt.dumpStack("XHR failure: " + status + " : " + exception);
+    handleUploadFailure: (file, error) => {
+        myt.dumpStack("Upload failure: " + error.status + " : " + error.message);
     },
     
     /** Subclasses must implement this to extract the uploaded file path from
         the response. By default this return null. */
-    parseServerPathFromResponse: function(data) {
-        return null;
-    },
+    parseServerPathFromResponse: (file, data) => null,
     
     addFile: function(file) {
         this.files.push(file);
