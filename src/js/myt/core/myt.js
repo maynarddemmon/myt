@@ -598,12 +598,20 @@ myt = (() => {
             ).then(
                 response => {
                     if (successFunc) {
-                        if (raw) {
-                            successFunc(response);
-                        } else {
-                            // Throw application errors to the catch clause below
-                            if (response.success === false) throw new FetchError(200, url, response.message);
-                            successFunc(response.data);
+                        try {
+                            if (raw) {
+                                successFunc(response);
+                            } else {
+                                // Throw application errors to the catch clause below
+                                if (response.success === false) throw new FetchError(200, url, response.message);
+                                successFunc(response.data);
+                            }
+                        } catch (ex) {
+                            // Ensure errors from successFunc get rethrown as
+                            // FetchError with the original stack trace.
+                            var fetchError = new FetchError(200, url, ex.message);
+                            fetchError.stack = ex.stack;
+                            throw fetchError;
                         }
                     }
                 }
