@@ -616,7 +616,18 @@ myt = (() => {
                     }
                 }
             ).catch(
-                error => {if (errorFunc) errorFunc(error);}
+                error => {
+                    if (errorFunc) {
+                        // Convert non FetchErrors into FetchErrors
+                        if (error.name !== 'FetchError') {
+                            var fetchError = new FetchError(0, url, error.message);
+                            fetchError.stack = error.stack;
+                            error = fetchError
+                        }
+                        
+                        errorFunc(error);
+                    }
+                }
             ).finally(
                 _ => {if (finallyFunc) finallyFunc();}
             )
