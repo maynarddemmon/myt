@@ -4,7 +4,7 @@
         /** Setup the limitToParent constraint. */
         updateLimitToParentConstraint = (divider) => {
             var dim = divider.axis === 'y' ? 'height' : 'width';
-            divider.applyConstraint('__limitToParent', [divider, 'limitToParent', divider, dim, divider.parent, dim]);
+            divider.constrain('__limitToParent', [divider, 'limitToParent', divider, dim, divider.parent, dim]);
         },
         
         /** A divider is a UI control that allows the user to resize two area by

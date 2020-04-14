@@ -291,7 +291,7 @@
             // been sized to the dom until it's added in.
             iconView = self.iconView;
             textView = self.textView;
-            self.applyConstraint('__updateContentPosition', [
+            self.constrain('__updateContentPosition', [
                 self, 'inset', self, 'outset',
                 self, 'width', self, 'shrinkToFit', self, 'iconSpacing',
                 self, 'contentAlign',
@@ -496,7 +496,7 @@
             // Setup the constraint after adoption since the textView won't have
             // been sized to the dom until it's added in.
             textView = self.textView;
-            self.applyConstraint('__updateContentPosition', [
+            self.constrain('__updateContentPosition', [
                 self, 'inset', self, 'outset',
                 self, 'width', self, 'shrinkToFit',
                 textView, 'visible', textView, 'width',

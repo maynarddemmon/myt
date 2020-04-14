@@ -20,7 +20,7 @@ myt.Constrainable = new JS.Module('Constrainable', {
         @param observables:array An array of observable/type pairs. An observer
             will attach to each observable for the event type.
         @returns void */
-    applyConstraint: function(methodName, observables) {
+    constrain: function(methodName, observables) {
         if (methodName && observables) {
             // Make sure an even number of observable/type was provided
             var len = observables.length;

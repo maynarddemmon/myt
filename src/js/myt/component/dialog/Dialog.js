@@ -47,7 +47,7 @@
                     whiteSpace:'nowrap',
                     domClass:'myt-Text mytButtonText'
                 });
-                if (shrinkToFit) this.applyConstraint('__update', [this, 'inset', this, 'outset', textView, 'width']);
+                if (shrinkToFit) this.constrain('__update', [this, 'inset', this, 'outset', textView, 'width']);
             },
             
             

@@ -45,8 +45,6 @@ myt = (() => {
                 @return number */
             generateGuid: () => ++GUID_COUNTER,
             
-            /*  Event listener code Adapted from: http://javascript.about.com/library/bllisten.htm
-                A more robust solution can be found here: http://msdn.microsoft.com/en-us/magazine/ff728624.aspx */
             /** Adds an event listener to a dom element. 
                 @param elem:DomElement the dom element to listen to.
                 @param type:string the name of the event to listen to.
@@ -55,37 +53,15 @@ myt = (() => {
                 @param capture:boolean (optional) indicates if the listener is 
                     registered during the capture phase or bubble phase.
                 @returns void */
-            addEventListener: (() => {
-                if (window.addEventListener) {
-                    return (elem, type, callback, capture, passive) => {
-                        elem.addEventListener(type, callback, {
-                            capture:capture || false,
-                            passive:passive || false
-                        });
-                    };
-                } else {
-                    return (elem, type, callback) => {
-                        var prop = type + callback;
-                        elem['e' + prop] = callback;
-                        elem[prop] = () => {elem['e' + prop](window.event);}
-                        elem.attachEvent('on' + type, elem[prop]);
-                    };
-                }
-            })(),
-            removeEventListener: (() => {
-                if (window.addEventListener) {
-                    return (elem, type, callback, capture) => {
-                        elem.removeEventListener(type, callback, capture || false);
-                    };
-                } else {
-                    return (elem, type, callback) => {
-                        var prop = type + callback;
-                        elem.detachEvent('on' + type, elem[prop]);
-                        elem[prop] = null;
-                        elem["e" + prop] = null;
-                    };
-                }
-            })(),
+            addEventListener: (elem, type, callback, capture, passive) => {
+                elem.addEventListener(type, callback, {
+                    capture:capture || false,
+                    passive:passive || false
+                });
+            },
+            removeEventListener: (elem, type, callback, capture) => {
+                elem.removeEventListener(type, callback, capture || false);
+            },
             
             /** Takes a '.' separated string such as "foo.bar.baz" and resolves it
                 into the value found at that location relative to a starting scope.
@@ -146,11 +122,15 @@ myt = (() => {
                 @returns A populated string. */
             fillTextTemplate: function() {
                 var params = Array.prototype.slice.call(arguments),
-                    template = params.shift();
+                    template = params.shift(),
+                    param,
+                    i,
+                    len;
                 
                 if (template == null) return '';
                 
-                var param, i = 0, len = params.length;
+                i = 0;
+                len = params.length;
                 for (; len > i; ++i) {
                     param = params[i];
                     template = template.split("{" + i + "}").join(param == null ? '' : param);
@@ -171,9 +151,10 @@ myt = (() => {
                     and provided to the link handler.
                 @returns void */
             generateLink: (text, callbackMethodName, attrs, data) => {
-                var optAttrs = '';
+                var optAttrs = '',
+                    name;
                 if (attrs) {
-                    for (var name in attrs) optAttrs += ' ' + name + '="' + attrs[name] + '"';
+                    for (name in attrs) optAttrs += ' ' + name + '="' + attrs[name] + '"';
                 }
                 
                 return exports.fillTextTemplate(
@@ -186,11 +167,11 @@ myt = (() => {
                 @private
                 @returns void */
             __handleGeneratedLink: (elem, callbackMethodName, data) => {
-                var model;
+                var model,
+                    value;
                 while (elem) {
                     model = elem.model;
                     if (model) {
-                        var value;
                         try {
                             if (data) value = JSON.parse(data);
                         } catch(e) {
@@ -252,11 +233,13 @@ myt = (() => {
                 }
             },
             
-            /** Used to wrap the first function with the second function. The first
+            /** UNUSED SO COMMENTING OUT FOR NOW.
+                
+                Used to wrap the first function with the second function. The first
                 function is exposed as this.callSuper within the wrapper function.
                 @param fn:function the function to wrap.
                 @param wrapperFn:function the wrapper function.
-                @returns a wrapped function. */
+                @returns a wrapped function.
             wrapFunction: function(fn, wrapperFn) {
                 return function() {
                     // Store existing callSuper function so we can put it back later.
@@ -275,7 +258,7 @@ myt = (() => {
                     
                     return retval;
                 };
-            },
+            },*/
             
             /** A wrapper on myt.global.error.notify
                 @param err:Error/string The error or message to dump stack for.

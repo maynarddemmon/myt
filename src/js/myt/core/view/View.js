@@ -132,10 +132,10 @@
             if (parent) {
                 switch (view.align) {
                     case 'center':
-                        view.applyConstraint('__doAlignCenter', [view, 'width', view, 'alignOffset', parent, 'width']);
+                        view.constrain('__doAlignCenter', [view, 'width', view, 'alignOffset', parent, 'width']);
                         break;
                     case 'right':
-                        view.applyConstraint('__doAlignRight', [view, 'width', view, 'alignOffset', parent, 'width']);
+                        view.constrain('__doAlignRight', [view, 'width', view, 'alignOffset', parent, 'width']);
                         break;
                     case 'left':
                         view.setX(view.alignOffset || 0);
@@ -159,10 +159,10 @@
             if (parent) {
                 switch (view.valign) {
                     case 'middle':
-                        view.applyConstraint('__doValignMiddle', [view, 'height', view, 'valignOffset', parent, 'height']);
+                        view.constrain('__doValignMiddle', [view, 'height', view, 'valignOffset', parent, 'height']);
                         break;
                     case 'bottom':
-                        view.applyConstraint('__doValignBottom', [view, 'height', view, 'valignOffset', parent, 'height']);
+                        view.constrain('__doValignBottom', [view, 'height', view, 'valignOffset', parent, 'height']);
                         break;
                     case 'top':
                         view.setY(view.valignOffset || 0);

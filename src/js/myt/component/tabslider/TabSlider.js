@@ -129,7 +129,7 @@ myt.TabSlider = new JS.Class('TabSlider', myt.View, {
         var container = new V(wrapper, {name:'container'});
         new M.SizeToChildren(container, {axis:'y'});
         
-        self.applyConstraint('__updateHeight', [wrapper, 'y', wrapper, 'height']);
+        self.constrain('__updateHeight', [wrapper, 'y', wrapper, 'height']);
         
         self.callSuper();
     },

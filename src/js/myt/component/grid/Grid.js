@@ -54,7 +54,7 @@ myt.Grid = new JS.Class('Grid', myt.View, {
         self.syncTo(self, 'setGridWidth', 'width');
         self.syncTo(header, '_updateContentWidth', 'width');
         
-        self.applyConstraint('_updateContentHeight', [
+        self.constrain('_updateContentHeight', [
             sizeHeightToRows ? content : self, 'height', 
             header, 'height', 
             header, 'y'
