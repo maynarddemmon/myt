@@ -33,7 +33,7 @@ test("Test generateLink", function() {
     ok(myt.generateLink('foo', 'bar', null, {x:5}) === '<a href="#" onclick=\'myt.__handleGeneratedLink(this, "bar", &apos;{"x":5}&apos;); return false;\'>foo</a>', "Basic link generation.");
 });
 
-test("Test wrapFunction", function() {
+/*test("Test wrapFunction", function() {
     var obj = {
         bonus: 1,
         
@@ -105,7 +105,7 @@ test("Test wrapFunction", function() {
     ok(f3() === 2, "Function three returns 2.");
     f3 = myt.wrapFunction(f3, f2);
     ok(f3() === 3, "Function three returns 3.");
-});
+});*/
 
 test("Test areFloatsEqual", function() {
     ok(myt.areFloatsEqual(0.0, 0.0), "0.0 equals 0.0");

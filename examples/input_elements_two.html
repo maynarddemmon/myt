@@ -75,7 +75,7 @@
             
             this.callSuper(parent, attrs);
             
-            this.applyConstraint('_constrainWidth', [this.parent, 'width', this, 'x']);
+            this.constrain('_constrainWidth', [this.parent, 'width', this, 'x']);
             
             var size,
                 lorem = '. abcdefghijklmnopqrstuvwxyz',

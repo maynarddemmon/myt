@@ -169,7 +169,7 @@
                 var dialog = this.parent.dialog;
                 dialog.showSpinner("Here is a message with a spinner.");
                 this.callSuper();
-                dialog.doOnceLater('hide', 1000);
+                setTimeout(() => {dialog.hide();}, 1000);
             }
         }]);
         var btn8 = new BtnClass2(rootView, {name:'eight', text:'bar', disabled:true});

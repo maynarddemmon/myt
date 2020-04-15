@@ -86,6 +86,6 @@
     }]);
     
     leftPanel.syncTo(divider, 'updateWidth', 'value');
-    rightPanel.applyConstraint('updateX', [divider, 'x', rootView, 'width']);
+    rightPanel.constrain('updateX', [divider, 'x', rootView, 'width']);
 </script>
 </body></html>

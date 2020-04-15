@@ -73,7 +73,7 @@ test("Modify dom class and id", function() {
     proxy.destroy();
 });
 
-test("getComputedStye, setStyleProperty and setZIndex", function() {
+test("setStyleProperty and setZIndex", function() {
     var div = document.createElement('div');
     div.style.position = 'absolute';
     myt.getElement().appendChild(div);
@@ -83,9 +83,6 @@ test("getComputedStye, setStyleProperty and setZIndex", function() {
     ok(div.style.left === '', 'Div should have a left style property with a value of empty string initially.');
     proxy.setStyleProperty('left', '10px');
     ok(div.style.left === '10px', 'Left is now 10px.');
-    
-    var computed = myt.DomElementProxy.getComputedStyle(div);
-    ok(computed.zIndex === 'auto', 'Z index defaults to auto.');
     
     ok(div.style.zIndex === '', 'No zIndex yet.');
     proxy.setZIndex(1);
