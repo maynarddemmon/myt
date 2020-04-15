@@ -1,40 +1,44 @@
 <!doctype html><html><head>
 <title>Myt Framework : Color Picker Example</title>
 <link rel="stylesheet" href="../src/css/myt.css"/>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
-<script>window.jQuery || document.write('<script src="../src/js/jquery/jquery-1.12.4.min.js">\x3C/script>');</script>
+<script src="../src/js/jquery/jquery-3.5.0.min.js"></script>
 <script src="../src/js/boilerplate.js"></script>
-<script src="../dist/myt.min.js"></script>
+<script src="../src/js/jsclass/loader-browser.js"></script>
+<script src="../src/js/myt/manifest.js"></script>
 </head><body>
 <script>
-    var rootView = new myt.View(null, {bgColor:'#eeeeee'}, [myt.SizeToWindow]);
+    JS.require('myt.all', function() {this.init();});
     
-    new myt.Dialog(rootView, {name:'dialog'});
-    
-    new myt.SimpleButton(rootView, {
-        x:10, y:10, width:50, height:20,
-        activeColor:'#999999', hoverColor:'#bbbbbb', readyColor:'#aaaaaa'
-    }, [{
-        doActivated: function() {
-            this.parent.dialog.showColorPicker(
-                function(action, color) {
-                    switch(action) {
-                        case 'closeBtn':
-                            console.log("cancelled");
-                            break;
-                        case 'cancelBtn':
-                            console.log("cancelled");
-                            break;
-                        case 'confirmBtn':
-                            console.log("confirmed", color);
-                            break;
+    function init() {
+        var rootView = new myt.View(null, {bgColor:'#eeeeee'}, [myt.SizeToWindow]);
+        
+        new myt.Dialog(rootView, {name:'dialog'});
+        
+        new myt.SimpleButton(rootView, {
+            x:10, y:10, width:50, height:20,
+            activeColor:'#999999', hoverColor:'#bbbbbb', readyColor:'#aaaaaa'
+        }, [{
+            doActivated: function() {
+                this.parent.dialog.showColorPicker(
+                    function(action, color) {
+                        switch(action) {
+                            case 'closeBtn':
+                                console.log("cancelled");
+                                break;
+                            case 'cancelBtn':
+                                console.log("cancelled");
+                                break;
+                            case 'confirmBtn':
+                                console.log("confirmed", color);
+                                break;
+                        }
+                    },{
+                        color:'#ffcc99'
                     }
-                },{
-                    color:'#ffcc99'
-                }
-            );
-            this.callSuper();
-        }
-    }]);
+                );
+                this.callSuper();
+            }
+        }]);
+    };
 </script>
 </body></html>
