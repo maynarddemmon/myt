@@ -120,9 +120,8 @@ myt = (() => {
                 @param (remaining args):(coerced to string) The parameters for the
                     template.
                 @returns A populated string. */
-            fillTextTemplate: function() {
-                var params = Array.prototype.slice.call(arguments),
-                    template = params.shift(),
+            fillTextTemplate: function(...params) {
+                var template = params.shift(),
                     param,
                     i,
                     len;

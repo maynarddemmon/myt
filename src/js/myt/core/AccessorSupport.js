@@ -155,28 +155,6 @@
                 self[attrName] = v;
                 if (self.inited !== false && self.fireEvent) self.fireEvent(attrName, v); // !== false allows this to work with non-nodes.
             }
-        },
-        
-        /** Checks if an attribute is not null or undefined.
-            @param attrName:string The name of the attribute to check.
-            @returns true if the attribute value is not null or undefined. */
-        has: function(attrName) {
-            return this.get(attrName) != null;
-        },
-        
-        /** Checks if an attribute is exactly true.
-            @param attrName:string The name of the attribute to check.
-            @returns true if the attribute value is === true. */
-        is: function(attrName) {
-            return this.get(attrName) === true;
-        },
-        
-        /** Checks if an attribute is not exactly true. Note: this is not the same
-            as testing exactly false.
-            @param attrName:string The name of the attribute to check.
-            @returns true if the attribute value is !== true. */
-        isNot: function(attrName) {
-            return this.get(attrName) !== true;
         }
     });
 })(myt);

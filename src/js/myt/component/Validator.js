@@ -242,11 +242,8 @@
             @param arguments:args ever argument after the first must be a
                 Validator or a Validator ID from the myt.global.validators
                 registry.*/
-        initialize: function(id) {
+        initialize: function(id, ...args) {
             this.callSuper(id);
-            
-            var args = Array.prototype.slice.call(arguments);
-            args.shift();
             
             // Make sure each arg is an myt.Validator
             var i = args.length,

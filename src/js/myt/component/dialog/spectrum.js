@@ -496,10 +496,9 @@
       * Define a jQuery plugin
       */
     var dataID = "spectrum.id";
-    $.fn.spectrum = function (opts, extra) {
+    $.fn.spectrum = function (opts, ...args) {
         if (typeof opts == "string") {
             var returnValue = this;
-            var args = Array.prototype.slice.call(arguments, 1);
             this.each(function () {
                 var spect = spectrums[$(this).data(dataID)];
                 if (spect) {
