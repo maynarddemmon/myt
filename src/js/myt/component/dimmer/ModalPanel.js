@@ -66,7 +66,7 @@ myt.ModalPanel = new JS.Class('ModalPanel', myt.Dimmer, {
             M = myt,
             V = M.View,
             viewAttrs = {name:'content', ignorePlacement:true},
-            centeredViewAttrs = M.extend({}, viewAttrs, {align:'center', valign:'middle'});
+            centeredViewAttrs = Object.assign({}, viewAttrs, {align:'center', valign:'middle'});
         
         self.callSuper();
         
@@ -79,7 +79,7 @@ myt.ModalPanel = new JS.Class('ModalPanel', myt.Dimmer, {
                 });
                 break;
             case 'parent':
-                new V(self, M.extend(viewAttrs, {
+                new V(self, Object.assign(viewAttrs, {
                     x:self.marginLeft,
                     y:self.marginTop,
                     percentOfParentWidthOffset:-self.marginLeft - self.marginRight,

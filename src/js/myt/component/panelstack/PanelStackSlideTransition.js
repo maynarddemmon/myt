@@ -42,7 +42,7 @@ myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.Pa
         panel.stopActiveAnimators(axis);
         panel.set(axis, toValue);
         panel.setVisible(true);
-        var nextFunc = function(success) {
+        var nextFunc = (success) => {
             panel.makeHighestZIndex();
             promise.keep();
         };
@@ -80,7 +80,7 @@ myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.Pa
         }
         
         panel.stopActiveAnimators(axis);
-        var nextFunc = function(success) {
+        var nextFunc = (success) => {
             panel.setVisible(false);
             promise.keep();
         };

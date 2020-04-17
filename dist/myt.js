@@ -1021,48 +1021,6 @@ myt = (() => {
                 };
             },
             
-            /** Copies properties from the source objects to the target object.
-                @param targetObj:object The object that properties will be copied into.
-                @param sourceObj:object The object that properties will be copied from.
-                @param arguments... Additional arguments beyond the second will also
-                    be used as source objects and copied in order from left to right.
-                @param mappingFunction:function (optional) If the last argument is a 
-                    function it will be used to copy values from the source to the
-                    target. The function will be passed three values, the key, the 
-                    target and the source. The mapping function should copy the
-                    source value into the target value if so desired.
-                @returns The target object. */
-            extend: function(targetObj, sourceObj) {
-                var iterable = targetObj, 
-                    result = iterable,
-                    args = arguments, argsLength = args.length, argsIndex = 0,
-                    key, mappingFunc, ownIndex, ownKeys, length;
-                
-                if (iterable) {
-                    if (argsLength > 2 && typeof args[argsLength - 1] === 'function') mappingFunc = args[--argsLength];
-                    
-                    while (++argsIndex < argsLength) {
-                        iterable = args[argsIndex];
-                        
-                        if (iterable) {
-                            ownIndex = -1;
-                            ownKeys = Object.keys(iterable);
-                            length = ownKeys ? ownKeys.length : 0;
-                            
-                            while (++ownIndex < length) {
-                                key = ownKeys[ownIndex];
-                                if (mappingFunc) {
-                                    mappingFunc(key, result, iterable);
-                                } else {
-                                    result[key] = iterable[key];
-                                }
-                            }
-                        }
-                    }
-                }
-                return result
-            },
-            
             promise: function() {
                 var promise = {
                     args:arguments,
@@ -1232,7 +1190,7 @@ myt = (() => {
                             cookie value before it is returned.
                 @returns The cookie value string or a parsed cookie value. */
             read: (key, options) => {
-                options = pkg.extend({}, Cookie.defaults, options);
+                options = Object.assign({}, Cookie.defaults, options);
                 
                 var decodeFunc = options.raw ? raw : decoded,
                     useJson = options.json,
@@ -1274,7 +1232,7 @@ myt = (() => {
                             the cookie value.
                 @returns void */
             write: (key, value, options) => {
-                options = pkg.extend({}, Cookie.defaults, options);
+                options = Object.assign({}, Cookie.defaults, options);
                 
                 if (typeof options.expires === 'number') {
                     var days = options.expires,
@@ -1302,7 +1260,7 @@ myt = (() => {
             remove: (key, options) => {
                 if (Cookie.read(key, options) !== undefined) {
                     // Must not alter options, thus extending a fresh object.
-                    Cookie.write(key, '', pkg.extend({}, options, {expires: -1}));
+                    Cookie.write(key, '', Object.assign({}, options, {expires: -1}));
                     return true;
                 }
                 return false;
@@ -16711,7 +16669,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
     }
 
     function spectrum(element, o) {
-        var opts = myt.extend({}, defaultOpts, o),
+        var opts = Object.assign({}, defaultOpts, o),
             showSelectionPalette = opts.showSelectionPalette,
             localStorageKey = opts.localStorageKey,
             dragWidth = 0,
@@ -17024,7 +16982,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         }
 
         function option(optionName, optionValue) {
-            if (optionName == null) return myt.extend({}, opts);
+            if (optionName == null) return Object.assign({}, opts);
             if (optionValue == null) return opts[optionName];
 
             opts[optionName] = optionValue;
@@ -17149,7 +17107,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
 
         // Initializing a new instance of spectrum
         return this.spectrum("destroy").each(function () {
-            var options = myt.extend({}, opts, $(this).data());
+            var options = Object.assign({}, opts, $(this).data());
             var spect = spectrum(this, options);
             $(this).data(dataID, spect.id);
         });
@@ -18365,7 +18323,7 @@ myt.ModalPanel = new JS.Class('ModalPanel', myt.Dimmer, {
             M = myt,
             V = M.View,
             viewAttrs = {name:'content', ignorePlacement:true},
-            centeredViewAttrs = M.extend({}, viewAttrs, {align:'center', valign:'middle'});
+            centeredViewAttrs = Object.assign({}, viewAttrs, {align:'center', valign:'middle'});
         
         self.callSuper();
         
@@ -18378,7 +18336,7 @@ myt.ModalPanel = new JS.Class('ModalPanel', myt.Dimmer, {
                 });
                 break;
             case 'parent':
-                new V(self, M.extend(viewAttrs, {
+                new V(self, Object.assign(viewAttrs, {
                     x:self.marginLeft,
                     y:self.marginTop,
                     percentOfParentWidthOffset:-self.marginLeft - self.marginRight,
@@ -18805,7 +18763,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 content = self.content, 
                 closeBtn = content.closeBtn;
             
-            opts = pkg.extend({}, D.WRAP_TEXT_DEFAULTS, opts);
+            opts = Object.assign({}, D.WRAP_TEXT_DEFAULTS, opts);
             
             self.destroyContent();
             
@@ -18890,7 +18848,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             var self = this,
                 content = self.content;
             
-            opts = pkg.extend({}, pkg.Dialog.NO_WRAP_TEXT_DEFAULTS, opts);
+            opts = Object.assign({}, pkg.Dialog.NO_WRAP_TEXT_DEFAULTS, opts);
             
             self.destroyContent();
             
@@ -18925,7 +18883,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 closeBtn = content.closeBtn,
                 r = pkg.Dialog.DEFAULT_RADIUS;
             
-            opts = pkg.extend({}, pkg.Dialog.PICKER_DEFAULTS, opts);
+            opts = Object.assign({}, pkg.Dialog.PICKER_DEFAULTS, opts);
             
             self.destroyContent();
             
@@ -18984,7 +18942,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 closeBtn = content.closeBtn,
                 r = pkg.Dialog.DEFAULT_RADIUS;
             
-            opts = pkg.extend({}, pkg.Dialog.DATE_PICKER_DEFAULTS, opts);
+            opts = Object.assign({}, pkg.Dialog.DATE_PICKER_DEFAULTS, opts);
             
             self.destroyContent();
             
@@ -19039,7 +18997,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         showConfirm: function(msg, callbackFunction, opts) {
             var self = this;
             
-            opts = pkg.extend({}, pkg.Dialog.CONFIRM_DEFAULTS, opts);
+            opts = Object.assign({}, pkg.Dialog.CONFIRM_DEFAULTS, opts);
             
             self.showMessage(msg, callbackFunction, opts);
             self.setupFooterButtons(self.content.msg, opts);
@@ -19054,7 +19012,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 r = pkg.Dialog.DEFAULT_RADIUS,
                 maxHeight;
             
-            opts = pkg.extend({}, pkg.Dialog.CONFIRM_DEFAULTS, opts);
+            opts = Object.assign({}, pkg.Dialog.CONFIRM_DEFAULTS, opts);
             
             maxHeight = opts.maxContainerHeight;
             
@@ -24594,7 +24552,7 @@ myt.PanelStackFadeTransition = new JS.Class('PanelStackFadeTransition', myt.Pane
         
         panel.stopActiveAnimators('opacity');
         panel.setVisible(true);
-        panel.animate({attribute:'opacity', to:1, duration:this.duration}).next(function(success) {
+        panel.animate({attribute:'opacity', to:1, duration:this.duration}).next((success) => {
             panel.makeHighestZIndex();
             promise.keep();
         });
@@ -24606,7 +24564,7 @@ myt.PanelStackFadeTransition = new JS.Class('PanelStackFadeTransition', myt.Pane
         var promise = myt.promise(panel);
         
         panel.stopActiveAnimators('opacity');
-        panel.animate({attribute:'opacity', to:0, duration:this.duration}).next(function(success) {
+        panel.animate({attribute:'opacity', to:0, duration:this.duration}).next((success) => {
             panel.setVisible(false);
             promise.keep();
         });
@@ -24660,7 +24618,7 @@ myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.Pa
         panel.stopActiveAnimators(axis);
         panel.set(axis, toValue);
         panel.setVisible(true);
-        var nextFunc = function(success) {
+        var nextFunc = (success) => {
             panel.makeHighestZIndex();
             promise.keep();
         };
@@ -24698,7 +24656,7 @@ myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.Pa
         }
         
         panel.stopActiveAnimators(axis);
-        var nextFunc = function(success) {
+        var nextFunc = (success) => {
             panel.setVisible(false);
             promise.keep();
         };
@@ -25159,7 +25117,7 @@ myt.DropSource = new JS.Module('DropSource', {
             dropParent = this.dropParent;
         if (dropClass && dropParent) {
             var pos = myt.DomElementProxy.getPagePosition(this.getInnerDomElement(), dropParent.getInnerDomElement()),
-            attrs = myt.extend({}, this.dropClassAttrs);
+            attrs = Object.assign({}, this.dropClassAttrs);
             attrs.x = pos.x || 0;
             attrs.y = pos.y || 0;
             return new dropClass(dropParent, attrs);

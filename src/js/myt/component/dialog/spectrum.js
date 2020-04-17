@@ -73,7 +73,7 @@
     }
 
     function spectrum(element, o) {
-        var opts = myt.extend({}, defaultOpts, o),
+        var opts = Object.assign({}, defaultOpts, o),
             showSelectionPalette = opts.showSelectionPalette,
             localStorageKey = opts.localStorageKey,
             dragWidth = 0,
@@ -386,7 +386,7 @@
         }
 
         function option(optionName, optionValue) {
-            if (optionName == null) return myt.extend({}, opts);
+            if (optionName == null) return Object.assign({}, opts);
             if (optionValue == null) return opts[optionName];
 
             opts[optionName] = optionValue;
@@ -511,7 +511,7 @@
 
         // Initializing a new instance of spectrum
         return this.spectrum("destroy").each(function () {
-            var options = myt.extend({}, opts, $(this).data());
+            var options = Object.assign({}, opts, $(this).data());
             var spect = spectrum(this, options);
             $(this).data(dataID, spect.id);
         });

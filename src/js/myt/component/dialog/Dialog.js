@@ -305,7 +305,7 @@
                 content = self.content, 
                 closeBtn = content.closeBtn;
             
-            opts = pkg.extend({}, D.WRAP_TEXT_DEFAULTS, opts);
+            opts = Object.assign({}, D.WRAP_TEXT_DEFAULTS, opts);
             
             self.destroyContent();
             
@@ -390,7 +390,7 @@
             var self = this,
                 content = self.content;
             
-            opts = pkg.extend({}, pkg.Dialog.NO_WRAP_TEXT_DEFAULTS, opts);
+            opts = Object.assign({}, pkg.Dialog.NO_WRAP_TEXT_DEFAULTS, opts);
             
             self.destroyContent();
             
@@ -425,7 +425,7 @@
                 closeBtn = content.closeBtn,
                 r = pkg.Dialog.DEFAULT_RADIUS;
             
-            opts = pkg.extend({}, pkg.Dialog.PICKER_DEFAULTS, opts);
+            opts = Object.assign({}, pkg.Dialog.PICKER_DEFAULTS, opts);
             
             self.destroyContent();
             
@@ -484,7 +484,7 @@
                 closeBtn = content.closeBtn,
                 r = pkg.Dialog.DEFAULT_RADIUS;
             
-            opts = pkg.extend({}, pkg.Dialog.DATE_PICKER_DEFAULTS, opts);
+            opts = Object.assign({}, pkg.Dialog.DATE_PICKER_DEFAULTS, opts);
             
             self.destroyContent();
             
@@ -539,7 +539,7 @@
         showConfirm: function(msg, callbackFunction, opts) {
             var self = this;
             
-            opts = pkg.extend({}, pkg.Dialog.CONFIRM_DEFAULTS, opts);
+            opts = Object.assign({}, pkg.Dialog.CONFIRM_DEFAULTS, opts);
             
             self.showMessage(msg, callbackFunction, opts);
             self.setupFooterButtons(self.content.msg, opts);
@@ -554,7 +554,7 @@
                 r = pkg.Dialog.DEFAULT_RADIUS,
                 maxHeight;
             
-            opts = pkg.extend({}, pkg.Dialog.CONFIRM_DEFAULTS, opts);
+            opts = Object.assign({}, pkg.Dialog.CONFIRM_DEFAULTS, opts);
             
             maxHeight = opts.maxContainerHeight;
             

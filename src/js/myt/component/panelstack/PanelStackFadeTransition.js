@@ -19,7 +19,7 @@ myt.PanelStackFadeTransition = new JS.Class('PanelStackFadeTransition', myt.Pane
         
         panel.stopActiveAnimators('opacity');
         panel.setVisible(true);
-        panel.animate({attribute:'opacity', to:1, duration:this.duration}).next(function(success) {
+        panel.animate({attribute:'opacity', to:1, duration:this.duration}).next((success) => {
             panel.makeHighestZIndex();
             promise.keep();
         });
@@ -31,7 +31,7 @@ myt.PanelStackFadeTransition = new JS.Class('PanelStackFadeTransition', myt.Pane
         var promise = myt.promise(panel);
         
         panel.stopActiveAnimators('opacity');
-        panel.animate({attribute:'opacity', to:0, duration:this.duration}).next(function(success) {
+        panel.animate({attribute:'opacity', to:0, duration:this.duration}).next((success) => {
             panel.setVisible(false);
             promise.keep();
         });

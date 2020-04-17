@@ -48,7 +48,7 @@
                             cookie value before it is returned.
                 @returns The cookie value string or a parsed cookie value. */
             read: (key, options) => {
-                options = pkg.extend({}, Cookie.defaults, options);
+                options = Object.assign({}, Cookie.defaults, options);
                 
                 var decodeFunc = options.raw ? raw : decoded,
                     useJson = options.json,
@@ -90,7 +90,7 @@
                             the cookie value.
                 @returns void */
             write: (key, value, options) => {
-                options = pkg.extend({}, Cookie.defaults, options);
+                options = Object.assign({}, Cookie.defaults, options);
                 
                 if (typeof options.expires === 'number') {
                     var days = options.expires,
@@ -118,7 +118,7 @@
             remove: (key, options) => {
                 if (Cookie.read(key, options) !== undefined) {
                     // Must not alter options, thus extending a fresh object.
-                    Cookie.write(key, '', pkg.extend({}, options, {expires: -1}));
+                    Cookie.write(key, '', Object.assign({}, options, {expires: -1}));
                     return true;
                 }
                 return false;

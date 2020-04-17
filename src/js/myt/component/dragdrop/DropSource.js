@@ -75,7 +75,7 @@ myt.DropSource = new JS.Module('DropSource', {
             dropParent = this.dropParent;
         if (dropClass && dropParent) {
             var pos = myt.DomElementProxy.getPagePosition(this.getInnerDomElement(), dropParent.getInnerDomElement()),
-            attrs = myt.extend({}, this.dropClassAttrs);
+            attrs = Object.assign({}, this.dropClassAttrs);
             attrs.x = pos.x || 0;
             attrs.y = pos.y || 0;
             return new dropClass(dropParent, attrs);
