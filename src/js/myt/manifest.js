@@ -23,8 +23,7 @@ JS.Packages(function() {with(this) {
     file(MYT_CORE_ROOT + 'Eventable.js'       ).provides('myt.Eventable'       ).requires('myt.AccessorSupport','myt.Destructible','myt.Constrainable');
     file(MYT_CORE_ROOT + 'Node.js'            ).provides('myt.Node'            ).requires('myt.AccessorSupport','myt.Destructible','myt.Constrainable','myt.TrackActivesPool');
     file(MYT_CORE_ROOT + 'Animator.js'        ).provides('myt.Animator'        ).requires('myt.Node','myt.global.idle','myt.Reusable');
-    file(MYT_CORE_ROOT + 'ThresholdCounter.js').provides('myt.ThresholdCounter').requires('myt.AccessorSupport','myt.Destructible','myt.Observable');
-    file(MYT_CORE_ROOT + 'Layout.js'          ).provides('myt.Layout','myt.ConstantLayout','myt.VariableLayout').requires('myt.Node','myt.ThresholdCounter');
+    file(MYT_CORE_ROOT + 'Layout.js'          ).provides('myt.Layout','myt.ConstantLayout','myt.VariableLayout').requires('myt.Node');
     
     // Core : Events
     var MYT_EVENTS_ROOT = MYT_CORE_ROOT + 'events/';

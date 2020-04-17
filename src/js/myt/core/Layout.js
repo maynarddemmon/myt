@@ -307,7 +307,7 @@
         });
     
     /** Create locked counter functions for the myt.Layout class. */
-    pkg.ThresholdCounter.createFixedThresholdCounter(Layout, 1, 'locked');
+    pkg.createFixedThresholdCounter(Layout, 1, 'locked');
     
     /** A layout that sets the target attribute name to the target value for 
         each subview.

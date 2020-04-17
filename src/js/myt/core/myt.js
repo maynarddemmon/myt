@@ -485,6 +485,68 @@ myt = (() => {
                 };
             },
             
+            /** Mixes threshold counter functionality with a fixed threshold 
+                onto the provided scope. A threshold is exceeded when the
+                counter value equals the threshold value.
+                @param scope:Observable|Class|Module the scope to mix onto.
+                @param thresholdValue:number the fixed threshold value.
+                @param exceededAttrName:string the name of the boolean attribute
+                    that will indicate if the threshold is exceeded or not.
+                @param counterAttrName:string (Optional) the name of the number
+                    attribute that will get adjusted up and down. If not provided
+                    the 'exceeded' attribute name will be used with 'Counter'
+                    appended to it. For example if the exceeded
+                    attribute was 'locked' this would be 'lockedCounter'.
+                @returns boolean True if creation succeeded, false otherwise. */
+            createFixedThresholdCounter: (scope, thresholdValue, exceededAttrName, counterAttrName) => {
+                var genNameFunc = exports.AccessorSupport.generateName,
+                    incrName,
+                    decrName,
+                    isModuleOrClass = typeof scope === 'function' || scope instanceof JS.Module,
+                    mod = {};
+                counterAttrName = counterAttrName || genNameFunc('counter', exceededAttrName);
+                
+                incrName = genNameFunc(counterAttrName, 'increment');
+                decrName = genNameFunc(counterAttrName, 'decrement');
+                
+                // Prevent clobbering
+                if ((isModuleOrClass ? scope.instanceMethod(incrName) : scope[incrName]) !== undefined) {
+                    console.warn("Can't clobber existing property during setup of increment function.", incrName, scope);
+                    return false;
+                }
+                if ((isModuleOrClass ? scope.instanceMethod(decrName) : scope[decrName]) !== undefined) {
+                    console.warn("Can't clobber existing property during setup of decrement function.", decrName, scope);
+                    return false;
+                }
+                
+                // Define the "module".
+                /** Increments the counter attribute on the scope object by 1.
+                    @returns void */
+                mod[incrName] = function() {
+                    var value = this[counterAttrName] + 1;
+                    this[counterAttrName] = value;
+                    this.fireEvent(counterAttrName, value);
+                    if (value === thresholdValue) this.set(exceededAttrName, true);
+                };
+                
+                /** Decrements the counter attribute on the scope object by 1.
+                    @returns void */
+                mod[decrName] = function() {
+                    var curValue = this[counterAttrName];
+                    if (curValue === 0) return;
+                    var value = curValue - 1;
+                    this[counterAttrName] = value;
+                    this.fireEvent(counterAttrName, value);
+                    if (curValue === thresholdValue) this.set(exceededAttrName, false);
+                };
+                
+                // Mixin in the "module"
+                scope[isModuleOrClass ? 'include' : 'extend'](mod);
+                
+                return true;
+            },
+            
+            // Fetch
             makeURLSearchParams: (params={}) => {
                 var urlSearchParams = new URLSearchParams(),
                     key,
