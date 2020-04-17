@@ -35,7 +35,7 @@ myt = (() => {
         exports = {
             /** A version number based on the time this distribution of myt was
                 created. */
-            version:20191105.1227,
+            version:20200416.1227,
             
             /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
                 should be set by the page that includes this script. */
@@ -455,36 +455,6 @@ myt = (() => {
                         cache = f.__cache || (f.__cache = {});
                     return (hash in cache) ? cache[hash] : cache[hash] = f.apply(this, arguments);
                 };
-            },
-            
-            promise: function() {
-                var promise = {
-                    args:arguments,
-                    
-                    next:function(nextFunc) {
-                        if (promise.kept) {
-                            // Execute next immediately since the promise has
-                            // already been kept
-                            nextFunc.apply(null, promise.args);
-                        } else {
-                            // Store the next function so it can be called later once
-                            // the promise is kept
-                            promise._nextFunc = nextFunc;
-                        }
-                        return promise;
-                    },
-                    
-                    keep:function() {
-                        promise.kept = true;
-                        
-                        // If a next function exists then execute it since now the
-                        // promise has been kept.
-                        if (promise._nextFunc) promise._nextFunc.apply(null, promise.args);
-                        
-                        return promise;
-                    }
-                };
-                return promise;
             },
             
             /** Returns a function that wraps the provided function and that, as long 

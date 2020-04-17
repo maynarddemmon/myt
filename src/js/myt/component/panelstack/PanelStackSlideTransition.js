@@ -17,8 +17,8 @@ myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.Pa
     
     // Methods /////////////////////////////////////////////////////////////////
     to: function(panel) {
-        var promise = myt.promise(panel),
-            panelStack = panel.getPanelStack(),
+        var panelStack = panel.getPanelStack(),
+            duration = this.duration,
             toValue, axis;
         switch (this.direction) {
             case 'left':
@@ -42,23 +42,24 @@ myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.Pa
         panel.stopActiveAnimators(axis);
         panel.set(axis, toValue);
         panel.setVisible(true);
-        var nextFunc = (success) => {
-            panel.makeHighestZIndex();
-            promise.keep();
-        };
-        if (this.duration > 0) {
-            panel.animate({attribute:axis, to:0, duration:this.duration}).next(nextFunc);
-        } else {
-            panel.set(axis, 0);
-            nextFunc();
-        }
         
-        return promise;
+        return new Promise((resolve, reject) => {
+            var nextFunc = (success) => {
+                panel.makeHighestZIndex();
+                resolve(panel);
+            };
+            if (duration > 0) {
+                panel.animate({attribute:axis, to:0, duration:duration}).next(nextFunc);
+            } else {
+                panel.set(axis, 0);
+                nextFunc();
+            }
+        });
     },
     
     from: function(panel) {
-        var promise = myt.promise(panel),
-            panelStack = panel.getPanelStack(),
+        var panelStack = panel.getPanelStack(),
+            duration = this.duration,
             toValue, axis;
         switch (this.direction) {
             case 'left':
@@ -80,17 +81,18 @@ myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.Pa
         }
         
         panel.stopActiveAnimators(axis);
-        var nextFunc = (success) => {
-            panel.setVisible(false);
-            promise.keep();
-        };
-        if (this.duration > 0) {
-            panel.animate({attribute:axis, to:toValue, duration:this.duration}).next(nextFunc);
-        } else {
-            panel.set(axis, toValue);
-            nextFunc();
-        }
         
-        return promise;
+        return new Promise((resolve, reject) => {
+            var nextFunc = (success) => {
+                panel.setVisible(false);
+                resolve(panel);
+            };
+            if (duration > 0) {
+                panel.animate({attribute:axis, to:toValue, duration:duration}).next(nextFunc);
+            } else {
+                panel.set(axis, toValue);
+                nextFunc();
+            }
+        });
     }
 });

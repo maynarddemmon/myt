@@ -15,27 +15,23 @@ myt.PanelStackFadeTransition = new JS.Class('PanelStackFadeTransition', myt.Pane
     
     // Methods /////////////////////////////////////////////////////////////////
     to: function(panel) {
-        var promise = myt.promise(panel);
-        
-        panel.stopActiveAnimators('opacity');
-        panel.setVisible(true);
-        panel.animate({attribute:'opacity', to:1, duration:this.duration}).next((success) => {
-            panel.makeHighestZIndex();
-            promise.keep();
+        return new Promise((resolve, reject) => {
+            panel.stopActiveAnimators('opacity');
+            panel.setVisible(true);
+            panel.animate({attribute:'opacity', to:1, duration:this.duration}).next((success) => {
+                panel.makeHighestZIndex();
+                resolve(panel);
+            });
         });
-        
-        return promise;
     },
     
     from: function(panel) {
-        var promise = myt.promise(panel);
-        
-        panel.stopActiveAnimators('opacity');
-        panel.animate({attribute:'opacity', to:0, duration:this.duration}).next((success) => {
-            panel.setVisible(false);
-            promise.keep();
+        return new Promise((resolve, reject) => {
+            panel.stopActiveAnimators('opacity');
+            panel.animate({attribute:'opacity', to:0, duration:this.duration}).next((success) => {
+                panel.setVisible(false);
+                resolve(panel);
+            });
         });
-        
-        return promise;
     }
 });

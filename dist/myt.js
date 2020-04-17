@@ -599,7 +599,7 @@ myt = (() => {
         exports = {
             /** A version number based on the time this distribution of myt was
                 created. */
-            version:20191105.1227,
+            version:20200416.1227,
             
             /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
                 should be set by the page that includes this script. */
@@ -1019,36 +1019,6 @@ myt = (() => {
                         cache = f.__cache || (f.__cache = {});
                     return (hash in cache) ? cache[hash] : cache[hash] = f.apply(this, arguments);
                 };
-            },
-            
-            promise: function() {
-                var promise = {
-                    args:arguments,
-                    
-                    next:function(nextFunc) {
-                        if (promise.kept) {
-                            // Execute next immediately since the promise has
-                            // already been kept
-                            nextFunc.apply(null, promise.args);
-                        } else {
-                            // Store the next function so it can be called later once
-                            // the promise is kept
-                            promise._nextFunc = nextFunc;
-                        }
-                        return promise;
-                    },
-                    
-                    keep:function() {
-                        promise.kept = true;
-                        
-                        // If a next function exists then execute it since now the
-                        // promise has been kept.
-                        if (promise._nextFunc) promise._nextFunc.apply(null, promise.args);
-                        
-                        return promise;
-                    }
-                };
-                return promise;
             },
             
             /** Returns a function that wraps the provided function and that, as long 
@@ -24514,20 +24484,16 @@ myt.StackablePanel = new JS.Module('StackablePanel', {
 myt.PanelStackTransition = new JS.Class('PanelStackTransition', myt.Node, {
     // Methods /////////////////////////////////////////////////////////////////
     /** Called when transitioning to the provided panel.
+        The default implementation keeps the promise right away.
         @param panel:myt.StackablePanel
         @returns a promise object that has a next function. */
-    to: function(panel) {
-        // Default implementation keeps the promise right away.
-        return myt.promise(panel).keep();
-    },
+    to: (panel) => Promise.resolve(panel),
     
     /** Called when transitioning from the provided panel.
+        The default implementation keeps the promise right away.
         @param panel:myt.StackablePanel
         @returns a promise object that has a next function. */
-    from: function(panel) {
-        // Default implementation keeps the promise right away.
-        return myt.promise(panel).keep();
-    }
+    from: (panel) => Promise.resolve(panel)
 });
 
 
@@ -24548,28 +24514,24 @@ myt.PanelStackFadeTransition = new JS.Class('PanelStackFadeTransition', myt.Pane
     
     // Methods /////////////////////////////////////////////////////////////////
     to: function(panel) {
-        var promise = myt.promise(panel);
-        
-        panel.stopActiveAnimators('opacity');
-        panel.setVisible(true);
-        panel.animate({attribute:'opacity', to:1, duration:this.duration}).next((success) => {
-            panel.makeHighestZIndex();
-            promise.keep();
+        return new Promise((resolve, reject) => {
+            panel.stopActiveAnimators('opacity');
+            panel.setVisible(true);
+            panel.animate({attribute:'opacity', to:1, duration:this.duration}).next((success) => {
+                panel.makeHighestZIndex();
+                resolve(panel);
+            });
         });
-        
-        return promise;
     },
     
     from: function(panel) {
-        var promise = myt.promise(panel);
-        
-        panel.stopActiveAnimators('opacity');
-        panel.animate({attribute:'opacity', to:0, duration:this.duration}).next((success) => {
-            panel.setVisible(false);
-            promise.keep();
+        return new Promise((resolve, reject) => {
+            panel.stopActiveAnimators('opacity');
+            panel.animate({attribute:'opacity', to:0, duration:this.duration}).next((success) => {
+                panel.setVisible(false);
+                resolve(panel);
+            });
         });
-        
-        return promise;
     }
 });
 
@@ -24593,8 +24555,8 @@ myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.Pa
     
     // Methods /////////////////////////////////////////////////////////////////
     to: function(panel) {
-        var promise = myt.promise(panel),
-            panelStack = panel.getPanelStack(),
+        var panelStack = panel.getPanelStack(),
+            duration = this.duration,
             toValue, axis;
         switch (this.direction) {
             case 'left':
@@ -24618,23 +24580,24 @@ myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.Pa
         panel.stopActiveAnimators(axis);
         panel.set(axis, toValue);
         panel.setVisible(true);
-        var nextFunc = (success) => {
-            panel.makeHighestZIndex();
-            promise.keep();
-        };
-        if (this.duration > 0) {
-            panel.animate({attribute:axis, to:0, duration:this.duration}).next(nextFunc);
-        } else {
-            panel.set(axis, 0);
-            nextFunc();
-        }
         
-        return promise;
+        return new Promise((resolve, reject) => {
+            var nextFunc = (success) => {
+                panel.makeHighestZIndex();
+                resolve(panel);
+            };
+            if (duration > 0) {
+                panel.animate({attribute:axis, to:0, duration:duration}).next(nextFunc);
+            } else {
+                panel.set(axis, 0);
+                nextFunc();
+            }
+        });
     },
     
     from: function(panel) {
-        var promise = myt.promise(panel),
-            panelStack = panel.getPanelStack(),
+        var panelStack = panel.getPanelStack(),
+            duration = this.duration,
             toValue, axis;
         switch (this.direction) {
             case 'left':
@@ -24656,18 +24619,19 @@ myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.Pa
         }
         
         panel.stopActiveAnimators(axis);
-        var nextFunc = (success) => {
-            panel.setVisible(false);
-            promise.keep();
-        };
-        if (this.duration > 0) {
-            panel.animate({attribute:axis, to:toValue, duration:this.duration}).next(nextFunc);
-        } else {
-            panel.set(axis, toValue);
-            nextFunc();
-        }
         
-        return promise;
+        return new Promise((resolve, reject) => {
+            var nextFunc = (success) => {
+                panel.setVisible(false);
+                resolve(panel);
+            };
+            if (duration > 0) {
+                panel.animate({attribute:axis, to:toValue, duration:duration}).next(nextFunc);
+            } else {
+                panel.set(axis, toValue);
+                nextFunc();
+            }
+        });
     }
 });
 
@@ -24762,7 +24726,7 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
         var transition = this.transition;
         if (transition) {
             var self = this;
-            transition.to(panel).next(function(panel) {self.doAfterTransitionTo(panel)});
+            transition.to(panel).then((panel) => {self.doAfterTransitionTo(panel)});
         } else {
             panel.makeHighestZIndex();
             panel.setVisible(true);
@@ -24785,7 +24749,7 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
         var transition = this.transition;
         if (transition) {
             var self = this;
-            transition.from(panel).next(function(panel) {self.doAfterTransitionFrom(panel)});
+            transition.from(panel).then((panel) => {self.doAfterTransitionFrom(panel)});
         } else {
             panel.setVisible(false);
             this.doAfterTransitionFrom(panel);
