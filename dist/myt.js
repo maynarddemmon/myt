@@ -9336,6 +9336,9 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
         /** Indicates an asynchronous transition. */
         ASYNC = 'async',
         
+        /** Special state name that holds transitions for all states. */
+        WILDCARD = '*',
+        
         resetTransitionProgress = (stateMachine) => {
             stateMachine.__additionalArgs = [];
             stateMachine.__pendingTransition = '';
@@ -9366,7 +9369,7 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
                 }
                 
                 var to = stateMachine.map[stateMachine.current][transitionName];
-                if (!to) to = stateMachine.map[StateMachine.WILDCARD][transitionName];
+                if (!to) to = stateMachine.map[WILDCARD][transitionName];
                 if (to) {
                     stateMachine.__pendingTransition = transitionName;
                     stateMachine.__transDestinationState = to;
@@ -9435,17 +9438,14 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
             /** The transition was invalid in some way. */
             INVALID:4,
             /** No transition exists for the current state. */
-            NO_TRANSITION:5,
-            
-            /** Special state name that holds transitions for all states. */
-            WILDCARD:'*'
+            NO_TRANSITION:5
         },
         
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
             this.map = {};
-            this.map[StateMachine.WILDCARD] = {};
+            this.map[WILDCARD] = {};
             
             this.current = this.initial = this.terminal = '';
             resetTransitionProgress(this);
@@ -9479,24 +9479,19 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
             this.terminal = v;
         },
         
-        setTransitions: function(v) {
-            var i = v.length,
-                data;
-            while (i) {
-                data = v[--i];
-                this.addTransition(data.name, data.from, data.to);
-            }
-        },
-        
         
         // Methods /////////////////////////////////////////////////////////////
+        addTransitions: function(transitions) {
+            transitions.forEach(transition => this.addTransition(...transition));
+        },
+        
         addTransition: function(transitionName, from, to) {
             var map = this.map;
             
             if (from) {
                 from = Array.isArray(from) ? from : [from];
             } else {
-                from = [StateMachine.WILDCARD];
+                from = [WILDCARD];
             }
             
             var i = from.length, 
@@ -9594,7 +9589,7 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
             if (this.map[this.current][transitionName] !== undefined) {
                 return true;
             } else {
-                return this.map[StateMachine.WILDCARD][transitionName] !== undefined;
+                return this.map[WILDCARD][transitionName] !== undefined;
             }
         }
     });
