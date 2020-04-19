@@ -148,10 +148,10 @@
             new myt.View(panelOne, {height:18}, [{
                 initNode: function(parent, attrs) {
                     this.callSuper(parent, attrs);
-                    new myt.TextRadio(this, {y:-1, groupId:'spacedAxis', optionValue:'x', text:'X', shrinkToFit:true, selected:true}, [{
+                    new myt.Radio(this, {y:-1, groupId:'spacedAxis', optionValue:'x', label:'X', selected:true}, [{
                         doActivated: function() {this.callSuper();spacedLayout.setAxis(this.getValue());}
                     }]);
-                    new myt.TextRadio(this, {y:-1, groupId:'spacedAxis', optionValue:'y', text:'Y', shrinkToFit:true}, [{
+                    new myt.Radio(this, {y:-1, groupId:'spacedAxis', optionValue:'y', label:'Y'}, [{
                         doActivated: function() {this.callSuper();spacedLayout.setAxis(this.getValue());}
                     }]);
                     new myt.SpacedLayout(this);
@@ -197,14 +197,14 @@
             new myt.View(panelTwo, {height:18}, [{
                 initNode: function(parent, attrs) {
                     this.callSuper(parent, attrs);
-                    new myt.TextRadio(this, {y:-1, groupId:'wrappingAxis', optionValue:'x', text:'X', shrinkToFit:true, selected:true}, [{
+                    new myt.Radio(this, {y:-1, groupId:'wrappingAxis', optionValue:'x', label:'X', selected:true}, [{
                         doActivated: function() {
                             this.callSuper();
                             rootView.setWidth(myt.global.windowResize.getWidth());
                             wrappingLayout.setAxis(this.getValue());
                         }
                     }]);
-                    new myt.TextRadio(this, {y:-1, groupId:'wrappingAxis', optionValue:'y', text:'Y', shrinkToFit:true}, [{
+                    new myt.Radio(this, {y:-1, groupId:'wrappingAxis', optionValue:'y', label:'Y'}, [{
                         doActivated: function() {
                             this.callSuper();
                             rootView.setHeight(myt.global.windowResize.getHeight());

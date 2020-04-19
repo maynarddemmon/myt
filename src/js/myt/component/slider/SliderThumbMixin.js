@@ -14,7 +14,6 @@ myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Checkbox */
     initNode: function(parent, attrs) {
         if (attrs.width == null) attrs.width = parent.thumbWidth;
         if (attrs.height == null) attrs.height = parent.thumbHeight;

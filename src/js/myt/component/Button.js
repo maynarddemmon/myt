@@ -153,33 +153,22 @@
             }
         }),
         
-        /** An myt.Button that makes use of activeColor, hoverColor and readyColor
-            attributes to fill the button.
+        /** A mixin that provides activeColor, hoverColor and readyColor
+            attributes to fill the view.
             
             Events:
                 None
             
             Attributes:
                 activeColor:string A color string such as '#ff0000' or 'transparent'.
-                    Used when the button is in the active state. The default value 
-                    is transparent.
+                    Used when the button is in the active state.
                 hoverColor:string A color string such as '#ff0000' or 'transparent'.
-                    Used when the button is in the hover state. The default value 
-                    is transparent.
+                    Used when the button is in the hover state.
                 readyColor:string A color string such as '#ff0000' or 'transparent'.
-                    Used when the button is in the ready or disabled state. The 
-                    default value is transparent.
+                    Used when the button is in the ready or disabled state.
         */
-        SimpleButton = pkg.SimpleButton = new JSClass('SimpleButton', pkg.View, {
+        SimpleButtonStyle = pkg.SimpleButtonStyle = new JSModule('SimpleButtonStyle', {
             include: [Button],
-            
-            
-            // Life Cycle //////////////////////////////////////////////////////
-            initNode: function(parent, attrs) {
-                this.activeColor = this.hoverColor = this.readyColor = 'transparent';
-                
-                this.callSuper(parent, attrs);
-            },
             
             
             // Accessors ///////////////////////////////////////////////////////
@@ -231,6 +220,19 @@
             drawReadyState: function() {
                 this.setOpacity(1);
                 this.setBgColor(this.readyColor);
+            }
+        });
+        
+        /** An myt.Button that makes use of activeColor, hoverColor and readyColor
+            attributes to fill the button. */
+        SimpleButton = pkg.SimpleButton = new JSClass('SimpleButton', pkg.View, {
+            include: [SimpleButtonStyle],
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            initNode: function(parent, attrs) {
+                this.activeColor = this.hoverColor = this.readyColor = 'transparent';
+                
+                this.callSuper(parent, attrs);
             }
         });
     

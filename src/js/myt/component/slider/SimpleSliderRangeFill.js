@@ -1,7 +1,6 @@
 /** A simple implementation of the range fill for a RangeSlider. */
 myt.SimpleSliderRangeFill = new JS.Class('SimpleSliderRangeFill', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Checkbox */
     initNode: function(parent, attrs) {
         if (attrs.bgColor == null) attrs.bgColor = '#666666';
         

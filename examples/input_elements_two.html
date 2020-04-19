@@ -30,8 +30,8 @@
         },
         
         _handleMouseOver: function(e) {
-            this.simulateDomEvent('mousedown');
-            this.simulateDomEvent('mouseup');
+            myt.DomElementProxy.simulateDomEvent(this.getInnerDomElement(), 'mousedown');
+            myt.DomElementProxy.simulateDomEvent(this.getInnerDomElement(), 'mouseup');
         },
         
         _handleKeyDown: function(e) {

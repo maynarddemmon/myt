@@ -11046,33 +11046,22 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
             }
         }),
         
-        /** An myt.Button that makes use of activeColor, hoverColor and readyColor
-            attributes to fill the button.
+        /** A mixin that provides activeColor, hoverColor and readyColor
+            attributes to fill the view.
             
             Events:
                 None
             
             Attributes:
                 activeColor:string A color string such as '#ff0000' or 'transparent'.
-                    Used when the button is in the active state. The default value 
-                    is transparent.
+                    Used when the button is in the active state.
                 hoverColor:string A color string such as '#ff0000' or 'transparent'.
-                    Used when the button is in the hover state. The default value 
-                    is transparent.
+                    Used when the button is in the hover state.
                 readyColor:string A color string such as '#ff0000' or 'transparent'.
-                    Used when the button is in the ready or disabled state. The 
-                    default value is transparent.
+                    Used when the button is in the ready or disabled state.
         */
-        SimpleButton = pkg.SimpleButton = new JSClass('SimpleButton', pkg.View, {
+        SimpleButtonStyle = pkg.SimpleButtonStyle = new JSModule('SimpleButtonStyle', {
             include: [Button],
-            
-            
-            // Life Cycle //////////////////////////////////////////////////////
-            initNode: function(parent, attrs) {
-                this.activeColor = this.hoverColor = this.readyColor = 'transparent';
-                
-                this.callSuper(parent, attrs);
-            },
             
             
             // Accessors ///////////////////////////////////////////////////////
@@ -11124,6 +11113,19 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
             drawReadyState: function() {
                 this.setOpacity(1);
                 this.setBgColor(this.readyColor);
+            }
+        });
+        
+        /** An myt.Button that makes use of activeColor, hoverColor and readyColor
+            attributes to fill the button. */
+        SimpleButton = pkg.SimpleButton = new JSClass('SimpleButton', pkg.View, {
+            include: [SimpleButtonStyle],
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            initNode: function(parent, attrs) {
+                this.activeColor = this.hoverColor = this.readyColor = 'transparent';
+                
+                this.callSuper(parent, attrs);
             }
         });
     
@@ -13097,437 +13099,6 @@ myt.ListViewAnchor = new JS.Module('ListViewAnchor', {
 });
 
 
-/** Provides styling functionality for a Checkbox and other similar components.
-    
-    Requires:
-        Should be used on: myt.DrawButton or subclass thereof.
-    
-    Events:
-        None
-    
-    Attributes:
-        None
-*/
-myt.CheckboxStyleMixin = new JS.Module('CheckboxStyleMixin', {
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        /** The x location of the "icon". */
-        DEFAULT_PAD_X:3,
-        /** The y location of the "icon". */
-        DEFAULT_PAD_Y:4,
-        /** The width of the "icon". */
-        DEFAULT_WIDTH:14,
-        /** The height of the "icon" */
-        DEFAULT_HEIGHT:14,
-        DEFAULT_FILL_COLOR_CHECKED: '#666666',
-        DEFAULT_FILL_COLOR_HOVER: '#eeeeee',
-        DEFAULT_FILL_COLOR_ACTIVE: '#cccccc',
-        DEFAULT_FILL_COLOR_READY: '#ffffff',
-        DEFAULT_EDGE_COLOR: '#333333',
-        DEFAULT_EDGE_SIZE: 0.5
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        if (attrs.width == null) attrs.width = this.getIconExtentX();
-        if (attrs.height == null) attrs.height = this.getIconExtentY();
-        if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
-        
-        var CSM = myt.CheckboxStyleMixin;
-        if (attrs.fillColorChecked == null) attrs.fillColorChecked = CSM.DEFAULT_FILL_COLOR_CHECKED;
-        if (attrs.fillColorHover == null) attrs.fillColorHover = CSM.DEFAULT_FILL_COLOR_HOVER;
-        if (attrs.fillColorActive == null) attrs.fillColorActive = CSM.DEFAULT_FILL_COLOR_ACTIVE;
-        if (attrs.fillColorReady == null) attrs.fillColorReady = CSM.DEFAULT_FILL_COLOR_READY;
-        if (attrs.edgeColor == null) attrs.edgeColor = CSM.DEFAULT_EDGE_COLOR;
-        if (attrs.edgeSize == null) attrs.edgeSize = CSM.DEFAULT_EDGE_SIZE;
-        
-        this.callSuper(parent, attrs);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setFillColorChecked: function(v) {this.fillColorChecked = v;},
-    setFillColorHover: function(v) {this.fillColorHover = v;},
-    setFillColorActive: function(v) {this.fillColorActive = v;},
-    setFillColorReady: function(v) {this.fillColorReady = v;},
-    setEdgeColor: function(v) {this.edgeColor = v;},
-    setEdgeSize: function(v) {this.edgeSize = v;},
-    
-    /** @overrides myt.DrawButton */
-    setFocused: function(v) {
-        this.callSuper(v);
-        
-        if (this.inited) this.redraw();
-    },
-    
-    /** @overrides myt.DrawButton */
-    getDrawBounds: function() {
-        var bounds = this.drawBounds,
-            CSM = myt.CheckboxStyleMixin;
-        bounds.x = CSM.DEFAULT_PAD_X;
-        bounds.y = CSM.DEFAULT_PAD_Y;
-        bounds.w = CSM.DEFAULT_WIDTH;
-        bounds.h = CSM.DEFAULT_HEIGHT;
-        return bounds;
-    },
-    
-    /** @overrides myt.DrawButton */
-    getDrawConfig: function(state) {
-        var self = this,
-            config = self.callSuper(state);
-        config.checkedColor = self.fillColorChecked;
-        config.edgeColor = self.edgeColor;
-        config.edgeSize = self.edgeSize;
-        
-        switch (state) {
-            case 'hover':
-                config.fillColor = self.fillColorHover;
-                break;
-            case 'active':
-                config.fillColor = self.fillColorActive;
-                break;
-            case 'disabled':
-            case 'ready':
-                config.fillColor = self.fillColorReady;
-                break;
-            default:
-        }
-        return config;
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Gets the horizontal size of the "icon" plus the padding
-        needed around it to display a shadow. */
-    getIconExtentX: function() {
-        var CSM = myt.CheckboxStyleMixin;
-        return CSM.DEFAULT_WIDTH + 2 * CSM.DEFAULT_PAD_X;
-    },
-    
-    /** Gets the vertical size of the "icon" plus the padding
-        needed around it to display a shadow. */
-    getIconExtentY: function() {
-        var CSM = myt.CheckboxStyleMixin;
-        return CSM.DEFAULT_HEIGHT + 2 * CSM.DEFAULT_PAD_Y;
-    }
-});
-
-
-/** Provides a setValue and getValue method.
-    
-    Events:
-        value:*
-    
-    Attributes:
-        value:* The stored value.
-        valueFilter:function If it exists, values will be run through this
-            filter function before being set on the component. By default
-            no valueFilter exists. A value filter function must take a 
-            single value as an argument and return a value.
-*/
-myt.ValueComponent = new JS.Module('ValueComponent', {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        this.appendToEarlyAttrs('valueFilter','value');
-        this.callSuper(parent, attrs);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setValueFilter: function(v) {
-        this.valueFilter = v;
-        
-        if (this.inited && v) this.setValue(this.value);
-    },
-    
-    setValue: function(v) {
-        if (this.valueFilter) v = this.valueFilter(v);
-        
-        if (this.value !== v) {
-            this.value = v;
-            if (this.inited) this.fireEvent('value', this.getValue());
-        }
-    },
-    
-    getValue: function() {
-        return this.value;
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Combines a value filter with any existing value filter.
-        @param filter:function the value filter to add.
-        @param where:string (optional) Determines where to add the filter.
-            Supported values are 'first' and 'last'. Defaults to 'first'.
-        @returns void */
-    chainValueFilter: function(filter, where) {
-        var existingFilter = this.valueFilter, chainedFilter = filter;
-        if (existingFilter) {
-            if (where === 'last') {
-                chainedFilter = function(v) {return filter(existingFilter(v));};
-            } else if (where === 'first' || where == null) {
-                chainedFilter = function(v) {return existingFilter(filter(v));};
-            }
-        }
-        this.setValueFilter(chainedFilter);
-    }
-});
-
-
-/** Draws a checkbox into an myt.Canvas. */
-myt.CheckboxDrawingMethod = new JS.Class('CheckboxDrawingMethod', myt.DrawingMethod, {
-    // Constructor /////////////////////////////////////////////////////////////
-    initialize: function() {
-        this.__getTemplate = myt.memoize(this.__getTemplate);
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.DrawingMethod */
-    draw: function(canvas, config) {
-        canvas.clear();
-        canvas.drawImage(this.__getTemplate(config), 0, 0);
-    },
-    
-    /** @private */
-    __getTemplate: function(config) {
-        var m = myt, 
-            b = config.bounds, x = b.x, y = b.y, w = b.w, h = b.h,
-            shadowBlur         = config.shadowBlur == null ? 2 : config.shadowBlur,
-            shadowOffsetX      = config.shadowOffsetX == null ? 0 : config.shadowOffsetX,
-            shadowOffsetY      = config.shadowOffsetY == null ? 1 : config.shadowOffsetY,
-            radius             = config.radius == null ? 4 : config.radius,
-            shadowColor        = config.shadowColor == null ? 'rgba(0, 0, 0, 0.3)' : config.shadowColor,
-            focusedShadowColor = config.focusedShadowColor == null ? 'rgba(0, 0, 0, 0.5)' : config.focusedShadowColor,
-            fillColor          = config.fillColor,
-            focused            = config.focused,
-            inset              = config.edgeSize,
-            x2 = x + inset, 
-            y2 = y + inset,
-            w2 = w - 2*inset,
-            h2 = h - 2*inset,
-            darkColor = (m.Color.makeColorFromHexString(fillColor)).multiply(5/6),
-            DU = m.DrawingUtil;
-        
-        var canvas = new m.Canvas(m.global.roots.getRoots()[0], {
-            width:x + w + shadowOffsetX + shadowBlur, 
-            height:y + h + shadowOffsetY + shadowBlur, 
-            visible:false, 
-            ignoreLayout:true, 
-            ignorePlacement:true
-        });
-        var grd = canvas.createLinearGradient(x2, y2, x2, y2 + h2);
-        
-        // Border and shadow
-        canvas.save();
-        canvas.setShadowOffsetX(shadowOffsetX);
-        canvas.setShadowOffsetY(shadowOffsetY);
-        canvas.setShadowBlur(shadowBlur * (focused ? 2 : 1));
-        canvas.setShadowColor(focused ? focusedShadowColor : shadowColor);
-        
-        DU.drawRoundedRect(canvas, radius, 0, x, y, w, h);
-        canvas.setFillStyle(config.edgeColor);
-        canvas.fill();
-        canvas.restore();
-        
-        // Fill
-        DU.drawRoundedRect(canvas, radius - inset, 0, x2, y2, w2, h2);
-        grd.addColorStop(0, fillColor);
-        grd.addColorStop(1, darkColor.getHtmlHexString());
-        canvas.setFillStyle(grd);
-        canvas.fill();
-        
-        // Checkmark
-        if (config.checked) {
-            var path = new m.Path([
-                x2 + 2, y2 + 1/2 * h2,
-                x2 + 1/2 * w2, y2 + h2 - 2,
-                x + w + 3, y,
-                x2 + 1/2 * w2, y2 + h2 - 6,
-                x2 + 5, y2 + 1/2 * h2 - 2
-            ]);
-            path.drawInto(canvas);
-            canvas.setFillStyle(config.checkedColor);
-            canvas.fill();
-        }
-        
-        var retval = canvas.__canvas;
-        canvas.destroy();
-        return retval;
-    }
-});
-
-
-/** Mix onto a view to make it behave as a checkbox button. Use setValue to 
-    set the checked state of the checkbox.
-    
-    Requires:
-        Should be used on: myt.DrawButton or subclass thereof.
-    
-    Events:
-        None
-    
-    Attributes:
-        None
-*/
-myt.CheckboxMixin = new JS.Module('CheckboxMixin', {
-    include: [myt.ValueComponent, myt.CheckboxStyleMixin],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        if (attrs.value == null) attrs.value = false;
-        if (attrs.drawingMethodClassname == null) attrs.drawingMethodClassname = 'myt.CheckboxDrawingMethod';
-        
-        this.callSuper(parent, attrs);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrides myt.ValueComponent */
-    setValue: function(v) {
-        if (this.value !== v) {
-            this.callSuper(v);
-            
-            if (this.inited) this.redraw();
-        }
-    },
-    
-    /** @overrides myt.CheckboxStyleMixin */
-    getDrawConfig: function(state) {
-        var config = this.callSuper(state);
-        config.checked = this.value;
-        return config;
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.DrawButton
-        Toggle the value attribute when activated. */
-    doActivated: function() {
-        this.setValue(!this.value);
-    }
-});
-
-
-/** A checkbox component. */
-myt.Checkbox = new JS.Class('Checkbox', myt.DrawButton, {
-    include: [myt.CheckboxMixin]
-});
-
-
-/** A checkbox component with a text label. */
-myt.TextCheckbox = new JS.Class('TextCheckbox', myt.Checkbox, {
-    include: [myt.TextButtonContent],
-    
-    
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        /** Padding on the left and right side of the text. */
-        DEFAULT_PAD_X:2,
-        /** Padding above the text when in multiline mode (shrinkToFit == false) */
-        DEFAULT_MULTILINE_PAD_Y:4,
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    doAfterAdoption: function() {
-        var self = this,
-            TC = myt.TextCheckbox,
-            padX = TC.DEFAULT_PAD_X;
-        self.setInset(self.getIconExtentX() + padX);
-        self.setOutset(padX);
-        
-        if (!self.shrinkToFit) self.setTextY(TC.DEFAULT_MULTILINE_PAD_Y);
-        
-        self.callSuper();
-    }
-});
-
-
-/** Draws a radio button into an myt.Canvas. */
-myt.RadioDrawingMethod = new JS.Class('RadioDrawingMethod', myt.DrawingMethod, {
-    // Constructor /////////////////////////////////////////////////////////////
-    initialize: function() {
-        this.__getTemplate = myt.memoize(this.__getTemplate);
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.DrawingMethod */
-    draw: function(canvas, config) {
-        canvas.clear();
-        canvas.drawImage(this.__getTemplate(config), 0, 0);
-    },
-    
-    /** @private */
-    __getTemplate: function(config) {
-        var m = myt,
-            b = config.bounds, x = b.x, y = b.y, w = b.w, h = b.h,
-            shadowBlur         = config.shadowBlur == null ? 2 : config.shadowBlur,
-            shadowOffsetX      = config.shadowOffsetX == null ? 0 : config.shadowOffsetX,
-            shadowOffsetY      = config.shadowOffsetY == null ? 1 : config.shadowOffsetY,
-            shadowColor        = config.shadowColor == null ? 'rgba(0, 0, 0, 0.3)' : config.shadowColor,
-            focusedShadowColor = config.focusedShadowColor == null ? 'rgba(0, 0, 0, 0.5)' : config.focusedShadowColor,
-            fillColor          = config.fillColor,
-            focused            = config.focused,
-            inset              = config.edgeSize,
-            radius = w / 2,
-            radius2 = radius - inset,
-            dotRadius = (radius2 / 2) - 1,
-            centerX = x + radius,
-            centerY = y + radius,
-            darkColor = (m.Color.makeColorFromHexString(fillColor)).multiply(5/6);
-        
-        var canvas = new m.Canvas(m.global.roots.getRoots()[0], {
-            width:x + w + shadowOffsetX + shadowBlur, 
-            height:y + h + shadowOffsetY + shadowBlur, 
-            visible:false, 
-            ignoreLayout:true, 
-            ignorePlacement:true
-        });
-        var grd = canvas.createLinearGradient(x, y, x, y + w);
-        
-        // Border and shadow
-        canvas.save();
-        canvas.setShadowOffsetX(shadowOffsetX);
-        canvas.setShadowOffsetY(shadowOffsetY);
-        canvas.setShadowBlur(shadowBlur * (focused ? 2 : 1));
-        canvas.setShadowColor(focused ? focusedShadowColor : shadowColor);
-        
-        canvas.beginPath();
-        canvas.circle(centerX, centerY, radius);
-        canvas.closePath();
-        canvas.setFillStyle(config.edgeColor);
-        canvas.fill();
-        canvas.restore();
-        
-        // Fill
-        canvas.beginPath();
-        canvas.circle(centerX, centerY, radius2);
-        canvas.closePath();
-        grd.addColorStop(0, fillColor);
-        grd.addColorStop(1, darkColor.getHtmlHexString());
-        canvas.setFillStyle(grd);
-        canvas.fill();
-        
-        // Checkmark
-        if (config.checked) {
-            canvas.beginPath();
-            canvas.circle(centerX, centerY, dotRadius);
-            canvas.closePath();
-            canvas.setFillStyle(config.checkedColor);
-            canvas.fill();
-        }
-        
-        var retval = canvas.__canvas;
-        canvas.destroy();
-        return retval;
-    }
-});
-
-
 /** Provides the capability for a Node to participate in a BAG.
     
     Events:
@@ -13821,153 +13392,155 @@ myt.BAG = new JS.Class('BAG', {
 });
 
 
-/** Mix onto a view to make it behave as a radio button. Should be used
-    on an myt.DrawButton or subclass thereof.
-    
-    Events:
-        optionValue:* Fired when the optionValue changes.
-        selected:boolean Fired when a radio is selected/deselected.
-        groupId:string Fired when the groupId is changed.
-    
-    Attributes:
-        optionValue:* The value of this radio button within the radio group.
-        selected:boolean Indicates if this radio is selected or not.
-        groupId:string The radio group ID this radio is a member of.
-    
-    Private Attributes:
-        __initValue:* Holds the value if it is set during initialization until
-            the end of initialization so the group value can be updated.
-*/
-myt.RadioMixin = new JS.Module('RadioMixin', {
-    include: [myt.BAGMembership, myt.CheckboxStyleMixin],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides */
-    initNode: function(parent, attrs) {
-        if (attrs.selected == null) attrs.selected = false;
-        if (attrs.groupId == null) attrs.groupId = myt.generateGuid();
-        if (attrs.drawingMethodClassname == null) attrs.drawingMethodClassname = 'myt.RadioDrawingMethod';
+((pkg) => {
+    var BAGAttrName = 'selected',
         
-        this.callSuper(parent, attrs);
-        
-        if (this.__initValue !== undefined) {
-            this.__updateGroupValue(this.__initValue);
-            delete this.__initValue;
+        updateUI = (radio) => {
+            var label = radio.label || '';
+            radio.setText(
+                '<i class="far fa-' + (radio.selected === true ? 'dot-' : '') + 'circle"></i>' +
+                (label.length > 0 ? ' ' : '') + label
+            );
         }
         
-        if (this.selected) {
-            var bag = this.__getBAG();
-            if (bag) bag.setTrue(this);
-        }
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setOptionValue: function(v) {this.set('optionValue', v, true);},
-    
-    /** Sets the value of the radio group. Calling this method on any
-        radio button in the group should have the same effect. */
-    setValue: function(v) {
-        if (this.inited) {
-            this.__updateGroupValue(v);
-        } else {
-            this.__initValue = v;
-        }
-    },
-    
-    /** Gets the value of the 'selected' radio button in the group.
-        @returns *: The value of the selected radio button. */
-    getValue: function() {
-        // Get selected radio
-        var bag = this.__getBAG(),
-            selectedRadio = bag ? bag.trueNode : null;
-        return selectedRadio ? selectedRadio.optionValue : null;
-    },
-    
-    setSelected: function(v) {
-        if (this.selected !== v) {
-            this.selected = v;
-            if (this.inited) {
-                this.fireEvent('selected', v);
-                this.redraw();
-            }
-        }
-    },
-    
-    setGroupId: function(v) {
-        if (this.groupId !== v) {
-            var oldGroupId = this.groupId;
-            this.groupId = v;
-            if (oldGroupId) this.removeFromBAG('selected', oldGroupId);
-            if (v) this.addToBAG('selected', v);
-            if (this.inited) this.fireEvent('groupId', v);
-        }
-    },
-    
-    /** @overrides myt.CheckboxStyleMixin */
-    getDrawConfig: function(state) {
-        var config = this.callSuper(state);
-        config.checked = this.selected;
-        return config;
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.DrawButton */
-    doActivated: function() {
-        if (!this.selected) this.setValue(this.optionValue);
-    },
-    
-    /** @private */
-    __getBAG: function() {
-        return this.getBAG('selected', this.groupId);
-    },
-    
-    /** Search the radio group for a matching node and make that one the
-        true node.
-        @private */
-    __updateGroupValue: function(v) {
-        var bag = this.__getBAG();
-        if (bag) {
-            var nodes = bag.getNodes(), i = nodes.length, node;
-            while (i) {
-                node = nodes[--i];
-                if (node.optionValue === v) {
-                    bag.setTrue(node);
-                    break;
+        /** Search the radio group for a matching node and make that one the
+            true node. */
+        updateGroupValue = (radio, value) => {
+            var bag = getBooleanAttributeGroup(radio);
+            if (bag) {
+                var nodes = bag.getNodes(), 
+                    i = nodes.length, 
+                    node;
+                while (i) {
+                    node = nodes[--i];
+                    if (node.optionValue === value) {
+                        bag.setTrue(node);
+                        break;
+                    }
                 }
             }
+        },
+        
+        getBooleanAttributeGroup = (radio) => radio.getBAG(BAGAttrName, radio.groupId);
+    
+    /** A radio component.
+        
+        Attributes:
+            label:string
+            radioStyle:string Determines what style of radio to display.
+                Supported values are "solid" and "outline".
+    */
+    pkg.Radio = new JS.Class('Radio', pkg.Text, {
+        include: [pkg.SimpleButtonStyle, pkg.BAGMembership],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            if (attrs.selected == null) attrs.selected = false;
+            if (attrs.groupId == null) attrs.groupId = pkg.generateGuid();
+            if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
+            
+            if (attrs.activeColor == null) attrs.activeColor = 'inherits';
+            if (attrs.hoverColor == null) attrs.hoverColor = 'inherits';
+            if (attrs.readyColor == null) attrs.readyColor = 'inherits';
+            
+            var value = attrs.value;
+            delete attrs.value;
+            
+            this.callSuper(parent, attrs);
+            
+            this.setValue(value);
+            
+            if (this.selected) {
+                var bag = getBooleanAttributeGroup(this);
+                if (bag) bag.setTrue(this);
+            }
+            
+            pkg.FontAwesome.registerForNotification(this);
+            
+            updateUI(this);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setOptionValue: function(v) {
+            this.set('optionValue', v, true);
+        },
+        
+        /** Sets the value of the radio group. Calling this method on any
+            radio button in the group should have the same effect. */
+        setValue: function(v) {
+            if (this.inited) updateGroupValue(this, v);
+        },
+        
+        /** Gets the value of the 'selected' radio button in the group.
+            @returns *: The value of the selected radio button. */
+        getValue: function() {
+            // Get selected radio
+            var bag = getBooleanAttributeGroup(this),
+                selectedRadio = bag ? bag.trueNode : null;
+            return selectedRadio ? selectedRadio.optionValue : null;
+        },
+        
+        setSelected: function(v) {
+            if (this.selected !== v) {
+                this.selected = v;
+                if (this.inited) {
+                    this.fireEvent(BAGAttrName, v);
+                    updateUI(this);
+                }
+            }
+        },
+    
+        setGroupId: function(v) {
+            if (this.groupId !== v) {
+                var oldGroupId = this.groupId;
+                this.groupId = v;
+                if (oldGroupId) this.removeFromBAG(BAGAttrName, oldGroupId);
+                if (v) this.addToBAG(BAGAttrName, v);
+                if (this.inited) this.fireEvent('groupId', v);
+            }
+        },
+        
+        setLabel: function(v) {
+            if (this.label !== v) {
+                this.set('label', v, true);
+                if (this.inited) updateUI(this);
+            }
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides myt.Button */
+        doActivated: function() {
+            if (!this.selected) this.setValue(this.optionValue);
+        },
+        
+        /** @overrides myt.SimpleButtonStyle */
+        drawDisabledState: function() {
+            this.setOpacity(pkg.Button.DEFAULT_DISABLED_OPACITY);
+            this.setTextColor(this.readyColor);
+        },
+        
+        /** @overrides myt.SimpleButtonStyle */
+        drawHoverState: function() {
+            this.setOpacity(1);
+            this.setTextColor(this.hoverColor);
+        },
+        
+        /** @overrides myt.SimpleButtonStyle */
+        drawActiveState: function() {
+            this.setOpacity(1);
+            this.setTextColor(this.activeColor);
+        },
+        
+        /** @overrides myt.SimpleButtonStyle */
+        drawReadyState: function() {
+            this.setOpacity(1);
+            this.setTextColor(this.readyColor);
         }
-    }
-});
-
-
-/** A radio button component. */
-myt.Radio = new JS.Class('Radio', myt.DrawButton, {
-    include: [myt.RadioMixin]
-});
-
-
-/** A radio button component with a text label. */
-myt.TextRadio = new JS.Class('TextRadio', myt.Radio, {
-    include: [myt.TextButtonContent],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    doAfterAdoption: function() {
-        var self = this,
-            TC = myt.TextCheckbox,
-            padX = TC.DEFAULT_PAD_X;
-        
-        self.setInset(self.getIconExtentX() + padX);
-        self.setOutset(padX);
-        
-        if (!self.shrinkToFit) self.setTextY(TC.DEFAULT_MULTILINE_PAD_Y);
-        
-        self.callSuper();
-    }
-});
+    });
+})(myt);
 
 
 /** Makes an object selectable.
@@ -14404,273 +13977,276 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
 });
 
 
-/** A tab slider component.
-    
-    Events:
-        expansionState:string Fired when the tab slider changes expansion state.
-    
-    Attributes:
-        tabId:string The unique ID for this tab slider relative to the
-            tab slider container that manages this tab slider.
-        tabContainer:myt.TabSliderContainer The tab slider container that 
-            manages this tab.
-        buttonClass:JS.Class The class to use for the button portion of the
-            tab slider. Defaults to myt.SimpleButton.
-        fillColorSelected:color The color of the button when selected.
-        fillColorHover:color The color of the button when moused over.
-        fillColorActive:color The color of the button while active.
-        fillColorReady:color The color of the button when ready for interaction.
-        buttonHeight:number The height of the button portion of the tab slider.
-            Defaults to myt.TabSlider.DEFAULT_BUTTON_HEIGHT which is 30.
-        minContainerHeight:number The minimum height of the content container
-            inside this tab slider. Defaults to 
-            myt.TabSlider.DEFAULT_MINIMUM_CONTAINER_HEIGHT which is 100.
-        expansionState:string Indicates the expansion state of the tab slider.
-            Supported values are: 'expanded', 'expanding', 'collapsed' and
-            'collapsing'. Defaults to 'collapsed'.
-*/
-myt.TabSlider = new JS.Class('TabSlider', myt.View, {
-    include: [myt.Selectable, myt.Disableable, myt.SizeToParent],
-    
-    
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        DEFAULT_BUTTON_HEIGHT:30,
-        /** The minimum height of the container when expanded. */
-        DEFAULT_MINIMUM_CONTAINER_HEIGHT:100,
-        DEFAULT_FILL_COLOR_SELECTED:'#666666',
-        DEFAULT_FILL_COLOR_HOVER:'#eeeeee',
-        DEFAULT_FILL_COLOR_ACTIVE:'#cccccc',
-        DEFAULT_FILL_COLOR_READY:'#ffffff',
-        DEFAULT_ANIMATION_MILLIS:500
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Checkbox */
-    initNode: function(parent, attrs) {
-        var self = this,
-            TS = myt.TabSlider,
-            initiallySelected;
+((pkg) => {
+    /** A tab slider component.
         
-        attrs.defaultPlacement = 'wrapper.container';
-        attrs.percentOfParentWidth = 100;
-        attrs.expansionState = 'collapsed';
+        Events:
+            expansionState:string Fired when the tab slider changes expansion state.
         
-        if (attrs.tabId == null) attrs.tabId = myt.generateGuid();
-        if (attrs.tabContainer == null) attrs.tabContainer = parent;
+        Attributes:
+            tabId:string The unique ID for this tab slider relative to the
+                tab slider container that manages this tab slider.
+            tabContainer:myt.TabSliderContainer The tab slider container that 
+                manages this tab.
+            buttonClass:JS.Class The class to use for the button portion of the
+                tab slider. Defaults to myt.SimpleButton.
+            fillColorSelected:color The color of the button when selected.
+            fillColorHover:color The color of the button when moused over.
+            fillColorActive:color The color of the button while active.
+            fillColorReady:color The color of the button when ready for interaction.
+            buttonHeight:number The height of the button portion of the tab slider.
+                Defaults to myt.TabSlider.DEFAULT_BUTTON_HEIGHT which is 30.
+            minContainerHeight:number The minimum height of the content container
+                inside this tab slider. Defaults to 
+                myt.TabSlider.DEFAULT_MINIMUM_CONTAINER_HEIGHT which is 100.
+            expansionState:string Indicates the expansion state of the tab slider.
+                Supported values are: 'expanded', 'expanding', 'collapsed' and
+                'collapsing'. Defaults to 'collapsed'.
+    */
+    var TabSlider = pkg.TabSlider = new JS.Class('TabSlider', pkg.View, {
+        include: [pkg.Selectable, pkg.Disableable, pkg.SizeToParent],
         
-        if (attrs.selected == null) attrs.selected = false;
-        if (attrs.buttonClass == null) attrs.buttonClass = myt.SimpleButton;
-        if (attrs.zIndex == null) attrs.zIndex = 0;
         
-        if (attrs.buttonHeight == null) attrs.buttonHeight = TS.DEFAULT_BUTTON_HEIGHT;
-        if (attrs.fillColorSelected == null) attrs.fillColorSelected = TS.DEFAULT_FILL_COLOR_SELECTED;
-        if (attrs.fillColorHover == null) attrs.fillColorHover = TS.DEFAULT_FILL_COLOR_HOVER;
-        if (attrs.fillColorActive == null) attrs.fillColorActive = TS.DEFAULT_FILL_COLOR_ACTIVE;
-        if (attrs.fillColorReady == null) attrs.fillColorReady = TS.DEFAULT_FILL_COLOR_READY;
-        if (attrs.minContainerHeight == null) attrs.minContainerHeight = TS.DEFAULT_MINIMUM_CONTAINER_HEIGHT;
+        // Class Methods and Attributes ////////////////////////////////////////
+        extend: {
+            DEFAULT_BUTTON_HEIGHT:30,
+            /** The minimum height of the container when expanded. */
+            DEFAULT_MINIMUM_CONTAINER_HEIGHT:100,
+            DEFAULT_FILL_COLOR_SELECTED:'#666666',
+            DEFAULT_FILL_COLOR_HOVER:'#eeeeee',
+            DEFAULT_FILL_COLOR_ACTIVE:'#cccccc',
+            DEFAULT_FILL_COLOR_READY:'#ffffff',
+            DEFAULT_ANIMATION_MILLIS:500
+        },
         
-        // Selection must be done via the select method on the tabContainer
-        if (attrs.selected) {
-            initiallySelected = true;
-            delete attrs.selected;
-        }
         
-        self.callSuper(parent, attrs);
+        // Life Cycle //////////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            var self = this,
+                initiallySelected;
+            
+            attrs.defaultPlacement = 'wrapper.container';
+            attrs.percentOfParentWidth = 100;
+            attrs.expansionState = 'collapsed';
+            
+            if (attrs.tabId == null) attrs.tabId = pkg.generateGuid();
+            if (attrs.tabContainer == null) attrs.tabContainer = parent;
+            
+            if (attrs.selected == null) attrs.selected = false;
+            if (attrs.buttonClass == null) attrs.buttonClass = pkg.SimpleButton;
+            if (attrs.zIndex == null) attrs.zIndex = 0;
+            
+            if (attrs.buttonHeight == null) attrs.buttonHeight = TabSlider.DEFAULT_BUTTON_HEIGHT;
+            if (attrs.fillColorSelected == null) attrs.fillColorSelected = TabSlider.DEFAULT_FILL_COLOR_SELECTED;
+            if (attrs.fillColorHover == null) attrs.fillColorHover = TabSlider.DEFAULT_FILL_COLOR_HOVER;
+            if (attrs.fillColorActive == null) attrs.fillColorActive = TabSlider.DEFAULT_FILL_COLOR_ACTIVE;
+            if (attrs.fillColorReady == null) attrs.fillColorReady = TabSlider.DEFAULT_FILL_COLOR_READY;
+            if (attrs.minContainerHeight == null) attrs.minContainerHeight = TabSlider.DEFAULT_MINIMUM_CONTAINER_HEIGHT;
+            
+            // Selection must be done via the select method on the tabContainer
+            if (attrs.selected) {
+                initiallySelected = true;
+                delete attrs.selected;
+            }
+            
+            self.callSuper(parent, attrs);
+            
+            if (initiallySelected) self.tabContainer.select(self);
+            if (attrs.disabled === true) self.setDisabled(true);
+            
+            self.setHeight(self.getCollapsedHeight());
+        },
         
-        if (initiallySelected) self.tabContainer.select(self);
-        if (attrs.disabled === true) self.setDisabled(true);
-        
-        self.setHeight(self.getCollapsedHeight());
-    },
-    
-    doAfterAdoption: function() {
-        var self = this, 
-            M = myt
-            V = M.View;
-        new self.buttonClass(self, {
-            name:'button', ignorePlacement:true, zIndex:1,
-            height:self.buttonHeight,
-            focusEmbellishment:true,
-            groupId:self.parent.parent.groupId,
-            percentOfParentWidth:100,
-            hoverColor:self.fillColorHover,
-            activeColor:self.fillColorActive,
-            readyColor:self.fillColorReady
-        }, [M.SizeToParent, {
-            /** @overrides myt.Button */
-            doActivated: function() {
-                var tc = self.tabContainer;
-                if (self.isSelected() && tc.maxSelected !== 1) {
-                    tc.deselect(self);
-                } else {
-                    tc.select(self);
+        doAfterAdoption: function() {
+            var self = this,
+                View = pkg.View,
+                SizeToParent = pkg.SizeToParent,
+                wrapper,
+                container;
+            
+            new self.buttonClass(self, {
+                name:'button', ignorePlacement:true, zIndex:1,
+                height:self.buttonHeight,
+                focusEmbellishment:true,
+                groupId:self.parent.parent.groupId,
+                percentOfParentWidth:100,
+                hoverColor:self.fillColorHover,
+                activeColor:self.fillColorActive,
+                readyColor:self.fillColorReady
+            }, [SizeToParent, {
+                /** @overrides myt.Button */
+                doActivated: function() {
+                    var tc = self.tabContainer;
+                    if (self.isSelected() && tc.maxSelected !== 1) {
+                        tc.deselect(self);
+                    } else {
+                        tc.select(self);
+                    }
+                },
+                
+                /** @overrides myt.Button. */
+                updateUI: function() {
+                    this.callSuper();
+                    if (self.selected && self.tabContainer.maxSelected !== -1) this.setBgColor(self.fillColorSelected);
+                    self.notifyButtonRedraw();
                 }
-            },
+            }]);
             
-            /** @overrides myt.Button. */
-            updateUI: function() {
-                this.callSuper();
-                if (self.selected && self.tabContainer.maxSelected !== -1) this.setBgColor(self.fillColorSelected);
-                self.notifyButtonRedraw();
-            }
-        }]);
-        
-        var wrapper = new V(self, {
-            name:'wrapper', ignorePlacement:true,
-            y:self.buttonHeight, height:0,
-            visible:false, maskFocus:true,
-            overflow:'hidden', percentOfParentWidth:100
-        }, [M.SizeToParent, {
-            setHeight: function(v, supressEvent) {
-                this.callSuper(Math.round(v), supressEvent);
-            },
-            setWidth: function(v, supressEvent) {
-                this.callSuper(v, supressEvent);
-                if (this.inited) this.container.setWidth(v);
-            }
-        }]);
-        
-        var container = new V(wrapper, {name:'container'});
-        new M.SizeToChildren(container, {axis:'y'});
-        
-        self.constrain('__updateHeight', [wrapper, 'y', wrapper, 'height']);
-        
-        self.callSuper();
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrides myt.Selectable */
-    setSelected: function(v) {
-        this.callSuper(v);
-        if (this.button) this.button.updateUI();
-    },
-    
-    setTabId: function(v) {this.tabId = v;},
-    setTabContainer: function(v) {this.tabContainer = v;},
-    
-    setMinContainerHeight: function(v) {this.minContainerHeight = v;},
-    setButtonClass: function(v) {this.buttonClass = v;},
-    setFillColorSelected: function(v) {this.fillColorSelected = v;},
-    setFillColorHover: function(v) {this.fillColorHover = v;},
-    setFillColorActive: function(v) {this.fillColorActive = v;},
-    setFillColorReady: function(v) {this.fillColorReady = v;},
-    
-    setButtonHeight: function(v) {
-        if (this.buttonHeight !== v) {
-            this.buttonHeight = v;
-            if (this.button) {
-                this.button.setHeight(v);
-                this.wrapper.setY(v);
-            }
-        }
-    },
-    
-    setExpansionState: function(v) {
-        if (this.expansionState !== v) {
-            this.expansionState = v;
-            if (this.inited) this.fireEvent('expansionState', v);
+            wrapper = new View(self, {
+                name:'wrapper', ignorePlacement:true,
+                y:self.buttonHeight, height:0,
+                visible:false, maskFocus:true,
+                overflow:'hidden', percentOfParentWidth:100
+            }, [SizeToParent, {
+                setHeight: function(v, supressEvent) {
+                    this.callSuper(Math.round(v), supressEvent);
+                },
+                setWidth: function(v, supressEvent) {
+                    this.callSuper(v, supressEvent);
+                    if (this.inited) this.container.setWidth(v);
+                }
+            }]);
             
-            var wrapper = this.wrapper;
-            if (wrapper) {
-                if (v === 'expanded') {
-                    wrapper.setMaskFocus(false);
-                    wrapper.setOverflow('auto');
-                } else if (v === 'expanding') {
-                    wrapper.setVisible(true);
-                } else if (v === 'collapsed') {
-                    wrapper.setVisible(false);
-                } else if (v === 'collapsing') {
-                    wrapper.setMaskFocus(true);
-                    wrapper.setOverflow('hidden');
+            container = new View(wrapper, {name:'container'});
+            new pkg.SizeToChildren(container, {axis:'y'});
+            
+            self.constrain('__updateHeight', [wrapper, 'y', wrapper, 'height']);
+            
+            self.callSuper();
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** @overrides myt.Selectable */
+        setSelected: function(v) {
+            this.callSuper(v);
+            if (this.button) this.button.updateUI();
+        },
+        
+        setTabId: function(v) {this.tabId = v;},
+        setTabContainer: function(v) {this.tabContainer = v;},
+        
+        setMinContainerHeight: function(v) {this.minContainerHeight = v;},
+        setButtonClass: function(v) {this.buttonClass = v;},
+        setFillColorSelected: function(v) {this.fillColorSelected = v;},
+        setFillColorHover: function(v) {this.fillColorHover = v;},
+        setFillColorActive: function(v) {this.fillColorActive = v;},
+        setFillColorReady: function(v) {this.fillColorReady = v;},
+        
+        setButtonHeight: function(v) {
+            if (this.buttonHeight !== v) {
+                this.buttonHeight = v;
+                if (this.button) {
+                    this.button.setHeight(v);
+                    this.wrapper.setY(v);
                 }
             }
+        },
+        
+        setExpansionState: function(v) {
+            if (this.expansionState !== v) {
+                this.expansionState = v;
+                if (this.inited) this.fireEvent('expansionState', v);
+                
+                var wrapper = this.wrapper;
+                if (wrapper) {
+                    if (v === 'expanded') {
+                        wrapper.setMaskFocus(false);
+                        wrapper.setOverflow('auto');
+                    } else if (v === 'expanding') {
+                        wrapper.setVisible(true);
+                    } else if (v === 'collapsed') {
+                        wrapper.setVisible(false);
+                    } else if (v === 'collapsing') {
+                        wrapper.setMaskFocus(true);
+                        wrapper.setOverflow('hidden');
+                    }
+                }
+            }
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides myt.Disableable */
+        doDisabled: function() {
+            var btn = this.button;
+            if (btn) btn.setDisabled(this.disabled);
+        },
+        
+        /** Called whenever the button is redrawn. Gives subclasses/instances
+            a chance to do additional things when the button is redrawn.
+            @returns void */
+        notifyButtonRedraw: () => {},
+        
+        /** @private */
+        __updateHeight: function(event) {
+            this.setHeight(this.wrapper.y + this.wrapper.height);
+        },
+        
+        /** Should only be called from the TabSliderContainer.
+            @private */
+        expand: function(targetHeight) {
+            var self = this,
+                wrapper = self.wrapper,
+                to = targetHeight - self.getCollapsedHeight();
+            
+            self.setExpansionState('expanding');
+            
+            wrapper.stopActiveAnimators();
+            
+            if (wrapper.height !== to) {
+                wrapper.animate({
+                    attribute:'height', to:to, 
+                    duration:TabSlider.DEFAULT_ANIMATION_MILLIS
+                }).next((success) => {self.setExpansionState('expanded');});
+            } else {
+                self.setExpansionState('expanded');
+            }
+        },
+        
+        /** Should only be called from the TabSliderContainer.
+            @private */
+        collapse: function() {
+            var self = this,
+                wrapper = self.wrapper;
+            
+            self.setExpansionState('collapsing');
+            
+            wrapper.stopActiveAnimators();
+            
+            if (wrapper.height !== 0) {
+                wrapper.animate({
+                    attribute:'height', to:0, 
+                    duration:TabSlider.DEFAULT_ANIMATION_MILLIS
+                }).next((success) => {self.setExpansionState('collapsed');});
+            } else {
+                self.setExpansionState('collapsed');
+            }
+        },
+        
+        /** Gets the height of the tab slider when it is collapsed. Will be the
+            height of the button portion of the tab slider.
+            @returns number */
+        getCollapsedHeight: function() {
+            return this.buttonHeight;
+        },
+        
+        /** Gets the minimum height. Will be the smaller of the preferred height
+            or the buttonHeight + minContainerHeight. Thus, if the content is
+            smaller than the minContainerHeight extra space will not be shown.
+            @returns number */
+        getMinimumExpandedHeight: function() {
+            return Math.min(this.getPreferredExpandedHeight(), this.buttonHeight + this.minContainerHeight);
+        },
+        
+        /** Gets the preferred height that would allow the container to be shown
+            without vertical scrollbars.
+            @returns number */
+        getPreferredExpandedHeight: function() {
+            return this.buttonHeight + this.wrapper.container.height;
         }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.Disableable */
-    doDisabled: function() {
-        var btn = this.button;
-        if (btn) btn.setDisabled(this.disabled);
-    },
-    
-    /** Called whenever the button is redrawn. Gives subclasses/instances
-        a chance to do additional things when the button is redrawn.
-        @returns void */
-    notifyButtonRedraw: function() {},
-    
-    /** @private */
-    __updateHeight: function(event) {
-        this.setHeight(this.wrapper.y + this.wrapper.height);
-    },
-    
-    /** Should only be called from the TabSliderContainer.
-        @private */
-    expand: function(targetHeight) {
-        var self = this,
-            wrapper = self.wrapper,
-            to = targetHeight - self.getCollapsedHeight();
-        
-        self.setExpansionState('expanding');
-        
-        wrapper.stopActiveAnimators();
-        
-        if (wrapper.height !== to) {
-            wrapper.animate({
-                attribute:'height', to:to, 
-                duration:myt.TabSlider.DEFAULT_ANIMATION_MILLIS
-            }).next(function(success) {self.setExpansionState('expanded');});
-        } else {
-            self.setExpansionState('expanded');
-        }
-    },
-    
-    /** Should only be called from the TabSliderContainer.
-        @private */
-    collapse: function() {
-        this.setExpansionState('collapsing');
-        
-        var wrapper = this.wrapper;
-        
-        wrapper.stopActiveAnimators();
-        
-        if (wrapper.height !== 0) {
-            var self = this;
-            wrapper.animate({
-                attribute:'height', to:0, 
-                duration:myt.TabSlider.DEFAULT_ANIMATION_MILLIS
-            }).next(function(success) {self.setExpansionState('collapsed');});
-        } else {
-            this.setExpansionState('collapsed');
-        }
-    },
-    
-    /** Gets the height of the tab slider when it is collapsed. Will be the
-        height of the button portion of the tab slider.
-        @returns number */
-    getCollapsedHeight: function() {
-        return this.buttonHeight;
-    },
-    
-    /** Gets the minimum height. Will be the smaller of the preferred height
-        or the buttonHeight + minContainerHeight. Thus, if the content is
-        smaller than the minContainerHeight extra space will not be shown.
-        @returns number */
-    getMinimumExpandedHeight: function() {
-        return Math.min(this.getPreferredExpandedHeight(), this.buttonHeight + this.minContainerHeight);
-    },
-    
-    /** Gets the preferred height that would allow the container to be shown
-        without vertical scrollbars.
-        @returns number */
-    getPreferredExpandedHeight: function() {
-        return this.buttonHeight + this.wrapper.container.height;
-    }
-});
+    });
+})(myt);
 
 
 /** A tab slider with a text label.
@@ -19854,91 +19430,251 @@ myt.FormInputSelect = new JS.Class('FormInputSelect', myt.InputSelect, {
 });
 
 
-/** Monitors a radio button group for a form.
+/** Provides a setValue and getValue method.
     
     Events:
-        None
+        value:*
     
     Attributes:
-        groupId:string The ID of the radio group to monitor.
+        value:* The stored value.
+        valueFilter:function If it exists, values will be run through this
+            filter function before being set on the component. By default
+            no valueFilter exists. A value filter function must take a 
+            single value as an argument and return a value.
 */
-myt.FormRadioGroup = new JS.Class('FormRadioGroup', myt.Node, {
-    include: [myt.ValueComponent, myt.FormElement],
-    
-    
+myt.ValueComponent = new JS.Module('ValueComponent', {
     // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides */
     initNode: function(parent, attrs) {
-        if (attrs.groupId == null) attrs.groupId = myt.generateGuid();
-        
+        this.appendToEarlyAttrs('valueFilter','value');
         this.callSuper(parent, attrs);
-        
-        if (this.value !== undefined) this.__updateGroupValue();
-        this.__startMonitoring();
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrides myt.FormElement */
-    setValue: function(v) {
-        var retval = this.callSuper(v);
-        if (this.inited) this.__updateGroupValue();
-        return retval;
+    setValueFilter: function(v) {
+        this.valueFilter = v;
+        
+        if (this.inited && v) this.setValue(this.value);
     },
     
-    setGroupId: function(v) {
-        if (this.groupId !== v) {
-            this.__stopMonitoring();
-            this.groupId = v;
-            if (this.inited) this.__startMonitoring();
+    setValue: function(v) {
+        if (this.valueFilter) v = this.valueFilter(v);
+        
+        if (this.value !== v) {
+            this.value = v;
+            if (this.inited) this.fireEvent('value', this.getValue());
         }
+    },
+    
+    getValue: function() {
+        return this.value;
     },
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
-    __startMonitoring: function() {
-        if (this.groupId) {
-            var bag = this.__getBAG();
-            if (bag) this.syncTo(bag, '__syncValue', 'trueNode');
-        }
-    },
-    
-    /** @private */
-    __stopMonitoring: function() {
-        if (this.groupId) {
-            var bag = this.__getBAG();
-            if (bag) this.detachFrom(bag, '__syncValue', 'trueNode');
-        }
-    },
-    
-    /** @private */
-    __syncValue: function(event) {
-        this.setValue(event.value ? event.value.optionValue : null);
-    },
-    
-    /** Search the radio group for a matching node and make that one the
-        true node.
-        @private */
-    __updateGroupValue: function() {
-        var bag = this.__getBAG();
-        if (bag) {
-            var nodes = bag.getNodes(), i = nodes.length, node, v = this.value;
-            while (i) {
-                node = nodes[--i];
-                if (node.optionValue === v) {
-                    bag.setTrue(node);
-                    break;
-                }
+    /** Combines a value filter with any existing value filter.
+        @param filter:function the value filter to add.
+        @param where:string (optional) Determines where to add the filter.
+            Supported values are 'first' and 'last'. Defaults to 'first'.
+        @returns void */
+    chainValueFilter: function(filter, where) {
+        var existingFilter = this.valueFilter, chainedFilter = filter;
+        if (existingFilter) {
+            if (where === 'last') {
+                chainedFilter = function(v) {return filter(existingFilter(v));};
+            } else if (where === 'first' || where == null) {
+                chainedFilter = function(v) {return existingFilter(filter(v));};
             }
         }
-    },
-    
-    /** @private */
-    __getBAG: function() {
-        return myt.BAG.getGroup('selected', this.groupId);
+        this.setValueFilter(chainedFilter);
     }
 });
+
+
+((pkg) => {
+    var getBooleanAttributeGroup = (formRadioGroup) => pkg.BAG.getGroup('selected', formRadioGroup.groupId),
+        
+        /** Search the radio group for a matching node and make that one the
+            true node. */
+        updateGroupValue = (formRadioGroup) => {
+            var bag = getBooleanAttributeGroup(formRadioGroup);
+            if (bag) {
+                var nodes = bag.getNodes(), 
+                    i = nodes.length, 
+                    node, 
+                    v = formRadioGroup.value;
+                while (i) {
+                    node = nodes[--i];
+                    if (node.optionValue === v) {
+                        bag.setTrue(node);
+                        break;
+                    }
+                }
+            }
+        },
+        
+        startMonitoring = (formRadioGroup) => {
+            if (formRadioGroup.groupId) {
+                var bag = getBooleanAttributeGroup(formRadioGroup);
+                if (bag) formRadioGroup.syncTo(bag, '__syncValue', 'trueNode');
+            }
+        },
+        
+        stopMonitoring = (formRadioGroup) => {
+            if (formRadioGroup.groupId) {
+                var bag = getBooleanAttributeGroup(formRadioGroup);
+                if (bag) formRadioGroup.detachFrom(bag, '__syncValue', 'trueNode');
+            }
+        };
+    
+    /** Monitors a radio button group for a form.
+        
+        Attributes:
+            groupId:string The ID of the radio group to monitor.
+    */
+    pkg.FormRadioGroup = new JS.Class('FormRadioGroup', pkg.Node, {
+        include: [pkg.ValueComponent, pkg.FormElement],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides */
+        initNode: function(parent, attrs) {
+            if (attrs.groupId == null) attrs.groupId = pkg.generateGuid();
+            
+            this.callSuper(parent, attrs);
+            
+            if (this.value !== undefined) updateGroupValue(this);
+            startMonitoring(this);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** @overrides myt.FormElement */
+        setValue: function(v) {
+            var retval = this.callSuper(v);
+            if (this.inited) updateGroupValue(this);
+            return retval;
+        },
+        
+        setGroupId: function(v) {
+            if (this.groupId !== v) {
+                stopMonitoring(this);
+                this.groupId = v;
+                if (this.inited) startMonitoring(this);
+            }
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @private */
+        __syncValue: function(event) {
+            this.setValue(event.value ? event.value.optionValue : null);
+        }
+    });
+})(myt);
+
+
+((pkg) => {
+    var STYLE_SOLID = 'solid',
+        STYLE_OUTLINE = 'outline',
+        DEFAULT_STYLE = STYLE_OUTLINE,
+        
+        updateUI = (checkbox) => {
+            var label = checkbox.label || '',
+                checkboxStyle = checkbox.checkboxStyle || DEFAULT_STYLE;
+            checkbox.setText(
+                '<i class="' + 
+                (checkboxStyle === STYLE_SOLID ? 'fas' : 'far') + 
+                ' fa-' + (checkbox.value === true ? 'check-' : '') + 'square"></i>' +
+                (label.length > 0 ? ' ' : '') + label
+            );
+        };
+    
+    /** A checkbox component.
+        
+        Attributes:
+            label:string
+            checkboxStyle:string Determines what style of checkbox to display.
+                Supported values are "solid" and "outline".
+    */
+    pkg.Checkbox = new JS.Class('Checkbox', pkg.Text, {
+        include: [pkg.SimpleButtonStyle, pkg.ValueComponent],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            if (attrs.value == null) attrs.value = false;
+            if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
+            if (attrs.checkboxStyle == null) attrs.checkboxStyle = DEFAULT_STYLE;
+            
+            if (attrs.activeColor == null) attrs.activeColor = 'inherits';
+            if (attrs.hoverColor == null) attrs.hoverColor = 'inherits';
+            if (attrs.readyColor == null) attrs.readyColor = 'inherits';
+            
+            this.callSuper(parent, attrs);
+            
+            pkg.FontAwesome.registerForNotification(this);
+            
+            updateUI(this);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** @overrides myt.ValueComponent */
+        setValue: function(v) {
+            if (this.value !== v) {
+                this.callSuper(v);
+                if (this.inited) updateUI(this);
+            }
+        },
+        
+        setLabel: function(v) {
+            if (this.label !== v) {
+                this.set('label', v, true);
+                if (this.inited) updateUI(this);
+            }
+        },
+        
+        setCheckboxStyle: function(v) {
+            if (this.checkboxStyle !== v) {
+                this.set('checkboxStyle', v, true);
+                if (this.inited) updateUI(this);
+            }
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides myt.Button
+            Toggle the value attribute when activated. */
+        doActivated: function() {
+            this.setValue(!this.value);
+        },
+        
+        /** @overrides myt.SimpleButtonStyle */
+        drawDisabledState: function() {
+            this.setOpacity(pkg.Button.DEFAULT_DISABLED_OPACITY);
+            this.setTextColor(this.readyColor);
+        },
+        
+        /** @overrides myt.SimpleButtonStyle */
+        drawHoverState: function() {
+            this.setOpacity(1);
+            this.setTextColor(this.hoverColor);
+        },
+        
+        /** @overrides myt.SimpleButtonStyle */
+        drawActiveState: function() {
+            this.setOpacity(1);
+            this.setTextColor(this.activeColor);
+        },
+        
+        /** @overrides myt.SimpleButtonStyle */
+        drawReadyState: function() {
+            this.setOpacity(1);
+            this.setTextColor(this.readyColor);
+        }
+    });
+})(myt);
 
 
 /** An myt.Checkbox that is also a FormElement.
@@ -19950,28 +19686,6 @@ myt.FormRadioGroup = new JS.Class('FormRadioGroup', myt.Node, {
         None
 */
 myt.FormCheckbox = new JS.Class('FormCheckbox', myt.Checkbox, {
-    include: [myt.FormElement],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides */
-    initNode: function(parent, attrs) {
-        this.rollbackValue = this.defaultValue = false;
-        
-        this.callSuper(parent, attrs);
-    }
-});
-
-
-/** An myt.TextCheckbox that is also a FormElement.
-    
-    Events:
-        None
-    
-    Attributes:
-        None
-*/
-myt.FormTextCheckbox = new JS.Class('FormTextCheckbox', myt.TextCheckbox, {
     include: [myt.FormElement],
     
     
@@ -21538,7 +21252,6 @@ myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Checkbox */
     initNode: function(parent, attrs) {
         if (attrs.width == null) attrs.width = parent.thumbWidth;
         if (attrs.height == null) attrs.height = parent.thumbHeight;
@@ -21995,7 +21708,6 @@ myt.BoundedRangeComponent = new JS.Module('BoundedRangeComponent', {
 /** A simple implementation of the range fill for a RangeSlider. */
 myt.SimpleSliderRangeFill = new JS.Class('SimpleSliderRangeFill', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Checkbox */
     initNode: function(parent, attrs) {
         if (attrs.bgColor == null) attrs.bgColor = '#666666';
         

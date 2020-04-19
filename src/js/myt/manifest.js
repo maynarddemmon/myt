@@ -81,7 +81,7 @@ JS.Packages(function() {with(this) {
     
     // Component : Misc
     file(MYT_COMPONENT_ROOT + 'Button.js'       ).provides(
-            'myt.Button','myt.SimpleButton','myt.SimpleIconTextButton','myt.SimpleTextButton',
+            'myt.Button','myt.SimpleButtonStyle','myt.SimpleButton','myt.SimpleIconTextButton','myt.SimpleTextButton',
             'myt.IconTextButtonContent','myt.TextButtonContent'
         ).requires(
             'myt.UpdateableUI','myt.MouseOverAndDown','myt.KeyActivation','myt.Disableable',
@@ -195,19 +195,10 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'listview/ListViewAnchor.js'   ).provides('myt.ListViewAnchor'   ).requires('myt.ListView','myt.FloatingPanelAnchor');
     
     // Component : Checkbox
-    file(MYT_COMPONENT_ROOT + 'checkbox/CheckboxDrawingMethod.js').provides('myt.CheckboxDrawingMethod').requires('myt.DrawingMethod');
-    file(MYT_COMPONENT_ROOT + 'checkbox/CheckboxStyleMixin.js'   ).provides('myt.CheckboxStyleMixin'   ).requires('myt.DrawButton');
-    file(MYT_COMPONENT_ROOT + 'checkbox/CheckboxMixin.js'        ).provides('myt.CheckboxMixin'        )
-        .requires('myt.CheckboxStyleMixin','myt.ValueComponent','myt.CheckboxDrawingMethod');
-    file(MYT_COMPONENT_ROOT + 'checkbox/Checkbox.js'             ).provides('myt.Checkbox'             ).requires('myt.CheckboxMixin');
-    file(MYT_COMPONENT_ROOT + 'checkbox/TextCheckbox.js'         ).provides('myt.TextCheckbox'         ).requires('myt.Checkbox','myt.TextButtonContent');
+    file(MYT_COMPONENT_ROOT + 'Checkbox.js').provides('myt.Checkbox').requires('myt.SimpleButtonStyle','myt.ValueComponent');
     
     // Component : Radio
-    file(MYT_COMPONENT_ROOT + 'radio/RadioDrawingMethod.js').provides('myt.RadioDrawingMethod').requires('myt.DrawingMethod');
-    file(MYT_COMPONENT_ROOT + 'radio/RadioMixin.js'        ).provides('myt.RadioMixin'        )
-        .requires('myt.CheckboxStyleMixin','myt.ValueComponent','myt.RadioDrawingMethod','myt.BAG');
-    file(MYT_COMPONENT_ROOT + 'radio/Radio.js'             ).provides('myt.Radio'             ).requires('myt.DrawButton','myt.RadioMixin');
-    file(MYT_COMPONENT_ROOT + 'radio/TextRadio.js'         ).provides('myt.TextRadio'         ).requires('myt.Radio','myt.TextButtonContent');
+    file(MYT_COMPONENT_ROOT + 'Radio.js').provides('myt.Radio').requires('myt.SimpleButtonStyle','myt.BAG');
     
     // Component : Slider
     file(MYT_COMPONENT_ROOT + 'slider/SliderThumbMixin.js'     ).provides('myt.SliderThumbMixin'     ).requires('myt.View','myt.Draggable');
@@ -219,9 +210,9 @@ JS.Packages(function() {with(this) {
                                                                                                                 'myt.SimpleSliderRangeFill');
     
     // Component : Tab Slider
-    file(MYT_COMPONENT_ROOT + 'tabslider/TabSliderContainer.js'    ).provides('myt.TabSliderContainer'    ).requires('myt.SelectionManager');
-    file(MYT_COMPONENT_ROOT + 'tabslider/TabSlider.js'             ).provides('myt.TabSlider'             ).requires('myt.Radio','myt.TabSliderContainer');
-    file(MYT_COMPONENT_ROOT + 'tabslider/TextTabSlider.js'         ).provides('myt.TextTabSlider'         ).requires('myt.TabSlider');
+    file(MYT_COMPONENT_ROOT + 'tabslider/TabSliderContainer.js').provides('myt.TabSliderContainer').requires('myt.SelectionManager');
+    file(MYT_COMPONENT_ROOT + 'tabslider/TabSlider.js'         ).provides('myt.TabSlider'         ).requires('myt.SimpleButton','myt.TabSliderContainer');
+    file(MYT_COMPONENT_ROOT + 'tabslider/TextTabSlider.js'     ).provides('myt.TextTabSlider'     ).requires('myt.TabSlider');
     
     // Component : Tab
     file(MYT_COMPONENT_ROOT + 'tab/TabContainer.js').provides('myt.TabContainer').requires('myt.SelectionManager');
@@ -273,9 +264,8 @@ JS.Packages(function() {with(this) {
     file(MYT_COMPONENT_ROOT + 'form/FormElement.js').provides('myt.FormElement').requires('myt.RootForm');
     
     file(MYT_COMPONENT_ROOT + 'form/elements/FormInputSelect.js'   ).provides('myt.FormInputSelect'   ).requires('myt.FormElement','myt.InputSelectOption');
-    file(MYT_COMPONENT_ROOT + 'form/elements/FormRadioGroup.js'    ).provides('myt.FormRadioGroup'    ).requires('myt.FormElement','myt.Radio');
+    file(MYT_COMPONENT_ROOT + 'form/elements/FormRadioGroup.js'    ).provides('myt.FormRadioGroup'    ).requires('myt.FormElement','myt.Radio','myt.ValueComponent');
     file(MYT_COMPONENT_ROOT + 'form/elements/FormCheckbox.js'      ).provides('myt.FormCheckbox'      ).requires('myt.FormElement','myt.Checkbox');
-    file(MYT_COMPONENT_ROOT + 'form/elements/FormTextCheckbox.js'  ).provides('myt.FormTextCheckbox'  ).requires('myt.FormElement','myt.TextCheckbox');
     file(MYT_COMPONENT_ROOT + 'form/elements/FormInputTextMixin.js').provides('myt.FormInputTextMixin').requires('myt.FormElement');
     file(MYT_COMPONENT_ROOT + 'form/elements/FormInputText.js'     ).provides('myt.FormInputText'     ).requires('myt.FormInputTextMixin','myt.InputText');
     file(MYT_COMPONENT_ROOT + 'form/elements/FormComboBox.js'      ).provides('myt.FormComboBox'      ).requires('myt.FormInputTextMixin','myt.ComboBox');
@@ -306,11 +296,11 @@ JS.Packages(function() {with(this) {
         'myt.DrawButton','myt.SimpleIconTextButton',
         'myt.FloatingPanelAnchor',
         'myt.ListViewAnchor',
-        'myt.TextCheckbox','myt.TextRadio','myt.TextTabSlider','myt.Tab',
+        'myt.Radio','myt.TextTabSlider','myt.Tab',
         'myt.ImageUploader','myt.Dialog',
         'myt.global.validators',
         'myt.global.valueProcessors','myt.UseOtherFieldIfEmptyValueProcessor',
-        'myt.FormElement','myt.FormInputSelect','myt.FormRadioGroup','myt.FormCheckbox','myt.FormTextCheckbox',
+        'myt.FormElement','myt.FormInputSelect','myt.FormRadioGroup','myt.FormCheckbox',
         'myt.FormInputText','myt.FormComboBox','myt.FormInputTextArea','myt.FormEditableText',
         'myt.Slider','myt.RangeSlider',
         'myt.HorizontalDivider','myt.VerticalDivider',
