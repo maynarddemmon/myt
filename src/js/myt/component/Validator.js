@@ -62,8 +62,7 @@
                 config.form = form;
                 return this.isValid(form.getValue(), config, errorMessages);
             }
-        });
-        
+        }),
         
         /** Tests that a value is not null, undefined or empty. */
         RequiredFieldValidator = pkg.RequiredFieldValidator = new JSClass('RequiredFieldValidator', Validator, {

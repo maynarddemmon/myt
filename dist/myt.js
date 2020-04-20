@@ -11114,7 +11114,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
                 this.setOpacity(1);
                 this.setBgColor(this.readyColor);
             }
-        });
+        }),
         
         /** An myt.Button that makes use of activeColor, hoverColor and readyColor
             attributes to fill the button. */
@@ -13401,7 +13401,7 @@ myt.BAG = new JS.Class('BAG', {
                 '<i class="far fa-' + (radio.selected === true ? 'dot-' : '') + 'circle"></i>' +
                 (label.length > 0 ? ' ' : '') + label
             );
-        }
+        },
         
         /** Search the radio group for a matching node and make that one the
             true node. */
@@ -18587,8 +18587,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 config.form = form;
                 return this.isValid(form.getValue(), config, errorMessages);
             }
-        });
-        
+        }),
         
         /** Tests that a value is not null, undefined or empty. */
         RequiredFieldValidator = pkg.RequiredFieldValidator = new JSClass('RequiredFieldValidator', Validator, {

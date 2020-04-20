@@ -221,7 +221,7 @@
                 this.setOpacity(1);
                 this.setBgColor(this.readyColor);
             }
-        });
+        }),
         
         /** An myt.Button that makes use of activeColor, hoverColor and readyColor
             attributes to fill the button. */

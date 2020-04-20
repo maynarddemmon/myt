@@ -7,7 +7,7 @@
                 '<i class="far fa-' + (radio.selected === true ? 'dot-' : '') + 'circle"></i>' +
                 (label.length > 0 ? ' ' : '') + label
             );
-        }
+        },
         
         /** Search the radio group for a matching node and make that one the
             true node. */
