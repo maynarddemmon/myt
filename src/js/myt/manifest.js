@@ -1,4 +1,6 @@
-JS.Packages(function() {with(this) {
+JS.Packages(function() {
+    var file = this.file;
+    
     // Package:myt
     var MYT_ROOT = global.MYT_ROOT || '../js/myt/';
     
@@ -314,4 +316,4 @@ JS.Packages(function() {with(this) {
         'myt.MessageTypeWebSocket',
         'myt.TooltipMixin'
     );
-}});
+});
