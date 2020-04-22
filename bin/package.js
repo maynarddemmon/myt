@@ -110,7 +110,6 @@
     
     instance._load = function() {
         if (!this._fire('request')) return;
-        if (!this._isLoaded()) this._prefetch();
     
         var allDeps = this._deps.list.concat(this._uses.list),
             source  = this._source || [],
@@ -128,7 +127,7 @@
                 if (n === 0) return fireOnLoad(exports);
                 n -= 1;
                 var index = self._loader.length - n - 1;
-                Package.loader.loadFile(self._loader[index], loadNext, source[index]);
+                loadFile(self._loader[index], loadNext, source[index]);
             };
             
             var fireOnLoad = function(exports) {
@@ -150,12 +149,6 @@
             else
                 loadNext();
         }, this);
-    };
-    
-    instance._prefetch = function() {
-        if (this._source || !(this._loader instanceof Array) || !Package.loader.fetch) return;
-        this._source = [];
-        for (var i = 0, n = this._loader.length; i < n; i++) this._source[i] = Package.loader.fetch(this._loader[i]);
     };
     
     // Class-level event API, handles group listeners //////////////////////////
@@ -199,12 +192,10 @@
     Package._getByPath = function(loader) {
         var path = loader.toString(),
             pkg  = this._indexByPath[path];
-        
-        if (pkg) return pkg;
-        
-        if (typeof loader === 'string') loader = [].slice.call(arguments);
-        
-        pkg = this._indexByPath[path] = new this(loader);
+        if (!pkg) {
+            if (typeof loader === 'string') loader = [].slice.call(arguments);
+            pkg = this._indexByPath[path] = new this(loader);
+        }
         return pkg;
     };
     
@@ -239,30 +230,25 @@
         return cached.obj = object;
     };
     
-    Package.loader = {
-        __FILE__: function() {
-            return this._currentPath;
-        },
+    // File Loader /////////////////////////////////////////////////////////////
+    var loadFile = (path, fireCallbacks) => {
+        var file, module;
         
-        loadFile: function(path, fireCallbacks) {
-            var file, module;
-            
-            if (typeof process !== 'undefined') {
-                module = path.replace(/\.[^\.]+$/g, '');
-                file   = require('path').resolve(module);
-            } else if (typeof phantom !== 'undefined') {
-                file = phantom.libraryPath.replace(/\/$/, '') + '/' +
-                path.replace(/^\//, '');
-            }
-            
-            this._currentPath = file + '.js';
-            var module = require(file);
-            fireCallbacks(module);
-            
-            return module;
+        if (typeof process !== 'undefined') {
+            module = path.replace(/\.[^\.]+$/g, '');
+            file   = require('path').resolve(module);
+        } else if (typeof phantom !== 'undefined') {
+            file = phantom.libraryPath.replace(/\/$/, '') + '/' +
+            path.replace(/^\//, '');
         }
+        
+        var module = require(file);
+        fireCallbacks(module);
+        
+        return module;
     };
     
+    // Exports /////////////////////////////////////////////////////////////////
     exports.Packages = function(declaration) {
         declaration.call({
             file: function(filename) {

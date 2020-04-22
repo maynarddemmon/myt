@@ -111,7 +111,14 @@ var JS = {};
     
     instance._load = function() {
         if (!this._fire('request')) return;
-        if (!this._isLoaded()) this._prefetch();
+        if (!this._isLoaded()) {
+            if (!this._source && (this._loader instanceof Array)) {
+                this._source = [];
+                for (var i = 0, len = this._loader.length; i < len; i++) {
+                    this._source[i] = fetchFile(this._loader[i]);
+                }
+            }
+        }
     
         var allDeps = this._deps.list.concat(this._uses.list),
             source  = this._source || [],
@@ -129,7 +136,7 @@ var JS = {};
                 if (n === 0) return fireOnLoad(exports);
                 n -= 1;
                 var index = self._loader.length - n - 1;
-                Package.loader.loadFile(self._loader[index], loadNext, source[index]);
+                loadFile(self._loader[index], loadNext, source[index]);
             };
             
             var fireOnLoad = function(exports) {
@@ -151,12 +158,6 @@ var JS = {};
             else
                 loadNext();
         }, this);
-    };
-    
-    instance._prefetch = function() {
-        if (this._source || !(this._loader instanceof Array) || !Package.loader.fetch) return;
-        this._source = [];
-        for (var i = 0, n = this._loader.length; i < n; i++) this._source[i] = Package.loader.fetch(this._loader[i]);
     };
     
     // Class-level event API, handles group listeners //////////////////////////
@@ -200,12 +201,10 @@ var JS = {};
     Package._getByPath = function(loader) {
         var path = loader.toString(),
             pkg  = this._indexByPath[path];
-        
-        if (pkg) return pkg;
-        
-        if (typeof loader === 'string') loader = [].slice.call(arguments);
-        
-        pkg = this._indexByPath[path] = new this(loader);
+        if (!pkg) {
+            if (typeof loader === 'string') loader = [].slice.call(arguments);
+            pkg = this._indexByPath[path] = new this(loader);
+        }
         return pkg;
     };
     
@@ -259,88 +258,67 @@ var JS = {};
         while (callback = this._callbacks.shift()) callback[0].call(callback[1], value);
     };
     
-    Package.loader = {
-        HOST_REGEX: /^(https?\:)?\/\/[^\/]+/i,
+    // File Loader /////////////////////////////////////////////////////////////
+    var HOST_REGEX = /^(https?\:)?\/\/[^\/]+/i,
+        WINDOW_HOST = HOST_REGEX.exec(window.location.href),
         
-        __FILE__: function() {
-            var scripts = document.getElementsByTagName('script'),
-                src     = scripts[scripts.length - 1].src,
-                url     = window.location.href;
+        fetchFile = (path) => {
+            var pathHost = HOST_REGEX.exec(path);
             
-            if (/^\w+\:\/+/.test(src)) return src;
-            if (/^\//.test(src)) return window.location.origin + src;
-            return url.replace(/[^\/]*$/g, '') + src;
-        },
-        
-        cacheBust: function(path) {
-            if (exports.cache !== false) return path;
-            return path + (/\?/.test(path) ? '&' : '?') + new Date().getTime();
-        },
-        
-        fetch: function(path) {
-            var originalPath = path;
-            path = this.cacheBust(path);
-            
-            this.HOST = this.HOST || this.HOST_REGEX.exec(window.location.href);
-            var host = this.HOST_REGEX.exec(path);
-            
-            if (!this.HOST || (host && host[0] !== this.HOST[0])) return null;
-            
-            var source = new Package.Deferred(),
-                self   = this,
-                xhr    = new XMLHttpRequest();
-            
-            xhr.open('GET', path, true);
-            xhr.onreadystatechange = () => {
-            if (xhr.readyState === 4) {
-                xhr.onreadystatechange = self._K;
-                if (xhr.status !== 200) {
-                    console.error('Manifest loading error for file:' + originalPath);
-                } else {
-                    source.succeed(xhr.responseText + '\n//# sourceURL=' + originalPath);
-                }
-                xhr = null;
+            // Don't use browser fetch API for cross-origin requests.
+            if (WINDOW_HOST && (!pathHost || pathHost[0] === WINDOW_HOST[0])) {
+                var source = new Package.Deferred();
+                
+                fetch(path, {method:'GET'}).then(
+                    response => {
+                        if (response.ok) {
+                            return response.text();
+                        } else {
+                            throw new Error('Manifest loading error for:' + path);
+                        }
+                    }
+                ).then(
+                    response => {
+                        source.succeed(response + '\n//# sourceURL=' + path);
+                    }
+                )
+                
+                return source;
             }
-            };
-            xhr.send(null);
-            return source;
         },
         
-        loadFile: function(path, fireCallbacks, source) {
-            if (!source) path = this.cacheBust(path);
-            
-            var self   = this,
-                head   = document.getElementsByTagName('head')[0],
-                script = document.createElement('script');
-            
-            script.type = 'text/javascript';
-            
+        loadFile = (path, fireCallbacks, source) => {
             if (source) {
+                // The fetch function retrieved the code.
                 return source.callback(function(code) {
                     var execute = new Function('code', 'eval(code)');
                     execute(code);
                     fireCallbacks();
                 });
-            };
-            
-            script.src = path;
-            
-            script.onload = script.onreadystatechange = function() {
-                var state = script.readyState,
-                    status = script.status;
-                if (!state || state === 'loaded' || state === 'complete' || (state === 4 && status === 200)) {
-                    fireCallbacks();
-                    script.onload = script.onreadystatechange = self._K;
-                    head = null;
-                    script = null;
-                }
-            };
-            head.appendChild(script);
-        },
-        
-        _K: function() {}
-    };
+            } else {
+                // Fully qualified URL from another domain so fetch didn't
+                // retrieve the code. We use a script tag instead.
+                var head = document.getElementsByTagName('head')[0],
+                    script = document.createElement('script');
+                
+                script.type = 'text/javascript';
+                script.src = path;
+                
+                script.onload = script.onreadystatechange = function() {
+                    var state = script.readyState,
+                        status = script.status;
+                    if (!state || state === 'loaded' || state === 'complete' || (state === 4 && status === 200)) {
+                        fireCallbacks();
+                        script.onload = script.onreadystatechange = () => {};
+                        head = null;
+                        script = null;
+                    }
+                };
+                head.appendChild(script);
+            }
+        };
     
+    // Exports /////////////////////////////////////////////////////////////////
     exports.Packages = function(declaration) {
         declaration.call({
             file: function(filename) {
