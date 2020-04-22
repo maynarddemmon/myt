@@ -9,7 +9,7 @@
             checkbox.setText(
                 '<i class="' + 
                 (checkboxStyle === STYLE_SOLID ? 'fas' : 'far') + 
-                ' fa-' + (checkbox.value === true ? 'check-' : '') + 'square"></i>' +
+                ' fa-' + (checkbox.isChecked() ? 'check-' : '') + 'square"></i>' +
                 (label.length > 0 ? ' ' : '') + label
             );
         };
@@ -68,6 +68,10 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
+        isChecked: function() {
+            return this.value === true;
+        },
+        
         /** @overrides myt.Button
             Toggle the value attribute when activated. */
         doActivated: function() {
