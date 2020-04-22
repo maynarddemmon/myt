@@ -18,7 +18,7 @@
  *                                  Martin Kleppe <kleppe@ubilabs.net>,
  *                                  Ubilabs http://ubilabs.net (MIT License)
  */
-global.myt = (() => {
+((pkg) => {
     class FetchError extends Error {
         constructor(status, url, ...params) {
             super(...params);
@@ -32,7 +32,7 @@ global.myt = (() => {
         /** Used to generate globally unique IDs. */
         GUID_COUNTER = 0,
         
-        exports = {
+        myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was
                 created. */
             version:20200416.1227,
@@ -93,7 +93,7 @@ global.myt = (() => {
                 @returns a JS.Class object or null if the string could not be resolved
                     or the value was not a JS.Class object. */
             resolveClassname: (value) => {
-                if (typeof value === 'string') value = exports.resolveName(value);
+                if (typeof value === 'string') value = myt.resolveName(value);
                 
                 // Make sure what we found is really a JS.Class otherwise return null.
                 return (value && typeof value.isA === 'function' && value.isA(JS.Class)) ? value : null;
@@ -156,7 +156,7 @@ global.myt = (() => {
                     for (name in attrs) optAttrs += ' ' + name + '="' + attrs[name] + '"';
                 }
                 
-                return exports.fillTextTemplate(
+                return myt.fillTextTemplate(
                     '<a href="#" onclick=\'myt.__handleGeneratedLink(this, "{0}", &apos;{3}&apos;); return false;\'{2}>{1}</a>', 
                     callbackMethodName, text, optAttrs, JSON.stringify(data)
                 );
@@ -174,7 +174,7 @@ global.myt = (() => {
                         try {
                             if (data) value = JSON.parse(data);
                         } catch(e) {
-                            exports.dumpStack(e);
+                            myt.dumpStack(e);
                         }
                         
                         model[callbackMethodName].call(model, value);
@@ -271,7 +271,7 @@ global.myt = (() => {
                     msg = err;
                     err = null;
                 }
-                exports.global.error.notify(type || 'error', null, msg, err);
+                myt.global.error.notify(type || 'error', null, msg, err);
             },
             
             // Random numbers
@@ -310,7 +310,7 @@ global.myt = (() => {
                     min = max;
                     max = tmp;
                 }
-                return exports.getRandom(func) * (max - min) + min;
+                return myt.getRandom(func) * (max - min) + min;
             },
             
             /** @returns a random integer between min (inclusive) and max (inclusive)
@@ -324,7 +324,7 @@ global.myt = (() => {
                     min = max;
                     max = tmp;
                 }
-                return Math.floor(exports.getRandom(func) * (max - min + 1) + min);
+                return Math.floor(myt.getRandom(func) * (max - min + 1) + min);
             },
             
             // Equality
@@ -414,15 +414,15 @@ global.myt = (() => {
             
             createInputPlaceholderCSSRule: (view, color, fontFamily) => {
                 // Make sure the view has a dom ID for rule targeting
-                var domId = view.getOuterDomElement().id || (view.getOuterDomElement().id = 'id' + exports.generateGuid()),
+                var domId = view.getOuterDomElement().id || (view.getOuterDomElement().id = 'id' + myt.generateGuid()),
                     sheet = view.__sheet,
                     rules = [];
                 
                 // Clear existing sheet if it exists or create a new sheet
                 if (sheet) {
-                    exports.removeCSSRules(sheet);
+                    myt.removeCSSRules(sheet);
                 } else {
-                    sheet = view.__sheet = exports.createStylesheet();
+                    sheet = view.__sheet = myt.createStylesheet();
                 }
                 
                 // Write rules
@@ -433,14 +433,14 @@ global.myt = (() => {
                 switch (BrowserDetect.browser) {
                     case 'Chrome':
                     case 'Safari':
-                        exports.addCSSRule(sheet, '#' + domId + '::-webkit-input-placeholder', rules, 0);
+                        myt.addCSSRule(sheet, '#' + domId + '::-webkit-input-placeholder', rules, 0);
                         break;
                     case 'Firefox':
-                        exports.addCSSRule(sheet, '#' + domId + ':-moz-placeholder', 'opacity:1; ' + rules, 0);
-                        exports.addCSSRule(sheet, '#' + domId + '::-moz-placeholder', 'opacity:1; ' + rules, 0);
+                        myt.addCSSRule(sheet, '#' + domId + ':-moz-placeholder', 'opacity:1; ' + rules, 0);
+                        myt.addCSSRule(sheet, '#' + domId + '::-moz-placeholder', 'opacity:1; ' + rules, 0);
                         break;
                     case 'Explorer':
-                        exports.addCSSRule(sheet, '#' + domId + ':-ms-input-placeholder', rules, 0);
+                        myt.addCSSRule(sheet, '#' + domId + ':-ms-input-placeholder', rules, 0);
                         break;
                 }
             },
@@ -499,7 +499,7 @@ global.myt = (() => {
                     attribute was 'locked' this would be 'lockedCounter'.
                 @returns boolean True if creation succeeded, false otherwise. */
             createFixedThresholdCounter: (scope, thresholdValue, exceededAttrName, counterAttrName) => {
-                var genNameFunc = exports.AccessorSupport.generateName,
+                var genNameFunc = myt.AccessorSupport.generateName,
                     incrName,
                     decrName,
                     isModuleOrClass = typeof scope === 'function' || scope instanceof JS.Module,
@@ -604,5 +604,4 @@ global.myt = (() => {
                 _ => {if (finallyFunc) finallyFunc();}
             )
         };
-    return exports;
-})();
+})(global);

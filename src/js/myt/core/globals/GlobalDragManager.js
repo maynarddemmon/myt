@@ -201,7 +201,7 @@
             // manager and is under the current mouse location and has a 
             // matching drag group.
             var topDropTarget,
-                filteredDropTargets = filterList(dropable, dropTargets);
+                filteredDropTargets = filterList(dropable, dropTargets),
                 i = filteredDropTargets.length;
             
             if (i > 0) {

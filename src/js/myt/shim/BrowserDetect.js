@@ -8,7 +8,7 @@
         version:number The browser version number.
         os:string The operating system.
 */
-global.BrowserDetect = (() => {
+((pkg) => {
     var versionSearchString,
         
         searchString = (data) => {
@@ -29,7 +29,7 @@ global.BrowserDetect = (() => {
         platform = navigator.platform, 
         unknown = 'UNKNOWN',
         
-        exports = {
+        BrowserDetect = pkg.BrowserDetect = {
             browser:searchString([
                 {prop:window.opera,                   id:"Opera",    ver:"Version"},
                 {str:navigator.vendor, sub:"Apple",   id:"Safari",   ver:"Version"},
@@ -50,7 +50,7 @@ global.BrowserDetect = (() => {
         dom,
         pre;
     
-    switch (exports.browser) {
+    switch (BrowserDetect.browser) {
         case 'Chrome': case 'Safari': dom = 'WebKit'; break;
         case 'Explorer': dom = 'MS'; break;
         case 'Firefox': dom = 'Moz'; break;
@@ -59,12 +59,10 @@ global.BrowserDetect = (() => {
     }
     pre = dom.toLowerCase();
     
-    exports.prefix = {
+    BrowserDetect.prefix = {
         dom:dom,
         lowercase:pre,
         css:'-' + pre + '-',
         js:pre[0].toUpperCase() + pre.substr(1)
     };
-    
-    return exports;
-})();
+})(global);
