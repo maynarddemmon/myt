@@ -18,7 +18,7 @@
  *                                  Martin Kleppe <kleppe@ubilabs.net>,
  *                                  Ubilabs http://ubilabs.net (MIT License)
  */
-myt = (() => {
+global.myt = (() => {
     class FetchError extends Error {
         constructor(status, url, ...params) {
             super(...params);

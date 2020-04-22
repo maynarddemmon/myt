@@ -1,4 +1,3 @@
-var JS = {};
 ((global, exports) => {
     'use strict';
     
@@ -349,4 +348,4 @@ var JS = {};
         
         return this;
     };
-})(global, JS);
+})(global, global.JS || (global.JS = {}));

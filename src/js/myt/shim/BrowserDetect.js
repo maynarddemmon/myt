@@ -8,7 +8,7 @@
         version:number The browser version number.
         os:string The operating system.
 */
-BrowserDetect = (() => {
+global.BrowserDetect = (() => {
     var versionSearchString,
         
         searchString = (data) => {
