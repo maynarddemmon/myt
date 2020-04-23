@@ -118,7 +118,7 @@
             @param attrs:object (Optional) A map of attribute names and values.
             @param mixins:array (Optional) a list of mixins to be added onto
                 the new instance.
-            @returns void */
+            @returns {undefined} */
         initialize: function(parent, attrs, mixins) {
             var self = this;
             if (mixins) {
@@ -143,7 +143,7 @@
             @param parent:Node (or dom element for RootViews) the parent of 
                 this Node.
             @param attrs:object A map of attribute names and values.
-            @returns void */
+            @returns {undefined} */
         initNode: function(parent, attrs) {
             var self = this;
             self.callSetters(attrs);
@@ -161,12 +161,12 @@
             be measured until insertion into the DOM so you may want to use
             doAfterAdoption for creating subviews since it will give you less
             trouble though it will be slower.
-            @returns void */
+            @returns {undefined} */
         doBeforeAdoption: () => {},
         
         /** Provides a hook for subclasses to do things after this Node has its
             parent assigned.
-            @returns void */
+            @returns {undefined} */
         doAfterAdoption: () => {},
         
         /** @overrides myt.Destructible. */
@@ -200,13 +200,13 @@
             This method is called after subnodes have been destroyed but before
             the parent has been unset.
             Subclasses should call super.
-            @returns void */
+            @returns {undefined} */
         destroyBeforeOrphaning: () => {},
         
         /** Provides a hook for subclasses to do destruction of their internals.
             This method is called after the parent has been unset.
             Subclasses must call super.
-            @returns void */
+            @returns {undefined} */
         destroyAfterOrphaning: function() {
             this.releaseAllConstraints();
             this.detachFromAllObservables();
@@ -437,7 +437,7 @@
             standard way to do this is to call the setParent method on the
             prospective child Node.
             @param node:Node the subnode to add.
-            @returns void */
+            @returns {undefined} */
         addSubnode: function(node) {
             node.setParent(this);
         },
@@ -457,14 +457,14 @@
             subclasses. No need for subclasses to call super. Do not call this
             method to add a subnode. Instead call addSubnode or setParent.
             @param node:Node the subnode that was added.
-            @returns void */
+            @returns {undefined} */
         subnodeAdded: (node) => {},
         
         /** Called when a subnode is removed from this node. Provides a hook for
             subclasses. No need for subclasses to call super. Do not call this
             method to remove a subnode. Instead call removeSubnode or setParent.
             @param node:Node the subnode that was removed.
-            @returns void */
+            @returns {undefined} */
         subnodeRemoved: (node) => {},
         
         // Animation
@@ -548,7 +548,7 @@
                 be used as a matching attribute name.
             @param executeCallbacks:boolean (optional) if true animator 
                 callbacks will be executed if they exist.
-            @returns void */
+            @returns {undefined} */
         stopActiveAnimators: function(filterFunc, executeCallbacks=false) {
             var activeAnims = this.getActiveAnimators(filterFunc),
                 i = activeAnims.length,
@@ -568,7 +568,7 @@
         /** A convienence method to execute a method once on idle.
             @param methodName:string The name of the method to execute on
                 this object.
-            @returns void */
+            @returns {undefined} */
         doOnceOnIdle: function(methodName) {
             this.attachTo(pkg.global.idle, methodName, 'idle', true);
         }

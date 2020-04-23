@@ -104,16 +104,20 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
+    /** @private
+        @returns {number} */
     _getDomScrollTop: function() {
         return this.getInnerDomElement().scrollTop;
     },
     
-    /** @private */
+    /** @private
+        @param {number} v
+        @returns {undefined} */
     _setDomScrollTop: function(v) {
         this.getInnerDomElement().scrollTop = v;
     },
     
+    /** @returns {undefined} */
     isScrolledToEnd: function() {
         return this._getDomScrollTop() + this.height === this._listView.height;
     },
@@ -224,7 +228,9 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
         }
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     _handleScrollChange: function(event) {
         this.refreshListUI();
     },

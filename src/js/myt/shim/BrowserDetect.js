@@ -1,14 +1,15 @@
-/** Based on browser detection from: http://www.quirksmode.org/js/detect.html
-    
-    Events:
-        none
-    
-    Attributes:
-        browser:string The browser name.
-        version:number The browser version number.
-        os:string The operating system.
-*/
 ((pkg) => {
+    /* Based on browser detection from: http://www.quirksmode.org/js/detect.html
+        
+        Events:
+            none
+        
+        Attributes:
+            browser:string The browser name.
+            version:number The browser version number.
+            os:string The operating system.
+    */
+    
     var versionSearchString,
         
         searchString = (data) => {

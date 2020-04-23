@@ -48,7 +48,7 @@ myt.StackablePanel = new JS.Module('StackablePanel', {
     /** Called whenever a transition between panels is initiated by this panel.
         Default behavior is to defer to the panelStack's doStackTransition
         method.
-        @returns void */
+        @returns {undefined} */
     doStackTransition: function() {
         this.getPanelStack().doStackTransition(this);
     }

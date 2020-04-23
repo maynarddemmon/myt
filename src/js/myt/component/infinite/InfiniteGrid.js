@@ -222,7 +222,9 @@ myt.InfiniteGrid = new JS.Class('InfiniteGrid', myt.View, {
         return this._getIndexOfModelInData(model) !== -1;
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} model
+        @returns {number} */
     _getIndexOfModelInData: function(model) {
         if (model) {
             var self = this,
@@ -233,8 +235,9 @@ myt.InfiniteGrid = new JS.Class('InfiniteGrid', myt.View, {
         }
         return -1;
     },
-    
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     _handleScrollChange: function(event) {
         this._listScrollY = this._gridListContainer.getInnerDomElement().scrollTop;
         this._refreshGridUI();

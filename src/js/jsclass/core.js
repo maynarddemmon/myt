@@ -99,19 +99,19 @@
       /** Adds a single named method to a JS.Class/JS.Module. If you’re modifying 
           a class, the method instantly becomes available in instances of the 
           class, and in its subclasses.
-          @param name:string The name of the method to add.
-          @param callable:function The method implementation.
-          @param options:object (optional)
-          @returns void */
+          @param {string} name - The name of the method to add.
+          @param {!Function} callable - The method implementation.
+          @param {?Object} [options]
+          @returns {undefined} */
       define: function(name, callable, options) {
         this.__fns__[name] = exports.Method.create(this, name, callable);
         if ((options || {})._resolve !== false) this.resolve();
       },
     
       /** Mixes in a module to this module.
-          @param module:JS.Module The module to mix in.
-          @param options:object (optional)
-          @returns JS.Module this module. */
+          @param {!Function} module - The JS.Module to mix in.
+          @param {?Object} [options]
+          @returns {!Function) this JS.Module. */
       include: function(module, options) {
         if (module) {
           options = options || {};
@@ -156,7 +156,9 @@
         return this;
       },
     
-      /** @private */
+      /** @private
+          @param {*} value
+          @returns {boolean} */
       _ignore: function(value) {
         return typeof value !== 'function' || (value.__fns__ && value.__inc__);
       },
@@ -186,10 +188,10 @@
       },
     
       /** Gets the ancestor classes array.
-          @param list:array (optional) An array of ancestors that will have
+          @param {?Array} [list] - An array of ancestors that will have
             ancestor classes pushed onto. If not provided a new array will
             be created.
-          @return array */
+          @returns {!Array} */
       ancestors: function(list) {
         var cachable = !list,
             inc = this.__inc__;
@@ -206,8 +208,8 @@
       },
     
       /** Gets an array of JS.Methods for the provided method name.
-          @param name:string The name of the method to lookup.
-          @return array An array of JS.Methods from the ancestors chain. */
+          @param {string} name - The name of the method to lookup.
+          @returns {!Array} An array of JS.Methods from the ancestors chain. */
       lookup: function(name) {
         var cached = this.__mct__[name];
         if (cached) return cached.slice();
@@ -224,8 +226,8 @@
       },
     
       /** Checks if this module includes the provided module.
-          @param module:JS.Module The module to check for.
-          @return boolean True if the module is included, otherwise false. */
+          @param {!Function} module - The module to check for.
+          @returns {boolean} True if the module is included, otherwise false. */
       includes: function(module) {
         if (module === this) return true;
         
@@ -237,8 +239,8 @@
       },
     
       /** Extracts a single named method from a module.
-          @param name:string The name of the method to extract.
-          @return JS.Method The extracted method. */
+          @param {string} name - The name of the method to extract.
+          @return {!Function) The extracted JS.Method. */
       instanceMethod: function(name) {
         return this.lookup(name).pop();
       }
@@ -262,8 +264,8 @@
       },
     
       /** Checks if this object includes, extends or is the provided module.
-          @param module:JS.Module The module to check for.
-          @return boolean */
+          @param {!Function} module - The JS.Module module to check for.
+          @returns {boolean} */
       isA: function(module) {
         return (typeof module === 'function' && this instanceof module) || this.__eigen__().includes(module);
       },

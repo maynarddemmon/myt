@@ -67,7 +67,8 @@ myt.MouseOver = new JS.Module('MouseOver', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
+    /** @private
+        @returns {undefined} */
     __doMouseOverOnIdle: function() {
         this.detachFrom(myt.global.idle, '__doMouseOverOnIdle', 'idle');
         this.__attachedToOverIdle = false;
@@ -84,13 +85,14 @@ myt.MouseOver = new JS.Module('MouseOver', {
     /** Called when mouseOver state changes. This method is called after
         an event filtering process has reduced frequent over/out events
         originating from the dom.
-        @returns void */
+        @returns {undefined} */
     doSmoothMouseOver: function(v) {
         if (this.inited && this.updateUI) this.updateUI();
     },
     
     /** Called when the mouse is over this view. Subclasses must call super.
-        @returns void */
+        @param {!Object} event
+        @returns {undefined} */
     doMouseOver: function(event) {
         this.__disabledOver = true;
         
@@ -98,7 +100,8 @@ myt.MouseOver = new JS.Module('MouseOver', {
     },
     
     /** Called when the mouse leaves this view. Subclasses must call super.
-        @returns void */
+        @param {!Object} event
+        @returns {undefined} */
     doMouseOut: function(event) {
         this.__disabledOver = false;
         

@@ -51,7 +51,9 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __handleKeyDown: function(event) {
         if (!this.disabled) {
             if (this.activateKeyDown === -1 || this.repeatKeyDown) {
@@ -73,7 +75,9 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         }
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __handleKeyPress: function(event) {
         if (!this.disabled) {
             var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
@@ -89,7 +93,9 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         }
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __handleKeyUp: function(event) {
         if (!this.disabled) {
             var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
@@ -107,7 +113,9 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         }
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doDomBlur: function(event) {
         if (!this.disabled) {
             var keyThatWasDown = this.activateKeyDown;
@@ -122,7 +130,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         does nothing.
         @param key:number the keycode that is down.
         @param isRepeat:boolean Indicates if this is a key repeat event or not.
-        @returns void */
+        @returns {undefined} */
     doActivationKeyDown: function(key, isRepeat) {
         // Subclasses to implement as needed.
     },
@@ -130,7 +138,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
     /** Called when an activation key is release up. This executes the
         'doActivated' method by default. 
         @param key:number the keycode that is up.
-        @returns void */
+        @returns {undefined} */
     doActivationKeyUp: function(key) {
         this.doActivated();
     },
@@ -138,7 +146,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
     /** Called when focus is lost while an activation key is down. Default 
         implementation does nothing.
         @param key:number the keycode that is down.
-        @returns void */
+        @returns {undefined} */
     doActivationKeyAborted: function(key) {
         // Subclasses to implement as needed.
     }

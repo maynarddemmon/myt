@@ -169,7 +169,7 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     
     // Selection //
     /** Deselects all selected options included disabled options.
-        @returns void */
+        @returns {undefined} */
     deselectAll: function() {
         var options = this.getOptions(), i = options.length, option, changed = false;
         while (i) {
@@ -191,14 +191,14 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     
     /** Selects the option that has the provided value.
         @param value:* The value of the option to select.
-        @returns void */
+        @returns {undefined} */
     selectValue: function(value) {
         this.select(this.getOptionForValue(value));
     },
     
     /** Selects the provided option.
         @param option:myt.InputSelectOption The option to select.
-        @returns void */
+        @returns {undefined} */
     select: function(option) {
         if (option && option.canSelect(this)) {
             option.setSelected(true);
@@ -208,14 +208,14 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     
     /** Deselects the option that has the provided value.
         @param value:* The value of the option to deselect.
-        @returns void */
+        @returns {undefined} */
     deselectValue: function(value) {
         this.deselect(this.getOptionForValue(value));
     },
     
     /** Deselects the provided option.
         @param option:myt.InputSelectOption The option to deselect.
-        @returns void */
+        @returns {undefined} */
     deselect: function(option) {
         if (option && option.canDeselect(this)) {
             option.setSelected(false);
@@ -223,14 +223,16 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
         }
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doChanged: function(event) {
         this.__syncToDom();
         this.doChanged();
     },
     
     /** Called whenever the underlying dom element fires a "change" event.
-        @returns void */
+        @returns {undefined} */
     doChanged: function() {},
     
     /** @private */

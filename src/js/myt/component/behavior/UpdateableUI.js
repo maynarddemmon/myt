@@ -22,7 +22,7 @@ myt.UpdateableUI = new JS.Module('UpdateableUI', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Updates the UI whenever a change occurs that requires a visual update.
         Subclasses should implement this as needed.
-        @returns void */
+        @returns {undefined} */
     updateUI: function() {
         // Subclasses to implement as needed.
     }

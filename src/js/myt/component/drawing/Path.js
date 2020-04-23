@@ -23,7 +23,7 @@ myt.Path = new JS.Class('Path', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Copy the data from the provided Path into this one.
         @param path:myt.Path
-        @returns void */
+        @returns {undefined} */
     copyFrom: function(path) {
         this.vectors = path.vectors.slice();
         this._boundingBox = null;
@@ -68,7 +68,7 @@ myt.Path = new JS.Class('Path', {
         @param angle:number the angle in radians
         @param xOrigin:number the x coordinate to rotate around.
         @param yOrigin:number the y coordinate to rotate around.
-        @returns void */
+        @returns {undefined} */
     rotateAroundOrigin: function(angle, xOrigin, yOrigin) {
         this.translate(-xOrigin, -yOrigin);
         this.rotate(angle);

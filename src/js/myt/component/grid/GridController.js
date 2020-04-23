@@ -263,12 +263,13 @@ myt.GridController = new JS.Module('GridController', {
     
     /** Sorts the rows according to the current sort criteria. Subclasses and
         instances should implement this as needed.
-        @returns void */
+        @returns {undefined} */
     doSort: () => {},
     
     // Column Headers
     /** Gets the column header before the provided one.
-        @returns myt.GridColumnHeader or null if none exists. */
+        @param {!Object} columnHeader
+        @returns {?Object} The myt.GridColumnHeader or null if none exists. */
     getPrevColumnHeader: function(columnHeader) {
         var hdr,
             hdrs = this.columnHeaders,
@@ -283,7 +284,8 @@ myt.GridController = new JS.Module('GridController', {
     },
     
     /** Gets the column header after the provided one.
-        @returns myt.GridColumnHeader or null if none exists. */
+        @param {!Object} columnHeader
+        @returns {?Object} The myt.GridColumnHeader or null if none exists. */
     getNextColumnHeader: function(columnHeader) {
         var hdr,
             hdrs = this.columnHeaders,
@@ -298,7 +300,8 @@ myt.GridController = new JS.Module('GridController', {
         return null;
     },
     
-    /** @private */
+    /** @private
+        @returns {?Object} */
     _findLastColumn: function() {
         var hdrs = this.columnHeaders,
             i = hdrs.length,
@@ -386,7 +389,10 @@ myt.GridController = new JS.Module('GridController', {
     /** Gets a row for the provided id and matcher function. If no matcher
         function is provided a default function will be used that assumes
         each row has a model property and that model property has an id
-        property. */
+        property.
+        @param {string} id
+        @param {?Function} [matcherFunc]
+        @returns {?Objecdt} */
     getRowById: function(id, matcherFunc=row => row.model.id === id) {
         return this.rows.find(matcherFunc);
     },

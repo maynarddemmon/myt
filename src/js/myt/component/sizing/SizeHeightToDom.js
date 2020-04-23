@@ -41,7 +41,7 @@ myt.SizeHeightToDom = new JS.Module('SizeHeightToDom', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Call this method after any change to the height of the dom
         element would have occurred.
-        @returns void */
+        @returns {undefined} */
     sizeViewToDom: function() {
         if (!this.__hasSetHeight) {
             // Bounding rect doesn't factor in scaling so we need to calculate

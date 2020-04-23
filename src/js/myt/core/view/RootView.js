@@ -14,8 +14,9 @@ myt.RootView = new JS.Module('RootView', {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
         /** Prevents default drag/drop behavior.
-            @param v:myt.View the view to supress default dragover and drop on.
-            @returns void */
+            @param {!Obect} v - The myt.View the view to supress default 
+                dragover and drop on.
+            @returns {undefined} */
         setupCaptureDrop: function(v) {
             var cdf = v.__captureDrop = function(event) {event.preventDefault();},
                 de = v.domElement;
@@ -24,9 +25,9 @@ myt.RootView = new JS.Module('RootView', {
         },
         
         /** Cleanup dom listeners for drag/drop.
-            @param v:myt.View the view that had supressed default dragover 
-                and drop on.
-            @returns void */
+            @param {!Obect} v - The myt.View the view that had supressed 
+                default dragover  and drop on.
+            @returns {undefined} */
         teardownCaptureDrop: function(v) {
             var de = v.domElement, cdf = v.__captureDrop;
             myt.removeEventListener(de, 'drop', cdf);

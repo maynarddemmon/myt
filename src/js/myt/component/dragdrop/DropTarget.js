@@ -43,31 +43,31 @@ myt.DropTarget = new JS.Module('DropTarget', {
     /** Called by myt.GlobalDragManager when a dropable starts being dragged
         that has a matching drag group.
         @param dropable:myt.Dropable The dropable being dragged.
-        @returns void */
+        @returns {undefined} */
     notifyDragStart: function(dropable) {},
     
     /** Called by myt.GlobalDragManager when a dropable stops being dragged
         that has a matching drag group.
         @param dropable:myt.Dropable The dropable no longer being dragged.
-        @returns void */
+        @returns {undefined} */
     notifyDragStop: function(dropable) {},
     
     /** Called by myt.GlobalDragManager when a dropable is dragged over this
         view and has a matching drag group.
         @param dropable:myt.Dropable The dropable being dragged over this view.
-        @returns void */
+        @returns {undefined} */
     notifyDragEnter: function(dropable) {},
     
     /** Called by myt.GlobalDragManager when a dropable is dragged out of this
         view and has a matching drag group.
         @param dropable:myt.Dropable The dropable being dragged out of 
             this view.
-        @returns void */
+        @returns {undefined} */
     notifyDragLeave: function(dropable) {},
     
     /** Called by myt.GlobalDragManager when a dropable is dropped onto this
         view and has a matching drag group.
         @param dropable:myt.Dropable The dropable being dropped onto this view.
-        @returns void */
+        @returns {undefined} */
     notifyDrop: function(dropable) {}
 });

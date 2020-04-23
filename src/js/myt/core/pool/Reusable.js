@@ -4,6 +4,6 @@ myt.Reusable = new JS.Module('Reusable', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Puts this object back into a default state suitable for storage in
         an myt.AbstractPool
-        @returns void */
+        @returns {undefined} */
     clean: function() {}
 });

@@ -41,7 +41,7 @@ myt.SizeWidthToDom = new JS.Module('SizeWidthToDom', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Call this method after any change to the width of the dom
         element would have occurred.
-        @returns void */
+        @returns {undefined} */
     sizeViewToDom: function() {
         if (!this.__hasSetWidth) {
             // Bounding rect doesn't factor in scaling so we need to calculate

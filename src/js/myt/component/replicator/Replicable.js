@@ -20,7 +20,7 @@ myt.Replicable = new JS.Module('Replicable', {
         call super.
         @param data:object the data being replicated for this instance.
         @param idx:number the index of the data in the replicated list.
-        @returns void */
+        @returns {undefined} */
     replicate: function(data, idx) {
         this.replicationData = data;
         this.replicationIndex = idx;
@@ -30,7 +30,7 @@ myt.Replicable = new JS.Module('Replicable', {
     /** Notifies this object that something happened.
         @param key:string the name of the message
         @param value:* the value of the message.
-        @returns void */
+        @returns {undefined} */
     notify: function(key, value) {},
     
     /** @overrides myt.Reusable

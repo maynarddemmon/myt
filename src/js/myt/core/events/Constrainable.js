@@ -19,7 +19,7 @@ myt.Constrainable = new JS.Module('Constrainable', {
         @param methodName:String The name of the method to call on this object.
         @param observables:array An array of observable/type pairs. An observer
             will attach to each observable for the event type.
-        @returns void */
+        @returns {undefined} */
     constrain: function(methodName, observables) {
         if (methodName && observables) {
             // Make sure an even number of observable/type was provided
@@ -59,7 +59,7 @@ myt.Constrainable = new JS.Module('Constrainable', {
     },
     
     /** Removes a constraint.
-        @returns void */
+        @returns {undefined} */
     releaseConstraint: function(methodName) {
         if (methodName) {
             // No need to remove if the constraint is already empty.
@@ -82,7 +82,7 @@ myt.Constrainable = new JS.Module('Constrainable', {
     },
     
     /** Removes all constraints.
-        @returns void */
+        @returns {undefined} */
     releaseAllConstraints: function() {
         var constraints = this.__cbmn,
             methodName;

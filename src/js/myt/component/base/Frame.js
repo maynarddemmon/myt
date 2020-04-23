@@ -51,14 +51,18 @@ myt.Frame = new JS.Class('Frame', myt.View, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doMouseDown: function(event) {
         this.__restorePointerEvents = this.pointerEvents;
         this.setPointerEvents('none');
         return true;
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doMouseUp: function(event) {
         this.setPointerEvents(this.__restorePointerEvents);
         return true;

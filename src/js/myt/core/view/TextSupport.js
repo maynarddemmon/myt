@@ -153,7 +153,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
     /** Configures the attributes for this Text so that an ellipsis will be
         displayed. To actually see an ellipsis, an explicit width should be
         set on the Text so that overflow will occur.
-        @returns void */
+        @returns {undefined} */
     enableEllipsis: function() {
         this.setWhiteSpace('nowrap');
         this.setOverflow('hidden');
@@ -163,7 +163,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
     /** Turns ellipsis off by setting overflow to 'visible'. Other CSS
         related changes for ellipsis are not undone such as whiteSpace and
         textOverflow.
-        @returns void */
+        @returns {undefined} */
     disableEllipsis: function() {
         this.setOverflow('visible');
     },
@@ -179,7 +179,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
             to '#000000' if not provided.
         @param extraStrength:number (optional) The number of times to render 
             the shadow to give the shadow extra opacity.
-        @returns void */
+        @returns {undefined} */
     showTextShadow: function(x, y, blur, color, extraStrength) {
         var shadow = (x || 0) + 'px ' + 
             (y || 0) + 'px ' + 
@@ -196,7 +196,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
     },
     
     /** Turns off a text shadow.
-        @returns void */
+        @returns {undefined} */
     hideTextShadow: function() {
         this.getInnerDomStyle().textShadow = 'none';
     }

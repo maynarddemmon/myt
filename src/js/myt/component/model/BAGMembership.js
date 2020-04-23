@@ -47,7 +47,7 @@ myt.BAGMembership = new JS.Module('BAGMembership', {
         attribute name.
         @param attrName:string
         @param groupId:string
-        @returns void */
+        @returns {undefined} */
     addToBAG: function(attrName, groupId) {
         var group = this.getBAG(attrName, groupId);
         if (!this.isRegisteredWithBAG(group)) {
@@ -65,7 +65,7 @@ myt.BAGMembership = new JS.Module('BAGMembership', {
         attribute name.
         @param attrName:string
         @param groupId:string
-        @returns void */
+        @returns {undefined} */
     removeFromBAG: function(attrName, groupId) {
         var group = this.getBAG(attrName, groupId);
         if (this.isRegisteredWithBAG(group)) {
@@ -87,7 +87,8 @@ myt.BAGMembership = new JS.Module('BAGMembership', {
     
     /** Called whenever an event for the attrName is fired.
         @private 
-        @returns void */
+        @param {!Object} event
+        @returns {undefined} */
     __updateForBAG: function(event) {
         var type = event.type,
             value = event.value,

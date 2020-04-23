@@ -169,7 +169,7 @@
                 @param eventName:string the name of the dom event to generate.
                 @param customOpts:Object (optional) a map of options that will
                     be added onto the dom event object.
-                @returns void */
+                @returns {undefined} */
             simulateDomEvent: (elem, eventName, customOpts) => {
                 if (elem) {
                     var opts = {
@@ -266,14 +266,14 @@
         },
         
         /** Removes this DomElementProxy's dom element from its parent node.
-            @returns void */
+            @returns {undefined} */
         removeDomElement: function() {
             var de = this.getOuterDomElement();
             de.parentNode.removeChild(de);
         },
         
         /** Called when this DomElementProxy is destroyed.
-            @returns void */
+            @returns {undefined} */
         disposeOfDomElement: function() {
             delete this.domElement.model;
             delete this.deStyle;
@@ -286,14 +286,14 @@
         
         /** Sets the dom "class" attribute on the dom element.
             @param v:string the dom class name.
-            @returns void */
+            @returns {undefined} */
         setDomClass: function(v) {
             this.domElement.className = this.domClass = v;
         },
         
         /** Adds a dom "class" to the existing dom classes on the dom element.
             @param v:string the dom class to add.
-            @returns void */
+            @returns {undefined} */
         addDomClass: function(v) {
             var existing = this.domElement.className;
             this.setDomClass((existing ? existing + ' ' : '') + v);
@@ -301,7 +301,7 @@
         
         /** Removes a dom "class" from the dom element.
             @param v:string the dom class to remove.
-            @returns void */
+            @returns {undefined} */
         removeDomClass: function(v) {
             var existing = this.domElement.className,
                 parts,
@@ -317,21 +317,21 @@
         },
         
         /** Clears the dom "class".
-            @returns void */
+            @returns {undefined} */
         clearDomClass: function() {
             this.setDomClass('');
         },
         
         /** Sets the dom "id" attribute on the dom element.
             @param v:string the dom id name.
-            @returns void */
+            @returns {undefined} */
         setDomId: function(v) {
             this.domElement.id = this.domId = v;
         },
         
         /** Set the z-index of the dom element.
             @param v:number the z-index to set.
-            @returns void */
+            @returns {undefined} */
         setZIndex: function(v) {
             this.deStyle.zIndex = v;
         },
@@ -339,7 +339,7 @@
         /** Set an arbitrary CSS style on the dom element.
             @param propertyName:string the name of the CSS property to set.
             @param v:* the value to set.
-            @returns void */
+            @returns {undefined} */
         setStyleProperty: function(propertyName, v) {
             this.deStyle[propertyName] = v;
         },
@@ -363,7 +363,7 @@
         },
         
         /** Generates a dom event "click" on this proxy's dom element.
-            @returns void */
+            @returns {undefined} */
         simulateClick: function() {
             DomElementProxy.simulateDomEvent(this.domElement, 'click');
         },
@@ -393,7 +393,7 @@
         
         /** Makes this dom element proxy the one with the highest z-index 
             relative to its sibling dom elements.
-            @returns void */
+            @returns {undefined} */
         makeHighestZIndex: function() {
             this.setZIndex(this.parent.getHighestChildZIndex(this.domElement) + 1);
         }

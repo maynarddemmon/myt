@@ -36,15 +36,15 @@ myt.RootForm = new JS.Module('RootForm', {
     },
     
     /** Called when the form is submitted and it is valid.
-        @returns void */
+        @returns {undefined} */
     doValidSubmit: function(value) {},
     
     /** Called when the form is submitted and it is not valid.
-        @returns void */
+        @returns {undefined} */
     doInvalidSubmit: function() {},
     
     /** Rolls back the form and revalidates it.
-        @returns void */
+        @returns {undefined} */
     doCancel: function() {
         this.rollbackForm();
         this.doValidation();

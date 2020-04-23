@@ -34,14 +34,18 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __updateWidth: function(event) {
         // Only resize the active panel
         var panel = this.getActivePanel();
         if (panel) panel.setWidth(event.value);
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __updateHeight: function(event) {
         // Only resize the active panel
         var panel = this.getActivePanel();
@@ -72,7 +76,7 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
     /** Called by a panel when it transitions between selected states. Should
         not be called directly. Instead change the panel selection.
         @param panel:myt.StackablePanel The panel that is transitioning.
-        @returns void */
+        @returns {undefined} */
     doStackTransition: function(panel) {
         this['doStackTransition' + (panel.selected ? 'To' : 'From')](panel);
     },
@@ -81,7 +85,7 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
         the newly selected panel in the stack. Should not be called directly. 
         Instead change the panel selection.
         @param panel:myt.StackablePanel The panel that is transitioning.
-        @returns void */
+        @returns {undefined} */
     doStackTransitionTo: function(panel) {
         this.doBeforeTransitionTo(panel);
         
@@ -104,7 +108,7 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
         the newly deselected panel in the stack. Should not be called directly. 
         Instead change the panel selection.
         @param panel:myt.StackablePanel The panel that is transitioning.
-        @returns void */
+        @returns {undefined} */
     doStackTransitionFrom: function(panel) {
         this.doBeforeTransitionFrom(panel);
         

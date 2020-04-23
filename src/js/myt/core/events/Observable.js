@@ -65,7 +65,7 @@ myt.Observable = new JS.Module('Observable', {
     },
     
     /** Removes all observers from this Observable.
-        @returns void */
+        @returns {undefined} */
     detachAllObservers: function() {
         var observersByType = this.__obsbt;
         if (observersByType) {
@@ -135,7 +135,7 @@ myt.Observable = new JS.Module('Observable', {
         @param value:* The value to set on the event.
         @param observers:array (Optional) If provided the event will
             be sent to this specific list of observers and no others.
-        @returns void */
+        @returns {undefined} */
     fireEvent: function(type, value, observers) {
         // Determine observers to use
         var self = this;

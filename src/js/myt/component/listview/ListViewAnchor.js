@@ -38,7 +38,7 @@ myt.ListViewAnchor = new JS.Module('ListViewAnchor', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Called by the list view when an item is activated. By default it
         hides the list view.
-        @returns void */
+        @returns {undefined} */
     doItemActivated: function(itemView) {
         this.hideFloatingPanel();
     },

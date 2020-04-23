@@ -91,7 +91,7 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
     
     /** Selects the provided item.
         @param item:object The item to select.
-        @returns void */
+        @returns {undefined} */
     select: function(item) {
         if (item && !this.isSelectedItem(item) && this.canSelectItem(item)) {
             item.setSelected(true);
@@ -107,12 +107,12 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
     
     /** Called when an item is selected.
         @param item:myt.Selectable The newly selected item.
-        @returns void */
+        @returns {undefined} */
     doSelected: function(item) {},
     
     /** Selects the item with the provided item selection ID.
         @param itemSelectionId:string
-        @returns void */
+        @returns {undefined} */
     selectById: function(itemSelectionId) {
         this.select(this.getSelectableItem(itemSelectionId));
     },
@@ -139,7 +139,7 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
     },
     
     /** Selects all items that can be selected.
-        @returns void */
+        @returns {undefined} */
     selectAll: function() {
         var items = this.getSelectableItems(), i = items.length;
         while (i) this.select(items[--i]);
@@ -147,7 +147,7 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
     
     /** Deselects the provided item.
         @param item:object The item to deselect.
-        @returns void */
+        @returns {undefined} */
     deselect: function(item) {
         if (this.isSelectedItem(item) && this.canDeselectItem(item)) {
             item.setSelected(false);
@@ -163,12 +163,12 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
     
     /** Called when an item is deselected.
         @param item:myt.Selectable The newly deselected item.
-        @returns void */
+        @returns {undefined} */
     doDeselected: function(item) {},
     
     /** Deselects the item with the provided item selection ID.
         @param itemSelectionId:string
-        @returns void */
+        @returns {undefined} */
     deselectById: function(itemSelectionId) {
         this.deselect(this.getSelectableItem(itemSelectionId));
     },
@@ -180,7 +180,7 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
     },
     
     /** Deselects all selected items.
-        @returns void */
+        @returns {undefined} */
     deselectAll: function() {
         var items = this.__selected, key;
         for (key in items) this.deselect(items[key]);

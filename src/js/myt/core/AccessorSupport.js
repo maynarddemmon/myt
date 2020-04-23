@@ -37,7 +37,7 @@
             
             /** Creates a standard setter function for the provided attrName on the
                 target. This assumes the target is an myt.Observable.
-                @returns void */
+                @returns {undefined} */
             createSetterFunction: (target, attrName) => {
                 var setterName = generateSetterName(attrName);
                 if (target[setterName]) console.log("Overwriting setter", setterName);
@@ -51,7 +51,7 @@
             
             /** Creates a standard getter function for the provided attrName on the
                 target.
-                @returns void */
+                @returns {undefined} */
             createGetterFunction: (target, attrName) => {
                 var getterName = generateGetterName(attrName);
                 if (target[getterName]) console.log("Overwriting getter", getterName);
@@ -68,7 +68,7 @@
         
         /** Calls a setter function for each attribute in the provided map.
             @param attrs:object a map of attributes to set.
-            @returns void. */
+            @returns {undefined}. */
         callSetters: function(attrs) {
             var self = this,
                 earlyAttrs = self.earlyAttrs,
@@ -141,7 +141,7 @@
             @param skipSetter:boolean (optional) If true no attempt will be made to
                 invoke a setter function. Useful when you want to invoke standard 
                 setter behavior. Defaults to undefined which is equivalent to false.
-            @returns void */
+            @returns {undefined} */
         set: function(attrName, v, skipSetter) {
             var self = this,
                 setterName;

@@ -133,7 +133,7 @@ myt.DomObservable = new JS.Module('DomObservable', {
     },
     
     /** Detaches all dom observers from this DomObservable.
-        @returns void */
+        @returns {undefined} */
     detachAllDomObservers: function() {
         var domElement = this.getInnerDomElement();
         if (domElement) {

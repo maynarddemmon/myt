@@ -49,17 +49,27 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
         this.detachFromDom(this, 'doDrop', 'drop', false);
     },
     
+    /** @param {!Object} event
+        @returns {undefined} */
     doDragOver: function(event) {},
     
+    /** @param {!Object} event
+        @returns {undefined} */
     doDragEnter: function(event) {},
     
+    /** @param {!Object} event
+        @returns {undefined} */
     doDragLeave: function(event) {},
     
+    /** @param {!Object} event
+        @returns {undefined} */
     doDrop: function(event) {
         this.handleFiles(event.value.dataTransfer.files, event);
     },
     
-    /** @private */
+    /** @param {?Array} files
+        @param {!Object} event
+        @returns {undefined} */
     handleFiles: function(files, event) {
         if (files !== undefined) {
             var i = files.length, file;
@@ -81,5 +91,8 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
         return file;
     },
     
+    /** @param {!Object} file
+        @param {!Object} event
+        @returns {undefined} */
     handleDroppedFile: function(file, event) {}
 });

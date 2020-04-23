@@ -70,7 +70,7 @@ myt.NativeInputWrapper = new JS.Class('NativeInputWrapper', myt.View, {
     
     /** Sets the value on the DOM.
         @param v:* The value to set.
-        @returns void */
+        @returns {undefined} */
     setDomValue: function(v) {
         var de = this.getInnerDomElement();
         if (de.value !== v) de.value = v;

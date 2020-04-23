@@ -81,7 +81,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
     },
     
     /** Puts all the active instances back in the pool.
-        @returns void */
+        @returns {undefined} */
     putActives: function() {
         var actives = this.__getActives();
         if (actives) {

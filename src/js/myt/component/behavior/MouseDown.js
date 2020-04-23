@@ -63,13 +63,15 @@ myt.MouseDown = new JS.Module('MouseDown', {
     },
     
     /** Called when the mouse is down on this view. Subclasses must call super.
-        @returns void */
+        @param {!Object} event
+        @returns {undefined} */
     doMouseDown: function(event) {
         if (!this.disabled) this.setMouseDown(true);
     },
     
     /** Called when the mouse is up on this view. Subclasses must call super.
-        @returns void */
+        @param {!Object} event
+        @returns {undefined} */
     doMouseUp: function(event) {
         // Cleanup global mouse listener since the mouseUp occurred outside
         // the view.
@@ -87,7 +89,8 @@ myt.MouseDown = new JS.Module('MouseDown', {
     
     /** Called when the mouse is up and we are still over the view. Executes
         the 'doActivated' method by default.
-        @returns void */
+        @param {!Object} event
+        @returns {undefined} */
     doMouseUpInside: function(event) {
         if (this.doActivated) this.doActivated();
     }

@@ -120,7 +120,7 @@ myt.Form = new JS.Module('Form', {
     /** Allows bulk setting of validators.
         @param validators:array An array of myt.Validator instances or
             IDs of validators from the myt.global.validators registry.
-        @returns void */
+        @returns {undefined} */
     setValidators: function(validators) {
         var i = validators.length, validator;
         while (i) {
@@ -244,14 +244,14 @@ myt.Form = new JS.Module('Form', {
         @param id:string the ID for the accelerator.
         @param func:function the function to call when the accelerator 
             is invoked.
-        @returns void */
+        @returns {undefined} */
     addAccelerator: function(id, func) {
         this.__acc[id] = func;
     },
     
     /** Removes an accelerator from this form.
         @param id:string the ID for the accelerator.
-        @returns void */
+        @returns {undefined} */
     removeAccelerator: function(id) {
         delete this.__acc[id];
     },
@@ -259,7 +259,7 @@ myt.Form = new JS.Module('Form', {
     /** Executes an accelerator in this form with the provided ID.
         @param id:string The ID of the accelerator to invoke.
         @param value:* (optional) The value to pass to the function.
-        @returns void */
+        @returns {undefined} */
     invokeAccelerator: function(id, value) {
         var accelerator = this.__acc[id];
         if (accelerator) accelerator.call(this, value === undefined ? null : value);
@@ -267,7 +267,7 @@ myt.Form = new JS.Module('Form', {
     
     /** Adds a validator to this form.
         @param validator:myt.Validator The validator to add.
-        @returns void */
+        @returns {undefined} */
     addValidator: function(validator) {
         if (validator) this.__v.push(validator);
     },
@@ -297,7 +297,7 @@ myt.Form = new JS.Module('Form', {
     
     /** Adds an myt.Form to this form.
         @param subform:myt.Form the form to add as a subform.
-        @returns void */
+        @returns {undefined} */
     addSubForm: function(subform) {
         var id = subform.id;
         if (this.getSubForm(id) != null) {
@@ -366,7 +366,7 @@ myt.Form = new JS.Module('Form', {
     },
     
     /** Called when a subform changes to the "invalid" state.
-        @returns void */
+        @returns {undefined} */
     notifySubFormInvalid: function() {
         this.setIsValid(false);
     },
@@ -418,13 +418,13 @@ myt.Form = new JS.Module('Form', {
     
     /** Called whenever a value changes for the form or any subform therein.
         @param sourceForm:myt.Form the form that had a value change.
-        @returns void */
+        @returns {undefined} */
     notifyValueChanged: function(sourceForm) {
         if (this.form) this.form.notifyValueChanged(sourceForm);
     },
     
     /** Called when a subform changed to the "changed" state.
-        @returns void */
+        @returns {undefined} */
     notifySubFormChanged: function() {
         this.setIsChanged(true);
     },
@@ -449,7 +449,7 @@ myt.Form = new JS.Module('Form', {
         @param defaultValue:object The default value.
         @param rollbackValue:object The rollback value.
         @param value:object The current value.
-        @returns void */
+        @returns {undefined} */
     setup: function(defaultValue, rollbackValue, value) {
         this._lockCascade = true;
         this.setIsChanged(false);
@@ -466,7 +466,7 @@ myt.Form = new JS.Module('Form', {
     },
     
     /** Resets this form to the default values.
-        @returns void */
+        @returns {undefined} */
     resetForm: function() {
         this._lockCascade = true;
         
@@ -481,7 +481,7 @@ myt.Form = new JS.Module('Form', {
     },
     
     /** Rolls back this form to the rollback values.
-        @returns void */
+        @returns {undefined} */
     rollbackForm: function() {
         this._lockCascade = true;
         

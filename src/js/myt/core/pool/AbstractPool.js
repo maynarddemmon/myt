@@ -56,7 +56,7 @@ myt.AbstractPool = new JS.Class('AbstractPool', {
     /** Puts the object back in the pool. The object will be "cleaned"
         before it is stored.
         @param obj:object the object to put in the pool.
-        @returns void */
+        @returns {undefined} */
     putInstance: function(obj) {
         this.__getObjPool(true).push(this.cleanInstance(obj));
     },
@@ -73,7 +73,7 @@ myt.AbstractPool = new JS.Class('AbstractPool', {
     
     /** Calls the destroy method on all object stored in the pool if they
         have a destroy function.
-        @returns void */
+        @returns {undefined} */
     destroyPooledInstances: function() {
         var objPool = this.__getObjPool();
         if (objPool) {

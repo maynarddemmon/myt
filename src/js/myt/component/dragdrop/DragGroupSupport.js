@@ -40,7 +40,7 @@ myt.DragGroupSupport = new JS.Module('DragGroupSupport', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Adds the provided dragGroup to the dragGroups.
         @param dragGroup:string The drag group to add.
-        @returns void */
+        @returns {undefined} */
     addDragGroup: function(dragGroup) {
         if (dragGroup) {
             this.__dragGroups[dragGroup] = true;
@@ -50,7 +50,7 @@ myt.DragGroupSupport = new JS.Module('DragGroupSupport', {
     
     /** Removes the provided dragGroup from the dragGroups.
         @param dragGroup:string The drag group to remove.
-        @returns void */
+        @returns {undefined} */
     removeDragGroup: function(dragGroup) {
         if (dragGroup) {
             delete this.__dragGroups[dragGroup];

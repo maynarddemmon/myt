@@ -12,7 +12,7 @@
 myt.Destructible = new JS.Module('Destructible', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Destroys this Object. Subclasses must call super.
-        @returns void */
+        @returns {undefined} */
     destroy: function() {
         // See http://perfectionkills.com/understanding-delete/ for details
         // on how delete works. This is why we use Object.keys below since it

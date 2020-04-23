@@ -86,14 +86,14 @@
             extend: {
                 /** Increments the global lock that prevents all layouts 
                     from updating.
-                    @returns void */
+                    @returns {undefined} */
                 incrementGlobalLock: () => {
                     if (++globalLockCount === 1) setGlobalLock(true);
                 },
                 
                 /** Decrements the global lock that prevents all layouts 
                     from updating.
-                    @returns void */
+                    @returns {undefined} */
                 decrementGlobalLock: () => {
                     if (globalLockCount > 0 && --globalLockCount === 0) setGlobalLock(false);
                 }
@@ -185,7 +185,7 @@
             
             /** Updates the layout. Subclasses should call canUpdate to check lock 
                 state before trying to do anything.
-                @returns void */
+                @returns {undefined} */
             update: () => {},
             
             // Subview Methods //
@@ -205,7 +205,7 @@
             
             /** Adds the provided View to the subviews array of this Layout.
                 @param sv:View the view to add to this layout.
-                @returns void */
+                @returns {undefined} */
             addSubview: function(sv) {
                 if (!this.ignore(sv)) {
                     this.subviews.push(sv);
@@ -217,13 +217,13 @@
             /** Subclasses should implement this method to start listening to
                 events from the subview that should trigger the update method.
                 @param sv:View the view to start monitoring for changes.
-                @returns void */
+                @returns {undefined} */
             startMonitoringSubview: (sv) => {},
             
             /** Calls startMonitoringSubview for all views. Used by Layout 
                 implementations when a change occurs to the layout that requires
                 refreshing all the subview monitoring.
-                @returns void */
+                @returns {undefined} */
             startMonitoringAllSubviews: function() {
                 var svs = this.subviews,
                     i = svs.length;
@@ -249,13 +249,13 @@
                 events from the subview that would trigger the update method. This
                 should remove all listeners that were setup in startMonitoringSubview.
                 @param sv:View the view to stop monitoring for changes.
-                @returns void */
+                @returns {undefined} */
             stopMonitoringSubview: (sv) => {},
             
             /** Calls stopMonitoringSubview for all views. Used by Layout 
                 implementations when a change occurs to the layout that requires
                 refreshing all the subview monitoring.
-                @returns void */
+                @returns {undefined} */
             stopMonitoringAllSubviews: function() {
                 var svs = this.subviews,
                     i = svs.length;
@@ -270,21 +270,25 @@
             ignore: (sv) => sv.ignoreLayout,
             
             /** If our parent adds a new subview we should add it.
-                @private */
+                @private
+                @param {!Object} event
+                @returns {undefined} */
             __handleParentSubviewAddedEvent: function(event) {
                 if (event.value.parent === this.parent) this.addSubview(event.value);
             },
             
             /** If our parent removes a subview we should remove it.
-                @private */
+                @private
+                @param {!Object} event
+                @returns {undefined} */
             __handleParentSubviewRemovedEvent: function(event) {
                 if (event.value.parent === this.parent) this.removeSubview(event.value);
             },
             
             // Subview ordering //
             /** Sorts the subviews array according to the provided sort function.
-                @param sortFunc:function the sort function to sort the subviews with.
-                @returns void */
+                @param {?Function} sortFunc - The sort function to sort the subviews with.
+                @returns {undefined} */
             sortSubviews: function(sortFunc) {
                 this.subviews.sort(sortFunc);
             },
@@ -292,7 +296,9 @@
             /** Moves the subview before the target subview in the order the subviews
                 are layed out. If no target subview is provided, or it isn't in the
                 layout the subview will be moved to the front of the list.
-                @returns void */
+                @param {?Object} sv
+                @param {?Object} target
+                @returns {undefined} */
             moveSubviewBefore: function(sv, target) {
                 moveSubview(this, sv, target, false);
             },
@@ -300,7 +306,9 @@
             /** Moves the subview after the target subview in the order the subviews
                 are layed out. If no target subview is provided, or it isn't in the
                 layout the subview will be moved to the back of the list.
-                @returns void */
+                @param {?Object} sv
+                @param {?Object} target
+                @returns {undefined} */
             moveSubviewAfter: function(sv, target) {
                 moveSubview(this, sv, target, true);
             }
@@ -457,7 +465,7 @@
         
         /** Called by update before any processing is done. Gives subviews a
             chance to do any special setup before update is processed.
-            @returns void */
+            @returns {undefined} */
         doBeforeUpdate: () => {
             // Subclasses to implement as needed.
         },
@@ -465,7 +473,7 @@
         /** Called by update after any processing is done but before the optional
             collapsing of parent is done. Gives subviews a chance to do any 
             special teardown after update is processed.
-            @returns void */
+            @returns {undefined} */
         doAfterUpdate: () => {
             // Subclasses to implement as needed.
         },
@@ -509,7 +517,7 @@
             @param setterName:string the name of the setter method to call on
                 the parent.
             @param value:* the value to set on the parent.
-            @returns void */
+            @returns {undefined} */
         updateParent: (setterName, value) => {
             // Subclasses to implement as needed.
         }

@@ -166,7 +166,7 @@
         
         // Methods /////////////////////////////////////////////////////////////
         /** Does basic styling of a dialog and creates a close button.
-            @returns void */
+            @returns {undefined} */
         setupDialog: function() {
             var D = pkg.Dialog,
                 content = this.content;
@@ -227,7 +227,7 @@
         
         /** Called before a dialog is shown to reset state and cleanup UI elements
             from the previous display of the Dialog.
-            @returns void */
+            @returns {undefined} */
         destroyContent: function() {
             hideSpinner(this);
             
@@ -267,7 +267,7 @@
         /** Called by each of the buttons that can trigger the dialog to be hidden.
             @param sourceView:myt.View the view that triggered the hiding 
                 of the dialog.
-            @returns void */
+            @returns {undefined} */
         doCallback: function(sourceView) {
             var cbf = this.callbackFunction;
             if (!cbf || !cbf.call(this, sourceView.name)) this.hide();
@@ -276,7 +276,7 @@
         /** Shows this dialog as a regular dimmer.
             @param opts:object If opts.bgColor is provided it will be used for
                 the bgColor of the overlay.
-            @returns void */
+            @returns {undefined} */
         showBlank: function(opts) {
             this.destroyContent();
             
@@ -298,7 +298,7 @@
                 be aborted.
             @param opts:object (optional) options that modify how the message is 
                 displayed. Supports: fontWeight, whiteSpace, wordWrap and width.
-            @returns void */
+            @returns {undefined} */
         showMessage: function(msg, callbackFunction, opts) {
             var self = this,
                 D = pkg.Dialog,
@@ -385,7 +385,7 @@
             @param msg:string the message to show.
             @param opts:object options that modify how the message is displayed.
                 Supports: fontWeight, whiteSpace, wordWrap and width.
-            @returns void */
+            @returns {undefined} */
         showSpinner: function(msg, opts) {
             var self = this,
                 content = self.content;

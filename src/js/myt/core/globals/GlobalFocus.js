@@ -168,20 +168,20 @@
         // Methods /////////////////////////////////////////////////////////////
         /** Called by a FocusObservable when it has received focus.
             @param focusable:FocusObservable the view that received focus.
-            @returns void. */
+            @returns {undefined}. */
         notifyFocus: (focusable) => {
             if (globalFocus.focusedView !== focusable) globalFocus.setFocusedView(focusable);
         },
         
         /** Called by a FocusObservable when it has lost focus.
             @param focusable:FocusObservable the view that lost focus.
-            @returns void. */
+            @returns {undefined}. */
         notifyBlur: (focusable) => {
             if (globalFocus.focusedView === focusable) globalFocus.setFocusedView(null);
         },
         
         /** Clears the current focus.
-            @returns void */
+            @returns {undefined} */
         clear: () => {
             if (globalFocus.focusedView) {
                 globalFocus.focusedView.blur();
@@ -194,7 +194,7 @@
         // Focus Traversal //
         /** Move focus to the next focusable element.
             @param ignoreFocusTrap:boolean If true focus traps will be skipped over.
-            @returns void */
+            @returns {undefined} */
         next: (ignoreFocusTrap) => {
             var next = traverse(true, ignoreFocusTrap);
             if (next) next.focus();
@@ -202,7 +202,7 @@
         
         /** Move focus to the previous focusable element.
             @param ignoreFocusTrap:boolean If true focus traps will be skipped over.
-            @returns void */
+            @returns {undefined} */
         prev: (ignoreFocusTrap) => {
             var prev = traverse(false, ignoreFocusTrap);
             if (prev) prev.focus();

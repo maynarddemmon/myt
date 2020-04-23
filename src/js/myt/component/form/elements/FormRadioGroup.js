@@ -73,7 +73,9 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** @private */
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
         __syncValue: function(event) {
             this.setValue(event.value ? event.value.optionValue : null);
         }

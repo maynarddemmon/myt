@@ -137,7 +137,9 @@ myt.ThreePanel = new JS.Module('ThreePanel', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __updateSize: function(event) {
         var v = this.second;
         if (this.axis === 'x') {
@@ -147,13 +149,17 @@ myt.ThreePanel = new JS.Module('ThreePanel', {
         }
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __updateImageSize: function(event) {
         var v = this.second;
         v.setImageSize(this.repeat ? undefined : v.width + 'px ' + v.height + 'px');
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __updateRepeat: function(event) {
         this.second.setImageRepeat(
             this.repeat ? (this.axis === 'x' ? 'repeat-x' : 'repeat-y') : 'no-repeat'

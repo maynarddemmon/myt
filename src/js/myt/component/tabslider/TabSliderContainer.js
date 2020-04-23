@@ -82,6 +82,8 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** @param {!Object} event
+        @returns {undefined} */
     updateLayout: function(event) {
         var tabSliders = this._tabSliders, 
             i = tabSliders.length, 

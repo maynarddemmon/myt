@@ -36,7 +36,7 @@ myt.Disableable = new JS.Module('Disableable', {
     /** Called after the disabled attribute is set. Default behavior attempts
         to give away focus and calls the updateUI method of myt.UpdateableUI if 
         it is defined.
-        @returns void */
+        @returns {undefined} */
     doDisabled: function() {
         if (this.inited) {
             // Give away focus if we become disabled and this instance is

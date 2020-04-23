@@ -1,6 +1,9 @@
 ((pkg) => {
     var degreesToRadians = pkg.Geometry.degreesToRadians,
         
+        /*  Redraws the annulus
+            @param {!Object} annulus - The Annulus to redraw.
+            @returns {undefined} */
         redraw = (annulus) => {
             pkg.Annulus.draw(
                 annulus.__path, 
@@ -15,7 +18,9 @@
             );
         },
         
-        /** Ensures the size of the view exactly fits the annulus. */
+        /*  Ensures the size of the view exactly fits the annulus.
+            @param {!Object} annulus - The Annulus to update.
+            @returns {undefined} */
         updateSize = (annulus) => {
             var size = 2*(annulus.radius + annulus.thickness),
                 svg = annulus.__svg;
@@ -46,7 +51,7 @@
                     be drawn as a semicircle.
                 @param endCapRounding:boolean If true the ending cap will be
                     drawn as a semicircle.
-                @returns void */
+                @returns {undefined} */
             draw: (path, startAngle, endAngle, thickness, r1, c, color, startCapRounding, endCapRounding) => {
                 // Ensure endAngle is greater than or equal to startAngle
                 if (startAngle > endAngle) {

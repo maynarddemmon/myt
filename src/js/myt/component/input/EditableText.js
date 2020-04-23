@@ -103,7 +103,9 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
         }
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __cleanInput: function(event) {
         // Prevent enter key from inserting a div
         if (myt.KeyObservable.getKeyCodeFromEvent(event) === 13) {
@@ -164,7 +166,9 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
         this.restoreSelection();
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __userInteraction: function(event) {
         this.saveSelection();
         return true;

@@ -86,12 +86,16 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
         this.setBoxShadow();
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __filterInput: function(event) {
         this.setDomValue(this.filterInput(this.getDomValue()));
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __filterInputPress: function(event) {
         var domEvent = event.value,
             charCode = domEvent.which;
@@ -122,16 +126,18 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     /** A hook for subclasses/instances to do input filtering during key press.
         The default implementation does nothing.
         @param domEvent:object The dom key press event.
-        @returns void */
+        @returns {undefined} */
     filterInputPress: function(domEvent) {},
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __syncToDom: function(event) {
         this.setValue(this.getDomValue());
     },
     
     /** Gets the location of the caret.
-        @returns int. */
+        @returns {number} An integer. */
     getCaretPosition: function() {
         // IE Support
         if (document.selection) {
@@ -147,7 +153,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
         @param start:int the start of the selection or location of the caret
             if no end is provided.
         @param end:int (optional) the end of the selection.
-        @returns void */
+        @returns {undefined} */
     setCaretPosition: function(start, end) {
         if (end == null || start === end) {
             // Don't update if the current position already matches.
@@ -169,20 +175,20 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     },
     
     /** Sets the caret to the start of the text input.
-        @returns void */
+        @returns {undefined} */
     setCaretToStart: function() {
         this.setCaretPosition(0);
     },
     
     /** Sets the caret to the end of the text input.
-        @returns void */
+        @returns {undefined} */
     setCaretToEnd: function() {
         this.setCaretPosition(this.getDomValue().length);
     },
     
     // Selection //
     /** Selects all the text in the input element.
-        @returns void */
+        @returns {undefined} */
     selectAll: function() {
         this.getInnerDomElement().select();
     },

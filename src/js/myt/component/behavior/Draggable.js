@@ -119,12 +119,16 @@ myt.Draggable = new JS.Module('Draggable', {
         return [this];
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doContextMenu: function(event) {
         // Do nothing so the context menu event is supressed.
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doMouseDown: function(event) {
         var self = this,
             pos = myt.MouseObservable.getMouseFromEvent(event),
@@ -144,7 +148,9 @@ myt.Draggable = new JS.Module('Draggable', {
         return self.draggableAllowBubble;
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doMouseUp: function(event) {
         if (this.isDragging) {
             this.stopDrag(event, false);
@@ -156,12 +162,16 @@ myt.Draggable = new JS.Module('Draggable', {
         return this.draggableAllowBubble;
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __watchForAbort: function(event) {
         if (event.value === 27) this.stopDrag(event, true);
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doDragCheck: function(event) {
         var self = this,
             M = myt,
@@ -176,8 +186,8 @@ myt.Draggable = new JS.Module('Draggable', {
     /** Active until stopDrag is called. The view position will be bound
         to the mouse position. Subclasses typically call this onmousedown for
         subviews that allow dragging the view.
-        @param event:event The event the mouse event when the drag started.
-        @returns void */
+        @param {!Object} event - The event the mouse event when the drag started.
+        @returns {undefined} */
     startDrag: function(event) {
         var self = this,
             g = myt.global;
@@ -195,23 +205,29 @@ myt.Draggable = new JS.Module('Draggable', {
     },
     
     /** Called on every mousemove event while dragging.
-        @returns void */
+        @param {!Object} event
+        @returns {undefined} */
     updateDrag: function(event) {
         this.__lastMousePosition = myt.MouseObservable.getMouseFromEvent(event);
         this.__requestDragPosition();
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __updateDragInitX: function(event) {
         this.dragInitX = this.width / 2 * (this.scaleX || 1);
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __updateDragInitY: function(event) {
         this.dragInitY = this.height / 2 * (this.scaleY || 1);
     },
     
-    /** @private */
+    /** @private
+        @returns {undefined} */
     __requestDragPosition: function() {
         var self = this,
             pos = self.__lastMousePosition;
@@ -222,10 +238,10 @@ myt.Draggable = new JS.Module('Draggable', {
     },
     
     /** Stop the drag. (see startDrag for more details)
-        @param event:object The event that ended the drag.
-        @param isAbort:boolean Indicates if the drag ended normally or was
+        @param {!Object} event - The event that ended the drag.
+        @param {boolean} isAbort - Indicates if the drag ended normally or was
             aborted.
-        @returns void */
+        @returns {undefined} */
     stopDrag: function(event, isAbort) {
         var self = this,
             g = myt.global,
@@ -243,9 +259,9 @@ myt.Draggable = new JS.Module('Draggable', {
     /** Repositions the view to the provided values. The default implementation
         is to directly set x and y. Subclasses should override this method
         when it is necessary to constrain the position.
-        @param x:number the new x position.
-        @param y:number the new y position.
-        @returns void */
+        @param {number} x - the new x position.
+        @param {number} y - the new y position.
+        @returns {undefined} */
     requestDragPosition: function(x, y) {
         if (!this.disabled) {
             this.setX(x);

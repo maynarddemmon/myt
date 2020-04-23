@@ -127,12 +127,16 @@ myt.FormInputTextMixin = new JS.Module('FormInputTextMixin', {
         }
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __handleKeyDown: function(event) {
         if (myt.KeyObservable.getKeyCodeFromEvent(event) === 13) this.invokeAccelerator("accept");
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __handleKeyUp: function(event) {
         if (myt.KeyObservable.getKeyCodeFromEvent(event) === 27) this.invokeAccelerator("reject");
     },

@@ -500,12 +500,16 @@
             }
         },
         
-        /** @private */
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
         __doAlignCenter: function(event) {
             this.setX(Math.round((this.parent.width - this.width) / 2) + (this.alignOffset || 0));
         },
         
-        /** @private */
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
         __doAlignRight: function(event) {
             this.setX(this.parent.width - this.width - (this.alignOffset || 0));
         },
@@ -529,12 +533,16 @@
             }
         },
         
-        /** @private */
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
         __doValignMiddle: function(event) {
             this.setY(Math.round((this.parent.height - this.height) / 2) + (this.valignOffset || 0));
         },
         
-        /** @private */
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
         __doValignBottom: function(event) {
             this.setY(this.parent.height - this.height - (this.valignOffset || 0));
         },
@@ -665,7 +673,7 @@
             @private
             @param w:number the boundsWidth to set.
             @param h:number the boundsHeight to set.
-            @returns void */
+            @returns {undefined} */
         __updateBounds: function(w, h) {
             if (this.boundsWidth !== w) {
                 this.boundsWidth = w;
@@ -684,7 +692,7 @@
             will be supressed.
             @param v:array where index 0 is outlineWidth, index 1 is outline 
                 style and index 2 is outlineColor.
-            @returns void */
+            @returns {undefined} */
         setOutline: function(v) {
             v = v || [];
             this.setOutlineWidth(v[0]);
@@ -711,7 +719,7 @@
             will be supressed.
             @param v:array where index 0 is borderWidth, index 1 is border 
                 style and index 2 is borderColor.
-            @returns void */
+            @returns {undefined} */
         setBorder: function(v) {
             v = v || [];
             this.setBorderWidth(v[0]);
@@ -735,35 +743,35 @@
         // Edge treatements
         /** A convienence method to set rounded corners on an element.
             @param radius:number the radius of the corners.
-            @returns void */
+            @returns {undefined} */
         setRoundedCorners: function(radius) {
             this.getOuterDomStyle().borderRadius = radius + 'px';
         },
         
         /** A convienence method to round the top left corner.
             @param radius:number the radius of the corner.
-            @returns void */
+            @returns {undefined} */
         setRoundedTopLeftCorner: function(radius) {
             setRoundedCorner(this, radius, 'TopLeft');
         },
         
         /** A convienence method to round the top right corner.
             @param radius:number the radius of the corner.
-            @returns void */
+            @returns {undefined} */
         setRoundedTopRightCorner: function(radius) {
             setRoundedCorner(this, radius, 'TopRight');
         },
         
         /** A convienence method to round the bottom left corner.
             @param radius:number the radius of the corner.
-            @returns void */
+            @returns {undefined} */
         setRoundedBottomLeftCorner: function(radius) {
             setRoundedCorner(this, radius, 'BottomLeft');
         },
         
         /** A convienence method to round the bottom right corner.
             @param radius:number the radius of the corner.
-            @returns void */
+            @returns {undefined} */
         setRoundedBottomRightCorner: function(radius) {
             setRoundedCorner(this, radius, 'BottomRight');
         },
@@ -772,7 +780,7 @@
             @param v:array where index 0 is the horizontal shadow offset,
                 index 1 is the vertical shadow offset, index 2 is the blur amount,
                 and index 3 is the color.
-            @returns void */
+            @returns {undefined} */
         setBoxShadow: function(v) {
             if (v) {
                 var hShadow = v[0] || 0,
@@ -803,7 +811,7 @@
                     colors since it will let you use an opacity. For a more 
                     comprehensive description of how to specify color stops see: 
                     https://developer.mozilla.org/en-US/docs/Web/CSS/linear-gradient
-            @returns void */
+            @returns {undefined} */
         setGradient: function(v) {
             var self = this,
                 ods = self.getOuterDomStyle();
@@ -949,13 +957,13 @@
         /** Called when a View is added to this View. Do not call this method to 
             add a View. Instead call addSubnode or setParent.
             @param sv:View the view that was added.
-            @returns void */
+            @returns {undefined} */
         subviewAdded: (sv) => {},
         
         /** Called when a View is removed from this View. Do not call this method 
             to remove a View. Instead call removeSubnode or setParent.
             @param sv:View the view that was removed.
-            @returns void */
+            @returns {undefined} */
         subviewRemoved: (sv) => {},
         
         /** Gets the next sibling view based on lexical ordering of dom elements.
@@ -996,13 +1004,13 @@
         /** Called when a Layout is added to this View. Do not call this method to 
             add a Layout. Instead call addSubnode or setParent.
             @param layout:Layout the layout that was added.
-            @returns void */
+            @returns {undefined} */
         layoutAdded: (layout) => {},
         
         /** Called when a Layout is removed from this View. Do not call this 
             method to remove a Layout. Instead call removeSubnode or setParent.
             @param layout:Layout the layout that was removed.
-            @returns void */
+            @returns {undefined} */
         layoutRemoved: (layout) => {},
         
         // Dom-Ordering //
@@ -1050,7 +1058,7 @@
         
         /** Sends the provided subview to the back.
             @param sv:View the subview of this view to bring to front.
-            @returns void */
+            @returns {undefined} */
         bringSubviewToFront: function(sv) {
             if (sv && sv.parent === this) {
                 var innerElem = this.getInnerDomElement();
@@ -1064,7 +1072,7 @@
         
         /** Sends the provided subview to the back.
             @param sv:View the subview of this view to send to back.
-            @returns void */
+            @returns {undefined} */
         sendSubviewToBack: function(sv) {
             if (sv && sv.parent === this) {
                 var innerElem = this.getInnerDomElement();
@@ -1079,7 +1087,7 @@
         /** Sends the subview behind the existing subview.
             @param sv:View the subview to send behind the existing view.
             @param existing:View the subview to send the other subview behind.
-            @returns void */
+            @returns {undefined} */
         sendSubviewBehind: function(sv, existing) {
             if (sv && existing && sv.parent === this && existing.parent === this) {
                 var innerElem = this.getInnerDomElement();
@@ -1092,7 +1100,7 @@
         /** Sends the subview in front of the existing subview.
             @param sv:View the subview to send in front of the existing view.
             @param existing:View the subview to send the other subview in front of.
-            @returns void */
+            @returns {undefined} */
         sendSubviewInFrontOf: function(sv, existing) {
             if (sv && existing && sv.parent === this && existing.parent === this) {
                 this.sendSubviewBehind(sv, existing);
@@ -1104,7 +1112,7 @@
             Also rearranges the dom elements so that focus navigation and z
             ordering get updated.
             @param sortFunc:function the sort function to sort the subviews with.
-            @returns void */
+            @returns {undefined} */
         sortSubviews: function(sortFunc) {
             // Sort subviews
             var self = this,

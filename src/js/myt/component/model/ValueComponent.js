@@ -44,7 +44,7 @@ myt.ValueComponent = new JS.Module('ValueComponent', {
         @param filter:function the value filter to add.
         @param where:string (optional) Determines where to add the filter.
             Supported values are 'first' and 'last'. Defaults to 'first'.
-        @returns void */
+        @returns {undefined} */
     chainValueFilter: function(filter, where) {
         var existingFilter = this.valueFilter, chainedFilter = filter;
         if (existingFilter) {

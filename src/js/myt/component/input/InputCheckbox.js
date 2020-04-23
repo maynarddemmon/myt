@@ -58,12 +58,16 @@ myt.InputCheckbox = new JS.Class('InputCheckbox', myt.NativeInputWrapper, {
         }
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __syncToDom: function(event) {
         this.setValue(this.getInnerDomElement().checked);
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __handleMouseDown: function(event) {
         this.focus();
     }

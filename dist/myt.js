@@ -1,14 +1,15 @@
-/** Based on browser detection from: http://www.quirksmode.org/js/detect.html
-    
-    Events:
-        none
-    
-    Attributes:
-        browser:string The browser name.
-        version:number The browser version number.
-        os:string The operating system.
-*/
 ((pkg) => {
+    /* Based on browser detection from: http://www.quirksmode.org/js/detect.html
+        
+        Events:
+            none
+        
+        Attributes:
+            browser:string The browser name.
+            version:number The browser version number.
+            os:string The operating system.
+    */
+    
     var versionSearchString,
         
         searchString = (data) => {
@@ -281,19 +282,19 @@ Date.prototype.format = Date.prototype.format || (() => {
       /** Adds a single named method to a JS.Class/JS.Module. If you’re modifying 
           a class, the method instantly becomes available in instances of the 
           class, and in its subclasses.
-          @param name:string The name of the method to add.
-          @param callable:function The method implementation.
-          @param options:object (optional)
-          @returns void */
+          @param {string} name - The name of the method to add.
+          @param {!Function} callable - The method implementation.
+          @param {?Object} [options]
+          @returns {undefined} */
       define: function(name, callable, options) {
         this.__fns__[name] = exports.Method.create(this, name, callable);
         if ((options || {})._resolve !== false) this.resolve();
       },
     
       /** Mixes in a module to this module.
-          @param module:JS.Module The module to mix in.
-          @param options:object (optional)
-          @returns JS.Module this module. */
+          @param {!Function} module - The JS.Module to mix in.
+          @param {?Object} [options]
+          @returns {!Function) this JS.Module. */
       include: function(module, options) {
         if (module) {
           options = options || {};
@@ -338,7 +339,9 @@ Date.prototype.format = Date.prototype.format || (() => {
         return this;
       },
     
-      /** @private */
+      /** @private
+          @param {*} value
+          @returns {boolean} */
       _ignore: function(value) {
         return typeof value !== 'function' || (value.__fns__ && value.__inc__);
       },
@@ -368,10 +371,10 @@ Date.prototype.format = Date.prototype.format || (() => {
       },
     
       /** Gets the ancestor classes array.
-          @param list:array (optional) An array of ancestors that will have
+          @param {?Array} [list] - An array of ancestors that will have
             ancestor classes pushed onto. If not provided a new array will
             be created.
-          @return array */
+          @returns {!Array} */
       ancestors: function(list) {
         var cachable = !list,
             inc = this.__inc__;
@@ -388,8 +391,8 @@ Date.prototype.format = Date.prototype.format || (() => {
       },
     
       /** Gets an array of JS.Methods for the provided method name.
-          @param name:string The name of the method to lookup.
-          @return array An array of JS.Methods from the ancestors chain. */
+          @param {string} name - The name of the method to lookup.
+          @returns {!Array} An array of JS.Methods from the ancestors chain. */
       lookup: function(name) {
         var cached = this.__mct__[name];
         if (cached) return cached.slice();
@@ -406,8 +409,8 @@ Date.prototype.format = Date.prototype.format || (() => {
       },
     
       /** Checks if this module includes the provided module.
-          @param module:JS.Module The module to check for.
-          @return boolean True if the module is included, otherwise false. */
+          @param {!Function} module - The module to check for.
+          @returns {boolean} True if the module is included, otherwise false. */
       includes: function(module) {
         if (module === this) return true;
         
@@ -419,8 +422,8 @@ Date.prototype.format = Date.prototype.format || (() => {
       },
     
       /** Extracts a single named method from a module.
-          @param name:string The name of the method to extract.
-          @return JS.Method The extracted method. */
+          @param {string} name - The name of the method to extract.
+          @return {!Function) The extracted JS.Method. */
       instanceMethod: function(name) {
         return this.lookup(name).pop();
       }
@@ -444,8 +447,8 @@ Date.prototype.format = Date.prototype.format || (() => {
       },
     
       /** Checks if this object includes, extends or is the provided module.
-          @param module:JS.Module The module to check for.
-          @return boolean */
+          @param {!Function} module - The JS.Module module to check for.
+          @returns {boolean} */
       isA: function(module) {
         return (typeof module === 'function' && this instanceof module) || this.__eigen__().includes(module);
       },
@@ -562,27 +565,27 @@ Date.prototype.format = Date.prototype.format || (() => {
     });
 })(global.JS || (global.JS = {}));
 
-/**
- * http://github.com/maynarddemmon/myt
- * Maynard Demmon <maynarddemmon@gmail.com.
- * @copyright Copyright (c) 2012-2018 Maynard Demmon and contributors
- * Myt: A simple javascript UI framework
- * Version: 20170326.2144
- * MIT License
- * 
- * Parts of the Software incorporates code from the following open-source projects:
- * * JS.Class, (c) 2007-2012 James Coglan and contributors (MIT License)
- * * Easing Functions, (c) 2001 Robert Penner (BSD License)
- * * jQuery Easing v1.3, (c) 2008 George McGinley Smith (BSD License)
- * * jQuery Cookie Plugin v1.3.1, (c) 2013 Klaus Hartl (MIT License)
- * * parseUri 1.2.2, (c) Steven Levithan <stevenlevithan.com> (MIT License)
- * * Spin.js 1.3.0 (c) 2011-2013 Felix Gnass (the MIT license)
- * * date.format Date:03/10/15, Copyright (c) 2005 Jacob Wright https://github.com/jacwright/date.format
- * * k-d Tree JavaScript - v1.0 (c) Mircea Pricop <pricop@ubilabs.net>,
- *                                  Martin Kleppe <kleppe@ubilabs.net>,
- *                                  Ubilabs http://ubilabs.net (MIT License)
- */
 ((pkg) => {
+    /*
+     * http://github.com/maynarddemmon/myt
+     * Maynard Demmon <maynarddemmon@gmail.com>
+     * @copyright Copyright (c) 2012-2020 Maynard Demmon and contributors
+     * Myt: A simple javascript UI framework
+     * Version: 20200416.1227
+     * MIT License
+     * 
+     * Parts of the Software incorporates code from the following open-source projects:
+     * * JS.Class, (c) 2007-2012 James Coglan and contributors (MIT License)
+     * * Easing Functions, (c) 2001 Robert Penner (BSD License)
+     * * jQuery Easing v1.3, (c) 2008 George McGinley Smith (BSD License)
+     * * jQuery Cookie Plugin v1.3.1, (c) 2013 Klaus Hartl (MIT License)
+     * * parseUri 1.2.2, (c) Steven Levithan <stevenlevithan.com> (MIT License)
+     * * date.format Date:03/10/15, Copyright (c) 2005 Jacob Wright https://github.com/jacwright/date.format
+     * * k-d Tree JavaScript - v1.0 (c) Mircea Pricop <pricop@ubilabs.net>,
+     *                                  Martin Kleppe <kleppe@ubilabs.net>,
+     *                                  Ubilabs http://ubilabs.net (MIT License)
+     */
+    
     class FetchError extends Error {
         constructor(status, url, ...params) {
             super(...params);
@@ -593,7 +596,7 @@ Date.prototype.format = Date.prototype.format || (() => {
     }
     
     var 
-        /** Used to generate globally unique IDs. */
+        /* Used to generate globally unique IDs. */
         GUID_COUNTER = 0,
         
         myt = pkg.myt = {
@@ -606,23 +609,32 @@ Date.prototype.format = Date.prototype.format || (() => {
             IMAGE_ROOT: global.MYT_IMAGE_ROOT || '',
             
             /** Generates a globally unique id, (GUID).
-                @return number */
+                @returns {number} */
             generateGuid: () => ++GUID_COUNTER,
             
             /** Adds an event listener to a dom element. 
-                @param elem:DomElement the dom element to listen to.
-                @param type:string the name of the event to listen to.
-                @param callback:function the callback function that will be
+                @param elem:DomElement The dom element to listen to.
+                @param {string} type - The name of the event to listen to.
+                @param {Function} callback - The callback function that will be
                     registered for the event.
-                @param capture:boolean (optional) indicates if the listener is 
+                @param {boolean} [capture] indicates if the listener is 
                     registered during the capture phase or bubble phase.
-                @returns void */
+                @returns {undefined} */
             addEventListener: (elem, type, callback, capture, passive) => {
                 elem.addEventListener(type, callback, {
                     capture:capture || false,
                     passive:passive || false
                 });
             },
+            
+            /** Removes an event listener from a dom element. 
+                @param elem:DomElement The dom element to listen to.
+                @param {string} type - The name of the event to listen to.
+                @param {Function} callback - The callback function that will be
+                    registered for the event.
+                @param {boolean} [capture] indicates if the listener is 
+                    registered during the capture phase or bubble phase.
+                @returns {undefined} */
             removeEventListener: (elem, type, callback, capture) => {
                 elem.removeEventListener(type, callback, capture || false);
             },
@@ -630,11 +642,12 @@ Date.prototype.format = Date.prototype.format || (() => {
             /** Takes a '.' separated string such as "foo.bar.baz" and resolves it
                 into the value found at that location relative to a starting scope.
                 If no scope is provided global scope is used.
-                @param objName:string|array The name to resolve or an array of path
+                @param {string|Array} objName - The name to resolve or an array of path
                     parts in descending order.
-                @param scope:Object (optional) The scope to resolve from. If not
+                @param {Object} [scope] - The scope to resolve from. If not
                     provided global scope is used.
-                @returns The referenced object or undefined if resolution failed. */
+                @returns {?Object} The referenced object or undefined if 
+                    resolution failed. */
             resolveName: (objName, scope) => {
                 if (!objName || objName.length === 0) return undefined;
                 
@@ -664,8 +677,8 @@ Date.prototype.format = Date.prototype.format || (() => {
             },
             
             /** Gets the file extension from a file name.
-                @param fileName:string The filename to extract the extension from.
-                @returns a string of the file extension or null if a falsy fileName
+                @param {string} fileName - The filename to extract the extension from.
+                @returns {string) The file extension or null if a falsy fileName
                     argument was provided. */
             getExtension: function(fileName) {
                 return fileName ? fileName.split('.')[1] : null;
@@ -680,13 +693,11 @@ Date.prototype.format = Date.prototype.format || (() => {
                     myt.fillTextTemplate("{0}/{2}/{1} hey {0}", 1, 2, 3) 
                     will return "1/3/2 hey 1".
                 
-                @param (first arg):string The template to use.
-                @param (remaining args):(coerced to string) The parameters for the
-                    template.
-                @returns A populated string. */
-            fillTextTemplate: function(...params) {
-                var template = params.shift(),
-                    param,
+                @param {string} template - The template to use.
+                @param {...*} [params] - The parameters for the template.
+                @returns {string} A populated string. */
+            fillTextTemplate: function(template, ...params) {
+                var param,
                     i,
                     len;
                 
@@ -706,13 +717,13 @@ Date.prototype.format = Date.prototype.format || (() => {
                 method name, an ancestor search is performed on the dom starting with
                 the link element. The first myt managed dom element encountered is
                 used as the scope for the method.
-                @param text:string the text to put inside the link.
-                @param callbackMethodName:string the name of the method to execute.
-                @param attrs:object (optional) a map of additional attributes that
+                @param {string} text - The text to put inside the link.
+                @param {string) callbackMethodName - The name of the method to execute.
+                @param {?Object} [attrs] - a map of additional attributes that
                     will be inserted into the tag.
-                @param data:object (optional) Data that will be serialized as JSON
+                @param {?Object} [data] - Data that will be serialized as JSON
                     and provided to the link handler.
-                @returns void */
+                @returns {string} */
             generateLink: (text, callbackMethodName, attrs, data) => {
                 var optAttrs = '',
                     name;
@@ -728,7 +739,10 @@ Date.prototype.format = Date.prototype.format || (() => {
             
             /** See myt.generateLink for documentation.
                 @private
-                @returns void */
+                @param {?Object} elem
+                @param {string} callbackMethodName
+                @param {string} data
+                @returns {undefined} */
             __handleGeneratedLink: (elem, callbackMethodName, data) => {
                 var model,
                     value;
@@ -749,14 +763,14 @@ Date.prototype.format = Date.prototype.format || (() => {
             },
             
             /** Dynamically load a script into the dom.
-                @param src:string the URL to the script file.
-                @param callback:function (optional) A function that will be called
+                @param {string} src - The URL to the script file.
+                @param {Function} [callback] - A function that will be called
                     when the script loads.
-                @param noCacheBust:boolean (optional) If true, not cacheBust query
+                @param {boolean} [noCacheBust] - If true, not cacheBust query
                     param will be added. Defaults to undefined which is equivalent
                     to false.
-                @returns The created script element or null if the script has already
-                    been loaded. */
+                @returns {?Objecd} The created script element or null if the 
+                    script has already been loaded. */
             loadScript: function(src, callback, noCacheBust) {
                 // Prevent reloading the same script
                 var loadedScripts = this._loadedScripts || (this._loadedScripts = {});
@@ -796,39 +810,12 @@ Date.prototype.format = Date.prototype.format || (() => {
                 }
             },
             
-            /** UNUSED SO COMMENTING OUT FOR NOW.
-                
-                Used to wrap the first function with the second function. The first
-                function is exposed as this.callSuper within the wrapper function.
-                @param fn:function the function to wrap.
-                @param wrapperFn:function the wrapper function.
-                @returns a wrapped function.
-            wrapFunction: function(fn, wrapperFn) {
-                return function() {
-                    // Store existing callSuper function so we can put it back later.
-                    var oldSuper = this.callSuper;
-                    
-                    // Assign new callSuper and execute wrapperFn
-                    this.callSuper = fn;
-                    var retval = wrapperFn.apply(this, arguments);
-                    
-                    // Restore existing callSuper or delete new callSuper
-                    if (oldSuper !== undefined) {
-                        this.callSuper = oldSuper;
-                    } else {
-                        delete this.callSuper;
-                    }
-                    
-                    return retval;
-                };
-            },*/
-            
             /** A wrapper on myt.global.error.notify
-                @param err:Error/string The error or message to dump stack for.
-                @param type:string (optional) The type of console message to write.
-                    Allowed values are 'error', 'warn', 'log' and 'debug'. Defaults to
-                    'error'.
-                @returns void */
+                @param {string|Error} err - The error or message to dump stack for.
+                @param {string} [type] - The type of console message to write.
+                    Allowed values are 'error', 'warn', 'log' and 'debug'. 
+                    Defaults to 'error'.
+                @returns {undefined} */
             dumpStack: (err, type) => {
                 var msg;
                 if (typeof err === 'string') {
@@ -839,15 +826,15 @@ Date.prototype.format = Date.prototype.format || (() => {
             },
             
             // Random numbers
-            /** @returns a random number between 0 (inclusive) and 1 (exclusive)
-                @param func:function (optional) a distribution function for the
+            /** Generates a random number between 0 (inclusive) and 1 (exclusive)
+                @param {?Function} [func] - A distribution function for the
                     random numbers. The function should map a number between 0 and 1
                     to another number between 0 (inclusive) and 1 (exclusive). If not 
                     provided a flat distribution will be used. Example functions:
                         - function(v) {return v * v;} will skew the value towards 0.
                         - function(v) {return 0.9999999999 - v * v;} will skew the 
                           value towards a value very close to 1.
-                @returns number: a random number between 0 and almost 1. */
+                @returns {number} a random number between 0 and almost 1. */
             getRandom: (func) => {
                 var v = Math.random();
                 if (func) {
@@ -864,10 +851,11 @@ Date.prototype.format = Date.prototype.format || (() => {
             },
             
             /** @returns a random number between min (inclusive) and max (exclusive).
-                @param min:number the minimum value returned.
-                @param max:number the maximum value returned.
-                @param func:function a skew function. See myt.getRandom for more info.
-                @returns number: between min and max. */
+                @param {number} min - the minimum value returned.
+                @param {number} max - the maximum value returned.
+                @param {?Function} [func] - A distribution function. 
+                    See myt.getRandom for more info.
+                @returns {number} a number between min and max. */
             getRandomArbitrary: (min, max, func) => {
                 if (min > max) {
                     var tmp = min;
@@ -877,11 +865,12 @@ Date.prototype.format = Date.prototype.format || (() => {
                 return myt.getRandom(func) * (max - min) + min;
             },
             
-            /** @returns a random integer between min (inclusive) and max (inclusive)
-                @param min:number the minimum value returned.
-                @param max:number the maximum value returned.
-                @param func:function a skew function. See myt.getRandom for more info.
-                @returns number: an integer between min and max. */
+            /** Generates a random integer between min (inclusive) and max (inclusive)
+                @param {number} min - the minimum value returned.
+                @param {number} max - the maximum value returned.
+                @param {?Function} [func] - A distribution function. 
+                    See myt.getRandom for more info.
+                @returns {number} a number between min and max. */
             getRandomInt: (min, max, func) => {
                 if (min > max) {
                     var tmp = min;
@@ -893,11 +882,11 @@ Date.prototype.format = Date.prototype.format || (() => {
             
             // Equality
             /** Tests if two floats are essentially equal to each other.
-                @param a:float
-                @param b:float
-                @param epsilon:float (optional) the percent of difference allowed
+                @param {number} a - A float
+                @param {number} b - A float
+                @param {numer} [epsilon] - The percent of difference allowed
                     between a and b. Defaults to 0.000001 if not provided.
-                @return true if equal, false otherwise. */
+                @return {boolean} true if equal, false otherwise. */
             areFloatsEqual: (a, b, epsilon) => {
                 var A = Math.abs(a), B = Math.abs(b);
                 epsilon = epsilon ? Math.abs(epsilon) : 0.000001;
@@ -905,7 +894,10 @@ Date.prototype.format = Date.prototype.format || (() => {
             },
             
             /** Tests if two array are equal. For a more complete deep equal
-                implementation use underscore.js */
+                implementation use underscore.js
+                @param {?Array} a
+                @param {?Array} b
+                @returns {boolean} */
             areArraysEqual: (a, b) => {
                 if (a !== b) {
                     if (a == null || b == null) return false;
@@ -919,7 +911,10 @@ Date.prototype.format = Date.prototype.format || (() => {
                 return true;
             },
             
-            /** Tests if two objects are shallowly equal. */
+            /** Tests if two objects are shallowly equal.
+                @param {?Object} a
+                @param {?Object} b
+                @returns {boolean} */
             areObjectsEqual: (a, b) => {
                 if (a !== b) {
                     if (a == null || b == null) return false;
@@ -931,15 +926,17 @@ Date.prototype.format = Date.prototype.format || (() => {
             
             // DOM
             /** Gets the dom element of the provided tagname and index.
-                @param tagname:string (optional) the name of the tag to search for.
+                @param {string} [tagname] - The name of the tag to search for.
                     Defaults to 'body' if not provided
-                @param index:int (optional) the index of the tag to get. Defaults to
+                @param {number} [index] - The index of the tag to get. Defaults to
                     0 if not provided.
-                @returns a dom element or undefined if none exist. */
+                @returns {?Object} a dom element or undefined if none exist. */
             getElement: (tagname, index) => document.getElementsByTagName(tagname || 'body')[index > 0 ? index : 0],
             
             // CSS
-            loadCSSFonts: fontUrls => {
+            /** @param {Array} fontUrls
+                @returns {undefined} */
+            loadCSSFonts: (fontUrls) => {
                 (fontUrls || []).forEach(fontUrl => {
                     var link = document.createElement("link");
                     link.appendChild(document.createTextNode("")); // Webkit workaround
@@ -949,6 +946,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                 });
             },
             
+            /** @returns {Object} */
             createStylesheet: () => {
                 var style = document.createElement("style");
                 style.appendChild(document.createTextNode("")); // Webkit workaround
@@ -1085,7 +1083,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                 
                 // Define the "module".
                 /** Increments the counter attribute on the scope object by 1.
-                    @returns void */
+                    @returns {undefined} */
                 mod[incrName] = function() {
                     var value = this[counterAttrName] + 1;
                     this[counterAttrName] = value;
@@ -1094,7 +1092,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                 };
                 
                 /** Decrements the counter attribute on the scope object by 1.
-                    @returns void */
+                    @returns {undefined} */
                 mod[decrName] = function() {
                     var curValue = this[counterAttrName];
                     if (curValue === 0) return;
@@ -1158,7 +1156,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                         if (error.name !== 'FetchError') {
                             var fetchError = new FetchError(0, url, error.message);
                             fetchError.stack = error.stack;
-                            error = fetchError
+                            error = fetchError;
                         }
                         
                         errorFunc(error);
@@ -1261,7 +1259,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                             Otherwise encodeURIComponent will be used.
                         json:boolean If true JSON.stringify will be used to encode
                             the cookie value.
-                @returns void */
+                @returns {undefined} */
             write: (key, value, options) => {
                 options = Object.assign({}, Cookie.defaults, options);
                 
@@ -1377,7 +1375,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                     over a short time interval. For example, when saving the position
                     of a UI control as it is being repositioned or a value the user
                     is typing.
-                @returns void */
+                @returns {undefined} */
             setDatum: (key, value, storeId, delay) => {
                 storeId = getStoreId(storeId);
                 doFunc(() => {
@@ -1393,7 +1391,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                     from. If not provided the default "myt" storeId will be used.
                 @param delay:number (optional) A number of millis to wait before
                     actually removing the data.
-                @returns void */
+                @returns {undefined} */
             removeDatum: (key, storeId, delay) => {
                 storeId = getStoreId(storeId);
                 doFunc(() => {
@@ -1457,7 +1455,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                     not provided the default "myt" storeId will be used.
                 @param delay:number (optional) A number of millis to wait before
                     actually removing the data.
-                @returns void */
+                @returns {undefined} */
             removeData: (storeId, delay) => {
                 storeId = getStoreId(storeId);
                 doFunc(() => {LocalStorage.removeItem(storeId);}, delay, storeId);
@@ -1479,20 +1477,20 @@ Date.prototype.format = Date.prototype.format || (() => {
                 the key the value will be replaced with the new value.
                 @param key:string The key to store the value under.
                 @param value:* The value to store.
-                @returns void */
+                @returns {undefined} */
             setItem: (key, value) => {
                 localStorage.setItem(key, value);
             },
             
             /** Removes the storage entry for the key.
                 @param key:string The key to remove.
-                @returns void */
+                @returns {undefined} */
             removeItem: (key) => {
                 localStorage.removeItem(key);
             },
             
             /** Removes all storage entries.
-                @returns void */
+                @returns {undefined} */
             clear: () => {
                 localStorage.clear();
             },
@@ -1988,7 +1986,7 @@ myt.Observable = new JS.Module('Observable', {
     },
     
     /** Removes all observers from this Observable.
-        @returns void */
+        @returns {undefined} */
     detachAllObservers: function() {
         var observersByType = this.__obsbt;
         if (observersByType) {
@@ -2058,7 +2056,7 @@ myt.Observable = new JS.Module('Observable', {
         @param value:* The value to set on the event.
         @param observers:array (Optional) If provided the event will
             be sent to this specific list of observers and no others.
-        @returns void */
+        @returns {undefined} */
     fireEvent: function(type, value, observers) {
         // Determine observers to use
         var self = this;
@@ -2144,7 +2142,7 @@ myt.Observer = new JS.Module('Observer', {
             to pull the value from.
         @param once:boolean (optional) if true  this Observer will detach
             from the Observable after the event is handled once.
-        @returns void */
+        @returns {undefined} */
     syncTo: function(observable, methodName, eventType, attrName, once) {
         if (attrName === undefined) attrName = eventType;
         try {
@@ -2279,7 +2277,7 @@ myt.Observer = new JS.Module('Observer', {
     
     /** Tries to detach this Observer from all Observables it
         is attached to.
-        @returns void */
+        @returns {undefined} */
     detachFromAllObservables: function() {
         var observablesByType = this.__obt;
         if (observablesByType) {
@@ -2316,7 +2314,7 @@ myt.Constrainable = new JS.Module('Constrainable', {
         @param methodName:String The name of the method to call on this object.
         @param observables:array An array of observable/type pairs. An observer
             will attach to each observable for the event type.
-        @returns void */
+        @returns {undefined} */
     constrain: function(methodName, observables) {
         if (methodName && observables) {
             // Make sure an even number of observable/type was provided
@@ -2356,7 +2354,7 @@ myt.Constrainable = new JS.Module('Constrainable', {
     },
     
     /** Removes a constraint.
-        @returns void */
+        @returns {undefined} */
     releaseConstraint: function(methodName) {
         if (methodName) {
             // No need to remove if the constraint is already empty.
@@ -2379,7 +2377,7 @@ myt.Constrainable = new JS.Module('Constrainable', {
     },
     
     /** Removes all constraints.
-        @returns void */
+        @returns {undefined} */
     releaseAllConstraints: function() {
         var constraints = this.__cbmn,
             methodName;
@@ -2405,7 +2403,7 @@ myt.global = new JS.Singleton('Global', {
     /** Registers the provided global under the key. Fires a register<key>
         event. If a global is already registered under the key the existing
         global is unregistered first.
-        @returns void */
+        @returns {undefined} */
     register: function(key, v) {
         if (this.hasOwnProperty(key)) {
             console.log("Warning: myt.global key in use: ", key);
@@ -2417,7 +2415,7 @@ myt.global = new JS.Singleton('Global', {
     
     /** Unegisters the global for the provided key. Fires an unregister<key>
         event if the key exists.
-        @returns void */
+        @returns {undefined} */
     unregister: function(key) {
         if (this.hasOwnProperty(key)) {
             var v = this[key];
@@ -2668,7 +2666,7 @@ new JS.Singleton('GlobalError', {
                 @param eventName:string the name of the dom event to generate.
                 @param customOpts:Object (optional) a map of options that will
                     be added onto the dom event object.
-                @returns void */
+                @returns {undefined} */
             simulateDomEvent: (elem, eventName, customOpts) => {
                 if (elem) {
                     var opts = {
@@ -2765,14 +2763,14 @@ new JS.Singleton('GlobalError', {
         },
         
         /** Removes this DomElementProxy's dom element from its parent node.
-            @returns void */
+            @returns {undefined} */
         removeDomElement: function() {
             var de = this.getOuterDomElement();
             de.parentNode.removeChild(de);
         },
         
         /** Called when this DomElementProxy is destroyed.
-            @returns void */
+            @returns {undefined} */
         disposeOfDomElement: function() {
             delete this.domElement.model;
             delete this.deStyle;
@@ -2785,14 +2783,14 @@ new JS.Singleton('GlobalError', {
         
         /** Sets the dom "class" attribute on the dom element.
             @param v:string the dom class name.
-            @returns void */
+            @returns {undefined} */
         setDomClass: function(v) {
             this.domElement.className = this.domClass = v;
         },
         
         /** Adds a dom "class" to the existing dom classes on the dom element.
             @param v:string the dom class to add.
-            @returns void */
+            @returns {undefined} */
         addDomClass: function(v) {
             var existing = this.domElement.className;
             this.setDomClass((existing ? existing + ' ' : '') + v);
@@ -2800,7 +2798,7 @@ new JS.Singleton('GlobalError', {
         
         /** Removes a dom "class" from the dom element.
             @param v:string the dom class to remove.
-            @returns void */
+            @returns {undefined} */
         removeDomClass: function(v) {
             var existing = this.domElement.className,
                 parts,
@@ -2816,21 +2814,21 @@ new JS.Singleton('GlobalError', {
         },
         
         /** Clears the dom "class".
-            @returns void */
+            @returns {undefined} */
         clearDomClass: function() {
             this.setDomClass('');
         },
         
         /** Sets the dom "id" attribute on the dom element.
             @param v:string the dom id name.
-            @returns void */
+            @returns {undefined} */
         setDomId: function(v) {
             this.domElement.id = this.domId = v;
         },
         
         /** Set the z-index of the dom element.
             @param v:number the z-index to set.
-            @returns void */
+            @returns {undefined} */
         setZIndex: function(v) {
             this.deStyle.zIndex = v;
         },
@@ -2838,7 +2836,7 @@ new JS.Singleton('GlobalError', {
         /** Set an arbitrary CSS style on the dom element.
             @param propertyName:string the name of the CSS property to set.
             @param v:* the value to set.
-            @returns void */
+            @returns {undefined} */
         setStyleProperty: function(propertyName, v) {
             this.deStyle[propertyName] = v;
         },
@@ -2862,7 +2860,7 @@ new JS.Singleton('GlobalError', {
         },
         
         /** Generates a dom event "click" on this proxy's dom element.
-            @returns void */
+            @returns {undefined} */
         simulateClick: function() {
             DomElementProxy.simulateDomEvent(this.domElement, 'click');
         },
@@ -2892,7 +2890,7 @@ new JS.Singleton('GlobalError', {
         
         /** Makes this dom element proxy the one with the highest z-index 
             relative to its sibling dom elements.
-            @returns void */
+            @returns {undefined} */
         makeHighestZIndex: function() {
             this.setZIndex(this.parent.getHighestChildZIndex(this.domElement) + 1);
         }
@@ -3035,7 +3033,7 @@ myt.DomObservable = new JS.Module('DomObservable', {
     },
     
     /** Detaches all dom observers from this DomObservable.
-        @returns void */
+        @returns {undefined} */
     detachAllDomObservers: function() {
         var domElement = this.getInnerDomElement();
         if (domElement) {
@@ -3081,7 +3079,7 @@ myt.DomObserver = new JS.Module('DomObserver', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Attaches this DomObserver to the provided DomObservable for the 
         provided type.
-        @returns void */
+        @returns {undefined} */
     attachToDom: function(observable, methodName, type, capture, passive) {
         if (observable && methodName && type) {
             capture = !!capture;
@@ -3134,7 +3132,7 @@ myt.DomObserver = new JS.Module('DomObserver', {
     },
     
     /** Detaches this DomObserver from all DomObservables it is attached to.
-        @returns void */
+        @returns {undefined} */
     detachFromAllDomSources: function() {
         var observablesByType = this.__dobt,
             type,
@@ -3168,8 +3166,8 @@ myt.KeyObservable = new JS.Module('KeyObservable', {
         EVENT:{source:null, type:null, value:null},
         
         /** Gets the key code from the provided key event.
-            @param event:event
-            @returns number The keycode from the event. */
+            @param {!Object} event
+            @returns {number} The keycode from the event. */
         getKeyCodeFromEvent: function(event) {
             var domEvent = event.value, 
                 keyCode = domEvent.keyCode;
@@ -3357,20 +3355,20 @@ myt.KeyObservable = new JS.Module('KeyObservable', {
         // Methods /////////////////////////////////////////////////////////////
         /** Called by a FocusObservable when it has received focus.
             @param focusable:FocusObservable the view that received focus.
-            @returns void. */
+            @returns {undefined}. */
         notifyFocus: (focusable) => {
             if (globalFocus.focusedView !== focusable) globalFocus.setFocusedView(focusable);
         },
         
         /** Called by a FocusObservable when it has lost focus.
             @param focusable:FocusObservable the view that lost focus.
-            @returns void. */
+            @returns {undefined}. */
         notifyBlur: (focusable) => {
             if (globalFocus.focusedView === focusable) globalFocus.setFocusedView(null);
         },
         
         /** Clears the current focus.
-            @returns void */
+            @returns {undefined} */
         clear: () => {
             if (globalFocus.focusedView) {
                 globalFocus.focusedView.blur();
@@ -3383,7 +3381,7 @@ myt.KeyObservable = new JS.Module('KeyObservable', {
         // Focus Traversal //
         /** Move focus to the next focusable element.
             @param ignoreFocusTrap:boolean If true focus traps will be skipped over.
-            @returns void */
+            @returns {undefined} */
         next: (ignoreFocusTrap) => {
             var next = traverse(true, ignoreFocusTrap);
             if (next) next.focus();
@@ -3391,7 +3389,7 @@ myt.KeyObservable = new JS.Module('KeyObservable', {
         
         /** Move focus to the previous focusable element.
             @param ignoreFocusTrap:boolean If true focus traps will be skipped over.
-            @returns void */
+            @returns {undefined} */
         prev: (ignoreFocusTrap) => {
             var prev = traverse(false, ignoreFocusTrap);
             if (prev) prev.focus();
@@ -3991,7 +3989,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
             
             /** Creates a standard setter function for the provided attrName on the
                 target. This assumes the target is an myt.Observable.
-                @returns void */
+                @returns {undefined} */
             createSetterFunction: (target, attrName) => {
                 var setterName = generateSetterName(attrName);
                 if (target[setterName]) console.log("Overwriting setter", setterName);
@@ -4005,7 +4003,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
             
             /** Creates a standard getter function for the provided attrName on the
                 target.
-                @returns void */
+                @returns {undefined} */
             createGetterFunction: (target, attrName) => {
                 var getterName = generateGetterName(attrName);
                 if (target[getterName]) console.log("Overwriting getter", getterName);
@@ -4022,7 +4020,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
         
         /** Calls a setter function for each attribute in the provided map.
             @param attrs:object a map of attributes to set.
-            @returns void. */
+            @returns {undefined}. */
         callSetters: function(attrs) {
             var self = this,
                 earlyAttrs = self.earlyAttrs,
@@ -4095,7 +4093,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
             @param skipSetter:boolean (optional) If true no attempt will be made to
                 invoke a setter function. Useful when you want to invoke standard 
                 setter behavior. Defaults to undefined which is equivalent to false.
-            @returns void */
+            @returns {undefined} */
         set: function(attrName, v, skipSetter) {
             var self = this,
                 setterName;
@@ -4128,7 +4126,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
 myt.Destructible = new JS.Module('Destructible', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Destroys this Object. Subclasses must call super.
-        @returns void */
+        @returns {undefined} */
     destroy: function() {
         // See http://perfectionkills.com/understanding-delete/ for details
         // on how delete works. This is why we use Object.keys below since it
@@ -4164,7 +4162,7 @@ myt.Reusable = new JS.Module('Reusable', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Puts this object back into a default state suitable for storage in
         an myt.AbstractPool
-        @returns void */
+        @returns {undefined} */
     clean: function() {}
 });
 
@@ -4227,7 +4225,7 @@ myt.AbstractPool = new JS.Class('AbstractPool', {
     /** Puts the object back in the pool. The object will be "cleaned"
         before it is stored.
         @param obj:object the object to put in the pool.
-        @returns void */
+        @returns {undefined} */
     putInstance: function(obj) {
         this.__getObjPool(true).push(this.cleanInstance(obj));
     },
@@ -4244,7 +4242,7 @@ myt.AbstractPool = new JS.Class('AbstractPool', {
     
     /** Calls the destroy method on all object stored in the pool if they
         have a destroy function.
-        @returns void */
+        @returns {undefined} */
     destroyPooledInstances: function() {
         var objPool = this.__getObjPool();
         if (objPool) {
@@ -4275,7 +4273,7 @@ myt.SimplePool = new JS.Class('SimplePool', myt.AbstractPool, {
         @param instanceClass:JS.Class the class to create instances from.
         @param instanceParent:object (optional) The place to create instances 
             on. When instanceClass is an myt.Node this will be the node parent.
-        @returns void */
+        @returns {undefined} */
     initialize: function(instanceClass, instanceParent) {
         this.callSuper();
         
@@ -4382,7 +4380,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
     },
     
     /** Puts all the active instances back in the pool.
-        @returns void */
+        @returns {undefined} */
     putActives: function() {
         var actives = this.__getActives();
         if (actives) {
@@ -4513,7 +4511,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
             @param attrs:object (Optional) A map of attribute names and values.
             @param mixins:array (Optional) a list of mixins to be added onto
                 the new instance.
-            @returns void */
+            @returns {undefined} */
         initialize: function(parent, attrs, mixins) {
             var self = this;
             if (mixins) {
@@ -4538,7 +4536,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
             @param parent:Node (or dom element for RootViews) the parent of 
                 this Node.
             @param attrs:object A map of attribute names and values.
-            @returns void */
+            @returns {undefined} */
         initNode: function(parent, attrs) {
             var self = this;
             self.callSetters(attrs);
@@ -4556,12 +4554,12 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
             be measured until insertion into the DOM so you may want to use
             doAfterAdoption for creating subviews since it will give you less
             trouble though it will be slower.
-            @returns void */
+            @returns {undefined} */
         doBeforeAdoption: () => {},
         
         /** Provides a hook for subclasses to do things after this Node has its
             parent assigned.
-            @returns void */
+            @returns {undefined} */
         doAfterAdoption: () => {},
         
         /** @overrides myt.Destructible. */
@@ -4595,13 +4593,13 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
             This method is called after subnodes have been destroyed but before
             the parent has been unset.
             Subclasses should call super.
-            @returns void */
+            @returns {undefined} */
         destroyBeforeOrphaning: () => {},
         
         /** Provides a hook for subclasses to do destruction of their internals.
             This method is called after the parent has been unset.
             Subclasses must call super.
-            @returns void */
+            @returns {undefined} */
         destroyAfterOrphaning: function() {
             this.releaseAllConstraints();
             this.detachFromAllObservables();
@@ -4832,7 +4830,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
             standard way to do this is to call the setParent method on the
             prospective child Node.
             @param node:Node the subnode to add.
-            @returns void */
+            @returns {undefined} */
         addSubnode: function(node) {
             node.setParent(this);
         },
@@ -4852,14 +4850,14 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
             subclasses. No need for subclasses to call super. Do not call this
             method to add a subnode. Instead call addSubnode or setParent.
             @param node:Node the subnode that was added.
-            @returns void */
+            @returns {undefined} */
         subnodeAdded: (node) => {},
         
         /** Called when a subnode is removed from this node. Provides a hook for
             subclasses. No need for subclasses to call super. Do not call this
             method to remove a subnode. Instead call removeSubnode or setParent.
             @param node:Node the subnode that was removed.
-            @returns void */
+            @returns {undefined} */
         subnodeRemoved: (node) => {},
         
         // Animation
@@ -4943,7 +4941,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
                 be used as a matching attribute name.
             @param executeCallbacks:boolean (optional) if true animator 
                 callbacks will be executed if they exist.
-            @returns void */
+            @returns {undefined} */
         stopActiveAnimators: function(filterFunc, executeCallbacks=false) {
             var activeAnims = this.getActiveAnimators(filterFunc),
                 i = activeAnims.length,
@@ -4963,7 +4961,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
         /** A convienence method to execute a method once on idle.
             @param methodName:string The name of the method to execute on
                 this object.
-            @returns void */
+            @returns {undefined} */
         doOnceOnIdle: function(methodName) {
             this.attachTo(pkg.global.idle, methodName, 'idle', true);
         }
@@ -5059,14 +5057,14 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
             extend: {
                 /** Increments the global lock that prevents all layouts 
                     from updating.
-                    @returns void */
+                    @returns {undefined} */
                 incrementGlobalLock: () => {
                     if (++globalLockCount === 1) setGlobalLock(true);
                 },
                 
                 /** Decrements the global lock that prevents all layouts 
                     from updating.
-                    @returns void */
+                    @returns {undefined} */
                 decrementGlobalLock: () => {
                     if (globalLockCount > 0 && --globalLockCount === 0) setGlobalLock(false);
                 }
@@ -5158,7 +5156,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
             
             /** Updates the layout. Subclasses should call canUpdate to check lock 
                 state before trying to do anything.
-                @returns void */
+                @returns {undefined} */
             update: () => {},
             
             // Subview Methods //
@@ -5178,7 +5176,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
             
             /** Adds the provided View to the subviews array of this Layout.
                 @param sv:View the view to add to this layout.
-                @returns void */
+                @returns {undefined} */
             addSubview: function(sv) {
                 if (!this.ignore(sv)) {
                     this.subviews.push(sv);
@@ -5190,13 +5188,13 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
             /** Subclasses should implement this method to start listening to
                 events from the subview that should trigger the update method.
                 @param sv:View the view to start monitoring for changes.
-                @returns void */
+                @returns {undefined} */
             startMonitoringSubview: (sv) => {},
             
             /** Calls startMonitoringSubview for all views. Used by Layout 
                 implementations when a change occurs to the layout that requires
                 refreshing all the subview monitoring.
-                @returns void */
+                @returns {undefined} */
             startMonitoringAllSubviews: function() {
                 var svs = this.subviews,
                     i = svs.length;
@@ -5222,13 +5220,13 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
                 events from the subview that would trigger the update method. This
                 should remove all listeners that were setup in startMonitoringSubview.
                 @param sv:View the view to stop monitoring for changes.
-                @returns void */
+                @returns {undefined} */
             stopMonitoringSubview: (sv) => {},
             
             /** Calls stopMonitoringSubview for all views. Used by Layout 
                 implementations when a change occurs to the layout that requires
                 refreshing all the subview monitoring.
-                @returns void */
+                @returns {undefined} */
             stopMonitoringAllSubviews: function() {
                 var svs = this.subviews,
                     i = svs.length;
@@ -5243,21 +5241,25 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
             ignore: (sv) => sv.ignoreLayout,
             
             /** If our parent adds a new subview we should add it.
-                @private */
+                @private
+                @param {!Object} event
+                @returns {undefined} */
             __handleParentSubviewAddedEvent: function(event) {
                 if (event.value.parent === this.parent) this.addSubview(event.value);
             },
             
             /** If our parent removes a subview we should remove it.
-                @private */
+                @private
+                @param {!Object} event
+                @returns {undefined} */
             __handleParentSubviewRemovedEvent: function(event) {
                 if (event.value.parent === this.parent) this.removeSubview(event.value);
             },
             
             // Subview ordering //
             /** Sorts the subviews array according to the provided sort function.
-                @param sortFunc:function the sort function to sort the subviews with.
-                @returns void */
+                @param {?Function} sortFunc - The sort function to sort the subviews with.
+                @returns {undefined} */
             sortSubviews: function(sortFunc) {
                 this.subviews.sort(sortFunc);
             },
@@ -5265,7 +5267,9 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
             /** Moves the subview before the target subview in the order the subviews
                 are layed out. If no target subview is provided, or it isn't in the
                 layout the subview will be moved to the front of the list.
-                @returns void */
+                @param {?Object} sv
+                @param {?Object} target
+                @returns {undefined} */
             moveSubviewBefore: function(sv, target) {
                 moveSubview(this, sv, target, false);
             },
@@ -5273,7 +5277,9 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
             /** Moves the subview after the target subview in the order the subviews
                 are layed out. If no target subview is provided, or it isn't in the
                 layout the subview will be moved to the back of the list.
-                @returns void */
+                @param {?Object} sv
+                @param {?Object} target
+                @returns {undefined} */
             moveSubviewAfter: function(sv, target) {
                 moveSubview(this, sv, target, true);
             }
@@ -5430,7 +5436,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
         
         /** Called by update before any processing is done. Gives subviews a
             chance to do any special setup before update is processed.
-            @returns void */
+            @returns {undefined} */
         doBeforeUpdate: () => {
             // Subclasses to implement as needed.
         },
@@ -5438,7 +5444,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
         /** Called by update after any processing is done but before the optional
             collapsing of parent is done. Gives subviews a chance to do any 
             special teardown after update is processed.
-            @returns void */
+            @returns {undefined} */
         doAfterUpdate: () => {
             // Subclasses to implement as needed.
         },
@@ -5482,7 +5488,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
             @param setterName:string the name of the setter method to call on
                 the parent.
             @param value:* the value to set on the parent.
-            @returns void */
+            @returns {undefined} */
         updateParent: (setterName, value) => {
             // Subclasses to implement as needed.
         }
@@ -5516,8 +5522,8 @@ myt.MouseObservable = new JS.Module('MouseObservable', {
         EVENT:{source:null, type:null, value:null},
         
         /** Gets the mouse coordinates from the provided event.
-            @param event
-            @returns object: An object with 'x' and 'y' keys containing the
+            @param {!Object} event
+            @returns {!Object} An object with 'x' and 'y' keys containing the
                 x and y mouse position. */
         getMouseFromEvent: function(event) {
             var domEvent = event.value;
@@ -5657,7 +5663,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Gives the focus to the next focusable element or, if nothing else
         is focusable, blurs away from this element.
-        @returns void */
+        @returns {undefined} */
     giveAwayFocus: function() {
         if (this.focused) {
             // Try to go to next focusable element.
@@ -5679,19 +5685,21 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
     /** Calling this method will set focus onto this view if it is focusable.
         @param noScroll:boolean (optional) if true is provided no auto-scrolling
             will occur when focus is set.
-        @returns void */
+        @returns {undefined} */
     focus: function(noScroll) {
         if (this.isFocusable()) this.getInnerDomElement().focus({preventScroll:noScroll});
     },
     
     /** Removes the focus from this view. Do not call this method directly.
         @private
-        @returns void */
+        @returns {undefined} */
     blur: function() {
         this.getInnerDomElement().blur();
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doFocus: function(event) {
         if (!this.focused) {
             this.setFocused(true);
@@ -5699,7 +5707,9 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
         }
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doBlur: function(event) {
         if (this.focused) {
             this.doBlur();
@@ -5707,6 +5717,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
         }
     },
     
+    /** @returns {undefined} */
     doFocus: function() {
         if (this.focusEmbellishment) {
             this.showFocusEmbellishment();
@@ -5715,10 +5726,12 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
         }
     },
     
+    /** @returns {undefined} */
     doBlur: function() {
         if (this.focusEmbellishment) this.hideFocusEmbellishment();
     },
     
+    /** @returns {undefined} */
     showFocusEmbellishment: function() {
         // IE
         this.getInnerDomElement().hideFocus = false;
@@ -5731,11 +5744,13 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
         s.outlineOffset = '0px';
     },
     
+    /** @returns {undefined} */
     hideFocusEmbellishment: function() {
         this.hideDefaultFocusEmbellishment();
     },
     
-    /** Hides the browser's default focus embellishment. */
+    /** Hides the browser's default focus embellishment.
+        @returns {undefined}*/
     hideDefaultFocusEmbellishment: function() {
         // IE
         this.getInnerDomElement().hideFocus = true;
@@ -5795,7 +5810,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         EVENT:{source:null, type:null, value:null},
         
         /** Gets the scrollLeft and scrollTop from the event.
-            @param event:event
+            @param {!Object} event
             @returns object with an x and y key each containing a number. */
         getScrollFromEvent: function(event) {
             var domEvent = event.value,
@@ -6316,12 +6331,16 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             }
         },
         
-        /** @private */
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
         __doAlignCenter: function(event) {
             this.setX(Math.round((this.parent.width - this.width) / 2) + (this.alignOffset || 0));
         },
         
-        /** @private */
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
         __doAlignRight: function(event) {
             this.setX(this.parent.width - this.width - (this.alignOffset || 0));
         },
@@ -6345,12 +6364,16 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             }
         },
         
-        /** @private */
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
         __doValignMiddle: function(event) {
             this.setY(Math.round((this.parent.height - this.height) / 2) + (this.valignOffset || 0));
         },
         
-        /** @private */
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
         __doValignBottom: function(event) {
             this.setY(this.parent.height - this.height - (this.valignOffset || 0));
         },
@@ -6481,7 +6504,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             @private
             @param w:number the boundsWidth to set.
             @param h:number the boundsHeight to set.
-            @returns void */
+            @returns {undefined} */
         __updateBounds: function(w, h) {
             if (this.boundsWidth !== w) {
                 this.boundsWidth = w;
@@ -6500,7 +6523,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             will be supressed.
             @param v:array where index 0 is outlineWidth, index 1 is outline 
                 style and index 2 is outlineColor.
-            @returns void */
+            @returns {undefined} */
         setOutline: function(v) {
             v = v || [];
             this.setOutlineWidth(v[0]);
@@ -6527,7 +6550,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             will be supressed.
             @param v:array where index 0 is borderWidth, index 1 is border 
                 style and index 2 is borderColor.
-            @returns void */
+            @returns {undefined} */
         setBorder: function(v) {
             v = v || [];
             this.setBorderWidth(v[0]);
@@ -6551,35 +6574,35 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         // Edge treatements
         /** A convienence method to set rounded corners on an element.
             @param radius:number the radius of the corners.
-            @returns void */
+            @returns {undefined} */
         setRoundedCorners: function(radius) {
             this.getOuterDomStyle().borderRadius = radius + 'px';
         },
         
         /** A convienence method to round the top left corner.
             @param radius:number the radius of the corner.
-            @returns void */
+            @returns {undefined} */
         setRoundedTopLeftCorner: function(radius) {
             setRoundedCorner(this, radius, 'TopLeft');
         },
         
         /** A convienence method to round the top right corner.
             @param radius:number the radius of the corner.
-            @returns void */
+            @returns {undefined} */
         setRoundedTopRightCorner: function(radius) {
             setRoundedCorner(this, radius, 'TopRight');
         },
         
         /** A convienence method to round the bottom left corner.
             @param radius:number the radius of the corner.
-            @returns void */
+            @returns {undefined} */
         setRoundedBottomLeftCorner: function(radius) {
             setRoundedCorner(this, radius, 'BottomLeft');
         },
         
         /** A convienence method to round the bottom right corner.
             @param radius:number the radius of the corner.
-            @returns void */
+            @returns {undefined} */
         setRoundedBottomRightCorner: function(radius) {
             setRoundedCorner(this, radius, 'BottomRight');
         },
@@ -6588,7 +6611,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             @param v:array where index 0 is the horizontal shadow offset,
                 index 1 is the vertical shadow offset, index 2 is the blur amount,
                 and index 3 is the color.
-            @returns void */
+            @returns {undefined} */
         setBoxShadow: function(v) {
             if (v) {
                 var hShadow = v[0] || 0,
@@ -6619,7 +6642,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
                     colors since it will let you use an opacity. For a more 
                     comprehensive description of how to specify color stops see: 
                     https://developer.mozilla.org/en-US/docs/Web/CSS/linear-gradient
-            @returns void */
+            @returns {undefined} */
         setGradient: function(v) {
             var self = this,
                 ods = self.getOuterDomStyle();
@@ -6765,13 +6788,13 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         /** Called when a View is added to this View. Do not call this method to 
             add a View. Instead call addSubnode or setParent.
             @param sv:View the view that was added.
-            @returns void */
+            @returns {undefined} */
         subviewAdded: (sv) => {},
         
         /** Called when a View is removed from this View. Do not call this method 
             to remove a View. Instead call removeSubnode or setParent.
             @param sv:View the view that was removed.
-            @returns void */
+            @returns {undefined} */
         subviewRemoved: (sv) => {},
         
         /** Gets the next sibling view based on lexical ordering of dom elements.
@@ -6812,13 +6835,13 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         /** Called when a Layout is added to this View. Do not call this method to 
             add a Layout. Instead call addSubnode or setParent.
             @param layout:Layout the layout that was added.
-            @returns void */
+            @returns {undefined} */
         layoutAdded: (layout) => {},
         
         /** Called when a Layout is removed from this View. Do not call this 
             method to remove a Layout. Instead call removeSubnode or setParent.
             @param layout:Layout the layout that was removed.
-            @returns void */
+            @returns {undefined} */
         layoutRemoved: (layout) => {},
         
         // Dom-Ordering //
@@ -6866,7 +6889,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         
         /** Sends the provided subview to the back.
             @param sv:View the subview of this view to bring to front.
-            @returns void */
+            @returns {undefined} */
         bringSubviewToFront: function(sv) {
             if (sv && sv.parent === this) {
                 var innerElem = this.getInnerDomElement();
@@ -6880,7 +6903,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         
         /** Sends the provided subview to the back.
             @param sv:View the subview of this view to send to back.
-            @returns void */
+            @returns {undefined} */
         sendSubviewToBack: function(sv) {
             if (sv && sv.parent === this) {
                 var innerElem = this.getInnerDomElement();
@@ -6895,7 +6918,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         /** Sends the subview behind the existing subview.
             @param sv:View the subview to send behind the existing view.
             @param existing:View the subview to send the other subview behind.
-            @returns void */
+            @returns {undefined} */
         sendSubviewBehind: function(sv, existing) {
             if (sv && existing && sv.parent === this && existing.parent === this) {
                 var innerElem = this.getInnerDomElement();
@@ -6908,7 +6931,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         /** Sends the subview in front of the existing subview.
             @param sv:View the subview to send in front of the existing view.
             @param existing:View the subview to send the other subview in front of.
-            @returns void */
+            @returns {undefined} */
         sendSubviewInFrontOf: function(sv, existing) {
             if (sv && existing && sv.parent === this && existing.parent === this) {
                 this.sendSubviewBehind(sv, existing);
@@ -6920,7 +6943,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             Also rearranges the dom elements so that focus navigation and z
             ordering get updated.
             @param sortFunc:function the sort function to sort the subviews with.
-            @returns void */
+            @returns {undefined} */
         sortSubviews: function(sortFunc) {
             // Sort subviews
             var self = this,
@@ -7469,7 +7492,7 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Call this method after any change to the width or height of the dom
         element would have occurred.
-        @returns void */
+        @returns {undefined} */
     sizeViewToDom: function() {
         var self = this,
             de,
@@ -7669,7 +7692,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
     /** Configures the attributes for this Text so that an ellipsis will be
         displayed. To actually see an ellipsis, an explicit width should be
         set on the Text so that overflow will occur.
-        @returns void */
+        @returns {undefined} */
     enableEllipsis: function() {
         this.setWhiteSpace('nowrap');
         this.setOverflow('hidden');
@@ -7679,7 +7702,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
     /** Turns ellipsis off by setting overflow to 'visible'. Other CSS
         related changes for ellipsis are not undone such as whiteSpace and
         textOverflow.
-        @returns void */
+        @returns {undefined} */
     disableEllipsis: function() {
         this.setOverflow('visible');
     },
@@ -7695,7 +7718,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
             to '#000000' if not provided.
         @param extraStrength:number (optional) The number of times to render 
             the shadow to give the shadow extra opacity.
-        @returns void */
+        @returns {undefined} */
     showTextShadow: function(x, y, blur, color, extraStrength) {
         var shadow = (x || 0) + 'px ' + 
             (y || 0) + 'px ' + 
@@ -7712,7 +7735,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
     },
     
     /** Turns off a text shadow.
-        @returns void */
+        @returns {undefined} */
     hideTextShadow: function() {
         this.getInnerDomStyle().textShadow = 'none';
     }
@@ -7916,7 +7939,7 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Loads an image to measure its size.
         @private
-        @returns void */
+        @returns {undefined} */
     __calculateNaturalSize: function() {
         var imgUrl = this.imageUrl;
         if (this.calculateNaturalSize && imgUrl) {
@@ -8075,14 +8098,18 @@ myt.Frame = new JS.Class('Frame', myt.View, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doMouseDown: function(event) {
         this.__restorePointerEvents = this.pointerEvents;
         this.setPointerEvents('none');
         return true;
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doMouseUp: function(event) {
         this.setPointerEvents(this.__restorePointerEvents);
         return true;
@@ -8133,7 +8160,7 @@ myt.SizeWidthToDom = new JS.Module('SizeWidthToDom', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Call this method after any change to the width of the dom
         element would have occurred.
-        @returns void */
+        @returns {undefined} */
     sizeViewToDom: function() {
         if (!this.__hasSetWidth) {
             // Bounding rect doesn't factor in scaling so we need to calculate
@@ -8194,7 +8221,7 @@ myt.SizeHeightToDom = new JS.Module('SizeHeightToDom', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Call this method after any change to the height of the dom
         element would have occurred.
-        @returns void */
+        @returns {undefined} */
     sizeViewToDom: function() {
         if (!this.__hasSetHeight) {
             // Bounding rect doesn't factor in scaling so we need to calculate
@@ -8295,18 +8322,22 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
+    /** @private
+        @returns {undefined} */
     __teardownPercentOfParentWidthConstraint: function() {
         if (this.percentOfParentWidth >= 0) this.detachFrom(this.parent, '__doPercentOfParentWidth', 'width');
     },
     
-    /** @private */
+    /** @private
+        @returns {undefined} */
     __setupPercentOfParentWidthConstraint: function() {
         var p = this.parent;
         if (p && this.percentOfParentWidth >= 0) this.syncTo(p, '__doPercentOfParentWidth', 'width');
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doPercentOfParentWidth: function(event) {
         this.setWidth((this.percentOfParentWidthOffset || 0) + Math.round(this.parent.width * (this.percentOfParentWidth / 100)));
         // Force width event if not inited yet so that align constraint
@@ -8314,18 +8345,22 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
         if (!this.inited) this.fireEvent('width', this.width);
     },
     
-    /** @private */
+    /** @private
+        @returns {undefined} */
     __teardownPercentOfParentHeightConstraint: function() {
         if (this.percentOfParentHeight >= 0) this.detachFrom(this.parent, '__doPercentOfParentHeight', 'height');
     },
     
-    /** @private */
+    /** @private
+        @returns {undefined} */
     __setupPercentOfParentHeightConstraint: function() {
         var p = this.parent;
         if (p && this.percentOfParentHeight >= 0) this.syncTo(p, '__doPercentOfParentHeight', 'height');
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doPercentOfParentHeight: function(event) {
         this.setHeight((this.percentOfParentHeightOffset || 0) + Math.round(this.parent.height * (this.percentOfParentHeight / 100)));
         // Force height event if not inited yet so that valign constraint
@@ -8372,7 +8407,7 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
         // Methods /////////////////////////////////////////////////////////////
         /** Add a rootable to the global list of root views.
             @param r:RootView the RootView to add.
-            @returns void */
+            @returns {undefined} */
         addRoot: (r) => {
             roots.push(r);
             globalRootViewRegistry.fireEvent('rootAdded', r);
@@ -8380,7 +8415,7 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
         
         /** Remove a rootable from the global list of root views.
             @param r:RootView the RootView to remove.
-            @returns void */
+            @returns {undefined} */
         removeRoot: (r) => {
             var i = roots.length,
                 root;
@@ -8413,8 +8448,9 @@ myt.RootView = new JS.Module('RootView', {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
         /** Prevents default drag/drop behavior.
-            @param v:myt.View the view to supress default dragover and drop on.
-            @returns void */
+            @param {!Obect} v - The myt.View the view to supress default 
+                dragover and drop on.
+            @returns {undefined} */
         setupCaptureDrop: function(v) {
             var cdf = v.__captureDrop = function(event) {event.preventDefault();},
                 de = v.domElement;
@@ -8423,9 +8459,9 @@ myt.RootView = new JS.Module('RootView', {
         },
         
         /** Cleanup dom listeners for drag/drop.
-            @param v:myt.View the view that had supressed default dragover 
-                and drop on.
-            @returns void */
+            @param {!Obect} v - The myt.View the view that had supressed 
+                default dragover  and drop on.
+            @returns {undefined} */
         teardownCaptureDrop: function(v) {
             var de = v.domElement, cdf = v.__captureDrop;
             myt.removeEventListener(de, 'drop', cdf);
@@ -8630,7 +8666,9 @@ myt.SizeToWindow = new JS.Module('SizeToWindow', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __handleResize: function(event) {
         var WR = myt.global.windowResize,
             dim = this.resizeDimension;
@@ -9119,7 +9157,7 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
                 @param callback:function the function to run.
                 @param replace:boolean (optional) if true the existing callback will 
                     be replaced with the new callback.
-                @returns void */
+                @returns {undefined} */
             next: function(callback, replace) {
                 var existingCallback = this.callback;
                 if (existingCallback && !replace) {
@@ -9136,7 +9174,7 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
             /** Puts the animator back to an initial configured state.
                 @param executeCallback:boolean (optional) if true the callback, if
                     it exists, will be executed.
-                @returns void */
+                @returns {undefined} */
             reset: function(executeCallback) {
                 var self = this;
                 
@@ -9462,7 +9500,7 @@ myt.Replicable = new JS.Module('Replicable', {
         call super.
         @param data:object the data being replicated for this instance.
         @param idx:number the index of the data in the replicated list.
-        @returns void */
+        @returns {undefined} */
     replicate: function(data, idx) {
         this.replicationData = data;
         this.replicationIndex = idx;
@@ -9472,7 +9510,7 @@ myt.Replicable = new JS.Module('Replicable', {
     /** Notifies this object that something happened.
         @param key:string the name of the message
         @param value:* the value of the message.
-        @returns void */
+        @returns {undefined} */
     notify: function(key, value) {},
     
     /** @overrides myt.Reusable
@@ -9581,7 +9619,7 @@ myt.Replicator = new JS.Class('Replicator', myt.Node, {
     },
     
     /** Performs replication.
-        @returns void */
+        @returns {undefined} */
     doReplication: function() {
         var pool = this.__pool;
         if (pool) {
@@ -9633,7 +9671,7 @@ myt.Replicator = new JS.Class('Replicator', myt.Node, {
     /** Sends a message to each active myt.Replicable.
         @param key:string the name of the message
         @param value:* the value of the message.
-        @returns void */
+        @returns {undefined} */
     notify: function(key, value) {
         var pool = this.__pool;
         if (pool) {
@@ -10011,14 +10049,14 @@ myt.ResizeLayout = new JS.Class('SpacedLayout', myt.SpacedLayout, {
     // Methods /////////////////////////////////////////////////////////////////
     /** Called when monitoring of width/height should start on our parent.
         @param attrName:string the name of the attribute to start monitoring.
-        @returns void */
+        @returns {undefined} */
     startMonitoringParent: function(attrName) {
         this.attachTo(this.parent, 'update', attrName);
     },
     
     /** Called when monitoring of width/height should stop on our parent.
         @param attrName:string the name of the attribute to stop monitoring.
-        @returns void */
+        @returns {undefined} */
     stopMonitoringParent: function(attrName) {
         this.detachFrom(this.parent, 'update', attrName);
     },
@@ -10373,7 +10411,7 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
         @param x:number the x location of the center of the circle.
         @param y:number the y location of the center of the circle.
         @param radius:number the radius of the circle.
-        @returns void */
+        @returns {undefined} */
     circle: function(x, y, radius) {
         this.__ctx.arc(x, y, radius, 0, 2 * Math.PI);
     },
@@ -10418,7 +10456,7 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
     drawImage: function() {var ctx = this.__ctx; ctx.drawImage.apply(ctx, arguments);},
     createImageData: function() {var ctx = this.__ctx; ctx.createImageData.apply(ctx, arguments);},
     getImageData: function() {var ctx = this.__ctx; return ctx.getImageData.apply(ctx, arguments);},
-    putImageData: function() {var ctx = this.__ctx; ctx.putImageData.apply(ctx, arguments)}
+    putImageData: function() {var ctx = this.__ctx; ctx.putImageData.apply(ctx, arguments);}
 });
 
 
@@ -10447,7 +10485,7 @@ myt.UpdateableUI = new JS.Module('UpdateableUI', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Updates the UI whenever a change occurs that requires a visual update.
         Subclasses should implement this as needed.
-        @returns void */
+        @returns {undefined} */
     updateUI: function() {
         // Subclasses to implement as needed.
     }
@@ -10492,7 +10530,7 @@ myt.Disableable = new JS.Module('Disableable', {
     /** Called after the disabled attribute is set. Default behavior attempts
         to give away focus and calls the updateUI method of myt.UpdateableUI if 
         it is defined.
-        @returns void */
+        @returns {undefined} */
     doDisabled: function() {
         if (this.inited) {
             // Give away focus if we become disabled and this instance is
@@ -10589,7 +10627,8 @@ myt.MouseOver = new JS.Module('MouseOver', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
+    /** @private
+        @returns {undefined} */
     __doMouseOverOnIdle: function() {
         this.detachFrom(myt.global.idle, '__doMouseOverOnIdle', 'idle');
         this.__attachedToOverIdle = false;
@@ -10606,13 +10645,14 @@ myt.MouseOver = new JS.Module('MouseOver', {
     /** Called when mouseOver state changes. This method is called after
         an event filtering process has reduced frequent over/out events
         originating from the dom.
-        @returns void */
+        @returns {undefined} */
     doSmoothMouseOver: function(v) {
         if (this.inited && this.updateUI) this.updateUI();
     },
     
     /** Called when the mouse is over this view. Subclasses must call super.
-        @returns void */
+        @param {!Object} event
+        @returns {undefined} */
     doMouseOver: function(event) {
         this.__disabledOver = true;
         
@@ -10620,7 +10660,8 @@ myt.MouseOver = new JS.Module('MouseOver', {
     },
     
     /** Called when the mouse leaves this view. Subclasses must call super.
-        @returns void */
+        @param {!Object} event
+        @returns {undefined} */
     doMouseOut: function(event) {
         this.__disabledOver = false;
         
@@ -10694,13 +10735,15 @@ myt.MouseDown = new JS.Module('MouseDown', {
     },
     
     /** Called when the mouse is down on this view. Subclasses must call super.
-        @returns void */
+        @param {!Object} event
+        @returns {undefined} */
     doMouseDown: function(event) {
         if (!this.disabled) this.setMouseDown(true);
     },
     
     /** Called when the mouse is up on this view. Subclasses must call super.
-        @returns void */
+        @param {!Object} event
+        @returns {undefined} */
     doMouseUp: function(event) {
         // Cleanup global mouse listener since the mouseUp occurred outside
         // the view.
@@ -10718,7 +10761,8 @@ myt.MouseDown = new JS.Module('MouseDown', {
     
     /** Called when the mouse is up and we are still over the view. Executes
         the 'doActivated' method by default.
-        @returns void */
+        @param {!Object} event
+        @returns {undefined} */
     doMouseUpInside: function(event) {
         if (this.doActivated) this.doActivated();
     }
@@ -10736,7 +10780,7 @@ myt.MouseOverAndDown = new JS.Module('MouseOverAndDown', {
 myt.Activateable = new JS.Module('Activateable', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Called when this view should be activated.
-        @returns void */
+        @returns {undefined} */
     doActivated: function() {
         // Subclasses to implement as needed.
     }
@@ -10796,7 +10840,9 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __handleKeyDown: function(event) {
         if (!this.disabled) {
             if (this.activateKeyDown === -1 || this.repeatKeyDown) {
@@ -10818,7 +10864,9 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         }
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __handleKeyPress: function(event) {
         if (!this.disabled) {
             var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
@@ -10834,7 +10882,9 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         }
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __handleKeyUp: function(event) {
         if (!this.disabled) {
             var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
@@ -10852,7 +10902,9 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         }
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doDomBlur: function(event) {
         if (!this.disabled) {
             var keyThatWasDown = this.activateKeyDown;
@@ -10867,7 +10919,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         does nothing.
         @param key:number the keycode that is down.
         @param isRepeat:boolean Indicates if this is a key repeat event or not.
-        @returns void */
+        @returns {undefined} */
     doActivationKeyDown: function(key, isRepeat) {
         // Subclasses to implement as needed.
     },
@@ -10875,7 +10927,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
     /** Called when an activation key is release up. This executes the
         'doActivated' method by default. 
         @param key:number the keycode that is up.
-        @returns void */
+        @returns {undefined} */
     doActivationKeyUp: function(key) {
         this.doActivated();
     },
@@ -10883,7 +10935,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
     /** Called when focus is lost while an activation key is down. Default 
         implementation does nothing.
         @param key:number the keycode that is down.
-        @returns void */
+        @returns {undefined} */
     doActivationKeyAborted: function(key) {
         // Subclasses to implement as needed.
     }
@@ -10999,21 +11051,21 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
             
             /** Draw the UI when the component has focus. The default implementation
                 calls drawHoverState.
-                @returns void */
+                @returns {undefined} */
             drawFocusedState: function() {
                 this.drawHoverState();
             },
             
             /** Draw the UI when the component is on the verge of being interacted 
                 with. For mouse interactions this corresponds to the over state.
-                @returns void */
+                @returns {undefined} */
             drawHoverState: () => {
                 // Subclasses to implement as needed.
             },
             
             /** Draw the UI when the component has a pending activation. For mouse
                 interactions this corresponds to the down state.
-                @returns void */
+                @returns {undefined} */
             drawActiveState: () => {
                 // Subclasses to implement as needed.
             },
@@ -11021,13 +11073,13 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
             /** Draw the UI when the component is ready to be interacted with. For
                 mouse interactions this corresponds to the enabled state when the
                 mouse is not over the component.
-                @returns void */
+                @returns {undefined} */
             drawReadyState: () => {
                 // Subclasses to implement as needed.
             },
             
             /** Draw the UI when the component is in the disabled state.
-                @returns void */
+                @returns {undefined} */
             drawDisabledState: () => {
                 // Subclasses to implement as needed.
             },
@@ -11783,7 +11835,7 @@ myt.Path = new JS.Class('Path', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Copy the data from the provided Path into this one.
         @param path:myt.Path
-        @returns void */
+        @returns {undefined} */
     copyFrom: function(path) {
         this.vectors = path.vectors.slice();
         this._boundingBox = null;
@@ -11828,7 +11880,7 @@ myt.Path = new JS.Class('Path', {
         @param angle:number the angle in radians
         @param xOrigin:number the x coordinate to rotate around.
         @param yOrigin:number the y coordinate to rotate around.
-        @returns void */
+        @returns {undefined} */
     rotateAroundOrigin: function(angle, xOrigin, yOrigin) {
         this.translate(-xOrigin, -yOrigin);
         this.rotate(angle);
@@ -12057,8 +12109,8 @@ myt.DrawingUtil = {
             canvas.lineTo(x2, y2);
             canvas.closePath();
             
-            var c = colors[i].color;
-            var colorDelta = colors[i].colorDelta
+            var c = colors[i].color,
+                colorDelta = colors[i].colorDelta;
             canvas.fillStyle = myt.Color.makeColorNumberFromChannels(
                 c.red + (diffCount * colorDelta.red),
                 c.green + (diffCount * colorDelta.green),
@@ -12292,7 +12344,9 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doMouseDown: function(event) {
         var v = event.value, px = v.pageX, py = v.pageY;
         if (!this.containsPoint(px, py) && 
@@ -12306,7 +12360,7 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
     /** Called when a mousedown occurs outside the floating panel. The default
         behavior is to hide the panel. This gives subclasses a chance to 
         provide different behavior.
-        @returns void */
+        @returns {undefined} */
     doMouseDownOutside: function() {
         if (this.hideOnMouseDown) this.hide();
     },
@@ -12340,7 +12394,9 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
         return this;
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doFocusChange: function(event) {
         var v = event.value;
         if (v && !this.isAncestorOf(v)) this.doLostFocus();
@@ -12348,7 +12404,7 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
     
     /** Called when focus moves out of the floating panel. Hides the
         floating panel by default.
-        @returns void */
+        @returns {undefined} */
     doLostFocus: function() {
         if (this.hideOnBlur) {
             if (this.ignoreOwnerForHideOnBlur && myt.global.focus.focusedView === this.owner) return;
@@ -12359,7 +12415,7 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
     
     /** Determines if this floating panel is being "shown" or not. Typically
         this means the floating panel is visible.
-        @returns boolean: True if this panel is shown, otherwise false. */
+        @returns {boolean} True if this panel is shown, otherwise false. */
     isShown: function() {
         return this.visible;
     },
@@ -12367,7 +12423,7 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
     /** Shows the floating panel for the provided myt.FloatingPanelAnchor.
         @param panelAnchor:myt.FloatingPanelAnchor The floating panel anchor 
             to show the panel for.
-        @returns void */
+        @returns {undefined} */
     show: function(panelAnchor) {
         if (!this.isShown()) {
             this.bringToFront();
@@ -12386,7 +12442,7 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
         @param ignoreRestoreFocus:boolean (Optional) If true the restoreFocus
             method will not be called. Defaults to undefined which is
             equivalent to false.
-        @returns void */
+        @returns {undefined} */
     hide: function(ignoreRestoreFocus) {
         if (this.isShown()) {
             var g = myt.global;
@@ -12402,7 +12458,7 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
     
     /** Sends the focus back to the owner. Can be overridden to
         send the focus elsewhere.
-        @returns void */
+        @returns {undefined} */
     restoreFocus: function() {
         if (this.owner) this.owner.focus();
     },
@@ -12411,7 +12467,7 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
         floating panel anchor.
         @param panelAnchor:myt.FloatingPanelAnchor The anchor to update the
             location for.
-        @returns void */
+        @returns {undefined} */
     updateLocation: function(panelAnchor) {
         this.setOwner(panelAnchor);
         
@@ -12568,7 +12624,7 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
     
     /** Called when a floating panel has been shown for this anchor.
         @param panel:myt.FloatingPanel The panel that is now shown.
-        @returns void */
+        @returns {undefined} */
     notifyPanelShown: function(panel) {
         // Subclasses to implement as needed.
         if (this.callSuper) this.callSuper();
@@ -12576,7 +12632,7 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
     
     /** Called when a floating panel has been hidden for this anchor.
         @param panel:myt.FloatingPanel The panel that is now hidden.
-        @returns void */
+        @returns {undefined} */
     notifyPanelHidden: function(panel) {
         // Subclasses to implement as needed.
         if (this.callSuper) this.callSuper();
@@ -12860,7 +12916,7 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
     // Methods /////////////////////////////////////////////////////////////////
     /** ListViewItems should call this method when they are activated. The
         default implementation invokes doItemActivated on the ListViewAnchor.
-        @returns void */
+        @returns {undefined} */
     doItemActivated: function(itemView) {
         var owner = this.owner;
         if (owner) owner.doItemActivated(itemView);
@@ -13018,7 +13074,7 @@ myt.ListViewAnchor = new JS.Module('ListViewAnchor', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Called by the list view when an item is activated. By default it
         hides the list view.
-        @returns void */
+        @returns {undefined} */
     doItemActivated: function(itemView) {
         this.hideFloatingPanel();
     },
@@ -13147,7 +13203,7 @@ myt.BAGMembership = new JS.Module('BAGMembership', {
         attribute name.
         @param attrName:string
         @param groupId:string
-        @returns void */
+        @returns {undefined} */
     addToBAG: function(attrName, groupId) {
         var group = this.getBAG(attrName, groupId);
         if (!this.isRegisteredWithBAG(group)) {
@@ -13165,7 +13221,7 @@ myt.BAGMembership = new JS.Module('BAGMembership', {
         attribute name.
         @param attrName:string
         @param groupId:string
-        @returns void */
+        @returns {undefined} */
     removeFromBAG: function(attrName, groupId) {
         var group = this.getBAG(attrName, groupId);
         if (this.isRegisteredWithBAG(group)) {
@@ -13187,7 +13243,8 @@ myt.BAGMembership = new JS.Module('BAGMembership', {
     
     /** Called whenever an event for the attrName is fired.
         @private 
-        @returns void */
+        @param {!Object} event
+        @returns {undefined} */
     __updateForBAG: function(event) {
         var type = event.type,
             value = event.value,
@@ -13314,7 +13371,7 @@ myt.BAG = new JS.Class('BAG', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Registeres a node with this group.
         @param node:myt.Node the node to register with this group.
-        @returns void */
+        @returns {undefined} */
     register: function(node) {
         if (node && !this.isRegistered(node)) {
             this.__nodes.push(node);
@@ -13326,7 +13383,7 @@ myt.BAG = new JS.Class('BAG', {
     
     /** Unregisteres a node from this group.
         @param node:myt.Node the node to unregister from this group.
-        @returns void */
+        @returns {undefined} */
     unregister: function(node) {
         if (node) {
             var nodes = this.__nodes, i = nodes.length;
@@ -13346,7 +13403,7 @@ myt.BAG = new JS.Class('BAG', {
     /** Sets the attribute to true on the provided registered node and sets 
         it to false on all other registered nodes.
         @param node:myt.Node the node to set the attribute to true on.
-        @returns void */
+        @returns {undefined} */
     setTrue: function(node) {
         if (node && this.trueNode !== node && this.isRegistered(node)) {
             var attrName = this.attrName,
@@ -13369,7 +13426,7 @@ myt.BAG = new JS.Class('BAG', {
     
     /** Sets the attribute to false on the provided registered node.
         @param node:myt.Node the node to set the attribute to false on.
-        @returns void */
+        @returns {undefined} */
     setFalse: function(node) {
         if (node && this.trueNode === node) {
             var setterName = myt.AccessorSupport.generateSetterName(this.attrName);
@@ -13380,7 +13437,7 @@ myt.BAG = new JS.Class('BAG', {
     
     /** Checks if a node is already registered or not.
         @param node:myt.Node the node to test.
-        @returns void */
+        @returns {undefined} */
     isRegistered: function(node) {
         var nodes = this.__nodes, i = nodes.length;
         while (i) {
@@ -13678,7 +13735,7 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
     
     /** Selects the provided item.
         @param item:object The item to select.
-        @returns void */
+        @returns {undefined} */
     select: function(item) {
         if (item && !this.isSelectedItem(item) && this.canSelectItem(item)) {
             item.setSelected(true);
@@ -13694,12 +13751,12 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
     
     /** Called when an item is selected.
         @param item:myt.Selectable The newly selected item.
-        @returns void */
+        @returns {undefined} */
     doSelected: function(item) {},
     
     /** Selects the item with the provided item selection ID.
         @param itemSelectionId:string
-        @returns void */
+        @returns {undefined} */
     selectById: function(itemSelectionId) {
         this.select(this.getSelectableItem(itemSelectionId));
     },
@@ -13726,7 +13783,7 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
     },
     
     /** Selects all items that can be selected.
-        @returns void */
+        @returns {undefined} */
     selectAll: function() {
         var items = this.getSelectableItems(), i = items.length;
         while (i) this.select(items[--i]);
@@ -13734,7 +13791,7 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
     
     /** Deselects the provided item.
         @param item:object The item to deselect.
-        @returns void */
+        @returns {undefined} */
     deselect: function(item) {
         if (this.isSelectedItem(item) && this.canDeselectItem(item)) {
             item.setSelected(false);
@@ -13750,12 +13807,12 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
     
     /** Called when an item is deselected.
         @param item:myt.Selectable The newly deselected item.
-        @returns void */
+        @returns {undefined} */
     doDeselected: function(item) {},
     
     /** Deselects the item with the provided item selection ID.
         @param itemSelectionId:string
-        @returns void */
+        @returns {undefined} */
     deselectById: function(itemSelectionId) {
         this.deselect(this.getSelectableItem(itemSelectionId));
     },
@@ -13767,7 +13824,7 @@ myt.SelectionManager = new JS.Module('SelectionManager', {
     },
     
     /** Deselects all selected items.
-        @returns void */
+        @returns {undefined} */
     deselectAll: function() {
         var items = this.__selected, key;
         for (key in items) this.deselect(items[key]);
@@ -13908,6 +13965,8 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** @param {!Object} event
+        @returns {undefined} */
     updateLayout: function(event) {
         var tabSliders = this._tabSliders, 
             i = tabSliders.length, 
@@ -14174,10 +14233,12 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
         
         /** Called whenever the button is redrawn. Gives subclasses/instances
             a chance to do additional things when the button is redrawn.
-            @returns void */
+            @returns {undefined} */
         notifyButtonRedraw: () => {},
         
-        /** @private */
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
         __updateHeight: function(event) {
             this.setHeight(this.wrapper.y + this.wrapper.height);
         },
@@ -14705,7 +14766,7 @@ myt.NativeInputWrapper = new JS.Class('NativeInputWrapper', myt.View, {
     
     /** Sets the value on the DOM.
         @param v:* The value to set.
-        @returns void */
+        @returns {undefined} */
     setDomValue: function(v) {
         var de = this.getInnerDomElement();
         if (de.value !== v) de.value = v;
@@ -14792,17 +14853,27 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
         this.detachFromDom(this, 'doDrop', 'drop', false);
     },
     
+    /** @param {!Object} event
+        @returns {undefined} */
     doDragOver: function(event) {},
     
+    /** @param {!Object} event
+        @returns {undefined} */
     doDragEnter: function(event) {},
     
+    /** @param {!Object} event
+        @returns {undefined} */
     doDragLeave: function(event) {},
     
+    /** @param {!Object} event
+        @returns {undefined} */
     doDrop: function(event) {
         this.handleFiles(event.value.dataTransfer.files, event);
     },
     
-    /** @private */
+    /** @param {?Array} files
+        @param {!Object} event
+        @returns {undefined} */
     handleFiles: function(files, event) {
         if (files !== undefined) {
             var i = files.length, file;
@@ -14824,6 +14895,9 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
         return file;
     },
     
+    /** @param {!Object} file
+        @param {!Object} event
+        @returns {undefined} */
     handleDroppedFile: function(file, event) {}
 });
 
@@ -14950,7 +15024,7 @@ myt.Form = new JS.Module('Form', {
     /** Allows bulk setting of validators.
         @param validators:array An array of myt.Validator instances or
             IDs of validators from the myt.global.validators registry.
-        @returns void */
+        @returns {undefined} */
     setValidators: function(validators) {
         var i = validators.length, validator;
         while (i) {
@@ -15074,14 +15148,14 @@ myt.Form = new JS.Module('Form', {
         @param id:string the ID for the accelerator.
         @param func:function the function to call when the accelerator 
             is invoked.
-        @returns void */
+        @returns {undefined} */
     addAccelerator: function(id, func) {
         this.__acc[id] = func;
     },
     
     /** Removes an accelerator from this form.
         @param id:string the ID for the accelerator.
-        @returns void */
+        @returns {undefined} */
     removeAccelerator: function(id) {
         delete this.__acc[id];
     },
@@ -15089,7 +15163,7 @@ myt.Form = new JS.Module('Form', {
     /** Executes an accelerator in this form with the provided ID.
         @param id:string The ID of the accelerator to invoke.
         @param value:* (optional) The value to pass to the function.
-        @returns void */
+        @returns {undefined} */
     invokeAccelerator: function(id, value) {
         var accelerator = this.__acc[id];
         if (accelerator) accelerator.call(this, value === undefined ? null : value);
@@ -15097,7 +15171,7 @@ myt.Form = new JS.Module('Form', {
     
     /** Adds a validator to this form.
         @param validator:myt.Validator The validator to add.
-        @returns void */
+        @returns {undefined} */
     addValidator: function(validator) {
         if (validator) this.__v.push(validator);
     },
@@ -15127,7 +15201,7 @@ myt.Form = new JS.Module('Form', {
     
     /** Adds an myt.Form to this form.
         @param subform:myt.Form the form to add as a subform.
-        @returns void */
+        @returns {undefined} */
     addSubForm: function(subform) {
         var id = subform.id;
         if (this.getSubForm(id) != null) {
@@ -15196,7 +15270,7 @@ myt.Form = new JS.Module('Form', {
     },
     
     /** Called when a subform changes to the "invalid" state.
-        @returns void */
+        @returns {undefined} */
     notifySubFormInvalid: function() {
         this.setIsValid(false);
     },
@@ -15248,13 +15322,13 @@ myt.Form = new JS.Module('Form', {
     
     /** Called whenever a value changes for the form or any subform therein.
         @param sourceForm:myt.Form the form that had a value change.
-        @returns void */
+        @returns {undefined} */
     notifyValueChanged: function(sourceForm) {
         if (this.form) this.form.notifyValueChanged(sourceForm);
     },
     
     /** Called when a subform changed to the "changed" state.
-        @returns void */
+        @returns {undefined} */
     notifySubFormChanged: function() {
         this.setIsChanged(true);
     },
@@ -15279,7 +15353,7 @@ myt.Form = new JS.Module('Form', {
         @param defaultValue:object The default value.
         @param rollbackValue:object The rollback value.
         @param value:object The current value.
-        @returns void */
+        @returns {undefined} */
     setup: function(defaultValue, rollbackValue, value) {
         this._lockCascade = true;
         this.setIsChanged(false);
@@ -15296,7 +15370,7 @@ myt.Form = new JS.Module('Form', {
     },
     
     /** Resets this form to the default values.
-        @returns void */
+        @returns {undefined} */
     resetForm: function() {
         this._lockCascade = true;
         
@@ -15311,7 +15385,7 @@ myt.Form = new JS.Module('Form', {
     },
     
     /** Rolls back this form to the rollback values.
-        @returns void */
+        @returns {undefined} */
     rollbackForm: function() {
         this._lockCascade = true;
         
@@ -15378,15 +15452,15 @@ myt.RootForm = new JS.Module('RootForm', {
     },
     
     /** Called when the form is submitted and it is valid.
-        @returns void */
+        @returns {undefined} */
     doValidSubmit: function(value) {},
     
     /** Called when the form is submitted and it is not valid.
-        @returns void */
+        @returns {undefined} */
     doInvalidSubmit: function() {},
     
     /** Rolls back the form and revalidates it.
-        @returns void */
+        @returns {undefined} */
     doCancel: function() {
         this.rollbackForm();
         this.doValidation();
@@ -15476,7 +15550,7 @@ myt.FormElement = new JS.Module('FormElement', {
         @param processors:array An array of myt.ValueProcessor instances or
             IDs of value processors from the myt.global.valueProcessors 
             registry.
-        @returns void */
+        @returns {undefined} */
     setValueProcessors: function(processors) {
         var i = processors.length, processor;
         while (i) {
@@ -15494,7 +15568,7 @@ myt.FormElement = new JS.Module('FormElement', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Adds a ValueProcessor to this form element.
         @param processor:myt.ValueProcessor
-        @returns void */
+        @returns {undefined} */
     addValueProcessor: function(processor) {
         this.__vp.push(processor);
     },
@@ -15899,7 +15973,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
                 file.width = this.width;
                 file.height = this.height;
                 
-                if (!image || image.destroyed) return
+                if (!image || image.destroyed) return;
                 
                 self.updateImage(file, image, this.src);
             };
@@ -15911,7 +15985,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
                     file.width = this.width;
                     file.height = this.height;
                     
-                    if (!image || image.destroyed) return
+                    if (!image || image.destroyed) return;
                     
                     self.updateImage(file, image, this.src);
                 };
@@ -17469,13 +17543,14 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
     
     // Methods /////////////////////////////////////////////////////////////////
     /** A handler for mouse events that does nothing and prevents propogation.
+        @param {!Object} event
         @return boolean True so that the dom event gets eaten. */
     eatMouseEvent: function(event) {
         return true;
     },
     
     /** Shows the dimmer and remembers the focus location.
-        @returns void */
+        @returns {undefined} */
     show: function() {
         var self = this,
             gf = myt.global.focus;
@@ -17490,7 +17565,7 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
     },
     
     /** Hides the dimmer and restores focus if necessary.
-        @returns void */
+        @returns {undefined} */
     hide: function(ignoreRestoreFocus) {
         this.setVisible(false);
         
@@ -18009,7 +18084,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         // Methods /////////////////////////////////////////////////////////////
         /** Does basic styling of a dialog and creates a close button.
-            @returns void */
+            @returns {undefined} */
         setupDialog: function() {
             var D = pkg.Dialog,
                 content = this.content;
@@ -18070,7 +18145,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         /** Called before a dialog is shown to reset state and cleanup UI elements
             from the previous display of the Dialog.
-            @returns void */
+            @returns {undefined} */
         destroyContent: function() {
             hideSpinner(this);
             
@@ -18110,7 +18185,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         /** Called by each of the buttons that can trigger the dialog to be hidden.
             @param sourceView:myt.View the view that triggered the hiding 
                 of the dialog.
-            @returns void */
+            @returns {undefined} */
         doCallback: function(sourceView) {
             var cbf = this.callbackFunction;
             if (!cbf || !cbf.call(this, sourceView.name)) this.hide();
@@ -18119,7 +18194,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         /** Shows this dialog as a regular dimmer.
             @param opts:object If opts.bgColor is provided it will be used for
                 the bgColor of the overlay.
-            @returns void */
+            @returns {undefined} */
         showBlank: function(opts) {
             this.destroyContent();
             
@@ -18141,7 +18216,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 be aborted.
             @param opts:object (optional) options that modify how the message is 
                 displayed. Supports: fontWeight, whiteSpace, wordWrap and width.
-            @returns void */
+            @returns {undefined} */
         showMessage: function(msg, callbackFunction, opts) {
             var self = this,
                 D = pkg.Dialog,
@@ -18228,7 +18303,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             @param msg:string the message to show.
             @param opts:object options that modify how the message is displayed.
                 Supports: fontWeight, whiteSpace, wordWrap and width.
-            @returns void */
+            @returns {undefined} */
         showSpinner: function(msg, opts) {
             var self = this,
                 content = self.content;
@@ -18544,7 +18619,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         },
         
         register = (identifiable) => {
-            doFuncOnIdentifiable(identifiable, (id) => {validators[id] = identifiable});
+            doFuncOnIdentifiable(identifiable, (id) => {validators[id] = identifiable;});
         },
         
         /** Tests if a value is "valid" or not.
@@ -18787,7 +18862,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         /** Add a Validator to this CompoundValidator.
             @param validator:myt.Validator|string The validator to add or a string
                 used to lookup a validator in the validator repository.
-            @returns void */
+            @returns {undefined} */
         addValidator: function(v) {
             if (typeof v === 'string') v = getValidator(v);
             if (v) this.__v.push(v);
@@ -18836,12 +18911,12 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         // Methods /////////////////////////////////////////////////////////////
         /** Adds a Validator to this registry.
             @param identifiable:myt.Validator the Validator to add.
-            @returns void */
+            @returns {undefined} */
         register: register,
         
         /** Removes a Validator from this registery.
             @param identifiable:myt.Validator the Validator to remove.
-            @returns void */
+            @returns {undefined} */
         unregister: (identifiable) => {
             doFuncOnIdentifiable(identifiable, (id) => {
                 // Make sure the validator is in the repository then delete.
@@ -19025,7 +19100,7 @@ new JS.Singleton('GlobalValueProcessorRegistry', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Adds a ValueProcessor to this registry.
         @param identifiable:myt.ValueProcessor the ValueProcessor to add.
-        @returns void */
+        @returns {undefined} */
     register: function(identifiable) {
         if (identifiable) {
             var id = identifiable.id;
@@ -19041,7 +19116,7 @@ new JS.Singleton('GlobalValueProcessorRegistry', {
     
     /** Removes a ValueProcessor from this registery.
         @param identifiable:myt.ValueProcessor the ValueProcessor to remove.
-        @returns void */
+        @returns {undefined} */
     unregister: function(identifiable) {
         if (identifiable) {
             var id = identifiable.id;
@@ -19192,7 +19267,10 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     /** Gets an array of selected myt.InputSelectOptions.
         @returns array: An array of selected myt.InputSelectOptions. */
     getSelectedOptions: function() {
-        var options = this.getOptions(), i = options.length, option, retval = [];
+        var options = this.getOptions(), 
+            i = options.length, 
+            option, 
+            retval = [];
         while (i) {
             option = options[--i];
             if (option.isSelected()) retval.push(option);
@@ -19203,7 +19281,10 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     /** Gets an array of selected myt.InputSelectOption values.
         @returns array: An array of selected option values. */
     getSelectedOptionValues: function() {
-        var options = this.getOptions(), i = options.length, option, retval = []
+        var options = this.getOptions(), 
+            i = options.length, 
+            option, 
+            retval = [];
         while (i) {
             option = options[--i];
             if (option.isSelected()) retval.push(option.value);
@@ -19250,7 +19331,7 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     
     // Selection //
     /** Deselects all selected options included disabled options.
-        @returns void */
+        @returns {undefined} */
     deselectAll: function() {
         var options = this.getOptions(), i = options.length, option, changed = false;
         while (i) {
@@ -19272,14 +19353,14 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     
     /** Selects the option that has the provided value.
         @param value:* The value of the option to select.
-        @returns void */
+        @returns {undefined} */
     selectValue: function(value) {
         this.select(this.getOptionForValue(value));
     },
     
     /** Selects the provided option.
         @param option:myt.InputSelectOption The option to select.
-        @returns void */
+        @returns {undefined} */
     select: function(option) {
         if (option && option.canSelect(this)) {
             option.setSelected(true);
@@ -19289,14 +19370,14 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     
     /** Deselects the option that has the provided value.
         @param value:* The value of the option to deselect.
-        @returns void */
+        @returns {undefined} */
     deselectValue: function(value) {
         this.deselect(this.getOptionForValue(value));
     },
     
     /** Deselects the provided option.
         @param option:myt.InputSelectOption The option to deselect.
-        @returns void */
+        @returns {undefined} */
     deselect: function(option) {
         if (option && option.canDeselect(this)) {
             option.setSelected(false);
@@ -19304,14 +19385,16 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
         }
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doChanged: function(event) {
         this.__syncToDom();
         this.doChanged();
     },
     
     /** Called whenever the underlying dom element fires a "change" event.
-        @returns void */
+        @returns {undefined} */
     doChanged: function() {},
     
     /** @private */
@@ -19474,7 +19557,7 @@ myt.ValueComponent = new JS.Module('ValueComponent', {
         @param filter:function the value filter to add.
         @param where:string (optional) Determines where to add the filter.
             Supported values are 'first' and 'last'. Defaults to 'first'.
-        @returns void */
+        @returns {undefined} */
     chainValueFilter: function(filter, where) {
         var existingFilter = this.valueFilter, chainedFilter = filter;
         if (existingFilter) {
@@ -19564,7 +19647,9 @@ myt.ValueComponent = new JS.Module('ValueComponent', {
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** @private */
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
         __syncValue: function(event) {
             this.setValue(event.value ? event.value.optionValue : null);
         }
@@ -19830,12 +19915,16 @@ myt.FormInputTextMixin = new JS.Module('FormInputTextMixin', {
         }
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __handleKeyDown: function(event) {
         if (myt.KeyObservable.getKeyCodeFromEvent(event) === 13) this.invokeAccelerator("accept");
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __handleKeyUp: function(event) {
         if (myt.KeyObservable.getKeyCodeFromEvent(event) === 27) this.invokeAccelerator("reject");
     },
@@ -19946,12 +20035,16 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
         this.setBoxShadow();
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __filterInput: function(event) {
         this.setDomValue(this.filterInput(this.getDomValue()));
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __filterInputPress: function(event) {
         var domEvent = event.value,
             charCode = domEvent.which;
@@ -19982,16 +20075,18 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     /** A hook for subclasses/instances to do input filtering during key press.
         The default implementation does nothing.
         @param domEvent:object The dom key press event.
-        @returns void */
+        @returns {undefined} */
     filterInputPress: function(domEvent) {},
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __syncToDom: function(event) {
         this.setValue(this.getDomValue());
     },
     
     /** Gets the location of the caret.
-        @returns int. */
+        @returns {number} An integer. */
     getCaretPosition: function() {
         // IE Support
         if (document.selection) {
@@ -20007,7 +20102,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
         @param start:int the start of the selection or location of the caret
             if no end is provided.
         @param end:int (optional) the end of the selection.
-        @returns void */
+        @returns {undefined} */
     setCaretPosition: function(start, end) {
         if (end == null || start === end) {
             // Don't update if the current position already matches.
@@ -20029,20 +20124,20 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     },
     
     /** Sets the caret to the start of the text input.
-        @returns void */
+        @returns {undefined} */
     setCaretToStart: function() {
         this.setCaretPosition(0);
     },
     
     /** Sets the caret to the end of the text input.
-        @returns void */
+        @returns {undefined} */
     setCaretToEnd: function() {
         this.setCaretPosition(this.getDomValue().length);
     },
     
     // Selection //
     /** Selects all the text in the input element.
-        @returns void */
+        @returns {undefined} */
     selectAll: function() {
         this.getInnerDomElement().select();
     },
@@ -20515,7 +20610,9 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
         }
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __cleanInput: function(event) {
         // Prevent enter key from inserting a div
         if (myt.KeyObservable.getKeyCodeFromEvent(event) === 13) {
@@ -20576,7 +20673,9 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
         this.restoreSelection();
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __userInteraction: function(event) {
         this.saveSelection();
         return true;
@@ -20886,14 +20985,14 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
         // Methods /////////////////////////////////////////////////////////////
         /** Registers the provided auto scroller to receive notifications.
             @param autoScroller:myt.AutoScroller The auto scroller to register.
-            @returns void */
+            @returns {undefined} */
         registerAutoScroller: (autoScroller) => {
             autoScrollers.push(autoScroller);
         },
         
         /** Unregisters the provided auto scroller.
             @param autoScroller:myt.AutoScroller The auto scroller to unregister.
-            @returns void */
+            @returns {undefined} */
         unregisterAutoScroller: (autoScroller) => {
             var i = autoScrollers.length;
             while (i) {
@@ -20906,14 +21005,14 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
         
         /** Registers the provided drop target to receive notifications.
             @param dropTarget:myt.DropTarget The drop target to register.
-            @returns void */
+            @returns {undefined} */
         registerDropTarget: (dropTarget) => {
             dropTargets.push(dropTarget);
         },
         
         /** Unregisters the provided drop target.
             @param dropTarget:myt.DropTarget The drop target to unregister.
-            @returns void */
+            @returns {undefined} */
         unregisterDropTarget: (dropTarget) => {
             var i = dropTargets.length;
             while (i) {
@@ -20926,7 +21025,7 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
         
         /** Called by a myt.Dropable when a drag starts.
             @param dropable:myt.Dropable The dropable that started the drag.
-            @returns void */
+            @returns {undefined} */
         startDrag: (dropable) => {
             setDragView(dropable);
         },
@@ -20934,7 +21033,7 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
         /** Called by a myt.Dropable when a drag stops.
             @param event:event The mouse event that triggered the stop drag.
             @param dropable:myt.Dropable The dropable that stopped being dragged.
-            @returns void */
+            @returns {undefined} */
         stopDrag: (event, dropable, isAbort) => {
             dropable.notifyDropped(overView, isAbort);
             if (overView && !isAbort) overView.notifyDrop(dropable);
@@ -20948,7 +21047,7 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
         /** Called by a myt.Dropable during dragging.
             @param event:event The mousemove event for the drag update.
             @param dropable:myt.Dropable The dropable that is being dragged.
-            @returns void */
+            @returns {undefined} */
         updateDrag: (event, dropable) => {
             // Get the frontmost myt.DropTarget that is registered with this 
             // manager and is under the current mouse location and has a 
@@ -21102,12 +21201,16 @@ myt.Draggable = new JS.Module('Draggable', {
         return [this];
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doContextMenu: function(event) {
         // Do nothing so the context menu event is supressed.
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doMouseDown: function(event) {
         var self = this,
             pos = myt.MouseObservable.getMouseFromEvent(event),
@@ -21127,7 +21230,9 @@ myt.Draggable = new JS.Module('Draggable', {
         return self.draggableAllowBubble;
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doMouseUp: function(event) {
         if (this.isDragging) {
             this.stopDrag(event, false);
@@ -21139,12 +21244,16 @@ myt.Draggable = new JS.Module('Draggable', {
         return this.draggableAllowBubble;
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __watchForAbort: function(event) {
         if (event.value === 27) this.stopDrag(event, true);
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doDragCheck: function(event) {
         var self = this,
             M = myt,
@@ -21159,8 +21268,8 @@ myt.Draggable = new JS.Module('Draggable', {
     /** Active until stopDrag is called. The view position will be bound
         to the mouse position. Subclasses typically call this onmousedown for
         subviews that allow dragging the view.
-        @param event:event The event the mouse event when the drag started.
-        @returns void */
+        @param {!Object} event - The event the mouse event when the drag started.
+        @returns {undefined} */
     startDrag: function(event) {
         var self = this,
             g = myt.global;
@@ -21178,23 +21287,29 @@ myt.Draggable = new JS.Module('Draggable', {
     },
     
     /** Called on every mousemove event while dragging.
-        @returns void */
+        @param {!Object} event
+        @returns {undefined} */
     updateDrag: function(event) {
         this.__lastMousePosition = myt.MouseObservable.getMouseFromEvent(event);
         this.__requestDragPosition();
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __updateDragInitX: function(event) {
         this.dragInitX = this.width / 2 * (this.scaleX || 1);
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __updateDragInitY: function(event) {
         this.dragInitY = this.height / 2 * (this.scaleY || 1);
     },
     
-    /** @private */
+    /** @private
+        @returns {undefined} */
     __requestDragPosition: function() {
         var self = this,
             pos = self.__lastMousePosition;
@@ -21205,10 +21320,10 @@ myt.Draggable = new JS.Module('Draggable', {
     },
     
     /** Stop the drag. (see startDrag for more details)
-        @param event:object The event that ended the drag.
-        @param isAbort:boolean Indicates if the drag ended normally or was
+        @param {!Object} event - The event that ended the drag.
+        @param {boolean} isAbort - Indicates if the drag ended normally or was
             aborted.
-        @returns void */
+        @returns {undefined} */
     stopDrag: function(event, isAbort) {
         var self = this,
             g = myt.global,
@@ -21226,9 +21341,9 @@ myt.Draggable = new JS.Module('Draggable', {
     /** Repositions the view to the provided values. The default implementation
         is to directly set x and y. Subclasses should override this method
         when it is necessary to constrain the position.
-        @param x:number the new x position.
-        @param y:number the new y position.
-        @returns void */
+        @param {number} x - the new x position.
+        @param {number} y - the new y position.
+        @returns {undefined} */
     requestDragPosition: function(x, y) {
         if (!this.disabled) {
             this.setX(x);
@@ -21889,7 +22004,9 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
 ((pkg) => {
     var JSClass = JS.Class,
         
-        /** Setup the limitToParent constraint. */
+        /*  Setup the limitToParent constraint.
+            @param {!BaseDivider} divider
+            @returns {undefined} */
         updateLimitToParentConstraint = (divider) => {
             var dim = divider.axis === 'y' ? 'height' : 'width';
             divider.constrain('__limitToParent', [divider, 'limitToParent', divider, dim, divider.parent, dim]);
@@ -21902,22 +22019,24 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
                 limitToParent:number
             
             Attributes:
-                axis:string Indicates if the divider should be constrained horizontally
+                @property {string} axis - Indicates if the divider should be constrained horizontally
                     or vertically. Allowed values: 'x' or 'y'. This value can only
                     be set during instantiation.
-                limitToParent:number If set, this will constrain the maxValue to the
+                @property {number} limitToParent - If set, this will constrain the maxValue to the
                     appropriate parent view dimension less the limitToParent amount.
-                expansionState:number Used by the "primary" action to update the 
+                @property {number} expansionState - Used by the "primary" action to update the 
                     divider position. Allowed values are:
                         collapsed:0
                         restored just collapsed:1
                         restored just expanded:2
                         expanded:3
-                restoreValue:number The value used to restore the position in the
+                @property {number} restoreValue - The value used to restore the position in the
                     "primary" action.
             
             Private Attributes:
                 __nudgeAcc:number The multiplier in px per nudge.
+            
+            @class
         */
         BaseDivider = new JSClass('BaseDivider', pkg.SimpleButton, {
             include: [pkg.BoundedValueComponent, pkg.Draggable],
@@ -22003,9 +22122,11 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
             },
             
             /** Update the x or y position of the component as the value changes.
-                @param restoreValueAlso:boolean (optional) If true, the restoreValue
+                @overrides myt.ValueComponent
+                @param {number} v - The x or y position to set.
+                @param {boolean} [restoreValueAlso] - If true, the restoreValue
                     will also be updated.
-                @overrides myt.ValueComponent */
+                @returns {undefined} */
             setValue: function(v, restoreValueAlso) {
                 this.callSuper(v);
                 
@@ -22022,7 +22143,9 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
             
             // Methods /////////////////////////////////////////////////////////
             /** Do the limitToParent constraint.
-                @private */
+                @private
+                @param {!Object} event
+                @returns {undefined} */
             __limitToParent: function(event) {
                 var self = this,
                     dim = self.axis === 'y' ? 'height' : 'width';
@@ -22119,7 +22242,8 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
             }
         });
     
-    /** A divider that moves left/right. */
+    /** A divider that moves left/right.
+        @class */
     pkg.HorizontalDivider = new JSClass('HorizontalDivider', BaseDivider, {
         initNode: function(parent, attrs) {
             attrs.axis = 'x';
@@ -22127,7 +22251,8 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         }
     });
     
-    /** A divider that moves left/right. */
+    /** A divider that moves left/right.
+        @class */
     pkg.VerticalDivider = new JSClass('VerticalDivider', BaseDivider, {
         initNode: function(parent, attrs) {
             attrs.axis = 'y';
@@ -22768,12 +22893,13 @@ myt.GridController = new JS.Module('GridController', {
     
     /** Sorts the rows according to the current sort criteria. Subclasses and
         instances should implement this as needed.
-        @returns void */
+        @returns {undefined} */
     doSort: () => {},
     
     // Column Headers
     /** Gets the column header before the provided one.
-        @returns myt.GridColumnHeader or null if none exists. */
+        @param {!Object} columnHeader
+        @returns {?Object} The myt.GridColumnHeader or null if none exists. */
     getPrevColumnHeader: function(columnHeader) {
         var hdr,
             hdrs = this.columnHeaders,
@@ -22788,7 +22914,8 @@ myt.GridController = new JS.Module('GridController', {
     },
     
     /** Gets the column header after the provided one.
-        @returns myt.GridColumnHeader or null if none exists. */
+        @param {!Object} columnHeader
+        @returns {?Object} The myt.GridColumnHeader or null if none exists. */
     getNextColumnHeader: function(columnHeader) {
         var hdr,
             hdrs = this.columnHeaders,
@@ -22803,7 +22930,8 @@ myt.GridController = new JS.Module('GridController', {
         return null;
     },
     
-    /** @private */
+    /** @private
+        @returns {?Object} */
     _findLastColumn: function() {
         var hdrs = this.columnHeaders,
             i = hdrs.length,
@@ -22891,7 +23019,10 @@ myt.GridController = new JS.Module('GridController', {
     /** Gets a row for the provided id and matcher function. If no matcher
         function is provided a default function will be used that assumes
         each row has a model property and that model property has an id
-        property. */
+        property.
+        @param {string} id
+        @param {?Function} [matcherFunc]
+        @returns {?Objecdt} */
     getRowById: function(id, matcherFunc=row => row.model.id === id) {
         return this.rows.find(matcherFunc);
     },
@@ -23046,10 +23177,16 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     _updateContentWidth: function(event) {
         this.content.setWidth(event.value);
     },
     
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     _updateContentHeight: function(event) {
         var self = this,
             header = self.header, 
@@ -23101,7 +23238,9 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     
     /** Gets the sort function used to sort the rows. Subclasses and instances
         should implement this as needed.
-        @returns function a comparator function used for sorting. */
+        @param {string} sortColumnId,
+        @param {string} sortOrder
+        @returns {!Function}  a comparator function used for sorting. */
     getSortFunction: (sortColumnId, sortOrder) => {
         if (sortColumnId) {
             // Default sort function uses the 'text' attribute of the subview.
@@ -23526,16 +23665,20 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
+    /** @private
+        @returns {number} */
     _getDomScrollTop: function() {
         return this.getInnerDomElement().scrollTop;
     },
     
-    /** @private */
+    /** @private
+        @param {number} v
+        @returns {undefined} */
     _setDomScrollTop: function(v) {
         this.getInnerDomElement().scrollTop = v;
     },
     
+    /** @returns {undefined} */
     isScrolledToEnd: function() {
         return this._getDomScrollTop() + this.height === this._listView.height;
     },
@@ -23551,7 +23694,7 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
                 a = a[modelIDName];
                 b = b[modelIDName];
                 return (a > b ? 1 : (a < b ? -1 : 0)) * asc;
-            }
+            };
         }
     },
     
@@ -23646,7 +23789,9 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
         }
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     _handleScrollChange: function(event) {
         this.refreshListUI();
     },
@@ -23721,7 +23866,7 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
             // into the pool
             for (i in visibleRowsByIdx) {
                 if (i < startIdx || i >= endIdx) {
-                    self.putRowBackInPool(visibleRowsByIdx[i])
+                    self.putRowBackInPool(visibleRowsByIdx[i]);
                     delete visibleRowsByIdx[i];
                 }
             }
@@ -24027,7 +24172,7 @@ myt.StackablePanel = new JS.Module('StackablePanel', {
     /** Called whenever a transition between panels is initiated by this panel.
         Default behavior is to defer to the panelStack's doStackTransition
         method.
-        @returns void */
+        @returns {undefined} */
     doStackTransition: function() {
         this.getPanelStack().doStackTransition(this);
     }
@@ -24226,14 +24371,18 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __updateWidth: function(event) {
         // Only resize the active panel
         var panel = this.getActivePanel();
         if (panel) panel.setWidth(event.value);
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __updateHeight: function(event) {
         // Only resize the active panel
         var panel = this.getActivePanel();
@@ -24264,7 +24413,7 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
     /** Called by a panel when it transitions between selected states. Should
         not be called directly. Instead change the panel selection.
         @param panel:myt.StackablePanel The panel that is transitioning.
-        @returns void */
+        @returns {undefined} */
     doStackTransition: function(panel) {
         this['doStackTransition' + (panel.selected ? 'To' : 'From')](panel);
     },
@@ -24273,14 +24422,14 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
         the newly selected panel in the stack. Should not be called directly. 
         Instead change the panel selection.
         @param panel:myt.StackablePanel The panel that is transitioning.
-        @returns void */
+        @returns {undefined} */
     doStackTransitionTo: function(panel) {
         this.doBeforeTransitionTo(panel);
         
         var transition = this.transition;
         if (transition) {
             var self = this;
-            transition.to(panel).then((panel) => {self.doAfterTransitionTo(panel)});
+            transition.to(panel).then((panel) => {self.doAfterTransitionTo(panel);});
         } else {
             panel.makeHighestZIndex();
             panel.setVisible(true);
@@ -24296,14 +24445,14 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
         the newly deselected panel in the stack. Should not be called directly. 
         Instead change the panel selection.
         @param panel:myt.StackablePanel The panel that is transitioning.
-        @returns void */
+        @returns {undefined} */
     doStackTransitionFrom: function(panel) {
         this.doBeforeTransitionFrom(panel);
         
         var transition = this.transition;
         if (transition) {
             var self = this;
-            transition.from(panel).then((panel) => {self.doAfterTransitionFrom(panel)});
+            transition.from(panel).then((panel) => {self.doAfterTransitionFrom(panel);});
         } else {
             panel.setVisible(false);
             this.doAfterTransitionFrom(panel);
@@ -24357,7 +24506,7 @@ myt.DragGroupSupport = new JS.Module('DragGroupSupport', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Adds the provided dragGroup to the dragGroups.
         @param dragGroup:string The drag group to add.
-        @returns void */
+        @returns {undefined} */
     addDragGroup: function(dragGroup) {
         if (dragGroup) {
             this.__dragGroups[dragGroup] = true;
@@ -24367,7 +24516,7 @@ myt.DragGroupSupport = new JS.Module('DragGroupSupport', {
     
     /** Removes the provided dragGroup from the dragGroups.
         @param dragGroup:string The drag group to remove.
-        @returns void */
+        @returns {undefined} */
     removeDragGroup: function(dragGroup) {
         if (dragGroup) {
             delete this.__dragGroups[dragGroup];
@@ -24446,7 +24595,7 @@ myt.Dropable = new JS.Module('Dropable', {
     /** Called by myt.GlobalDragManager when this view is dragged over a drop
         target.
         @param dropTarget:myt.DropTarget The target that was dragged over.
-        @returns void */
+        @returns {undefined} */
     notifyDragEnter: function(dropTarget) {
         this.setDropTarget(dropTarget);
     },
@@ -24454,7 +24603,7 @@ myt.Dropable = new JS.Module('Dropable', {
     /** Called by myt.GlobalDragManager when this view is dragged out of a drop
         target.
         @param dropTarget:myt.DropTarget The target that was dragged out of.
-        @returns void */
+        @returns {undefined} */
     notifyDragLeave: function(dropTarget) {
         this.setDropTarget();
     },
@@ -24464,7 +24613,7 @@ myt.Dropable = new JS.Module('Dropable', {
             be undefined if this dropable was dropped on no drop target.
         @param isAbort:boolean Indicates if the drop was the result of an
             abort or a normal drop.
-        @returns void */
+        @returns {undefined} */
     notifyDropped: function(dropTarget, isAbort) {
         this.setDropped(true);
         
@@ -24473,12 +24622,12 @@ myt.Dropable = new JS.Module('Dropable', {
     
     /** Called after dragging stops and the drop failed. The default
         implementation does nothing.
-        @returns void */
+        @returns {undefined} */
     notifyDropFailed: function() {},
     
     /** Called after dragging stops and the drop was aborted. The default
         implementation does nothing.
-        @returns void */
+        @returns {undefined} */
     notifyDropAborted: function() {}
 });
 
@@ -24528,32 +24677,32 @@ myt.DropTarget = new JS.Module('DropTarget', {
     /** Called by myt.GlobalDragManager when a dropable starts being dragged
         that has a matching drag group.
         @param dropable:myt.Dropable The dropable being dragged.
-        @returns void */
+        @returns {undefined} */
     notifyDragStart: function(dropable) {},
     
     /** Called by myt.GlobalDragManager when a dropable stops being dragged
         that has a matching drag group.
         @param dropable:myt.Dropable The dropable no longer being dragged.
-        @returns void */
+        @returns {undefined} */
     notifyDragStop: function(dropable) {},
     
     /** Called by myt.GlobalDragManager when a dropable is dragged over this
         view and has a matching drag group.
         @param dropable:myt.Dropable The dropable being dragged over this view.
-        @returns void */
+        @returns {undefined} */
     notifyDragEnter: function(dropable) {},
     
     /** Called by myt.GlobalDragManager when a dropable is dragged out of this
         view and has a matching drag group.
         @param dropable:myt.Dropable The dropable being dragged out of 
             this view.
-        @returns void */
+        @returns {undefined} */
     notifyDragLeave: function(dropable) {},
     
     /** Called by myt.GlobalDragManager when a dropable is dropped onto this
         view and has a matching drag group.
         @param dropable:myt.Dropable The dropable being dropped onto this view.
-        @returns void */
+        @returns {undefined} */
     notifyDrop: function(dropable) {}
 });
 
@@ -24711,8 +24860,8 @@ myt.AutoScroller = new JS.Module('AutoScroller', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Called by myt.GlobalDragManager when a dropable starts being dragged
         that has a matching drag group.
-        @param dropable:myt.Dropable The dropable being dragged.
-        @returns void */
+        @param {!Object} dropable - The myt.Dropable being dragged.
+        @returns {undefined} */
     notifyDragStart: function(dropable) {
         var de = this.getInnerDomElement();
         if (de.scrollHeight > de.clientHeight || de.scrollWidth > de.clientWidth) {
@@ -24722,8 +24871,8 @@ myt.AutoScroller = new JS.Module('AutoScroller', {
     
     /** Called by myt.GlobalDragManager when a dropable stops being dragged
         that has a matching drag group.
-        @param dropable:myt.Dropable The dropable no longer being dragged.
-        @returns void */
+        @param {!Object} dropable - The myt.Dropable no longer being dragged.
+        @returns {undefined} */
     notifyDragStop: function(dropable) {
         this.detachFromDom(myt.global.mouse, '__handleMouseMove', 'mousemove', true);
         
@@ -24731,7 +24880,9 @@ myt.AutoScroller = new JS.Module('AutoScroller', {
         this.__resetHScroll();
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __handleMouseMove: function(event) {
         var self = this,
             mousePos = event.value, 
@@ -24774,24 +24925,31 @@ myt.AutoScroller = new JS.Module('AutoScroller', {
         }
     },
     
-    /** @private */
+    /** @private
+        @param {number} percent - The percent of scroll acceleration to use.
+        @returns {number} */
     __calculateAmount: function(percent) {
         return Math.round(this.scrollAmount * (1 + this.scrollAcceleration * percent));
     },
     
-    /** @private */
+    /** @private
+        @returns {undefined} */
     __resetVScroll: function() {
         this.__isAutoscrollUp = this.__isAutoscrollDown = false;
         this.__timerIdAutoscrollUp = this.__timerIdAutoscrollDown = null;
     },
     
-    /** @private */
+    /** @private
+        @returns {undefined} */
     __resetHScroll: function() {
         this.__isAutoscrollLeft = this.__isAutoscrollRight = false;
         this.__timerIdAutoscrollLeft = this.__timerIdAutoscrollRight = null;
     },
     
-    /** @private */
+    /** @private
+        @param {string} dir - The direction to scroll.
+        @param {number} amt - The amount to scroll.
+        @returns {undefined} */
     __doAutoScrollAdj: function(dir, amt) {
         var self = this;
         
@@ -24826,7 +24984,7 @@ myt.Eventable = new JS.Class('Eventable', {
         @param attrs:object (Optional) A map of attribute names and values.
         @param mixins:array (Optional) a list of mixins to be added onto
             the new instance.
-        @returns void */
+        @returns {undefined} */
     initialize: function(attrs, mixins) {
         var self = this;
         if (mixins) {
@@ -24848,7 +25006,7 @@ myt.Eventable = new JS.Class('Eventable', {
     /** Called during initialization. Calls setter methods and lastly, sets 
         inited to true. Subclasses must callSuper.
         @param attrs:object A map of attribute names and values.
-        @returns void */
+        @returns {undefined} */
     init: function(attrs) {
         this.callSetters(attrs);
         this.inited = true;
@@ -24869,6 +25027,9 @@ myt.Eventable = new JS.Class('Eventable', {
 ((pkg) => {
     var degreesToRadians = pkg.Geometry.degreesToRadians,
         
+        /*  Redraws the annulus
+            @param {!Object} annulus - The Annulus to redraw.
+            @returns {undefined} */
         redraw = (annulus) => {
             pkg.Annulus.draw(
                 annulus.__path, 
@@ -24883,7 +25044,9 @@ myt.Eventable = new JS.Class('Eventable', {
             );
         },
         
-        /** Ensures the size of the view exactly fits the annulus. */
+        /*  Ensures the size of the view exactly fits the annulus.
+            @param {!Object} annulus - The Annulus to update.
+            @returns {undefined} */
         updateSize = (annulus) => {
             var size = 2*(annulus.radius + annulus.thickness),
                 svg = annulus.__svg;
@@ -24914,7 +25077,7 @@ myt.Eventable = new JS.Class('Eventable', {
                     be drawn as a semicircle.
                 @param endCapRounding:boolean If true the ending cap will be
                     drawn as a semicircle.
-                @returns void */
+                @returns {undefined} */
             draw: (path, startAngle, endAngle, thickness, r1, c, color, startCapRounding, endCapRounding) => {
                 // Ensure endAngle is greater than or equal to startAngle
                 if (startAngle > endAngle) {
@@ -25149,10 +25312,10 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
     
     // Methods /////////////////////////////////////////////////////////////////
     /** Connects the WebSocket to the currently configured URL.
-        @param afterOpenCallback:function (optional) This callback will be
+        @param {?Function} [afterOpenCallback] - This callback will be
             executed once after the connection is established and the onOpen
             method has been called.
-        @returns void */
+        @returns {undefined} */
     connect: function(afterOpenCallback) {
         if (!this._ws && this.url) {
             try {
@@ -25167,7 +25330,7 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
                         
                         // Reassign handler
                         ws.onopen = openFunc;
-                    }
+                    };
                 } else {
                     ws.onopen = openFunc;
                 }
@@ -25182,11 +25345,11 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
     },
     
     /** Sends a message over the WebSocket.
-        @param msg:* The message to send.
-        @param doNotTryToConnect:boolean (optional) If falsy an attempt will
+        @param {*} msg - The message to send.
+        @param {boolean} [doNotTryToConnect] - If falsy an attempt will
             be made to connect if the WebSocket is not currently connected
             before sending the message.
-        @param returns boolean|undefined Indicating if the message was sent
+        @returns {boolean|undefined} Indicating if the message was sent
             or not. Undefined is returned when the connection has to be opened
             before sending. */
     send: function(msg, doNotTryToConnect) {
@@ -25215,21 +25378,21 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
             value. Defaults to 1000 CLOSE_NORMAL.
         @param reason:string (optional) An explanation of why the close is
             occurring. Defaults to "close".
-        @returns void */
+        @returns {undefined} */
     close: function(code, reason) {
         if (this._ws) this._ws.close(code || 1000, reason || 'close');
     },
     
     /** Invoked when after the WebSocket is opened.
-        @param event:Event The open event fired by the WebSocket.
-        @returns void */
+        @param {!Object} event -  The open event fired by the WebSocket.
+        @returns {undefined} */
     onOpen: function(event) {
         this.setStatus('open');
     },
     
     /** Invoked when an error occurs in the WebSocket.
-        @param event:Event The error event fired by the WebSocket.
-        @returns void */
+        @param {!Object} event -  The error event fired by the WebSocket.
+        @returns {undefined} */
     onError: function(event) {
         console.error(event);
         
@@ -25238,7 +25401,7 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
     },
     
     /** Invoked when a message is received over the WebSocket.
-        @param event:Event The message event fired by the WebSocket.
+        @param {!Object} event -  The message event fired by the WebSocket.
         @returns msg:* The message received. */
     onMessage: function(event) {
         var msg = event.data;
@@ -25255,8 +25418,8 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
     },
     
     /** Invoked when the WebSocket is closed.
-        @param event:Event The close event fired by the WebSocket.
-        @returns void */
+        @param {!Object} event - The close event fired by the WebSocket.
+        @returns {undefined} */
     onClose: function(event) {
         if (this._ws) delete this._ws;
         this.setStatus('closed');
@@ -25292,15 +25455,15 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
     // Methods /////////////////////////////////////////////////////////////////
     /** Registers a listener function that will get called for messages with
         a type that is matched by the provided matcher.
-        @param listenerFunc:function The function that will get invoked. The
+        @param {?Function} listenerFunc The function that will get invoked. The
             message is provided as the sole argument to the function.
-        @param matcher:string|function (optional) A matcher function that takes
+        @param {string|?Function} matcher (optional) A matcher function that takes
             the type as the sole argument and must return true or false
             indicating if the type is matched or not. If a string is provided
             it will be converted into an exact match function. If not provided
             (or something falsy) is provided a promiscuous matcher function
             will be used.
-        @returns void */
+        @returns {undefined} */
     registerListener: function(listenerFunc, matcher) {
         if (listenerFunc) {
             var matcherFunc = this._makeMatcherFunction(matcher);
@@ -25333,7 +25496,10 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
         }
     },
     
-    /** Removed the provided listener function and matcher. */
+    /** Removed the provided listener function and matcher.
+        @param {!Function} listenerFunc
+        @param {string|?Function} matcher
+        @returns {undefined} */
     unregisterListener: function(listenerFunc, matcher) {
         if (listenerFunc) {
             var matcherFunc = this._makeMatcherFunction(matcher);
@@ -25361,16 +25527,19 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
         }
     },
     
-    /** @private */
+    /** @private
+        @param {string|?Function} matcher
+        @return {?Function} */
     _makeMatcherFunction: function(matcher) {
-        var matcherFunc;
+        var matcherFunc,
+            funcsByKey;
         if (typeof matcher === 'string') {
             // Use the provided string as an exact match function. We must
             // generate a unique function for each string key (and reuse it)
             // so that the === tests will work in the registerListener and
             // unregisterListener functions.
-            var funcsByKey = myt.MessageTypeWebSocket.matcherFunctionsByKey;
-            matcherFunc = funcsByKey[matcher] || (funcsByKey[matcher] = function(type) {return type === matcher;});
+            funcsByKey = myt.MessageTypeWebSocket.matcherFunctionsByKey;
+            matcherFunc = funcsByKey[matcher] || (funcsByKey[matcher] = (type) => type === matcher);
         } else if (typeof matcher === 'function') {
             matcherFunc = matcher;
         } else if (matcher == null) {
@@ -25382,7 +25551,9 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
         return matcherFunc;
     },
     
-    /** @private */
+    /** @private
+        @param {string} type
+        @returns {!Array} */
     _getListenersForType: function(type) {
         var retval = [],
             listeners = this._listeners,
@@ -25398,9 +25569,10 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
     },
     
     /** Sends a message with a type. Use this method instead of send.
-        @param type:string The type of the message to send.
-        @param msg:* The message value. Must be convertible to JSON.
-        @returns The sent message. */
+        @param {string} type The type of the message to send.
+        @param {*} msg The message value. Must be convertible to JSON.
+        @param {boolean} doNotTryToConnect
+        @returns {undefined} The sent message. */
     sendTypedMessage: function(type, msg, doNotTryToConnect) {
         msg = this.createMessage(type, msg);
         if (msg) return this.send(msg, doNotTryToConnect);
@@ -25473,6 +25645,7 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     extend: {
         /** The length of time in millis before the tip is shown. */
         DEFAULT_TIP_DELAY:500,
+        
         /** The length of time in millis before the tip is hidden. */
         DEFAULT_TIP_HIDE_DELAY:100
     },
@@ -25492,11 +25665,12 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     
     // Accessors ///////////////////////////////////////////////////////////////
     /** Sets the tooltip info that will be displayed. 
-        @param v:object with the following keys:
+        @param v {Object} The object has the following keys:
             parent:myt.View The view to show the tip for.
             text:string The tip text.
             tipalign:string Tip alignment, 'left' or 'right'.
-            tipvalign:string Tip vertical alignment, 'above' or 'below'. */
+            tipvalign:string Tip vertical alignment, 'above' or 'below'.
+        @returns {undefined} */
     setTooltip: function(v) {
         if (this.inited) {
             this.tooltip = v;
@@ -25512,7 +25686,9 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
+    /** @private
+        @param {!Object} event The event object.
+        @returns {undefined} */
     __checkMouseMovement: function(event) {
         var self = this;
         self._lastPos = myt.MouseObservable.getMouseFromEvent(event);
@@ -25530,7 +25706,8 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
         }
     },
     
-    /** @private */
+    /** @private
+        @returns {undefined} */
     __clearTimeout: function() {
         if (this.__checkTipTimerId) {
             clearTimeout(this.__checkTipTimerId);
@@ -25541,7 +25718,7 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     /** Checks if the last mouse position is inside the tip's parent.
         If not inside the tip will also get hidden.
         @private
-        @returns boolean: false if the tip got hidden, true otherwise. */
+        @returns {boolean} false if the tip got hidden, true otherwise. */
     __checkIn: function() {
         var tt = this.tooltip;
         if (tt) {
@@ -25553,7 +25730,8 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     },
     
     /** Called when the tip will be hidden.
-        @returns boolean */
+        @param {!Object} event The event object.
+        @returns {boolean} */
     hideTip: function(event) {
         this.__clearTimeout();
         
@@ -25573,7 +25751,7 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     },
     
     /** Called when the tip will be shown.
-        @returns void */
+        @returns {undefined} */
     showTip: function() {
         // Don't show tooltips while doing drag and drop since they're
         // distracting while this is going on.
@@ -25673,7 +25851,7 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.BaseTooltip. */
+    /** @override myt.BaseTooltip. */
     showTip: function() {
         var self = this,
             tt = self.tooltip,
@@ -25766,7 +25944,12 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
         self.callSuper();
     },
     
-    /** @private */
+    /** Redraw the tooltip
+        @private
+        @param {number} pointerX The x location of the tooltip pointer.
+        @param {boolean} pointerOnTop Determines if the pointer will be draw
+            on the top or the bottom of the tooltip.
+        @returns {undefined} */
     __redraw: function(pointerX, pointerOnTop) {
         var self = this,
             canvas = self._bg,

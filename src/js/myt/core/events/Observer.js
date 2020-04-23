@@ -32,7 +32,7 @@ myt.Observer = new JS.Module('Observer', {
             to pull the value from.
         @param once:boolean (optional) if true  this Observer will detach
             from the Observable after the event is handled once.
-        @returns void */
+        @returns {undefined} */
     syncTo: function(observable, methodName, eventType, attrName, once) {
         if (attrName === undefined) attrName = eventType;
         try {
@@ -167,7 +167,7 @@ myt.Observer = new JS.Module('Observer', {
     
     /** Tries to detach this Observer from all Observables it
         is attached to.
-        @returns void */
+        @returns {undefined} */
     detachFromAllObservables: function() {
         var observablesByType = this.__obt;
         if (observablesByType) {

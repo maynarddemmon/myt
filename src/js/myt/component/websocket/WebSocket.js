@@ -42,10 +42,10 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
     
     // Methods /////////////////////////////////////////////////////////////////
     /** Connects the WebSocket to the currently configured URL.
-        @param afterOpenCallback:function (optional) This callback will be
+        @param {?Function} [afterOpenCallback] - This callback will be
             executed once after the connection is established and the onOpen
             method has been called.
-        @returns void */
+        @returns {undefined} */
     connect: function(afterOpenCallback) {
         if (!this._ws && this.url) {
             try {
@@ -75,11 +75,11 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
     },
     
     /** Sends a message over the WebSocket.
-        @param msg:* The message to send.
-        @param doNotTryToConnect:boolean (optional) If falsy an attempt will
+        @param {*} msg - The message to send.
+        @param {boolean} [doNotTryToConnect] - If falsy an attempt will
             be made to connect if the WebSocket is not currently connected
             before sending the message.
-        @param returns boolean|undefined Indicating if the message was sent
+        @returns {boolean|undefined} Indicating if the message was sent
             or not. Undefined is returned when the connection has to be opened
             before sending. */
     send: function(msg, doNotTryToConnect) {
@@ -108,21 +108,21 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
             value. Defaults to 1000 CLOSE_NORMAL.
         @param reason:string (optional) An explanation of why the close is
             occurring. Defaults to "close".
-        @returns void */
+        @returns {undefined} */
     close: function(code, reason) {
         if (this._ws) this._ws.close(code || 1000, reason || 'close');
     },
     
     /** Invoked when after the WebSocket is opened.
-        @param event:Event The open event fired by the WebSocket.
-        @returns void */
+        @param {!Object} event -  The open event fired by the WebSocket.
+        @returns {undefined} */
     onOpen: function(event) {
         this.setStatus('open');
     },
     
     /** Invoked when an error occurs in the WebSocket.
-        @param event:Event The error event fired by the WebSocket.
-        @returns void */
+        @param {!Object} event -  The error event fired by the WebSocket.
+        @returns {undefined} */
     onError: function(event) {
         console.error(event);
         
@@ -131,7 +131,7 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
     },
     
     /** Invoked when a message is received over the WebSocket.
-        @param event:Event The message event fired by the WebSocket.
+        @param {!Object} event -  The message event fired by the WebSocket.
         @returns msg:* The message received. */
     onMessage: function(event) {
         var msg = event.data;
@@ -148,8 +148,8 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
     },
     
     /** Invoked when the WebSocket is closed.
-        @param event:Event The close event fired by the WebSocket.
-        @returns void */
+        @param {!Object} event - The close event fired by the WebSocket.
+        @returns {undefined} */
     onClose: function(event) {
         if (this._ws) delete this._ws;
         this.setStatus('closed');

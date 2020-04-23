@@ -50,7 +50,9 @@ myt.SizeToWindow = new JS.Module('SizeToWindow', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __handleResize: function(event) {
         var WR = myt.global.windowResize,
             dim = this.resizeDimension;

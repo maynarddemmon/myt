@@ -15,7 +15,7 @@ myt.SimplePool = new JS.Class('SimplePool', myt.AbstractPool, {
         @param instanceClass:JS.Class the class to create instances from.
         @param instanceParent:object (optional) The place to create instances 
             on. When instanceClass is an myt.Node this will be the node parent.
-        @returns void */
+        @returns {undefined} */
     initialize: function(instanceClass, instanceParent) {
         this.callSuper();
         

@@ -157,7 +157,7 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Loads an image to measure its size.
         @private
-        @returns void */
+        @returns {undefined} */
     __calculateNaturalSize: function() {
         var imgUrl = this.imageUrl;
         if (this.calculateNaturalSize && imgUrl) {

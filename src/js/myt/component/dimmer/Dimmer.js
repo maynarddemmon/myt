@@ -79,13 +79,14 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
     
     // Methods /////////////////////////////////////////////////////////////////
     /** A handler for mouse events that does nothing and prevents propogation.
+        @param {!Object} event
         @return boolean True so that the dom event gets eaten. */
     eatMouseEvent: function(event) {
         return true;
     },
     
     /** Shows the dimmer and remembers the focus location.
-        @returns void */
+        @returns {undefined} */
     show: function() {
         var self = this,
             gf = myt.global.focus;
@@ -100,7 +101,7 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
     },
     
     /** Hides the dimmer and restores focus if necessary.
-        @returns void */
+        @returns {undefined} */
     hide: function(ignoreRestoreFocus) {
         this.setVisible(false);
         

@@ -65,8 +65,8 @@ myt.AutoScroller = new JS.Module('AutoScroller', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Called by myt.GlobalDragManager when a dropable starts being dragged
         that has a matching drag group.
-        @param dropable:myt.Dropable The dropable being dragged.
-        @returns void */
+        @param {!Object} dropable - The myt.Dropable being dragged.
+        @returns {undefined} */
     notifyDragStart: function(dropable) {
         var de = this.getInnerDomElement();
         if (de.scrollHeight > de.clientHeight || de.scrollWidth > de.clientWidth) {
@@ -76,8 +76,8 @@ myt.AutoScroller = new JS.Module('AutoScroller', {
     
     /** Called by myt.GlobalDragManager when a dropable stops being dragged
         that has a matching drag group.
-        @param dropable:myt.Dropable The dropable no longer being dragged.
-        @returns void */
+        @param {!Object} dropable - The myt.Dropable no longer being dragged.
+        @returns {undefined} */
     notifyDragStop: function(dropable) {
         this.detachFromDom(myt.global.mouse, '__handleMouseMove', 'mousemove', true);
         
@@ -85,7 +85,9 @@ myt.AutoScroller = new JS.Module('AutoScroller', {
         this.__resetHScroll();
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __handleMouseMove: function(event) {
         var self = this,
             mousePos = event.value, 
@@ -128,24 +130,31 @@ myt.AutoScroller = new JS.Module('AutoScroller', {
         }
     },
     
-    /** @private */
+    /** @private
+        @param {number} percent - The percent of scroll acceleration to use.
+        @returns {number} */
     __calculateAmount: function(percent) {
         return Math.round(this.scrollAmount * (1 + this.scrollAcceleration * percent));
     },
     
-    /** @private */
+    /** @private
+        @returns {undefined} */
     __resetVScroll: function() {
         this.__isAutoscrollUp = this.__isAutoscrollDown = false;
         this.__timerIdAutoscrollUp = this.__timerIdAutoscrollDown = null;
     },
     
-    /** @private */
+    /** @private
+        @returns {undefined} */
     __resetHScroll: function() {
         this.__isAutoscrollLeft = this.__isAutoscrollRight = false;
         this.__timerIdAutoscrollLeft = this.__timerIdAutoscrollRight = null;
     },
     
-    /** @private */
+    /** @private
+        @param {string} dir - The direction to scroll.
+        @param {number} amt - The amount to scroll.
+        @returns {undefined} */
     __doAutoScrollAdj: function(dir, amt) {
         var self = this;
         

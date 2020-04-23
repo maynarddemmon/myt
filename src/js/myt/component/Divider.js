@@ -1,7 +1,9 @@
 ((pkg) => {
     var JSClass = JS.Class,
         
-        /** Setup the limitToParent constraint. */
+        /*  Setup the limitToParent constraint.
+            @param {!BaseDivider} divider
+            @returns {undefined} */
         updateLimitToParentConstraint = (divider) => {
             var dim = divider.axis === 'y' ? 'height' : 'width';
             divider.constrain('__limitToParent', [divider, 'limitToParent', divider, dim, divider.parent, dim]);
@@ -14,22 +16,24 @@
                 limitToParent:number
             
             Attributes:
-                axis:string Indicates if the divider should be constrained horizontally
+                @property {string} axis - Indicates if the divider should be constrained horizontally
                     or vertically. Allowed values: 'x' or 'y'. This value can only
                     be set during instantiation.
-                limitToParent:number If set, this will constrain the maxValue to the
+                @property {number} limitToParent - If set, this will constrain the maxValue to the
                     appropriate parent view dimension less the limitToParent amount.
-                expansionState:number Used by the "primary" action to update the 
+                @property {number} expansionState - Used by the "primary" action to update the 
                     divider position. Allowed values are:
                         collapsed:0
                         restored just collapsed:1
                         restored just expanded:2
                         expanded:3
-                restoreValue:number The value used to restore the position in the
+                @property {number} restoreValue - The value used to restore the position in the
                     "primary" action.
             
             Private Attributes:
                 __nudgeAcc:number The multiplier in px per nudge.
+            
+            @class
         */
         BaseDivider = new JSClass('BaseDivider', pkg.SimpleButton, {
             include: [pkg.BoundedValueComponent, pkg.Draggable],
@@ -115,9 +119,11 @@
             },
             
             /** Update the x or y position of the component as the value changes.
-                @param restoreValueAlso:boolean (optional) If true, the restoreValue
+                @overrides myt.ValueComponent
+                @param {number} v - The x or y position to set.
+                @param {boolean} [restoreValueAlso] - If true, the restoreValue
                     will also be updated.
-                @overrides myt.ValueComponent */
+                @returns {undefined} */
             setValue: function(v, restoreValueAlso) {
                 this.callSuper(v);
                 
@@ -134,7 +140,9 @@
             
             // Methods /////////////////////////////////////////////////////////
             /** Do the limitToParent constraint.
-                @private */
+                @private
+                @param {!Object} event
+                @returns {undefined} */
             __limitToParent: function(event) {
                 var self = this,
                     dim = self.axis === 'y' ? 'height' : 'width';
@@ -231,7 +239,8 @@
             }
         });
     
-    /** A divider that moves left/right. */
+    /** A divider that moves left/right.
+        @class */
     pkg.HorizontalDivider = new JSClass('HorizontalDivider', BaseDivider, {
         initNode: function(parent, attrs) {
             attrs.axis = 'x';
@@ -239,7 +248,8 @@
         }
     });
     
-    /** A divider that moves left/right. */
+    /** A divider that moves left/right.
+        @class */
     pkg.VerticalDivider = new JSClass('VerticalDivider', BaseDivider, {
         initNode: function(parent, attrs) {
             attrs.axis = 'y';

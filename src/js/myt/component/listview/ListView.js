@@ -76,7 +76,7 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
     // Methods /////////////////////////////////////////////////////////////////
     /** ListViewItems should call this method when they are activated. The
         default implementation invokes doItemActivated on the ListViewAnchor.
-        @returns void */
+        @returns {undefined} */
     doItemActivated: function(itemView) {
         var owner = this.owner;
         if (owner) owner.doItemActivated(itemView);

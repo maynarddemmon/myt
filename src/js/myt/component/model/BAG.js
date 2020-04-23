@@ -106,7 +106,7 @@ myt.BAG = new JS.Class('BAG', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Registeres a node with this group.
         @param node:myt.Node the node to register with this group.
-        @returns void */
+        @returns {undefined} */
     register: function(node) {
         if (node && !this.isRegistered(node)) {
             this.__nodes.push(node);
@@ -118,7 +118,7 @@ myt.BAG = new JS.Class('BAG', {
     
     /** Unregisteres a node from this group.
         @param node:myt.Node the node to unregister from this group.
-        @returns void */
+        @returns {undefined} */
     unregister: function(node) {
         if (node) {
             var nodes = this.__nodes, i = nodes.length;
@@ -138,7 +138,7 @@ myt.BAG = new JS.Class('BAG', {
     /** Sets the attribute to true on the provided registered node and sets 
         it to false on all other registered nodes.
         @param node:myt.Node the node to set the attribute to true on.
-        @returns void */
+        @returns {undefined} */
     setTrue: function(node) {
         if (node && this.trueNode !== node && this.isRegistered(node)) {
             var attrName = this.attrName,
@@ -161,7 +161,7 @@ myt.BAG = new JS.Class('BAG', {
     
     /** Sets the attribute to false on the provided registered node.
         @param node:myt.Node the node to set the attribute to false on.
-        @returns void */
+        @returns {undefined} */
     setFalse: function(node) {
         if (node && this.trueNode === node) {
             var setterName = myt.AccessorSupport.generateSetterName(this.attrName);
@@ -172,7 +172,7 @@ myt.BAG = new JS.Class('BAG', {
     
     /** Checks if a node is already registered or not.
         @param node:myt.Node the node to test.
-        @returns void */
+        @returns {undefined} */
     isRegistered: function(node) {
         var nodes = this.__nodes, i = nodes.length;
         while (i) {

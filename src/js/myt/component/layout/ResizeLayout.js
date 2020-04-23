@@ -37,14 +37,14 @@ myt.ResizeLayout = new JS.Class('SpacedLayout', myt.SpacedLayout, {
     // Methods /////////////////////////////////////////////////////////////////
     /** Called when monitoring of width/height should start on our parent.
         @param attrName:string the name of the attribute to start monitoring.
-        @returns void */
+        @returns {undefined} */
     startMonitoringParent: function(attrName) {
         this.attachTo(this.parent, 'update', attrName);
     },
     
     /** Called when monitoring of width/height should stop on our parent.
         @param attrName:string the name of the attribute to stop monitoring.
-        @returns void */
+        @returns {undefined} */
     stopMonitoringParent: function(attrName) {
         this.detachFrom(this.parent, 'update', attrName);
     },

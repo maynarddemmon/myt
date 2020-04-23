@@ -85,20 +85,25 @@ myt.HorizontalThreePanel = new JS.Module('HorizontalThreePanel', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __updateSize: function(event) {
         var v = this.second;
         v.setHeight(v.naturalHeight);
         this.__updateImageSize();
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __updateImageSize: function(event) {
         var v = this.second;
         v.setImageSize(this.repeat ? undefined : v.width + 'px ' + v.height + 'px');
     },
     
-    /** @private */
+    /** @private
+        @returns {undefined} */
     __updateRepeat: function() {
         this.second.setImageRepeat(this.repeat ? 'repeat-x' : 'no-repeat');
     }

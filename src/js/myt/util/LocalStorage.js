@@ -75,7 +75,7 @@
                     over a short time interval. For example, when saving the position
                     of a UI control as it is being repositioned or a value the user
                     is typing.
-                @returns void */
+                @returns {undefined} */
             setDatum: (key, value, storeId, delay) => {
                 storeId = getStoreId(storeId);
                 doFunc(() => {
@@ -91,7 +91,7 @@
                     from. If not provided the default "myt" storeId will be used.
                 @param delay:number (optional) A number of millis to wait before
                     actually removing the data.
-                @returns void */
+                @returns {undefined} */
             removeDatum: (key, storeId, delay) => {
                 storeId = getStoreId(storeId);
                 doFunc(() => {
@@ -155,7 +155,7 @@
                     not provided the default "myt" storeId will be used.
                 @param delay:number (optional) A number of millis to wait before
                     actually removing the data.
-                @returns void */
+                @returns {undefined} */
             removeData: (storeId, delay) => {
                 storeId = getStoreId(storeId);
                 doFunc(() => {LocalStorage.removeItem(storeId);}, delay, storeId);
@@ -177,20 +177,20 @@
                 the key the value will be replaced with the new value.
                 @param key:string The key to store the value under.
                 @param value:* The value to store.
-                @returns void */
+                @returns {undefined} */
             setItem: (key, value) => {
                 localStorage.setItem(key, value);
             },
             
             /** Removes the storage entry for the key.
                 @param key:string The key to remove.
-                @returns void */
+                @returns {undefined} */
             removeItem: (key) => {
                 localStorage.removeItem(key);
             },
             
             /** Removes all storage entries.
-                @returns void */
+                @returns {undefined} */
             clear: () => {
                 localStorage.clear();
             },

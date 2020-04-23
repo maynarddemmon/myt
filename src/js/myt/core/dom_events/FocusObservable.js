@@ -112,7 +112,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Gives the focus to the next focusable element or, if nothing else
         is focusable, blurs away from this element.
-        @returns void */
+        @returns {undefined} */
     giveAwayFocus: function() {
         if (this.focused) {
             // Try to go to next focusable element.
@@ -134,19 +134,21 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
     /** Calling this method will set focus onto this view if it is focusable.
         @param noScroll:boolean (optional) if true is provided no auto-scrolling
             will occur when focus is set.
-        @returns void */
+        @returns {undefined} */
     focus: function(noScroll) {
         if (this.isFocusable()) this.getInnerDomElement().focus({preventScroll:noScroll});
     },
     
     /** Removes the focus from this view. Do not call this method directly.
         @private
-        @returns void */
+        @returns {undefined} */
     blur: function() {
         this.getInnerDomElement().blur();
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doFocus: function(event) {
         if (!this.focused) {
             this.setFocused(true);
@@ -154,7 +156,9 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
         }
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doBlur: function(event) {
         if (this.focused) {
             this.doBlur();
@@ -162,6 +166,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
         }
     },
     
+    /** @returns {undefined} */
     doFocus: function() {
         if (this.focusEmbellishment) {
             this.showFocusEmbellishment();
@@ -170,10 +175,12 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
         }
     },
     
+    /** @returns {undefined} */
     doBlur: function() {
         if (this.focusEmbellishment) this.hideFocusEmbellishment();
     },
     
+    /** @returns {undefined} */
     showFocusEmbellishment: function() {
         // IE
         this.getInnerDomElement().hideFocus = false;
@@ -186,11 +193,13 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
         s.outlineOffset = '0px';
     },
     
+    /** @returns {undefined} */
     hideFocusEmbellishment: function() {
         this.hideDefaultFocusEmbellishment();
     },
     
-    /** Hides the browser's default focus embellishment. */
+    /** Hides the browser's default focus embellishment.
+        @returns {undefined}*/
     hideDefaultFocusEmbellishment: function() {
         // IE
         this.getInnerDomElement().hideFocus = true;

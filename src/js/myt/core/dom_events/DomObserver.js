@@ -20,7 +20,7 @@ myt.DomObserver = new JS.Module('DomObserver', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Attaches this DomObserver to the provided DomObservable for the 
         provided type.
-        @returns void */
+        @returns {undefined} */
     attachToDom: function(observable, methodName, type, capture, passive) {
         if (observable && methodName && type) {
             capture = !!capture;
@@ -73,7 +73,7 @@ myt.DomObserver = new JS.Module('DomObserver', {
     },
     
     /** Detaches this DomObserver from all DomObservables it is attached to.
-        @returns void */
+        @returns {undefined} */
     detachFromAllDomSources: function() {
         var observablesByType = this.__dobt,
             type,

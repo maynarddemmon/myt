@@ -89,7 +89,9 @@ myt.InputRadio = new JS.Class('InputRadio', myt.NativeInputWrapper, {
         }
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __syncToDom: function(event) {
         if (this.getInnerDomElement().checked) {
             // Get last checked and deselect
@@ -103,7 +105,9 @@ myt.InputRadio = new JS.Class('InputRadio', myt.NativeInputWrapper, {
         }
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __handleMouseDown: function(event) {
         this.focus();
     }

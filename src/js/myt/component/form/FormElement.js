@@ -80,7 +80,7 @@ myt.FormElement = new JS.Module('FormElement', {
         @param processors:array An array of myt.ValueProcessor instances or
             IDs of value processors from the myt.global.valueProcessors 
             registry.
-        @returns void */
+        @returns {undefined} */
     setValueProcessors: function(processors) {
         var i = processors.length, processor;
         while (i) {
@@ -98,7 +98,7 @@ myt.FormElement = new JS.Module('FormElement', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Adds a ValueProcessor to this form element.
         @param processor:myt.ValueProcessor
-        @returns void */
+        @returns {undefined} */
     addValueProcessor: function(processor) {
         this.__vp.push(processor);
     },

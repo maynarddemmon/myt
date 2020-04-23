@@ -81,18 +81,22 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
+    /** @private
+        @returns {undefined} */
     __teardownPercentOfParentWidthConstraint: function() {
         if (this.percentOfParentWidth >= 0) this.detachFrom(this.parent, '__doPercentOfParentWidth', 'width');
     },
     
-    /** @private */
+    /** @private
+        @returns {undefined} */
     __setupPercentOfParentWidthConstraint: function() {
         var p = this.parent;
         if (p && this.percentOfParentWidth >= 0) this.syncTo(p, '__doPercentOfParentWidth', 'width');
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doPercentOfParentWidth: function(event) {
         this.setWidth((this.percentOfParentWidthOffset || 0) + Math.round(this.parent.width * (this.percentOfParentWidth / 100)));
         // Force width event if not inited yet so that align constraint
@@ -100,18 +104,22 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
         if (!this.inited) this.fireEvent('width', this.width);
     },
     
-    /** @private */
+    /** @private
+        @returns {undefined} */
     __teardownPercentOfParentHeightConstraint: function() {
         if (this.percentOfParentHeight >= 0) this.detachFrom(this.parent, '__doPercentOfParentHeight', 'height');
     },
     
-    /** @private */
+    /** @private
+        @returns {undefined} */
     __setupPercentOfParentHeightConstraint: function() {
         var p = this.parent;
         if (p && this.percentOfParentHeight >= 0) this.syncTo(p, '__doPercentOfParentHeight', 'height');
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doPercentOfParentHeight: function(event) {
         this.setHeight((this.percentOfParentHeightOffset || 0) + Math.round(this.parent.height * (this.percentOfParentHeight / 100)));
         // Force height event if not inited yet so that valign constraint

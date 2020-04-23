@@ -58,7 +58,7 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Call this method after any change to the width or height of the dom
         element would have occurred.
-        @returns void */
+        @returns {undefined} */
     sizeViewToDom: function() {
         var self = this,
             de,

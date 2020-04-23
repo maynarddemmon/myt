@@ -263,7 +263,7 @@
         /** Add a Validator to this CompoundValidator.
             @param validator:myt.Validator|string The validator to add or a string
                 used to lookup a validator in the validator repository.
-            @returns void */
+            @returns {undefined} */
         addValidator: function(v) {
             if (typeof v === 'string') v = getValidator(v);
             if (v) this.__v.push(v);
@@ -312,12 +312,12 @@
         // Methods /////////////////////////////////////////////////////////////
         /** Adds a Validator to this registry.
             @param identifiable:myt.Validator the Validator to add.
-            @returns void */
+            @returns {undefined} */
         register: register,
         
         /** Removes a Validator from this registery.
             @param identifiable:myt.Validator the Validator to remove.
-            @returns void */
+            @returns {undefined} */
         unregister: (identifiable) => {
             doFuncOnIdentifiable(identifiable, (id) => {
                 // Make sure the validator is in the repository then delete.

@@ -41,7 +41,7 @@ new JS.Singleton('GlobalValueProcessorRegistry', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Adds a ValueProcessor to this registry.
         @param identifiable:myt.ValueProcessor the ValueProcessor to add.
-        @returns void */
+        @returns {undefined} */
     register: function(identifiable) {
         if (identifiable) {
             var id = identifiable.id;
@@ -57,7 +57,7 @@ new JS.Singleton('GlobalValueProcessorRegistry', {
     
     /** Removes a ValueProcessor from this registery.
         @param identifiable:myt.ValueProcessor the ValueProcessor to remove.
-        @returns void */
+        @returns {undefined} */
     unregister: function(identifiable) {
         if (identifiable) {
             var id = identifiable.id;

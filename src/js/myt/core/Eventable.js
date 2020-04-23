@@ -18,7 +18,7 @@ myt.Eventable = new JS.Class('Eventable', {
         @param attrs:object (Optional) A map of attribute names and values.
         @param mixins:array (Optional) a list of mixins to be added onto
             the new instance.
-        @returns void */
+        @returns {undefined} */
     initialize: function(attrs, mixins) {
         var self = this;
         if (mixins) {
@@ -40,7 +40,7 @@ myt.Eventable = new JS.Class('Eventable', {
     /** Called during initialization. Calls setter methods and lastly, sets 
         inited to true. Subclasses must callSuper.
         @param attrs:object A map of attribute names and values.
-        @returns void */
+        @returns {undefined} */
     init: function(attrs) {
         this.callSetters(attrs);
         this.inited = true;

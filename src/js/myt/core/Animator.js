@@ -358,7 +358,7 @@
                 @param callback:function the function to run.
                 @param replace:boolean (optional) if true the existing callback will 
                     be replaced with the new callback.
-                @returns void */
+                @returns {undefined} */
             next: function(callback, replace) {
                 var existingCallback = this.callback;
                 if (existingCallback && !replace) {
@@ -375,7 +375,7 @@
             /** Puts the animator back to an initial configured state.
                 @param executeCallback:boolean (optional) if true the callback, if
                     it exists, will be executed.
-                @returns void */
+                @returns {undefined} */
             reset: function(executeCallback) {
                 var self = this;
                 

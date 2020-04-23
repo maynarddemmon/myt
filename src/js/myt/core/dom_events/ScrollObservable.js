@@ -12,7 +12,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         EVENT:{source:null, type:null, value:null},
         
         /** Gets the scrollLeft and scrollTop from the event.
-            @param event:event
+            @param {!Object} event
             @returns object with an x and y key each containing a number. */
         getScrollFromEvent: function(event) {
             var domEvent = event.value,

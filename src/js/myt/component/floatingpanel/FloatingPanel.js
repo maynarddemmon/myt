@@ -48,7 +48,9 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doMouseDown: function(event) {
         var v = event.value, px = v.pageX, py = v.pageY;
         if (!this.containsPoint(px, py) && 
@@ -62,7 +64,7 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
     /** Called when a mousedown occurs outside the floating panel. The default
         behavior is to hide the panel. This gives subclasses a chance to 
         provide different behavior.
-        @returns void */
+        @returns {undefined} */
     doMouseDownOutside: function() {
         if (this.hideOnMouseDown) this.hide();
     },
@@ -96,7 +98,9 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
         return this;
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     __doFocusChange: function(event) {
         var v = event.value;
         if (v && !this.isAncestorOf(v)) this.doLostFocus();
@@ -104,7 +108,7 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
     
     /** Called when focus moves out of the floating panel. Hides the
         floating panel by default.
-        @returns void */
+        @returns {undefined} */
     doLostFocus: function() {
         if (this.hideOnBlur) {
             if (this.ignoreOwnerForHideOnBlur && myt.global.focus.focusedView === this.owner) return;
@@ -115,7 +119,7 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
     
     /** Determines if this floating panel is being "shown" or not. Typically
         this means the floating panel is visible.
-        @returns boolean: True if this panel is shown, otherwise false. */
+        @returns {boolean} True if this panel is shown, otherwise false. */
     isShown: function() {
         return this.visible;
     },
@@ -123,7 +127,7 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
     /** Shows the floating panel for the provided myt.FloatingPanelAnchor.
         @param panelAnchor:myt.FloatingPanelAnchor The floating panel anchor 
             to show the panel for.
-        @returns void */
+        @returns {undefined} */
     show: function(panelAnchor) {
         if (!this.isShown()) {
             this.bringToFront();
@@ -142,7 +146,7 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
         @param ignoreRestoreFocus:boolean (Optional) If true the restoreFocus
             method will not be called. Defaults to undefined which is
             equivalent to false.
-        @returns void */
+        @returns {undefined} */
     hide: function(ignoreRestoreFocus) {
         if (this.isShown()) {
             var g = myt.global;
@@ -158,7 +162,7 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
     
     /** Sends the focus back to the owner. Can be overridden to
         send the focus elsewhere.
-        @returns void */
+        @returns {undefined} */
     restoreFocus: function() {
         if (this.owner) this.owner.focus();
     },
@@ -167,7 +171,7 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
         floating panel anchor.
         @param panelAnchor:myt.FloatingPanelAnchor The anchor to update the
             location for.
-        @returns void */
+        @returns {undefined} */
     updateLocation: function(panelAnchor) {
         this.setOwner(panelAnchor);
         

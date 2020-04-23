@@ -108,10 +108,16 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     _updateContentWidth: function(event) {
         this.content.setWidth(event.value);
     },
     
+    /** @private
+        @param {!Object} event
+        @returns {undefined} */
     _updateContentHeight: function(event) {
         var self = this,
             header = self.header, 
@@ -163,7 +169,9 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     
     /** Gets the sort function used to sort the rows. Subclasses and instances
         should implement this as needed.
-        @returns function a comparator function used for sorting. */
+        @param {string} sortColumnId,
+        @param {string} sortOrder
+        @returns {!Function}  a comparator function used for sorting. */
     getSortFunction: (sortColumnId, sortOrder) => {
         if (sortColumnId) {
             // Default sort function uses the 'text' attribute of the subview.

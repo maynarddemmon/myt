@@ -88,7 +88,7 @@
                             Otherwise encodeURIComponent will be used.
                         json:boolean If true JSON.stringify will be used to encode
                             the cookie value.
-                @returns void */
+                @returns {undefined} */
             write: (key, value, options) => {
                 options = Object.assign({}, Cookie.defaults, options);
                 

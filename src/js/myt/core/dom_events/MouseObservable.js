@@ -24,8 +24,8 @@ myt.MouseObservable = new JS.Module('MouseObservable', {
         EVENT:{source:null, type:null, value:null},
         
         /** Gets the mouse coordinates from the provided event.
-            @param event
-            @returns object: An object with 'x' and 'y' keys containing the
+            @param {!Object} event
+            @returns {!Object} An object with 'x' and 'y' keys containing the
                 x and y mouse position. */
         getMouseFromEvent: function(event) {
             var domEvent = event.value;

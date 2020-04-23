@@ -1,24 +1,24 @@
-/**
- * http://github.com/maynarddemmon/myt
- * Maynard Demmon <maynarddemmon@gmail.com.
- * @copyright Copyright (c) 2012-2018 Maynard Demmon and contributors
- * Myt: A simple javascript UI framework
- * Version: 20170326.2144
- * MIT License
- * 
- * Parts of the Software incorporates code from the following open-source projects:
- * * JS.Class, (c) 2007-2012 James Coglan and contributors (MIT License)
- * * Easing Functions, (c) 2001 Robert Penner (BSD License)
- * * jQuery Easing v1.3, (c) 2008 George McGinley Smith (BSD License)
- * * jQuery Cookie Plugin v1.3.1, (c) 2013 Klaus Hartl (MIT License)
- * * parseUri 1.2.2, (c) Steven Levithan <stevenlevithan.com> (MIT License)
- * * Spin.js 1.3.0 (c) 2011-2013 Felix Gnass (the MIT license)
- * * date.format Date:03/10/15, Copyright (c) 2005 Jacob Wright https://github.com/jacwright/date.format
- * * k-d Tree JavaScript - v1.0 (c) Mircea Pricop <pricop@ubilabs.net>,
- *                                  Martin Kleppe <kleppe@ubilabs.net>,
- *                                  Ubilabs http://ubilabs.net (MIT License)
- */
 ((pkg) => {
+    /*
+     * http://github.com/maynarddemmon/myt
+     * Maynard Demmon <maynarddemmon@gmail.com>
+     * @copyright Copyright (c) 2012-2020 Maynard Demmon and contributors
+     * Myt: A simple javascript UI framework
+     * Version: 20200416.1227
+     * MIT License
+     * 
+     * Parts of the Software incorporates code from the following open-source projects:
+     * * JS.Class, (c) 2007-2012 James Coglan and contributors (MIT License)
+     * * Easing Functions, (c) 2001 Robert Penner (BSD License)
+     * * jQuery Easing v1.3, (c) 2008 George McGinley Smith (BSD License)
+     * * jQuery Cookie Plugin v1.3.1, (c) 2013 Klaus Hartl (MIT License)
+     * * parseUri 1.2.2, (c) Steven Levithan <stevenlevithan.com> (MIT License)
+     * * date.format Date:03/10/15, Copyright (c) 2005 Jacob Wright https://github.com/jacwright/date.format
+     * * k-d Tree JavaScript - v1.0 (c) Mircea Pricop <pricop@ubilabs.net>,
+     *                                  Martin Kleppe <kleppe@ubilabs.net>,
+     *                                  Ubilabs http://ubilabs.net (MIT License)
+     */
+    
     class FetchError extends Error {
         constructor(status, url, ...params) {
             super(...params);
@@ -29,7 +29,7 @@
     }
     
     var 
-        /** Used to generate globally unique IDs. */
+        /* Used to generate globally unique IDs. */
         GUID_COUNTER = 0,
         
         myt = pkg.myt = {
@@ -42,23 +42,32 @@
             IMAGE_ROOT: global.MYT_IMAGE_ROOT || '',
             
             /** Generates a globally unique id, (GUID).
-                @return number */
+                @returns {number} */
             generateGuid: () => ++GUID_COUNTER,
             
             /** Adds an event listener to a dom element. 
-                @param elem:DomElement the dom element to listen to.
-                @param type:string the name of the event to listen to.
-                @param callback:function the callback function that will be
+                @param elem:DomElement The dom element to listen to.
+                @param {string} type - The name of the event to listen to.
+                @param {Function} callback - The callback function that will be
                     registered for the event.
-                @param capture:boolean (optional) indicates if the listener is 
+                @param {boolean} [capture] indicates if the listener is 
                     registered during the capture phase or bubble phase.
-                @returns void */
+                @returns {undefined} */
             addEventListener: (elem, type, callback, capture, passive) => {
                 elem.addEventListener(type, callback, {
                     capture:capture || false,
                     passive:passive || false
                 });
             },
+            
+            /** Removes an event listener from a dom element. 
+                @param elem:DomElement The dom element to listen to.
+                @param {string} type - The name of the event to listen to.
+                @param {Function} callback - The callback function that will be
+                    registered for the event.
+                @param {boolean} [capture] indicates if the listener is 
+                    registered during the capture phase or bubble phase.
+                @returns {undefined} */
             removeEventListener: (elem, type, callback, capture) => {
                 elem.removeEventListener(type, callback, capture || false);
             },
@@ -66,11 +75,12 @@
             /** Takes a '.' separated string such as "foo.bar.baz" and resolves it
                 into the value found at that location relative to a starting scope.
                 If no scope is provided global scope is used.
-                @param objName:string|array The name to resolve or an array of path
+                @param {string|Array} objName - The name to resolve or an array of path
                     parts in descending order.
-                @param scope:Object (optional) The scope to resolve from. If not
+                @param {Object} [scope] - The scope to resolve from. If not
                     provided global scope is used.
-                @returns The referenced object or undefined if resolution failed. */
+                @returns {?Object} The referenced object or undefined if 
+                    resolution failed. */
             resolveName: (objName, scope) => {
                 if (!objName || objName.length === 0) return undefined;
                 
@@ -100,8 +110,8 @@
             },
             
             /** Gets the file extension from a file name.
-                @param fileName:string The filename to extract the extension from.
-                @returns a string of the file extension or null if a falsy fileName
+                @param {string} fileName - The filename to extract the extension from.
+                @returns {string) The file extension or null if a falsy fileName
                     argument was provided. */
             getExtension: function(fileName) {
                 return fileName ? fileName.split('.')[1] : null;
@@ -116,13 +126,11 @@
                     myt.fillTextTemplate("{0}/{2}/{1} hey {0}", 1, 2, 3) 
                     will return "1/3/2 hey 1".
                 
-                @param (first arg):string The template to use.
-                @param (remaining args):(coerced to string) The parameters for the
-                    template.
-                @returns A populated string. */
-            fillTextTemplate: function(...params) {
-                var template = params.shift(),
-                    param,
+                @param {string} template - The template to use.
+                @param {...*} [params] - The parameters for the template.
+                @returns {string} A populated string. */
+            fillTextTemplate: function(template, ...params) {
+                var param,
                     i,
                     len;
                 
@@ -142,13 +150,13 @@
                 method name, an ancestor search is performed on the dom starting with
                 the link element. The first myt managed dom element encountered is
                 used as the scope for the method.
-                @param text:string the text to put inside the link.
-                @param callbackMethodName:string the name of the method to execute.
-                @param attrs:object (optional) a map of additional attributes that
+                @param {string} text - The text to put inside the link.
+                @param {string) callbackMethodName - The name of the method to execute.
+                @param {?Object} [attrs] - a map of additional attributes that
                     will be inserted into the tag.
-                @param data:object (optional) Data that will be serialized as JSON
+                @param {?Object} [data] - Data that will be serialized as JSON
                     and provided to the link handler.
-                @returns void */
+                @returns {string} */
             generateLink: (text, callbackMethodName, attrs, data) => {
                 var optAttrs = '',
                     name;
@@ -164,7 +172,10 @@
             
             /** See myt.generateLink for documentation.
                 @private
-                @returns void */
+                @param {?Object} elem
+                @param {string} callbackMethodName
+                @param {string} data
+                @returns {undefined} */
             __handleGeneratedLink: (elem, callbackMethodName, data) => {
                 var model,
                     value;
@@ -185,14 +196,14 @@
             },
             
             /** Dynamically load a script into the dom.
-                @param src:string the URL to the script file.
-                @param callback:function (optional) A function that will be called
+                @param {string} src - The URL to the script file.
+                @param {Function} [callback] - A function that will be called
                     when the script loads.
-                @param noCacheBust:boolean (optional) If true, not cacheBust query
+                @param {boolean} [noCacheBust] - If true, not cacheBust query
                     param will be added. Defaults to undefined which is equivalent
                     to false.
-                @returns The created script element or null if the script has already
-                    been loaded. */
+                @returns {?Objecd} The created script element or null if the 
+                    script has already been loaded. */
             loadScript: function(src, callback, noCacheBust) {
                 // Prevent reloading the same script
                 var loadedScripts = this._loadedScripts || (this._loadedScripts = {});
@@ -232,39 +243,12 @@
                 }
             },
             
-            /** UNUSED SO COMMENTING OUT FOR NOW.
-                
-                Used to wrap the first function with the second function. The first
-                function is exposed as this.callSuper within the wrapper function.
-                @param fn:function the function to wrap.
-                @param wrapperFn:function the wrapper function.
-                @returns a wrapped function.
-            wrapFunction: function(fn, wrapperFn) {
-                return function() {
-                    // Store existing callSuper function so we can put it back later.
-                    var oldSuper = this.callSuper;
-                    
-                    // Assign new callSuper and execute wrapperFn
-                    this.callSuper = fn;
-                    var retval = wrapperFn.apply(this, arguments);
-                    
-                    // Restore existing callSuper or delete new callSuper
-                    if (oldSuper !== undefined) {
-                        this.callSuper = oldSuper;
-                    } else {
-                        delete this.callSuper;
-                    }
-                    
-                    return retval;
-                };
-            },*/
-            
             /** A wrapper on myt.global.error.notify
-                @param err:Error/string The error or message to dump stack for.
-                @param type:string (optional) The type of console message to write.
-                    Allowed values are 'error', 'warn', 'log' and 'debug'. Defaults to
-                    'error'.
-                @returns void */
+                @param {string|Error} err - The error or message to dump stack for.
+                @param {string} [type] - The type of console message to write.
+                    Allowed values are 'error', 'warn', 'log' and 'debug'. 
+                    Defaults to 'error'.
+                @returns {undefined} */
             dumpStack: (err, type) => {
                 var msg;
                 if (typeof err === 'string') {
@@ -275,15 +259,15 @@
             },
             
             // Random numbers
-            /** @returns a random number between 0 (inclusive) and 1 (exclusive)
-                @param func:function (optional) a distribution function for the
+            /** Generates a random number between 0 (inclusive) and 1 (exclusive)
+                @param {?Function} [func] - A distribution function for the
                     random numbers. The function should map a number between 0 and 1
                     to another number between 0 (inclusive) and 1 (exclusive). If not 
                     provided a flat distribution will be used. Example functions:
                         - function(v) {return v * v;} will skew the value towards 0.
                         - function(v) {return 0.9999999999 - v * v;} will skew the 
                           value towards a value very close to 1.
-                @returns number: a random number between 0 and almost 1. */
+                @returns {number} a random number between 0 and almost 1. */
             getRandom: (func) => {
                 var v = Math.random();
                 if (func) {
@@ -300,10 +284,11 @@
             },
             
             /** @returns a random number between min (inclusive) and max (exclusive).
-                @param min:number the minimum value returned.
-                @param max:number the maximum value returned.
-                @param func:function a skew function. See myt.getRandom for more info.
-                @returns number: between min and max. */
+                @param {number} min - the minimum value returned.
+                @param {number} max - the maximum value returned.
+                @param {?Function} [func] - A distribution function. 
+                    See myt.getRandom for more info.
+                @returns {number} a number between min and max. */
             getRandomArbitrary: (min, max, func) => {
                 if (min > max) {
                     var tmp = min;
@@ -313,11 +298,12 @@
                 return myt.getRandom(func) * (max - min) + min;
             },
             
-            /** @returns a random integer between min (inclusive) and max (inclusive)
-                @param min:number the minimum value returned.
-                @param max:number the maximum value returned.
-                @param func:function a skew function. See myt.getRandom for more info.
-                @returns number: an integer between min and max. */
+            /** Generates a random integer between min (inclusive) and max (inclusive)
+                @param {number} min - the minimum value returned.
+                @param {number} max - the maximum value returned.
+                @param {?Function} [func] - A distribution function. 
+                    See myt.getRandom for more info.
+                @returns {number} a number between min and max. */
             getRandomInt: (min, max, func) => {
                 if (min > max) {
                     var tmp = min;
@@ -329,11 +315,11 @@
             
             // Equality
             /** Tests if two floats are essentially equal to each other.
-                @param a:float
-                @param b:float
-                @param epsilon:float (optional) the percent of difference allowed
+                @param {number} a - A float
+                @param {number} b - A float
+                @param {numer} [epsilon] - The percent of difference allowed
                     between a and b. Defaults to 0.000001 if not provided.
-                @return true if equal, false otherwise. */
+                @return {boolean} true if equal, false otherwise. */
             areFloatsEqual: (a, b, epsilon) => {
                 var A = Math.abs(a), B = Math.abs(b);
                 epsilon = epsilon ? Math.abs(epsilon) : 0.000001;
@@ -341,7 +327,10 @@
             },
             
             /** Tests if two array are equal. For a more complete deep equal
-                implementation use underscore.js */
+                implementation use underscore.js
+                @param {?Array} a
+                @param {?Array} b
+                @returns {boolean} */
             areArraysEqual: (a, b) => {
                 if (a !== b) {
                     if (a == null || b == null) return false;
@@ -355,7 +344,10 @@
                 return true;
             },
             
-            /** Tests if two objects are shallowly equal. */
+            /** Tests if two objects are shallowly equal.
+                @param {?Object} a
+                @param {?Object} b
+                @returns {boolean} */
             areObjectsEqual: (a, b) => {
                 if (a !== b) {
                     if (a == null || b == null) return false;
@@ -367,15 +359,17 @@
             
             // DOM
             /** Gets the dom element of the provided tagname and index.
-                @param tagname:string (optional) the name of the tag to search for.
+                @param {string} [tagname] - The name of the tag to search for.
                     Defaults to 'body' if not provided
-                @param index:int (optional) the index of the tag to get. Defaults to
+                @param {number} [index] - The index of the tag to get. Defaults to
                     0 if not provided.
-                @returns a dom element or undefined if none exist. */
+                @returns {?Object} a dom element or undefined if none exist. */
             getElement: (tagname, index) => document.getElementsByTagName(tagname || 'body')[index > 0 ? index : 0],
             
             // CSS
-            loadCSSFonts: fontUrls => {
+            /** @param {Array} fontUrls
+                @returns {undefined} */
+            loadCSSFonts: (fontUrls) => {
                 (fontUrls || []).forEach(fontUrl => {
                     var link = document.createElement("link");
                     link.appendChild(document.createTextNode("")); // Webkit workaround
@@ -385,6 +379,7 @@
                 });
             },
             
+            /** @returns {Object} */
             createStylesheet: () => {
                 var style = document.createElement("style");
                 style.appendChild(document.createTextNode("")); // Webkit workaround
@@ -521,7 +516,7 @@
                 
                 // Define the "module".
                 /** Increments the counter attribute on the scope object by 1.
-                    @returns void */
+                    @returns {undefined} */
                 mod[incrName] = function() {
                     var value = this[counterAttrName] + 1;
                     this[counterAttrName] = value;
@@ -530,7 +525,7 @@
                 };
                 
                 /** Decrements the counter attribute on the scope object by 1.
-                    @returns void */
+                    @returns {undefined} */
                 mod[decrName] = function() {
                     var curValue = this[counterAttrName];
                     if (curValue === 0) return;
