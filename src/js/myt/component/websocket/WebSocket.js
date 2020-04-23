@@ -60,7 +60,7 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
                         
                         // Reassign handler
                         ws.onopen = openFunc;
-                    }
+                    };
                 } else {
                     ws.onopen = openFunc;
                 }
