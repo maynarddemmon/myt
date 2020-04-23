@@ -85,7 +85,7 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.BaseTooltip. */
+    /** @override myt.BaseTooltip. */
     showTip: function() {
         var self = this,
             tt = self.tooltip,
@@ -178,7 +178,12 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
         self.callSuper();
     },
     
-    /** @private */
+    /** Redraw the tooltip
+        @private
+        @param {number} pointerX The x location of the tooltip pointer.
+        @param {boolean} pointerOnTop Determines if the pointer will be draw
+            on the top or the bottom of the tooltip.
+        @returns {undefined} */
     __redraw: function(pointerX, pointerOnTop) {
         var self = this,
             canvas = self._bg,

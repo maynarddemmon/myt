@@ -26,15 +26,15 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
     // Methods /////////////////////////////////////////////////////////////////
     /** Registers a listener function that will get called for messages with
         a type that is matched by the provided matcher.
-        @param listenerFunc:function The function that will get invoked. The
+        @param {?Function} listenerFunc The function that will get invoked. The
             message is provided as the sole argument to the function.
-        @param matcher:string|function (optional) A matcher function that takes
+        @param {string|?Function} matcher (optional) A matcher function that takes
             the type as the sole argument and must return true or false
             indicating if the type is matched or not. If a string is provided
             it will be converted into an exact match function. If not provided
             (or something falsy) is provided a promiscuous matcher function
             will be used.
-        @returns void */
+        @returns {undefined} */
     registerListener: function(listenerFunc, matcher) {
         if (listenerFunc) {
             var matcherFunc = this._makeMatcherFunction(matcher);
@@ -67,7 +67,10 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
         }
     },
     
-    /** Removed the provided listener function and matcher. */
+    /** Removed the provided listener function and matcher.
+        @param {!Function} listenerFunc
+        @param {string|?Function} matcher
+        @returns {undefined} */
     unregisterListener: function(listenerFunc, matcher) {
         if (listenerFunc) {
             var matcherFunc = this._makeMatcherFunction(matcher);
@@ -95,16 +98,19 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
         }
     },
     
-    /** @private */
+    /** @private
+        @param {string|?Function} matcher
+        @return {?Function} */
     _makeMatcherFunction: function(matcher) {
-        var matcherFunc;
+        var matcherFunc,
+            funcsByKey;
         if (typeof matcher === 'string') {
             // Use the provided string as an exact match function. We must
             // generate a unique function for each string key (and reuse it)
             // so that the === tests will work in the registerListener and
             // unregisterListener functions.
-            var funcsByKey = myt.MessageTypeWebSocket.matcherFunctionsByKey;
-            matcherFunc = funcsByKey[matcher] || (funcsByKey[matcher] = function(type) {return type === matcher;});
+            funcsByKey = myt.MessageTypeWebSocket.matcherFunctionsByKey;
+            matcherFunc = funcsByKey[matcher] || (funcsByKey[matcher] = (type) => type === matcher);
         } else if (typeof matcher === 'function') {
             matcherFunc = matcher;
         } else if (matcher == null) {
@@ -116,7 +122,9 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
         return matcherFunc;
     },
     
-    /** @private */
+    /** @private
+        @param {string} type
+        @returns {!Array} */
     _getListenersForType: function(type) {
         var retval = [],
             listeners = this._listeners,
@@ -132,9 +140,10 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
     },
     
     /** Sends a message with a type. Use this method instead of send.
-        @param type:string The type of the message to send.
-        @param msg:* The message value. Must be convertible to JSON.
-        @returns The sent message. */
+        @param {string} type The type of the message to send.
+        @param {*} msg The message value. Must be convertible to JSON.
+        @param {boolean} doNotTryToConnect
+        @returns {undefined} The sent message. */
     sendTypedMessage: function(type, msg, doNotTryToConnect) {
         msg = this.createMessage(type, msg);
         if (msg) return this.send(msg, doNotTryToConnect);

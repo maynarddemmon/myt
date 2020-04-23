@@ -129,7 +129,7 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
                 a = a[modelIDName];
                 b = b[modelIDName];
                 return (a > b ? 1 : (a < b ? -1 : 0)) * asc;
-            }
+            };
         }
     },
     
@@ -299,7 +299,7 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
             // into the pool
             for (i in visibleRowsByIdx) {
                 if (i < startIdx || i >= endIdx) {
-                    self.putRowBackInPool(visibleRowsByIdx[i])
+                    self.putRowBackInPool(visibleRowsByIdx[i]);
                     delete visibleRowsByIdx[i];
                 }
             }

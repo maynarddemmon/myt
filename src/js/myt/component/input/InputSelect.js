@@ -105,7 +105,10 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     /** Gets an array of selected myt.InputSelectOptions.
         @returns array: An array of selected myt.InputSelectOptions. */
     getSelectedOptions: function() {
-        var options = this.getOptions(), i = options.length, option, retval = [];
+        var options = this.getOptions(), 
+            i = options.length, 
+            option, 
+            retval = [];
         while (i) {
             option = options[--i];
             if (option.isSelected()) retval.push(option);
@@ -116,7 +119,10 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     /** Gets an array of selected myt.InputSelectOption values.
         @returns array: An array of selected option values. */
     getSelectedOptionValues: function() {
-        var options = this.getOptions(), i = options.length, option, retval = []
+        var options = this.getOptions(), 
+            i = options.length, 
+            option, 
+            retval = [];
         while (i) {
             option = options[--i];
             if (option.isSelected()) retval.push(option.value);

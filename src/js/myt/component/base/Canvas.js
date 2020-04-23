@@ -206,6 +206,6 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
     drawImage: function() {var ctx = this.__ctx; ctx.drawImage.apply(ctx, arguments);},
     createImageData: function() {var ctx = this.__ctx; ctx.createImageData.apply(ctx, arguments);},
     getImageData: function() {var ctx = this.__ctx; return ctx.getImageData.apply(ctx, arguments);},
-    putImageData: function() {var ctx = this.__ctx; ctx.putImageData.apply(ctx, arguments)}
+    putImageData: function() {var ctx = this.__ctx; ctx.putImageData.apply(ctx, arguments);}
 });
 

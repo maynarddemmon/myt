@@ -55,7 +55,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
                 file.width = this.width;
                 file.height = this.height;
                 
-                if (!image || image.destroyed) return
+                if (!image || image.destroyed) return;
                 
                 self.updateImage(file, image, this.src);
             };
@@ -67,7 +67,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
                     file.width = this.width;
                     file.height = this.height;
                     
-                    if (!image || image.destroyed) return
+                    if (!image || image.destroyed) return;
                     
                     self.updateImage(file, image, this.src);
                 };

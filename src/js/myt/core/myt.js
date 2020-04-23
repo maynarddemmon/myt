@@ -594,7 +594,7 @@
                         if (error.name !== 'FetchError') {
                             var fetchError = new FetchError(0, url, error.message);
                             fetchError.stack = error.stack;
-                            error = fetchError
+                            error = fetchError;
                         }
                         
                         errorFunc(error);

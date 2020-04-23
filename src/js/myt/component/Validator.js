@@ -20,7 +20,7 @@
         },
         
         register = (identifiable) => {
-            doFuncOnIdentifiable(identifiable, (id) => {validators[id] = identifiable});
+            doFuncOnIdentifiable(identifiable, (id) => {validators[id] = identifiable;});
         },
         
         /** Tests if a value is "valid" or not.

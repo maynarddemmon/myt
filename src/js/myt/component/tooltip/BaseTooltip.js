@@ -22,6 +22,7 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     extend: {
         /** The length of time in millis before the tip is shown. */
         DEFAULT_TIP_DELAY:500,
+        
         /** The length of time in millis before the tip is hidden. */
         DEFAULT_TIP_HIDE_DELAY:100
     },
@@ -41,11 +42,12 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     
     // Accessors ///////////////////////////////////////////////////////////////
     /** Sets the tooltip info that will be displayed. 
-        @param v:object with the following keys:
+        @param v {Object} The object has the following keys:
             parent:myt.View The view to show the tip for.
             text:string The tip text.
             tipalign:string Tip alignment, 'left' or 'right'.
-            tipvalign:string Tip vertical alignment, 'above' or 'below'. */
+            tipvalign:string Tip vertical alignment, 'above' or 'below'.
+        @returns {undefined} */
     setTooltip: function(v) {
         if (this.inited) {
             this.tooltip = v;
@@ -61,7 +63,9 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
+    /** @private
+        @param {!Object} event The event object.
+        @returns {undefined} */
     __checkMouseMovement: function(event) {
         var self = this;
         self._lastPos = myt.MouseObservable.getMouseFromEvent(event);
@@ -79,7 +83,8 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
         }
     },
     
-    /** @private */
+    /** @private
+        @returns {undefined} */
     __clearTimeout: function() {
         if (this.__checkTipTimerId) {
             clearTimeout(this.__checkTipTimerId);
@@ -90,7 +95,7 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     /** Checks if the last mouse position is inside the tip's parent.
         If not inside the tip will also get hidden.
         @private
-        @returns boolean: false if the tip got hidden, true otherwise. */
+        @returns {boolean} false if the tip got hidden, true otherwise. */
     __checkIn: function() {
         var tt = this.tooltip;
         if (tt) {
@@ -102,7 +107,8 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     },
     
     /** Called when the tip will be hidden.
-        @returns boolean */
+        @param {!Object} event The event object.
+        @returns {boolean} */
     hideTip: function(event) {
         this.__clearTimeout();
         
@@ -122,7 +128,7 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     },
     
     /** Called when the tip will be shown.
-        @returns void */
+        @returns {undefined} */
     showTip: function() {
         // Don't show tooltips while doing drag and drop since they're
         // distracting while this is going on.

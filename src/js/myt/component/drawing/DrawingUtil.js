@@ -167,8 +167,8 @@ myt.DrawingUtil = {
             canvas.lineTo(x2, y2);
             canvas.closePath();
             
-            var c = colors[i].color;
-            var colorDelta = colors[i].colorDelta
+            var c = colors[i].color,
+                colorDelta = colors[i].colorDelta;
             canvas.fillStyle = myt.Color.makeColorNumberFromChannels(
                 c.red + (diffCount * colorDelta.red),
                 c.green + (diffCount * colorDelta.green),
