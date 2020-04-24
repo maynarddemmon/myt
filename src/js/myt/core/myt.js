@@ -32,6 +32,36 @@
         /* Used to generate globally unique IDs. */
         GUID_COUNTER = 0,
         
+        /* Font functionality */
+        fontTargets = {},
+        fontLoaded = {
+            // Empty entry is so that notifyInstanceThatFontLoaded will get 
+            // triggered for registerForFontNotification when an empty
+            // font name is provided. This should be done when a built in
+            // font will be used.
+            '':true
+        },
+        docFonts = document.fonts,
+        
+        notifyFontLoaded = (fontFace) => {
+            var fontName = fontFace.family + ' ' + fontFace.weight,
+                targets;
+            
+            // Fix for Firefox and FontAwesome because of garbage returned in
+            // the font family name.
+            if (fontName.indexOf('\\35 ') >= 0) fontName = fontName.replace(/\\35 /g, '5');
+            
+            if (!fontLoaded[fontName]) {
+                fontLoaded[fontName] = true;
+                targets = fontTargets[fontName] || [];
+                while (targets.length) notifyInstanceThatFontLoaded(targets.pop());
+            }
+        },
+        
+        notifyInstanceThatFontLoaded = (instance) => {
+            instance.sizeViewToDom();
+        },
+        
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was
                 created. */
@@ -366,23 +396,64 @@
                 @returns {?Object} a dom element or undefined if none exist. */
             getElement: (tagname, index) => document.getElementsByTagName(tagname || 'body')[index > 0 ? index : 0],
             
-            // CSS
+            // Fonts
+            loadFontFaces: (fontList, callback) => {
+                var fonts = [];
+                fontList.forEach(fontInfo => {
+                    var fontFace = new FontFace(fontInfo.family, 'url(' + fontInfo.url + ')', fontInfo.options);
+                    fonts.push(fontFace.load());
+                });
+                
+                Promise.all(fonts).then(loadedFonts => {
+                    loadedFonts.forEach(font => {
+                        docFonts.add(font);
+                        notifyFontLoaded(font);
+                    });
+                    if (callback) callback(loadedFonts);
+                });
+            },
+            
+            loadFontFace: (fontName, fontUrl, fontOptions={}, callback) => {
+                var fontFace = new FontFace(fontName, 'url(' + fontUrl + ')', fontOptions);
+                fontFace.loaded.then((loadedFontFace) => {
+                    docFonts.add(loadedFontFace);
+                    notifyFontLoaded(loadedFontFace);
+                    if (callback) callback(loadedFontFace);
+                });
+                fontFace.load();
+            },
+            
+            registerForFontNotification: (textView, fontName) => {
+                if (fontLoaded[fontName]) {
+                    notifyInstanceThatFontLoaded(textView);
+                } else {
+                    (fontTargets[fontName] || (fontTargets[fontName] = [])).push(textView);
+                }
+            },
+            
+            /** Create a CSS rule that defines the base font for 
+                the document.
+                @param {string} fontFamily
+                @returns {undefined} */
+            createBaseFontCSSRule: (fontFamily) => {
+                myt.addCSSRule(myt.createStylesheet(), 'body, input', 'font-family:' + fontFamily, 0);
+            },
+            
             /** @param {Array} fontUrls
                 @returns {undefined} */
             loadCSSFonts: (fontUrls) => {
                 (fontUrls || []).forEach(fontUrl => {
-                    var link = document.createElement("link");
-                    link.appendChild(document.createTextNode("")); // Webkit workaround
+                    var link = document.createElement('link');
                     link.rel = 'stylesheet';
                     link.href = fontUrl;
                     document.head.appendChild(link);
                 });
             },
             
+            // CSS
             /** @returns {Object} */
             createStylesheet: () => {
-                var style = document.createElement("style");
-                style.appendChild(document.createTextNode("")); // Webkit workaround
+                var style = document.createElement('style');
                 document.head.appendChild(style);
                 return style.sheet;
             },
@@ -599,4 +670,8 @@
                 _ => {if (finallyFunc) finallyFunc();}
             )
         };
+    
+    docFonts.onloadingdone = (fontFaceSetEvent) => {
+        fontFaceSetEvent.fontfaces.forEach(fontFace => {notifyFontLoaded(fontFace);});
+    };
 })(global);

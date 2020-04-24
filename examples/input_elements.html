@@ -28,6 +28,7 @@
                 attrs.whiteSpace = 'normal';
                 attrs.label = "Here is some text that will definitely wrap.";
                 attrs.width = 120;
+                attrs.checkboxStyle = 'solid';
             }
             new myt.Checkbox(rootView, attrs);
         }
@@ -45,11 +46,11 @@
             if (i % 2 == 0) attrs.groupId = 'bar';
             if (i % 5 == 0) attrs.disabled = true;
             if (i % 16 == 0) {
-                attrs.text = "Here is some text.";
+                attrs.label = "Here is some text.";
             }
             if (i % 32 == 0) {
                 attrs.whiteSpace = 'normal';
-                attrs.text = "Here is some text that will definitely wrap.";
+                attrs.label = "Here is some text that will definitely wrap.";
                 attrs.width = 120;
             }
             new myt.Radio(rootView, attrs, [{
