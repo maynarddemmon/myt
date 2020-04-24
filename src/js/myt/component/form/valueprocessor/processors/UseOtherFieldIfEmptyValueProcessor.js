@@ -8,7 +8,7 @@
 myt.UseOtherFieldIfEmptyValueProcessor = new JS.Class('UseOtherFieldIfEmptyValueProcessor', myt.ValueProcessor, {
     // Constructor /////////////////////////////////////////////////////////////
     /** @overrides myt.ValueProcessor
-        @param otherField:myt.FormElement The form field to pull the 
+        @param {!Object} otherField - The myt.FormElement to pull the 
             value from. */
     initialize: function(id, runForDefault, runForRollback, runForCurrent, otherField) {
         this.callSuper(id, runForDefault, runForRollback, runForCurrent);

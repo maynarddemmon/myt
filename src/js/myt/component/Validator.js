@@ -31,32 +31,34 @@
             Attributes:
                 id:string the ideally unique ID for this Validator so it can be
                     stored and retreived from the myt.global.validators registry.
+            
+            @class
         */
         Validator = pkg.Validator = new JSClass('Validator', {
             /** Creates a new Validator
-                @param id:string the ideally unique ID for a validator instance. */
+                @param {string} id - The ideally unique ID for a validator instance. */
             initialize: function(id) {
                 this.id = id;
             },
             
             /** Tests if the value is valid or not.
-                @param value:* the value to test validity for.
-                @param config:Object (optional) A map of configuration values that
+                @param {*} value - The value to test validity for.
+                @param {?Object} [config] - A map of configuration values that
                     can be used to augment the validation function as needed. The
                     nature of this config will be specific to each Validator class.
-                @param errorMessages:array (optional) Any error messages arising during
+                @param {?Array} [errorMessages] - Any error messages arising during
                     validation will be pushed onto thiis array if it is provided.
-                @returns boolean true if the value is valid, false otherwise. */
+                @returns {boolean} true if the value is valid, false otherwise. */
             isValid: (value, config, errorMessages) => true,
             
             /** Tests if the form is valid or not.
-                @param form:myt.Form the form to test validity for.
-                @param config:Object (optional) A map of configuration values that
+                @param {!Object} form - The myt.Form to test validity for.
+                @param {?Object} [config] - A map of configuration values that
                     can be used to augment the validation function as needed. The
                     nature of this config will be specific to each Validator class.
-                @param errorMessages:array (optional) Any error messages arising during
+                @param {?Array} [errorMessages] - Any error messages arising during
                     validation will be pushed onto thiis array if it is provided.
-                @returns boolean true if the form is valid, false otherwise. */
+                @returns {boolean} true if the form is valid, false otherwise. */
             isFormValid: function(form, config, errorMessages) {
                 if (!config) config = {};
                 config.form = form;
@@ -64,7 +66,8 @@
             }
         }),
         
-        /** Tests that a value is not null, undefined or empty. */
+        /** Tests that a value is not null, undefined or empty. 
+            @class */
         RequiredFieldValidator = pkg.RequiredFieldValidator = new JSClass('RequiredFieldValidator', Validator, {
             /** @overrides myt.Validator */
             isValid: function(value, config, errorMessages) {
@@ -78,7 +81,8 @@
         }),
         
         /** Tests that the value differs from the form rollback value by more than
-            just case. */
+            just case.
+            @class */
         EqualsIgnoreCaseValidator = pkg.EqualsIgnoreCaseValidator = new JSClass('EqualsIgnoreCaseValidator', Validator, {
             /** @overrides myt.Validator */
             isValid: function(value, config, errorMessages) {
@@ -92,9 +96,11 @@
             }
         }),
         
-        /** Verifies that a value is in the form of a URL. */
+        /** Verifies that a value is in the form of a URL.
+            @class */
         URLValidator = pkg.URLValidator = new JSClass('URLValidator', Validator, {
             /** @overrides myt.Validator
+                @param {string id
                 @param originalRawQuery:boolean if true this prevents the query from
                     being normalized. */
             initialize: function(id, originalRawQuery) {
@@ -113,7 +119,8 @@
             }
         }),
         
-        /** Verifies that a value is JSON. */
+        /** Verifies that a value is JSON.
+            @class */
         JSONValidator = pkg.JSONValidator = new JSClass('JSONValidator', Validator, {
             /** @overrides myt.Validator */
             isValid: function(value, config, errorMessages) {
@@ -130,6 +137,7 @@
     /** Tests that the value from two fields are equal. */
     pkg.EqualFieldsValidator = new JSClass('EqualFieldsValidator', Validator, {
         /** @overrides myt.Validator
+            @param {string} id
             @param fieldA the first form field to compare.
             @param fieldB the second form field to compare. */
         initialize: function(id, fieldA, fieldB) {
@@ -151,8 +159,9 @@
     /** Tests that the value has a length between min and max. */
     pkg.LengthValidator = new JSClass('LengthValidator', Validator, {
         /** @overrides myt.Validator
-            @param min:number The minimum length value.
-            @param max:number The maximum length value. */
+            @param {string} id
+            @param {number} min - The minimum length value.
+            @param {number} max - The maximum length value. */
         initialize: function(id, min, max) {
             this.callSuper(id);
             
@@ -185,8 +194,9 @@
     /** Tests that adBinary value is between min and max. */
     pkg.NumericRangeValidator = new JSClass('NumericRangeValidator', Validator, {
         /** @overrides myt.Validator
-            @param min:number The minimum value.
-            @param max:number The maximum value. */
+            @param {string} id
+            @param {number} min - The minimum value.
+            @param {number} max - The maximum value. */
         initialize: function(id, min, max) {
             this.callSuper(id);
             
@@ -238,6 +248,7 @@
         // Constructor /////////////////////////////////////////////////////////
         /** Creates a new CompoundValidator for the ID and 0 or more Validators
             provided.
+            @param {string} id
             @param arguments:args ever argument after the first must be a
                 Validator or a Validator ID from the myt.global.validators
                 registry.*/
@@ -261,7 +272,7 @@
         
         // Methods /////////////////////////////////////////////////////////////
         /** Add a Validator to this CompoundValidator.
-            @param validator:myt.Validator|string The validator to add or a string
+            @param {!Object|string} v - The myt.Validator to add or a string
                 used to lookup a validator in the validator repository.
             @returns {undefined} */
         addValidator: function(v) {
@@ -304,19 +315,19 @@
         
         // Accessors ///////////////////////////////////////////////////////////
         /** Gets a Validator for the ID.
-            @param id:string the ID of the Validator to get.
-            @returns an myt.Validator or undefined if not found. */
+            @param {string} id - the ID of the Validator to get.
+            @returns {?Obect} - An myt.Validator or undefined if not found. */
         getValidator: getValidator,
         
         
         // Methods /////////////////////////////////////////////////////////////
         /** Adds a Validator to this registry.
-            @param identifiable:myt.Validator the Validator to add.
+            @param {!Object} identifiable - The myt.Validator to add.
             @returns {undefined} */
         register: register,
         
         /** Removes a Validator from this registery.
-            @param identifiable:myt.Validator the Validator to remove.
+            @param {!Object} identifiable - The myt.Validator to remove.
             @returns {undefined} */
         unregister: (identifiable) => {
             doFuncOnIdentifiable(identifiable, (id) => {

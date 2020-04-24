@@ -8,6 +8,8 @@
     
     Private Attributes:
         __lockSync:boolean Used internally to prevent infinite loops.
+    
+    @class
 */
 myt.Slider = new JS.Class('Slider', myt.BaseSlider, {
     include: [myt.BoundedValueComponent],
@@ -49,7 +51,9 @@ myt.Slider = new JS.Class('Slider', myt.BaseSlider, {
     
     // Methods /////////////////////////////////////////////////////////////////
     /** Should only be called by myt.SliderThumbMixin.
-        @private */
+        @private
+        @param {!Object} thumb
+        @returns {undefined} */
     _syncValueToThumb: function(thumb) {
         if (this.inited && !this.__lockSync) {
             this.__lockSync = true;
@@ -71,13 +75,17 @@ myt.Slider = new JS.Class('Slider', myt.BaseSlider, {
     },
     
     /** Should only be called by myt.SliderThumbMixin.
-        @private */
+        @private
+        @param {!Object} thumb
+        @returns {number} */
     getMinPixelValueForThumb: function(thumb) {
         return this.convertValueToPixels(this.minValue);
     },
     
     /** Should only be called by myt.SliderThumbMixin.
-        @private */
+        @private
+        @param {!Object} thumb
+        @returns {number} */
     getMaxPixelValueForThumb: function(thumb) {
         return this.convertValueToPixels(this.maxValue);
     }

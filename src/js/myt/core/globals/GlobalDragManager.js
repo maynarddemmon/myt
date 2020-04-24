@@ -1,18 +1,18 @@
 ((pkg) => {
     var globalDragManager,
         
-        /** The list of myt.AutoScrollers currently registered for notification
+        /* The list of myt.AutoScrollers currently registered for notification
             when drags start and stop. */
         autoScrollers = [],
         
-        /** The list of myt.DropTargets currently registered for notification 
+        /* The list of myt.DropTargets currently registered for notification 
             when drag and drop events occur. */
         dropTargets = [],
         
-        /** The view currently being dragged. */
+        /* The view currently being dragged. */
         dragView,
         
-        /** The view currently being dragged over. */
+        /* The view currently being dragged over. */
         overView,
         
         setOverView = (v) => {
@@ -64,9 +64,12 @@
             }
         },
         
-        /** Filters the provided array of myt.DragGroupSupport items for the
+        /*  Filters the provided array of myt.DragGroupSupport items for the
             provided myt.Dropable. Returns an array of the matching list
-            items. */
+            items.
+            @param {!Object} dropable
+            @param {!Array} list
+            @returns {!Array} */
         filterList = (dropable, list) => {
             var retval;
             
@@ -115,6 +118,8 @@
             drop:object Fired when a drag ends over a drop target. The value is
                 an array containing the dropable at index 0 and the drop target
                 at index 1.
+        
+        @class
     */
     new JS.Singleton('GlobalDragManager', {
         include: [pkg.Observable],
@@ -132,14 +137,14 @@
         
         // Methods /////////////////////////////////////////////////////////////
         /** Registers the provided auto scroller to receive notifications.
-            @param autoScroller:myt.AutoScroller The auto scroller to register.
+            @param {!Object} autoScroller - The myt.AutoScroller to register.
             @returns {undefined} */
         registerAutoScroller: (autoScroller) => {
             autoScrollers.push(autoScroller);
         },
         
         /** Unregisters the provided auto scroller.
-            @param autoScroller:myt.AutoScroller The auto scroller to unregister.
+            @param {!Object} autoScroller - The myt.AutoScroller to unregister.
             @returns {undefined} */
         unregisterAutoScroller: (autoScroller) => {
             var i = autoScrollers.length;
@@ -152,14 +157,14 @@
         },
         
         /** Registers the provided drop target to receive notifications.
-            @param dropTarget:myt.DropTarget The drop target to register.
+            @param {!Object} dropTarget - The myt.DropTarget to register.
             @returns {undefined} */
         registerDropTarget: (dropTarget) => {
             dropTargets.push(dropTarget);
         },
         
         /** Unregisters the provided drop target.
-            @param dropTarget:myt.DropTarget The drop target to unregister.
+            @param {!Object} dropTarget - The myt.DropTarget to unregister.
             @returns {undefined} */
         unregisterDropTarget: (dropTarget) => {
             var i = dropTargets.length;
@@ -172,15 +177,16 @@
         },
         
         /** Called by a myt.Dropable when a drag starts.
-            @param dropable:myt.Dropable The dropable that started the drag.
+            @param {!Object} dropable - The myt.Dropable that started the drag.
             @returns {undefined} */
         startDrag: (dropable) => {
             setDragView(dropable);
         },
         
         /** Called by a myt.Dropable when a drag stops.
-            @param event:event The mouse event that triggered the stop drag.
-            @param dropable:myt.Dropable The dropable that stopped being dragged.
+            @param {!Object} event -The mouse event that triggered the stop drag.
+            @param {!Object} dropable - The myt.Dropable that stopped being dragged.
+            @param {boolean} isAbort
             @returns {undefined} */
         stopDrag: (event, dropable, isAbort) => {
             dropable.notifyDropped(overView, isAbort);
@@ -193,8 +199,8 @@
         },
         
         /** Called by a myt.Dropable during dragging.
-            @param event:event The mousemove event for the drag update.
-            @param dropable:myt.Dropable The dropable that is being dragged.
+            @param {!Object} event - The mousemove event for the drag update.
+            @param {!Object} dropable - The myt.Dropable that is being dragged.
             @returns {undefined} */
         updateDrag: (event, dropable) => {
             // Get the frontmost myt.DropTarget that is registered with this 

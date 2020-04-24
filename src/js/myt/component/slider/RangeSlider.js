@@ -8,6 +8,8 @@
     
     Private Attributes:
         __lockSync:boolean Used internally to prevent infinite loops.
+    
+    @class
 */
 myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
     include: [myt.BoundedRangeComponent],
@@ -77,7 +79,8 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
     
     // Methods /////////////////////////////////////////////////////////////////
     /** Should only be called by myt.SimpleSliderRangeFill.
-        @private */
+        @private
+        @returns {undefined} */
     _syncRangeFillToValue: function() {
         var rangeFill = this.rangeFill, value = this.getValue(),
             lowerPx = this.convertValueToPixels(value.lower),
@@ -97,7 +100,9 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
     },
     
     /** Should only be called by myt.SliderThumbMixin.
-        @private */
+        @private
+        @param {!Object} thumb
+        @returns {undefined} */
     _syncValueToThumb: function(thumb) {
         if (this.inited && !this.__lockSync) {
             this.__lockSync = true;
@@ -138,7 +143,9 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
     },
     
     /** Should only be called by myt.SliderThumbMixin.
-        @private */
+        @private
+        @param {!Object} thumb
+        @returns {number} */
     getMinPixelValueForThumb: function(thumb) {
         return this.convertValueToPixels(
             thumb.name === 'thumbLower' ? this.minValue : this.getValue().lower
@@ -146,7 +153,9 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
     },
     
     /** Should only be called by myt.SliderThumbMixin.
-        @private */
+        @private
+        @param {!Object} thumb
+        @returns {number} */
     getMaxPixelValueForThumb: function(thumb) {
         return this.convertValueToPixels(
             thumb.name === 'thumbLower' ? this.getValue().upper : this.maxValue

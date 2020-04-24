@@ -9,8 +9,11 @@
             );
         },
         
-        /** Search the radio group for a matching node and make that one the
-            true node. */
+        /*  Search the radio group for a matching node and make that one the
+            true node.
+            @param {!Object} radio
+            @param {*} value
+            @returns {undefined} */
         updateGroupValue = (radio, value) => {
             var bag = getBooleanAttributeGroup(radio);
             if (bag) {
@@ -35,6 +38,8 @@
             label:string
             radioStyle:string Determines what style of radio to display.
                 Supported values are "solid" and "outline".
+        
+        @class
     */
     pkg.Radio = new JS.Class('Radio', pkg.Text, {
         include: [pkg.SimpleButtonStyle, pkg.BAGMembership],
@@ -74,13 +79,15 @@
         },
         
         /** Sets the value of the radio group. Calling this method on any
-            radio button in the group should have the same effect. */
+            radio button in the group should have the same effect.
+            @param {*} v
+            @returns {undefined} */
         setValue: function(v) {
             if (this.inited) updateGroupValue(this, v);
         },
         
         /** Gets the value of the 'selected' radio button in the group.
-            @returns *: The value of the selected radio button. */
+            @returns {*} The value of the selected radio button. */
         getValue: function() {
             // Get selected radio
             var bag = getBooleanAttributeGroup(this),

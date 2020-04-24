@@ -8448,7 +8448,7 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
 ((pkg) => {
     var globalRootViewRegistry,
         
-        /** Holds an array of RootViews. */
+        /* Holds an array of RootViews. */
         roots = [];
     
     /** Provides events when a new myt.RootView is created or destroyed.
@@ -8475,13 +8475,13 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
         
         // Accessors ///////////////////////////////////////////////////////////
         /** Gets the list of global root views.
-            @returns array of RootViews. */
+            @returns {!Array} of RootViews. */
         getRoots: () => roots,
         
         
         // Methods /////////////////////////////////////////////////////////////
         /** Add a rootable to the global list of root views.
-            @param r:RootView the RootView to add.
+            @param {!Object} r - The RootView to add.
             @returns {undefined} */
         addRoot: (r) => {
             roots.push(r);
@@ -8489,7 +8489,7 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
         },
         
         /** Remove a rootable from the global list of root views.
-            @param r:RootView the RootView to remove.
+            @param {!Object} r - The RootView to remove.
             @returns {undefined} */
         removeRoot: (r) => {
             var i = roots.length,
@@ -8642,10 +8642,10 @@ myt.RootView = new JS.Module('RootView', {
 ((pkg) => {
     var win = window,
         
-        /** The inner width of the browser window. */
+        /* The inner width of the browser window. */
         innerWidth,
         
-        /** The inner height of the browser window. */
+        /* The inner height of the browser window. */
         innerHeight;
     
     /** Provides events when the window is resized. Registered with myt.global
@@ -8679,11 +8679,11 @@ myt.RootView = new JS.Module('RootView', {
         
         // Accessors ///////////////////////////////////////////////////////////
         /** Gets the window's innerWidth.
-            @returns the current width of the window. */
+            @returns {number} - The current width of the window. */
         getWidth: () => innerWidth || (innerWidth = win.innerWidth),
         
         /** Gets the window's innerHeight.
-            @returns the current height of the window. */
+            @returns {number} - The current height of the window. */
         getHeight: () => innerHeight || (innerHeight = win.innerHeight)
     });
 })(myt);
@@ -13534,8 +13534,11 @@ myt.BAG = new JS.Class('BAG', {
             );
         },
         
-        /** Search the radio group for a matching node and make that one the
-            true node. */
+        /*  Search the radio group for a matching node and make that one the
+            true node.
+            @param {!Object} radio
+            @param {*} value
+            @returns {undefined} */
         updateGroupValue = (radio, value) => {
             var bag = getBooleanAttributeGroup(radio);
             if (bag) {
@@ -13560,6 +13563,8 @@ myt.BAG = new JS.Class('BAG', {
             label:string
             radioStyle:string Determines what style of radio to display.
                 Supported values are "solid" and "outline".
+        
+        @class
     */
     pkg.Radio = new JS.Class('Radio', pkg.Text, {
         include: [pkg.SimpleButtonStyle, pkg.BAGMembership],
@@ -13599,13 +13604,15 @@ myt.BAG = new JS.Class('BAG', {
         },
         
         /** Sets the value of the radio group. Calling this method on any
-            radio button in the group should have the same effect. */
+            radio button in the group should have the same effect.
+            @param {*} v
+            @returns {undefined} */
         setValue: function(v) {
             if (this.inited) updateGroupValue(this, v);
         },
         
         /** Gets the value of the 'selected' radio button in the group.
-            @returns *: The value of the selected radio button. */
+            @returns {*} The value of the selected radio button. */
         getValue: function() {
             // Get selected radio
             var bag = getBooleanAttributeGroup(this),
@@ -18705,32 +18712,34 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             Attributes:
                 id:string the ideally unique ID for this Validator so it can be
                     stored and retreived from the myt.global.validators registry.
+            
+            @class
         */
         Validator = pkg.Validator = new JSClass('Validator', {
             /** Creates a new Validator
-                @param id:string the ideally unique ID for a validator instance. */
+                @param {string} id - The ideally unique ID for a validator instance. */
             initialize: function(id) {
                 this.id = id;
             },
             
             /** Tests if the value is valid or not.
-                @param value:* the value to test validity for.
-                @param config:Object (optional) A map of configuration values that
+                @param {*} value - The value to test validity for.
+                @param {?Object} [config] - A map of configuration values that
                     can be used to augment the validation function as needed. The
                     nature of this config will be specific to each Validator class.
-                @param errorMessages:array (optional) Any error messages arising during
+                @param {?Array} [errorMessages] - Any error messages arising during
                     validation will be pushed onto thiis array if it is provided.
-                @returns boolean true if the value is valid, false otherwise. */
+                @returns {boolean} true if the value is valid, false otherwise. */
             isValid: (value, config, errorMessages) => true,
             
             /** Tests if the form is valid or not.
-                @param form:myt.Form the form to test validity for.
-                @param config:Object (optional) A map of configuration values that
+                @param {!Object} form - The myt.Form to test validity for.
+                @param {?Object} [config] - A map of configuration values that
                     can be used to augment the validation function as needed. The
                     nature of this config will be specific to each Validator class.
-                @param errorMessages:array (optional) Any error messages arising during
+                @param {?Array} [errorMessages] - Any error messages arising during
                     validation will be pushed onto thiis array if it is provided.
-                @returns boolean true if the form is valid, false otherwise. */
+                @returns {boolean} true if the form is valid, false otherwise. */
             isFormValid: function(form, config, errorMessages) {
                 if (!config) config = {};
                 config.form = form;
@@ -18738,7 +18747,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             }
         }),
         
-        /** Tests that a value is not null, undefined or empty. */
+        /** Tests that a value is not null, undefined or empty. 
+            @class */
         RequiredFieldValidator = pkg.RequiredFieldValidator = new JSClass('RequiredFieldValidator', Validator, {
             /** @overrides myt.Validator */
             isValid: function(value, config, errorMessages) {
@@ -18752,7 +18762,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         }),
         
         /** Tests that the value differs from the form rollback value by more than
-            just case. */
+            just case.
+            @class */
         EqualsIgnoreCaseValidator = pkg.EqualsIgnoreCaseValidator = new JSClass('EqualsIgnoreCaseValidator', Validator, {
             /** @overrides myt.Validator */
             isValid: function(value, config, errorMessages) {
@@ -18766,9 +18777,11 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             }
         }),
         
-        /** Verifies that a value is in the form of a URL. */
+        /** Verifies that a value is in the form of a URL.
+            @class */
         URLValidator = pkg.URLValidator = new JSClass('URLValidator', Validator, {
             /** @overrides myt.Validator
+                @param {string id
                 @param originalRawQuery:boolean if true this prevents the query from
                     being normalized. */
             initialize: function(id, originalRawQuery) {
@@ -18787,7 +18800,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             }
         }),
         
-        /** Verifies that a value is JSON. */
+        /** Verifies that a value is JSON.
+            @class */
         JSONValidator = pkg.JSONValidator = new JSClass('JSONValidator', Validator, {
             /** @overrides myt.Validator */
             isValid: function(value, config, errorMessages) {
@@ -18804,6 +18818,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     /** Tests that the value from two fields are equal. */
     pkg.EqualFieldsValidator = new JSClass('EqualFieldsValidator', Validator, {
         /** @overrides myt.Validator
+            @param {string} id
             @param fieldA the first form field to compare.
             @param fieldB the second form field to compare. */
         initialize: function(id, fieldA, fieldB) {
@@ -18825,8 +18840,9 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     /** Tests that the value has a length between min and max. */
     pkg.LengthValidator = new JSClass('LengthValidator', Validator, {
         /** @overrides myt.Validator
-            @param min:number The minimum length value.
-            @param max:number The maximum length value. */
+            @param {string} id
+            @param {number} min - The minimum length value.
+            @param {number} max - The maximum length value. */
         initialize: function(id, min, max) {
             this.callSuper(id);
             
@@ -18859,8 +18875,9 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     /** Tests that adBinary value is between min and max. */
     pkg.NumericRangeValidator = new JSClass('NumericRangeValidator', Validator, {
         /** @overrides myt.Validator
-            @param min:number The minimum value.
-            @param max:number The maximum value. */
+            @param {string} id
+            @param {number} min - The minimum value.
+            @param {number} max - The maximum value. */
         initialize: function(id, min, max) {
             this.callSuper(id);
             
@@ -18912,6 +18929,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         // Constructor /////////////////////////////////////////////////////////
         /** Creates a new CompoundValidator for the ID and 0 or more Validators
             provided.
+            @param {string} id
             @param arguments:args ever argument after the first must be a
                 Validator or a Validator ID from the myt.global.validators
                 registry.*/
@@ -18935,7 +18953,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         // Methods /////////////////////////////////////////////////////////////
         /** Add a Validator to this CompoundValidator.
-            @param validator:myt.Validator|string The validator to add or a string
+            @param {!Object|string} v - The myt.Validator to add or a string
                 used to lookup a validator in the validator repository.
             @returns {undefined} */
         addValidator: function(v) {
@@ -18978,19 +18996,19 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         // Accessors ///////////////////////////////////////////////////////////
         /** Gets a Validator for the ID.
-            @param id:string the ID of the Validator to get.
-            @returns an myt.Validator or undefined if not found. */
+            @param {string} id - the ID of the Validator to get.
+            @returns {?Obect} - An myt.Validator or undefined if not found. */
         getValidator: getValidator,
         
         
         // Methods /////////////////////////////////////////////////////////////
         /** Adds a Validator to this registry.
-            @param identifiable:myt.Validator the Validator to add.
+            @param {!Object} identifiable - The myt.Validator to add.
             @returns {undefined} */
         register: register,
         
         /** Removes a Validator from this registery.
-            @param identifiable:myt.Validator the Validator to remove.
+            @param {!Object} identifiable - The myt.Validator to remove.
             @returns {undefined} */
         unregister: (identifiable) => {
             doFuncOnIdentifiable(identifiable, (id) => {
@@ -19218,7 +19236,7 @@ new JS.Singleton('GlobalValueProcessorRegistry', {
 myt.UseOtherFieldIfEmptyValueProcessor = new JS.Class('UseOtherFieldIfEmptyValueProcessor', myt.ValueProcessor, {
     // Constructor /////////////////////////////////////////////////////////////
     /** @overrides myt.ValueProcessor
-        @param otherField:myt.FormElement The form field to pull the 
+        @param {!Object} otherField - The myt.FormElement to pull the 
             value from. */
     initialize: function(id, runForDefault, runForRollback, runForCurrent, otherField) {
         this.callSuper(id, runForDefault, runForRollback, runForCurrent);
@@ -19472,7 +19490,8 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
         @returns {undefined} */
     doChanged: function() {},
     
-    /** @private */
+    /** @private
+        @returns {undefined} */
     __syncToDom: function() {
         this.setValue(this.multiple ? this.getSelectedOptionValues() : this.getDomValue());
     }
@@ -19650,8 +19669,10 @@ myt.ValueComponent = new JS.Module('ValueComponent', {
 ((pkg) => {
     var getBooleanAttributeGroup = (formRadioGroup) => pkg.BAG.getGroup('selected', formRadioGroup.groupId),
         
-        /** Search the radio group for a matching node and make that one the
-            true node. */
+        /*  Search the radio group for a matching node and make that one the
+            true node.
+            @param {!Object} formRadioGroup
+            @returns {undefined} */
         updateGroupValue = (formRadioGroup) => {
             var bag = getBooleanAttributeGroup(formRadioGroup);
             if (bag) {
@@ -19687,6 +19708,8 @@ myt.ValueComponent = new JS.Module('ValueComponent', {
         
         Attributes:
             groupId:string The ID of the radio group to monitor.
+        
+        @class
     */
     pkg.FormRadioGroup = new JS.Class('FormRadioGroup', pkg.Node, {
         include: [pkg.ValueComponent, pkg.FormElement],
@@ -20039,6 +20062,8 @@ myt.FormInputTextMixin = new JS.Module('FormInputTextMixin', {
             input character. If not set or empty all characters are allowed. 
             Defaults to undefined.
         placeholder:string Text that will be shown if the value is empty.
+    
+    @class
 */
 myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     include: [myt.TextSupport],
@@ -20141,15 +20166,15 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     
     /** A hook for subclasses/instances to do input filtering. The default
         implementation returns the value unchanged.
-        @param v:string the current value of the form element.
-        @returns string: The new value of the form element. */
+        @param {string} v - the current value of the form element.
+        @returns {string} The new value of the form element. */
     filterInput: function(v) {
         return v;
     },
     
     /** A hook for subclasses/instances to do input filtering during key press.
         The default implementation does nothing.
-        @param domEvent:object The dom key press event.
+        @param {!Object} domEvent - The dom key press event.
         @returns {undefined} */
     filterInputPress: function(domEvent) {},
     
@@ -20640,7 +20665,10 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     setPaddingBottom: function(v) {this.__setProp(v, 'paddingBottom');},
     setPaddingLeft: function(v) {this.__setProp(v, 'paddingLeft');},
     
-    /** @private */
+    /** @private
+        @param {*} v
+        @param {string} propName
+        @returns {undefined} */
     __setProp: function(v, propName) {
         if (this[propName] !== v) {
             this[propName] = v;
@@ -20928,18 +20956,18 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
 ((pkg) => {
     var globalDragManager,
         
-        /** The list of myt.AutoScrollers currently registered for notification
+        /* The list of myt.AutoScrollers currently registered for notification
             when drags start and stop. */
         autoScrollers = [],
         
-        /** The list of myt.DropTargets currently registered for notification 
+        /* The list of myt.DropTargets currently registered for notification 
             when drag and drop events occur. */
         dropTargets = [],
         
-        /** The view currently being dragged. */
+        /* The view currently being dragged. */
         dragView,
         
-        /** The view currently being dragged over. */
+        /* The view currently being dragged over. */
         overView,
         
         setOverView = (v) => {
@@ -20991,9 +21019,12 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
             }
         },
         
-        /** Filters the provided array of myt.DragGroupSupport items for the
+        /*  Filters the provided array of myt.DragGroupSupport items for the
             provided myt.Dropable. Returns an array of the matching list
-            items. */
+            items.
+            @param {!Object} dropable
+            @param {!Array} list
+            @returns {!Array} */
         filterList = (dropable, list) => {
             var retval;
             
@@ -21042,6 +21073,8 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
             drop:object Fired when a drag ends over a drop target. The value is
                 an array containing the dropable at index 0 and the drop target
                 at index 1.
+        
+        @class
     */
     new JS.Singleton('GlobalDragManager', {
         include: [pkg.Observable],
@@ -21059,14 +21092,14 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
         
         // Methods /////////////////////////////////////////////////////////////
         /** Registers the provided auto scroller to receive notifications.
-            @param autoScroller:myt.AutoScroller The auto scroller to register.
+            @param {!Object} autoScroller - The myt.AutoScroller to register.
             @returns {undefined} */
         registerAutoScroller: (autoScroller) => {
             autoScrollers.push(autoScroller);
         },
         
         /** Unregisters the provided auto scroller.
-            @param autoScroller:myt.AutoScroller The auto scroller to unregister.
+            @param {!Object} autoScroller - The myt.AutoScroller to unregister.
             @returns {undefined} */
         unregisterAutoScroller: (autoScroller) => {
             var i = autoScrollers.length;
@@ -21079,14 +21112,14 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
         },
         
         /** Registers the provided drop target to receive notifications.
-            @param dropTarget:myt.DropTarget The drop target to register.
+            @param {!Object} dropTarget - The myt.DropTarget to register.
             @returns {undefined} */
         registerDropTarget: (dropTarget) => {
             dropTargets.push(dropTarget);
         },
         
         /** Unregisters the provided drop target.
-            @param dropTarget:myt.DropTarget The drop target to unregister.
+            @param {!Object} dropTarget - The myt.DropTarget to unregister.
             @returns {undefined} */
         unregisterDropTarget: (dropTarget) => {
             var i = dropTargets.length;
@@ -21099,15 +21132,16 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
         },
         
         /** Called by a myt.Dropable when a drag starts.
-            @param dropable:myt.Dropable The dropable that started the drag.
+            @param {!Object} dropable - The myt.Dropable that started the drag.
             @returns {undefined} */
         startDrag: (dropable) => {
             setDragView(dropable);
         },
         
         /** Called by a myt.Dropable when a drag stops.
-            @param event:event The mouse event that triggered the stop drag.
-            @param dropable:myt.Dropable The dropable that stopped being dragged.
+            @param {!Object} event -The mouse event that triggered the stop drag.
+            @param {!Object} dropable - The myt.Dropable that stopped being dragged.
+            @param {boolean} isAbort
             @returns {undefined} */
         stopDrag: (event, dropable, isAbort) => {
             dropable.notifyDropped(overView, isAbort);
@@ -21120,8 +21154,8 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
         },
         
         /** Called by a myt.Dropable during dragging.
-            @param event:event The mousemove event for the drag update.
-            @param dropable:myt.Dropable The dropable that is being dragged.
+            @param {!Object} event - The mousemove event for the drag update.
+            @param {!Object} dropable - The myt.Dropable that is being dragged.
             @returns {undefined} */
         updateDrag: (event, dropable) => {
             // Get the frontmost myt.DropTarget that is registered with this 
@@ -21711,6 +21745,8 @@ myt.BaseSlider = new JS.Class('BaseSlider', myt.View, {
     
     Private Attributes:
         __lockSync:boolean Used internally to prevent infinite loops.
+    
+    @class
 */
 myt.Slider = new JS.Class('Slider', myt.BaseSlider, {
     include: [myt.BoundedValueComponent],
@@ -21752,7 +21788,9 @@ myt.Slider = new JS.Class('Slider', myt.BaseSlider, {
     
     // Methods /////////////////////////////////////////////////////////////////
     /** Should only be called by myt.SliderThumbMixin.
-        @private */
+        @private
+        @param {!Object} thumb
+        @returns {undefined} */
     _syncValueToThumb: function(thumb) {
         if (this.inited && !this.__lockSync) {
             this.__lockSync = true;
@@ -21774,13 +21812,17 @@ myt.Slider = new JS.Class('Slider', myt.BaseSlider, {
     },
     
     /** Should only be called by myt.SliderThumbMixin.
-        @private */
+        @private
+        @param {!Object} thumb
+        @returns {number} */
     getMinPixelValueForThumb: function(thumb) {
         return this.convertValueToPixels(this.minValue);
     },
     
     /** Should only be called by myt.SliderThumbMixin.
-        @private */
+        @private
+        @param {!Object} thumb
+        @returns {number} */
     getMaxPixelValueForThumb: function(thumb) {
         return this.convertValueToPixels(this.maxValue);
     }
@@ -21929,6 +21971,8 @@ myt.SimpleSliderRangeFill = new JS.Class('SimpleSliderRangeFill', myt.View, {
     
     Private Attributes:
         __lockSync:boolean Used internally to prevent infinite loops.
+    
+    @class
 */
 myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
     include: [myt.BoundedRangeComponent],
@@ -21998,7 +22042,8 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
     
     // Methods /////////////////////////////////////////////////////////////////
     /** Should only be called by myt.SimpleSliderRangeFill.
-        @private */
+        @private
+        @returns {undefined} */
     _syncRangeFillToValue: function() {
         var rangeFill = this.rangeFill, value = this.getValue(),
             lowerPx = this.convertValueToPixels(value.lower),
@@ -22018,7 +22063,9 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
     },
     
     /** Should only be called by myt.SliderThumbMixin.
-        @private */
+        @private
+        @param {!Object} thumb
+        @returns {undefined} */
     _syncValueToThumb: function(thumb) {
         if (this.inited && !this.__lockSync) {
             this.__lockSync = true;
@@ -22059,7 +22106,9 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
     },
     
     /** Should only be called by myt.SliderThumbMixin.
-        @private */
+        @private
+        @param {!Object} thumb
+        @returns {number} */
     getMinPixelValueForThumb: function(thumb) {
         return this.convertValueToPixels(
             thumb.name === 'thumbLower' ? this.minValue : this.getValue().lower
@@ -22067,7 +22116,9 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
     },
     
     /** Should only be called by myt.SliderThumbMixin.
-        @private */
+        @private
+        @param {!Object} thumb
+        @returns {number} */
     getMaxPixelValueForThumb: function(thumb) {
         return this.convertValueToPixels(
             thumb.name === 'thumbLower' ? this.getValue().upper : this.maxValue

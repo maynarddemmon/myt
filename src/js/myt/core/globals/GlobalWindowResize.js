@@ -1,10 +1,10 @@
 ((pkg) => {
     var win = window,
         
-        /** The inner width of the browser window. */
+        /* The inner width of the browser window. */
         innerWidth,
         
-        /** The inner height of the browser window. */
+        /* The inner height of the browser window. */
         innerHeight;
     
     /** Provides events when the window is resized. Registered with myt.global
@@ -38,11 +38,11 @@
         
         // Accessors ///////////////////////////////////////////////////////////
         /** Gets the window's innerWidth.
-            @returns the current width of the window. */
+            @returns {number} - The current width of the window. */
         getWidth: () => innerWidth || (innerWidth = win.innerWidth),
         
         /** Gets the window's innerHeight.
-            @returns the current height of the window. */
+            @returns {number} - The current height of the window. */
         getHeight: () => innerHeight || (innerHeight = win.innerHeight)
     });
 })(myt);

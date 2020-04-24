@@ -235,7 +235,8 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
         @returns {undefined} */
     doChanged: function() {},
     
-    /** @private */
+    /** @private
+        @returns {undefined} */
     __syncToDom: function() {
         this.setValue(this.multiple ? this.getSelectedOptionValues() : this.getDomValue());
     }

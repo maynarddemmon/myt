@@ -15,6 +15,8 @@
             input character. If not set or empty all characters are allowed. 
             Defaults to undefined.
         placeholder:string Text that will be shown if the value is empty.
+    
+    @class
 */
 myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     include: [myt.TextSupport],
@@ -117,15 +119,15 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     
     /** A hook for subclasses/instances to do input filtering. The default
         implementation returns the value unchanged.
-        @param v:string the current value of the form element.
-        @returns string: The new value of the form element. */
+        @param {string} v - the current value of the form element.
+        @returns {string} The new value of the form element. */
     filterInput: function(v) {
         return v;
     },
     
     /** A hook for subclasses/instances to do input filtering during key press.
         The default implementation does nothing.
-        @param domEvent:object The dom key press event.
+        @param {!Object} domEvent - The dom key press event.
         @returns {undefined} */
     filterInputPress: function(domEvent) {},
     

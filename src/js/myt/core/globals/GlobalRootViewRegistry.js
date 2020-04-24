@@ -1,7 +1,7 @@
 ((pkg) => {
     var globalRootViewRegistry,
         
-        /** Holds an array of RootViews. */
+        /* Holds an array of RootViews. */
         roots = [];
     
     /** Provides events when a new myt.RootView is created or destroyed.
@@ -28,13 +28,13 @@
         
         // Accessors ///////////////////////////////////////////////////////////
         /** Gets the list of global root views.
-            @returns array of RootViews. */
+            @returns {!Array} of RootViews. */
         getRoots: () => roots,
         
         
         // Methods /////////////////////////////////////////////////////////////
         /** Add a rootable to the global list of root views.
-            @param r:RootView the RootView to add.
+            @param {!Object} r - The RootView to add.
             @returns {undefined} */
         addRoot: (r) => {
             roots.push(r);
@@ -42,7 +42,7 @@
         },
         
         /** Remove a rootable from the global list of root views.
-            @param r:RootView the RootView to remove.
+            @param {!Object} r - The RootView to remove.
             @returns {undefined} */
         removeRoot: (r) => {
             var i = roots.length,

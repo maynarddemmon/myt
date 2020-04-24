@@ -58,7 +58,10 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     setPaddingBottom: function(v) {this.__setProp(v, 'paddingBottom');},
     setPaddingLeft: function(v) {this.__setProp(v, 'paddingLeft');},
     
-    /** @private */
+    /** @private
+        @param {*} v
+        @param {string} propName
+        @returns {undefined} */
     __setProp: function(v, propName) {
         if (this[propName] !== v) {
             this[propName] = v;

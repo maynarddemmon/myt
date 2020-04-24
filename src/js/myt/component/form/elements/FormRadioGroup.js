@@ -1,8 +1,10 @@
 ((pkg) => {
     var getBooleanAttributeGroup = (formRadioGroup) => pkg.BAG.getGroup('selected', formRadioGroup.groupId),
         
-        /** Search the radio group for a matching node and make that one the
-            true node. */
+        /*  Search the radio group for a matching node and make that one the
+            true node.
+            @param {!Object} formRadioGroup
+            @returns {undefined} */
         updateGroupValue = (formRadioGroup) => {
             var bag = getBooleanAttributeGroup(formRadioGroup);
             if (bag) {
@@ -38,6 +40,8 @@
         
         Attributes:
             groupId:string The ID of the radio group to monitor.
+        
+        @class
     */
     pkg.FormRadioGroup = new JS.Class('FormRadioGroup', pkg.Node, {
         include: [pkg.ValueComponent, pkg.FormElement],
