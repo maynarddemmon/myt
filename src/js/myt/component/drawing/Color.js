@@ -14,8 +14,8 @@
         extend: {
             /** Converts a number or string representation of a number to a 
                 two character hex string.
-                @param value:number/string The number or string to convert.
-                @returns string: A two character hex string such as: '0c' or 'c9'. */
+                @param {number|string} value - The number or string to convert.
+                @returns {string} A two character hex string such as: '0c' or 'c9'. */
             toHex: function(value) {
                 value = this.cleanChannelValue(value).toString(16);
                 return value.length === 1 ? '0' + value : value;
@@ -23,36 +23,40 @@
             
             /** Converts red, green, and blue color channel numbers to a six 
                 character hex string.
-                @param red:number The red color channel.
-                @param green:number The green color channel.
-                @param blue:number The blue color channel.
-                @param prependHash:boolean (optional) If true a '#' character
+                @param {number} red - The red color channel.
+                @param {number} green - The green color channel.
+                @param {number} blue - The blue color channel.
+                @param {boolean} [prependHash] - If true a '#' character
                     will be prepended to the return value.
-                @returns string: Something like: '#ff9c02' or 'ff9c02' */
+                @returns {string} Something like: '#ff9c02' or 'ff9c02' */
             rgbToHex: function(red, green, blue, prependHash) {
                 var toHex = this.toHex.bind(this);
                 return [prependHash ? '#' : '', toHex(red), toHex(green), toHex(blue)].join('');
             },
             
             /** Limits a channel value to integers between 0 and 255.
-                @param value:number the channel value to clean up.
-                @returns number */
+                @param {number} value - The channel value to clean up.
+                @returns {number} */
             cleanChannelValue: (value) => Math.min(255, Math.max(0, Math.round(value))),
             
             /** Gets the red channel from a "color" number.
-                @return number */
+                @param {string} value
+                @returns {number} */
             getRedChannel: (value) => (0xff0000 & value) >> 16,
             
             /** Gets the green channel from a "color" number.
-                @returns number */
+                @param {string} value
+                @returns {number} */
             getGreenChannel: (value) => (0x00ff00 & value) >> 8,
             
             /** Gets the blue channel from a "color" number.
-                @returns number */
+                @param {string} value
+                @returns {number} */
             getBlueChannel: (value) => (0x0000ff & value),
             
             /** Creates an myt.Color from a "color" number.
-                @returns myt.Color */
+                @param {string} value
+                @returns {!Object} myt.Color */
             makeColorFromNumber: function(value) {
                 return new Color(
                     this.getRedChannel(value),
@@ -62,9 +66,9 @@
             },
             
             /** Creates an myt.Color from an html color string.
-                @param value:string A hex string representation of a color, such
+                @param {string} value - A hex string representation of a color, such
                     as '#ff339b'.
-                @returns myt.Color or null if no color could be parsed. */
+                @returns {!Object} a myt.Color or null if no color could be parsed. */
             makeColorFromHexString: function(value) {
                 if (value && value.indexOf('#') === 0) {
                     return this.makeColorFromNumber(parseInt(value.substring(1), 16));
@@ -74,9 +78,9 @@
             },
             
             /** Returns the lighter of the two provided colors.
-                @param a:number A color number.
-                @param b:number A color number.
-                @returns The number that represents the lighter color. */
+                @param {number} a - A color number.
+                @param {number} b - A color number.
+                @returns {number} The number that represents the lighter color. */
             getLighterColor: function(a, b) {
                 var cA = this.makeColorFromNumber(a),
                     cB = this.makeColorFromNumber(b);
@@ -84,10 +88,10 @@
             },
             
             /** Creates a "color" number from the provided color channels.
-                @param red:number the red channel
-                @param green:number the green channel
-                @param blue:number the blue channel
-                @returns number */
+                @param {number} red - The red channel
+                @param {number} green - The green channel
+                @param {number} blue - The blue channel
+                @returns {number} */
             makeColorNumberFromChannels: function(red, green, blue) {
                 red = this.cleanChannelValue(red);
                 green = this.cleanChannelValue(green);
@@ -97,11 +101,11 @@
             
             /** Creates a new myt.Color object that is a blend of the two provided
                 colors.
-                @param fromColor:myt.Color The first color to blend.
-                @param toColor:myt.Color The second color to blend.
-                @param percent:number The blend percent between the two colors
+                @param {!Object} fromColor - The first myt.Color to blend.
+                @param {!Objecdt} toColor - The second myt.Color to blend.
+                @param {number} percent - The blend percent between the two colors
                     where 0 is the fromColor and 1.0 is the toColor.
-                @returns myt.Color */
+                @returns {!Object} myt.Color */
             makeBlendedColor: (fromColor, toColor, percent) => {
                 return new Color(
                     fromColor.red + (percent * (toColor.red - fromColor.red)),
@@ -114,9 +118,10 @@
         
         // Constructor /////////////////////////////////////////////////////////
         /** Create a new Color.
-            @param red:number the red channel
-            @param green:number the green channel
-            @param blue:number the blue channel */
+            @param {number} red - The red channel
+            @param {number} green - The green channel
+            @param {number} blue - The blue channel
+            @returns {undefined} */
         initialize: function(red, green, blue) {
             this.setRed(red);
             this.setGreen(green);
@@ -125,17 +130,23 @@
         
         
         // Accessors ///////////////////////////////////////////////////////////
-        /** Sets the red channel value. */
+        /** Sets the red channel value.
+            @param {number} red
+            @return {undefined} */
         setRed: function(red) {
             this.red = Color.cleanChannelValue(red);
         },
         
-        /** Sets the green channel value. */
+        /** Sets the green channel value.
+            @param {number} green
+            @return {undefined} */
         setGreen: function(green) {
             this.green = Color.cleanChannelValue(green);
         },
         
-        /** Sets the blue channel value. */
+        /** Sets the blue channel value.
+            @param {number} blue
+            @return {undefined} */
         setBlue: function(blue) {
             this.blue = Color.cleanChannelValue(blue);
         },
@@ -143,20 +154,20 @@
         
         // Methods /////////////////////////////////////////////////////////////
         /** Gets the numerical representation of this color.
-            @returns number: The number that represents this color. */
+            @returns {number} The number that represents this color. */
         getColorNumber: function() {
             return (this.red << 16) + (this.green << 8) + this.blue;
         },
         
         /** Gets the hex string representation of this color.
-            @returns string: A hex color such as '#a0bbcc'. */
+            @returns {string} A hex color such as '#a0bbcc'. */
         getHtmlHexString: function() {
             return Color.rgbToHex(this.red, this.green, this.blue, true);
         },
         
         /** Tests if this color is lighter than the provided color.
-            @param c:myt.Color the color to compare to.
-            @returns boolean: True if this color is lighter, false otherwise. */
+            @param {!Object} c - The myt.Color to compare to.
+            @returns {boolean} True if this color is lighter, false otherwise. */
         isLighterThan: function(c) {
             var diff = this.getDiffFrom(c);
             
@@ -166,8 +177,8 @@
         },
         
         /** Gets an object holding color channel diffs.
-            @param c:myt.Color the color to diff from.
-            @returns object containing the diffs for the red, green and blue
+            @param {!Object} c - The myt.Color to diff from.
+            @returns {!Object} containing the diffs for the red, green and blue
                 channels. */
         getDiffFrom: function(c) {
             return {
@@ -178,15 +189,15 @@
         },
         
         /** Applies the provided diff object to this color.
-            @param diff:object the color diff to apply.
-            @returns this myt.Color to facilitate method chaining. */
+            @param {!Object} diff - The color diff to apply.
+            @returns {!Object} - This myt.Color to facilitate method chaining. */
         applyDiff: function(diff) {
             return this.add(diff);
         },
         
         /** Adds the provided color to this color.
-            @param c:myt.Color the color to add.
-            @returns this myt.Color to facilitate method chaining. */
+            @param {!Object} c - The myt.Color to add.
+            @returns {!Object} - This myt.Color to facilitate method chaining. */
         add: function(c) {
             this.setRed(this.red + c.red);
             this.setGreen(this.green + c.green);
@@ -195,8 +206,8 @@
         },
         
         /** Subtracts the provided color from this color.
-            @param c:myt.Color the color to subtract.
-            @returns this myt.Color to facilitate method chaining. */
+            @param {!Object} c - The myt.Color to subtract.
+            @returns {!Object} - This myt.Color to facilitate method chaining. */
         subtract: function(c) {
             this.setRed(this.red - c.red);
             this.setGreen(this.green - c.green);
@@ -205,8 +216,8 @@
         },
         
         /** Multiplys this color by the provided scalar.
-            @param s:number the scaler to multiply by.
-            @returns this myt.Color to facilitate method chaining. */
+            @param {number} s - The scaler to multiply by.
+            @returns {!Object} - This myt.Color to facilitate method chaining. */
         multiply: function(s) {
             this.setRed(this.red * s);
             this.setGreen(this.green * s);
@@ -215,8 +226,8 @@
         },
         
         /** Divides this color by the provided scalar.
-            @param s:number the scaler to divide by.
-            @returns this myt.Color to facilitate method chaining. */
+            @param {number} s - The scaler to divide by.
+            @returns {!Object} - This myt.Color to facilitate method chaining. */
         divide: function(s) {
             this.setRed(this.red / s);
             this.setGreen(this.green / s);
@@ -225,13 +236,14 @@
         },
         
         /** Clones this Color.
-            @returns myt.Color A copy of this myt.Color. */
+            @returns {!Object} - A copy of this myt.Color. */
         clone: function() {
             return new Color(this.red, this.green, this.blue);
         },
         
         /** Determine if this color has the same value as another color.
-            @returns boolean True if this color has the same color values as
+            @param {?Object} obj - The color object to test against.
+            @returns {boolean} True if this color has the same color values as
                 this provided color, false otherwise. */
         equals: function(obj) {
             return obj === this || (obj && obj.isA && 

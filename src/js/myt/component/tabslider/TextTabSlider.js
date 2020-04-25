@@ -7,6 +7,8 @@
         labelTextColorChecked:color
         labelTextColor:color
         text:string The text for the tab slider.
+    
+    @class
 */
 myt.TextTabSlider = new JS.Class('TextTabSlider', myt.TabSlider, {
     // Class Methods and Attributes ////////////////////////////////////////////
@@ -52,7 +54,8 @@ myt.TextTabSlider = new JS.Class('TextTabSlider', myt.TabSlider, {
         if (label) label.setTextColor(this.__getTextColor());
     },
     
-    /** @private */
+    /** @private
+        @returns {string} */
     __getTextColor: function() {
         return (this.selected && this.tabContainer.maxSelected !== -1) ? this.labelTextColorChecked : this.labelTextColor;
     }

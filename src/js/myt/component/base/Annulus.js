@@ -34,7 +34,9 @@
             redraw(annulus);
         };
      
-    /** An annulus component. */
+    /** An annulus component.
+        
+        @class */
     pkg.Annulus = new JS.Class('Annulus', pkg.View, {
         // Class Methods and Attributes ////////////////////////////////////////
         extend: {
@@ -222,7 +224,7 @@
         // Methods /////////////////////////////////////////////////////////////
         /** Prevent views from being sent behind the __svg. This allows us to
             add child views to an Annulus which is not directly supported in HTML.
-            @overrides myt.View */
+            @overrides */
         sendSubviewToBack: function(sv) {
             if (sv.parent === this) {
                 var de = this.getInnerDomElement(),

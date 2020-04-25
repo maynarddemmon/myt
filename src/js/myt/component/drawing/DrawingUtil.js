@@ -2,9 +2,15 @@
 myt.DrawingUtil = {
     // Methods /////////////////////////////////////////////////////////////////
     /** Draws a rounded rect into the provided drawview.
-        @param r:Number the radius of the corners.
-        @param thickness:Number the thickness of the line. If thickness is
-            zero or less a fill will be done rather than an outline. */
+        @param {!Object} canvas
+        @param {number} r - The radius of the corners.
+        @param {number} thickness - The thickness of the line. If thickness is
+            zero or less a fill will be done rather than an outline.
+        @param {number} left
+        @param {number} top
+        @param {number} w
+        @param {number} h
+        @returns {undefined} */
     drawRoundedRect: (canvas, r, thickness, left, top, w, h) => {
         var bottom = top + h,
             right = left + w,
@@ -55,7 +61,13 @@ myt.DrawingUtil = {
     },
     
     /** Draws a rect outline into the provided drawview.
-        @param thickness:Number the thickness of the line. */
+        @param {!Object} canvas
+        @param {number} thickness - The thickness of the line.
+        @param {number} left
+        @param {number} top
+        @param {number} w
+        @param {number} h
+        @returns {undefined} */
     drawRectOutline: (canvas, thickness, left, top, w, h) => {
         var bottom = top + h, 
             right = left + w,
@@ -82,10 +94,16 @@ myt.DrawingUtil = {
     },
     
     /** Draws a rounded rect with one or more flat corners.
-        @param rTL:Number the radius for the top left corner.
-        @param rTR:Number the radius for the top right corner.
-        @param rBL:Number the radius for the bottom left corner.
-        @param rBR:Number the radius for the bottom right corner. */
+        @param {!Object} canvas
+        @param {number} rTL - the radius for the top left corner.
+        @param {number} rTR - the radius for the top right corner.
+        @param {number} rBL - the radius for the bottom left corner.
+        @param {number} rBR - the radius for the bottom right corner.
+        @param {number} left
+        @param {number} top
+        @param {number} w
+        @param {number} h
+        @returns {undefined} */
     drawPartiallyRoundedRect: (canvas, rTL, rTR, rBL, rBR, left, top, w, h) => {
         var bottom = top + h, right = left + w;
         

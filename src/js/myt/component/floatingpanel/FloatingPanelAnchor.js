@@ -25,6 +25,8 @@
             position by vertically.
         lastFloatingPanelShown:myt.FloatingPanel A reference to the last
             floating panel shown by this anchor.
+    
+    @class
 */
 myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
     // Class Methods and Attributes ////////////////////////////////////////////
@@ -103,7 +105,7 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
     },
     
     /** Called when a floating panel has been shown for this anchor.
-        @param panel:myt.FloatingPanel The panel that is now shown.
+        @param {!Object} panel - The myt.FloatingPanel that is now shown.
         @returns {undefined} */
     notifyPanelShown: function(panel) {
         // Subclasses to implement as needed.
@@ -111,7 +113,7 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
     },
     
     /** Called when a floating panel has been hidden for this anchor.
-        @param panel:myt.FloatingPanel The panel that is now hidden.
+        @param {!Object} panel - The myt.FloatingPanel that is now hidden.
         @returns {undefined} */
     notifyPanelHidden: function(panel) {
         // Subclasses to implement as needed.
@@ -122,8 +124,8 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
         horizontally. By default this returns the floatingAlign attribute. 
         Subclasses and instances should override this if panel specific 
         behavior is needed.
-        @param panelId:string the ID of the panel being positioned.
-        @returns:string|number an alignment identifer or absolute position. */
+        @param {string} panelId - The ID of the panel being positioned.
+        @returns {string|number} - An alignment identifer or absolute position. */
     getFloatingAlignForPanelId: function(panelId) {
         return this.floatingAlign;
     },
@@ -132,8 +134,8 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
         vertically. By default this returns the floatingAlign attribute. 
         Subclasses and instances should override this if panel specific 
         behavior is needed.
-        @param panelId:string the ID of the panel being positioned.
-        @returns:string|number an alignment identifer or absolute position. */
+        @param {string} panelId - The ID of the panel being positioned.
+        @returns {string|number} - An alignment identifer or absolute position. */
     getFloatingValignForPanelId: function(panelId) {
         return this.floatingValign;
     },
@@ -142,8 +144,8 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
         horizontally. By default this returns the floatingAlignOffset attribute. 
         Subclasses and instances should override this if panel specific 
         behavior is needed.
-        @param panelId:string the ID of the panel being positioned.
-        @returns:number the offset to use. */
+        @param {string} panelId - The ID of the panel being positioned.
+        @returns {number} the offset to use. */
     getFloatingAlignOffsetForPanelId: function(panelId) {
         return this.floatingAlignOffset;
     },
@@ -152,15 +154,15 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
         vertically. By default this returns the floatingValignOffset attribute. 
         Subclasses and instances should override this if panel specific 
         behavior is needed.
-        @param panelId:string the ID of the panel being positioned.
-        @returns:number the offset to use. */
+        @param {string} panelId - The ID of the panel being positioned.
+        @returns {number} the offset to use. */
     getFloatingValignOffsetForPanelId: function(panelId) {
         return this.floatingValignOffset;
     },
     
     /** @overrides myt.FocusObservable
-        @returns the last floating panel shown if it exists and can be shown.
-        Otherwise it returns the default. */
+        @returns {!Object} The last floating panel shown if it exists and 
+            can be shown. Otherwise it returns the default. */
     getNextFocus: function() {
         var last = this.lastFloatingPanelShown;
         if (last && last.isShown()) return last;
@@ -168,13 +170,17 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
     },
     
     /** Called by the floating panel owned by this anchor to determine where
-        to go to next after leaving the panel in the forward direction. */
+        to go to next after leaving the panel in the forward direction.
+        @param {string} panelId
+        @returns {!Object} */
     getNextFocusAfterPanel: function(panelId) {
         return this;
     },
     
     /** Called by the floating panel owned by this anchor to determine where
-        to go to next after leaving the panel in the backward direction. */
+        to go to next after leaving the panel in the backward direction.
+        @param {string} panelId
+        @returns {!Object} */
     getPrevFocusAfterPanel: function(panelId) {
         return this;
     }

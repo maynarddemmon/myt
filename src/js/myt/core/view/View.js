@@ -297,7 +297,8 @@
                 be accessed through the getSubviews method.
             layouts:array The array of child myt.Layouts for this view. Should
                 be accessed through the getLayouts method.
-    */
+        
+        @class */
     pkg.View = new JS.Class('View', pkg.Node, {
         include: [
             pkg.DomElementProxy, 
@@ -347,9 +348,9 @@
             backed. This implementation also looks for a this.tagName property
             which it will use as the name for the dom element that gets created.
             If no this.tagName property is found "div" will be used.
-            @param parent:dom element The dom element that will be the parent
+            @param {!Object} parent - The dom element that will be the parent
                 of the newly created dom element.
-            @returns a dom element */
+            @returns {!Object} a dom element */
         createOurDomElement: function(parent) {
             var elem = document.createElement(this.tagName || 'div');
             elem.style.position = 'absolute';
@@ -398,13 +399,14 @@
             }
         },
         
-        /** Does lazy instantiation of the subviews array. */
+        /** Does lazy instantiation of the subviews array.
+            @returns {!Array} */
         getSubviews: function() {
             return this.subviews || (this.subviews = []);
         },
         
         /** Gets the views that are our siblings.
-            @returns array of myt.View or undefined if this view is orphaned. */
+            @returns {!Array} of myt.View or undefined if this view is orphaned. */
         getSiblingViews: function() {
             if (this.parent) {
                 // Get a copy of the subviews since we will modify it and do not
@@ -432,7 +434,8 @@
         // Layout Attributes //
         setLayoutHint: function(v) {this.layoutHint = v;},
         
-        /** Does lazy instantiation of the layouts array. */
+        /** Does lazy instantiation of the layouts array.
+            @returns {!Array} */
         getLayouts: function() {
             return this.layouts || (this.layouts = []);
         },
@@ -671,8 +674,8 @@
         
         /** Updates the boundsWidth and boundsHeight attributes.
             @private
-            @param w:number the boundsWidth to set.
-            @param h:number the boundsHeight to set.
+            @param {number} w - the boundsWidth to set.
+            @param {number} h - the boundsHeight to set.
             @returns {undefined} */
         __updateBounds: function(w, h) {
             if (this.boundsWidth !== w) {
@@ -690,7 +693,7 @@
         /** Sets outlineWidth, outlineStyle and outlineColor via a single 
             array. If a value equivalent to false is provided the outline 
             will be supressed.
-            @param v:array where index 0 is outlineWidth, index 1 is outline 
+            @param {?Array} v - An array where index 0 is outlineWidth, index 1 is outline 
                 style and index 2 is outlineColor.
             @returns {undefined} */
         setOutline: function(v) {
@@ -717,7 +720,7 @@
         /** Sets borderWidth, borderStyle and borderColor via a single 
             array. If a value equivalent to false is provided the border 
             will be supressed.
-            @param v:array where index 0 is borderWidth, index 1 is border 
+            @param {?Array} v - An array where index 0 is borderWidth, index 1 is border 
                 style and index 2 is borderColor.
             @returns {undefined} */
         setBorder: function(v) {
@@ -742,42 +745,42 @@
         
         // Edge treatements
         /** A convienence method to set rounded corners on an element.
-            @param radius:number the radius of the corners.
+            @param {number} radius - The radius of the corners.
             @returns {undefined} */
         setRoundedCorners: function(radius) {
             this.getOuterDomStyle().borderRadius = radius + 'px';
         },
         
         /** A convienence method to round the top left corner.
-            @param radius:number the radius of the corner.
+            @param {number} radius - The radius of the corner.
             @returns {undefined} */
         setRoundedTopLeftCorner: function(radius) {
             setRoundedCorner(this, radius, 'TopLeft');
         },
         
         /** A convienence method to round the top right corner.
-            @param radius:number the radius of the corner.
+            @param {number} radius - The radius of the corner.
             @returns {undefined} */
         setRoundedTopRightCorner: function(radius) {
             setRoundedCorner(this, radius, 'TopRight');
         },
         
         /** A convienence method to round the bottom left corner.
-            @param radius:number the radius of the corner.
+            @param {number} radius - The radius of the corner.
             @returns {undefined} */
         setRoundedBottomLeftCorner: function(radius) {
             setRoundedCorner(this, radius, 'BottomLeft');
         },
         
         /** A convienence method to round the bottom right corner.
-            @param radius:number the radius of the corner.
+            @param {number} radius - The radius of the corner.
             @returns {undefined} */
         setRoundedBottomRightCorner: function(radius) {
             setRoundedCorner(this, radius, 'BottomRight');
         },
         
         /** Sets the CSS boxShadow property.
-            @param v:array where index 0 is the horizontal shadow offset,
+            @param {?Array} v - An array where index 0 is the horizontal shadow offset,
                 index 1 is the vertical shadow offset, index 2 is the blur amount,
                 and index 3 is the color.
             @returns {undefined} */
@@ -796,7 +799,7 @@
         
         /** Sets the CSS liner-gradient or radial-gradient property. Setting this
             property will take the place of any bgColor used in the view.
-            @param v:array where:
+            @param {?Array} v - An array where:
                 index 0: is the gradient type: linear or radial
                 index 1: is the geometry of the gradient.
                     radial: The value "cover" / "farthest-corner" or 
@@ -869,8 +872,8 @@
         },
         
         /** Sets the tooltip.
-            @param v:string
-            @return void */
+            @param {string} string
+            @return {undefined} */
         setTooltip: function(v) {
             if (this.tooltip !== v) {
                 this.tooltip = this.getOuterDomElement().title = v;
@@ -883,21 +886,24 @@
         /** Checks if this view is visible and each view in the parent chain to
             the RootView is also visible. Dom elements are not explicitly
             checked. If you need to check that use myt.DomElementProxy.isDomElementVisible.
-            @returns true if this view is visible, false otherwise. */
+            @returns {boolean} true if this view is visible, false otherwise. */
         isVisible: function() {
             return this.searchAncestorsOrSelf((v) => !v.visible) === null;
         },
         
         /** Finds the youngest ancestor (or self) that is a focusTrap or focusCage.
-            @param ignoreFocusTrap:boolean indicates focusTraps should be
+            @param {boolean} ignoreFocusTrap - indicates focusTraps should be
                 ignored.
-            @returns a View with focusTrap set to true or null if not found. */
+            @returns {?Object} a View with focusTrap set to true or null if not found. */
         getFocusTrap: function(ignoreFocusTrap) {
             return this.searchAncestorsOrSelf((v) => v.focusCage || (v.focusTrap && !ignoreFocusTrap));
         },
         
         /** @overrides myt.Node
-            Calls this.subviewAdded if the added subnode is a myt.View. 
+            Calls this.subviewAdded if the added subnode is a myt.View.
+            @param {!Object} node
+            @returns {undefined}
+            
             @fires subviewAdded event with the provided Node if it's a View. 
             @fires layoutAdded event with the provided node if it's a Layout. */
         subnodeAdded: function(node) {
@@ -915,6 +921,9 @@
         
         /** @overrides myt.Node
             Calls this.subviewRemoved if the remove subnode is a myt.View.
+            @param {!Object} node
+            @returns {undefined}
+            
             @fires subviewRemoved event with the provided Node if it's a View
                 and removal succeeds. 
             @fires layoutRemoved event with the provided Node if it's a Layout
@@ -941,33 +950,33 @@
         
         // Subviews //
         /** Checks if this View has the provided View in the subviews array.
-            @param sv:View the view to look for.
-            @returns true if the subview is found, false otherwise. */
+            @param {!Object} sv - The myt.View to look for.
+            @returns {boolean} true if the subview is found, false otherwise. */
         hasSubview: function(sv) {
             return this.getSubviewIndex(sv) !== -1;
         },
         
         /** Gets the index of the provided View in the subviews array.
-            @param sv:View the view to look for.
-            @returns the index of the subview or -1 if not found. */
+            @param {!Object} sv - The myt.View to look for.
+            @returns {number} the index of the subview or -1 if not found. */
         getSubviewIndex: function(sv) {
             return this.getSubviews().indexOf(sv);
         },
         
         /** Called when a View is added to this View. Do not call this method to 
             add a View. Instead call addSubnode or setParent.
-            @param sv:View the view that was added.
+            @param {!Object} sv - The myt.View that was added.
             @returns {undefined} */
         subviewAdded: (sv) => {},
         
         /** Called when a View is removed from this View. Do not call this method 
             to remove a View. Instead call removeSubnode or setParent.
-            @param sv:View the view that was removed.
+            @param {!Object} sv - The myt.View that was removed.
             @returns {undefined} */
         subviewRemoved: (sv) => {},
         
         /** Gets the next sibling view based on lexical ordering of dom elements.
-            @returns myt.View: The next sibling view or null if none exists. */
+            @returns {?Object} - The next sibling myt.View or null if none exists. */
         getNextSibling: function() {
             if (this.parent) {
                 var nextDomElement = this.getOuterDomElement().nextElementSibling;
@@ -977,7 +986,7 @@
         },
         
         /** Gets the previous sibling view.
-            @returns myt.View: The previous sibling view or null if none exists. */
+            @returns {?Object} - The previous sibling myt.View or null if none exists. */
         getPrevSibling: function() {
             if (this.parent) {
                 var prevDomElement = this.getOuterDomElement().previousElementSibling;
@@ -988,38 +997,38 @@
         
         // Layouts //
         /** Checks if this View has the provided Layout in the layouts array.
-            @param layout:Layout the layout to look for.
-            @returns true if the layout is found, false otherwise. */
+            @param {!Object} layout - The myt.Layout to look for.
+            @returns {boolean} true if the layout is found, false otherwise. */
         hasLayout: function(layout) {
             return this.getLayoutIndex(layout) !== -1;
         },
         
         /** Gets the index of the provided Layout in the layouts array.
-            @param layout:Layout the layout to look for.
-            @returns the index of the layout or -1 if not found. */
+            @param {!Object} layout - The myt.Layout to look for.
+            @returns {number} the index of the layout or -1 if not found. */
         getLayoutIndex: function(layout) {
             return this.getLayouts().indexOf(layout);
         },
         
         /** Called when a Layout is added to this View. Do not call this method to 
             add a Layout. Instead call addSubnode or setParent.
-            @param layout:Layout the layout that was added.
+            @param {!Object} layout - The myt.Layout that was added.
             @returns {undefined} */
         layoutAdded: (layout) => {},
         
         /** Called when a Layout is removed from this View. Do not call this 
             method to remove a Layout. Instead call removeSubnode or setParent.
-            @param layout:Layout the layout that was removed.
+            @param {!Object} layout - The myt.Layout that was removed.
             @returns {undefined} */
         layoutRemoved: (layout) => {},
         
         // Dom-Ordering //
         /** Test if the provided view is behind this view. The view to test can
             be anywhere in the document.
-            @param view:myt.View the view to check.
-            @param checkZIndex:boolean (optional) If true z-index will first be
+            @param {!Object} view - The myt.View to check.
+            @param {boolean} [checkZIndex] - If true z-index will first be
                 used to check if the view is behind or not.
-            @returns boolean: true if the view is behind this view, 
+            @returns {boolean} true if the view is behind this view, 
                 false otherwise. */
         isBehind: function(view, checkZIndex) {
             return comparePosition(this, view, false, checkZIndex);
@@ -1027,37 +1036,43 @@
         
         /** Test if the provided view is front of this view. The view to test can
             be anywhere in the document.
-            @param view:myt.View the view to check.
-            @param checkZIndex:boolean (optional) If true z-index will first be
+            @param {!Object} view - The myt.View to check.
+            @param {boolean} [checkZIndex] - If true z-index will first be
                 used to check if the view is in front or not.
-            @returns boolean: true if the view is in front of this view, 
+            @returns {boolean} true if the view is in front of this view, 
                 false otherwise. */
         isInFrontOf: function(view, checkZIndex) {
             return comparePosition(this, view, true, checkZIndex);
         },
         
-        /** Brings this view to the front. */
+        /** Brings this view to the front.
+            @returns {undefined} */
         bringToFront: function() {
             this.parent.bringSubviewToFront(this);
         },
         
-        /** Sends this view to the back. */
+        /** Sends this view to the back.
+            @returns {undefined} */
         sendToBack: function() {
             this.parent.sendSubviewToBack(this);
         },
         
-        /** Sends this view behind the provided sibling view. */
+        /** Sends this view behind the provided sibling view.
+            @param {!Object} sv
+            @returns {undefined} */
         sendBehind: function(sv) {
             this.parent.sendSubviewBehind(this, sv);
         },
         
-        /** Sends this view in front of the provided sibling view. */
+        /** Sends this view in front of the provided sibling view.
+            @param {!Object} sv
+            @returns {undefined} */
         sendInFrontOf: function(sv) {
             this.parent.sendSubviewInFrontOf(this, sv);
         },
         
         /** Sends the provided subview to the back.
-            @param sv:View the subview of this view to bring to front.
+            @param {!Object} sv - The subview of this view to bring to front.
             @returns {undefined} */
         bringSubviewToFront: function(sv) {
             if (sv && sv.parent === this) {
@@ -1071,7 +1086,7 @@
         },
         
         /** Sends the provided subview to the back.
-            @param sv:View the subview of this view to send to back.
+            @param {!Object} sv - The sub myt.View of this myt.View to send to back.
             @returns {undefined} */
         sendSubviewToBack: function(sv) {
             if (sv && sv.parent === this) {
@@ -1085,8 +1100,8 @@
         },
         
         /** Sends the subview behind the existing subview.
-            @param sv:View the subview to send behind the existing view.
-            @param existing:View the subview to send the other subview behind.
+            @param {!Object} sv - The sub myt.View to send behind the existing myt.View.
+            @param {?Object} existing - The sub myt.View to send the other sub myt.View behind.
             @returns {undefined} */
         sendSubviewBehind: function(sv, existing) {
             if (sv && existing && sv.parent === this && existing.parent === this) {
@@ -1098,8 +1113,8 @@
         },
         
         /** Sends the subview in front of the existing subview.
-            @param sv:View the subview to send in front of the existing view.
-            @param existing:View the subview to send the other subview in front of.
+            @param {!Object} sv - the subview to send in front of the existing view.
+            @param {!Object} existing - the subview to send the other subview in front of.
             @returns {undefined} */
         sendSubviewInFrontOf: function(sv, existing) {
             if (sv && existing && sv.parent === this && existing.parent === this) {
@@ -1111,7 +1126,7 @@
         /** Sorts the subviews array according to the provided sort function.
             Also rearranges the dom elements so that focus navigation and z
             ordering get updated.
-            @param sortFunc:function the sort function to sort the subviews with.
+            @param {!Function) sortFunc - The sort function to sort the subviews with.
             @returns {undefined} */
         sortSubviews: function(sortFunc) {
             // Sort subviews
@@ -1144,12 +1159,12 @@
         
         // Hit Testing //
         /** Checks if the provided location is inside this view or not.
-            @param locX:number the x position to test.
-            @param locY:number the y position to test.
-            @param referenceFrameDomElem:dom_element (optional) The dom element
+            @param {number} locX - the x position to test.
+            @param {number} locY - the y position to test.
+            @param {?Object} [referenceFrameDomElem] - The dom element
                 the locX and locY are relative to. If not provided the page is
                 assumed.
-            @returns boolean True if the location is inside this view, false 
+            @returns {boolean} True if the location is inside this view, false 
                 if not. */
         containsPoint: function(locX, locY, referenceFrameDomElem) {
             var outerElem = this.getOuterDomElement();
@@ -1161,7 +1176,9 @@
         
         /** Checks if the provided location is visible on this view and is not
             masked by the bounding box of the view or any of its ancestor views.
-            @returns boolean: true if visible, false otherwise. */
+            @param {number} locX
+            @param {number} locY
+            @returns {boolean} true if visible, false otherwise. */
         isPointVisible: function(locX, locY) {
             var pos = this.getTruePagePosition();
             calculateEffectiveScale(this);
@@ -1181,7 +1198,9 @@
         },
         
         /** Used by myt.Animator to determine if an attribute is a color 
-            attribute or not. */
+            attribute or not.
+            @param {string} attrName
+            @returns {boolean} */
         isColorAttr: (attrName) => attrName === 'bgColor' || attrName === 'textColor'
     });
 })(myt);

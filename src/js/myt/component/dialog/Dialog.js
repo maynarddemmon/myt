@@ -5,7 +5,7 @@
         ModalPanel = pkg.ModalPanel,
         
         
-        /** Hide spinner related elements. */
+        /* Hide spinner related elements. */
         hideSpinner = (dialog) => {
             if (dialog.spinner) {
                 dialog.spinner.setVisible(false);
@@ -13,7 +13,7 @@
             }
         },
         
-        /** The class used as the DEFAULT_BUTTON_CLASS in myt.Dialog. */
+        /* The class used as the DEFAULT_BUTTON_CLASS in myt.Dialog. */
         DialogButton = new JSClass('DialogButton', pkg.SimpleButton, {
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides */
@@ -180,18 +180,18 @@
         },
         
         /** Creates a close button on the provided targetView.
-            @param targetView:myt.View The view to create the button on.
-            @param callbackTarget:object An object with a doCallback method
+            @param {!Object} targetView - The myt.View to create the button on.
+            @param {!Object} callbackTarget - An object with a doCallback method
                 that will get called when the close button is activated.
-            @param hoverColor:color (optional) The color used when the mouse 
+            @param {string} [hoverColor] - The color used when the mouse 
                 hovers over the button. Defaults to '#666666'.
-            @param activeColor:color (optional) The color used when the button 
+            @param {string} [activeColor] - The color used when the button 
                 is active. Defaults to '#000000'.
-            @param readyColor:color (optional) The color used when the button 
+            @param {string} [readyColor] - The color used when the button 
                 is ready to be activated. Defaults to '#333333'.
-            @param iconColor:color (optional) The color used to draw the 
+            @param {string} [iconColor] - The color used to draw the 
                 close icon. Defaults to '#ffffff'.
-            @returns myt.Button: The created button. */
+            @returns {!Object} - The created myt.Button. */
         createCloseButton: function(
             targetView, callbackTarget, hoverColor, activeColor, readyColor, iconColor
         ) {
@@ -265,7 +265,7 @@
         },
         
         /** Called by each of the buttons that can trigger the dialog to be hidden.
-            @param sourceView:myt.View the view that triggered the hiding 
+            @param {!Object} sourceView - The myt.View that triggered the hiding 
                 of the dialog.
             @returns {undefined} */
         doCallback: function(sourceView) {
@@ -274,7 +274,7 @@
         },
         
         /** Shows this dialog as a regular dimmer.
-            @param opts:object If opts.bgColor is provided it will be used for
+            @param {?Object} opts - If opts.bgColor is provided it will be used for
                 the bgColor of the overlay.
             @returns {undefined} */
         showBlank: function(opts) {
@@ -289,14 +289,14 @@
         },
         
         /** Shows a dialog with a message and the standard cancel button.
-            @param msg:string the message to show.
-            @param callbackFunction:function (optional) A function that gets 
+            @param {string} msg - The message to show.
+            @param {?Function} [callbackFunction] - A function that gets 
                 called when the close button is activated. A single argument is
                 passed in that indicates the UI element interacted with that should
                 close the dialog. Supported values are: 'closeBtn', 'cancelBtn' and
                 'confirmBtn'. The function should return true if the close should 
                 be aborted.
-            @param opts:object (optional) options that modify how the message is 
+            @param {?Object} [opts] - Options that modify how the message is 
                 displayed. Supports: fontWeight, whiteSpace, wordWrap and width.
             @returns {undefined} */
         showMessage: function(msg, callbackFunction, opts) {
@@ -382,8 +382,8 @@
         
         /** Shows a dialog with a spinner and a message and no standard cancel
             button.
-            @param msg:string the message to show.
-            @param opts:object options that modify how the message is displayed.
+            @param {string} msg - the message to show.
+            @param {?Objecft} opts - Options that modify how the message is displayed.
                 Supports: fontWeight, whiteSpace, wordWrap and width.
             @returns {undefined} */
         showSpinner: function(msg, opts) {
@@ -473,7 +473,9 @@
             self.setDisplayMode('color_picker');
         },
         
-        /** Called by the spectrum color picker. */
+        /** Called by the spectrum color picker.
+            @param {!Object} spectrum
+            @returns {undefined} */
         _spectrumCallback: function(spectrum) {
             this._spectrum = spectrum;
         },
@@ -531,7 +533,9 @@
             self.setDisplayMode('date_picker');
         },
         
-        /** Called by the simple-dtpicker. */
+        /** Called by the simple-dtpicker.
+            @param {!Object} dtpicker
+            @returns {undefined} */
         _dtpickerCallback: function(dtpicker) {
             this._pickedDateTime = dtpicker;
         },
@@ -606,7 +610,10 @@
             });
         },
         
-        /** @private */
+        /** @private 
+            @param {!Object} mainView
+            @param {!Object} opts
+            @returns {undefined} */
         setupFooterButtons: function(mainView, opts) {
             var self = this,
                 content = self.content, 

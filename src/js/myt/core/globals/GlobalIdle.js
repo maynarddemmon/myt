@@ -1,19 +1,19 @@
 ((pkg) => {
     var win = window,
         
-        /** The idle event object that gets reused. */
+        /* The idle event object that gets reused. */
         EVENT = {},
         
-        /** The ID of the last idle event in the browser. */
+        /* The ID of the last idle event in the browser. */
         timerId,
         
-        /** The function that gets executed on idle. */
+        /* The function that gets executed on idle. */
         idleFunc,
         
-        /** The millis of the last idle event fired. */
+        /* The millis of the last idle event fired. */
         lastTime,
         
-        /** Indicates if idle events are currently being fired or not. */
+        /* Indicates if idle events are currently being fired or not. */
         running = false;
     
     /** Provides idle events. Registered with myt.global as 'idle'.
@@ -23,7 +23,8 @@
                 is an object containing:
                     delta: The time in millis since the last idle evnet.
                     time: The time in millis of this idle event.
-    */
+        
+        @class */
     new JS.Singleton('GlobalIdle', {
         include: [pkg.Observable],
         

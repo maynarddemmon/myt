@@ -45,6 +45,8 @@
                 cornerRadius:number Passed into the drawing config to determine
                     if a rounded corner is drawn or not. Defaults to undefined 
                     which causes myt.Tab.DEFAULT_RADIUS to be used.
+                    
+            @class
         */
         Tab = pkg.Tab = new JS.Class('Tab', pkg.SimpleIconTextButton, {
             include: [pkg.TabMixin],

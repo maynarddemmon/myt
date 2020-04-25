@@ -14,6 +14,8 @@
         itemConfig:array An array of configuration information for the items
             in the list.
         items:array The array of items in the list.
+    
+    @class
 */
 myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
     // Life Cycle //////////////////////////////////////////////////////////////
@@ -49,8 +51,8 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
     },
     
     /** Get the view that will contain list content.
-        @returns myt.View */
-    getContentView: function(v) {
+        @returns {!Object} myt.View */
+    getContentView: function() {
         return this;
     },
     
@@ -76,6 +78,7 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
     // Methods /////////////////////////////////////////////////////////////////
     /** ListViewItems should call this method when they are activated. The
         default implementation invokes doItemActivated on the ListViewAnchor.
+        @param {!Object} itemView
         @returns {undefined} */
     doItemActivated: function(itemView) {
         var owner = this.owner;
@@ -105,7 +108,8 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
         return null;
     },
     
-    /** @private */
+    /** @private
+        @returns {undefined} */
     __updateItems: function() {
         var self = this,
             cfg = self.itemConfig || [],

@@ -36,6 +36,7 @@ myt.RootForm = new JS.Module('RootForm', {
     },
     
     /** Called when the form is submitted and it is valid.
+        @param {*} value
         @returns {undefined} */
     doValidSubmit: function(value) {},
     

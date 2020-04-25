@@ -1,6 +1,6 @@
 ((pkg) => {
     var
-        /** Sets the 'transformOrigin' style property of the provided
+        /*  Sets the 'transformOrigin' style property of the provided
             style property map.
                 param view:View the view to modify.
                 param v:string the transformOrigin to set.
@@ -9,7 +9,7 @@
             view.getOuterDomStyle().transformOrigin = v || '50% 50% 0';
         },
         
-        /** Adds an entry to the 'transform' style property of the provided
+        /*  Adds an entry to the 'transform' style property of the provided
             style property map.
                 param view:View the view to add the transform to.
                 param type:string the type of transform: 'rotate', 'scaleX', 
@@ -21,7 +21,7 @@
             view.getOuterDomStyle().transform = cur + (cur.length === 0 ? '' : ' ') + type + '(' + v + ')';
         },
         
-        /** Removes an entry from the 'transform' style property of the provided
+        /*  Removes an entry from the 'transform' style property of the provided
             style property map. Returns the new transform value after the 
             removal has been applied.
                 param view:View the view ro remove the transform from.
@@ -79,7 +79,8 @@
                 is no scaling, 0.5 is 50%, 2 is 200%, etc.
             skewX:number Sets the horizontal skew in degrees.
             skewY:number Sets the vertical skew in degrees.
-    */
+        
+        @class */
     pkg.TransformSupport = new JS.Module('TransformSupport', {
         // Accessors ///////////////////////////////////////////////////////////
         setTransformOrigin: function(v) {
@@ -162,7 +163,7 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** @overrides myt.View
+        /** @overrides
             @private */
         __updateBounds: function(w, h) {
             var r = this.rotation,

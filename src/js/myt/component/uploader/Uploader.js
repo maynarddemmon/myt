@@ -76,7 +76,8 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     
     // Accessors ///////////////////////////////////////////////////////////////
     /** Add a "remote" file when the value is set.
-        @param v:string the URI for a remote image file. */
+        @param {string} v - the URI for a remote image file.
+        @returns {string} */
     setValue: function(v) {
         this.clearFiles();
         
@@ -89,7 +90,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         return this.callSuper ? this.callSuper(v) : v;
     },
     
-    /** @returns the path to the uploaded files. */
+    /** @returns {string} The path to the uploaded files. */
     getValue: function() {
         return this.value;
     },
@@ -178,7 +179,10 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     },
     
     /** Subclasses must implement this to extract the uploaded file path from
-        the response. By default this return null. */
+        the response. By default this return null.
+        @param {!Object} file
+        @param {!Object} data
+        @returns {undefined} */
     parseServerPathFromResponse: (file, data) => null,
     
     addFile: function(file) {

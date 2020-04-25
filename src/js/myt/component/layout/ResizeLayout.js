@@ -1,6 +1,8 @@
 /** An extension of SpacedLayout that resizes one or more views to fill in
     any remaining space. The resizable subviews should not have a transform
-    applied to it. The non-resized views may have transforms applied to them. */
+    applied to it. The non-resized views may have transforms applied to them.
+    
+    @class */
 myt.ResizeLayout = new JS.Class('SpacedLayout', myt.SpacedLayout, {
     // Accessors ///////////////////////////////////////////////////////////////
     /** @overrides myt.VariableLayout */
@@ -36,14 +38,14 @@ myt.ResizeLayout = new JS.Class('SpacedLayout', myt.SpacedLayout, {
     
     // Methods /////////////////////////////////////////////////////////////////
     /** Called when monitoring of width/height should start on our parent.
-        @param attrName:string the name of the attribute to start monitoring.
+        @param {string} attrName - The name of the attribute to start monitoring.
         @returns {undefined} */
     startMonitoringParent: function(attrName) {
         this.attachTo(this.parent, 'update', attrName);
     },
     
     /** Called when monitoring of width/height should stop on our parent.
-        @param attrName:string the name of the attribute to stop monitoring.
+        @param {string} attrName - The name of the attribute to stop monitoring.
         @returns {undefined} */
     stopMonitoringParent: function(attrName) {
         this.detachFrom(this.parent, 'update', attrName);

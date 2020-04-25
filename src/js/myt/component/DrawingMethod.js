@@ -1,5 +1,7 @@
 /** Encapsulates drawing into a myt.Canvas object. Contains a repository
-    of DrawingMethod instances that can be accessed by class name. */
+    of DrawingMethod instances that can be accessed by class name.
+    
+    @class */
 myt.DrawingMethod = new JS.Class('DrawingMethod', {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
@@ -7,7 +9,8 @@ myt.DrawingMethod = new JS.Class('DrawingMethod', {
         _drawingMethods: {},
         
         /** Gets a DrawingMethod for the classname.
-            @returns myt.DrawingMethod. */
+            @param {string} classname
+            @returns {!Function} myt.DrawingMethod. */
         get: function(classname) {
             var drawingMethods = this._drawingMethods,
                 drawingMethod = drawingMethods[classname];
@@ -22,10 +25,11 @@ myt.DrawingMethod = new JS.Class('DrawingMethod', {
         },
         
         /** Gets a DrawingMethod and uses it to draw into the Canvas.
-            @param classname:String the name of the class to draw with.
-            @param canvas:myt.Canvas the canvas to draw into.
-            @param config:Object (Optional) a map of configuration parameters 
-                that control how the DrawingMethod draws. */
+            @param {string} classname - The name of the class to draw with.
+            @param {!Objecdt} canvas - The myt.Canvas to draw into.
+            @param {?Object} [config] - A map of configuration parameters 
+                that control how the DrawingMethod draws.
+            @returns {undefined} */
         draw: function(classname, canvas, config) {
             var drawingMethod = this.get(classname);
             if (drawingMethod) {
@@ -39,8 +43,9 @@ myt.DrawingMethod = new JS.Class('DrawingMethod', {
     
     // Methods /////////////////////////////////////////////////////////////////
     /** Draw into the Canvas.
-        @param canvas:myt.Canvas the canvas to draw into.
-        @param config:Object (Optional) a map of configuration parameters 
-            that control how the DrawingMethod draws. */
+        @param {!Object} canvas - The myt.Canvas to draw into.
+        @param {?Object} [config] - A map of configuration parameters 
+            that control how the DrawingMethod draws.
+        @returns {undefined} */
     draw: function(canvas, config) {}
 });

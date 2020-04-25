@@ -166,7 +166,8 @@
                     to start the animation will behave the same.
                 __isColorAnim:boolean Indicates this animator is animating a
                     color attribute.
-        */
+            
+            @class */
         Animator = pkg.Animator = new JS.Class('Animator', pkg.Node, {
             include: [pkg.Reusable],
             
@@ -355,8 +356,8 @@
             /** A convienence method to set the callback to run when the animator
                 stops running. If a callback already exists the provided callback
                 will be executed after the existing one.
-                @param callback:function the function to run.
-                @param replace:boolean (optional) if true the existing callback will 
+                @param {!Function) callback - The function to run.
+                @param {boolean} [replace] - If true the existing callback will 
                     be replaced with the new callback.
                 @returns {undefined} */
             next: function(callback, replace) {
@@ -373,7 +374,7 @@
             },
             
             /** Puts the animator back to an initial configured state.
-                @param executeCallback:boolean (optional) if true the callback, if
+                @param {boolean} [executeCallback] - If true the callback, if
                     it exists, will be executed.
                 @returns {undefined} */
             reset: function(executeCallback) {
@@ -400,12 +401,14 @@
                 self.reset(false);
             },
             
-            /** @private */
+            /** @private
+                @param {!Object} idleEvent
+                @returns {undefined} */
             __updateAnim: function(idleEvent) {
                 advance(this, idleEvent.value.delta);
             }
         });
     
-    /** Setup the default easing function. */
+    /* Setup the default easing function. */
     Animator.DEFAULT_EASING_FUNCTION = Animator.easingFunctions.easeInOutQuad;
 })(myt);

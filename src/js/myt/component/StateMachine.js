@@ -1,12 +1,12 @@
 ((pkg) => {
     var 
-        /** Indicates a synchronous transition. */
+        /* Indicates a synchronous transition. */
         SYNC = 'sync',
         
-        /** Indicates an asynchronous transition. */
+        /* Indicates an asynchronous transition. */
         ASYNC = 'async',
         
-        /** Special state name that holds transitions for all states. */
+        /* Special state name that holds transitions for all states. */
         WILDCARD = '*',
         
         resetTransitionProgress = (stateMachine) => {
@@ -95,7 +95,8 @@
                 values are 'leaveState' and 'enterState'.
             __deferredTransitions:array An array of transitions that will be
                 performed after the current one completes.
-    */
+        
+        @class */
     var StateMachine = pkg.StateMachine = new JS.Class('StateMachine', pkg.Node, {
         // Class Methods and Attributes ////////////////////////////////////////
         extend: {

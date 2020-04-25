@@ -5,6 +5,8 @@
     
     Attributes:
         selected:boolean Indicates the object is selected.
+    
+    @class
 */
 myt.Selectable = new JS.Module('Selectable', {
     // Accessors ///////////////////////////////////////////////////////////////
@@ -20,21 +22,24 @@ myt.Selectable = new JS.Module('Selectable', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** Checks if this object is selected. */
+    /** Checks if this object is selected.
+        @returns {boolean} */
     isSelected: function() {
         return this.selected ? true : false;
     },
     
     /** Checks if the provided myt.SelectionManager can select this object.
         Returns true by default.
-        @returns boolean */
+        @param {!Object} selectionManager
+        @returns {boolean} */
     canSelect: function(selectionManager) {
         return true;
     },
     
     /** Checks if the provided myt.SelectionManager can deselect this object.
         Returns true by default.
-        @returns boolean */
+        @param {!Object} selectionManager
+        @returns {boolean} */
     canDeselect: function(selectionManager) {
         return true;
     }

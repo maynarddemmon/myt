@@ -122,7 +122,10 @@ myt.SizeToChildren = new JS.Class('SizeToChildren', myt.Layout, {
     },
     
     /** Wrapped by startMonitoringSubview and stopMonitoringSubview.
-        @private */
+        @private
+        @param {!Object} sv
+        @param {!Function} func
+        @returns {undefined} */
     __updateMonitoringSubview: function(sv, func) {
         var axis = this.axis;
         func = func.bind(this);

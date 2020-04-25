@@ -2,7 +2,7 @@
 // https://github.com/bgrins/spectrum
 // Author: Brian Grinstead
 // License: MIT
-(function (window, $, undefined) {
+(function (window, $) {
     "use strict";
 
     var defaultOpts = {

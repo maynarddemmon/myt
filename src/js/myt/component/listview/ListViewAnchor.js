@@ -10,6 +10,8 @@
             listViewClass.
         itemConfig:array An array of configuration parameters for the items
             in the list.
+    
+    @class
 */
 myt.ListViewAnchor = new JS.Module('ListViewAnchor', {
     include: [myt.FloatingPanelAnchor],
@@ -38,6 +40,7 @@ myt.ListViewAnchor = new JS.Module('ListViewAnchor', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Called by the list view when an item is activated. By default it
         hides the list view.
+        @param {!Object} itemView
         @returns {undefined} */
     doItemActivated: function(itemView) {
         this.hideFloatingPanel();

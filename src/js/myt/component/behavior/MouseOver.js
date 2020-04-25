@@ -85,8 +85,9 @@ myt.MouseOver = new JS.Module('MouseOver', {
     /** Called when mouseOver state changes. This method is called after
         an event filtering process has reduced frequent over/out events
         originating from the dom.
+        @param {boolean} isOver
         @returns {undefined} */
-    doSmoothMouseOver: function(v) {
+    doSmoothMouseOver: function(isOver) {
         if (this.inited && this.updateUI) this.updateUI();
     },
     

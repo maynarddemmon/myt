@@ -19,7 +19,8 @@
             Private Attributes:
                 __restoreCursor:string The cursor to restore to when the button is
                     no longer disabled.
-        */
+            
+            @class */
         Button = pkg.Button = new JSModule('Button', {
             include: [
                 pkg.Activateable, 
@@ -166,7 +167,8 @@
                     Used when the button is in the hover state.
                 readyColor:string A color string such as '#ff0000' or 'transparent'.
                     Used when the button is in the ready or disabled state.
-        */
+            
+            @class */
         SimpleButtonStyle = pkg.SimpleButtonStyle = new JSModule('SimpleButtonStyle', {
             include: [Button],
             
@@ -224,7 +226,9 @@
         }),
         
         /** An myt.Button that makes use of activeColor, hoverColor and readyColor
-            attributes to fill the button. */
+            attributes to fill the button.
+            
+            @class */
         SimpleButton = pkg.SimpleButton = new JSClass('SimpleButton', pkg.View, {
             include: [SimpleButtonStyle],
             
@@ -272,7 +276,8 @@
         Private Attributes:
             __updateContentPositionLoopBlock:boolean Used in __updateContentPosition
                 to prevent infinite loops.
-    */
+        
+        @class */
     pkg.IconTextButtonContent = new JSModule('IconTextButtonContent', {
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
@@ -479,7 +484,8 @@
             __origHeight:number The height the button has after adoption. Used to
                 keep a positive height for the button even when the textView is
                 not shown.
-    */
+        
+        @class */
     pkg.TextButtonContent = new JSModule('TextButtonContent', {
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
@@ -608,12 +614,16 @@
         }
     });
     
-    /** A simple button with support for an icon, text and a tooltip. */
+    /** A simple button with support for an icon, text and a tooltip.
+        
+        @class */
     pkg.SimpleIconTextButton = new JSClass('SimpleIconTextButton', SimpleButton, {
         include: [pkg.IconTextButtonContent]
     });
     
-    /** A simple button with support for text and a tooltip. */
+    /** A simple button with support for text and a tooltip.
+        
+        @class */
     pkg.SimpleTextButton = new JSClass('SimpleTextButton', SimpleButton, {
         include: [pkg.TextButtonContent]
     });

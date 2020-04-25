@@ -115,12 +115,16 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** Called when monitoring of width/height should start on our parent. */
+    /** Called when monitoring of width/height should start on our parent.
+        @param {string} measureAttrName - The name of the attribute to start monitoring.
+        @returns {undefined} */
     startMonitoringParent: function(measureAttrName) {
         this.attachTo(this.parent, 'update', measureAttrName);
     },
     
-    /** Called when monitoring of width/height should stop on our parent. */
+    /** Called when monitoring of width/height should stop on our parent.
+        @param {string} measureAttrName - The name of the attribute to stop monitoring.
+        @returns {undefined} */
     stopMonitoringParent: function(measureAttrName) {
         this.detachFrom(this.parent, 'update', measureAttrName);
     },
