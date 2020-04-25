@@ -22,13 +22,14 @@
             
             The Data methods utilize a single JSON object to store multiple values
             under a single local storage item.
-        */
+            
+            @class */
         LocalStorage = pkg.LocalStorage = {
             /** Check if data has been stored under the key and storage id.
-                @param key:string the key to look for.
-                @param storeId:string (optional) id of the data store to look in. If
+                @param {string} key - The key to look for.
+                @param {string} [storeId] - The id of the data store to look in. If
                     not provided the default "myt" storeId will be used.
-                @returns boolean false if an undefined or null value is found,
+                @returns {boolean} - false if an undefined or null value is found,
                     otherwise true. */
             hasDatum: (key, storeId) => {
                 if (key) {
@@ -46,10 +47,10 @@
             },
             
             /** Get the data stored under the key and storage id.
-                @param key:string the key to get data for.
-                @param storeId:string (optional) id of the data store to get data for.
+                @param {string} key - The key to get data for.
+                @param {string} [storeId] - The id of the data store to get data for.
                     If not provided the default "myt" storeId will be used.
-                @returns the value of the data or undefined if not found. */
+                @returns {*} the value of the data or undefined if not found. */
             getDatum: (key, storeId) => {
                 if (key) {
                     var data = LocalStorage.getItem(getStoreId(storeId));
@@ -65,11 +66,11 @@
             },
             
             /** Sets a single entry in a data store.
-                @param key:string The key to store the value under.
-                @param value:* The value to store.
-                @param storeId:string (optional) id of the data store to put data in.
+                @param {string} key - The key to store the value under.
+                @param {*} value - The value to store.
+                @param {string} [storeId] - The id of the data store to put data in.
                     If not provided the default "myt" storeId will be used.
-                @param delay:number (optional) A number of millis to wait before
+                @param {number} [delay] - A number of millis to wait before
                     actually storing the data. This can be useful to prevent excessive
                     numbers of writes when a value will be set a large number of times
                     over a short time interval. For example, when saving the position
@@ -86,10 +87,10 @@
             },
             
             /** Removes a single entry in a data store.
-                @param key:string The key to remove the entry for.
-                @param storeId:string (optional) id of the data store to remove data 
+                @param {string} key - The key to remove the entry for.
+                @param {string} [storeId] - The id of the data store to remove data 
                     from. If not provided the default "myt" storeId will be used.
-                @param delay:number (optional) A number of millis to wait before
+                @param {number} [delay] - A number of millis to wait before
                     actually removing the data.
                 @returns {undefined} */
             removeDatum: (key, storeId, delay) => {
@@ -102,16 +103,16 @@
             },
             
             /** Check if data has been stored under the storage id.
-                @param storeId:string (optional) id of the data store to look in. If
+                @param {string} [storeId] - THe id of the data store to look in. If
                     not provided the default "myt" storeId will be used.
-                @returns boolean false if an undefined or null value is found,
+                @returns {boolean} - false if an undefined or null value is found,
                     otherwise true. */
             hasData: (storeId) => LocalStorage.getItem(getStoreId(storeId)) != null,
             
             /** Get the data store stored under storage id.
-                @param storeId:string (optional) id of the data store to get data for.
+                @param {string} [storeId] - The id of the data store to get data for.
                     If not provided the default "myt" storeId will be used.
-                @returns the store object. */
+                @returns {!Object} - The store object. */
             getData: (storeId) => {
                 var data = LocalStorage.getItem(getStoreId(storeId));
                 if (data) {
@@ -126,17 +127,17 @@
             
             /** Store data under the storage id. This replaces an entire data store
                 with the new data object.
-                @param data:object (optional) The data object to store under the 
+                @param {?Object} [data] - The data object to store under the 
                     storage id.
-                @param storeId:string (optional) id of the data store to put data in.
+                @param {string} [storeId] - The id of the data store to put data in.
                     If not provided the default "myt" storeId will be used.
-                @param delay:number (optional) A number of millis to wait before
+                @param {number} [delay] - A number of millis to wait before
                     actually storing the data. This can be useful to prevent excessive
                     numbers of writes when a value will be set a large number of times
                     over a short time interval. For example, when saving the position
                     of a UI control as it is being repositioned or a value the user
                     is typing.
-                @returns boolean true if the data is of type object false otherwise. */
+                @returns {boolean} - true if the data is of type object false otherwise. */
             setData: (data, storeId, delay) => {
                 storeId = getStoreId(storeId);
                 
@@ -151,9 +152,9 @@
             },
             
             /** Removes a data store.
-                @param storeId:string (optional) id of the data store to remove. If 
+                @param {string} [storeId] - The id of the data store to remove. If 
                     not provided the default "myt" storeId will be used.
-                @param delay:number (optional) A number of millis to wait before
+                @param {number} [delay] - A number of millis to wait before
                     actually removing the data.
                 @returns {undefined} */
             removeData: (storeId, delay) => {
@@ -162,28 +163,28 @@
             },
             
             // wrapper functions on localStorage
-            /** @returns The number of data items stored in the Storage object. */
+            /** @returns {number} - The number of data items stored in the Storage object. */
             getLength: () => localStorage.length,
             
-            /** @param n:integer The index of the key name to retrieve.
-                @returns The name of the nth key in the storage. */
+            /** @param {number} n - The index of the key name to retrieve.
+                @returns {string} The name of the nth key in the storage. */
             getKey: (n) => localStorage.key(n),
             
-            /** @param key:string The name of the storage entry to return.
-                @returns The value of the storage entry or null if not found. */
+            /** @param {string} key - The name of the storage entry to return.
+                @returns {*} - The value of the storage entry or null if not found. */
             getItem: (key) => localStorage.getItem(key),
             
             /** Stores the value under the key. If a value already exists for
                 the key the value will be replaced with the new value.
-                @param key:string The key to store the value under.
-                @param value:* The value to store.
+                @param {string} key - The key to store the value under.
+                @param {*} value - The value to store.
                 @returns {undefined} */
             setItem: (key, value) => {
                 localStorage.setItem(key, value);
             },
             
             /** Removes the storage entry for the key.
-                @param key:string The key to remove.
+                @param {string} key - The key to remove.
                 @returns {undefined} */
             removeItem: (key) => {
                 localStorage.removeItem(key);
@@ -196,20 +197,28 @@
             },
             
             // Aliases for better API compatibility with some libraries.
-            /** An alias for getItem. */
+            /** An alias for getItem.
+                @param {string} key - The name of the storage entry to return.
+                @returns {*} - The value of the storage entry or null if not found. */
             get: (key) => LocalStorage.getItem(key),
             
-            /** An alias for setItem. */
+            /** An alias for setItem.
+                @param {string} key - The key to store the value under.
+                @param {*} value - The value to store.
+                @returns {undefined} */
             set: (key, value) => {
                 LocalStorage.setItem(key, value);
             },
             
-            /** An alias for removeItem. */
+            /** An alias for removeItem.
+                @param {string} key - The key to remove.
+                @returns {undefined} */
             remove: (key) => {
                 LocalStorage.removeItem(key);
             },
             
-            /** An alias for clear. */
+            /** An alias for clear.
+                @returns {undefined} */
             clearAll: () => {
                 LocalStorage.clear();
             }

@@ -3,13 +3,19 @@
     Attributes:
         trim:string Determines what kind of trimming to do. Supported values
             are 'left', 'right' and 'both'. The default value is 'both'.
-*/
+    
+    @class */
 myt.TrimValueProcessor = new JS.Class('TrimValueProcessor', myt.ValueProcessor, {
     // Constructor /////////////////////////////////////////////////////////////
     /** @overrides myt.ValueProcessor
+        @param {string} id - The ideally unique ID for a processor instance.
+        @param {boolean} [runForDefault]
+        @param {boolean} [runForRollback]
+        @param {boolean} [runForCurrent]
         @param trim:string Determines the type of trimming to do. Allowed
             values are 'left', 'right' or 'both'. The default value 
-            is 'both'. */
+            is 'both'.
+        @returns {undefined} */
     initialize: function(id, runForDefault, runForRollback, runForCurrent, trim) {
         this.callSuper(id, runForDefault, runForRollback, runForCurrent);
         
@@ -18,7 +24,7 @@ myt.TrimValueProcessor = new JS.Class('TrimValueProcessor', myt.ValueProcessor, 
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.ValueProcessor */
+    /** @overrides */
     process: function(v) {
         v += '';
         switch (this.trim) {

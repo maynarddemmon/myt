@@ -11,17 +11,18 @@
             domElement:domElement the dom element hidden we are a proxy for.
             deStyle:object a shortcut reference to the style attribute of 
                 the dom element.
-    */
+        
+        @class */
     var DomElementProxy = pkg.DomElementProxy = new JS.Module('DomElementProxy', {
         // Class Methods ///////////////////////////////////////////////////////
         extend: {
             /** Creates a new dom element.
-                @param tagname:string the name of the element to create.
-                @param styles:object (optional) a map of style keys and values to 
+                @param {string} tagname - The name of the element to create.
+                @param {?Object} [styles] - A map of style keys and values to 
                     add to the style property of the new element.
-                @param props:object (optional) a map of keys and values to add to 
+                @param {?Object} [props] - A map of keys and values to add to 
                     the new element.
-                @returns the created element. */
+                @returns {!Object} the created element. */
             createDomElement: (tagname, styles, props) => {
                 var de = document.createElement(tagname),
                     key;
@@ -31,8 +32,8 @@
             },
             
             /** Tests if a dom element is visible or not.
-                @param elem:DomElement the element to check visibility for.
-                @returns boolean True if visible, false otherwise. */
+                @param {!Object} elem - The domElement to check visibility for.
+                @returns {boolean} - True if visible, false otherwise. */
             isDomElementVisible: (elem) => {
                 // Special Case: hidden input elements should be considered not visible.
                 if (elem.nodeName === 'INPUT' && elem.type === 'hidden') return false;
@@ -51,7 +52,9 @@
             
             /** Gets the z-index of a dom element relative to an ancestor dom
                 element.
-                @returns int */
+                @param {?Object} elem
+                @param {?Object} ancestor
+                @returns {number} */
             getZIndexRelativeToAncestor: (elem, ancestor) => {
                 if (elem && ancestor) {
                     var ancestors = DomElementProxy.getAncestorArray(elem, ancestor),
@@ -77,10 +80,10 @@
             
             /** Gets an array of ancestor dom elements including the element
                 itself.
-                @param elem:DomElement the element to start from.
-                @param ancestor:DomElement (optional) The dom element to stop
+                @param {!Object} elem - The domElement to start from.
+                @param {?Object} ancestor - The domElement to stop
                     getting ancestors at.
-                @returns an array of ancestor dom elements. */
+                @returns {!Array} - An array of ancestor dom elements. */
             getAncestorArray: (elem, ancestor) => {
                 var ancestors = [];
                 while (elem) {
@@ -94,8 +97,8 @@
             /** Gets the z-index of the dom element or, if it does not define a 
                 stacking context, the highest z-index of any of the dom element's 
                 descendants.
-                @param elem:DomElement
-                @returns int */
+                @param {!Object} elem - A domElement
+                @returns {number} - An int */
             getHighestZIndex: (elem) => {
                 // See https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Understanding_z_index/The_stacking_context
                 var style = GLOBAL.getComputedStyle(elem),
@@ -122,12 +125,12 @@
             /** Gets the x and y position of the dom element relative to the 
                 ancestor dom element or the page. Transforms are not supported.
                 Use getTruePagePosition if you need support for transforms.
-                @param elem:domElement The dom element to get the position for.
-                @param ancestorElem:domElement (optional) An ancestor dom element
+                @param {!Object} elem - The domElement to get the position for.
+                @param {?Object} [ancestorElem] - The ancestor domElement
                     that if encountered will halt the page position calculation
                     thus giving the position of elem relative to ancestorElem.
-                @returns object with 'x' and 'y' keys or null if an error has
-                    occurred. */
+                @returns {?Object} - An object with 'x' and 'y' keys or null 
+                    if an error has occurred. */
             getPagePosition: (elem, ancestorElem) => {
                 if (!elem) return null;
                 
@@ -154,9 +157,9 @@
             
             /** Gets the x and y position of the dom element relative to the page
                 with support for transforms.
-                @param elem:domElement The dom element to get the position for.
-                @returns object with 'x' and 'y' keys or null if an error has
-                    occurred. */
+                @param {!Object} elem - The domElement to get the position for.
+                @returns {?Object} - An object with 'x' and 'y' keys or null 
+                    if an error has occurred. */
             getTruePagePosition: (elem) => {
                 if (!elem) return null;
                 var pos = $(elem).offset();
@@ -165,9 +168,9 @@
             
             /** Generates a dom event on a dom element. Adapted from:
                     http://stackoverflow.com/questions/6157929/how-to-simulate-mouse-click-using-javascript
-                @param elem:domElement the element to simulate the event on.
-                @param eventName:string the name of the dom event to generate.
-                @param customOpts:Object (optional) a map of options that will
+                @param {!Object} elem - The domElement to simulate the event on.
+                @param {string} eventName - The name of the dom event to generate.
+                @param {?Object} [customOpts] - A map of options that will
                     be added onto the dom event object.
                 @returns {undefined} */
             simulateDomEvent: (elem, eventName, customOpts) => {
@@ -238,7 +241,9 @@
             return this.__oS;
         },
         
-        /** Sets the dom element(s) to the provided one. */
+        /** Sets the dom element(s) to the provided one.
+            @param {?Object} v
+            @returns {undefined} */
         setDomElement: function(v) {
             // Support an inner and outer dom element if an array of elements is
             // provided.
@@ -285,14 +290,14 @@
         },
         
         /** Sets the dom "class" attribute on the dom element.
-            @param v:string the dom class name.
+            @param {string} v - The dom class name.
             @returns {undefined} */
         setDomClass: function(v) {
             this.domElement.className = this.domClass = v;
         },
         
         /** Adds a dom "class" to the existing dom classes on the dom element.
-            @param v:string the dom class to add.
+            @param {string} v - The dom class to add.
             @returns {undefined} */
         addDomClass: function(v) {
             var existing = this.domElement.className;
@@ -300,7 +305,7 @@
         },
         
         /** Removes a dom "class" from the dom element.
-            @param v:string the dom class to remove.
+            @param {string} v - The dom class to remove.
             @returns {undefined} */
         removeDomClass: function(v) {
             var existing = this.domElement.className,
@@ -323,22 +328,22 @@
         },
         
         /** Sets the dom "id" attribute on the dom element.
-            @param v:string the dom id name.
+            @param {string} v - The dom id name.
             @returns {undefined} */
         setDomId: function(v) {
             this.domElement.id = this.domId = v;
         },
         
         /** Set the z-index of the dom element.
-            @param v:number the z-index to set.
+            @param {number} v - The z-index to set.
             @returns {undefined} */
         setZIndex: function(v) {
             this.deStyle.zIndex = v;
         },
         
         /** Set an arbitrary CSS style on the dom element.
-            @param propertyName:string the name of the CSS property to set.
-            @param v:* the value to set.
+            @param {string} propertyName - The name of the CSS property to set.
+            @param {*} v - The value to set.
             @returns {undefined} */
         setStyleProperty: function(propertyName, v) {
             this.deStyle[propertyName] = v;
@@ -348,16 +353,16 @@
         // Methods /////////////////////////////////////////////////////////////
         /** Gets the x and y position of the underlying dom element relative to
             the page. Transforms are not supported.
-            @returns object with 'x' and 'y' keys or null if no dom element exists
-                for this proxy. */
+            @returns {?Object} - An object with 'x' and 'y' keys or null 
+                if an error has occurred. */
         getPagePosition: function() {
             return DomElementProxy.getPagePosition(this.domElement);
         },
         
         /** Gets the x and y position of the underlying dom element relative 
             to the page with support for transforms.
-            @returns object with 'x' and 'y' keys or null if no dom element exists
-                for this proxy. */
+            @returns {?Object} - An object with 'x' and 'y' keys or null 
+                if an error has occurred. */
         getTruePagePosition: function() {
             return DomElementProxy.getTruePagePosition(this.domElement);
         },
@@ -369,16 +374,16 @@
         },
         
         /** Gets the highest z-index of the dom element.
-            @returns int */
+            @returns {number} - An int */
         getHighestZIndex: function() {
             return DomElementProxy.getHighestZIndex(this.domElement);
         },
         
         /** Gets the highest z-index of any of the descendant dom elements of
             the domElement of this DomElementProxy.
-            @param skipChild:domElement (optional) A dom element to skip over
+            @param {boolean} [skipChild] - A domElement to skip over
                 when determining the z-index.
-            @returns number */
+            @returns {number} - An int. */
         getHighestChildZIndex: function(skipChild) {
             var children = this.domElement.childNodes, 
                 i = children.length, 

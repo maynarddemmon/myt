@@ -194,13 +194,16 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
         }
     },
     
-    /** @private */
+    /** @private
+        @returns {undefined} */
     __syncSubviews: function() {
         var svs = this.getSubviews();
         svs.forEach(sv => this.__syncSubview(sv));
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} sv
+        @returns {undefined} */
     __syncSubview: function(sv) {
         if (sv && sv.syncInnerToOuter && !sv.ignoreFlex) {
             sv.syncInnerToOuter();
@@ -209,7 +212,7 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
     },
     
     /** @overrides myt.View
-        Allow the child views to be managed by the flex box.*/
+        Allow the child views to be managed by the flex box. */
     subviewRemoved: function(sv) {
         if (sv && !sv.destroyed && !sv.ignoreFlex) sv.getOuterDomStyle().position = 'absolute';
     }

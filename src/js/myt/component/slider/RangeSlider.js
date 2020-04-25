@@ -52,8 +52,8 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         }
     },
     
-    /** Update the thumb position if the width changes.
-        @overrides */
+    /** @overrides
+        Update the thumb position if the width changes. */
     setWidth: function(v, supressEvent) {
         var existing = this.width;
         this.callSuper(v, supressEvent);
@@ -64,8 +64,8 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         }
     },
     
-    /** Update the thumb position if the height changes.
-        @overrides */
+    /** @overrides
+        Update the thumb position if the height changes. */
     setHeight: function(v, supressEvent) {
         var existing = this.height;
         this.callSuper(v, supressEvent);

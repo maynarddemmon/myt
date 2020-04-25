@@ -12,7 +12,8 @@
             rollback form values. Defaults to true.
         runForCurrent:boolean Indicates this processor should be run for
             current form values. Defaults to true.
-*/
+    
+    @class */
 myt.ValueProcessor = new JS.Class('ValueProcessor', {
     // Class Methods ///////////////////////////////////////////////////////////
     extend: {
@@ -24,10 +25,11 @@ myt.ValueProcessor = new JS.Class('ValueProcessor', {
     
     // Constructor /////////////////////////////////////////////////////////////
     /** Creates a new ValueProcessor
-        @param id:string the ideally unique ID for a processor instance.
-        @param runForDefault:boolean (optional) 
-        @param runForRollback:boolean (optional) 
-        @param runForCurrent:boolean (optional) */
+        @param {string} id - The ideally unique ID for a processor instance.
+        @param {boolean} [runForDefault]
+        @param {boolean} [runForRollback]
+        @param {boolean} [runForCurrent]
+        @returns {undefined} */
     initialize: function(id, runForDefault, runForRollback, runForCurrent) {
         this.id = id;
         
@@ -41,8 +43,8 @@ myt.ValueProcessor = new JS.Class('ValueProcessor', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Processes the value. The default implementation returns the value
         unmodified.
-        @param value:* the value to modify.
-        @returns * the modified value. */
+        @param {*} value - The value to modify.
+        @returns {*} - The modified value. */
     process: function(value) {
         return value;
     }

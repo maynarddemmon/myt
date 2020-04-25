@@ -61,7 +61,8 @@
             will be set to 'none' thus making text selection not work.
             Furthermore, the cursor will be set to the default so it no longer
             appears as an i-beam.
-*/
+    
+    @class */
 myt.TextSupport = new JS.Module('TextSupport', {
     // Accessors ///////////////////////////////////////////////////////////////
     /** @overrides myt.View */
@@ -127,7 +128,11 @@ myt.TextSupport = new JS.Module('TextSupport', {
     
     /** A private setter function that provides a common implementation for
         most of this setters in this mixin.
-        @private */
+        @private
+        @param {string|number} v
+        @param {string} attrName
+        @param {string|number} defaultValue
+        @returns {undefined} */
     __s: function(v, attrName, defaultValue) {
         if (this[attrName] !== v) {
             this[attrName] = v;
@@ -169,15 +174,15 @@ myt.TextSupport = new JS.Module('TextSupport', {
     },
     
     /** Turns on a text shadow.
-        @param x:number (optional) The x offset in pixels of the shadow.
+        @param {number} [x] - The x offset in pixels of the shadow.
             Defaults to 0 if not provided.
-        @param y:number (optional) The y offset in pixels of the shadow.
+        @param {number} [y] - The y offset in pixels of the shadow.
             Defaults to 0 if not provided.
-        @param blur:number (optional) The bluriness in pixels of the shadow.
+        @param {number} [blur] - The bluriness in pixels of the shadow.
             Defaults to 2 if not provided.
-        @param color:color_string (optional) The color of the shadow. Defaults
+        @param {string} [color] - The color of the shadow. Defaults
             to '#000000' if not provided.
-        @param extraStrength:number (optional) The number of times to render 
+        @param {number} [extraStrength] - The number of times to render 
             the shadow to give the shadow extra opacity.
         @returns {undefined} */
     showTextShadow: function(x, y, blur, color, extraStrength) {

@@ -13,29 +13,29 @@
         KEYCODE_COMMAND = isFirefox ? 224 : 91,
         KEYCODE_RIGHT_COMMAND = isFirefox ? 224 : 93,
         
-        /** A map of keycodes of the keys currently pressed down. */
+        /* A map of keycodes of the keys currently pressed down. */
         keysDown = {},
         
         getKeyCodeFromEvent = (event) => pkg.KeyObservable.getKeyCodeFromEvent(event),
         
-        /** Tests if a key is currently pressed down or not. Returns true if 
+        /*  Tests if a key is currently pressed down or not. Returns true if 
             the key is down, false otherwise.
                 param keyCode:number the key to test. */
         isKeyDown = (keyCode) => !!keysDown[keyCode],
         
-        /** Tests if the 'shift' key is down. */
+        /* Tests if the 'shift' key is down. */
         isShiftKeyDown = () => isKeyDown(KEYCODE_SHIFT),
         
-        /** Tests if the 'control' key is down. */
+        /* Tests if the 'control' key is down. */
         isControlKeyDown = () => isKeyDown(KEYCODE_CONTROL),
         
-        /** Tests if the 'alt' key is down. */
+        /* Tests if the 'alt' key is down. */
         isAltKeyDown = () => isKeyDown(KEYCODE_ALT),
         
-        /** Tests if the 'command' key is down. */
+        /* Tests if the 'command' key is down. */
         isCommandKeyDown = () => isKeyDown(KEYCODE_COMMAND) || isKeyDown(KEYCODE_RIGHT_COMMAND),
         
-        /** Tests if the platform specific "accelerator" key is down. */
+        /* Tests if the platform specific "accelerator" key is down. */
         isAcceleratorKeyDown = () => BrowserDetect.os === 'Mac' ? isCommandKeyDown() : isControlKeyDown(),
         
         ignoreFocusTrap = () => isAltKeyDown(),
@@ -173,7 +173,8 @@
             back slash       220
             close braket     221
             single quote     222
-    */
+        
+        @class */
     new JS.Singleton('GlobalKeys', {
         include: [
             pkg.DomElementProxy, 
@@ -220,7 +221,9 @@
         
         ignoreFocusTrap: ignoreFocusTrap,
         
-        /** @private */
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
         __handleFocused: (event) => {
             var focused = event.value;
             if (focused) {
@@ -244,14 +247,17 @@
             }
         },
         
-        /** @private */
+        /** @private
+            @returns {undefined} */
         __listenToDocument: () => {
             globalKeys.attachToDom(globalKeys, '__handleKeyDown', 'keydown');
             globalKeys.attachToDom(globalKeys, '__handleKeyPress', 'keypress');
             globalKeys.attachToDom(globalKeys, '__handleKeyUp', 'keyup');
         },
         
-        /** @private */
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
         __handleKeyDown: (event) => {
             var keyCode = getKeyCodeFromEvent(event),
                 domEvent = event.value;
@@ -280,12 +286,16 @@
             }
         },
         
-        /** @private */
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
         __handleKeyPress: (event) => {
             globalKeys.fireEvent('keypress', getKeyCodeFromEvent(event));
         },
         
-        /** @private */
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
         __handleKeyUp: (event) => {
             var keyCode = getKeyCodeFromEvent(event),
                 domEvent = event.value;

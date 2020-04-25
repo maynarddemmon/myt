@@ -11,18 +11,17 @@
     Private Attributes:
         __pool:myt.TrackActivesPool The pool that holds the myt.Replicable
             instances.
-*/
+    
+    @class */
 myt.Replicator = new JS.Class('Replicator', myt.Node, {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
-        SORT_FUNCTION: function(a, b) {
-            return a.replicationIndex - b.replicationIndex;
-        }
+        SORT_FUNCTION: (a, b) => a.replicationIndex - b.replicationIndex
     },
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Node */
+    /** @overrides */
     initNode: function(parent, attrs) {
         this.callSuper(parent, attrs);
         
@@ -30,7 +29,7 @@ myt.Replicator = new JS.Class('Replicator', myt.Node, {
         this.doReplication();
     },
     
-    /** @overrides myt.Node */
+    /** @overrides */
     destroyAfterOrphaning: function() {
         this.__destroyOldPool();
         this.callSuper();
@@ -56,7 +55,8 @@ myt.Replicator = new JS.Class('Replicator', myt.Node, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
+    /** @private
+        @returns {undefined} */
     __setupPool: function() {
         this.__destroyOldPool();
         
@@ -65,7 +65,8 @@ myt.Replicator = new JS.Class('Replicator', myt.Node, {
         if (template) this.__pool = new myt.TrackActivesPool(template, this.parent);
     },
     
-    /** @private */
+    /** @private
+        @returns {undefined} */
     __destroyOldPool: function() {
         // Destroy old pool and instances.
         var pool = this.__pool;
@@ -134,8 +135,8 @@ myt.Replicator = new JS.Class('Replicator', myt.Node, {
     
     // FIXME: Make this a mixin?
     /** Sends a message to each active myt.Replicable.
-        @param key:string the name of the message
-        @param value:* the value of the message.
+        @param {string} key - The name of the message
+        @param {*} value - The value of the message.
         @returns {undefined} */
     notify: function(key, value) {
         var pool = this.__pool;
@@ -145,13 +146,18 @@ myt.Replicator = new JS.Class('Replicator', myt.Node, {
         }
     },
     
-    /** @private */
+    /** @private
+        @param {!Array} layouts
+        @returns {undefined} */
     __lockLayouts: function(layouts) {
         var i = layouts.length;
         while (i) layouts[--i].incrementLockedCounter();
     },
     
-    /** @private */
+    /** @private
+        @param {!Array} layouts
+        @param {boolean} update
+        @returns {undefined} */
     __unlockLayouts: function(layouts, update) {
         var i = layouts.length, layout;
         while (i) {

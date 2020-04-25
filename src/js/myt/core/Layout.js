@@ -1,17 +1,17 @@
 ((pkg) => {
     var JSClass = JS.Class,
         
-        /** A list of layouts to be updated once the global lock is released. */
+        /* A list of layouts to be updated once the global lock is released. */
         deferredLayouts = [],
         
-        /** The global lock counter. Any value greater than zero sets the
+        /*  The global lock counter. Any value greater than zero sets the
             global lock. */
         globalLockCount = 0,
         
-        /** The global layout locked status. */
+        /* The global layout locked status. */
         globalLock = false,
         
-        /** Called to set/unset the global lock. Updates all the currently 
+        /*  Called to set/unset the global lock. Updates all the currently 
             deferred layouts. */
         setGlobalLock = (v) => {
             if (globalLock !== v) {
@@ -30,7 +30,7 @@
             }
         },
         
-        /** Adds a Layout to the list of layouts that will get updated when the
+        /*  Adds a Layout to the list of layouts that will get updated when the
             global lock is released.
                 param layout:myt.Layout the layout to defer an update for.
         */
@@ -42,7 +42,7 @@
             }
         },
         
-        /** Implements moveSubviewBefore and moveSubviewAfter for Layout. */
+        /* Implements moveSubviewBefore and moveSubviewAfter for Layout. */
         moveSubview = (layout, sv, target, after) => {
             var curIdx = layout.getSubviewIndex(sv),
                 targetIdx,
@@ -80,7 +80,8 @@
                 subviews:array An array of Views managed by this layout.
                 __deferredLayout:boolean Marks a layout as deferred if the global
                     layout lock is true during a call to 'canUpdate' on the layout.
-        */
+            
+            @class */
         Layout = pkg.Layout = new JSClass('Layout', pkg.Node, {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
@@ -101,7 +102,7 @@
             
             
             // Life Cycle //////////////////////////////////////////////////////
-            /** @overrides myt.Node */
+            /** @overrides */
             initNode: function(parent, attrs) {
                 this.subviews = [];
                 
@@ -121,7 +122,7 @@
                 this.update();
             },
             
-            /** @overrides myt.Node */
+            /** @overrides */
             destroyAfterOrphaning: function() {
                 this.callSuper();
                 this.subviews.length = 0;
@@ -129,7 +130,7 @@
             
             
             // Accessors ///////////////////////////////////////////////////////
-            /** @overrides myt.Node */
+            /** @overrides */
             setParent: function(parent) {
                 if (this.parent !== parent) {
                     // Lock during parent change so that old parent is not updated by
@@ -174,7 +175,7 @@
                 If myt.Layout.locked is true (the global layout lock) then a deferred
                 layout update will be setup for this Layout. Once the global lock is
                 unlocked this Layout's 'update' method will be invoked.
-                @returns true if not locked, false otherwise. */
+                @returns {boolean} true if not locked, false otherwise. */
             canUpdate: function() {
                 if (globalLock) {
                     deferLayoutUpdate(this);
@@ -190,21 +191,21 @@
             
             // Subview Methods //
             /** Checks if this Layout has the provided View in the subviews array.
-                @param sv:View the view to check for.
+                @param {?Object} sv - The myt.View to check for.
                 @returns true if the subview is found, false otherwise. */
             hasSubview: function(sv) {
                 return this.getSubviewIndex(sv) !== -1;
             },
             
             /** Gets the index of the provided View in the subviews array.
-                @param sv:View the view to check for.
-                @returns the index of the subview or -1 if not found. */
+                @param {?Object} sv - The myt.View to check for.
+                @returns {number} - The index of the subview or -1 if not found. */
             getSubviewIndex: function(sv) {
                 return this.subviews.indexOf(sv);
             },
             
             /** Adds the provided View to the subviews array of this Layout.
-                @param sv:View the view to add to this layout.
+                @param {?Object} sv - The myt.View to add to this layout.
                 @returns {undefined} */
             addSubview: function(sv) {
                 if (!this.ignore(sv)) {
@@ -216,7 +217,7 @@
             
             /** Subclasses should implement this method to start listening to
                 events from the subview that should trigger the update method.
-                @param sv:View the view to start monitoring for changes.
+                @param {?Object} sv - The myt.View to start monitoring for changes.
                 @returns {undefined} */
             startMonitoringSubview: (sv) => {},
             
@@ -231,7 +232,7 @@
             },
             
             /** Removes the provided View from the subviews array of this Layout.
-                @param sv:View the view to remove from this layout.
+                @param {?Object} sv - The myt.View to remove from this layout.
                 @returns the index of the removed subview or -1 if not removed. */
             removeSubview: function(sv) {
                 if (this.ignore(sv)) return -1;
@@ -248,7 +249,7 @@
             /** Subclasses should implement this method to stop listening to
                 events from the subview that would trigger the update method. This
                 should remove all listeners that were setup in startMonitoringSubview.
-                @param sv:View the view to stop monitoring for changes.
+                @param {?Object} sv - The myt.View to stop monitoring for changes.
                 @returns {undefined} */
             stopMonitoringSubview: (sv) => {},
             
@@ -264,8 +265,8 @@
             
             /** Checks if a subview can be added to this Layout or not. The default 
                 implementation returns the 'ignoreLayout' attributes of the subview.
-                @param sv:myt.View the view to check.
-                @returns boolean true means the subview will be skipped, false
+                @param {?Object} sv - The myt.View to check.
+                @returns {boolean} true means the subview will be skipped, false
                     otherwise. */
             ignore: (sv) => sv.ignoreLayout,
             
@@ -314,7 +315,7 @@
             }
         });
     
-    /** Create locked counter functions for the myt.Layout class. */
+    /* Create locked counter functions for the myt.Layout class. */
     pkg.createFixedThresholdCounter(Layout, 1, 'locked');
     
     /** A layout that sets the target attribute name to the target value for 
@@ -330,7 +331,8 @@
             setterName:string the name of the setter method to call on the subview
                 for the targetAttrName. This value is updated when
                 setTargetAttrName is called.
-    */
+        
+        @class */
     pkg.ConstantLayout = new JSClass('ConstantLayout', Layout, {
         // Accessors ///////////////////////////////////////////////////////////
         setTargetAttrName: function(v) {
@@ -356,7 +358,7 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** @overrides myt.Layout */
+        /** @overrides */
         update: function() {
             if (this.canUpdate()) {
                 var setterName = this.setterName, 
@@ -387,10 +389,11 @@
             reverse:boolean If true the layout will position the items in the
                 opposite order. For example, right to left instead of left to right.
                 Defaults to false.
-    */
+        
+        @class */
     pkg.VariableLayout = new JSClass('VariableLayout', pkg.ConstantLayout, {
         // Life Cycle //////////////////////////////////////////////////////////
-        /** @overrides myt.Node */
+        /** @overrides */
         initNode: function(parent, attrs) {
             this.collapseParent = this.reverse = false;
             
@@ -421,7 +424,7 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** @overrides myt.ConstantLayout */
+        /** @overrides */
         update: function() {
             if (this.canUpdate()) {
                 // Prevent inadvertent loops
@@ -478,28 +481,32 @@
             // Subclasses to implement as needed.
         },
         
-        /** @overrides myt.Layout
-            Provides a default implementation that calls update when the
-            visibility of a subview changes. */
+        /** Provides a default implementation that calls update when the
+            visibility of a subview changes.
+            @overrides myt.Layout
+            @param {?Object} sv
+            @returns {undefined} */
         startMonitoringSubview: function(sv) {
             this.attachTo(sv, 'update', 'visible');
         },
         
-        /** @overrides myt.Layout
-            Provides a default implementation that calls update when the
-            visibility of a subview changes. */
+        /** Provides a default implementation that calls update when the
+            visibility of a subview changes.
+            @overrides myt.Layout
+            @param {?Object} sv
+            @returns {undefined} */
         stopMonitoringSubview: function(sv) {
             this.detachFrom(sv, 'update', 'visible');
         },
         
         /** Called for each subview in the layout.
-            @param count:int the number of subviews that have been layed out
+            @param {number} count - The number of subviews that have been layed out
                 including the current one. i.e. count will be 1 for the first
                 subview layed out.
-            @param sv:View the subview being layed out.
-            @param setterName:string the name of the setter method to call.
-            @param value:* the layout value.
-            @returns the value to use for the next subview. */
+            @param {!Object} sv - The sub myt.View being layed out.
+            @param {string} setterName - The name of the setter method to call.
+            @param {*} value - The layout value.
+            @returns {*} - The value to use for the next subview. */
         updateSubview: (count, sv, setterName, value) => {
             sv[setterName](value);
             return value;
@@ -508,15 +515,15 @@
         /** Called for each subview in the layout to determine if the view should
             be positioned or not. The default implementation returns true if the 
             subview is not visible.
-            @param sv:View The subview to test.
-            @returns true if the subview should be skipped during layout updates.*/
+            @param {?Object} sv - The sub myt.View to test.
+            @returns {boolean} true if the subview should be skipped during layout updates.*/
         skipSubview: (sv) => !sv.visible,
         
         /** Called if the collapseParent attribute is true. Subclasses should 
             implement this if they want to modify the parent view.
-            @param setterName:string the name of the setter method to call on
+            @param {string} setterName - The name of the setter method to call on
                 the parent.
-            @param value:* the value to set on the parent.
+            @param {*} value - The value to set on the parent.
             @returns {undefined} */
         updateParent: (setterName, value) => {
             // Subclasses to implement as needed.

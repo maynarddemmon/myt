@@ -13,7 +13,8 @@
     
     Private Attributes:
         _selRange:object Stores the start and end of the selection.
-*/
+    
+    @class */
 myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     include: [myt.SizeToDom],
     

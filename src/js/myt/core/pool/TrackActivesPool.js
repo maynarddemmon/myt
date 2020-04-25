@@ -9,7 +9,8 @@
     
     Private Attributes:
         __actives:array an array of active instances.
-*/
+    
+    @class */
 myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Destructible */
@@ -23,8 +24,9 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
     
     // Methods /////////////////////////////////////////////////////////////////
     /** Get the active objects array.
-        @param lazy:boolean If true a list will be lazily instantiated.
-        @private */
+        @private
+        @param {boolean} lazy - If true a list will be lazily instantiated.
+        @returns {!Array} */
     __getActives: function(lazy) {
         return lazy ? this.__actives || (this.__actives = []) : this.__actives;
     },
@@ -58,9 +60,9 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
     },
     
     /** Gets an array of the active instances.
-        @param filterFunc:function (optional) If provided filters the
+        @param {?Function} [filterFunc] - If provided filters the
             results.
-        @returns array */
+        @returns {!Array} */
     getActives: function(filterFunc) {
         var actives = this.__getActives();
         if (actives) {

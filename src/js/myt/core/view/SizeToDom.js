@@ -18,7 +18,8 @@
             so that should be used rather than sizing to the dom element.
         __hasSetHeight:boolean Indicates the an explicit height has been set
             so that should be used rather than sizing to the dom element.
-*/
+    
+    @class */
 myt.SizeToDom = new JS.Module('SizeToDom', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View 

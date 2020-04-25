@@ -10,17 +10,19 @@
     Private Attributes:
         __dobsbt:object Stores arrays of myt.DomObservers and method names 
             by event type.
-*/
+    
+    @class */
 myt.DomObservable = new JS.Module('DomObservable', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Adds the observer to the list of event recipients for the event type.
-        @param domObserver:myt.DomObserver The observer that will be notified
+        @param {!Object} domObserver - The myt.DomObserver that will be notified
             when a dom event occurs.
-        @param methodName:string The method name to call on the dom observer.
-        @param type:string The type of dom event to register for.
-        @param capture:boolean (optional) Indicates if the event registration
+        @param {string} methodName - The method name to call on the dom observer.
+        @param {string} type - The type of dom event to register for.
+        @param {boolean} [capture] - Indicates if the event registration
             is during capture or bubble phase. Defaults to false, bubble phase.
-        @returns boolean True if the observer was successfully registered, 
+        @param {boolean} [passive]
+        @returns {boolean} - True if the observer was successfully registered, 
             false otherwise.*/
     attachDomObserver: function(domObserver, methodName, type, capture, passive) {
         if (domObserver && methodName && type) {
@@ -51,25 +53,25 @@ myt.DomObservable = new JS.Module('DomObservable', {
     /** Creates a function that will handle the dom event when it is fired
         by the browser. Must be implemented by the object this mixin is 
         applied to.
-        @param domObserver:myt.DomObserver the observer that must be notified
+        @param {!Object} domObserver - The myt.DomObserver that must be notified
             when the dom event fires.
-        @param methodName:string the name of the function to pass the event to.
-        @param type:string the type of the event to fire.
-        @returns a function to handle the dom event or null if the event
-            is not supported. */
+        @param {string} methodName - the name of the function to pass the event to.
+        @param {string} type - the type of the event to fire.
+        @returns {?Function} - A function to handle the dom event or null if 
+            the event is not supported. */
     createDomMethodRef: (domObserver, methodName, type) => null,
     
     /** Used by the createDomMethodRef implementations of submixins of 
         myt.DomObservable to implement the standard methodRef.
-        @param domObserver:myt.DomObserver the observer that must be notified
+        @param {!Object} domObserver - The myt.DomObserver that must be notified
             when the dom event fires.
-        @param methodName:string the name of the function to pass the event to.
-        @param type:string the type of the event to fire.
-        @param observableClass:JS.Class The class that has the common event.
-        @param preventDefault:boolean (Optional) If true the default behavior
+        @param {string} methodName - The name of the function to pass the event to.
+        @param {string} type - The type of the event to fire.
+        @param {!Function} observableClass - The JS.Class that has the common event.
+        @param {boolean} [preventDefault] - If true the default behavior
             of the domEvent will be prevented.
-        @returns a function to handle the dom event or undefined if the event
-            will not be handled. */
+        @returns {?Function} - A function to handle the dom event or undefined 
+            if the event will not be handled. */
     createStandardDomMethodRef: function(domObserver, methodName, type, observableClass, preventDefault) {
         if (observableClass.EVENT_TYPES[type]) {
             var self = this, 
@@ -95,12 +97,12 @@ myt.DomObservable = new JS.Module('DomObservable', {
     },
     
     /** Removes the observer from the list of dom observers for the event type.
-        @param domObserver:myt.DomObserver The dom observer to unregister.
-        @param methodName:string The method name to unregister for.
-        @param type:string The dom event type to unregister for.
-        @param capture:boolean (optional) The event phase to unregister for.
+        @param {!Object} domObserver - The myt.DomObserver to unregister.
+        @param {string} methodName - The method name to unregister for.
+        @param {string} type - The dom event type to unregister for.
+        @param {boolean} [capture] - The event phase to unregister for.
             Defaults to false if not provided.
-        @returns boolean True if the observer was successfully unregistered, 
+        @returns {boolean} - True if the observer was successfully unregistered, 
             false otherwise.*/
     detachDomObserver: function(domObserver, methodName, type, capture) {
         if (domObserver && methodName && type) {

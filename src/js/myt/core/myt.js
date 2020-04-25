@@ -76,12 +76,13 @@
             generateGuid: () => ++GUID_COUNTER,
             
             /** Adds an event listener to a dom element. 
-                @param elem:DomElement The dom element to listen to.
+                @param {!Object} elem - The DomElement to listen to.
                 @param {string} type - The name of the event to listen to.
-                @param {Function} callback - The callback function that will be
+                @param {!Function} callback - The callback function that will be
                     registered for the event.
-                @param {boolean} [capture] indicates if the listener is 
+                @param {boolean} [capture]  - Indicates if the listener is 
                     registered during the capture phase or bubble phase.
+                @param {boolean} passive
                 @returns {undefined} */
             addEventListener: (elem, type, callback, capture, passive) => {
                 elem.addEventListener(type, callback, {
@@ -93,7 +94,7 @@
             /** Removes an event listener from a dom element. 
                 @param elem:DomElement The dom element to listen to.
                 @param {string} type - The name of the event to listen to.
-                @param {Function} callback - The callback function that will be
+                @param {!Function} callback - The callback function that will be
                     registered for the event.
                 @param {boolean} [capture] indicates if the listener is 
                     registered during the capture phase or bubble phase.
@@ -105,9 +106,9 @@
             /** Takes a '.' separated string such as "foo.bar.baz" and resolves it
                 into the value found at that location relative to a starting scope.
                 If no scope is provided global scope is used.
-                @param {string|Array} objName - The name to resolve or an array of path
+                @param {string|?Array} objName - The name to resolve or an array of path
                     parts in descending order.
-                @param {Object} [scope] - The scope to resolve from. If not
+                @param {?Object} [scope] - The scope to resolve from. If not
                     provided global scope is used.
                 @returns {?Object} The referenced object or undefined if 
                     resolution failed. */
@@ -129,9 +130,9 @@
             
             /** Resolves a provided string into a JS.Class object. If a non-string 
                 value is provided it is verified to be a JS.Class object.
-                @param value:string:* The value to resolve and/or verify.
-                @returns a JS.Class object or null if the string could not be resolved
-                    or the value was not a JS.Class object. */
+                @param {*} value - The value to resolve and/or verify.
+                @returns {?Function} - A JS.Class or null if the string could not 
+                    be resolved or the value was not a JS.Class object. */
             resolveClassname: (value) => {
                 if (typeof value === 'string') value = myt.resolveName(value);
                 
@@ -181,10 +182,11 @@
                 the link element. The first myt managed dom element encountered is
                 used as the scope for the method.
                 @param {string} text - The text to put inside the link.
-                @param {string) callbackMethodName - The name of the method to execute.
-                @param {?Object} [attrs] - a map of additional attributes that
+                @param {string} callbackMethodName - The name of the method 
+                    to execute.
+                @param {?Object} [attrs] - A map of additional attributes that 
                     will be inserted into the tag.
-                @param {?Object} [data] - Data that will be serialized as JSON
+                @param {?Object} [data] - Data that will be serialized as JSON 
                     and provided to the link handler.
                 @returns {string} */
             generateLink: (text, callbackMethodName, attrs, data) => {
@@ -227,12 +229,12 @@
             
             /** Dynamically load a script into the dom.
                 @param {string} src - The URL to the script file.
-                @param {Function} [callback] - A function that will be called
+                @param {?Function} [callback] - A function that will be called
                     when the script loads.
                 @param {boolean} [noCacheBust] - If true, not cacheBust query
                     param will be added. Defaults to undefined which is equivalent
                     to false.
-                @returns {?Objecd} The created script element or null if the 
+                @returns {?Object} The created script element or null if the 
                     script has already been loaded. */
             loadScript: function(src, callback, noCacheBust) {
                 // Prevent reloading the same script
@@ -274,7 +276,7 @@
             },
             
             /** A wrapper on myt.global.error.notify
-                @param {string|Error} err - The error or message to dump stack for.
+                @param {string|?Error} err - The error or message to dump stack for.
                 @param {string} [type] - The type of console message to write.
                     Allowed values are 'error', 'warn', 'log' and 'debug'. 
                     Defaults to 'error'.
@@ -347,9 +349,9 @@
             /** Tests if two floats are essentially equal to each other.
                 @param {number} a - A float
                 @param {number} b - A float
-                @param {numer} [epsilon] - The percent of difference allowed
+                @param {number} [epsilon] - The percent of difference allowed
                     between a and b. Defaults to 0.000001 if not provided.
-                @return {boolean} true if equal, false otherwise. */
+                @returns {boolean} true if equal, false otherwise. */
             areFloatsEqual: (a, b, epsilon) => {
                 var A = Math.abs(a), B = Math.abs(b);
                 epsilon = epsilon ? Math.abs(epsilon) : 0.000001;
@@ -439,7 +441,7 @@
                 myt.addCSSRule(myt.createStylesheet(), 'body, input', 'font-family:' + fontFamily, 0);
             },
             
-            /** @param {Array} fontUrls
+            /** @param {?Array} fontUrls
                 @returns {undefined} */
             loadCSSFonts: (fontUrls) => {
                 (fontUrls || []).forEach(fontUrl => {
@@ -451,7 +453,8 @@
             },
             
             // CSS
-            /** @returns {Object} */
+            /** Creates a "style" dom element.
+                @returns {!Object} */
             createStylesheet: () => {
                 var style = document.createElement('style');
                 document.head.appendChild(style);
@@ -513,8 +516,8 @@
             
             // Misc
             /** Memoize a function.
-                @param f:function The function to memoize
-                @returns function: The memoized function. */
+                @param {!Function} f - The function to memoize
+                @returns {!Function} - The memoized function. */
             memoize: (f) => {
                 return function() {
                     var hash = JSON.stringify(arguments),
@@ -529,12 +532,13 @@
                 being called for "wait" milliseconds. If "immediate" is passed, the
                 wrapped function will be invoked on the leading edge instead of 
                 the trailing edge.
-                @param func:function The function to wrap.
-                @param wait:number (optional) The time in millis to delay invocation by.
+                @param {!Function} func - The function to wrap.
+                @param {number} [wait] - The time in millis to delay invocation by.
                     If not provided 0 is used.
-                @param immediate:boolean (optional) If true the function will be
+                @param {boolean} [immediate] - If true the function will be
                     invoked immediately and then the wait time will be used to block
-                    subsequent calls. */
+                    subsequent calls.
+                @returns {!Function} - The debounced function. */
             debounce: function(func, wait, immediate) {
                 var timeout;
                 return function() {
@@ -554,16 +558,17 @@
             /** Mixes threshold counter functionality with a fixed threshold 
                 onto the provided scope. A threshold is exceeded when the
                 counter value equals the threshold value.
-                @param scope:Observable|Class|Module the scope to mix onto.
-                @param thresholdValue:number the fixed threshold value.
-                @param exceededAttrName:string the name of the boolean attribute
+                @param {!Object|!Function} scope - Either an myt.Observable,
+                    JS.Class or JS.Module to mix onto.
+                @param {number} thresholdValue - The fixed threshold value.
+                @param {string} exceededAttrName - The name of the boolean attribute
                     that will indicate if the threshold is exceeded or not.
-                @param counterAttrName:string (Optional) the name of the number
+                @param {string} [counterAttrName] - The name of the number
                     attribute that will get adjusted up and down. If not provided
                     the 'exceeded' attribute name will be used with 'Counter'
                     appended to it. For example if the exceeded
                     attribute was 'locked' this would be 'lockedCounter'.
-                @returns boolean True if creation succeeded, false otherwise. */
+                @returns {boolean} - True if creation succeeded, false otherwise. */
             createFixedThresholdCounter: (scope, thresholdValue, exceededAttrName, counterAttrName) => {
                 var genNameFunc = myt.AccessorSupport.generateName,
                     incrName,

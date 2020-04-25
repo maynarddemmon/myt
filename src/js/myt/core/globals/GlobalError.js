@@ -28,32 +28,65 @@ new JS.Singleton('GlobalError', {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** A wrapper on this.notify where consoleFuncName is 'error'. */
-    notifyError: function(type, msg, err) {this.notify('error', type, msg, err);},
+    /** A wrapper on this.notify where consoleFuncName is 'error'.
+        @param {string} [eventType] - The type of the event that will be 
+            broadcast. If not provided 'error' will be used.
+        @param {*} [msg] - Usually a string, this is additional information
+            that will be provided in the value object of the broadcast event.
+        @param {?Error} [err] - A javascript error object from which a
+            stacktrace will be taken. If not provided a stacktrace will be
+            automatically generated.
+        @returns {undefined} */
+    notifyError: function(eventType, msg, err) {this.notify('error', eventType, msg, err);},
     
-    /** A wrapper on this.notify where consoleFuncName is 'warn'. */
-    notifyWarn: function(type, msg, err) {this.notify('warn', type, msg, err);},
+    /** A wrapper on this.notify where consoleFuncName is 'warn'.
+        @param {string} [eventType] - The type of the event that will be 
+            broadcast. If not provided 'error' will be used.
+        @param {*} [msg] - Usually a string, this is additional information
+            that will be provided in the value object of the broadcast event.
+        @param {?Error} [err] - A javascript error object from which a
+            stacktrace will be taken. If not provided a stacktrace will be
+            automatically generated.
+        @returns {undefined} */
+    notifyWarn: function(eventType, msg, err) {this.notify('warn', eventType, msg, err);},
     
-    /** A wrapper on this.notify where consoleFuncName is 'log'. */
-    notifyMsg: function(type, msg, err) {this.notify('log', type, msg, err);},
+    /** A wrapper on this.notify where consoleFuncName is 'log'.
+        @param {string} [eventType] - The type of the event that will be 
+            broadcast. If not provided 'error' will be used.
+        @param {*} [msg] - Usually a string, this is additional information
+            that will be provided in the value object of the broadcast event.
+        @param {?Error} [err] - A javascript error object from which a
+            stacktrace will be taken. If not provided a stacktrace will be
+            automatically generated.
+        @returns {undefined} */
+    notifyMsg: function(eventType, msg, err) {this.notify('log', eventType, msg, err);},
     
-    /** A wrapper on this.notify where consoleFuncName is 'debug'. */
-    notifyDebug: function(type, msg, err) {this.notify('debug', type, msg, err);},
+    /** A wrapper on this.notify where consoleFuncName is 'debug'.
+        @param {string} [eventType] - The type of the event that will be 
+            broadcast. If not provided 'error' will be used.
+        @param {*} [msg] - Usually a string, this is additional information
+            that will be provided in the value object of the broadcast event.
+        @param {?Error} [err] - A javascript error object from which a
+            stacktrace will be taken. If not provided a stacktrace will be
+            automatically generated.
+        @returns {undefined} */
+    notifyDebug: function(eventType, msg, err) {this.notify('debug', eventType, msg, err);},
     
     /** Broadcasts that an error has occurred and also logs the error to the
         console if so configured.
-        @param consoleFuncName:string (optional) The name of the function to 
+        @private
+        @param {string} [consoleFuncName] - The name of the function to 
             call on the console. Standard values are:'error', 'warn', 'log'
             and 'debug'. If not provided no console logging will occur 
             regardless of the value of this.consoleLogging.
-        @param evenType:string (optional) The type of the event that will be 
+        @param {string} [eventType] - The type of the event that will be 
             broadcast. If not provided 'error' will be used.
-        @param msg:* (optional) Usually a string, this is additional information
+        @param {*} [msg] - Usually a string, this is additional information
             that will be provided in the value object of the broadcast event.
-        @param err:Error (optional) A javascript error object from which a
+        @param {?Error} [err] - A javascript error object from which a
             stacktrace will be taken. If not provided a stacktrace will be
             automatically generated.
-        @private */
+        @returns {undefined} */
     notify: function(consoleFuncName, eventType, msg, err) {
         // Generate Stacktrace
         if (!err) err = new Error(msg || eventType);

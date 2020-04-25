@@ -9,8 +9,7 @@
     Private Attributes:
         __lockSync:boolean Used internally to prevent infinite loops.
     
-    @class
-*/
+    @class */
 myt.Slider = new JS.Class('Slider', myt.BaseSlider, {
     include: [myt.BoundedValueComponent],
     
@@ -32,16 +31,16 @@ myt.Slider = new JS.Class('Slider', myt.BaseSlider, {
         if (this.inited && !this.__lockSync) this._syncThumbToValue(this.thumb, this.getValue());
     },
     
-    /** Update the thumb position if the width changes.
-        @overrides */
+    /** @overrides
+        Update the thumb position if the width changes. */
     setWidth: function(v, supressEvent) {
         var existing = this.width;
         this.callSuper(v, supressEvent);
         if (this.inited && this.axis === 'x' && this.width !== existing) this._syncThumbToValue(this.thumb, this.getValue());
     },
     
-    /** Update the thumb position if the height changes.
-        @overrides */
+    /** @overrides
+        Update the thumb position if the height changes. */
     setHeight: function(v, supressEvent) {
         var existing = this.height;
         this.callSuper(v, supressEvent);

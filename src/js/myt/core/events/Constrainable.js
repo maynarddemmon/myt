@@ -8,7 +8,8 @@
     
     Private Attributes:
         __cbmn:object Holds arrays of constraints by method name.
-*/
+    
+    @class */
 myt.Constrainable = new JS.Module('Constrainable', {
     include: [myt.Observer],
     
@@ -16,8 +17,8 @@ myt.Constrainable = new JS.Module('Constrainable', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Creates a constraint. The method will be executed on this object
         whenever any of the provided observables fire the indicated event type.
-        @param methodName:String The name of the method to call on this object.
-        @param observables:array An array of observable/type pairs. An observer
+        @param {string} methodName - The name of the method to call on this object.
+        @param {?Array} observables - An array of observable/type pairs. An observer
             will attach to each observable for the event type.
         @returns {undefined} */
     constrain: function(methodName, observables) {
@@ -59,6 +60,7 @@ myt.Constrainable = new JS.Module('Constrainable', {
     },
     
     /** Removes a constraint.
+        @param {string} methodName
         @returns {undefined} */
     releaseConstraint: function(methodName) {
         if (methodName) {

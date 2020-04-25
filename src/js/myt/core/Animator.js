@@ -356,7 +356,7 @@
             /** A convienence method to set the callback to run when the animator
                 stops running. If a callback already exists the provided callback
                 will be executed after the existing one.
-                @param {!Function) callback - The function to run.
+                @param {!Function} callback - The function to run.
                 @param {boolean} [replace] - If true the existing callback will 
                     be replaced with the new callback.
                 @returns {undefined} */

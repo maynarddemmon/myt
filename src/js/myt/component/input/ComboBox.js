@@ -41,9 +41,9 @@ myt.ComboBox = new JS.Class('ComboBox', myt.InputText, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** Show floating panel if the value has changed during during
-        user interaction.
-        @overrides */
+    /** @overrides
+        Show floating panel if the value has changed during during
+        user interaction. */
     __syncToDom: function(event) {
         var existing = this.value;
         this.callSuper(event);

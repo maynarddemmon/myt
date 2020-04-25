@@ -1,6 +1,6 @@
 ((pkg) => {
     var 
-        /** Preserves focus and scroll position during dom updates. Focus can 
+        /*  Preserves focus and scroll position during dom updates. Focus can 
             get lost in webkit when an element is removed from the dom.
                 param viewBeingRemoved:myt.View
                 param wrapperFunc:function a function to execute that 
@@ -34,7 +34,7 @@
             elem.scrollLeft = restoreScrollLeft;
         },
         
-        /** Implements isBehind and isInFrontOf methods. Returns a boolean
+        /*  Implements isBehind and isInFrontOf methods. Returns a boolean
             indicating front or behind respective to the "front" param.
                 param firstView:View The view to check position for
                 param view:View The view to check the position of the first
@@ -82,7 +82,7 @@
             }
         },
         
-        /** Calculates the effective scale for the provided view and all its
+        /*  Calculates the effective scale for the provided view and all its
             ancestors. Returns the effective scale for the provided view. */
         calculateEffectiveScale = (view) => {
             var ancestorsAndSelf = view.getAncestors(), 
@@ -172,10 +172,10 @@
             }
         },
         
-        /** A convienence method to set a single rounded corner on an element.
-                radius:number the radius of the corner.
-                corner:string One of 'TopLeft', 'TopRight', 'BottomLeft' or
-                    'BottomRight'.
+        /*  A convienence method to set a single rounded corner on an element.
+            @param {!Object} view
+            @param {number} radius - The radius of the corner.
+            @param {string} corner - One of 'TopLeft', 'TopRight', 'BottomLeft' or 'BottomRight'.
         */
         setRoundedCorner = (view, radius, corner) => {
             view.getOuterDomStyle()['border' + corner + 'Radius'] = radius + 'px';
@@ -872,7 +872,7 @@
         },
         
         /** Sets the tooltip.
-            @param {string} string
+            @param {string} v
             @return {undefined} */
         setTooltip: function(v) {
             if (this.tooltip !== v) {
@@ -1086,7 +1086,7 @@
         },
         
         /** Sends the provided subview to the back.
-            @param {!Object} sv - The sub myt.View of this myt.View to send to back.
+            @param {?Object} sv - The sub myt.View of this myt.View to send to back.
             @returns {undefined} */
         sendSubviewToBack: function(sv) {
             if (sv && sv.parent === this) {
@@ -1126,7 +1126,7 @@
         /** Sorts the subviews array according to the provided sort function.
             Also rearranges the dom elements so that focus navigation and z
             ordering get updated.
-            @param {!Function) sortFunc - The sort function to sort the subviews with.
+            @param {!Function} sortFunc - The sort function to sort the subviews with.
             @returns {undefined} */
         sortSubviews: function(sortFunc) {
             // Sort subviews

@@ -9,7 +9,8 @@
         flexGrow
         flexShrink
         alignSelf
-*/
+    
+    @class */
 myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
     // Accessors ///////////////////////////////////////////////////////////////
     /** @overrides */
@@ -26,7 +27,8 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
         if (self.inited && oldParentIsFlexBox && !self.isChildOfFlexBox()) self._syncDomToModel();
     },
     
-    /** @private */
+    /** @private
+        @returns {undefined} */
     _syncDomToModel: function() {
         var self = this,
             s = self.getOuterDomStyle();
@@ -116,7 +118,9 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
         this.__syncModelToOuterBoundsHeight(de);
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} de - A dom element.
+        @returns {undefined} */
     __syncModelToOuterBoundsWidth: function(de) {
         var ids = this.getInnerDomStyle();
         if (!de) de = this.getOuterDomElement();
@@ -132,7 +136,9 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
         this.fireEvent('width', this.width = de.clientWidth);
     },
     
-    /** @private */
+    /** @private
+        @param {!Object} de - A dom element.
+        @returns {undefined} */
     __syncModelToOuterBoundsHeight: function(de) {
         var ids = this.getInnerDomStyle();
         if (!de) de = this.getOuterDomElement();
@@ -148,12 +154,14 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
         this.fireEvent('height', this.height = de.clientHeight);
     },
     
+    /** @returns {undefined} */
     syncInnerToOuter: function() {
         this.__syncInnerWidthToOuterWidth();
         this.__syncInnerHeightToOuterHeight();
     },
     
-    /** @private */
+    /** @private
+        @returns {undefined} */
     __syncInnerWidthToOuterWidth: function() {
         // Don't clobber auto sizing
         if (this.getInnerDomStyle().width !== 'auto') {
@@ -161,7 +169,8 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
         }
     },
     
-    /** @private */
+    /** @private
+        @returns {undefined} */
     __syncInnerHeightToOuterHeight: function() {
         // Don't clobber auto sizing
         if (this.getInnerDomStyle().height !== 'auto') {
@@ -169,12 +178,16 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
         }
     },
     
-    /** @private */
+    /** @private
+        @param {number} v
+        @returns {undefined} */
     __setInnerWidth: function(v) {
         this.getInnerDomStyle().width = v + 'px';
     },
     
-    /** @private */
+    /** @private
+        @param {number} v
+        @returns {undefined} */
     __setInnerHeight: function(v) {
         this.getInnerDomStyle().height = v + 'px';
     },

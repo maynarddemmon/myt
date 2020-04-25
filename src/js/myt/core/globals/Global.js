@@ -13,6 +13,8 @@ myt.global = new JS.Singleton('Global', {
     /** Registers the provided global under the key. Fires a register<key>
         event. If a global is already registered under the key the existing
         global is unregistered first.
+        @param {string} key
+        @param {!Object} v
         @returns {undefined} */
     register: function(key, v) {
         if (this.hasOwnProperty(key)) {
@@ -25,6 +27,7 @@ myt.global = new JS.Singleton('Global', {
     
     /** Unegisters the global for the provided key. Fires an unregister<key>
         event if the key exists.
+        @param {string} key
         @returns {undefined} */
     unregister: function(key) {
         if (this.hasOwnProperty(key)) {

@@ -13,7 +13,8 @@
             
         When more complex URI parsing is needed, perhaps try URI.js which can be
         found at: http://medialize.github.io/URI.js/
-    */
+        
+        @class */
     pkg.URI = new JS.Class('URI', {
         // Constructor /////////////////////////////////////////////////////////
         initialize: function(str, loose) {
@@ -69,7 +70,9 @@
             });
         },
         
-        /** Unescape a query param value. */
+        /** Unescape a query param value.
+            @param {string} v
+            @returns {string} */
         decodeQueryParam: function(v) {
             v = decodeURIComponent(v);
             return v.replace('+', ' ');

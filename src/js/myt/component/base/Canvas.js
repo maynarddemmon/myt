@@ -10,7 +10,8 @@
     Private Attributes:
         __canvas: A reference to the canvas dom element.
         __ctx: A reference to the 2D drawing context.
-*/
+    
+    @class */
 myt.Canvas = new JS.Class('Canvas', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
@@ -100,9 +101,9 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
     
     
     // Methods /////////////////////////////////////////////////////////////////
-    /** Prevent views from being sent behind the __canvas. This allows us to
-        add child views to a Canvas which is not directly supported in HTML.
-        @overrides */
+    /** @overrides
+        Prevent views from being sent behind the __canvas. This allows us to
+        add child views to a Canvas which is not directly supported in HTML. */
     sendSubviewToBack: function(sv) {
         if (sv.parent === this) {
             var de = this.domElement,

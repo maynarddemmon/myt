@@ -15,11 +15,17 @@
     
     Private Attributes:
         __dobt: (Object) Holds arrays of DomObservables by event type.
-*/
+    
+    @class */
 myt.DomObserver = new JS.Module('DomObserver', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Attaches this DomObserver to the provided DomObservable for the 
         provided type.
+        @param {!Object} observable
+        @param {string} methodName
+        @param {string} type
+        @param {boolean} [capture]
+        @param {boolean} [passive]
         @returns {undefined} */
     attachToDom: function(observable, methodName, type, capture, passive) {
         if (observable && methodName && type) {
@@ -37,7 +43,11 @@ myt.DomObserver = new JS.Module('DomObserver', {
     },
     
     /** Detaches this DomObserver from the DomObservable for the event type.
-        @returns boolean True if detachment succeeded, false otherwise. */
+        @param {!Object} observable
+        @param {string} methodName
+        @param {string} type
+        @param {boolean} [capture]
+        @returns {boolean} - True if detachment succeeded, false otherwise. */
     detachFromDom: function(observable, methodName, type, capture) {
         if (observable && methodName && type) {
             capture = !!capture;
