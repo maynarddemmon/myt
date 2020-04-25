@@ -280,7 +280,7 @@
                     response => {
                         source.succeed(response + '\n//# sourceURL=' + path);
                     }
-                )
+                );
                 
                 return source;
             }
