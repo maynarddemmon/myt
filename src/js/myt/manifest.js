@@ -143,7 +143,7 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'dragdrop/Dropable.js'        ).provides('myt.Dropable'        ).requires('myt.Draggable','myt.DragGroupSupport');
     file(MYT_COMPONENT_ROOT + 'dragdrop/DropTarget.js'      ).provides('myt.DropTarget'      ).requires('myt.Dropable','myt.DragGroupSupport');
     file(MYT_COMPONENT_ROOT + 'dragdrop/DropSource.js'      ).provides('myt.DropSource'      ).requires('myt.Dropable');
-    file(MYT_COMPONENT_ROOT + 'dragdrop/AutoScroller.js'    ).provides('myt.AutoScroller'    ).requires('myt.DragGroupSupport');
+    file(MYT_COMPONENT_ROOT + 'dragdrop/AutoScroller.js'    ).provides('myt.AutoScroller'    ).requires('myt.global.dragManager','myt.DragGroupSupport');
     
     // Component : Drawing
     file(MYT_COMPONENT_ROOT + 'drawing/Color.js'      ).provides('myt.Color'      ).requires('myt');

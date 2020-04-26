@@ -22673,370 +22673,358 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
 })(myt);
 
 
-/** Makes a view behave as a grid column header.
-    
-    Events:
-        sortable:boolean
-        sortState:string
-        resizable:boolean
-    
-    Attributes:
-        columnId:string The unique ID for this column relative to the grid it
-            is part of.
-        gridController:myt.GridController the controller for the grid this
-            component is part of.
-        flex:number If 1 or more the column will get extra space if any exists.
-        resizable:boolean Indicates if this column can be resized or not.
-            Defaults to true.
-        last:boolean Indicates if this is the last column header or not.
-        sortable:boolean Indicates if this column can be sorted or not.
-            Defaults to true.
-        sortState:string The sort state of this column. Allowed values are:
-            'ascending': Sorted in ascending order.
-            'descending': Sorted in descending order.
-            'none': Not currently an active sort column.
-        cellXAdj:number The amount to shift the x values of cells updated by
-            this column. Defaults to 0.
-        cellWidthAdj:number The amount to grow/shrink the width of cells 
-            updated by this column. Defaults to 0.
-*/
-myt.GridColumnHeader = new JS.Module('GridColumnHeader', {
-    include: [myt.BoundedValueComponent],
-    
-    
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        DEFAULT_MIN_VALUE: 16,
-        DEFAULT_MAX_VALUE: 9999
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        var M = myt,
-            GCH = M.GridColumnHeader;
-        if (attrs.minValue == null) attrs.minValue = GCH.DEFAULT_MIN_VALUE;
-        if (attrs.maxValue == null) attrs.maxValue = GCH.DEFAULT_MAX_VALUE;
-        if (attrs.resizable == null) attrs.resizable = true;
-        if (attrs.flex == null) attrs.flex = 0;
-        if (attrs.cellXAdj == null) attrs.cellXAdj = 0;
-        if (attrs.cellWidthAdj == null) attrs.cellWidthAdj = 0;
+((pkg) => {
+    var defaultMaxValue = 9999,
         
-        if (attrs.sortable == null) attrs.sortable = true;
-        if (attrs.sortState == null) attrs.sortState = 'none';
+        getPrevColumnHeader = (gridHeader) => gridHeader.gridController ? gridHeader.gridController.getPrevColumnHeader(gridHeader) : null,
         
-        // Ensure participation in determinePlacement method of myt.Grid
-        if (attrs.placement == null) attrs.placement = '*';
+        getNextColumnHeader = (gridHeader) => gridHeader.gridController ? gridHeader.gridController.getNextColumnHeader(gridHeader) : null,
         
-        this.callSuper(parent, attrs);
+        getGiveLeft = (gridHeader) => {
+            var hdr = getPrevColumnHeader(gridHeader);
+            return hdr ? hdr.maxValue - hdr.value + getGiveLeft(hdr) : 0;
+        },
         
-        new M.View(this, {
-            name:'resizer', cursor:'col-resize', width:10, zIndex:1,
-            percentOfParentHeight:100, align:'right', alignOffset:-5,
-            draggableAllowBubble:false
-        }, [M.SizeToParent, M.Draggable, {
-            requestDragPosition: function(x, y) {
-                var p = this.parent, gc = p.gridController,
-                    diff = x - this.x;
-                
-                if (gc.fitToWidth) {
-                    if (diff > 0) {
-                        // Get amount that this header can grow
-                        var growAmt = p.maxValue - p.value;
-                        // Get amount that can be given on the left
-                        var giveLeft = p._getGiveLeft();
+        getGiveRight = (gridHeader) => {
+            var hdr = getNextColumnHeader(gridHeader);
+            return hdr ? hdr.maxValue - hdr.value + getGiveRight(hdr) : 0;
+        },
+        
+        getTakeLeft = (gridHeader) => {
+            var hdr = getPrevColumnHeader(gridHeader);
+            return hdr ? hdr.minValue - hdr.value + getTakeLeft(hdr) : 0;
+        },
+        
+        getTakeRight = (gridHeader) => {
+            var hdr = getNextColumnHeader(gridHeader);
+            return hdr ? hdr.minValue - hdr.value + getTakeRight(hdr) : 0;
+        },
+        
+        /*  @param {!Object} gridHeader
+            @returns {undefined} */
+        updateLast = (gridHeader) => {
+            gridHeader.resizer.setVisible(!(gridHeader.last && gridHeader.gridController.fitToWidth));
+        },
+        
+        /*  Steals width from previous column headers.
+            @param {!Object} gridHeader
+            @param {number} diff - The amount to steal. Will be a negative number.
+            @returns {number} - The amount of width actually stolen. */
+        stealPrevWidth = (gridHeader, diff) => {
+            var hdr = getPrevColumnHeader(gridHeader),
+                usedDiff = 0;
+            if (hdr) {
+                var newValue = hdr.value + diff;
+                if (hdr.resizable) hdr.setValue(newValue);
+                var remainingDiff = newValue - hdr.value;
+                usedDiff = diff - remainingDiff;
+                if (remainingDiff < 0) usedDiff += stealPrevWidth(hdr, remainingDiff);
+            }
+            return usedDiff;
+        },
+        
+        /*  Gives width to previous column headers.
+            @param {!Object} gridHeader
+            @param {number} diff - The amount to give. Will be a positive number.
+            @returns {number} - The amount of width actually given. */
+        givePrevWidth = (gridHeader, diff) => {
+            var hdr = getPrevColumnHeader(gridHeader),
+                usedDiff = 0;
+            if (hdr) {
+                var newValue = hdr.value + diff;
+                if (hdr.resizable) hdr.setValue(newValue);
+                var remainingDiff = newValue - hdr.value;
+                usedDiff = diff - remainingDiff;
+                if (remainingDiff > 0) usedDiff += givePrevWidth(hdr, remainingDiff);
+            }
+            return usedDiff;
+        },
+        
+        /*  Steals width from next column headers.
+            @param {!Object} gridHeader
+            @param {number} diff - The amount to steal. Will be a negative number.
+            @returns {number} - The amount of width actually stolen. */
+        stealNextWidth = (gridHeader, diff) => {
+            var hdr = getNextColumnHeader(gridHeader);
+            if (hdr) {
+                var newValue = hdr.value + diff;
+                if (hdr.resizable) hdr.setValue(newValue);
+                var remainingDiff = newValue - hdr.value;
+                if (remainingDiff < 0) stealNextWidth(hdr, remainingDiff);
+            }
+        },
+        
+        /*  Gives width to next column headers.
+            @param {!Object} gridHeader
+            @param {number} diff - The amount to give. Will be a positive number.
+            @returns {number} - The amount of width actually given. */
+        giveNextWidth = (gridHeader, diff) => {
+            var hdr = getNextColumnHeader(gridHeader);
+            if (hdr) {
+                var newValue = hdr.value + diff;
+                if (hdr.resizable) hdr.setValue(newValue);
+                var remainingDiff = newValue - hdr.value;
+                if (remainingDiff > 0) giveNextWidth(hdr, remainingDiff);
+            }
+        };
+    
+    /** Makes a view behave as a grid column header.
+        
+        Events:
+            sortable:boolean
+            sortState:string
+            resizable:boolean
+        
+        Attributes:
+            columnId:string The unique ID for this column relative to the grid it
+                is part of.
+            gridController:myt.GridController the controller for the grid this
+                component is part of.
+            flex:number If 1 or more the column will get extra space if any exists.
+            resizable:boolean Indicates if this column can be resized or not.
+                Defaults to true.
+            last:boolean Indicates if this is the last column header or not.
+            sortable:boolean Indicates if this column can be sorted or not.
+                Defaults to true.
+            sortState:string The sort state of this column. Allowed values are:
+                'ascending': Sorted in ascending order.
+                'descending': Sorted in descending order.
+                'none': Not currently an active sort column.
+            cellXAdj:number The amount to shift the x values of cells updated by
+                this column. Defaults to 0.
+            cellWidthAdj:number The amount to grow/shrink the width of cells 
+                updated by this column. Defaults to 0.
+        
+        @class */
+    pkg.GridColumnHeader = new JS.Module('GridColumnHeader', {
+        include: [pkg.BoundedValueComponent],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            var self = this,
+                gc;
+            
+            if (attrs.minValue == null) attrs.minValue = 16;
+            if (attrs.maxValue == null) attrs.maxValue = defaultMaxValue;
+            if (attrs.resizable == null) attrs.resizable = true;
+            if (attrs.flex == null) attrs.flex = 0;
+            if (attrs.cellXAdj == null) attrs.cellXAdj = 0;
+            if (attrs.cellWidthAdj == null) attrs.cellWidthAdj = 0;
+            
+            if (attrs.sortable == null) attrs.sortable = true;
+            if (attrs.sortState == null) attrs.sortState = 'none';
+            
+            // Ensure participation in determinePlacement method of myt.Grid
+            if (attrs.placement == null) attrs.placement = '*';
+            
+            self.callSuper(parent, attrs);
+            
+            gc = self.gridController;
+            
+            new pkg.View(self, {
+                name:'resizer', cursor:'col-resize', width:10, zIndex:1,
+                percentOfParentHeight:100, align:'right', alignOffset:-5,
+                draggableAllowBubble:false
+            }, [pkg.SizeToParent, pkg.Draggable, {
+                requestDragPosition: function(x, y) {
+                    var diff = x - this.x,
+                        growAmt,
+                        shrinkAmt,
+                        newValue;
+                    
+                    if (gc.fitToWidth) {
+                        if (diff > 0) {
+                            // Get amount that this header can grow
+                            growAmt = self.maxValue - self.value;
+                            diff = Math.min(diff, Math.min(-getTakeRight(self), growAmt + getGiveLeft(self)));
+                        } else if (diff < 0) {
+                            // Get amount that this header can shrink
+                            shrinkAmt = self.minValue - self.value;
+                            diff = Math.max(diff, Math.max(-getGiveRight(self), shrinkAmt + getTakeLeft(self)));
+                        }
                         
-                        // Get amount that can be stolen on the right
-                        var takeRight = p._getTakeRight();
-                        
-                        diff = Math.min(diff, Math.min(-takeRight, growAmt + giveLeft));
-                    } else if (diff < 0) {
-                        // Get amount that this header can shrink
-                        var shrinkAmt = p.minValue - p.value;
-                        // Get amount that can be stolen on the left
-                        var takeLeft = p._getTakeLeft();
-                        
-                        // Get amount that can be given on the right
-                        var giveRight = p._getGiveRight();
-                        
-                        diff = Math.max(diff, Math.max(-giveRight, shrinkAmt + takeLeft));
+                        if (diff === 0) return;
                     }
                     
-                    if (diff === 0) return;
-                }
-                
-                var newValue = p.value + diff;
-                
-                if (p.resizable) p.setValue(newValue);
-                var remainingDiff = newValue - p.value;
-                var stolenAmt = remainingDiff - diff;
-                var additionalActualDiff = 0;
-                if (remainingDiff < 0) {
-                    additionalActualDiff = p._stealPrevWidth(remainingDiff);
-                } else if (remainingDiff > 0) {
-                    additionalActualDiff = p._givePrevWidth(remainingDiff);
-                }
-                this.dragInitX += additionalActualDiff;
-                stolenAmt -= additionalActualDiff;
-                
-                if (gc.fitToWidth) {
-                    if (stolenAmt < 0) {
-                        p._stealNextWidth(stolenAmt);
-                    } else if (stolenAmt > 0) {
-                        p._giveNextWidth(stolenAmt);
+                    newValue = self.value + diff;
+                    
+                    if (self.resizable) self.setValue(newValue);
+                    var remainingDiff = newValue - self.value,
+                        stolenAmt = remainingDiff - diff,
+                        additionalActualDiff = 0;
+                    if (remainingDiff < 0) {
+                        additionalActualDiff = stealPrevWidth(self, remainingDiff);
+                    } else if (remainingDiff > 0) {
+                        additionalActualDiff = givePrevWidth(self, remainingDiff);
+                    }
+                    this.dragInitX += additionalActualDiff;
+                    stolenAmt -= additionalActualDiff;
+                    
+                    if (gc.fitToWidth) {
+                        if (stolenAmt < 0) {
+                            stealNextWidth(self, stolenAmt);
+                        } else if (stolenAmt > 0) {
+                            giveNextWidth(self, stolenAmt);
+                        }
                     }
                 }
+            }]);
+            
+            if (gc) {
+                gc.notifyAddColumnHeader(self);
+                gc.notifyColumnHeaderXChange(self);
+                gc.notifyColumnHeaderVisibilityChange(self);
             }
-        }]);
+            self.setWidth(self.value);
+            updateLast(self);
+        },
         
-        var gc = this.gridController;
-        if (gc) {
-            gc.notifyAddColumnHeader(this);
-            gc.notifyColumnHeaderXChange(this);
-            gc.notifyColumnHeaderVisibilityChange(this);
-        }
-        this.setWidth(this.value);
-        this._updateLast();
-    },
-    
-    destroy: function(v) {
-        this.setGridController();
+        destroy: function(v) {
+            this.setGridController();
+            this.callSuper(v);
+        },
         
-        this.callSuper(v);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setSortable: function(v) {this.set('sortable', v, true);},
-    setSortState: function(v) {this.set('sortState', v, true);},
-    
-    setResizable: function(v) {this.set('resizable', v, true);},
-    
-    setCellWidthAdj: function(v) {this.cellWidthAdj = v;},
-    setCellXAdj: function(v) {this.cellXAdj = v;},
-    setFlex: function(v) {this.flex = v;},
-    setColumnId: function(v) {this.columnId = v;},
-    
-    setLast: function(v) {
-        this.last = v;
-        if (this.inited) this._updateLast();
-    },
-    
-    setGridController: function(v) {
-        var existing = this.gridController;
-        if (existing !== v) {
-            if (existing) existing.notifyRemoveColumnHeader(this);
-            this.gridController = v;
-            if (this.inited && v) {
-                v.notifyAddColumnHeader(this);
-                v.notifyColumnHeaderXChange(this);
-                v.notifyColumnHeaderWidthChange(this);
-                v.notifyColumnHeaderVisibilityChange(this);
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setSortable: function(v) {this.set('sortable', v, true);},
+        setSortState: function(v) {this.set('sortState', v, true);},
+        setResizable: function(v) {this.set('resizable', v, true);},
+        setCellWidthAdj: function(v) {this.cellWidthAdj = v;},
+        setCellXAdj: function(v) {this.cellXAdj = v;},
+        setFlex: function(v) {this.flex = v;},
+        setColumnId: function(v) {this.columnId = v;},
+        
+        setLast: function(v) {
+            this.last = v;
+            if (this.inited) updateLast(this);
+        },
+        
+        setGridController: function(v) {
+            var existing = this.gridController;
+            if (existing !== v) {
+                if (existing) existing.notifyRemoveColumnHeader(this);
+                this.gridController = v;
+                if (this.inited && v) {
+                    v.notifyAddColumnHeader(this);
+                    v.notifyColumnHeaderXChange(this);
+                    v.notifyColumnHeaderWidthChange(this);
+                    v.notifyColumnHeaderVisibilityChange(this);
+                }
             }
-        }
-    },
-    
-    /** @overrides myt.BoundedValueComponent */
-    setValue: function(v) {
-        this.callSuper(v);
-        if (this.inited) this.setWidth(this.value);
-    },
-    
-    /** @overrides myt.BoundedValueComponent */
-    setMinValue: function(v) {
-        var self = this,
-            oldMinValue = self.minValue || 0, 
-            gc = self.gridController;
-        self.callSuper(v);
-        if (self.inited && gc && oldMinValue !== self.minValue) gc.setMinWidth(gc.minWidth + self.minValue - oldMinValue);
-    },
-    
-    /** @overrides myt.BoundedValueComponent */
-    setMaxValue: function(v) {
-        var self = this,
-            oldMaxValue = self.maxValue || 0,
-            gc = self.gridController;
-        if (v == null) v = myt.GridColumnHeader.DEFAULT_MAX_VALUE;
-        self.callSuper(v);
-        if (self.inited && gc && oldMaxValue !== self.maxValue) gc.setMaxWidth(gc.maxWidth + self.maxValue - oldMaxValue);
-    },
-    
-    /** @overrides myt.View */
-    setWidth: function(v, supressEvent) {
-        var self = this,
-            cur = self.width;
-        self.callSuper(v, supressEvent);
-        if (self.inited && self.gridController && cur !== self.width) self.gridController.notifyColumnHeaderWidthChange(self);
-    },
-    
-    /** @overrides myt.View */
-    setX: function(v) {
-        var self = this,
-            cur = self.x;
-        self.callSuper(v);
-        if (self.inited && self.gridController && cur !== self.x) self.gridController.notifyColumnHeaderXChange(self);
-    },
-    
-    /** @overrides myt.View */
-    setVisible: function(v) {
-        var self = this,
-            cur = self.visible;
-        self.callSuper(v);
-        if (self.inited && self.gridController && cur !== self.visible) self.gridController.notifyColumnHeaderVisibilityChange(self);
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    getPrevColumnHeader: function() {
-        return this.gridController ? this.gridController.getPrevColumnHeader(this) : null;
-    },
-    
-    getNextColumnHeader: function() {
-        return this.gridController ? this.gridController.getNextColumnHeader(this) : null;
-    },
-    
-    /** @private */
-    _updateLast: function() {
-        this.resizer.setVisible(!(this.last && this.gridController.fitToWidth));
-    },
-    
-    /** Steals width from previous column headers.
-        @param diff:number the amount to steal. Will be a negative number.
-        @returns number:the amount of width actually stolen. */
-    _stealPrevWidth: function(diff) {
-        var hdr = this.getPrevColumnHeader(),
-            usedDiff = 0;
-        if (hdr) {
-            var newValue = hdr.value + diff;
-            if (hdr.resizable) hdr.setValue(newValue);
-            var remainingDiff = newValue - hdr.value;
-            usedDiff = diff - remainingDiff;
-            if (remainingDiff < 0) usedDiff += hdr._stealPrevWidth(remainingDiff);
-        }
+        },
         
-        return usedDiff;
-    },
-    
-    /** Gives width to previous column headers.
-        @param diff:number the amount to give. Will be a positive number.
-        @returns number:the amount of width actually given. */
-    _givePrevWidth: function(diff) {
-        var hdr = this.getPrevColumnHeader(),
-            usedDiff = 0;
-        if (hdr) {
-            var newValue = hdr.value + diff;
-            if (hdr.resizable) hdr.setValue(newValue);
-            var remainingDiff = newValue - hdr.value;
-            usedDiff = diff - remainingDiff;
-            if (remainingDiff > 0) usedDiff += hdr._givePrevWidth(remainingDiff);
-        }
+        /** @overrides myt.BoundedValueComponent */
+        setValue: function(v) {
+            this.callSuper(v);
+            if (this.inited) this.setWidth(this.value);
+        },
         
-        return usedDiff;
-    },
-    
-    /** Steals width from next column headers.
-        @param diff:number the amount to steal. Will be a negative number.
-        @returns number:the amount of width actually stolen. */
-    _stealNextWidth: function(diff) {
-        var hdr = this.getNextColumnHeader();
-        if (hdr) {
-            var newValue = hdr.value + diff;
-            if (hdr.resizable) hdr.setValue(newValue);
-            var remainingDiff = newValue - hdr.value;
-            if (remainingDiff < 0) hdr._stealNextWidth(remainingDiff);
+        /** @overrides myt.BoundedValueComponent */
+        setMinValue: function(v) {
+            var self = this,
+                oldMinValue = self.minValue || 0, 
+                gc = self.gridController;
+            self.callSuper(v);
+            if (self.inited && gc && oldMinValue !== self.minValue) gc.setMinWidth(gc.minWidth + self.minValue - oldMinValue);
+        },
+        
+        /** @overrides myt.BoundedValueComponent */
+        setMaxValue: function(v) {
+            var self = this,
+                oldMaxValue = self.maxValue || 0,
+                gc = self.gridController;
+            if (v == null) v = defaultMaxValue;
+            self.callSuper(v);
+            if (self.inited && gc && oldMaxValue !== self.maxValue) gc.setMaxWidth(gc.maxWidth + self.maxValue - oldMaxValue);
+        },
+        
+        /** @overrides myt.View */
+        setWidth: function(v, supressEvent) {
+            var self = this,
+                cur = self.width;
+            self.callSuper(v, supressEvent);
+            if (self.inited && self.gridController && cur !== self.width) self.gridController.notifyColumnHeaderWidthChange(self);
+        },
+        
+        /** @overrides myt.View */
+        setX: function(v) {
+            var self = this,
+                cur = self.x;
+            self.callSuper(v);
+            if (self.inited && self.gridController && cur !== self.x) self.gridController.notifyColumnHeaderXChange(self);
+        },
+        
+        /** @overrides myt.View */
+        setVisible: function(v) {
+            var self = this,
+                cur = self.visible;
+            self.callSuper(v);
+            if (self.inited && self.gridController && cur !== self.visible) self.gridController.notifyColumnHeaderVisibilityChange(self);
         }
-    },
-    
-    /** Gives width to next column headers.
-        @param diff:number the amount to give. Will be a positive number.
-        @returns number:the amount of width actually given. */
-    _giveNextWidth: function(diff) {
-        var hdr = this.getNextColumnHeader();
-        if (hdr) {
-            var newValue = hdr.value + diff;
-            if (hdr.resizable) hdr.setValue(newValue);
-            var remainingDiff = newValue - hdr.value;
-            if (remainingDiff > 0) hdr._giveNextWidth(remainingDiff);
-        }
-    },
-    
-    _getGiveLeft: function() {
-        var hdr = this.getPrevColumnHeader();
-        return hdr ? hdr.maxValue - hdr.value + hdr._getGiveLeft() : 0;
-    },
-    
-    _getGiveRight: function() {
-        var hdr = this.getNextColumnHeader();
-        return hdr ? hdr.maxValue - hdr.value + hdr._getGiveRight() : 0;
-    },
-    
-    _getTakeLeft: function() {
-        var hdr = this.getPrevColumnHeader();
-        return hdr ? hdr.minValue - hdr.value + hdr._getTakeLeft() : 0;
-    },
-    
-    _getTakeRight: function() {
-        var hdr = this.getNextColumnHeader();
-        return hdr ? hdr.minValue - hdr.value + hdr._getTakeRight() : 0;
-    }
-});
+    });
+})(myt);
 
 
-/** Makes a view behave as a row in a grid.
+((pkg) => {
+    var getSubview = (gridRow, columnHeader) => gridRow[columnHeader.columnId + 'View'];
     
-    Events:
-        None
-    
-    Attributes:
-        gridController:myt.GridConstroller A reference to the grid controller
-            that is managing this row.
-*/
-myt.GridRow = new JS.Module('GridRow', {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        // Ensure participation in determinePlacement method of myt.Grid
-        if (attrs.placement == null) attrs.placement = '*';
+    /** Makes a view behave as a row in a grid.
         
-        this.callSuper(parent, attrs);
+        Events:
+            None
         
-        var gc = this.gridController;
-        if (gc) gc.notifyAddRow(this);
-    },
-    
-    destroy: function(v) {
-        this.setGridController();
+        Attributes:
+            gridController:myt.GridConstroller A reference to the grid controller
+                that is managing this row.
         
-        this.callSuper(v);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setGridController: function(v) {
-        var existing = this.gridController;
-        if (existing !== v) {
-            if (existing) existing.notifyRemoveRow(this);
-            this.gridController = v;
-            if (this.inited && v) v.notifyAddRow(this);
+        @class */
+    pkg.GridRow = new JS.Module('GridRow', {
+        // Life Cycle //////////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            // Ensure participation in determinePlacement method of myt.Grid
+            if (attrs.placement == null) attrs.placement = '*';
+            
+            this.callSuper(parent, attrs);
+            
+            var gc = this.gridController;
+            if (gc) gc.notifyAddRow(this);
+        },
+        
+        destroy: function(v) {
+            this.setGridController();
+            this.callSuper(v);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setGridController: function(v) {
+            var existing = this.gridController;
+            if (existing !== v) {
+                if (existing) existing.notifyRemoveRow(this);
+                this.gridController = v;
+                if (this.inited && v) v.notifyAddRow(this);
+            }
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        notifyColumnHeaderXChange: function(columnHeader) {
+            var sv = getSubview(this, columnHeader);
+            if (sv) sv.setX(columnHeader.x + columnHeader.cellXAdj);
+        },
+        
+        notifyColumnHeaderWidthChange: function(columnHeader) {
+            var sv = getSubview(this, columnHeader);
+            if (sv) sv.setWidth(columnHeader.width + columnHeader.cellWidthAdj);
+        },
+        
+        notifyColumnHeaderVisibilityChange: function(columnHeader) {
+            var sv = getSubview(this, columnHeader);
+            if (sv) sv.setVisible(columnHeader.visible);
         }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    notifyColumnHeaderXChange: function(columnHeader) {
-        var sv = this[columnHeader.columnId + 'View'];
-        if (sv) sv.setX(columnHeader.x + columnHeader.cellXAdj);
-    },
-    
-    notifyColumnHeaderWidthChange: function(columnHeader) {
-        var sv = this[columnHeader.columnId + 'View'];
-        if (sv) sv.setWidth(columnHeader.width + columnHeader.cellWidthAdj);
-    },
-    
-    notifyColumnHeaderVisibilityChange: function(columnHeader) {
-        var sv = this[columnHeader.columnId + 'View'];
-        if (sv) sv.setVisible(columnHeader.visible);
-    }
-});
+    });
+})(myt);
 
 
 /** Coordinates the behavior of a grid.
@@ -23780,142 +23768,144 @@ myt.Grid = new JS.Class('Grid', myt.View, {
 })(myt);
 
 
-/** A simple implementation of a grid column header.
-    
-    Attributes:
-        sortIconColor:color the color to fill the sort icon with if shown.
-            Defaults to '#666666'.
-*/
-myt.SimpleGridColumnHeader = new JS.Class('SimpleGridColumnHeader', myt.SimpleIconTextButton, {
-    include: [myt.GridColumnHeader],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.View */
-    initNode: function(parent, attrs) {
-        if (attrs.activeColor == null) attrs.activeColor = '#999999';
-        if (attrs.hoverColor == null) attrs.hoverColor = '#bbbbbb';
-        if (attrs.readyColor == null) attrs.readyColor = '#aaaaaa';
-        if (attrs.inset == null) attrs.inset = 2;
-        if (attrs.outset == null) attrs.outset = 2;
+((pkg) => {
+    var updateSortIcon = (gridHeader) => {
+            var glyph = '';
+            if (gridHeader.sortable) {
+                switch (gridHeader.sortState) {
+                    case 'ascending':
+                        glyph = 'chevron-up';
+                        break;
+                    case 'descending':
+                        glyph = 'chevron-down';
+                        break;
+                }
+            }
+            gridHeader.sortIcon.setIcon(glyph);
+        },
         
-        if (attrs.height == null) attrs.height = 18;
-        
-        if (attrs.contentAlign == null) attrs.contentAlign = 'left';
-        if (attrs.sortIconColor == null) attrs.sortIconColor = '#666666';
-        
-        this.callSuper(parent, attrs);
-        
-        this.setDisabled(!this.sortable);
-        this._updateTextWidth();
-        this._updateSortIcon();
-    },
+        updateTextWidth = (gridHeader) => {
+            if (gridHeader.contentAlign === 'left') {
+                var tv = gridHeader.textView;
+                if (tv) tv.setWidth(gridHeader.width - gridHeader.outset - tv.x);
+            }
+        };
     
-    /** @overrides myt.View */
-    doAfterAdoption: function() {
-        new myt.FontAwesome(this, {
-            name:'sortIcon', align:'right', alignOffset:3, valign:'middle',
-            textColor:this.sortIconColor
-        }, [{
-            initNode: function(parent, attrs) {
-                this.callSuper(parent, attrs);
-                this.deStyle.fontSize = '0.7em'; // Looks better a bit smaller.
-            },
+    /** A simple implementation of a grid column header.
+        
+        Attributes:
+            sortIconColor:color the color to fill the sort icon with if shown.
+                Defaults to '#666666'.
+        
+        @class */
+    pkg.SimpleGridColumnHeader = new JS.Class('SimpleGridColumnHeader', pkg.SimpleIconTextButton, {
+        include: [pkg.GridColumnHeader],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.View */
+        initNode: function(parent, attrs) {
+            if (attrs.activeColor == null) attrs.activeColor = '#999999';
+            if (attrs.hoverColor == null) attrs.hoverColor = '#bbbbbb';
+            if (attrs.readyColor == null) attrs.readyColor = '#aaaaaa';
+            if (attrs.inset == null) attrs.inset = 2;
+            if (attrs.outset == null) attrs.outset = 2;
             
-            sizeViewToDom:function() {
-                this.callSuper();
+            if (attrs.height == null) attrs.height = 18;
+            
+            if (attrs.contentAlign == null) attrs.contentAlign = 'left';
+            if (attrs.sortIconColor == null) attrs.sortIconColor = '#666666';
+            
+            this.callSuper(parent, attrs);
+            
+            this.setDisabled(!this.sortable);
+            updateTextWidth(this);
+            updateSortIcon(this);
+        },
+        
+        /** @overrides myt.View */
+        doAfterAdoption: function() {
+            var self = this;
+            
+            new pkg.FontAwesome(self, {
+                name:'sortIcon', align:'right', alignOffset:3, valign:'middle',
+                textColor:self.sortIconColor
+            }, [{
+                initNode: function(parent, attrs) {
+                    this.callSuper(parent, attrs);
+                    this.deStyle.fontSize = '0.7em'; // Looks better a bit smaller.
+                },
                 
-                var p = this.parent;
-                p.setOutset(this.width + 2);
-                p._updateTextWidth();
+                sizeViewToDom:function() {
+                    this.callSuper();
+                    
+                    self.setOutset(this.width + 2);
+                    updateTextWidth(self);
+                }
+            }]);
+            
+            self.callSuper();
+            
+            self.textView.enableEllipsis();
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setSortIconColor: function(v) {
+            this.sortIconColor = v;
+            if (this.sortIcon) this.sortIcon.setTextColor(v);
+        },
+        
+        /** @overrides myt.GridColumnHeader */
+        setSortable: function(v) {
+            this.callSuper(v);
+            
+            if (this.inited) {
+                if (v) this.setOutset(14);
+                this.setDisabled(!v);
+                updateSortIcon(this);
             }
-        }]);
+        },
         
-        this.callSuper();
+        /** @overrides myt.GridColumnHeader */
+        setSortState: function(v) {
+            this.callSuper(v);
+            
+            if (this.inited) updateSortIcon(this);
+        },
         
-        this.textView.enableEllipsis();
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setSortIconColor: function(v) {
-        this.sortIconColor = v;
-        if (this.sortIcon) this.sortIcon.setTextColor(v);
-    },
-    
-    /** @overrides myt.GridColumnHeader */
-    setSortable: function(v) {
-        this.callSuper(v);
+        /** @overrides myt.View */
+        setWidth: function(v, supressEvent) {
+            this.callSuper(v, supressEvent);
+            
+            if (this.inited) updateTextWidth(this);
+        },
         
-        if (this.inited) {
-            if (v) this.setOutset(14);
-            this.setDisabled(!v);
-            this._updateSortIcon();
-        }
-    },
-    
-    /** @overrides myt.GridColumnHeader */
-    setSortState: function(v) {
-        this.callSuper(v);
         
-        if (this.inited) this._updateSortIcon();
-    },
-    
-    /** @overrides myt.View */
-    setWidth: function(v, supressEvent) {
-        this.callSuper(v, supressEvent);
-        
-        if (this.inited) this._updateTextWidth();
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
-    _updateSortIcon: function() {
-        var glyph = '';
-        if (this.sortable) {
-            switch (this.sortState) {
-                case 'ascending':
-                    glyph = 'chevron-up';
-                    break;
-                case 'descending':
-                    glyph = 'chevron-down';
-                    break;
+        // Methods /////////////////////////////////////////////////////////////
+        doActivated: function() {
+            if (!this.disabled) {
+                switch (this.sortState) {
+                    case 'ascending': this.setSortState('descending'); break;
+                    case 'descending': this.setSortState('ascending'); break;
+                    case 'none': this.setSortState('ascending'); break;
+                }
+                this.gridController.setSort([this.columnId, this.sortState]);
             }
-        }
-        this.sortIcon.setIcon(glyph);
-    },
-    
-    /** @private */
-    _updateTextWidth: function() {
-        if (this.contentAlign === 'left') {
-            var tv = this.textView;
-            if (tv) tv.setWidth(this.width - this.outset - tv.x);
-        }
-    },
-    
-    doActivated: function() {
-        if (!this.disabled) {
-            switch (this.sortState) {
-                case 'ascending': this.setSortState('descending'); break;
-                case 'descending': this.setSortState('ascending'); break;
-                case 'none': this.setSortState('ascending'); break;
-            }
-            this.gridController.setSort([this.columnId, this.sortState]);
-        }
-    },
-    
-    /** @overrides myt.SimpleButton */
-    drawDisabledState: function() {
-        this.setBgColor(this.readyColor);
-    },
-    
-    /** @overrides myt.Button */
-    showFocusEmbellishment: function() {this.hideDefaultFocusEmbellishment();},
-    
-    /** @overrides myt.Button */
-    hideFocusEmbellishment: function() {this.hideDefaultFocusEmbellishment();}
-});
+        },
+        
+        /** @overrides myt.SimpleButton */
+        drawDisabledState: function() {
+            this.setBgColor(this.readyColor);
+        },
+        
+        /** @overrides myt.Button */
+        showFocusEmbellishment: function() {this.hideDefaultFocusEmbellishment();},
+        
+        /** @overrides myt.Button */
+        hideFocusEmbellishment: function() {this.hideDefaultFocusEmbellishment();}
+    });
+})(myt);
 
 
 /** A mixin for rows in infinite scrolling lists
