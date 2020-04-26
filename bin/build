@@ -132,6 +132,8 @@ jsBuild(manifestFile, rootPath, requiredFiles, function(concatenatedData) {
     }
     
     var cmd = 'java -Xmx256m -jar bin/closure-compiler/compiler.jar --js ' + targetFile + 
+        ' --jscomp_warning=lintChecks' +
+        ' --language_out ECMASCRIPT_2015' +
         ' --js_output_file ' + minifiedFilePath + sourceMapOpts;
     console.error("Executing: " + cmd);
     exec(cmd, function (error, stdout, stderr) {
