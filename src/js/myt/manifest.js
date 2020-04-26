@@ -82,20 +82,22 @@ JS.Packages(function() {
     var MYT_COMPONENT_ROOT = MYT_ROOT + 'component/';
     
     // Component : Misc
-    file(MYT_COMPONENT_ROOT + 'Button.js'       ).provides(
+    file(MYT_COMPONENT_ROOT + 'Button.js'          ).provides(
             'myt.Button','myt.SimpleButtonStyle','myt.SimpleButton','myt.SimpleIconTextButton','myt.SimpleTextButton',
             'myt.IconTextButtonContent','myt.TextButtonContent'
         ).requires(
             'myt.UpdateableUI','myt.MouseOverAndDown','myt.KeyActivation','myt.Disableable',
             'myt.View','myt.Image','myt.Text'
         );
-    file(MYT_COMPONENT_ROOT + 'Divider.js'      ).provides('myt.HorizontalDivider','myt.VerticalDivider').requires('myt.SimpleButton','myt.BoundedValueComponent','myt.Draggable');
-    file(MYT_COMPONENT_ROOT + 'DrawingMethod.js').provides('myt.DrawingMethod').requires('myt.DrawingUtil');
-    file(MYT_COMPONENT_ROOT + 'DrawButton.js'   ).provides('myt.DrawButton'   ).requires('myt.Canvas','myt.Button','myt.DrawingMethod');
-    file(MYT_COMPONENT_ROOT + 'FontAwesome.js'  ).provides('myt.FontAwesome'  ).requires('myt.Markup');
-    file(MYT_COMPONENT_ROOT + 'Spinner.js'      ).provides('myt.Spinner'      ).requires('myt.View');
-    file(MYT_COMPONENT_ROOT + 'StateMachine.js' ).provides('myt.StateMachine' ).requires('myt.Node');
-    file(MYT_COMPONENT_ROOT + 'Validator.js'    ).provides(
+    file(MYT_COMPONENT_ROOT + 'Divider.js'         ).provides('myt.HorizontalDivider','myt.VerticalDivider').requires('myt.SimpleButton','myt.BoundedValueComponent','myt.Draggable');
+    file(MYT_COMPONENT_ROOT + 'DrawingMethod.js'   ).provides('myt.DrawingMethod').requires('myt.DrawingUtil');
+    file(MYT_COMPONENT_ROOT + 'DrawButton.js'      ).provides('myt.DrawButton' ).requires('myt.Canvas','myt.Button','myt.DrawingMethod');
+    file(MYT_COMPONENT_ROOT + 'FontAwesome.js'     ).provides('myt.FontAwesome' ).requires('myt.Markup');
+    file(MYT_COMPONENT_ROOT + 'Replicator.js'      ).provides('myt.Replicable','myt.Replicator').requires('myt.Reusable','myt.Node','myt.TrackActivesPool');
+    file(MYT_COMPONENT_ROOT + 'SelectionManager.js').provides('myt.SelectionManager','myt.Selectable').requires('myt.global.keys');
+    file(MYT_COMPONENT_ROOT + 'Spinner.js'         ).provides('myt.Spinner' ).requires('myt.View');
+    file(MYT_COMPONENT_ROOT + 'StateMachine.js'    ).provides('myt.StateMachine' ).requires('myt.Node');
+    file(MYT_COMPONENT_ROOT + 'Validator.js'       ).provides(
             'myt.global.validators','myt.Validator','myt.CompoundValidator',
             'myt.EqualFieldsValidator','myt.EqualsIgnoreCaseValidator','myt.LengthValidator',
             'myt.NumericRangeValidator','myt.URLValidator','myt.RequiredFieldValidator','myt.JSONValidator'
@@ -147,14 +149,6 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'drawing/Color.js'      ).provides('myt.Color'      ).requires('myt');
     file(MYT_COMPONENT_ROOT + 'drawing/Path.js'       ).provides('myt.Path'       ).requires('myt');
     file(MYT_COMPONENT_ROOT + 'drawing/DrawingUtil.js').provides('myt.DrawingUtil').requires('myt.Color','myt.Path');
-    
-    // Component : Replicator
-    file(MYT_COMPONENT_ROOT + 'replicator/Replicable.js').provides('myt.Replicable').requires('myt.Reusable');
-    file(MYT_COMPONENT_ROOT + 'replicator/Replicator.js').provides('myt.Replicator').requires('myt.Replicable','myt.Node','myt.TrackActivesPool');
-    
-    // Component : Selection
-    file(MYT_COMPONENT_ROOT + 'selection/Selectable.js'      ).provides('myt.Selectable'      ).requires('myt');
-    file(MYT_COMPONENT_ROOT + 'selection/SelectionManager.js').provides('myt.SelectionManager').requires('myt.Selectable','myt.global.keys');
     
     // Component : Tooltip
     file(MYT_COMPONENT_ROOT + 'tooltip/BaseTooltip.js' ).provides('myt.BaseTooltip' ).requires('myt.RootView');

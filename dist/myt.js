@@ -9711,230 +9711,230 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
 })(myt);
 
 
-/** Objects that can be replicated should include this mixin and implemment
-    the replicate method. The myt.Reusable mixin is also included and the
-    clean method should also be implemented. The methods replicate and clean
-    should perform setup and teardown of the object respectively.
-    
-    Events:
-        None
-    
-    Attributes:
-        replicationData:* The data provided during replication.
-        replicationIndex:number The replication index provided 
-            during replication.
-*/
-myt.Replicable = new JS.Module('Replicable', {
-    include: [myt.Reusable],
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Called to configure the replicable object with data. Subclasses should
-        call super.
-        @param data:object the data being replicated for this instance.
-        @param idx:number the index of the data in the replicated list.
-        @returns {undefined} */
-    replicate: function(data, idx) {
-        this.replicationData = data;
-        this.replicationIndex = idx;
-    },
-    
-    // FIXME: Make this a mixin?
-    /** Notifies this object that something happened.
-        @param key:string the name of the message
-        @param value:* the value of the message.
-        @returns {undefined} */
-    notify: function(key, value) {},
-    
-    /** @overrides myt.Reusable
-        Subclasses should call super. */
-    clean: function() {
-        this.replicationData = null;
-        this.replicationIndex = -1;
-    },
-    
-    /** Called by an myt.Replicator to check if this replicable needs to be
-        updated or not.
-        @param data:object the data being replicated for this instance.
-        @param idx:number the index of the data in the replicated list.
-        @returns boolean true if the provided data is already set on this
-            replicable, false otherwise. */
-    alreadyHasReplicationData: function(data, idx) {
-        // FIXME: Use deepEquals on replicationData?
-        return idx === this.replicationIndex && data === this.replicationData;
-    }
-});
-
-
-/** Creates instances using a template class and an array of data items.
-    
-    Events:
-        None
-    
-    Attributes:
-        template:JS.Class The template to replicate for each entry in the
-            data set.
-        data:array The data to replicate the template for.
-    
-    Private Attributes:
-        __pool:myt.TrackActivesPool The pool that holds the myt.Replicable
-            instances.
-    
-    @class */
-myt.Replicator = new JS.Class('Replicator', myt.Node, {
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        SORT_FUNCTION: (a, b) => a.replicationIndex - b.replicationIndex
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides */
-    initNode: function(parent, attrs) {
-        this.callSuper(parent, attrs);
+((pkg) => {
+    var sortFunction = (a, b) => a.replicationIndex - b.replicationIndex,
         
-        this.__setupPool();
-        this.doReplication();
-    },
-    
-    /** @overrides */
-    destroyAfterOrphaning: function() {
-        this.__destroyOldPool();
-        this.callSuper();
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setTemplate: function(v) {
-        // Make sure template class is an myt.Replicable
-        this.template = v.includes(myt.Replicable) ? v : null;
-        if (!this.template) myt.dumpStack("Template not an myt.Replicable");
+        /*  @param {!Array} layouts
+            @returns {undefined} */
+        lockLayouts = (layouts) => {
+            var i = layouts.length;
+            while (i) layouts[--i].incrementLockedCounter();
+        },
         
-        if (this.inited) {
-            this.__setupPool();
+        /*  @param {!Array} layouts
+            @param {boolean} update
+            @returns {undefined} */
+        unlockLayouts = (layouts, update) => {
+            var i = layouts.length, layout;
+            while (i) {
+                layout = layouts[--i];
+                layout.decrementLockedCounter();
+                if (update) layout.update();
+            }
+        },
+        
+        /*  @param {!Object} replicator
+            @returns {undefined} */
+        setupPool = (replicator) => {
+            destroyOldPool(replicator);
+            
+            // Create new pool
+            var template = replicator.template;
+            if (template) replicator.__pool = new pkg.TrackActivesPool(template, replicator.parent);
+        },
+        
+        /*  @param {!Object} replicator
+            @returns {undefined} */
+        destroyOldPool = (replicator) => {
+            // Destroy old pool and instances.
+            var pool = replicator.__pool;
+            if (pool) {
+                // Lock layouts before modifying instances
+                var layouts = replicator.parent.getLayouts();
+                lockLayouts(layouts);
+                
+                pool.putActives();
+                pool.destroyPooledInstances();
+                
+                unlockLayouts(layouts, false);
+                
+                pool.destroy();
+            }
+        };
+    
+    /** Objects that can be replicated should include this mixin and implemment
+        the replicate method. The myt.Reusable mixin is also included and the
+        clean method should also be implemented. The methods replicate and clean
+        should perform setup and teardown of the object respectively.
+        
+        Events:
+            None
+        
+        Attributes:
+            replicationData:* The data provided during replication.
+            replicationIndex:number The replication index provided 
+                during replication.
+        
+        @class */
+    pkg.Replicable = new JS.Module('Replicable', {
+        include: [pkg.Reusable],
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Called to configure the replicable object with data. Subclasses should
+            call super.
+            @param {?Object} data - The data being replicated for this instance.
+            @param {number} idx - The index of the data in the replicated list.
+            @returns {undefined} */
+        replicate: function(data, idx) {
+            this.replicationData = data;
+            this.replicationIndex = idx;
+        },
+        
+        // FIXME: Make this a mixin?
+        /** Notifies this object that something happened.
+            @param {string} key - The name of the message
+            @param {*} value - The value of the message.
+            @returns {undefined} */
+        notify: function(key, value) {},
+        
+        /** @overrides myt.Reusable
+            Subclasses should call super. */
+        clean: function() {
+            this.replicationData = null;
+            this.replicationIndex = -1;
+        },
+        
+        /** Called by an myt.Replicator to check if this replicable needs to be
+            updated or not.
+            @param {!Object} data - The data being replicated for this instance.
+            @param {number} idx - The index of the data in the replicated list.
+            @returns {boolean} - True if the provided data is already set on this
+                replicable, false otherwise. */
+        alreadyHasReplicationData: function(data, idx) {
+            // FIXME: Use deepEquals on replicationData?
+            return idx === this.replicationIndex && data === this.replicationData;
+        }
+    });
+
+    /** Creates instances using a template class and an array of data items.
+        
+        Events:
+            None
+        
+        Attributes:
+            template:JS.Class The template to replicate for each entry in the
+                data set.
+            data:array The data to replicate the template for.
+        
+        Private Attributes:
+            __pool:myt.TrackActivesPool The pool that holds the myt.Replicable
+                instances.
+        
+        @class */
+    pkg.Replicator = new JS.Class('Replicator', pkg.Node, {
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides */
+        initNode: function(parent, attrs) {
+            this.callSuper(parent, attrs);
+            
+            setupPool(this);
             this.doReplication();
-        }
-    },
-    
-    setData: function(v) {
-        this.data = v;
-        if (this.inited) this.doReplication();
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @private
-        @returns {undefined} */
-    __setupPool: function() {
-        this.__destroyOldPool();
+        },
         
-        // Create new pool
-        var template = this.template;
-        if (template) this.__pool = new myt.TrackActivesPool(template, this.parent);
-    },
-    
-    /** @private
-        @returns {undefined} */
-    __destroyOldPool: function() {
-        // Destroy old pool and instances.
-        var pool = this.__pool;
-        if (pool) {
-            // Lock layouts before modifying instances
-            var layouts = this.parent.getLayouts();
-            this.__lockLayouts(layouts);
+        /** @overrides */
+        destroyAfterOrphaning: function() {
+            destroyOldPool(this);
+            this.callSuper();
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setTemplate: function(v) {
+            // Make sure template class is an myt.Replicable
+            this.template = v.includes(pkg.Replicable) ? v : null;
+            if (!this.template) pkg.dumpStack("Template not an myt.Replicable");
             
-            pool.putActives();
-            pool.destroyPooledInstances();
-            
-            this.__unlockLayouts(layouts, false);
-            
-            pool.destroy();
-        }
-    },
-    
-    /** Performs replication.
-        @returns {undefined} */
-    doReplication: function() {
-        var pool = this.__pool;
-        if (pool) {
-            // Lock layouts before modifying instances
-            var layouts = this.parent.getLayouts();
-            this.__lockLayouts(layouts);
-            
-            // Walk actives comparing against data
-            var data = this.data, dataLen = data ? data.length : 0,
-                actives = pool.getActives(), activesLen = actives.length,
-                i = activesLen, active,
-                replicationIndex, unused = [],
-                sortFunc = myt.Replicator.SORT_FUNCTION;
-            
-            actives.sort(sortFunc);
-            
-            while (i) {
-                active = actives[--i];
-                replicationIndex = active.replicationIndex;
-                if (replicationIndex >= dataLen ||
-                    !active.alreadyHasReplicationData(data[replicationIndex], replicationIndex)
-                ) {
-                    unused[replicationIndex] = active;
+            if (this.inited) {
+                setupPool(this);
+                this.doReplication();
+            }
+        },
+        
+        setData: function(v) {
+            this.data = v;
+            if (this.inited) this.doReplication();
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Performs replication.
+            @returns {undefined} */
+        doReplication: function() {
+            var pool = this.__pool,
+                layouts;
+            if (pool) {
+                // Lock layouts before modifying instances
+                layouts = this.parent.getLayouts();
+                lockLayouts(layouts);
+                
+                // Walk actives comparing against data
+                var data = this.data, 
+                    dataLen = data ? data.length : 0,
+                    actives = pool.getActives(), 
+                    activesLen = actives.length,
+                    i = activesLen, 
+                    active,
+                    replicationIndex, 
+                    unused = [];
+                
+                actives.sort(sortFunction);
+                
+                while (i) {
+                    active = actives[--i];
+                    replicationIndex = active.replicationIndex;
+                    if (replicationIndex >= dataLen ||
+                        !active.alreadyHasReplicationData(data[replicationIndex], replicationIndex)
+                    ) {
+                        unused[replicationIndex] = active;
+                    }
                 }
+                
+                // Put away all unused actives
+                i = unused.length;
+                while (i) {
+                    active = unused[--i];
+                    if (active) pool.putInstance(active);
+                }
+                
+                // Replicate on unused data and data that was beyond the length
+                // of the actives list
+                for (i = 0; dataLen > i; ++i) {
+                    if (i >= activesLen || unused[i] != null) pool.getInstance().replicate(data[i], i);
+                }
+                
+                // Sort layout subviews so the layout reflects the data list order.
+                i = layouts.length;
+                while (i) layouts[--i].sortSubviews(sortFunction);
+                
+                unlockLayouts(layouts, true);
             }
-            
-            // Put away all unused actives
-            i = unused.length;
-            while (i) {
-                active = unused[--i];
-                if (active) pool.putInstance(active);
+        },
+        
+        // FIXME: Make this a mixin?
+        /** Sends a message to each active myt.Replicable.
+            @param {string} key - The name of the message
+            @param {*} value - The value of the message.
+            @returns {undefined} */
+        notify: function(key, value) {
+            var pool = this.__pool;
+            if (pool) {
+                var actives = pool.getActives(), i = actives.length;
+                while (i) actives[--i].notify(key, value);
             }
-            
-            // Replicate on unused data and data that was beyond the length
-            // of the actives list
-            for (i = 0; dataLen > i; ++i) {
-                if (i >= activesLen || unused[i] != null) pool.getInstance().replicate(data[i], i);
-            }
-            
-            // Sort layout subviews so the layout reflects the data list order.
-            i = layouts.length;
-            while (i) layouts[--i].sortSubviews(sortFunc);
-            
-            this.__unlockLayouts(layouts, true);
         }
-    },
-    
-    // FIXME: Make this a mixin?
-    /** Sends a message to each active myt.Replicable.
-        @param {string} key - The name of the message
-        @param {*} value - The value of the message.
-        @returns {undefined} */
-    notify: function(key, value) {
-        var pool = this.__pool;
-        if (pool) {
-            var actives = pool.getActives(), i = actives.length;
-            while (i) actives[--i].notify(key, value);
-        }
-    },
-    
-    /** @private
-        @param {!Array} layouts
-        @returns {undefined} */
-    __lockLayouts: function(layouts) {
-        var i = layouts.length;
-        while (i) layouts[--i].incrementLockedCounter();
-    },
-    
-    /** @private
-        @param {!Array} layouts
-        @param {boolean} update
-        @returns {undefined} */
-    __unlockLayouts: function(layouts, update) {
-        var i = layouts.length, layout;
-        while (i) {
-            layout = layouts[--i];
-            layout.decrementLockedCounter();
-            if (update) layout.update();
-        }
-    }
-});
+    });
+})(myt);
 
 
 /** An extension of VariableLayout that positions views along an axis using
@@ -13921,302 +13921,295 @@ myt.BAG = new JS.Class('BAG', {
 })(myt);
 
 
-/** Makes an object selectable.
+((pkg) => {
+    var JSModule = JS.Module,
+        globalKeys = pkg.global.keys,
     
-    Events:
-        selected:boolean
-    
-    Attributes:
-        selected:boolean Indicates the object is selected.
-    
-    @class
-*/
-myt.Selectable = new JS.Module('Selectable', {
-    // Accessors ///////////////////////////////////////////////////////////////
-    setSelected: function(v) {
-        // Adapt to event from syncTo
-        if (v !== null && typeof v === 'object') v = v.value;
-        
-        if (this.selected !== v) {
-            this.selected = v;
-            if (this.inited && this.fireEvent) this.fireEvent('selected', v);
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Checks if this object is selected.
-        @returns {boolean} */
-    isSelected: function() {
-        return this.selected ? true : false;
-    },
-    
-    /** Checks if the provided myt.SelectionManager can select this object.
-        Returns true by default.
-        @param {!Object} selectionManager
-        @returns {boolean} */
-    canSelect: function(selectionManager) {
-        return true;
-    },
-    
-    /** Checks if the provided myt.SelectionManager can deselect this object.
-        Returns true by default.
-        @param {!Object} selectionManager
-        @returns {boolean} */
-    canDeselect: function(selectionManager) {
-        return true;
-    }
-});
-
-
-/** Manages the selection of one or more items.
-    
-    Events:
-        itemSelected:object Fired when an item is selected. The event value is 
-            the selected item.
-        itemDeselected:object Fired when an item is deselected. The event 
-            value is the deselected item.
-        selectedCount:number Fired when the number of selected items changes.
-    
-    Attributes:
-        itemSelectionId:string The name of the property on items that is used
-            to differentiate them from each other for selection. The default
-            value is 'id'.
-        maxSelected:number The maximum number of items that can be selected.
-            If -1 is provided the count is unlimited. If 1 is provided attempts
-            to select when an item is already selected will result in the
-            existing selection being cleared and the the new item being
-            selected. Defaults to -1.
-        selectedCount:number The number of selected items.
-    
-    Private Attributes:
-        __selected:object A map of selected items by itemSelectionId.
-        __lastSelectedItem:object A reference to the last item that was
-            selected. If this item is deselected this will get set to null.
-    
-    @class
-*/
-myt.SelectionManager = new JS.Module('SelectionManager', {
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        /** Determines if we are in "add" mode for selection such that
-            selections will only be increased not reduced. Typically this
-            means the shift key is down.
-            @returns {boolean} true if in add mode, false otherwise. */
-        isAddMode: function() {
-            return myt.global.keys.isShiftKeyDown();
-        },
-        
-        /** Determines if we are in "toggle" mode for selection such that
-            selections can be added to or removed from incrementally. Typically 
-            this means the control or command key is down.
-            @returns {boolean} true if in add mode, false otherwise. */
-        isToggleMode: function() {
-            return myt.global.keys.isAcceleratorKeyDown();
-        }
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        this.__selected = {};
-        this.__lastSelectedItem = null;
-        
-        attrs.selectedCount = 0;
-        
-        if (attrs.itemSelectionId == null) attrs.itemSelectionId = 'id';
-        if (attrs.maxSelected == null) attrs.maxSelected = -1;
-        
-        this.callSuper(parent, attrs);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setItemSelectionId: function(v) {this.itemSelectionId = v;},
-    setMaxSelected: function(v) {this.maxSelected = v;},
-    
-    setSelectedCount: function(v) {
-        if (this.selectedCount !== v) {
-            this.selectedCount = v;
-            if (this.inited) this.fireEvent('selectedCount', v);
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** A wrapper around myt.SelectionManager.isAddMode.
-        @returns {boolean} */
-    isAddMode: function() {
-        return myt.SelectionManager.isAddMode();
-    },
-    
-    /** A wrapper around myt.SelectionManager.isToggleMode.
-        @returns {boolean} */
-    isToggleMode: function() {
-        return myt.SelectionManager.isToggleMode();
-    },
-    
-    /** Gets the currently selected items.
-        @returns {!Array} The selected items. */
-    getSelected: function() {
-        var retval = [], 
-            items = this.__selected, 
-            key;
-        for (key in items) retval.push(items[key]);
-        return retval;
-    },
-    
-    /** Selects the provided item.
-        @param {!Object} item - The item to select.
-        @returns {undefined} */
-    select: function(item) {
-        if (item && !this.isSelectedItem(item) && this.canSelectItem(item)) {
-            item.setSelected(true);
-            this.__selected[item[this.itemSelectionId]] = item;
-            this.setSelectedCount(this.selectedCount + 1);
+        /** Makes an object selectable.
             
-            this.__lastSelectedItem = item;
+            Events:
+                selected:boolean
             
-            this.doSelected(item);
-            this.fireEvent('itemSelected', item);
-        }
-    },
-    
-    /** Called when an item is selected.
-        @param {!Objectd} item - The newly selected myt.Selectable..
-        @returns {undefined} */
-    doSelected: function(item) {},
-    
-    /** Selects the item with the provided item selection ID.
-        @param {string} itemSelectionId
-        @returns {undefined} */
-    selectById: function(itemSelectionId) {
-        this.select(this.getSelectableItem(itemSelectionId));
-    },
-    
-    /** Checks if the item can be selected.
-        @param {!Object} item - The item to test.
-        @returns {boolean} True if selection is allowed, false otherwise. */
-    canSelectItem: function(item) {
-        var ms = this.maxSelected, sc = this.selectedCount;
+            Attributes:
+                selected:boolean Indicates the object is selected.
+            
+            @class */
+        Selectable = pkg.Selectable = new JSModule('Selectable', {
+            // Accessors ///////////////////////////////////////////////////////
+            setSelected: function(v) {
+                // Adapt to event from syncTo
+                if (v !== null && typeof v === 'object') v = v.value;
+                
+                if (this.selected !== v) {
+                    this.selected = v;
+                    if (this.inited && this.fireEvent) this.fireEvent('selected', v);
+                }
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** Checks if this object is selected.
+                @returns {boolean} */
+            isSelected: function() {
+                return this.selected ? true : false;
+            },
+            
+            /** Checks if the provided myt.SelectionManager can select this object.
+                Returns true by default.
+                @param {!Object} selectionManager
+                @returns {boolean} */
+            canSelect: (selectionManager) => true,
+            
+            /** Checks if the provided myt.SelectionManager can deselect this object.
+                Returns true by default.
+                @param {!Object} selectionManager
+                @returns {boolean} */
+            canDeselect: (selectionManager) => true
+        }),
         
-        if (ms === 0) {
-            return false;
-        } else if (ms === 1) {
-            // Deselect current selection if necessary
-            if (sc > 0) {
-                this.deselectAll();
-                if (this.selectedCount > 0) return false;
+        /** Manages the selection of one or more items.
+            
+            Events:
+                itemSelected:object Fired when an item is selected. The event value is 
+                    the selected item.
+                itemDeselected:object Fired when an item is deselected. The event 
+                    value is the deselected item.
+                selectedCount:number Fired when the number of selected items changes.
+            
+            Attributes:
+                itemSelectionId:string The name of the property on items that is used
+                    to differentiate them from each other for selection. The default
+                    value is 'id'.
+                maxSelected:number The maximum number of items that can be selected.
+                    If -1 is provided the count is unlimited. If 1 is provided attempts
+                    to select when an item is already selected will result in the
+                    existing selection being cleared and the the new item being
+                    selected. Defaults to -1.
+                selectedCount:number The number of selected items.
+            
+            Private Attributes:
+                __selected:object A map of selected items by itemSelectionId.
+                __lastSelectedItem:object A reference to the last item that was
+                    selected. If this item is deselected this will get set to null.
+            
+            @class */
+        SelectionManager = pkg.SelectionManager = new JSModule('SelectionManager', {
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                /** Determines if we are in "add" mode for selection such that
+                    selections will only be increased not reduced. Typically this
+                    means the shift key is down.
+                    @returns {boolean} true if in add mode, false otherwise. */
+                isAddMode: () => globalKeys.isShiftKeyDown(),
+                
+                /** Determines if we are in "toggle" mode for selection such that
+                    selections can be added to or removed from incrementally. Typically 
+                    this means the control or command key is down.
+                    @returns {boolean} true if in add mode, false otherwise. */
+                isToggleMode: () => globalKeys.isAcceleratorKeyDown()
+            },
+            
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            initNode: function(parent, attrs) {
+                this.__selected = {};
+                this.__lastSelectedItem = null;
+                
+                attrs.selectedCount = 0;
+                
+                if (attrs.itemSelectionId == null) attrs.itemSelectionId = 'id';
+                if (attrs.maxSelected == null) attrs.maxSelected = -1;
+                
+                this.callSuper(parent, attrs);
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setItemSelectionId: function(v) {this.itemSelectionId = v;},
+            setMaxSelected: function(v) {this.maxSelected = v;},
+            
+            setSelectedCount: function(v) {
+                if (this.selectedCount !== v) {
+                    this.selectedCount = v;
+                    if (this.inited) this.fireEvent('selectedCount', v);
+                }
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** A wrapper around myt.SelectionManager.isAddMode.
+                @returns {boolean} */
+            isAddMode: () => SelectionManager.isAddMode(),
+            
+            /** A wrapper around myt.SelectionManager.isToggleMode.
+                @returns {boolean} */
+            isToggleMode: () => SelectionManager.isToggleMode(),
+            
+            /** Gets the currently selected items.
+                @returns {!Array} The selected items. */
+            getSelected: function() {
+                var retval = [], 
+                    items = this.__selected, 
+                    key;
+                for (key in items) retval.push(items[key]);
+                return retval;
+            },
+            
+            /** Selects the provided item.
+                @param {!Object} item - The item to select.
+                @returns {undefined} */
+            select: function(item) {
+                if (item && !this.isSelectedItem(item) && this.canSelectItem(item)) {
+                    item.setSelected(true);
+                    this.__selected[item[this.itemSelectionId]] = item;
+                    this.setSelectedCount(this.selectedCount + 1);
+                    
+                    this.__lastSelectedItem = item;
+                    
+                    this.doSelected(item);
+                    this.fireEvent('itemSelected', item);
+                }
+            },
+            
+            /** Called when an item is selected.
+                @param {!Objectd} item - The newly selected myt.Selectable..
+                @returns {undefined} */
+            doSelected: (item) => {},
+            
+            /** Selects the item with the provided item selection ID.
+                @param {string} itemSelectionId
+                @returns {undefined} */
+            selectById: function(itemSelectionId) {
+                this.select(this.getSelectableItem(itemSelectionId));
+            },
+            
+            /** Checks if the item can be selected.
+                @param {!Object} item - The item to test.
+                @returns {boolean} True if selection is allowed, false otherwise. */
+            canSelectItem: function(item) {
+                var ms = this.maxSelected, 
+                    sc = this.selectedCount;
+                
+                if (ms === 0) {
+                    return false;
+                } else if (ms === 1) {
+                    // Deselect current selection if necessary
+                    if (sc > 0) {
+                        this.deselectAll();
+                        if (this.selectedCount > 0) return false;
+                    }
+                } else if (ms > 1) {
+                    if (sc >= ms) return false;
+                }
+                
+                return item.canSelect(this);
+            },
+            
+            /** Selects all items that can be selected.
+                @returns {undefined} */
+            selectAll: function() {
+                var items = this.getSelectableItems(), 
+                    i = items.length;
+                while (i) this.select(items[--i]);
+            },
+            
+            /** Deselects the provided item.
+                @param {!Object} item - The item to deselect.
+                @returns {undefined} */
+            deselect: function(item) {
+                if (this.isSelectedItem(item) && this.canDeselectItem(item)) {
+                    item.setSelected(false);
+                    delete this.__selected[item[this.itemSelectionId]];
+                    this.setSelectedCount(this.selectedCount - 1);
+                    
+                    if (this.__lastSelectedItem === item) this.__lastSelectedItem = null;
+                    
+                    this.doDeselected(item);
+                    this.fireEvent('itemDeselected', item);
+                }
+            },
+            
+            /** Called when an item is deselected.
+                @param {!Object} item - The newly deselected myt.Selectable.
+                @returns {undefined} */
+            doDeselected: (item) => {},
+            
+            /** Deselects the item with the provided item selection ID.
+                @param {string} itemSelectionId
+                @returns {undefined} */
+            deselectById: function(itemSelectionId) {
+                this.deselect(this.getSelectableItem(itemSelectionId));
+            },
+            
+            /** Checks if the item can be deselected.
+                @param {!Object} item
+                @returns {boolean}true if deselection is allowed, false otherwise. */
+            canDeselectItem: function(item) {
+                return item.canDeselect(this);
+            },
+            
+            /** Deselects all selected items.
+                @returns {undefined} */
+            deselectAll: function() {
+                var items = this.__selected, 
+                    key;
+                for (key in items) this.deselect(items[key]);
+            },
+            
+            /** Checks if the item is selected.
+                @param {!Objecdt} item - The item to test.
+                @returns {boolean} */
+            isSelectedItem: (item) => item ? item.isSelected() : false,
+            
+            /** Checks if all selectable items are selected.
+                @returns {boolean} */
+            areAllSelected: function() {
+                return this.selectedCount === this.getSelectableItems().length;
+            },
+            
+            /** Gets a list of items that are potentially selectable by this manager.
+                By default assumes this is an myt.View and returns all 
+                myt.Selectable subviews.
+                @returns {!Array} */
+            getManagedItems: function() {
+                var retval = [], 
+                    svs = this.getSubviews(), 
+                    i = svs.length, 
+                    sv;
+                while (i) {
+                    sv = svs[--i];
+                    if (sv.isA(Selectable)) retval.push(sv);
+                }
+                return retval;
+            },
+            
+            /** Gets a list of items that can currently be selected by this manager.
+                @returns {!Array} */
+            getSelectableItems: function() {
+                var items = this.getManagedItems(), 
+                    i = items.length;
+                while (i) {
+                    if (!items[--i].canSelect(this)) items.splice(i, 1);
+                }
+                return items;
+            },
+            
+            /** Gets a selectable item with the the provided selection item ID.
+                @param {string} itemSelectionId
+                @returns {?Object} - The myt.Selectable or null if not found. */
+            getSelectableItem: function(itemSelectionId) {
+                var items = this.getSelectableItems(), 
+                    i = items.length, 
+                    item,
+                    selectionAttr = this.itemSelectionId;
+                while (i) {
+                    item = items[--i];
+                    if (item[selectionAttr] === itemSelectionId) return item;
+                }
+                return null;
             }
-        } else if (ms > 1) {
-            if (sc >= ms) return false;
-        }
-        
-        return item.canSelect(this);
-    },
-    
-    /** Selects all items that can be selected.
-        @returns {undefined} */
-    selectAll: function() {
-        var items = this.getSelectableItems(), i = items.length;
-        while (i) this.select(items[--i]);
-    },
-    
-    /** Deselects the provided item.
-        @param {!Object} item - The item to deselect.
-        @returns {undefined} */
-    deselect: function(item) {
-        if (this.isSelectedItem(item) && this.canDeselectItem(item)) {
-            item.setSelected(false);
-            delete this.__selected[item[this.itemSelectionId]];
-            this.setSelectedCount(this.selectedCount - 1);
-            
-            if (this.__lastSelectedItem === item) this.__lastSelectedItem = null;
-            
-            this.doDeselected(item);
-            this.fireEvent('itemDeselected', item);
-        }
-    },
-    
-    /** Called when an item is deselected.
-        @param {!Object} item - The newly deselected myt.Selectable.
-        @returns {undefined} */
-    doDeselected: function(item) {},
-    
-    /** Deselects the item with the provided item selection ID.
-        @param {string} itemSelectionId
-        @returns {undefined} */
-    deselectById: function(itemSelectionId) {
-        this.deselect(this.getSelectableItem(itemSelectionId));
-    },
-    
-    /** Checks if the item can be deselected.
-        @param {!Object} item
-        @returns {boolean}true if deselection is allowed, false otherwise. */
-    canDeselectItem: function(item) {
-        return item.canDeselect(this);
-    },
-    
-    /** Deselects all selected items.
-        @returns {undefined} */
-    deselectAll: function() {
-        var items = this.__selected, key;
-        for (key in items) this.deselect(items[key]);
-    },
-    
-    /** Checks if the item is selected.
-        @param {!Objecdt} item - The item to test.
-        @returns {boolean} */
-    isSelectedItem: function(item) {
-        return item ? item.isSelected() : false;
-    },
-    
-    /** Checks if all selectable items are selected.
-        @returns {boolean} */
-    areAllSelected: function() {
-        return this.selectedCount === this.getSelectableItems().length;
-    },
-    
-    /** Gets a list of items that are potentially selectable by this manager.
-        By default assumes this is an myt.View and returns all 
-        myt.Selectable subviews.
-        @returns {!Array} */
-    getManagedItems: function() {
-        var retval = [], 
-            svs = this.getSubviews(), 
-            i = svs.length, 
-            sv;
-        while (i) {
-            sv = svs[--i];
-            if (sv.isA(myt.Selectable)) retval.push(sv);
-        }
-        return retval;
-    },
-    
-    /** Gets a list of items that can currently be selected by this manager.
-        @returns {!Array} */
-    getSelectableItems: function() {
-        var items = this.getManagedItems(), 
-            i = items.length;
-        while (i) {
-            if (!items[--i].canSelect(this)) items.splice(i, 1);
-        }
-        return items;
-    },
-    
-    /** Gets a selectable item with the the provided selection item ID.
-        @param {string} itemSelectionId
-        @returns {?Object} - The myt.Selectable or null if not found. */
-    getSelectableItem: function(itemSelectionId) {
-        var items = this.getSelectableItems(), i = items.length, item,
-            selectionAttr = this.itemSelectionId;
-        while (i) {
-            item = items[--i];
-            if (item[selectionAttr] === itemSelectionId) return item;
-        }
-        return null;
-    }
-});
+        });
+})(myt);
 
 
 /** A mixin that allows myt.TabSliders to be added to a view.
@@ -21483,277 +21476,277 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
 })(myt);
 
 
-/** Makes an myt.View draggable via the mouse.
-    
-    Also supresses context menus since the mouse down to open it causes bad
-    behavior since a mouseup event is not always fired.
-    
-    Events:
-        isDragging:boolean Fired when the isDragging attribute is modified
-            via setIsDragging.
-    
-    Attributes:
-        allowAbort:boolean Allows a drag to be aborted by the user by
-            pressing the 'esc' key. Defaults to undefined which is equivalent
-            to false.
-        isDraggable:boolean Configures the view to be draggable or not. The 
-            default value is true.
-        distanceBeforeDrag:number The distance, in pixels, before a mouse 
-            down and drag is considered a drag action. Defaults to 0.
-        isDragging:boolean Indicates that this view is currently being dragged.
-        draggableAllowBubble:boolean Determines if mousedown and mouseup
-            dom events handled by this component will bubble or not. Defaults
-            to true.
-        dragOffsetX:number The x amount to offset the position during dragging.
-            Defaults to 0.
-        dragOffsetY:number The y amount to offset the position during dragging.
-            Defaults to 0.
-        dragInitX:number Stores initial mouse x position during dragging.
-        dragInitY:number Stores initial mouse y position during dragging.
-        centerOnMouse:boolean If true this draggable will update the dragInitX
-            and dragInitY to keep the view centered on the mouse. Defaults
-            to undefined which is equivalent to false.
-    
-    Private Attributes:
-        __lastMousePosition:object The last position of the mouse during
-            dragging.
-*/
-myt.Draggable = new JS.Module('Draggable', {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.View */
-    initNode: function(parent, attrs) {
-        var self = this,
-            isDraggable = true;
+((pkg) => {
+    var G = pkg.global,
+        globalMouse = G.mouse,
+        globalKeys = G.keys,
         
-        self.isDraggable = self.isDragging = false;
-        self.draggableAllowBubble = true;
-        self.distanceBeforeDrag = self.dragOffsetX = self.dragOffsetY = 0;
-        
-        // Will be set after init since the draggable subview probably
-        // doesn't exist yet.
-        if (attrs.isDraggable != null) {
-            isDraggable = attrs.isDraggable;
-            delete attrs.isDraggable;
-        }
-        
-        self.callSuper(parent, attrs);
-        
-        self.setIsDraggable(isDraggable);
-    },
+        /*  @param {!Object} draggable
+            @returns {undefined} */
+        requestDragPosition = (draggable) => {
+            var pos = draggable.__lastMousePosition;
+            draggable.requestDragPosition(
+                pos.x - draggable.dragInitX + draggable.dragOffsetX, 
+                pos.y - draggable.dragInitY + draggable.dragOffsetY
+            );
+        };
     
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setIsDraggable: function(v) {
-        var self = this,
-            func,
-            dragviews,
-            dragview,
-            i;
-        if (self.isDraggable !== v) {
-            self.isDraggable = v;
-            // No event needed.
+    /** Makes an myt.View draggable via the mouse.
+        
+        Also supresses context menus since the mouse down to open it causes bad
+        behavior since a mouseup event is not always fired.
+        
+        Events:
+            isDragging:boolean Fired when the isDragging attribute is modified
+                via setIsDragging.
+        
+        Attributes:
+            allowAbort:boolean Allows a drag to be aborted by the user by
+                pressing the 'esc' key. Defaults to undefined which is equivalent
+                to false.
+            isDraggable:boolean Configures the view to be draggable or not. The 
+                default value is true.
+            distanceBeforeDrag:number The distance, in pixels, before a mouse 
+                down and drag is considered a drag action. Defaults to 0.
+            isDragging:boolean Indicates that this view is currently being dragged.
+            draggableAllowBubble:boolean Determines if mousedown and mouseup
+                dom events handled by this component will bubble or not. Defaults
+                to true.
+            dragOffsetX:number The x amount to offset the position during dragging.
+                Defaults to 0.
+            dragOffsetY:number The y amount to offset the position during dragging.
+                Defaults to 0.
+            dragInitX:number Stores initial mouse x position during dragging.
+            dragInitY:number Stores initial mouse y position during dragging.
+            centerOnMouse:boolean If true this draggable will update the dragInitX
+                and dragInitY to keep the view centered on the mouse. Defaults
+                to undefined which is equivalent to false.
+        
+        Private Attributes:
+            __lastMousePosition:object The last position of the mouse during
+                dragging.
+        
+        @class */
+    pkg.Draggable = new JS.Module('Draggable', {
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.View */
+        initNode: function(parent, attrs) {
+            var self = this,
+                isDraggable = true;
             
-            if (v) {
-                func = self.attachToDom;
-            } else if (self.inited) {
-                func = self.detachFromDom;
+            self.isDraggable = self.isDragging = false;
+            self.draggableAllowBubble = true;
+            self.distanceBeforeDrag = self.dragOffsetX = self.dragOffsetY = 0;
+            
+            // Will be set after init since the draggable subview probably
+            // doesn't exist yet.
+            if (attrs.isDraggable != null) {
+                isDraggable = attrs.isDraggable;
+                delete attrs.isDraggable;
             }
             
-            if (func) {
-                dragviews = self.getDragViews();
-                i = dragviews.length;
-                while (i) {
-                    dragview = dragviews[--i];
-                    func.call(self, dragview, '__doMouseDown', 'mousedown');
-                    func.call(self, dragview, '__doContextMenu', 'contextmenu');
+            self.callSuper(parent, attrs);
+            
+            self.setIsDraggable(isDraggable);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setIsDraggable: function(v) {
+            var self = this,
+                func,
+                dragviews,
+                dragview,
+                i;
+            if (self.isDraggable !== v) {
+                self.isDraggable = v;
+                // No event needed.
+                
+                if (v) {
+                    func = self.attachToDom;
+                } else if (self.inited) {
+                    func = self.detachFromDom;
+                }
+                
+                if (func) {
+                    dragviews = self.getDragViews();
+                    i = dragviews.length;
+                    while (i) {
+                        dragview = dragviews[--i];
+                        func.call(self, dragview, '__doMouseDown', 'mousedown');
+                        func.call(self, dragview, '__doContextMenu', 'contextmenu');
+                    }
                 }
             }
-        }
-    },
-    
-    setIsDragging: function(v) {
-        this.set('isDragging', v, true);
-    },
-    
-    setDragOffsetX: function(v, supressUpdate) {
-        if (this.dragOffsetX !== v) {
-            this.dragOffsetX = v;
-            if (this.inited && this.isDragging && !supressUpdate) this.__requestDragPosition();
-        }
-    },
-    
-    setDragOffsetY: function(v, supressUpdate) {
-        if (this.dragOffsetY !== v) {
-            this.dragOffsetY = v;
-            if (this.inited && this.isDragging && !supressUpdate) this.__requestDragPosition();
-        }
-    },
-    
-    setDistanceBeforeDrag: function(v) {this.distanceBeforeDrag = v;},
-    setDraggableAllowBubble: function(v) {this.draggableAllowBubble = v;},
-    setCenterOnMouse: function(v) {this.centerOnMouse = v;},
-    setAllowAbort: function(v) {this.allowAbort = v;},
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @returns an array of views that can be moused down on to start the
-        drag. Subclasses should override this to return an appropriate list
-        of views. By default this view is returned thus making the entire
-        view capable of starting a drag. */
-    getDragViews: function() {
-        return [this];
-    },
-    
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __doContextMenu: function(event) {
-        // Do nothing so the context menu event is supressed.
-    },
-    
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __doMouseDown: function(event) {
-        var self = this,
-            pos = myt.MouseObservable.getMouseFromEvent(event),
-            gm = myt.global.mouse,
-            de = self.getOuterDomElement();
-        self.dragInitX = pos.x - de.offsetLeft;
-        self.dragInitY = pos.y - de.offsetTop;
+        },
         
-        self.attachToDom(gm, '__doMouseUp', 'mouseup', true);
-        if (self.distanceBeforeDrag > 0) {
-            self.attachToDom(gm, '__doDragCheck', 'mousemove', true);
-        } else {
-            self.startDrag(event);
-        }
+        setIsDragging: function(v) {
+            this.set('isDragging', v, true);
+        },
         
-        event.value.preventDefault();
-        return self.draggableAllowBubble;
-    },
-    
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __doMouseUp: function(event) {
-        if (this.isDragging) {
-            this.stopDrag(event, false);
-        } else {
-            var gm = myt.global.mouse;
-            this.detachFromDom(gm, '__doMouseUp', 'mouseup', true);
-            this.detachFromDom(gm, '__doDragCheck', 'mousemove', true);
-        }
-        return this.draggableAllowBubble;
-    },
-    
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __watchForAbort: function(event) {
-        if (event.value === 27) this.stopDrag(event, true);
-    },
-    
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __doDragCheck: function(event) {
-        var self = this,
-            M = myt,
-            pos = M.MouseObservable.getMouseFromEvent(event),
-            distance = M.Geometry.measureDistance(pos.x, pos.y, self.dragInitX + self.x, self.dragInitY + self.y);
-        if (distance >= self.distanceBeforeDrag) {
-            self.detachFromDom(M.global.mouse, '__doDragCheck', 'mousemove', true);
-            self.startDrag(event);
-        }
-    },
-    
-    /** Active until stopDrag is called. The view position will be bound
-        to the mouse position. Subclasses typically call this onmousedown for
-        subviews that allow dragging the view.
-        @param {!Object} event - The event the mouse event when the drag started.
-        @returns {undefined} */
-    startDrag: function(event) {
-        var self = this,
-            g = myt.global;
+        setDragOffsetX: function(v, supressUpdate) {
+            if (this.dragOffsetX !== v) {
+                this.dragOffsetX = v;
+                if (this.inited && this.isDragging && !supressUpdate) requestDragPosition(this);
+            }
+        },
         
-        if (self.centerOnMouse) {
-            self.syncTo(self, '__updateDragInitX', 'width');
-            self.syncTo(self, '__updateDragInitY', 'height');
-        }
+        setDragOffsetY: function(v, supressUpdate) {
+            if (this.dragOffsetY !== v) {
+                this.dragOffsetY = v;
+                if (this.inited && this.isDragging && !supressUpdate) requestDragPosition(this);
+            }
+        },
         
-        if (self.allowAbort) self.attachTo(g.keys, '__watchForAbort', 'keyup');
+        setDistanceBeforeDrag: function(v) {this.distanceBeforeDrag = v;},
+        setDraggableAllowBubble: function(v) {this.draggableAllowBubble = v;},
+        setCenterOnMouse: function(v) {this.centerOnMouse = v;},
+        setAllowAbort: function(v) {this.allowAbort = v;},
         
-        self.setIsDragging(true);
-        self.attachToDom(g.mouse, 'updateDrag', 'mousemove', true);
-        self.updateDrag(event);
-    },
-    
-    /** Called on every mousemove event while dragging.
-        @param {!Object} event
-        @returns {undefined} */
-    updateDrag: function(event) {
-        this.__lastMousePosition = myt.MouseObservable.getMouseFromEvent(event);
-        this.__requestDragPosition();
-    },
-    
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __updateDragInitX: function(event) {
-        this.dragInitX = this.width / 2 * (this.scaleX || 1);
-    },
-    
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __updateDragInitY: function(event) {
-        this.dragInitY = this.height / 2 * (this.scaleY || 1);
-    },
-    
-    /** @private
-        @returns {undefined} */
-    __requestDragPosition: function() {
-        var self = this,
-            pos = self.__lastMousePosition;
-        self.requestDragPosition(
-            pos.x - self.dragInitX + self.dragOffsetX, 
-            pos.y - self.dragInitY + self.dragOffsetY
-        );
-    },
-    
-    /** Stop the drag. (see startDrag for more details)
-        @param {!Object} event - The event that ended the drag.
-        @param {boolean} isAbort - Indicates if the drag ended normally or was
-            aborted.
-        @returns {undefined} */
-    stopDrag: function(event, isAbort) {
-        var self = this,
-            g = myt.global,
-            gm = g.mouse;
-        self.detachFromDom(gm, '__doMouseUp', 'mouseup', true);
-        self.detachFromDom(gm, 'updateDrag', 'mousemove', true);
-        if (self.centerOnMouse) {
-            self.detachFrom(self, '__updateDragInitX', 'width');
-            self.detachFrom(self, '__updateDragInitY', 'height');
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @returns {!Array} - An array of views that can be moused down on to 
+            start the drag. Subclasses should override this to return an 
+            appropriate list of views. By default this view is returned thus 
+            making the entire view capable of starting a drag. */
+        getDragViews: function() {
+            return [this];
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __doContextMenu: (event) => {
+            // Do nothing so the context menu event is supressed.
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __doMouseDown: function(event) {
+            var self = this,
+                pos = pkg.MouseObservable.getMouseFromEvent(event),
+                de = self.getOuterDomElement();
+            self.dragInitX = pos.x - de.offsetLeft;
+            self.dragInitY = pos.y - de.offsetTop;
+            
+            self.attachToDom(globalMouse, '__doMouseUp', 'mouseup', true);
+            if (self.distanceBeforeDrag > 0) {
+                self.attachToDom(globalMouse, '__doDragCheck', 'mousemove', true);
+            } else {
+                self.startDrag(event);
+            }
+            
+            event.value.preventDefault();
+            return self.draggableAllowBubble;
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __doMouseUp: function(event) {
+            if (this.isDragging) {
+                this.stopDrag(event, false);
+            } else {
+                this.detachFromDom(globalMouse, '__doMouseUp', 'mouseup', true);
+                this.detachFromDom(globalMouse, '__doDragCheck', 'mousemove', true);
+            }
+            return this.draggableAllowBubble;
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __watchForAbort: function(event) {
+            if (event.value === 27) this.stopDrag(event, true);
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __doDragCheck: function(event) {
+            var self = this,
+                pos = pkg.MouseObservable.getMouseFromEvent(event),
+                distance = pkg.Geometry.measureDistance(pos.x, pos.y, self.dragInitX + self.x, self.dragInitY + self.y);
+            if (distance >= self.distanceBeforeDrag) {
+                self.detachFromDom(pkg.global.mouse, '__doDragCheck', 'mousemove', true);
+                self.startDrag(event);
+            }
+        },
+        
+        /** Active until stopDrag is called. The view position will be bound
+            to the mouse position. Subclasses typically call this onmousedown for
+            subviews that allow dragging the view.
+            @param {!Object} event - The event the mouse event when the drag started.
+            @returns {undefined} */
+        startDrag: function(event) {
+            var self = this;
+            
+            if (self.centerOnMouse) {
+                self.syncTo(self, '__updateDragInitX', 'width');
+                self.syncTo(self, '__updateDragInitY', 'height');
+            }
+            
+            if (self.allowAbort) self.attachTo(globalKeys, '__watchForAbort', 'keyup');
+            
+            self.setIsDragging(true);
+            self.attachToDom(globalMouse, 'updateDrag', 'mousemove', true);
+            self.updateDrag(event);
+        },
+        
+        /** Called on every mousemove event while dragging.
+            @param {!Object} event
+            @returns {undefined} */
+        updateDrag: function(event) {
+            this.__lastMousePosition = pkg.MouseObservable.getMouseFromEvent(event);
+            requestDragPosition(this);
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __updateDragInitX: function(event) {
+            this.dragInitX = this.width / 2 * (this.scaleX || 1);
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __updateDragInitY: function(event) {
+            this.dragInitY = this.height / 2 * (this.scaleY || 1);
+        },
+        
+        /** Stop the drag. (see startDrag for more details)
+            @param {!Object} event - The event that ended the drag.
+            @param {boolean} isAbort - Indicates if the drag ended normally or was
+                aborted.
+            @returns {undefined} */
+        stopDrag: function(event, isAbort) {
+            var self = this;
+            self.detachFromDom(globalMouse, '__doMouseUp', 'mouseup', true);
+            self.detachFromDom(globalMouse, 'updateDrag', 'mousemove', true);
+            if (self.centerOnMouse) {
+                self.detachFrom(self, '__updateDragInitX', 'width');
+                self.detachFrom(self, '__updateDragInitY', 'height');
+            }
+            if (self.allowAbort) self.detachFrom(globalKeys, '__watchForAbort', 'keyup');
+            self.setIsDragging(false);
+        },
+        
+        /** Repositions the view to the provided values. The default implementation
+            is to directly set x and y. Subclasses should override this method
+            when it is necessary to constrain the position.
+            @param {number} x - the new x position.
+            @param {number} y - the new y position.
+            @returns {undefined} */
+        requestDragPosition: function(x, y) {
+            if (!this.disabled) {
+                this.setX(x);
+                this.setY(y);
+            }
         }
-        if (self.allowAbort) self.detachFrom(g.keys, '__watchForAbort', 'keyup');
-        self.setIsDragging(false);
-    },
-    
-    /** Repositions the view to the provided values. The default implementation
-        is to directly set x and y. Subclasses should override this method
-        when it is necessary to constrain the position.
-        @param {number} x - the new x position.
-        @param {number} y - the new y position.
-        @returns {undefined} */
-    requestDragPosition: function(x, y) {
-        if (!this.disabled) {
-            this.setX(x);
-            this.setY(y);
-        }
-    }
-});
+    });
+})(myt);
 
 
 /** Provides Slider thumb functionality.
@@ -22040,8 +22033,7 @@ myt.BaseSlider = new JS.Class('BaseSlider', myt.View, {
     Private Attributes:
         __lockSync:boolean Used internally to prevent infinite loops.
     
-    @class
-*/
+    @class */
 myt.Slider = new JS.Class('Slider', myt.BaseSlider, {
     include: [myt.BoundedValueComponent],
     
@@ -22456,8 +22448,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
             Private Attributes:
                 __nudgeAcc:number The multiplier in px per nudge.
             
-            @class
-        */
+            @class */
         BaseDivider = new JSClass('BaseDivider', pkg.SimpleButton, {
             include: [pkg.BoundedValueComponent, pkg.Draggable],
             
@@ -25187,175 +25178,177 @@ myt.DropSource = new JS.Module('DropSource', {
 });
 
 
-/** Makes an myt.View auto scroll during drag and drop.
-    
-    Events:
-        None
-    
-    Attributes:
-        scrollBorder:number The thickness of the auto scroll border. Defaults
-            to 40 pixels.
-        scrollFrequency:number The time between autoscroll adjustments.
-            Defaults to 50 millis.
-        scrollAmount:number The number of pixels to adjust by each time.
-            Defaults to 2 pixels.
-        scrollAcceleration:number The amount to increase scrolling by as the
-            mouse gets closer to the edge of the view. Setting this to 0 will
-            result in no acceleration. Defaults to 7.
-    
-    Private Attributes:
-        __amountscrollUp:number
-        __amountscrollDown:number
-        __amountscrollLeft:number
-        __amountscrollRight:number
-        __isAutoscrollUp:boolean
-        __timerIdAutoscrollUp:number
-        __isAutoscrollDown:boolean
-        __timerIdAutoscrollDown:number
-        __isAutoscrollLeft:boolean
-        __timerIdAutoscrollLeft:number
-        __isAutoscrollRight:boolean
-        __timerIdAutoscrollRight:number
-*/
-myt.AutoScroller = new JS.Module('AutoScroller', {
-    include: [myt.DragGroupSupport],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides */
-    initNode: function(parent, attrs) {
-        this.scrollBorder = 40;
-        this.scrollFrequency = 50;
-        this.scrollAmount = 2;
-        this.scrollAcceleration = 7;
+((pkg) => {
+    var G = pkg.global,
+        dragManager = G.dragManager,
+        globalMouse = G.mouse,
         
-        if (attrs.overflow == null) attrs.overflow = 'auto';
-        
-        this.callSuper(parent, attrs);
-        
-        myt.global.dragManager.registerAutoScroller(this);
-    },
-    
-    /** @overrides */
-    destroyAfterOrphaning: function() {
-        myt.global.dragManager.unregisterAutoScroller(this);
-        
-        this.callSuper();
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setScrollBorder: function(v) {this.scrollBorder = v;},
-    setScrollFrequency: function(v) {this.scrollFrequency = v;},
-    setScrollAmount: function(v) {this.scrollAmount = v;},
-    setScrollAcceleration: function(v) {this.scrollAcceleration = v;},
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Called by myt.GlobalDragManager when a dropable starts being dragged
-        that has a matching drag group.
-        @param {!Object} dropable - The myt.Dropable being dragged.
-        @returns {undefined} */
-    notifyDragStart: function(dropable) {
-        var de = this.getInnerDomElement();
-        if (de.scrollHeight > de.clientHeight || de.scrollWidth > de.clientWidth) {
-            this.attachToDom(myt.global.mouse, '__handleMouseMove', 'mousemove', true);
-        }
-    },
-    
-    /** Called by myt.GlobalDragManager when a dropable stops being dragged
-        that has a matching drag group.
-        @param {!Object} dropable - The myt.Dropable no longer being dragged.
-        @returns {undefined} */
-    notifyDragStop: function(dropable) {
-        this.detachFromDom(myt.global.mouse, '__handleMouseMove', 'mousemove', true);
-        
-        this.__resetVScroll();
-        this.__resetHScroll();
-    },
-    
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __handleMouseMove: function(event) {
-        var self = this,
-            mousePos = event.value, 
-            mouseX = mousePos.pageX, 
-            mouseY = mousePos.pageY;
-        
-        if (self.containsPoint(mouseX, mouseY)) {
-            var pos = self.getPagePosition(), 
-                scrollBorder = self.scrollBorder;
-            
-            mouseX -= pos.x;
-            mouseY -= pos.y;
-            
-            if (mouseY < scrollBorder) {
-                self.__isAutoscrollUp = true;
-                self.__amountscrollUp = self.__calculateAmount((scrollBorder - mouseY) / scrollBorder);
-                if (!self.__timerIdAutoscrollUp) self.__doAutoScrollAdj('scrollUp', -1);
-            } else if (self.height - mouseY < scrollBorder) {
-                self.__isAutoscrollDown = true;
-                self.__amountscrollDown = self.__calculateAmount((scrollBorder - (self.height - mouseY)) / scrollBorder);
-                if (!self.__timerIdAutoscrollDown) self.__doAutoScrollAdj('scrollDown', 1);
-            } else {
-                self.__resetVScroll();
+        /*  @param {!Object} autoScroller
+            @param {string} dir - The direction to scroll.
+            @param {number} amt - The amount to scroll.
+            @returns {undefined} */
+        doAutoScrollAdj = (autoScroller, dir, amt) => {
+            if (autoScroller['__isAuto' + dir]) {
+                autoScroller.getInnerDomElement()[dir === 'scrollUp' || dir === 'scrollDown' ? 'scrollTop' : 'scrollLeft'] += amt * autoScroller['__amount' + dir];
+                
+                autoScroller['__timerIdAuto' + dir] = setTimeout(() => {
+                    doAutoScrollAdj(autoScroller, dir, amt);
+                }, autoScroller.scrollFrequency);
             }
-            
-            if (mouseX < scrollBorder) {
-                self.__isAutoscrollLeft = true;
-                self.__amountscrollLeft = self.__calculateAmount((scrollBorder - mouseX) / scrollBorder);
-                if (!self.__timerIdAutoscrollLeft) self.__doAutoScrollAdj('scrollLeft', -1);
-            } else if (self.width - mouseX < scrollBorder) {
-                self.__isAutoscrollRight = true;
-                self.__amountscrollRight = self.__calculateAmount((scrollBorder - (self.width - mouseX)) / scrollBorder);
-                if (!self.__timerIdAutoscrollRight) self.__doAutoScrollAdj('scrollRight', 1);
-            } else {
-                self.__resetHScroll();
-            }
-        } else {
-            self.__resetVScroll();
-            self.__resetHScroll();
-        }
-    },
-    
-    /** @private
-        @param {number} percent - The percent of scroll acceleration to use.
-        @returns {number} */
-    __calculateAmount: function(percent) {
-        return Math.round(this.scrollAmount * (1 + this.scrollAcceleration * percent));
-    },
-    
-    /** @private
-        @returns {undefined} */
-    __resetVScroll: function() {
-        this.__isAutoscrollUp = this.__isAutoscrollDown = false;
-        this.__timerIdAutoscrollUp = this.__timerIdAutoscrollDown = null;
-    },
-    
-    /** @private
-        @returns {undefined} */
-    __resetHScroll: function() {
-        this.__isAutoscrollLeft = this.__isAutoscrollRight = false;
-        this.__timerIdAutoscrollLeft = this.__timerIdAutoscrollRight = null;
-    },
-    
-    /** @private
-        @param {string} dir - The direction to scroll.
-        @param {number} amt - The amount to scroll.
-        @returns {undefined} */
-    __doAutoScrollAdj: function(dir, amt) {
-        var self = this;
+        },
         
-        if (self['__isAuto' + dir]) {
-            self.getInnerDomElement()[dir === 'scrollUp' || dir === 'scrollDown' ? 'scrollTop' : 'scrollLeft'] += amt * self['__amount' + dir];
+        /*  @param {!Object} autoScroller
+            @param {number} percent - The percent of scroll acceleration to use.
+            @returns {number} */
+        calculateAmount = (autoScroller, percent) => Math.round(autoScroller.scrollAmount * (1 + autoScroller.scrollAcceleration * percent)),
+        
+        /*  @param {!Object} autoScroller
+            @returns {undefined} */
+        resetVScroll = (autoScroller) => {
+            autoScroller.__isAutoscrollUp = autoScroller.__isAutoscrollDown = false;
+            autoScroller.__timerIdAutoscrollUp = autoScroller.__timerIdAutoscrollDown = null;
+        },
+        
+        /*  @param {!Object} autoScroller
+            @returns {undefined} */
+        resetHScroll = (autoScroller) => {
+            autoScroller.__isAutoscrollLeft = autoScroller.__isAutoscrollRight = false;
+            autoScroller.__timerIdAutoscrollLeft = autoScroller.__timerIdAutoscrollRight = null;
+        };
+    
+    /** Makes an myt.View auto scroll during drag and drop.
+        
+        Events:
+            None
+        
+        Attributes:
+            scrollBorder:number The thickness of the auto scroll border. Defaults
+                to 40 pixels.
+            scrollFrequency:number The time between autoscroll adjustments.
+                Defaults to 50 millis.
+            scrollAmount:number The number of pixels to adjust by each time.
+                Defaults to 2 pixels.
+            scrollAcceleration:number The amount to increase scrolling by as the
+                mouse gets closer to the edge of the view. Setting this to 0 will
+                result in no acceleration. Defaults to 7.
+        
+        Private Attributes:
+            __amountscrollUp:number
+            __amountscrollDown:number
+            __amountscrollLeft:number
+            __amountscrollRight:number
+            __isAutoscrollUp:boolean
+            __timerIdAutoscrollUp:number
+            __isAutoscrollDown:boolean
+            __timerIdAutoscrollDown:number
+            __isAutoscrollLeft:boolean
+            __timerIdAutoscrollLeft:number
+            __isAutoscrollRight:boolean
+            __timerIdAutoscrollRight:number
+    */
+    pkg.AutoScroller = new JS.Module('AutoScroller', {
+        include: [pkg.DragGroupSupport],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides */
+        initNode: function(parent, attrs) {
+            this.scrollBorder = 40;
+            this.scrollFrequency = 50;
+            this.scrollAmount = 2;
+            this.scrollAcceleration = 7;
             
-            self['__timerIdAuto' + dir] = setTimeout(function() {
-                self.__doAutoScrollAdj(dir, amt);
-            }, self.scrollFrequency);
+            if (attrs.overflow == null) attrs.overflow = 'auto';
+            
+            this.callSuper(parent, attrs);
+            
+            dragManager.registerAutoScroller(this);
+        },
+        
+        /** @overrides */
+        destroyAfterOrphaning: function() {
+            dragManager.unregisterAutoScroller(this);
+            
+            this.callSuper();
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setScrollBorder: function(v) {this.scrollBorder = v;},
+        setScrollFrequency: function(v) {this.scrollFrequency = v;},
+        setScrollAmount: function(v) {this.scrollAmount = v;},
+        setScrollAcceleration: function(v) {this.scrollAcceleration = v;},
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Called by myt.GlobalDragManager when a dropable starts being dragged
+            that has a matching drag group.
+            @param {!Object} dropable - The myt.Dropable being dragged.
+            @returns {undefined} */
+        notifyDragStart: function(dropable) {
+            var de = this.getInnerDomElement();
+            if (de.scrollHeight > de.clientHeight || de.scrollWidth > de.clientWidth) {
+                this.attachToDom(globalMouse, '__handleMouseMove', 'mousemove', true);
+            }
+        },
+        
+        /** Called by myt.GlobalDragManager when a dropable stops being dragged
+            that has a matching drag group.
+            @param {!Object} dropable - The myt.Dropable no longer being dragged.
+            @returns {undefined} */
+        notifyDragStop: function(dropable) {
+            this.detachFromDom(globalMouse, '__handleMouseMove', 'mousemove', true);
+            
+            resetVScroll(this);
+            resetHScroll(this);
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __handleMouseMove: function(event) {
+            var self = this,
+                mousePos = event.value, 
+                mouseX = mousePos.pageX, 
+                mouseY = mousePos.pageY;
+            
+            if (self.containsPoint(mouseX, mouseY)) {
+                var pos = self.getPagePosition(), 
+                    scrollBorder = self.scrollBorder;
+                
+                mouseX -= pos.x;
+                mouseY -= pos.y;
+                
+                if (mouseY < scrollBorder) {
+                    self.__isAutoscrollUp = true;
+                    self.__amountscrollUp = calculateAmount(self, (scrollBorder - mouseY) / scrollBorder);
+                    if (!self.__timerIdAutoscrollUp) doAutoScrollAdj(self, 'scrollUp', -1);
+                } else if (self.height - mouseY < scrollBorder) {
+                    self.__isAutoscrollDown = true;
+                    self.__amountscrollDown = calculateAmount(self, (scrollBorder - (self.height - mouseY)) / scrollBorder);
+                    if (!self.__timerIdAutoscrollDown) doAutoScrollAdj(self, 'scrollDown', 1);
+                } else {
+                    resetVScroll(self);
+                }
+                
+                if (mouseX < scrollBorder) {
+                    self.__isAutoscrollLeft = true;
+                    self.__amountscrollLeft = calculateAmount(self, (scrollBorder - mouseX) / scrollBorder);
+                    if (!self.__timerIdAutoscrollLeft) doAutoScrollAdj(self, 'scrollLeft', -1);
+                } else if (self.width - mouseX < scrollBorder) {
+                    self.__isAutoscrollRight = true;
+                    self.__amountscrollRight = calculateAmount(self, (scrollBorder - (self.width - mouseX)) / scrollBorder);
+                    if (!self.__timerIdAutoscrollRight) doAutoScrollAdj(self, 'scrollRight', 1);
+                } else {
+                    resetHScroll(self);
+                }
+            } else {
+                resetVScroll(self);
+                resetHScroll(self);
+            }
         }
-    }
-});
+    });
+})(myt);
 
 
 /** An object that provides accessors, events and simple lifecycle management.

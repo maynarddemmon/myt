@@ -33,8 +33,7 @@
             Private Attributes:
                 __nudgeAcc:number The multiplier in px per nudge.
             
-            @class
-        */
+            @class */
         BaseDivider = new JSClass('BaseDivider', pkg.SimpleButton, {
             include: [pkg.BoundedValueComponent, pkg.Draggable],
             
