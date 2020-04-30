@@ -115,9 +115,11 @@
             resolveName: (objName, scope) => {
                 if (!objName || objName.length === 0) return undefined;
                 
-                var scope = scope || global,
-                    parts = Array.isArray(objName) ? objName : objName.split("."),
-                    i = 0, len = parts.length;
+                scope = scope || global;
+                
+                var parts = Array.isArray(objName) ? objName : objName.split("."),
+                    i = 0, 
+                    len = parts.length;
                 for (; i < len; ++i) {
                     scope = scope[parts[i]];
                     if (scope === undefined) {

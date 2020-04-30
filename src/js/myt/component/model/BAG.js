@@ -36,7 +36,7 @@ myt.BAG = new JS.Class('BAG', {
             @param attrName:string
             @returns a new BAG. */
         createGroup: function(attrName) {
-            return new BAG(attrName, this.generateUniqueGroupId());
+            return new myt.BAG(attrName, this.generateUniqueGroupId());
         },
         
         /** Gets a BAG for the attribute name and group ID.

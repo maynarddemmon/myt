@@ -208,9 +208,10 @@
                         if (t==1) return 1;
                         if (!p) p=0.3;
                         if (a < 1) {
-                            a=1; var s=p/4;
+                            a=1;
+                            s=p/4;
                         } else {
-                            var s = p/(2*Math.PI) * Math.asin (1/a);
+                            s = p/(2*Math.PI) * Math.asin (1/a);
                         }
                         return -(a*Math.pow(2,10*(t-=1)) * Math.sin( (t*1-s)*(2*Math.PI)/p));
                     },
@@ -236,7 +237,7 @@
                             a=1;
                             s=p/4;
                         } else {
-                            var s = p/(2*Math.PI) * Math.asin(1/a);
+                            s = p/(2*Math.PI) * Math.asin(1/a);
                         }
                         if (t < 1) return -.5*(a*Math.pow(2,10*(t-=1)) * Math.sin((t*1-s)*(2*Math.PI)/p));
                         return a*Math.pow(2,-10*(t-=1)) * Math.sin((t*1-s)*(2*Math.PI)/p)*0.5 + 1;

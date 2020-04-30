@@ -525,237 +525,232 @@
     // TinyColor v1.0.0
     // https://github.com/bgrins/TinyColor
     // Brian Grinstead, MIT License
-    (function() {
-    
-        var trimHash = /^[#]+/,
-            math = Math,
-            mathRound = math.round,
-            mathMin = math.min,
-            mathMax = math.max;
-    
-        var tinycolor = function tinycolor(color) {
-            color = color ? color : '';
-    
-            // If input is already a tinycolor, return itself
-            if (color instanceof tinycolor) return color;
-    
-            // If we are called as a function, call using new instead
-            if (!(this instanceof tinycolor)) return new tinycolor(color);
-    
-            // Input to RGB
-            var rgb = {r:0, g:0, b:0},
-                ok = false;
-            if (typeof color == "string") color = stringInputToObject(color);
-            if (typeof color == "object") {
-                if (color.hasOwnProperty("r") && color.hasOwnProperty("g") && color.hasOwnProperty("b")) {
-                    rgb = rgbToRgb(color.r, color.g, color.b);
-                    ok = true;
-                } else if (color.hasOwnProperty("h") && color.hasOwnProperty("s") && color.hasOwnProperty("v")) {
-                    color.s = convertToPercentage(color.s);
-                    color.v = convertToPercentage(color.v);
-                    rgb = hsvToRgb(color.h, color.s, color.v);
-                    ok = true;
-                }
+    var trimHash = /^[#]+/,
+        math = Math,
+        mathRound = math.round,
+        mathMin = math.min,
+        mathMax = math.max;
+
+    var tinycolor = function tinycolor(color) {
+        color = color ? color : '';
+
+        // If input is already a tinycolor, return itself
+        if (color instanceof tinycolor) return color;
+
+        // If we are called as a function, call using new instead
+        if (!(this instanceof tinycolor)) return new tinycolor(color);
+
+        // Input to RGB
+        var rgb = {r:0, g:0, b:0},
+            ok = false;
+        if (typeof color == "string") color = stringInputToObject(color);
+        if (typeof color == "object") {
+            if (color.hasOwnProperty("r") && color.hasOwnProperty("g") && color.hasOwnProperty("b")) {
+                rgb = rgbToRgb(color.r, color.g, color.b);
+                ok = true;
+            } else if (color.hasOwnProperty("h") && color.hasOwnProperty("s") && color.hasOwnProperty("v")) {
+                color.s = convertToPercentage(color.s);
+                color.v = convertToPercentage(color.v);
+                rgb = hsvToRgb(color.h, color.s, color.v);
+                ok = true;
             }
-    
-            this._r = mathMin(255, mathMax(rgb.r, 0));
-            this._g = mathMin(255, mathMax(rgb.g, 0));
-            this._b = mathMin(255, mathMax(rgb.b, 0));
-            this._ok = ok;
-    
-            // Don't let the range of [0,255] come back in [0,1].
-            // Potentially lose a little bit of precision here, but will fix issues where
-            // .5 gets interpreted as half of the total, instead of half of 1
-            // If it was supposed to be 128, this was already taken care of by `inputToRgb`
-            if (this._r < 1) this._r = mathRound(this._r);
-            if (this._g < 1) this._g = mathRound(this._g);
-            if (this._b < 1) this._b = mathRound(this._b);
-        };
-    
-        tinycolor.prototype = {
-            isValid: function() {
-                return this._ok;
-            },
-            toHsv: function() {
-                var hsv = rgbToHsv(this._r, this._g, this._b);
-                return {h:hsv.h * 360, s:hsv.s, v:hsv.v};
-            },
-            toHsl: function() {
-                var hsl = rgbToHsl(this._r, this._g, this._b);
-                return {h:hsl.h * 360, s:hsl.s, l:hsl.l};
-            },
-            toHexString: function() {
-                return myt.Color.rgbToHex(this._r, this._g, this._b, true);
-            }
-        };
-    
-        // If input is an object, force 1 into "1.0" to handle ratios properly
-        // String input requires "1.0" as input, so 1 will be treated as 1
-        tinycolor.fromRatio = function(color) {
-            if (typeof color == "object") {
-                var newColor = {};
-                for (var i in color) {
-                    if (color.hasOwnProperty(i)) newColor[i] = convertToPercentage(color[i]);
-                }
-                color = newColor;
-            }
-            return tinycolor(color);
-        };
-    
-        // `equals`
-        // Can be called with any tinycolor input
-        tinycolor.equals = function (color1, color2) {
-            if (!color1 || !color2) return false;
-            return tinycolor(color1).toHexString() == tinycolor(color2).toHexString();
-        };
-    
-        // `rgbToHsl`, `rgbToHsv`, `hsvToRgb` modified from:
-        // <http://mjijackson.com/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript>
-    
-        // `rgbToRgb`
-        // Handle bounds / percentage checking to conform to CSS color spec
-        // <http://www.w3.org/TR/css3-color/>
-        // *Assumes:* r, g, b in [0, 255] or [0, 1]
-        // *Returns:* { r, g, b } in [0, 255]
-        function rgbToRgb(r, g, b){
-            return {
-                r:bound01(r, 255) * 255,
-                g:bound01(g, 255) * 255,
-                b:bound01(b, 255) * 255
-            };
         }
-    
-        // `rgbToHsl`
-        // Converts an RGB color value to HSL.
-        // *Assumes:* r, g, and b are contained in [0, 255] or [0, 1]
-        // *Returns:* { h, s, l } in [0,1]
-        function rgbToHsl(r, g, b) {
-            r = bound01(r, 255);
-            g = bound01(g, 255);
-            b = bound01(b, 255);
-    
-            var max = mathMax(r, g, b), min = mathMin(r, g, b);
-            var h, s, l = (max + min) / 2;
-    
-            if (max == min) {
-                h = s = 0; // achromatic
-            } else {
-                var d = max - min;
-                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-                switch(max) {
-                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-                    case g: h = (b - r) / d + 2; break;
-                    case b: h = (r - g) / d + 4; break;
-                }
-                h /= 6;
-            }
-            return {h:h, s:s, l:l};
+
+        this._r = mathMin(255, mathMax(rgb.r, 0));
+        this._g = mathMin(255, mathMax(rgb.g, 0));
+        this._b = mathMin(255, mathMax(rgb.b, 0));
+        this._ok = ok;
+
+        // Don't let the range of [0,255] come back in [0,1].
+        // Potentially lose a little bit of precision here, but will fix issues where
+        // .5 gets interpreted as half of the total, instead of half of 1
+        // If it was supposed to be 128, this was already taken care of by `inputToRgb`
+        if (this._r < 1) this._r = mathRound(this._r);
+        if (this._g < 1) this._g = mathRound(this._g);
+        if (this._b < 1) this._b = mathRound(this._b);
+    };
+
+    tinycolor.prototype = {
+        isValid: function() {
+            return this._ok;
+        },
+        toHsv: function() {
+            var hsv = rgbToHsv(this._r, this._g, this._b);
+            return {h:hsv.h * 360, s:hsv.s, v:hsv.v};
+        },
+        toHsl: function() {
+            var hsl = rgbToHsl(this._r, this._g, this._b);
+            return {h:hsl.h * 360, s:hsl.s, l:hsl.l};
+        },
+        toHexString: function() {
+            return myt.Color.rgbToHex(this._r, this._g, this._b, true);
         }
-    
-        // `rgbToHsv`
-        // Converts an RGB color value to HSV
-        // *Assumes:* r, g, and b are contained in the set [0, 255] or [0, 1]
-        // *Returns:* { h, s, v } in [0,1]
-        function rgbToHsv(r, g, b) {
-            r = bound01(r, 255);
-            g = bound01(g, 255);
-            b = bound01(b, 255);
-    
-            var max = mathMax(r, g, b), min = mathMin(r, g, b);
-            var h, s, v = max;
-    
+    };
+
+    // If input is an object, force 1 into "1.0" to handle ratios properly
+    // String input requires "1.0" as input, so 1 will be treated as 1
+    tinycolor.fromRatio = function(color) {
+        if (typeof color == "object") {
+            var newColor = {};
+            for (var i in color) {
+                if (color.hasOwnProperty(i)) newColor[i] = convertToPercentage(color[i]);
+            }
+            color = newColor;
+        }
+        return tinycolor(color);
+    };
+
+    // `equals`
+    // Can be called with any tinycolor input
+    tinycolor.equals = function (color1, color2) {
+        if (!color1 || !color2) return false;
+        return tinycolor(color1).toHexString() == tinycolor(color2).toHexString();
+    };
+
+    // `rgbToHsl`, `rgbToHsv`, `hsvToRgb` modified from:
+    // <http://mjijackson.com/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript>
+
+    // `rgbToRgb`
+    // Handle bounds / percentage checking to conform to CSS color spec
+    // <http://www.w3.org/TR/css3-color/>
+    // *Assumes:* r, g, b in [0, 255] or [0, 1]
+    // *Returns:* { r, g, b } in [0, 255]
+    function rgbToRgb(r, g, b){
+        return {
+            r:bound01(r, 255) * 255,
+            g:bound01(g, 255) * 255,
+            b:bound01(b, 255) * 255
+        };
+    }
+
+    // `rgbToHsl`
+    // Converts an RGB color value to HSL.
+    // *Assumes:* r, g, and b are contained in [0, 255] or [0, 1]
+    // *Returns:* { h, s, l } in [0,1]
+    function rgbToHsl(r, g, b) {
+        r = bound01(r, 255);
+        g = bound01(g, 255);
+        b = bound01(b, 255);
+
+        var max = mathMax(r, g, b), min = mathMin(r, g, b);
+        var h, s, l = (max + min) / 2;
+
+        if (max == min) {
+            h = s = 0; // achromatic
+        } else {
             var d = max - min;
-            s = max === 0 ? 0 : d / max;
-    
-            if (max == min) {
-                h = 0; // achromatic
-            } else {
-                switch(max) {
-                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-                    case g: h = (b - r) / d + 2; break;
-                    case b: h = (r - g) / d + 4; break;
-                }
-                h /= 6;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            switch(max) {
+                case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                case g: h = (b - r) / d + 2; break;
+                case b: h = (r - g) / d + 4; break;
             }
-            return {h:h, s:s, v:v};
+            h /= 6;
         }
-    
-        // `hsvToRgb`
-        // Converts an HSV color value to RGB.
-        // *Assumes:* h is contained in [0, 1] or [0, 360] and s and v are contained in [0, 1] or [0, 100]
-        // *Returns:* { r, g, b } in the set [0, 255]
-        function hsvToRgb(h, s, v) {
-            h = bound01(h, 360) * 6;
-            s = bound01(s, 100);
-            v = bound01(v, 100);
-    
-            var i = math.floor(h),
-                f = h - i,
-                p = v * (1 - s),
-                q = v * (1 - f * s),
-                t = v * (1 - (1 - f) * s),
-                mod = i % 6,
-                r = [v, q, p, p, t, v][mod],
-                g = [t, v, v, q, p, p][mod],
-                b = [p, p, t, v, v, q][mod];
-    
-            return {r:r * 255, g:g * 255, b:b * 255};
-        }
-    
-        // Take input from [0, n] and return it as [0, 1]
-        function bound01(n, max) {
-            var isString = typeof n == "string";
-            if (isString && n.indexOf('.') != -1 && parseFloat(n) === 1) n = "100%";
-    
-            var isPercentage = isString && n.indexOf('%') != -1;
-            n = mathMin(max, mathMax(0, parseFloat(n)));
-    
-            // Automatically convert percentage into number
-            if (isPercentage) n = parseInt(n * max, 10) / 100;
-    
-            // Handle floating point rounding errors
-            if (math.abs(n - max) < 0.000001) return 1;
-    
-            // Convert into [0, 1] range if it isn't already
-            return (n % max) / parseFloat(max);
-        }
-    
-        // Replace a decimal with it's percentage value
-        function convertToPercentage(n) {
-            return n <= 1 ? (n * 100) + "%" : n;
-        }
-    
-        var matchers = (function() {
-            // Allow positive/negative integer/number. Don't capture the either/or, just the entire outcome.
-            var CSS_UNIT = "(?:[-\\+]?\\d*\\.\\d+%?)|(?:[-\\+]?\\d+%?)";
-            return {
-                rgb: new RegExp("rgb[\\s|\\(]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")\\s*\\)?"),
-                hex6: /^([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/
-            };
-        })();
-    
-        // `stringInputToObject`
-        // Permissive string parsing.  Take in a number of formats, and output an object
-        // based on detected format.  Returns `{ r, g, b }` or `{ h, s, l }` or `{ h, s, v}`
-        function stringInputToObject(color) {
-            color = color.trim().toLowerCase().replace(trimHash, '');
-    
-            // Try to match string input using regular expressions.
-            // Keep most of the number bounding out of this function - don't worry about [0,1] or [0,100] or [0,360]
-            // Just return an object and let the conversion functions handle that.
-            // This way the result will be the same whether the tinycolor is initialized with string or object.
-            var match;
-            if (match = matchers.rgb.exec(color)) return {r:match[1], g:match[2], b:match[3]};
-            if (match = matchers.hex6.exec(color)) {
-                return {
-                    r: parseInt(match[1], 16),
-                    g: parseInt(match[2], 16),
-                    b: parseInt(match[3], 16)
-                };
+        return {h:h, s:s, l:l};
+    }
+
+    // `rgbToHsv`
+    // Converts an RGB color value to HSV
+    // *Assumes:* r, g, and b are contained in the set [0, 255] or [0, 1]
+    // *Returns:* { h, s, v } in [0,1]
+    function rgbToHsv(r, g, b) {
+        r = bound01(r, 255);
+        g = bound01(g, 255);
+        b = bound01(b, 255);
+
+        var max = mathMax(r, g, b), min = mathMin(r, g, b);
+        var h, s, v = max;
+
+        var d = max - min;
+        s = max === 0 ? 0 : d / max;
+
+        if (max == min) {
+            h = 0; // achromatic
+        } else {
+            switch(max) {
+                case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                case g: h = (b - r) / d + 2; break;
+                case b: h = (r - g) / d + 4; break;
             }
-            return false;
+            h /= 6;
         }
-    
-        window.tinycolor = tinycolor;
+        return {h:h, s:s, v:v};
+    }
+
+    // `hsvToRgb`
+    // Converts an HSV color value to RGB.
+    // *Assumes:* h is contained in [0, 1] or [0, 360] and s and v are contained in [0, 1] or [0, 100]
+    // *Returns:* { r, g, b } in the set [0, 255]
+    function hsvToRgb(h, s, v) {
+        h = bound01(h, 360) * 6;
+        s = bound01(s, 100);
+        v = bound01(v, 100);
+
+        var i = math.floor(h),
+            f = h - i,
+            p = v * (1 - s),
+            q = v * (1 - f * s),
+            t = v * (1 - (1 - f) * s),
+            mod = i % 6,
+            r = [v, q, p, p, t, v][mod],
+            g = [t, v, v, q, p, p][mod],
+            b = [p, p, t, v, v, q][mod];
+
+        return {r:r * 255, g:g * 255, b:b * 255};
+    }
+
+    // Take input from [0, n] and return it as [0, 1]
+    function bound01(n, max) {
+        var isString = typeof n == "string";
+        if (isString && n.indexOf('.') != -1 && parseFloat(n) === 1) n = "100%";
+
+        var isPercentage = isString && n.indexOf('%') != -1;
+        n = mathMin(max, mathMax(0, parseFloat(n)));
+
+        // Automatically convert percentage into number
+        if (isPercentage) n = parseInt(n * max, 10) / 100;
+
+        // Handle floating point rounding errors
+        if (math.abs(n - max) < 0.000001) return 1;
+
+        // Convert into [0, 1] range if it isn't already
+        return (n % max) / parseFloat(max);
+    }
+
+    // Replace a decimal with it's percentage value
+    function convertToPercentage(n) {
+        return n <= 1 ? (n * 100) + "%" : n;
+    }
+
+    var matchers = (function() {
+        // Allow positive/negative integer/number. Don't capture the either/or, just the entire outcome.
+        var CSS_UNIT = "(?:[-\\+]?\\d*\\.\\d+%?)|(?:[-\\+]?\\d+%?)";
+        return {
+            rgb: new RegExp("rgb[\\s|\\(]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")\\s*\\)?"),
+            hex6: /^([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/
+        };
     })();
+
+    // `stringInputToObject`
+    // Permissive string parsing.  Take in a number of formats, and output an object
+    // based on detected format.  Returns `{ r, g, b }` or `{ h, s, l }` or `{ h, s, v}`
+    function stringInputToObject(color) {
+        color = color.trim().toLowerCase().replace(trimHash, '');
+
+        // Try to match string input using regular expressions.
+        // Keep most of the number bounding out of this function - don't worry about [0,1] or [0,100] or [0,360]
+        // Just return an object and let the conversion functions handle that.
+        // This way the result will be the same whether the tinycolor is initialized with string or object.
+        var match;
+        if (match = matchers.rgb.exec(color)) return {r:match[1], g:match[2], b:match[3]};
+        if (match = matchers.hex6.exec(color)) {
+            return {
+                r: parseInt(match[1], 16),
+                g: parseInt(match[2], 16),
+                b: parseInt(match[3], 16)
+            };
+        }
+        return false;
+    }
 })(window, jQuery);

@@ -18,7 +18,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         
         readFile: function(file, handlerFunc) {
             if (FileReader !== undefined) {
-                reader = new FileReader();
+                var reader = new FileReader();
                 reader.onload = handlerFunc;
                 reader.readAsDataURL(file);
             }

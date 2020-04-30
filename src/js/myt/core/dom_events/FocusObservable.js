@@ -213,7 +213,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
         if (myt.FocusObservable.EVENT_TYPES[type]) {
             var self = this;
             return (domEvent) => {
-                if (!domEvent) var domEvent = window.event;
+                if (!domEvent) domEvent = window.event;
                 
                 // OPTIMIZATION: prevent extra focus events under special 
                 // circumstances. See myt.VariableLayout for more detail.

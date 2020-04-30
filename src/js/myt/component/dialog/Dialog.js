@@ -340,10 +340,11 @@
         },
         
         showSimple: function(contentBuilderFunc, callbackFunction, opts) {
+            opts = opts || {};
+            
             var self = this,
                 content = self.content,
                 closeBtn = content.closeBtn,
-                opts = opts || {},
                 maxHeight = opts.maxContainerHeight;
             
             self.destroyContent();

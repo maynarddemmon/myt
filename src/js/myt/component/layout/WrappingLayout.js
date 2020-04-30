@@ -51,11 +51,11 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
     },
     
     /** @overrides myt.Layout */
-    setParent: function(v) {
+    setParent: function(parent) {
         if (this.parent !== parent) {
             var isY = this.targetAttrName === 'y';
             if (this.parent) this.stopMonitoringParent(isY ? 'height' : 'width');
-            this.callSuper(v);
+            this.callSuper(parent);
             if (this.parent) this.startMonitoringParent(isY ? 'height' : 'width');
         }
     },

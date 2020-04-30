@@ -77,7 +77,7 @@ myt.DomObservable = new JS.Module('DomObservable', {
             var self = this, 
                 event = observableClass.EVENT;
             return (domEvent) => {
-                if (!domEvent) var domEvent = window.event;
+                if (!domEvent) domEvent = window.event;
                 
                 event.source = self;
                 event.type = domEvent.type;
