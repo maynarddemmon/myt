@@ -1,352 +1,159 @@
-/** A base class for infinite scrolling grids
-    
-    Events:
-        None
-    
-    Attributes:
-        selectedRow
-        selectedRowModel
-        controller
-        collectionModel
-        rowClass
-        hideGridHeader:boolean
-    
-    Private Attributes:
-        _listData:array The data for the rows in the grid.
-        _listScrollY:int The current scroll offset of the grid
-        _startIdx:int The index into the data of the first row shown
-        _endIdx:int The index into the data of the last row shown
-        _visibleRowsByIdx:object A cache of what rows are currently shown by
-            the index of the data for the row. This is provides faster
-            performance when refreshing the grid.
-        _gridListContainer:myt.View The view that contains the listView. This 
-            view allows scrolling of the list. This is where _listScrollY 
-            comes from.
-        _gridListView:myt.View The view that contains the rows in the grid.
-        _gridPool:myt.TrackActivesPool The pool for grid row views.
-*/
-myt.InfiniteGrid = new JS.Class('InfiniteGrid', myt.View, {
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        SPACING:1,
-        ROW_HEIGHT:30,
-        ROW_EXTENT:31, // ROW_HEIGHT + SPACING
+((pkg) => {
+    var JSClass = JS.Class,
+        View = pkg.View,
         
-        LIST_BG_COLOR:'#cccccc',
-    },
+        getSubview = (gridRow, columnHeader) => gridRow[columnHeader.columnId + 'View'];
     
+    pkg.InfiniteGridRow = new JS.Module('InfiniteGridRow', {
+        include: [pkg.InfiniteListRow],
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        notifyXChange: function(columnHeader) {
+            var sv = getSubview(this, columnHeader);
+            if (sv) sv.setX(columnHeader.x + columnHeader.cellXAdj);
+        },
+        
+        notifyWidthChange: function(columnHeader) {
+            var sv = getSubview(this, columnHeader);
+            if (sv) sv.setWidth(columnHeader.width + columnHeader.cellWidthAdj);
+        },
+        
+        notifyVisibilityChange: function(columnHeader) {
+            var sv = getSubview(this, columnHeader);
+            if (sv) sv.setVisible(columnHeader.visible);
+        }
+    });
     
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        var self = this,
-            M = myt,
-            IG = M.InfiniteGrid,
-            V = M.View,
-            rowClass = attrs.rowClass,
-            hideGridHeader = attrs.hideGridHeader;
-        delete attrs.rowClass;
-        delete attrs.hideGridHeader;
+    pkg.InfiniteGridHeader = new JSClass('InfiniteGridHeader', View, {
+        include: [pkg.GridController],
         
-        if (attrs.focusable == null) attrs.focusable = true;
-        if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
         
-        self._listScrollY = self._startIdx = self._endIdx = 0;
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides */
+        initNode: function(parent, attrs) {
+            if (attrs.columnSpacing == null) attrs.columnSpacing = 1;
+            
+            attrs.overflow = 'hidden';
+            
+            this.callSuper(parent, attrs);
+            
+            new pkg.SpacedLayout(this, {spacing:this.columnSpacing});
+        },
         
-        self.callSuper(parent, attrs);
         
-        //// Build UI
-        var gridHeader = self.controller = new V(self, {
-            height:IG.ROW_HEIGHT, gridWidth:self.width,
-            visible:!hideGridHeader
-        }, [M.GridController, {
-            /** Eliminates the sort side effect of the standard implementation
-                in GridController.
-                @overrides */
-            notifyAddRow: function(row) {
-                if (!this.hasRow(row)) {
-                    this.rows.push(row);
-                    
-                    // Update cell positions
-                    if (!this.locked) {
-                        var hdrs = this.columnHeaders,
-                            i = hdrs.length,
-                            hdr;
-                        while (i) {
-                            hdr = hdrs[--i];
-                            row.notifyColumnHeaderXChange(hdr);
-                            row.notifyColumnHeaderWidthChange(hdr);
-                            row.notifyColumnHeaderVisibilityChange(hdr);
-                        }
-                        
-                        // Eliminates sort that would normally happen here.
+        // Accessors ///////////////////////////////////////////////////////////
+        setGrid: function(v) {this.grid = v;},
+        setColumnSpacing: function(v) {this.columnSpacing = v;},
+        
+        /** @overrides myt.View */
+        setHeight: function(v, supressEvent) {
+            this.callSuper(v, supressEvent);
+            if (this.inited) {
+                v = this.height;
+                this.columnHeaders.forEach((hdr) => {hdr.setHeight(v);});
+            }
+        },
+        
+        /** @overrides myt.View */
+        setWidth: function(v, supressEvent) {
+            this.callSuper(Math.max(this.minWidth, v), supressEvent);
+            if (this.inited) this.setGridWidth(this.width);
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides */
+        subviewAdded: function(sv) {
+            this.callSuper(sv);
+            
+            if (sv.isA(pkg.GridColumnHeader)) {
+                sv.setGridController(this);
+                sv.setHeight(this.height);
+            }
+        },
+        
+        /** @overrides myt.GridController */
+        doSort: function() {
+            this.grid.refreshListData(true);
+        },
+        
+        /** @overrides myt.GridController */
+        notifyColumnHeaderXChange: function(columnHeader) {
+            if (!this.isLocked()) this.grid.notifyXChange(columnHeader);
+        },
+        
+        /** @overrides myt.GridController */
+        notifyColumnHeaderWidthChange: function(columnHeader) {
+            if (!this.isLocked()) this.grid.notifyWidthChange(columnHeader);
+        },
+        
+        /** @overrides myt.GridController */
+        updateRowsForVisibilityChange: function(columnHeader) {
+            this.grid.notifyVisibilityChange(columnHeader);
+        }
+    });
+    
+    /** A base class for infinite scrolling grids
+        
+        @class */
+    pkg.InfiniteGrid = new JSClass('InfiniteGrid', pkg.InfiniteList, {
+        // Accessors ///////////////////////////////////////////////////////////
+        setGridHeader: function(v) {
+            this.gridHeader = v;
+            if (v) v.setGrid(this);
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        makeReady: function() {
+            this.gridHeader.setLocked(false);
+            this.refreshListData(false);
+        },
+        
+        /** @overrides myt.InfiniteList */
+        getSortFunction: function() {
+            var sort = this.gridHeader.sort || ['',''],
+                sortColumnId  = sort[0],
+                sortOrder = sort[1];
+            if (sortColumnId) {
+                var sortNum = sortOrder === 'ascending' ? 1 : -1;
+                return (a, b) => {
+                    var aValue = a[sortColumnId],
+                        bValue = b[sortColumnId];
+                    if (aValue > bValue) {
+                        return sortNum;
+                    } else if (bValue > aValue) {
+                        return -sortNum;
                     }
-                }
-            },
-            
-            /** @overrides */
-            doSort: function() {
-                if (this.sort) self.refreshGridData();
-            },
-            
-            /** @overrides */
-            setWidth: function(v, supressEvent) {
-                this.callSuper(v, supressEvent);
-                
-                if (listContainer && listView) {
-                    listContainer.setWidth(v);
-                    listView.setWidth(v);
-                    listView.getSubviews().forEach(sv => {sv.setWidth(v);});
-                }
-            }
-        }]);
-        gridHeader.grid = self; // Allows SelectableGridRow to access functions of the grid.
-        new M.SpacedLayout(gridHeader, {collapseParent:true, spacing:IG.SPACING});
-        self.buildGridHeaders(gridHeader);
-        
-        // List
-        var listContainer = self._gridListContainer = new V(self, {
-            bgColor:IG.LIST_BG_COLOR, overflow:'autoy', layoutHint:1
-        });
-        listContainer.getInnerDomStyle().overscrollBehavior = 'contain';
-        
-        var listView = self._gridListView = new V(listContainer);
-        
-        new M.ResizeLayout(self, {axis:'y', spacing:IG.SPACING});
-        
-        gridHeader.setLocked(false);
-        gridHeader.setWidth(gridHeader.width);
-        
-        self.attachTo(listContainer, '_refreshGridUI', 'height');
-        self.attachToDom(listContainer, '_handleScrollChange', 'scroll');
-        
-        self._gridPool = new M.TrackActivesPool(rowClass, listView);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setCollectionModel: function(v) {this.collectionModel = v;},
-    
-    setWidth: function(v, supressEvent) {
-        if (v > 0) {
-            var self = this;
-            self.callSuper(v, supressEvent);
-            if (self.inited) {
-                var w = self.width;
-                self.controller.setGridWidth(w);
-                self._gridListContainer.setWidth(w);
-                self._gridListView.setWidth(w);
-            }
-        }
-    },
-    
-    setSelectedRow: function(v) {
-        var existing = this.selectedRow;
-        if (v !== existing) {
-            if (existing) existing.setSelected(false);
-            this.setSelectedRowModel();
-            this.set('selectedRow', v, true);
-            if (v) {
-                this.setSelectedRowModel(v.model);
-                v.setSelected(true);
-            }
-        }
-    },
-    
-    /** Clears the selectedRow while leaving the selectedRowModel. */
-    clearSelectedRow: function() {
-        var existing = this.selectedRow;
-        if (existing) {
-            existing.setSelected(false);
-            this.set('selectedRow', null, true);
-        }
-    },
-    
-    /** Sets the selectedRow without updating the selectedRowModel. */
-    restoreSelectedRow: function(row, model) {
-        if (model === this.selectedRowModel) {
-            this.set('selectedRow', row, true);
-            row.setSelected(true);
-        }
-    },
-    
-    setSelectedRowModel: function(v) {
-        this.set('selectedRowModel', v, true);
-        this.doSelectedModel(this.selectedRowModel);
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    isScrolledToEnd: function() {
-        var container = this._gridListContainer;
-        return container.getInnerDomElement().scrollTop + container.height === this._gridListView.height;
-    },
-    
-    buildGridHeaders: function(gridHeader) {},
-    
-    buildSortFunction: function(sortOrder) {
-        if (sortOrder) {
-            // FIXME
-        } else {
-            // Default to a numeric sort on the IDs
-            return (a, b) => a.id - b.id;
-        }
-    },
-    
-    doSelectedModel: function(model) {
-        // Scroll the selected row into view
-        this.scrollModelIntoView(model);
-    },
-    
-    scrollModelIntoView: function(model) {
-        var self = this,
-            idx = self._getIndexOfModelInData(model),
-            rowExtent = myt.InfiniteGrid.ROW_EXTENT,
-            gridListContainer = self._gridListContainer,
-            de = gridListContainer.getInnerDomElement(),
-            viewportTop,
-            viewportBottom,
-            rowTop,
-            rowBottom;
-        if (idx >= 0) {
-            viewportTop = de.scrollTop;
-            viewportBottom = viewportTop + gridListContainer.height;
-            rowTop = idx * rowExtent;
-            rowBottom = rowTop + rowExtent;
-            
-            // Only scroll if not overlapping visible part of grid container.
-            if (rowBottom <= viewportTop || rowTop >= viewportBottom) de.scrollTop = rowTop;
-        }
-    },
-    
-    isModelInData: function(model) {
-        return this._getIndexOfModelInData(model) !== -1;
-    },
-    
-    /** @private
-        @param {!Object} model
-        @returns {number} */
-    _getIndexOfModelInData: function(model) {
-        if (model) {
-            var self = this,
-                modelId = model.id,
-                data = self._listData,
-                i = data.length;
-                while (i) if (data[--i].id === modelId) return i;
-        }
-        return -1;
-    },
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    _handleScrollChange: function(event) {
-        this._listScrollY = this._gridListContainer.getInnerDomElement().scrollTop;
-        this._refreshGridUI();
-    },
-    
-    refreshGridData: function(preserveScroll) {
-        this._listData = this.fetchGridData();
-        this.resetGridUI(preserveScroll);
-    },
-    
-    fetchGridData: function() {
-        return this.collectionModel.getAsSortedList(this.buildSortFunction(this.controller.sort));
-    },
-    
-    resetGridUI: function(preserveScroll) {
-        var self = this,
-            IG = myt.InfiniteGrid,
-            data = self._listData,
-            len = data.length;
-        
-        // Resize the listView to the height to accomodate all rows
-        self._gridListView.setHeight(len * IG.ROW_EXTENT - (len > 0 ? IG.SPACING : 0));
-        
-        if (self.isModelInData(self.selectedRowModel)) {
-            // Only clear the selected row since it's still in the data and
-            // thus may be shown again.
-            self.clearSelectedRow();
-        } else {
-            // Clear the row and model since the model can no longer be shown.
-            self.setSelectedRow();
-        }
-        
-        // Clear out existing rows
-        self._gridPool.putActives();
-        self._startIdx = self._endIdx = 0;
-        self._visibleRowsByIdx = {};
-        
-        // Reset scroll position
-        if (preserveScroll) {
-            // Just refresh since we won't move the scroll position
-            self._refreshGridUI();
-        } else {
-            if (self._listScrollY !== 0) {
-                // Updating the scroll position triggers a _refreshGridUI via _handleScrollChange
-                self._gridListContainer.getInnerDomElement().scrollTop = 0;
+                    return 0;
+                };
             } else {
-                self._refreshGridUI();
+                return this.callSuper();
             }
+        },
+        
+        /** @overrides myt.InfiniteList */
+        updateRow: function(row) {
+            if (this.gridHeader) {
+                this.gridHeader.columnHeaders.forEach((hdr) => {
+                    row.notifyXChange(hdr);
+                    row.notifyWidthChange(hdr);
+                    row.notifyVisibilityChange(hdr);
+                });
+            }
+        },
+        
+        notifyXChange: function(columnHeader) {
+            this.getVisibleRows().forEach((row) => {row.notifyXChange(columnHeader);});
+        },
+        
+        notifyWidthChange: function(columnHeader) {
+            this.getVisibleRows().forEach((row) => {row.notifyWidthChange(columnHeader);});
+        },
+        
+        notifyVisibilityChange: function(columnHeader) {
+            this.getVisibleRows().forEach((row) => {row.notifyVisibilityChange(columnHeader);});
         }
-    },
-    
-    /** @private */
-    _refreshGridUI: function() {
-        var self = this,
-            rowExtent = myt.InfiniteGrid.ROW_EXTENT,
-            startIdx,
-            endIdx,
-            scrollY = self._listScrollY,
-            listContainerHeight = self._gridListContainer.height,
-            data = self._listData || [],
-            visibleRowsByIdx = self._visibleRowsByIdx,
-            pool = self._gridPool,
-            row,
-            gridController = self.controller,
-            rowWidth = self.width,
-            i,
-            model;
-        
-        startIdx = Math.max(0, Math.floor(scrollY / rowExtent));
-        endIdx = Math.min(data.length, Math.ceil((scrollY + listContainerHeight) / rowExtent));
-        
-        if (self._startIdx !== startIdx || self._endIdx !== endIdx) {
-            self._startIdx = startIdx;
-            self._endIdx = endIdx;
-            
-            // Put all visible rows that are not within the idx range back 
-            // into the pool
-            for (i in visibleRowsByIdx) {
-                if (i < startIdx || i >= endIdx) {
-                    pool.putInstance(visibleRowsByIdx[i]);
-                    delete visibleRowsByIdx[i];
-                }
-            }
-            
-            for (i = startIdx; i < endIdx; i++) {
-                row = visibleRowsByIdx[i];
-                if (!row) {
-                    model = data[i];
-                    
-                    row = pool.getInstance();
-                    row.setWidth(rowWidth);
-                    row.setY(i * rowExtent);
-                    row.setModel(model);
-                    row.setInfiniteGridOwner(self);
-                    row.setVisible(true);
-                    
-                    // Restore Selection
-                    self.restoreSelectedRow(row, model);
-                    
-                    visibleRowsByIdx[i] = row;
-                }
-                
-                // Maintain tab ordering by updating the underlying dom order.
-                row.bringToFront();
-            }
-        }
-        
-        self.doAfterGridRefresh();
-    },
-    
-    doAfterGridRefresh: function() {}
-});
+    });
+})(myt);

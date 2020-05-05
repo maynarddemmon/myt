@@ -177,7 +177,7 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'infinite/SelectableInfiniteListRow.js'      ).provides('myt.SelectableInfiniteListRow'      ).requires('myt.Selectable','myt.InfiniteListRow');
     file(MYT_COMPONENT_ROOT + 'infinite/SimpleSelectableInfiniteListRow.js').provides('myt.SimpleSelectableInfiniteListRow').requires('myt.View','myt.SelectableInfiniteListRow');
     file(MYT_COMPONENT_ROOT + 'infinite/SelectableInfiniteList.js'         ).provides('myt.SelectableInfiniteList'         ).requires('myt.InfiniteList','myt.SelectableInfiniteListRow');
-    //file(MYT_COMPONENT_ROOT + 'infinite/InfiniteGrid.js'                   ).provides('myt.InfiniteGrid'                   ).requires('myt.GridController');
+    file(MYT_COMPONENT_ROOT + 'infinite/InfiniteGrid.js'                   ).provides('myt.InfiniteGrid'                   ).requires('myt.InfiniteList','myt.GridController');
     
     // Component : Floating Panel
     file(MYT_COMPONENT_ROOT + 'floatingpanel/FloatingPanel.js'      ).provides('myt.FloatingPanel'      ).requires('myt.RootView');
@@ -301,7 +301,7 @@ JS.Packages(function() {
         'myt.Slider','myt.RangeSlider',
         'myt.HorizontalDivider','myt.VerticalDivider',
         'myt.Grid','myt.SimpleGridColumnHeader',
-        //'myt.InfiniteGrid',
+        'myt.InfiniteGrid',
         'myt.SelectableInfiniteList','myt.SimpleSelectableInfiniteListRow',
         'myt.PanelStack',
         'myt.DropTarget','myt.DropSource','myt.AutoScroller',

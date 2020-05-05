@@ -89,6 +89,10 @@ myt.GridController = new JS.Module('GridController', {
         }
     },
     
+    isLocked: function() {
+        return this.locked || this.__tempLock;
+    },
+    
     setMaxWidth: function(v) {this.set('maxWidth', v, true);},
     setMinWidth: function(v) {this.set('minWidth', v, true);},
     
@@ -106,10 +110,23 @@ myt.GridController = new JS.Module('GridController', {
     _fitToWidth: function() {
         if (this.locked || !this.fitToWidth) return;
         
-        var hdrs = this.columnHeaders, len = hdrs.length, i = len, hdr;
+        var hdrs = this.columnHeaders, 
+            len = hdrs.length, 
+            i = len, 
+            hdr,
+            maxExtent = 0,
+            extent,
+            extra,
+            isGrow,
+            resizeInfo = [], 
+            limit,
+            resizeCount,
+            idx = 0, 
+            fullCount = 0, 
+            incr, 
+            info;
         
         // Determine max extent
-        var maxExtent = 0, extent;
         while(i) {
             hdr = hdrs[--i];
             if (!hdr.visible) continue;
@@ -117,13 +134,12 @@ myt.GridController = new JS.Module('GridController', {
             if (extent > maxExtent) maxExtent = extent;
         }
         
-        var extra = this.gridWidth - maxExtent;
+        extra = this.gridWidth - maxExtent;
         
         if (extra === 0) return;
-        var isGrow = extra > 0;
+        isGrow = extra > 0;
         
         // Get resizable columns
-        var resizeInfo = [], limit;
         i = len;
         while(i) {
             hdr = hdrs[--i];
@@ -135,11 +151,10 @@ myt.GridController = new JS.Module('GridController', {
         }
         
         // Abort if no resizable flex columns.
-        var resizeCount = resizeInfo.length;
+        resizeCount = resizeInfo.length;
         if (resizeCount <= 0) return;
         
         // Calculate resize amounts
-        var idx = 0, fullCount = 0, incr, info;
         while (extra !== 0) {
             info = resizeInfo[idx];
             hdr = info.hdr;
@@ -348,33 +363,31 @@ myt.GridController = new JS.Module('GridController', {
     },
     
     notifyColumnHeaderXChange: function(columnHeader) {
-        if (this.locked || this.__tempLock) return;
-        var rows = this.rows, i = rows.length;
-        while (i) rows[--i].notifyColumnHeaderXChange(columnHeader);
+        if (!this.isLocked()) this.rows.forEach((row) => {row.notifyColumnHeaderXChange(columnHeader);});
     },
     
     notifyColumnHeaderWidthChange: function(columnHeader) {
-        if (this.locked || this.__tempLock) return;
-        var rows = this.rows, i = rows.length;
-        while (i) rows[--i].notifyColumnHeaderWidthChange(columnHeader);
+        if (!this.isLocked()) this.rows.forEach((row) => {row.notifyColumnHeaderWidthChange(columnHeader);});
     },
     
     notifyColumnHeaderVisibilityChange: function(columnHeader) {
-        if (this.locked || this.__tempLock) return;
-        
-        var rows = this.rows, 
-            i = rows.length;
-        while (i) rows[--i].notifyColumnHeaderVisibilityChange(columnHeader);
-        
-        this.setLastColumn(this._findLastColumn());
-        if (columnHeader.visible) {
-            this.setMaxWidth(this.maxWidth + columnHeader.maxValue);
-            this.setMinWidth(this.minWidth + columnHeader.minValue);
-        } else {
-            this.setMaxWidth(this.maxWidth - columnHeader.maxValue);
-            this.setMinWidth(this.minWidth - columnHeader.minValue);
+        if (!this.isLocked()) {
+            this.updateRowsForVisibilityChange(columnHeader);
+            
+            this.setLastColumn(this._findLastColumn());
+            if (columnHeader.visible) {
+                this.setMaxWidth(this.maxWidth + columnHeader.maxValue);
+                this.setMinWidth(this.minWidth + columnHeader.minValue);
+            } else {
+                this.setMaxWidth(this.maxWidth - columnHeader.maxValue);
+                this.setMinWidth(this.minWidth - columnHeader.minValue);
+            }
+            this._fitToWidth();
         }
-        this._fitToWidth();
+    },
+    
+    updateRowsForVisibilityChange: function(columnHeader) {
+        this.rows.forEach((row) => {row.notifyColumnHeaderVisibilityChange(columnHeader);});
     },
     
     // Rows

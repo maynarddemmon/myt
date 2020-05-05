@@ -54,12 +54,12 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
         if (attrs.rowOutset == null) attrs.rowOutset = IL.DEFAULT_ROW_OUTSET;
         if (attrs.rowHeight == null) attrs.rowHeight = IL.DEFAULT_ROW_HEIGHT;
         
+        if (attrs.overscrollBehavior == null) attrs.overscrollBehavior = 'auto contain';
+        
         self._rowExtent = self.rowSpacing = self.rowHeight = 
             self._startIdx = self._endIdx = 0;
         
         self.callSuper(parent, attrs);
-        
-        self.getInnerDomStyle().overscrollBehavior = 'contain';
         
         // Build UI
         var listView = self._listView = new M.View(self);
@@ -72,6 +72,11 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
     
     
     // Accessors ///////////////////////////////////////////////////////////////
+    setOverscrollBehavior: function(v) {
+        this.overscrollBehavior = v;
+        this.getInnerDomStyle().overscrollBehavior = v;
+    },
+    
     setCollectionModel: function(v) {this.collectionModel = v;},
     setModelIDName: function(v) {this.modelIDName = v;},
     setRowSpacing: function(v) {
@@ -100,6 +105,10 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
                 listView.getSubviews().forEach(sv => {sv.setWidth(w);});
             }
         }
+    },
+    
+    getVisibleRows: function() {
+        return Object.values(this._visibleRowsByIdx || {});
     },
     
     
@@ -324,6 +333,8 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
                     row.setVisible(true);
                     
                     visibleRowsByIdx[i] = row;
+                    
+                    self.updateRow(row);
                 }
                 
                 // Maintain tab ordering by updating the underlying dom order.
@@ -334,5 +345,7 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
         self.doAfterListRefresh();
     },
     
-    doAfterListRefresh: function() {}
+    updateRow: (row) => {},
+    
+    doAfterListRefresh: () => {}
 });
