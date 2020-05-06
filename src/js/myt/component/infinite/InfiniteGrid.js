@@ -106,9 +106,14 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        makeReady: function() {
-            this.gridHeader.setLocked(false);
-            this.refreshListData(false);
+        makeReady: function(sortState) {
+            var gridHeader = this.gridHeader;
+            if (gridHeader) {
+                gridHeader.setSort(sortState);
+                gridHeader.setLocked(false);
+            } else {
+                this.refreshListData(false);
+            }
         },
         
         /** @overrides myt.InfiniteList */

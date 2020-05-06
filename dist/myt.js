@@ -626,7 +626,7 @@ Date.prototype.format = Date.prototype.format || (() => {
         },
         
         notifyInstanceThatFontLoaded = (instance) => {
-            instance.sizeViewToDom();
+            if (instance && !instance.destroyed) instance.sizeViewToDom();
         },
         
         myt = pkg.myt = {
@@ -24407,9 +24407,14 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
         
         
         // Methods /////////////////////////////////////////////////////////////
-        makeReady: function() {
-            this.gridHeader.setLocked(false);
-            this.refreshListData(false);
+        makeReady: function(sortState) {
+            var gridHeader = this.gridHeader;
+            if (gridHeader) {
+                gridHeader.setSort(sortState);
+                gridHeader.setLocked(false);
+            } else {
+                this.refreshListData(false);
+            }
         },
         
         /** @overrides myt.InfiniteList */

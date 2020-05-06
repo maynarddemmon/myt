@@ -59,7 +59,7 @@
         },
         
         notifyInstanceThatFontLoaded = (instance) => {
-            instance.sizeViewToDom();
+            if (instance && !instance.destroyed) instance.sizeViewToDom();
         },
         
         myt = pkg.myt = {
