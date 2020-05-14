@@ -686,8 +686,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                 
                 const parts = Array.isArray(objName) ? objName : objName.split("."), 
                     len = parts.length;
-                let i = 0;
-                for (; i < len; ++i) {
+                for (let i = 0; i < len; i++) {
                     scope = scope[parts[i]];
                     if (scope === undefined) {
                         console.warn("resolveName failed for:", objName, "at part:", i, parts[i]);
@@ -713,83 +712,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                 @param {string} fileName - The filename to extract the extension from.
                 @returns {string) The file extension or null if a falsy fileName
                     argument was provided. */
-            getExtension: function(fileName) {
-                return fileName ? fileName.split('.')[1] : null;
-            },
-            
-            // Text Templating
-            /** Populates a text "template" with 1 or more arguments. The
-                template consists of a string with text interspersed with 
-                curly-braced indices. The arguments are replaced in order one at
-                a time into the template. For example:
-                
-                    myt.fillTextTemplate("{0}/{2}/{1} hey {0}", 1, 2, 3) 
-                    will return "1/3/2 hey 1".
-                
-                @param {string} template - The template to use.
-                @param {...*} [params] - The parameters for the template.
-                @returns {string} A populated string. */
-            fillTextTemplate: function(template, ...params) {
-                if (template == null) return '';
-                
-                const len = params.length;
-                for (let i = 0, param; len > i; ++i) {
-                    param = params[i];
-                    template = template.split("{" + i + "}").join(param == null ? '' : param);
-                }
-                return template;
-            },
-            
-            /** Generates the text for an "a href" html element that when clicked on
-                executes a provided callback method name. To resolve the callback
-                method name, an ancestor search is performed on the dom starting with
-                the link element. The first myt managed dom element encountered is
-                used as the scope for the method.
-                @param {string} text - The text to put inside the link.
-                @param {string} callbackMethodName - The name of the method 
-                    to execute.
-                @param {?Object} [attrs] - A map of additional attributes that 
-                    will be inserted into the tag.
-                @param {?Object} [data] - Data that will be serialized as JSON 
-                    and provided to the link handler.
-                @returns {string} */
-            generateLink: (text, callbackMethodName, attrs, data) => {
-                let optAttrs = '',
-                    name;
-                if (attrs) {
-                    for (name in attrs) optAttrs += ' ' + name + '="' + attrs[name] + '"';
-                }
-                
-                return myt.fillTextTemplate(
-                    '<a href="#" onclick=\'myt.__handleGeneratedLink(this, "{0}", &apos;{3}&apos;); return false;\'{2}>{1}</a>', 
-                    callbackMethodName, text, optAttrs, JSON.stringify(data)
-                );
-            },
-            
-            /** See myt.generateLink for documentation.
-                @private
-                @param {?Object} elem
-                @param {string} callbackMethodName
-                @param {string} data
-                @returns {undefined} */
-            __handleGeneratedLink: (elem, callbackMethodName, data) => {
-                let model,
-                    value;
-                while (elem) {
-                    model = elem.model;
-                    if (model) {
-                        try {
-                            if (data) value = JSON.parse(data);
-                        } catch(e) {
-                            myt.dumpStack(e);
-                        }
-                        
-                        model[callbackMethodName].call(model, value);
-                        break;
-                    }
-                    elem = elem.parentNode;
-                }
-            },
+            getExtension: (fileName) => fileName ? fileName.split('.')[1] : null,
             
             /** Dynamically load a script into the dom.
                 @param {string} src - The URL to the script file.
