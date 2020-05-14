@@ -9,30 +9,6 @@ test("Test getElement", function() {
     ok(myt.getElement('abcd', 1) === undefined, "Providing a non-existant tagname and index will return undefined.");
 });
 
-test("Test fillTextTemplate", function() {
-    var template = "A {1}{0} B {1}";
-    
-    ok(myt.fillTextTemplate() === "", "No template should return ''.");
-    ok(myt.fillTextTemplate(template) === "A {1}{0} B {1}", "Fill with no args should work.");
-    ok(myt.fillTextTemplate(template, "z") === "A {1}z B {1}", "Partial filling should work.");
-    ok(myt.fillTextTemplate(template, "z", "y") === "A yz B y", "Full filling should work.");
-    ok(myt.fillTextTemplate(template, "z", "y", "x") === "A yz B y", "Over filling should work.");
-    ok(myt.fillTextTemplate(template, "Z{1}z", "y") === "A yZyz B y", "Templates are evaluated in order.");
-    ok(myt.fillTextTemplate(template, null, undefined) === "A  B ", "Null or undefined will become ''.");
-    ok(myt.fillTextTemplate(template, true, 7) === "A 7true B 7", "Numbers and booleans will work.");
-    
-    var template2 = "A {{1}}{{0}} B";
-    
-    ok(myt.fillTextTemplate(template2, "z", "y") === "A {y}{z} B", "Templates with braces should work too.");
-    ok(myt.fillTextTemplate(template2, "1", "y") === "A {y}y B", "Inadvertent replacement also works.");
-});
-
-test("Test generateLink", function() {
-    ok(myt.generateLink('foo', 'bar') === '<a href="#" onclick=\'myt.__handleGeneratedLink(this, "bar", &apos;&apos;); return false;\'>foo</a>', "Basic link generation.");
-    ok(myt.generateLink('foo', 'bar', {a:'b', c:'d'}) === '<a href="#" onclick=\'myt.__handleGeneratedLink(this, "bar", &apos;&apos;); return false;\' a="b" c="d">foo</a>', "Basic link generation.");
-    ok(myt.generateLink('foo', 'bar', null, {x:5}) === '<a href="#" onclick=\'myt.__handleGeneratedLink(this, "bar", &apos;{"x":5}&apos;); return false;\'>foo</a>', "Basic link generation.");
-});
-
 /*test("Test wrapFunction", function() {
     var obj = {
         bonus: 1,
