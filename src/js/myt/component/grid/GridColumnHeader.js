@@ -1,27 +1,27 @@
 ((pkg) => {
-    var defaultMaxValue = 9999,
+    const defaultMaxValue = 9999,
         
         getPrevColumnHeader = (gridHeader) => gridHeader.gridController ? gridHeader.gridController.getPrevColumnHeader(gridHeader) : null,
         
         getNextColumnHeader = (gridHeader) => gridHeader.gridController ? gridHeader.gridController.getNextColumnHeader(gridHeader) : null,
         
         getGiveLeft = (gridHeader) => {
-            var hdr = getPrevColumnHeader(gridHeader);
+            const hdr = getPrevColumnHeader(gridHeader);
             return hdr ? hdr.maxValue - hdr.value + getGiveLeft(hdr) : 0;
         },
         
         getGiveRight = (gridHeader) => {
-            var hdr = getNextColumnHeader(gridHeader);
+            const hdr = getNextColumnHeader(gridHeader);
             return hdr ? hdr.maxValue - hdr.value + getGiveRight(hdr) : 0;
         },
         
         getTakeLeft = (gridHeader) => {
-            var hdr = getPrevColumnHeader(gridHeader);
+            const hdr = getPrevColumnHeader(gridHeader);
             return hdr ? hdr.minValue - hdr.value + getTakeLeft(hdr) : 0;
         },
         
         getTakeRight = (gridHeader) => {
-            var hdr = getNextColumnHeader(gridHeader);
+            const hdr = getNextColumnHeader(gridHeader);
             return hdr ? hdr.minValue - hdr.value + getTakeRight(hdr) : 0;
         },
         
@@ -36,12 +36,12 @@
             @param {number} diff - The amount to steal. Will be a negative number.
             @returns {number} - The amount of width actually stolen. */
         stealPrevWidth = (gridHeader, diff) => {
-            var hdr = getPrevColumnHeader(gridHeader),
-                usedDiff = 0;
+            const hdr = getPrevColumnHeader(gridHeader);
+            let usedDiff = 0;
             if (hdr) {
-                var newValue = hdr.value + diff;
+                const newValue = hdr.value + diff;
                 if (hdr.resizable) hdr.setValue(newValue);
-                var remainingDiff = newValue - hdr.value;
+                const remainingDiff = newValue - hdr.value;
                 usedDiff = diff - remainingDiff;
                 if (remainingDiff < 0) usedDiff += stealPrevWidth(hdr, remainingDiff);
             }
@@ -53,12 +53,12 @@
             @param {number} diff - The amount to give. Will be a positive number.
             @returns {number} - The amount of width actually given. */
         givePrevWidth = (gridHeader, diff) => {
-            var hdr = getPrevColumnHeader(gridHeader),
-                usedDiff = 0;
+            const hdr = getPrevColumnHeader(gridHeader);
+            let usedDiff = 0;
             if (hdr) {
-                var newValue = hdr.value + diff;
+                const newValue = hdr.value + diff;
                 if (hdr.resizable) hdr.setValue(newValue);
-                var remainingDiff = newValue - hdr.value;
+                const remainingDiff = newValue - hdr.value;
                 usedDiff = diff - remainingDiff;
                 if (remainingDiff > 0) usedDiff += givePrevWidth(hdr, remainingDiff);
             }
@@ -70,11 +70,11 @@
             @param {number} diff - The amount to steal. Will be a negative number.
             @returns {number} - The amount of width actually stolen. */
         stealNextWidth = (gridHeader, diff) => {
-            var hdr = getNextColumnHeader(gridHeader);
+            const hdr = getNextColumnHeader(gridHeader);
             if (hdr) {
-                var newValue = hdr.value + diff;
+                const newValue = hdr.value + diff;
                 if (hdr.resizable) hdr.setValue(newValue);
-                var remainingDiff = newValue - hdr.value;
+                const remainingDiff = newValue - hdr.value;
                 if (remainingDiff < 0) stealNextWidth(hdr, remainingDiff);
             }
         },
@@ -84,11 +84,11 @@
             @param {number} diff - The amount to give. Will be a positive number.
             @returns {number} - The amount of width actually given. */
         giveNextWidth = (gridHeader, diff) => {
-            var hdr = getNextColumnHeader(gridHeader);
+            const hdr = getNextColumnHeader(gridHeader);
             if (hdr) {
-                var newValue = hdr.value + diff;
+                const newValue = hdr.value + diff;
                 if (hdr.resizable) hdr.setValue(newValue);
-                var remainingDiff = newValue - hdr.value;
+                const remainingDiff = newValue - hdr.value;
                 if (remainingDiff > 0) giveNextWidth(hdr, remainingDiff);
             }
         };
@@ -127,8 +127,8 @@
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            var self = this,
-                gc;
+            const self = this;
+            let gc;
             
             if (attrs.minValue == null) attrs.minValue = 16;
             if (attrs.maxValue == null) attrs.maxValue = defaultMaxValue;
@@ -153,7 +153,7 @@
                 draggableAllowBubble:false
             }, [pkg.SizeToParent, pkg.Draggable, {
                 requestDragPosition: function(x, y) {
-                    var diff = x - this.x,
+                    let diff = x - this.x,
                         growAmt,
                         shrinkAmt,
                         newValue;
@@ -175,8 +175,8 @@
                     newValue = self.value + diff;
                     
                     if (self.resizable) self.setValue(newValue);
-                    var remainingDiff = newValue - self.value,
-                        stolenAmt = remainingDiff - diff,
+                    const remainingDiff = newValue - self.value;
+                    let stolenAmt = remainingDiff - diff,
                         additionalActualDiff = 0;
                     if (remainingDiff < 0) {
                         additionalActualDiff = stealPrevWidth(self, remainingDiff);
@@ -226,7 +226,7 @@
         },
         
         setGridController: function(v) {
-            var existing = this.gridController;
+            const existing = this.gridController;
             if (existing !== v) {
                 if (existing) existing.notifyRemoveColumnHeader(this);
                 this.gridController = v;
@@ -247,7 +247,7 @@
         
         /** @overrides myt.BoundedValueComponent */
         setMinValue: function(v) {
-            var self = this,
+            const self = this,
                 oldMinValue = self.minValue || 0, 
                 gc = self.gridController;
             self.callSuper(v);
@@ -256,7 +256,7 @@
         
         /** @overrides myt.BoundedValueComponent */
         setMaxValue: function(v) {
-            var self = this,
+            const self = this,
                 oldMaxValue = self.maxValue || 0,
                 gc = self.gridController;
             if (v == null) v = defaultMaxValue;
@@ -266,7 +266,7 @@
         
         /** @overrides myt.View */
         setWidth: function(v, supressEvent) {
-            var self = this,
+            const self = this,
                 cur = self.width;
             self.callSuper(v, supressEvent);
             if (self.inited && self.gridController && cur !== self.width) self.gridController.notifyColumnHeaderWidthChange(self);
@@ -274,7 +274,7 @@
         
         /** @overrides myt.View */
         setX: function(v) {
-            var self = this,
+            const self = this,
                 cur = self.x;
             self.callSuper(v);
             if (self.inited && self.gridController && cur !== self.x) self.gridController.notifyColumnHeaderXChange(self);
@@ -282,7 +282,7 @@
         
         /** @overrides myt.View */
         setVisible: function(v) {
-            var self = this,
+            const self = this,
                 cur = self.visible;
             self.callSuper(v);
             if (self.inited && self.gridController && cur !== self.visible) self.gridController.notifyColumnHeaderVisibilityChange(self);

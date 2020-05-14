@@ -53,7 +53,7 @@ myt.ListViewAnchor = new JS.Module('ListViewAnchor', {
     
     /** @overrides myt.FloatingPanelAnchor */
     showFloatingPanel: function(panelId) {
-        var fp = this.getFloatingPanel(panelId);
+        const fp = this.getFloatingPanel(panelId);
         if (fp) {
             fp.setItemConfig(this.itemConfig);
             this.callSuper(panelId);
@@ -104,17 +104,17 @@ myt.ListViewAnchor = new JS.Module('ListViewAnchor', {
     },
     
     selectLastItem: function() {
-        var fp = this.getFloatingPanel();
+        const fp = this.getFloatingPanel();
         if (fp && fp.isShown()) {
-            var item = fp.getLastFocusableItem();
+            const item = fp.getLastFocusableItem();
             if (item) item.focus();
         }
     },
     
     selectFirstItem: function() {
-        var fp = this.getFloatingPanel();
+        const fp = this.getFloatingPanel();
         if (fp && fp.isShown()) {
-            var item = fp.getFirstFocusableItem();
+            const item = fp.getFirstFocusableItem();
             if (item) item.focus();
         }
     }

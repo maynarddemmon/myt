@@ -22,7 +22,7 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.BaseInputText */
     initNode: function(parent, attrs) {
-        var self = this;
+        const self = this;
         
         if (attrs.tagName == null) attrs.tagName = 'div';
         attrs.inputType = null;
@@ -86,7 +86,7 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     /** @overrides myt.BaseInputText */
     filterInputPress: function(domEvent) {
         // Implement maxLength
-        var maxLength = this.maxLength;
+        const maxLength = this.maxLength;
         if (maxLength >= 0 && this.getCharacterCount() === maxLength) domEvent.preventDefault();
         
         this.callSuper(domEvent);
@@ -99,7 +99,7 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     
     /** @overrides myt.NativeInputWrapper */
     setDomValue: function(v) {
-        var de = this.getInnerDomElement();
+        const de = this.getInnerDomElement();
         if (de.innerHTML !== v) {
             de.innerHTML = v;
             this.sizeViewToDom();
@@ -133,7 +133,7 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     
     // Caret handling
     getCharacterCount: function() {
-        var elem = this.getInnerDomElement().firstChild;
+        const elem = this.getInnerDomElement().firstChild;
         return elem ? elem.length : 0;
     },
     
@@ -143,7 +143,7 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     
     /** @overrides myt.BaseInputText */
     getCaretPosition: function() {
-        var selection = this.getSelection();
+        const selection = this.getSelection();
         return selection ? selection.end : 0;
     },
     
@@ -180,9 +180,9 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     
     /** @overrides myt.BaseInputText */
     getSelection: function() {
-        var range;
+        let range;
         if (window.getSelection) {
-            var sel = window.getSelection();
+            const sel = window.getSelection();
             if (sel.rangeCount > 0) {
                 // Sometimes when deleting we get an unexpected node
                 if (sel.extentNode === this.getInnerDomElement()) return null;
@@ -204,15 +204,15 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     /** @overrides myt.BaseInputText */
     setSelection: function(selection) {
         if (selection) {
-            var startElem = selection.startElem,
+            const startElem = selection.startElem,
                 endElem = selection.endElem;
             if (startElem && startElem.parentNode && endElem && endElem.parentNode) {
-                var range = document.createRange();
+                const range = document.createRange();
                 range.setStart(startElem, Math.min(selection.start, startElem.length));
                 range.setEnd(endElem, Math.min(selection.end, endElem.length));
                 
                 if (window.getSelection) {
-                    var sel = window.getSelection();
+                    const sel = window.getSelection();
                     if (sel.rangeCount > 0) sel.removeAllRanges();
                     sel.addRange(range);
                 } else if (document.selection) {

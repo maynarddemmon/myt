@@ -22,7 +22,9 @@ myt.BAGMembership = new JS.Module('BAGMembership', {
     destroyAfterOrphaning: function() {
         this.callSuper();
         
-        var groups = this.__bags, i = groups.length, group;
+        const groups = this.__bags;
+        let i = groups.length,
+            group;
         while (i) {
             group = groups[--i];
             this.removeFromBAG(group.attrName, group.groupId);
@@ -32,7 +34,8 @@ myt.BAGMembership = new JS.Module('BAGMembership', {
     
     // Methods /////////////////////////////////////////////////////////////////
     isRegisteredWithBAG: function(group) {
-        var groups = this.__bags, i = groups.length;
+        const groups = this.__bags;
+        let i = groups.length;
         while (i) {
             if (groups[--i] === group) return true;
         }
@@ -49,7 +52,7 @@ myt.BAGMembership = new JS.Module('BAGMembership', {
         @param groupId:string
         @returns {undefined} */
     addToBAG: function(attrName, groupId) {
-        var group = this.getBAG(attrName, groupId);
+        const group = this.getBAG(attrName, groupId);
         if (!this.isRegisteredWithBAG(group)) {
             this.__bags.push(group);
             group.register(this);
@@ -67,9 +70,12 @@ myt.BAGMembership = new JS.Module('BAGMembership', {
         @param groupId:string
         @returns {undefined} */
     removeFromBAG: function(attrName, groupId) {
-        var group = this.getBAG(attrName, groupId);
+        const group = this.getBAG(attrName, groupId);
         if (this.isRegisteredWithBAG(group)) {
-            var groups = this.__bags, i = groups.length, g, detach = true;
+            const groups = this.__bags;
+            let i = groups.length,
+                g,
+                detach = true;
             while (i) {
                 g = groups[--i];
                 if (g === group) {
@@ -90,9 +96,11 @@ myt.BAGMembership = new JS.Module('BAGMembership', {
         @param {!Object} event
         @returns {undefined} */
     __updateForBAG: function(event) {
-        var type = event.type,
+        const type = event.type,
             value = event.value,
-            groups = this.__bags, i = groups.length, group;
+            groups = this.__bags;
+        let i = groups.length,
+            group;
         while (i) {
             group = groups[--i];
             if (group.attrName === type) {

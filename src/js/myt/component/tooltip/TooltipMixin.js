@@ -43,7 +43,7 @@ myt.TooltipMixin = new JS.Module('TooltipMixin', {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.MouseOver. */
     doSmoothMouseOver: function(isOver) {
-        var self = this,
+        const self = this,
             M = myt,
             g = M.global,
             tooltip = self.tooltip;
@@ -52,8 +52,8 @@ myt.TooltipMixin = new JS.Module('TooltipMixin', {
         
         if (isOver && tooltip) {
             // Use configured class or default if none defined.
-            var tipClass = self.tipClass || M.TooltipMixin.DEFAULT_TIP_CLASS,
-                tooltipView = g.tooltipView;
+            const tipClass = self.tipClass || M.TooltipMixin.DEFAULT_TIP_CLASS;
+            let tooltipView = g.tooltipView;
             
             // Destroy tip if it's not the correct class.
             if (tooltipView && !(tooltipView instanceof tipClass)) {
@@ -65,7 +65,7 @@ myt.TooltipMixin = new JS.Module('TooltipMixin', {
             // Create new instance.
             if (!tooltipView) {
                 // Create tooltip div if necessary
-                var elem = document.getElementById("tooltipDiv");
+                let elem = document.getElementById("tooltipDiv");
                 if (!elem) {
                     elem = M.DomElementProxy.createDomElement('div', {position:'absolute'});
                     

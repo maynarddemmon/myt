@@ -25,7 +25,7 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
-        var self = this;
+        const self = this;
         
         self.restoreFocus = true;
         
@@ -54,7 +54,7 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
     doBeforeAdoption: function() {
         this.callSuper();
         
-        var M = myt,
+        const M = myt,
             D = M.Dimmer;
         new M.View(this, {
             name:'overlay', ignorePlacement:true, 
@@ -88,7 +88,7 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
     /** Shows the dimmer and remembers the focus location.
         @returns {undefined} */
     show: function() {
-        var self = this,
+        const self = this,
             gf = myt.global.focus;
         self.prevFocus = gf.focusedView || gf.focusedDom;
         

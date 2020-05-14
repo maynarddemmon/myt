@@ -15,7 +15,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Destructible */
     destroy: function() {
-        var actives = this.__getActives();
+        const actives = this.__getActives();
         if (actives) actives.length = 0;
         
         this.callSuper();
@@ -33,15 +33,15 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
     
     /** @overrides myt.AbstractPool */
     getInstance: function() {
-        var instance = this.callSuper();
+        const instance = this.callSuper();
         this.__getActives(true).push(instance);
         return instance;
     },
     
     /** @overrides myt.AbstractPool */
     putInstance: function(obj) {
-        var actives = this.__getActives(),
-            i,
+        const actives = this.__getActives();
+        let i,
             warningType;
         if (actives) {
             i = actives.length;
@@ -64,12 +64,12 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
             results.
         @returns {!Array} */
     getActives: function(filterFunc) {
-        var actives = this.__getActives();
+        const actives = this.__getActives();
         if (actives) {
             if (filterFunc) {
-                var retval = [],
-                    len = actives.length,
-                    i = 0,
+                const retval = [],
+                    len = actives.length;
+                let i = 0,
                     active;
                 for (; len > i;) {
                     active = actives[i++];
@@ -85,9 +85,9 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
     /** Puts all the active instances back in the pool.
         @returns {undefined} */
     putActives: function() {
-        var actives = this.__getActives();
+        const actives = this.__getActives();
         if (actives) {
-            var i = actives.length;
+            let i = actives.length;
             while (i) this.putInstance(actives[--i]);
         }
     }

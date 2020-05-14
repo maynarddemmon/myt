@@ -4,7 +4,7 @@
      * Maynard Demmon <maynarddemmon@gmail.com>
      * @copyright Copyright (c) 2012-2020 Maynard Demmon and contributors
      * Myt: A simple javascript UI framework
-     * Version: 20200416.1227
+     * Version: 20200514.1444
      * MIT License
      * 
      * Parts of the Software incorporates code from the following open-source projects:
@@ -28,10 +28,10 @@
         }
     }
     
-    var 
-        /* Used to generate globally unique IDs. */
-        GUID_COUNTER = 0,
-        
+    /* Used to generate globally unique IDs. */
+    let GUID_COUNTER = 0;
+    
+    const 
         /* Font functionality */
         fontTargets = {},
         fontLoaded = {
@@ -44,7 +44,7 @@
         docFonts = document.fonts,
         
         notifyFontLoaded = (fontFace) => {
-            var fontName = fontFace.family + ' ' + fontFace.weight,
+            let fontName = fontFace.family + ' ' + fontFace.weight,
                 targets;
             
             // Fix for Firefox and FontAwesome because of garbage returned in
@@ -65,7 +65,7 @@
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was
                 created. */
-            version:20200416.1227,
+            version:20200514.1444,
             
             /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
                 should be set by the page that includes this script. */
@@ -117,9 +117,9 @@
                 
                 scope = scope || global;
                 
-                var parts = Array.isArray(objName) ? objName : objName.split("."),
-                    i = 0, 
+                const parts = Array.isArray(objName) ? objName : objName.split("."), 
                     len = parts.length;
+                let i = 0;
                 for (; i < len; ++i) {
                     scope = scope[parts[i]];
                     if (scope === undefined) {
@@ -163,15 +163,10 @@
                 @param {...*} [params] - The parameters for the template.
                 @returns {string} A populated string. */
             fillTextTemplate: function(template, ...params) {
-                var param,
-                    i,
-                    len;
-                
                 if (template == null) return '';
                 
-                i = 0;
-                len = params.length;
-                for (; len > i; ++i) {
+                const len = params.length;
+                for (let i = 0, param; len > i; ++i) {
                     param = params[i];
                     template = template.split("{" + i + "}").join(param == null ? '' : param);
                 }
@@ -192,7 +187,7 @@
                     and provided to the link handler.
                 @returns {string} */
             generateLink: (text, callbackMethodName, attrs, data) => {
-                var optAttrs = '',
+                let optAttrs = '',
                     name;
                 if (attrs) {
                     for (name in attrs) optAttrs += ' ' + name + '="' + attrs[name] + '"';
@@ -211,7 +206,7 @@
                 @param {string} data
                 @returns {undefined} */
             __handleGeneratedLink: (elem, callbackMethodName, data) => {
-                var model,
+                let model,
                     value;
                 while (elem) {
                     model = elem.model;
@@ -240,19 +235,19 @@
                     script has already been loaded. */
             loadScript: function(src, callback, noCacheBust) {
                 // Prevent reloading the same script
-                var loadedScripts = this._loadedScripts || (this._loadedScripts = {});
+                const loadedScripts = this._loadedScripts || (this._loadedScripts = {});
                 if (loadedScripts[src]) {
                     console.warn("script already loaded for src", src);
                     return null;
                 } else {
                     loadedScripts[src] = true;
                     
-                    var s = document.createElement('script');
+                    const s = document.createElement('script');
                     s.type = 'text/javascript';
                     s.async = false;
                     
                     if (callback) {
-                        var r = false;
+                        let r = false;
                         s.onload = s.onreadystatechange = function() {
                             if (!r && (!this.readyState || this.readyState === 'complete')) {
                                 // Prevent refiring callback
@@ -284,7 +279,7 @@
                     Defaults to 'error'.
                 @returns {undefined} */
             dumpStack: (err, type) => {
-                var msg;
+                let msg;
                 if (typeof err === 'string') {
                     msg = err;
                     err = null;
@@ -303,7 +298,7 @@
                           value towards a value very close to 1.
                 @returns {number} a random number between 0 and almost 1. */
             getRandom: (func) => {
-                var v = Math.random();
+                let v = Math.random();
                 if (func) {
                     v = func(v);
                     
@@ -325,7 +320,7 @@
                 @returns {number} a number between min and max. */
             getRandomArbitrary: (min, max, func) => {
                 if (min > max) {
-                    var tmp = min;
+                    const tmp = min;
                     min = max;
                     max = tmp;
                 }
@@ -340,7 +335,7 @@
                 @returns {number} a number between min and max. */
             getRandomInt: (min, max, func) => {
                 if (min > max) {
-                    var tmp = min;
+                    const tmp = min;
                     min = max;
                     max = tmp;
                 }
@@ -355,7 +350,7 @@
                     between a and b. Defaults to 0.000001 if not provided.
                 @returns {boolean} true if equal, false otherwise. */
             areFloatsEqual: (a, b, epsilon) => {
-                var A = Math.abs(a), B = Math.abs(b);
+                const A = Math.abs(a), B = Math.abs(b);
                 epsilon = epsilon ? Math.abs(epsilon) : 0.000001;
                 return Math.abs(a - b) <= (A > B ? B : A) * epsilon;
             },
@@ -368,7 +363,7 @@
             areArraysEqual: (a, b) => {
                 if (a !== b) {
                     if (a == null || b == null) return false;
-                    var i = a.length;
+                    let i = a.length;
                     if (i !== b.length) return false;
                     
                     while (i) {
@@ -385,7 +380,8 @@
             areObjectsEqual: (a, b) => {
                 if (a !== b) {
                     if (a == null || b == null) return false;
-                    for (var key in a) if (a[key] !== b[key]) return false;
+                    let key;
+                    for (key in a) if (a[key] !== b[key]) return false;
                     for (key in b) if (a[key] !== b[key]) return false;
                 }
                 return true;
@@ -402,9 +398,9 @@
             
             // Fonts
             loadFontFaces: (fontList, callback) => {
-                var fonts = [];
+                const fonts = [];
                 fontList.forEach(fontInfo => {
-                    var fontFace = new FontFace(fontInfo.family, 'url(' + fontInfo.url + ')', fontInfo.options);
+                    const fontFace = new FontFace(fontInfo.family, 'url(' + fontInfo.url + ')', fontInfo.options);
                     fonts.push(fontFace.load());
                 });
                 
@@ -418,7 +414,7 @@
             },
             
             loadFontFace: (fontName, fontUrl, fontOptions={}, callback) => {
-                var fontFace = new FontFace(fontName, 'url(' + fontUrl + ')', fontOptions);
+                const fontFace = new FontFace(fontName, 'url(' + fontUrl + ')', fontOptions);
                 fontFace.loaded.then((loadedFontFace) => {
                     docFonts.add(loadedFontFace);
                     notifyFontLoaded(loadedFontFace);
@@ -447,7 +443,7 @@
                 @returns {undefined} */
             loadCSSFonts: (fontUrls) => {
                 (fontUrls || []).forEach(fontUrl => {
-                    var link = document.createElement('link');
+                    const link = document.createElement('link');
                     link.rel = 'stylesheet';
                     link.href = fontUrl;
                     document.head.appendChild(link);
@@ -458,7 +454,7 @@
             /** Creates a "style" dom element.
                 @returns {!Object} */
             createStylesheet: () => {
-                var style = document.createElement('style');
+                const style = document.createElement('style');
                 document.head.appendChild(style);
                 return style.sheet;
             },
@@ -472,7 +468,7 @@
             },
             
             removeCSSRules: (sheet) => {
-                var i = sheet.cssRules.length;
+                let i = sheet.cssRules.length;
                 while (i) {
                     i--;
                     if ("deleteRule" in sheet) {
@@ -485,8 +481,8 @@
             
             createInputPlaceholderCSSRule: (view, color, fontFamily) => {
                 // Make sure the view has a dom ID for rule targeting
-                var domId = view.getOuterDomElement().id || (view.getOuterDomElement().id = 'id' + myt.generateGuid()),
-                    sheet = view.__sheet,
+                const domId = view.getOuterDomElement().id || (view.getOuterDomElement().id = 'id' + myt.generateGuid());
+                let sheet = view.__sheet,
                     rules = [];
                 
                 // Clear existing sheet if it exists or create a new sheet
@@ -522,7 +518,7 @@
                 @returns {!Function} - The memoized function. */
             memoize: (f) => {
                 return function() {
-                    var hash = JSON.stringify(arguments),
+                    const hash = JSON.stringify(arguments),
                         cache = f.__cache || (f.__cache = {});
                     return (hash in cache) ? cache[hash] : cache[hash] = f.apply(this, arguments);
                 };
@@ -542,9 +538,9 @@
                     subsequent calls.
                 @returns {!Function} - The debounced function. */
             debounce: function(func, wait, immediate) {
-                var timeout;
+                let timeout;
                 return function() {
-                    var context = this,
+                    const context = this,
                         args = arguments,
                         later = function() {
                             timeout = null;
@@ -572,11 +568,11 @@
                     attribute was 'locked' this would be 'lockedCounter'.
                 @returns {boolean} - True if creation succeeded, false otherwise. */
             createFixedThresholdCounter: (scope, thresholdValue, exceededAttrName, counterAttrName) => {
-                var genNameFunc = myt.AccessorSupport.generateName,
-                    incrName,
-                    decrName,
+                const genNameFunc = myt.AccessorSupport.generateName,
                     isModuleOrClass = typeof scope === 'function' || scope instanceof JS.Module,
                     mod = {};
+                let incrName,
+                    decrName;
                 counterAttrName = counterAttrName || genNameFunc('counter', exceededAttrName);
                 
                 incrName = genNameFunc(counterAttrName, 'increment');
@@ -596,7 +592,7 @@
                 /** Increments the counter attribute on the scope object by 1.
                     @returns {undefined} */
                 mod[incrName] = function() {
-                    var value = this[counterAttrName] + 1;
+                    const value = this[counterAttrName] + 1;
                     this[counterAttrName] = value;
                     this.fireEvent(counterAttrName, value);
                     if (value === thresholdValue) this.set(exceededAttrName, true);
@@ -605,9 +601,9 @@
                 /** Decrements the counter attribute on the scope object by 1.
                     @returns {undefined} */
                 mod[decrName] = function() {
-                    var curValue = this[counterAttrName];
+                    const curValue = this[counterAttrName];
                     if (curValue === 0) return;
-                    var value = curValue - 1;
+                    const value = curValue - 1;
                     this[counterAttrName] = value;
                     this.fireEvent(counterAttrName, value);
                     if (curValue === thresholdValue) this.set(exceededAttrName, false);
@@ -621,8 +617,8 @@
             
             // Fetch
             makeURLSearchParams: (params={}) => {
-                var urlSearchParams = new URLSearchParams(),
-                    key,
+                const urlSearchParams = new URLSearchParams();
+                let key,
                     value;
                 for (key in params) {
                     value = params[key];
@@ -654,7 +650,7 @@
                         } catch (ex) {
                             // Ensure errors from successFunc get rethrown as
                             // FetchError with the original stack trace.
-                            var fetchError = new FetchError(200, url, ex.message);
+                            const fetchError = new FetchError(200, url, ex.message);
                             fetchError.stack = ex.stack;
                             throw fetchError;
                         }
@@ -665,7 +661,7 @@
                     if (errorFunc) {
                         // Convert non FetchErrors into FetchErrors
                         if (error.name !== 'FetchError') {
-                            var fetchError = new FetchError(0, url, error.message);
+                            const fetchError = new FetchError(0, url, error.message);
                             fetchError.stack = error.stack;
                             error = fetchError;
                         }

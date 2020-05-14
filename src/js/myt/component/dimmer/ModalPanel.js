@@ -46,7 +46,7 @@ myt.ModalPanel = new JS.Class('ModalPanel', myt.Dimmer, {
         
         if (attrs.sizingStrategy == null) attrs.sizingStrategy = 'children';
         
-        var MP = myt.ModalPanel;
+        const MP = myt.ModalPanel;
         
         // Used for parent sizing strategy
         if (attrs.marginTop == null) attrs.marginTop = MP.DEFAULT_MARGIN_TOP;
@@ -62,7 +62,7 @@ myt.ModalPanel = new JS.Class('ModalPanel', myt.Dimmer, {
     },
     
     doBeforeAdoption: function() {
-        var self = this,
+        const self = this,
             M = myt,
             V = M.View,
             viewAttrs = {name:'content', ignorePlacement:true},

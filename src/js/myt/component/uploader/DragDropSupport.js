@@ -72,7 +72,8 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
         @returns {undefined} */
     handleFiles: function(files, event) {
         if (files !== undefined) {
-            var i = files.length, file;
+            let i = files.length,
+                file;
             while (i) {
                 file = this.filterFiles(files[--i]);
                 if (file) this.handleDroppedFile(file, event);

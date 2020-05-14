@@ -71,7 +71,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
         
         // Height can change with width change when wrapping occurs.
         if (v !== 'auto') {
-            var ws = this.whiteSpace;
+            const ws = this.whiteSpace;
             if (ws === 'normal' || ws === 'pre-line' || ws === 'pre-wrap') {
                 this.sizeViewToDom();
             }
@@ -186,13 +186,13 @@ myt.TextSupport = new JS.Module('TextSupport', {
             the shadow to give the shadow extra opacity.
         @returns {undefined} */
     showTextShadow: function(x, y, blur, color, extraStrength) {
-        var shadow = (x || 0) + 'px ' + 
+        let shadow = (x || 0) + 'px ' + 
             (y || 0) + 'px ' + 
             (blur != null ? blur : 2) + 'px ' + 
             (color || '#000000');
             
         if (extraStrength > 0) {
-            var value = [shadow];
+            const value = [shadow];
             while (extraStrength--) value.push(shadow);
             shadow = value.join(',');
         }

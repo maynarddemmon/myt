@@ -22,15 +22,15 @@ myt.Frame = new JS.Class('Frame', myt.View, {
         
         this.callSuper(parent, attrs);
         
-        var gm = myt.global.mouse;
+        const gm = myt.global.mouse;
         this.attachToDom(gm, '__doMouseDown', 'mousedown', true);
         this.attachToDom(gm, '__doMouseUp', 'mouseup', true);
     },
     
     /** @overrides myt.View */
     createOurDomElement: function(parent) {
-        var elements = this.callSuper(parent),
-            innerElem;
+        const elements = this.callSuper(parent);
+        let innerElem;
         if (Array.isArray(elements)) {
             innerElem = elements[1];
         } else {

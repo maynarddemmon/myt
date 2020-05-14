@@ -10,7 +10,8 @@
             underlying dom element and is not generally supported.
             See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#attr-type
             for more info and a list of allowed values.
-*/
+    
+    @class */
 myt.NativeInputWrapper = new JS.Class('NativeInputWrapper', myt.View, {
     include: [myt.Disableable, myt.InputObservable],
     
@@ -29,8 +30,8 @@ myt.NativeInputWrapper = new JS.Class('NativeInputWrapper', myt.View, {
     
     /** @overrides myt.View */
     createOurDomElement: function(parent) {
-        var elements = this.callSuper(parent),
-            innerElem;
+        const elements = this.callSuper(parent);
+        let innerElem;
         if (this.inputType) {
             if (Array.isArray(elements)) {
                 innerElem = elements[1];
@@ -72,7 +73,7 @@ myt.NativeInputWrapper = new JS.Class('NativeInputWrapper', myt.View, {
         @param v:* The value to set.
         @returns {undefined} */
     setDomValue: function(v) {
-        var de = this.getInnerDomElement();
+        const de = this.getInnerDomElement();
         if (de.value !== v) de.value = v;
     }
 });

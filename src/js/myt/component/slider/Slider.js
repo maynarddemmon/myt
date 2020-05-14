@@ -34,7 +34,7 @@ myt.Slider = new JS.Class('Slider', myt.BaseSlider, {
     /** @overrides
         Update the thumb position if the width changes. */
     setWidth: function(v, supressEvent) {
-        var existing = this.width;
+        const existing = this.width;
         this.callSuper(v, supressEvent);
         if (this.inited && this.axis === 'x' && this.width !== existing) this._syncThumbToValue(this.thumb, this.getValue());
     },
@@ -42,7 +42,7 @@ myt.Slider = new JS.Class('Slider', myt.BaseSlider, {
     /** @overrides
         Update the thumb position if the height changes. */
     setHeight: function(v, supressEvent) {
-        var existing = this.height;
+        const existing = this.height;
         this.callSuper(v, supressEvent);
         if (this.inited && this.axis === 'y' && this.height !== existing) this._syncThumbToValue(this.thumb, this.getValue());
     },

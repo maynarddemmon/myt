@@ -1,12 +1,12 @@
 ((pkg) => {
-    var G = pkg.global,
+    const G = pkg.global,
         globalMouse = G.mouse,
         globalKeys = G.keys,
         
         /*  @param {!Object} draggable
             @returns {undefined} */
         requestDragPosition = (draggable) => {
-            var pos = draggable.__lastMousePosition;
+            const pos = draggable.__lastMousePosition;
             draggable.requestDragPosition(
                 pos.x - draggable.dragInitX + draggable.dragOffsetX, 
                 pos.y - draggable.dragInitY + draggable.dragOffsetY
@@ -53,8 +53,8 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.View */
         initNode: function(parent, attrs) {
-            var self = this,
-                isDraggable = true;
+            const self = this;
+            let isDraggable = true;
             
             self.isDraggable = self.isDragging = false;
             self.draggableAllowBubble = true;
@@ -75,8 +75,8 @@
         
         // Accessors ///////////////////////////////////////////////////////////
         setIsDraggable: function(v) {
-            var self = this,
-                func,
+            const self = this;
+            let func,
                 dragviews,
                 dragview,
                 i;
@@ -146,7 +146,7 @@
             @param {!Object} event
             @returns {undefined} */
         __doMouseDown: function(event) {
-            var self = this,
+            const self = this,
                 pos = pkg.MouseObservable.getMouseFromEvent(event),
                 de = self.getOuterDomElement();
             self.dragInitX = pos.x - de.offsetLeft;
@@ -187,7 +187,7 @@
             @param {!Object} event
             @returns {undefined} */
         __doDragCheck: function(event) {
-            var self = this,
+            const self = this,
                 pos = pkg.MouseObservable.getMouseFromEvent(event),
                 distance = pkg.Geometry.measureDistance(pos.x, pos.y, self.dragInitX + self.x, self.dragInitY + self.y);
             if (distance >= self.distanceBeforeDrag) {
@@ -202,7 +202,7 @@
             @param {!Object} event - The event the mouse event when the drag started.
             @returns {undefined} */
         startDrag: function(event) {
-            var self = this;
+            const self = this;
             
             if (self.centerOnMouse) {
                 self.syncTo(self, '__updateDragInitX', 'width');
@@ -244,7 +244,7 @@
                 aborted.
             @returns {undefined} */
         stopDrag: function(event, isAbort) {
-            var self = this;
+            const self = this;
             self.detachFromDom(globalMouse, '__doMouseUp', 'mouseup', true);
             self.detachFromDom(globalMouse, 'updateDrag', 'mousemove', true);
             if (self.centerOnMouse) {

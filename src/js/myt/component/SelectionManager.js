@@ -1,5 +1,5 @@
 ((pkg) => {
-    var JSModule = JS.Module,
+    const JSModule = JS.Module,
         globalKeys = pkg.global.keys,
     
         /** Makes an object selectable.
@@ -125,9 +125,9 @@
             /** Gets the currently selected items.
                 @returns {!Array} The selected items. */
             getSelected: function() {
-                var retval = [], 
-                    items = this.__selected, 
-                    key;
+                const retval = [], 
+                    items = this.__selected;
+                let key;
                 for (key in items) retval.push(items[key]);
                 return retval;
             },
@@ -164,7 +164,7 @@
                 @param {!Object} item - The item to test.
                 @returns {boolean} True if selection is allowed, false otherwise. */
             canSelectItem: function(item) {
-                var ms = this.maxSelected, 
+                const ms = this.maxSelected, 
                     sc = this.selectedCount;
                 
                 if (ms === 0) {
@@ -185,8 +185,8 @@
             /** Selects all items that can be selected.
                 @returns {undefined} */
             selectAll: function() {
-                var items = this.getSelectableItems(), 
-                    i = items.length;
+                const items = this.getSelectableItems();
+                let i = items.length;
                 while (i) this.select(items[--i]);
             },
             
@@ -228,8 +228,8 @@
             /** Deselects all selected items.
                 @returns {undefined} */
             deselectAll: function() {
-                var items = this.__selected, 
-                    key;
+                const items = this.__selected;
+                let key;
                 for (key in items) this.deselect(items[key]);
             },
             
@@ -249,9 +249,9 @@
                 myt.Selectable subviews.
                 @returns {!Array} */
             getManagedItems: function() {
-                var retval = [], 
-                    svs = this.getSubviews(), 
-                    i = svs.length, 
+                const retval = [], 
+                    svs = this.getSubviews();
+                let i = svs.length, 
                     sv;
                 while (i) {
                     sv = svs[--i];
@@ -263,8 +263,8 @@
             /** Gets a list of items that can currently be selected by this manager.
                 @returns {!Array} */
             getSelectableItems: function() {
-                var items = this.getManagedItems(), 
-                    i = items.length;
+                const items = this.getManagedItems();
+                let i = items.length;
                 while (i) {
                     if (!items[--i].canSelect(this)) items.splice(i, 1);
                 }
@@ -275,10 +275,10 @@
                 @param {string} itemSelectionId
                 @returns {?Object} - The myt.Selectable or null if not found. */
             getSelectableItem: function(itemSelectionId) {
-                var items = this.getSelectableItems(), 
-                    i = items.length, 
-                    item,
+                const items = this.getSelectableItems(),
                     selectionAttr = this.itemSelectionId;
+                let i = items.length, 
+                    item;
                 while (i) {
                     item = items[--i];
                     if (item[selectionAttr] === itemSelectionId) return item;

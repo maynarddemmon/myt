@@ -64,7 +64,7 @@ myt.BaseSlider = new JS.Class('BaseSlider', myt.View, {
     
     // Methods /////////////////////////////////////////////////////////////////
     convertValueToPixels: function(v) {
-        var self = this,
+        const self = this,
             minV = self.minValue, ti = self.trackInset,
             pxRange = (self.axis === 'x' ? self.width : self.height) - ti - self.trackOutset,
             valueRange = self.maxValue - minV;
@@ -72,7 +72,7 @@ myt.BaseSlider = new JS.Class('BaseSlider', myt.View, {
     },
     
     convertPixelsToValue: function(px) {
-        var self = this,
+        const self = this,
             minV = self.minValue, ti = self.trackInset,
             pxRange = (self.axis === 'x' ? self.width : self.height) - ti - self.trackOutset,
             valueRange = self.maxValue - minV;

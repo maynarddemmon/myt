@@ -62,7 +62,7 @@ myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
         if (this.x !== v) {
             this.callSuper(v);
             
-            var p = this.parent;
+            const p = this.parent;
             if (p.axis === 'x') p._syncValueToThumb(this);
         }
     },
@@ -72,7 +72,7 @@ myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
         if (this.y !== v) {
             this.callSuper(v);
             
-            var p = this.parent;
+            const p = this.parent;
             if (p.axis === 'y') p._syncValueToThumb(this);
         }
     },
@@ -82,10 +82,12 @@ myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
     /** @overrides myt.Draggable */
     requestDragPosition: function(x, y) {
         if (!this.disabled) {
-            var parent = this.parent,
+            const parent = this.parent,
                 minPx = parent.getMinPixelValueForThumb(this),
-                maxPx = parent.getMaxPixelValueForThumb(this),
-                halfSize, pos, func;
+                maxPx = parent.getMaxPixelValueForThumb(this);
+            let halfSize,
+                pos,
+                func;
             
             if (parent.axis === 'x') {
                 halfSize = this.width / 2;
@@ -103,7 +105,7 @@ myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
     
     /** @overrides myt.Button. */
     doActivationKeyDown: function(key, isRepeat) {
-        var parent = this.parent;
+        const parent = this.parent;
         switch (key) {
             case 37: // Left
                 parent.nudgeValueLeft(this);

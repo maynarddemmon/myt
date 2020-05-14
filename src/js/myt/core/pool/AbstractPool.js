@@ -24,7 +24,7 @@ myt.AbstractPool = new JS.Class('AbstractPool', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Destructible */
     destroy: function() {
-        var objPool = this.__getObjPool();
+        const objPool = this.__getObjPool();
         if (objPool) objPool.length = 0;
         
         this.callSuper();
@@ -45,7 +45,7 @@ myt.AbstractPool = new JS.Class('AbstractPool', {
         Note: these have no effect if an object already exists in the pool.
         @returns {!Object} */
     getInstance: function() {
-        var objPool = this.__getObjPool(true);
+        const objPool = this.__getObjPool(true);
         return objPool.length ? objPool.pop() : this.createInstance.apply(this, arguments);
     },
     
@@ -78,9 +78,10 @@ myt.AbstractPool = new JS.Class('AbstractPool', {
         have a destroy function.
         @returns {undefined} */
     destroyPooledInstances: function() {
-        var objPool = this.__getObjPool();
+        const objPool = this.__getObjPool();
         if (objPool) {
-            var i = objPool.length, obj;
+            let i = objPool.length,
+                obj;
             while (i) {
                 obj = objPool[--i];
                 if (typeof obj.destroy === 'function') obj.destroy();

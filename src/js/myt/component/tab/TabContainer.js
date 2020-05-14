@@ -26,7 +26,7 @@ myt.TabContainer = new JS.Module('TabContainer', {
     initNode: function(parent, attrs) {
         this.__tabs = [];
         
-        var TC = myt.TabContainer;
+        const TC = myt.TabContainer;
         if (attrs.spacing == null) attrs.spacing = TC.DEFAULT_SPACING;
         if (attrs.inset == null) attrs.inset = TC.DEFAULT_INSET;
         
@@ -37,7 +37,7 @@ myt.TabContainer = new JS.Module('TabContainer', {
         
         this.callSuper(parent, attrs);
         
-        var axis;
+        let axis;
         switch (this.location) {
             case 'top':
             case 'bottom':
@@ -111,7 +111,8 @@ myt.TabContainer = new JS.Module('TabContainer', {
     /** @overrides myt.View */
     subnodeRemoved: function(node) {
         if (node.isA(myt.TabMixin)) {
-            var tabs = this.__tabs, i = tabs.length;
+            const tabs = this.__tabs;
+            let i = tabs.length;
             while (i) {
                 if (tabs[--i] === node) {
                     tabs.splice(i, 1);

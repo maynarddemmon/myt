@@ -22,7 +22,7 @@ myt.VerticalThreePanel = new JS.Class('VerticalThreePanel', {
     },
     
     doBeforeAdoption: function() {
-        var self = this,
+        const self = this,
             m = myt;
             
         self.callSuper();
@@ -31,7 +31,7 @@ myt.VerticalThreePanel = new JS.Class('VerticalThreePanel', {
             name:'first', imageUrl:self.firstImageUrl, ignoreLayout:true
         });
         
-        var second = new m.Image(self, {
+        const second = new m.Image(self, {
             name:'second', layoutHint:1, imageUrl:self.secondImageUrl, 
             ignoreLayout:true, useNaturalSize:false, calculateNaturalSize:true
         });
@@ -42,7 +42,7 @@ myt.VerticalThreePanel = new JS.Class('VerticalThreePanel', {
             name:'third', imageUrl:self.thirdImageUrl, ignoreLayout:true
         });
         
-        var ignoreMixin = [m.ThreePanel.IGNORE_FUNCTION_MIXIN];
+        const ignoreMixin = [m.ThreePanel.IGNORE_FUNCTION_MIXIN];
         new m.ResizeLayout(self, {name:'resizeLayout', axis:'y'}, ignoreMixin);
         new m.SizeToChildren(self, {axis:'x'}, ignoreMixin);
         
@@ -89,7 +89,7 @@ myt.VerticalThreePanel = new JS.Class('VerticalThreePanel', {
         @param {!Object} event
         @returns {undefined} */
     __updateSize: function(event) {
-        var v = this.second;
+        const v = this.second;
         v.setWidth(v.naturalWidth);
         this.__updateImageSize();
     },
@@ -98,7 +98,7 @@ myt.VerticalThreePanel = new JS.Class('VerticalThreePanel', {
         @param {!Object} event
         @returns {undefined} */
     __updateImageSize: function(event) {
-        var v = this.second;
+        const v = this.second;
         v.setImageSize(this.repeat ? undefined : v.width + 'px ' + v.height + 'px');
     },
     

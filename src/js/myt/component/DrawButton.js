@@ -44,7 +44,7 @@ myt.DrawButton = new JS.Class('DrawButton', myt.Canvas, {
         this returns the bounds of this view.
         @returns an object with x, y, w and h properties. */
     getDrawBounds: function() {
-        var bounds = this.drawBounds;
+        const bounds = this.drawBounds;
         bounds.w = this.width;
         bounds.h = this.height;
         return bounds;

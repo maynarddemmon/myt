@@ -75,7 +75,7 @@ myt.MouseOver = new JS.Module('MouseOver', {
         
         // Only call doSmoothOver if the over/out state has changed since the
         // last time it was called.
-        var isOver = this.mouseOver;
+        const isOver = this.mouseOver;
         if (this.__lastOverIdleValue !== isOver) {
             this.__lastOverIdleValue = isOver;
             this.doSmoothMouseOver(isOver);

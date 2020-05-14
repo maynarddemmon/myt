@@ -15,7 +15,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
     // Accessors ///////////////////////////////////////////////////////////////
     /** @overrides */
     setParent: function(v) {
-        var self = this,
+        const self = this,
             oldParentIsFlexBox = self.isChildOfFlexBox();
         
         self.callSuper(v);
@@ -30,7 +30,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
     /** @private
         @returns {undefined} */
     _syncDomToModel: function() {
-        var self = this,
+        const self = this,
             s = self.getOuterDomStyle();
         if (s.width !== 'auto') s.width = self.width + 'px';
         if (s.height !== 'auto') s.height = self.height + 'px';
@@ -91,7 +91,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
             this.alignSelf = v;
             
             // Alias common unexpected values when assigning to the dom
-            var domValue = v;
+            let domValue = v;
             switch (domValue) {
                 case 'start':
                     domValue = 'flex-start';
@@ -113,7 +113,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
     },
     
     syncModelToOuterBounds: function() {
-        var de = this.getOuterDomElement();
+        const de = this.getOuterDomElement();
         this.__syncModelToOuterBoundsWidth(de);
         this.__syncModelToOuterBoundsHeight(de);
     },
@@ -122,7 +122,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
         @param {!Object} de - A dom element.
         @returns {undefined} */
     __syncModelToOuterBoundsWidth: function(de) {
-        var ids = this.getInnerDomStyle();
+        const ids = this.getInnerDomStyle();
         if (!de) de = this.getOuterDomElement();
         if (ids.width === 'auto') {
             // We're sizing to our contents so first sync the outer dom style 
@@ -140,7 +140,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
         @param {!Object} de - A dom element.
         @returns {undefined} */
     __syncModelToOuterBoundsHeight: function(de) {
-        var ids = this.getInnerDomStyle();
+        const ids = this.getInnerDomStyle();
         if (!de) de = this.getOuterDomElement();
         if (ids.height === 'auto') {
             // We're sizing to our contents so first sync the outer dom style 
@@ -194,11 +194,11 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
     
     /** @overrides */
     createOurDomElement: function(parent) {
-        var outerElem = this.callSuper(parent);
+        const outerElem = this.callSuper(parent);
         
         // We need an inner dom element that is position relative to mask the
         // flex box behavior for descendants of this flex box child.
-        var innerElem = document.createElement('div');
+        const innerElem = document.createElement('div');
         innerElem.style.position = 'relative';
         outerElem.appendChild(innerElem);
         

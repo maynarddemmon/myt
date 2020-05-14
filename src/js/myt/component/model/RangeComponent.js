@@ -31,7 +31,7 @@ myt.RangeComponent = new JS.Module('RangeComponent', {
     
     setValue: function(v) {
         if (v) {
-            var existing = this.value,
+            const existing = this.value,
                 existingLower = existing ? existing.lower : undefined,
                 existingUpper = existing ? existing.upper : undefined;
             
@@ -48,7 +48,7 @@ myt.RangeComponent = new JS.Module('RangeComponent', {
             
             // Swap lower and upper if they are in the wrong order
             if (v.lower !== undefined && v.upper !== undefined && v.lower > v.upper) {
-                var temp = v.lower;
+                const temp = v.lower;
                 v.lower = v.upper;
                 v.upper = temp;
             }
@@ -67,7 +67,7 @@ myt.RangeComponent = new JS.Module('RangeComponent', {
     
     // Methods /////////////////////////////////////////////////////////////////
     getValueCopy: function() {
-        var v = this.value;
+        const v = this.value;
         return {lower:v.lower, upper:v.upper};
     }
 });

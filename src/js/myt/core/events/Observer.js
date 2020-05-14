@@ -55,11 +55,11 @@ myt.Observer = new JS.Module('Observer', {
         @returns true if attached, false otherwise. */
     isAttachedTo: function(observable, methodName, eventType) {
         if (observable && methodName && eventType) {
-            var observablesByType = this.__obt;
+            const observablesByType = this.__obt;
             if (observablesByType) {
-                var observables = observablesByType[eventType];
+                const observables = observablesByType[eventType];
                 if (observables) {
-                    var i = observables.length;
+                    let i = observables.length;
                     while (i) {
                         // Ensures we decrement twice. First with --i, then 
                         // with i-- since the part after && may not be executed.
@@ -78,7 +78,7 @@ myt.Observer = new JS.Module('Observer', {
         @param eventType:string the event type to check for.
         @returns an array of observables. */
     getObservables: function(eventType) {
-        var observablesByType = this.__obt || (this.__obt = {});
+        const observablesByType = this.__obt || (this.__obt = {});
         return observablesByType[eventType] || (observablesByType[eventType] = []);
     },
     
@@ -86,9 +86,9 @@ myt.Observer = new JS.Module('Observer', {
         @param eventType:string the event type to check for.
         @returns true if any exist, false otherwise. */
     hasObservables: function(eventType) {
-        var observablesByType = this.__obt;
+        const observablesByType = this.__obt;
         if (!observablesByType) return false;
-        var observables = observablesByType[eventType];
+        const observables = observablesByType[eventType];
         return observables && observables.length > 0;
     },
     
@@ -103,11 +103,12 @@ myt.Observer = new JS.Module('Observer', {
             false otherwise. */
     attachTo: function(observable, methodName, eventType, once) {
         if (observable && methodName && eventType) {
-            var observables = this.getObservables(eventType);
+            const observables = this.getObservables(eventType);
             
             // Setup wrapper method when 'once' is true.
             if (once) {
-                var self = this, origMethodName = methodName;
+                const self = this, 
+                    origMethodName = methodName;
                 
                 // Generate one time method name.
                 if (this.__methodNameCounter === undefined) this.__methodNameCounter = 0;
@@ -140,13 +141,14 @@ myt.Observer = new JS.Module('Observer', {
     detachFrom: function(observable, methodName, eventType) {
         if (observable && methodName && eventType) {
             // No need to unregister if observable array doesn't exist.
-            var observablesByType = this.__obt;
+            const observablesByType = this.__obt;
             if (observablesByType) {
-                var observables = observablesByType[eventType];
+                const observables = observablesByType[eventType];
                 if (observables) {
                     // Remove all instances of this observer/methodName/eventType 
                     // from the observable
-                    var retval = false, i = observables.length;
+                    let retval = false, 
+                        i = observables.length;
                     while (i) {
                         --i;
                         if (observable === observables[i--] && methodName === observables[i]) {
@@ -169,9 +171,11 @@ myt.Observer = new JS.Module('Observer', {
         is attached to.
         @returns {undefined} */
     detachFromAllObservables: function() {
-        var observablesByType = this.__obt;
+        const observablesByType = this.__obt;
         if (observablesByType) {
-            var observables, i, eventType;
+            let observables, 
+                i, 
+                eventType;
             for (eventType in observablesByType) {
                 observables = observablesByType[eventType];
                 i = observables.length;

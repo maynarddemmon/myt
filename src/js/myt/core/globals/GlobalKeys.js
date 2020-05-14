@@ -1,8 +1,11 @@
 ((pkg) => {
-    var G = pkg.global,
-        globalFocus = G.focus,
+    let globalKeys,
         
-        globalKeys,
+        /* A map of keycodes of the keys currently pressed down. */
+        keysDown = {};
+    
+    const G = pkg.global,
+        globalFocus = G.focus,
         
         isFirefox = BrowserDetect.browser === 'Firefox',
         KEYCODE_TAB = 9,
@@ -12,9 +15,6 @@
         KEYCODE_Z = 90,
         KEYCODE_COMMAND = isFirefox ? 224 : 91,
         KEYCODE_RIGHT_COMMAND = isFirefox ? 224 : 93,
-        
-        /* A map of keycodes of the keys currently pressed down. */
-        keysDown = {},
         
         getKeyCodeFromEvent = (event) => pkg.KeyObservable.getKeyCodeFromEvent(event),
         
@@ -45,7 +45,7 @@
                 case 8: // Backspace
                     // Catch backspace since it navigates the history. Allow it to
                     // go through for text input elements though.
-                    var nodeName = targetElem.nodeName;
+                    const nodeName = targetElem.nodeName;
                     if (nodeName === 'TEXTAREA' || 
                         (nodeName === 'INPUT' && (targetElem.type === 'text' || targetElem.type === 'password')) ||
                         (nodeName === 'DIV' && targetElem.contentEditable === 'true' && targetElem.firstChild)
@@ -225,7 +225,7 @@
             @param {!Object} event
             @returns {undefined} */
         __handleFocused: (event) => {
-            var focused = event.value;
+            const focused = event.value;
             if (focused) {
                 // unlisten to document
                 globalKeys.detachFromDom(globalKeys, '__handleKeyDown', 'keydown');
@@ -236,7 +236,7 @@
                 globalKeys.attachToDom(focused, '__handleKeyPress', 'keypress');
                 globalKeys.attachToDom(focused, '__handleKeyUp', 'keyup');
             } else {
-                var prevFocused = globalFocus.prevFocusedView;
+                const prevFocused = globalFocus.prevFocusedView;
                 if (prevFocused) {
                     globalKeys.detachFromDom(prevFocused, '__handleKeyDown', 'keydown');
                     globalKeys.detachFromDom(prevFocused, '__handleKeyPress', 'keypress');
@@ -259,7 +259,7 @@
             @param {!Object} event
             @returns {undefined} */
         __handleKeyDown: (event) => {
-            var keyCode = getKeyCodeFromEvent(event),
+            const keyCode = getKeyCodeFromEvent(event),
                 domEvent = event.value;
             if (shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
             
@@ -274,7 +274,7 @@
                 
                 // Check for 'tab' key and do focus traversal.
                 if (keyCode === KEYCODE_TAB) {
-                    var ift = ignoreFocusTrap();
+                    const ift = ignoreFocusTrap();
                     if (isShiftKeyDown()) {
                         globalFocus.prev(ift);
                     } else {
@@ -297,7 +297,7 @@
             @param {!Object} event
             @returns {undefined} */
         __handleKeyUp: (event) => {
-            var keyCode = getKeyCodeFromEvent(event),
+            const keyCode = getKeyCodeFromEvent(event),
                 domEvent = event.value;
             if (shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
             keysDown[keyCode] = false;

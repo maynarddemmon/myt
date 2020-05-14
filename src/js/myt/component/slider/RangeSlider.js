@@ -55,10 +55,10 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
     /** @overrides
         Update the thumb position if the width changes. */
     setWidth: function(v, supressEvent) {
-        var existing = this.width;
+        const existing = this.width;
         this.callSuper(v, supressEvent);
         if (this.inited && this.axis === 'x' && this.width !== existing) {
-            var value = this.getValue();
+            const value = this.getValue();
             this._syncThumbToValue(this.thumbLower, value);
             this._syncThumbToValue(this.thumbUpper, value);
         }
@@ -67,10 +67,10 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
     /** @overrides
         Update the thumb position if the height changes. */
     setHeight: function(v, supressEvent) {
-        var existing = this.height;
+        const existing = this.height;
         this.callSuper(v, supressEvent);
         if (this.inited && this.axis === 'y' && this.height !== existing) {
-            var value = this.getValue();
+            const value = this.getValue();
             this._syncThumbToValue(this.thumbLower, value);
             this._syncThumbToValue(this.thumbUpper, value);
         }
@@ -82,7 +82,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         @private
         @returns {undefined} */
     _syncRangeFillToValue: function() {
-        var rangeFill = this.rangeFill, value = this.getValue(),
+        const rangeFill = this.rangeFill, value = this.getValue(),
             lowerPx = this.convertValueToPixels(value.lower),
             extent = this.convertValueToPixels(value.upper) - lowerPx;
         if (this.axis === 'x') {
@@ -107,11 +107,11 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         if (this.inited && !this.__lockSync) {
             this.__lockSync = true;
             
-            var converted = this.convertPixelsToValue(
+            const converted = this.convertPixelsToValue(
                 this.axis === 'x' ? thumb.x + thumb.width / 2 : thumb.y + thumb.height / 2
             );
             
-            var value = this.getValueCopy();
+            let value = this.getValueCopy();
             if (thumb.name === 'thumbLower') {
                 value.lower = converted;
             } else {
@@ -130,7 +130,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
     
     /** @overrides myt.BaseSlider */
     _nudge: function(thumb, up) {
-        var value = this.getValueCopy(),
+        const value = this.getValueCopy(),
             adj = this.nudgeAmount * (up ? 1 : -1);
         if (thumb.name === 'thumbLower') {
             value.lower += adj;

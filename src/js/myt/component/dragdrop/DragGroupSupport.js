@@ -26,8 +26,8 @@ myt.DragGroupSupport = new JS.Module('DragGroupSupport', {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setDragGroups: function(v) {
-        var newDragGroups = {};
-        for (var dragGroup in v) newDragGroups[dragGroup] = true;
+        const newDragGroups = {};
+        for (let dragGroup in v) newDragGroups[dragGroup] = true;
         this.__dragGroups = newDragGroups;
         this.__acceptAny = newDragGroups.hasOwnProperty('*');
     },

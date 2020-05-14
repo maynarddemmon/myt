@@ -1,8 +1,8 @@
 ((pkg) => {
-    var win = window,
+    const win = window;
         
         /* The inner width of the browser window. */
-        innerWidth,
+    let innerWidth,
         
         /* The inner height of the browser window. */
         innerHeight;

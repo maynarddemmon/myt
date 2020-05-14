@@ -20,9 +20,10 @@ myt.Eventable = new JS.Class('Eventable', {
             the new instance.
         @returns {undefined} */
     initialize: function(attrs, mixins) {
-        var self = this;
+        const self = this;
         if (mixins) {
-            for (var i = 0, len = mixins.length, mixin; len > i;) {
+            const len = mixins.length;
+            for (let i = 0, mixin; len > i;) {
                 if (mixin = mixins[i++]) {
                     self.extend(mixin);
                 } else {
@@ -48,7 +49,7 @@ myt.Eventable = new JS.Class('Eventable', {
     
     /** @overrides myt.Destructible. */
     destroy: function() {
-        var self = this;
+        const self = this;
         self.releaseAllConstraints();
         self.detachFromAllObservables();
         self.detachAllObservers();

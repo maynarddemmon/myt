@@ -4,12 +4,13 @@
     
     Supported Layout Hints:
         break:string Will force the subview to start a new line/column.
-*/
+    
+    @class */
 myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.VariableLayout */
     initNode: function(parent, attrs) {
-        var self = this;
+        const self = this;
         
         self.targetAttrName = self.axis = 'x';
         self.setterName = 'setX';
@@ -29,15 +30,15 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
     /** @overrides myt.ConstantLayout */
     setTargetAttrName: function(v) {
         if (this.targetAttrName !== v) {
-            var isY = v === 'y',
+            const isY = v === 'y',
                 inited = this.inited;
             
             if (inited) this.stopMonitoringAllSubviews();
             
             this.measureAttrName = isY ? 'boundsHeight' : 'boundsWidth';
-            var mabn = this.measureAttrBaseName = isY ? 'height' : 'width';
+            const mabn = this.measureAttrBaseName = isY ? 'height' : 'width';
             this.otherMeasureAttrName = isY ? 'boundsWidth' : 'boundsHeight';
-            var omabn = this.otherMeasureAttrBaseName = isY ? 'width' : 'height';
+            const omabn = this.otherMeasureAttrBaseName = isY ? 'width' : 'height';
             this.parentSetterName = isY ? 'setWidth' : 'setHeight';
             this.otherSetterName = isY ? 'setX' : 'setY';
             
@@ -53,7 +54,7 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
     /** @overrides myt.Layout */
     setParent: function(parent) {
         if (this.parent !== parent) {
-            var isY = this.targetAttrName === 'y';
+            const isY = this.targetAttrName === 'y';
             if (this.parent) this.stopMonitoringParent(isY ? 'height' : 'width');
             this.callSuper(parent);
             if (this.parent) this.startMonitoringParent(isY ? 'height' : 'width');
@@ -167,7 +168,7 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
     
     /** @overrides myt.ConstantLayout */
     updateSubview: function(count, sv, setterName, value) {
-        var size = sv[this.measureAttrName],
+        const size = sv[this.measureAttrName],
             otherSize = sv[this.otherMeasureAttrName];
         
         if (value + size > this.parentSizeLessOutset || sv.layoutHint === 'break') {

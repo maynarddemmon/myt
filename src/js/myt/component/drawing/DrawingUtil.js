@@ -12,9 +12,9 @@ myt.DrawingUtil = {
         @param {number} h
         @returns {undefined} */
     drawRoundedRect: (canvas, r, thickness, left, top, w, h) => {
-        var bottom = top + h,
-            right = left + w,
-            PI = Math.PI;
+        const PI = Math.PI;
+        let bottom = top + h,
+            right = left + w;
         
         // We create a single path for both an outer and inner rounded rect.
         // The reason for this is that filling looks much better than stroking.
@@ -69,7 +69,7 @@ myt.DrawingUtil = {
         @param {number} h
         @returns {undefined} */
     drawRectOutline: (canvas, thickness, left, top, w, h) => {
-        var bottom = top + h, 
+        const bottom = top + h, 
             right = left + w,
             ileft = left + thickness,
             iright = right - thickness,
@@ -105,7 +105,8 @@ myt.DrawingUtil = {
         @param {number} h
         @returns {undefined} */
     drawPartiallyRoundedRect: (canvas, rTL, rTR, rBL, rBR, left, top, w, h) => {
-        var bottom = top + h, right = left + w;
+        const bottom = top + h, 
+            right = left + w;
         
         canvas.beginPath();
         
@@ -129,14 +130,18 @@ myt.DrawingUtil = {
     drawGradientArc: (canvas, centerX, centerY, r, ir, startAngle, endAngle, colors, segments) => {
         if (segments == null) segments = 60;
         
-        var angleDelta = Math.PI / segments,
+        let angleDelta = Math.PI / segments,
         
         // Antialiasing issues means we need to draw each polygon with a small 
         // overlap to fill the gap.
             angleOverlap =  Math.PI / 360,
         
         // Calculate Colors
-            len = colors.length, i = 0, angleDiff, slices, diff;
+            len = colors.length,
+            i = 0, 
+            angleDiff, 
+            slices, 
+            diff;
         for (; len > i + 1; i++) {
             angleDiff = colors[i + 1].angle - colors[i].angle;
             slices = Math.round(angleDiff / angleDelta);
@@ -144,13 +149,13 @@ myt.DrawingUtil = {
             colors[i].colorDelta = {red:diff.red / slices, green:diff.green / slices, blue:diff.blue / slices};
         }
         
-        var path = new myt.Path([centerX + r, centerY, centerX + ir, centerY]),
-            prevAngle, ix1, iy1, x1, y1,
+        const path = new myt.Path([centerX + r, centerY, centerX + ir, centerY]);
+        let prevAngle, ix1, iy1, x1, y1,
             angle = startAngle;
         
         path.rotateAroundOrigin(angle, centerX, centerY);
-        var vectors = path.vectors,
-            x2 = vectors[0], y2 = vectors[1],
+        const vectors = path.vectors;
+        let x2 = vectors[0], y2 = vectors[1],
             ix2 = vectors[2], iy2 = vectors[3],
             diffCount = 0;
         
@@ -185,7 +190,7 @@ myt.DrawingUtil = {
             canvas.lineTo(x2, y2);
             canvas.closePath();
             
-            var c = colors[i].color,
+            const c = colors[i].color,
                 colorDelta = colors[i].colorDelta;
             canvas.fillStyle = myt.Color.makeColorNumberFromChannels(
                 c.red + (diffCount * colorDelta.red),

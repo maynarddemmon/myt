@@ -1,13 +1,13 @@
 ((pkg) => {
-    var getTarget = (animator) => animator.target || animator.parent,
+    const getTarget = (animator) => animator.target || animator.parent,
         
         isColorAttr = (animator) => {
-            var target = getTarget(animator);
+            const target = getTarget(animator);
             animator.__isColorAnim = (target && typeof target.isColorAttr === 'function') ? target.isColorAttr(animator.attribute) : undefined;
         },
         
         getColorValue = (from, to, motionValue, relative, value) => {
-            var Color = pkg.Color,
+            const Color = pkg.Color,
                 fromColor = Color.makeColorFromHexString(from),
                 toColor = Color.makeColorFromHexString(to),
                 colorObj = relative ? Color.makeColorFromHexString(value) : fromColor;
@@ -18,7 +18,7 @@
         },
         
         updateTarget = (animator, target, progress, oldProgress) => {
-            var relative = animator.relative,
+            const relative = animator.relative,
                 duration = animator.duration,
                 attr = animator.attribute,
                 progressPercent = Math.max(0, progress / duration), 
@@ -30,7 +30,7 @@
                 animator.from = relative ? (animator.__isColorAnim ? '#000000' : 0) : target.get(attr);
             }
             
-            var motionValue = animator.easingFunction(progressPercent) - (relative ? animator.easingFunction(oldProgressPercent) : 0),
+            const motionValue = animator.easingFunction(progressPercent) - (relative ? animator.easingFunction(oldProgressPercent) : 0),
                 value = relative ? target.get(attr) : animator.from,
                 to = animator.to;
             
@@ -45,7 +45,7 @@
         
         advance = (animator, timeDiff) => {
             if (animator.running && !animator.paused) {
-                var reverse = animator.reverse, 
+                const reverse = animator.reverse, 
                     duration = animator.duration, 
                     repeat = animator.repeat;
                 
@@ -53,11 +53,11 @@
                 if (reverse) timeDiff = timeDiff * -1;
                 
                 // Determine how much time to move forward by.
-                var oldProgress = animator.__progress;
+                const oldProgress = animator.__progress;
                 animator.__progress += timeDiff;
                 
                 // Check for overage
-                var remainderTime = 0;
+                let remainderTime = 0;
                 if (animator.__progress > duration) {
                     remainderTime = animator.__progress - duration;
                     animator.__progress = duration;
@@ -73,7 +73,7 @@
                     if (0 > --animator.__loopCount && repeat > 0) remainderTime = 0;
                 }
                 
-                var target = getTarget(animator);
+                const target = getTarget(animator);
                 if (target) {
                     updateTarget(animator, target, animator.__progress, oldProgress);
                     
@@ -99,6 +99,10 @@
                 }
             }
         },
+        
+        PI = Math.PI,
+        TWO_PI = 2*PI,
+        HALF_PI = PI/2,
         
         /** Changes the value of an attribute on a target over time.
             
@@ -176,78 +180,70 @@
             extend: {
                 easingFunctions: {
                     linear:t => t,
+                    
                     easeInQuad:t => t*t,
                     easeOutQuad:t => -t*(t-2),
                     easeInOutQuad:t => (t/=0.5) < 1 ? 0.5*t*t : -0.5 * ((--t)*(t-2) - 1),
+                    
                     easeInCubic:t => t*t*t,
                     easeOutCubic:t => ((t=t-1)*t*t + 1),
                     easeInOutCubic:t => (t/=0.5) < 1 ? 0.5*t*t*t : 1 /2*((t-=2)*t*t + 2),
+                    
                     easeInQuart:t => t*t*t*t,
                     easeOutQuart:t => -((t=t-1)*t*t*t - 1),
                     easeInOutQuart:t => (t/=0.5) < 1 ? 0.5*t*t*t*t : -0.5 * ((t-=2)*t*t*t - 2),
+                    
                     easeInQuint:t => t*t*t*t*t,
                     easeOutQuint:t => ((t=t-1)*t*t*t*t + 1),
                     easeInOutQuint:t => (t/=0.5) < 1 ? 0.5*t*t*t*t*t : 0.5*((t-=2)*t*t*t*t + 2),
-                    easeInSine:t => -Math.cos(t * (Math.PI/2)) + 1,
-                    easeOutSine:t => Math.sin(t * (Math.PI/2)),
-                    easeInOutSine:t => -0.5 * (Math.cos(Math.PI*t) - 1),
-                    easeInExpo:t => (t==0)? 0: Math.pow(2, 10 * (t - 1)),
-                    easeOutExpo:t => (t==1)? 1: (-Math.pow(2, -10 * t) + 1),
+                    
+                    easeInSine:t => -Math.cos(t * HALF_PI) + 1,
+                    easeOutSine:t => Math.sin(t * HALF_PI),
+                    easeInOutSine:t => -0.5 * (Math.cos(PI*t) - 1),
+                    
                     easeInCirc:t => -(Math.sqrt(1 - t*t) - 1),
                     easeOutCirc:t => Math.sqrt(1 - (t=t-1)*t),
                     easeInOutCirc:t => (t/=0.5) < 1? -0.5 * (Math.sqrt(1 - t*t) - 1): 0.5 * (Math.sqrt(1 - (t-=2)*t) + 1),
+                    
+                    easeInExpo:t => (t==0) ? 0 : Math.pow(2, 10 * (t - 1)),
+                    easeOutExpo:t => (t==1) ? 1 : (-Math.pow(2, -10 * t) + 1),
                     easeInOutExpo:t => {
                         if (t==0) return 0;
                         if (t==1) return 1;
                         if ((t/=0.5) < 1) return 0.5 * Math.pow(2, 10 * (t - 1));
                         return 0.5 * (-Math.pow(2, -10 * --t) + 2);
                     },
+                    
                     easeInElastic:t => {
-                        var s=1.70158, p=0, a=1;
                         if (t==0) return 0;
                         if (t==1) return 1;
-                        if (!p) p=0.3;
-                        if (a < 1) {
-                            a=1;
-                            s=p/4;
-                        } else {
-                            s = p/(2*Math.PI) * Math.asin (1/a);
-                        }
-                        return -(a*Math.pow(2,10*(t-=1)) * Math.sin( (t*1-s)*(2*Math.PI)/p));
+                        let p = 0.3,
+                            s = p/4;
+                        return -(Math.pow(2,10*(t-=1)) * Math.sin((t*1-s)*TWO_PI/p));
                     },
                     easeOutElastic:t => {
-                        var s=1.70158, p=0, a=1;
                         if (t==0) return 0;
                         if (t==1) return 1;
-                        if (!p) p=1*0.3;
-                        if (a < 1) {
-                            a=1;
-                            s=p/4;
-                        } else {
-                            s = p/(2*Math.PI) * Math.asin(1/a);
-                        }
-                        return a*Math.pow(2,-10*t) * Math.sin((t*1-s)*(2*Math.PI)/p) + 1;
+                        let p = 0.3,
+                            s = p/4;
+                        return Math.pow(2,-10*t) * Math.sin((t*1-s)*TWO_PI/p) + 1;
                     },
                     easeInOutElastic:t => {
-                        var s=1.70158, p=0, a=1;
                         if (t==0) return 0;
                         if ((t/=0.5)==2) return 1;
-                        if (!p) p=(0.3*1.5);
-                        if (a < 1) {
-                            a=1;
-                            s=p/4;
-                        } else {
-                            s = p/(2*Math.PI) * Math.asin(1/a);
-                        }
-                        if (t < 1) return -.5*(a*Math.pow(2,10*(t-=1)) * Math.sin((t*1-s)*(2*Math.PI)/p));
-                        return a*Math.pow(2,-10*(t-=1)) * Math.sin((t*1-s)*(2*Math.PI)/p)*0.5 + 1;
+                        let p = 0.45,
+                            s = p/4;
+                        if (t < 1) return -.5*(Math.pow(2,10*(t-=1)) * Math.sin((t*1-s)*TWO_PI/p));
+                        return Math.pow(2,-10*(t-=1)) * Math.sin((t*1-s)*TWO_PI/p)*0.5 + 1;
                     },
+                    
                     easeInBack:(t, s=1.70158) => (t/=1)*t*((s+1)*t - s),
                     easeOutBack:(t, s=1.70158) => ((t=t/1-1)*t*((s+1)*t + s) + 1),
                     easeInOutBack:(t, s=1.70158) => {
                         if ((t/=0.5) < 1) return 0.5*(t*t*(((s*=(1.525))+1)*t - s));
                         return 0.5*((t-=2)*t*(((s*=(1.525))+1)*t + s) + 2);
                     },
+                    
                     easeInBounce:t => 1 - Animator.easingFunctions.easeOutBounce(1-t),
                     easeOutBounce:t => {
                         if (t < (1/2.75)) {
@@ -270,7 +266,7 @@
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides myt.Node */
             initNode: function(parent, attrs) {
-                var self = this;
+                const self = this;
                 
                 self.duration = 1000;
                 self.relative = self.reverse = self.running = self.paused = false;
@@ -285,7 +281,7 @@
             
             // Accessors ///////////////////////////////////////////////////////
             setRunning: function(v) {
-                var self = this;
+                const self = this;
                 
                 if (self.running !== v) {
                     self.running = v;
@@ -304,7 +300,7 @@
             },
             
             setPaused: function(v) {
-                var self = this;
+                const self = this;
                 
                 if (self.paused !== v) {
                     self.paused = v;
@@ -314,7 +310,7 @@
             },
             
             setReverse: function(v) {
-                var self = this;
+                const self = this;
                 
                 if (self.reverse !== v) {
                     self.reverse = v;
@@ -362,9 +358,9 @@
                     be replaced with the new callback.
                 @returns {undefined} */
             next: function(callback, replace) {
-                var existingCallback = this.callback;
+                const existingCallback = this.callback;
                 if (existingCallback && !replace) {
-                    var anim = this;
+                    const anim = this;
                     this.setCallback(function(success) {
                         existingCallback.call(anim, success);
                         callback.call(anim, success);
@@ -379,7 +375,7 @@
                     it exists, will be executed.
                 @returns {undefined} */
             reset: function(executeCallback) {
-                var self = this;
+                const self = this;
                 
                 reset(self);
                 
@@ -391,7 +387,7 @@
             
             /** @overrides myt.Reusable */
             clean: function() {
-                var self = this;
+                const self = this;
                 
                 self.to = self.from = self.attribute = self.callback = undefined;
                 self.duration = 1000;

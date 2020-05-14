@@ -90,7 +90,7 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
     /** @private
         @returns {undefined} */
     __setupPercentOfParentWidthConstraint: function() {
-        var p = this.parent;
+        const p = this.parent;
         if (p && this.percentOfParentWidth >= 0) this.syncTo(p, '__doPercentOfParentWidth', 'width');
     },
     
@@ -113,7 +113,7 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
     /** @private
         @returns {undefined} */
     __setupPercentOfParentHeightConstraint: function() {
-        var p = this.parent;
+        const p = this.parent;
         if (p && this.percentOfParentHeight >= 0) this.syncTo(p, '__doPercentOfParentHeight', 'height');
     },
     

@@ -27,7 +27,7 @@
 myt.Form = new JS.Module('Form', {
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        var self = this;
+        const self = this;
         
         self.isChanged = self._lockCascade = false;
         self.isValid = true;
@@ -53,8 +53,8 @@ myt.Form = new JS.Module('Form', {
     setErrorMessages: function(v) {this.errorMessages = v;},
     
     getFullId: function() {
-        var ids = [this.id],
-            form = this.form;
+        const ids = [this.id];
+        let form = this.form;
         while (form && form.id) {
             ids.unshift(form.id);
             form = form.form;
@@ -64,10 +64,10 @@ myt.Form = new JS.Module('Form', {
     
     setId: function(v) {
         if (this.id !== v) {
-            var existingId = this.id;
+            const existingId = this.id;
             this.id = v;
             
-            var form = this.form;
+            const form = this.form;
             if (form && this.inited) {
                 form.removeSubForm(existingId);
                 form.addSubForm(this);
@@ -77,7 +77,7 @@ myt.Form = new JS.Module('Form', {
     
     setForm: function(v) {
         if (this.form !== v) {
-            var existingForm = this.form;
+            const existingForm = this.form;
             this.form = v;
             if (existingForm) existingForm.removeSubForm(this.id);
             if (v && this.inited) v.addSubForm(this);
@@ -91,7 +91,7 @@ myt.Form = new JS.Module('Form', {
         this.isValid = v;
         if (this.inited) this.fireEvent('isValid', v);
         
-        var form = this.form;
+        const form = this.form;
         if (form && !this._lockCascade) {
             if (v) {
                 form.verifyValidState(this);
@@ -106,7 +106,7 @@ myt.Form = new JS.Module('Form', {
             this.isChanged = v;
             if (this.inited) this.fireEvent('isChanged', v);
             
-            var form = this.form;
+            const form = this.form;
             if (form && !this._lockCascade) {
                 if (v) {
                     form.notifySubFormChanged();
@@ -122,7 +122,7 @@ myt.Form = new JS.Module('Form', {
             IDs of validators from the myt.global.validators registry.
         @returns {undefined} */
     setValidators: function(validators) {
-        var i = validators.length, validator;
+        let i = validators.length, validator;
         while (i) {
             validator = validators[--i];
             if (typeof validator === 'string') {
@@ -145,7 +145,9 @@ myt.Form = new JS.Module('Form', {
         // Only do "form" behavior for true forms, not for form elements.
         if (this.isA(myt.FormElement)) return this.value;
         
-        var retval = {}, subForms = this.__sf, id;
+        const retval = {}, 
+            subForms = this.__sf;
+        let id;
         for (id in subForms) retval[id] = subForms[id].getValue();
         return retval;
     },
@@ -161,7 +163,7 @@ myt.Form = new JS.Module('Form', {
         
         // Only do "form" behavior for true forms, not for form elements.
         if (typeof value === 'object' && !this.isA(myt.FormElement)) {
-            var subform, id;
+            let subform, id;
             for (id in value) {
                 subform = this.getSubForm(id);
                 if (subform) {
@@ -183,7 +185,9 @@ myt.Form = new JS.Module('Form', {
         to return an element specific default value.
         @returns object */
     getDefaultValue: function() {
-        var retval = {}, subForms = this.__sf, id;
+        const retval = {};
+        let subForms = this.__sf, 
+            id;
         for (id in subForms) retval[id] = subForms[id].getDefaultValue();
         return retval;
     },
@@ -195,7 +199,7 @@ myt.Form = new JS.Module('Form', {
         @returns the value that was actually set. */
     setDefaultValue: function(value) {
         if (typeof value === 'object') {
-            var subform, id;
+            let subform, id;
             for (id in value) {
                 subform = this.getSubForm(id);
                 if (subform) {
@@ -213,7 +217,9 @@ myt.Form = new JS.Module('Form', {
         to return an element specific rollback value.
         @returns object */
     getRollbackValue: function() {
-        var retval = {}, subForms = this.__sf, id;
+        const retval = {}, 
+            subForms = this.__sf;
+        let id;
         for (id in subForms) retval[id] = subForms[id].getRollbackValue();
         return retval;
     },
@@ -225,7 +231,7 @@ myt.Form = new JS.Module('Form', {
         @returns the value that was actually set. */
     setRollbackValue: function(value) {
         if (typeof value === 'object') {
-            var subform, id;
+            let subform, id;
             for (id in value) {
                 subform = this.getSubForm(id);
                 if (subform) {
@@ -261,7 +267,7 @@ myt.Form = new JS.Module('Form', {
         @param value:* (optional) The value to pass to the function.
         @returns {undefined} */
     invokeAccelerator: function(id, value) {
-        var accelerator = this.__acc[id];
+        const accelerator = this.__acc[id];
         if (accelerator) accelerator.call(this, value === undefined ? null : value);
     },
     
@@ -277,7 +283,9 @@ myt.Form = new JS.Module('Form', {
         @returns the removed myt.Validator or null if not found. */
     removeValidator: function(id) {
         if (id) {
-            var validators = this.__v, i = validators.length, validator;
+            const validators = this.__v;
+            let i = validators.length, 
+                validator;
             while (i) {
                 validator = validators[--i];
                 if (validator.id === id) {
@@ -299,7 +307,7 @@ myt.Form = new JS.Module('Form', {
         @param subform:myt.Form the form to add as a subform.
         @returns {undefined} */
     addSubForm: function(subform) {
-        var id = subform.id;
+        const id = subform.id;
         if (this.getSubForm(id) != null) {
             console.warn("ID in use for subform, add aborted.", id, subform);
             return;
@@ -316,7 +324,7 @@ myt.Form = new JS.Module('Form', {
         @param id:string The ID of the form to remove.
         @returns myt.Form or undefined if not found. */
     removeSubForm: function(id) {
-        var subform = this.getSubForm(id);
+        const subform = this.getSubForm(id);
         if (subform) {
             subform.setForm(null);
             delete this.__sf[id];
@@ -340,15 +348,14 @@ myt.Form = new JS.Module('Form', {
     getInvalidSubformIds: function(doValidation) {
         if (doValidation) this.doValidation();
         
-        var FE = myt.FormElement,
+        const FE = myt.FormElement,
             retval = [];
         (function inspect(subform) {
             if (subform.isA(FE)) {
                 if (!subform.isValid) retval.push(subform.getFullId());
             } else {
-                var subforms = subform.getSubForms(),
-                    key;
-                for (key in subforms) inspect(subforms[key]);
+                const subforms = subform.getSubForms();
+                for (let key in subforms) inspect(subforms[key]);
             }
         })(this);
         
@@ -358,8 +365,8 @@ myt.Form = new JS.Module('Form', {
     /** Gets all error messages from the entire form tree.
         @returns array of error messages strings. */
     getAllErrorMessages: function() {
-        var msgs = (this.errorMessages || []).concat(),
-            subForms = this.__sf,
+        const subForms = this.__sf;
+        let msgs = (this.errorMessages || []).concat(),
             id;
         for (id in subForms) msgs = msgs.concat(subForms[id].getAllErrorMessages());
         return msgs;
@@ -378,7 +385,10 @@ myt.Form = new JS.Module('Form', {
             invoking this method.
         @returns boolean true if this form is valid, false otherwise. */
     verifyValidState: function(subformToIgnore) {
-        var isValid = true, subForms = this.__sf, subform, id;
+        const subForms = this.__sf;
+        let isValid = true, 
+            subform, 
+            id;
         for (id in subForms) {
             subform = subForms[id];
             if (subform !== subformToIgnore) isValid = subform.isValid && isValid;
@@ -391,7 +401,9 @@ myt.Form = new JS.Module('Form', {
         validity check since this is intended to be a top down check.
         @returns boolean true if this form is valid, false otherwise. */
     doValidation: function() {
-        var isValid = true, subForms = this.__sf, id;
+        const subForms = this.__sf;
+        let isValid = true,
+            id;
         for (id in subForms) isValid = subForms[id].doValidation() && isValid;
         
         this._lockCascade = true;
@@ -406,9 +418,9 @@ myt.Form = new JS.Module('Form', {
         @param isValid:boolean The currently determined validity.
         @returns boolean true if this form is valid, false otherwise. */
     __applyValidation: function(isValid) {
-        var validators = this.__v, len = validators.length, 
-            errorMessages = [], i = 0;
-        for (; len > i;) isValid = validators[i++].isFormValid(this, null, errorMessages) && isValid;
+        const validators = this.__v, len = validators.length, 
+            errorMessages = [];
+        for (let i = 0; len > i;) isValid = validators[i++].isFormValid(this, null, errorMessages) && isValid;
         
         this.setErrorMessages(errorMessages);
         this.setIsValid(isValid);
@@ -436,7 +448,10 @@ myt.Form = new JS.Module('Form', {
             invoking this method.
         @returns boolean true if this form is changed, false otherwise. */
     verifyChangedState: function(subformToIgnore) {
-        var isChanged = false, subForms = this.__sf, subform, id;
+        const subForms = this.__sf;
+        let isChanged = false, 
+            subform, 
+            id;
         for (id in subForms) {
             subform = subForms[id];
             if (subform !== subformToIgnore) isChanged = subform.isChanged || isChanged;
@@ -461,8 +476,8 @@ myt.Form = new JS.Module('Form', {
         if (rollbackValue == null) rollbackValue = {};
         if (value == null) value = {};
         
-        var subForms = this.__sf, id;
-        for (id in subForms) subForms[id].setup(defaultValue[id], rollbackValue[id], value[id]);
+        const subForms = this.__sf;
+        for (let id in subForms) subForms[id].setup(defaultValue[id], rollbackValue[id], value[id]);
     },
     
     /** Resets this form to the default values.
@@ -470,8 +485,8 @@ myt.Form = new JS.Module('Form', {
     resetForm: function() {
         this._lockCascade = true;
         
-        var subForms = this.__sf, id;
-        for (id in subForms) subForms[id].resetForm();
+        const subForms = this.__sf;
+        for (let id in subForms) subForms[id].resetForm();
         
         this.setIsChanged(false);
         this.setErrorMessages([]);
@@ -485,8 +500,8 @@ myt.Form = new JS.Module('Form', {
     rollbackForm: function() {
         this._lockCascade = true;
         
-        var subForms = this.__sf, id;
-        for (id in subForms) subForms[id].rollbackForm();
+        const subForms = this.__sf;
+        for (let id in subForms) subForms[id].rollbackForm();
         
         this.setIsChanged(false);
         this.setErrorMessages([]);
@@ -500,7 +515,10 @@ myt.Form = new JS.Module('Form', {
         elements should override this to return an element specific value.
         @returns object */
     getChangedValue: function() {
-        var retval = {}, subForms = this.__sf, subform, id;
+        const retval = {}, 
+            subForms = this.__sf;
+        let subform, 
+            id;
         for (id in subForms) {
             subform = subForms[id];
             if (subform.isChanged) retval[id] = subform.getChangedValue();

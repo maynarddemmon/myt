@@ -1,5 +1,5 @@
 ((pkg) => {
-    var
+    const
         /*  Sets the 'transformOrigin' style property of the provided
             style property map.
                 param view:View the view to modify.
@@ -17,7 +17,7 @@
                     param v:string the style value to set.
         */
         addTransform = (view, type, v) => {
-            var cur = removeTransform(view, type);
+            const cur = removeTransform(view, type);
             view.getOuterDomStyle().transform = cur + (cur.length === 0 ? '' : ' ') + type + '(' + v + ')';
         },
         
@@ -29,9 +29,9 @@
                     'scaleY', 'skewX', 'skewY'.
         */
         removeTransform = (view, type) => {
-            var ods = view.getOuterDomStyle(),
-                value = ods.transform,
-                parts,
+            const ods = view.getOuterDomStyle(),
+                value = ods.transform;
+            let parts,
                 i;
             
             if (!value || value.length === 0) return '';
@@ -106,10 +106,10 @@
         },
         
         setScale: function(v) {
-            var doUpdateX = this.scaleX !== v;
+            const doUpdateX = this.scaleX !== v;
             if (doUpdateX) applyScale(this, 'scaleX', this.scaleX = v);
             
-            var doUpdateY = this.scaleY !== v;
+            const doUpdateY = this.scaleY !== v;
             if (doUpdateY) applyScale(this, 'scaleY', this.scaleY = v);
             
             if (this.inited) {
@@ -166,10 +166,10 @@
         /** @overrides
             @private */
         __updateBounds: function(w, h) {
-            var r = this.rotation,
+            const r = this.rotation,
                 sx = this.scaleX,
-                sy = this.scaleY,
-                notScaled = false;
+                sy = this.scaleY;
+            let notScaled = false;
             if ((sx === undefined || sx === 1) && (sy === undefined || sy === 1)) notScaled = true;
             
             if (notScaled && (r === undefined || r === 0 || r === 180)) {
@@ -178,7 +178,7 @@
                 w = this.height;
                 h = this.width;
             } else {
-                var b = this.getOuterDomElement().getBoundingClientRect();
+                const b = this.getOuterDomElement().getBoundingClientRect();
                 w = b.width;
                 h = b.height;
             }

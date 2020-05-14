@@ -13,19 +13,19 @@
 new JS.Singleton('GlobalValueProcessorRegistry', {
     // Life Cycle //////////////////////////////////////////////////////////////
     initialize: function() {
-        var self = this,
-            m = myt;
+        const self = this,
+            M = myt;
         
         self.__c = {};
         
-        m.global.register('valueProcessors', self);
+        M.global.register('valueProcessors', self);
         
         // Register a few common ValueProcessors
-        self.register(new m.UndefinedValueProcessor('undefToEmpty', true, true, true, ''));
-        self.register(new m.ToNumberValueProcessor('toNumber', true, true, true));
-        self.register(new m.TrimValueProcessor('trimLeft', true, true, true, 'left'));
-        self.register(new m.TrimValueProcessor('trimRight', true, true, true, 'right'));
-        self.register(new m.TrimValueProcessor('trimBoth', true, true, true, 'both'));
+        self.register(new M.UndefinedValueProcessor('undefToEmpty', true, true, true, ''));
+        self.register(new M.ToNumberValueProcessor('toNumber', true, true, true));
+        self.register(new M.TrimValueProcessor('trimLeft', true, true, true, 'left'));
+        self.register(new M.TrimValueProcessor('trimRight', true, true, true, 'right'));
+        self.register(new M.TrimValueProcessor('trimBoth', true, true, true, 'both'));
     },
     
     
@@ -44,7 +44,7 @@ new JS.Singleton('GlobalValueProcessorRegistry', {
         @returns {undefined} */
     register: function(identifiable) {
         if (identifiable) {
-            var id = identifiable.id;
+            const id = identifiable.id;
             if (id) {
                 this.__c[id] = identifiable;
             } else {
@@ -60,7 +60,7 @@ new JS.Singleton('GlobalValueProcessorRegistry', {
         @returns {undefined} */
     unregister: function(identifiable) {
         if (identifiable) {
-            var id = identifiable.id;
+            const id = identifiable.id;
             if (id) {
                 // Make sure it's in the repository and then delete
                 if (this.getValueProcessor(id)) delete this.__c[id];

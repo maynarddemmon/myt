@@ -1,5 +1,5 @@
 ((pkg) => {
-    var
+    const
         /* Caches getter names. */
         GETTER_NAMES = {},
     
@@ -42,7 +42,7 @@
                 @param {string} attrName
                 @returns {undefined} */
             createSetterFunction: (target, attrName) => {
-                var setterName = generateSetterName(attrName);
+                const setterName = generateSetterName(attrName);
                 if (target[setterName]) console.log("Overwriting setter", setterName);
                 target[setterName] = (v) => {
                     if (target[attrName] !== v) {
@@ -58,7 +58,7 @@
                 @param {string} attrName
                 @returns {undefined} */
             createGetterFunction: (target, attrName) => {
-                var getterName = generateGetterName(attrName);
+                const getterName = generateGetterName(attrName);
                 if (target[getterName]) console.log("Overwriting getter", getterName);
                 target[getterName] = () => target[attrName];
             }
@@ -75,17 +75,17 @@
             @param {?Object} attrs - A map of attributes to set.
             @returns {undefined}. */
         callSetters: function(attrs) {
-            var self = this,
+            const self = this,
                 earlyAttrs = self.earlyAttrs,
-                lateAttrs = self.lateAttrs,
-                attrName, 
+                lateAttrs = self.lateAttrs;
+            let attrName, 
                 extractedLateAttrs, 
                 i, 
                 len;
             if (earlyAttrs || lateAttrs) {
                 // Make a shallow copy of attrs since we can't guarantee that
                 // attrs won't be reused
-                var copyOfAttrs = {};
+                const copyOfAttrs = {};
                 for (attrName in attrs) copyOfAttrs[attrName] = attrs[attrName];
                 attrs = copyOfAttrs;
                 
@@ -133,7 +133,7 @@
             @param {string} attrName - The name of the attribute to get.
             @returns {*} - The attribute value. */
         get: function(attrName) {
-            var getterName = generateGetterName(attrName);
+            const getterName = generateGetterName(attrName);
             return this[getterName] ? this[getterName]() : this[attrName];
         },
         
@@ -148,8 +148,8 @@
                 setter behavior. Defaults to undefined which is equivalent to false.
             @returns {undefined} */
         set: function(attrName, v, skipSetter) {
-            var self = this,
-                setterName;
+            const self = this;
+            let setterName;
             
             if (!skipSetter) {
                 setterName = generateSetterName(attrName);

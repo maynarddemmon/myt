@@ -17,12 +17,13 @@
             layout updates when a subview is added off/on. Defaults to 
             undefined which is equivalent to false and thus leaves the
             optimization on.
-*/
+    
+    @class */
 myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.VariableLayout */
     initNode: function(parent, attrs) {
-        var self = this;
+        const self = this;
         
         self.targetAttrName = self.axis = 'x';
         self.setterName = 'setX';
@@ -39,7 +40,7 @@ myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
     /** @overrides myt.ConstantLayout */
     setTargetAttrName: function(v) {
         if (this.targetAttrName !== v) {
-            var isY = v === 'y',
+            const isY = v === 'y',
                 inited = this.inited;
             if (inited) this.stopMonitoringAllSubviews();
             this.measureAttrName = isY ? 'boundsHeight' : 'boundsWidth';
@@ -81,7 +82,7 @@ myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
         // OPTIMIZATION: Skip the update call that happens during subview add.
         // The boundsWidth/boundsHeight events will be fired immediately 
         // after and are a more appropriate time to do the update.
-        var isLocked = this.locked; // Remember original locked state.
+        const isLocked = this.locked; // Remember original locked state.
         if (!this.noAddSubviewOptimization) this.locked = true; // Lock the layout so no updates occur.
         this.callSuper(sv);
         this.locked = isLocked; // Restore original locked state.
@@ -101,7 +102,7 @@ myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
     
     /** @overrides myt.ConstantLayout */
     updateSubview: function(count, sv, setterName, value) {
-        var size = sv[this.measureAttrName];
+        const size = sv[this.measureAttrName];
         sv[setterName](value + (size - sv[this.measureAttrBaseName])/2.0); // Adj for transform
         return value + size + this.spacing;
     },

@@ -1,17 +1,17 @@
 ((pkg) => {
-    var getBooleanAttributeGroup = (formRadioGroup) => pkg.BAG.getGroup('selected', formRadioGroup.groupId),
+    const getBooleanAttributeGroup = (formRadioGroup) => pkg.BAG.getGroup('selected', formRadioGroup.groupId),
         
         /*  Search the radio group for a matching node and make that one the
             true node.
             @param {!Object} formRadioGroup
             @returns {undefined} */
         updateGroupValue = (formRadioGroup) => {
-            var bag = getBooleanAttributeGroup(formRadioGroup);
+            const bag = getBooleanAttributeGroup(formRadioGroup);
             if (bag) {
-                var nodes = bag.getNodes(), 
-                    i = nodes.length, 
-                    node, 
+                const nodes = bag.getNodes(),
                     v = formRadioGroup.value;
+                let i = nodes.length, 
+                    node;
                 while (i) {
                     node = nodes[--i];
                     if (node.optionValue === v) {
@@ -24,14 +24,14 @@
         
         startMonitoring = (formRadioGroup) => {
             if (formRadioGroup.groupId) {
-                var bag = getBooleanAttributeGroup(formRadioGroup);
+                const bag = getBooleanAttributeGroup(formRadioGroup);
                 if (bag) formRadioGroup.syncTo(bag, '__syncValue', 'trueNode');
             }
         },
         
         stopMonitoring = (formRadioGroup) => {
             if (formRadioGroup.groupId) {
-                var bag = getBooleanAttributeGroup(formRadioGroup);
+                const bag = getBooleanAttributeGroup(formRadioGroup);
                 if (bag) formRadioGroup.detachFrom(bag, '__syncValue', 'trueNode');
             }
         };
@@ -62,7 +62,7 @@
         // Accessors ///////////////////////////////////////////////////////////
         /** @overrides myt.FormElement */
         setValue: function(v) {
-            var retval = this.callSuper(v);
+            const retval = this.callSuper(v);
             if (this.inited) updateGroupValue(this);
             return retval;
         },

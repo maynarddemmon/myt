@@ -34,10 +34,10 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
     },
     
     doAfterAdoption: function() {
-        var self = this,
+        const self = this,
             M = myt,
             TS = M.TabSlider;
-        var container = new M.View(self, {
+        const container = new M.View(self, {
             name:'container', ignorePlacement:true, percentOfParentWidth:100
         }, [M.SizeToParent, {
             /** @overrides myt.View */
@@ -52,7 +52,8 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
             /** @overrides myt.View */
             subnodeRemoved: function(node) {
                 if (node instanceof TS) {
-                    var tabSliders = self._tabSliders, i = tabSliders.length;
+                    const tabSliders = self._tabSliders;
+                    let i = tabSliders.length;
                     while (i) {
                         if (tabSliders[--i] === node) {
                             self.detachFrom(node, 'updateLayout', 'selected');
@@ -85,8 +86,8 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
     /** @param {!Object} event
         @returns {undefined} */
     updateLayout: function(event) {
-        var tabSliders = this._tabSliders, 
-            i = tabSliders.length, 
+        const tabSliders = this._tabSliders;
+        let i = tabSliders.length, 
             tabSlider,
             min = 0, 
             preferred = 0, 
@@ -109,16 +110,18 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
             }
         }
         
-        var layout = this.container.layout,
+        const layout = this.container.layout,
             layoutOverage = layout.inset + layout.outset + layout.spacing * (visCount - 1);
         min += layoutOverage;
         preferred += layoutOverage;
         
-        var h = this.height,
+        const h = this.height,
             minIsOver = min > h,
-            preferredIsOver = preferred > h,
-            overage = preferred - h,
-            tabPreferred, tabMin, newVal;
+            preferredIsOver = preferred > h;
+        let overage = preferred - h,
+            tabPreferred, 
+            tabMin, 
+            newVal;
         
         i = tabSliders.length;
         while (i) {

@@ -1,14 +1,14 @@
 ((pkg) => {
-    var JSClass = JS.Class,
+    const JSClass = JS.Class,
         
-        // Safe as a closure var because the registry is a singleton.,
+        // Safe as a closure variable because the registry is a singleton.,
         validators = {},
         
         getValidator = (id) => validators[id],
         
         doFuncOnIdentifiable = (identifiable, func) => {
             if (identifiable) {
-                var id = identifiable.id;
+                const id = identifiable.id;
                 if (identifiable.id) {
                     func(id);
                 } else {
@@ -86,7 +86,7 @@
         EqualsIgnoreCaseValidator = pkg.EqualsIgnoreCaseValidator = new JSClass('EqualsIgnoreCaseValidator', Validator, {
             /** @overrides myt.Validator */
             isValid: function(value, config, errorMessages) {
-                var rbv = config.form.getRollbackValue();
+                const rbv = config.form.getRollbackValue();
                 if (value && rbv && value.toLowerCase() === rbv.toLowerCase()) {
                     if (errorMessages) errorMessages.push("Value must differ by more than just case.");
                     return false;
@@ -110,7 +110,7 @@
             
             /** @overrides myt.Validator */
             isValid: function(value, config, errorMessages) {
-                var uri = new pkg.URI(value);
+                const uri = new pkg.URI(value);
                 if (uri.toString(this.originalRawQuery) !== value) {
                     if (errorMessages) errorMessages.push("Not a valid URL.");
                     return false;
@@ -171,7 +171,7 @@
         
         /** @overrides myt.Validator */
         isValid: function(value, config, errorMessages) {
-            var len = value ? value.length : 0,
+            const len = value ? value.length : 0,
                 min = this.min,
                 max = this.max;
             
@@ -210,7 +210,9 @@
             if (value === "") return true;
             
             // Must be a number
-            var numericValue = Number(value), min = this.min, max = this.max;
+            const numericValue = Number(value),
+                min = this.min,
+                max = this.max;
             if (isNaN(numericValue)) {
                 if (errorMessages) errorMessages.push("Value is not a number.");
                 return false;
@@ -256,7 +258,7 @@
             this.callSuper(id);
             
             // Make sure each arg is an myt.Validator
-            var i = args.length,
+            let i = args.length,
                 validator;
             while (i) {
                 validator = args[--i];
@@ -282,9 +284,9 @@
         
         /** @overrides myt.Validator */
         isValid: function(value, config, errorMessages) {
-            var isValid = true, 
-                validators = this.__v, 
-                len = validators.length, 
+            const validators = this.__v, 
+                len = validators.length;
+            let isValid = true,
                 i = 0;
             for (; len > i;) isValid = validators[i++].isValid(value, config, errorMessages) && isValid;
             return isValid;

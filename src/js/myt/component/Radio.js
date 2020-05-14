@@ -1,8 +1,8 @@
 ((pkg) => {
-    var BAGAttrName = 'selected',
+    const BAGAttrName = 'selected',
         
         updateUI = (radio) => {
-            var label = radio.label || '';
+            const label = radio.label || '';
             radio.setText(
                 '<i class="far fa-' + (radio.selected === true ? 'dot-' : '') + 'circle"></i>' +
                 (label.length > 0 ? ' ' : '') + label
@@ -15,10 +15,10 @@
             @param {*} value
             @returns {undefined} */
         updateGroupValue = (radio, value) => {
-            var bag = getBooleanAttributeGroup(radio);
+            const bag = getBooleanAttributeGroup(radio);
             if (bag) {
-                var nodes = bag.getNodes(), 
-                    i = nodes.length, 
+                const nodes = bag.getNodes();
+                let i = nodes.length, 
                     node;
                 while (i) {
                     node = nodes[--i];
@@ -55,7 +55,7 @@
             if (attrs.hoverColor == null) attrs.hoverColor = 'inherits';
             if (attrs.readyColor == null) attrs.readyColor = 'inherits';
             
-            var value = attrs.value;
+            const value = attrs.value;
             delete attrs.value;
             
             this.callSuper(parent, attrs);
@@ -63,7 +63,7 @@
             this.setValue(value);
             
             if (this.selected) {
-                var bag = getBooleanAttributeGroup(this);
+                const bag = getBooleanAttributeGroup(this);
                 if (bag) bag.setTrue(this);
             }
             
@@ -90,7 +90,7 @@
             @returns {*} The value of the selected radio button. */
         getValue: function() {
             // Get selected radio
-            var bag = getBooleanAttributeGroup(this),
+            const bag = getBooleanAttributeGroup(this),
                 selectedRadio = bag ? bag.trueNode : null;
             return selectedRadio ? selectedRadio.optionValue : null;
         },
@@ -107,7 +107,7 @@
     
         setGroupId: function(v) {
             if (this.groupId !== v) {
-                var oldGroupId = this.groupId;
+                const oldGroupId = this.groupId;
                 this.groupId = v;
                 if (oldGroupId) this.removeFromBAG(BAGAttrName, oldGroupId);
                 if (v) this.addToBAG(BAGAttrName, v);

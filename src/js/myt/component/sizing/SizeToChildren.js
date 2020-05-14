@@ -68,17 +68,21 @@ myt.SizeToChildren = new JS.Class('SizeToChildren', myt.Layout, {
             // Prevent inadvertent loops
             this.incrementLockedCounter();
             
-            var p = this.parent;
+            const p = this.parent;
             
             if (!p.isBeingDestroyed) {
-                var svs = this.subviews, len = svs.length, i, sv,
-                    max, bound,
+                const svs = this.subviews, 
+                    len = svs.length,
                     axis = this.axis,
                     maxFunc = Math.max;
+                let i, 
+                    sv,
+                    max, 
+                    bound;
                 if (axis !== 'y') {
                     i = len;
                     max = 0;
-                    while(i) {
+                    while (i) {
                         sv = svs[--i];
                         if (sv.visible) {
                             bound = sv.boundsWidth;
@@ -91,7 +95,7 @@ myt.SizeToChildren = new JS.Class('SizeToChildren', myt.Layout, {
                 if (axis !== 'x') {
                     i = len;
                     max = 0;
-                    while(i) {
+                    while (i) {
                         sv = svs[--i];
                         if (sv.visible) {
                             bound = sv.boundsHeight;
@@ -127,7 +131,7 @@ myt.SizeToChildren = new JS.Class('SizeToChildren', myt.Layout, {
         @param {!Function} func
         @returns {undefined} */
     __updateMonitoringSubview: function(sv, func) {
-        var axis = this.axis;
+        const axis = this.axis;
         func = func.bind(this);
         if (axis !== 'y') {
             func(sv, 'update', 'x');

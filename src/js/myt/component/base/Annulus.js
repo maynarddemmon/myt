@@ -1,5 +1,5 @@
 ((pkg) => {
-    var degreesToRadians = pkg.Geometry.degreesToRadians,
+    const degreesToRadians = pkg.Geometry.degreesToRadians,
         
         /*  Redraws the annulus
             @param {!Object} annulus - The Annulus to redraw.
@@ -22,7 +22,7 @@
             @param {!Object} annulus - The Annulus to update.
             @returns {undefined} */
         updateSize = (annulus) => {
-            var size = 2*(annulus.radius + annulus.thickness),
+            const size = 2*(annulus.radius + annulus.thickness),
                 svg = annulus.__svg;
             annulus.setWidth(size);
             annulus.setHeight(size);
@@ -57,12 +57,12 @@
             draw: (path, startAngle, endAngle, thickness, r1, c, color, startCapRounding, endCapRounding) => {
                 // Ensure endAngle is greater than or equal to startAngle
                 if (startAngle > endAngle) {
-                    var tmp = startAngle;
+                    const tmp = startAngle;
                     startAngle = endAngle;
                     endAngle = tmp;
                 }
                 
-                var r2 = r1 + thickness,
+                const r2 = r1 + thickness,
                     PI = Math.PI,
                     angleDiff = endAngle - startAngle,
                     isFull = angleDiff + 0.0001 >= 2 * PI; // 0.0001 is to handle floating point errors
@@ -73,7 +73,7 @@
                     endAngle = PI;
                 }
                 
-                var COS = Math.cos,
+                const COS = Math.cos,
                     SIN = Math.sin,
                     points = [
                         [c + r2 * COS(startAngle), c + r2 * SIN(startAngle)],
@@ -91,7 +91,7 @@
                     commands.push("A" + [r1, r1, 0, 1, 0, points[3]].join());
                     commands.push("A" + [r1, r1, 0, 1, 0, points[2]].join());
                 } else {
-                    var largeArc = (angleDiff % (2 * PI)) > PI ? 1 : 0;
+                    const largeArc = (angleDiff % (2 * PI)) > PI ? 1 : 0;
                     commands.push("A" + [r2, r2, 0, largeArc, 1, points[1]].join());
                     if (endCapRounding) {
                         commands.push("A" + [thickness / 2, thickness / 2, 0, 0, 1, points[2]].join());
@@ -108,7 +108,7 @@
             },
             
             makeSVG: (elementName, parentElem) => {
-                var svgElem = document.createElementNS("http://www.w3.org/2000/svg", elementName);
+                const svgElem = document.createElementNS("http://www.w3.org/2000/svg", elementName);
                 if (parentElem) parentElem.appendChild(svgElem);
                 return svgElem;
             }
@@ -117,7 +117,7 @@
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            var self = this;
+            const self = this;
             
             self.radius = self.thickness = self.startAngle = self.endAngle = 0;
             self.startCapRounding = self.endCapRounding = false;
@@ -129,9 +129,9 @@
         
         /** @overrides myt.View */
         createOurDomElement: function(parent) {
-            var elements = this.callSuper(parent),
-                MSVG = pkg.Annulus.makeSVG,
-                svg,
+            const elements = this.callSuper(parent),
+                MSVG = pkg.Annulus.makeSVG;
+            let svg,
                 innerElem;
             if (Array.isArray(elements)) {
                 innerElem = elements[1];
@@ -227,10 +227,10 @@
             @overrides */
         sendSubviewToBack: function(sv) {
             if (sv.parent === this) {
-                var de = this.getInnerDomElement(),
+                const de = this.getInnerDomElement(),
                     firstChild = de.childNodes[1];
                 if (sv.getOuterDomElement() !== firstChild) {
-                    var removedElem = de.removeChild(sv.getOuterDomElement());
+                    const removedElem = de.removeChild(sv.getOuterDomElement());
                     if (removedElem) de.insertBefore(removedElem, firstChild);
                 }
             }

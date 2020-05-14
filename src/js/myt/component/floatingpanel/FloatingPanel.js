@@ -24,7 +24,7 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
     initNode: function(parent, attrs) {
         // Create a dom element for the panel and insert it at the end of
         // the body.
-        var elem = document.createElement('div');
+        const elem = document.createElement('div');
         elem.style.position = 'absolute';
         myt.getElement().appendChild(elem);
         
@@ -52,7 +52,9 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
         @param {!Object} event
         @returns {undefined} */
     __doMouseDown: function(event) {
-        var v = event.value, px = v.pageX, py = v.pageY;
+        const v = event.value, 
+            px = v.pageX, 
+            py = v.pageY;
         if (!this.containsPoint(px, py) && 
             (this.ignoreOwnerForHideOnMouseDown ? !this.owner.containsPoint(px, py) : true)
         ) {
@@ -75,11 +77,11 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
         descendant of the panel. When leaving we ask the panel anchor
         where to give focus. */
     focus: function(noScroll) {
-        var gf = myt.global.focus;
+        const gf = myt.global.focus;
         if (this.owner && this.isAncestorOf(gf.focusedView)) {
             this.owner[gf.lastTraversalWasForward ? 'getNextFocusAfterPanel' : 'getPrevFocusAfterPanel'](this.panelId).focus(noScroll);
         } else {
-            var ffv = this.getFirstFocusableDescendant();
+            const ffv = this.getFirstFocusableDescendant();
             if (ffv === this) {
                 // Process normally since focus is actually being set
                 // on the panel.
@@ -102,7 +104,7 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
         @param {!Object} event
         @returns {undefined} */
     __doFocusChange: function(event) {
-        var v = event.value;
+        const v = event.value;
         if (v && !this.isAncestorOf(v)) this.doLostFocus();
     },
     
@@ -136,7 +138,7 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
             
             this.owner.notifyPanelShown(this);
             
-            var g = myt.global;
+            const g = myt.global;
             this.attachToDom(g.mouse, '__doMouseDown', 'mousedown', true);
             this.attachTo(g.focus, '__doFocusChange', 'focused');
         }
@@ -149,7 +151,7 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
         @returns {undefined} */
     hide: function(ignoreRestoreFocus) {
         if (this.isShown()) {
-            var g = myt.global;
+            const g = myt.global;
             this.detachFromDom(g.mouse, '__doMouseDown', 'mousedown', true);
             this.detachFrom(g.focus, '__doFocusChange', 'focused');
             
@@ -175,11 +177,12 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
     updateLocation: function(panelAnchor) {
         this.setOwner(panelAnchor);
         
-        var panelId = this.panelId,
+        const panelId = this.panelId,
             align = panelAnchor.getFloatingAlignForPanelId(panelId),
             valign = panelAnchor.getFloatingValignForPanelId(panelId),
-            anchorLocation = panelAnchor.getPagePosition(),
-            x = 0, y = 0,
+            anchorLocation = panelAnchor.getPagePosition();
+        let x = 0,
+            y = 0,
             type = typeof align;
         
         if (type === 'string') {

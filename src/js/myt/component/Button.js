@@ -1,5 +1,5 @@
 ((pkg) => {
-    var JSClass = JS.Class,
+    const JSClass = JS.Class,
         JSModule = JS.Module,
         defaultDisabledOpacity = 0.5,
         defaultFocusShadowPropertyValue = [0, 0, 7, '#666666'],
@@ -51,7 +51,7 @@
             // Accessors ///////////////////////////////////////////////////////
             /** @overrides myt.FocusObservable */
             setFocused: function(v) {
-                var self = this,
+                const self = this,
                     existing = self.focused;
                 self.callSuper(v);
                 if (self.inited && self.focused !== existing) self.updateUI();
@@ -79,7 +79,7 @@
             
             /** @overrides myt.UpdateableUI. */
             updateUI: function() {
-                var self = this;
+                const self = this;
                 
                 if (self.disabled) {
                     // Remember the cursor to change back to, but don't re-remember
@@ -88,7 +88,7 @@
                     self.setCursor('not-allowed');
                     self.drawDisabledState();
                 } else {
-                    var rc = self.__restoreCursor;
+                    const rc = self.__restoreCursor;
                     if (rc) {
                         self.setCursor(rc);
                         self.__restoreCursor = null;
@@ -281,8 +281,8 @@
     pkg.IconTextButtonContent = new JSModule('IconTextButtonContent', {
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            var self = this,
-                iconView,
+            const self = this;
+            let iconView,
                 textView;
             
             self.textY = self.iconY = 'middle';
@@ -308,10 +308,10 @@
         },
         
         doAfterAdoption: function() {
-            var self = this,
+            const self = this,
                 iconY = self.iconY,
-                textY = self.textY,
-                attrs = {
+                textY = self.textY;
+            let attrs = {
                     name:'iconView',
                     imageUrl:self.iconUrl
                 };
@@ -380,7 +380,7 @@
         },
         
         setIconY: function(v) {
-            var self = this,
+            const self = this,
                 iconView = self.iconView;
             if (self.iconY !== v) {
                 self.iconY = v;
@@ -396,7 +396,7 @@
         },
         
         setTextY: function(v) {
-            var self = this,
+            const self = this,
                 textView = self.textView;
             if (self.textY !== v) {
                 self.textY = v;
@@ -416,19 +416,19 @@
         // Methods /////////////////////////////////////////////////////////////
         /** @private */
         __updateContentPosition: function(v) {
-            var self = this;
+            const self = this;
             
             if (self.__updateContentPositionLoopBlock || self.destroyed) return;
             
-            var inset = self.inset,
+            const inset = self.inset,
                 outset = self.outset,
                 iconView = self.iconView,
                 textView = self.textView,
                 textViewVisible = textView.visible && self.text,
                 iconWidth = iconView.visible ? iconView.width : 0,
                 iconExtent = iconWidth + (textViewVisible && iconWidth > 0 ? self.iconSpacing : 0),
-                textWidth = textViewVisible ? textView.width : 0,
-                totalWidth,
+                textWidth = textViewVisible ? textView.width : 0;
+            let totalWidth,
                 leftPos,
                 extraWidth;
             
@@ -489,8 +489,8 @@
     pkg.TextButtonContent = new JSModule('TextButtonContent', {
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            var self = this,
-                textView;
+            const self = this;
+            let textView;
             
             self.inset = self.outset = 0;
             
@@ -513,7 +513,7 @@
         },
         
         doAfterAdoption: function() {
-            var self = this,
+            const self = this,
                 textY = self.textY, 
                 attrs = {
                     name:'textView', 
@@ -559,7 +559,7 @@
         },
         
         setShrinkToFit: function(v) {
-            var self = this,
+            const self = this,
                 textView = self.textView;
             if (self.shrinkToFit !== v) {
                 self.shrinkToFit = v;
@@ -571,7 +571,7 @@
         },
         
         setTextY: function(v) {
-            var self = this,
+            const self = this,
                 textView = self.textView;
             if (self.textY !== v) {
                 self.textY = v;
@@ -590,11 +590,11 @@
         
         // Methods /////////////////////////////////////////////////////////////
         __updateContentPosition: function(v) {
-            var self = this;
+            const self = this;
             
             if (self.__updateContentPositionLoopBlock || self.destroyed) return;
             
-            var inset = self.inset, 
+            const inset = self.inset, 
                 outset = self.outset, 
                 textView = self.textView,
                 textViewVisible = textView.visible && self.text;

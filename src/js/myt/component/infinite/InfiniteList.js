@@ -23,7 +23,8 @@
             performance when refreshing the list.
         _listView:myt.View The view that contains the rows in the list.
         _itemPool:myt.TrackActivesPool The pool for row views.
-*/
+    
+    @class */
 myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
@@ -37,7 +38,7 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        var self = this,
+        const self = this,
             M = myt,
             IL = M.InfiniteList,
             rowClass = attrs.rowClass;
@@ -62,7 +63,7 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
         self.callSuper(parent, attrs);
         
         // Build UI
-        var listView = self._listView = new M.View(self);
+        const listView = self._listView = new M.View(self);
         self._scrollAnchorView = new M.View(listView, {width:1, height:1, bgColor:'transparent'});
         self._itemPool = new M.TrackActivesPool(rowClass, listView);
         
@@ -99,7 +100,7 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
         if (v > 0) {
             this.callSuper(v, supressEvent);
             if (this.inited) {
-                var listView = this._listView,
+                const listView = this._listView,
                     w = this.width;
                 listView.setWidth(w);
                 listView.getSubviews().forEach(sv => {sv.setWidth(w);});
@@ -133,7 +134,7 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
     
     getSortFunction: function() {
         // Default to a numeric sort on the IDs
-        var modelIDName = this.modelIDName,
+        const modelIDName = this.modelIDName,
             asc = this.ascendingSort ? 1 : -1;
         if (this.numericSort) {
             return (a, b) => (a[modelIDName] - b[modelIDName]) * asc;
@@ -151,10 +152,10 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
     },
     
     scrollModelIntoView: function(model) {
-        var self = this,
+        const self = this,
             idx = self.getIndexOfModelInData(model),
-            rowExtent = self._rowExtent,
-            viewportTop,
+            rowExtent = self._rowExtent;
+        let viewportTop,
             viewportBottom,
             rowTop,
             rowBottom;
@@ -182,9 +183,9 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
     },
     
     getNextModel: function(model, wrap=true, alwaysReturnAModel=true) {
-        var data = this.getListData(),
-            len = data.length,
-            idx = this.getIndexOfModelInData(model);
+        const data = this.getListData(),
+            len = data.length;
+        let idx = this.getIndexOfModelInData(model);
         if (idx >= 0) {
             idx += 1;
             if (idx >= len) {
@@ -199,9 +200,9 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
     },
     
     getPrevModel: function(model, wrap=true, alwaysReturnAModel=true) {
-        var data = this.getListData(),
-            len = data.length,
-            idx = this.getIndexOfModelInData(model);
+        const data = this.getListData(),
+            len = data.length;
+        let idx = this.getIndexOfModelInData(model);
         if (idx >= 0) {
             idx -= 1;
             if (idx < 0) {
@@ -217,19 +218,19 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
     
     getIndexOfModelInData: function(model) {
         if (model) {
-            var self = this,
+            const self = this,
                 modelIDName = self.modelIDName,
                 modelId = model[modelIDName],
-                data = self.getListData(),
-                i = data.length;
+                data = self.getListData();
+            let i = data.length;
             while (i) if (data[--i][modelIDName] === modelId) return i;
         }
         return -1;
     },
     
     getActiveRowForModel: function(model) {
-        var activeRows = this._itemPool.getActives(),
-            i = activeRows.length,
+        const activeRows = this._itemPool.getActives();
+        let i = activeRows.length,
             row;
         while (i) {
             row = activeRows[--i];
@@ -254,14 +255,14 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
     },
     
     resetListUI: function(preserveScroll) {
-        var self = this,
+        const self = this,
             data = self.getListData(),
             len = data.length,
-            i,
             visibleRowsByIdx = self._visibleRowsByIdx,
             pool = self._itemPool,
             listView = self._listView,
             scrollAnchorView = self._scrollAnchorView;
+        let i;
         
         // Resize the listView to the height to accomodate all rows
         listView.setHeight(len * self._rowExtent - (len > 0 ? self.rowSpacing : 0) + self.rowInset + self.rowOutset);
@@ -289,18 +290,18 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
     },
     
     refreshListUI: function() {
-        var self = this,
-            startIdx,
-            endIdx,
-            scrollY = self._getDomScrollTop(),
-            data = self.getListData() || [],
-            visibleRowsByIdx = self._visibleRowsByIdx,
-            pool = self._itemPool,
-            row,
+        const self = this,
             rowWidth = self.width,
             rowHeight = self.rowHeight,
             rowExtent = self._rowExtent,
             rowInset = self.rowInset,
+            scrollY = self._getDomScrollTop(),
+            data = self.getListData() || [],
+            visibleRowsByIdx = self._visibleRowsByIdx,
+            pool = self._itemPool;
+        let startIdx,
+            endIdx,
+            row,
             i;
         
         startIdx = Math.max(0, Math.floor((scrollY - rowInset) / rowExtent));

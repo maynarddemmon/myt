@@ -1,8 +1,8 @@
 ((pkg) => {
-    var globalRootViewRegistry,
+    let globalRootViewRegistry;
         
-        /* Holds an array of RootViews. */
-        roots = [];
+    /* Holds an array of RootViews. */
+    const roots = [];
     
     /** Provides events when a new myt.RootView is created or destroyed.
         Registered in myt.global as 'roots'.
@@ -45,9 +45,9 @@
             @param {!Object} r - The RootView to remove.
             @returns {undefined} */
         removeRoot: (r) => {
-            var i = roots.length,
+            let i = roots.length,
                 root;
-            while(i) {
+            while (i) {
                 root = roots[--i];
                 if (root === r) {
                     roots.splice(i, 1);

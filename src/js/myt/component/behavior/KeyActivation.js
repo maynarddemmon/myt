@@ -30,7 +30,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides */
     initNode: function(parent, attrs) {
-        var self = this;
+        const self = this;
         
         self.activateKeyDown = -1;
         
@@ -57,8 +57,9 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
     __handleKeyDown: function(event) {
         if (!this.disabled) {
             if (this.activateKeyDown === -1 || this.repeatKeyDown) {
-                var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event),
-                    keys = this.activationKeys, i = keys.length;
+                const keyCode = myt.KeyObservable.getKeyCodeFromEvent(event),
+                    keys = this.activationKeys;
+                let i = keys.length;
                 while (i) {
                     if (keyCode === keys[--i]) {
                         if (this.activateKeyDown === keyCode) {
@@ -80,9 +81,10 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         @returns {undefined} */
     __handleKeyPress: function(event) {
         if (!this.disabled) {
-            var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
+            const keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
             if (this.activateKeyDown === keyCode) {
-                var keys = this.activationKeys, i = keys.length;
+                const keys = this.activationKeys;
+                let i = keys.length;
                 while (i) {
                     if (keyCode === keys[--i]) {
                         event.value.preventDefault();
@@ -98,9 +100,10 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         @returns {undefined} */
     __handleKeyUp: function(event) {
         if (!this.disabled) {
-            var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
+            const keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
             if (this.activateKeyDown === keyCode) {
-                var keys = this.activationKeys, i = keys.length;
+                const keys = this.activationKeys;
+                let i = keys.length;
                 while (i) {
                     if (keyCode === keys[--i]) {
                         this.activateKeyDown = -1;
@@ -118,7 +121,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         @returns {undefined} */
     __doDomBlur: function(event) {
         if (!this.disabled) {
-            var keyThatWasDown = this.activateKeyDown;
+            const keyThatWasDown = this.activateKeyDown;
             if (keyThatWasDown !== -1) {
                 this.activateKeyDown = -1;
                 this.doActivationKeyAborted(keyThatWasDown);

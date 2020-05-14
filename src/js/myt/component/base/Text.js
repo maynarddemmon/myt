@@ -26,10 +26,10 @@ myt.Text = new JS.Class('Text', myt.View, {
         
         // Temporarily set wrapping to 'nowrap', take measurement and
         // then restore wrapping.
-        var s = this.deStyle,
+        const s = this.deStyle,
             oldValue = s.whiteSpace;
         s.whiteSpace = 'nowrap';
-        var measuredWidth = this.getOuterDomElement().offsetWidth;
+        const measuredWidth = this.getOuterDomElement().offsetWidth;
         s.whiteSpace = oldValue;
         return measuredWidth;
     }

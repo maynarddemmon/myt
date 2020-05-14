@@ -24,14 +24,14 @@ myt.Constrainable = new JS.Module('Constrainable', {
     constrain: function(methodName, observables) {
         if (methodName && observables) {
             // Make sure an even number of observable/type was provided
-            var len = observables.length;
+            const len = observables.length;
             if (len % 2 !== 0) {
                 console.log("Observables was not even.", this);
                 return;
             }
             
             // Lazy instantiate constraints array.
-            var constraints = this.__cbmn || (this.__cbmn = {}),
+            const constraints = this.__cbmn || (this.__cbmn = {}),
                 constraint = constraints[methodName] || (constraints[methodName] = []);
             
             // Don't allow a constraint to be clobbered.
@@ -40,7 +40,9 @@ myt.Constrainable = new JS.Module('Constrainable', {
                 return;
             }
             
-            var observable, type, i = 0;
+            let observable, 
+                type, 
+                i = 0;
             for (; len !== i;) {
                 observable = observables[i++];
                 type = observables[i++];
@@ -65,11 +67,11 @@ myt.Constrainable = new JS.Module('Constrainable', {
     releaseConstraint: function(methodName) {
         if (methodName) {
             // No need to remove if the constraint is already empty.
-            var constraints = this.__cbmn;
+            const constraints = this.__cbmn;
             if (constraints) {
-                var constraint = constraints[methodName];
+                const constraint = constraints[methodName];
                 if (constraint) {
-                    var i = constraint.length, 
+                    let i = constraint.length, 
                         type, 
                         observable;
                     while (i) {
@@ -86,10 +88,9 @@ myt.Constrainable = new JS.Module('Constrainable', {
     /** Removes all constraints.
         @returns {undefined} */
     releaseAllConstraints: function() {
-        var constraints = this.__cbmn,
-            methodName;
+        const constraints = this.__cbmn;
         if (constraints) {
-            for (methodName in constraints) this.releaseConstraint(methodName);
+            for (let methodName in constraints) this.releaseConstraint(methodName);
         }
     }
 });

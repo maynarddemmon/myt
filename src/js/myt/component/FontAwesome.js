@@ -1,8 +1,8 @@
 ((pkg) => {
-    var sizeClasses = ['','fa-lg','fa-2x','fa-3x','fa-4x','fa-5x'],
+    const sizeClasses = ['','fa-lg','fa-2x','fa-3x','fa-4x','fa-5x'],
         
         updateInstance = (instance) => {
-            var props = instance.properties;
+            let props = instance.properties;
             if (props) {
                 if (typeof props === 'string') {
                     props = props.split(' ');
@@ -29,12 +29,12 @@
             propeties:string || array A space separated string or list of FA
                 CSS classes to set.
     */
-    var FontAwesome = pkg.FontAwesome = new JS.Class('FontAwesome', pkg.Markup, {
+    const FontAwesome = pkg.FontAwesome = new JS.Class('FontAwesome', pkg.Markup, {
         // Class Methods and Attributes ////////////////////////////////////////
         extend: {
             makeTag: function(props) {
                 if (Array.isArray(props)) {
-                    var len = props.length,
+                    let len = props.length,
                         prop,
                         i;
                     if (len > 0) {
@@ -86,13 +86,13 @@
         
         // Accessors ///////////////////////////////////////////////////////////
         setIcon: function(v) {
-            var existing = this.icon;
+            const existing = this.icon;
             this.set('icon', v, true);
             if (this.inited && existing !== v) updateInstance(this);
         },
         
         setSize: function(v) {
-            var existing = this.size;
+            const existing = this.size;
             this.set('size', v, true);
             if (this.inited && existing !== v) updateInstance(this);
         },

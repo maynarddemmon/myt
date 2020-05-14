@@ -37,15 +37,17 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
         @returns {undefined} */
     registerListener: function(listenerFunc, matcher) {
         if (listenerFunc) {
-            var matcherFunc = this._makeMatcherFunction(matcher);
+            const matcherFunc = this._makeMatcherFunction(matcher);
             if (matcherFunc) {
                 // Register for existing listenr
-                var listeners = this._listeners, i = listeners.length, listenerInfo;
+                const listeners = this._listeners;
+                let i = listeners.length, 
+                    listenerInfo;
                 while (i) {
                     listenerInfo = listeners[--i];
                     if (listenerInfo.func === listenerFunc) {
-                        var patternMatchers = listenerInfo.patternMatchers, 
-                            j = patternMatchers.length;
+                        const patternMatchers = listenerInfo.patternMatchers; 
+                        let j = patternMatchers.length;
                         while (j) {
                             // Abort since patternMatcher is already registered
                             if (patternMatchers[--j] === matcherFunc) return;
@@ -73,15 +75,17 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
         @returns {undefined} */
     unregisterListener: function(listenerFunc, matcher) {
         if (listenerFunc) {
-            var matcherFunc = this._makeMatcherFunction(matcher);
+            const matcherFunc = this._makeMatcherFunction(matcher);
             if (matcherFunc) {
-                var listeners = this._listeners, i = listeners.length, listenerInfo;
+                const listeners = this._listeners;
+                let i = listeners.length, 
+                    listenerInfo;
                 while (i) {
                     listenerInfo = listeners[--i];
                     if (listenerInfo.func === listenerFunc) {
                         // Try to remove the matcherFunc
-                        var patternMatchers = listenerInfo.patternMatchers, 
-                            j = patternMatchers.length;
+                        const patternMatchers = listenerInfo.patternMatchers;
+                        let j = patternMatchers.length;
                         while (j) {
                             if (patternMatchers[--j] === matcherFunc) {
                                 patternMatchers.splice(j, 1);
@@ -102,7 +106,7 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
         @param {string|?Function} matcher
         @return {?Function} */
     _makeMatcherFunction: function(matcher) {
-        var matcherFunc,
+        let matcherFunc,
             funcsByKey;
         if (typeof matcher === 'string') {
             // Use the provided string as an exact match function. We must
@@ -126,10 +130,12 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
         @param {string} type
         @returns {!Array} */
     _getListenersForType: function(type) {
-        var retval = [],
-            listeners = this._listeners,
-            i = listeners.length,
-            listenerInfo, patternMatchers, j;
+        const retval = [],
+            listeners = this._listeners;
+        let i = listeners.length,
+            listenerInfo, 
+            patternMatchers, 
+            j;
         while (i) {
             listenerInfo = listeners[--i];
             patternMatchers = listenerInfo.patternMatchers;
@@ -156,7 +162,7 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
         @returns string The message to be sent or undefined if an
             exception occurs during JSON.stringify. */
     createMessage: function(type, msg) {
-        var jsonMsg;
+        let jsonMsg;
         try {
             jsonMsg = JSON.stringify(msg);
         } catch (ex) {
@@ -173,7 +179,7 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
     
     /** @overrides */
     onMessage: function(event) {
-        var msg = this.callSuper(event);
+        const msg = this.callSuper(event);
         
         // Parse msg.msg JSON
         try {
@@ -184,7 +190,8 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
         }
         
         // Notify Listeners
-        var listeners = this._getListenersForType(msg.type), i = listeners.length;
+        const listeners = this._getListenersForType(msg.type);
+        let i = listeners.length;
         while (i) listeners[--i](msg);
         
         return msg;

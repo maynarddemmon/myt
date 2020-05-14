@@ -1,5 +1,5 @@
 ((pkg) => {
-    var
+    const
         /*  Get the closest ancestor of the provided Node or the Node itself for 
             which the matcher function returns true. Returns a Node or null if 
             no match is found.
@@ -32,7 +32,7 @@
                 param nodeToAdd:Node the node to add the name reference for.
         */
         addNameRef = (node, nodeToAdd) => {
-            var name = nodeToAdd.name;
+            const name = nodeToAdd.name;
             if (node[name] === undefined) {
                 node[name] = nodeToAdd;
             } else {
@@ -45,7 +45,7 @@
                 param nodeToRemove:Node the node to remove the name reference for.
         */
         removeNameRef = (node, nodeToRemove) => {
-            var name = nodeToRemove.name;
+            const name = nodeToRemove.name;
             if (node[name] === nodeToRemove) {
                 delete node[name];
             } else {
@@ -121,9 +121,12 @@
                 the new instance.
             @returns {undefined} */
         initialize: function(parent, attrs, mixins) {
-            var self = this;
+            const self = this;
             if (mixins) {
-                for (var i = 0, len = mixins.length, mixin; len > i;) {
+                const len = mixins.length;
+                let i = 0,
+                    mixin;
+                for (; len > i;) {
                     if (mixin = mixins[i++]) {
                         self.extend(mixin);
                     } else {
@@ -146,7 +149,7 @@
             @param {?Object} attrs - A map of attribute names and values.
             @returns {undefined} */
         initNode: function(parent, attrs) {
-            var self = this;
+            const self = this;
             self.callSetters(attrs);
             
             self.doBeforeAdoption();
@@ -172,16 +175,15 @@
         
         /** @overrides myt.Destructible. */
         destroy: function() {
-            var self = this,
-                subs = self.subnodes,
-                i;
+            const self = this,
+                subs = self.subnodes;
             
             // Allows descendants to know destruction is in process
             self.isBeingDestroyed = true;
             
             // Destroy subnodes depth first
             if (subs) {
-                i = subs.length;
+                let i = subs.length;
                 while (i) subs[--i].destroy();
             }
             
@@ -226,14 +228,11 @@
             @param {?Object} newParent
             @returns {undefined} */
         setParent: function(newParent) {
-            var self = this,
-                placement,
-                curParent,
-                idx;
+            const self = this;
             
             // Use placement if indicated
             if (newParent && !self.ignorePlacement) {
-                placement = self.placement || newParent.defaultPlacement;
+                let placement = self.placement || newParent.defaultPlacement;
                 if (placement) newParent = newParent.determinePlacement(placement, self);
             }
             
@@ -242,8 +241,10 @@
                 if (newParent && newParent.destroyed) return;
                 
                 // Remove ourselves from our existing parent if we have one.
-                if (curParent = self.parent) {
-                    if ((idx = curParent.getSubnodeIndex(self)) !== -1) {
+                let curParent = self.parent;
+                if (curParent) {
+                    let idx = curParent.getSubnodeIndex(self);
+                    if (idx !== -1) {
                         if (self.name) removeNameRef(curParent, self);
                         curParent.subnodes.splice(idx, 1);
                         curParent.subnodeRemoved(self);
@@ -266,16 +267,16 @@
         
         /** The 'name' of a Node allows it to be referenced by name from its
             parent node. For example a Node named 'foo' that is a child of a
-            Node stored in the var 'bar' would be referenced like this: bar.foo 
-            or bar['foo'].
+            Node stored in the variable 'bar' would be referenced like 
+            this: bar.foo or bar['foo'].
             @param {string} name
             @returns {undefined} */
         setName: function(name) {
-            var self = this;
+            const self = this;
             
             if (self.name !== name) {
                 // Remove "name" reference from parent.
-                var p = self.parent;
+                const p = self.parent;
                 if (p && self.name) removeNameRef(p, self);
                 
                 self.name = name;
@@ -302,7 +303,9 @@
             @returns {!Object} - The Node to place a subnode into. */
         determinePlacement: function(placement, subnode) {
             // Parse "active" placement and remaining placement.
-            var idx = placement.indexOf('.'), remainder, loc;
+            let idx = placement.indexOf('.'),
+                remainder,
+                loc;
             if (idx !== -1) {
                 remainder = placement.substring(idx + 1);
                 placement = placement.substring(0, idx);
@@ -350,7 +353,7 @@
             @param {!Object} node - The myt.Node to check for descent from.
             @returns {boolean} */
         isDescendantOf: function(node) {
-            var self = this;
+            const self = this;
             
             if (node) {
                 if (node === self) return true;
@@ -416,8 +419,8 @@
             be at the front of the list.
             @returns {!Array} - The array of ancestor nodes. */
         getAncestors: function() {
-            var ancestors = [],
-                node = this;
+            const ancestors = [];
+            let node = this;
             while (node) {
                 ancestors.push(node);
                 node = node.parent;
@@ -505,7 +508,7 @@
             @param {?Function} [easingFunction]
             @returns {!Object} - The Animator being run. */
         animate: function(attribute, to, from, relative, callback, duration, reverse, repeat, easingFunction) {
-            var animPool = getAnimPool(this),
+            const animPool = getAnimPool(this),
                 anim = animPool.getInstance({ignorePlacement:true}); // ignorePlacement ensures the animator is directly attached to this node
             
             if (typeof attribute === 'object') {
@@ -542,7 +545,7 @@
             @returns {!Array} - An array of active animators. */
         getActiveAnimators: function(filterFunc) {
             if (typeof filterFunc === 'string') {
-                var attrName = filterFunc;
+                const attrName = filterFunc;
                 filterFunc = (anim) => anim.attribute === attrName;
             }
             return getAnimPool(this).getActives(filterFunc);
@@ -557,8 +560,8 @@
                 callbacks will be executed if they exist.
             @returns {undefined} */
         stopActiveAnimators: function(filterFunc, executeCallbacks=false) {
-            var activeAnims = this.getActiveAnimators(filterFunc),
-                i = activeAnims.length,
+            const activeAnims = this.getActiveAnimators(filterFunc);
+            let i = activeAnims.length,
                 anim,
                 animPool;
             if (i > 0) {

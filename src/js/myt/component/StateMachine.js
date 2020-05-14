@@ -1,5 +1,5 @@
 ((pkg) => {
-    var 
+    const 
         /* Indicates a synchronous transition. */
         SYNC = 'sync',
         
@@ -20,13 +20,13 @@
             // Don't allow another transition if one is already in progress.
             // Instead, defer them until after the current transition completes.
             if (stateMachine.__transInProgress) {
-                var deferredTransitions = stateMachine.__deferredTransitions;
+                let deferredTransitions = stateMachine.__deferredTransitions;
                 if (!deferredTransitions) deferredTransitions = stateMachine.__deferredTransitions = [];
                 deferredTransitions.unshift(args);
             } else {
                 stateMachine.__transInProgress = true;
                 
-                var async = args.shift(),
+                const async = args.shift(),
                     transitionName = args.shift();
                 
                 // Invalid to start a transition if one is still pending.
@@ -38,7 +38,7 @@
                     return StateMachine.NO_TRANSITION;
                 }
                 
-                var to = stateMachine.map[stateMachine.current][transitionName];
+                let to = stateMachine.map[stateMachine.current][transitionName];
                 if (!to) to = stateMachine.map[WILDCARD][transitionName];
                 if (to) {
                     stateMachine.__pendingTransition = transitionName;
@@ -55,7 +55,7 @@
         doDeferredTransitions = (stateMachine) => {
             stateMachine.__transInProgress = false;
             
-            var deferredTransitions = stateMachine.__deferredTransitions;
+            const deferredTransitions = stateMachine.__deferredTransitions;
             if (deferredTransitions) {
                 while (deferredTransitions.length > 0) doTheTransition(stateMachine, deferredTransitions.pop());
             }
@@ -97,7 +97,7 @@
                 performed after the current one completes.
         
         @class */
-    var StateMachine = pkg.StateMachine = new JS.Class('StateMachine', pkg.Node, {
+    const StateMachine = pkg.StateMachine = new JS.Class('StateMachine', pkg.Node, {
         // Class Methods and Attributes ////////////////////////////////////////
         extend: {
             /** The transition was successfull. */
@@ -129,7 +129,7 @@
         setInitialState: function(v) {
             if (this.current === '') {
                 // Get optional args if v is an array
-                var args;
+                let args;
                 if (Array.isArray(v)) {
                     args = v;
                     v = args.shift();
@@ -139,7 +139,7 @@
                 
                 this.current = this.initial = v;
                 this.doEnterState('', '', v, args);
-                var eventValue = {name:'', from:'', to:v, args:args};
+                const eventValue = {name:'', from:'', to:v, args:args};
                 this.fireEvent('enter' + v, eventValue);
                 this.fireEvent('enter', eventValue);
                 if (this.isFinished()) this.fireEvent('finished', eventValue);
@@ -157,7 +157,7 @@
         },
         
         addTransition: function(transitionName, from, to) {
-            var map = this.map;
+            const map = this.map;
             
             if (from) {
                 from = Array.isArray(from) ? from : [from];
@@ -165,7 +165,7 @@
                 from = [WILDCARD];
             }
             
-            var i = from.length, 
+            let i = from.length, 
                 mapEntry;
             while (i) {
                 mapEntry = map[from[--i]];
@@ -185,19 +185,19 @@
         },
         
         resumeTransition: function(async) {
-            var transitionName = this.__pendingTransition;
+            const transitionName = this.__pendingTransition;
             
             // Invalid to resume a transition if none is pending.
             if (!transitionName) return StateMachine.INVALID;
             
-            var current = this.current,
+            const current = this.current,
                 to = this.__transDestinationState,
                 args = this.__additionalArgs,
                 eventValue = {name:transitionName, from:current, to:to, args:args};
             
             switch (this.__transStage) {
                 case 'leaveState':
-                    var result = this.doLeaveState(transitionName, current, to, args);
+                    const result = this.doLeaveState(transitionName, current, to, args);
                     if (result === false) {
                         resetTransitionProgress(this);
                         doDeferredTransitions(this);

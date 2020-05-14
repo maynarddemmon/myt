@@ -30,7 +30,7 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        var BTT = myt.BaseTooltip;
+        const BTT = myt.BaseTooltip;
         this.tipDelay = this.nextTipDelay = BTT.DEFAULT_TIP_DELAY;
         this.tipHideDelay = BTT.DEFAULT_TIP_HIDE_DELAY;
         
@@ -54,7 +54,7 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
             if (v) {
                 this.attachToDom(myt.global.mouse, '__checkMouseMovement', 'mousemove', true);
                 
-                var ttp = v.parent;
+                const ttp = v.parent;
                 this.attachToDom(ttp, 'hideTip', 'mousedown', true);
                 this.attachToDom(ttp, 'hideTip', 'mouseup', true);
             }
@@ -67,7 +67,7 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
         @param {!Object} event The event object.
         @returns {undefined} */
     __checkMouseMovement: function(event) {
-        var self = this;
+        const self = this;
         self._lastPos = myt.MouseObservable.getMouseFromEvent(event);
         if (self.__checkIn()) {
             self.__clearTimeout();
@@ -97,9 +97,9 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
         @private
         @returns {boolean} false if the tip got hidden, true otherwise. */
     __checkIn: function() {
-        var tt = this.tooltip;
+        const tt = this.tooltip;
         if (tt) {
-            var pos = this._lastPos;
+            const pos = this._lastPos;
             if (tt.parent.containsPoint(pos.x, pos.y)) return true;
         }
         this.hideTip();
@@ -112,7 +112,7 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     hideTip: function(event) {
         this.__clearTimeout();
         
-        var ttp = this.tooltip.parent;
+        const ttp = this.tooltip.parent;
         this.detachFromDom(ttp, 'hideTip', 'mousedown', true);
         this.detachFromDom(ttp, 'hideTip', 'mouseup', true);
         this.detachFromDom(myt.global.mouse, '__checkMouseMovement', 'mousemove', true);

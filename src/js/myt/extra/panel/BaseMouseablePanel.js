@@ -92,7 +92,7 @@ myt.BaseMouseablePanel = new JS.Module('BaseMouseablePanel', {
     
     /** @private */
     __updateImageUrls: function(mouseState) {
-        var suffix = '_' + mouseState + '.' + this.extension,
+        const suffix = '_' + mouseState + '.' + this.extension,
             imageRoot = this.imageRoot;
         
         this.first.setImageUrl(imageRoot + this.firstPrefix + suffix);

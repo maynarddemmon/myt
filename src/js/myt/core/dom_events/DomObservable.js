@@ -28,12 +28,12 @@ myt.DomObservable = new JS.Module('DomObservable', {
         if (domObserver && methodName && type) {
             capture = !!capture;
             
-            var methodRef = this.createDomMethodRef(domObserver, methodName, type);
+            const methodRef = this.createDomMethodRef(domObserver, methodName, type);
             if (methodRef) {
-                var domObserversByType = this.__dobsbt || (this.__dobsbt = {});
+                const domObserversByType = this.__dobsbt || (this.__dobsbt = {});
                 
                 // Lazy instantiate dom observers array for type and insert observer.
-                var domObservers = domObserversByType[type];
+                const domObservers = domObserversByType[type];
                 if (!domObservers) {
                     // Create list with observer
                     domObserversByType[type] = [domObserver, methodName, methodRef, capture];
@@ -74,7 +74,7 @@ myt.DomObservable = new JS.Module('DomObservable', {
             if the event will not be handled. */
     createStandardDomMethodRef: function(domObserver, methodName, type, observableClass, preventDefault) {
         if (observableClass.EVENT_TYPES[type]) {
-            var self = this, 
+            const self = this, 
                 event = observableClass.EVENT;
             return (domEvent) => {
                 if (!domEvent) domEvent = window.event;
@@ -83,7 +83,7 @@ myt.DomObservable = new JS.Module('DomObservable', {
                 event.type = domEvent.type;
                 event.value = domEvent;
                 
-                var allowBubble = domObserver[methodName](event);
+                const allowBubble = domObserver[methodName](event);
                 if (!allowBubble) {
                     domEvent.cancelBubble = true;
                     if (domEvent.stopPropagation) domEvent.stopPropagation();
@@ -108,13 +108,13 @@ myt.DomObservable = new JS.Module('DomObservable', {
         if (domObserver && methodName && type) {
             capture = !!capture;
             
-            var domObserversByType = this.__dobsbt;
+            const domObserversByType = this.__dobsbt;
             if (domObserversByType) {
-                var domObservers = domObserversByType[type];
+                const domObservers = domObserversByType[type];
                 if (domObservers) {
                     // Remove dom observer
-                    var retval = false, 
-                        domElement = this.getInnerDomElement(), 
+                    const domElement = this.getInnerDomElement();
+                    let retval = false,  
                         i = domObservers.length;
                     while (i) {
                         i -= 4;
@@ -137,11 +137,15 @@ myt.DomObservable = new JS.Module('DomObservable', {
     /** Detaches all dom observers from this DomObservable.
         @returns {undefined} */
     detachAllDomObservers: function() {
-        var domElement = this.getInnerDomElement();
+        const domElement = this.getInnerDomElement();
         if (domElement) {
-            var domObserversByType = this.__dobsbt;
+            const domObserversByType = this.__dobsbt;
             if (domObserversByType) {
-                var domObservers, methodRef, capture, i, type;
+                let domObservers, 
+                    methodRef, 
+                    capture, 
+                    i, 
+                    type;
                 for (type in domObserversByType) {
                     domObservers = domObserversByType[type];
                     i = domObservers.length;

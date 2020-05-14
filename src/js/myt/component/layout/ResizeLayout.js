@@ -14,7 +14,7 @@ myt.ResizeLayout = new JS.Class('SpacedLayout', myt.SpacedLayout, {
     setTargetAttrName: function(v) {
         if (this.targetAttrName !== v) {
             if (this.inited) {
-                var isX = v === 'x';
+                const isX = v === 'x';
                 this.stopMonitoringParent(isX ? 'height' : 'width');
                 this.startMonitoringParent(isX ? 'width' : 'height');
             }
@@ -26,7 +26,7 @@ myt.ResizeLayout = new JS.Class('SpacedLayout', myt.SpacedLayout, {
     /** @overrides myt.Layout */
     setParent: function(parent) {
         if (this.parent !== parent) {
-            var dim = this.targetAttrName === 'x' ? 'width' : 'height';
+            const dim = this.targetAttrName === 'x' ? 'width' : 'height';
             if (this.parent) this.stopMonitoringParent(dim);
             
             this.callSuper(parent);
@@ -54,17 +54,20 @@ myt.ResizeLayout = new JS.Class('SpacedLayout', myt.SpacedLayout, {
     /** @overrides myt.VariableLayout */
     doBeforeUpdate: function() {
         // Get size to fill
-        var measureAttrName = this.measureAttrName,
-            measureAttrBaseName = this.measureAttrBaseName,
-            remainder = this.parent[measureAttrBaseName];
+        const measureAttrName = this.measureAttrName,
+            measureAttrBaseName = this.measureAttrBaseName;
+        let remainder = this.parent[measureAttrBaseName];
         
         // Calculate minimum required size
         remainder -= this.targetValue + this.outset;
         
-        var svs = this.subviews, i = svs.length, sv,
-            count = 0, resizeSum = 0;
+        const svs = this.subviews;
+        let i = svs.length, 
+            sv,
+            count = 0, 
+            resizeSum = 0;
         
-        while(i) {
+        while (i) {
             sv = svs[--i];
             if (this.skipSubview(sv)) continue;
             ++count;
@@ -89,11 +92,11 @@ myt.ResizeLayout = new JS.Class('SpacedLayout', myt.SpacedLayout, {
     
     /** @overrides myt.SpacedLayout */
     updateSubview: function(count, sv, setterName, value) {
-        var hint = sv.layoutHint;
+        const hint = sv.layoutHint;
         if (hint > 0) {
             this.resizeSumUsed += hint;
             
-            var size = this.resizeSum === this.resizeSumUsed ? 
+            const size = this.resizeSum === this.resizeSumUsed ? 
                 this.remainder - this.remainderUsed : 
                 Math.round(hint * this.scalingFactor);
             

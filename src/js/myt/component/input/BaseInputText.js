@@ -16,8 +16,7 @@
             Defaults to undefined.
         placeholder:string Text that will be shown if the value is empty.
     
-    @class
-*/
+    @class */
 myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     include: [myt.TextSupport],
     
@@ -25,7 +24,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.NativeInputWrapper */
     initNode: function(parent, attrs) {
-        var self = this;
+        const self = this;
         
         if (attrs.bgColor == null) attrs.bgColor = 'transparent';
         if (attrs.spellcheck == null) attrs.spellcheck = false;
@@ -99,7 +98,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
         @param {!Object} event
         @returns {undefined} */
     __filterInputPress: function(event) {
-        var domEvent = event.value,
+        const domEvent = event.value,
             charCode = domEvent.which;
         
         // Firefox fires events for arrow keys and backspace which should be
@@ -111,7 +110,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
         }
         
         // Filter for allowed characters
-        var allowedChars = this.allowedChars;
+        const allowedChars = this.allowedChars;
         if (allowedChars && allowedChars.indexOf(String.fromCharCode(charCode)) === -1) domEvent.preventDefault();
         
         this.filterInputPress(domEvent);
@@ -143,7 +142,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     getCaretPosition: function() {
         // IE Support
         if (document.selection) {
-            var selection = document.selection.createRange();
+            const selection = document.selection.createRange();
             selection.moveStart('character', -this.getDomValue().length);
             return selection.text.length;
         }
@@ -163,12 +162,12 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
             
             end = start;
         }
-        var elem = this.getInnerDomElement();
+        const elem = this.getInnerDomElement();
         
         if (elem.setSelectionRange) {
             elem.setSelectionRange(start, end);
         } else if (elem.createTextRange) {
-            var range = elem.createTextRange();
+            const range = elem.createTextRange();
             range.collapse(true);
             range.moveEnd('character', end);
             range.moveStart('character', start);
@@ -196,7 +195,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     },
     
     getSelection: function() {
-        var de = this.getInnerDomElement();
+        const de = this.getInnerDomElement();
         return {
             start:de.selectionStart,
             startElem:de,

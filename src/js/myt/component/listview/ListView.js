@@ -81,7 +81,7 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
         @param {!Object} itemView
         @returns {undefined} */
     doItemActivated: function(itemView) {
-        var owner = this.owner;
+        const owner = this.owner;
         if (owner) owner.doItemActivated(itemView);
     },
     
@@ -91,7 +91,10 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
     },
     
     getFirstFocusableItem: function() {
-        var items = this.items, item, len = items.length, i = 0;
+        const items = this.items, 
+            len = items.length;
+        let item, 
+            i = 0;
         for (; len > i; ++i) {
             item = items[i];
             if (item.isFocusable()) return item;
@@ -100,7 +103,9 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
     },
     
     getLastFocusableItem: function() {
-        var items = this.items, item, i = items.length;
+        const items = this.items;
+        let item,
+            i = items.length;
         while (i) {
             item = items[--i];
             if (item.isFocusable()) return item;
@@ -111,22 +116,30 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
     /** @private
         @returns {undefined} */
     __updateItems: function() {
-        var self = this,
+        const self = this,
             cfg = self.itemConfig || [],
-            cfgLen = cfg.length, cfgItem, cfgClass, cfgAttrs,
-            items = self.items, itemsLen = items.length, item,
+            cfgLen = cfg.length,
+            items = self.items, 
+            itemsLen = items.length,
             defaultItemClass = self.defaultItemClass,
             contentView = self.getContentView(), 
-            layouts = contentView.getLayouts(), layout,
-            layoutLen = layouts.length, i,
-            minItemWidth, minWidth = self.minWidth;
+            layouts = contentView.getLayouts(),
+            layoutLen = layouts.length;
+        let cfgItem, 
+            cfgClass, 
+            cfgAttrs,
+            item, 
+            layout, 
+            i,
+            minItemWidth, 
+            minWidth = self.minWidth;
         
         // Lock layouts during reconfiguration
         i = layoutLen;
         while (i) layouts[--i].incrementLockedCounter();
         
         // Performance: Remove from dom while doing inserts
-        var de = contentView.getOuterDomElement(),
+        const de = contentView.getOuterDomElement(),
             nextDe = de.nextSibling,
             parentElem = de.parentNode;
         parentElem.removeChild(de);

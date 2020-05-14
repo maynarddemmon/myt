@@ -39,7 +39,7 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
         @returns {undefined} */
     __updateWidth: function(event) {
         // Only resize the active panel
-        var panel = this.getActivePanel();
+        const panel = this.getActivePanel();
         if (panel) panel.setWidth(event.value);
     },
     
@@ -48,7 +48,7 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
         @returns {undefined} */
     __updateHeight: function(event) {
         // Only resize the active panel
-        var panel = this.getActivePanel();
+        const panel = this.getActivePanel();
         if (panel) panel.setHeight(event.value);
     },
     
@@ -87,17 +87,18 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
         @param panel:myt.StackablePanel The panel that is transitioning.
         @returns {undefined} */
     doStackTransitionTo: function(panel) {
-        this.doBeforeTransitionTo(panel);
+        const self = this;
         
-        var transition = this.transition;
+        self.doBeforeTransitionTo(panel);
+        
+        const transition = self.transition;
         if (transition) {
-            var self = this;
             transition.to(panel).then((panel) => {self.doAfterTransitionTo(panel);});
         } else {
             panel.makeHighestZIndex();
             panel.setVisible(true);
             
-            this.doAfterTransitionTo(panel);
+            self.doAfterTransitionTo(panel);
         }
     },
     
@@ -110,15 +111,16 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
         @param panel:myt.StackablePanel The panel that is transitioning.
         @returns {undefined} */
     doStackTransitionFrom: function(panel) {
-        this.doBeforeTransitionFrom(panel);
+        const self = this;
         
-        var transition = this.transition;
+        self.doBeforeTransitionFrom(panel);
+        
+        const transition = self.transition;
         if (transition) {
-            var self = this;
             transition.from(panel).then((panel) => {self.doAfterTransitionFrom(panel);});
         } else {
             panel.setVisible(false);
-            this.doAfterTransitionFrom(panel);
+            self.doAfterTransitionFrom(panel);
         }
     },
     

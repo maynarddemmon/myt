@@ -39,7 +39,7 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        var self = this,
+        const self = this,
             M = myt,
             T = M.Tooltip;
         if (attrs.pointerWidth == null) attrs.pointerWidth = T.DEFAULT_POINTER_WIDTH;
@@ -87,7 +87,7 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
     // Methods /////////////////////////////////////////////////////////////////
     /** @override myt.BaseTooltip. */
     showTip: function() {
-        var self = this,
+        const self = this,
             tt = self.tooltip,
             txt = tt.text,
             ttp = tt.parent,
@@ -99,19 +99,19 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
         if (tipText.text !== txt) tipText.setText(txt);
         
         // Get floating boundary
-        var gwr = myt.global.windowResize,
+        const gwr = myt.global.windowResize,
             bounds = {x:0, y:0, width:gwr.getWidth(), height:gwr.getHeight()},
             boundsXOffset = 0, boundsYOffset = 0;
         
         // Get position of parent
-        var parentPos = ttp.getPagePosition(),
-            tipX = parentPos.x,
+        const parentPos = ttp.getPagePosition(),
             tipParentY = parentPos.y;
+        let tipX = parentPos.x;
         
         // Determine X position
         tipText.setWidth('auto');
-        var tipTextWidth = Math.min(tipText.measureNoWrapWidth(), self.maxTextWidth),
-            pointerX = tipText.x;
+        const tipTextWidth = Math.min(tipText.measureNoWrapWidth(), self.maxTextWidth);
+        let pointerX = tipText.x;
         self.__tipWidth = 2 * pointerX + tipTextWidth;
         tipText.setWidth(tipTextWidth);
         tipText.sizeViewToDom();
@@ -124,7 +124,7 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
         }
         
         // Prevent out-of-bounds to the left
-        var diff;
+        let diff;
         if (boundsXOffset > tipX) {
             diff = boundsXOffset - tipX;
             tipX += diff;
@@ -139,9 +139,10 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
         }
         
         // Determine Y position
-        var tipHeight = 2*self.edgeWidth + insetTop + self.insetBottom + tipText.height + self.pointerHeight,
-            tipParentHeight = ttp.height,
-            pointerOnTop, tipY;
+        const tipHeight = 2*self.edgeWidth + insetTop + self.insetBottom + tipText.height + self.pointerHeight,
+            tipParentHeight = ttp.height;
+        let pointerOnTop,
+            tipY;
         switch (tt.tipvalign) {
             case "below":
                 tipY = tipParentY + tipParentHeight;
@@ -185,11 +186,8 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
             on the top or the bottom of the tooltip.
         @returns {undefined} */
     __redraw: function(pointerX, pointerOnTop) {
-        var self = this,
+        const self = this,
             canvas = self._bg,
-            right = self.__tipWidth,
-            top = pointerOnTop ? self.pointerHeight : 0,
-            bottom = 2*self.edgeWidth + self.insetTop + self.insetBottom + self._tipText.height + top,
             pointerWidth = self.pointerWidth,
             pointerXCtr = pointerX + pointerWidth / 2,
             pointerXRt = pointerX + pointerWidth,
@@ -197,6 +195,9 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
             shadowWidth = self.shadowWidth,
             edgeWidth = self.edgeWidth,
             lineTo = canvas.lineTo.bind(canvas);
+        let right = self.__tipWidth,
+            top = pointerOnTop ? self.pointerHeight : 0,
+            bottom = 2*self.edgeWidth + self.insetTop + self.insetBottom + self._tipText.height + top;
         
         canvas.clear();
         

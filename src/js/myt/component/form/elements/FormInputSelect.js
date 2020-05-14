@@ -19,7 +19,7 @@ myt.FormInputSelect = new JS.Class('FormInputSelect', myt.InputSelect, {
     setValue: function(v) {
         if (this.__abortSetValue) return;
         
-        var retval = this.callSuper(v);
+        const retval = this.callSuper(v);
         
         // Clear Selection and then reselect
         this.__abortSetValue = true;

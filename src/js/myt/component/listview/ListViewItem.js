@@ -36,7 +36,7 @@ myt.ListViewItem = new JS.Class('ListViewItem', myt.SimpleIconTextButton, {
     
     /** @overrides myt.ListViewItemMixin */
     getMinimumWidth: function() {
-        var self = this,
+        const self = this,
             iconView = self.iconView,
             textView = self.textView,
             textViewVisible = textView.visible && self.text,

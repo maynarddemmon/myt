@@ -63,7 +63,7 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
     createFloatingPanel: function(panelId, panelClass, panelInitAttrs) {
         panelId = panelId || this.floatingPanelId;
         
-        var FPA = myt.FloatingPanelAnchor;
+        const FPA = myt.FloatingPanelAnchor;
         panelClass = panelClass || FPA.classesByPanelId[panelId];
         if (!panelClass) {
             console.log("No panel class found for panelId:", panelId);
@@ -80,7 +80,7 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
     },
     
     toggleFloatingPanel: function(panelId) {
-        var fp = this.getFloatingPanel(panelId = panelId || this.floatingPanelId);
+        const fp = this.getFloatingPanel(panelId = panelId || this.floatingPanelId);
         if (fp && fp.isShown()) {
             this.hideFloatingPanel(panelId);
         } else {
@@ -89,7 +89,7 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
     },
     
     showFloatingPanel: function(panelId) {
-        var fp = this.getFloatingPanel(panelId || this.floatingPanelId);
+        const fp = this.getFloatingPanel(panelId || this.floatingPanelId);
         if (fp) {
             fp.show(this);
             this.setLastFloatingPanelShown(fp);
@@ -97,7 +97,7 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
     },
     
     hideFloatingPanel: function(panelId) {
-        var fp = this.getFloatingPanel(panelId || this.floatingPanelId);
+        const fp = this.getFloatingPanel(panelId || this.floatingPanelId);
         if (fp) {
             fp.hide();
             this.setLastFloatingPanelShown();
@@ -164,7 +164,7 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
         @returns {!Object} The last floating panel shown if it exists and 
             can be shown. Otherwise it returns the default. */
     getNextFocus: function() {
-        var last = this.lastFloatingPanelShown;
+        const last = this.lastFloatingPanelShown;
         if (last && last.isShown()) return last;
         return this.callSuper ? this.callSuper() : null;
     },

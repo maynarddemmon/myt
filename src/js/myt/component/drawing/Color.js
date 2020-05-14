@@ -9,7 +9,7 @@
             green:int The green channel. Will be an integer between 0 and 255.
             blue:int The blue channel. Will be an integer between 0 and 255.
     */
-    var Color = pkg.Color = new JS.Class('Color', {
+    const Color = pkg.Color = new JS.Class('Color', {
         // Class Methods and Attributes ////////////////////////////////////////
         extend: {
             /** Converts a number or string representation of a number to a 
@@ -30,7 +30,7 @@
                     will be prepended to the return value.
                 @returns {string} Something like: '#ff9c02' or 'ff9c02' */
             rgbToHex: function(red, green, blue, prependHash) {
-                var toHex = this.toHex.bind(this);
+                const toHex = this.toHex.bind(this);
                 return [prependHash ? '#' : '', toHex(red), toHex(green), toHex(blue)].join('');
             },
             
@@ -82,7 +82,7 @@
                 @param {number} b - A color number.
                 @returns {number} The number that represents the lighter color. */
             getLighterColor: function(a, b) {
-                var cA = this.makeColorFromNumber(a),
+                const cA = this.makeColorFromNumber(a),
                     cB = this.makeColorFromNumber(b);
                 return cA.isLighterThan(cB) ? a : b;
             },
@@ -169,7 +169,7 @@
             @param {!Object} c - The myt.Color to compare to.
             @returns {boolean} True if this color is lighter, false otherwise. */
         isLighterThan: function(c) {
-            var diff = this.getDiffFrom(c);
+            const diff = this.getDiffFrom(c);
             
             // Sum channel diffs to determine lightest color. A negative diff
             // means a lighter color.

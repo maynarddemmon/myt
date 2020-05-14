@@ -9,11 +9,12 @@
             version:number The browser version number.
             os:string The operating system.
     */
-    
-    var versionSearchString,
-        
-        searchString = (data) => {
-            var dataItem, i = data.length;
+    let versionSearchString,
+        dom,
+        pre;
+    const searchString = (data) => {
+            let dataItem, 
+                i = data.length;
             while (i) {
                 dataItem = data[--i];
                 versionSearchString = dataItem.ver || dataItem.id;
@@ -22,7 +23,7 @@
         },
         
         searchVersion = (dataString) => {
-            var index = dataString.indexOf(versionSearchString);
+            const index = dataString.indexOf(versionSearchString);
             if (index >= 0) return parseFloat(dataString.substring(index + versionSearchString.length + 1));
         },
         
@@ -47,9 +48,7 @@
                 {str:platform,  sub:"Mac",    id:"Mac"},
                 {str:platform,  sub:"Win",    id:"Windows"}
             ]) || unknown
-        },
-        dom,
-        pre;
+        };
     
     switch (BrowserDetect.browser) {
         case 'Chrome': case 'Safari': dom = 'WebKit'; break;
@@ -93,7 +92,7 @@
   * THE SOFTWARE
   */
 Date.prototype.format = Date.prototype.format || (() => {
-    var shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    const shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
         longMonths = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
         shortDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         longDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
@@ -107,15 +106,15 @@ Date.prototype.format = Date.prototype.format || (() => {
             N: (date) => (date.getDay() == 0 ? 7 : date.getDay()),
             S: (date) => (date.getDate() % 10 == 1 && date.getDate() != 11 ? 'st' : (date.getDate() % 10 == 2 && date.getDate() != 12 ? 'nd' : (date.getDate() % 10 == 3 && date.getDate() != 13 ? 'rd' : 'th'))),
             w: (date) => date.getDay(),
-            z: (date) => {var d = new Date(date.getFullYear(),0,1); return Math.ceil((date - d) / 86400000);},
+            z: (date) => {const d = new Date(date.getFullYear(),0,1); return Math.ceil((date - d) / 86400000);},
             // Week
             W: (date) => {
-                var target = new Date(date.valueOf()), dayNr = (date.getDay() + 6) % 7;
+                const target = new Date(date.valueOf()), dayNr = (date.getDay() + 6) % 7;
                 target.setDate(target.getDate() - dayNr + 3);
-                var firstThursday = target.valueOf();
+                const firstThursday = target.valueOf();
                 target.setMonth(0, 1);
                 if (target.getDay() !== 4) target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
-                var retVal = 1 + Math.ceil((firstThursday - target) / 604800000);
+                const retVal = 1 + Math.ceil((firstThursday - target) / 604800000);
                 return (retVal < 10 ? '0' + retVal : retVal);
             },
             // Month
@@ -124,7 +123,8 @@ Date.prototype.format = Date.prototype.format || (() => {
             M: (date) => shortMonths[date.getMonth()],
             n: (date) => date.getMonth() + 1,
             t: (date) => {
-                var year = date.getFullYear(), nextMonth = date.getMonth() + 1;
+                let year = date.getFullYear(),
+                    nextMonth = date.getMonth() + 1;
                 if (nextMonth === 12) {
                     year = year++;
                     nextMonth = 0;
@@ -132,8 +132,8 @@ Date.prototype.format = Date.prototype.format || (() => {
                 return new Date(year, nextMonth, 0).getDate();
             },
             // Year
-            L: (date) => {var year = date.getFullYear(); return (year % 400 == 0 || (year % 100 != 0 && year % 4 == 0));},
-            o: (date) => {var d  = new Date(date.valueOf());  d.setDate(d.getDate() - ((date.getDay() + 6) % 7) + 3); return d.getFullYear();},
+            L: (date) => {const year = date.getFullYear(); return (year % 400 == 0 || (year % 100 != 0 && year % 4 == 0));},
+            o: (date) => {const d = new Date(date.valueOf()); d.setDate(d.getDate() - ((date.getDay() + 6) % 7) + 3); return d.getFullYear();},
             Y: (date) => date.getFullYear(),
             y: (date) => ('' + date.getFullYear()).substr(2),
             // Time
@@ -146,11 +146,11 @@ Date.prototype.format = Date.prototype.format || (() => {
             H: (date) => (date.getHours() < 10 ? '0' : '') + date.getHours(),
             i: (date) => (date.getMinutes() < 10 ? '0' : '') + date.getMinutes(),
             s: (date) => (date.getSeconds() < 10 ? '0' : '') + date.getSeconds(),
-            u: (date) => {var m = date.getMilliseconds(); return (m < 10 ? '00' : (m < 100 ? '0' : '')) + m;},
+            u: (date) => {const m = date.getMilliseconds(); return (m < 10 ? '00' : (m < 100 ? '0' : '')) + m;},
             // Timezone
             e: (date) => /\((.*)\)/.exec(new Date().toString())[1],
             I: (date) => {
-                var DST = null, i = 0, d, offset;
+                let DST = null, i = 0, d, offset;
                 for (; i < 12;) {
                     d = new Date(date.getFullYear(), i++, 1);
                     offset = d.getTimezoneOffset();
@@ -175,7 +175,7 @@ Date.prototype.format = Date.prototype.format || (() => {
         };
 
     return function(format) {
-        var date = this;
+        const date = this;
         return format.replace(/(\\?)(.)/g, (_, esc, chr) => (esc === '' && replaceChars[chr]) ? replaceChars[chr](date) : chr);
     };
 })();
@@ -571,7 +571,7 @@ Date.prototype.format = Date.prototype.format || (() => {
      * Maynard Demmon <maynarddemmon@gmail.com>
      * @copyright Copyright (c) 2012-2020 Maynard Demmon and contributors
      * Myt: A simple javascript UI framework
-     * Version: 20200416.1227
+     * Version: 20200514.1444
      * MIT License
      * 
      * Parts of the Software incorporates code from the following open-source projects:
@@ -595,10 +595,10 @@ Date.prototype.format = Date.prototype.format || (() => {
         }
     }
     
-    var 
-        /* Used to generate globally unique IDs. */
-        GUID_COUNTER = 0,
-        
+    /* Used to generate globally unique IDs. */
+    let GUID_COUNTER = 0;
+    
+    const 
         /* Font functionality */
         fontTargets = {},
         fontLoaded = {
@@ -611,7 +611,7 @@ Date.prototype.format = Date.prototype.format || (() => {
         docFonts = document.fonts,
         
         notifyFontLoaded = (fontFace) => {
-            var fontName = fontFace.family + ' ' + fontFace.weight,
+            let fontName = fontFace.family + ' ' + fontFace.weight,
                 targets;
             
             // Fix for Firefox and FontAwesome because of garbage returned in
@@ -632,7 +632,7 @@ Date.prototype.format = Date.prototype.format || (() => {
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was
                 created. */
-            version:20200416.1227,
+            version:20200514.1444,
             
             /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
                 should be set by the page that includes this script. */
@@ -684,9 +684,9 @@ Date.prototype.format = Date.prototype.format || (() => {
                 
                 scope = scope || global;
                 
-                var parts = Array.isArray(objName) ? objName : objName.split("."),
-                    i = 0, 
+                const parts = Array.isArray(objName) ? objName : objName.split("."), 
                     len = parts.length;
+                let i = 0;
                 for (; i < len; ++i) {
                     scope = scope[parts[i]];
                     if (scope === undefined) {
@@ -730,15 +730,10 @@ Date.prototype.format = Date.prototype.format || (() => {
                 @param {...*} [params] - The parameters for the template.
                 @returns {string} A populated string. */
             fillTextTemplate: function(template, ...params) {
-                var param,
-                    i,
-                    len;
-                
                 if (template == null) return '';
                 
-                i = 0;
-                len = params.length;
-                for (; len > i; ++i) {
+                const len = params.length;
+                for (let i = 0, param; len > i; ++i) {
                     param = params[i];
                     template = template.split("{" + i + "}").join(param == null ? '' : param);
                 }
@@ -759,7 +754,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                     and provided to the link handler.
                 @returns {string} */
             generateLink: (text, callbackMethodName, attrs, data) => {
-                var optAttrs = '',
+                let optAttrs = '',
                     name;
                 if (attrs) {
                     for (name in attrs) optAttrs += ' ' + name + '="' + attrs[name] + '"';
@@ -778,7 +773,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                 @param {string} data
                 @returns {undefined} */
             __handleGeneratedLink: (elem, callbackMethodName, data) => {
-                var model,
+                let model,
                     value;
                 while (elem) {
                     model = elem.model;
@@ -807,19 +802,19 @@ Date.prototype.format = Date.prototype.format || (() => {
                     script has already been loaded. */
             loadScript: function(src, callback, noCacheBust) {
                 // Prevent reloading the same script
-                var loadedScripts = this._loadedScripts || (this._loadedScripts = {});
+                const loadedScripts = this._loadedScripts || (this._loadedScripts = {});
                 if (loadedScripts[src]) {
                     console.warn("script already loaded for src", src);
                     return null;
                 } else {
                     loadedScripts[src] = true;
                     
-                    var s = document.createElement('script');
+                    const s = document.createElement('script');
                     s.type = 'text/javascript';
                     s.async = false;
                     
                     if (callback) {
-                        var r = false;
+                        let r = false;
                         s.onload = s.onreadystatechange = function() {
                             if (!r && (!this.readyState || this.readyState === 'complete')) {
                                 // Prevent refiring callback
@@ -851,7 +846,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                     Defaults to 'error'.
                 @returns {undefined} */
             dumpStack: (err, type) => {
-                var msg;
+                let msg;
                 if (typeof err === 'string') {
                     msg = err;
                     err = null;
@@ -870,7 +865,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                           value towards a value very close to 1.
                 @returns {number} a random number between 0 and almost 1. */
             getRandom: (func) => {
-                var v = Math.random();
+                let v = Math.random();
                 if (func) {
                     v = func(v);
                     
@@ -892,7 +887,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                 @returns {number} a number between min and max. */
             getRandomArbitrary: (min, max, func) => {
                 if (min > max) {
-                    var tmp = min;
+                    const tmp = min;
                     min = max;
                     max = tmp;
                 }
@@ -907,7 +902,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                 @returns {number} a number between min and max. */
             getRandomInt: (min, max, func) => {
                 if (min > max) {
-                    var tmp = min;
+                    const tmp = min;
                     min = max;
                     max = tmp;
                 }
@@ -922,7 +917,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                     between a and b. Defaults to 0.000001 if not provided.
                 @returns {boolean} true if equal, false otherwise. */
             areFloatsEqual: (a, b, epsilon) => {
-                var A = Math.abs(a), B = Math.abs(b);
+                const A = Math.abs(a), B = Math.abs(b);
                 epsilon = epsilon ? Math.abs(epsilon) : 0.000001;
                 return Math.abs(a - b) <= (A > B ? B : A) * epsilon;
             },
@@ -935,7 +930,7 @@ Date.prototype.format = Date.prototype.format || (() => {
             areArraysEqual: (a, b) => {
                 if (a !== b) {
                     if (a == null || b == null) return false;
-                    var i = a.length;
+                    let i = a.length;
                     if (i !== b.length) return false;
                     
                     while (i) {
@@ -952,7 +947,8 @@ Date.prototype.format = Date.prototype.format || (() => {
             areObjectsEqual: (a, b) => {
                 if (a !== b) {
                     if (a == null || b == null) return false;
-                    for (var key in a) if (a[key] !== b[key]) return false;
+                    let key;
+                    for (key in a) if (a[key] !== b[key]) return false;
                     for (key in b) if (a[key] !== b[key]) return false;
                 }
                 return true;
@@ -969,9 +965,9 @@ Date.prototype.format = Date.prototype.format || (() => {
             
             // Fonts
             loadFontFaces: (fontList, callback) => {
-                var fonts = [];
+                const fonts = [];
                 fontList.forEach(fontInfo => {
-                    var fontFace = new FontFace(fontInfo.family, 'url(' + fontInfo.url + ')', fontInfo.options);
+                    const fontFace = new FontFace(fontInfo.family, 'url(' + fontInfo.url + ')', fontInfo.options);
                     fonts.push(fontFace.load());
                 });
                 
@@ -985,7 +981,7 @@ Date.prototype.format = Date.prototype.format || (() => {
             },
             
             loadFontFace: (fontName, fontUrl, fontOptions={}, callback) => {
-                var fontFace = new FontFace(fontName, 'url(' + fontUrl + ')', fontOptions);
+                const fontFace = new FontFace(fontName, 'url(' + fontUrl + ')', fontOptions);
                 fontFace.loaded.then((loadedFontFace) => {
                     docFonts.add(loadedFontFace);
                     notifyFontLoaded(loadedFontFace);
@@ -1014,7 +1010,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                 @returns {undefined} */
             loadCSSFonts: (fontUrls) => {
                 (fontUrls || []).forEach(fontUrl => {
-                    var link = document.createElement('link');
+                    const link = document.createElement('link');
                     link.rel = 'stylesheet';
                     link.href = fontUrl;
                     document.head.appendChild(link);
@@ -1025,7 +1021,7 @@ Date.prototype.format = Date.prototype.format || (() => {
             /** Creates a "style" dom element.
                 @returns {!Object} */
             createStylesheet: () => {
-                var style = document.createElement('style');
+                const style = document.createElement('style');
                 document.head.appendChild(style);
                 return style.sheet;
             },
@@ -1039,7 +1035,7 @@ Date.prototype.format = Date.prototype.format || (() => {
             },
             
             removeCSSRules: (sheet) => {
-                var i = sheet.cssRules.length;
+                let i = sheet.cssRules.length;
                 while (i) {
                     i--;
                     if ("deleteRule" in sheet) {
@@ -1052,8 +1048,8 @@ Date.prototype.format = Date.prototype.format || (() => {
             
             createInputPlaceholderCSSRule: (view, color, fontFamily) => {
                 // Make sure the view has a dom ID for rule targeting
-                var domId = view.getOuterDomElement().id || (view.getOuterDomElement().id = 'id' + myt.generateGuid()),
-                    sheet = view.__sheet,
+                const domId = view.getOuterDomElement().id || (view.getOuterDomElement().id = 'id' + myt.generateGuid());
+                let sheet = view.__sheet,
                     rules = [];
                 
                 // Clear existing sheet if it exists or create a new sheet
@@ -1089,7 +1085,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                 @returns {!Function} - The memoized function. */
             memoize: (f) => {
                 return function() {
-                    var hash = JSON.stringify(arguments),
+                    const hash = JSON.stringify(arguments),
                         cache = f.__cache || (f.__cache = {});
                     return (hash in cache) ? cache[hash] : cache[hash] = f.apply(this, arguments);
                 };
@@ -1109,9 +1105,9 @@ Date.prototype.format = Date.prototype.format || (() => {
                     subsequent calls.
                 @returns {!Function} - The debounced function. */
             debounce: function(func, wait, immediate) {
-                var timeout;
+                let timeout;
                 return function() {
-                    var context = this,
+                    const context = this,
                         args = arguments,
                         later = function() {
                             timeout = null;
@@ -1139,11 +1135,11 @@ Date.prototype.format = Date.prototype.format || (() => {
                     attribute was 'locked' this would be 'lockedCounter'.
                 @returns {boolean} - True if creation succeeded, false otherwise. */
             createFixedThresholdCounter: (scope, thresholdValue, exceededAttrName, counterAttrName) => {
-                var genNameFunc = myt.AccessorSupport.generateName,
-                    incrName,
-                    decrName,
+                const genNameFunc = myt.AccessorSupport.generateName,
                     isModuleOrClass = typeof scope === 'function' || scope instanceof JS.Module,
                     mod = {};
+                let incrName,
+                    decrName;
                 counterAttrName = counterAttrName || genNameFunc('counter', exceededAttrName);
                 
                 incrName = genNameFunc(counterAttrName, 'increment');
@@ -1163,7 +1159,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                 /** Increments the counter attribute on the scope object by 1.
                     @returns {undefined} */
                 mod[incrName] = function() {
-                    var value = this[counterAttrName] + 1;
+                    const value = this[counterAttrName] + 1;
                     this[counterAttrName] = value;
                     this.fireEvent(counterAttrName, value);
                     if (value === thresholdValue) this.set(exceededAttrName, true);
@@ -1172,9 +1168,9 @@ Date.prototype.format = Date.prototype.format || (() => {
                 /** Decrements the counter attribute on the scope object by 1.
                     @returns {undefined} */
                 mod[decrName] = function() {
-                    var curValue = this[counterAttrName];
+                    const curValue = this[counterAttrName];
                     if (curValue === 0) return;
-                    var value = curValue - 1;
+                    const value = curValue - 1;
                     this[counterAttrName] = value;
                     this.fireEvent(counterAttrName, value);
                     if (curValue === thresholdValue) this.set(exceededAttrName, false);
@@ -1188,8 +1184,8 @@ Date.prototype.format = Date.prototype.format || (() => {
             
             // Fetch
             makeURLSearchParams: (params={}) => {
-                var urlSearchParams = new URLSearchParams(),
-                    key,
+                const urlSearchParams = new URLSearchParams();
+                let key,
                     value;
                 for (key in params) {
                     value = params[key];
@@ -1221,7 +1217,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                         } catch (ex) {
                             // Ensure errors from successFunc get rethrown as
                             // FetchError with the original stack trace.
-                            var fetchError = new FetchError(200, url, ex.message);
+                            const fetchError = new FetchError(200, url, ex.message);
                             fetchError.stack = ex.stack;
                             throw fetchError;
                         }
@@ -1232,7 +1228,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                     if (errorFunc) {
                         // Convert non FetchErrors into FetchErrors
                         if (error.name !== 'FetchError') {
-                            var fetchError = new FetchError(0, url, error.message);
+                            const fetchError = new FetchError(0, url, error.message);
                             fetchError.stack = error.stack;
                             error = fetchError;
                         }
@@ -1252,7 +1248,7 @@ Date.prototype.format = Date.prototype.format || (() => {
 
 
 ((pkg) => {
-    var pluses = /\+/g,
+    const pluses = /\+/g,
         
         /* Function to return a raw cookie name/value. */
         raw = (s) => s,
@@ -1304,10 +1300,10 @@ Date.prototype.format = Date.prototype.format || (() => {
             read: (key, options) => {
                 options = Object.assign({}, Cookie.defaults, options);
                 
-                var decodeFunc = options.raw ? raw : decoded,
+                const decodeFunc = options.raw ? raw : decoded,
                     useJson = options.json,
-                    cookies = document.cookie.split('; '),
-                    result = key ? undefined : {},
+                    cookies = document.cookie.split('; ');
+                let result = key ? undefined : {},
                     parts, 
                     name, 
                     cookie, 
@@ -1347,7 +1343,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                 options = Object.assign({}, Cookie.defaults, options);
                 
                 if (typeof options.expires === 'number') {
-                    var days = options.expires,
+                    const days = options.expires,
                         t = options.expires = new Date();
                     t.setDate(t.getDate() + days);
                 }
@@ -1382,13 +1378,13 @@ Date.prototype.format = Date.prototype.format || (() => {
 
 
 ((pkg) => {
-    var localStorage = global.localStorage,
+    const localStorage = global.localStorage,
         
         getStoreId = (storeId) => storeId = storeId || 'myt',
         
         doFunc = (func, delay, timerKey) => {
             if (delay > 0) {
-                var timerIdKey = '__timerId_' + timerKey,
+                const timerIdKey = '__timerId_' + timerKey,
                     timerId = LocalStorage[timerIdKey];
                 if (timerId) clearTimeout(timerId);
                 
@@ -1416,7 +1412,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                     otherwise true. */
             hasDatum: (key, storeId) => {
                 if (key) {
-                    var data = LocalStorage.getItem(getStoreId(storeId));
+                    const data = LocalStorage.getItem(getStoreId(storeId));
                     if (data) {
                         try {
                             return JSON.parse(data)[key] != null;
@@ -1436,11 +1432,11 @@ Date.prototype.format = Date.prototype.format || (() => {
                 @returns {*} the value of the data or undefined if not found. */
             getDatum: (key, storeId) => {
                 if (key) {
-                    var data = LocalStorage.getItem(getStoreId(storeId));
+                    const data = LocalStorage.getItem(getStoreId(storeId));
                     if (data) {
                         try {
-                            data = JSON.parse(data);
-                            if (typeof data === 'object') return data[key];
+                            const jsonData = JSON.parse(data);
+                            if (typeof jsonData === 'object') return jsonData[key];
                         } catch (e) {
                             console.error(e);
                         }
@@ -1463,7 +1459,7 @@ Date.prototype.format = Date.prototype.format || (() => {
             setDatum: (key, value, storeId, delay) => {
                 storeId = getStoreId(storeId);
                 doFunc(() => {
-                    var data = LocalStorage.getData(storeId);
+                    const data = LocalStorage.getData(storeId);
                     data[key] = value;
                     LocalStorage.setItem(storeId, JSON.stringify(data));
                 }, delay, storeId + '___' + key);
@@ -1479,7 +1475,7 @@ Date.prototype.format = Date.prototype.format || (() => {
             removeDatum: (key, storeId, delay) => {
                 storeId = getStoreId(storeId);
                 doFunc(() => {
-                    var data = LocalStorage.getData(storeId);
+                    const data = LocalStorage.getData(storeId);
                     delete data[key];
                     LocalStorage.setItem(storeId, JSON.stringify(data));
                 }, delay, storeId + '___' + key);
@@ -1497,7 +1493,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                     If not provided the default "myt" storeId will be used.
                 @returns {!Object} - The store object. */
             getData: (storeId) => {
-                var data = LocalStorage.getItem(getStoreId(storeId));
+                const data = LocalStorage.getItem(getStoreId(storeId));
                 if (data) {
                     try {
                         return JSON.parse(data);
@@ -1610,7 +1606,7 @@ Date.prototype.format = Date.prototype.format || (() => {
 
 
 ((pkg) => {
-    var queryParser = /(?:^|&)([^&=]*)=?([^&]*)/g,
+    const queryParser = /(?:^|&)([^&=]*)=?([^&]*)/g,
         strictParser = /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/,
         looseParser = /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/;
     
@@ -1655,7 +1651,7 @@ Date.prototype.format = Date.prototype.format || (() => {
             // match order: "source", "protocol", "authority", "userInfo", "user",
             //              "password", "host", "port", "relative", "path", 
             //              "directory", "file", "query", "anchor".
-            var self = this,
+            const self = this,
                 m = (loose ? looseParser : strictParser).exec(str);
             
             self.setSource(m[0] || "");
@@ -1690,9 +1686,9 @@ Date.prototype.format = Date.prototype.format || (() => {
         },
         
         getQuery: function() {
-            var pairs = this.queryPairs,
-                parts = [],
-                key,
+            const pairs = this.queryPairs,
+                parts = [];
+            let key,
                 s;
             for (key in pairs) parts.push(key + '=' + encodeURIComponent(this.getQueryParam(key)));
             s = parts.join('&');
@@ -1700,15 +1696,15 @@ Date.prototype.format = Date.prototype.format || (() => {
         },
         
         getQueryParam: function(name) {
-            var v = this.queryPairs[name];
+            const v = this.queryPairs[name];
             return v == null ? undefined : this.decodeQueryParam(v);
         },
         
         getPathParts: function(allowEmpties) {
-            var parts = this.path.split('/');
+            const parts = this.path.split('/');
             
             if (!allowEmpties) {
-                var i = parts.length;
+                let i = parts.length;
                 while (i) if (parts[--i].length === 0) parts.splice(i, 1);
             }
             
@@ -1716,15 +1712,15 @@ Date.prototype.format = Date.prototype.format || (() => {
         },
         
         toString: function(originalRawQuery) {
-            var self = this,
+            const self = this,
                 protocol = self.protocol,
                 host = self.host,
                 userInfo = self.userInfo,
                 port = self.port,
                 path = self.path,
                 query = originalRawQuery ? (self.query ? '?' + self.query : '') : self.getQuery(),
-                anchor = self.anchor,
-                s = '';
+                anchor = self.anchor;
+            let s = '';
             
             if (protocol) s += protocol + '://';
             if (userInfo && host) s += userInfo + '@';
@@ -1751,22 +1747,22 @@ Date.prototype.format = Date.prototype.format || (() => {
 
 ((pkg) => {
     /** Provides common geometry related functions. */
-    var Geometry = pkg.Geometry = {
-        // Methods /////////////////////////////////////////////////////////////////
+    const Geometry = pkg.Geometry = {
+        // Methods /////////////////////////////////////////////////////////////
         /** Get the closest point on a line to a given point.
-            @param Ax:number The x-coordinate of the first point that defines 
-                the line.
-            @param Ay:number The y-coordinate of the first point that defines 
-                the line.
-            @param Bx:number The x-coordinate of the second point that defines 
-                the line.
-            @param By:number The y-coordinate of the second point that defines 
-                the line.
-            @param Px:number The x-coordinate of the point.
-            @param Py:number The y-coordinate of the point.
-            @returns object: A position object with x and y properties. */
+            @param {number} Ax - The x-coordinate of the first point that 
+                defines the line.
+            @param {number} Ay - The y-coordinate of the first point that 
+                defines the line.
+            @param {number} Bx - The x-coordinate of the second point that 
+                defines the line.
+            @param {number} By - The y-coordinate of the second point that 
+                defines the line.
+            @param {number} Px - The x-coordinate of the point.
+            @param {number} Py - The y-coordinate of the point.
+            @returns {!Object} - A position object with x and y properties. */
         getClosestPointOnALineToAPoint: (Ax, Ay, Bx, By, Px, Py) => {
-            var APx = Px - Ax,
+            const APx = Px - Ax,
                 APy = Py - Ay,
                 ABx = Bx - Ax,
                 ABy = By - Ay,
@@ -1777,19 +1773,19 @@ Date.prototype.format = Date.prototype.format || (() => {
         },
         
         /** Get the closest point on a segment to a given point.
-            @param Ax:number The x-coordinate of the first endpoint that defines 
-                the segment.
-            @param Ay:number The y-coordinate of the first endpoint that defines 
-                the segment.
-            @param Bx:number The x-coordinate of the second endpoint that defines 
-                the segment.
-            @param By:number The y-coordinate of the second endpoint that defines 
-                the segment.
-            @param Px:number The x-coordinate of the point.
-            @param Py:number The y-coordinate of the point.
-            @returns object: A position object with x and y properties. */
+            @param {number} Ax - The x-coordinate of the first endpoint that 
+                defines the segment.
+            @param {number} Ay - The y-coordinate of the first endpoint that 
+                defines  the segment.
+            @param {number} Bx - The x-coordinate of the second endpoint that 
+                defines the segment.
+            @param {number} By - The y-coordinate of the second endpoint that 
+                defines the segment.
+            @param {number} Px - The x-coordinate of the point.
+            @param {number} Py - The y-coordinate of the point.
+            @returns {!Object} - A position object with x and y properties. */
         getClosestPointOnASegmentToAPoint: (Ax, Ay, Bx, By, Px, Py) => {
-            var APx = Px - Ax,
+            const APx = Px - Ax,
                 APy = Py - Ay,
                 ABx = Bx - Ax,
                 ABy = By - Ay,
@@ -1802,16 +1798,14 @@ Date.prototype.format = Date.prototype.format || (() => {
         },
         
         /** Tests if the provided point is inside this path.
-            @param x:number the x coordinate to test.
-            @param y:number the y coordinate to test.
-            @param boundingBox:object a bounding box object that bounds the path.
-            @param path:array an array of points where the index 0,2,4,... are
-                the x values and index 1,3,5,... are the y values.
-            
-            Alternate params:
-            @param x:object A point object with x and y properties.
-            
-            @return true if inside, false otherwise. */
+            @param {number|!Object} x - The x coordinate to test or alternately
+                a point object with x and y properties.
+            @param {number} y - The y coordinate to test.
+            @param {!Object} boundingBox - A bounding box object that bounds 
+                the path.
+            @param {!Araay} path - An array of points where the index 0,2,4,... 
+                are the x values and index 1,3,5,... are the y values.
+            @return {boolean} - True if inside, false otherwise. */
         isPointInPath: (x, y, boundingBox, path) => {
             if (typeof x === 'object') {
                 path = boundingBox;
@@ -1823,11 +1817,11 @@ Date.prototype.format = Date.prototype.format || (() => {
             // First test bounding box
             if (Geometry.rectContainsPoint(x, y, boundingBox)) {
                 // Test using Jordan Curve Theorem
-                var len = path.length;
+                let len = path.length;
                 
                 // Must at least be a triangle to have an inside.
                 if (len >= 6) {
-                    var c = false, 
+                    let c = false, 
                         x1 = path[0], 
                         y1 = path[1], 
                         x2, 
@@ -1847,18 +1841,16 @@ Date.prototype.format = Date.prototype.format || (() => {
         
         /** Checks if the provided point is inside or on the edge of the provided 
             rectangle.
-            @param pX:number the x coordinate of the point to test.
-            @param pY:number the y coordinate of the point to test.
-            @param rX:number the x coordinate of the rectangle.
-            @param rY:number the y coordinate of the rectangle.
-            @param rW:number the width of the rectangle.
-            @param rH:number the height of the rectangle.
-            
-            Alternate Params:
-            @param pX:object a point object with properties x and y.
-            @param rX:object a rect object with properties x, y, width and height.
-            
-            @returns boolean True if the point is inside or on the rectangle. */
+            @param {number|!Object} pX - The x coordinate of the point to test
+                or alternately a point object with properties x and y.
+            @param {number} pY - The y coordinate of the point to test.
+            @param {number|!Object} rX - The x coordinate of the rectangle or
+                alternately a rect object with properties x, y, width and height.
+            @param {number} rY - The y coordinate of the rectangle.
+            @param {number} rW - The width of the rectangle.
+            @param {number} rH - The height of the rectangle.
+            @returns {boolean} - True if the point is inside or on the 
+                rectangle. */
         rectContainsPoint: (pX, pY, rX, rY, rW, rH) => {
             if (typeof pX === 'object') {
                 rH = rW;
@@ -1881,63 +1873,64 @@ Date.prototype.format = Date.prototype.format || (() => {
         
         /** Checks if the provided point lies inside or on the edge of the
             provided circle.
-            @param pX:number the x coordinate of the point to test.
-            @param pY:number the y coordinate of the point to test.
-            @param cX:number the x coordinate of the center of the circle.
-            @param cY:number the y coordinate of the center of the circle.
-            @param cR:number the radius of the circle.
-            @return boolean True if the point is inside or on the circle. */
+            @param {number} pX - The x coordinate of the point to test.
+            @param {number} pY - The y coordinate of the point to test.
+            @param {number} cX - The x coordinate of the center of the circle.
+            @param {number} cY - The y coordinate of the center of the circle.
+            @param {number} cR - The radius of the circle.
+            @return {boolean} - True if the point is inside or on the circle. */
         circleContainsPoint: (pX, pY, cX, cY, cR) => Geometry.measureDistance(pX, pY, cX, cY, true) <= cR * cR,
         
         /** Measure the distance between two points.
-            @param x1:number the x position of the first point.
-            @param y1:number the y position of the first point.
-            @param x2:number the x position of the second point.
-            @param y2:number the y position of the second point.
-            @param squared:boolean (optional) If true, the squared distance will
+            @param {number} x1 - The x position of the first point.
+            @param {number} y1 - The y position of the first point.
+            @param {number} x2 - The x position of the second point.
+            @param {number} y2 - The y position of the second point.
+            @param {boolean} [squared] - If true, the squared distance will
                 be returned.
-            @returns number the distance between the two points. */
+            @returns {number} - The distance between the two points. */
         measureDistance: (x1, y1, x2, y2, squared) => {
-            var diffX = x2 - x1, 
+            const diffX = x2 - x1, 
                 diffY = y2 - y1, 
                 diffSquared = diffX * diffX + diffY * diffY;
             return squared ? diffSquared : Math.sqrt(diffSquared);
         },
         
         /** Convert radians to degrees.
-            @param deg:number degrees.
-            @returns number: radians. */
+            @param {number} deg - The degrees to convert.
+            @returns {number} - The converted radians. */
         degreesToRadians: (deg) => deg * Math.PI / 180,
         
         /** Convert degrees to radians.
-            @param rad:number radians.
-            @returns number: degrees. */
+            @param {number} rad - The radians to convert.
+            @returns {number} The converted degrees. */
         radiansToDegrees: (rad) => rad * 180 / Math.PI,
         
         // Geometry on a sphere
-        /** Checks if the provided lat/lng point lies inside or on the edge of the
-            provided circle.
-            @param pLat:number the latitude of the point to test.
-            @param pLng:number the longitude of the point to test.
-            @param cLat:number the latitude of the center of the circle.
-            @param cLng:number the longitude of the center of the circle.
-            @param cR:number the radius of the circle in kilometers.
-            @param sphereRadius:number (optional) the radius of the sphere the
-                measurement is being taken on in kilometers. If not provided the
-                radius of the earth is used.
-            @return boolean True if the point is inside or on the circle. */
+        /** Checks if the provided lat/lng point lies inside or on the edge 
+            of the provided circle.
+            @param {number} pLat - The latitude of the point to test.
+            @param {number} pLng - The longitude of the point to test.
+            @param {number} cLat - The latitude of the center of the circle.
+            @param {number} cLng - The longitude of the center of the circle.
+            @param {number} cR - The radius of the circle in kilometers.
+            @param {number} [sphereRadius] - The radius of the sphere the
+                measurement is being taken on in kilometers. If not provided 
+                the radius of the earth is used.
+            @return {boolean} - True if the point is inside or on the circle. */
         circleContainsLatLng: (pLat, pLng, cLat, cLng, cR, sphereRadius) => Geometry.measureLatLngDistance(pLat, pLng, cLat, cLng, sphereRadius) <= cR,
         
         /** Measures the distance between two points on a sphere using latitude
             and longitude.
-            @param lat1:number the latitude of the first point.
-            @param lng1:number the longitude of the first point.
-            @param lat2:number the latitude of the second point.
-            @param lng2:number the longitude of the second point.
-            @param sphereRadius:number (optional) the radius of the sphere the
-                measurement is being taken on in kilometers. If not provided the
-                radius of the earth is used.
-            @returns number the distance between the points in kilometers. */
+            @param {number} lat1 - the latitude of the first point.
+            @param {number} lng1 - the longitude of the first point.
+            @param {number} lat2 - the latitude of the second point.
+            @param {number} lng2 - the longitude of the second point.
+            @param {number} [sphereRadius] - The radius of the sphere the
+                measurement is being taken on in kilometers. If not provided 
+                the radius of the earth is used.
+            @returns {number} - The distance between the points 
+                in kilometers. */
         measureLatLngDistance: (lat1, lng1, lat2, lng2, sphereRadius) => {
             // Taken from: http://www.movable-type.co.uk/scripts/latlong.html
             if (sphereRadius === undefined) sphereRadius = 6371; // kilometers for earth
@@ -1952,21 +1945,24 @@ Date.prototype.format = Date.prototype.format || (() => {
         },
         
         /** Convert from polar to cartesian coordinates.
-            @param radius:number The radius of the point to convert relative to
+            @param {number} radius - The radius of the point to convert 
+                relative to the circle.
+            @param {number} degrees - The angle coordinate of the point 
+                to convert.
+            @param {number} [cx] - The x coordinate of the center of 
                 the circle.
-            @param degrees:number The angle coordinate of the point to convert.
-            @param cx:number (optional) The x coordinate of the center of the 
-                circle.
-            @param cy:number (optional) The y coordinate of the center of the 
-                circle.
-            @returns array where index 0 is the x coordinate and index 1 is the
-                y coordinate. */
+            @param {number} [cy] - The y coordinate of the center of 
+                the circle.
+            @returns {!Array} - Where index 0 is the x coordinate and index 
+                1 is the y coordinate. */
         polarToCartesian: (radius, degrees, cx, cy) => {
             if (cx == null) cx = 0;
             if (cy == null) cy = 0;
             degrees = degrees % 360;
             
-            var x, y, radians;
+            let x, 
+                y, 
+                radians;
             if (degrees === 0) {
                 x = radius;
                 y = 0;
@@ -1989,24 +1985,24 @@ Date.prototype.format = Date.prototype.format || (() => {
         },
         
         /** Convert from cartesian to polar coordinates.
-            @param x:number The x coordinate to transform.
-            @param y:number The y coordinate to transform.
-            @param cx:number (optional) The x coordinate of the center of the
+            @param {number} x - The x coordinate to transform.
+            @param {number} y - The y coordinate to transform.
+            @param {number} [cx] - The x coordinate of the center of the
                 circle.
-            @param cy:number (optional) The y coordinate of the center of the
+            @param {number} [cy] - The y coordinate of the center of the
                 circle.
-            @param useRadians:boolean (optional) If true the angle returned will
+            @param {boolean} [useRadians] - If true the angle returned will
                 be in radians otherwise it will be degrees.
-            @return array where index 0 is the radius and index 1 is angle
-                in degrees (or radians if userRadians is true). */
+            @return {!Array} An array where index 0 is the radius and index 1 
+                is angle in degrees (or radians if userRadians is true). */
         cartesianToPolar: (x, y, cx, cy, useRadians) => {
             if (cx == null) cx = 0;
             if (cy == null) cy = 0;
             
-            var diffX = x - cx,
+            const diffX = x - cx,
                 diffY = y - cy,
-                radius = Math.sqrt(diffX*diffX + diffY*diffY),
-                radians = Math.atan2(diffY, diffX);
+                radius = Math.sqrt(diffX*diffX + diffY*diffY);
+            let radians = Math.atan2(diffY, diffX);
             if (radians < 0) radians += 2 * Math.PI;
             return [radius, useRadians ? radians : Geometry.radiansToDegrees(radians)];
         }
@@ -2057,13 +2053,14 @@ myt.Observable = new JS.Module('Observable', {
             false otherwise. */
     detachObserver: function(observer, methodName, type) {
         if (observer && methodName && type) {
-            var observersByType = this.__obsbt;
+            const observersByType = this.__obsbt;
             if (observersByType) {
-                var observers = observersByType[type];
+                const observers = observersByType[type];
                 if (observers) {
                     // Remove all instances of the observer and methodName 
                     // combination.
-                    var retval = false, i = observers.length;
+                    let retval = false, 
+                        i = observers.length;
                     while (i) {
                         // Ensures we decrement twice. First with --i, then 
                         // with i-- since the part after && may not be executed.
@@ -2083,15 +2080,14 @@ myt.Observable = new JS.Module('Observable', {
     /** Removes all observers from this Observable.
         @returns {undefined} */
     detachAllObservers: function() {
-        var observersByType = this.__obsbt;
+        const observersByType = this.__obsbt;
         if (observersByType) {
-            var observers, observer, methodName, i, type;
-            for (type in observersByType) {
-                observers = observersByType[type];
-                i = observers.length;
+            for (let type in observersByType) {
+                const observers = observersByType[type];
+                let i = observers.length;
                 while (i) {
-                    observer = observers[--i];
-                    methodName = observers[--i];
+                    let observer = observers[--i],
+                        methodName = observers[--i];
                     
                     // If an observer is registered more than once the list may 
                     // get shortened by observer.detachFrom. If so, just 
@@ -2118,7 +2114,7 @@ myt.Observable = new JS.Module('Observable', {
         @param type:string The name of the event to get observers for.
         @returns array: The observers of the event. */
     getObservers: function(type) {
-        var observersByType = this.__obsbt || (this.__obsbt = {});
+        const observersByType = this.__obsbt || (this.__obsbt = {});
         return observersByType[type] || (observersByType[type] = []);
     },
     
@@ -2126,9 +2122,9 @@ myt.Observable = new JS.Module('Observable', {
         @param type:string The name of the event to check.
         @returns boolean: True if any exist, false otherwise. */
     hasObservers: function(type) {
-        var observersByType = this.__obsbt;
+        const observersByType = this.__obsbt;
         if (!observersByType) return false;
-        var observers = observersByType[type];
+        const observers = observersByType[type];
         return observers && observers.length > 0;
     },
     
@@ -2154,13 +2150,13 @@ myt.Observable = new JS.Module('Observable', {
         @returns {undefined} */
     fireEvent: function(type, value, observers) {
         // Determine observers to use
-        var self = this;
+        const self = this;
         observers = observers || (self.hasObservers(type) ? self.__obsbt[type] : null);
         
         // Fire event
         if (observers) {
             // Prevent "active" events from being fired again
-            var event = {source:self, type:type, value:value}, // Inlined from this.createEvent
+            const event = {source:self, type:type, value:value}, // Inlined from this.createEvent
                 activeEventTypes = self.__aet || (self.__aet = {});
             if (activeEventTypes[type] === true) {
                 myt.global.error.notifyWarn('eventLoop', "Attempt to refire active event: " + type);
@@ -2172,7 +2168,7 @@ myt.Observable = new JS.Module('Observable', {
                 // detached by the event handler the index won't get messed up.
                 // FIXME: If necessary we could queue up detachObserver calls that 
                 // come in during iteration or make some sort of adjustment to 'i'.
-                var i = observers.length,
+                let i = observers.length,
                     observer,
                     methodName;
                 while (i) {
@@ -2260,11 +2256,11 @@ myt.Observer = new JS.Module('Observer', {
         @returns true if attached, false otherwise. */
     isAttachedTo: function(observable, methodName, eventType) {
         if (observable && methodName && eventType) {
-            var observablesByType = this.__obt;
+            const observablesByType = this.__obt;
             if (observablesByType) {
-                var observables = observablesByType[eventType];
+                const observables = observablesByType[eventType];
                 if (observables) {
-                    var i = observables.length;
+                    let i = observables.length;
                     while (i) {
                         // Ensures we decrement twice. First with --i, then 
                         // with i-- since the part after && may not be executed.
@@ -2283,7 +2279,7 @@ myt.Observer = new JS.Module('Observer', {
         @param eventType:string the event type to check for.
         @returns an array of observables. */
     getObservables: function(eventType) {
-        var observablesByType = this.__obt || (this.__obt = {});
+        const observablesByType = this.__obt || (this.__obt = {});
         return observablesByType[eventType] || (observablesByType[eventType] = []);
     },
     
@@ -2291,9 +2287,9 @@ myt.Observer = new JS.Module('Observer', {
         @param eventType:string the event type to check for.
         @returns true if any exist, false otherwise. */
     hasObservables: function(eventType) {
-        var observablesByType = this.__obt;
+        const observablesByType = this.__obt;
         if (!observablesByType) return false;
-        var observables = observablesByType[eventType];
+        const observables = observablesByType[eventType];
         return observables && observables.length > 0;
     },
     
@@ -2308,11 +2304,12 @@ myt.Observer = new JS.Module('Observer', {
             false otherwise. */
     attachTo: function(observable, methodName, eventType, once) {
         if (observable && methodName && eventType) {
-            var observables = this.getObservables(eventType);
+            const observables = this.getObservables(eventType);
             
             // Setup wrapper method when 'once' is true.
             if (once) {
-                var self = this, origMethodName = methodName;
+                const self = this, 
+                    origMethodName = methodName;
                 
                 // Generate one time method name.
                 if (this.__methodNameCounter === undefined) this.__methodNameCounter = 0;
@@ -2345,13 +2342,14 @@ myt.Observer = new JS.Module('Observer', {
     detachFrom: function(observable, methodName, eventType) {
         if (observable && methodName && eventType) {
             // No need to unregister if observable array doesn't exist.
-            var observablesByType = this.__obt;
+            const observablesByType = this.__obt;
             if (observablesByType) {
-                var observables = observablesByType[eventType];
+                const observables = observablesByType[eventType];
                 if (observables) {
                     // Remove all instances of this observer/methodName/eventType 
                     // from the observable
-                    var retval = false, i = observables.length;
+                    let retval = false, 
+                        i = observables.length;
                     while (i) {
                         --i;
                         if (observable === observables[i--] && methodName === observables[i]) {
@@ -2374,9 +2372,11 @@ myt.Observer = new JS.Module('Observer', {
         is attached to.
         @returns {undefined} */
     detachFromAllObservables: function() {
-        var observablesByType = this.__obt;
+        const observablesByType = this.__obt;
         if (observablesByType) {
-            var observables, i, eventType;
+            let observables, 
+                i, 
+                eventType;
             for (eventType in observablesByType) {
                 observables = observablesByType[eventType];
                 i = observables.length;
@@ -2414,14 +2414,14 @@ myt.Constrainable = new JS.Module('Constrainable', {
     constrain: function(methodName, observables) {
         if (methodName && observables) {
             // Make sure an even number of observable/type was provided
-            var len = observables.length;
+            const len = observables.length;
             if (len % 2 !== 0) {
                 console.log("Observables was not even.", this);
                 return;
             }
             
             // Lazy instantiate constraints array.
-            var constraints = this.__cbmn || (this.__cbmn = {}),
+            const constraints = this.__cbmn || (this.__cbmn = {}),
                 constraint = constraints[methodName] || (constraints[methodName] = []);
             
             // Don't allow a constraint to be clobbered.
@@ -2430,7 +2430,9 @@ myt.Constrainable = new JS.Module('Constrainable', {
                 return;
             }
             
-            var observable, type, i = 0;
+            let observable, 
+                type, 
+                i = 0;
             for (; len !== i;) {
                 observable = observables[i++];
                 type = observables[i++];
@@ -2455,11 +2457,11 @@ myt.Constrainable = new JS.Module('Constrainable', {
     releaseConstraint: function(methodName) {
         if (methodName) {
             // No need to remove if the constraint is already empty.
-            var constraints = this.__cbmn;
+            const constraints = this.__cbmn;
             if (constraints) {
-                var constraint = constraints[methodName];
+                const constraint = constraints[methodName];
                 if (constraint) {
-                    var i = constraint.length, 
+                    let i = constraint.length, 
                         type, 
                         observable;
                     while (i) {
@@ -2476,10 +2478,9 @@ myt.Constrainable = new JS.Module('Constrainable', {
     /** Removes all constraints.
         @returns {undefined} */
     releaseAllConstraints: function() {
-        var constraints = this.__cbmn,
-            methodName;
+        const constraints = this.__cbmn;
         if (constraints) {
-            for (methodName in constraints) this.releaseConstraint(methodName);
+            for (let methodName in constraints) this.releaseConstraint(methodName);
         }
     }
 });
@@ -2518,7 +2519,7 @@ myt.global = new JS.Singleton('Global', {
         @returns {undefined} */
     unregister: function(key) {
         if (this.hasOwnProperty(key)) {
-            var v = this[key];
+            const v = this[key];
             delete this[key];
             this.fireEvent('unregister' + key, v);
         } else {
@@ -2620,7 +2621,7 @@ new JS.Singleton('GlobalError', {
     notify: function(consoleFuncName, eventType, msg, err) {
         // Generate Stacktrace
         if (!err) err = new Error(msg || eventType);
-        var stacktrace = err.stack || err.stacktrace;
+        const stacktrace = err.stack || err.stacktrace;
         
         this.fireEvent(eventType || 'error', {msg:msg, stacktrace:stacktrace});
         if (this.consoleLogging && consoleFuncName) console[consoleFuncName](stacktrace);
@@ -2629,7 +2630,7 @@ new JS.Singleton('GlobalError', {
 
 
 ((pkg) => {
-    var GLOBAL = global;
+    const GLOBAL = global;
     
     /** Provides a dom element for this instance. Also assigns a reference to this
         DomElementProxy to a property named "model" on the dom element.
@@ -2643,7 +2644,7 @@ new JS.Singleton('GlobalError', {
                 the dom element.
         
         @class */
-    var DomElementProxy = pkg.DomElementProxy = new JS.Module('DomElementProxy', {
+    const DomElementProxy = pkg.DomElementProxy = new JS.Module('DomElementProxy', {
         // Class Methods ///////////////////////////////////////////////////////
         extend: {
             /** Creates a new dom element.
@@ -2654,8 +2655,8 @@ new JS.Singleton('GlobalError', {
                     the new element.
                 @returns {!Object} the created element. */
             createDomElement: (tagname, styles, props) => {
-                var de = document.createElement(tagname),
-                    key;
+                const de = document.createElement(tagname);
+                let key;
                 if (props) for (key in props) de[key] = props[key];
                 if (styles) for (key in styles) de.style[key] = styles[key];
                 return de;
@@ -2668,7 +2669,7 @@ new JS.Singleton('GlobalError', {
                 // Special Case: hidden input elements should be considered not visible.
                 if (elem.nodeName === 'INPUT' && elem.type === 'hidden') return false;
                 
-                var style;
+                let style;
                 while (elem) {
                     if (elem === document) return true;
                     
@@ -2687,8 +2688,8 @@ new JS.Singleton('GlobalError', {
                 @returns {number} */
             getZIndexRelativeToAncestor: (elem, ancestor) => {
                 if (elem && ancestor) {
-                    var ancestors = DomElementProxy.getAncestorArray(elem, ancestor),
-                        i = ancestors.length - 1, 
+                    const ancestors = DomElementProxy.getAncestorArray(elem, ancestor);
+                    let i = ancestors.length - 1, 
                         style, 
                         zIdx, 
                         isAuto;
@@ -2715,7 +2716,7 @@ new JS.Singleton('GlobalError', {
                     getting ancestors at.
                 @returns {!Array} - An array of ancestor dom elements. */
             getAncestorArray: (elem, ancestor) => {
-                var ancestors = [];
+                const ancestors = [];
                 while (elem) {
                     ancestors.push(elem);
                     if (elem === ancestor) break;
@@ -2731,8 +2732,8 @@ new JS.Singleton('GlobalError', {
                 @returns {number} - An int */
             getHighestZIndex: (elem) => {
                 // See https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Understanding_z_index/The_stacking_context
-                var style = GLOBAL.getComputedStyle(elem),
-                    zIdx = style.zIndex, 
+                const style = GLOBAL.getComputedStyle(elem);
+                let zIdx = style.zIndex, 
                     isAuto = zIdx === 'auto',
                     children,
                     i,
@@ -2764,10 +2765,10 @@ new JS.Singleton('GlobalError', {
             getPagePosition: (elem, ancestorElem) => {
                 if (!elem) return null;
                 
-                var x = 0, 
+                const borderMultiplier = BrowserDetect.browser === 'Firefox' ? 2 : 1; // I have no idea why firefox needs it twice, but it does.
+                let x = 0, 
                     y = 0, 
-                    s,
-                    borderMultiplier = BrowserDetect.browser === 'Firefox' ? 2 : 1; // I have no idea why firefox needs it twice, but it does.
+                    s;
                 
                 // elem.nodeName !== "BODY" test prevents looking at the body
                 // which causes problems when the document is scrolled on webkit.
@@ -2792,7 +2793,7 @@ new JS.Singleton('GlobalError', {
                     if an error has occurred. */
             getTruePagePosition: (elem) => {
                 if (!elem) return null;
-                var pos = $(elem).offset();
+                const pos = $(elem).offset();
                 return {x:pos.left, y:pos.top};
             },
             
@@ -2805,20 +2806,20 @@ new JS.Singleton('GlobalError', {
                 @returns {undefined} */
             simulateDomEvent: (elem, eventName, customOpts) => {
                 if (elem) {
-                    var opts = {
+                    const opts = {
                             pointerX:0, pointerY:0, button:0,
                             ctrlKey:false, altKey:false, shiftKey:false, metaKey:false,
                             bubbles:true, cancelable:true
                         },
-                        p,
-                        name,
-                        key,
-                        domEvent,
-                        eventType,
                         eventMatchers = {
                             'HTMLEvents': /^(?:load|unload|abort|error|select|change|submit|reset|focus|blur|resize|scroll)$/,
                             'MouseEvents': /^(?:click|dblclick|mouse(?:down|up|over|move|out))$/
                         };
+                    let p,
+                        name,
+                        key,
+                        domEvent,
+                        eventType;
                     
                     if (customOpts) {
                         for (p in customOpts) opts[p] = customOpts[p];
@@ -2877,8 +2878,8 @@ new JS.Singleton('GlobalError', {
         setDomElement: function(v) {
             // Support an inner and outer dom element if an array of elements is
             // provided.
-            var self = this,
-                outerElem,
+            const self = this;
+            let outerElem,
                 innerElem;
             if (Array.isArray(v)) {
                 outerElem = v[0];
@@ -2903,7 +2904,7 @@ new JS.Singleton('GlobalError', {
         /** Removes this DomElementProxy's dom element from its parent node.
             @returns {undefined} */
         removeDomElement: function() {
-            var de = this.getOuterDomElement();
+            const de = this.getOuterDomElement();
             de.parentNode.removeChild(de);
         },
         
@@ -2930,7 +2931,7 @@ new JS.Singleton('GlobalError', {
             @param {string} v - The dom class to add.
             @returns {undefined} */
         addDomClass: function(v) {
-            var existing = this.domElement.className;
+            const existing = this.domElement.className;
             this.setDomClass((existing ? existing + ' ' : '') + v);
         },
         
@@ -2938,8 +2939,8 @@ new JS.Singleton('GlobalError', {
             @param {string} v - The dom class to remove.
             @returns {undefined} */
         removeDomClass: function(v) {
-            var existing = this.domElement.className,
-                parts,
+            const existing = this.domElement.className;
+            let parts,
                 i;
             if (existing) {
                 parts = existing.split(' ');
@@ -3015,8 +3016,8 @@ new JS.Singleton('GlobalError', {
                 when determining the z-index.
             @returns {number} - An int. */
         getHighestChildZIndex: function(skipChild) {
-            var children = this.domElement.childNodes, 
-                i = children.length, 
+            const children = this.domElement.childNodes;
+            let i = children.length, 
                 child, 
                 zIdx = 0;
             while (i) {
@@ -3066,12 +3067,12 @@ myt.DomObservable = new JS.Module('DomObservable', {
         if (domObserver && methodName && type) {
             capture = !!capture;
             
-            var methodRef = this.createDomMethodRef(domObserver, methodName, type);
+            const methodRef = this.createDomMethodRef(domObserver, methodName, type);
             if (methodRef) {
-                var domObserversByType = this.__dobsbt || (this.__dobsbt = {});
+                const domObserversByType = this.__dobsbt || (this.__dobsbt = {});
                 
                 // Lazy instantiate dom observers array for type and insert observer.
-                var domObservers = domObserversByType[type];
+                const domObservers = domObserversByType[type];
                 if (!domObservers) {
                     // Create list with observer
                     domObserversByType[type] = [domObserver, methodName, methodRef, capture];
@@ -3112,7 +3113,7 @@ myt.DomObservable = new JS.Module('DomObservable', {
             if the event will not be handled. */
     createStandardDomMethodRef: function(domObserver, methodName, type, observableClass, preventDefault) {
         if (observableClass.EVENT_TYPES[type]) {
-            var self = this, 
+            const self = this, 
                 event = observableClass.EVENT;
             return (domEvent) => {
                 if (!domEvent) domEvent = window.event;
@@ -3121,7 +3122,7 @@ myt.DomObservable = new JS.Module('DomObservable', {
                 event.type = domEvent.type;
                 event.value = domEvent;
                 
-                var allowBubble = domObserver[methodName](event);
+                const allowBubble = domObserver[methodName](event);
                 if (!allowBubble) {
                     domEvent.cancelBubble = true;
                     if (domEvent.stopPropagation) domEvent.stopPropagation();
@@ -3146,13 +3147,13 @@ myt.DomObservable = new JS.Module('DomObservable', {
         if (domObserver && methodName && type) {
             capture = !!capture;
             
-            var domObserversByType = this.__dobsbt;
+            const domObserversByType = this.__dobsbt;
             if (domObserversByType) {
-                var domObservers = domObserversByType[type];
+                const domObservers = domObserversByType[type];
                 if (domObservers) {
                     // Remove dom observer
-                    var retval = false, 
-                        domElement = this.getInnerDomElement(), 
+                    const domElement = this.getInnerDomElement();
+                    let retval = false,  
                         i = domObservers.length;
                     while (i) {
                         i -= 4;
@@ -3175,11 +3176,15 @@ myt.DomObservable = new JS.Module('DomObservable', {
     /** Detaches all dom observers from this DomObservable.
         @returns {undefined} */
     detachAllDomObservers: function() {
-        var domElement = this.getInnerDomElement();
+        const domElement = this.getInnerDomElement();
         if (domElement) {
-            var domObserversByType = this.__dobsbt;
+            const domObserversByType = this.__dobsbt;
             if (domObserversByType) {
-                var domObservers, methodRef, capture, i, type;
+                let domObservers, 
+                    methodRef, 
+                    capture, 
+                    i, 
+                    type;
                 for (type in domObserversByType) {
                     domObservers = domObserversByType[type];
                     i = domObservers.length;
@@ -3231,7 +3236,7 @@ myt.DomObserver = new JS.Module('DomObserver', {
             capture = !!capture;
             
             // Lazy instantiate __dobt map.
-            var observablesByType = this.__dobt || (this.__dobt = {}),
+            const observablesByType = this.__dobt || (this.__dobt = {}),
                 observables = observablesByType[type] || (observablesByType[type] = []);
             
             // Attach this DomObserver to the DomObservable
@@ -3252,13 +3257,13 @@ myt.DomObserver = new JS.Module('DomObserver', {
             capture = !!capture;
             
             // No need to detach if observable array doesn't exist.
-            var observablesByType = this.__dobt;
+            const observablesByType = this.__dobt;
             if (observablesByType) {
-                var observables = observablesByType[type];
+                const observables = observablesByType[type];
                 if (observables) {
                     // Remove all instances of this observer/methodName/type/capture 
                     // from the observable
-                    var retval = false, 
+                    let retval = false, 
                         i = observables.length;
                     while (i) {
                         i -= 3;
@@ -3284,11 +3289,11 @@ myt.DomObserver = new JS.Module('DomObserver', {
     /** Detaches this DomObserver from all DomObservables it is attached to.
         @returns {undefined} */
     detachFromAllDomSources: function() {
-        var observablesByType = this.__dobt,
-            type,
-            observables,
-            i;
+        const observablesByType = this.__dobt;
         if (observablesByType) {
+            let type,
+                observables,
+                i;
             for (type in observablesByType) {
                 observables = observablesByType[type];
                 i = observables.length;
@@ -3319,7 +3324,7 @@ myt.KeyObservable = new JS.Module('KeyObservable', {
             @param {!Object} event
             @returns {number} The keycode from the event. */
         getKeyCodeFromEvent: function(event) {
-            var domEvent = event.value, 
+            const domEvent = event.value, 
                 keyCode = domEvent.keyCode;
             return keyCode || domEvent.charCode;
         }
@@ -3336,8 +3341,9 @@ myt.KeyObservable = new JS.Module('KeyObservable', {
 
 
 ((pkg) => {
-    var globalFocus,
+    let globalFocus;
         
+    const
         /*  Gets the deepest dom element that is a descendant of the provided
             dom element or the element itself. */
         getDeepestDescendant = (elem) => {
@@ -3356,19 +3362,20 @@ myt.KeyObservable = new JS.Module('KeyObservable', {
             globalFocus.lastTraversalWasForward = isForward;
             
             // Determine root element and starting element for traversal.
-            var activeElem = document.activeElement, 
-                rootElem = document.body,
+            let rootElem = document.body,
                 startElem = rootElem,
+                activeElem = document.activeElement, 
                 elem = startElem,
-                model, progModel,
-                focusFuncName = isForward ? 'getNextFocus' : 'getPrevFocus';
+                model,
+                progModel;
+            const focusFuncName = isForward ? 'getNextFocus' : 'getPrevFocus';
             
             if (activeElem) {
                 elem = startElem = activeElem;
                 model = startElem.model;
                 if (!model) model = globalFocus.findModelForDomElement(startElem);
                 if (model) {
-                    var focusTrap = model.getFocusTrap(ignoreFocusTrap);
+                    const focusTrap = model.getFocusTrap(ignoreFocusTrap);
                     if (focusTrap) rootElem = focusTrap.domElement;
                 }
             }
@@ -3422,7 +3429,7 @@ myt.KeyObservable = new JS.Module('KeyObservable', {
                     if (model && model instanceof pkg.View) {
                         if (model.isFocusable()) return model;
                     } else {
-                        var nodeName = elem.nodeName;
+                        const nodeName = elem.nodeName;
                         if (nodeName === 'A' || nodeName === 'AREA' || 
                             nodeName === 'INPUT' || nodeName === 'TEXTAREA' || 
                             nodeName === 'SELECT' || nodeName === 'BUTTON'
@@ -3536,7 +3543,7 @@ myt.KeyObservable = new JS.Module('KeyObservable', {
             @param {boolean} ignoreFocusTrap - If true focus traps will be skipped over.
             @returns {undefined} */
         next: (ignoreFocusTrap) => {
-            var next = traverse(true, ignoreFocusTrap);
+            const next = traverse(true, ignoreFocusTrap);
             if (next) next.focus();
         },
         
@@ -3544,7 +3551,7 @@ myt.KeyObservable = new JS.Module('KeyObservable', {
             @param {boolean} ignoreFocusTrap - If true focus traps will be skipped over.
             @returns {undefined} */
         prev: (ignoreFocusTrap) => {
-            var prev = traverse(false, ignoreFocusTrap);
+            const prev = traverse(false, ignoreFocusTrap);
             if (prev) prev.focus();
         },
         
@@ -3552,9 +3559,8 @@ myt.KeyObservable = new JS.Module('KeyObservable', {
             @param {!Object} elem - The domElement to start looking from.
             @returns {?Object} - A myt.View or null if not found. */
         findModelForDomElement: (elem) => {
-            var model;
             while (elem) {
-                model = elem.model;
+                let model = elem.model;
                 if (model && model instanceof pkg.View) return model;
                 elem = elem.parentNode;
             }
@@ -3565,10 +3571,13 @@ myt.KeyObservable = new JS.Module('KeyObservable', {
 
 
 ((pkg) => {
-    var G = pkg.global,
-        globalFocus = G.focus,
+    let globalKeys,
         
-        globalKeys,
+        /* A map of keycodes of the keys currently pressed down. */
+        keysDown = {};
+    
+    const G = pkg.global,
+        globalFocus = G.focus,
         
         isFirefox = BrowserDetect.browser === 'Firefox',
         KEYCODE_TAB = 9,
@@ -3578,9 +3587,6 @@ myt.KeyObservable = new JS.Module('KeyObservable', {
         KEYCODE_Z = 90,
         KEYCODE_COMMAND = isFirefox ? 224 : 91,
         KEYCODE_RIGHT_COMMAND = isFirefox ? 224 : 93,
-        
-        /* A map of keycodes of the keys currently pressed down. */
-        keysDown = {},
         
         getKeyCodeFromEvent = (event) => pkg.KeyObservable.getKeyCodeFromEvent(event),
         
@@ -3611,7 +3617,7 @@ myt.KeyObservable = new JS.Module('KeyObservable', {
                 case 8: // Backspace
                     // Catch backspace since it navigates the history. Allow it to
                     // go through for text input elements though.
-                    var nodeName = targetElem.nodeName;
+                    const nodeName = targetElem.nodeName;
                     if (nodeName === 'TEXTAREA' || 
                         (nodeName === 'INPUT' && (targetElem.type === 'text' || targetElem.type === 'password')) ||
                         (nodeName === 'DIV' && targetElem.contentEditable === 'true' && targetElem.firstChild)
@@ -3791,7 +3797,7 @@ myt.KeyObservable = new JS.Module('KeyObservable', {
             @param {!Object} event
             @returns {undefined} */
         __handleFocused: (event) => {
-            var focused = event.value;
+            const focused = event.value;
             if (focused) {
                 // unlisten to document
                 globalKeys.detachFromDom(globalKeys, '__handleKeyDown', 'keydown');
@@ -3802,7 +3808,7 @@ myt.KeyObservable = new JS.Module('KeyObservable', {
                 globalKeys.attachToDom(focused, '__handleKeyPress', 'keypress');
                 globalKeys.attachToDom(focused, '__handleKeyUp', 'keyup');
             } else {
-                var prevFocused = globalFocus.prevFocusedView;
+                const prevFocused = globalFocus.prevFocusedView;
                 if (prevFocused) {
                     globalKeys.detachFromDom(prevFocused, '__handleKeyDown', 'keydown');
                     globalKeys.detachFromDom(prevFocused, '__handleKeyPress', 'keypress');
@@ -3825,7 +3831,7 @@ myt.KeyObservable = new JS.Module('KeyObservable', {
             @param {!Object} event
             @returns {undefined} */
         __handleKeyDown: (event) => {
-            var keyCode = getKeyCodeFromEvent(event),
+            const keyCode = getKeyCodeFromEvent(event),
                 domEvent = event.value;
             if (shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
             
@@ -3840,7 +3846,7 @@ myt.KeyObservable = new JS.Module('KeyObservable', {
                 
                 // Check for 'tab' key and do focus traversal.
                 if (keyCode === KEYCODE_TAB) {
-                    var ift = ignoreFocusTrap();
+                    const ift = ignoreFocusTrap();
                     if (isShiftKeyDown()) {
                         globalFocus.prev(ift);
                     } else {
@@ -3863,7 +3869,7 @@ myt.KeyObservable = new JS.Module('KeyObservable', {
             @param {!Object} event
             @returns {undefined} */
         __handleKeyUp: (event) => {
-            var keyCode = getKeyCodeFromEvent(event),
+            const keyCode = getKeyCodeFromEvent(event),
                 domEvent = event.value;
             if (shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
             keysDown[keyCode] = false;
@@ -3934,7 +3940,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
     // Accessors ///////////////////////////////////////////////////////////////
     /** @overrides */
     setParent: function(v) {
-        var self = this,
+        const self = this,
             oldParentIsFlexBox = self.isChildOfFlexBox();
         
         self.callSuper(v);
@@ -3949,7 +3955,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
     /** @private
         @returns {undefined} */
     _syncDomToModel: function() {
-        var self = this,
+        const self = this,
             s = self.getOuterDomStyle();
         if (s.width !== 'auto') s.width = self.width + 'px';
         if (s.height !== 'auto') s.height = self.height + 'px';
@@ -4010,7 +4016,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
             this.alignSelf = v;
             
             // Alias common unexpected values when assigning to the dom
-            var domValue = v;
+            let domValue = v;
             switch (domValue) {
                 case 'start':
                     domValue = 'flex-start';
@@ -4032,7 +4038,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
     },
     
     syncModelToOuterBounds: function() {
-        var de = this.getOuterDomElement();
+        const de = this.getOuterDomElement();
         this.__syncModelToOuterBoundsWidth(de);
         this.__syncModelToOuterBoundsHeight(de);
     },
@@ -4041,7 +4047,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
         @param {!Object} de - A dom element.
         @returns {undefined} */
     __syncModelToOuterBoundsWidth: function(de) {
-        var ids = this.getInnerDomStyle();
+        const ids = this.getInnerDomStyle();
         if (!de) de = this.getOuterDomElement();
         if (ids.width === 'auto') {
             // We're sizing to our contents so first sync the outer dom style 
@@ -4059,7 +4065,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
         @param {!Object} de - A dom element.
         @returns {undefined} */
     __syncModelToOuterBoundsHeight: function(de) {
-        var ids = this.getInnerDomStyle();
+        const ids = this.getInnerDomStyle();
         if (!de) de = this.getOuterDomElement();
         if (ids.height === 'auto') {
             // We're sizing to our contents so first sync the outer dom style 
@@ -4113,11 +4119,11 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
     
     /** @overrides */
     createOurDomElement: function(parent) {
-        var outerElem = this.callSuper(parent);
+        const outerElem = this.callSuper(parent);
         
         // We need an inner dom element that is position relative to mask the
         // flex box behavior for descendants of this flex box child.
-        var innerElem = document.createElement('div');
+        const innerElem = document.createElement('div');
         innerElem.style.position = 'relative';
         outerElem.appendChild(innerElem);
         
@@ -4127,7 +4133,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
 
 
 ((pkg) => {
-    var
+    const
         /* Caches getter names. */
         GETTER_NAMES = {},
     
@@ -4170,7 +4176,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
                 @param {string} attrName
                 @returns {undefined} */
             createSetterFunction: (target, attrName) => {
-                var setterName = generateSetterName(attrName);
+                const setterName = generateSetterName(attrName);
                 if (target[setterName]) console.log("Overwriting setter", setterName);
                 target[setterName] = (v) => {
                     if (target[attrName] !== v) {
@@ -4186,7 +4192,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
                 @param {string} attrName
                 @returns {undefined} */
             createGetterFunction: (target, attrName) => {
-                var getterName = generateGetterName(attrName);
+                const getterName = generateGetterName(attrName);
                 if (target[getterName]) console.log("Overwriting getter", getterName);
                 target[getterName] = () => target[attrName];
             }
@@ -4203,17 +4209,17 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
             @param {?Object} attrs - A map of attributes to set.
             @returns {undefined}. */
         callSetters: function(attrs) {
-            var self = this,
+            const self = this,
                 earlyAttrs = self.earlyAttrs,
-                lateAttrs = self.lateAttrs,
-                attrName, 
+                lateAttrs = self.lateAttrs;
+            let attrName, 
                 extractedLateAttrs, 
                 i, 
                 len;
             if (earlyAttrs || lateAttrs) {
                 // Make a shallow copy of attrs since we can't guarantee that
                 // attrs won't be reused
-                var copyOfAttrs = {};
+                const copyOfAttrs = {};
                 for (attrName in attrs) copyOfAttrs[attrName] = attrs[attrName];
                 attrs = copyOfAttrs;
                 
@@ -4261,7 +4267,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
             @param {string} attrName - The name of the attribute to get.
             @returns {*} - The attribute value. */
         get: function(attrName) {
-            var getterName = generateGetterName(attrName);
+            const getterName = generateGetterName(attrName);
             return this[getterName] ? this[getterName]() : this[attrName];
         },
         
@@ -4276,8 +4282,8 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
                 setter behavior. Defaults to undefined which is equivalent to false.
             @returns {undefined} */
         set: function(attrName, v, skipSetter) {
-            var self = this,
-                setterName;
+            const self = this;
+            let setterName;
             
             if (!skipSetter) {
                 setterName = generateSetterName(attrName);
@@ -4312,9 +4318,10 @@ myt.Destructible = new JS.Module('Destructible', {
         // See http://perfectionkills.com/understanding-delete/ for details
         // on how delete works. This is why we use Object.keys below since it
         // avoids iterating over many of the properties that are not deletable.
-        var self = this,
-            keys, i,
+        const self = this,
             meta = self.__meta__;
+        let keys,
+            i;
         
         if (self.destroyed) {
             console.warn('No destroying the destroyed.');
@@ -4374,7 +4381,7 @@ myt.AbstractPool = new JS.Class('AbstractPool', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Destructible */
     destroy: function() {
-        var objPool = this.__getObjPool();
+        const objPool = this.__getObjPool();
         if (objPool) objPool.length = 0;
         
         this.callSuper();
@@ -4395,7 +4402,7 @@ myt.AbstractPool = new JS.Class('AbstractPool', {
         Note: these have no effect if an object already exists in the pool.
         @returns {!Object} */
     getInstance: function() {
-        var objPool = this.__getObjPool(true);
+        const objPool = this.__getObjPool(true);
         return objPool.length ? objPool.pop() : this.createInstance.apply(this, arguments);
     },
     
@@ -4428,9 +4435,10 @@ myt.AbstractPool = new JS.Class('AbstractPool', {
         have a destroy function.
         @returns {undefined} */
     destroyPooledInstances: function() {
-        var objPool = this.__getObjPool();
+        const objPool = this.__getObjPool();
         if (objPool) {
-            var i = objPool.length, obj;
+            let i = objPool.length,
+                obj;
             while (i) {
                 obj = objPool[--i];
                 if (typeof obj.destroy === 'function') obj.destroy();
@@ -4476,7 +4484,8 @@ myt.SimplePool = new JS.Class('SimplePool', myt.AbstractPool, {
     createInstance: function() {
         // If we ever need full arguments with new, see:
         // http://stackoverflow.com/questions/1606797/use-of-apply-with-new-operator-is-this-possible
-        var parent = this.instanceParent, instanceClass = this.instanceClass;
+        const parent = this.instanceParent, 
+            instanceClass = this.instanceClass;
         return parent ? new instanceClass(parent, arguments[0]) : new instanceClass();
     }
 });
@@ -4499,7 +4508,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Destructible */
     destroy: function() {
-        var actives = this.__getActives();
+        const actives = this.__getActives();
         if (actives) actives.length = 0;
         
         this.callSuper();
@@ -4517,15 +4526,15 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
     
     /** @overrides myt.AbstractPool */
     getInstance: function() {
-        var instance = this.callSuper();
+        const instance = this.callSuper();
         this.__getActives(true).push(instance);
         return instance;
     },
     
     /** @overrides myt.AbstractPool */
     putInstance: function(obj) {
-        var actives = this.__getActives(),
-            i,
+        const actives = this.__getActives();
+        let i,
             warningType;
         if (actives) {
             i = actives.length;
@@ -4548,12 +4557,12 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
             results.
         @returns {!Array} */
     getActives: function(filterFunc) {
-        var actives = this.__getActives();
+        const actives = this.__getActives();
         if (actives) {
             if (filterFunc) {
-                var retval = [],
-                    len = actives.length,
-                    i = 0,
+                const retval = [],
+                    len = actives.length;
+                let i = 0,
                     active;
                 for (; len > i;) {
                     active = actives[i++];
@@ -4569,9 +4578,9 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
     /** Puts all the active instances back in the pool.
         @returns {undefined} */
     putActives: function() {
-        var actives = this.__getActives();
+        const actives = this.__getActives();
         if (actives) {
-            var i = actives.length;
+            let i = actives.length;
             while (i) this.putInstance(actives[--i]);
         }
     }
@@ -4579,7 +4588,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
 
 
 ((pkg) => {
-    var
+    const
         /*  Get the closest ancestor of the provided Node or the Node itself for 
             which the matcher function returns true. Returns a Node or null if 
             no match is found.
@@ -4612,7 +4621,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
                 param nodeToAdd:Node the node to add the name reference for.
         */
         addNameRef = (node, nodeToAdd) => {
-            var name = nodeToAdd.name;
+            const name = nodeToAdd.name;
             if (node[name] === undefined) {
                 node[name] = nodeToAdd;
             } else {
@@ -4625,7 +4634,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
                 param nodeToRemove:Node the node to remove the name reference for.
         */
         removeNameRef = (node, nodeToRemove) => {
-            var name = nodeToRemove.name;
+            const name = nodeToRemove.name;
             if (node[name] === nodeToRemove) {
                 delete node[name];
             } else {
@@ -4701,9 +4710,12 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
                 the new instance.
             @returns {undefined} */
         initialize: function(parent, attrs, mixins) {
-            var self = this;
+            const self = this;
             if (mixins) {
-                for (var i = 0, len = mixins.length, mixin; len > i;) {
+                const len = mixins.length;
+                let i = 0,
+                    mixin;
+                for (; len > i;) {
                     if (mixin = mixins[i++]) {
                         self.extend(mixin);
                     } else {
@@ -4726,7 +4738,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
             @param {?Object} attrs - A map of attribute names and values.
             @returns {undefined} */
         initNode: function(parent, attrs) {
-            var self = this;
+            const self = this;
             self.callSetters(attrs);
             
             self.doBeforeAdoption();
@@ -4752,16 +4764,15 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
         
         /** @overrides myt.Destructible. */
         destroy: function() {
-            var self = this,
-                subs = self.subnodes,
-                i;
+            const self = this,
+                subs = self.subnodes;
             
             // Allows descendants to know destruction is in process
             self.isBeingDestroyed = true;
             
             // Destroy subnodes depth first
             if (subs) {
-                i = subs.length;
+                let i = subs.length;
                 while (i) subs[--i].destroy();
             }
             
@@ -4806,14 +4817,11 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
             @param {?Object} newParent
             @returns {undefined} */
         setParent: function(newParent) {
-            var self = this,
-                placement,
-                curParent,
-                idx;
+            const self = this;
             
             // Use placement if indicated
             if (newParent && !self.ignorePlacement) {
-                placement = self.placement || newParent.defaultPlacement;
+                let placement = self.placement || newParent.defaultPlacement;
                 if (placement) newParent = newParent.determinePlacement(placement, self);
             }
             
@@ -4822,8 +4830,10 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
                 if (newParent && newParent.destroyed) return;
                 
                 // Remove ourselves from our existing parent if we have one.
-                if (curParent = self.parent) {
-                    if ((idx = curParent.getSubnodeIndex(self)) !== -1) {
+                let curParent = self.parent;
+                if (curParent) {
+                    let idx = curParent.getSubnodeIndex(self);
+                    if (idx !== -1) {
                         if (self.name) removeNameRef(curParent, self);
                         curParent.subnodes.splice(idx, 1);
                         curParent.subnodeRemoved(self);
@@ -4846,16 +4856,16 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
         
         /** The 'name' of a Node allows it to be referenced by name from its
             parent node. For example a Node named 'foo' that is a child of a
-            Node stored in the var 'bar' would be referenced like this: bar.foo 
-            or bar['foo'].
+            Node stored in the variable 'bar' would be referenced like 
+            this: bar.foo or bar['foo'].
             @param {string} name
             @returns {undefined} */
         setName: function(name) {
-            var self = this;
+            const self = this;
             
             if (self.name !== name) {
                 // Remove "name" reference from parent.
-                var p = self.parent;
+                const p = self.parent;
                 if (p && self.name) removeNameRef(p, self);
                 
                 self.name = name;
@@ -4882,7 +4892,9 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
             @returns {!Object} - The Node to place a subnode into. */
         determinePlacement: function(placement, subnode) {
             // Parse "active" placement and remaining placement.
-            var idx = placement.indexOf('.'), remainder, loc;
+            let idx = placement.indexOf('.'),
+                remainder,
+                loc;
             if (idx !== -1) {
                 remainder = placement.substring(idx + 1);
                 placement = placement.substring(0, idx);
@@ -4930,7 +4942,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
             @param {!Object} node - The myt.Node to check for descent from.
             @returns {boolean} */
         isDescendantOf: function(node) {
-            var self = this;
+            const self = this;
             
             if (node) {
                 if (node === self) return true;
@@ -4996,8 +5008,8 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
             be at the front of the list.
             @returns {!Array} - The array of ancestor nodes. */
         getAncestors: function() {
-            var ancestors = [],
-                node = this;
+            const ancestors = [];
+            let node = this;
             while (node) {
                 ancestors.push(node);
                 node = node.parent;
@@ -5085,7 +5097,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
             @param {?Function} [easingFunction]
             @returns {!Object} - The Animator being run. */
         animate: function(attribute, to, from, relative, callback, duration, reverse, repeat, easingFunction) {
-            var animPool = getAnimPool(this),
+            const animPool = getAnimPool(this),
                 anim = animPool.getInstance({ignorePlacement:true}); // ignorePlacement ensures the animator is directly attached to this node
             
             if (typeof attribute === 'object') {
@@ -5122,7 +5134,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
             @returns {!Array} - An array of active animators. */
         getActiveAnimators: function(filterFunc) {
             if (typeof filterFunc === 'string') {
-                var attrName = filterFunc;
+                const attrName = filterFunc;
                 filterFunc = (anim) => anim.attribute === attrName;
             }
             return getAnimPool(this).getActives(filterFunc);
@@ -5137,8 +5149,8 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
                 callbacks will be executed if they exist.
             @returns {undefined} */
         stopActiveAnimators: function(filterFunc, executeCallbacks=false) {
-            var activeAnims = this.getActiveAnimators(filterFunc),
-                i = activeAnims.length,
+            const activeAnims = this.getActiveAnimators(filterFunc);
+            let i = activeAnims.length,
                 anim,
                 animPool;
             if (i > 0) {
@@ -5164,17 +5176,18 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
 
 
 ((pkg) => {
-    var JSClass = JS.Class,
-        
-        /* A list of layouts to be updated once the global lock is released. */
-        deferredLayouts = [],
-        
-        /*  The global lock counter. Any value greater than zero sets the
+    let 
+        /*  The global lock counter. Any value greater than zero sets the 
             global lock. */
         globalLockCount = 0,
         
         /* The global layout locked status. */
-        globalLock = false,
+        globalLock = false;
+    
+    const JSClass = JS.Class,
+        
+        /* A list of layouts to be updated once the global lock is released. */
+        deferredLayouts = [],
         
         /*  Called to set/unset the global lock. Updates all the currently 
             deferred layouts. */
@@ -5183,7 +5196,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
                 globalLock = v;
                 
                 if (!v) {
-                    var i = deferredLayouts.length, 
+                    let i = deferredLayouts.length, 
                         layout;
                     while (i) {
                         layout = deferredLayouts[--i];
@@ -5209,9 +5222,9 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
         
         /* Implements moveSubviewBefore and moveSubviewAfter for Layout. */
         moveSubview = (layout, sv, target, after) => {
-            var curIdx = layout.getSubviewIndex(sv),
-                targetIdx,
+            const curIdx = layout.getSubviewIndex(sv),
                 svs = layout.subviews;
+            let targetIdx;
             if (curIdx >= 0) {
                 targetIdx = layout.getSubviewIndex(target);
                 
@@ -5276,7 +5289,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
                 this.lockedCounter = 1;
                 
                 // Remember how initial locking state should be set
-                var initiallyLocked = attrs.locked === true;
+                const initiallyLocked = attrs.locked === true;
                 delete attrs.locked;
                 
                 this.callSuper(parent, attrs);
@@ -5300,11 +5313,11 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
                 if (this.parent !== parent) {
                     // Lock during parent change so that old parent is not updated by
                     // the calls to removeSubview and addSubview.
-                    var wasNotLocked = !this.locked;
+                    const wasNotLocked = !this.locked;
                     if (wasNotLocked) this.locked = true;
                     
                     // Stop monitoring parent
-                    var svs, i, len;
+                    let svs, i, len;
                     if (this.parent) {
                         svs = this.subviews;
                         i = svs.length;
@@ -5391,8 +5404,8 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
                 refreshing all the subview monitoring.
                 @returns {undefined} */
             startMonitoringAllSubviews: function() {
-                var svs = this.subviews,
-                    i = svs.length;
+                const svs = this.subviews;
+                let i = svs.length;
                 while (i) this.startMonitoringSubview(svs[--i]);
             },
             
@@ -5402,7 +5415,7 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
             removeSubview: function(sv) {
                 if (this.ignore(sv)) return -1;
                 
-                var idx = this.getSubviewIndex(sv);
+                const idx = this.getSubviewIndex(sv);
                 if (idx !== -1) {
                     this.stopMonitoringSubview(sv);
                     this.subviews.splice(idx, 1);
@@ -5423,8 +5436,8 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
                 refreshing all the subview monitoring.
                 @returns {undefined} */
             stopMonitoringAllSubviews: function() {
-                var svs = this.subviews,
-                    i = svs.length;
+                const svs = this.subviews;
+                let i = svs.length;
                 while (i) this.stopMonitoringSubview(svs[--i]);
             },
             
@@ -5526,10 +5539,13 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
         /** @overrides */
         update: function() {
             if (this.canUpdate()) {
-                var setterName = this.setterName, 
+                const setterName = this.setterName, 
                     value = this.targetValue, 
-                    svs = this.subviews, len = svs.length, sv,
-                    setter, i = 0;
+                    svs = this.subviews, 
+                    len = svs.length; 
+                let sv,
+                    setter, 
+                    i = 0;
                 for (; len > i;) {
                     sv = svs[i++];
                     setter = sv[setterName];
@@ -5597,24 +5613,24 @@ myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
                 
                 this.doBeforeUpdate();
                 
-                var setterName = this.setterName, 
-                    value = this.targetValue,
+                const setterName = this.setterName, 
                     svs = this.subviews, 
-                    len = svs.length, 
+                    len = svs.length;
+                let value = this.targetValue,
                     i, 
                     sv, 
                     count = 0;
                 
                 if (this.reverse) {
                     i = len;
-                    while(i) {
+                    while (i) {
                         sv = svs[--i];
                         if (this.skipSubview(sv)) continue;
                         value = this.updateSubview(++count, sv, setterName, value);
                     }
                 } else {
                     i = 0;
-                    while(len > i) {
+                    while (len > i) {
                         sv = svs[i++];
                         if (this.skipSubview(sv)) continue;
                         value = this.updateSubview(++count, sv, setterName, value);
@@ -5727,12 +5743,12 @@ myt.MouseObservable = new JS.Module('MouseObservable', {
             @returns {!Object} An object with 'x' and 'y' keys containing the
                 x and y mouse position. */
         getMouseFromEvent: function(event) {
-            var domEvent = event.value;
+            const domEvent = event.value;
             return {x:domEvent.pageX, y:domEvent.pageY};
         },
         
         getMouseFromEventRelativeToView: function(event, view) {
-            var viewPos = view.getPagePosition(),
+            const viewPos = view.getPagePosition(),
                 pos = this.getMouseFromEvent(event);
             pos.x -= viewPos.x;
             pos.y -= viewPos.y;
@@ -5816,7 +5832,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
             this.focused = v;
             if (this.inited) {
                 this.fireEvent('focused', v);
-                var gf = myt.global.focus;
+                const gf = myt.global.focus;
                 if (v) {
                     gf.notifyFocus(this);
                 } else {
@@ -5827,10 +5843,10 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
     },
     
     setFocusable: function(v) {
-        var self = this;
+        const self = this;
         
         if (self.focusable !== v) {
-            var wasFocusable = self.focusable;
+            const wasFocusable = self.focusable;
             self.focusable = v;
             
             if (v) {
@@ -5938,7 +5954,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
         this.getInnerDomElement().hideFocus = false;
         
         // Mozilla and Webkit
-        var s = this.getInnerDomStyle();
+        const s = this.getInnerDomStyle();
         s.outlineWidth = 'thin';
         s.outlineColor = '#88bbff';
         s.outlineStyle = 'solid';
@@ -5963,7 +5979,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
     /** @overrides myt.DomObservable */
     createDomMethodRef: function(domObserver, methodName, type) {
         if (myt.FocusObservable.EVENT_TYPES[type]) {
-            var self = this;
+            const self = this;
             return (domEvent) => {
                 if (!domEvent) domEvent = window.event;
                 
@@ -5977,12 +5993,12 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
                 }
                 
                 // Configure common focus event.
-                var event = myt.FocusObservable.EVENT;
+                const event = myt.FocusObservable.EVENT;
                 event.source = self;
                 event.type = domEvent.type;
                 event.value = domEvent;
                 
-                var allowBubble = domObserver[methodName](event);
+                const allowBubble = domObserver[methodName](event);
                 if (!allowBubble) {
                     domEvent.cancelBubble = true;
                     if (domEvent.stopPropagation) domEvent.stopPropagation();
@@ -6014,7 +6030,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             @param {!Object} event
             @returns object with an x and y key each containing a number. */
         getScrollFromEvent: function(event) {
-            var domEvent = event.value,
+            const domEvent = event.value,
                 target = domEvent.target || domEvent.srcElement;
             return {x: target.scrollLeft, y: target.scrollTop};
         }
@@ -6031,7 +6047,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
 
 
 ((pkg) => {
-    var 
+    const 
         /*  Preserves focus and scroll position during dom updates. Focus can 
             get lost in webkit when an element is removed from the dom.
                 param viewBeingRemoved:myt.View
@@ -6040,9 +6056,9 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
                     followed by an insert.
         */
         retainFocusDuringDomUpdate = (viewBeingRemoved, wrappedFunc) => {
-            var restoreFocus = pkg.global.focus.focusedView, 
-                elem = viewBeingRemoved.getInnerDomElement(), 
-                restoreScrollTop, 
+            const restoreFocus = pkg.global.focus.focusedView, 
+                elem = viewBeingRemoved.getInnerDomElement();
+            let restoreScrollTop, 
                 restoreScrollLeft;
             if (restoreFocus === viewBeingRemoved || (restoreFocus && restoreFocus.isDescendantOf(viewBeingRemoved))) {
                 restoreFocus._ignoreFocus = true;
@@ -6079,11 +6095,11 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         comparePosition = (firstView, secondView, front, checkZIndex) => {
             if (secondView && typeof secondView === 'object') {
                 if (checkZIndex) {
-                    var commonAncestor = firstView.getLeastCommonAncestor(secondView);
+                    const commonAncestor = firstView.getLeastCommonAncestor(secondView);
                     if (commonAncestor) {
-                        var commonAncestorElem = commonAncestor.getInnerDomElement(),
-                            DEP = pkg.DomElementProxy,
-                            zIdx = DEP.getZIndexRelativeToAncestor(firstView.getOuterDomElement(), commonAncestorElem),
+                        const commonAncestorElem = commonAncestor.getInnerDomElement(),
+                            DEP = pkg.DomElementProxy;
+                        let zIdx = DEP.getZIndexRelativeToAncestor(firstView.getOuterDomElement(), commonAncestorElem),
                             otherZIdx = DEP.getZIndexRelativeToAncestor(secondView.getOuterDomElement(), commonAncestorElem);
                         
                         // Reverse comparison order
@@ -6107,7 +6123,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
                 // DOCUMENT_POSITION_CONTAINS 8
                 // DOCUMENT_POSITION_CONTAINED_BY 16
                 // DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC 32
-                var rel = firstView.getOuterDomElement().compareDocumentPosition(secondView.getOuterDomElement());
+                const rel = firstView.getOuterDomElement().compareDocumentPosition(secondView.getOuterDomElement());
                 return front ? rel === 2 || rel === 10 : rel === 4 || rel === 20;
             } else {
                 return false;
@@ -6117,8 +6133,8 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         /*  Calculates the effective scale for the provided view and all its
             ancestors. Returns the effective scale for the provided view. */
         calculateEffectiveScale = (view) => {
-            var ancestorsAndSelf = view.getAncestors(), 
-                i = ancestorsAndSelf.length, 
+            const ancestorsAndSelf = view.getAncestors();
+            let i = ancestorsAndSelf.length, 
                 ancestor,
                 effectiveScaleX = 1,
                 effectiveScaleY = 1;
@@ -6133,8 +6149,8 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         },
         
         isPointVisible = (view, x, y) => {
-            var ode = view.getOuterDomElement(),
-                parent,
+            const ode = view.getOuterDomElement();
+            let parent,
                 pOde;
             if (pkg.Geometry.rectContainsPoint(x, y, 0, 0, ode.offsetWidth * view.__effectiveScaleX, ode.offsetHeight * view.__effectiveScaleY)) {
                 if (parent = view.parent) {
@@ -6160,7 +6176,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         },
         
         setupAlignConstraint = (view) => {
-            var parent = view.parent;
+            const parent = view.parent;
             if (parent) {
                 switch (view.align) {
                     case 'center':
@@ -6187,7 +6203,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         },
         
         setupValignConstraint = (view) => {
-            var parent = view.parent;
+            const parent = view.parent;
             if (parent) {
                 switch (view.valign) {
                     case 'middle':
@@ -6352,7 +6368,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.Node */
         initNode: function(parent, attrs) {
-            var self = this;
+            const self = this;
             
             self.x = self.y = self.width = self.height = 0;
             self.opacity = 1;
@@ -6365,7 +6381,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             // Necessary since x and y of 0 won't update deStyle so this gets
             // things initialized correctly. Without this RootViews will have
             // an incorrect initial position for x or y of 0.
-            var s = self.getOuterDomStyle();
+            const s = self.getOuterDomStyle();
             s.left = s.top = '0px';
             
             self.callSuper(parent, attrs);
@@ -6384,11 +6400,11 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
                 of the newly created dom element.
             @returns {!Object} a dom element */
         createOurDomElement: function(parent) {
-            var elem = document.createElement(this.tagName || 'div');
+            const elem = document.createElement(this.tagName || 'div');
             elem.style.position = 'absolute';
             
             // Make dom elements easier to location via selectors
-            var klass = this.klass;
+            const klass = this.klass;
             elem.className = klass.__cssClassName || (klass.__cssClassName = 'myt-' + klass.__displayName.split('.').join('-'));
             
             return elem;
@@ -6405,7 +6421,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         
         /** @overrides myt.Node */
         destroyAfterOrphaning: function() {
-            var self = this;
+            const self = this;
             
             self.callSuper();
             
@@ -6418,7 +6434,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         // Accessors ///////////////////////////////////////////////////////////
         /** @overrides myt.Node */
         setParent: function(parent) {
-            var self = this;
+            const self = this;
             
             if (self.parent !== parent) {
                 if (self.inited) {
@@ -6443,8 +6459,8 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             if (this.parent) {
                 // Get a copy of the subviews since we will modify it and do not
                 // want to modify the original array.
-                var svs = this.parent.getSubviews().concat(),
-                    i = svs.length;
+                const svs = this.parent.getSubviews().concat();
+                let i = svs.length;
                 
                 // Remove ourselves from the subviews since we only want siblings.
                 while (i) {
@@ -6473,12 +6489,12 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         },
         
         setIgnoreLayout: function(v) {
-            var self = this;
+            const self = this;
             
             if (self.ignoreLayout !== v) {
                 // Add or remove ourselves from any layouts on our parent.
-                var ready = self.inited && self.parent,
-                    layouts,
+                const ready = self.inited && self.parent;
+                let layouts,
                     i;
                 if (v) {
                     if (ready) {
@@ -6650,11 +6666,11 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         },
         
         setOverflow: function(v) {
-            var existing = this.overflow;
+            const existing = this.overflow;
             if (existing !== v) {
                 this.overflow = v;
                 
-                var s = this.getInnerDomStyle();
+                const s = this.getInnerDomStyle();
                 if (v === 'autox') {
                     s.overflowX = 'auto';
                     s.overflowY = 'hidden';
@@ -6671,11 +6687,11 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         },
         
         setVisible: function(v) {
-            var self = this;
+            const self = this;
             if (self.visible !== v) {
                 self.visible = v;
                 
-                var s = self.getOuterDomStyle();
+                const s = self.getOuterDomStyle();
                 s.visibility = v ? 'inherit' : 'hidden';
                 
                 // Move invisible elements to a very negative location so they won't
@@ -6818,7 +6834,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             @returns {undefined} */
         setBoxShadow: function(v) {
             if (v) {
-                var hShadow = v[0] || 0,
+                const hShadow = v[0] || 0,
                     vShadow = v[1] || 0,
                     blur = v[2] || 7,
                     color = v[3] || '#000000';
@@ -6848,11 +6864,11 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
                     https://developer.mozilla.org/en-US/docs/Web/CSS/linear-gradient
             @returns {undefined} */
         setGradient: function(v) {
-            var self = this,
+            const self = this,
                 ods = self.getOuterDomStyle();
             if (v) {
                 // Determine type
-                var type = v[0];
+                let type = v[0];
                 if (type === 'linear' || type === 'radial') {
                     v.shift();
                 } else {
@@ -6860,7 +6876,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
                 }
                 
                 // Determine geometry of the gradient
-                var geometry = v[0];
+                let geometry = v[0];
                 if (type === 'radial') {
                     if (geometry !== undefined) {
                         if (geometry === 'cover' || geometry === 'farthest-corner') {
@@ -6887,7 +6903,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
                 
                 // Use colors that may have already been configured if less
                 // than 2 color stops are provided
-                var pushColor = (color) => {
+                const pushColor = (color) => {
                     v.push(color && color !== 'inherit' ? color : 'transparent');
                 };
                 if (v.length < 2) pushColor(self.textColor);
@@ -6961,7 +6977,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             @fires layoutRemoved event with the provided Node if it's a Layout
                 and removal succeeds. */
         subnodeRemoved: function(node) {
-            var idx;
+            let idx;
             if (node instanceof pkg.View) {
                 idx = this.getSubviewIndex(node);
                 if (idx !== -1) {
@@ -7011,7 +7027,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             @returns {?Object} - The next sibling myt.View or null if none exists. */
         getNextSibling: function() {
             if (this.parent) {
-                var nextDomElement = this.getOuterDomElement().nextElementSibling;
+                const nextDomElement = this.getOuterDomElement().nextElementSibling;
                 if (nextDomElement) return nextDomElement.model;
             }
             return null;
@@ -7021,7 +7037,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             @returns {?Object} - The previous sibling myt.View or null if none exists. */
         getPrevSibling: function() {
             if (this.parent) {
-                var prevDomElement = this.getOuterDomElement().previousElementSibling;
+                const prevDomElement = this.getOuterDomElement().previousElementSibling;
                 if (prevDomElement) return prevDomElement.model;
             }
             return null;
@@ -7108,7 +7124,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             @returns {undefined} */
         bringSubviewToFront: function(sv) {
             if (sv && sv.parent === this) {
-                var innerElem = this.getInnerDomElement();
+                const innerElem = this.getInnerDomElement();
                 if (sv.getOuterDomElement() !== innerElem.lastChild) {
                     retainFocusDuringDomUpdate(sv, () => {
                         innerElem.appendChild(sv.getOuterDomElement());
@@ -7122,7 +7138,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             @returns {undefined} */
         sendSubviewToBack: function(sv) {
             if (sv && sv.parent === this) {
-                var innerElem = this.getInnerDomElement();
+                const innerElem = this.getInnerDomElement();
                 if (sv.getOuterDomElement() !== innerElem.firstChild) {
                     retainFocusDuringDomUpdate(sv, () => {
                         innerElem.insertBefore(sv.getOuterDomElement(), innerElem.firstChild);
@@ -7137,7 +7153,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             @returns {undefined} */
         sendSubviewBehind: function(sv, existing) {
             if (sv && existing && sv.parent === this && existing.parent === this) {
-                var innerElem = this.getInnerDomElement();
+                const innerElem = this.getInnerDomElement();
                 retainFocusDuringDomUpdate(sv, () => {
                     innerElem.insertBefore(sv.getOuterDomElement(), existing.getOuterDomElement());
                 });
@@ -7162,18 +7178,18 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             @returns {undefined} */
         sortSubviews: function(sortFunc) {
             // Sort subviews
-            var self = this,
+            const self = this,
                 svs = self.getSubviews();
             svs.sort(sortFunc);
             
             // Rearrange dom to match new sort order.
             retainFocusDuringDomUpdate(self, () => {
-                var len = svs.length,
-                    i = 0,
+                const len = svs.length,
                     outerElem = self.getOuterDomElement(),
                     innerElem = self.getInnerDomElement(),
                     nextDe = outerElem.nextSibling,
-                    parentElem = outerElem.parentNode,
+                    parentElem = outerElem.parentNode;
+                let i = 0,
                     fragment;
                 // Remove this dom element from the dom
                 if (parentElem) parentElem.removeChild(outerElem);
@@ -7199,10 +7215,10 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             @returns {boolean} True if the location is inside this view, false 
                 if not. */
         containsPoint: function(locX, locY, referenceFrameDomElem) {
-            var outerElem = this.getOuterDomElement();
+            const outerElem = this.getOuterDomElement();
             if (!outerElem) return false;
             
-            var pos = pkg.DomElementProxy.getPagePosition(outerElem, referenceFrameDomElem);
+            const pos = pkg.DomElementProxy.getPagePosition(outerElem, referenceFrameDomElem);
             return pkg.Geometry.rectContainsPoint(locX, locY, pos.x, pos.y, this.width, this.height);
         },
         
@@ -7212,7 +7228,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             @param {number} locY
             @returns {boolean} true if visible, false otherwise. */
         isPointVisible: function(locX, locY) {
-            var pos = this.getTruePagePosition();
+            const pos = this.getTruePagePosition();
             calculateEffectiveScale(this);
             return isPointVisible(this, locX - pos.x, locY - pos.y);
         },
@@ -7281,7 +7297,7 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
             this.flexDirection = v;
             
             // Alias common unexpected values when assigning to the dom
-            var domValue = v;
+            let domValue = v;
             switch (domValue) {
                 case 'rowReverse':
                     domValue = 'row-reverse';
@@ -7304,7 +7320,7 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
             this.flexWrap = v;
             
             // Alias common unexpected values when assigning to the dom
-            var domValue = v;
+            let domValue = v;
             switch (domValue) {
                 case 'wrapReverse':
                 case 'reverse':
@@ -7326,7 +7342,7 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
             this.justifyContent = v;
             
             // Alias common unexpected values when assigning to the dom
-            var domValue = v;
+            let domValue = v;
             switch (domValue) {
                 case 'start':
                     domValue = 'flex-start';
@@ -7361,7 +7377,7 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
             this.alignItems = v;
             
             // Alias common unexpected values when assigning to the dom
-            var domValue = v;
+            let domValue = v;
             switch (domValue) {
                 case 'start':
                     domValue = 'flex-start';
@@ -7384,7 +7400,7 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
             this.alignContent = v;
             
             // Alias common unexpected values when assigning to the dom
-            var domValue = v;
+            let domValue = v;
             switch (domValue) {
                 case 'start':
                     domValue = 'flex-start';
@@ -7414,8 +7430,8 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides */
     createOurDomElement: function(parent) {
-        var elements = this.callSuper(parent),
-            innerElem;
+        const elements = this.callSuper(parent);
+        let innerElem;
         if (Array.isArray(elements)) {
             innerElem = elements[1];
         } else {
@@ -7437,7 +7453,7 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
     /** @private
         @returns {undefined} */
     __syncSubviews: function() {
-        var svs = this.getSubviews();
+        const svs = this.getSubviews();
         svs.forEach(sv => this.__syncSubview(sv));
     },
     
@@ -7466,7 +7482,7 @@ myt.FlexBox = new JS.Class('FlexBox', myt.View, {
 
 
 ((pkg) => {
-    var
+    const
         /*  Sets the 'transformOrigin' style property of the provided
             style property map.
                 param view:View the view to modify.
@@ -7484,7 +7500,7 @@ myt.FlexBox = new JS.Class('FlexBox', myt.View, {
                     param v:string the style value to set.
         */
         addTransform = (view, type, v) => {
-            var cur = removeTransform(view, type);
+            const cur = removeTransform(view, type);
             view.getOuterDomStyle().transform = cur + (cur.length === 0 ? '' : ' ') + type + '(' + v + ')';
         },
         
@@ -7496,9 +7512,9 @@ myt.FlexBox = new JS.Class('FlexBox', myt.View, {
                     'scaleY', 'skewX', 'skewY'.
         */
         removeTransform = (view, type) => {
-            var ods = view.getOuterDomStyle(),
-                value = ods.transform,
-                parts,
+            const ods = view.getOuterDomStyle(),
+                value = ods.transform;
+            let parts,
                 i;
             
             if (!value || value.length === 0) return '';
@@ -7573,10 +7589,10 @@ myt.FlexBox = new JS.Class('FlexBox', myt.View, {
         },
         
         setScale: function(v) {
-            var doUpdateX = this.scaleX !== v;
+            const doUpdateX = this.scaleX !== v;
             if (doUpdateX) applyScale(this, 'scaleX', this.scaleX = v);
             
-            var doUpdateY = this.scaleY !== v;
+            const doUpdateY = this.scaleY !== v;
             if (doUpdateY) applyScale(this, 'scaleY', this.scaleY = v);
             
             if (this.inited) {
@@ -7633,10 +7649,10 @@ myt.FlexBox = new JS.Class('FlexBox', myt.View, {
         /** @overrides
             @private */
         __updateBounds: function(w, h) {
-            var r = this.rotation,
+            const r = this.rotation,
                 sx = this.scaleX,
-                sy = this.scaleY,
-                notScaled = false;
+                sy = this.scaleY;
+            let notScaled = false;
             if ((sx === undefined || sx === 1) && (sy === undefined || sy === 1)) notScaled = true;
             
             if (notScaled && (r === undefined || r === 0 || r === 180)) {
@@ -7645,7 +7661,7 @@ myt.FlexBox = new JS.Class('FlexBox', myt.View, {
                 w = this.height;
                 h = this.width;
             } else {
-                var b = this.getOuterDomElement().getBoundingClientRect();
+                const b = this.getOuterDomElement().getBoundingClientRect();
                 w = b.width;
                 h = b.height;
             }
@@ -7719,8 +7735,8 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
         element would have occurred.
         @returns {undefined} */
     sizeViewToDom: function() {
-        var self = this,
-            de,
+        const self = this;
+        let de,
             scaling,
             w,
             h;
@@ -7835,7 +7851,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
         
         // Height can change with width change when wrapping occurs.
         if (v !== 'auto') {
-            var ws = this.whiteSpace;
+            const ws = this.whiteSpace;
             if (ws === 'normal' || ws === 'pre-line' || ws === 'pre-wrap') {
                 this.sizeViewToDom();
             }
@@ -7950,13 +7966,13 @@ myt.TextSupport = new JS.Module('TextSupport', {
             the shadow to give the shadow extra opacity.
         @returns {undefined} */
     showTextShadow: function(x, y, blur, color, extraStrength) {
-        var shadow = (x || 0) + 'px ' + 
+        let shadow = (x || 0) + 'px ' + 
             (y || 0) + 'px ' + 
             (blur != null ? blur : 2) + 'px ' + 
             (color || '#000000');
             
         if (extraStrength > 0) {
-            var value = [shadow];
+            const value = [shadow];
             while (extraStrength--) value.push(shadow);
             shadow = value.join(',');
         }
@@ -8000,10 +8016,10 @@ myt.Text = new JS.Class('Text', myt.View, {
         
         // Temporarily set wrapping to 'nowrap', take measurement and
         // then restore wrapping.
-        var s = this.deStyle,
+        const s = this.deStyle,
             oldValue = s.whiteSpace;
         s.whiteSpace = 'nowrap';
-        var measuredWidth = this.getOuterDomElement().offsetWidth;
+        const measuredWidth = this.getOuterDomElement().offsetWidth;
         s.whiteSpace = oldValue;
         return measuredWidth;
     }
@@ -8171,9 +8187,9 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
         @private
         @returns {undefined} */
     __calculateNaturalSize: function() {
-        var imgUrl = this.imageUrl;
+        const imgUrl = this.imageUrl;
         if (this.calculateNaturalSize && imgUrl) {
-            var sizeCache = myt.ImageSupport.SIZE_CACHE,
+            const sizeCache = myt.ImageSupport.SIZE_CACHE,
                 cachedSize = sizeCache[imgUrl];
             if (cachedSize) {
                 // Cache hit
@@ -8181,20 +8197,20 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
                 this.setNaturalHeight(cachedSize.height);
             } else {
                 // Cache miss
-                var openQueryCache = myt.ImageSupport.OPEN_SIZE_QUERIES,
-                    openQuery = openQueryCache[imgUrl];
+                const openQueryCache = myt.ImageSupport.OPEN_SIZE_QUERIES;
+                let openQuery = openQueryCache[imgUrl];
                 if (!openQuery) {
                     // Lazy instantiate the open query array.
                     openQueryCache[imgUrl] = openQuery = [];
                     
                     // Start a size query
-                    var img = new Image();
+                    const img = new Image();
                     img.onerror = function(err) {
                         // Notify all ImageSupport instances that are waiting
                         // for a natural size that an error has occurred.
-                        var openQueries = openQueryCache[imgUrl];
+                        const openQueries = openQueryCache[imgUrl];
                         if (openQueries) {
-                            var i = openQueries.length;
+                            let i = openQueries.length;
                             while (i) openQueries[--i].setImageLoadingError(true);
                             
                             // Cleanup
@@ -8203,13 +8219,15 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
                         }
                     };
                     img.onload = function() {
-                        var w = this.width, h = this.height;
+                        const w = this.width,
+                            h = this.height;
                         
                         // Notify all ImageSupport instances that are waiting
                         // for a natural size.
-                        var openQueries = openQueryCache[imgUrl];
+                        const openQueries = openQueryCache[imgUrl];
                         if (openQueries) {
-                            var i = openQueries.length, imageSupportInstance;
+                            let i = openQueries.length,
+                                imageSupportInstance;
                             while (i) {
                                 imageSupportInstance = openQueries[--i];
                                 if (imageSupportInstance.imageUrl === imgUrl) {
@@ -8263,7 +8281,7 @@ myt.Markup = new JS.Class('Markup', myt.View, {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setHtml: function(v) {
-        var self = this;
+        const self = this;
         if (self.html !== v) {
             self.getInnerDomElement().innerHTML = self.html = v;
             if (self.inited) {
@@ -8299,15 +8317,15 @@ myt.Frame = new JS.Class('Frame', myt.View, {
         
         this.callSuper(parent, attrs);
         
-        var gm = myt.global.mouse;
+        const gm = myt.global.mouse;
         this.attachToDom(gm, '__doMouseDown', 'mousedown', true);
         this.attachToDom(gm, '__doMouseUp', 'mouseup', true);
     },
     
     /** @overrides myt.View */
     createOurDomElement: function(parent) {
-        var elements = this.callSuper(parent),
-            innerElem;
+        const elements = this.callSuper(parent);
+        let innerElem;
         if (Array.isArray(elements)) {
             innerElem = elements[1];
         } else {
@@ -8395,7 +8413,7 @@ myt.SizeWidthToDom = new JS.Module('SizeWidthToDom', {
         if (!this.__hasSetWidth) {
             // Bounding rect doesn't factor in scaling so we need to calculate
             // this ourselves.
-            var w = this.getOuterDomElement().offsetWidth / this.getEffectiveScaleX();
+            const w = this.getOuterDomElement().offsetWidth / this.getEffectiveScaleX();
             
             // Circumvent setter
             if (this.width !== w) {
@@ -8456,7 +8474,7 @@ myt.SizeHeightToDom = new JS.Module('SizeHeightToDom', {
         if (!this.__hasSetHeight) {
             // Bounding rect doesn't factor in scaling so we need to calculate
             // this ourselves.
-            var h = this.getOuterDomElement().offsetHeight / this.getEffectiveScaleY();
+            const h = this.getOuterDomElement().offsetHeight / this.getEffectiveScaleY();
             
             // Circumvent setter
             if (this.height !== h) {
@@ -8561,7 +8579,7 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
     /** @private
         @returns {undefined} */
     __setupPercentOfParentWidthConstraint: function() {
-        var p = this.parent;
+        const p = this.parent;
         if (p && this.percentOfParentWidth >= 0) this.syncTo(p, '__doPercentOfParentWidth', 'width');
     },
     
@@ -8584,7 +8602,7 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
     /** @private
         @returns {undefined} */
     __setupPercentOfParentHeightConstraint: function() {
-        var p = this.parent;
+        const p = this.parent;
         if (p && this.percentOfParentHeight >= 0) this.syncTo(p, '__doPercentOfParentHeight', 'height');
     },
     
@@ -8601,10 +8619,10 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
 
 
 ((pkg) => {
-    var globalRootViewRegistry,
+    let globalRootViewRegistry;
         
-        /* Holds an array of RootViews. */
-        roots = [];
+    /* Holds an array of RootViews. */
+    const roots = [];
     
     /** Provides events when a new myt.RootView is created or destroyed.
         Registered in myt.global as 'roots'.
@@ -8647,9 +8665,9 @@ myt.SizeToParent = new JS.Module('SizeToParent', {
             @param {!Object} r - The RootView to remove.
             @returns {undefined} */
         removeRoot: (r) => {
-            var i = roots.length,
+            let i = roots.length,
                 root;
-            while(i) {
+            while (i) {
                 root = roots[--i];
                 if (root === r) {
                     roots.splice(i, 1);
@@ -8682,7 +8700,7 @@ myt.RootView = new JS.Module('RootView', {
                 dragover and drop on.
             @returns {undefined} */
         setupCaptureDrop: function(v) {
-            var cdf = v.__captureDrop = function(event) {event.preventDefault();},
+            const cdf = v.__captureDrop = (event) => {event.preventDefault();},
                 de = v.domElement;
             myt.addEventListener(de, 'drop', cdf);
             myt.addEventListener(de, 'dragover', cdf);
@@ -8693,7 +8711,8 @@ myt.RootView = new JS.Module('RootView', {
                 default dragover  and drop on.
             @returns {undefined} */
         teardownCaptureDrop: function(v) {
-            var de = v.domElement, cdf = v.__captureDrop;
+            const de = v.domElement, 
+                cdf = v.__captureDrop;
             myt.removeEventListener(de, 'drop', cdf);
             myt.removeEventListener(de, 'dragover', cdf);
         }
@@ -8754,9 +8773,9 @@ myt.RootView = new JS.Module('RootView', {
     /** @overrides myt.View */
     bringToFront: function() {
         // Attempt to manipulate dom above root node.
-        var de = this.domElement, parentNode = de.parentNode;
+        const de = this.domElement, parentNode = de.parentNode;
         if (de !== parentNode.lastChild) {
-            var removedElem = parentNode.removeChild(de);
+            const removedElem = parentNode.removeChild(de);
             if (removedElem) parentNode.appendChild(removedElem);
         }
     },
@@ -8764,9 +8783,9 @@ myt.RootView = new JS.Module('RootView', {
     /** @overrides myt.View */
     sendToBack: function() {
         // Attempt to manipulate dom above root node.
-        var de = this.domElement, parentNode = de.parentNode;
+        const de = this.domElement, parentNode = de.parentNode;
         if (de !== parentNode.firstChild) {
-            var removedElem = parentNode.removeChild(de);
+            const removedElem = parentNode.removeChild(de);
             if (removedElem) parentNode.insertBefore(removedElem, parentNode.firstChild);
         }
     },
@@ -8774,11 +8793,11 @@ myt.RootView = new JS.Module('RootView', {
     /** @overrides myt.View */
     sendBehind: function(otherRootView) {
         // Attempt to manipulate dom above root node.
-        var de = this.domElement,
+        const de = this.domElement,
             otherDe = otherRootView.domElement,
             parentNode = de.parentNode;
         if (otherDe.parentNode === parentNode) {
-            var removedElem = parentNode.removeChild(de);
+            const removedElem = parentNode.removeChild(de);
             if (removedElem) parentNode.insertBefore(removedElem, otherDe);
         }
     },
@@ -8795,10 +8814,10 @@ myt.RootView = new JS.Module('RootView', {
 
 
 ((pkg) => {
-    var win = window,
+    const win = window;
         
         /* The inner width of the browser window. */
-        innerWidth,
+    let innerWidth,
         
         /* The inner height of the browser window. */
         innerHeight;
@@ -8900,7 +8919,7 @@ myt.SizeToWindow = new JS.Module('SizeToWindow', {
         @param {!Object} event
         @returns {undefined} */
     __handleResize: function(event) {
-        var WR = myt.global.windowResize,
+        const WR = myt.global.windowResize,
             dim = this.resizeDimension;
         if (dim === 'width' || dim === 'both') this.setWidth(Math.max(this.minWidth, WR.getWidth()));
         if (dim === 'height' || dim === 'both') this.setHeight(Math.max(this.minHeight, WR.getHeight()));
@@ -8939,13 +8958,13 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
 
 
 ((pkg) => {
-    var win = window,
+    const win = window,
         
         /* The idle event object that gets reused. */
-        EVENT = {},
+        EVENT = {};
         
         /* The ID of the last idle event in the browser. */
-        timerId,
+    let timerId,
         
         /* The function that gets executed on idle. */
         idleFunc,
@@ -8971,10 +8990,10 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
         
         // Constructor /////////////////////////////////////////////////////////
         initialize: function() {
-            var self = this,
-                vendor, 
-                vendors = ['webkit','moz','ms','o'],
-                i = 0;
+            const self = this,
+                vendors = ['webkit','moz','ms','o'];
+            let i = 0,
+                vendor;
             for (; i < vendors.length && !win.requestAnimationFrame;) {
                 vendor = vendors[i++];
                 win.requestAnimationFrame = win[vendor + 'RequestAnimationFrame'];
@@ -9000,7 +9019,7 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides myt.Observable */
         attachObserver: function(observer, methodName, type) {
-            var retval = this.callSuper(observer, methodName, type);
+            const retval = this.callSuper(observer, methodName, type);
             
             // Start firing idle events
             if (!running && this.hasObservers('idle')) {
@@ -9014,7 +9033,7 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
         
         /** @overrides myt.Observable */
         detachObserver: function(observer, methodName, type) {
-            var retval = this.callSuper(observer, methodName, type);
+            const retval = this.callSuper(observer, methodName, type);
             
             // Stop firing idle events
             if (running && !this.hasObservers('idle')) {
@@ -9029,15 +9048,15 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
 
 
 ((pkg) => {
-    var getTarget = (animator) => animator.target || animator.parent,
+    const getTarget = (animator) => animator.target || animator.parent,
         
         isColorAttr = (animator) => {
-            var target = getTarget(animator);
+            const target = getTarget(animator);
             animator.__isColorAnim = (target && typeof target.isColorAttr === 'function') ? target.isColorAttr(animator.attribute) : undefined;
         },
         
         getColorValue = (from, to, motionValue, relative, value) => {
-            var Color = pkg.Color,
+            const Color = pkg.Color,
                 fromColor = Color.makeColorFromHexString(from),
                 toColor = Color.makeColorFromHexString(to),
                 colorObj = relative ? Color.makeColorFromHexString(value) : fromColor;
@@ -9048,7 +9067,7 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
         },
         
         updateTarget = (animator, target, progress, oldProgress) => {
-            var relative = animator.relative,
+            const relative = animator.relative,
                 duration = animator.duration,
                 attr = animator.attribute,
                 progressPercent = Math.max(0, progress / duration), 
@@ -9060,7 +9079,7 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
                 animator.from = relative ? (animator.__isColorAnim ? '#000000' : 0) : target.get(attr);
             }
             
-            var motionValue = animator.easingFunction(progressPercent) - (relative ? animator.easingFunction(oldProgressPercent) : 0),
+            const motionValue = animator.easingFunction(progressPercent) - (relative ? animator.easingFunction(oldProgressPercent) : 0),
                 value = relative ? target.get(attr) : animator.from,
                 to = animator.to;
             
@@ -9075,7 +9094,7 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
         
         advance = (animator, timeDiff) => {
             if (animator.running && !animator.paused) {
-                var reverse = animator.reverse, 
+                const reverse = animator.reverse, 
                     duration = animator.duration, 
                     repeat = animator.repeat;
                 
@@ -9083,11 +9102,11 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
                 if (reverse) timeDiff = timeDiff * -1;
                 
                 // Determine how much time to move forward by.
-                var oldProgress = animator.__progress;
+                const oldProgress = animator.__progress;
                 animator.__progress += timeDiff;
                 
                 // Check for overage
-                var remainderTime = 0;
+                let remainderTime = 0;
                 if (animator.__progress > duration) {
                     remainderTime = animator.__progress - duration;
                     animator.__progress = duration;
@@ -9103,7 +9122,7 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
                     if (0 > --animator.__loopCount && repeat > 0) remainderTime = 0;
                 }
                 
-                var target = getTarget(animator);
+                const target = getTarget(animator);
                 if (target) {
                     updateTarget(animator, target, animator.__progress, oldProgress);
                     
@@ -9129,6 +9148,10 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
                 }
             }
         },
+        
+        PI = Math.PI,
+        TWO_PI = 2*PI,
+        HALF_PI = PI/2,
         
         /** Changes the value of an attribute on a target over time.
             
@@ -9206,78 +9229,70 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
             extend: {
                 easingFunctions: {
                     linear:t => t,
+                    
                     easeInQuad:t => t*t,
                     easeOutQuad:t => -t*(t-2),
                     easeInOutQuad:t => (t/=0.5) < 1 ? 0.5*t*t : -0.5 * ((--t)*(t-2) - 1),
+                    
                     easeInCubic:t => t*t*t,
                     easeOutCubic:t => ((t=t-1)*t*t + 1),
                     easeInOutCubic:t => (t/=0.5) < 1 ? 0.5*t*t*t : 1 /2*((t-=2)*t*t + 2),
+                    
                     easeInQuart:t => t*t*t*t,
                     easeOutQuart:t => -((t=t-1)*t*t*t - 1),
                     easeInOutQuart:t => (t/=0.5) < 1 ? 0.5*t*t*t*t : -0.5 * ((t-=2)*t*t*t - 2),
+                    
                     easeInQuint:t => t*t*t*t*t,
                     easeOutQuint:t => ((t=t-1)*t*t*t*t + 1),
                     easeInOutQuint:t => (t/=0.5) < 1 ? 0.5*t*t*t*t*t : 0.5*((t-=2)*t*t*t*t + 2),
-                    easeInSine:t => -Math.cos(t * (Math.PI/2)) + 1,
-                    easeOutSine:t => Math.sin(t * (Math.PI/2)),
-                    easeInOutSine:t => -0.5 * (Math.cos(Math.PI*t) - 1),
-                    easeInExpo:t => (t==0)? 0: Math.pow(2, 10 * (t - 1)),
-                    easeOutExpo:t => (t==1)? 1: (-Math.pow(2, -10 * t) + 1),
+                    
+                    easeInSine:t => -Math.cos(t * HALF_PI) + 1,
+                    easeOutSine:t => Math.sin(t * HALF_PI),
+                    easeInOutSine:t => -0.5 * (Math.cos(PI*t) - 1),
+                    
                     easeInCirc:t => -(Math.sqrt(1 - t*t) - 1),
                     easeOutCirc:t => Math.sqrt(1 - (t=t-1)*t),
                     easeInOutCirc:t => (t/=0.5) < 1? -0.5 * (Math.sqrt(1 - t*t) - 1): 0.5 * (Math.sqrt(1 - (t-=2)*t) + 1),
+                    
+                    easeInExpo:t => (t==0) ? 0 : Math.pow(2, 10 * (t - 1)),
+                    easeOutExpo:t => (t==1) ? 1 : (-Math.pow(2, -10 * t) + 1),
                     easeInOutExpo:t => {
                         if (t==0) return 0;
                         if (t==1) return 1;
                         if ((t/=0.5) < 1) return 0.5 * Math.pow(2, 10 * (t - 1));
                         return 0.5 * (-Math.pow(2, -10 * --t) + 2);
                     },
+                    
                     easeInElastic:t => {
-                        var s=1.70158, p=0, a=1;
                         if (t==0) return 0;
                         if (t==1) return 1;
-                        if (!p) p=0.3;
-                        if (a < 1) {
-                            a=1;
-                            s=p/4;
-                        } else {
-                            s = p/(2*Math.PI) * Math.asin (1/a);
-                        }
-                        return -(a*Math.pow(2,10*(t-=1)) * Math.sin( (t*1-s)*(2*Math.PI)/p));
+                        let p = 0.3,
+                            s = p/4;
+                        return -(Math.pow(2,10*(t-=1)) * Math.sin((t*1-s)*TWO_PI/p));
                     },
                     easeOutElastic:t => {
-                        var s=1.70158, p=0, a=1;
                         if (t==0) return 0;
                         if (t==1) return 1;
-                        if (!p) p=1*0.3;
-                        if (a < 1) {
-                            a=1;
-                            s=p/4;
-                        } else {
-                            s = p/(2*Math.PI) * Math.asin(1/a);
-                        }
-                        return a*Math.pow(2,-10*t) * Math.sin((t*1-s)*(2*Math.PI)/p) + 1;
+                        let p = 0.3,
+                            s = p/4;
+                        return Math.pow(2,-10*t) * Math.sin((t*1-s)*TWO_PI/p) + 1;
                     },
                     easeInOutElastic:t => {
-                        var s=1.70158, p=0, a=1;
                         if (t==0) return 0;
                         if ((t/=0.5)==2) return 1;
-                        if (!p) p=(0.3*1.5);
-                        if (a < 1) {
-                            a=1;
-                            s=p/4;
-                        } else {
-                            s = p/(2*Math.PI) * Math.asin(1/a);
-                        }
-                        if (t < 1) return -.5*(a*Math.pow(2,10*(t-=1)) * Math.sin((t*1-s)*(2*Math.PI)/p));
-                        return a*Math.pow(2,-10*(t-=1)) * Math.sin((t*1-s)*(2*Math.PI)/p)*0.5 + 1;
+                        let p = 0.45,
+                            s = p/4;
+                        if (t < 1) return -.5*(Math.pow(2,10*(t-=1)) * Math.sin((t*1-s)*TWO_PI/p));
+                        return Math.pow(2,-10*(t-=1)) * Math.sin((t*1-s)*TWO_PI/p)*0.5 + 1;
                     },
+                    
                     easeInBack:(t, s=1.70158) => (t/=1)*t*((s+1)*t - s),
                     easeOutBack:(t, s=1.70158) => ((t=t/1-1)*t*((s+1)*t + s) + 1),
                     easeInOutBack:(t, s=1.70158) => {
                         if ((t/=0.5) < 1) return 0.5*(t*t*(((s*=(1.525))+1)*t - s));
                         return 0.5*((t-=2)*t*(((s*=(1.525))+1)*t + s) + 2);
                     },
+                    
                     easeInBounce:t => 1 - Animator.easingFunctions.easeOutBounce(1-t),
                     easeOutBounce:t => {
                         if (t < (1/2.75)) {
@@ -9300,7 +9315,7 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides myt.Node */
             initNode: function(parent, attrs) {
-                var self = this;
+                const self = this;
                 
                 self.duration = 1000;
                 self.relative = self.reverse = self.running = self.paused = false;
@@ -9315,7 +9330,7 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
             
             // Accessors ///////////////////////////////////////////////////////
             setRunning: function(v) {
-                var self = this;
+                const self = this;
                 
                 if (self.running !== v) {
                     self.running = v;
@@ -9334,7 +9349,7 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
             },
             
             setPaused: function(v) {
-                var self = this;
+                const self = this;
                 
                 if (self.paused !== v) {
                     self.paused = v;
@@ -9344,7 +9359,7 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
             },
             
             setReverse: function(v) {
-                var self = this;
+                const self = this;
                 
                 if (self.reverse !== v) {
                     self.reverse = v;
@@ -9392,9 +9407,9 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
                     be replaced with the new callback.
                 @returns {undefined} */
             next: function(callback, replace) {
-                var existingCallback = this.callback;
+                const existingCallback = this.callback;
                 if (existingCallback && !replace) {
-                    var anim = this;
+                    const anim = this;
                     this.setCallback(function(success) {
                         existingCallback.call(anim, success);
                         callback.call(anim, success);
@@ -9409,7 +9424,7 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
                     it exists, will be executed.
                 @returns {undefined} */
             reset: function(executeCallback) {
-                var self = this;
+                const self = this;
                 
                 reset(self);
                 
@@ -9421,7 +9436,7 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
             
             /** @overrides myt.Reusable */
             clean: function() {
-                var self = this;
+                const self = this;
                 
                 self.to = self.from = self.attribute = self.callback = undefined;
                 self.duration = 1000;
@@ -9446,7 +9461,7 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
 
 
 ((pkg) => {
-    var 
+    const 
         /* Indicates a synchronous transition. */
         SYNC = 'sync',
         
@@ -9467,13 +9482,13 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
             // Don't allow another transition if one is already in progress.
             // Instead, defer them until after the current transition completes.
             if (stateMachine.__transInProgress) {
-                var deferredTransitions = stateMachine.__deferredTransitions;
+                let deferredTransitions = stateMachine.__deferredTransitions;
                 if (!deferredTransitions) deferredTransitions = stateMachine.__deferredTransitions = [];
                 deferredTransitions.unshift(args);
             } else {
                 stateMachine.__transInProgress = true;
                 
-                var async = args.shift(),
+                const async = args.shift(),
                     transitionName = args.shift();
                 
                 // Invalid to start a transition if one is still pending.
@@ -9485,7 +9500,7 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
                     return StateMachine.NO_TRANSITION;
                 }
                 
-                var to = stateMachine.map[stateMachine.current][transitionName];
+                let to = stateMachine.map[stateMachine.current][transitionName];
                 if (!to) to = stateMachine.map[WILDCARD][transitionName];
                 if (to) {
                     stateMachine.__pendingTransition = transitionName;
@@ -9502,7 +9517,7 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
         doDeferredTransitions = (stateMachine) => {
             stateMachine.__transInProgress = false;
             
-            var deferredTransitions = stateMachine.__deferredTransitions;
+            const deferredTransitions = stateMachine.__deferredTransitions;
             if (deferredTransitions) {
                 while (deferredTransitions.length > 0) doTheTransition(stateMachine, deferredTransitions.pop());
             }
@@ -9544,7 +9559,7 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
                 performed after the current one completes.
         
         @class */
-    var StateMachine = pkg.StateMachine = new JS.Class('StateMachine', pkg.Node, {
+    const StateMachine = pkg.StateMachine = new JS.Class('StateMachine', pkg.Node, {
         // Class Methods and Attributes ////////////////////////////////////////
         extend: {
             /** The transition was successfull. */
@@ -9576,7 +9591,7 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
         setInitialState: function(v) {
             if (this.current === '') {
                 // Get optional args if v is an array
-                var args;
+                let args;
                 if (Array.isArray(v)) {
                     args = v;
                     v = args.shift();
@@ -9586,7 +9601,7 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
                 
                 this.current = this.initial = v;
                 this.doEnterState('', '', v, args);
-                var eventValue = {name:'', from:'', to:v, args:args};
+                const eventValue = {name:'', from:'', to:v, args:args};
                 this.fireEvent('enter' + v, eventValue);
                 this.fireEvent('enter', eventValue);
                 if (this.isFinished()) this.fireEvent('finished', eventValue);
@@ -9604,7 +9619,7 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
         },
         
         addTransition: function(transitionName, from, to) {
-            var map = this.map;
+            const map = this.map;
             
             if (from) {
                 from = Array.isArray(from) ? from : [from];
@@ -9612,7 +9627,7 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
                 from = [WILDCARD];
             }
             
-            var i = from.length, 
+            let i = from.length, 
                 mapEntry;
             while (i) {
                 mapEntry = map[from[--i]];
@@ -9632,19 +9647,19 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
         },
         
         resumeTransition: function(async) {
-            var transitionName = this.__pendingTransition;
+            const transitionName = this.__pendingTransition;
             
             // Invalid to resume a transition if none is pending.
             if (!transitionName) return StateMachine.INVALID;
             
-            var current = this.current,
+            const current = this.current,
                 to = this.__transDestinationState,
                 args = this.__additionalArgs,
                 eventValue = {name:transitionName, from:current, to:to, args:args};
             
             switch (this.__transStage) {
                 case 'leaveState':
-                    var result = this.doLeaveState(transitionName, current, to, args);
+                    const result = this.doLeaveState(transitionName, current, to, args);
                     if (result === false) {
                         resetTransitionProgress(this);
                         doDeferredTransitions(this);
@@ -9715,12 +9730,12 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
 
 
 ((pkg) => {
-    var sortFunction = (a, b) => a.replicationIndex - b.replicationIndex,
+    const sortFunction = (a, b) => a.replicationIndex - b.replicationIndex,
         
         /*  @param {!Array} layouts
             @returns {undefined} */
         lockLayouts = (layouts) => {
-            var i = layouts.length;
+            let i = layouts.length;
             while (i) layouts[--i].incrementLockedCounter();
         },
         
@@ -9728,7 +9743,8 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
             @param {boolean} update
             @returns {undefined} */
         unlockLayouts = (layouts, update) => {
-            var i = layouts.length, layout;
+            let i = layouts.length,
+                layout;
             while (i) {
                 layout = layouts[--i];
                 layout.decrementLockedCounter();
@@ -9742,7 +9758,7 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
             destroyOldPool(replicator);
             
             // Create new pool
-            var template = replicator.template;
+            const template = replicator.template;
             if (template) replicator.__pool = new pkg.TrackActivesPool(template, replicator.parent);
         },
         
@@ -9750,10 +9766,10 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
             @returns {undefined} */
         destroyOldPool = (replicator) => {
             // Destroy old pool and instances.
-            var pool = replicator.__pool;
+            const pool = replicator.__pool;
             if (pool) {
                 // Lock layouts before modifying instances
-                var layouts = replicator.parent.getLayouts();
+                const layouts = replicator.parent.getLayouts();
                 lockLayouts(layouts);
                 
                 pool.putActives();
@@ -9874,22 +9890,22 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
         /** Performs replication.
             @returns {undefined} */
         doReplication: function() {
-            var pool = this.__pool,
-                layouts;
+            const pool = this.__pool;
+            let layouts;
             if (pool) {
                 // Lock layouts before modifying instances
                 layouts = this.parent.getLayouts();
                 lockLayouts(layouts);
                 
                 // Walk actives comparing against data
-                var data = this.data, 
+                const data = this.data, 
                     dataLen = data ? data.length : 0,
                     actives = pool.getActives(), 
-                    activesLen = actives.length,
-                    i = activesLen, 
-                    active,
-                    replicationIndex, 
+                    activesLen = actives.length, 
                     unused = [];
+                let i = activesLen, 
+                    active,
+                    replicationIndex;
                 
                 actives.sort(sortFunction);
                 
@@ -9930,9 +9946,10 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
             @param {*} value - The value of the message.
             @returns {undefined} */
         notify: function(key, value) {
-            var pool = this.__pool;
+            const pool = this.__pool;
             if (pool) {
-                var actives = pool.getActives(), i = actives.length;
+                const actives = pool.getActives();
+                let i = actives.length;
                 while (i) actives[--i].notify(key, value);
             }
         }
@@ -9946,12 +9963,13 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
     
     Supported Layout Hints:
         break:string Will force the subview to start a new line/column.
-*/
+    
+    @class */
 myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.VariableLayout */
     initNode: function(parent, attrs) {
-        var self = this;
+        const self = this;
         
         self.targetAttrName = self.axis = 'x';
         self.setterName = 'setX';
@@ -9971,15 +9989,15 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
     /** @overrides myt.ConstantLayout */
     setTargetAttrName: function(v) {
         if (this.targetAttrName !== v) {
-            var isY = v === 'y',
+            const isY = v === 'y',
                 inited = this.inited;
             
             if (inited) this.stopMonitoringAllSubviews();
             
             this.measureAttrName = isY ? 'boundsHeight' : 'boundsWidth';
-            var mabn = this.measureAttrBaseName = isY ? 'height' : 'width';
+            const mabn = this.measureAttrBaseName = isY ? 'height' : 'width';
             this.otherMeasureAttrName = isY ? 'boundsWidth' : 'boundsHeight';
-            var omabn = this.otherMeasureAttrBaseName = isY ? 'width' : 'height';
+            const omabn = this.otherMeasureAttrBaseName = isY ? 'width' : 'height';
             this.parentSetterName = isY ? 'setWidth' : 'setHeight';
             this.otherSetterName = isY ? 'setX' : 'setY';
             
@@ -9995,7 +10013,7 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
     /** @overrides myt.Layout */
     setParent: function(parent) {
         if (this.parent !== parent) {
-            var isY = this.targetAttrName === 'y';
+            const isY = this.targetAttrName === 'y';
             if (this.parent) this.stopMonitoringParent(isY ? 'height' : 'width');
             this.callSuper(parent);
             if (this.parent) this.startMonitoringParent(isY ? 'height' : 'width');
@@ -10109,7 +10127,7 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
     
     /** @overrides myt.ConstantLayout */
     updateSubview: function(count, sv, setterName, value) {
-        var size = sv[this.measureAttrName],
+        const size = sv[this.measureAttrName],
             otherSize = sv[this.otherMeasureAttrName];
         
         if (value + size > this.parentSizeLessOutset || sv.layoutHint === 'break') {
@@ -10160,12 +10178,13 @@ myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
             layout updates when a subview is added off/on. Defaults to 
             undefined which is equivalent to false and thus leaves the
             optimization on.
-*/
+    
+    @class */
 myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.VariableLayout */
     initNode: function(parent, attrs) {
-        var self = this;
+        const self = this;
         
         self.targetAttrName = self.axis = 'x';
         self.setterName = 'setX';
@@ -10182,7 +10201,7 @@ myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
     /** @overrides myt.ConstantLayout */
     setTargetAttrName: function(v) {
         if (this.targetAttrName !== v) {
-            var isY = v === 'y',
+            const isY = v === 'y',
                 inited = this.inited;
             if (inited) this.stopMonitoringAllSubviews();
             this.measureAttrName = isY ? 'boundsHeight' : 'boundsWidth';
@@ -10224,7 +10243,7 @@ myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
         // OPTIMIZATION: Skip the update call that happens during subview add.
         // The boundsWidth/boundsHeight events will be fired immediately 
         // after and are a more appropriate time to do the update.
-        var isLocked = this.locked; // Remember original locked state.
+        const isLocked = this.locked; // Remember original locked state.
         if (!this.noAddSubviewOptimization) this.locked = true; // Lock the layout so no updates occur.
         this.callSuper(sv);
         this.locked = isLocked; // Restore original locked state.
@@ -10244,7 +10263,7 @@ myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
     
     /** @overrides myt.ConstantLayout */
     updateSubview: function(count, sv, setterName, value) {
-        var size = sv[this.measureAttrName];
+        const size = sv[this.measureAttrName];
         sv[setterName](value + (size - sv[this.measureAttrBaseName])/2.0); // Adj for transform
         return value + size + this.spacing;
     },
@@ -10272,7 +10291,7 @@ myt.ResizeLayout = new JS.Class('SpacedLayout', myt.SpacedLayout, {
     setTargetAttrName: function(v) {
         if (this.targetAttrName !== v) {
             if (this.inited) {
-                var isX = v === 'x';
+                const isX = v === 'x';
                 this.stopMonitoringParent(isX ? 'height' : 'width');
                 this.startMonitoringParent(isX ? 'width' : 'height');
             }
@@ -10284,7 +10303,7 @@ myt.ResizeLayout = new JS.Class('SpacedLayout', myt.SpacedLayout, {
     /** @overrides myt.Layout */
     setParent: function(parent) {
         if (this.parent !== parent) {
-            var dim = this.targetAttrName === 'x' ? 'width' : 'height';
+            const dim = this.targetAttrName === 'x' ? 'width' : 'height';
             if (this.parent) this.stopMonitoringParent(dim);
             
             this.callSuper(parent);
@@ -10312,17 +10331,20 @@ myt.ResizeLayout = new JS.Class('SpacedLayout', myt.SpacedLayout, {
     /** @overrides myt.VariableLayout */
     doBeforeUpdate: function() {
         // Get size to fill
-        var measureAttrName = this.measureAttrName,
-            measureAttrBaseName = this.measureAttrBaseName,
-            remainder = this.parent[measureAttrBaseName];
+        const measureAttrName = this.measureAttrName,
+            measureAttrBaseName = this.measureAttrBaseName;
+        let remainder = this.parent[measureAttrBaseName];
         
         // Calculate minimum required size
         remainder -= this.targetValue + this.outset;
         
-        var svs = this.subviews, i = svs.length, sv,
-            count = 0, resizeSum = 0;
+        const svs = this.subviews;
+        let i = svs.length, 
+            sv,
+            count = 0, 
+            resizeSum = 0;
         
-        while(i) {
+        while (i) {
             sv = svs[--i];
             if (this.skipSubview(sv)) continue;
             ++count;
@@ -10347,11 +10369,11 @@ myt.ResizeLayout = new JS.Class('SpacedLayout', myt.SpacedLayout, {
     
     /** @overrides myt.SpacedLayout */
     updateSubview: function(count, sv, setterName, value) {
-        var hint = sv.layoutHint;
+        const hint = sv.layoutHint;
         if (hint > 0) {
             this.resizeSumUsed += hint;
             
-            var size = this.resizeSum === this.resizeSumUsed ? 
+            const size = this.resizeSum === this.resizeSumUsed ? 
                 this.remainder - this.remainderUsed : 
                 Math.round(hint * this.scalingFactor);
             
@@ -10399,7 +10421,7 @@ myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.VariableLayout */
     initNode: function(parent, attrs) {
-        var self = this;
+        const self = this;
         
         self.align = 'middle';
         self.targetAttrName = 'y';
@@ -10417,7 +10439,7 @@ myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
     /** @overrides myt.ConstantLayout */
     setTargetAttrName: function(v) {
         if (this.targetAttrName !== v) {
-            var isY = v === 'y',
+            const isY = v === 'y',
                 inited = this.inited;
             if (inited) this.stopMonitoringAllSubviews();
             this.measureAttrName = isY ? 'boundsHeight' : 'boundsWidth';
@@ -10434,7 +10456,7 @@ myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
             
             // Update orientation but don't trigger an update since we
             // already call update at the end of this setter.
-            var isLocked = this.locked;
+            const isLocked = this.locked;
             this.locked = true;
             this.setTargetAttrName((v === 'middle' || v === 'bottom' || v === 'top') ? 'y' : 'x');
             this.locked = isLocked;
@@ -10463,9 +10485,12 @@ myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
     /** Determine the maximum subview width/height according to the axis.
         @overrides myt.VariableLayout */
     doBeforeUpdate: function() {
-        var measureAttrName = this.measureAttrName,
-            value = 0, svs = this.subviews, sv, i = svs.length;
-        while(i) {
+        const measureAttrName = this.measureAttrName, 
+            svs = this.subviews;
+        let value = 0, 
+            sv, 
+            i = svs.length;
+        while (i) {
             sv = svs[--i];
             if (this.skipSubview(sv)) continue;
             value = value > sv[measureAttrName] ? value : sv[measureAttrName];
@@ -10514,15 +10539,15 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     createOurDomElement: function(parent) {
-        var elements = this.callSuper(parent),
-            innerElem;
+        const elements = this.callSuper(parent);
+        let innerElem;
         if (Array.isArray(elements)) {
             innerElem = elements[1];
         } else {
             innerElem = elements;
         }
         
-        var canvas = this.__canvas = document.createElement('canvas');
+        const canvas = this.__canvas = document.createElement('canvas');
         canvas.className = 'mytUnselectable';
         innerElem.appendChild(canvas);
         canvas.style.position = 'absolute';
@@ -10604,10 +10629,10 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
         add child views to a Canvas which is not directly supported in HTML. */
     sendSubviewToBack: function(sv) {
         if (sv.parent === this) {
-            var de = this.domElement,
+            const de = this.domElement,
                 firstChild = de.childNodes[1];
             if (sv.domElement !== firstChild) {
-                var removedElem = de.removeChild(sv.domElement);
+                const removedElem = de.removeChild(sv.domElement);
                 if (removedElem) de.insertBefore(removedElem, firstChild);
             }
         }
@@ -10617,7 +10642,7 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
     clear: function() {
         // Store the current transform matrix, then apply the identity matrix
         // to make clearing simpler then restore the transform.
-        var ctx = this.__ctx;
+        const ctx = this.__ctx;
         ctx.save();
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.clearRect(0, 0, this.width, this.height);
@@ -10625,9 +10650,9 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
     },
     
     dataURItoBlob: function(dataURI, dataTYPE) {
-        var binary = atob(dataURI.split(',')[1]), 
+        const binary = atob(dataURI.split(',')[1]), 
             array = [];
-        for (var i = 0; i < binary.length; i++) array.push(binary.charCodeAt(i));
+        for (let i = 0; i < binary.length; i++) array.push(binary.charCodeAt(i));
         return new Blob([new Uint8Array(array)], {type: dataTYPE});
     },
     
@@ -10636,7 +10661,7 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
     },
     
     getImageFile: function(imageType, filename, opt) {
-        var extension;
+        let extension;
         switch (imageType) {
             case 'png': case 'PNG':
                 extension = 'png';
@@ -10650,7 +10675,7 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
                 console.warn('Unexpected image type: ', imageType);
                 extension = imageType.toLowerCase();
         }
-        var mimeType = 'image/' + extension,
+        const mimeType = 'image/' + extension,
             blob = this.dataURItoBlob(this.getDataURL(mimeType, opt), mimeType);
         if (filename) blob.name = filename + '.' + extension;
         return blob;
@@ -10665,47 +10690,47 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
         this.__ctx.arc(x, y, radius, 0, 2 * Math.PI);
     },
     
-    save: function() {var ctx = this.__ctx; ctx.save.apply(ctx, arguments);},
-    restore: function() {var ctx = this.__ctx; ctx.restore.apply(ctx, arguments);},
+    save: function() {const ctx = this.__ctx; ctx.save.apply(ctx, arguments);},
+    restore: function() {const ctx = this.__ctx; ctx.restore.apply(ctx, arguments);},
     
-    scale: function() {var ctx = this.__ctx; ctx.scale.apply(ctx, arguments);},
-    rotate: function() {var ctx = this.__ctx; ctx.rotate.apply(ctx, arguments);},
-    translate: function() {var ctx = this.__ctx; ctx.translate.apply(ctx, arguments);},
-    transform: function() {var ctx = this.__ctx; ctx.transform.apply(ctx, arguments);},
-    setTransform: function() {var ctx = this.__ctx; ctx.setTransform.apply(ctx, arguments);},
+    scale: function() {const ctx = this.__ctx; ctx.scale.apply(ctx, arguments);},
+    rotate: function() {const ctx = this.__ctx; ctx.rotate.apply(ctx, arguments);},
+    translate: function() {const ctx = this.__ctx; ctx.translate.apply(ctx, arguments);},
+    transform: function() {const ctx = this.__ctx; ctx.transform.apply(ctx, arguments);},
+    setTransform: function() {const ctx = this.__ctx; ctx.setTransform.apply(ctx, arguments);},
     
-    createLinearGradient: function() {var ctx = this.__ctx; return ctx.createLinearGradient.apply(ctx, arguments);},
-    createRadialGradient: function() {var ctx = this.__ctx; return ctx.createRadialGradient.apply(ctx, arguments);},
-    createPattern: function() {var ctx = this.__ctx; return ctx.createPattern.apply(ctx, arguments);},
+    createLinearGradient: function() {const ctx = this.__ctx; return ctx.createLinearGradient.apply(ctx, arguments);},
+    createRadialGradient: function() {const ctx = this.__ctx; return ctx.createRadialGradient.apply(ctx, arguments);},
+    createPattern: function() {const ctx = this.__ctx; return ctx.createPattern.apply(ctx, arguments);},
     
-    clearRect: function() {var ctx = this.__ctx; ctx.clearRect.apply(ctx, arguments);},
-    fillRect: function() {var ctx = this.__ctx; ctx.fillRect.apply(ctx, arguments);},
-    strokeRect: function() {var ctx = this.__ctx; ctx.strokeRect.apply(ctx, arguments);},
+    clearRect: function() {const ctx = this.__ctx; ctx.clearRect.apply(ctx, arguments);},
+    fillRect: function() {const ctx = this.__ctx; ctx.fillRect.apply(ctx, arguments);},
+    strokeRect: function() {const ctx = this.__ctx; ctx.strokeRect.apply(ctx, arguments);},
     
-    beginPath: function() {var ctx = this.__ctx; ctx.beginPath.apply(ctx, arguments);},
-    closePath: function() {var ctx = this.__ctx; ctx.closePath.apply(ctx, arguments);},
-    moveTo: function() {var ctx = this.__ctx; ctx.moveTo.apply(ctx, arguments);},
-    lineTo: function() {var ctx = this.__ctx; ctx.lineTo.apply(ctx, arguments);},
+    beginPath: function() {const ctx = this.__ctx; ctx.beginPath.apply(ctx, arguments);},
+    closePath: function() {const ctx = this.__ctx; ctx.closePath.apply(ctx, arguments);},
+    moveTo: function() {const ctx = this.__ctx; ctx.moveTo.apply(ctx, arguments);},
+    lineTo: function() {const ctx = this.__ctx; ctx.lineTo.apply(ctx, arguments);},
     
-    quadraticCurveTo: function() {var ctx = this.__ctx; ctx.quadraticCurveTo.apply(ctx, arguments);},
-    bezierCurveTo: function() {var ctx = this.__ctx; ctx.bezierCurveTo.apply(ctx, arguments);},
-    arcTo: function() {var ctx = this.__ctx; ctx.arcTo.apply(ctx, arguments);},
-    rect: function() {var ctx = this.__ctx; ctx.rect.apply(ctx, arguments);},
-    arc: function() {var ctx = this.__ctx; ctx.arc.apply(ctx, arguments);},
+    quadraticCurveTo: function() {const ctx = this.__ctx; ctx.quadraticCurveTo.apply(ctx, arguments);},
+    bezierCurveTo: function() {const ctx = this.__ctx; ctx.bezierCurveTo.apply(ctx, arguments);},
+    arcTo: function() {const ctx = this.__ctx; ctx.arcTo.apply(ctx, arguments);},
+    rect: function() {const ctx = this.__ctx; ctx.rect.apply(ctx, arguments);},
+    arc: function() {const ctx = this.__ctx; ctx.arc.apply(ctx, arguments);},
     
-    fill: function() {var ctx = this.__ctx; ctx.fill.apply(ctx, arguments);},
-    stroke: function() {var ctx = this.__ctx; ctx.stroke.apply(ctx, arguments);},
-    clip: function() {var ctx = this.__ctx; ctx.clip.apply(ctx, arguments);},
-    isPointInPath: function() {var ctx = this.__ctx; ctx.isPointInPath.apply(ctx, arguments);},
+    fill: function() {const ctx = this.__ctx; ctx.fill.apply(ctx, arguments);},
+    stroke: function() {const ctx = this.__ctx; ctx.stroke.apply(ctx, arguments);},
+    clip: function() {const ctx = this.__ctx; ctx.clip.apply(ctx, arguments);},
+    isPointInPath: function() {const ctx = this.__ctx; ctx.isPointInPath.apply(ctx, arguments);},
     
-    fillText: function() {var ctx = this.__ctx; ctx.fillText.apply(ctx, arguments);},
-    strokeText: function() {var ctx = this.__ctx; ctx.strokeText.apply(ctx, arguments);},
-    measureText: function() {var ctx = this.__ctx; return ctx.measureText.apply(ctx, arguments);},
+    fillText: function() {const ctx = this.__ctx; ctx.fillText.apply(ctx, arguments);},
+    strokeText: function() {const ctx = this.__ctx; ctx.strokeText.apply(ctx, arguments);},
+    measureText: function() {const ctx = this.__ctx; return ctx.measureText.apply(ctx, arguments);},
     
-    drawImage: function() {var ctx = this.__ctx; ctx.drawImage.apply(ctx, arguments);},
-    createImageData: function() {var ctx = this.__ctx; ctx.createImageData.apply(ctx, arguments);},
-    getImageData: function() {var ctx = this.__ctx; return ctx.getImageData.apply(ctx, arguments);},
-    putImageData: function() {var ctx = this.__ctx; ctx.putImageData.apply(ctx, arguments);}
+    drawImage: function() {const ctx = this.__ctx; ctx.drawImage.apply(ctx, arguments);},
+    createImageData: function() {const ctx = this.__ctx; ctx.createImageData.apply(ctx, arguments);},
+    getImageData: function() {const ctx = this.__ctx; return ctx.getImageData.apply(ctx, arguments);},
+    putImageData: function() {const ctx = this.__ctx; ctx.putImageData.apply(ctx, arguments);}
 });
 
 
@@ -10884,7 +10909,7 @@ myt.MouseOver = new JS.Module('MouseOver', {
         
         // Only call doSmoothOver if the over/out state has changed since the
         // last time it was called.
-        var isOver = this.mouseOver;
+        const isOver = this.mouseOver;
         if (this.__lastOverIdleValue !== isOver) {
             this.__lastOverIdleValue = isOver;
             this.doSmoothMouseOver(isOver);
@@ -11069,7 +11094,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides */
     initNode: function(parent, attrs) {
-        var self = this;
+        const self = this;
         
         self.activateKeyDown = -1;
         
@@ -11096,8 +11121,9 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
     __handleKeyDown: function(event) {
         if (!this.disabled) {
             if (this.activateKeyDown === -1 || this.repeatKeyDown) {
-                var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event),
-                    keys = this.activationKeys, i = keys.length;
+                const keyCode = myt.KeyObservable.getKeyCodeFromEvent(event),
+                    keys = this.activationKeys;
+                let i = keys.length;
                 while (i) {
                     if (keyCode === keys[--i]) {
                         if (this.activateKeyDown === keyCode) {
@@ -11119,9 +11145,10 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         @returns {undefined} */
     __handleKeyPress: function(event) {
         if (!this.disabled) {
-            var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
+            const keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
             if (this.activateKeyDown === keyCode) {
-                var keys = this.activationKeys, i = keys.length;
+                const keys = this.activationKeys;
+                let i = keys.length;
                 while (i) {
                     if (keyCode === keys[--i]) {
                         event.value.preventDefault();
@@ -11137,9 +11164,10 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         @returns {undefined} */
     __handleKeyUp: function(event) {
         if (!this.disabled) {
-            var keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
+            const keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
             if (this.activateKeyDown === keyCode) {
-                var keys = this.activationKeys, i = keys.length;
+                const keys = this.activationKeys;
+                let i = keys.length;
                 while (i) {
                     if (keyCode === keys[--i]) {
                         this.activateKeyDown = -1;
@@ -11157,7 +11185,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         @returns {undefined} */
     __doDomBlur: function(event) {
         if (!this.disabled) {
-            var keyThatWasDown = this.activateKeyDown;
+            const keyThatWasDown = this.activateKeyDown;
             if (keyThatWasDown !== -1) {
                 this.activateKeyDown = -1;
                 this.doActivationKeyAborted(keyThatWasDown);
@@ -11193,7 +11221,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
 
 
 ((pkg) => {
-    var JSClass = JS.Class,
+    const JSClass = JS.Class,
         JSModule = JS.Module,
         defaultDisabledOpacity = 0.5,
         defaultFocusShadowPropertyValue = [0, 0, 7, '#666666'],
@@ -11245,7 +11273,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
             // Accessors ///////////////////////////////////////////////////////
             /** @overrides myt.FocusObservable */
             setFocused: function(v) {
-                var self = this,
+                const self = this,
                     existing = self.focused;
                 self.callSuper(v);
                 if (self.inited && self.focused !== existing) self.updateUI();
@@ -11273,7 +11301,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
             
             /** @overrides myt.UpdateableUI. */
             updateUI: function() {
-                var self = this;
+                const self = this;
                 
                 if (self.disabled) {
                     // Remember the cursor to change back to, but don't re-remember
@@ -11282,7 +11310,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
                     self.setCursor('not-allowed');
                     self.drawDisabledState();
                 } else {
-                    var rc = self.__restoreCursor;
+                    const rc = self.__restoreCursor;
                     if (rc) {
                         self.setCursor(rc);
                         self.__restoreCursor = null;
@@ -11475,8 +11503,8 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
     pkg.IconTextButtonContent = new JSModule('IconTextButtonContent', {
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            var self = this,
-                iconView,
+            const self = this;
+            let iconView,
                 textView;
             
             self.textY = self.iconY = 'middle';
@@ -11502,10 +11530,10 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         },
         
         doAfterAdoption: function() {
-            var self = this,
+            const self = this,
                 iconY = self.iconY,
-                textY = self.textY,
-                attrs = {
+                textY = self.textY;
+            let attrs = {
                     name:'iconView',
                     imageUrl:self.iconUrl
                 };
@@ -11574,7 +11602,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         },
         
         setIconY: function(v) {
-            var self = this,
+            const self = this,
                 iconView = self.iconView;
             if (self.iconY !== v) {
                 self.iconY = v;
@@ -11590,7 +11618,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         },
         
         setTextY: function(v) {
-            var self = this,
+            const self = this,
                 textView = self.textView;
             if (self.textY !== v) {
                 self.textY = v;
@@ -11610,19 +11638,19 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         // Methods /////////////////////////////////////////////////////////////
         /** @private */
         __updateContentPosition: function(v) {
-            var self = this;
+            const self = this;
             
             if (self.__updateContentPositionLoopBlock || self.destroyed) return;
             
-            var inset = self.inset,
+            const inset = self.inset,
                 outset = self.outset,
                 iconView = self.iconView,
                 textView = self.textView,
                 textViewVisible = textView.visible && self.text,
                 iconWidth = iconView.visible ? iconView.width : 0,
                 iconExtent = iconWidth + (textViewVisible && iconWidth > 0 ? self.iconSpacing : 0),
-                textWidth = textViewVisible ? textView.width : 0,
-                totalWidth,
+                textWidth = textViewVisible ? textView.width : 0;
+            let totalWidth,
                 leftPos,
                 extraWidth;
             
@@ -11683,8 +11711,8 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
     pkg.TextButtonContent = new JSModule('TextButtonContent', {
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            var self = this,
-                textView;
+            const self = this;
+            let textView;
             
             self.inset = self.outset = 0;
             
@@ -11707,7 +11735,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         },
         
         doAfterAdoption: function() {
-            var self = this,
+            const self = this,
                 textY = self.textY, 
                 attrs = {
                     name:'textView', 
@@ -11753,7 +11781,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         },
         
         setShrinkToFit: function(v) {
-            var self = this,
+            const self = this,
                 textView = self.textView;
             if (self.shrinkToFit !== v) {
                 self.shrinkToFit = v;
@@ -11765,7 +11793,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         },
         
         setTextY: function(v) {
-            var self = this,
+            const self = this,
                 textView = self.textView;
             if (self.textY !== v) {
                 self.textY = v;
@@ -11784,11 +11812,11 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         
         // Methods /////////////////////////////////////////////////////////////
         __updateContentPosition: function(v) {
-            var self = this;
+            const self = this;
             
             if (self.__updateContentPositionLoopBlock || self.destroyed) return;
             
-            var inset = self.inset, 
+            const inset = self.inset, 
                 outset = self.outset, 
                 textView = self.textView,
                 textViewVisible = textView.visible && self.text;
@@ -11835,7 +11863,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
             green:int The green channel. Will be an integer between 0 and 255.
             blue:int The blue channel. Will be an integer between 0 and 255.
     */
-    var Color = pkg.Color = new JS.Class('Color', {
+    const Color = pkg.Color = new JS.Class('Color', {
         // Class Methods and Attributes ////////////////////////////////////////
         extend: {
             /** Converts a number or string representation of a number to a 
@@ -11856,7 +11884,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
                     will be prepended to the return value.
                 @returns {string} Something like: '#ff9c02' or 'ff9c02' */
             rgbToHex: function(red, green, blue, prependHash) {
-                var toHex = this.toHex.bind(this);
+                const toHex = this.toHex.bind(this);
                 return [prependHash ? '#' : '', toHex(red), toHex(green), toHex(blue)].join('');
             },
             
@@ -11908,7 +11936,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
                 @param {number} b - A color number.
                 @returns {number} The number that represents the lighter color. */
             getLighterColor: function(a, b) {
-                var cA = this.makeColorFromNumber(a),
+                const cA = this.makeColorFromNumber(a),
                     cB = this.makeColorFromNumber(b);
                 return cA.isLighterThan(cB) ? a : b;
             },
@@ -11995,7 +12023,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
             @param {!Object} c - The myt.Color to compare to.
             @returns {boolean} True if this color is lighter, false otherwise. */
         isLighterThan: function(c) {
-            var diff = this.getDiffFrom(c);
+            const diff = this.getDiffFrom(c);
             
             // Sum channel diffs to determine lightest color. A negative diff
             // means a lighter color.
@@ -12121,7 +12149,9 @@ myt.Path = new JS.Class('Path', {
         @returns {undefined} */
     drawInto: function(canvas) {
         canvas.beginPath();
-        var vecs = this.vectors, len = vecs.length, i = 0;
+        const vecs = this.vectors;
+        let len = vecs.length, 
+            i = 0;
         canvas.moveTo(vecs[i++], vecs[i++]);
         for (; len > i;) canvas.lineTo(vecs[i++], vecs[i++]);
         canvas.closePath();
@@ -12132,7 +12162,8 @@ myt.Path = new JS.Class('Path', {
         @param {number} dy
         @returns {undefined} */
     translate: function(dx, dy) {
-        var vecs = this.vectors, i = vecs.length;
+        const vecs = this.vectors;
+        let i = vecs.length;
         while (i) {
             vecs[--i] += dy;
             vecs[--i] += dx;
@@ -12144,9 +12175,10 @@ myt.Path = new JS.Class('Path', {
         @param {number} a
         @returns {undefined} */
     rotate: function(a) {
-        var cosA = Math.cos(a), sinA = Math.sin(a),
-            vecs = this.vectors, len = vecs.length,
-            xNew, yNew, i = 0;
+        const cosA = Math.cos(a), sinA = Math.sin(a),
+            vecs = this.vectors,
+            len = vecs.length;
+        let xNew, yNew, i = 0;
         for (; len > i;) {
             xNew = vecs[i] * cosA - vecs[i + 1] * sinA;
             yNew = vecs[i] * sinA + vecs[i + 1] * cosA;
@@ -12175,7 +12207,8 @@ myt.Path = new JS.Class('Path', {
     getBoundingBox: function() {
         if (this._boundingBox) return this._boundingBox;
         
-        var vecs = this.vectors, i = vecs.length, x, y, minX, maxX, minY, maxY;
+        const vecs = this.vectors;
+        let i = vecs.length, x, y, minX, maxX, minY, maxY;
         if (i >= 2) {
             minY = maxY = vecs[--i];
             minX = maxX = vecs[--i];
@@ -12197,7 +12230,7 @@ myt.Path = new JS.Class('Path', {
         @returns {!Object} with properties x and y or null if no bounding box
             could be calculated. */
     getCenter: function() {
-        var box = this.getBoundingBox();
+        const box = this.getBoundingBox();
         return box ? {
             x:box.x + box.width / 2,
             y:box.y + box.height / 2
@@ -12233,9 +12266,9 @@ myt.DrawingUtil = {
         @param {number} h
         @returns {undefined} */
     drawRoundedRect: (canvas, r, thickness, left, top, w, h) => {
-        var bottom = top + h,
-            right = left + w,
-            PI = Math.PI;
+        const PI = Math.PI;
+        let bottom = top + h,
+            right = left + w;
         
         // We create a single path for both an outer and inner rounded rect.
         // The reason for this is that filling looks much better than stroking.
@@ -12290,7 +12323,7 @@ myt.DrawingUtil = {
         @param {number} h
         @returns {undefined} */
     drawRectOutline: (canvas, thickness, left, top, w, h) => {
-        var bottom = top + h, 
+        const bottom = top + h, 
             right = left + w,
             ileft = left + thickness,
             iright = right - thickness,
@@ -12326,7 +12359,8 @@ myt.DrawingUtil = {
         @param {number} h
         @returns {undefined} */
     drawPartiallyRoundedRect: (canvas, rTL, rTR, rBL, rBR, left, top, w, h) => {
-        var bottom = top + h, right = left + w;
+        const bottom = top + h, 
+            right = left + w;
         
         canvas.beginPath();
         
@@ -12350,14 +12384,18 @@ myt.DrawingUtil = {
     drawGradientArc: (canvas, centerX, centerY, r, ir, startAngle, endAngle, colors, segments) => {
         if (segments == null) segments = 60;
         
-        var angleDelta = Math.PI / segments,
+        let angleDelta = Math.PI / segments,
         
         // Antialiasing issues means we need to draw each polygon with a small 
         // overlap to fill the gap.
             angleOverlap =  Math.PI / 360,
         
         // Calculate Colors
-            len = colors.length, i = 0, angleDiff, slices, diff;
+            len = colors.length,
+            i = 0, 
+            angleDiff, 
+            slices, 
+            diff;
         for (; len > i + 1; i++) {
             angleDiff = colors[i + 1].angle - colors[i].angle;
             slices = Math.round(angleDiff / angleDelta);
@@ -12365,13 +12403,13 @@ myt.DrawingUtil = {
             colors[i].colorDelta = {red:diff.red / slices, green:diff.green / slices, blue:diff.blue / slices};
         }
         
-        var path = new myt.Path([centerX + r, centerY, centerX + ir, centerY]),
-            prevAngle, ix1, iy1, x1, y1,
+        const path = new myt.Path([centerX + r, centerY, centerX + ir, centerY]);
+        let prevAngle, ix1, iy1, x1, y1,
             angle = startAngle;
         
         path.rotateAroundOrigin(angle, centerX, centerY);
-        var vectors = path.vectors,
-            x2 = vectors[0], y2 = vectors[1],
+        const vectors = path.vectors;
+        let x2 = vectors[0], y2 = vectors[1],
             ix2 = vectors[2], iy2 = vectors[3],
             diffCount = 0;
         
@@ -12406,7 +12444,7 @@ myt.DrawingUtil = {
             canvas.lineTo(x2, y2);
             canvas.closePath();
             
-            var c = colors[i].color,
+            const c = colors[i].color,
                 colorDelta = colors[i].colorDelta;
             canvas.fillStyle = myt.Color.makeColorNumberFromChannels(
                 c.red + (diffCount * colorDelta.red),
@@ -12448,12 +12486,12 @@ myt.DrawingMethod = new JS.Class('DrawingMethod', {
             @param {string} classname
             @returns {!Function} myt.DrawingMethod. */
         get: function(classname) {
-            var drawingMethods = this._drawingMethods,
-                drawingMethod = drawingMethods[classname];
+            const drawingMethods = this._drawingMethods;
+            let drawingMethod = drawingMethods[classname];
             
             // Create the DrawingMethod if it wasn't found in the cache.
             if (!drawingMethod) {
-                var drawingMethodClass = myt.resolveClassname(classname);
+                const drawingMethodClass = myt.resolveClassname(classname);
                 if (drawingMethodClass) drawingMethods[classname] = drawingMethod = new drawingMethodClass();
             }
             
@@ -12467,7 +12505,7 @@ myt.DrawingMethod = new JS.Class('DrawingMethod', {
                 that control how the DrawingMethod draws.
             @returns {undefined} */
         draw: function(classname, canvas, config) {
-            var drawingMethod = this.get(classname);
+            const drawingMethod = this.get(classname);
             if (drawingMethod) {
                 drawingMethod.draw(canvas, config);
             } else {
@@ -12533,7 +12571,7 @@ myt.DrawButton = new JS.Class('DrawButton', myt.Canvas, {
         this returns the bounds of this view.
         @returns an object with x, y, w and h properties. */
     getDrawBounds: function() {
-        var bounds = this.drawBounds;
+        const bounds = this.drawBounds;
         bounds.w = this.width;
         bounds.h = this.height;
         return bounds;
@@ -12625,7 +12663,7 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
     initNode: function(parent, attrs) {
         // Create a dom element for the panel and insert it at the end of
         // the body.
-        var elem = document.createElement('div');
+        const elem = document.createElement('div');
         elem.style.position = 'absolute';
         myt.getElement().appendChild(elem);
         
@@ -12653,7 +12691,9 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
         @param {!Object} event
         @returns {undefined} */
     __doMouseDown: function(event) {
-        var v = event.value, px = v.pageX, py = v.pageY;
+        const v = event.value, 
+            px = v.pageX, 
+            py = v.pageY;
         if (!this.containsPoint(px, py) && 
             (this.ignoreOwnerForHideOnMouseDown ? !this.owner.containsPoint(px, py) : true)
         ) {
@@ -12676,11 +12716,11 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
         descendant of the panel. When leaving we ask the panel anchor
         where to give focus. */
     focus: function(noScroll) {
-        var gf = myt.global.focus;
+        const gf = myt.global.focus;
         if (this.owner && this.isAncestorOf(gf.focusedView)) {
             this.owner[gf.lastTraversalWasForward ? 'getNextFocusAfterPanel' : 'getPrevFocusAfterPanel'](this.panelId).focus(noScroll);
         } else {
-            var ffv = this.getFirstFocusableDescendant();
+            const ffv = this.getFirstFocusableDescendant();
             if (ffv === this) {
                 // Process normally since focus is actually being set
                 // on the panel.
@@ -12703,7 +12743,7 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
         @param {!Object} event
         @returns {undefined} */
     __doFocusChange: function(event) {
-        var v = event.value;
+        const v = event.value;
         if (v && !this.isAncestorOf(v)) this.doLostFocus();
     },
     
@@ -12737,7 +12777,7 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
             
             this.owner.notifyPanelShown(this);
             
-            var g = myt.global;
+            const g = myt.global;
             this.attachToDom(g.mouse, '__doMouseDown', 'mousedown', true);
             this.attachTo(g.focus, '__doFocusChange', 'focused');
         }
@@ -12750,7 +12790,7 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
         @returns {undefined} */
     hide: function(ignoreRestoreFocus) {
         if (this.isShown()) {
-            var g = myt.global;
+            const g = myt.global;
             this.detachFromDom(g.mouse, '__doMouseDown', 'mousedown', true);
             this.detachFrom(g.focus, '__doFocusChange', 'focused');
             
@@ -12776,11 +12816,12 @@ myt.FloatingPanel = new JS.Class('FloatingPanel', myt.View, {
     updateLocation: function(panelAnchor) {
         this.setOwner(panelAnchor);
         
-        var panelId = this.panelId,
+        const panelId = this.panelId,
             align = panelAnchor.getFloatingAlignForPanelId(panelId),
             valign = panelAnchor.getFloatingValignForPanelId(panelId),
-            anchorLocation = panelAnchor.getPagePosition(),
-            x = 0, y = 0,
+            anchorLocation = panelAnchor.getPagePosition();
+        let x = 0,
+            y = 0,
             type = typeof align;
         
         if (type === 'string') {
@@ -12888,7 +12929,7 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
     createFloatingPanel: function(panelId, panelClass, panelInitAttrs) {
         panelId = panelId || this.floatingPanelId;
         
-        var FPA = myt.FloatingPanelAnchor;
+        const FPA = myt.FloatingPanelAnchor;
         panelClass = panelClass || FPA.classesByPanelId[panelId];
         if (!panelClass) {
             console.log("No panel class found for panelId:", panelId);
@@ -12905,7 +12946,7 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
     },
     
     toggleFloatingPanel: function(panelId) {
-        var fp = this.getFloatingPanel(panelId = panelId || this.floatingPanelId);
+        const fp = this.getFloatingPanel(panelId = panelId || this.floatingPanelId);
         if (fp && fp.isShown()) {
             this.hideFloatingPanel(panelId);
         } else {
@@ -12914,7 +12955,7 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
     },
     
     showFloatingPanel: function(panelId) {
-        var fp = this.getFloatingPanel(panelId || this.floatingPanelId);
+        const fp = this.getFloatingPanel(panelId || this.floatingPanelId);
         if (fp) {
             fp.show(this);
             this.setLastFloatingPanelShown(fp);
@@ -12922,7 +12963,7 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
     },
     
     hideFloatingPanel: function(panelId) {
-        var fp = this.getFloatingPanel(panelId || this.floatingPanelId);
+        const fp = this.getFloatingPanel(panelId || this.floatingPanelId);
         if (fp) {
             fp.hide();
             this.setLastFloatingPanelShown();
@@ -12989,7 +13030,7 @@ myt.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
         @returns {!Object} The last floating panel shown if it exists and 
             can be shown. Otherwise it returns the default. */
     getNextFocus: function() {
-        var last = this.lastFloatingPanelShown;
+        const last = this.lastFloatingPanelShown;
         if (last && last.isShown()) return last;
         return this.callSuper ? this.callSuper() : null;
     },
@@ -13078,7 +13119,7 @@ myt.ListViewItem = new JS.Class('ListViewItem', myt.SimpleIconTextButton, {
     
     /** @overrides myt.ListViewItemMixin */
     getMinimumWidth: function() {
-        var self = this,
+        const self = this,
             iconView = self.iconView,
             textView = self.textView,
             textViewVisible = textView.visible && self.text,
@@ -13232,7 +13273,7 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
         @param {!Object} itemView
         @returns {undefined} */
     doItemActivated: function(itemView) {
-        var owner = this.owner;
+        const owner = this.owner;
         if (owner) owner.doItemActivated(itemView);
     },
     
@@ -13242,7 +13283,10 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
     },
     
     getFirstFocusableItem: function() {
-        var items = this.items, item, len = items.length, i = 0;
+        const items = this.items, 
+            len = items.length;
+        let item, 
+            i = 0;
         for (; len > i; ++i) {
             item = items[i];
             if (item.isFocusable()) return item;
@@ -13251,7 +13295,9 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
     },
     
     getLastFocusableItem: function() {
-        var items = this.items, item, i = items.length;
+        const items = this.items;
+        let item,
+            i = items.length;
         while (i) {
             item = items[--i];
             if (item.isFocusable()) return item;
@@ -13262,22 +13308,30 @@ myt.ListView = new JS.Class('ListView', myt.FloatingPanel, {
     /** @private
         @returns {undefined} */
     __updateItems: function() {
-        var self = this,
+        const self = this,
             cfg = self.itemConfig || [],
-            cfgLen = cfg.length, cfgItem, cfgClass, cfgAttrs,
-            items = self.items, itemsLen = items.length, item,
+            cfgLen = cfg.length,
+            items = self.items, 
+            itemsLen = items.length,
             defaultItemClass = self.defaultItemClass,
             contentView = self.getContentView(), 
-            layouts = contentView.getLayouts(), layout,
-            layoutLen = layouts.length, i,
-            minItemWidth, minWidth = self.minWidth;
+            layouts = contentView.getLayouts(),
+            layoutLen = layouts.length;
+        let cfgItem, 
+            cfgClass, 
+            cfgAttrs,
+            item, 
+            layout, 
+            i,
+            minItemWidth, 
+            minWidth = self.minWidth;
         
         // Lock layouts during reconfiguration
         i = layoutLen;
         while (i) layouts[--i].incrementLockedCounter();
         
         // Performance: Remove from dom while doing inserts
-        var de = contentView.getOuterDomElement(),
+        const de = contentView.getOuterDomElement(),
             nextDe = de.nextSibling,
             parentElem = de.parentNode;
         parentElem.removeChild(de);
@@ -13404,7 +13458,7 @@ myt.ListViewAnchor = new JS.Module('ListViewAnchor', {
     
     /** @overrides myt.FloatingPanelAnchor */
     showFloatingPanel: function(panelId) {
-        var fp = this.getFloatingPanel(panelId);
+        const fp = this.getFloatingPanel(panelId);
         if (fp) {
             fp.setItemConfig(this.itemConfig);
             this.callSuper(panelId);
@@ -13455,17 +13509,17 @@ myt.ListViewAnchor = new JS.Module('ListViewAnchor', {
     },
     
     selectLastItem: function() {
-        var fp = this.getFloatingPanel();
+        const fp = this.getFloatingPanel();
         if (fp && fp.isShown()) {
-            var item = fp.getLastFocusableItem();
+            const item = fp.getLastFocusableItem();
             if (item) item.focus();
         }
     },
     
     selectFirstItem: function() {
-        var fp = this.getFloatingPanel();
+        const fp = this.getFloatingPanel();
         if (fp && fp.isShown()) {
-            var item = fp.getFirstFocusableItem();
+            const item = fp.getFirstFocusableItem();
             if (item) item.focus();
         }
     }
@@ -13496,7 +13550,9 @@ myt.BAGMembership = new JS.Module('BAGMembership', {
     destroyAfterOrphaning: function() {
         this.callSuper();
         
-        var groups = this.__bags, i = groups.length, group;
+        const groups = this.__bags;
+        let i = groups.length,
+            group;
         while (i) {
             group = groups[--i];
             this.removeFromBAG(group.attrName, group.groupId);
@@ -13506,7 +13562,8 @@ myt.BAGMembership = new JS.Module('BAGMembership', {
     
     // Methods /////////////////////////////////////////////////////////////////
     isRegisteredWithBAG: function(group) {
-        var groups = this.__bags, i = groups.length;
+        const groups = this.__bags;
+        let i = groups.length;
         while (i) {
             if (groups[--i] === group) return true;
         }
@@ -13523,7 +13580,7 @@ myt.BAGMembership = new JS.Module('BAGMembership', {
         @param groupId:string
         @returns {undefined} */
     addToBAG: function(attrName, groupId) {
-        var group = this.getBAG(attrName, groupId);
+        const group = this.getBAG(attrName, groupId);
         if (!this.isRegisteredWithBAG(group)) {
             this.__bags.push(group);
             group.register(this);
@@ -13541,9 +13598,12 @@ myt.BAGMembership = new JS.Module('BAGMembership', {
         @param groupId:string
         @returns {undefined} */
     removeFromBAG: function(attrName, groupId) {
-        var group = this.getBAG(attrName, groupId);
+        const group = this.getBAG(attrName, groupId);
         if (this.isRegisteredWithBAG(group)) {
-            var groups = this.__bags, i = groups.length, g, detach = true;
+            const groups = this.__bags;
+            let i = groups.length,
+                g,
+                detach = true;
             while (i) {
                 g = groups[--i];
                 if (g === group) {
@@ -13564,9 +13624,11 @@ myt.BAGMembership = new JS.Module('BAGMembership', {
         @param {!Object} event
         @returns {undefined} */
     __updateForBAG: function(event) {
-        var type = event.type,
+        const type = event.type,
             value = event.value,
-            groups = this.__bags, i = groups.length, group;
+            groups = this.__bags;
+        let i = groups.length,
+            group;
         while (i) {
             group = groups[--i];
             if (group.attrName === type) {
@@ -13628,7 +13690,7 @@ myt.BAG = new JS.Class('BAG', {
             @returns the BAG */
         getGroup: function(attrName, groupId) {
             if (attrName && groupId) {
-                var groups = this.__groups,
+                const groups = this.__groups,
                     groupIdMap = groups[attrName] || (groups[attrName] = {});
                 return groupIdMap[groupId] || (groupIdMap[groupId] = new myt.BAG(attrName, groupId));
             }
@@ -13641,11 +13703,11 @@ myt.BAG = new JS.Class('BAG', {
             @returns the removed BAG */
         removeGroup: function(attrName, groupId) {
             if (attrName && groupId) {
-                var groups = this.__groups;
+                const groups = this.__groups;
                 if (groups) {
-                    var groupIdMap = groups[attrName];
+                    const groupIdMap = groups[attrName];
                     if (groupIdMap) {
-                        var group = groupIdMap[groupId];
+                        const group = groupIdMap[groupId];
                         if (group) delete groupIdMap[groupId];
                         return group;
                     }
@@ -13704,7 +13766,8 @@ myt.BAG = new JS.Class('BAG', {
         @returns {undefined} */
     unregister: function(node) {
         if (node) {
-            var nodes = this.__nodes, i = nodes.length;
+            const nodes = this.__nodes;
+            let i = nodes.length;
             while (i) {
                 if (node === nodes[--i]) {
                     nodes.splice(i, 1);
@@ -13724,9 +13787,11 @@ myt.BAG = new JS.Class('BAG', {
         @returns {undefined} */
     setTrue: function(node) {
         if (node && this.trueNode !== node && this.isRegistered(node)) {
-            var attrName = this.attrName,
+            const attrName = this.attrName,
                 setterName = myt.AccessorSupport.generateSetterName(attrName),
-                nodes = this.__nodes, i = nodes.length, n;
+                nodes = this.__nodes;
+            let i = nodes.length,
+                n;
             
             this.setTrueNode(node);
             
@@ -13747,7 +13812,7 @@ myt.BAG = new JS.Class('BAG', {
         @returns {undefined} */
     setFalse: function(node) {
         if (node && this.trueNode === node) {
-            var setterName = myt.AccessorSupport.generateSetterName(this.attrName);
+            const setterName = myt.AccessorSupport.generateSetterName(this.attrName);
             node[setterName](false);
             this.setTrueNode(null);
         }
@@ -13757,7 +13822,8 @@ myt.BAG = new JS.Class('BAG', {
         @param node:myt.Node the node to test.
         @returns {undefined} */
     isRegistered: function(node) {
-        var nodes = this.__nodes, i = nodes.length;
+        const nodes = this.__nodes;
+        let i = nodes.length;
         while (i) {
             if (node === nodes[--i]) return true;
         }
@@ -13767,10 +13833,10 @@ myt.BAG = new JS.Class('BAG', {
 
 
 ((pkg) => {
-    var BAGAttrName = 'selected',
+    const BAGAttrName = 'selected',
         
         updateUI = (radio) => {
-            var label = radio.label || '';
+            const label = radio.label || '';
             radio.setText(
                 '<i class="far fa-' + (radio.selected === true ? 'dot-' : '') + 'circle"></i>' +
                 (label.length > 0 ? ' ' : '') + label
@@ -13783,10 +13849,10 @@ myt.BAG = new JS.Class('BAG', {
             @param {*} value
             @returns {undefined} */
         updateGroupValue = (radio, value) => {
-            var bag = getBooleanAttributeGroup(radio);
+            const bag = getBooleanAttributeGroup(radio);
             if (bag) {
-                var nodes = bag.getNodes(), 
-                    i = nodes.length, 
+                const nodes = bag.getNodes();
+                let i = nodes.length, 
                     node;
                 while (i) {
                     node = nodes[--i];
@@ -13823,7 +13889,7 @@ myt.BAG = new JS.Class('BAG', {
             if (attrs.hoverColor == null) attrs.hoverColor = 'inherits';
             if (attrs.readyColor == null) attrs.readyColor = 'inherits';
             
-            var value = attrs.value;
+            const value = attrs.value;
             delete attrs.value;
             
             this.callSuper(parent, attrs);
@@ -13831,7 +13897,7 @@ myt.BAG = new JS.Class('BAG', {
             this.setValue(value);
             
             if (this.selected) {
-                var bag = getBooleanAttributeGroup(this);
+                const bag = getBooleanAttributeGroup(this);
                 if (bag) bag.setTrue(this);
             }
             
@@ -13858,7 +13924,7 @@ myt.BAG = new JS.Class('BAG', {
             @returns {*} The value of the selected radio button. */
         getValue: function() {
             // Get selected radio
-            var bag = getBooleanAttributeGroup(this),
+            const bag = getBooleanAttributeGroup(this),
                 selectedRadio = bag ? bag.trueNode : null;
             return selectedRadio ? selectedRadio.optionValue : null;
         },
@@ -13875,7 +13941,7 @@ myt.BAG = new JS.Class('BAG', {
     
         setGroupId: function(v) {
             if (this.groupId !== v) {
-                var oldGroupId = this.groupId;
+                const oldGroupId = this.groupId;
                 this.groupId = v;
                 if (oldGroupId) this.removeFromBAG(BAGAttrName, oldGroupId);
                 if (v) this.addToBAG(BAGAttrName, v);
@@ -13925,7 +13991,7 @@ myt.BAG = new JS.Class('BAG', {
 
 
 ((pkg) => {
-    var JSModule = JS.Module,
+    const JSModule = JS.Module,
         globalKeys = pkg.global.keys,
     
         /** Makes an object selectable.
@@ -14051,9 +14117,9 @@ myt.BAG = new JS.Class('BAG', {
             /** Gets the currently selected items.
                 @returns {!Array} The selected items. */
             getSelected: function() {
-                var retval = [], 
-                    items = this.__selected, 
-                    key;
+                const retval = [], 
+                    items = this.__selected;
+                let key;
                 for (key in items) retval.push(items[key]);
                 return retval;
             },
@@ -14090,7 +14156,7 @@ myt.BAG = new JS.Class('BAG', {
                 @param {!Object} item - The item to test.
                 @returns {boolean} True if selection is allowed, false otherwise. */
             canSelectItem: function(item) {
-                var ms = this.maxSelected, 
+                const ms = this.maxSelected, 
                     sc = this.selectedCount;
                 
                 if (ms === 0) {
@@ -14111,8 +14177,8 @@ myt.BAG = new JS.Class('BAG', {
             /** Selects all items that can be selected.
                 @returns {undefined} */
             selectAll: function() {
-                var items = this.getSelectableItems(), 
-                    i = items.length;
+                const items = this.getSelectableItems();
+                let i = items.length;
                 while (i) this.select(items[--i]);
             },
             
@@ -14154,8 +14220,8 @@ myt.BAG = new JS.Class('BAG', {
             /** Deselects all selected items.
                 @returns {undefined} */
             deselectAll: function() {
-                var items = this.__selected, 
-                    key;
+                const items = this.__selected;
+                let key;
                 for (key in items) this.deselect(items[key]);
             },
             
@@ -14175,9 +14241,9 @@ myt.BAG = new JS.Class('BAG', {
                 myt.Selectable subviews.
                 @returns {!Array} */
             getManagedItems: function() {
-                var retval = [], 
-                    svs = this.getSubviews(), 
-                    i = svs.length, 
+                const retval = [], 
+                    svs = this.getSubviews();
+                let i = svs.length, 
                     sv;
                 while (i) {
                     sv = svs[--i];
@@ -14189,8 +14255,8 @@ myt.BAG = new JS.Class('BAG', {
             /** Gets a list of items that can currently be selected by this manager.
                 @returns {!Array} */
             getSelectableItems: function() {
-                var items = this.getManagedItems(), 
-                    i = items.length;
+                const items = this.getManagedItems();
+                let i = items.length;
                 while (i) {
                     if (!items[--i].canSelect(this)) items.splice(i, 1);
                 }
@@ -14201,10 +14267,10 @@ myt.BAG = new JS.Class('BAG', {
                 @param {string} itemSelectionId
                 @returns {?Object} - The myt.Selectable or null if not found. */
             getSelectableItem: function(itemSelectionId) {
-                var items = this.getSelectableItems(), 
-                    i = items.length, 
-                    item,
+                const items = this.getSelectableItems(),
                     selectionAttr = this.itemSelectionId;
+                let i = items.length, 
+                    item;
                 while (i) {
                     item = items[--i];
                     if (item[selectionAttr] === itemSelectionId) return item;
@@ -14251,10 +14317,10 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
     },
     
     doAfterAdoption: function() {
-        var self = this,
+        const self = this,
             M = myt,
             TS = M.TabSlider;
-        var container = new M.View(self, {
+        const container = new M.View(self, {
             name:'container', ignorePlacement:true, percentOfParentWidth:100
         }, [M.SizeToParent, {
             /** @overrides myt.View */
@@ -14269,7 +14335,8 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
             /** @overrides myt.View */
             subnodeRemoved: function(node) {
                 if (node instanceof TS) {
-                    var tabSliders = self._tabSliders, i = tabSliders.length;
+                    const tabSliders = self._tabSliders;
+                    let i = tabSliders.length;
                     while (i) {
                         if (tabSliders[--i] === node) {
                             self.detachFrom(node, 'updateLayout', 'selected');
@@ -14302,8 +14369,8 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
     /** @param {!Object} event
         @returns {undefined} */
     updateLayout: function(event) {
-        var tabSliders = this._tabSliders, 
-            i = tabSliders.length, 
+        const tabSliders = this._tabSliders;
+        let i = tabSliders.length, 
             tabSlider,
             min = 0, 
             preferred = 0, 
@@ -14326,16 +14393,18 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
             }
         }
         
-        var layout = this.container.layout,
+        const layout = this.container.layout,
             layoutOverage = layout.inset + layout.outset + layout.spacing * (visCount - 1);
         min += layoutOverage;
         preferred += layoutOverage;
         
-        var h = this.height,
+        const h = this.height,
             minIsOver = min > h,
-            preferredIsOver = preferred > h,
-            overage = preferred - h,
-            tabPreferred, tabMin, newVal;
+            preferredIsOver = preferred > h;
+        let overage = preferred - h,
+            tabPreferred, 
+            tabMin, 
+            newVal;
         
         i = tabSliders.length;
         while (i) {
@@ -14395,7 +14464,7 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
                 Supported values are: 'expanded', 'expanding', 'collapsed' and
                 'collapsing'. Defaults to 'collapsed'.
     */
-    var TabSlider = pkg.TabSlider = new JS.Class('TabSlider', pkg.View, {
+    const TabSlider = pkg.TabSlider = new JS.Class('TabSlider', pkg.View, {
         include: [pkg.Selectable, pkg.Disableable, pkg.SizeToParent],
         
         
@@ -14414,8 +14483,8 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            var self = this,
-                initiallySelected;
+            const self = this;
+            let initiallySelected;
             
             attrs.defaultPlacement = 'wrapper.container';
             attrs.percentOfParentWidth = 100;
@@ -14450,10 +14519,10 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
         },
         
         doAfterAdoption: function() {
-            var self = this,
+            const self = this,
                 View = pkg.View,
-                SizeToParent = pkg.SizeToParent,
-                wrapper,
+                SizeToParent = pkg.SizeToParent;
+            let wrapper,
                 container;
             
             new self.buttonClass(self, {
@@ -14468,7 +14537,7 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
             }, [SizeToParent, {
                 /** @overrides myt.Button */
                 doActivated: function() {
-                    var tc = self.tabContainer;
+                    const tc = self.tabContainer;
                     if (self.isSelected() && tc.maxSelected !== 1) {
                         tc.deselect(self);
                     } else {
@@ -14540,7 +14609,7 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
                 this.expansionState = v;
                 if (this.inited) this.fireEvent('expansionState', v);
                 
-                var wrapper = this.wrapper;
+                const wrapper = this.wrapper;
                 if (wrapper) {
                     if (v === 'expanded') {
                         wrapper.setMaskFocus(false);
@@ -14561,7 +14630,7 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides myt.Disableable */
         doDisabled: function() {
-            var btn = this.button;
+            const btn = this.button;
             if (btn) btn.setDisabled(this.disabled);
         },
         
@@ -14580,7 +14649,7 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
         /** Should only be called from the TabSliderContainer.
             @private */
         expand: function(targetHeight) {
-            var self = this,
+            const self = this,
                 wrapper = self.wrapper,
                 to = targetHeight - self.getCollapsedHeight();
             
@@ -14601,7 +14670,7 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
         /** Should only be called from the TabSliderContainer.
             @private */
         collapse: function() {
-            var self = this,
+            const self = this,
                 wrapper = self.wrapper;
             
             self.setExpansionState('collapsing');
@@ -14665,7 +14734,7 @@ myt.TextTabSlider = new JS.Class('TextTabSlider', myt.TabSlider, {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        var TTS = myt.TextTabSlider;
+        const TTS = myt.TextTabSlider;
         if (attrs.labelTextColorChecked == null) attrs.labelTextColorChecked = TTS.DEFAULT_LABEL_TEXT_COLOR_CHECKED;
         if (attrs.labelTextColor == null) attrs.labelTextColor = TTS.DEFAULT_LABEL_TEXT_COLOR;
         
@@ -14686,7 +14755,7 @@ myt.TextTabSlider = new JS.Class('TextTabSlider', myt.TabSlider, {
     setText: function(v) {
         if (this.text !== v) {
             this.text = v;
-            var button = this.button;
+            const button = this.button;
             if (button && button.label) button.label.setText(v);
         }
     },
@@ -14695,7 +14764,7 @@ myt.TextTabSlider = new JS.Class('TextTabSlider', myt.TabSlider, {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.TabSlider */
     notifyButtonRedraw: function() {
-        var label = this.button.label;
+        const label = this.button.label;
         if (label) label.setTextColor(this.__getTextColor());
     },
     
@@ -14735,7 +14804,7 @@ myt.TabContainer = new JS.Module('TabContainer', {
     initNode: function(parent, attrs) {
         this.__tabs = [];
         
-        var TC = myt.TabContainer;
+        const TC = myt.TabContainer;
         if (attrs.spacing == null) attrs.spacing = TC.DEFAULT_SPACING;
         if (attrs.inset == null) attrs.inset = TC.DEFAULT_INSET;
         
@@ -14746,7 +14815,7 @@ myt.TabContainer = new JS.Module('TabContainer', {
         
         this.callSuper(parent, attrs);
         
-        var axis;
+        let axis;
         switch (this.location) {
             case 'top':
             case 'bottom':
@@ -14820,7 +14889,8 @@ myt.TabContainer = new JS.Module('TabContainer', {
     /** @overrides myt.View */
     subnodeRemoved: function(node) {
         if (node.isA(myt.TabMixin)) {
-            var tabs = this.__tabs, i = tabs.length;
+            const tabs = this.__tabs;
+            let i = tabs.length;
             while (i) {
                 if (tabs[--i] === node) {
                     tabs.splice(i, 1);
@@ -14856,7 +14926,7 @@ myt.TabMixin = new JS.Module('TabMixin', {
         if (attrs.tabContainer == null) attrs.tabContainer = parent;
         
         // Selection must be done via the select method on the tabContainer
-        var initiallySelected;
+        let initiallySelected;
         if (attrs.selected) {
             initiallySelected = true;
             delete attrs.selected;
@@ -14882,13 +14952,13 @@ myt.TabMixin = new JS.Module('TabMixin', {
 
 
 ((pkg) => {
-    var
+    const
         updateTextColor = (tab) => {
             tab.textView.setTextColor(tab.selected ? tab.labelTextSelectedColor : tab.labelTextColor);
         },
         
         updateCornerRadius = (tab) => {
-            var r = tab.cornerRadius != null ? tab.cornerRadius : Tab.DEFAULT_RADIUS;
+            const r = tab.cornerRadius != null ? tab.cornerRadius : Tab.DEFAULT_RADIUS;
             switch (tab.tabContainer.location) {
                 case 'top':
                     tab.setRoundedTopLeftCorner(r);
@@ -15045,7 +15115,8 @@ myt.InputObservable = new JS.Module('InputObservable', {
             underlying dom element and is not generally supported.
             See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#attr-type
             for more info and a list of allowed values.
-*/
+    
+    @class */
 myt.NativeInputWrapper = new JS.Class('NativeInputWrapper', myt.View, {
     include: [myt.Disableable, myt.InputObservable],
     
@@ -15064,8 +15135,8 @@ myt.NativeInputWrapper = new JS.Class('NativeInputWrapper', myt.View, {
     
     /** @overrides myt.View */
     createOurDomElement: function(parent) {
-        var elements = this.callSuper(parent),
-            innerElem;
+        const elements = this.callSuper(parent);
+        let innerElem;
         if (this.inputType) {
             if (Array.isArray(elements)) {
                 innerElem = elements[1];
@@ -15107,7 +15178,7 @@ myt.NativeInputWrapper = new JS.Class('NativeInputWrapper', myt.View, {
         @param v:* The value to set.
         @returns {undefined} */
     setDomValue: function(v) {
-        var de = this.getInnerDomElement();
+        const de = this.getInnerDomElement();
         if (de.value !== v) de.value = v;
     }
 });
@@ -15215,7 +15286,8 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
         @returns {undefined} */
     handleFiles: function(files, event) {
         if (files !== undefined) {
-            var i = files.length, file;
+            let i = files.length,
+                file;
             while (i) {
                 file = this.filterFiles(files[--i]);
                 if (file) this.handleDroppedFile(file, event);
@@ -15270,7 +15342,7 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
 myt.Form = new JS.Module('Form', {
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        var self = this;
+        const self = this;
         
         self.isChanged = self._lockCascade = false;
         self.isValid = true;
@@ -15296,8 +15368,8 @@ myt.Form = new JS.Module('Form', {
     setErrorMessages: function(v) {this.errorMessages = v;},
     
     getFullId: function() {
-        var ids = [this.id],
-            form = this.form;
+        const ids = [this.id];
+        let form = this.form;
         while (form && form.id) {
             ids.unshift(form.id);
             form = form.form;
@@ -15307,10 +15379,10 @@ myt.Form = new JS.Module('Form', {
     
     setId: function(v) {
         if (this.id !== v) {
-            var existingId = this.id;
+            const existingId = this.id;
             this.id = v;
             
-            var form = this.form;
+            const form = this.form;
             if (form && this.inited) {
                 form.removeSubForm(existingId);
                 form.addSubForm(this);
@@ -15320,7 +15392,7 @@ myt.Form = new JS.Module('Form', {
     
     setForm: function(v) {
         if (this.form !== v) {
-            var existingForm = this.form;
+            const existingForm = this.form;
             this.form = v;
             if (existingForm) existingForm.removeSubForm(this.id);
             if (v && this.inited) v.addSubForm(this);
@@ -15334,7 +15406,7 @@ myt.Form = new JS.Module('Form', {
         this.isValid = v;
         if (this.inited) this.fireEvent('isValid', v);
         
-        var form = this.form;
+        const form = this.form;
         if (form && !this._lockCascade) {
             if (v) {
                 form.verifyValidState(this);
@@ -15349,7 +15421,7 @@ myt.Form = new JS.Module('Form', {
             this.isChanged = v;
             if (this.inited) this.fireEvent('isChanged', v);
             
-            var form = this.form;
+            const form = this.form;
             if (form && !this._lockCascade) {
                 if (v) {
                     form.notifySubFormChanged();
@@ -15365,7 +15437,7 @@ myt.Form = new JS.Module('Form', {
             IDs of validators from the myt.global.validators registry.
         @returns {undefined} */
     setValidators: function(validators) {
-        var i = validators.length, validator;
+        let i = validators.length, validator;
         while (i) {
             validator = validators[--i];
             if (typeof validator === 'string') {
@@ -15388,7 +15460,9 @@ myt.Form = new JS.Module('Form', {
         // Only do "form" behavior for true forms, not for form elements.
         if (this.isA(myt.FormElement)) return this.value;
         
-        var retval = {}, subForms = this.__sf, id;
+        const retval = {}, 
+            subForms = this.__sf;
+        let id;
         for (id in subForms) retval[id] = subForms[id].getValue();
         return retval;
     },
@@ -15404,7 +15478,7 @@ myt.Form = new JS.Module('Form', {
         
         // Only do "form" behavior for true forms, not for form elements.
         if (typeof value === 'object' && !this.isA(myt.FormElement)) {
-            var subform, id;
+            let subform, id;
             for (id in value) {
                 subform = this.getSubForm(id);
                 if (subform) {
@@ -15426,7 +15500,9 @@ myt.Form = new JS.Module('Form', {
         to return an element specific default value.
         @returns object */
     getDefaultValue: function() {
-        var retval = {}, subForms = this.__sf, id;
+        const retval = {};
+        let subForms = this.__sf, 
+            id;
         for (id in subForms) retval[id] = subForms[id].getDefaultValue();
         return retval;
     },
@@ -15438,7 +15514,7 @@ myt.Form = new JS.Module('Form', {
         @returns the value that was actually set. */
     setDefaultValue: function(value) {
         if (typeof value === 'object') {
-            var subform, id;
+            let subform, id;
             for (id in value) {
                 subform = this.getSubForm(id);
                 if (subform) {
@@ -15456,7 +15532,9 @@ myt.Form = new JS.Module('Form', {
         to return an element specific rollback value.
         @returns object */
     getRollbackValue: function() {
-        var retval = {}, subForms = this.__sf, id;
+        const retval = {}, 
+            subForms = this.__sf;
+        let id;
         for (id in subForms) retval[id] = subForms[id].getRollbackValue();
         return retval;
     },
@@ -15468,7 +15546,7 @@ myt.Form = new JS.Module('Form', {
         @returns the value that was actually set. */
     setRollbackValue: function(value) {
         if (typeof value === 'object') {
-            var subform, id;
+            let subform, id;
             for (id in value) {
                 subform = this.getSubForm(id);
                 if (subform) {
@@ -15504,7 +15582,7 @@ myt.Form = new JS.Module('Form', {
         @param value:* (optional) The value to pass to the function.
         @returns {undefined} */
     invokeAccelerator: function(id, value) {
-        var accelerator = this.__acc[id];
+        const accelerator = this.__acc[id];
         if (accelerator) accelerator.call(this, value === undefined ? null : value);
     },
     
@@ -15520,7 +15598,9 @@ myt.Form = new JS.Module('Form', {
         @returns the removed myt.Validator or null if not found. */
     removeValidator: function(id) {
         if (id) {
-            var validators = this.__v, i = validators.length, validator;
+            const validators = this.__v;
+            let i = validators.length, 
+                validator;
             while (i) {
                 validator = validators[--i];
                 if (validator.id === id) {
@@ -15542,7 +15622,7 @@ myt.Form = new JS.Module('Form', {
         @param subform:myt.Form the form to add as a subform.
         @returns {undefined} */
     addSubForm: function(subform) {
-        var id = subform.id;
+        const id = subform.id;
         if (this.getSubForm(id) != null) {
             console.warn("ID in use for subform, add aborted.", id, subform);
             return;
@@ -15559,7 +15639,7 @@ myt.Form = new JS.Module('Form', {
         @param id:string The ID of the form to remove.
         @returns myt.Form or undefined if not found. */
     removeSubForm: function(id) {
-        var subform = this.getSubForm(id);
+        const subform = this.getSubForm(id);
         if (subform) {
             subform.setForm(null);
             delete this.__sf[id];
@@ -15583,15 +15663,14 @@ myt.Form = new JS.Module('Form', {
     getInvalidSubformIds: function(doValidation) {
         if (doValidation) this.doValidation();
         
-        var FE = myt.FormElement,
+        const FE = myt.FormElement,
             retval = [];
         (function inspect(subform) {
             if (subform.isA(FE)) {
                 if (!subform.isValid) retval.push(subform.getFullId());
             } else {
-                var subforms = subform.getSubForms(),
-                    key;
-                for (key in subforms) inspect(subforms[key]);
+                const subforms = subform.getSubForms();
+                for (let key in subforms) inspect(subforms[key]);
             }
         })(this);
         
@@ -15601,8 +15680,8 @@ myt.Form = new JS.Module('Form', {
     /** Gets all error messages from the entire form tree.
         @returns array of error messages strings. */
     getAllErrorMessages: function() {
-        var msgs = (this.errorMessages || []).concat(),
-            subForms = this.__sf,
+        const subForms = this.__sf;
+        let msgs = (this.errorMessages || []).concat(),
             id;
         for (id in subForms) msgs = msgs.concat(subForms[id].getAllErrorMessages());
         return msgs;
@@ -15621,7 +15700,10 @@ myt.Form = new JS.Module('Form', {
             invoking this method.
         @returns boolean true if this form is valid, false otherwise. */
     verifyValidState: function(subformToIgnore) {
-        var isValid = true, subForms = this.__sf, subform, id;
+        const subForms = this.__sf;
+        let isValid = true, 
+            subform, 
+            id;
         for (id in subForms) {
             subform = subForms[id];
             if (subform !== subformToIgnore) isValid = subform.isValid && isValid;
@@ -15634,7 +15716,9 @@ myt.Form = new JS.Module('Form', {
         validity check since this is intended to be a top down check.
         @returns boolean true if this form is valid, false otherwise. */
     doValidation: function() {
-        var isValid = true, subForms = this.__sf, id;
+        const subForms = this.__sf;
+        let isValid = true,
+            id;
         for (id in subForms) isValid = subForms[id].doValidation() && isValid;
         
         this._lockCascade = true;
@@ -15649,9 +15733,9 @@ myt.Form = new JS.Module('Form', {
         @param isValid:boolean The currently determined validity.
         @returns boolean true if this form is valid, false otherwise. */
     __applyValidation: function(isValid) {
-        var validators = this.__v, len = validators.length, 
-            errorMessages = [], i = 0;
-        for (; len > i;) isValid = validators[i++].isFormValid(this, null, errorMessages) && isValid;
+        const validators = this.__v, len = validators.length, 
+            errorMessages = [];
+        for (let i = 0; len > i;) isValid = validators[i++].isFormValid(this, null, errorMessages) && isValid;
         
         this.setErrorMessages(errorMessages);
         this.setIsValid(isValid);
@@ -15679,7 +15763,10 @@ myt.Form = new JS.Module('Form', {
             invoking this method.
         @returns boolean true if this form is changed, false otherwise. */
     verifyChangedState: function(subformToIgnore) {
-        var isChanged = false, subForms = this.__sf, subform, id;
+        const subForms = this.__sf;
+        let isChanged = false, 
+            subform, 
+            id;
         for (id in subForms) {
             subform = subForms[id];
             if (subform !== subformToIgnore) isChanged = subform.isChanged || isChanged;
@@ -15704,8 +15791,8 @@ myt.Form = new JS.Module('Form', {
         if (rollbackValue == null) rollbackValue = {};
         if (value == null) value = {};
         
-        var subForms = this.__sf, id;
-        for (id in subForms) subForms[id].setup(defaultValue[id], rollbackValue[id], value[id]);
+        const subForms = this.__sf;
+        for (let id in subForms) subForms[id].setup(defaultValue[id], rollbackValue[id], value[id]);
     },
     
     /** Resets this form to the default values.
@@ -15713,8 +15800,8 @@ myt.Form = new JS.Module('Form', {
     resetForm: function() {
         this._lockCascade = true;
         
-        var subForms = this.__sf, id;
-        for (id in subForms) subForms[id].resetForm();
+        const subForms = this.__sf;
+        for (let id in subForms) subForms[id].resetForm();
         
         this.setIsChanged(false);
         this.setErrorMessages([]);
@@ -15728,8 +15815,8 @@ myt.Form = new JS.Module('Form', {
     rollbackForm: function() {
         this._lockCascade = true;
         
-        var subForms = this.__sf, id;
-        for (id in subForms) subForms[id].rollbackForm();
+        const subForms = this.__sf;
+        for (let id in subForms) subForms[id].rollbackForm();
         
         this.setIsChanged(false);
         this.setErrorMessages([]);
@@ -15743,7 +15830,10 @@ myt.Form = new JS.Module('Form', {
         elements should override this to return an element specific value.
         @returns object */
     getChangedValue: function() {
-        var retval = {}, subForms = this.__sf, subform, id;
+        const retval = {}, 
+            subForms = this.__sf;
+        let subform, 
+            id;
         for (id in subForms) {
             subform = subForms[id];
             if (subform.isChanged) retval[id] = subform.getChangedValue();
@@ -15892,7 +15982,8 @@ myt.FormElement = new JS.Module('FormElement', {
             registry.
         @returns {undefined} */
     setValueProcessors: function(processors) {
-        var i = processors.length, processor;
+        let i = processors.length, 
+            processor;
         while (i) {
             processor = processors[--i];
             if (typeof processor === 'string') {
@@ -15918,7 +16009,9 @@ myt.FormElement = new JS.Module('FormElement', {
         @returns the removed myt.ValueProcessor or null if not found. */
     removeValueProcessor: function(id) {
         if (id) {
-            var processors = this.__vp, i = processors.length, processor;
+            const processors = this.__vp;
+            let i = processors.length, 
+                processor;
             while (i) {
                 processor = processors[--i];
                 if (processor.id === id) {
@@ -15937,7 +16030,10 @@ myt.FormElement = new JS.Module('FormElement', {
             that is checked to see if that processor should be run or not.
         @returns * The processed value. */
     __processValue: function(value, checkAttr) {
-        var processors = this.__vp, len = processors.length, processor, i = 0;
+        const processors = this.__vp, 
+            len = processors.length;
+        let processor, 
+            i = 0;
         for (; len > i;) {
             processor = processors[i++];
             if (processor[checkAttr]) value = processor.process(value);
@@ -15964,7 +16060,7 @@ myt.FormElement = new JS.Module('FormElement', {
     
     /** @overrides myt.Form */
     verifyChangedState: function(subformToIgnore) {
-        var isChanged = this.getValue() !== this.getRollbackValue();
+        const isChanged = this.getValue() !== this.getRollbackValue();
         this.setIsChanged(isChanged);
         return isChanged;
     },
@@ -15995,7 +16091,7 @@ myt.FormElement = new JS.Module('FormElement', {
     resetForm: function() {
         this._lockCascade = true;
         
-        var defaultValue = this.getDefaultValue();
+        const defaultValue = this.getDefaultValue();
         this.setRollbackValue(defaultValue);
         this.setValue(defaultValue);
         
@@ -16048,7 +16144,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         
         readFile: function(file, handlerFunc) {
             if (FileReader !== undefined) {
-                var reader = new FileReader();
+                const reader = new FileReader();
                 reader.onload = handlerFunc;
                 reader.readAsDataURL(file);
             }
@@ -16060,7 +16156,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         },
         
         createFile: function(urlStr) {
-            var fileName = (new myt.URI(urlStr)).file;
+            const fileName = (new myt.URI(urlStr)).file;
             return {
                 name: fileName,
                 serverPath: urlStr,
@@ -16074,7 +16170,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
-        var self = this;
+        const self = this;
         
         self.files = [];
         
@@ -16113,7 +16209,8 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         
         if (v) {
             if (!Array.isArray(v)) v = [v];
-            var len = v.length, i = 0;
+            const len = v.length;
+            let i = 0;
             for(; len > i; ++i) this.addFile(myt.Uploader.createFile(v[i]));
         }
         
@@ -16175,12 +16272,13 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     uploadFiles: function(url, fileParam) {
         url = url || this.uploadUrl;
         
-        var files = this.files, i = files.length;
+        const files = this.files;
+        let i = files.length;
         while (i) this.uploadFile(files[--i], url, fileParam);
     },
     
     uploadFile: function(file, url, fileParam) {
-        var self = this,
+        const self = this,
             formData = new FormData();
         formData.append(fileParam || self.requestFileParam, file, file.name);
         myt.doFetch(
@@ -16222,7 +16320,8 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     },
     
     removeFile: function(file) {
-        var files = this.files, i = files.length;
+        const files = this.files;
+        let i = files.length;
         while (i) {
             if (myt.Uploader.isSameFile(files[--i], file)) {
                 files.splice(i, 1);
@@ -16234,13 +16333,16 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     },
     
     updateValueFromFiles: function() {
-        var value = [], files = this.files, i = files.length, serverPath;
+        const value = [],
+            files = this.files;
+        let i = files.length,
+            serverPath;
         while (i) {
             serverPath = files[--i][myt.Uploader.FILE_ATTR_SERVER_PATH];
             if (serverPath) value.push(serverPath);
         }
         
-        var len = value.length;
+        const len = value.length;
         this.value = len === 1 ? value[0] : (len === 0 ? undefined : value);
         
         // Reset the form element if empty. Otherwise uploading the 
@@ -16254,7 +16356,8 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     },
     
     clearFiles: function() {
-        var files = this.files, i = files.length;
+        const files = this.files;
+        let i = files.length;
         while (i) this.removeFile(files[--i]);
     }
 });
@@ -16302,17 +16405,17 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
     },
     
     addFile: function(file) {
-        var self = this;
+        const self = this;
         
         self.callSuper(file);
         
-        var image = self.image = new myt.Image(self, {useNaturalSize:false, align:'center', valign:'middle'});
+        const image = self.image = new myt.Image(self, {useNaturalSize:false, align:'center', valign:'middle'});
         
         image.file = file;
         
         // Read into image
         if (file.size === -1) {
-            var img = new Image();
+            const img = new Image();
             img.onload = function() {
                 file.width = this.width;
                 file.height = this.height;
@@ -16324,7 +16427,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
             img.src = file.serverPath;
         } else if (FileReader !== undefined && myt.ImageUploader.isImageFile(file)) {
             myt.Uploader.readFile(file, function(event) {
-                var img = new Image();
+                const img = new Image();
                 img.onload = function() {
                     file.width = this.width;
                     file.height = this.height;
@@ -16339,8 +16442,8 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
     },
     
     scaleToFit: function(boundsWidth, boundsHeight, imgWidth, imgHeight) {
-        var boundsRatio = boundsWidth / boundsHeight;
-        var imgRatio = imgWidth / imgHeight;
+        const boundsRatio = boundsWidth / boundsHeight,
+            imgRatio = imgWidth / imgHeight;
         
         if (imgRatio > boundsRatio) {
             return [boundsWidth, imgHeight * boundsWidth / imgWidth];
@@ -16352,8 +16455,8 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
     removeFile: function(file) {
         this.callSuper(file);
         
-        var images = this.getSubviews(),
-            i = images.length,
+        const images = this.getSubviews();
+        let i = images.length,
             image;
         while (i) {
             image = images[--i];
@@ -16380,9 +16483,9 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
     },
     
     updateImageSize: function() {
-        var image = this.image;
+        const image = this.image;
         if (image && !image.destroyed) {
-            var size = this.scaleToFit(this.width, this.height, this.nativeWidth, this.nativeHeight),
+            const size = this.scaleToFit(this.width, this.height, this.nativeWidth, this.nativeHeight),
                 w = Math.round(size[0]), 
                 h = Math.round(size[1]);
             image.setImageSize(w + 'px ' + h + 'px');
@@ -16403,8 +16506,8 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
 // License: MIT
 (function (window, $) {
     "use strict";
-
-    var defaultOpts = {
+    
+    const defaultOpts = {
             color: false,
             allowEmpty: true,
             showSelectionPalette: true,
@@ -16446,10 +16549,10 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
                 "</div>",
             "</div>"
         ].join("");
-
+    
     function paletteTemplate(p, color, opts) {
-        var html = [],
-            i = 0,
+        const html = [];
+        let i = 0,
             current,
             tiny,
             c;
@@ -16470,12 +16573,29 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         }
         return "<div class='sp-cf'>" + html.join('') + "</div>";
     }
-
+    
     function spectrum(element, o) {
-        var opts = Object.assign({}, defaultOpts, o),
+        const opts = Object.assign({}, defaultOpts, o),
             showSelectionPalette = opts.showSelectionPalette,
             localStorageKey = opts.localStorageKey,
-            dragWidth = 0,
+            initialColor = opts.color,
+            doc = element.ownerDocument,
+            body = doc.body,
+            boundElement = $(element),
+            container = $(markup, doc),
+            pickerContainer = container.find(".sp-picker-container"),
+            dragger = container.find(".sp-color"),
+            dragHelper = container.find(".sp-dragger"),
+            slider = container.find(".sp-hue"),
+            slideHelper = container.find(".sp-slider"),
+            textInput = container.find(".sp-input"),
+            paletteContainer = container.find(".sp-palette"),
+            initialColorContainer = container.find(".sp-initial"),
+            clearButton = container.find(".sp-clear"),
+            allowEmpty = opts.allowEmpty,
+            dialog = opts.dialog;
+        
+        let dragWidth = 0,
             dragHeight = 0,
             dragHelperHeight = 0,
             slideHeight = 0,
@@ -16491,35 +16611,18 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
             selectionWrapSize = opts.selectionWrapSize,
             maxSelectionSize = opts.maxSelectionSize,
             draggingClass = "sp-dragging",
-            shiftMovementDirection = null;
-
-        var doc = element.ownerDocument,
-            body = doc.body,
-            boundElement = $(element),
-            container = $(markup, doc),
-            pickerContainer = container.find(".sp-picker-container"),
-            dragger = container.find(".sp-color"),
-            dragHelper = container.find(".sp-dragger"),
-            slider = container.find(".sp-hue"),
-            slideHelper = container.find(".sp-slider"),
-            textInput = container.find(".sp-input"),
-            paletteContainer = container.find(".sp-palette"),
-            initialColorContainer = container.find(".sp-initial"),
-            clearButton = container.find(".sp-clear"),
-            initialColor = opts.color,
-            colorOnShow = false,
+            shiftMovementDirection = null,
             isEmpty = !initialColor,
-            allowEmpty = opts.allowEmpty,
-            dialog = opts.dialog;
-
+            colorOnShow = false;
+        
         function applyOptions() {
             if (opts.palette) {
                 palette = opts.palette.slice(0);
                 paletteArray = Array.isArray(palette[0]) ? palette : [palette];
                 paletteLookup = {};
-                for (var i = 0; i < paletteArray.length; i++) {
-                    for (var j = 0; j < paletteArray[i].length; j++) {
-                        var rgb = tinycolor(paletteArray[i][j]).toHexString();
+                for (let i = 0; i < paletteArray.length; i++) {
+                    for (let j = 0; j < paletteArray[i].length; j++) {
+                        const rgb = tinycolor(paletteArray[i][j]).toHexString();
                         paletteLookup[rgb] = true;
                     }
                 }
@@ -16527,23 +16630,23 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
             container.toggleClass("sp-clear-enabled", allowEmpty);
             reflow();
         }
-
+        
         function initialize() {
             applyOptions();
-
+            
             if (!allowEmpty) clearButton.hide();
-
+            
             boundElement.after(container).hide();
-
+            
             updateSelectionPaletteFromStorage();
-
+            
             // Handle user typed input
             textInput.change(setFromTextInput);
             textInput.bind("paste", function() {
                 setTimeout(setFromTextInput, 1);
             });
             textInput.keydown(function(e) {if (e.keyCode == 13) {setFromTextInput();}});
-
+            
             clearButton.attr("title", opts.clearText);
             clearButton.bind("click.spectrum", function(e) {
                 e.stopPropagation();
@@ -16551,55 +16654,55 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
                 isEmpty = true;
                 updateUI();
             });
-
+            
             draggable(slider, function(dragX, dragY) {
                 currentHue = parseFloat(dragY / slideHeight);
                 isEmpty = false;
                 updateUI();
             }, dragStart, dragStop);
-
+            
             draggable(dragger, function(dragX, dragY, e) {
                 // shift+drag should snap the movement to either the x or y axis.
                 if (!e.shiftKey) {
                     shiftMovementDirection = null;
                 } else if (!shiftMovementDirection) {
-                    var oldDragX = currentSaturation * dragWidth;
-                    var oldDragY = dragHeight - (currentValue * dragHeight);
-                    var furtherFromX = Math.abs(dragX - oldDragX) > Math.abs(dragY - oldDragY);
+                    const oldDragX = currentSaturation * dragWidth,
+                        oldDragY = dragHeight - (currentValue * dragHeight),
+                        furtherFromX = Math.abs(dragX - oldDragX) > Math.abs(dragY - oldDragY);
                     shiftMovementDirection = furtherFromX ? "x" : "y";
                 }
-
-                var setSaturation = !shiftMovementDirection || shiftMovementDirection === "x";
-                var setValue = !shiftMovementDirection || shiftMovementDirection === "y";
-
+                
+                const setSaturation = !shiftMovementDirection || shiftMovementDirection === "x",
+                    setValue = !shiftMovementDirection || shiftMovementDirection === "y";
+                
                 if (setSaturation) currentSaturation = parseFloat(dragX / dragWidth);
                 if (setValue) currentValue = parseFloat((dragHeight - dragY) / dragHeight);
-
+                
                 isEmpty = false;
-
+                
                 updateUI();
             }, dragStart, dragStop);
-
+            
             if (!!initialColor) {
                 set(initialColor);
                 addColorToSelectionPalette(initialColor);
             }
-
+            
             reflow();
             colorOnShow = get();
             updateUI();
-
+            
             function paletteElementClick(e) {
                 set($(e.target).closest(".sp-thumb-el").data("color"));
                 updateUI();
                 return false;
             }
-
-            var paletteEvent = "click.spectrum";
+            
+            const paletteEvent = "click.spectrum";
             paletteContainer.delegate(".sp-thumb-el", paletteEvent, paletteElementClick);
             initialColorContainer.delegate(".sp-thumb-el:nth-child(1)", paletteEvent, paletteElementClick);
         }
-
+        
         function updateSelectionPaletteFromStorage() {
             if (localStorageKey && window.localStorage) {
                 try {
@@ -16607,15 +16710,15 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
                 } catch (e) {}
             }
         }
-
+        
         function addColorToSelectionPalette(color) {
             if (showSelectionPalette) {
-                var rgb = tinycolor(color).toHexString();
+                const rgb = tinycolor(color).toHexString();
                 if (!paletteLookup[rgb] && $.inArray(rgb, selectionPalette) === -1) {
                     selectionPalette.push(rgb);
                     while (selectionPalette.length > maxSelectionSize) selectionPalette.shift();
                 }
-
+                
                 if (localStorageKey && window.localStorage) {
                     try {
                         window.localStorage[localStorageKey] = selectionPalette.join(";");
@@ -16623,53 +16726,54 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
                 }
             }
         }
-
+        
         function getUniqueSelectionPalette() {
-            var unique = [];
-            for (var i = 0; i < selectionPalette.length; i++) {
-                var rgb = tinycolor(selectionPalette[i]).toHexString();
+            const unique = [];
+            for (let i = 0; i < selectionPalette.length; i++) {
+                const rgb = tinycolor(selectionPalette[i]).toHexString();
                 if (!paletteLookup[rgb]) unique.push(selectionPalette[i]);
             }
             return unique.reverse().slice(0, opts.maxSelectionSize);
         }
-
+        
         function drawPalette() {
-            var currentColor = get();
-
-            var html = $.map(paletteArray, function (palette, i) {
+            const currentColor = get();
+            
+            const html = $.map(paletteArray, function (palette, i) {
                 return paletteTemplate(palette, currentColor, opts);
             });
-
+            
             updateSelectionPaletteFromStorage();
-
+            
             if (selectionPalette) {
-                var uniquePalette = getUniqueSelectionPalette();
-                for (var i = 0, len = uniquePalette.length; len > i; i += selectionWrapSize) {
+                const uniquePalette = getUniqueSelectionPalette(),
+                    len = uniquePalette.length;
+                for (let i = 0; len > i; i += selectionWrapSize) {
                     html.push(paletteTemplate(uniquePalette.slice(i, i + selectionWrapSize), currentColor, opts));
                 }
             }
-
+            
             paletteContainer.html(html.join(""));
         }
-
+        
         function dragStart() {
             if (dragHeight <= 0 || dragWidth <= 0 || slideHeight <= 0) reflow();
             container.addClass(draggingClass);
             shiftMovementDirection = null;
             boundElement.trigger('dragstart.spectrum', [get()]);
         }
-
+        
         function dragStop() {
             container.removeClass(draggingClass);
             boundElement.trigger('dragstop.spectrum', [get()]);
         }
-
+        
         function setFromTextInput() {
-            var value = textInput.val();
+            const value = textInput.val();
             if ((value === null || value === "") && allowEmpty) {
                 set(null);
             } else {
-                var tiny = tinycolor(value);
+                const tiny = tinycolor(value);
                 if (tiny.isValid()) {
                     set(tiny);
                 } else {
@@ -16677,10 +16781,11 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
                 }
             }
         }
-
+        
         function set(color) {
             if (!tinycolor.equals(color, get())) {
-                var newColor, newHsv;
+                let newColor,
+                    newHsv;
                 if (!color && allowEmpty) {
                     isEmpty = true;
                 } else {
@@ -16692,44 +16797,44 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
                     currentValue = newHsv.v;
                 }
             }
-
+            
             // Update UI just in case a validation error needs to be cleared.
             updateUI();
         }
-
+        
         function get() {
             if (allowEmpty && isEmpty) return null;
-
+            
             return tinycolor.fromRatio({
                 h: currentHue,
                 s: currentSaturation,
                 v: currentValue
             });
         }
-
+        
         function updateUI() {
             textInput.removeClass("sp-validation-error");
-
+            
             updateHelperLocations();
-
+            
             // Update dragger background color (gradients take care of saturation and value).
-            var flatColor = tinycolor.fromRatio({h:currentHue, s:1, v:1});
+            const flatColor = tinycolor.fromRatio({h:currentHue, s:1, v:1});
             dragger.css("background-color", flatColor.toHexString());
-
-            var realColor = get(),
+            
+            const realColor = get(),
                 displayColor = (realColor || !allowEmpty) ? realColor.toHexString() : '';
-
+            
             // Update the text entry input as it changes happen
             textInput.val(displayColor);
-
+            
             drawPalette();
-
+            
             // Draw initial
-            var initial = colorOnShow,
+            const initial = colorOnShow,
                 current = get();
             initialColorContainer.html(paletteTemplate([initial, current], current, opts));
         }
-
+        
         function updateHelperLocations() {
             if (allowEmpty && isEmpty) {
                 // if selected color is empty, hide the helpers
@@ -16739,9 +16844,9 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
                 // make sure helpers are visible
                 slideHelper.show();
                 dragHelper.show();
-
+                
                 // Where to show the little circle in that displays your current selected color
-                var dragX = currentSaturation * dragWidth,
+                let dragX = currentSaturation * dragWidth,
                     dragY = dragHeight - (currentValue * dragHeight);
                 dragX = Math.max(
                     -dragHelperHeight,
@@ -16755,15 +16860,15 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
                     "top": dragY + "px",
                     "left": dragX + "px"
                 });
-
+                
                 // Where to show the bar that displays your current selected hue
-                var slideY = currentHue * slideHeight;
+                const slideY = currentHue * slideHeight;
                 slideHelper.css({
                     "top": (slideY - slideHelperHeight) + "px"
                 });
             }
         }
-
+        
         function reflow() {
             dragWidth = dragger.width();
             dragHeight = dragger.height();
@@ -16771,30 +16876,30 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
             slideWidth = slider.width();
             slideHeight = slider.height();
             slideHelperHeight = slideHelper.height();
-
+            
             updateHelperLocations();
             drawPalette();
-
+            
             boundElement.trigger('reflow.spectrum');
         }
-
+        
         function destroy() {
             boundElement.show();
             container.remove();
             spectrums[spect.id] = null;
         }
-
+        
         function option(optionName, optionValue) {
             if (optionName == null) return Object.assign({}, opts);
             if (optionValue == null) return opts[optionName];
-
+            
             opts[optionName] = optionValue;
             applyOptions();
         }
-
+        
         initialize();
-
-        var spect = {
+        
+        const spect = {
             reflow: reflow,
             option: option,
             set: set,
@@ -16803,67 +16908,65 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
             destroy: destroy,
             container: container
         };
-
+        
         spect.id = spectrums.push(spect) - 1;
-
+        
         dialog._spectrumCallback(spect);
-
+        
         return spect;
     }
-
-    /**
-      * Lightweight drag helper.  Handles containment within the element, so that
-      * when dragging, the x is within [0,element.width] and y is within [0,element.height]
-      */
+    
+    /*  Lightweight drag helper.  Handles containment within the element, so that
+        when dragging, the x is within [0,element.width] and y is within [0,element.height] */
     function draggable(element, onmove, onstart, onstop) {
         onmove = onmove || function () { };
         onstart = onstart || function () { };
         onstop = onstop || function () { };
-        var doc = element.ownerDocument || document;
-        var dragging = false;
-        var offset = {};
-        var maxHeight = 0;
-        var maxWidth = 0;
-
-        var duringDragEvents = {};
+        const doc = element.ownerDocument || document;
+        let dragging = false,
+            offset = {},
+            maxHeight = 0,
+            maxWidth = 0;
+        
+        const duringDragEvents = {};
         duringDragEvents["selectstart"] = prevent;
         duringDragEvents["dragstart"] = prevent;
         duringDragEvents["mousemove"] = move;
         duringDragEvents["mouseup"] = stop;
-
+        
         function prevent(e) {
             if (e.stopPropagation) e.stopPropagation();
             if (e.preventDefault) e.preventDefault();
             e.returnValue = false;
         }
-
+        
         function move(e) {
             if (dragging) {
-                var dragX = Math.max(0, Math.min(e.pageX - offset.left, maxWidth)),
+                const dragX = Math.max(0, Math.min(e.pageX - offset.left, maxWidth)),
                     dragY = Math.max(0, Math.min(e.pageY - offset.top, maxHeight));
                 onmove.apply(element, [dragX, dragY, e]);
             }
         }
-
+        
         function start(e) {
-            var rightclick = (e.which) ? (e.which == 3) : (e.button == 2);
-
+            const rightclick = (e.which) ? (e.which == 3) : (e.button == 2);
+            
             if (!rightclick && !dragging) {
                 if (onstart.apply(element, arguments) !== false) {
                     dragging = true;
                     maxHeight = $(element).height();
                     maxWidth = $(element).width();
                     offset = $(element).offset();
-
+                    
                     $(doc).bind(duringDragEvents);
                     $(doc.body).addClass("sp-dragging");
-
+                    
                     move(e);
                     prevent(e);
                 }
             }
         }
-
+        
         function stop() {
             if (dragging) {
                 $(doc).unbind(duringDragEvents);
@@ -16872,25 +16975,23 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
             }
             dragging = false;
         }
-
+        
         $(element).bind("mousedown", start);
     }
-
-    /**
-      * Define a jQuery plugin
-      */
-    var dataID = "spectrum.id";
+    
+    /* Define a jQuery plugin */
+    const dataID = "spectrum.id";
     $.fn.spectrum = function (opts, ...args) {
         if (typeof opts == "string") {
-            var returnValue = this;
+            let returnValue = this;
             this.each(function () {
-                var spect = spectrums[$(this).data(dataID)];
+                const spect = spectrums[$(this).data(dataID)];
                 if (spect) {
-                    var method = spect[opts];
+                    const method = spect[opts];
                     if (!method) {
                         throw new Error( "Spectrum: no such method: '" + opts + "'" );
                     }
-
+                    
                     if (opts == "get") {
                         returnValue = spect.get();
                     } else if (opts == "container") {
@@ -16907,40 +17008,40 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
             });
             return returnValue;
         }
-
+        
         // Initializing a new instance of spectrum
         return this.spectrum("destroy").each(function () {
-            var options = Object.assign({}, opts, $(this).data());
-            var spect = spectrum(this, options);
+            const options = Object.assign({}, opts, $(this).data()),
+                spect = spectrum(this, options);
             $(this).data(dataID, spect.id);
         });
     };
-
+    
     $.fn.spectrum.load = true;
     $.fn.spectrum.draggable = draggable;
     $.fn.spectrum.defaults = defaultOpts;
     $.spectrum = {};
-
+    
     // TinyColor v1.0.0
     // https://github.com/bgrins/TinyColor
     // Brian Grinstead, MIT License
-    var trimHash = /^[#]+/,
+    const trimHash = /^[#]+/,
         math = Math,
         mathRound = math.round,
         mathMin = math.min,
         mathMax = math.max;
-
-    var tinycolor = function tinycolor(color) {
+    
+    const tinycolor = function tinycolor(color) {
         color = color ? color : '';
-
+        
         // If input is already a tinycolor, return itself
         if (color instanceof tinycolor) return color;
-
+        
         // If we are called as a function, call using new instead
         if (!(this instanceof tinycolor)) return new tinycolor(color);
-
+        
         // Input to RGB
-        var rgb = {r:0, g:0, b:0},
+        let rgb = {r:0, g:0, b:0},
             ok = false;
         if (typeof color == "string") color = stringInputToObject(color);
         if (typeof color == "object") {
@@ -16954,12 +17055,12 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
                 ok = true;
             }
         }
-
+        
         this._r = mathMin(255, mathMax(rgb.r, 0));
         this._g = mathMin(255, mathMax(rgb.g, 0));
         this._b = mathMin(255, mathMax(rgb.b, 0));
         this._ok = ok;
-
+        
         // Don't let the range of [0,255] come back in [0,1].
         // Potentially lose a little bit of precision here, but will fix issues where
         // .5 gets interpreted as half of the total, instead of half of 1
@@ -16968,47 +17069,47 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         if (this._g < 1) this._g = mathRound(this._g);
         if (this._b < 1) this._b = mathRound(this._b);
     };
-
+    
     tinycolor.prototype = {
         isValid: function() {
             return this._ok;
         },
         toHsv: function() {
-            var hsv = rgbToHsv(this._r, this._g, this._b);
+            const hsv = rgbToHsv(this._r, this._g, this._b);
             return {h:hsv.h * 360, s:hsv.s, v:hsv.v};
         },
         toHsl: function() {
-            var hsl = rgbToHsl(this._r, this._g, this._b);
+            const hsl = rgbToHsl(this._r, this._g, this._b);
             return {h:hsl.h * 360, s:hsl.s, l:hsl.l};
         },
         toHexString: function() {
             return myt.Color.rgbToHex(this._r, this._g, this._b, true);
         }
     };
-
+    
     // If input is an object, force 1 into "1.0" to handle ratios properly
     // String input requires "1.0" as input, so 1 will be treated as 1
     tinycolor.fromRatio = function(color) {
         if (typeof color == "object") {
-            var newColor = {};
-            for (var i in color) {
+            let newColor = {};
+            for (let i in color) {
                 if (color.hasOwnProperty(i)) newColor[i] = convertToPercentage(color[i]);
             }
             color = newColor;
         }
         return tinycolor(color);
     };
-
+    
     // `equals`
     // Can be called with any tinycolor input
     tinycolor.equals = function (color1, color2) {
         if (!color1 || !color2) return false;
         return tinycolor(color1).toHexString() == tinycolor(color2).toHexString();
     };
-
+    
     // `rgbToHsl`, `rgbToHsv`, `hsvToRgb` modified from:
     // <http://mjijackson.com/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript>
-
+    
     // `rgbToRgb`
     // Handle bounds / percentage checking to conform to CSS color spec
     // <http://www.w3.org/TR/css3-color/>
@@ -17021,7 +17122,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
             b:bound01(b, 255) * 255
         };
     }
-
+    
     // `rgbToHsl`
     // Converts an RGB color value to HSL.
     // *Assumes:* r, g, and b are contained in [0, 255] or [0, 1]
@@ -17030,14 +17131,16 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         r = bound01(r, 255);
         g = bound01(g, 255);
         b = bound01(b, 255);
-
-        var max = mathMax(r, g, b), min = mathMin(r, g, b);
-        var h, s, l = (max + min) / 2;
-
+        
+        const max = mathMax(r, g, b),
+            min = mathMin(r, g, b),
+            l = (max + min) / 2;
+        let h, s;
+        
         if (max == min) {
             h = s = 0; // achromatic
         } else {
-            var d = max - min;
+            const d = max - min;
             s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
             switch(max) {
                 case r: h = (g - b) / d + (g < b ? 6 : 0); break;
@@ -17048,7 +17151,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         }
         return {h:h, s:s, l:l};
     }
-
+    
     // `rgbToHsv`
     // Converts an RGB color value to HSV
     // *Assumes:* r, g, and b are contained in the set [0, 255] or [0, 1]
@@ -17058,10 +17161,10 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         g = bound01(g, 255);
         b = bound01(b, 255);
 
-        var max = mathMax(r, g, b), min = mathMin(r, g, b);
-        var h, s, v = max;
+        const max = mathMax(r, g, b), min = mathMin(r, g, b);
+        let h, s, v = max;
 
-        var d = max - min;
+        const d = max - min;
         s = max === 0 ? 0 : d / max;
 
         if (max == min) {
@@ -17076,7 +17179,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         }
         return {h:h, s:s, v:v};
     }
-
+    
     // `hsvToRgb`
     // Converts an HSV color value to RGB.
     // *Assumes:* h is contained in [0, 1] or [0, 360] and s and v are contained in [0, 1] or [0, 100]
@@ -17085,8 +17188,8 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         h = bound01(h, 360) * 6;
         s = bound01(s, 100);
         v = bound01(v, 100);
-
-        var i = math.floor(h),
+        
+        const i = math.floor(h),
             f = h - i,
             p = v * (1 - s),
             q = v * (1 - f * s),
@@ -17095,53 +17198,53 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
             r = [v, q, p, p, t, v][mod],
             g = [t, v, v, q, p, p][mod],
             b = [p, p, t, v, v, q][mod];
-
+        
         return {r:r * 255, g:g * 255, b:b * 255};
     }
-
+    
     // Take input from [0, n] and return it as [0, 1]
     function bound01(n, max) {
-        var isString = typeof n == "string";
+        const isString = typeof n == "string";
         if (isString && n.indexOf('.') != -1 && parseFloat(n) === 1) n = "100%";
-
-        var isPercentage = isString && n.indexOf('%') != -1;
+        
+        const isPercentage = isString && n.indexOf('%') != -1;
         n = mathMin(max, mathMax(0, parseFloat(n)));
-
+        
         // Automatically convert percentage into number
         if (isPercentage) n = parseInt(n * max, 10) / 100;
-
+        
         // Handle floating point rounding errors
         if (math.abs(n - max) < 0.000001) return 1;
-
+        
         // Convert into [0, 1] range if it isn't already
         return (n % max) / parseFloat(max);
     }
-
+    
     // Replace a decimal with it's percentage value
     function convertToPercentage(n) {
         return n <= 1 ? (n * 100) + "%" : n;
     }
-
-    var matchers = (function() {
+    
+    const matchers = (function() {
         // Allow positive/negative integer/number. Don't capture the either/or, just the entire outcome.
-        var CSS_UNIT = "(?:[-\\+]?\\d*\\.\\d+%?)|(?:[-\\+]?\\d+%?)";
+        const CSS_UNIT = "(?:[-\\+]?\\d*\\.\\d+%?)|(?:[-\\+]?\\d+%?)";
         return {
             rgb: new RegExp("rgb[\\s|\\(]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")\\s*\\)?"),
             hex6: /^([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/
         };
     })();
-
+    
     // `stringInputToObject`
     // Permissive string parsing.  Take in a number of formats, and output an object
     // based on detected format.  Returns `{ r, g, b }` or `{ h, s, l }` or `{ h, s, v}`
     function stringInputToObject(color) {
         color = color.trim().toLowerCase().replace(trimHash, '');
-
+        
         // Try to match string input using regular expressions.
         // Keep most of the number bounding out of this function - don't worry about [0,1] or [0,100] or [0,360]
         // Just return an object and let the conversion functions handle that.
         // This way the result will be the same whether the tinycolor is initialized with string or object.
-        var match;
+        let match;
         if (match = matchers.rgb.exec(color)) return {r:match[1], g:match[2], b:match[3]};
         if (match = matchers.hex6.exec(color)) {
             return {
@@ -17161,521 +17264,525 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
 // https://github.com/mugifly/jquery-simple-datetimepicker
 (function (window, $) {
     "use strict";
-    var lang = {
-        en: {
-            days: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
-            months: [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ],
-            sep: '-',
-            prevMonth: 'Previous month',
-            nextMonth: 'Next month',
-            today: 'Today'
+    
+    const lang = {
+            en: {
+                days: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+                months: [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ],
+                sep: '-',
+                prevMonth: 'Previous month',
+                nextMonth: 'Next month',
+                today: 'Today'
+            },
+            ro:{
+                days: ['Dum', 'Lun', 'Mar', 'Mie', 'Joi', 'Vin', 'Sâm'],
+                months: ['Ian', 'Feb', 'Mar', 'Apr', 'Mai', 'Iun', 'Iul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                sep: '.',
+                prevMonth: 'Luna precedentă',
+                nextMonth: 'Luna următoare',
+                today: 'Azi'
+            },
+            ja: {
+                days: ['日', '月', '火', '水', '木', '金', '土'],
+                months: [ "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" ],
+                sep: '/'
+            },
+            ru: {
+                days: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
+                months: [ "Янв", "Фев", "Мар", "Апр", "Май", "Июн", "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек" ]
+            },
+            br: {
+                days: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
+                months: [ "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro" ]
+            },
+            pt: {
+                days: ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'],
+                months: [ "janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro" ]
+            },
+            cn: {
+                days: ['日', '一', '二', '三', '四', '五', '六'],
+                months: [ "一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月" ]
+            },
+            de: {
+                days: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
+                months: [ "Jan", "Feb", "März", "Apr", "Mai", "Juni", "Juli", "Aug", "Sept", "Okt", "Nov", "Dez" ]
+            },
+            sv: {
+                days: ['Sö', 'Må', 'Ti', 'On', 'To', 'Fr', 'Lö'],
+                months: [ "Jan", "Feb", "Mar", "Apr", "Maj", "Juni", "Juli", "Aug", "Sept", "Okt", "Nov", "Dec" ]
+            },
+            id: {
+                days: ['Min','Sen','Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+                months: [ "Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des" ]
+            },
+            it: {
+                days: ['Dom','Lun','Mar', 'Mer', 'Gio', 'Ven', 'Sab'],
+                months: [ "Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic" ]
+            },
+            tr: {
+                days: ['Pz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cu', 'Cts'],
+                months: [ "Ock", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Agu", "Eyl", "Ekm", "Kas", "Arlk" ]
+            },
+            es: {
+                days: ['dom', 'lun', 'mar', 'miér', 'jue', 'vié', 'sáb'],
+                months: [ "ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic" ]
+            },
+            ko: {
+                days: ['일', '월', '화', '수', '목', '금', '토'],
+                months: [ "1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월" ]
+            },
+            nl: {
+                days: ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za'],
+                months: [ "jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec" ],
+            },
+            cz: {
+                days: ['Ne', 'Po', 'Út', 'St', 'Čt', 'Pá', 'So'],
+                months: [ "Led", "Úno", "Bře", "Dub", "Kvě", "Čer", "Čvc", "Srp", "Zář", "Říj", "Lis", "Pro" ]
+            },
+            fr: {
+                days: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
+                months: [ "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre" ]
+            },
+            pl: {
+                days: ['N', 'Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So'],
+                months: [ "Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień" ],
+                prevMonth: 'Poprzedni miesiąc',
+                nextMonth: 'Następny miesiąc',
+                today: 'Dzisiaj'
+            },
+            gr: {
+                days: ['Κυ', 'Δε', 'Τρ', 'Τε', 'Πε', 'Πα', 'Σα'],
+                months: [ "Ιαν", "Φεβ", "Μαρ", "Απρ", "Μαϊ", "Ιουν", "Ιουλ", "Αυγ", "Σεπ", "Οκτ", "Νοε", "Δεκ" ],
+                prevMonth: 'Προηγ. μήνας',
+                nextMonth: 'Επόμ. μήνας',
+                today: 'Σήμερα'
+            }
         },
-        ro:{
-            days: ['Dum', 'Lun', 'Mar', 'Mie', 'Joi', 'Vin', 'Sâm'],
-            months: ['Ian', 'Feb', 'Mar', 'Apr', 'Mai', 'Iun', 'Iul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            sep: '.',
-            prevMonth: 'Luna precedentă',
-            nextMonth: 'Luna următoare',
-            today: 'Azi'
-        },
-        ja: {
-            days: ['日', '月', '火', '水', '木', '金', '土'],
-            months: [ "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" ],
-            sep: '/'
-        },
-        ru: {
-            days: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
-            months: [ "Янв", "Фев", "Мар", "Апр", "Май", "Июн", "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек" ]
-        },
-        br: {
-            days: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
-            months: [ "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro" ]
-        },
-        pt: {
-            days: ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'],
-            months: [ "janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro" ]
-        },
-        cn: {
-            days: ['日', '一', '二', '三', '四', '五', '六'],
-            months: [ "一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月" ]
-        },
-        de: {
-            days: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
-            months: [ "Jan", "Feb", "März", "Apr", "Mai", "Juni", "Juli", "Aug", "Sept", "Okt", "Nov", "Dez" ]
-        },
-        sv: {
-            days: ['Sö', 'Må', 'Ti', 'On', 'To', 'Fr', 'Lö'],
-            months: [ "Jan", "Feb", "Mar", "Apr", "Maj", "Juni", "Juli", "Aug", "Sept", "Okt", "Nov", "Dec" ]
-        },
-        id: {
-            days: ['Min','Sen','Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
-            months: [ "Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des" ]
-        },
-        it: {
-            days: ['Dom','Lun','Mar', 'Mer', 'Gio', 'Ven', 'Sab'],
-            months: [ "Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic" ]
-        },
-        tr: {
-            days: ['Pz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cu', 'Cts'],
-            months: [ "Ock", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Agu", "Eyl", "Ekm", "Kas", "Arlk" ]
-        },
-        es: {
-            days: ['dom', 'lun', 'mar', 'miér', 'jue', 'vié', 'sáb'],
-            months: [ "ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic" ]
-        },
-        ko: {
-            days: ['일', '월', '화', '수', '목', '금', '토'],
-            months: [ "1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월" ]
-        },
-        nl: {
-            days: ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za'],
-            months: [ "jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec" ],
-        },
-        cz: {
-            days: ['Ne', 'Po', 'Út', 'St', 'Čt', 'Pá', 'So'],
-            months: [ "Led", "Úno", "Bře", "Dub", "Kvě", "Čer", "Čvc", "Srp", "Zář", "Říj", "Lis", "Pro" ]
-        },
-        fr: {
-            days: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
-            months: [ "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre" ]
-        },
-        pl: {
-            days: ['N', 'Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So'],
-            months: [ "Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień" ],
-            prevMonth: 'Poprzedni miesiąc',
-            nextMonth: 'Następny miesiąc',
-            today: 'Dzisiaj'
-        },
-        gr: {
-            days: ['Κυ', 'Δε', 'Τρ', 'Τε', 'Πε', 'Πα', 'Σα'],
-            months: [ "Ιαν", "Φεβ", "Μαρ", "Απρ", "Μαϊ", "Ιουν", "Ιουλ", "Αυγ", "Σεπ", "Οκτ", "Νοε", "Δεκ" ],
-            prevMonth: 'Προηγ. μήνας',
-            nextMonth: 'Επόμ. μήνας',
-            today: 'Σήμερα'
-        }
-    };
-
-    var getParentPickerObject = function(obj) {
-        return $(obj).closest('.datepicker');
-    };
-
-    var beforeMonth = function($obj) {
-        var $picker = getParentPickerObject($obj);
-
-        if ($picker.data('stateAllowBeforeMonth') === false) return;
-
-        var date = getPickedDate($picker);
-        var targetMonth_lastDay = new Date(date.getFullYear(), date.getMonth(), 0).getDate();
-        if (targetMonth_lastDay < date.getDate()) date.setDate(targetMonth_lastDay);
-        draw($picker, date.getFullYear(), date.getMonth() - 1, date.getDate(), date.getHours(), date.getMinutes());
-
-        var todayDate = new Date();
-        var isCurrentYear = todayDate.getFullYear() == date.getFullYear();
-        var isCurrentMonth = isCurrentYear && todayDate.getMonth() == date.getMonth();
         
-        if (!isCurrentMonth || !$picker.data("futureOnly")) {
+        getParentPickerObject = function(obj) {
+            return $(obj).closest('.datepicker');
+        },
+        
+        beforeMonth = function($obj) {
+            const $picker = getParentPickerObject($obj);
+            
+            if ($picker.data('stateAllowBeforeMonth') === false) return;
+            
+            const date = getPickedDate($picker),
+                targetMonth_lastDay = new Date(date.getFullYear(), date.getMonth(), 0).getDate();
             if (targetMonth_lastDay < date.getDate()) date.setDate(targetMonth_lastDay);
             draw($picker, date.getFullYear(), date.getMonth() - 1, date.getDate(), date.getHours(), date.getMinutes());
-        }
-    };
-
-    var nextMonth = function($obj) {
-        var $picker = getParentPickerObject($obj);
-        var date = getPickedDate($picker);
-        var targetMonth_lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-        if (targetMonth_lastDay < date.getDate()) date.setDate(targetMonth_lastDay);
-
-        // Check a last date of a next month
-        var lastDate = (new Date(date.getFullYear(), date.getMonth() + 2, 0)).getDate();
-        if (lastDate < date.getDate()) date.setDate(lastDate);
-
-        draw($picker, date.getFullYear(), date.getMonth() + 1, date.getDate(), date.getHours(), date.getMinutes());
-    };
-    
-    var beforeDay = function($obj) {
-        var $picker = getParentPickerObject($obj);
-        var date = getPickedDate($picker);
-        date.setDate(date.getDate() - 1);
-        draw($picker, date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes());
-    };
-    
-    var afterDay = function($obj) {
-        var $picker = getParentPickerObject($obj);
-        var date = getPickedDate($picker);
-        date.setDate(date.getDate() + 1);
-        draw($picker, date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes());
-    };
-
-    var getPickedDate = function($obj) {
-        return getParentPickerObject($obj).data("pickedDate");
-    };
-
-    var zpadding = function(num) {
-        return ("0" + num).slice(-2);
-    };
-
-    var translate = function(locale, s) {
-        if (typeof lang[locale][s] !== "undefined") return lang[locale][s];
-        return lang.en[s];
-    };
-
-    var draw = function($picker, year, month, day, hour, min) {
-        var date;
-        if (hour != null) {
-            date = new Date(year, month, day, hour, min, 0);
-        } else if (year != null) {
-            date = new Date(year, month, day);
-        } else {
-            date = new Date();
-        }
-
-        var isTodayButton = $picker.data("todayButton");
-        var isFutureOnly = $picker.data("futureOnly");
-        var minDate = $picker.data("minDate");
-        var maxDate = $picker.data("maxDate");
-
-        var minuteInterval = $picker.data("minuteInterval");
-        var firstDayOfWeek = $picker.data("firstDayOfWeek");
-
-        var allowWdays = $picker.data("allowWdays");
-        if (allowWdays == null || Array.isArray(allowWdays) === false || allowWdays.length <= 0) allowWdays = null;
-        
-        var minTime = $picker.data("minTime");
-        var maxTime = $picker.data("maxTime");
-
-        /* Check a specified date */
-        var todayDate = new Date();
-        if (isFutureOnly) {
-            if (date.getTime() < todayDate.getTime()) { // Already passed
-                date.setTime(todayDate.getTime());
-            }
-        }
-        if (allowWdays != null && allowWdays.length <= 6) {
-            while (true) {
-                if ($.inArray(date.getDay(), allowWdays) == -1) { // Unallowed wday
-                    // Slide a date
-                    date.setDate(date.getDate() + 1);
-                } else {
-                    break;
-                }
-            }
-        }
-
-        /* Read locale option */
-        var locale = $picker.data("locale");
-        if (!lang.hasOwnProperty(locale)) locale = 'en';
-
-        /* Calculate dates */
-        var firstWday = new Date(date.getFullYear(), date.getMonth(), 1).getDay() - firstDayOfWeek;
-        var lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-        var beforeMonthLastDay = new Date(date.getFullYear(), date.getMonth(), 0).getDate();
-        var dateBeforeMonth = new Date(date.getFullYear(), date.getMonth(), 0);
-        var dateNextMonth = new Date(date.getFullYear(), date.getMonth() + 2, 0);
-        var isCurrentYear = todayDate.getFullYear() == date.getFullYear();
-        var isCurrentMonth = isCurrentYear && todayDate.getMonth() == date.getMonth();
-        var isCurrentDay = isCurrentMonth && todayDate.getDate() == date.getDate();
-        var isPastMonth = false;
-        if (date.getFullYear() < todayDate.getFullYear() || (isCurrentYear && date.getMonth() < todayDate.getMonth())) {
-            isPastMonth = true;
-        }
-
-        /* Collect each part */
-        var $header = $picker.children('.datepicker_header');
-        var $inner = $picker.children('.datepicker_inner_container');
-        var $calendar = $picker.children('.datepicker_inner_container').children('.datepicker_calendar');
-        var $table = $calendar.children('.datepicker_table');
-        var $timelist = $picker.children('.datepicker_inner_container').children('.datepicker_timelist');
-
-        /* Grasp a point that will be changed */
-        var changePoint = "";
-        var oldDate = getPickedDate($picker);
-        if(oldDate != null){
-            if(oldDate.getMonth() != date.getMonth() || oldDate.getDate() != date.getDate()){
-                changePoint = "calendar";
-            } else if (oldDate.getHours() != date.getHours() || oldDate.getMinutes() != date.getMinutes()){
-                if(date.getMinutes() === 0 || date.getMinutes() % minuteInterval === 0){
-                    changePoint = "timelist";
-                }
-            }
-        }
-
-        /* Save new date to Picker data */
-        $($picker).data("pickedDate", date);
-        $.fn.dtpicker.dialog._dtpickerCallback(date);
-
-        /* Remind timelist scroll state */
-        var drawBefore_timeList_scrollTop = $timelist.scrollTop();
-
-        /* New timelist  */
-        var timelist_activeTimeCell_offsetTop = -1;
-
-        if ($picker.data("timeOnly") === true) {
-            $calendar.css("border-right", '0px');
-            $calendar.css("width", '0px');
-            $timelist.css("width", '130px');
-        } else {
-            /* Header ----- */
-            $header.children().remove();
-    
-            var cDate = new Date(date.getTime());
-            cDate.setMinutes(59);
-            cDate.setHours(23);
-            cDate.setSeconds(59);
-            cDate.setDate(0); // last day of previous month
-    
-            var $link_before_month = null;
-            if ((!isFutureOnly || !isCurrentMonth) && ((minDate == null) || (minDate < cDate.getTime()))) {
-                $link_before_month = $('<a>');
-                $link_before_month.text('<');
-                $link_before_month.prop('alt', translate(locale,'prevMonth'));
-                $link_before_month.prop('title', translate(locale,'prevMonth') );
-                $link_before_month.click(function() {
-                    beforeMonth($picker);
-                });
-                $picker.data('stateAllowBeforeMonth', true);
-            } else {
-                $picker.data('stateAllowBeforeMonth', false);
-            }
-    
-            cDate.setMinutes(0);
-            cDate.setHours(0);
-            cDate.setSeconds(0);
-            cDate.setDate(1); // First day of next month
-            cDate.setMonth(date.getMonth() + 1);
-    
-            var $now_month = $('<span>');
-            $now_month.text(date.getFullYear() + " " + translate(locale, 'sep') + " " + translate(locale, 'months')[date.getMonth()]);
-    
-            var $link_next_month = null;
-            if ((maxDate == null) || (maxDate > cDate.getTime())) {
-                $link_next_month = $('<a>');
-                $link_next_month.text('>');
-                $link_next_month.prop('alt', translate(locale,'nextMonth'));
-                $link_next_month.prop('title', translate(locale,'nextMonth'));
-                $link_next_month.click(function() {
-                    nextMonth($picker);
-                });
-            }
-    
-            if (isTodayButton) {
-                var $link_today = $('<a/>');
-                /* This icon resource from a part of "FontAwesome" by Dave Gandy - http://fontawesome.io".
-                    http://fortawesome.github.io/Font-Awesome/license/
-                    Thankyou. */
-                $link_today.html(decodeURIComponent('%3c%3fxml%20version%3d%221%2e0%22%20encoding%3d%22UTF%2d8%22%20standalone%3d%22no%22%3f%3e%3csvg%20%20xmlns%3adc%3d%22http%3a%2f%2fpurl%2eorg%2fdc%2felements%2f1%2e1%2f%22%20%20xmlns%3acc%3d%22http%3a%2f%2fcreativecommons%2eorg%2fns%23%22%20xmlns%3ardf%3d%22http%3a%2f%2fwww%2ew3%2eorg%2f1999%2f02%2f22%2drdf%2dsyntax%2dns%23%22%20%20xmlns%3asvg%3d%22http%3a%2f%2fwww%2ew3%2eorg%2f2000%2fsvg%22%20xmlns%3d%22http%3a%2f%2fwww%2ew3%2eorg%2f2000%2fsvg%22%20%20version%3d%221%2e1%22%20%20width%3d%22100%25%22%20%20height%3d%22100%25%22%20viewBox%3d%220%200%2010%2010%22%3e%3cg%20transform%3d%22translate%28%2d5%2e5772299%2c%2d26%2e54581%29%22%3e%3cpath%20d%3d%22m%2014%2e149807%2c31%2e130932%20c%200%2c%2d0%2e01241%200%2c%2d0%2e02481%20%2d0%2e0062%2c%2d0%2e03721%20L%2010%2e57723%2c28%2e153784%207%2e0108528%2c31%2e093719%20c%200%2c0%2e01241%20%2d0%2e0062%2c0%2e02481%20%2d0%2e0062%2c0%2e03721%20l%200%2c2%2e97715%20c%200%2c0%2e217084%200%2e1798696%2c0%2e396953%200%2e3969534%2c0%2e396953%20l%202%2e3817196%2c0%200%2c%2d2%2e38172%201%2e5878132%2c0%200%2c2%2e38172%202%2e381719%2c0%20c%200%2e217084%2c0%200%2e396953%2c%2d0%2e179869%200%2e396953%2c%2d0%2e396953%20l%200%2c%2d2%2e97715%20m%201%2e383134%2c%2d0%2e427964%20c%200%2e06823%2c%2d0%2e08063%200%2e05582%2c%2d0%2e210882%20%2d0%2e02481%2c%2d0%2e279108%20l%20%2d1%2e358324%2c%2d1%2e128837%200%2c%2d2%2e530576%20c%200%2c%2d0%2e111643%20%2d0%2e08683%2c%2d0%2e198477%20%2d0%2e198477%2c%2d0%2e198477%20l%20%2d1%2e190859%2c0%20c%20%2d0%2e111643%2c0%20%2d0%2e198477%2c0%2e08683%20%2d0%2e198477%2c0%2e198477%20l%200%2c1%2e209467%20%2d1%2e513384%2c%2d1%2e265289%20c%20%2d0%2e2605%2c%2d0%2e217083%20%2d0%2e682264%2c%2d0%2e217083%20%2d0%2e942764%2c0%20L%205%2e6463253%2c30%2e42386%20c%20%2d0%2e080631%2c0%2e06823%20%2d0%2e093036%2c0%2e198476%20%2d0%2e024809%2c0%2e279108%20l%200%2e3845485%2c0%2e458976%20c%200%2e031012%2c0%2e03721%200%2e080631%2c0%2e06203%200%2e1302503%2c0%2e06823%200%2e055821%2c0%2e0062%200%2e1054407%2c%2d0%2e01241%200%2e1488574%2c%2d0%2e04342%20l%204%2e2920565%2c%2d3%2e578782%204%2e292058%2c3%2e578782%20c%200%2e03721%2c0%2e03101%200%2e08063%2c0%2e04342%200%2e13025%2c0%2e04342%200%2e0062%2c0%200%2e01241%2c0%200%2e01861%2c0%200%2e04962%2c%2d0%2e0062%200%2e09924%2c%2d0%2e03101%200%2e130251%2c%2d0%2e06823%20l%200%2e384549%2c%2d0%2e458976%22%20%2f%3e%3c%2fg%3e%3c%2fsvg%3e') );
-                $link_today.addClass('icon-home');
-                $link_today.prop('alt', translate(locale,'today'));
-                $link_today.prop('title', translate(locale,'today'));
-                $link_today.click(function() {
-                    var date = new Date();
-                    draw(getParentPickerObject($picker), date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes());
-                });
-                $header.append($link_today);
-            }
-    
-            if ($link_before_month != null) $header.append($link_before_month);
-            $header.append($now_month);
-            if ($link_next_month != null) $header.append($link_next_month);
-    
-            /* Calendar > Table ----- */
-            $table.children().remove();
-            var $tr = $('<tr>');
-            $table.append($tr);
-    
-            /* Output wday cells */
-            var firstDayDiff = 7 + firstDayOfWeek;
-            var daysOfWeek = translate(locale,'days');
-            var $td;
-            for (var i = 0; i < 7; i++) {
-                $td = $('<th>');
-                $td.text(daysOfWeek[((i + firstDayDiff) % 7)]);
-                $tr.append($td);
-            }
-    
-            /* Output day cells */
-            var cellNum = Math.ceil((firstWday + lastDay) / 7) * 7;
-            i = 0;
-            if (firstWday < 0) i = -7;
             
-            var realDayObj =  new Date(date.getTime());
-            realDayObj.setHours(0);
-            realDayObj.setMinutes(0);
-            realDayObj.setSeconds(0);
-            for (var zz = 0; i < cellNum; i++) {
-                var realDay = i + 1 - firstWday;
-    
-                var isPast = isPastMonth || (isCurrentMonth && realDay < todayDate.getDate());
-    
-                if (i % 7 === 0) {
-                    $tr = $('<tr>');
-                    $table.append($tr);
-                }
-    
-                $td = $('<td>');
-                $td.data("day", realDay);
-    
-                $tr.append($td);
-    
-                if (firstWday > i) {/* Before months day */
-                    $td.text(beforeMonthLastDay + realDay);
-                    $td.addClass('day_another_month');
-                    $td.data("dateStr", dateBeforeMonth.getFullYear() + "/" + (dateBeforeMonth.getMonth() + 1) + "/" + (beforeMonthLastDay + realDay));
-                    realDayObj.setDate(beforeMonthLastDay + realDay);
-                    realDayObj.setMonth(dateBeforeMonth.getMonth());
-                    realDayObj.setYear(dateBeforeMonth.getFullYear());
-                } else if (i < firstWday + lastDay) {/* Now months day */
-                    $td.text(realDay);
-                    $td.data("dateStr", (date.getFullYear()) + "/" + (date.getMonth() + 1) + "/" + realDay);
-                    realDayObj.setDate(realDay);
-                    realDayObj.setMonth(date.getMonth());
-                    realDayObj.setYear(date.getFullYear());
-                } else {/* Next months day */
-                    $td.text(realDay - lastDay);
-                    $td.addClass('day_another_month');
-                    $td.data("dateStr", dateNextMonth.getFullYear() + "/" + (dateNextMonth.getMonth() + 1) + "/" + (realDay - lastDay));
-                    realDayObj.setDate(realDay - lastDay);
-                    realDayObj.setMonth(dateNextMonth.getMonth());
-                    realDayObj.setYear(dateNextMonth.getFullYear());
-                }
-    
-                /* Check a wday */
-                var wday = ((i + firstDayDiff) % 7);
-                if(allowWdays != null) {
-                    if ($.inArray(wday, allowWdays) == -1) {
-                        $td.addClass('day_in_unallowed');
-                        continue; // Skip
-                    }
-                } else if (wday === 0) {/* Sunday */
-                    $td.addClass('wday_sun');
-                } else if (wday == 6) {/* Saturday */
-                    $td.addClass('wday_sat');
-                }
-    
-                /* Set a special mark class */
-                if (realDay == date.getDate()) $td.addClass('active');
-    
-                if (isCurrentMonth && realDay == todayDate.getDate()) $td.addClass('today');
-    
-                var realDayObjMN =  new Date(realDayObj.getTime());
-                realDayObjMN.setHours(23);
-                realDayObjMN.setMinutes(59);
-                realDayObjMN.setSeconds(59);
-    
-                if (
-                    // compare to 23:59:59 on the current day (if MIN is 1pm, then we still need to show this day
-                    ((minDate != null) && (minDate > realDayObjMN.getTime())) || ((maxDate != null) && (maxDate < realDayObj.getTime())) // compare to 00:00:00
-                ) { // Out of range day
-                    $td.addClass('out_of_range');
-                } else if (isFutureOnly && isPast) { // Past day
-                    $td.addClass('day_in_past');
-                } else {
-                    /* Set event-handler to day cell */
-                    $td.click(function() {
-                        if ($(this).hasClass('hover')) {
-                            $(this).removeClass('hover');
-                        }
-                        $(this).addClass('active');
-    
-                        var $picker = getParentPickerObject($(this));
-                        var targetDate = new Date($(this).data("dateStr"));
-                        var selectedDate = getPickedDate($picker);
-                        draw($picker, targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), selectedDate.getHours(), selectedDate.getMinutes());
-                    });
-    
-                    $td.hover(function() {
-                        if (! $(this).hasClass('active')) {
-                            $(this).addClass('hover');
-                        }
-                    }, function() {
-                        if ($(this).hasClass('hover')) {
-                            $(this).removeClass('hover');
-                        }
-                    });
-                }
+            const todayDate = new Date(),
+                isCurrentYear = todayDate.getFullYear() == date.getFullYear(),
+                isCurrentMonth = isCurrentYear && todayDate.getMonth() == date.getMonth();
+            
+            if (!isCurrentMonth || !$picker.data("futureOnly")) {
+                if (targetMonth_lastDay < date.getDate()) date.setDate(targetMonth_lastDay);
+                draw($picker, date.getFullYear(), date.getMonth() - 1, date.getDate(), date.getHours(), date.getMinutes());
             }
-        }
+        },
         
-        if ($picker.data("dateOnly") === true) {
-            /* dateOnly mode */
-            $timelist.css("display", "none");
-            $calendar.css("border-right", '0px');
-        } else {
-            /* Timelist ----- */
-            $timelist.children().remove();
-
-            realDayObj =  new Date(date.getTime());
-            $timelist.css("height", '175px');
-
-            /* Output time cells */
-            var hour_ = minTime[0];
-            var min_ = minTime[1];
-
-            while( hour_*100+min_ < maxTime[0]*100+maxTime[1] ){
-                var $o = $('<div>');
-                var is_past_time = hour_ < todayDate.getHours() || (hour_ == todayDate.getHours() && min_ < todayDate.getMinutes());
-                var is_past = isCurrentDay && is_past_time;
+        nextMonth = function($obj) {
+            const $picker = getParentPickerObject($obj),
+                date = getPickedDate($picker),
+                targetMonth_lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+            if (targetMonth_lastDay < date.getDate()) date.setDate(targetMonth_lastDay);
+            
+            // Check a last date of a next month
+            const lastDate = (new Date(date.getFullYear(), date.getMonth() + 2, 0)).getDate();
+            if (lastDate < date.getDate()) date.setDate(lastDate);
+            
+            draw($picker, date.getFullYear(), date.getMonth() + 1, date.getDate(), date.getHours(), date.getMinutes());
+        },
+        
+        beforeDay = function($obj) {
+            const $picker = getParentPickerObject($obj),
+                date = getPickedDate($picker);
+            date.setDate(date.getDate() - 1);
+            draw($picker, date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes());
+        },
+        
+        afterDay = function($obj) {
+            const $picker = getParentPickerObject($obj),
+                date = getPickedDate($picker);
+            date.setDate(date.getDate() + 1);
+            draw($picker, date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes());
+        },
+        
+        getPickedDate = function($obj) {
+            return getParentPickerObject($obj).data("pickedDate");
+        },
+        
+        zpadding = function(num) {
+            return ("0" + num).slice(-2);
+        },
+        
+        translate = function(locale, s) {
+            if (typeof lang[locale][s] !== "undefined") return lang[locale][s];
+            return lang.en[s];
+        },
+        
+        draw = function($picker, year, month, day, hour, min) {
+            let date;
+            if (hour != null) {
+                date = new Date(year, month, day, hour, min, 0);
+            } else if (year != null) {
+                date = new Date(year, month, day);
+            } else {
+                date = new Date();
+            }
+            
+            const isTodayButton = $picker.data("todayButton"),
+                isFutureOnly = $picker.data("futureOnly"),
+                minDate = $picker.data("minDate"),
+                maxDate = $picker.data("maxDate"),
                 
-                $o.addClass('timelist_item');
-                $o.text(zpadding(hour_) + ":" + zpadding(min_));
-
-                $o.data("hour", hour_);
-                $o.data("min", min_);
-
-                $timelist.append($o);
-
-                realDayObj.setHours(hour_);
-                realDayObj.setMinutes(min_);
-
-                if (
-                    ((minDate != null) && (minDate > realDayObj.getTime())) || ((maxDate != null) && (maxDate < realDayObj.getTime()))
-                ) { // Out of range cell
-                    $o.addClass('out_of_range');
-                } else if (isFutureOnly && is_past) { // Past cell
-                    $o.addClass('time_in_past');
-                } else { // Normal cell
-                    /* Set event handler to time cell */
-                    $o.click(function() {
-                        if ($(this).hasClass('hover')) {
-                            $(this).removeClass('hover');
-                        }
-                        $(this).addClass('active');
-
-                        var $picker = getParentPickerObject($(this));
-                        var date = getPickedDate($picker);
-                        var hour = $(this).data("hour");
-                        var min = $(this).data("min");
-                        draw($picker, date.getFullYear(), date.getMonth(), date.getDate(), hour, min);
-                    });
-
-                    $o.hover(function() {
-                        if (!$(this).hasClass('active')) $(this).addClass('hover');
-                    }, function() {
-                        if ($(this).hasClass('hover')) $(this).removeClass('hover');
-                    });
-                }
+                minuteInterval = $picker.data("minuteInterval"),
+                firstDayOfWeek = $picker.data("firstDayOfWeek");
                 
-                if (hour_ == date.getHours() && min_ == date.getMinutes()) { /* selected time */
-                    $o.addClass('active');
-                    timelist_activeTimeCell_offsetTop = $o.offset().top;
-                }
-
-                min_ += minuteInterval;
-                if (min_ >= 60){
-                    min_ -= 60;
-                    hour_++;
+            let allowWdays = $picker.data("allowWdays");
+            if (allowWdays == null || Array.isArray(allowWdays) === false || allowWdays.length <= 0) allowWdays = null;
+            
+            const minTime = $picker.data("minTime"),
+                maxTime = $picker.data("maxTime");
+            
+            /* Check a specified date */
+            const todayDate = new Date();
+            if (isFutureOnly) {
+                if (date.getTime() < todayDate.getTime()) { // Already passed
+                    date.setTime(todayDate.getTime());
                 }
             }
-
-            /* Scroll the timelist */
-            $timelist.scrollTop(drawBefore_timeList_scrollTop);
-        }
-    };
-
+            if (allowWdays != null && allowWdays.length <= 6) {
+                while (true) {
+                    if ($.inArray(date.getDay(), allowWdays) == -1) { // Unallowed wday
+                        // Slide a date
+                        date.setDate(date.getDate() + 1);
+                    } else {
+                        break;
+                    }
+                }
+            }
+            
+            /* Read locale option */
+            let locale = $picker.data("locale");
+            if (!lang.hasOwnProperty(locale)) locale = 'en';
+            
+            /* Calculate dates */
+            const firstWday = new Date(date.getFullYear(), date.getMonth(), 1).getDay() - firstDayOfWeek,
+                lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate(),
+                beforeMonthLastDay = new Date(date.getFullYear(), date.getMonth(), 0).getDate(),
+                dateBeforeMonth = new Date(date.getFullYear(), date.getMonth(), 0),
+                dateNextMonth = new Date(date.getFullYear(), date.getMonth() + 2, 0),
+                isCurrentYear = todayDate.getFullYear() == date.getFullYear(),
+                isCurrentMonth = isCurrentYear && todayDate.getMonth() == date.getMonth(),
+                isCurrentDay = isCurrentMonth && todayDate.getDate() == date.getDate();
+            let isPastMonth = false;
+            if (date.getFullYear() < todayDate.getFullYear() || (isCurrentYear && date.getMonth() < todayDate.getMonth())) {
+                isPastMonth = true;
+            }
+            
+            /* Collect each part */
+            const $header = $picker.children('.datepicker_header'),
+                $inner = $picker.children('.datepicker_inner_container'),
+                $calendar = $picker.children('.datepicker_inner_container').children('.datepicker_calendar'),
+                $table = $calendar.children('.datepicker_table'),
+                $timelist = $picker.children('.datepicker_inner_container').children('.datepicker_timelist');
+            
+            /* Grasp a point that will be changed */
+            let changePoint = "";
+            const oldDate = getPickedDate($picker);
+            if (oldDate != null) {
+                if (oldDate.getMonth() != date.getMonth() || oldDate.getDate() != date.getDate()){
+                    changePoint = "calendar";
+                } else if (oldDate.getHours() != date.getHours() || oldDate.getMinutes() != date.getMinutes()){
+                    if (date.getMinutes() === 0 || date.getMinutes() % minuteInterval === 0){
+                        changePoint = "timelist";
+                    }
+                }
+            }
+            
+            /* Save new date to Picker data */
+            $($picker).data("pickedDate", date);
+            $.fn.dtpicker.dialog._dtpickerCallback(date);
+            
+            /* Remind timelist scroll state */
+            const drawBefore_timeList_scrollTop = $timelist.scrollTop();
+            
+            /* New timelist  */
+            let timelist_activeTimeCell_offsetTop = -1;
+            
+            let realDayObj;
+            
+            if ($picker.data("timeOnly") === true) {
+                $calendar.css("border-right", '0px');
+                $calendar.css("width", '0px');
+                $timelist.css("width", '130px');
+            } else {
+                /* Header ----- */
+                $header.children().remove();
+                
+                const cDate = new Date(date.getTime());
+                cDate.setMinutes(59);
+                cDate.setHours(23);
+                cDate.setSeconds(59);
+                cDate.setDate(0); // last day of previous month
+                
+                let $link_before_month = null;
+                if ((!isFutureOnly || !isCurrentMonth) && ((minDate == null) || (minDate < cDate.getTime()))) {
+                    $link_before_month = $('<a>');
+                    $link_before_month.text('<');
+                    $link_before_month.prop('alt', translate(locale,'prevMonth'));
+                    $link_before_month.prop('title', translate(locale,'prevMonth') );
+                    $link_before_month.click(function() {
+                        beforeMonth($picker);
+                    });
+                    $picker.data('stateAllowBeforeMonth', true);
+                } else {
+                    $picker.data('stateAllowBeforeMonth', false);
+                }
+                
+                cDate.setMinutes(0);
+                cDate.setHours(0);
+                cDate.setSeconds(0);
+                cDate.setDate(1); // First day of next month
+                cDate.setMonth(date.getMonth() + 1);
+                
+                const $now_month = $('<span>');
+                $now_month.text(date.getFullYear() + " " + translate(locale, 'sep') + " " + translate(locale, 'months')[date.getMonth()]);
+                
+                let $link_next_month = null;
+                if ((maxDate == null) || (maxDate > cDate.getTime())) {
+                    $link_next_month = $('<a>');
+                    $link_next_month.text('>');
+                    $link_next_month.prop('alt', translate(locale,'nextMonth'));
+                    $link_next_month.prop('title', translate(locale,'nextMonth'));
+                    $link_next_month.click(function() {
+                        nextMonth($picker);
+                    });
+                }
+                
+                if (isTodayButton) {
+                    const $link_today = $('<a/>');
+                    /* This icon resource from a part of "FontAwesome" by Dave Gandy - http://fontawesome.io".
+                        http://fortawesome.github.io/Font-Awesome/license/
+                        Thankyou. */
+                    $link_today.html(decodeURIComponent('%3c%3fxml%20version%3d%221%2e0%22%20encoding%3d%22UTF%2d8%22%20standalone%3d%22no%22%3f%3e%3csvg%20%20xmlns%3adc%3d%22http%3a%2f%2fpurl%2eorg%2fdc%2felements%2f1%2e1%2f%22%20%20xmlns%3acc%3d%22http%3a%2f%2fcreativecommons%2eorg%2fns%23%22%20xmlns%3ardf%3d%22http%3a%2f%2fwww%2ew3%2eorg%2f1999%2f02%2f22%2drdf%2dsyntax%2dns%23%22%20%20xmlns%3asvg%3d%22http%3a%2f%2fwww%2ew3%2eorg%2f2000%2fsvg%22%20xmlns%3d%22http%3a%2f%2fwww%2ew3%2eorg%2f2000%2fsvg%22%20%20version%3d%221%2e1%22%20%20width%3d%22100%25%22%20%20height%3d%22100%25%22%20viewBox%3d%220%200%2010%2010%22%3e%3cg%20transform%3d%22translate%28%2d5%2e5772299%2c%2d26%2e54581%29%22%3e%3cpath%20d%3d%22m%2014%2e149807%2c31%2e130932%20c%200%2c%2d0%2e01241%200%2c%2d0%2e02481%20%2d0%2e0062%2c%2d0%2e03721%20L%2010%2e57723%2c28%2e153784%207%2e0108528%2c31%2e093719%20c%200%2c0%2e01241%20%2d0%2e0062%2c0%2e02481%20%2d0%2e0062%2c0%2e03721%20l%200%2c2%2e97715%20c%200%2c0%2e217084%200%2e1798696%2c0%2e396953%200%2e3969534%2c0%2e396953%20l%202%2e3817196%2c0%200%2c%2d2%2e38172%201%2e5878132%2c0%200%2c2%2e38172%202%2e381719%2c0%20c%200%2e217084%2c0%200%2e396953%2c%2d0%2e179869%200%2e396953%2c%2d0%2e396953%20l%200%2c%2d2%2e97715%20m%201%2e383134%2c%2d0%2e427964%20c%200%2e06823%2c%2d0%2e08063%200%2e05582%2c%2d0%2e210882%20%2d0%2e02481%2c%2d0%2e279108%20l%20%2d1%2e358324%2c%2d1%2e128837%200%2c%2d2%2e530576%20c%200%2c%2d0%2e111643%20%2d0%2e08683%2c%2d0%2e198477%20%2d0%2e198477%2c%2d0%2e198477%20l%20%2d1%2e190859%2c0%20c%20%2d0%2e111643%2c0%20%2d0%2e198477%2c0%2e08683%20%2d0%2e198477%2c0%2e198477%20l%200%2c1%2e209467%20%2d1%2e513384%2c%2d1%2e265289%20c%20%2d0%2e2605%2c%2d0%2e217083%20%2d0%2e682264%2c%2d0%2e217083%20%2d0%2e942764%2c0%20L%205%2e6463253%2c30%2e42386%20c%20%2d0%2e080631%2c0%2e06823%20%2d0%2e093036%2c0%2e198476%20%2d0%2e024809%2c0%2e279108%20l%200%2e3845485%2c0%2e458976%20c%200%2e031012%2c0%2e03721%200%2e080631%2c0%2e06203%200%2e1302503%2c0%2e06823%200%2e055821%2c0%2e0062%200%2e1054407%2c%2d0%2e01241%200%2e1488574%2c%2d0%2e04342%20l%204%2e2920565%2c%2d3%2e578782%204%2e292058%2c3%2e578782%20c%200%2e03721%2c0%2e03101%200%2e08063%2c0%2e04342%200%2e13025%2c0%2e04342%200%2e0062%2c0%200%2e01241%2c0%200%2e01861%2c0%200%2e04962%2c%2d0%2e0062%200%2e09924%2c%2d0%2e03101%200%2e130251%2c%2d0%2e06823%20l%200%2e384549%2c%2d0%2e458976%22%20%2f%3e%3c%2fg%3e%3c%2fsvg%3e') );
+                    $link_today.addClass('icon-home');
+                    $link_today.prop('alt', translate(locale,'today'));
+                    $link_today.prop('title', translate(locale,'today'));
+                    $link_today.click(function() {
+                        const date = new Date();
+                        draw(getParentPickerObject($picker), date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes());
+                    });
+                    $header.append($link_today);
+                }
+                
+                if ($link_before_month != null) $header.append($link_before_month);
+                $header.append($now_month);
+                if ($link_next_month != null) $header.append($link_next_month);
+                
+                /* Calendar > Table ----- */
+                $table.children().remove();
+                let $tr = $('<tr>');
+                $table.append($tr);
+                
+                /* Output wday cells */
+                const firstDayDiff = 7 + firstDayOfWeek,
+                    daysOfWeek = translate(locale,'days');
+                let $td,
+                    i = 0;
+                for (; i < 7; i++) {
+                    $td = $('<th>');
+                    $td.text(daysOfWeek[((i + firstDayDiff) % 7)]);
+                    $tr.append($td);
+                }
+                
+                /* Output day cells */
+                const cellNum = Math.ceil((firstWday + lastDay) / 7) * 7;
+                i = 0;
+                if (firstWday < 0) i = -7;
+                
+                realDayObj = new Date(date.getTime());
+                realDayObj.setHours(0);
+                realDayObj.setMinutes(0);
+                realDayObj.setSeconds(0);
+                for (let zz = 0; i < cellNum; i++) {
+                    const realDay = i + 1 - firstWday;
+                    
+                    const isPast = isPastMonth || (isCurrentMonth && realDay < todayDate.getDate());
+                    
+                    if (i % 7 === 0) {
+                        $tr = $('<tr>');
+                        $table.append($tr);
+                    }
+                    
+                    $td = $('<td>');
+                    $td.data("day", realDay);
+                    
+                    $tr.append($td);
+                    
+                    if (firstWday > i) {/* Before months day */
+                        $td.text(beforeMonthLastDay + realDay);
+                        $td.addClass('day_another_month');
+                        $td.data("dateStr", dateBeforeMonth.getFullYear() + "/" + (dateBeforeMonth.getMonth() + 1) + "/" + (beforeMonthLastDay + realDay));
+                        realDayObj.setDate(beforeMonthLastDay + realDay);
+                        realDayObj.setMonth(dateBeforeMonth.getMonth());
+                        realDayObj.setYear(dateBeforeMonth.getFullYear());
+                    } else if (i < firstWday + lastDay) {/* Now months day */
+                        $td.text(realDay);
+                        $td.data("dateStr", (date.getFullYear()) + "/" + (date.getMonth() + 1) + "/" + realDay);
+                        realDayObj.setDate(realDay);
+                        realDayObj.setMonth(date.getMonth());
+                        realDayObj.setYear(date.getFullYear());
+                    } else {/* Next months day */
+                        $td.text(realDay - lastDay);
+                        $td.addClass('day_another_month');
+                        $td.data("dateStr", dateNextMonth.getFullYear() + "/" + (dateNextMonth.getMonth() + 1) + "/" + (realDay - lastDay));
+                        realDayObj.setDate(realDay - lastDay);
+                        realDayObj.setMonth(dateNextMonth.getMonth());
+                        realDayObj.setYear(dateNextMonth.getFullYear());
+                    }
+                    
+                    /* Check a wday */
+                    const wday = ((i + firstDayDiff) % 7);
+                    if (allowWdays != null) {
+                        if ($.inArray(wday, allowWdays) == -1) {
+                            $td.addClass('day_in_unallowed');
+                            continue; // Skip
+                        }
+                    } else if (wday === 0) {/* Sunday */
+                        $td.addClass('wday_sun');
+                    } else if (wday == 6) {/* Saturday */
+                        $td.addClass('wday_sat');
+                    }
+                    
+                    /* Set a special mark class */
+                    if (realDay == date.getDate()) $td.addClass('active');
+                    
+                    if (isCurrentMonth && realDay == todayDate.getDate()) $td.addClass('today');
+                    
+                    const realDayObjMN =  new Date(realDayObj.getTime());
+                    realDayObjMN.setHours(23);
+                    realDayObjMN.setMinutes(59);
+                    realDayObjMN.setSeconds(59);
+                    
+                    if (
+                        // compare to 23:59:59 on the current day (if MIN is 1pm, then we still need to show this day
+                        ((minDate != null) && (minDate > realDayObjMN.getTime())) || ((maxDate != null) && (maxDate < realDayObj.getTime())) // compare to 00:00:00
+                    ) { // Out of range day
+                        $td.addClass('out_of_range');
+                    } else if (isFutureOnly && isPast) { // Past day
+                        $td.addClass('day_in_past');
+                    } else {
+                        /* Set event-handler to day cell */
+                        $td.click(function() {
+                            if ($(this).hasClass('hover')) {
+                                $(this).removeClass('hover');
+                            }
+                            $(this).addClass('active');
+                            
+                            const $picker = getParentPickerObject($(this)),
+                                targetDate = new Date($(this).data("dateStr")),
+                                selectedDate = getPickedDate($picker);
+                            draw($picker, targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), selectedDate.getHours(), selectedDate.getMinutes());
+                        });
+                        
+                        $td.hover(function() {
+                            if (! $(this).hasClass('active')) {
+                                $(this).addClass('hover');
+                            }
+                        }, function() {
+                            if ($(this).hasClass('hover')) {
+                                $(this).removeClass('hover');
+                            }
+                        });
+                    }
+                }
+            }
+            
+            if ($picker.data("dateOnly") === true) {
+                /* dateOnly mode */
+                $timelist.css("display", "none");
+                $calendar.css("border-right", '0px');
+            } else {
+                /* Timelist ----- */
+                $timelist.children().remove();
+                
+                realDayObj =  new Date(date.getTime());
+                $timelist.css("height", '175px');
+                
+                /* Output time cells */
+                let hour_ = minTime[0],
+                    min_ = minTime[1];
+                
+                while (hour_*100+min_ < maxTime[0]*100+maxTime[1]){
+                    const $o = $('<div>'),
+                        is_past_time = hour_ < todayDate.getHours() || (hour_ == todayDate.getHours() && min_ < todayDate.getMinutes()),
+                        is_past = isCurrentDay && is_past_time;
+                    
+                    $o.addClass('timelist_item');
+                    $o.text(zpadding(hour_) + ":" + zpadding(min_));
+                    
+                    $o.data("hour", hour_);
+                    $o.data("min", min_);
+                    
+                    $timelist.append($o);
+                    
+                    realDayObj.setHours(hour_);
+                    realDayObj.setMinutes(min_);
+                    
+                    if (
+                        ((minDate != null) && (minDate > realDayObj.getTime())) || ((maxDate != null) && (maxDate < realDayObj.getTime()))
+                    ) { // Out of range cell
+                        $o.addClass('out_of_range');
+                    } else if (isFutureOnly && is_past) { // Past cell
+                        $o.addClass('time_in_past');
+                    } else { // Normal cell
+                        /* Set event handler to time cell */
+                        $o.click(function() {
+                            if ($(this).hasClass('hover')) {
+                                $(this).removeClass('hover');
+                            }
+                            $(this).addClass('active');
+                            
+                            const $picker = getParentPickerObject($(this)),
+                                date = getPickedDate($picker),
+                                hour = $(this).data("hour"),
+                                min = $(this).data("min");
+                            draw($picker, date.getFullYear(), date.getMonth(), date.getDate(), hour, min);
+                        });
+                        
+                        $o.hover(function() {
+                            if (!$(this).hasClass('active')) $(this).addClass('hover');
+                        }, function() {
+                            if ($(this).hasClass('hover')) $(this).removeClass('hover');
+                        });
+                    }
+                    
+                    if (hour_ == date.getHours() && min_ == date.getMinutes()) { /* selected time */
+                        $o.addClass('active');
+                        timelist_activeTimeCell_offsetTop = $o.offset().top;
+                    }
+                    
+                    min_ += minuteInterval;
+                    if (min_ >= 60){
+                        min_ -= 60;
+                        hour_++;
+                    }
+                }
+                
+                /* Scroll the timelist */
+                $timelist.scrollTop(drawBefore_timeList_scrollTop);
+            }
+        };
+    
     /** Initialize dtpicker */
     $.fn.dtpicker = function(config) {
-        var dialog = config.dialog;
+        const dialog = config.dialog;
         
-        var opt = $.extend({
+        const opt = $.extend({
             "current": null,
             "locale": "en",
             "minuteInterval": 30,
@@ -17692,14 +17799,14 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         }, config);
         
         /* Container */
-        var $picker = $('<div>');
-
+        const $picker = $('<div>');
+        
         $picker.addClass('datepicker');
         $(this).append($picker);
-
+        
         /* Set current date */
         if (!opt.current) opt.current = new Date();
-
+        
         /* Set options data to container object  */
         $picker.data("dateOnly", opt.dateOnly);
         $picker.data("timeOnly", opt.timeOnly);
@@ -17708,26 +17815,26 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         $picker.data("todayButton", opt.todayButton);
         $picker.data('futureOnly', opt.futureOnly);
         $picker.data('allowWdays', opt.allowWdays);
-
-        var minDate = Date.parse(opt.minDate);
+        
+        const minDate = Date.parse(opt.minDate);
         $picker.data('minDate', isNaN(minDate) ? null : minDate);
-        var maxDate = Date.parse(opt.maxDate);
+        const maxDate = Date.parse(opt.maxDate);
         $picker.data('maxDate', isNaN(maxDate) ? null : maxDate);
         
         $picker.data("state", 0);
-
-        if(5 <= opt.minuteInterval && opt.minuteInterval <= 30){
+        
+        if (5 <= opt.minuteInterval && opt.minuteInterval <= 30){
             $picker.data("minuteInterval", opt.minuteInterval);
         } else {
             $picker.data("minuteInterval", 30);
         }
         opt.minTime = opt.minTime.split(':');
         opt.maxTime = opt.maxTime.split(':');
-
-        if(!((opt.minTime[0] >= 0 ) && (opt.minTime[0] <24 ))) opt.minTime[0]="00";
-        if(!((opt.maxTime[0] >= 0 ) && (opt.maxTime[0] <24 ))) opt.maxTime[0]="23";
-        if(!((opt.minTime[1] >= 0 ) && (opt.minTime[1] <60 ))) opt.minTime[1]="00";
-        if(!((opt.maxTime[1] >= 0 ) && (opt.maxTime[1] <24 ))) opt.maxTime[1]="59";
+        
+        if (!((opt.minTime[0] >= 0 ) && (opt.minTime[0] <24 ))) opt.minTime[0]="00";
+        if (!((opt.maxTime[0] >= 0 ) && (opt.maxTime[0] <24 ))) opt.maxTime[0]="23";
+        if (!((opt.minTime[1] >= 0 ) && (opt.minTime[1] <60 ))) opt.minTime[1]="00";
+        if (!((opt.maxTime[1] >= 0 ) && (opt.maxTime[1] <24 ))) opt.maxTime[1]="59";
         opt.minTime[0]=parseInt(opt.minTime[0]);
         opt.minTime[1]=parseInt(opt.minTime[1]);
         opt.maxTime[0]=parseInt(opt.maxTime[0]);
@@ -17736,37 +17843,37 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         $picker.data('maxTime', opt.maxTime);
         
         /* Header */
-        var $header = $('<div>');
+        const $header = $('<div>');
         $header.addClass('datepicker_header');
         $picker.append($header);
         
         /* InnerContainer*/
-        var $inner = $('<div>');
+        const $inner = $('<div>');
         $inner.addClass('datepicker_inner_container');
         $picker.append($inner);
         
         /* Calendar */
-        var $calendar = $('<div>');
+        const $calendar = $('<div>');
         $calendar.addClass('datepicker_calendar');
         $calendar.css("height", '175px');
-        var $table = $('<table>');
+        const $table = $('<table>');
         $table.addClass('datepicker_table');
         $calendar.append($table);
         $inner.append($calendar);
         
         /* Timelist */
-        var $timelist = $('<div>');
+        const $timelist = $('<div>');
         $timelist.addClass('datepicker_timelist');
         $inner.append($timelist);
 
         /* Set event-handler to calendar */
         if (window.sidebar) { // Mozilla Firefox
             $calendar.bind('DOMMouseScroll', function(e){
-                var $picker = getParentPickerObject($(this));
+                const $picker = getParentPickerObject($(this));
                 
                 // up,left [delta < 0] down,right [delta > 0]
-                var delta = e.originalEvent.detail;
-                if(delta > 0) {
+                const delta = e.originalEvent.detail;
+                if (delta > 0) {
                     afterDay($picker);
                 } else {
                     beforeDay($picker);
@@ -17775,12 +17882,12 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
             });
         } else { // Other browsers
             $calendar.bind('mousewheel', function(e){
-                var $picker = getParentPickerObject($(this));
+                const $picker = getParentPickerObject($(this));
                 // up [delta > 0] down [delta < 0]
-                var threshold = 75, dtpicker = $.fn.dtpicker;
+                const threshold = 75, dtpicker = $.fn.dtpicker;
                 if (dtpicker._delta == null) dtpicker._delta = 0;
-                var delta = dtpicker._delta += e.originalEvent.wheelDeltaY;
-                if(delta > threshold) {
+                const delta = dtpicker._delta += e.originalEvent.wheelDeltaY;
+                if (delta > threshold) {
                     dtpicker._delta -= threshold;
                     beforeDay($picker);
                 } else if (delta < -threshold) {
@@ -17793,7 +17900,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         
         $.fn.dtpicker.dialog = dialog;
         
-        var date = opt.current;
+        const date = opt.current;
         draw($picker, date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes());
     };
 })(window, jQuery);
@@ -17826,7 +17933,7 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
-        var self = this;
+        const self = this;
         
         self.restoreFocus = true;
         
@@ -17855,7 +17962,7 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
     doBeforeAdoption: function() {
         this.callSuper();
         
-        var M = myt,
+        const M = myt,
             D = M.Dimmer;
         new M.View(this, {
             name:'overlay', ignorePlacement:true, 
@@ -17889,7 +17996,7 @@ myt.Dimmer = new JS.Class('Dimmer', myt.View, {
     /** Shows the dimmer and remembers the focus location.
         @returns {undefined} */
     show: function() {
-        var self = this,
+        const self = this,
             gf = myt.global.focus;
         self.prevFocus = gf.focusedView || gf.focusedDom;
         
@@ -17982,17 +18089,21 @@ myt.SizeToChildren = new JS.Class('SizeToChildren', myt.Layout, {
             // Prevent inadvertent loops
             this.incrementLockedCounter();
             
-            var p = this.parent;
+            const p = this.parent;
             
             if (!p.isBeingDestroyed) {
-                var svs = this.subviews, len = svs.length, i, sv,
-                    max, bound,
+                const svs = this.subviews, 
+                    len = svs.length,
                     axis = this.axis,
                     maxFunc = Math.max;
+                let i, 
+                    sv,
+                    max, 
+                    bound;
                 if (axis !== 'y') {
                     i = len;
                     max = 0;
-                    while(i) {
+                    while (i) {
                         sv = svs[--i];
                         if (sv.visible) {
                             bound = sv.boundsWidth;
@@ -18005,7 +18116,7 @@ myt.SizeToChildren = new JS.Class('SizeToChildren', myt.Layout, {
                 if (axis !== 'x') {
                     i = len;
                     max = 0;
-                    while(i) {
+                    while (i) {
                         sv = svs[--i];
                         if (sv.visible) {
                             bound = sv.boundsHeight;
@@ -18041,7 +18152,7 @@ myt.SizeToChildren = new JS.Class('SizeToChildren', myt.Layout, {
         @param {!Function} func
         @returns {undefined} */
     __updateMonitoringSubview: function(sv, func) {
-        var axis = this.axis;
+        const axis = this.axis;
         func = func.bind(this);
         if (axis !== 'y') {
             func(sv, 'update', 'x');
@@ -18104,7 +18215,7 @@ myt.ModalPanel = new JS.Class('ModalPanel', myt.Dimmer, {
         
         if (attrs.sizingStrategy == null) attrs.sizingStrategy = 'children';
         
-        var MP = myt.ModalPanel;
+        const MP = myt.ModalPanel;
         
         // Used for parent sizing strategy
         if (attrs.marginTop == null) attrs.marginTop = MP.DEFAULT_MARGIN_TOP;
@@ -18120,7 +18231,7 @@ myt.ModalPanel = new JS.Class('ModalPanel', myt.Dimmer, {
     },
     
     doBeforeAdoption: function() {
-        var self = this,
+        const self = this,
             M = myt,
             V = M.View,
             viewAttrs = {name:'content', ignorePlacement:true},
@@ -18186,7 +18297,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
-        var self = this;
+        const self = this;
         
         self.lateAttrs = ['spinColor'];
         
@@ -18247,7 +18358,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         spinner doesn't take up more space that the size.
         @private */
     _updateSize: function() {
-        var self = this,
+        const self = this,
             size = self.size,
             deStyle = self.deStyle;
         self.setWidth(size);
@@ -18258,7 +18369,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
 
 
 ((pkg) => {
-    var JSClass = JS.Class,
+    const JSClass = JS.Class,
         View = pkg.View,
         Text = pkg.Text,
         ModalPanel = pkg.ModalPanel,
@@ -18289,7 +18400,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 if (attrs.readyColor == null) attrs.readyColor = '#cccccc';
                 if (attrs.textColor == null) attrs.textColor = '#000000';
                 
-                var fontSize = attrs.fontSize,
+                const fontSize = attrs.fontSize,
                     shrinkToFit = attrs.shrinkToFit,
                     text = attrs.text || '';
                 delete attrs.fontSize;
@@ -18298,7 +18409,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 
                 this.callSuper(parent, attrs);
                 
-                var textView = this.textView = new Text(this, {
+                const textView = this.textView = new Text(this, {
                     x:this.inset, 
                     y:this.textY, 
                     text:text,
@@ -18324,7 +18435,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             /** @private */
             __update: function(v) {
                 if (!this.destroyed) {
-                    var inset = this.inset,
+                    const inset = this.inset,
                         textView = this.textView;
                     textView.setX(inset);
                     this.setWidth(inset + textView.width + this.outset);
@@ -18427,7 +18538,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         /** Does basic styling of a dialog and creates a close button.
             @returns {undefined} */
         setupDialog: function() {
-            var D = pkg.Dialog,
+            const D = pkg.Dialog,
                 content = this.content;
             content.setRoundedCorners(D.DEFAULT_RADIUS);
             content.setBgColor(D.DEFAULT_BGCOLOR);
@@ -18490,11 +18601,11 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         destroyContent: function() {
             hideSpinner(this);
             
-            var MD = pkg.Dialog,
+            const MD = pkg.Dialog,
                 content = this.content, 
                 stc = content.sizeToChildren,
-                svs = content.getSubviews(), 
-                i = svs.length,
+                svs = content.getSubviews();
+            let i = svs.length,
                 sv;
             
             // Destroy all children except the close button since that gets reused.
@@ -18528,7 +18639,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 of the dialog.
             @returns {undefined} */
         doCallback: function(sourceView) {
-            var cbf = this.callbackFunction;
+            const cbf = this.callbackFunction;
             if (!cbf || !cbf.call(this, sourceView.name)) this.hide();
         },
         
@@ -18559,7 +18670,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 displayed. Supports: fontWeight, whiteSpace, wordWrap and width.
             @returns {undefined} */
         showMessage: function(msg, callbackFunction, opts) {
-            var self = this,
+            const self = this,
                 D = pkg.Dialog,
                 content = self.content, 
                 closeBtn = content.closeBtn;
@@ -18570,7 +18681,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             
             self.setCallbackFunction(callbackFunction);
             
-            var msgView = new Text(content, {
+            const msgView = new Text(content, {
                 name:'msg',
                 text:msg,
                 whiteSpace:opts.whiteSpace,
@@ -18601,7 +18712,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         showSimple: function(contentBuilderFunc, callbackFunction, opts) {
             opts = opts || {};
             
-            var self = this,
+            const self = this,
                 content = self.content,
                 closeBtn = content.closeBtn,
                 maxHeight = opts.maxContainerHeight;
@@ -18616,7 +18727,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             content.sizeToChildren.setPaddingX(1);
             self.setCallbackFunction(callbackFunction);
             
-            var contentContainer = new View(content, {
+            const contentContainer = new View(content, {
                 name:'contentContainer', x:1, y:25, overflow:'auto'
             }, [{
                 setHeight: function(v) {
@@ -18647,14 +18758,14 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 Supports: fontWeight, whiteSpace, wordWrap and width.
             @returns {undefined} */
         showSpinner: function(msg, opts) {
-            var self = this,
+            const self = this,
                 content = self.content;
             
             opts = Object.assign({}, pkg.Dialog.NO_WRAP_TEXT_DEFAULTS, opts);
             
             self.destroyContent();
             
-            var spinner = self.spinner = new pkg.Spinner(content, {
+            const spinner = self.spinner = new pkg.Spinner(content, {
                 align:'center', visible:true,
                 borderColor:'#cccccc',
                 size:50, y:opts.msgY == null ? ModalPanel.DEFAULT_PADDING_Y : opts.msgY,
@@ -18680,7 +18791,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         },
         
         showColorPicker: function(callbackFunction, opts) {
-            var self = this,
+            const self = this,
                 content = self.content,
                 closeBtn = content.closeBtn,
                 r = pkg.Dialog.DEFAULT_RADIUS;
@@ -18697,7 +18808,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                         callbackFunction.call(this, action);
                         break;
                     case 'confirmBtn':
-                        var color = this._spectrum.get();
+                        const color = this._spectrum.get();
                         this._spectrum.addColorToSelectionPalette(color);
                         callbackFunction.call(this, action, color ? color.toHexString() : 'transparent');
                         break;
@@ -18706,14 +18817,14 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             });
             
             // Build Picker
-            var picker = new View(content, {
+            const picker = new View(content, {
                 name:'picker',
                 x:ModalPanel.DEFAULT_PADDING_X,
                 y:ModalPanel.DEFAULT_PADDING_Y + 24,
                 width:337,
                 height:177
             });
-            var spectrumView = new View(picker);
+            const spectrumView = new View(picker);
             $(spectrumView.getInnerDomElement()).spectrum({
                 color:opts.color,
                 palette: [['#000000','#111111','#222222','#333333','#444444','#555555','#666666','#777777'],
@@ -18741,7 +18852,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         },
         
         showDatePicker: function(callbackFunction, opts) {
-            var self = this,
+            const self = this,
                 content = self.content,
                 closeBtn = content.closeBtn,
                 r = pkg.Dialog.DEFAULT_RADIUS;
@@ -18766,14 +18877,14 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             });
             
             // Build Picker
-            var picker = new View(content, {
+            const picker = new View(content, {
                 name:'picker',
                 x:ModalPanel.DEFAULT_PADDING_X,
                 y:ModalPanel.DEFAULT_PADDING_Y + 24,
                 width:opts.dateOnly ? 195 : (opts.timeOnly ? 150 : 240),
                 height:185
             });
-            var pickerView = new View(picker);
+            const pickerView = new View(picker);
             
             $(pickerView.getInnerDomElement()).dtpicker({
                 current:new Date(opts.initialDate || Date.now()),
@@ -18801,7 +18912,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         },
         
         showConfirm: function(msg, callbackFunction, opts) {
-            var self = this;
+            const self = this;
             
             opts = Object.assign({}, pkg.Dialog.CONFIRM_DEFAULTS, opts);
             
@@ -18812,11 +18923,11 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         },
         
         showContentConfirm: function(contentBuilderFunc, callbackFunction, opts) {
-            var self = this,
+            const self = this,
                 content = self.content,
                 closeBtn = content.closeBtn,
-                r = pkg.Dialog.DEFAULT_RADIUS,
-                maxHeight;
+                r = pkg.Dialog.DEFAULT_RADIUS;
+            let maxHeight;
             
             opts = Object.assign({}, pkg.Dialog.CONFIRM_DEFAULTS, opts);
             
@@ -18828,7 +18939,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             self.setCallbackFunction(callbackFunction);
             
             // Setup form
-            var contentContainer = new View(content, {
+            const contentContainer = new View(content, {
                 name:'contentContainer', x:1, y:25, overflow:'auto'
             }, [{
                 setHeight: function(v) {
@@ -18875,16 +18986,16 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             @param {!Object} opts
             @returns {undefined} */
         setupFooterButtons: function(mainView, opts) {
-            var self = this,
+            const self = this,
                 content = self.content, 
                 DPY = ModalPanel.DEFAULT_PADDING_Y,
                 r = pkg.Dialog.DEFAULT_RADIUS,
-                BUTTON_CLASS = self.buttonClass,
-                attrs,
+                BUTTON_CLASS = self.buttonClass;
+            let attrs,
                 buttons,
                 cancelBtn;
             
-            var btnContainer = new View(content, {
+            const btnContainer = new View(content, {
                 y:mainView.y + mainView.height + DPY, align:'center'
             });
             
@@ -18915,7 +19026,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             // Additional Buttons
             buttons = opts.buttons;
             if (buttons) {
-                for (var i = 0, len = buttons.length; len > i; i++) {
+                const len = buttons.length;
+                for (let i = 0; len > i; i++) {
                     attrs = buttons[i];
                     if (attrs.name == null) attrs.name = 'btn_' + i;
                     new BUTTON_CLASS(btnContainer, attrs, [{
@@ -18929,7 +19041,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             
             content.sizeToChildren.setPaddingY(DPY / 2);
             
-            var bg = new View(content, {
+            const bg = new View(content, {
                 ignoreLayout:true,
                 y:btnContainer.y - (DPY / 2),
                 width:content.width,
@@ -18947,16 +19059,16 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
 
 
 ((pkg) => {
-    var JSClass = JS.Class,
+    const JSClass = JS.Class,
         
-        // Safe as a closure var because the registry is a singleton.,
+        // Safe as a closure variable because the registry is a singleton.,
         validators = {},
         
         getValidator = (id) => validators[id],
         
         doFuncOnIdentifiable = (identifiable, func) => {
             if (identifiable) {
-                var id = identifiable.id;
+                const id = identifiable.id;
                 if (identifiable.id) {
                     func(id);
                 } else {
@@ -19034,7 +19146,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         EqualsIgnoreCaseValidator = pkg.EqualsIgnoreCaseValidator = new JSClass('EqualsIgnoreCaseValidator', Validator, {
             /** @overrides myt.Validator */
             isValid: function(value, config, errorMessages) {
-                var rbv = config.form.getRollbackValue();
+                const rbv = config.form.getRollbackValue();
                 if (value && rbv && value.toLowerCase() === rbv.toLowerCase()) {
                     if (errorMessages) errorMessages.push("Value must differ by more than just case.");
                     return false;
@@ -19058,7 +19170,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             
             /** @overrides myt.Validator */
             isValid: function(value, config, errorMessages) {
-                var uri = new pkg.URI(value);
+                const uri = new pkg.URI(value);
                 if (uri.toString(this.originalRawQuery) !== value) {
                     if (errorMessages) errorMessages.push("Not a valid URL.");
                     return false;
@@ -19119,7 +19231,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         /** @overrides myt.Validator */
         isValid: function(value, config, errorMessages) {
-            var len = value ? value.length : 0,
+            const len = value ? value.length : 0,
                 min = this.min,
                 max = this.max;
             
@@ -19158,7 +19270,9 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             if (value === "") return true;
             
             // Must be a number
-            var numericValue = Number(value), min = this.min, max = this.max;
+            const numericValue = Number(value),
+                min = this.min,
+                max = this.max;
             if (isNaN(numericValue)) {
                 if (errorMessages) errorMessages.push("Value is not a number.");
                 return false;
@@ -19204,7 +19318,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             this.callSuper(id);
             
             // Make sure each arg is an myt.Validator
-            var i = args.length,
+            let i = args.length,
                 validator;
             while (i) {
                 validator = args[--i];
@@ -19230,9 +19344,9 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         /** @overrides myt.Validator */
         isValid: function(value, config, errorMessages) {
-            var isValid = true, 
-                validators = this.__v, 
-                len = validators.length, 
+            const validators = this.__v, 
+                len = validators.length;
+            let isValid = true,
                 i = 0;
             for (; len > i;) isValid = validators[i++].isValid(value, config, errorMessages) && isValid;
             return isValid;
@@ -19322,7 +19436,7 @@ myt.ValueProcessor = new JS.Class('ValueProcessor', {
     initialize: function(id, runForDefault, runForRollback, runForCurrent) {
         this.id = id;
         
-        var VP = myt.ValueProcessor;
+        const VP = myt.ValueProcessor;
         this[VP.DEFAULT_ATTR] = runForDefault ? true : false;
         this[VP.ROLLBACK_ATTR] = runForRollback ? true : false;
         this[VP.CURRENT_ATTR] = runForCurrent ? true : false;
@@ -19351,7 +19465,7 @@ myt.ToNumberValueProcessor = new JS.Class('ToNumberValueProcessor', myt.ValuePro
         // they will become NaN.
         if (v == null || v === "" || v === "-") return v;
         
-        var numericValue = Number(v);
+        const numericValue = Number(v);
         return isNaN(numericValue) ? v : numericValue;
     }
 });
@@ -19445,19 +19559,19 @@ myt.UndefinedValueProcessor = new JS.Class('UndefinedValueProcessor', myt.ValueP
 new JS.Singleton('GlobalValueProcessorRegistry', {
     // Life Cycle //////////////////////////////////////////////////////////////
     initialize: function() {
-        var self = this,
-            m = myt;
+        const self = this,
+            M = myt;
         
         self.__c = {};
         
-        m.global.register('valueProcessors', self);
+        M.global.register('valueProcessors', self);
         
         // Register a few common ValueProcessors
-        self.register(new m.UndefinedValueProcessor('undefToEmpty', true, true, true, ''));
-        self.register(new m.ToNumberValueProcessor('toNumber', true, true, true));
-        self.register(new m.TrimValueProcessor('trimLeft', true, true, true, 'left'));
-        self.register(new m.TrimValueProcessor('trimRight', true, true, true, 'right'));
-        self.register(new m.TrimValueProcessor('trimBoth', true, true, true, 'both'));
+        self.register(new M.UndefinedValueProcessor('undefToEmpty', true, true, true, ''));
+        self.register(new M.ToNumberValueProcessor('toNumber', true, true, true));
+        self.register(new M.TrimValueProcessor('trimLeft', true, true, true, 'left'));
+        self.register(new M.TrimValueProcessor('trimRight', true, true, true, 'right'));
+        self.register(new M.TrimValueProcessor('trimBoth', true, true, true, 'both'));
     },
     
     
@@ -19476,7 +19590,7 @@ new JS.Singleton('GlobalValueProcessorRegistry', {
         @returns {undefined} */
     register: function(identifiable) {
         if (identifiable) {
-            var id = identifiable.id;
+            const id = identifiable.id;
             if (id) {
                 this.__c[id] = identifiable;
             } else {
@@ -19492,7 +19606,7 @@ new JS.Singleton('GlobalValueProcessorRegistry', {
         @returns {undefined} */
     unregister: function(identifiable) {
         if (identifiable) {
-            var id = identifiable.id;
+            const id = identifiable.id;
             if (id) {
                 // Make sure it's in the repository and then delete
                 if (this.getValueProcessor(id)) delete this.__c[id];
@@ -19596,7 +19710,8 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     setOptions: function(v) {
         this.destroyAllOptions();
         if (Array.isArray(v)) {
-            for (var i = 0, len = v.length; len > i; ++i) this.addOption(v[i]);
+            const len = v.length;
+            for (let i = 0; len > i; ++i) this.addOption(v[i]);
         }
     },
     
@@ -19643,12 +19758,12 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     
     // Options //
     /** Gets an array of selected myt.InputSelectOptions.
-        @returns array: An array of selected myt.InputSelectOptions. */
+        @returns {!Array} - An array of selected myt.InputSelectOptions. */
     getSelectedOptions: function() {
-        var options = this.getOptions(), 
-            i = options.length, 
-            option, 
-            retval = [];
+        const options = this.getOptions(), 
+            retval = []; 
+        let i = options.length, 
+            option;
         while (i) {
             option = options[--i];
             if (option.isSelected()) retval.push(option);
@@ -19657,12 +19772,12 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     },
     
     /** Gets an array of selected myt.InputSelectOption values.
-        @returns array: An array of selected option values. */
+        @returns {!Array} - An array of selected option values. */
     getSelectedOptionValues: function() {
-        var options = this.getOptions(), 
-            i = options.length, 
-            option, 
-            retval = [];
+        const options = this.getOptions(), 
+            retval = []; 
+        let i = options.length, 
+            option;
         while (i) {
             option = options[--i];
             if (option.isSelected()) retval.push(option.value);
@@ -19671,11 +19786,13 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     },
     
     /** Gets the myt.InputSelectOption with the provided value.
-        @param value:* The value of the option to get.
-        @returns myt.InputSelectOption: The matching option or null if not
-            found. */
+        @param {*} value - The value of the option to get.
+        @returns {?Object} - The matching myt.InputSelectOption option or null 
+            if not found. */
     getOptionForValue: function(value) {
-        var options = this.getOptions(), i = options.length, option;
+        const options = this.getOptions();
+        let i = options.length, 
+            option;
         while (i) {
             option = options[--i];
             if (option.value === value) return option;
@@ -19691,7 +19808,8 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     },
     
     destroyAllOptions: function() {
-        var options = this.getOptions(), i = options.length;
+        const options = this.getOptions();
+        let i = options.length;
         while (i) options[--i].destroy();
     },
     
@@ -19699,7 +19817,7 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
         @param value:* The value of the option to remove.
         @returns boolean: true if the option is destroyed, false otherwise. */
     destroyOptionWithValue: function(value) {
-        var option = this.getOptionForValue(value);
+        const option = this.getOptionForValue(value);
         if (option) {
             option.destroy();
             if (option.destroyed) return true;
@@ -19711,7 +19829,10 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     /** Deselects all selected options included disabled options.
         @returns {undefined} */
     deselectAll: function() {
-        var options = this.getOptions(), i = options.length, option, changed = false;
+        const options = this.getOptions();
+        let i = options.length, 
+            option, 
+            changed = false;
         while (i) {
             option = options[--i];
             if (option.isSelected()) {
@@ -19725,7 +19846,7 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     
     selectValues: function(values) {
         values = Array.isArray(values) ? values : [values];
-        var i = values.length;
+        let i = values.length;
         while (i) this.selectValue(values[--i]);
     },
     
@@ -19747,7 +19868,7 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     },
     
     /** Deselects the option that has the provided value.
-        @param value:* The value of the option to deselect.
+        @param {*} value - The value of the option to deselect.
         @returns {undefined} */
     deselectValue: function(value) {
         this.deselect(this.getOptionForValue(value));
@@ -19773,7 +19894,7 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     
     /** Called whenever the underlying dom element fires a "change" event.
         @returns {undefined} */
-    doChanged: function() {},
+    doChanged: () => {},
     
     /** @private
         @returns {undefined} */
@@ -19792,7 +19913,8 @@ myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
     Attributes:
         value:* the value of the option.
         label:string the text label for the option.
-*/
+    
+    @class */
 myt.InputSelectOption = new JS.Class('InputSelectOption', myt.View, {
     include: [myt.Disableable, myt.Selectable],
     
@@ -19810,7 +19932,7 @@ myt.InputSelectOption = new JS.Class('InputSelectOption', myt.View, {
         // Adapt to event from syncTo
         if (v !== null && typeof v === 'object') v = v.value;
         
-        var de = this.getInnerDomElement();
+        const de = this.getInnerDomElement();
         if (de.selected !== v) de.selected = v;
     },
     
@@ -19877,7 +19999,7 @@ myt.FormInputSelect = new JS.Class('FormInputSelect', myt.InputSelect, {
     setValue: function(v) {
         if (this.__abortSetValue) return;
         
-        var retval = this.callSuper(v);
+        const retval = this.callSuper(v);
         
         // Clear Selection and then reselect
         this.__abortSetValue = true;
@@ -19938,13 +20060,17 @@ myt.ValueComponent = new JS.Module('ValueComponent', {
             Supported values are 'first' and 'last'. Defaults to 'first'.
         @returns {undefined} */
     chainValueFilter: function(filter, where) {
-        var existingFilter = this.valueFilter, chainedFilter = filter;
+        const existingFilter = this.valueFilter;
+        let chainedFilter;
         if (existingFilter) {
             if (where === 'last') {
-                chainedFilter = function(v) {return filter(existingFilter(v));};
-            } else if (where === 'first' || where == null) {
-                chainedFilter = function(v) {return existingFilter(filter(v));};
+                chainedFilter = (v) => filter(existingFilter(v));
+            } else {
+                // "where" is 'first' or not provided.
+                chainedFilter = (v) => existingFilter(filter(v));
             }
+        } else {
+            chainedFilter = filter;
         }
         this.setValueFilter(chainedFilter);
     }
@@ -19952,19 +20078,19 @@ myt.ValueComponent = new JS.Module('ValueComponent', {
 
 
 ((pkg) => {
-    var getBooleanAttributeGroup = (formRadioGroup) => pkg.BAG.getGroup('selected', formRadioGroup.groupId),
+    const getBooleanAttributeGroup = (formRadioGroup) => pkg.BAG.getGroup('selected', formRadioGroup.groupId),
         
         /*  Search the radio group for a matching node and make that one the
             true node.
             @param {!Object} formRadioGroup
             @returns {undefined} */
         updateGroupValue = (formRadioGroup) => {
-            var bag = getBooleanAttributeGroup(formRadioGroup);
+            const bag = getBooleanAttributeGroup(formRadioGroup);
             if (bag) {
-                var nodes = bag.getNodes(), 
-                    i = nodes.length, 
-                    node, 
+                const nodes = bag.getNodes(),
                     v = formRadioGroup.value;
+                let i = nodes.length, 
+                    node;
                 while (i) {
                     node = nodes[--i];
                     if (node.optionValue === v) {
@@ -19977,14 +20103,14 @@ myt.ValueComponent = new JS.Module('ValueComponent', {
         
         startMonitoring = (formRadioGroup) => {
             if (formRadioGroup.groupId) {
-                var bag = getBooleanAttributeGroup(formRadioGroup);
+                const bag = getBooleanAttributeGroup(formRadioGroup);
                 if (bag) formRadioGroup.syncTo(bag, '__syncValue', 'trueNode');
             }
         },
         
         stopMonitoring = (formRadioGroup) => {
             if (formRadioGroup.groupId) {
-                var bag = getBooleanAttributeGroup(formRadioGroup);
+                const bag = getBooleanAttributeGroup(formRadioGroup);
                 if (bag) formRadioGroup.detachFrom(bag, '__syncValue', 'trueNode');
             }
         };
@@ -20015,7 +20141,7 @@ myt.ValueComponent = new JS.Module('ValueComponent', {
         // Accessors ///////////////////////////////////////////////////////////
         /** @overrides myt.FormElement */
         setValue: function(v) {
-            var retval = this.callSuper(v);
+            const retval = this.callSuper(v);
             if (this.inited) updateGroupValue(this);
             return retval;
         },
@@ -20041,12 +20167,12 @@ myt.ValueComponent = new JS.Module('ValueComponent', {
 
 
 ((pkg) => {
-    var STYLE_SOLID = 'solid',
+    const STYLE_SOLID = 'solid',
         STYLE_OUTLINE = 'outline',
         DEFAULT_STYLE = STYLE_OUTLINE,
         
         updateUI = (checkbox) => {
-            var label = checkbox.label || '',
+            const label = checkbox.label || '',
                 checkboxStyle = checkbox.checkboxStyle || DEFAULT_STYLE;
             checkbox.setText(
                 '<i class="' + 
@@ -20210,7 +20336,7 @@ myt.FormInputTextMixin = new JS.Module('FormInputTextMixin', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.Input */
     initNode: function(parent, attrs) {
-        var self = this;
+        const self = this;
         
         self.acceleratorScope = 'element';
         self.validateWhen = 'key';
@@ -20254,10 +20380,10 @@ myt.FormInputTextMixin = new JS.Module('FormInputTextMixin', {
     
     /** @overrides myt.FormElement */
     setValue: function(v) {
-        var retval = this.callSuper(v);
+        const retval = this.callSuper(v);
         
         // Validate as we type.
-        var when = this.validateWhen;
+        const when = this.validateWhen;
         if (when === 'key' || when === 'blurWithKeyFix') this.verifyValidState();
         
         return retval;
@@ -20317,7 +20443,7 @@ myt.FormInputTextMixin = new JS.Module('FormInputTextMixin', {
         this.callSuper();
         
         // Validate on blur
-        var when = this.validateWhen;
+        const when = this.validateWhen;
         if (when === 'blur' || when === 'blurWithKeyFix') this.verifyValidState();
     },
     
@@ -20348,8 +20474,7 @@ myt.FormInputTextMixin = new JS.Module('FormInputTextMixin', {
             Defaults to undefined.
         placeholder:string Text that will be shown if the value is empty.
     
-    @class
-*/
+    @class */
 myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     include: [myt.TextSupport],
     
@@ -20357,7 +20482,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.NativeInputWrapper */
     initNode: function(parent, attrs) {
-        var self = this;
+        const self = this;
         
         if (attrs.bgColor == null) attrs.bgColor = 'transparent';
         if (attrs.spellcheck == null) attrs.spellcheck = false;
@@ -20431,7 +20556,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
         @param {!Object} event
         @returns {undefined} */
     __filterInputPress: function(event) {
-        var domEvent = event.value,
+        const domEvent = event.value,
             charCode = domEvent.which;
         
         // Firefox fires events for arrow keys and backspace which should be
@@ -20443,7 +20568,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
         }
         
         // Filter for allowed characters
-        var allowedChars = this.allowedChars;
+        const allowedChars = this.allowedChars;
         if (allowedChars && allowedChars.indexOf(String.fromCharCode(charCode)) === -1) domEvent.preventDefault();
         
         this.filterInputPress(domEvent);
@@ -20475,7 +20600,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     getCaretPosition: function() {
         // IE Support
         if (document.selection) {
-            var selection = document.selection.createRange();
+            const selection = document.selection.createRange();
             selection.moveStart('character', -this.getDomValue().length);
             return selection.text.length;
         }
@@ -20495,12 +20620,12 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
             
             end = start;
         }
-        var elem = this.getInnerDomElement();
+        const elem = this.getInnerDomElement();
         
         if (elem.setSelectionRange) {
             elem.setSelectionRange(start, end);
         } else if (elem.createTextRange) {
-            var range = elem.createTextRange();
+            const range = elem.createTextRange();
             range.collapse(true);
             range.moveEnd('character', end);
             range.moveStart('character', start);
@@ -20528,7 +20653,7 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
     },
     
     getSelection: function() {
-        var de = this.getInnerDomElement();
+        const de = this.getInnerDomElement();
         return {
             start:de.selectionStart,
             startElem:de,
@@ -20595,7 +20720,8 @@ myt.FormInputText = new JS.Class('FormInputText', myt.InputText, {
         fullItemConfig:array The full list of items that can be shown in the
             list. The actual itemConfig used will be filtered based on the
             current value of the input text.
-*/
+    
+    @class */
 myt.ComboBox = new JS.Class('ComboBox', myt.InputText, {
     include: [
         myt.Activateable,
@@ -20631,25 +20757,28 @@ myt.ComboBox = new JS.Class('ComboBox', myt.InputText, {
         Show floating panel if the value has changed during during
         user interaction. */
     __syncToDom: function(event) {
-        var existing = this.value;
+        const existing = this.value;
         this.callSuper(event);
         if (existing !== this.value) this.showFloatingPanel();
     },
     
     /** @overrides */
     showFloatingPanel: function(panelId) {
-        var fp = this.getFloatingPanel(panelId);
+        const fp = this.getFloatingPanel(panelId);
         if (fp) {
             // Filter config
-            var itemConfig;
+            let itemConfig;
             if (this.filterItems) {
                 itemConfig = [];
                 
-                var curValue = this.value,
+                const curValue = this.value,
                     normalizedCurValue = curValue == null ? '' : ('' + curValue).toLowerCase(),
                     fullItemConfig = this.fullItemConfig,
-                    len = fullItemConfig.length, i = 0, 
-                    item, normalizedItemValue, idx;
+                    len = fullItemConfig.length;
+                let i = 0, 
+                    item, 
+                    normalizedItemValue, 
+                    idx;
                 for (; len > i;) {
                     item = fullItemConfig[i++];
                     normalizedItemValue = item.attrs.text.toLowerCase();
@@ -20736,10 +20865,10 @@ myt.FormComboBox = new JS.Class('FormComboBox', myt.ComboBox, {
     
     /** @overrides myt.FormElement */
     setValue: function(v) {
-        var retval = this.callSuper(v);
+        const retval = this.callSuper(v);
         
         // Validate as we type.
-        var when = this.validateWhen;
+        const when = this.validateWhen;
         if (when === 'key' || when === 'blurWithKeyFix') this.verifyValidState();
         
         return retval;
@@ -20811,7 +20940,7 @@ myt.FormComboBox = new JS.Class('FormComboBox', myt.ComboBox, {
         this.callSuper();
         
         // Validate on blur
-        var when = this.validateWhen;
+        const when = this.validateWhen;
         if (when === 'blur' || when === 'blurWithKeyFix') this.verifyValidState();
     },
     
@@ -20914,7 +21043,7 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.BaseInputText */
     initNode: function(parent, attrs) {
-        var self = this;
+        const self = this;
         
         if (attrs.tagName == null) attrs.tagName = 'div';
         attrs.inputType = null;
@@ -20978,7 +21107,7 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     /** @overrides myt.BaseInputText */
     filterInputPress: function(domEvent) {
         // Implement maxLength
-        var maxLength = this.maxLength;
+        const maxLength = this.maxLength;
         if (maxLength >= 0 && this.getCharacterCount() === maxLength) domEvent.preventDefault();
         
         this.callSuper(domEvent);
@@ -20991,7 +21120,7 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     
     /** @overrides myt.NativeInputWrapper */
     setDomValue: function(v) {
-        var de = this.getInnerDomElement();
+        const de = this.getInnerDomElement();
         if (de.innerHTML !== v) {
             de.innerHTML = v;
             this.sizeViewToDom();
@@ -21025,7 +21154,7 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     
     // Caret handling
     getCharacterCount: function() {
-        var elem = this.getInnerDomElement().firstChild;
+        const elem = this.getInnerDomElement().firstChild;
         return elem ? elem.length : 0;
     },
     
@@ -21035,7 +21164,7 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     
     /** @overrides myt.BaseInputText */
     getCaretPosition: function() {
-        var selection = this.getSelection();
+        const selection = this.getSelection();
         return selection ? selection.end : 0;
     },
     
@@ -21072,9 +21201,9 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     
     /** @overrides myt.BaseInputText */
     getSelection: function() {
-        var range;
+        let range;
         if (window.getSelection) {
-            var sel = window.getSelection();
+            const sel = window.getSelection();
             if (sel.rangeCount > 0) {
                 // Sometimes when deleting we get an unexpected node
                 if (sel.extentNode === this.getInnerDomElement()) return null;
@@ -21096,15 +21225,15 @@ myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
     /** @overrides myt.BaseInputText */
     setSelection: function(selection) {
         if (selection) {
-            var startElem = selection.startElem,
+            const startElem = selection.startElem,
                 endElem = selection.endElem;
             if (startElem && startElem.parentNode && endElem && endElem.parentNode) {
-                var range = document.createRange();
+                const range = document.createRange();
                 range.setStart(startElem, Math.min(selection.start, startElem.length));
                 range.setEnd(endElem, Math.min(selection.end, endElem.length));
                 
                 if (window.getSelection) {
-                    var sel = window.getSelection();
+                    const sel = window.getSelection();
                     if (sel.rangeCount > 0) sel.removeAllRanges();
                     sel.addRange(range);
                 } else if (document.selection) {
@@ -21161,12 +21290,12 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
         if (attrs.snapToInt == null) attrs.snapToInt = true;
         
         if (!attrs.valueFilter) {
-            var self = this;
+            const self = this;
             attrs.valueFilter = function(v) {
-                var max = self.maxValue;
+                const max = self.maxValue;
                 if (max != null && v > max) return max;
                 
-                var min = self.minValue;
+                const min = self.minValue;
                 if (min != null && v < min) return min;
                 
                 return v;
@@ -21198,7 +21327,7 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
         if (this.snapToInt && v != null) v = Math.round(v);
         
         if (this.minValue !== v) {
-            var max = this.maxValue;
+            const max = this.maxValue;
             if (max != null && v > max) v = max;
             
             if (this.minValue !== v) {
@@ -21217,7 +21346,7 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
         if (this.snapToInt && v != null) v = Math.round(v);
         
         if (this.maxValue !== v) {
-            var min = this.minValue;
+            const min = this.minValue;
             if (min != null && v < min) v = min;
             
             if (this.maxValue !== v) {
@@ -21240,8 +21369,15 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
 
 
 ((pkg) => {
-    var globalDragManager,
+    let globalDragManager,
         
+        /* The view currently being dragged. */
+        dragView,
+        
+        /* The view currently being dragged over. */
+        overView;
+        
+    const
         /* The list of myt.AutoScrollers currently registered for notification
             when drags start and stop. */
         autoScrollers = [],
@@ -21250,14 +21386,8 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
             when drag and drop events occur. */
         dropTargets = [],
         
-        /* The view currently being dragged. */
-        dragView,
-        
-        /* The view currently being dragged over. */
-        overView,
-        
         setOverView = (v) => {
-            var existingOverView = overView;
+            const existingOverView = overView;
             if (existingOverView !== v) {
                 if (existingOverView) {
                     existingOverView.notifyDragLeave(dragView);
@@ -21276,7 +21406,7 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
         },
         
         setDragView = (v) => {
-            var existingDragView = dragView,
+            let existingDragView = dragView,
                 funcName, 
                 eventName,
                 targets,
@@ -21312,7 +21442,7 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
             @param {!Array} list
             @returns {!Array} */
         filterList = (dropable, list) => {
-            var retval;
+            let retval;
             
             if (dropable.destroyed) {
                 retval = [];
@@ -21322,9 +21452,11 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
                 } else {
                     retval = [];
                     
-                    var dragGroups = dropable.getDragGroups(),
-                        i = list.length, 
-                        item, targetGroups, dragGroup;
+                    const dragGroups = dropable.getDragGroups();
+                    let i = list.length, 
+                        item, 
+                        targetGroups, 
+                        dragGroup;
                     while (i) {
                         item = list[--i];
                         if (item.acceptAnyDragGroup()) {
@@ -21388,7 +21520,7 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
             @param {!Object} autoScroller - The myt.AutoScroller to unregister.
             @returns {undefined} */
         unregisterAutoScroller: (autoScroller) => {
-            var i = autoScrollers.length;
+            let i = autoScrollers.length;
             while (i) {
                 if (autoScrollers[--i] === autoScroller) {
                     autoScrollers.splice(i, 1);
@@ -21408,7 +21540,7 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
             @param {!Object} dropTarget - The myt.DropTarget to unregister.
             @returns {undefined} */
         unregisterDropTarget: (dropTarget) => {
-            var i = dropTargets.length;
+            let i = dropTargets.length;
             while (i) {
                 if (dropTargets[--i] === dropTarget) {
                     dropTargets.splice(i, 1);
@@ -21447,18 +21579,17 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
             // Get the frontmost myt.DropTarget that is registered with this 
             // manager and is under the current mouse location and has a 
             // matching drag group.
-            var topDropTarget,
-                filteredDropTargets = filterList(dropable, dropTargets),
-                i = filteredDropTargets.length;
+            const filteredDropTargets = filterList(dropable, dropTargets);
+            let i = filteredDropTargets.length,
+                topDropTarget;
             
             if (i > 0) {
-                var domMouseEvent = event.value,
+                const domMouseEvent = event.value,
                     mouseX = domMouseEvent.pageX,
-                    mouseY = domMouseEvent.pageY,
-                    dropTarget;
+                    mouseY = domMouseEvent.pageY;
                 
                 while (i) {
-                    dropTarget = filteredDropTargets[--i];
+                    let dropTarget = filteredDropTargets[--i];
                     if (dropTarget.willAcceptDrop(dropable) &&
                         dropable.willPermitDrop(dropTarget) &&
                         dropTarget.isPointVisible(mouseX, mouseY) && 
@@ -21476,14 +21607,14 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
 
 
 ((pkg) => {
-    var G = pkg.global,
+    const G = pkg.global,
         globalMouse = G.mouse,
         globalKeys = G.keys,
         
         /*  @param {!Object} draggable
             @returns {undefined} */
         requestDragPosition = (draggable) => {
-            var pos = draggable.__lastMousePosition;
+            const pos = draggable.__lastMousePosition;
             draggable.requestDragPosition(
                 pos.x - draggable.dragInitX + draggable.dragOffsetX, 
                 pos.y - draggable.dragInitY + draggable.dragOffsetY
@@ -21530,8 +21661,8 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.View */
         initNode: function(parent, attrs) {
-            var self = this,
-                isDraggable = true;
+            const self = this;
+            let isDraggable = true;
             
             self.isDraggable = self.isDragging = false;
             self.draggableAllowBubble = true;
@@ -21552,8 +21683,8 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
         
         // Accessors ///////////////////////////////////////////////////////////
         setIsDraggable: function(v) {
-            var self = this,
-                func,
+            const self = this;
+            let func,
                 dragviews,
                 dragview,
                 i;
@@ -21623,7 +21754,7 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
             @param {!Object} event
             @returns {undefined} */
         __doMouseDown: function(event) {
-            var self = this,
+            const self = this,
                 pos = pkg.MouseObservable.getMouseFromEvent(event),
                 de = self.getOuterDomElement();
             self.dragInitX = pos.x - de.offsetLeft;
@@ -21664,7 +21795,7 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
             @param {!Object} event
             @returns {undefined} */
         __doDragCheck: function(event) {
-            var self = this,
+            const self = this,
                 pos = pkg.MouseObservable.getMouseFromEvent(event),
                 distance = pkg.Geometry.measureDistance(pos.x, pos.y, self.dragInitX + self.x, self.dragInitY + self.y);
             if (distance >= self.distanceBeforeDrag) {
@@ -21679,7 +21810,7 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
             @param {!Object} event - The event the mouse event when the drag started.
             @returns {undefined} */
         startDrag: function(event) {
-            var self = this;
+            const self = this;
             
             if (self.centerOnMouse) {
                 self.syncTo(self, '__updateDragInitX', 'width');
@@ -21721,7 +21852,7 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
                 aborted.
             @returns {undefined} */
         stopDrag: function(event, isAbort) {
-            var self = this;
+            const self = this;
             self.detachFromDom(globalMouse, '__doMouseUp', 'mouseup', true);
             self.detachFromDom(globalMouse, 'updateDrag', 'mousemove', true);
             if (self.centerOnMouse) {
@@ -21812,7 +21943,7 @@ myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
         if (this.x !== v) {
             this.callSuper(v);
             
-            var p = this.parent;
+            const p = this.parent;
             if (p.axis === 'x') p._syncValueToThumb(this);
         }
     },
@@ -21822,7 +21953,7 @@ myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
         if (this.y !== v) {
             this.callSuper(v);
             
-            var p = this.parent;
+            const p = this.parent;
             if (p.axis === 'y') p._syncValueToThumb(this);
         }
     },
@@ -21832,10 +21963,12 @@ myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
     /** @overrides myt.Draggable */
     requestDragPosition: function(x, y) {
         if (!this.disabled) {
-            var parent = this.parent,
+            const parent = this.parent,
                 minPx = parent.getMinPixelValueForThumb(this),
-                maxPx = parent.getMaxPixelValueForThumb(this),
-                halfSize, pos, func;
+                maxPx = parent.getMaxPixelValueForThumb(this);
+            let halfSize,
+                pos,
+                func;
             
             if (parent.axis === 'x') {
                 halfSize = this.width / 2;
@@ -21853,7 +21986,7 @@ myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
     
     /** @overrides myt.Button. */
     doActivationKeyDown: function(key, isRepeat) {
-        var parent = this.parent;
+        const parent = this.parent;
         switch (key) {
             case 37: // Left
                 parent.nudgeValueLeft(this);
@@ -21975,7 +22108,7 @@ myt.BaseSlider = new JS.Class('BaseSlider', myt.View, {
     
     // Methods /////////////////////////////////////////////////////////////////
     convertValueToPixels: function(v) {
-        var self = this,
+        const self = this,
             minV = self.minValue, ti = self.trackInset,
             pxRange = (self.axis === 'x' ? self.width : self.height) - ti - self.trackOutset,
             valueRange = self.maxValue - minV;
@@ -21983,7 +22116,7 @@ myt.BaseSlider = new JS.Class('BaseSlider', myt.View, {
     },
     
     convertPixelsToValue: function(px) {
-        var self = this,
+        const self = this,
             minV = self.minValue, ti = self.trackInset,
             pxRange = (self.axis === 'x' ? self.width : self.height) - ti - self.trackOutset,
             valueRange = self.maxValue - minV;
@@ -22057,7 +22190,7 @@ myt.Slider = new JS.Class('Slider', myt.BaseSlider, {
     /** @overrides
         Update the thumb position if the width changes. */
     setWidth: function(v, supressEvent) {
-        var existing = this.width;
+        const existing = this.width;
         this.callSuper(v, supressEvent);
         if (this.inited && this.axis === 'x' && this.width !== existing) this._syncThumbToValue(this.thumb, this.getValue());
     },
@@ -22065,7 +22198,7 @@ myt.Slider = new JS.Class('Slider', myt.BaseSlider, {
     /** @overrides
         Update the thumb position if the height changes. */
     setHeight: function(v, supressEvent) {
-        var existing = this.height;
+        const existing = this.height;
         this.callSuper(v, supressEvent);
         if (this.inited && this.axis === 'y' && this.height !== existing) this._syncThumbToValue(this.thumb, this.getValue());
     },
@@ -22147,7 +22280,7 @@ myt.RangeComponent = new JS.Module('RangeComponent', {
     
     setValue: function(v) {
         if (v) {
-            var existing = this.value,
+            const existing = this.value,
                 existingLower = existing ? existing.lower : undefined,
                 existingUpper = existing ? existing.upper : undefined;
             
@@ -22164,7 +22297,7 @@ myt.RangeComponent = new JS.Module('RangeComponent', {
             
             // Swap lower and upper if they are in the wrong order
             if (v.lower !== undefined && v.upper !== undefined && v.lower > v.upper) {
-                var temp = v.lower;
+                const temp = v.lower;
                 v.lower = v.upper;
                 v.upper = temp;
             }
@@ -22183,7 +22316,7 @@ myt.RangeComponent = new JS.Module('RangeComponent', {
     
     // Methods /////////////////////////////////////////////////////////////////
     getValueCopy: function() {
-        var v = this.value;
+        const v = this.value;
         return {lower:v.lower, upper:v.upper};
     }
 });
@@ -22197,10 +22330,11 @@ myt.BoundedRangeComponent = new JS.Module('BoundedRangeComponent', {
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
         if (!attrs.valueFilter) {
-            var self = this;
+            const self = this;
             attrs.valueFilter = function(v) {
                 if (v) {
-                    var max = self.maxValue, min = self.minValue;
+                    const max = self.maxValue,
+                        min = self.minValue;
                     if (max != null && v.upper > max) v.upper = max;
                     if (min != null && v.lower < min) v.lower = min;
                 }
@@ -22303,10 +22437,10 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
     /** @overrides
         Update the thumb position if the width changes. */
     setWidth: function(v, supressEvent) {
-        var existing = this.width;
+        const existing = this.width;
         this.callSuper(v, supressEvent);
         if (this.inited && this.axis === 'x' && this.width !== existing) {
-            var value = this.getValue();
+            const value = this.getValue();
             this._syncThumbToValue(this.thumbLower, value);
             this._syncThumbToValue(this.thumbUpper, value);
         }
@@ -22315,10 +22449,10 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
     /** @overrides
         Update the thumb position if the height changes. */
     setHeight: function(v, supressEvent) {
-        var existing = this.height;
+        const existing = this.height;
         this.callSuper(v, supressEvent);
         if (this.inited && this.axis === 'y' && this.height !== existing) {
-            var value = this.getValue();
+            const value = this.getValue();
             this._syncThumbToValue(this.thumbLower, value);
             this._syncThumbToValue(this.thumbUpper, value);
         }
@@ -22330,7 +22464,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         @private
         @returns {undefined} */
     _syncRangeFillToValue: function() {
-        var rangeFill = this.rangeFill, value = this.getValue(),
+        const rangeFill = this.rangeFill, value = this.getValue(),
             lowerPx = this.convertValueToPixels(value.lower),
             extent = this.convertValueToPixels(value.upper) - lowerPx;
         if (this.axis === 'x') {
@@ -22355,11 +22489,11 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         if (this.inited && !this.__lockSync) {
             this.__lockSync = true;
             
-            var converted = this.convertPixelsToValue(
+            const converted = this.convertPixelsToValue(
                 this.axis === 'x' ? thumb.x + thumb.width / 2 : thumb.y + thumb.height / 2
             );
             
-            var value = this.getValueCopy();
+            let value = this.getValueCopy();
             if (thumb.name === 'thumbLower') {
                 value.lower = converted;
             } else {
@@ -22378,7 +22512,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
     
     /** @overrides myt.BaseSlider */
     _nudge: function(thumb, up) {
-        var value = this.getValueCopy(),
+        const value = this.getValueCopy(),
             adj = this.nudgeAmount * (up ? 1 : -1);
         if (thumb.name === 'thumbLower') {
             value.lower += adj;
@@ -22413,13 +22547,13 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
 
 
 ((pkg) => {
-    var JSClass = JS.Class,
+    const JSClass = JS.Class,
         
         /*  Setup the limitToParent constraint.
             @param {!BaseDivider} divider
             @returns {undefined} */
         updateLimitToParentConstraint = (divider) => {
-            var dim = divider.axis === 'y' ? 'height' : 'width';
+            const dim = divider.axis === 'y' ? 'height' : 'width';
             divider.constrain('__limitToParent', [divider, 'limitToParent', divider, dim, divider.parent, dim]);
         },
         
@@ -22454,7 +22588,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                var self = this;
+                const self = this;
                 
                 if (attrs.activeColor == null) attrs.activeColor = '#bbbbbb';
                 if (attrs.hoverColor == null) attrs.hoverColor = '#dddddd';
@@ -22507,7 +22641,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
             setRestoreValue: function(v) {this.restoreValue = v;},
             
             setLimitToParent: function(v) {
-                var self = this;
+                const self = this;
                 
                 if (self.limitToParent !== v) {
                     self.limitToParent = v;
@@ -22557,7 +22691,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
                 @param {!Object} event
                 @returns {undefined} */
             __limitToParent: function(event) {
-                var self = this,
+                const self = this,
                     dim = self.axis === 'y' ? 'height' : 'width';
                 self.setMaxValue(self.parent[dim] - self.limitToParent - self[dim]);
             },
@@ -22566,8 +22700,8 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
                 up to a limit if the key is held down.
                 @overrides myt.Button. */
             doActivationKeyDown: function(key, isRepeat) {
-                var self = this,
-                    dir = 0;
+                const self = this;
+                let dir = 0;
                 
                 self.callSuper(key, isRepeat);
                 
@@ -22588,11 +22722,11 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
             },
             
             doPrimaryAction: function() {
-                var self = this,
-                    toValue, 
+                const self = this,
                     rv = self.restoreValue, 
                     maxV = self.maxValue, 
                     minV = self.minValue;
+                let toValue;
                 switch (self.expansionState) {
                     case 0:
                         if (rv != null) {
@@ -22673,29 +22807,29 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
 
 
 ((pkg) => {
-    var defaultMaxValue = 9999,
+    const defaultMaxValue = 9999,
         
         getPrevColumnHeader = (gridHeader) => gridHeader.gridController ? gridHeader.gridController.getPrevColumnHeader(gridHeader) : null,
         
         getNextColumnHeader = (gridHeader) => gridHeader.gridController ? gridHeader.gridController.getNextColumnHeader(gridHeader) : null,
         
         getGiveLeft = (gridHeader) => {
-            var hdr = getPrevColumnHeader(gridHeader);
+            const hdr = getPrevColumnHeader(gridHeader);
             return hdr ? hdr.maxValue - hdr.value + getGiveLeft(hdr) : 0;
         },
         
         getGiveRight = (gridHeader) => {
-            var hdr = getNextColumnHeader(gridHeader);
+            const hdr = getNextColumnHeader(gridHeader);
             return hdr ? hdr.maxValue - hdr.value + getGiveRight(hdr) : 0;
         },
         
         getTakeLeft = (gridHeader) => {
-            var hdr = getPrevColumnHeader(gridHeader);
+            const hdr = getPrevColumnHeader(gridHeader);
             return hdr ? hdr.minValue - hdr.value + getTakeLeft(hdr) : 0;
         },
         
         getTakeRight = (gridHeader) => {
-            var hdr = getNextColumnHeader(gridHeader);
+            const hdr = getNextColumnHeader(gridHeader);
             return hdr ? hdr.minValue - hdr.value + getTakeRight(hdr) : 0;
         },
         
@@ -22710,12 +22844,12 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
             @param {number} diff - The amount to steal. Will be a negative number.
             @returns {number} - The amount of width actually stolen. */
         stealPrevWidth = (gridHeader, diff) => {
-            var hdr = getPrevColumnHeader(gridHeader),
-                usedDiff = 0;
+            const hdr = getPrevColumnHeader(gridHeader);
+            let usedDiff = 0;
             if (hdr) {
-                var newValue = hdr.value + diff;
+                const newValue = hdr.value + diff;
                 if (hdr.resizable) hdr.setValue(newValue);
-                var remainingDiff = newValue - hdr.value;
+                const remainingDiff = newValue - hdr.value;
                 usedDiff = diff - remainingDiff;
                 if (remainingDiff < 0) usedDiff += stealPrevWidth(hdr, remainingDiff);
             }
@@ -22727,12 +22861,12 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
             @param {number} diff - The amount to give. Will be a positive number.
             @returns {number} - The amount of width actually given. */
         givePrevWidth = (gridHeader, diff) => {
-            var hdr = getPrevColumnHeader(gridHeader),
-                usedDiff = 0;
+            const hdr = getPrevColumnHeader(gridHeader);
+            let usedDiff = 0;
             if (hdr) {
-                var newValue = hdr.value + diff;
+                const newValue = hdr.value + diff;
                 if (hdr.resizable) hdr.setValue(newValue);
-                var remainingDiff = newValue - hdr.value;
+                const remainingDiff = newValue - hdr.value;
                 usedDiff = diff - remainingDiff;
                 if (remainingDiff > 0) usedDiff += givePrevWidth(hdr, remainingDiff);
             }
@@ -22744,11 +22878,11 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
             @param {number} diff - The amount to steal. Will be a negative number.
             @returns {number} - The amount of width actually stolen. */
         stealNextWidth = (gridHeader, diff) => {
-            var hdr = getNextColumnHeader(gridHeader);
+            const hdr = getNextColumnHeader(gridHeader);
             if (hdr) {
-                var newValue = hdr.value + diff;
+                const newValue = hdr.value + diff;
                 if (hdr.resizable) hdr.setValue(newValue);
-                var remainingDiff = newValue - hdr.value;
+                const remainingDiff = newValue - hdr.value;
                 if (remainingDiff < 0) stealNextWidth(hdr, remainingDiff);
             }
         },
@@ -22758,11 +22892,11 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
             @param {number} diff - The amount to give. Will be a positive number.
             @returns {number} - The amount of width actually given. */
         giveNextWidth = (gridHeader, diff) => {
-            var hdr = getNextColumnHeader(gridHeader);
+            const hdr = getNextColumnHeader(gridHeader);
             if (hdr) {
-                var newValue = hdr.value + diff;
+                const newValue = hdr.value + diff;
                 if (hdr.resizable) hdr.setValue(newValue);
-                var remainingDiff = newValue - hdr.value;
+                const remainingDiff = newValue - hdr.value;
                 if (remainingDiff > 0) giveNextWidth(hdr, remainingDiff);
             }
         };
@@ -22801,8 +22935,8 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            var self = this,
-                gc;
+            const self = this;
+            let gc;
             
             if (attrs.minValue == null) attrs.minValue = 16;
             if (attrs.maxValue == null) attrs.maxValue = defaultMaxValue;
@@ -22827,7 +22961,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
                 draggableAllowBubble:false
             }, [pkg.SizeToParent, pkg.Draggable, {
                 requestDragPosition: function(x, y) {
-                    var diff = x - this.x,
+                    let diff = x - this.x,
                         growAmt,
                         shrinkAmt,
                         newValue;
@@ -22849,8 +22983,8 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
                     newValue = self.value + diff;
                     
                     if (self.resizable) self.setValue(newValue);
-                    var remainingDiff = newValue - self.value,
-                        stolenAmt = remainingDiff - diff,
+                    const remainingDiff = newValue - self.value;
+                    let stolenAmt = remainingDiff - diff,
                         additionalActualDiff = 0;
                     if (remainingDiff < 0) {
                         additionalActualDiff = stealPrevWidth(self, remainingDiff);
@@ -22900,7 +23034,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         },
         
         setGridController: function(v) {
-            var existing = this.gridController;
+            const existing = this.gridController;
             if (existing !== v) {
                 if (existing) existing.notifyRemoveColumnHeader(this);
                 this.gridController = v;
@@ -22921,7 +23055,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         
         /** @overrides myt.BoundedValueComponent */
         setMinValue: function(v) {
-            var self = this,
+            const self = this,
                 oldMinValue = self.minValue || 0, 
                 gc = self.gridController;
             self.callSuper(v);
@@ -22930,7 +23064,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         
         /** @overrides myt.BoundedValueComponent */
         setMaxValue: function(v) {
-            var self = this,
+            const self = this,
                 oldMaxValue = self.maxValue || 0,
                 gc = self.gridController;
             if (v == null) v = defaultMaxValue;
@@ -22940,7 +23074,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         
         /** @overrides myt.View */
         setWidth: function(v, supressEvent) {
-            var self = this,
+            const self = this,
                 cur = self.width;
             self.callSuper(v, supressEvent);
             if (self.inited && self.gridController && cur !== self.width) self.gridController.notifyColumnHeaderWidthChange(self);
@@ -22948,7 +23082,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         
         /** @overrides myt.View */
         setX: function(v) {
-            var self = this,
+            const self = this,
                 cur = self.x;
             self.callSuper(v);
             if (self.inited && self.gridController && cur !== self.x) self.gridController.notifyColumnHeaderXChange(self);
@@ -22956,7 +23090,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         
         /** @overrides myt.View */
         setVisible: function(v) {
-            var self = this,
+            const self = this,
                 cur = self.visible;
             self.callSuper(v);
             if (self.inited && self.gridController && cur !== self.visible) self.gridController.notifyColumnHeaderVisibilityChange(self);
@@ -22966,7 +23100,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
 
 
 ((pkg) => {
-    var getSubview = (gridRow, columnHeader) => gridRow[columnHeader.columnId + 'View'];
+    const getSubview = (gridRow, columnHeader) => gridRow[columnHeader.columnId + 'View'];
     
     /** Makes a view behave as a row in a grid.
         
@@ -22986,7 +23120,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
             
             this.callSuper(parent, attrs);
             
-            var gc = this.gridController;
+            const gc = this.gridController;
             if (gc) gc.notifyAddRow(this);
         },
         
@@ -22998,7 +23132,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         
         // Accessors ///////////////////////////////////////////////////////////
         setGridController: function(v) {
-            var existing = this.gridController;
+            const existing = this.gridController;
             if (existing !== v) {
                 if (existing) existing.notifyRemoveRow(this);
                 this.gridController = v;
@@ -23009,255 +23143,96 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         
         // Methods /////////////////////////////////////////////////////////////
         notifyColumnHeaderXChange: function(columnHeader) {
-            var sv = getSubview(this, columnHeader);
+            const sv = getSubview(this, columnHeader);
             if (sv) sv.setX(columnHeader.x + columnHeader.cellXAdj);
         },
         
         notifyColumnHeaderWidthChange: function(columnHeader) {
-            var sv = getSubview(this, columnHeader);
+            const sv = getSubview(this, columnHeader);
             if (sv) sv.setWidth(columnHeader.width + columnHeader.cellWidthAdj);
         },
         
         notifyColumnHeaderVisibilityChange: function(columnHeader) {
-            var sv = getSubview(this, columnHeader);
+            const sv = getSubview(this, columnHeader);
             if (sv) sv.setVisible(columnHeader.visible);
         }
     });
 })(myt);
 
 
-/** Coordinates the behavior of a grid.
-    
-    Events:
-        sort:array
-        maxWidth:number
-        minWidth:number
-    
-    Attributes:
-        maxWidth:number the sum of the maximum widths of the columns.
-        minWidth:number the sum of the minimum widths of the columns.
-        gridWidth:number the width of the grid component.
-        fitToWidth:boolean determines if the columns will always fill up the
-            width of the grid or not. Defaults to true.
-        lastColumn:myt.GridColumnHeader Holds a reference to the last
-            column header.
-        sort:array An array containing the id of the column to sort by and
-            the order to sort by.
-        locked:boolean Prevents the grid from updating the UI. Defaults to
-            true. After a grid has been setup a call should be made to
-            setLocked(false)
-    
-    Private Attributes:
-        columnHeaders:array An array of column headers in this grid.
-        rows:array An array of rows in this grid.
-        __tempLock:boolean Prevents "change" notifications from being processed.
-*/
-myt.GridController = new JS.Module('GridController', {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        var self = this;
-        
-        self.columnHeaders = [];
-        self.rows = [];
-        
-        self.maxWidth = self.minWidth = self.gridWidth = 0;
-        self.fitToWidth = self.locked = true;
-        
-        self.callSuper(parent, attrs);
-        
-        self._fitToWidth();
-        self._notifyHeadersOfSortState();
-        if (!self.locked) self.doSort();
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setSort: function(v) {
-        if (!myt.areArraysEqual(v, this.sort)) {
-            this.sort = v;
-            if (this.inited) {
-                this.fireEvent('sort', v);
-                this._notifyHeadersOfSortState();
-                if (!this.locked) this.doSort();
-            }
-        }
-    },
-    
-    setLastColumn: function(v) {
-        var cur = this.lastColumn;
-        if (cur !== v) {
-            if (cur) cur.setLast(false);
-            this.lastColumn = v;
-            if (v) v.setLast(true);
-        }
-    },
-    
-    setFitToWidth: function(v) {this.fitToWidth = v;},
-    
-    setLocked: function(v) {
-        this.locked = v;
-        if (this.inited && !v) {
-            this.__tempLock = true; // Prevent change calls during fitToWidth
-            this._fitToWidth();
-            this.__tempLock = false;
-            
-            var hdrs = this.columnHeaders, i = hdrs.length, hdr;
-            // Reset min/max since notifyColumnHeaderVisibilityChange will
-            // update these values
-            this.setMaxWidth(0);
-            this.setMinWidth(0);
+((pkg) => {
+    const findLastColumn = (controller) => {
+            const hdrs = controller.columnHeaders;
+            let i = hdrs.length,
+                hdr;
             while (i) {
                 hdr = hdrs[--i];
-                this.notifyColumnHeaderXChange(hdr);
-                this.notifyColumnHeaderWidthChange(hdr);
-                this.notifyColumnHeaderVisibilityChange(hdr);
+                if (hdr.visible) return hdr;
             }
+            return null;
+        },
+        
+        fitHeadersToWidth = (controller) => {
+            if (controller.locked || !controller.fitToWidth) return;
             
-            this.doSort();
-        }
-    },
-    
-    isLocked: function() {
-        return this.locked || this.__tempLock;
-    },
-    
-    setMaxWidth: function(v) {this.set('maxWidth', v, true);},
-    setMinWidth: function(v) {this.set('minWidth', v, true);},
-    
-    setGridWidth: function(v) {
-        if (v !== null && typeof v === 'object') v = v.value;
-        
-        if (this.gridWidth !== v) {
-            this.gridWidth = v;
-            if (this.inited) this._fitToWidth();
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    _fitToWidth: function() {
-        if (this.locked || !this.fitToWidth) return;
-        
-        var hdrs = this.columnHeaders, 
-            len = hdrs.length, 
-            i = len, 
-            hdr,
-            maxExtent = 0,
-            extent,
-            extra,
-            isGrow,
-            resizeInfo = [], 
-            limit,
-            resizeCount,
-            idx = 0, 
-            fullCount = 0, 
-            incr, 
-            info;
-        
-        // Determine max extent
-        while(i) {
-            hdr = hdrs[--i];
-            if (!hdr.visible) continue;
-            extent = hdr.x + hdr.width;
-            if (extent > maxExtent) maxExtent = extent;
-        }
-        
-        extra = this.gridWidth - maxExtent;
-        
-        if (extra === 0) return;
-        isGrow = extra > 0;
-        
-        // Get resizable columns
-        i = len;
-        while(i) {
-            hdr = hdrs[--i];
-            if (!hdr.visible) continue;
-            if (hdr.resizable && hdr.flex > 0) {
-                limit = (isGrow ? hdr.maxValue : hdr.minValue) - hdr.value;
-                resizeInfo.push({hdr:hdr, limit:limit, amt:0});
-            }
-        }
-        
-        // Abort if no resizable flex columns.
-        resizeCount = resizeInfo.length;
-        if (resizeCount <= 0) return;
-        
-        // Calculate resize amounts
-        while (extra !== 0) {
-            info = resizeInfo[idx];
-            hdr = info.hdr;
+            const hdrs = controller.columnHeaders,
+                len = hdrs.length;
+            let i = len, 
+                hdr,
+                maxExtent = 0,
+                extent,
+                extra,
+                isGrow, 
+                limit,
+                resizeCount,
+                idx = 0, 
+                fullCount = 0, 
+                incr, 
+                info,
+                resizeInfo = [];
             
-            if (!info.full) {
-                if (isGrow) {
-                    incr = Math.min(hdr.flex, extra);
-                    if (info.amt + incr > info.limit) {
-                        incr = info.limit - info.amt;
-                        info.full = true;
-                    }
-                } else {
-                    incr = Math.max(-hdr.flex, extra);
-                    if (info.amt + incr < info.limit) {
-                        incr = info.limit - info.amt;
-                        info.full = true;
-                    }
-                }
-                info.amt += incr;
-                extra -= incr;
-            } else {
-                ++fullCount;
-            }
-            
-            if (fullCount === resizeCount) break;
-            
-            ++idx;
-            if (idx === resizeCount) {
-                idx = 0;
-                fullCount = 0;
-            }
-        }
-        
-        // Distribute amounts
-        i = resizeCount;
-        while (i) {
-            info = resizeInfo[--i];
-            hdr = info.hdr;
-            hdr.setValue(hdr.value + info.amt);
-        }
-        
-        // Distribute remaing extra to resizable non-flex columns
-        if (extra !== 0) {
-            // Get resizable columns
-            resizeInfo = [];
-            i = len;
-            while(i) {
+            // Determine max extent
+            while (i) {
                 hdr = hdrs[--i];
                 if (!hdr.visible) continue;
-                if (hdr.resizable && hdr.flex === 0) {
+                extent = hdr.x + hdr.width;
+                if (extent > maxExtent) maxExtent = extent;
+            }
+            
+            extra = controller.gridWidth - maxExtent;
+            
+            if (extra === 0) return;
+            isGrow = extra > 0;
+            
+            // Get resizable columns
+            i = len;
+            while (i) {
+                hdr = hdrs[--i];
+                if (!hdr.visible) continue;
+                if (hdr.resizable && hdr.flex > 0) {
                     limit = (isGrow ? hdr.maxValue : hdr.minValue) - hdr.value;
                     resizeInfo.push({hdr:hdr, limit:limit, amt:0});
                 }
             }
             
-            // Abort if no resizable columns.
+            // Abort if no resizable flex columns.
             resizeCount = resizeInfo.length;
             if (resizeCount <= 0) return;
             
             // Calculate resize amounts
-            idx = 0;
-            fullCount = 0;
             while (extra !== 0) {
                 info = resizeInfo[idx];
                 hdr = info.hdr;
                 
                 if (!info.full) {
                     if (isGrow) {
-                        incr = Math.min(1, extra);
+                        incr = Math.min(hdr.flex, extra);
                         if (info.amt + incr > info.limit) {
                             incr = info.limit - info.amt;
                             info.full = true;
                         }
                     } else {
-                        incr = Math.max(-1, extra);
+                        incr = Math.max(-hdr.flex, extra);
                         if (info.amt + incr < info.limit) {
                             incr = info.limit - info.amt;
                             info.full = true;
@@ -23285,197 +23260,362 @@ myt.GridController = new JS.Module('GridController', {
                 hdr = info.hdr;
                 hdr.setValue(hdr.value + info.amt);
             }
-        }
-    },
-    
-    // Sorting
-    _notifyHeadersOfSortState: function() {
-        var hdrs = this.columnHeaders, i = hdrs.length, hdr,
-            sort = this.sort,
-            sortColumnId = sort ? sort[0] : '',
-            sortOrder = sort ? sort[1] : '';
-        while (i) {
-            hdr = hdrs[--i];
-            if (hdr.columnId === sortColumnId) {
-                if (hdr.sortable) hdr.setSortState(sortOrder);
-            } else {
-                hdr.setSortState('none');
-            }
-        }
-    },
-    
-    /** Sorts the rows according to the current sort criteria. Subclasses and
-        instances should implement this as needed.
-        @returns {undefined} */
-    doSort: () => {},
-    
-    // Column Headers
-    /** Gets the column header before the provided one.
-        @param {!Object} columnHeader
-        @returns {?Object} The myt.GridColumnHeader or null if none exists. */
-    getPrevColumnHeader: function(columnHeader) {
-        var hdr,
-            hdrs = this.columnHeaders,
-            idx = this.getColumnHeaderIndex(columnHeader);
-        if (idx > 0) {
-            while (idx) {
-                hdr = hdrs[--idx];
-                if (hdr.visible) return hdr;
-            }
-        }
-        return null;
-    },
-    
-    /** Gets the column header after the provided one.
-        @param {!Object} columnHeader
-        @returns {?Object} The myt.GridColumnHeader or null if none exists. */
-    getNextColumnHeader: function(columnHeader) {
-        var hdr,
-            hdrs = this.columnHeaders,
-            len = hdrs.length,
-            idx = this.getColumnHeaderIndex(columnHeader) + 1;
-        if (idx > 0 && idx < len) {
-            for (; len > idx; idx++) {
-                hdr = hdrs[idx];
-                if (hdr.visible) return hdr;
-            }
-        }
-        return null;
-    },
-    
-    /** @private
-        @returns {?Object} */
-    _findLastColumn: function() {
-        var hdrs = this.columnHeaders,
-            i = hdrs.length,
-            hdr;
-        while (i) {
-            hdr = hdrs[--i];
-            if (hdr.visible) return hdr;
-        }
-        return null;
-    },
-    
-    hasColumnHeader: function(columnHeader) {
-        return this.getColumnHeaderIndex(columnHeader) !== -1;
-    },
-    
-    getColumnHeaderIndex: function(columnHeader) {
-        return this.columnHeaders.indexOf(columnHeader);
-    },
-    
-    getColumnHeaderById: function(columnId) {
-        var hdrs = this.columnHeaders,
-            i = hdrs.length,
-            hdr;
-        while (i) {
-            hdr = hdrs[--i];
-            if (hdr.columnId === columnId) return hdr;
-        }
-        return null;
-    },
-    
-    notifyAddColumnHeader: function(columnHeader) {
-        if (!this.hasColumnHeader(columnHeader)) {
-            this.columnHeaders.push(columnHeader);
-            if (columnHeader.visible) this.setLastColumn(columnHeader);
-        }
-    },
-    
-    notifyRemoveColumnHeader: function(columnHeader) {
-        var idx = this.getColumnHeaderIndex(columnHeader);
-        if (idx >= 0) {
-            this.columnHeaders.splice(idx, 1);
-            if (columnHeader.visible && columnHeader.last) this.setLastColumn(this.getPrevColumnHeader(columnHeader));
-        }
-    },
-    
-    notifyColumnHeaderXChange: function(columnHeader) {
-        if (!this.isLocked()) this.rows.forEach((row) => {row.notifyColumnHeaderXChange(columnHeader);});
-    },
-    
-    notifyColumnHeaderWidthChange: function(columnHeader) {
-        if (!this.isLocked()) this.rows.forEach((row) => {row.notifyColumnHeaderWidthChange(columnHeader);});
-    },
-    
-    notifyColumnHeaderVisibilityChange: function(columnHeader) {
-        if (!this.isLocked()) {
-            this.updateRowsForVisibilityChange(columnHeader);
             
-            this.setLastColumn(this._findLastColumn());
-            if (columnHeader.visible) {
-                this.setMaxWidth(this.maxWidth + columnHeader.maxValue);
-                this.setMinWidth(this.minWidth + columnHeader.minValue);
-            } else {
-                this.setMaxWidth(this.maxWidth - columnHeader.maxValue);
-                this.setMinWidth(this.minWidth - columnHeader.minValue);
-            }
-            this._fitToWidth();
-        }
-    },
-    
-    updateRowsForVisibilityChange: function(columnHeader) {
-        this.rows.forEach((row) => {row.notifyColumnHeaderVisibilityChange(columnHeader);});
-    },
-    
-    // Rows
-    hasRow: function(row) {
-        return this.getRowIndex(row) !== -1;
-    },
-    
-    getRowIndex: function(row) {
-        return this.rows.indexOf(row);
-    },
-    
-    /** Gets a row for the provided id and matcher function. If no matcher
-        function is provided a default function will be used that assumes
-        each row has a model property and that model property has an id
-        property.
-        @param {string} id
-        @param {?Function} [matcherFunc]
-        @returns {?Objecdt} */
-    getRowById: function(id, matcherFunc=row => row.model.id === id) {
-        return this.rows.find(matcherFunc);
-    },
-    
-    getPrevRow: function(row) {
-        var rows = this.rows,
-            idx = this.getRowIndex(row) - 1;
-        if (idx < 0) idx = rows.length - 1;
-        return rows[idx];
-    },
-    
-    getNextRow: function(row) {
-        var rows = this.rows,
-            idx = this.getRowIndex(row) + 1;
-        if (idx >= rows.length) idx = 0;
-        return rows[idx];
-    },
-    
-    notifyAddRow: function(row) {
-        if (!this.hasRow(row)) {
-            this.rows.push(row);
-            
-            // Update cell positions
-            if (!this.locked) {
-                var hdrs = this.columnHeaders, i = hdrs.length, hdr;
+            // Distribute remaing extra to resizable non-flex columns
+            if (extra !== 0) {
+                // Get resizable columns
+                resizeInfo = [];
+                i = len;
                 while (i) {
                     hdr = hdrs[--i];
-                    row.notifyColumnHeaderXChange(hdr);
-                    row.notifyColumnHeaderWidthChange(hdr);
-                    row.notifyColumnHeaderVisibilityChange(hdr);
+                    if (!hdr.visible) continue;
+                    if (hdr.resizable && hdr.flex === 0) {
+                        limit = (isGrow ? hdr.maxValue : hdr.minValue) - hdr.value;
+                        resizeInfo.push({hdr:hdr, limit:limit, amt:0});
+                    }
+                }
+                
+                // Abort if no resizable columns.
+                resizeCount = resizeInfo.length;
+                if (resizeCount <= 0) return;
+                
+                // Calculate resize amounts
+                idx = 0;
+                fullCount = 0;
+                while (extra !== 0) {
+                    info = resizeInfo[idx];
+                    hdr = info.hdr;
+                    
+                    if (!info.full) {
+                        if (isGrow) {
+                            incr = Math.min(1, extra);
+                            if (info.amt + incr > info.limit) {
+                                incr = info.limit - info.amt;
+                                info.full = true;
+                            }
+                        } else {
+                            incr = Math.max(-1, extra);
+                            if (info.amt + incr < info.limit) {
+                                incr = info.limit - info.amt;
+                                info.full = true;
+                            }
+                        }
+                        info.amt += incr;
+                        extra -= incr;
+                    } else {
+                        ++fullCount;
+                    }
+                    
+                    if (fullCount === resizeCount) break;
+                    
+                    ++idx;
+                    if (idx === resizeCount) {
+                        idx = 0;
+                        fullCount = 0;
+                    }
+                }
+                
+                // Distribute amounts
+                i = resizeCount;
+                while (i) {
+                    info = resizeInfo[--i];
+                    hdr = info.hdr;
+                    hdr.setValue(hdr.value + info.amt);
+                }
+            }
+        },
+        
+        notifyHeadersOfSortState = (controller) => {
+            const hdrs = controller.columnHeaders,
+                sort = controller.sort,
+                sortColumnId = sort ? sort[0] : '',
+                sortOrder = sort ? sort[1] : '';
+            let i = hdrs.length, 
+                hdr;
+            while (i) {
+                hdr = hdrs[--i];
+                if (hdr.columnId === sortColumnId) {
+                    if (hdr.sortable) hdr.setSortState(sortOrder);
+                } else {
+                    hdr.setSortState('none');
+                }
+            }
+        };
+    
+    /** Coordinates the behavior of a grid.
+        
+        Events:
+            sort:array
+            maxWidth:number
+            minWidth:number
+        
+        Attributes:
+            maxWidth:number the sum of the maximum widths of the columns.
+            minWidth:number the sum of the minimum widths of the columns.
+            gridWidth:number the width of the grid component.
+            fitToWidth:boolean determines if the columns will always fill up the
+                width of the grid or not. Defaults to true.
+            lastColumn:myt.GridColumnHeader Holds a reference to the last
+                column header.
+            sort:array An array containing the id of the column to sort by and
+                the order to sort by.
+            locked:boolean Prevents the grid from updating the UI. Defaults to
+                true. After a grid has been setup a call should be made to
+                setLocked(false)
+        
+        Private Attributes:
+            columnHeaders:array An array of column headers in this grid.
+            rows:array An array of rows in this grid.
+            __tempLock:boolean Prevents "change" notifications from being processed.
+        
+        @class */
+    pkg.GridController = new JS.Module('GridController', {
+        // Life Cycle //////////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            const self = this;
+            
+            self.columnHeaders = [];
+            self.rows = [];
+            
+            self.maxWidth = self.minWidth = self.gridWidth = 0;
+            self.fitToWidth = self.locked = true;
+            
+            self.callSuper(parent, attrs);
+            
+            fitHeadersToWidth(self);
+            notifyHeadersOfSortState(self);
+            if (!self.locked) self.doSort();
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setSort: function(v) {
+            if (!pkg.areArraysEqual(v, this.sort)) {
+                this.sort = v;
+                if (this.inited) {
+                    this.fireEvent('sort', v);
+                    notifyHeadersOfSortState(this);
+                    if (!this.locked) this.doSort();
+                }
+            }
+        },
+        
+        setLastColumn: function(v) {
+            const cur = this.lastColumn;
+            if (cur !== v) {
+                if (cur) cur.setLast(false);
+                this.lastColumn = v;
+                if (v) v.setLast(true);
+            }
+        },
+        
+        setFitToWidth: function(v) {this.fitToWidth = v;},
+        
+        setLocked: function(v) {
+            this.locked = v;
+            if (this.inited && !v) {
+                this.__tempLock = true; // Prevent change calls during fitToWidth
+                fitHeadersToWidth(this);
+                this.__tempLock = false;
+                
+                const hdrs = this.columnHeaders;
+                let i = hdrs.length,
+                    hdr;
+                // Reset min/max since notifyColumnHeaderVisibilityChange will
+                // update these values
+                this.setMaxWidth(0);
+                this.setMinWidth(0);
+                while (i) {
+                    hdr = hdrs[--i];
+                    this.notifyColumnHeaderXChange(hdr);
+                    this.notifyColumnHeaderWidthChange(hdr);
+                    this.notifyColumnHeaderVisibilityChange(hdr);
                 }
                 
                 this.doSort();
             }
+        },
+        
+        isLocked: function() {
+            return this.locked || this.__tempLock;
+        },
+        
+        setMaxWidth: function(v) {this.set('maxWidth', v, true);},
+        setMinWidth: function(v) {this.set('minWidth', v, true);},
+        
+        setGridWidth: function(v) {
+            if (v !== null && typeof v === 'object') v = v.value;
+            
+            if (this.gridWidth !== v) {
+                this.gridWidth = v;
+                if (this.inited) fitHeadersToWidth(this);
+            }
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Sorts the rows according to the current sort criteria. Subclasses and
+            instances should implement this as needed.
+            @returns {undefined} */
+        doSort: () => {},
+        
+        // Column Headers
+        /** Gets the column header before the provided one.
+            @param {!Object} columnHeader
+            @returns {?Object} The myt.GridColumnHeader or null if none exists. */
+        getPrevColumnHeader: function(columnHeader) {
+            const hdrs = this.columnHeaders;
+            let hdr,
+                idx = this.getColumnHeaderIndex(columnHeader);
+            if (idx > 0) {
+                while (idx) {
+                    hdr = hdrs[--idx];
+                    if (hdr.visible) return hdr;
+                }
+            }
+            return null;
+        },
+        
+        /** Gets the column header after the provided one.
+            @param {!Object} columnHeader
+            @returns {?Object} The myt.GridColumnHeader or null if none exists. */
+        getNextColumnHeader: function(columnHeader) {
+            const hdrs = this.columnHeaders,
+                len = hdrs.length;
+            let idx = this.getColumnHeaderIndex(columnHeader) + 1,
+                hdr;
+            if (idx > 0 && idx < len) {
+                for (; len > idx; idx++) {
+                    hdr = hdrs[idx];
+                    if (hdr.visible) return hdr;
+                }
+            }
+            return null;
+        },
+        
+        hasColumnHeader: function(columnHeader) {
+            return this.getColumnHeaderIndex(columnHeader) !== -1;
+        },
+        
+        getColumnHeaderIndex: function(columnHeader) {
+            return this.columnHeaders.indexOf(columnHeader);
+        },
+        
+        getColumnHeaderById: function(columnId) {
+            const hdrs = this.columnHeaders;
+            let i = hdrs.length,
+                hdr;
+            while (i) {
+                hdr = hdrs[--i];
+                if (hdr.columnId === columnId) return hdr;
+            }
+            return null;
+        },
+        
+        notifyAddColumnHeader: function(columnHeader) {
+            if (!this.hasColumnHeader(columnHeader)) {
+                this.columnHeaders.push(columnHeader);
+                if (columnHeader.visible) this.setLastColumn(columnHeader);
+            }
+        },
+        
+        notifyRemoveColumnHeader: function(columnHeader) {
+            const idx = this.getColumnHeaderIndex(columnHeader);
+            if (idx >= 0) {
+                this.columnHeaders.splice(idx, 1);
+                if (columnHeader.visible && columnHeader.last) this.setLastColumn(this.getPrevColumnHeader(columnHeader));
+            }
+        },
+        
+        notifyColumnHeaderXChange: function(columnHeader) {
+            if (!this.isLocked()) this.rows.forEach((row) => {row.notifyColumnHeaderXChange(columnHeader);});
+        },
+        
+        notifyColumnHeaderWidthChange: function(columnHeader) {
+            if (!this.isLocked()) this.rows.forEach((row) => {row.notifyColumnHeaderWidthChange(columnHeader);});
+        },
+        
+        notifyColumnHeaderVisibilityChange: function(columnHeader) {
+            if (!this.isLocked()) {
+                this.updateRowsForVisibilityChange(columnHeader);
+                
+                this.setLastColumn(findLastColumn(this));
+                if (columnHeader.visible) {
+                    this.setMaxWidth(this.maxWidth + columnHeader.maxValue);
+                    this.setMinWidth(this.minWidth + columnHeader.minValue);
+                } else {
+                    this.setMaxWidth(this.maxWidth - columnHeader.maxValue);
+                    this.setMinWidth(this.minWidth - columnHeader.minValue);
+                }
+                fitHeadersToWidth(this);
+            }
+        },
+        
+        updateRowsForVisibilityChange: function(columnHeader) {
+            this.rows.forEach((row) => {row.notifyColumnHeaderVisibilityChange(columnHeader);});
+        },
+        
+        // Rows
+        hasRow: function(row) {
+            return this.getRowIndex(row) !== -1;
+        },
+        
+        getRowIndex: function(row) {
+            return this.rows.indexOf(row);
+        },
+        
+        /** Gets a row for the provided id and matcher function. If no matcher
+            function is provided a default function will be used that assumes
+            each row has a model property and that model property has an id
+            property.
+            @param {string} id
+            @param {?Function} [matcherFunc]
+            @returns {?Objecdt} */
+        getRowById: function(id, matcherFunc=row => row.model.id === id) {
+            return this.rows.find(matcherFunc);
+        },
+        
+        getPrevRow: function(row) {
+            const rows = this.rows;
+            let idx = this.getRowIndex(row) - 1;
+            if (idx < 0) idx = rows.length - 1;
+            return rows[idx];
+        },
+        
+        getNextRow: function(row) {
+            const rows = this.rows;
+            let idx = this.getRowIndex(row) + 1;
+            if (idx >= rows.length) idx = 0;
+            return rows[idx];
+        },
+        
+        notifyAddRow: function(row) {
+            if (!this.hasRow(row)) {
+                this.rows.push(row);
+                
+                // Update cell positions
+                if (!this.locked) {
+                    const hdrs = this.columnHeaders;
+                    let i = hdrs.length,
+                        hdr;
+                    while (i) {
+                        hdr = hdrs[--i];
+                        row.notifyColumnHeaderXChange(hdr);
+                        row.notifyColumnHeaderWidthChange(hdr);
+                        row.notifyColumnHeaderVisibilityChange(hdr);
+                    }
+                    
+                    this.doSort();
+                }
+            }
+        },
+        
+        notifyRemoveRow: function(row) {
+            const idx = this.getRowIndex(row);
+            if (idx >= 0) this.rows.splice(idx, 1);
         }
-    },
-    
-    notifyRemoveRow: function(row) {
-        var idx = this.getRowIndex(row);
-        if (idx >= 0) this.rows.splice(idx, 1);
-    }
-});
+    });
+})(myt);
 
 
 /** An implementation of a grid component.
@@ -23509,20 +23649,20 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     
     /** @overrides myt.View */
     doAfterAdoption: function() {
-        var self = this,
+        const self = this,
             M = myt,
             V = M.View,
             SL = M.SpacedLayout,
             sizeHeightToRows = self.sizeHeightToRows;
         
-        var header = new V(self, {name:'header', overflow:'hidden'});
+        const header = new V(self, {name:'header', overflow:'hidden'});
         new SL(header, {
             name:'xLayout', locked:true, collapseParent:true, 
             spacing:self.columnSpacing
         });
         new M.SizeToChildren(header, {name:'yLayout', locked:true, axis:'y'});
         
-        var content = new V(self, {
+        const content = new V(self, {
             name:'content', 
             overflow:sizeHeightToRows ? 'hidden' : 'autoy'
         });
@@ -23565,7 +23705,7 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     setLocked: function(v) {
         // Performance: don't update layouts until the grid is unlocked.
         if (this.inited) {
-            var header = this.header,
+            const header = this.header,
                 headerXLayout = header.xLayout,
                 headerYLayout = header.yLayout,
                 contentYLayout = this.content.yLayout;
@@ -23599,7 +23739,7 @@ myt.Grid = new JS.Class('Grid', myt.View, {
         @param {!Object} event
         @returns {undefined} */
     _updateContentHeight: function(event) {
-        var self = this,
+        const self = this,
             header = self.header, 
             content = self.content,
             y = header.y + header.height;
@@ -23617,7 +23757,7 @@ myt.Grid = new JS.Class('Grid', myt.View, {
         // Automatically place column headers and rows in the header and
         // content views respectively.
         if (placement === '*') {
-            var target;
+            let target;
             if (subnode.isA(myt.GridRow)) {
                 target = this.content;
             } else if (subnode.isA(myt.GridColumnHeader)) {
@@ -23635,10 +23775,10 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     
     /** @overrides myt.GridController */
     doSort: function() {
-        var sort = this.sort || ['',''],
+        const sort = this.sort || ['',''],
             sortFunc = this.getSortFunction(sort[0], sort[1]);
         if (sortFunc) {
-            var content = this.content, 
+            const content = this.content, 
                 yLayout = content.yLayout;
             this.rows.sort(sortFunc);
             content.sortSubviews(sortFunc);
@@ -23655,10 +23795,10 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     getSortFunction: (sortColumnId, sortOrder) => {
         if (sortColumnId) {
             // Default sort function uses the 'text' attribute of the subview.
-            var sortNum = sortOrder === 'ascending' ? 1 : -1,
+            const sortNum = sortOrder === 'ascending' ? 1 : -1,
                 columnName = sortColumnId + 'View';
             return (a, b) => {
-                var aValue = a[columnName].text,
+                const aValue = a[columnName].text,
                     bValue = b[columnName].text;
                 if (aValue > bValue) {
                     return sortNum;
@@ -23673,10 +23813,10 @@ myt.Grid = new JS.Class('Grid', myt.View, {
 
 
 ((pkg) => {
-    var sizeClasses = ['','fa-lg','fa-2x','fa-3x','fa-4x','fa-5x'],
+    const sizeClasses = ['','fa-lg','fa-2x','fa-3x','fa-4x','fa-5x'],
         
         updateInstance = (instance) => {
-            var props = instance.properties;
+            let props = instance.properties;
             if (props) {
                 if (typeof props === 'string') {
                     props = props.split(' ');
@@ -23703,12 +23843,12 @@ myt.Grid = new JS.Class('Grid', myt.View, {
             propeties:string || array A space separated string or list of FA
                 CSS classes to set.
     */
-    var FontAwesome = pkg.FontAwesome = new JS.Class('FontAwesome', pkg.Markup, {
+    const FontAwesome = pkg.FontAwesome = new JS.Class('FontAwesome', pkg.Markup, {
         // Class Methods and Attributes ////////////////////////////////////////
         extend: {
             makeTag: function(props) {
                 if (Array.isArray(props)) {
-                    var len = props.length,
+                    let len = props.length,
                         prop,
                         i;
                     if (len > 0) {
@@ -23760,13 +23900,13 @@ myt.Grid = new JS.Class('Grid', myt.View, {
         
         // Accessors ///////////////////////////////////////////////////////////
         setIcon: function(v) {
-            var existing = this.icon;
+            const existing = this.icon;
             this.set('icon', v, true);
             if (this.inited && existing !== v) updateInstance(this);
         },
         
         setSize: function(v) {
-            var existing = this.size;
+            const existing = this.size;
             this.set('size', v, true);
             if (this.inited && existing !== v) updateInstance(this);
         },
@@ -23781,8 +23921,8 @@ myt.Grid = new JS.Class('Grid', myt.View, {
 
 
 ((pkg) => {
-    var updateSortIcon = (gridHeader) => {
-            var glyph = '';
+    const updateSortIcon = (gridHeader) => {
+            let glyph = '';
             if (gridHeader.sortable) {
                 switch (gridHeader.sortState) {
                     case 'ascending':
@@ -23798,7 +23938,7 @@ myt.Grid = new JS.Class('Grid', myt.View, {
         
         updateTextWidth = (gridHeader) => {
             if (gridHeader.contentAlign === 'left') {
-                var tv = gridHeader.textView;
+                const tv = gridHeader.textView;
                 if (tv) tv.setWidth(gridHeader.width - gridHeader.outset - tv.x);
             }
         };
@@ -23837,7 +23977,7 @@ myt.Grid = new JS.Class('Grid', myt.View, {
         
         /** @overrides myt.View */
         doAfterAdoption: function() {
-            var self = this;
+            const self = this;
             
             new pkg.FontAwesome(self, {
                 name:'sortIcon', align:'right', alignOffset:3, valign:'middle',
@@ -23971,7 +24111,8 @@ myt.InfiniteListRow = new JS.Module('InfiniteListRow', {
             performance when refreshing the list.
         _listView:myt.View The view that contains the rows in the list.
         _itemPool:myt.TrackActivesPool The pool for row views.
-*/
+    
+    @class */
 myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
@@ -23985,7 +24126,7 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        var self = this,
+        const self = this,
             M = myt,
             IL = M.InfiniteList,
             rowClass = attrs.rowClass;
@@ -24010,7 +24151,7 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
         self.callSuper(parent, attrs);
         
         // Build UI
-        var listView = self._listView = new M.View(self);
+        const listView = self._listView = new M.View(self);
         self._scrollAnchorView = new M.View(listView, {width:1, height:1, bgColor:'transparent'});
         self._itemPool = new M.TrackActivesPool(rowClass, listView);
         
@@ -24047,7 +24188,7 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
         if (v > 0) {
             this.callSuper(v, supressEvent);
             if (this.inited) {
-                var listView = this._listView,
+                const listView = this._listView,
                     w = this.width;
                 listView.setWidth(w);
                 listView.getSubviews().forEach(sv => {sv.setWidth(w);});
@@ -24081,7 +24222,7 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
     
     getSortFunction: function() {
         // Default to a numeric sort on the IDs
-        var modelIDName = this.modelIDName,
+        const modelIDName = this.modelIDName,
             asc = this.ascendingSort ? 1 : -1;
         if (this.numericSort) {
             return (a, b) => (a[modelIDName] - b[modelIDName]) * asc;
@@ -24099,10 +24240,10 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
     },
     
     scrollModelIntoView: function(model) {
-        var self = this,
+        const self = this,
             idx = self.getIndexOfModelInData(model),
-            rowExtent = self._rowExtent,
-            viewportTop,
+            rowExtent = self._rowExtent;
+        let viewportTop,
             viewportBottom,
             rowTop,
             rowBottom;
@@ -24130,9 +24271,9 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
     },
     
     getNextModel: function(model, wrap=true, alwaysReturnAModel=true) {
-        var data = this.getListData(),
-            len = data.length,
-            idx = this.getIndexOfModelInData(model);
+        const data = this.getListData(),
+            len = data.length;
+        let idx = this.getIndexOfModelInData(model);
         if (idx >= 0) {
             idx += 1;
             if (idx >= len) {
@@ -24147,9 +24288,9 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
     },
     
     getPrevModel: function(model, wrap=true, alwaysReturnAModel=true) {
-        var data = this.getListData(),
-            len = data.length,
-            idx = this.getIndexOfModelInData(model);
+        const data = this.getListData(),
+            len = data.length;
+        let idx = this.getIndexOfModelInData(model);
         if (idx >= 0) {
             idx -= 1;
             if (idx < 0) {
@@ -24165,19 +24306,19 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
     
     getIndexOfModelInData: function(model) {
         if (model) {
-            var self = this,
+            const self = this,
                 modelIDName = self.modelIDName,
                 modelId = model[modelIDName],
-                data = self.getListData(),
-                i = data.length;
+                data = self.getListData();
+            let i = data.length;
             while (i) if (data[--i][modelIDName] === modelId) return i;
         }
         return -1;
     },
     
     getActiveRowForModel: function(model) {
-        var activeRows = this._itemPool.getActives(),
-            i = activeRows.length,
+        const activeRows = this._itemPool.getActives();
+        let i = activeRows.length,
             row;
         while (i) {
             row = activeRows[--i];
@@ -24202,14 +24343,14 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
     },
     
     resetListUI: function(preserveScroll) {
-        var self = this,
+        const self = this,
             data = self.getListData(),
             len = data.length,
-            i,
             visibleRowsByIdx = self._visibleRowsByIdx,
             pool = self._itemPool,
             listView = self._listView,
             scrollAnchorView = self._scrollAnchorView;
+        let i;
         
         // Resize the listView to the height to accomodate all rows
         listView.setHeight(len * self._rowExtent - (len > 0 ? self.rowSpacing : 0) + self.rowInset + self.rowOutset);
@@ -24237,18 +24378,18 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
     },
     
     refreshListUI: function() {
-        var self = this,
-            startIdx,
-            endIdx,
-            scrollY = self._getDomScrollTop(),
-            data = self.getListData() || [],
-            visibleRowsByIdx = self._visibleRowsByIdx,
-            pool = self._itemPool,
-            row,
+        const self = this,
             rowWidth = self.width,
             rowHeight = self.rowHeight,
             rowExtent = self._rowExtent,
             rowInset = self.rowInset,
+            scrollY = self._getDomScrollTop(),
+            data = self.getListData() || [],
+            visibleRowsByIdx = self._visibleRowsByIdx,
+            pool = self._itemPool;
+        let startIdx,
+            endIdx,
+            row,
             i;
         
         startIdx = Math.max(0, Math.floor((scrollY - rowInset) / rowExtent));
@@ -24300,7 +24441,7 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
 
 
 ((pkg) => {
-    var JSClass = JS.Class,
+    const JSClass = JS.Class,
         View = pkg.View,
         
         getSubview = (gridRow, columnHeader) => gridRow[columnHeader.columnId + 'View'];
@@ -24311,17 +24452,17 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
         
         // Methods /////////////////////////////////////////////////////////////
         notifyXChange: function(columnHeader) {
-            var sv = getSubview(this, columnHeader);
+            const sv = getSubview(this, columnHeader);
             if (sv) sv.setX(columnHeader.x + columnHeader.cellXAdj);
         },
         
         notifyWidthChange: function(columnHeader) {
-            var sv = getSubview(this, columnHeader);
+            const sv = getSubview(this, columnHeader);
             if (sv) sv.setWidth(columnHeader.width + columnHeader.cellWidthAdj);
         },
         
         notifyVisibilityChange: function(columnHeader) {
-            var sv = getSubview(this, columnHeader);
+            const sv = getSubview(this, columnHeader);
             if (sv) sv.setVisible(columnHeader.visible);
         }
     });
@@ -24408,7 +24549,7 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
         
         // Methods /////////////////////////////////////////////////////////////
         makeReady: function(sortState) {
-            var gridHeader = this.gridHeader;
+            const gridHeader = this.gridHeader;
             if (gridHeader) {
                 gridHeader.setSort(sortState);
                 gridHeader.setLocked(false);
@@ -24419,13 +24560,13 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
         
         /** @overrides myt.InfiniteList */
         getSortFunction: function() {
-            var sort = this.gridHeader.sort || ['',''],
+            const sort = this.gridHeader.sort || ['',''],
                 sortColumnId  = sort[0],
                 sortOrder = sort[1];
             if (sortColumnId) {
-                var sortNum = sortOrder === 'ascending' ? 1 : -1;
+                const sortNum = sortOrder === 'ascending' ? 1 : -1;
                 return (a, b) => {
-                    var aValue = a[sortColumnId],
+                    const aValue = a[sortColumnId],
                         bValue = b[sortColumnId];
                     if (aValue > bValue) {
                         return sortNum;
@@ -24496,7 +24637,7 @@ myt.SelectableInfiniteListRow = new JS.Module('SelectableInfiniteListRow', {
 myt.SelectableInfiniteList = new JS.Class('SelectableInfiniteList', myt.InfiniteList, {
     // Accessors ///////////////////////////////////////////////////////////////
     setSelectedRow: function(row) {
-        var existing = this.selectedRow;
+        const existing = this.selectedRow;
         if (row !== existing) {
             if (existing) existing.setSelected(false);
             this.setSelectedRowModel();
@@ -24520,7 +24661,7 @@ myt.SelectableInfiniteList = new JS.Class('SelectableInfiniteList', myt.Infinite
     /** Clears the selectedRow while leaving the selectedRowModel.
         @private */
     _clearSelectedRow: function() {
-        var existing = this.selectedRow;
+        const existing = this.selectedRow;
         if (existing) {
             existing.setSelected(false);
             this.set('selectedRow', null, true);
@@ -24539,7 +24680,7 @@ myt.SelectableInfiniteList = new JS.Class('SelectableInfiniteList', myt.Infinite
             
             // Focus on the newly selected row
             if (focus) {
-                var row = this.getActiveSelectedRow();
+                const row = this.getActiveSelectedRow();
                 if (row) row.focus();
             }
         }
@@ -24555,7 +24696,7 @@ myt.SelectableInfiniteList = new JS.Class('SelectableInfiniteList', myt.Infinite
     
     /** @overrides */
     resetListUI: function(preserveScroll) {
-        var self = this;
+        const self = this;
         
         if (self.isModelInData(self.selectedRowModel)) {
             // Only clear the selected row since it's still in the data and
@@ -24577,7 +24718,7 @@ myt.SelectableInfiniteList = new JS.Class('SelectableInfiniteList', myt.Infinite
     
     /** @overrides */
     doAfterListRefresh: function() {
-        var row = this.getActiveSelectedRow();
+        const row = this.getActiveSelectedRow();
         if (row) {
             this.set('selectedRow', row, true);
             row.setSelected(true);
@@ -24598,7 +24739,8 @@ myt.SelectableInfiniteList = new JS.Class('SelectableInfiniteList', myt.Infinite
     
     Private Attributes:
         None
-*/
+    
+    @class */
 myt.SimpleSelectableInfiniteListRow = new JS.Class('SimpleSelectableInfiniteListRow', myt.SimpleButton, {
     include: [myt.SelectableInfiniteListRow],
     
@@ -24613,7 +24755,7 @@ myt.SimpleSelectableInfiniteListRow = new JS.Class('SimpleSelectableInfiniteList
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        var self = this,
+        const self = this,
             SSILR = myt.SimpleSelectableInfiniteListRow;
         
         if (attrs.selectedColor == null) attrs.selectedColor = SSILR.DEFAULT_SELECTED_COLOR;
@@ -24624,7 +24766,7 @@ myt.SimpleSelectableInfiniteListRow = new JS.Class('SimpleSelectableInfiniteList
         if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
         if (attrs.activationKeys == null) attrs.activationKeys = [13,27,32,37,38,39,40];
         
-        this.callSuper(parent, attrs);
+        self.callSuper(parent, attrs);
     },
     
     destroy: function() {
@@ -24659,7 +24801,7 @@ myt.SimpleSelectableInfiniteListRow = new JS.Class('SimpleSelectableInfiniteList
     },
     
     doActivationKeyDown: function(key, isRepeat) {
-        var self = this,
+        const self = this,
             owner = self.infiniteOwner,
             model = self.model;
         switch (key) {
@@ -24820,9 +24962,10 @@ myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.Pa
     
     // Methods /////////////////////////////////////////////////////////////////
     to: function(panel) {
-        var panelStack = panel.getPanelStack(),
-            duration = this.duration,
-            toValue, axis;
+        const panelStack = panel.getPanelStack(),
+            duration = this.duration;
+        let toValue,
+            axis;
         switch (this.direction) {
             case 'left':
                 axis = 'x';
@@ -24847,7 +24990,7 @@ myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.Pa
         panel.setVisible(true);
         
         return new Promise((resolve, reject) => {
-            var nextFunc = (success) => {
+            const nextFunc = (success) => {
                 panel.makeHighestZIndex();
                 resolve(panel);
             };
@@ -24861,9 +25004,10 @@ myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.Pa
     },
     
     from: function(panel) {
-        var panelStack = panel.getPanelStack(),
-            duration = this.duration,
-            toValue, axis;
+        const panelStack = panel.getPanelStack(),
+            duration = this.duration;
+        let toValue,
+            axis;
         switch (this.direction) {
             case 'left':
                 axis = 'x';
@@ -24886,7 +25030,7 @@ myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.Pa
         panel.stopActiveAnimators(axis);
         
         return new Promise((resolve, reject) => {
-            var nextFunc = (success) => {
+            const nextFunc = (success) => {
                 panel.setVisible(false);
                 resolve(panel);
             };
@@ -24942,7 +25086,7 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
         @returns {undefined} */
     __updateWidth: function(event) {
         // Only resize the active panel
-        var panel = this.getActivePanel();
+        const panel = this.getActivePanel();
         if (panel) panel.setWidth(event.value);
     },
     
@@ -24951,7 +25095,7 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
         @returns {undefined} */
     __updateHeight: function(event) {
         // Only resize the active panel
-        var panel = this.getActivePanel();
+        const panel = this.getActivePanel();
         if (panel) panel.setHeight(event.value);
     },
     
@@ -24990,17 +25134,18 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
         @param panel:myt.StackablePanel The panel that is transitioning.
         @returns {undefined} */
     doStackTransitionTo: function(panel) {
-        this.doBeforeTransitionTo(panel);
+        const self = this;
         
-        var transition = this.transition;
+        self.doBeforeTransitionTo(panel);
+        
+        const transition = self.transition;
         if (transition) {
-            var self = this;
             transition.to(panel).then((panel) => {self.doAfterTransitionTo(panel);});
         } else {
             panel.makeHighestZIndex();
             panel.setVisible(true);
             
-            this.doAfterTransitionTo(panel);
+            self.doAfterTransitionTo(panel);
         }
     },
     
@@ -25013,15 +25158,16 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
         @param panel:myt.StackablePanel The panel that is transitioning.
         @returns {undefined} */
     doStackTransitionFrom: function(panel) {
-        this.doBeforeTransitionFrom(panel);
+        const self = this;
         
-        var transition = this.transition;
+        self.doBeforeTransitionFrom(panel);
+        
+        const transition = self.transition;
         if (transition) {
-            var self = this;
             transition.from(panel).then((panel) => {self.doAfterTransitionFrom(panel);});
         } else {
             panel.setVisible(false);
-            this.doAfterTransitionFrom(panel);
+            self.doAfterTransitionFrom(panel);
         }
     },
     
@@ -25058,8 +25204,8 @@ myt.DragGroupSupport = new JS.Module('DragGroupSupport', {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setDragGroups: function(v) {
-        var newDragGroups = {};
-        for (var dragGroup in v) newDragGroups[dragGroup] = true;
+        const newDragGroups = {};
+        for (let dragGroup in v) newDragGroups[dragGroup] = true;
         this.__dragGroups = newDragGroups;
         this.__acceptAny = newDragGroups.hasOwnProperty('*');
     },
@@ -25314,12 +25460,12 @@ myt.DropSource = new JS.Module('DropSource', {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.Draggable */
     startDrag: function(event) {
-        var dropable = this.dropable = this.makeDropable();
+        const dropable = this.dropable = this.makeDropable();
         
         // Emulate mouse down on the dropable
         if (dropable) {
             // Remember distance and set to zero so a drag will begin for sure.
-            var origDistance = dropable.distanceBeforeDrag;
+            const origDistance = dropable.distanceBeforeDrag;
             dropable.distanceBeforeDrag = 0;
             
             dropable.doMouseDown(event); // Execute MouseDownMixin
@@ -25335,7 +25481,7 @@ myt.DropSource = new JS.Module('DropSource', {
         this.callSuper(event);
         
         // Emulate mouse up on the dropable
-        var dropable = this.dropable;
+        const dropable = this.dropable;
         if (dropable) {
             dropable.__doMouseUp(event);
             dropable.doMouseUp(event);
@@ -25346,10 +25492,10 @@ myt.DropSource = new JS.Module('DropSource', {
     /** Called by startDrag to make a dropable.
         @returns myt.Dropable or undefined if one can't be created. */
     makeDropable: function() {
-        var dropClass = this.dropClass,
+        const dropClass = this.dropClass,
             dropParent = this.dropParent;
         if (dropClass && dropParent) {
-            var pos = myt.DomElementProxy.getPagePosition(this.getInnerDomElement(), dropParent.getInnerDomElement()),
+            const pos = myt.DomElementProxy.getPagePosition(this.getInnerDomElement(), dropParent.getInnerDomElement()),
             attrs = Object.assign({}, this.dropClassAttrs);
             attrs.x = pos.x || 0;
             attrs.y = pos.y || 0;
@@ -25360,7 +25506,7 @@ myt.DropSource = new JS.Module('DropSource', {
 
 
 ((pkg) => {
-    var G = pkg.global,
+    const G = pkg.global,
         dragManager = G.dragManager,
         globalMouse = G.mouse,
         
@@ -25467,7 +25613,7 @@ myt.DropSource = new JS.Module('DropSource', {
             @param {!Object} dropable - The myt.Dropable being dragged.
             @returns {undefined} */
         notifyDragStart: function(dropable) {
-            var de = this.getInnerDomElement();
+            const de = this.getInnerDomElement();
             if (de.scrollHeight > de.clientHeight || de.scrollWidth > de.clientWidth) {
                 this.attachToDom(globalMouse, '__handleMouseMove', 'mousemove', true);
             }
@@ -25488,13 +25634,13 @@ myt.DropSource = new JS.Module('DropSource', {
             @param {!Object} event
             @returns {undefined} */
         __handleMouseMove: function(event) {
-            var self = this,
-                mousePos = event.value, 
-                mouseX = mousePos.pageX, 
+            const self = this,
+                mousePos = event.value;
+            let mouseX = mousePos.pageX, 
                 mouseY = mousePos.pageY;
             
             if (self.containsPoint(mouseX, mouseY)) {
-                var pos = self.getPagePosition(), 
+                const pos = self.getPagePosition(), 
                     scrollBorder = self.scrollBorder;
                 
                 mouseX -= pos.x;
@@ -25554,9 +25700,10 @@ myt.Eventable = new JS.Class('Eventable', {
             the new instance.
         @returns {undefined} */
     initialize: function(attrs, mixins) {
-        var self = this;
+        const self = this;
         if (mixins) {
-            for (var i = 0, len = mixins.length, mixin; len > i;) {
+            const len = mixins.length;
+            for (let i = 0, mixin; len > i;) {
                 if (mixin = mixins[i++]) {
                     self.extend(mixin);
                 } else {
@@ -25582,7 +25729,7 @@ myt.Eventable = new JS.Class('Eventable', {
     
     /** @overrides myt.Destructible. */
     destroy: function() {
-        var self = this;
+        const self = this;
         self.releaseAllConstraints();
         self.detachFromAllObservables();
         self.detachAllObservers();
@@ -25593,7 +25740,7 @@ myt.Eventable = new JS.Class('Eventable', {
 
 
 ((pkg) => {
-    var degreesToRadians = pkg.Geometry.degreesToRadians,
+    const degreesToRadians = pkg.Geometry.degreesToRadians,
         
         /*  Redraws the annulus
             @param {!Object} annulus - The Annulus to redraw.
@@ -25616,7 +25763,7 @@ myt.Eventable = new JS.Class('Eventable', {
             @param {!Object} annulus - The Annulus to update.
             @returns {undefined} */
         updateSize = (annulus) => {
-            var size = 2*(annulus.radius + annulus.thickness),
+            const size = 2*(annulus.radius + annulus.thickness),
                 svg = annulus.__svg;
             annulus.setWidth(size);
             annulus.setHeight(size);
@@ -25651,12 +25798,12 @@ myt.Eventable = new JS.Class('Eventable', {
             draw: (path, startAngle, endAngle, thickness, r1, c, color, startCapRounding, endCapRounding) => {
                 // Ensure endAngle is greater than or equal to startAngle
                 if (startAngle > endAngle) {
-                    var tmp = startAngle;
+                    const tmp = startAngle;
                     startAngle = endAngle;
                     endAngle = tmp;
                 }
                 
-                var r2 = r1 + thickness,
+                const r2 = r1 + thickness,
                     PI = Math.PI,
                     angleDiff = endAngle - startAngle,
                     isFull = angleDiff + 0.0001 >= 2 * PI; // 0.0001 is to handle floating point errors
@@ -25667,7 +25814,7 @@ myt.Eventable = new JS.Class('Eventable', {
                     endAngle = PI;
                 }
                 
-                var COS = Math.cos,
+                const COS = Math.cos,
                     SIN = Math.sin,
                     points = [
                         [c + r2 * COS(startAngle), c + r2 * SIN(startAngle)],
@@ -25685,7 +25832,7 @@ myt.Eventable = new JS.Class('Eventable', {
                     commands.push("A" + [r1, r1, 0, 1, 0, points[3]].join());
                     commands.push("A" + [r1, r1, 0, 1, 0, points[2]].join());
                 } else {
-                    var largeArc = (angleDiff % (2 * PI)) > PI ? 1 : 0;
+                    const largeArc = (angleDiff % (2 * PI)) > PI ? 1 : 0;
                     commands.push("A" + [r2, r2, 0, largeArc, 1, points[1]].join());
                     if (endCapRounding) {
                         commands.push("A" + [thickness / 2, thickness / 2, 0, 0, 1, points[2]].join());
@@ -25702,7 +25849,7 @@ myt.Eventable = new JS.Class('Eventable', {
             },
             
             makeSVG: (elementName, parentElem) => {
-                var svgElem = document.createElementNS("http://www.w3.org/2000/svg", elementName);
+                const svgElem = document.createElementNS("http://www.w3.org/2000/svg", elementName);
                 if (parentElem) parentElem.appendChild(svgElem);
                 return svgElem;
             }
@@ -25711,7 +25858,7 @@ myt.Eventable = new JS.Class('Eventable', {
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            var self = this;
+            const self = this;
             
             self.radius = self.thickness = self.startAngle = self.endAngle = 0;
             self.startCapRounding = self.endCapRounding = false;
@@ -25723,9 +25870,9 @@ myt.Eventable = new JS.Class('Eventable', {
         
         /** @overrides myt.View */
         createOurDomElement: function(parent) {
-            var elements = this.callSuper(parent),
-                MSVG = pkg.Annulus.makeSVG,
-                svg,
+            const elements = this.callSuper(parent),
+                MSVG = pkg.Annulus.makeSVG;
+            let svg,
                 innerElem;
             if (Array.isArray(elements)) {
                 innerElem = elements[1];
@@ -25821,10 +25968,10 @@ myt.Eventable = new JS.Class('Eventable', {
             @overrides */
         sendSubviewToBack: function(sv) {
             if (sv.parent === this) {
-                var de = this.getInnerDomElement(),
+                const de = this.getInnerDomElement(),
                     firstChild = de.childNodes[1];
                 if (sv.getOuterDomElement() !== firstChild) {
-                    var removedElem = de.removeChild(sv.getOuterDomElement());
+                    const removedElem = de.removeChild(sv.getOuterDomElement());
                     if (removedElem) de.insertBefore(removedElem, firstChild);
                 }
             }
@@ -25889,9 +26036,9 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
     connect: function(afterOpenCallback) {
         if (!this._ws && this.url) {
             try {
-                var ws = this._ws = new WebSocket(this.url, this.protocols);
+                const ws = this._ws = new WebSocket(this.url, this.protocols);
                 
-                var openFunc = this.onOpen.bind(this);
+                const openFunc = this.onOpen.bind(this);
                 if (afterOpenCallback) {
                     // Execute an afterOpenCallback one time
                     ws.onopen = function(event) {
@@ -25923,21 +26070,21 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
             or not. Undefined is returned when the connection has to be opened
             before sending. */
     send: function(msg, doNotTryToConnect) {
-        var ws = this._ws;
-        if (ws && this.status === 'open') {
-            if (this.useJSON) {
+        const self = this,
+            ws = self._ws;
+        if (ws && self.status === 'open') {
+            if (self.useJSON) {
                 try {
                     msg = JSON.stringify(msg);
                 } catch (ex) {
-                    this.onError(ex);
+                    self.onError(ex);
                 }
             }
             ws.send(msg);
             return true;
         } else if (!doNotTryToConnect) {
             // Try to connect first and then send
-            var self = this;
-            this.connect(function(event) {self.send(msg, true);});
+            self.connect(function(event) {self.send(msg, true);});
         } else {
             return false;
         }
@@ -25966,7 +26113,7 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
     onError: function(event) {
         console.error(event);
         
-        var ws = this._ws;
+        const ws = this._ws;
         if (ws && ws.readyState !== 1) this.close();
     },
     
@@ -25974,7 +26121,7 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
         @param {!Object} event -  The message event fired by the WebSocket.
         @returns msg:* The message received. */
     onMessage: function(event) {
-        var msg = event.data;
+        let msg = event.data;
         
         if (this.useJSON) {
             try {
@@ -26036,15 +26183,17 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
         @returns {undefined} */
     registerListener: function(listenerFunc, matcher) {
         if (listenerFunc) {
-            var matcherFunc = this._makeMatcherFunction(matcher);
+            const matcherFunc = this._makeMatcherFunction(matcher);
             if (matcherFunc) {
                 // Register for existing listenr
-                var listeners = this._listeners, i = listeners.length, listenerInfo;
+                const listeners = this._listeners;
+                let i = listeners.length, 
+                    listenerInfo;
                 while (i) {
                     listenerInfo = listeners[--i];
                     if (listenerInfo.func === listenerFunc) {
-                        var patternMatchers = listenerInfo.patternMatchers, 
-                            j = patternMatchers.length;
+                        const patternMatchers = listenerInfo.patternMatchers; 
+                        let j = patternMatchers.length;
                         while (j) {
                             // Abort since patternMatcher is already registered
                             if (patternMatchers[--j] === matcherFunc) return;
@@ -26072,15 +26221,17 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
         @returns {undefined} */
     unregisterListener: function(listenerFunc, matcher) {
         if (listenerFunc) {
-            var matcherFunc = this._makeMatcherFunction(matcher);
+            const matcherFunc = this._makeMatcherFunction(matcher);
             if (matcherFunc) {
-                var listeners = this._listeners, i = listeners.length, listenerInfo;
+                const listeners = this._listeners;
+                let i = listeners.length, 
+                    listenerInfo;
                 while (i) {
                     listenerInfo = listeners[--i];
                     if (listenerInfo.func === listenerFunc) {
                         // Try to remove the matcherFunc
-                        var patternMatchers = listenerInfo.patternMatchers, 
-                            j = patternMatchers.length;
+                        const patternMatchers = listenerInfo.patternMatchers;
+                        let j = patternMatchers.length;
                         while (j) {
                             if (patternMatchers[--j] === matcherFunc) {
                                 patternMatchers.splice(j, 1);
@@ -26101,7 +26252,7 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
         @param {string|?Function} matcher
         @return {?Function} */
     _makeMatcherFunction: function(matcher) {
-        var matcherFunc,
+        let matcherFunc,
             funcsByKey;
         if (typeof matcher === 'string') {
             // Use the provided string as an exact match function. We must
@@ -26125,10 +26276,12 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
         @param {string} type
         @returns {!Array} */
     _getListenersForType: function(type) {
-        var retval = [],
-            listeners = this._listeners,
-            i = listeners.length,
-            listenerInfo, patternMatchers, j;
+        const retval = [],
+            listeners = this._listeners;
+        let i = listeners.length,
+            listenerInfo, 
+            patternMatchers, 
+            j;
         while (i) {
             listenerInfo = listeners[--i];
             patternMatchers = listenerInfo.patternMatchers;
@@ -26155,7 +26308,7 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
         @returns string The message to be sent or undefined if an
             exception occurs during JSON.stringify. */
     createMessage: function(type, msg) {
-        var jsonMsg;
+        let jsonMsg;
         try {
             jsonMsg = JSON.stringify(msg);
         } catch (ex) {
@@ -26172,7 +26325,7 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
     
     /** @overrides */
     onMessage: function(event) {
-        var msg = this.callSuper(event);
+        const msg = this.callSuper(event);
         
         // Parse msg.msg JSON
         try {
@@ -26183,7 +26336,8 @@ myt.MessageTypeWebSocket = new JS.Class('MessageTypeWebSocket', myt.WebSocket, {
         }
         
         // Notify Listeners
-        var listeners = this._getListenersForType(msg.type), i = listeners.length;
+        const listeners = this._getListenersForType(msg.type);
+        let i = listeners.length;
         while (i) listeners[--i](msg);
         
         return msg;
@@ -26223,7 +26377,7 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        var BTT = myt.BaseTooltip;
+        const BTT = myt.BaseTooltip;
         this.tipDelay = this.nextTipDelay = BTT.DEFAULT_TIP_DELAY;
         this.tipHideDelay = BTT.DEFAULT_TIP_HIDE_DELAY;
         
@@ -26247,7 +26401,7 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
             if (v) {
                 this.attachToDom(myt.global.mouse, '__checkMouseMovement', 'mousemove', true);
                 
-                var ttp = v.parent;
+                const ttp = v.parent;
                 this.attachToDom(ttp, 'hideTip', 'mousedown', true);
                 this.attachToDom(ttp, 'hideTip', 'mouseup', true);
             }
@@ -26260,7 +26414,7 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
         @param {!Object} event The event object.
         @returns {undefined} */
     __checkMouseMovement: function(event) {
-        var self = this;
+        const self = this;
         self._lastPos = myt.MouseObservable.getMouseFromEvent(event);
         if (self.__checkIn()) {
             self.__clearTimeout();
@@ -26290,9 +26444,9 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
         @private
         @returns {boolean} false if the tip got hidden, true otherwise. */
     __checkIn: function() {
-        var tt = this.tooltip;
+        const tt = this.tooltip;
         if (tt) {
-            var pos = this._lastPos;
+            const pos = this._lastPos;
             if (tt.parent.containsPoint(pos.x, pos.y)) return true;
         }
         this.hideTip();
@@ -26305,7 +26459,7 @@ myt.BaseTooltip = new JS.Class('BaseTooltip', myt.View, {
     hideTip: function(event) {
         this.__clearTimeout();
         
-        var ttp = this.tooltip.parent;
+        const ttp = this.tooltip.parent;
         this.detachFromDom(ttp, 'hideTip', 'mousedown', true);
         this.detachFromDom(ttp, 'hideTip', 'mouseup', true);
         this.detachFromDom(myt.global.mouse, '__checkMouseMovement', 'mousemove', true);
@@ -26375,7 +26529,7 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        var self = this,
+        const self = this,
             M = myt,
             T = M.Tooltip;
         if (attrs.pointerWidth == null) attrs.pointerWidth = T.DEFAULT_POINTER_WIDTH;
@@ -26423,7 +26577,7 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
     // Methods /////////////////////////////////////////////////////////////////
     /** @override myt.BaseTooltip. */
     showTip: function() {
-        var self = this,
+        const self = this,
             tt = self.tooltip,
             txt = tt.text,
             ttp = tt.parent,
@@ -26435,19 +26589,19 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
         if (tipText.text !== txt) tipText.setText(txt);
         
         // Get floating boundary
-        var gwr = myt.global.windowResize,
+        const gwr = myt.global.windowResize,
             bounds = {x:0, y:0, width:gwr.getWidth(), height:gwr.getHeight()},
             boundsXOffset = 0, boundsYOffset = 0;
         
         // Get position of parent
-        var parentPos = ttp.getPagePosition(),
-            tipX = parentPos.x,
+        const parentPos = ttp.getPagePosition(),
             tipParentY = parentPos.y;
+        let tipX = parentPos.x;
         
         // Determine X position
         tipText.setWidth('auto');
-        var tipTextWidth = Math.min(tipText.measureNoWrapWidth(), self.maxTextWidth),
-            pointerX = tipText.x;
+        const tipTextWidth = Math.min(tipText.measureNoWrapWidth(), self.maxTextWidth);
+        let pointerX = tipText.x;
         self.__tipWidth = 2 * pointerX + tipTextWidth;
         tipText.setWidth(tipTextWidth);
         tipText.sizeViewToDom();
@@ -26460,7 +26614,7 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
         }
         
         // Prevent out-of-bounds to the left
-        var diff;
+        let diff;
         if (boundsXOffset > tipX) {
             diff = boundsXOffset - tipX;
             tipX += diff;
@@ -26475,9 +26629,10 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
         }
         
         // Determine Y position
-        var tipHeight = 2*self.edgeWidth + insetTop + self.insetBottom + tipText.height + self.pointerHeight,
-            tipParentHeight = ttp.height,
-            pointerOnTop, tipY;
+        const tipHeight = 2*self.edgeWidth + insetTop + self.insetBottom + tipText.height + self.pointerHeight,
+            tipParentHeight = ttp.height;
+        let pointerOnTop,
+            tipY;
         switch (tt.tipvalign) {
             case "below":
                 tipY = tipParentY + tipParentHeight;
@@ -26521,11 +26676,8 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
             on the top or the bottom of the tooltip.
         @returns {undefined} */
     __redraw: function(pointerX, pointerOnTop) {
-        var self = this,
+        const self = this,
             canvas = self._bg,
-            right = self.__tipWidth,
-            top = pointerOnTop ? self.pointerHeight : 0,
-            bottom = 2*self.edgeWidth + self.insetTop + self.insetBottom + self._tipText.height + top,
             pointerWidth = self.pointerWidth,
             pointerXCtr = pointerX + pointerWidth / 2,
             pointerXRt = pointerX + pointerWidth,
@@ -26533,6 +26685,9 @@ myt.Tooltip = new JS.Class('Tooltip', myt.BaseTooltip, {
             shadowWidth = self.shadowWidth,
             edgeWidth = self.edgeWidth,
             lineTo = canvas.lineTo.bind(canvas);
+        let right = self.__tipWidth,
+            top = pointerOnTop ? self.pointerHeight : 0,
+            bottom = 2*self.edgeWidth + self.insetTop + self.insetBottom + self._tipText.height + top;
         
         canvas.clear();
         
@@ -26649,7 +26804,7 @@ myt.TooltipMixin = new JS.Module('TooltipMixin', {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.MouseOver. */
     doSmoothMouseOver: function(isOver) {
-        var self = this,
+        const self = this,
             M = myt,
             g = M.global,
             tooltip = self.tooltip;
@@ -26658,8 +26813,8 @@ myt.TooltipMixin = new JS.Module('TooltipMixin', {
         
         if (isOver && tooltip) {
             // Use configured class or default if none defined.
-            var tipClass = self.tipClass || M.TooltipMixin.DEFAULT_TIP_CLASS,
-                tooltipView = g.tooltipView;
+            const tipClass = self.tipClass || M.TooltipMixin.DEFAULT_TIP_CLASS;
+            let tooltipView = g.tooltipView;
             
             // Destroy tip if it's not the correct class.
             if (tooltipView && !(tooltipView instanceof tipClass)) {
@@ -26671,7 +26826,7 @@ myt.TooltipMixin = new JS.Module('TooltipMixin', {
             // Create new instance.
             if (!tooltipView) {
                 // Create tooltip div if necessary
-                var elem = document.getElementById("tooltipDiv");
+                let elem = document.getElementById("tooltipDiv");
                 if (!elem) {
                     elem = M.DomElementProxy.createDomElement('div', {position:'absolute'});
                     

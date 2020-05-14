@@ -16,15 +16,15 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     createOurDomElement: function(parent) {
-        var elements = this.callSuper(parent),
-            innerElem;
+        const elements = this.callSuper(parent);
+        let innerElem;
         if (Array.isArray(elements)) {
             innerElem = elements[1];
         } else {
             innerElem = elements;
         }
         
-        var canvas = this.__canvas = document.createElement('canvas');
+        const canvas = this.__canvas = document.createElement('canvas');
         canvas.className = 'mytUnselectable';
         innerElem.appendChild(canvas);
         canvas.style.position = 'absolute';
@@ -106,10 +106,10 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
         add child views to a Canvas which is not directly supported in HTML. */
     sendSubviewToBack: function(sv) {
         if (sv.parent === this) {
-            var de = this.domElement,
+            const de = this.domElement,
                 firstChild = de.childNodes[1];
             if (sv.domElement !== firstChild) {
-                var removedElem = de.removeChild(sv.domElement);
+                const removedElem = de.removeChild(sv.domElement);
                 if (removedElem) de.insertBefore(removedElem, firstChild);
             }
         }
@@ -119,7 +119,7 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
     clear: function() {
         // Store the current transform matrix, then apply the identity matrix
         // to make clearing simpler then restore the transform.
-        var ctx = this.__ctx;
+        const ctx = this.__ctx;
         ctx.save();
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.clearRect(0, 0, this.width, this.height);
@@ -127,9 +127,9 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
     },
     
     dataURItoBlob: function(dataURI, dataTYPE) {
-        var binary = atob(dataURI.split(',')[1]), 
+        const binary = atob(dataURI.split(',')[1]), 
             array = [];
-        for (var i = 0; i < binary.length; i++) array.push(binary.charCodeAt(i));
+        for (let i = 0; i < binary.length; i++) array.push(binary.charCodeAt(i));
         return new Blob([new Uint8Array(array)], {type: dataTYPE});
     },
     
@@ -138,7 +138,7 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
     },
     
     getImageFile: function(imageType, filename, opt) {
-        var extension;
+        let extension;
         switch (imageType) {
             case 'png': case 'PNG':
                 extension = 'png';
@@ -152,7 +152,7 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
                 console.warn('Unexpected image type: ', imageType);
                 extension = imageType.toLowerCase();
         }
-        var mimeType = 'image/' + extension,
+        const mimeType = 'image/' + extension,
             blob = this.dataURItoBlob(this.getDataURL(mimeType, opt), mimeType);
         if (filename) blob.name = filename + '.' + extension;
         return blob;
@@ -167,46 +167,46 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
         this.__ctx.arc(x, y, radius, 0, 2 * Math.PI);
     },
     
-    save: function() {var ctx = this.__ctx; ctx.save.apply(ctx, arguments);},
-    restore: function() {var ctx = this.__ctx; ctx.restore.apply(ctx, arguments);},
+    save: function() {const ctx = this.__ctx; ctx.save.apply(ctx, arguments);},
+    restore: function() {const ctx = this.__ctx; ctx.restore.apply(ctx, arguments);},
     
-    scale: function() {var ctx = this.__ctx; ctx.scale.apply(ctx, arguments);},
-    rotate: function() {var ctx = this.__ctx; ctx.rotate.apply(ctx, arguments);},
-    translate: function() {var ctx = this.__ctx; ctx.translate.apply(ctx, arguments);},
-    transform: function() {var ctx = this.__ctx; ctx.transform.apply(ctx, arguments);},
-    setTransform: function() {var ctx = this.__ctx; ctx.setTransform.apply(ctx, arguments);},
+    scale: function() {const ctx = this.__ctx; ctx.scale.apply(ctx, arguments);},
+    rotate: function() {const ctx = this.__ctx; ctx.rotate.apply(ctx, arguments);},
+    translate: function() {const ctx = this.__ctx; ctx.translate.apply(ctx, arguments);},
+    transform: function() {const ctx = this.__ctx; ctx.transform.apply(ctx, arguments);},
+    setTransform: function() {const ctx = this.__ctx; ctx.setTransform.apply(ctx, arguments);},
     
-    createLinearGradient: function() {var ctx = this.__ctx; return ctx.createLinearGradient.apply(ctx, arguments);},
-    createRadialGradient: function() {var ctx = this.__ctx; return ctx.createRadialGradient.apply(ctx, arguments);},
-    createPattern: function() {var ctx = this.__ctx; return ctx.createPattern.apply(ctx, arguments);},
+    createLinearGradient: function() {const ctx = this.__ctx; return ctx.createLinearGradient.apply(ctx, arguments);},
+    createRadialGradient: function() {const ctx = this.__ctx; return ctx.createRadialGradient.apply(ctx, arguments);},
+    createPattern: function() {const ctx = this.__ctx; return ctx.createPattern.apply(ctx, arguments);},
     
-    clearRect: function() {var ctx = this.__ctx; ctx.clearRect.apply(ctx, arguments);},
-    fillRect: function() {var ctx = this.__ctx; ctx.fillRect.apply(ctx, arguments);},
-    strokeRect: function() {var ctx = this.__ctx; ctx.strokeRect.apply(ctx, arguments);},
+    clearRect: function() {const ctx = this.__ctx; ctx.clearRect.apply(ctx, arguments);},
+    fillRect: function() {const ctx = this.__ctx; ctx.fillRect.apply(ctx, arguments);},
+    strokeRect: function() {const ctx = this.__ctx; ctx.strokeRect.apply(ctx, arguments);},
     
-    beginPath: function() {var ctx = this.__ctx; ctx.beginPath.apply(ctx, arguments);},
-    closePath: function() {var ctx = this.__ctx; ctx.closePath.apply(ctx, arguments);},
-    moveTo: function() {var ctx = this.__ctx; ctx.moveTo.apply(ctx, arguments);},
-    lineTo: function() {var ctx = this.__ctx; ctx.lineTo.apply(ctx, arguments);},
+    beginPath: function() {const ctx = this.__ctx; ctx.beginPath.apply(ctx, arguments);},
+    closePath: function() {const ctx = this.__ctx; ctx.closePath.apply(ctx, arguments);},
+    moveTo: function() {const ctx = this.__ctx; ctx.moveTo.apply(ctx, arguments);},
+    lineTo: function() {const ctx = this.__ctx; ctx.lineTo.apply(ctx, arguments);},
     
-    quadraticCurveTo: function() {var ctx = this.__ctx; ctx.quadraticCurveTo.apply(ctx, arguments);},
-    bezierCurveTo: function() {var ctx = this.__ctx; ctx.bezierCurveTo.apply(ctx, arguments);},
-    arcTo: function() {var ctx = this.__ctx; ctx.arcTo.apply(ctx, arguments);},
-    rect: function() {var ctx = this.__ctx; ctx.rect.apply(ctx, arguments);},
-    arc: function() {var ctx = this.__ctx; ctx.arc.apply(ctx, arguments);},
+    quadraticCurveTo: function() {const ctx = this.__ctx; ctx.quadraticCurveTo.apply(ctx, arguments);},
+    bezierCurveTo: function() {const ctx = this.__ctx; ctx.bezierCurveTo.apply(ctx, arguments);},
+    arcTo: function() {const ctx = this.__ctx; ctx.arcTo.apply(ctx, arguments);},
+    rect: function() {const ctx = this.__ctx; ctx.rect.apply(ctx, arguments);},
+    arc: function() {const ctx = this.__ctx; ctx.arc.apply(ctx, arguments);},
     
-    fill: function() {var ctx = this.__ctx; ctx.fill.apply(ctx, arguments);},
-    stroke: function() {var ctx = this.__ctx; ctx.stroke.apply(ctx, arguments);},
-    clip: function() {var ctx = this.__ctx; ctx.clip.apply(ctx, arguments);},
-    isPointInPath: function() {var ctx = this.__ctx; ctx.isPointInPath.apply(ctx, arguments);},
+    fill: function() {const ctx = this.__ctx; ctx.fill.apply(ctx, arguments);},
+    stroke: function() {const ctx = this.__ctx; ctx.stroke.apply(ctx, arguments);},
+    clip: function() {const ctx = this.__ctx; ctx.clip.apply(ctx, arguments);},
+    isPointInPath: function() {const ctx = this.__ctx; ctx.isPointInPath.apply(ctx, arguments);},
     
-    fillText: function() {var ctx = this.__ctx; ctx.fillText.apply(ctx, arguments);},
-    strokeText: function() {var ctx = this.__ctx; ctx.strokeText.apply(ctx, arguments);},
-    measureText: function() {var ctx = this.__ctx; return ctx.measureText.apply(ctx, arguments);},
+    fillText: function() {const ctx = this.__ctx; ctx.fillText.apply(ctx, arguments);},
+    strokeText: function() {const ctx = this.__ctx; ctx.strokeText.apply(ctx, arguments);},
+    measureText: function() {const ctx = this.__ctx; return ctx.measureText.apply(ctx, arguments);},
     
-    drawImage: function() {var ctx = this.__ctx; ctx.drawImage.apply(ctx, arguments);},
-    createImageData: function() {var ctx = this.__ctx; ctx.createImageData.apply(ctx, arguments);},
-    getImageData: function() {var ctx = this.__ctx; return ctx.getImageData.apply(ctx, arguments);},
-    putImageData: function() {var ctx = this.__ctx; ctx.putImageData.apply(ctx, arguments);}
+    drawImage: function() {const ctx = this.__ctx; ctx.drawImage.apply(ctx, arguments);},
+    createImageData: function() {const ctx = this.__ctx; ctx.createImageData.apply(ctx, arguments);},
+    getImageData: function() {const ctx = this.__ctx; return ctx.getImageData.apply(ctx, arguments);},
+    putImageData: function() {const ctx = this.__ctx; ctx.putImageData.apply(ctx, arguments);}
 });
 

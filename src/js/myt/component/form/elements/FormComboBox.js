@@ -47,10 +47,10 @@ myt.FormComboBox = new JS.Class('FormComboBox', myt.ComboBox, {
     
     /** @overrides myt.FormElement */
     setValue: function(v) {
-        var retval = this.callSuper(v);
+        const retval = this.callSuper(v);
         
         // Validate as we type.
-        var when = this.validateWhen;
+        const when = this.validateWhen;
         if (when === 'key' || when === 'blurWithKeyFix') this.verifyValidState();
         
         return retval;
@@ -122,7 +122,7 @@ myt.FormComboBox = new JS.Class('FormComboBox', myt.ComboBox, {
         this.callSuper();
         
         // Validate on blur
-        var when = this.validateWhen;
+        const when = this.validateWhen;
         if (when === 'blur' || when === 'blurWithKeyFix') this.verifyValidState();
     },
     

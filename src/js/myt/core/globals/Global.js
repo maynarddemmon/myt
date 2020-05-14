@@ -31,7 +31,7 @@ myt.global = new JS.Singleton('Global', {
         @returns {undefined} */
     unregister: function(key) {
         if (this.hasOwnProperty(key)) {
-            var v = this[key];
+            const v = this[key];
             delete this[key];
             this.fireEvent('unregister' + key, v);
         } else {

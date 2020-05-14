@@ -9,7 +9,8 @@
         fullItemConfig:array The full list of items that can be shown in the
             list. The actual itemConfig used will be filtered based on the
             current value of the input text.
-*/
+    
+    @class */
 myt.ComboBox = new JS.Class('ComboBox', myt.InputText, {
     include: [
         myt.Activateable,
@@ -45,25 +46,28 @@ myt.ComboBox = new JS.Class('ComboBox', myt.InputText, {
         Show floating panel if the value has changed during during
         user interaction. */
     __syncToDom: function(event) {
-        var existing = this.value;
+        const existing = this.value;
         this.callSuper(event);
         if (existing !== this.value) this.showFloatingPanel();
     },
     
     /** @overrides */
     showFloatingPanel: function(panelId) {
-        var fp = this.getFloatingPanel(panelId);
+        const fp = this.getFloatingPanel(panelId);
         if (fp) {
             // Filter config
-            var itemConfig;
+            let itemConfig;
             if (this.filterItems) {
                 itemConfig = [];
                 
-                var curValue = this.value,
+                const curValue = this.value,
                     normalizedCurValue = curValue == null ? '' : ('' + curValue).toLowerCase(),
                     fullItemConfig = this.fullItemConfig,
-                    len = fullItemConfig.length, i = 0, 
-                    item, normalizedItemValue, idx;
+                    len = fullItemConfig.length;
+                let i = 0, 
+                    item, 
+                    normalizedItemValue, 
+                    idx;
                 for (; len > i;) {
                     item = fullItemConfig[i++];
                     normalizedItemValue = item.attrs.text.toLowerCase();

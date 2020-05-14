@@ -1,10 +1,10 @@
 ((pkg) => {
-    var sortFunction = (a, b) => a.replicationIndex - b.replicationIndex,
+    const sortFunction = (a, b) => a.replicationIndex - b.replicationIndex,
         
         /*  @param {!Array} layouts
             @returns {undefined} */
         lockLayouts = (layouts) => {
-            var i = layouts.length;
+            let i = layouts.length;
             while (i) layouts[--i].incrementLockedCounter();
         },
         
@@ -12,7 +12,8 @@
             @param {boolean} update
             @returns {undefined} */
         unlockLayouts = (layouts, update) => {
-            var i = layouts.length, layout;
+            let i = layouts.length,
+                layout;
             while (i) {
                 layout = layouts[--i];
                 layout.decrementLockedCounter();
@@ -26,7 +27,7 @@
             destroyOldPool(replicator);
             
             // Create new pool
-            var template = replicator.template;
+            const template = replicator.template;
             if (template) replicator.__pool = new pkg.TrackActivesPool(template, replicator.parent);
         },
         
@@ -34,10 +35,10 @@
             @returns {undefined} */
         destroyOldPool = (replicator) => {
             // Destroy old pool and instances.
-            var pool = replicator.__pool;
+            const pool = replicator.__pool;
             if (pool) {
                 // Lock layouts before modifying instances
-                var layouts = replicator.parent.getLayouts();
+                const layouts = replicator.parent.getLayouts();
                 lockLayouts(layouts);
                 
                 pool.putActives();
@@ -158,22 +159,22 @@
         /** Performs replication.
             @returns {undefined} */
         doReplication: function() {
-            var pool = this.__pool,
-                layouts;
+            const pool = this.__pool;
+            let layouts;
             if (pool) {
                 // Lock layouts before modifying instances
                 layouts = this.parent.getLayouts();
                 lockLayouts(layouts);
                 
                 // Walk actives comparing against data
-                var data = this.data, 
+                const data = this.data, 
                     dataLen = data ? data.length : 0,
                     actives = pool.getActives(), 
-                    activesLen = actives.length,
-                    i = activesLen, 
-                    active,
-                    replicationIndex, 
+                    activesLen = actives.length, 
                     unused = [];
+                let i = activesLen, 
+                    active,
+                    replicationIndex;
                 
                 actives.sort(sortFunction);
                 
@@ -214,9 +215,10 @@
             @param {*} value - The value of the message.
             @returns {undefined} */
         notify: function(key, value) {
-            var pool = this.__pool;
+            const pool = this.__pool;
             if (pool) {
-                var actives = pool.getActives(), i = actives.length;
+                const actives = pool.getActives();
+                let i = actives.length;
                 while (i) actives[--i].notify(key, value);
             }
         }

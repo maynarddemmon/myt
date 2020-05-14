@@ -13,7 +13,7 @@
 myt.SelectableInfiniteList = new JS.Class('SelectableInfiniteList', myt.InfiniteList, {
     // Accessors ///////////////////////////////////////////////////////////////
     setSelectedRow: function(row) {
-        var existing = this.selectedRow;
+        const existing = this.selectedRow;
         if (row !== existing) {
             if (existing) existing.setSelected(false);
             this.setSelectedRowModel();
@@ -37,7 +37,7 @@ myt.SelectableInfiniteList = new JS.Class('SelectableInfiniteList', myt.Infinite
     /** Clears the selectedRow while leaving the selectedRowModel.
         @private */
     _clearSelectedRow: function() {
-        var existing = this.selectedRow;
+        const existing = this.selectedRow;
         if (existing) {
             existing.setSelected(false);
             this.set('selectedRow', null, true);
@@ -56,7 +56,7 @@ myt.SelectableInfiniteList = new JS.Class('SelectableInfiniteList', myt.Infinite
             
             // Focus on the newly selected row
             if (focus) {
-                var row = this.getActiveSelectedRow();
+                const row = this.getActiveSelectedRow();
                 if (row) row.focus();
             }
         }
@@ -72,7 +72,7 @@ myt.SelectableInfiniteList = new JS.Class('SelectableInfiniteList', myt.Infinite
     
     /** @overrides */
     resetListUI: function(preserveScroll) {
-        var self = this;
+        const self = this;
         
         if (self.isModelInData(self.selectedRowModel)) {
             // Only clear the selected row since it's still in the data and
@@ -94,7 +94,7 @@ myt.SelectableInfiniteList = new JS.Class('SelectableInfiniteList', myt.Infinite
     
     /** @overrides */
     doAfterListRefresh: function() {
-        var row = this.getActiveSelectedRow();
+        const row = this.getActiveSelectedRow();
         if (row) {
             this.set('selectedRow', row, true);
             row.setSelected(true);

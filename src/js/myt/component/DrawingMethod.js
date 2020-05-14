@@ -12,12 +12,12 @@ myt.DrawingMethod = new JS.Class('DrawingMethod', {
             @param {string} classname
             @returns {!Function} myt.DrawingMethod. */
         get: function(classname) {
-            var drawingMethods = this._drawingMethods,
-                drawingMethod = drawingMethods[classname];
+            const drawingMethods = this._drawingMethods;
+            let drawingMethod = drawingMethods[classname];
             
             // Create the DrawingMethod if it wasn't found in the cache.
             if (!drawingMethod) {
-                var drawingMethodClass = myt.resolveClassname(classname);
+                const drawingMethodClass = myt.resolveClassname(classname);
                 if (drawingMethodClass) drawingMethods[classname] = drawingMethod = new drawingMethodClass();
             }
             
@@ -31,7 +31,7 @@ myt.DrawingMethod = new JS.Class('DrawingMethod', {
                 that control how the DrawingMethod draws.
             @returns {undefined} */
         draw: function(classname, canvas, config) {
-            var drawingMethod = this.get(classname);
+            const drawingMethod = this.get(classname);
             if (drawingMethod) {
                 drawingMethod.draw(canvas, config);
             } else {

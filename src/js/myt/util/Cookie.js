@@ -1,5 +1,5 @@
 ((pkg) => {
-    var pluses = /\+/g,
+    const pluses = /\+/g,
         
         /* Function to return a raw cookie name/value. */
         raw = (s) => s,
@@ -51,10 +51,10 @@
             read: (key, options) => {
                 options = Object.assign({}, Cookie.defaults, options);
                 
-                var decodeFunc = options.raw ? raw : decoded,
+                const decodeFunc = options.raw ? raw : decoded,
                     useJson = options.json,
-                    cookies = document.cookie.split('; '),
-                    result = key ? undefined : {},
+                    cookies = document.cookie.split('; ');
+                let result = key ? undefined : {},
                     parts, 
                     name, 
                     cookie, 
@@ -94,7 +94,7 @@
                 options = Object.assign({}, Cookie.defaults, options);
                 
                 if (typeof options.expires === 'number') {
-                    var days = options.expires,
+                    const days = options.expires,
                         t = options.expires = new Date();
                     t.setDate(t.getDate() + days);
                 }

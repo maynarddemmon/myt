@@ -29,20 +29,20 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     
     /** @overrides myt.View */
     doAfterAdoption: function() {
-        var self = this,
+        const self = this,
             M = myt,
             V = M.View,
             SL = M.SpacedLayout,
             sizeHeightToRows = self.sizeHeightToRows;
         
-        var header = new V(self, {name:'header', overflow:'hidden'});
+        const header = new V(self, {name:'header', overflow:'hidden'});
         new SL(header, {
             name:'xLayout', locked:true, collapseParent:true, 
             spacing:self.columnSpacing
         });
         new M.SizeToChildren(header, {name:'yLayout', locked:true, axis:'y'});
         
-        var content = new V(self, {
+        const content = new V(self, {
             name:'content', 
             overflow:sizeHeightToRows ? 'hidden' : 'autoy'
         });
@@ -85,7 +85,7 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     setLocked: function(v) {
         // Performance: don't update layouts until the grid is unlocked.
         if (this.inited) {
-            var header = this.header,
+            const header = this.header,
                 headerXLayout = header.xLayout,
                 headerYLayout = header.yLayout,
                 contentYLayout = this.content.yLayout;
@@ -119,7 +119,7 @@ myt.Grid = new JS.Class('Grid', myt.View, {
         @param {!Object} event
         @returns {undefined} */
     _updateContentHeight: function(event) {
-        var self = this,
+        const self = this,
             header = self.header, 
             content = self.content,
             y = header.y + header.height;
@@ -137,7 +137,7 @@ myt.Grid = new JS.Class('Grid', myt.View, {
         // Automatically place column headers and rows in the header and
         // content views respectively.
         if (placement === '*') {
-            var target;
+            let target;
             if (subnode.isA(myt.GridRow)) {
                 target = this.content;
             } else if (subnode.isA(myt.GridColumnHeader)) {
@@ -155,10 +155,10 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     
     /** @overrides myt.GridController */
     doSort: function() {
-        var sort = this.sort || ['',''],
+        const sort = this.sort || ['',''],
             sortFunc = this.getSortFunction(sort[0], sort[1]);
         if (sortFunc) {
-            var content = this.content, 
+            const content = this.content, 
                 yLayout = content.yLayout;
             this.rows.sort(sortFunc);
             content.sortSubviews(sortFunc);
@@ -175,10 +175,10 @@ myt.Grid = new JS.Class('Grid', myt.View, {
     getSortFunction: (sortColumnId, sortOrder) => {
         if (sortColumnId) {
             // Default sort function uses the 'text' attribute of the subview.
-            var sortNum = sortOrder === 'ascending' ? 1 : -1,
+            const sortNum = sortOrder === 'ascending' ? 1 : -1,
                 columnName = sortColumnId + 'View';
             return (a, b) => {
-                var aValue = a[columnName].text,
+                const aValue = a[columnName].text,
                     bValue = b[columnName].text;
                 if (aValue > bValue) {
                     return sortNum;

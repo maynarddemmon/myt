@@ -95,7 +95,7 @@ myt.InputRadio = new JS.Class('InputRadio', myt.NativeInputWrapper, {
     __syncToDom: function(event) {
         if (this.getInnerDomElement().checked) {
             // Get last checked and deselect
-            var groupId = this.groupId, 
+            const groupId = this.groupId, 
                 cache = myt.InputRadio.lastChecked,
                 lastChecked = cache[groupId];
             if (lastChecked) lastChecked.setValue(false);

@@ -1,6 +1,7 @@
 ((pkg) => {
-    var globalFocus,
+    let globalFocus;
         
+    const
         /*  Gets the deepest dom element that is a descendant of the provided
             dom element or the element itself. */
         getDeepestDescendant = (elem) => {
@@ -19,19 +20,20 @@
             globalFocus.lastTraversalWasForward = isForward;
             
             // Determine root element and starting element for traversal.
-            var activeElem = document.activeElement, 
-                rootElem = document.body,
+            let rootElem = document.body,
                 startElem = rootElem,
+                activeElem = document.activeElement, 
                 elem = startElem,
-                model, progModel,
-                focusFuncName = isForward ? 'getNextFocus' : 'getPrevFocus';
+                model,
+                progModel;
+            const focusFuncName = isForward ? 'getNextFocus' : 'getPrevFocus';
             
             if (activeElem) {
                 elem = startElem = activeElem;
                 model = startElem.model;
                 if (!model) model = globalFocus.findModelForDomElement(startElem);
                 if (model) {
-                    var focusTrap = model.getFocusTrap(ignoreFocusTrap);
+                    const focusTrap = model.getFocusTrap(ignoreFocusTrap);
                     if (focusTrap) rootElem = focusTrap.domElement;
                 }
             }
@@ -85,7 +87,7 @@
                     if (model && model instanceof pkg.View) {
                         if (model.isFocusable()) return model;
                     } else {
-                        var nodeName = elem.nodeName;
+                        const nodeName = elem.nodeName;
                         if (nodeName === 'A' || nodeName === 'AREA' || 
                             nodeName === 'INPUT' || nodeName === 'TEXTAREA' || 
                             nodeName === 'SELECT' || nodeName === 'BUTTON'
@@ -199,7 +201,7 @@
             @param {boolean} ignoreFocusTrap - If true focus traps will be skipped over.
             @returns {undefined} */
         next: (ignoreFocusTrap) => {
-            var next = traverse(true, ignoreFocusTrap);
+            const next = traverse(true, ignoreFocusTrap);
             if (next) next.focus();
         },
         
@@ -207,7 +209,7 @@
             @param {boolean} ignoreFocusTrap - If true focus traps will be skipped over.
             @returns {undefined} */
         prev: (ignoreFocusTrap) => {
-            var prev = traverse(false, ignoreFocusTrap);
+            const prev = traverse(false, ignoreFocusTrap);
             if (prev) prev.focus();
         },
         
@@ -215,9 +217,8 @@
             @param {!Object} elem - The domElement to start looking from.
             @returns {?Object} - A myt.View or null if not found. */
         findModelForDomElement: (elem) => {
-            var model;
             while (elem) {
-                model = elem.model;
+                let model = elem.model;
                 if (model && model instanceof pkg.View) return model;
                 elem = elem.parentNode;
             }

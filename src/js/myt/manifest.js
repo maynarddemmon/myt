@@ -1,8 +1,8 @@
 JS.Packages(function() {
-    var file = this.file;
+    const file = this.file;
     
     // Package:myt
-    var MYT_ROOT = global.MYT_ROOT || '../js/myt/';
+    const MYT_ROOT = global.MYT_ROOT || '../js/myt/';
     
     // JS.Class
     file(MYT_ROOT+'../jsclass/core.js').provides('JS.Class','JS.Module','JS.Singleton');
@@ -11,37 +11,37 @@ JS.Packages(function() {
     file(MYT_ROOT+'shim/BrowserDetect.js',MYT_ROOT+'shim/language.js').provides('BrowserDetect','Date.prototype.format');
     
     // Util
-    var UTIL_ROOT = MYT_ROOT+'util/';
+    const UTIL_ROOT = MYT_ROOT+'util/';
     file(UTIL_ROOT+'Cookie.js',UTIL_ROOT+'LocalStorage.js',UTIL_ROOT+'URI.js',UTIL_ROOT+'Geometry.js')
         .provides('myt.Cookie','myt.LocalStorage','myt.URI','myt.Geometry')
         .requires('myt');
     
     // Core
-    var MYT_CORE_ROOT = MYT_ROOT + 'core/';
+    const MYT_CORE_ROOT = MYT_ROOT + 'core/';
     file(MYT_CORE_ROOT + 'myt.js').provides('myt').requires('BrowserDetect','Date.prototype.format','JS.Class','JS.Module','JS.Singleton');
     
-    file(MYT_CORE_ROOT + 'Destructible.js'    ).provides('myt.Destructible'    ).requires('myt');
-    file(MYT_CORE_ROOT + 'AccessorSupport.js' ).provides('myt.AccessorSupport' ).requires('myt');
-    file(MYT_CORE_ROOT + 'Eventable.js'       ).provides('myt.Eventable'       ).requires('myt.AccessorSupport','myt.Destructible','myt.Constrainable');
-    file(MYT_CORE_ROOT + 'Node.js'            ).provides('myt.Node'            ).requires('myt.AccessorSupport','myt.Destructible','myt.Constrainable','myt.TrackActivesPool');
-    file(MYT_CORE_ROOT + 'Animator.js'        ).provides('myt.Animator'        ).requires('myt.Node','myt.global.idle','myt.Reusable');
-    file(MYT_CORE_ROOT + 'Layout.js'          ).provides('myt.Layout','myt.ConstantLayout','myt.VariableLayout').requires('myt.Node');
+    file(MYT_CORE_ROOT + 'Destructible.js'   ).provides('myt.Destructible'   ).requires('myt');
+    file(MYT_CORE_ROOT + 'AccessorSupport.js').provides('myt.AccessorSupport').requires('myt');
+    file(MYT_CORE_ROOT + 'Eventable.js'      ).provides('myt.Eventable'      ).requires('myt.AccessorSupport','myt.Destructible','myt.Constrainable');
+    file(MYT_CORE_ROOT + 'Node.js'           ).provides('myt.Node'           ).requires('myt.AccessorSupport','myt.Destructible','myt.Constrainable','myt.TrackActivesPool');
+    file(MYT_CORE_ROOT + 'Animator.js'       ).provides('myt.Animator'       ).requires('myt.Node','myt.global.idle','myt.Reusable');
+    file(MYT_CORE_ROOT + 'Layout.js'         ).provides('myt.Layout','myt.ConstantLayout','myt.VariableLayout').requires('myt.Node');
     
     // Core : Events
-    var MYT_EVENTS_ROOT = MYT_CORE_ROOT + 'events/';
+    const MYT_EVENTS_ROOT = MYT_CORE_ROOT + 'events/';
     file(MYT_EVENTS_ROOT + 'Observable.js'   ).provides('myt.Observable'   ).requires('myt');
     file(MYT_EVENTS_ROOT + 'Observer.js'     ).provides('myt.Observer'     ).requires('myt.Observable');
     file(MYT_EVENTS_ROOT + 'Constrainable.js').provides('myt.Constrainable').requires('myt.Observer');
     
     // Core : Pool
-    var MYT_POOL_ROOT = MYT_CORE_ROOT + 'pool/';
+    const MYT_POOL_ROOT = MYT_CORE_ROOT + 'pool/';
     file(MYT_POOL_ROOT + 'Reusable.js'        ).provides('myt.Reusable'        ).requires('myt');
     file(MYT_POOL_ROOT + 'AbstractPool.js'    ).provides('myt.AbstractPool'    ).requires('myt.Destructible','myt.Reusable');
     file(MYT_POOL_ROOT + 'SimplePool.js'      ).provides('myt.SimplePool'      ).requires('myt.AbstractPool');
     file(MYT_POOL_ROOT + 'TrackActivesPool.js').provides('myt.TrackActivesPool').requires('myt.SimplePool');
     
     // Core : View
-    var MYT_VIEW_ROOT = MYT_CORE_ROOT + 'view/';
+    const MYT_VIEW_ROOT = MYT_CORE_ROOT + 'view/';
     file(MYT_VIEW_ROOT + 'DomElementProxy.js').provides('myt.DomElementProxy').requires('myt');
     file(MYT_VIEW_ROOT + 'View.js'           ).provides('myt.View')
         .requires('myt.Layout','myt.MouseObservable','myt.KeyObservable','myt.DomObserver','myt.FocusObservable','myt.ScrollObservable','myt.Geometry');
@@ -55,7 +55,7 @@ JS.Packages(function() {
     file(MYT_VIEW_ROOT + 'FlexBoxChildSupport.js').provides('myt.FlexBoxChildSupport').requires('myt');
     
     // Core : Dom Events
-    var MYT_DOM_EVENTS_ROOT = MYT_CORE_ROOT + 'dom_events/';
+    const MYT_DOM_EVENTS_ROOT = MYT_CORE_ROOT + 'dom_events/';
     file(MYT_DOM_EVENTS_ROOT + 'DomObservable.js'   ).provides('myt.DomObservable'   ).requires('myt.DomElementProxy');
     file(MYT_DOM_EVENTS_ROOT + 'DomObserver.js'     ).provides('myt.DomObserver'     ).requires('myt.DomObservable');
     file(MYT_DOM_EVENTS_ROOT + 'MouseObservable.js' ).provides('myt.MouseObservable' ).requires('myt.DomObservable');
@@ -65,7 +65,7 @@ JS.Packages(function() {
     file(MYT_DOM_EVENTS_ROOT + 'TouchObservable.js' ).provides('myt.TouchObservable' ).requires('myt.DomObservable');
     
     // Core : Globals
-    var MYT_GLOBALS_ROOT = MYT_CORE_ROOT + 'globals/';
+    const MYT_GLOBALS_ROOT = MYT_CORE_ROOT + 'globals/';
     file(MYT_GLOBALS_ROOT + 'Global.js'                ).provides('myt.global'             ).requires('myt.Constrainable');
     file(MYT_GLOBALS_ROOT + 'GlobalError.js'           ).provides('myt.global.error'       ).requires('myt.global','myt.Observable');
     file(MYT_GLOBALS_ROOT + 'GlobalIdle.js'            ).provides('myt.global.idle'        ).requires('myt.global','myt.Observable');
@@ -79,7 +79,7 @@ JS.Packages(function() {
     file(MYT_GLOBALS_ROOT + 'GlobalRootViewRegistry.js').provides('myt.global.roots'       ).requires('myt.global','myt.Observable');
     
     // Component
-    var MYT_COMPONENT_ROOT = MYT_ROOT + 'component/';
+    const MYT_COMPONENT_ROOT = MYT_ROOT + 'component/';
     
     // Component : Misc
     file(MYT_COMPONENT_ROOT + 'Button.js'          ).provides(

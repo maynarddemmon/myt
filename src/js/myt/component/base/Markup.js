@@ -9,7 +9,7 @@ myt.Markup = new JS.Class('Markup', myt.View, {
     
     // Accessors ///////////////////////////////////////////////////////////////
     setHtml: function(v) {
-        var self = this;
+        const self = this;
         if (self.html !== v) {
             self.getInnerDomElement().innerHTML = self.html = v;
             if (self.inited) {

@@ -7,7 +7,8 @@
     Attributes:
         value:* the value of the option.
         label:string the text label for the option.
-*/
+    
+    @class */
 myt.InputSelectOption = new JS.Class('InputSelectOption', myt.View, {
     include: [myt.Disableable, myt.Selectable],
     
@@ -25,7 +26,7 @@ myt.InputSelectOption = new JS.Class('InputSelectOption', myt.View, {
         // Adapt to event from syncTo
         if (v !== null && typeof v === 'object') v = v.value;
         
-        var de = this.getInnerDomElement();
+        const de = this.getInnerDomElement();
         if (de.selected !== v) de.selected = v;
     },
     

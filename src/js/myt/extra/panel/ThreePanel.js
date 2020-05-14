@@ -46,16 +46,16 @@ myt.ThreePanel = new JS.Module('ThreePanel', {
     },
     
     doBeforeAdoption: function() {
-        var self = this;
+        const self = this,
+            m = myt;
         
         self.callSuper();
         
-        var m = myt;
         new m.Image(self, {
             name:'first', imageUrl:self.firstImageUrl, ignoreLayout:true
         });
         
-        var second = new m.Image(self, {
+        const second = new m.Image(self, {
             name:'second', layoutHint:1, imageUrl:self.secondImageUrl, 
             ignoreLayout:true, useNaturalSize:false, calculateNaturalSize:true,
         });
@@ -68,7 +68,7 @@ myt.ThreePanel = new JS.Module('ThreePanel', {
             name:'third', imageUrl:self.thirdImageUrl, ignoreLayout:true
         });
         
-        var axis = self.axis,
+        const axis = self.axis,
             otherAxis = axis === 'x' ? 'y' : 'x',
             ignoreMixin = [m.ThreePanel.IGNORE_FUNCTION_MIXIN];
         new m.ResizeLayout(self, {name:'resizeLayout', axis:axis}, ignoreMixin);
@@ -141,7 +141,7 @@ myt.ThreePanel = new JS.Module('ThreePanel', {
         @param {!Object} event
         @returns {undefined} */
     __updateSize: function(event) {
-        var v = this.second;
+        const v = this.second;
         if (this.axis === 'x') {
             v.setHeight(v.naturalHeight);
         } else {
@@ -153,7 +153,7 @@ myt.ThreePanel = new JS.Module('ThreePanel', {
         @param {!Object} event
         @returns {undefined} */
     __updateImageSize: function(event) {
-        var v = this.second;
+        const v = this.second;
         v.setImageSize(this.repeat ? undefined : v.width + 'px ' + v.height + 'px');
     },
     

@@ -49,9 +49,9 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
     connect: function(afterOpenCallback) {
         if (!this._ws && this.url) {
             try {
-                var ws = this._ws = new WebSocket(this.url, this.protocols);
+                const ws = this._ws = new WebSocket(this.url, this.protocols);
                 
-                var openFunc = this.onOpen.bind(this);
+                const openFunc = this.onOpen.bind(this);
                 if (afterOpenCallback) {
                     // Execute an afterOpenCallback one time
                     ws.onopen = function(event) {
@@ -83,21 +83,21 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
             or not. Undefined is returned when the connection has to be opened
             before sending. */
     send: function(msg, doNotTryToConnect) {
-        var ws = this._ws;
-        if (ws && this.status === 'open') {
-            if (this.useJSON) {
+        const self = this,
+            ws = self._ws;
+        if (ws && self.status === 'open') {
+            if (self.useJSON) {
                 try {
                     msg = JSON.stringify(msg);
                 } catch (ex) {
-                    this.onError(ex);
+                    self.onError(ex);
                 }
             }
             ws.send(msg);
             return true;
         } else if (!doNotTryToConnect) {
             // Try to connect first and then send
-            var self = this;
-            this.connect(function(event) {self.send(msg, true);});
+            self.connect(function(event) {self.send(msg, true);});
         } else {
             return false;
         }
@@ -126,7 +126,7 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
     onError: function(event) {
         console.error(event);
         
-        var ws = this._ws;
+        const ws = this._ws;
         if (ws && ws.readyState !== 1) this.close();
     },
     
@@ -134,7 +134,7 @@ myt.WebSocket = new JS.Class('WebSocket', myt.Node, {
         @param {!Object} event -  The message event fired by the WebSocket.
         @returns msg:* The message received. */
     onMessage: function(event) {
-        var msg = event.data;
+        let msg = event.data;
         
         if (this.useJSON) {
             try {

@@ -41,13 +41,14 @@ myt.Observable = new JS.Module('Observable', {
             false otherwise. */
     detachObserver: function(observer, methodName, type) {
         if (observer && methodName && type) {
-            var observersByType = this.__obsbt;
+            const observersByType = this.__obsbt;
             if (observersByType) {
-                var observers = observersByType[type];
+                const observers = observersByType[type];
                 if (observers) {
                     // Remove all instances of the observer and methodName 
                     // combination.
-                    var retval = false, i = observers.length;
+                    let retval = false, 
+                        i = observers.length;
                     while (i) {
                         // Ensures we decrement twice. First with --i, then 
                         // with i-- since the part after && may not be executed.
@@ -67,15 +68,14 @@ myt.Observable = new JS.Module('Observable', {
     /** Removes all observers from this Observable.
         @returns {undefined} */
     detachAllObservers: function() {
-        var observersByType = this.__obsbt;
+        const observersByType = this.__obsbt;
         if (observersByType) {
-            var observers, observer, methodName, i, type;
-            for (type in observersByType) {
-                observers = observersByType[type];
-                i = observers.length;
+            for (let type in observersByType) {
+                const observers = observersByType[type];
+                let i = observers.length;
                 while (i) {
-                    observer = observers[--i];
-                    methodName = observers[--i];
+                    let observer = observers[--i],
+                        methodName = observers[--i];
                     
                     // If an observer is registered more than once the list may 
                     // get shortened by observer.detachFrom. If so, just 
@@ -102,7 +102,7 @@ myt.Observable = new JS.Module('Observable', {
         @param type:string The name of the event to get observers for.
         @returns array: The observers of the event. */
     getObservers: function(type) {
-        var observersByType = this.__obsbt || (this.__obsbt = {});
+        const observersByType = this.__obsbt || (this.__obsbt = {});
         return observersByType[type] || (observersByType[type] = []);
     },
     
@@ -110,9 +110,9 @@ myt.Observable = new JS.Module('Observable', {
         @param type:string The name of the event to check.
         @returns boolean: True if any exist, false otherwise. */
     hasObservers: function(type) {
-        var observersByType = this.__obsbt;
+        const observersByType = this.__obsbt;
         if (!observersByType) return false;
-        var observers = observersByType[type];
+        const observers = observersByType[type];
         return observers && observers.length > 0;
     },
     
@@ -138,13 +138,13 @@ myt.Observable = new JS.Module('Observable', {
         @returns {undefined} */
     fireEvent: function(type, value, observers) {
         // Determine observers to use
-        var self = this;
+        const self = this;
         observers = observers || (self.hasObservers(type) ? self.__obsbt[type] : null);
         
         // Fire event
         if (observers) {
             // Prevent "active" events from being fired again
-            var event = {source:self, type:type, value:value}, // Inlined from this.createEvent
+            const event = {source:self, type:type, value:value}, // Inlined from this.createEvent
                 activeEventTypes = self.__aet || (self.__aet = {});
             if (activeEventTypes[type] === true) {
                 myt.global.error.notifyWarn('eventLoop', "Attempt to refire active event: " + type);
@@ -156,7 +156,7 @@ myt.Observable = new JS.Module('Observable', {
                 // detached by the event handler the index won't get messed up.
                 // FIXME: If necessary we could queue up detachObserver calls that 
                 // come in during iteration or make some sort of adjustment to 'i'.
-                var i = observers.length,
+                let i = observers.length,
                     observer,
                     methodName;
                 while (i) {

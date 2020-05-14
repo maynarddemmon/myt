@@ -1,5 +1,5 @@
 ((pkg) => {
-    var 
+    const 
         /*  Preserves focus and scroll position during dom updates. Focus can 
             get lost in webkit when an element is removed from the dom.
                 param viewBeingRemoved:myt.View
@@ -8,9 +8,9 @@
                     followed by an insert.
         */
         retainFocusDuringDomUpdate = (viewBeingRemoved, wrappedFunc) => {
-            var restoreFocus = pkg.global.focus.focusedView, 
-                elem = viewBeingRemoved.getInnerDomElement(), 
-                restoreScrollTop, 
+            const restoreFocus = pkg.global.focus.focusedView, 
+                elem = viewBeingRemoved.getInnerDomElement();
+            let restoreScrollTop, 
                 restoreScrollLeft;
             if (restoreFocus === viewBeingRemoved || (restoreFocus && restoreFocus.isDescendantOf(viewBeingRemoved))) {
                 restoreFocus._ignoreFocus = true;
@@ -47,11 +47,11 @@
         comparePosition = (firstView, secondView, front, checkZIndex) => {
             if (secondView && typeof secondView === 'object') {
                 if (checkZIndex) {
-                    var commonAncestor = firstView.getLeastCommonAncestor(secondView);
+                    const commonAncestor = firstView.getLeastCommonAncestor(secondView);
                     if (commonAncestor) {
-                        var commonAncestorElem = commonAncestor.getInnerDomElement(),
-                            DEP = pkg.DomElementProxy,
-                            zIdx = DEP.getZIndexRelativeToAncestor(firstView.getOuterDomElement(), commonAncestorElem),
+                        const commonAncestorElem = commonAncestor.getInnerDomElement(),
+                            DEP = pkg.DomElementProxy;
+                        let zIdx = DEP.getZIndexRelativeToAncestor(firstView.getOuterDomElement(), commonAncestorElem),
                             otherZIdx = DEP.getZIndexRelativeToAncestor(secondView.getOuterDomElement(), commonAncestorElem);
                         
                         // Reverse comparison order
@@ -75,7 +75,7 @@
                 // DOCUMENT_POSITION_CONTAINS 8
                 // DOCUMENT_POSITION_CONTAINED_BY 16
                 // DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC 32
-                var rel = firstView.getOuterDomElement().compareDocumentPosition(secondView.getOuterDomElement());
+                const rel = firstView.getOuterDomElement().compareDocumentPosition(secondView.getOuterDomElement());
                 return front ? rel === 2 || rel === 10 : rel === 4 || rel === 20;
             } else {
                 return false;
@@ -85,8 +85,8 @@
         /*  Calculates the effective scale for the provided view and all its
             ancestors. Returns the effective scale for the provided view. */
         calculateEffectiveScale = (view) => {
-            var ancestorsAndSelf = view.getAncestors(), 
-                i = ancestorsAndSelf.length, 
+            const ancestorsAndSelf = view.getAncestors();
+            let i = ancestorsAndSelf.length, 
                 ancestor,
                 effectiveScaleX = 1,
                 effectiveScaleY = 1;
@@ -101,8 +101,8 @@
         },
         
         isPointVisible = (view, x, y) => {
-            var ode = view.getOuterDomElement(),
-                parent,
+            const ode = view.getOuterDomElement();
+            let parent,
                 pOde;
             if (pkg.Geometry.rectContainsPoint(x, y, 0, 0, ode.offsetWidth * view.__effectiveScaleX, ode.offsetHeight * view.__effectiveScaleY)) {
                 if (parent = view.parent) {
@@ -128,7 +128,7 @@
         },
         
         setupAlignConstraint = (view) => {
-            var parent = view.parent;
+            const parent = view.parent;
             if (parent) {
                 switch (view.align) {
                     case 'center':
@@ -155,7 +155,7 @@
         },
         
         setupValignConstraint = (view) => {
-            var parent = view.parent;
+            const parent = view.parent;
             if (parent) {
                 switch (view.valign) {
                     case 'middle':
@@ -320,7 +320,7 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.Node */
         initNode: function(parent, attrs) {
-            var self = this;
+            const self = this;
             
             self.x = self.y = self.width = self.height = 0;
             self.opacity = 1;
@@ -333,7 +333,7 @@
             // Necessary since x and y of 0 won't update deStyle so this gets
             // things initialized correctly. Without this RootViews will have
             // an incorrect initial position for x or y of 0.
-            var s = self.getOuterDomStyle();
+            const s = self.getOuterDomStyle();
             s.left = s.top = '0px';
             
             self.callSuper(parent, attrs);
@@ -352,11 +352,11 @@
                 of the newly created dom element.
             @returns {!Object} a dom element */
         createOurDomElement: function(parent) {
-            var elem = document.createElement(this.tagName || 'div');
+            const elem = document.createElement(this.tagName || 'div');
             elem.style.position = 'absolute';
             
             // Make dom elements easier to location via selectors
-            var klass = this.klass;
+            const klass = this.klass;
             elem.className = klass.__cssClassName || (klass.__cssClassName = 'myt-' + klass.__displayName.split('.').join('-'));
             
             return elem;
@@ -373,7 +373,7 @@
         
         /** @overrides myt.Node */
         destroyAfterOrphaning: function() {
-            var self = this;
+            const self = this;
             
             self.callSuper();
             
@@ -386,7 +386,7 @@
         // Accessors ///////////////////////////////////////////////////////////
         /** @overrides myt.Node */
         setParent: function(parent) {
-            var self = this;
+            const self = this;
             
             if (self.parent !== parent) {
                 if (self.inited) {
@@ -411,8 +411,8 @@
             if (this.parent) {
                 // Get a copy of the subviews since we will modify it and do not
                 // want to modify the original array.
-                var svs = this.parent.getSubviews().concat(),
-                    i = svs.length;
+                const svs = this.parent.getSubviews().concat();
+                let i = svs.length;
                 
                 // Remove ourselves from the subviews since we only want siblings.
                 while (i) {
@@ -441,12 +441,12 @@
         },
         
         setIgnoreLayout: function(v) {
-            var self = this;
+            const self = this;
             
             if (self.ignoreLayout !== v) {
                 // Add or remove ourselves from any layouts on our parent.
-                var ready = self.inited && self.parent,
-                    layouts,
+                const ready = self.inited && self.parent;
+                let layouts,
                     i;
                 if (v) {
                     if (ready) {
@@ -618,11 +618,11 @@
         },
         
         setOverflow: function(v) {
-            var existing = this.overflow;
+            const existing = this.overflow;
             if (existing !== v) {
                 this.overflow = v;
                 
-                var s = this.getInnerDomStyle();
+                const s = this.getInnerDomStyle();
                 if (v === 'autox') {
                     s.overflowX = 'auto';
                     s.overflowY = 'hidden';
@@ -639,11 +639,11 @@
         },
         
         setVisible: function(v) {
-            var self = this;
+            const self = this;
             if (self.visible !== v) {
                 self.visible = v;
                 
-                var s = self.getOuterDomStyle();
+                const s = self.getOuterDomStyle();
                 s.visibility = v ? 'inherit' : 'hidden';
                 
                 // Move invisible elements to a very negative location so they won't
@@ -786,7 +786,7 @@
             @returns {undefined} */
         setBoxShadow: function(v) {
             if (v) {
-                var hShadow = v[0] || 0,
+                const hShadow = v[0] || 0,
                     vShadow = v[1] || 0,
                     blur = v[2] || 7,
                     color = v[3] || '#000000';
@@ -816,11 +816,11 @@
                     https://developer.mozilla.org/en-US/docs/Web/CSS/linear-gradient
             @returns {undefined} */
         setGradient: function(v) {
-            var self = this,
+            const self = this,
                 ods = self.getOuterDomStyle();
             if (v) {
                 // Determine type
-                var type = v[0];
+                let type = v[0];
                 if (type === 'linear' || type === 'radial') {
                     v.shift();
                 } else {
@@ -828,7 +828,7 @@
                 }
                 
                 // Determine geometry of the gradient
-                var geometry = v[0];
+                let geometry = v[0];
                 if (type === 'radial') {
                     if (geometry !== undefined) {
                         if (geometry === 'cover' || geometry === 'farthest-corner') {
@@ -855,7 +855,7 @@
                 
                 // Use colors that may have already been configured if less
                 // than 2 color stops are provided
-                var pushColor = (color) => {
+                const pushColor = (color) => {
                     v.push(color && color !== 'inherit' ? color : 'transparent');
                 };
                 if (v.length < 2) pushColor(self.textColor);
@@ -929,7 +929,7 @@
             @fires layoutRemoved event with the provided Node if it's a Layout
                 and removal succeeds. */
         subnodeRemoved: function(node) {
-            var idx;
+            let idx;
             if (node instanceof pkg.View) {
                 idx = this.getSubviewIndex(node);
                 if (idx !== -1) {
@@ -979,7 +979,7 @@
             @returns {?Object} - The next sibling myt.View or null if none exists. */
         getNextSibling: function() {
             if (this.parent) {
-                var nextDomElement = this.getOuterDomElement().nextElementSibling;
+                const nextDomElement = this.getOuterDomElement().nextElementSibling;
                 if (nextDomElement) return nextDomElement.model;
             }
             return null;
@@ -989,7 +989,7 @@
             @returns {?Object} - The previous sibling myt.View or null if none exists. */
         getPrevSibling: function() {
             if (this.parent) {
-                var prevDomElement = this.getOuterDomElement().previousElementSibling;
+                const prevDomElement = this.getOuterDomElement().previousElementSibling;
                 if (prevDomElement) return prevDomElement.model;
             }
             return null;
@@ -1076,7 +1076,7 @@
             @returns {undefined} */
         bringSubviewToFront: function(sv) {
             if (sv && sv.parent === this) {
-                var innerElem = this.getInnerDomElement();
+                const innerElem = this.getInnerDomElement();
                 if (sv.getOuterDomElement() !== innerElem.lastChild) {
                     retainFocusDuringDomUpdate(sv, () => {
                         innerElem.appendChild(sv.getOuterDomElement());
@@ -1090,7 +1090,7 @@
             @returns {undefined} */
         sendSubviewToBack: function(sv) {
             if (sv && sv.parent === this) {
-                var innerElem = this.getInnerDomElement();
+                const innerElem = this.getInnerDomElement();
                 if (sv.getOuterDomElement() !== innerElem.firstChild) {
                     retainFocusDuringDomUpdate(sv, () => {
                         innerElem.insertBefore(sv.getOuterDomElement(), innerElem.firstChild);
@@ -1105,7 +1105,7 @@
             @returns {undefined} */
         sendSubviewBehind: function(sv, existing) {
             if (sv && existing && sv.parent === this && existing.parent === this) {
-                var innerElem = this.getInnerDomElement();
+                const innerElem = this.getInnerDomElement();
                 retainFocusDuringDomUpdate(sv, () => {
                     innerElem.insertBefore(sv.getOuterDomElement(), existing.getOuterDomElement());
                 });
@@ -1130,18 +1130,18 @@
             @returns {undefined} */
         sortSubviews: function(sortFunc) {
             // Sort subviews
-            var self = this,
+            const self = this,
                 svs = self.getSubviews();
             svs.sort(sortFunc);
             
             // Rearrange dom to match new sort order.
             retainFocusDuringDomUpdate(self, () => {
-                var len = svs.length,
-                    i = 0,
+                const len = svs.length,
                     outerElem = self.getOuterDomElement(),
                     innerElem = self.getInnerDomElement(),
                     nextDe = outerElem.nextSibling,
-                    parentElem = outerElem.parentNode,
+                    parentElem = outerElem.parentNode;
+                let i = 0,
                     fragment;
                 // Remove this dom element from the dom
                 if (parentElem) parentElem.removeChild(outerElem);
@@ -1167,10 +1167,10 @@
             @returns {boolean} True if the location is inside this view, false 
                 if not. */
         containsPoint: function(locX, locY, referenceFrameDomElem) {
-            var outerElem = this.getOuterDomElement();
+            const outerElem = this.getOuterDomElement();
             if (!outerElem) return false;
             
-            var pos = pkg.DomElementProxy.getPagePosition(outerElem, referenceFrameDomElem);
+            const pos = pkg.DomElementProxy.getPagePosition(outerElem, referenceFrameDomElem);
             return pkg.Geometry.rectContainsPoint(locX, locY, pos.x, pos.y, this.width, this.height);
         },
         
@@ -1180,7 +1180,7 @@
             @param {number} locY
             @returns {boolean} true if visible, false otherwise. */
         isPointVisible: function(locX, locY) {
-            var pos = this.getTruePagePosition();
+            const pos = this.getTruePagePosition();
             calculateEffectiveScale(this);
             return isPointVisible(this, locX - pos.x, locY - pos.y);
         },

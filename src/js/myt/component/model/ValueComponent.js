@@ -46,13 +46,17 @@ myt.ValueComponent = new JS.Module('ValueComponent', {
             Supported values are 'first' and 'last'. Defaults to 'first'.
         @returns {undefined} */
     chainValueFilter: function(filter, where) {
-        var existingFilter = this.valueFilter, chainedFilter = filter;
+        const existingFilter = this.valueFilter;
+        let chainedFilter;
         if (existingFilter) {
             if (where === 'last') {
-                chainedFilter = function(v) {return filter(existingFilter(v));};
-            } else if (where === 'first' || where == null) {
-                chainedFilter = function(v) {return existingFilter(filter(v));};
+                chainedFilter = (v) => filter(existingFilter(v));
+            } else {
+                // "where" is 'first' or not provided.
+                chainedFilter = (v) => existingFilter(filter(v));
             }
+        } else {
+            chainedFilter = filter;
         }
         this.setValueFilter(chainedFilter);
     }

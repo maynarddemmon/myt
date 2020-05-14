@@ -17,9 +17,10 @@ myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.Pa
     
     // Methods /////////////////////////////////////////////////////////////////
     to: function(panel) {
-        var panelStack = panel.getPanelStack(),
-            duration = this.duration,
-            toValue, axis;
+        const panelStack = panel.getPanelStack(),
+            duration = this.duration;
+        let toValue,
+            axis;
         switch (this.direction) {
             case 'left':
                 axis = 'x';
@@ -44,7 +45,7 @@ myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.Pa
         panel.setVisible(true);
         
         return new Promise((resolve, reject) => {
-            var nextFunc = (success) => {
+            const nextFunc = (success) => {
                 panel.makeHighestZIndex();
                 resolve(panel);
             };
@@ -58,9 +59,10 @@ myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.Pa
     },
     
     from: function(panel) {
-        var panelStack = panel.getPanelStack(),
-            duration = this.duration,
-            toValue, axis;
+        const panelStack = panel.getPanelStack(),
+            duration = this.duration;
+        let toValue,
+            axis;
         switch (this.direction) {
             case 'left':
                 axis = 'x';
@@ -83,7 +85,7 @@ myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.Pa
         panel.stopActiveAnimators(axis);
         
         return new Promise((resolve, reject) => {
-            var nextFunc = (success) => {
+            const nextFunc = (success) => {
                 panel.setVisible(false);
                 resolve(panel);
             };

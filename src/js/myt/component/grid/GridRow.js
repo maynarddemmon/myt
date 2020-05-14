@@ -1,5 +1,5 @@
 ((pkg) => {
-    var getSubview = (gridRow, columnHeader) => gridRow[columnHeader.columnId + 'View'];
+    const getSubview = (gridRow, columnHeader) => gridRow[columnHeader.columnId + 'View'];
     
     /** Makes a view behave as a row in a grid.
         
@@ -19,7 +19,7 @@
             
             this.callSuper(parent, attrs);
             
-            var gc = this.gridController;
+            const gc = this.gridController;
             if (gc) gc.notifyAddRow(this);
         },
         
@@ -31,7 +31,7 @@
         
         // Accessors ///////////////////////////////////////////////////////////
         setGridController: function(v) {
-            var existing = this.gridController;
+            const existing = this.gridController;
             if (existing !== v) {
                 if (existing) existing.notifyRemoveRow(this);
                 this.gridController = v;
@@ -42,17 +42,17 @@
         
         // Methods /////////////////////////////////////////////////////////////
         notifyColumnHeaderXChange: function(columnHeader) {
-            var sv = getSubview(this, columnHeader);
+            const sv = getSubview(this, columnHeader);
             if (sv) sv.setX(columnHeader.x + columnHeader.cellXAdj);
         },
         
         notifyColumnHeaderWidthChange: function(columnHeader) {
-            var sv = getSubview(this, columnHeader);
+            const sv = getSubview(this, columnHeader);
             if (sv) sv.setWidth(columnHeader.width + columnHeader.cellWidthAdj);
         },
         
         notifyColumnHeaderVisibilityChange: function(columnHeader) {
-            var sv = getSubview(this, columnHeader);
+            const sv = getSubview(this, columnHeader);
             if (sv) sv.setVisible(columnHeader.visible);
         }
     });

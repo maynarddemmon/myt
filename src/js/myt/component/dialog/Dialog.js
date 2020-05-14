@@ -1,5 +1,5 @@
 ((pkg) => {
-    var JSClass = JS.Class,
+    const JSClass = JS.Class,
         View = pkg.View,
         Text = pkg.Text,
         ModalPanel = pkg.ModalPanel,
@@ -30,7 +30,7 @@
                 if (attrs.readyColor == null) attrs.readyColor = '#cccccc';
                 if (attrs.textColor == null) attrs.textColor = '#000000';
                 
-                var fontSize = attrs.fontSize,
+                const fontSize = attrs.fontSize,
                     shrinkToFit = attrs.shrinkToFit,
                     text = attrs.text || '';
                 delete attrs.fontSize;
@@ -39,7 +39,7 @@
                 
                 this.callSuper(parent, attrs);
                 
-                var textView = this.textView = new Text(this, {
+                const textView = this.textView = new Text(this, {
                     x:this.inset, 
                     y:this.textY, 
                     text:text,
@@ -65,7 +65,7 @@
             /** @private */
             __update: function(v) {
                 if (!this.destroyed) {
-                    var inset = this.inset,
+                    const inset = this.inset,
                         textView = this.textView;
                     textView.setX(inset);
                     this.setWidth(inset + textView.width + this.outset);
@@ -168,7 +168,7 @@
         /** Does basic styling of a dialog and creates a close button.
             @returns {undefined} */
         setupDialog: function() {
-            var D = pkg.Dialog,
+            const D = pkg.Dialog,
                 content = this.content;
             content.setRoundedCorners(D.DEFAULT_RADIUS);
             content.setBgColor(D.DEFAULT_BGCOLOR);
@@ -231,11 +231,11 @@
         destroyContent: function() {
             hideSpinner(this);
             
-            var MD = pkg.Dialog,
+            const MD = pkg.Dialog,
                 content = this.content, 
                 stc = content.sizeToChildren,
-                svs = content.getSubviews(), 
-                i = svs.length,
+                svs = content.getSubviews();
+            let i = svs.length,
                 sv;
             
             // Destroy all children except the close button since that gets reused.
@@ -269,7 +269,7 @@
                 of the dialog.
             @returns {undefined} */
         doCallback: function(sourceView) {
-            var cbf = this.callbackFunction;
+            const cbf = this.callbackFunction;
             if (!cbf || !cbf.call(this, sourceView.name)) this.hide();
         },
         
@@ -300,7 +300,7 @@
                 displayed. Supports: fontWeight, whiteSpace, wordWrap and width.
             @returns {undefined} */
         showMessage: function(msg, callbackFunction, opts) {
-            var self = this,
+            const self = this,
                 D = pkg.Dialog,
                 content = self.content, 
                 closeBtn = content.closeBtn;
@@ -311,7 +311,7 @@
             
             self.setCallbackFunction(callbackFunction);
             
-            var msgView = new Text(content, {
+            const msgView = new Text(content, {
                 name:'msg',
                 text:msg,
                 whiteSpace:opts.whiteSpace,
@@ -342,7 +342,7 @@
         showSimple: function(contentBuilderFunc, callbackFunction, opts) {
             opts = opts || {};
             
-            var self = this,
+            const self = this,
                 content = self.content,
                 closeBtn = content.closeBtn,
                 maxHeight = opts.maxContainerHeight;
@@ -357,7 +357,7 @@
             content.sizeToChildren.setPaddingX(1);
             self.setCallbackFunction(callbackFunction);
             
-            var contentContainer = new View(content, {
+            const contentContainer = new View(content, {
                 name:'contentContainer', x:1, y:25, overflow:'auto'
             }, [{
                 setHeight: function(v) {
@@ -388,14 +388,14 @@
                 Supports: fontWeight, whiteSpace, wordWrap and width.
             @returns {undefined} */
         showSpinner: function(msg, opts) {
-            var self = this,
+            const self = this,
                 content = self.content;
             
             opts = Object.assign({}, pkg.Dialog.NO_WRAP_TEXT_DEFAULTS, opts);
             
             self.destroyContent();
             
-            var spinner = self.spinner = new pkg.Spinner(content, {
+            const spinner = self.spinner = new pkg.Spinner(content, {
                 align:'center', visible:true,
                 borderColor:'#cccccc',
                 size:50, y:opts.msgY == null ? ModalPanel.DEFAULT_PADDING_Y : opts.msgY,
@@ -421,7 +421,7 @@
         },
         
         showColorPicker: function(callbackFunction, opts) {
-            var self = this,
+            const self = this,
                 content = self.content,
                 closeBtn = content.closeBtn,
                 r = pkg.Dialog.DEFAULT_RADIUS;
@@ -438,7 +438,7 @@
                         callbackFunction.call(this, action);
                         break;
                     case 'confirmBtn':
-                        var color = this._spectrum.get();
+                        const color = this._spectrum.get();
                         this._spectrum.addColorToSelectionPalette(color);
                         callbackFunction.call(this, action, color ? color.toHexString() : 'transparent');
                         break;
@@ -447,14 +447,14 @@
             });
             
             // Build Picker
-            var picker = new View(content, {
+            const picker = new View(content, {
                 name:'picker',
                 x:ModalPanel.DEFAULT_PADDING_X,
                 y:ModalPanel.DEFAULT_PADDING_Y + 24,
                 width:337,
                 height:177
             });
-            var spectrumView = new View(picker);
+            const spectrumView = new View(picker);
             $(spectrumView.getInnerDomElement()).spectrum({
                 color:opts.color,
                 palette: [['#000000','#111111','#222222','#333333','#444444','#555555','#666666','#777777'],
@@ -482,7 +482,7 @@
         },
         
         showDatePicker: function(callbackFunction, opts) {
-            var self = this,
+            const self = this,
                 content = self.content,
                 closeBtn = content.closeBtn,
                 r = pkg.Dialog.DEFAULT_RADIUS;
@@ -507,14 +507,14 @@
             });
             
             // Build Picker
-            var picker = new View(content, {
+            const picker = new View(content, {
                 name:'picker',
                 x:ModalPanel.DEFAULT_PADDING_X,
                 y:ModalPanel.DEFAULT_PADDING_Y + 24,
                 width:opts.dateOnly ? 195 : (opts.timeOnly ? 150 : 240),
                 height:185
             });
-            var pickerView = new View(picker);
+            const pickerView = new View(picker);
             
             $(pickerView.getInnerDomElement()).dtpicker({
                 current:new Date(opts.initialDate || Date.now()),
@@ -542,7 +542,7 @@
         },
         
         showConfirm: function(msg, callbackFunction, opts) {
-            var self = this;
+            const self = this;
             
             opts = Object.assign({}, pkg.Dialog.CONFIRM_DEFAULTS, opts);
             
@@ -553,11 +553,11 @@
         },
         
         showContentConfirm: function(contentBuilderFunc, callbackFunction, opts) {
-            var self = this,
+            const self = this,
                 content = self.content,
                 closeBtn = content.closeBtn,
-                r = pkg.Dialog.DEFAULT_RADIUS,
-                maxHeight;
+                r = pkg.Dialog.DEFAULT_RADIUS;
+            let maxHeight;
             
             opts = Object.assign({}, pkg.Dialog.CONFIRM_DEFAULTS, opts);
             
@@ -569,7 +569,7 @@
             self.setCallbackFunction(callbackFunction);
             
             // Setup form
-            var contentContainer = new View(content, {
+            const contentContainer = new View(content, {
                 name:'contentContainer', x:1, y:25, overflow:'auto'
             }, [{
                 setHeight: function(v) {
@@ -616,16 +616,16 @@
             @param {!Object} opts
             @returns {undefined} */
         setupFooterButtons: function(mainView, opts) {
-            var self = this,
+            const self = this,
                 content = self.content, 
                 DPY = ModalPanel.DEFAULT_PADDING_Y,
                 r = pkg.Dialog.DEFAULT_RADIUS,
-                BUTTON_CLASS = self.buttonClass,
-                attrs,
+                BUTTON_CLASS = self.buttonClass;
+            let attrs,
                 buttons,
                 cancelBtn;
             
-            var btnContainer = new View(content, {
+            const btnContainer = new View(content, {
                 y:mainView.y + mainView.height + DPY, align:'center'
             });
             
@@ -656,7 +656,8 @@
             // Additional Buttons
             buttons = opts.buttons;
             if (buttons) {
-                for (var i = 0, len = buttons.length; len > i; i++) {
+                const len = buttons.length;
+                for (let i = 0; len > i; i++) {
                     attrs = buttons[i];
                     if (attrs.name == null) attrs.name = 'btn_' + i;
                     new BUTTON_CLASS(btnContainer, attrs, [{
@@ -670,7 +671,7 @@
             
             content.sizeToChildren.setPaddingY(DPY / 2);
             
-            var bg = new View(content, {
+            const bg = new View(content, {
                 ignoreLayout:true,
                 y:btnContainer.y - (DPY / 2),
                 width:content.width,

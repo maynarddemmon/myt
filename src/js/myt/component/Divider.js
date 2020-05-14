@@ -1,11 +1,11 @@
 ((pkg) => {
-    var JSClass = JS.Class,
+    const JSClass = JS.Class,
         
         /*  Setup the limitToParent constraint.
             @param {!BaseDivider} divider
             @returns {undefined} */
         updateLimitToParentConstraint = (divider) => {
-            var dim = divider.axis === 'y' ? 'height' : 'width';
+            const dim = divider.axis === 'y' ? 'height' : 'width';
             divider.constrain('__limitToParent', [divider, 'limitToParent', divider, dim, divider.parent, dim]);
         },
         
@@ -40,7 +40,7 @@
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                var self = this;
+                const self = this;
                 
                 if (attrs.activeColor == null) attrs.activeColor = '#bbbbbb';
                 if (attrs.hoverColor == null) attrs.hoverColor = '#dddddd';
@@ -93,7 +93,7 @@
             setRestoreValue: function(v) {this.restoreValue = v;},
             
             setLimitToParent: function(v) {
-                var self = this;
+                const self = this;
                 
                 if (self.limitToParent !== v) {
                     self.limitToParent = v;
@@ -143,7 +143,7 @@
                 @param {!Object} event
                 @returns {undefined} */
             __limitToParent: function(event) {
-                var self = this,
+                const self = this,
                     dim = self.axis === 'y' ? 'height' : 'width';
                 self.setMaxValue(self.parent[dim] - self.limitToParent - self[dim]);
             },
@@ -152,8 +152,8 @@
                 up to a limit if the key is held down.
                 @overrides myt.Button. */
             doActivationKeyDown: function(key, isRepeat) {
-                var self = this,
-                    dir = 0;
+                const self = this;
+                let dir = 0;
                 
                 self.callSuper(key, isRepeat);
                 
@@ -174,11 +174,11 @@
             },
             
             doPrimaryAction: function() {
-                var self = this,
-                    toValue, 
+                const self = this,
                     rv = self.restoreValue, 
                     maxV = self.maxValue, 
                     minV = self.minValue;
+                let toValue;
                 switch (self.expansionState) {
                     case 0:
                         if (rv != null) {

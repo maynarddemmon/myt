@@ -20,7 +20,7 @@ myt.TextTabSlider = new JS.Class('TextTabSlider', myt.TabSlider, {
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        var TTS = myt.TextTabSlider;
+        const TTS = myt.TextTabSlider;
         if (attrs.labelTextColorChecked == null) attrs.labelTextColorChecked = TTS.DEFAULT_LABEL_TEXT_COLOR_CHECKED;
         if (attrs.labelTextColor == null) attrs.labelTextColor = TTS.DEFAULT_LABEL_TEXT_COLOR;
         
@@ -41,7 +41,7 @@ myt.TextTabSlider = new JS.Class('TextTabSlider', myt.TabSlider, {
     setText: function(v) {
         if (this.text !== v) {
             this.text = v;
-            var button = this.button;
+            const button = this.button;
             if (button && button.label) button.label.setText(v);
         }
     },
@@ -50,7 +50,7 @@ myt.TextTabSlider = new JS.Class('TextTabSlider', myt.TabSlider, {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.TabSlider */
     notifyButtonRedraw: function() {
-        var label = this.button.label;
+        const label = this.button.label;
         if (label) label.setTextColor(this.__getTextColor());
     },
     

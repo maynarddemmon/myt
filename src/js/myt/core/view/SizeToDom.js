@@ -61,8 +61,8 @@ myt.SizeToDom = new JS.Module('SizeToDom', {
         element would have occurred.
         @returns {undefined} */
     sizeViewToDom: function() {
-        var self = this,
-            de,
+        const self = this;
+        let de,
             scaling,
             w,
             h;

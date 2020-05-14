@@ -9,11 +9,12 @@
             version:number The browser version number.
             os:string The operating system.
     */
-    
-    var versionSearchString,
-        
-        searchString = (data) => {
-            var dataItem, i = data.length;
+    let versionSearchString,
+        dom,
+        pre;
+    const searchString = (data) => {
+            let dataItem, 
+                i = data.length;
             while (i) {
                 dataItem = data[--i];
                 versionSearchString = dataItem.ver || dataItem.id;
@@ -22,7 +23,7 @@
         },
         
         searchVersion = (dataString) => {
-            var index = dataString.indexOf(versionSearchString);
+            const index = dataString.indexOf(versionSearchString);
             if (index >= 0) return parseFloat(dataString.substring(index + versionSearchString.length + 1));
         },
         
@@ -47,9 +48,7 @@
                 {str:platform,  sub:"Mac",    id:"Mac"},
                 {str:platform,  sub:"Win",    id:"Windows"}
             ]) || unknown
-        },
-        dom,
-        pre;
+        };
     
     switch (BrowserDetect.browser) {
         case 'Chrome': case 'Safari': dom = 'WebKit'; break;

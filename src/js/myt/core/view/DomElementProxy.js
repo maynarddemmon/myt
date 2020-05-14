@@ -1,5 +1,5 @@
 ((pkg) => {
-    var GLOBAL = global;
+    const GLOBAL = global;
     
     /** Provides a dom element for this instance. Also assigns a reference to this
         DomElementProxy to a property named "model" on the dom element.
@@ -13,7 +13,7 @@
                 the dom element.
         
         @class */
-    var DomElementProxy = pkg.DomElementProxy = new JS.Module('DomElementProxy', {
+    const DomElementProxy = pkg.DomElementProxy = new JS.Module('DomElementProxy', {
         // Class Methods ///////////////////////////////////////////////////////
         extend: {
             /** Creates a new dom element.
@@ -24,8 +24,8 @@
                     the new element.
                 @returns {!Object} the created element. */
             createDomElement: (tagname, styles, props) => {
-                var de = document.createElement(tagname),
-                    key;
+                const de = document.createElement(tagname);
+                let key;
                 if (props) for (key in props) de[key] = props[key];
                 if (styles) for (key in styles) de.style[key] = styles[key];
                 return de;
@@ -38,7 +38,7 @@
                 // Special Case: hidden input elements should be considered not visible.
                 if (elem.nodeName === 'INPUT' && elem.type === 'hidden') return false;
                 
-                var style;
+                let style;
                 while (elem) {
                     if (elem === document) return true;
                     
@@ -57,8 +57,8 @@
                 @returns {number} */
             getZIndexRelativeToAncestor: (elem, ancestor) => {
                 if (elem && ancestor) {
-                    var ancestors = DomElementProxy.getAncestorArray(elem, ancestor),
-                        i = ancestors.length - 1, 
+                    const ancestors = DomElementProxy.getAncestorArray(elem, ancestor);
+                    let i = ancestors.length - 1, 
                         style, 
                         zIdx, 
                         isAuto;
@@ -85,7 +85,7 @@
                     getting ancestors at.
                 @returns {!Array} - An array of ancestor dom elements. */
             getAncestorArray: (elem, ancestor) => {
-                var ancestors = [];
+                const ancestors = [];
                 while (elem) {
                     ancestors.push(elem);
                     if (elem === ancestor) break;
@@ -101,8 +101,8 @@
                 @returns {number} - An int */
             getHighestZIndex: (elem) => {
                 // See https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Understanding_z_index/The_stacking_context
-                var style = GLOBAL.getComputedStyle(elem),
-                    zIdx = style.zIndex, 
+                const style = GLOBAL.getComputedStyle(elem);
+                let zIdx = style.zIndex, 
                     isAuto = zIdx === 'auto',
                     children,
                     i,
@@ -134,10 +134,10 @@
             getPagePosition: (elem, ancestorElem) => {
                 if (!elem) return null;
                 
-                var x = 0, 
+                const borderMultiplier = BrowserDetect.browser === 'Firefox' ? 2 : 1; // I have no idea why firefox needs it twice, but it does.
+                let x = 0, 
                     y = 0, 
-                    s,
-                    borderMultiplier = BrowserDetect.browser === 'Firefox' ? 2 : 1; // I have no idea why firefox needs it twice, but it does.
+                    s;
                 
                 // elem.nodeName !== "BODY" test prevents looking at the body
                 // which causes problems when the document is scrolled on webkit.
@@ -162,7 +162,7 @@
                     if an error has occurred. */
             getTruePagePosition: (elem) => {
                 if (!elem) return null;
-                var pos = $(elem).offset();
+                const pos = $(elem).offset();
                 return {x:pos.left, y:pos.top};
             },
             
@@ -175,20 +175,20 @@
                 @returns {undefined} */
             simulateDomEvent: (elem, eventName, customOpts) => {
                 if (elem) {
-                    var opts = {
+                    const opts = {
                             pointerX:0, pointerY:0, button:0,
                             ctrlKey:false, altKey:false, shiftKey:false, metaKey:false,
                             bubbles:true, cancelable:true
                         },
-                        p,
-                        name,
-                        key,
-                        domEvent,
-                        eventType,
                         eventMatchers = {
                             'HTMLEvents': /^(?:load|unload|abort|error|select|change|submit|reset|focus|blur|resize|scroll)$/,
                             'MouseEvents': /^(?:click|dblclick|mouse(?:down|up|over|move|out))$/
                         };
+                    let p,
+                        name,
+                        key,
+                        domEvent,
+                        eventType;
                     
                     if (customOpts) {
                         for (p in customOpts) opts[p] = customOpts[p];
@@ -247,8 +247,8 @@
         setDomElement: function(v) {
             // Support an inner and outer dom element if an array of elements is
             // provided.
-            var self = this,
-                outerElem,
+            const self = this;
+            let outerElem,
                 innerElem;
             if (Array.isArray(v)) {
                 outerElem = v[0];
@@ -273,7 +273,7 @@
         /** Removes this DomElementProxy's dom element from its parent node.
             @returns {undefined} */
         removeDomElement: function() {
-            var de = this.getOuterDomElement();
+            const de = this.getOuterDomElement();
             de.parentNode.removeChild(de);
         },
         
@@ -300,7 +300,7 @@
             @param {string} v - The dom class to add.
             @returns {undefined} */
         addDomClass: function(v) {
-            var existing = this.domElement.className;
+            const existing = this.domElement.className;
             this.setDomClass((existing ? existing + ' ' : '') + v);
         },
         
@@ -308,8 +308,8 @@
             @param {string} v - The dom class to remove.
             @returns {undefined} */
         removeDomClass: function(v) {
-            var existing = this.domElement.className,
-                parts,
+            const existing = this.domElement.className;
+            let parts,
                 i;
             if (existing) {
                 parts = existing.split(' ');
@@ -385,8 +385,8 @@
                 when determining the z-index.
             @returns {number} - An int. */
         getHighestChildZIndex: function(skipChild) {
-            var children = this.domElement.childNodes, 
-                i = children.length, 
+            const children = this.domElement.childNodes;
+            let i = children.length, 
                 child, 
                 zIdx = 0;
             while (i) {

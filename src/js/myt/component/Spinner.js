@@ -15,7 +15,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
-        var self = this;
+        const self = this;
         
         self.lateAttrs = ['spinColor'];
         
@@ -76,7 +76,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         spinner doesn't take up more space that the size.
         @private */
     _updateSize: function() {
-        var self = this,
+        const self = this,
             size = self.size,
             deStyle = self.deStyle;
         self.setWidth(size);

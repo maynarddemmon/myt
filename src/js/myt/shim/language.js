@@ -22,7 +22,7 @@
   * THE SOFTWARE
   */
 Date.prototype.format = Date.prototype.format || (() => {
-    var shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    const shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
         longMonths = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
         shortDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         longDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
@@ -36,15 +36,15 @@ Date.prototype.format = Date.prototype.format || (() => {
             N: (date) => (date.getDay() == 0 ? 7 : date.getDay()),
             S: (date) => (date.getDate() % 10 == 1 && date.getDate() != 11 ? 'st' : (date.getDate() % 10 == 2 && date.getDate() != 12 ? 'nd' : (date.getDate() % 10 == 3 && date.getDate() != 13 ? 'rd' : 'th'))),
             w: (date) => date.getDay(),
-            z: (date) => {var d = new Date(date.getFullYear(),0,1); return Math.ceil((date - d) / 86400000);},
+            z: (date) => {const d = new Date(date.getFullYear(),0,1); return Math.ceil((date - d) / 86400000);},
             // Week
             W: (date) => {
-                var target = new Date(date.valueOf()), dayNr = (date.getDay() + 6) % 7;
+                const target = new Date(date.valueOf()), dayNr = (date.getDay() + 6) % 7;
                 target.setDate(target.getDate() - dayNr + 3);
-                var firstThursday = target.valueOf();
+                const firstThursday = target.valueOf();
                 target.setMonth(0, 1);
                 if (target.getDay() !== 4) target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
-                var retVal = 1 + Math.ceil((firstThursday - target) / 604800000);
+                const retVal = 1 + Math.ceil((firstThursday - target) / 604800000);
                 return (retVal < 10 ? '0' + retVal : retVal);
             },
             // Month
@@ -53,7 +53,8 @@ Date.prototype.format = Date.prototype.format || (() => {
             M: (date) => shortMonths[date.getMonth()],
             n: (date) => date.getMonth() + 1,
             t: (date) => {
-                var year = date.getFullYear(), nextMonth = date.getMonth() + 1;
+                let year = date.getFullYear(),
+                    nextMonth = date.getMonth() + 1;
                 if (nextMonth === 12) {
                     year = year++;
                     nextMonth = 0;
@@ -61,8 +62,8 @@ Date.prototype.format = Date.prototype.format || (() => {
                 return new Date(year, nextMonth, 0).getDate();
             },
             // Year
-            L: (date) => {var year = date.getFullYear(); return (year % 400 == 0 || (year % 100 != 0 && year % 4 == 0));},
-            o: (date) => {var d  = new Date(date.valueOf());  d.setDate(d.getDate() - ((date.getDay() + 6) % 7) + 3); return d.getFullYear();},
+            L: (date) => {const year = date.getFullYear(); return (year % 400 == 0 || (year % 100 != 0 && year % 4 == 0));},
+            o: (date) => {const d = new Date(date.valueOf()); d.setDate(d.getDate() - ((date.getDay() + 6) % 7) + 3); return d.getFullYear();},
             Y: (date) => date.getFullYear(),
             y: (date) => ('' + date.getFullYear()).substr(2),
             // Time
@@ -75,11 +76,11 @@ Date.prototype.format = Date.prototype.format || (() => {
             H: (date) => (date.getHours() < 10 ? '0' : '') + date.getHours(),
             i: (date) => (date.getMinutes() < 10 ? '0' : '') + date.getMinutes(),
             s: (date) => (date.getSeconds() < 10 ? '0' : '') + date.getSeconds(),
-            u: (date) => {var m = date.getMilliseconds(); return (m < 10 ? '00' : (m < 100 ? '0' : '')) + m;},
+            u: (date) => {const m = date.getMilliseconds(); return (m < 10 ? '00' : (m < 100 ? '0' : '')) + m;},
             // Timezone
             e: (date) => /\((.*)\)/.exec(new Date().toString())[1],
             I: (date) => {
-                var DST = null, i = 0, d, offset;
+                let DST = null, i = 0, d, offset;
                 for (; i < 12;) {
                     d = new Date(date.getFullYear(), i++, 1);
                     offset = d.getTimezoneOffset();
@@ -104,7 +105,7 @@ Date.prototype.format = Date.prototype.format || (() => {
         };
 
     return function(format) {
-        var date = this;
+        const date = this;
         return format.replace(/(\\?)(.)/g, (_, esc, chr) => (esc === '' && replaceChars[chr]) ? replaceChars[chr](date) : chr);
     };
 })();

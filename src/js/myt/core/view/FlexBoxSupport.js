@@ -41,7 +41,7 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
             this.flexDirection = v;
             
             // Alias common unexpected values when assigning to the dom
-            var domValue = v;
+            let domValue = v;
             switch (domValue) {
                 case 'rowReverse':
                     domValue = 'row-reverse';
@@ -64,7 +64,7 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
             this.flexWrap = v;
             
             // Alias common unexpected values when assigning to the dom
-            var domValue = v;
+            let domValue = v;
             switch (domValue) {
                 case 'wrapReverse':
                 case 'reverse':
@@ -86,7 +86,7 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
             this.justifyContent = v;
             
             // Alias common unexpected values when assigning to the dom
-            var domValue = v;
+            let domValue = v;
             switch (domValue) {
                 case 'start':
                     domValue = 'flex-start';
@@ -121,7 +121,7 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
             this.alignItems = v;
             
             // Alias common unexpected values when assigning to the dom
-            var domValue = v;
+            let domValue = v;
             switch (domValue) {
                 case 'start':
                     domValue = 'flex-start';
@@ -144,7 +144,7 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
             this.alignContent = v;
             
             // Alias common unexpected values when assigning to the dom
-            var domValue = v;
+            let domValue = v;
             switch (domValue) {
                 case 'start':
                     domValue = 'flex-start';
@@ -174,8 +174,8 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides */
     createOurDomElement: function(parent) {
-        var elements = this.callSuper(parent),
-            innerElem;
+        const elements = this.callSuper(parent);
+        let innerElem;
         if (Array.isArray(elements)) {
             innerElem = elements[1];
         } else {
@@ -197,7 +197,7 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
     /** @private
         @returns {undefined} */
     __syncSubviews: function() {
-        var svs = this.getSubviews();
+        const svs = this.getSubviews();
         svs.forEach(sv => this.__syncSubview(sv));
     },
     

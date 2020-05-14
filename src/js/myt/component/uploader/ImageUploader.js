@@ -40,17 +40,17 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
     },
     
     addFile: function(file) {
-        var self = this;
+        const self = this;
         
         self.callSuper(file);
         
-        var image = self.image = new myt.Image(self, {useNaturalSize:false, align:'center', valign:'middle'});
+        const image = self.image = new myt.Image(self, {useNaturalSize:false, align:'center', valign:'middle'});
         
         image.file = file;
         
         // Read into image
         if (file.size === -1) {
-            var img = new Image();
+            const img = new Image();
             img.onload = function() {
                 file.width = this.width;
                 file.height = this.height;
@@ -62,7 +62,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
             img.src = file.serverPath;
         } else if (FileReader !== undefined && myt.ImageUploader.isImageFile(file)) {
             myt.Uploader.readFile(file, function(event) {
-                var img = new Image();
+                const img = new Image();
                 img.onload = function() {
                     file.width = this.width;
                     file.height = this.height;
@@ -77,8 +77,8 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
     },
     
     scaleToFit: function(boundsWidth, boundsHeight, imgWidth, imgHeight) {
-        var boundsRatio = boundsWidth / boundsHeight;
-        var imgRatio = imgWidth / imgHeight;
+        const boundsRatio = boundsWidth / boundsHeight,
+            imgRatio = imgWidth / imgHeight;
         
         if (imgRatio > boundsRatio) {
             return [boundsWidth, imgHeight * boundsWidth / imgWidth];
@@ -90,8 +90,8 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
     removeFile: function(file) {
         this.callSuper(file);
         
-        var images = this.getSubviews(),
-            i = images.length,
+        const images = this.getSubviews();
+        let i = images.length,
             image;
         while (i) {
             image = images[--i];
@@ -118,9 +118,9 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
     },
     
     updateImageSize: function() {
-        var image = this.image;
+        const image = this.image;
         if (image && !image.destroyed) {
-            var size = this.scaleToFit(this.width, this.height, this.nativeWidth, this.nativeHeight),
+            const size = this.scaleToFit(this.width, this.height, this.nativeWidth, this.nativeHeight),
                 w = Math.round(size[0]), 
                 h = Math.round(size[1]);
             image.setImageSize(w + 'px ' + h + 'px');

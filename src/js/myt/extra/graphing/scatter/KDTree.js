@@ -42,7 +42,7 @@ myt.BinaryHeap = new JS.Class('BinaryHeap', {
     
     pop: function() {
         // Store the first element so we can return it later.
-        var content = this.content,
+        const content = this.content,
             result = content[0],
             // Get the element at the end of the array.
             end = content.pop();
@@ -61,9 +61,10 @@ myt.BinaryHeap = new JS.Class('BinaryHeap', {
     },
     
     remove: function(node) {
-        var content = this.content,
-            len = content.length,
-            i = 0, end;
+        const content = this.content,
+            len = content.length;
+        let i = 0, 
+            end;
         // To remove a value, we must search through the array to find it.
         for (; i < len;) {
             if (content[i++] == node) {
@@ -90,9 +91,10 @@ myt.BinaryHeap = new JS.Class('BinaryHeap', {
     
     bubbleUp: function(n) {
         // Fetch the element that has to be moved.
-        var content = this.content,
-            element = content[n],
-            parentN, parent;
+        const content = this.content,
+            element = content[n];
+        let parentN,
+            parent;
         
         // When at 0, an element can not go up any further.
         while (n > 0) {
@@ -115,27 +117,28 @@ myt.BinaryHeap = new JS.Class('BinaryHeap', {
     
     sinkDown: function(n) {
         // Look up the target element and its score.
-        var content = this.content,
+        const content = this.content,
             length = content.length,
             element = content[n],
             elemScore = this.scoreFunction(element);
         
         while (true) {
             // Compute the indices of the child elements.
-            var child2N = (n + 1) * 2, child1N = child2N - 1;
+            let child2N = (n + 1) * 2, 
+                child1N = child2N - 1;
             // This is used to store the new position of the element, if any.
-            var swap = null;
+            let swap = null;
             // If the first child exists (is inside the array)...
             if (child1N < length) {
                 // Look it up and compute its score.
-                var child1 = content[child1N],
+                const child1 = content[child1N],
                     child1Score = this.scoreFunction(child1);
                 // If the score is less than our element's, we need to swap.
                 if (child1Score < elemScore) swap = child1N;
             }
             // Do the same checks for the other child.
             if (child2N < length) {
-                var child2 = content[child2N],
+                const child2 = content[child2N],
                     child2Score = this.scoreFunction(child2);
                 if (child2Score < (swap == null ? elemScore : child1Score)) swap = child2N;
             }
@@ -179,9 +182,9 @@ myt.KDTree = new JS.Class('KDTree', {
     },
     
     buildTree: function(points, depth, parent) {
-        var dimensions = this.dimensions,
-            dim = depth % dimensions.length, 
-            median, 
+        const dimensions = this.dimensions,
+            dim = depth % dimensions.length;
+        let median, 
             node;
         
         if (points.length === 0) return null;
@@ -200,14 +203,14 @@ myt.KDTree = new JS.Class('KDTree', {
     },
     
     insert: function(point) {
-        var dimensions = this.dimensions,
-            newNode,
+        const dimensions = this.dimensions;
+        let newNode,
             dimension;
         
         function innerSearch(node, parent) {
             if (node === null) return parent;
             
-            var dimension = dimensions[node.dimension];
+            const dimension = dimensions[node.dimension];
             if (point[dimension] < node.obj[dimension]) {
                 return innerSearch(node.left, node);
             } else {
@@ -215,7 +218,7 @@ myt.KDTree = new JS.Class('KDTree', {
             }
         }
         
-        var insertPosition = innerSearch(this.root, null);
+        const insertPosition = innerSearch(this.root, null);
         
         if (insertPosition === null) {
             this.root = new myt.KDTreeNode(point, 0, null);
@@ -235,14 +238,14 @@ myt.KDTree = new JS.Class('KDTree', {
     /*
     As of 1.0.1 remove still doesn't work in all cases.
     remove: function(point) {
-        var node, dimensions = this.dimensions, self = this;
+        let node, dimensions = this.dimensions, self = this;
         
         function nodeSearch(node) {
             if (node === null) return null;
             
             if (node.obj === point) return node;
             
-            var dimension = dimensions[node.dimension];
+            const dimension = dimensions[node.dimension];
             
             if (point[dimension] < node.obj[dimension]) {
                 return nodeSearch(node.left);
@@ -252,10 +255,10 @@ myt.KDTree = new JS.Class('KDTree', {
         }
         
         function removeNode(node) {
-            var nextNode, nextObj, pDimension;
+            let nextNode, nextObj, pDimension;
             
             function findMin(node, dim) {
-                var dimension, own, left, right, min;
+                let dimension, own, left, right, min;
                 
                 if (node === null) return null;
                 
@@ -315,14 +318,18 @@ myt.KDTree = new JS.Class('KDTree', {
     },*/
     
     nearest: function(point, maxNodes, maxDistance) {
-        var i, result, bestNodes, dimensions = this.dimensions, self = this;
+        const self = this,
+            dimensions = self.dimensions;
+        let i, 
+            result, 
+            bestNodes;
         
         bestNodes = new myt.BinaryHeap(
             function(e) {return -e[1];}
         );
         
         function nearestSearch(node) {
-            var bestChild,
+            let bestChild,
                 dimension = dimensions[node.dimension],
                 ownDistance = self.metric(point, node.obj),
                 linearPoint = {},
@@ -399,7 +406,7 @@ myt.KDTree = new JS.Class('KDTree', {
     },
     
     balanceFactor: function() {
-        var self = this;
+        const self = this;
         
         function height(node) {
             if (node === null) return 0;

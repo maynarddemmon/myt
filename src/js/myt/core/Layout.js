@@ -1,15 +1,16 @@
 ((pkg) => {
-    var JSClass = JS.Class,
-        
-        /* A list of layouts to be updated once the global lock is released. */
-        deferredLayouts = [],
-        
-        /*  The global lock counter. Any value greater than zero sets the
+    let 
+        /*  The global lock counter. Any value greater than zero sets the 
             global lock. */
         globalLockCount = 0,
         
         /* The global layout locked status. */
-        globalLock = false,
+        globalLock = false;
+    
+    const JSClass = JS.Class,
+        
+        /* A list of layouts to be updated once the global lock is released. */
+        deferredLayouts = [],
         
         /*  Called to set/unset the global lock. Updates all the currently 
             deferred layouts. */
@@ -18,7 +19,7 @@
                 globalLock = v;
                 
                 if (!v) {
-                    var i = deferredLayouts.length, 
+                    let i = deferredLayouts.length, 
                         layout;
                     while (i) {
                         layout = deferredLayouts[--i];
@@ -44,9 +45,9 @@
         
         /* Implements moveSubviewBefore and moveSubviewAfter for Layout. */
         moveSubview = (layout, sv, target, after) => {
-            var curIdx = layout.getSubviewIndex(sv),
-                targetIdx,
+            const curIdx = layout.getSubviewIndex(sv),
                 svs = layout.subviews;
+            let targetIdx;
             if (curIdx >= 0) {
                 targetIdx = layout.getSubviewIndex(target);
                 
@@ -111,7 +112,7 @@
                 this.lockedCounter = 1;
                 
                 // Remember how initial locking state should be set
-                var initiallyLocked = attrs.locked === true;
+                const initiallyLocked = attrs.locked === true;
                 delete attrs.locked;
                 
                 this.callSuper(parent, attrs);
@@ -135,11 +136,11 @@
                 if (this.parent !== parent) {
                     // Lock during parent change so that old parent is not updated by
                     // the calls to removeSubview and addSubview.
-                    var wasNotLocked = !this.locked;
+                    const wasNotLocked = !this.locked;
                     if (wasNotLocked) this.locked = true;
                     
                     // Stop monitoring parent
-                    var svs, i, len;
+                    let svs, i, len;
                     if (this.parent) {
                         svs = this.subviews;
                         i = svs.length;
@@ -226,8 +227,8 @@
                 refreshing all the subview monitoring.
                 @returns {undefined} */
             startMonitoringAllSubviews: function() {
-                var svs = this.subviews,
-                    i = svs.length;
+                const svs = this.subviews;
+                let i = svs.length;
                 while (i) this.startMonitoringSubview(svs[--i]);
             },
             
@@ -237,7 +238,7 @@
             removeSubview: function(sv) {
                 if (this.ignore(sv)) return -1;
                 
-                var idx = this.getSubviewIndex(sv);
+                const idx = this.getSubviewIndex(sv);
                 if (idx !== -1) {
                     this.stopMonitoringSubview(sv);
                     this.subviews.splice(idx, 1);
@@ -258,8 +259,8 @@
                 refreshing all the subview monitoring.
                 @returns {undefined} */
             stopMonitoringAllSubviews: function() {
-                var svs = this.subviews,
-                    i = svs.length;
+                const svs = this.subviews;
+                let i = svs.length;
                 while (i) this.stopMonitoringSubview(svs[--i]);
             },
             
@@ -361,10 +362,13 @@
         /** @overrides */
         update: function() {
             if (this.canUpdate()) {
-                var setterName = this.setterName, 
+                const setterName = this.setterName, 
                     value = this.targetValue, 
-                    svs = this.subviews, len = svs.length, sv,
-                    setter, i = 0;
+                    svs = this.subviews, 
+                    len = svs.length; 
+                let sv,
+                    setter, 
+                    i = 0;
                 for (; len > i;) {
                     sv = svs[i++];
                     setter = sv[setterName];
@@ -432,24 +436,24 @@
                 
                 this.doBeforeUpdate();
                 
-                var setterName = this.setterName, 
-                    value = this.targetValue,
+                const setterName = this.setterName, 
                     svs = this.subviews, 
-                    len = svs.length, 
+                    len = svs.length;
+                let value = this.targetValue,
                     i, 
                     sv, 
                     count = 0;
                 
                 if (this.reverse) {
                     i = len;
-                    while(i) {
+                    while (i) {
                         sv = svs[--i];
                         if (this.skipSubview(sv)) continue;
                         value = this.updateSubview(++count, sv, setterName, value);
                     }
                 } else {
                     i = 0;
-                    while(len > i) {
+                    while (len > i) {
                         sv = svs[i++];
                         if (this.skipSubview(sv)) continue;
                         value = this.updateSubview(++count, sv, setterName, value);

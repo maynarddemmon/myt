@@ -1,10 +1,10 @@
 ((pkg) => {
-    var STYLE_SOLID = 'solid',
+    const STYLE_SOLID = 'solid',
         STYLE_OUTLINE = 'outline',
         DEFAULT_STYLE = STYLE_OUTLINE,
         
         updateUI = (checkbox) => {
-            var label = checkbox.label || '',
+            const label = checkbox.label || '',
                 checkboxStyle = checkbox.checkboxStyle || DEFAULT_STYLE;
             checkbox.setText(
                 '<i class="' + 

@@ -1,11 +1,11 @@
 ((pkg) => {
-    var localStorage = global.localStorage,
+    const localStorage = global.localStorage,
         
         getStoreId = (storeId) => storeId = storeId || 'myt',
         
         doFunc = (func, delay, timerKey) => {
             if (delay > 0) {
-                var timerIdKey = '__timerId_' + timerKey,
+                const timerIdKey = '__timerId_' + timerKey,
                     timerId = LocalStorage[timerIdKey];
                 if (timerId) clearTimeout(timerId);
                 
@@ -33,7 +33,7 @@
                     otherwise true. */
             hasDatum: (key, storeId) => {
                 if (key) {
-                    var data = LocalStorage.getItem(getStoreId(storeId));
+                    const data = LocalStorage.getItem(getStoreId(storeId));
                     if (data) {
                         try {
                             return JSON.parse(data)[key] != null;
@@ -53,11 +53,11 @@
                 @returns {*} the value of the data or undefined if not found. */
             getDatum: (key, storeId) => {
                 if (key) {
-                    var data = LocalStorage.getItem(getStoreId(storeId));
+                    const data = LocalStorage.getItem(getStoreId(storeId));
                     if (data) {
                         try {
-                            data = JSON.parse(data);
-                            if (typeof data === 'object') return data[key];
+                            const jsonData = JSON.parse(data);
+                            if (typeof jsonData === 'object') return jsonData[key];
                         } catch (e) {
                             console.error(e);
                         }
@@ -80,7 +80,7 @@
             setDatum: (key, value, storeId, delay) => {
                 storeId = getStoreId(storeId);
                 doFunc(() => {
-                    var data = LocalStorage.getData(storeId);
+                    const data = LocalStorage.getData(storeId);
                     data[key] = value;
                     LocalStorage.setItem(storeId, JSON.stringify(data));
                 }, delay, storeId + '___' + key);
@@ -96,7 +96,7 @@
             removeDatum: (key, storeId, delay) => {
                 storeId = getStoreId(storeId);
                 doFunc(() => {
-                    var data = LocalStorage.getData(storeId);
+                    const data = LocalStorage.getData(storeId);
                     delete data[key];
                     LocalStorage.setItem(storeId, JSON.stringify(data));
                 }, delay, storeId + '___' + key);
@@ -114,7 +114,7 @@
                     If not provided the default "myt" storeId will be used.
                 @returns {!Object} - The store object. */
             getData: (storeId) => {
-                var data = LocalStorage.getItem(getStoreId(storeId));
+                const data = LocalStorage.getItem(getStoreId(storeId));
                 if (data) {
                     try {
                         return JSON.parse(data);

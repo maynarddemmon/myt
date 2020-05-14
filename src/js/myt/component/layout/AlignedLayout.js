@@ -13,7 +13,7 @@ myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.VariableLayout */
     initNode: function(parent, attrs) {
-        var self = this;
+        const self = this;
         
         self.align = 'middle';
         self.targetAttrName = 'y';
@@ -31,7 +31,7 @@ myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
     /** @overrides myt.ConstantLayout */
     setTargetAttrName: function(v) {
         if (this.targetAttrName !== v) {
-            var isY = v === 'y',
+            const isY = v === 'y',
                 inited = this.inited;
             if (inited) this.stopMonitoringAllSubviews();
             this.measureAttrName = isY ? 'boundsHeight' : 'boundsWidth';
@@ -48,7 +48,7 @@ myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
             
             // Update orientation but don't trigger an update since we
             // already call update at the end of this setter.
-            var isLocked = this.locked;
+            const isLocked = this.locked;
             this.locked = true;
             this.setTargetAttrName((v === 'middle' || v === 'bottom' || v === 'top') ? 'y' : 'x');
             this.locked = isLocked;
@@ -77,9 +77,12 @@ myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
     /** Determine the maximum subview width/height according to the axis.
         @overrides myt.VariableLayout */
     doBeforeUpdate: function() {
-        var measureAttrName = this.measureAttrName,
-            value = 0, svs = this.subviews, sv, i = svs.length;
-        while(i) {
+        const measureAttrName = this.measureAttrName, 
+            svs = this.subviews;
+        let value = 0, 
+            sv, 
+            i = svs.length;
+        while (i) {
             sv = svs[--i];
             if (this.skipSubview(sv)) continue;
             value = value > sv[measureAttrName] ? value : sv[measureAttrName];

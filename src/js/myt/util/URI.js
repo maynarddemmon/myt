@@ -1,5 +1,5 @@
 ((pkg) => {
-    var queryParser = /(?:^|&)([^&=]*)=?([^&]*)/g,
+    const queryParser = /(?:^|&)([^&=]*)=?([^&]*)/g,
         strictParser = /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/,
         looseParser = /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/;
     
@@ -44,7 +44,7 @@
             // match order: "source", "protocol", "authority", "userInfo", "user",
             //              "password", "host", "port", "relative", "path", 
             //              "directory", "file", "query", "anchor".
-            var self = this,
+            const self = this,
                 m = (loose ? looseParser : strictParser).exec(str);
             
             self.setSource(m[0] || "");
@@ -79,9 +79,9 @@
         },
         
         getQuery: function() {
-            var pairs = this.queryPairs,
-                parts = [],
-                key,
+            const pairs = this.queryPairs,
+                parts = [];
+            let key,
                 s;
             for (key in pairs) parts.push(key + '=' + encodeURIComponent(this.getQueryParam(key)));
             s = parts.join('&');
@@ -89,15 +89,15 @@
         },
         
         getQueryParam: function(name) {
-            var v = this.queryPairs[name];
+            const v = this.queryPairs[name];
             return v == null ? undefined : this.decodeQueryParam(v);
         },
         
         getPathParts: function(allowEmpties) {
-            var parts = this.path.split('/');
+            const parts = this.path.split('/');
             
             if (!allowEmpties) {
-                var i = parts.length;
+                let i = parts.length;
                 while (i) if (parts[--i].length === 0) parts.splice(i, 1);
             }
             
@@ -105,15 +105,15 @@
         },
         
         toString: function(originalRawQuery) {
-            var self = this,
+            const self = this,
                 protocol = self.protocol,
                 host = self.host,
                 userInfo = self.userInfo,
                 port = self.port,
                 path = self.path,
                 query = originalRawQuery ? (self.query ? '?' + self.query : '') : self.getQuery(),
-                anchor = self.anchor,
-                s = '';
+                anchor = self.anchor;
+            let s = '';
             
             if (protocol) s += protocol + '://';
             if (userInfo && host) s += userInfo + '@';

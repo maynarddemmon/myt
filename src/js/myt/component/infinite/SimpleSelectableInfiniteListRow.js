@@ -8,7 +8,8 @@
     
     Private Attributes:
         None
-*/
+    
+    @class */
 myt.SimpleSelectableInfiniteListRow = new JS.Class('SimpleSelectableInfiniteListRow', myt.SimpleButton, {
     include: [myt.SelectableInfiniteListRow],
     
@@ -23,7 +24,7 @@ myt.SimpleSelectableInfiniteListRow = new JS.Class('SimpleSelectableInfiniteList
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        var self = this,
+        const self = this,
             SSILR = myt.SimpleSelectableInfiniteListRow;
         
         if (attrs.selectedColor == null) attrs.selectedColor = SSILR.DEFAULT_SELECTED_COLOR;
@@ -34,7 +35,7 @@ myt.SimpleSelectableInfiniteListRow = new JS.Class('SimpleSelectableInfiniteList
         if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
         if (attrs.activationKeys == null) attrs.activationKeys = [13,27,32,37,38,39,40];
         
-        this.callSuper(parent, attrs);
+        self.callSuper(parent, attrs);
     },
     
     destroy: function() {
@@ -69,7 +70,7 @@ myt.SimpleSelectableInfiniteListRow = new JS.Class('SimpleSelectableInfiniteList
     },
     
     doActivationKeyDown: function(key, isRepeat) {
-        var self = this,
+        const self = this,
             owner = self.infiniteOwner,
             model = self.model;
         switch (key) {

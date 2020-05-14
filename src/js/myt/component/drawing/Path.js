@@ -37,7 +37,9 @@ myt.Path = new JS.Class('Path', {
         @returns {undefined} */
     drawInto: function(canvas) {
         canvas.beginPath();
-        var vecs = this.vectors, len = vecs.length, i = 0;
+        const vecs = this.vectors;
+        let len = vecs.length, 
+            i = 0;
         canvas.moveTo(vecs[i++], vecs[i++]);
         for (; len > i;) canvas.lineTo(vecs[i++], vecs[i++]);
         canvas.closePath();
@@ -48,7 +50,8 @@ myt.Path = new JS.Class('Path', {
         @param {number} dy
         @returns {undefined} */
     translate: function(dx, dy) {
-        var vecs = this.vectors, i = vecs.length;
+        const vecs = this.vectors;
+        let i = vecs.length;
         while (i) {
             vecs[--i] += dy;
             vecs[--i] += dx;
@@ -60,9 +63,10 @@ myt.Path = new JS.Class('Path', {
         @param {number} a
         @returns {undefined} */
     rotate: function(a) {
-        var cosA = Math.cos(a), sinA = Math.sin(a),
-            vecs = this.vectors, len = vecs.length,
-            xNew, yNew, i = 0;
+        const cosA = Math.cos(a), sinA = Math.sin(a),
+            vecs = this.vectors,
+            len = vecs.length;
+        let xNew, yNew, i = 0;
         for (; len > i;) {
             xNew = vecs[i] * cosA - vecs[i + 1] * sinA;
             yNew = vecs[i] * sinA + vecs[i + 1] * cosA;
@@ -91,7 +95,8 @@ myt.Path = new JS.Class('Path', {
     getBoundingBox: function() {
         if (this._boundingBox) return this._boundingBox;
         
-        var vecs = this.vectors, i = vecs.length, x, y, minX, maxX, minY, maxY;
+        const vecs = this.vectors;
+        let i = vecs.length, x, y, minX, maxX, minY, maxY;
         if (i >= 2) {
             minY = maxY = vecs[--i];
             minX = maxX = vecs[--i];
@@ -113,7 +118,7 @@ myt.Path = new JS.Class('Path', {
         @returns {!Object} with properties x and y or null if no bounding box
             could be calculated. */
     getCenter: function() {
-        var box = this.getBoundingBox();
+        const box = this.getBoundingBox();
         return box ? {
             x:box.x + box.width / 2,
             y:box.y + box.height / 2

@@ -90,7 +90,7 @@ new JS.Singleton('GlobalError', {
     notify: function(consoleFuncName, eventType, msg, err) {
         // Generate Stacktrace
         if (!err) err = new Error(msg || eventType);
-        var stacktrace = err.stack || err.stacktrace;
+        const stacktrace = err.stack || err.stacktrace;
         
         this.fireEvent(eventType || 'error', {msg:msg, stacktrace:stacktrace});
         if (this.consoleLogging && consoleFuncName) console[consoleFuncName](stacktrace);

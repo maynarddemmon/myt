@@ -82,7 +82,8 @@ myt.FormElement = new JS.Module('FormElement', {
             registry.
         @returns {undefined} */
     setValueProcessors: function(processors) {
-        var i = processors.length, processor;
+        let i = processors.length, 
+            processor;
         while (i) {
             processor = processors[--i];
             if (typeof processor === 'string') {
@@ -108,7 +109,9 @@ myt.FormElement = new JS.Module('FormElement', {
         @returns the removed myt.ValueProcessor or null if not found. */
     removeValueProcessor: function(id) {
         if (id) {
-            var processors = this.__vp, i = processors.length, processor;
+            const processors = this.__vp;
+            let i = processors.length, 
+                processor;
             while (i) {
                 processor = processors[--i];
                 if (processor.id === id) {
@@ -127,7 +130,10 @@ myt.FormElement = new JS.Module('FormElement', {
             that is checked to see if that processor should be run or not.
         @returns * The processed value. */
     __processValue: function(value, checkAttr) {
-        var processors = this.__vp, len = processors.length, processor, i = 0;
+        const processors = this.__vp, 
+            len = processors.length;
+        let processor, 
+            i = 0;
         for (; len > i;) {
             processor = processors[i++];
             if (processor[checkAttr]) value = processor.process(value);
@@ -154,7 +160,7 @@ myt.FormElement = new JS.Module('FormElement', {
     
     /** @overrides myt.Form */
     verifyChangedState: function(subformToIgnore) {
-        var isChanged = this.getValue() !== this.getRollbackValue();
+        const isChanged = this.getValue() !== this.getRollbackValue();
         this.setIsChanged(isChanged);
         return isChanged;
     },
@@ -185,7 +191,7 @@ myt.FormElement = new JS.Module('FormElement', {
     resetForm: function() {
         this._lockCascade = true;
         
-        var defaultValue = this.getDefaultValue();
+        const defaultValue = this.getDefaultValue();
         this.setRollbackValue(defaultValue);
         this.setValue(defaultValue);
         

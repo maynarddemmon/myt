@@ -1,6 +1,6 @@
 ((pkg) => {
-    var updateSortIcon = (gridHeader) => {
-            var glyph = '';
+    const updateSortIcon = (gridHeader) => {
+            let glyph = '';
             if (gridHeader.sortable) {
                 switch (gridHeader.sortState) {
                     case 'ascending':
@@ -16,7 +16,7 @@
         
         updateTextWidth = (gridHeader) => {
             if (gridHeader.contentAlign === 'left') {
-                var tv = gridHeader.textView;
+                const tv = gridHeader.textView;
                 if (tv) tv.setWidth(gridHeader.width - gridHeader.outset - tv.x);
             }
         };
@@ -55,7 +55,7 @@
         
         /** @overrides myt.View */
         doAfterAdoption: function() {
-            var self = this;
+            const self = this;
             
             new pkg.FontAwesome(self, {
                 name:'sortIcon', align:'right', alignOffset:3, valign:'middle',

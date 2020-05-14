@@ -10,11 +10,11 @@
     JS.require('myt.all', function() {this.init();});
     
     function init() {
-        var rootView = new myt.View(null, {bgColor:'#eeeeee'}, [myt.SizeToWindow]);
+        const rootView = new myt.View(null, {bgColor:'#eeeeee'}, [myt.SizeToWindow]);
         
         new myt.Dialog(rootView, {name:'dialog'});
         
-        new myt.SimpleButton(rootView, {
+        const btn = new myt.SimpleButton(rootView, {
             x:10, y:10, width:50, height:20,
             activeColor:'#999999', hoverColor:'#bbbbbb', readyColor:'#aaaaaa'
         }, [{
@@ -30,10 +30,11 @@
                                 break;
                             case 'confirmBtn':
                                 console.log("confirmed", color);
+                                rootView.setBgColor(color);
                                 break;
                         }
                     },{
-                        color:'#ffcc99'
+                        color:rootView.bgColor
                     }
                 );
                 this.callSuper();

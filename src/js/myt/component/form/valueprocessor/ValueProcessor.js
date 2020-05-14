@@ -33,7 +33,7 @@ myt.ValueProcessor = new JS.Class('ValueProcessor', {
     initialize: function(id, runForDefault, runForRollback, runForCurrent) {
         this.id = id;
         
-        var VP = myt.ValueProcessor;
+        const VP = myt.ValueProcessor;
         this[VP.DEFAULT_ATTR] = runForDefault ? true : false;
         this[VP.ROLLBACK_ATTR] = runForRollback ? true : false;
         this[VP.CURRENT_ATTR] = runForCurrent ? true : false;

@@ -9,7 +9,7 @@ myt.ToNumberValueProcessor = new JS.Class('ToNumberValueProcessor', myt.ValuePro
         // they will become NaN.
         if (v == null || v === "" || v === "-") return v;
         
-        var numericValue = Number(v);
+        const numericValue = Number(v);
         return isNaN(numericValue) ? v : numericValue;
     }
 });

@@ -18,7 +18,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         
         readFile: function(file, handlerFunc) {
             if (FileReader !== undefined) {
-                var reader = new FileReader();
+                const reader = new FileReader();
                 reader.onload = handlerFunc;
                 reader.readAsDataURL(file);
             }
@@ -30,7 +30,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         },
         
         createFile: function(urlStr) {
-            var fileName = (new myt.URI(urlStr)).file;
+            const fileName = (new myt.URI(urlStr)).file;
             return {
                 name: fileName,
                 serverPath: urlStr,
@@ -44,7 +44,7 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** @overrides myt.View */
     initNode: function(parent, attrs) {
-        var self = this;
+        const self = this;
         
         self.files = [];
         
@@ -83,7 +83,8 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
         
         if (v) {
             if (!Array.isArray(v)) v = [v];
-            var len = v.length, i = 0;
+            const len = v.length;
+            let i = 0;
             for(; len > i; ++i) this.addFile(myt.Uploader.createFile(v[i]));
         }
         
@@ -145,12 +146,13 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     uploadFiles: function(url, fileParam) {
         url = url || this.uploadUrl;
         
-        var files = this.files, i = files.length;
+        const files = this.files;
+        let i = files.length;
         while (i) this.uploadFile(files[--i], url, fileParam);
     },
     
     uploadFile: function(file, url, fileParam) {
-        var self = this,
+        const self = this,
             formData = new FormData();
         formData.append(fileParam || self.requestFileParam, file, file.name);
         myt.doFetch(
@@ -192,7 +194,8 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     },
     
     removeFile: function(file) {
-        var files = this.files, i = files.length;
+        const files = this.files;
+        let i = files.length;
         while (i) {
             if (myt.Uploader.isSameFile(files[--i], file)) {
                 files.splice(i, 1);
@@ -204,13 +207,16 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     },
     
     updateValueFromFiles: function() {
-        var value = [], files = this.files, i = files.length, serverPath;
+        const value = [],
+            files = this.files;
+        let i = files.length,
+            serverPath;
         while (i) {
             serverPath = files[--i][myt.Uploader.FILE_ATTR_SERVER_PATH];
             if (serverPath) value.push(serverPath);
         }
         
-        var len = value.length;
+        const len = value.length;
         this.value = len === 1 ? value[0] : (len === 0 ? undefined : value);
         
         // Reset the form element if empty. Otherwise uploading the 
@@ -224,7 +230,8 @@ myt.Uploader = new JS.Class('Uploader', myt.View, {
     },
     
     clearFiles: function() {
-        var files = this.files, i = files.length;
+        const files = this.files;
+        let i = files.length;
         while (i) this.removeFile(files[--i]);
     }
 });

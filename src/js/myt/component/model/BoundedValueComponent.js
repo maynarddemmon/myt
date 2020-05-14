@@ -22,12 +22,12 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
         if (attrs.snapToInt == null) attrs.snapToInt = true;
         
         if (!attrs.valueFilter) {
-            var self = this;
+            const self = this;
             attrs.valueFilter = function(v) {
-                var max = self.maxValue;
+                const max = self.maxValue;
                 if (max != null && v > max) return max;
                 
-                var min = self.minValue;
+                const min = self.minValue;
                 if (min != null && v < min) return min;
                 
                 return v;
@@ -59,7 +59,7 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
         if (this.snapToInt && v != null) v = Math.round(v);
         
         if (this.minValue !== v) {
-            var max = this.maxValue;
+            const max = this.maxValue;
             if (max != null && v > max) v = max;
             
             if (this.minValue !== v) {
@@ -78,7 +78,7 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
         if (this.snapToInt && v != null) v = Math.round(v);
         
         if (this.maxValue !== v) {
-            var min = this.minValue;
+            const min = this.minValue;
             if (min != null && v < min) v = min;
             
             if (this.maxValue !== v) {

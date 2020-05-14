@@ -45,7 +45,7 @@ myt.BAG = new JS.Class('BAG', {
             @returns the BAG */
         getGroup: function(attrName, groupId) {
             if (attrName && groupId) {
-                var groups = this.__groups,
+                const groups = this.__groups,
                     groupIdMap = groups[attrName] || (groups[attrName] = {});
                 return groupIdMap[groupId] || (groupIdMap[groupId] = new myt.BAG(attrName, groupId));
             }
@@ -58,11 +58,11 @@ myt.BAG = new JS.Class('BAG', {
             @returns the removed BAG */
         removeGroup: function(attrName, groupId) {
             if (attrName && groupId) {
-                var groups = this.__groups;
+                const groups = this.__groups;
                 if (groups) {
-                    var groupIdMap = groups[attrName];
+                    const groupIdMap = groups[attrName];
                     if (groupIdMap) {
-                        var group = groupIdMap[groupId];
+                        const group = groupIdMap[groupId];
                         if (group) delete groupIdMap[groupId];
                         return group;
                     }
@@ -121,7 +121,8 @@ myt.BAG = new JS.Class('BAG', {
         @returns {undefined} */
     unregister: function(node) {
         if (node) {
-            var nodes = this.__nodes, i = nodes.length;
+            const nodes = this.__nodes;
+            let i = nodes.length;
             while (i) {
                 if (node === nodes[--i]) {
                     nodes.splice(i, 1);
@@ -141,9 +142,11 @@ myt.BAG = new JS.Class('BAG', {
         @returns {undefined} */
     setTrue: function(node) {
         if (node && this.trueNode !== node && this.isRegistered(node)) {
-            var attrName = this.attrName,
+            const attrName = this.attrName,
                 setterName = myt.AccessorSupport.generateSetterName(attrName),
-                nodes = this.__nodes, i = nodes.length, n;
+                nodes = this.__nodes;
+            let i = nodes.length,
+                n;
             
             this.setTrueNode(node);
             
@@ -164,7 +167,7 @@ myt.BAG = new JS.Class('BAG', {
         @returns {undefined} */
     setFalse: function(node) {
         if (node && this.trueNode === node) {
-            var setterName = myt.AccessorSupport.generateSetterName(this.attrName);
+            const setterName = myt.AccessorSupport.generateSetterName(this.attrName);
             node[setterName](false);
             this.setTrueNode(null);
         }
@@ -174,7 +177,8 @@ myt.BAG = new JS.Class('BAG', {
         @param node:myt.Node the node to test.
         @returns {undefined} */
     isRegistered: function(node) {
-        var nodes = this.__nodes, i = nodes.length;
+        const nodes = this.__nodes;
+        let i = nodes.length;
         while (i) {
             if (node === nodes[--i]) return true;
         }

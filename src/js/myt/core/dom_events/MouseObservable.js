@@ -28,12 +28,12 @@ myt.MouseObservable = new JS.Module('MouseObservable', {
             @returns {!Object} An object with 'x' and 'y' keys containing the
                 x and y mouse position. */
         getMouseFromEvent: function(event) {
-            var domEvent = event.value;
+            const domEvent = event.value;
             return {x:domEvent.pageX, y:domEvent.pageY};
         },
         
         getMouseFromEventRelativeToView: function(event, view) {
-            var viewPos = view.getPagePosition(),
+            const viewPos = view.getPagePosition(),
                 pos = this.getMouseFromEvent(event);
             pos.x -= viewPos.x;
             pos.y -= viewPos.y;

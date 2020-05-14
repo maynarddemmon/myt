@@ -1,5 +1,5 @@
 ((pkg) => {
-    var JSClass = JS.Class,
+    const JSClass = JS.Class,
         View = pkg.View,
         
         getSubview = (gridRow, columnHeader) => gridRow[columnHeader.columnId + 'View'];
@@ -10,17 +10,17 @@
         
         // Methods /////////////////////////////////////////////////////////////
         notifyXChange: function(columnHeader) {
-            var sv = getSubview(this, columnHeader);
+            const sv = getSubview(this, columnHeader);
             if (sv) sv.setX(columnHeader.x + columnHeader.cellXAdj);
         },
         
         notifyWidthChange: function(columnHeader) {
-            var sv = getSubview(this, columnHeader);
+            const sv = getSubview(this, columnHeader);
             if (sv) sv.setWidth(columnHeader.width + columnHeader.cellWidthAdj);
         },
         
         notifyVisibilityChange: function(columnHeader) {
-            var sv = getSubview(this, columnHeader);
+            const sv = getSubview(this, columnHeader);
             if (sv) sv.setVisible(columnHeader.visible);
         }
     });
@@ -107,7 +107,7 @@
         
         // Methods /////////////////////////////////////////////////////////////
         makeReady: function(sortState) {
-            var gridHeader = this.gridHeader;
+            const gridHeader = this.gridHeader;
             if (gridHeader) {
                 gridHeader.setSort(sortState);
                 gridHeader.setLocked(false);
@@ -118,13 +118,13 @@
         
         /** @overrides myt.InfiniteList */
         getSortFunction: function() {
-            var sort = this.gridHeader.sort || ['',''],
+            const sort = this.gridHeader.sort || ['',''],
                 sortColumnId  = sort[0],
                 sortOrder = sort[1];
             if (sortColumnId) {
-                var sortNum = sortOrder === 'ascending' ? 1 : -1;
+                const sortNum = sortOrder === 'ascending' ? 1 : -1;
                 return (a, b) => {
-                    var aValue = a[sortColumnId],
+                    const aValue = a[sortColumnId],
                         bValue = b[sortColumnId];
                     if (aValue > bValue) {
                         return sortNum;

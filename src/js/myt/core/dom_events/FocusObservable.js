@@ -64,7 +64,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
             this.focused = v;
             if (this.inited) {
                 this.fireEvent('focused', v);
-                var gf = myt.global.focus;
+                const gf = myt.global.focus;
                 if (v) {
                     gf.notifyFocus(this);
                 } else {
@@ -75,10 +75,10 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
     },
     
     setFocusable: function(v) {
-        var self = this;
+        const self = this;
         
         if (self.focusable !== v) {
-            var wasFocusable = self.focusable;
+            const wasFocusable = self.focusable;
             self.focusable = v;
             
             if (v) {
@@ -186,7 +186,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
         this.getInnerDomElement().hideFocus = false;
         
         // Mozilla and Webkit
-        var s = this.getInnerDomStyle();
+        const s = this.getInnerDomStyle();
         s.outlineWidth = 'thin';
         s.outlineColor = '#88bbff';
         s.outlineStyle = 'solid';
@@ -211,7 +211,7 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
     /** @overrides myt.DomObservable */
     createDomMethodRef: function(domObserver, methodName, type) {
         if (myt.FocusObservable.EVENT_TYPES[type]) {
-            var self = this;
+            const self = this;
             return (domEvent) => {
                 if (!domEvent) domEvent = window.event;
                 
@@ -225,12 +225,12 @@ myt.FocusObservable = new JS.Module('FocusObservable', {
                 }
                 
                 // Configure common focus event.
-                var event = myt.FocusObservable.EVENT;
+                const event = myt.FocusObservable.EVENT;
                 event.source = self;
                 event.type = domEvent.type;
                 event.value = domEvent;
                 
-                var allowBubble = domObserver[methodName](event);
+                const allowBubble = domObserver[methodName](event);
                 if (!allowBubble) {
                     domEvent.cancelBubble = true;
                     if (domEvent.stopPropagation) domEvent.stopPropagation();

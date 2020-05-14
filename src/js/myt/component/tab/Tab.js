@@ -1,11 +1,11 @@
 ((pkg) => {
-    var
+    const
         updateTextColor = (tab) => {
             tab.textView.setTextColor(tab.selected ? tab.labelTextSelectedColor : tab.labelTextColor);
         },
         
         updateCornerRadius = (tab) => {
-            var r = tab.cornerRadius != null ? tab.cornerRadius : Tab.DEFAULT_RADIUS;
+            const r = tab.cornerRadius != null ? tab.cornerRadius : Tab.DEFAULT_RADIUS;
             switch (tab.tabContainer.location) {
                 case 'top':
                     tab.setRoundedTopLeftCorner(r);

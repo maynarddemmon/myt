@@ -1,6 +1,13 @@
 ((pkg) => {
-    var globalDragManager,
+    let globalDragManager,
         
+        /* The view currently being dragged. */
+        dragView,
+        
+        /* The view currently being dragged over. */
+        overView;
+        
+    const
         /* The list of myt.AutoScrollers currently registered for notification
             when drags start and stop. */
         autoScrollers = [],
@@ -9,14 +16,8 @@
             when drag and drop events occur. */
         dropTargets = [],
         
-        /* The view currently being dragged. */
-        dragView,
-        
-        /* The view currently being dragged over. */
-        overView,
-        
         setOverView = (v) => {
-            var existingOverView = overView;
+            const existingOverView = overView;
             if (existingOverView !== v) {
                 if (existingOverView) {
                     existingOverView.notifyDragLeave(dragView);
@@ -35,7 +36,7 @@
         },
         
         setDragView = (v) => {
-            var existingDragView = dragView,
+            let existingDragView = dragView,
                 funcName, 
                 eventName,
                 targets,
@@ -71,7 +72,7 @@
             @param {!Array} list
             @returns {!Array} */
         filterList = (dropable, list) => {
-            var retval;
+            let retval;
             
             if (dropable.destroyed) {
                 retval = [];
@@ -81,9 +82,11 @@
                 } else {
                     retval = [];
                     
-                    var dragGroups = dropable.getDragGroups(),
-                        i = list.length, 
-                        item, targetGroups, dragGroup;
+                    const dragGroups = dropable.getDragGroups();
+                    let i = list.length, 
+                        item, 
+                        targetGroups, 
+                        dragGroup;
                     while (i) {
                         item = list[--i];
                         if (item.acceptAnyDragGroup()) {
@@ -147,7 +150,7 @@
             @param {!Object} autoScroller - The myt.AutoScroller to unregister.
             @returns {undefined} */
         unregisterAutoScroller: (autoScroller) => {
-            var i = autoScrollers.length;
+            let i = autoScrollers.length;
             while (i) {
                 if (autoScrollers[--i] === autoScroller) {
                     autoScrollers.splice(i, 1);
@@ -167,7 +170,7 @@
             @param {!Object} dropTarget - The myt.DropTarget to unregister.
             @returns {undefined} */
         unregisterDropTarget: (dropTarget) => {
-            var i = dropTargets.length;
+            let i = dropTargets.length;
             while (i) {
                 if (dropTargets[--i] === dropTarget) {
                     dropTargets.splice(i, 1);
@@ -206,18 +209,17 @@
             // Get the frontmost myt.DropTarget that is registered with this 
             // manager and is under the current mouse location and has a 
             // matching drag group.
-            var topDropTarget,
-                filteredDropTargets = filterList(dropable, dropTargets),
-                i = filteredDropTargets.length;
+            const filteredDropTargets = filterList(dropable, dropTargets);
+            let i = filteredDropTargets.length,
+                topDropTarget;
             
             if (i > 0) {
-                var domMouseEvent = event.value,
+                const domMouseEvent = event.value,
                     mouseX = domMouseEvent.pageX,
-                    mouseY = domMouseEvent.pageY,
-                    dropTarget;
+                    mouseY = domMouseEvent.pageY;
                 
                 while (i) {
-                    dropTarget = filteredDropTargets[--i];
+                    let dropTarget = filteredDropTargets[--i];
                     if (dropTarget.willAcceptDrop(dropable) &&
                         dropable.willPermitDrop(dropTarget) &&
                         dropTarget.isPointVisible(mouseX, mouseY) && 

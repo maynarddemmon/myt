@@ -39,12 +39,12 @@ myt.DropSource = new JS.Module('DropSource', {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.Draggable */
     startDrag: function(event) {
-        var dropable = this.dropable = this.makeDropable();
+        const dropable = this.dropable = this.makeDropable();
         
         // Emulate mouse down on the dropable
         if (dropable) {
             // Remember distance and set to zero so a drag will begin for sure.
-            var origDistance = dropable.distanceBeforeDrag;
+            const origDistance = dropable.distanceBeforeDrag;
             dropable.distanceBeforeDrag = 0;
             
             dropable.doMouseDown(event); // Execute MouseDownMixin
@@ -60,7 +60,7 @@ myt.DropSource = new JS.Module('DropSource', {
         this.callSuper(event);
         
         // Emulate mouse up on the dropable
-        var dropable = this.dropable;
+        const dropable = this.dropable;
         if (dropable) {
             dropable.__doMouseUp(event);
             dropable.doMouseUp(event);
@@ -71,10 +71,10 @@ myt.DropSource = new JS.Module('DropSource', {
     /** Called by startDrag to make a dropable.
         @returns myt.Dropable or undefined if one can't be created. */
     makeDropable: function() {
-        var dropClass = this.dropClass,
+        const dropClass = this.dropClass,
             dropParent = this.dropParent;
         if (dropClass && dropParent) {
-            var pos = myt.DomElementProxy.getPagePosition(this.getInnerDomElement(), dropParent.getInnerDomElement()),
+            const pos = myt.DomElementProxy.getPagePosition(this.getInnerDomElement(), dropParent.getInnerDomElement()),
             attrs = Object.assign({}, this.dropClassAttrs);
             attrs.x = pos.x || 0;
             attrs.y = pos.y || 0;

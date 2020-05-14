@@ -24,7 +24,7 @@
                 Supported values are: 'expanded', 'expanding', 'collapsed' and
                 'collapsing'. Defaults to 'collapsed'.
     */
-    var TabSlider = pkg.TabSlider = new JS.Class('TabSlider', pkg.View, {
+    const TabSlider = pkg.TabSlider = new JS.Class('TabSlider', pkg.View, {
         include: [pkg.Selectable, pkg.Disableable, pkg.SizeToParent],
         
         
@@ -43,8 +43,8 @@
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            var self = this,
-                initiallySelected;
+            const self = this;
+            let initiallySelected;
             
             attrs.defaultPlacement = 'wrapper.container';
             attrs.percentOfParentWidth = 100;
@@ -79,10 +79,10 @@
         },
         
         doAfterAdoption: function() {
-            var self = this,
+            const self = this,
                 View = pkg.View,
-                SizeToParent = pkg.SizeToParent,
-                wrapper,
+                SizeToParent = pkg.SizeToParent;
+            let wrapper,
                 container;
             
             new self.buttonClass(self, {
@@ -97,7 +97,7 @@
             }, [SizeToParent, {
                 /** @overrides myt.Button */
                 doActivated: function() {
-                    var tc = self.tabContainer;
+                    const tc = self.tabContainer;
                     if (self.isSelected() && tc.maxSelected !== 1) {
                         tc.deselect(self);
                     } else {
@@ -169,7 +169,7 @@
                 this.expansionState = v;
                 if (this.inited) this.fireEvent('expansionState', v);
                 
-                var wrapper = this.wrapper;
+                const wrapper = this.wrapper;
                 if (wrapper) {
                     if (v === 'expanded') {
                         wrapper.setMaskFocus(false);
@@ -190,7 +190,7 @@
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides myt.Disableable */
         doDisabled: function() {
-            var btn = this.button;
+            const btn = this.button;
             if (btn) btn.setDisabled(this.disabled);
         },
         
@@ -209,7 +209,7 @@
         /** Should only be called from the TabSliderContainer.
             @private */
         expand: function(targetHeight) {
-            var self = this,
+            const self = this,
                 wrapper = self.wrapper,
                 to = targetHeight - self.getCollapsedHeight();
             
@@ -230,7 +230,7 @@
         /** Should only be called from the TabSliderContainer.
             @private */
         collapse: function() {
-            var self = this,
+            const self = this,
                 wrapper = self.wrapper;
             
             self.setExpansionState('collapsing');

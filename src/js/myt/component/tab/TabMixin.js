@@ -21,7 +21,7 @@ myt.TabMixin = new JS.Module('TabMixin', {
         if (attrs.tabContainer == null) attrs.tabContainer = parent;
         
         // Selection must be done via the select method on the tabContainer
-        var initiallySelected;
+        let initiallySelected;
         if (attrs.selected) {
             initiallySelected = true;
             delete attrs.selected;

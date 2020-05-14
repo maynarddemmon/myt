@@ -1,11 +1,11 @@
 ((pkg) => {
-    var win = window,
+    const win = window,
         
         /* The idle event object that gets reused. */
-        EVENT = {},
+        EVENT = {};
         
         /* The ID of the last idle event in the browser. */
-        timerId,
+    let timerId,
         
         /* The function that gets executed on idle. */
         idleFunc,
@@ -31,10 +31,10 @@
         
         // Constructor /////////////////////////////////////////////////////////
         initialize: function() {
-            var self = this,
-                vendor, 
-                vendors = ['webkit','moz','ms','o'],
-                i = 0;
+            const self = this,
+                vendors = ['webkit','moz','ms','o'];
+            let i = 0,
+                vendor;
             for (; i < vendors.length && !win.requestAnimationFrame;) {
                 vendor = vendors[i++];
                 win.requestAnimationFrame = win[vendor + 'RequestAnimationFrame'];
@@ -60,7 +60,7 @@
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides myt.Observable */
         attachObserver: function(observer, methodName, type) {
-            var retval = this.callSuper(observer, methodName, type);
+            const retval = this.callSuper(observer, methodName, type);
             
             // Start firing idle events
             if (!running && this.hasObservers('idle')) {
@@ -74,7 +74,7 @@
         
         /** @overrides myt.Observable */
         detachObserver: function(observer, methodName, type) {
-            var retval = this.callSuper(observer, methodName, type);
+            const retval = this.callSuper(observer, methodName, type);
             
             // Stop firing idle events
             if (running && !this.hasObservers('idle')) {

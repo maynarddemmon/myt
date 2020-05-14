@@ -159,9 +159,9 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
         @private
         @returns {undefined} */
     __calculateNaturalSize: function() {
-        var imgUrl = this.imageUrl;
+        const imgUrl = this.imageUrl;
         if (this.calculateNaturalSize && imgUrl) {
-            var sizeCache = myt.ImageSupport.SIZE_CACHE,
+            const sizeCache = myt.ImageSupport.SIZE_CACHE,
                 cachedSize = sizeCache[imgUrl];
             if (cachedSize) {
                 // Cache hit
@@ -169,20 +169,20 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
                 this.setNaturalHeight(cachedSize.height);
             } else {
                 // Cache miss
-                var openQueryCache = myt.ImageSupport.OPEN_SIZE_QUERIES,
-                    openQuery = openQueryCache[imgUrl];
+                const openQueryCache = myt.ImageSupport.OPEN_SIZE_QUERIES;
+                let openQuery = openQueryCache[imgUrl];
                 if (!openQuery) {
                     // Lazy instantiate the open query array.
                     openQueryCache[imgUrl] = openQuery = [];
                     
                     // Start a size query
-                    var img = new Image();
+                    const img = new Image();
                     img.onerror = function(err) {
                         // Notify all ImageSupport instances that are waiting
                         // for a natural size that an error has occurred.
-                        var openQueries = openQueryCache[imgUrl];
+                        const openQueries = openQueryCache[imgUrl];
                         if (openQueries) {
-                            var i = openQueries.length;
+                            let i = openQueries.length;
                             while (i) openQueries[--i].setImageLoadingError(true);
                             
                             // Cleanup
@@ -191,13 +191,15 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
                         }
                     };
                     img.onload = function() {
-                        var w = this.width, h = this.height;
+                        const w = this.width,
+                            h = this.height;
                         
                         // Notify all ImageSupport instances that are waiting
                         // for a natural size.
-                        var openQueries = openQueryCache[imgUrl];
+                        const openQueries = openQueryCache[imgUrl];
                         if (openQueries) {
-                            var i = openQueries.length, imageSupportInstance;
+                            let i = openQueries.length,
+                                imageSupportInstance;
                             while (i) {
                                 imageSupportInstance = openQueries[--i];
                                 if (imageSupportInstance.imageUrl === imgUrl) {

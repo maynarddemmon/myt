@@ -1,5 +1,5 @@
 ((pkg) => {
-    var G = pkg.global,
+    const G = pkg.global,
         dragManager = G.dragManager,
         globalMouse = G.mouse,
         
@@ -106,7 +106,7 @@
             @param {!Object} dropable - The myt.Dropable being dragged.
             @returns {undefined} */
         notifyDragStart: function(dropable) {
-            var de = this.getInnerDomElement();
+            const de = this.getInnerDomElement();
             if (de.scrollHeight > de.clientHeight || de.scrollWidth > de.clientWidth) {
                 this.attachToDom(globalMouse, '__handleMouseMove', 'mousemove', true);
             }
@@ -127,13 +127,13 @@
             @param {!Object} event
             @returns {undefined} */
         __handleMouseMove: function(event) {
-            var self = this,
-                mousePos = event.value, 
-                mouseX = mousePos.pageX, 
+            const self = this,
+                mousePos = event.value;
+            let mouseX = mousePos.pageX, 
                 mouseY = mousePos.pageY;
             
             if (self.containsPoint(mouseX, mouseY)) {
-                var pos = self.getPagePosition(), 
+                const pos = self.getPagePosition(), 
                     scrollBorder = self.scrollBorder;
                 
                 mouseX -= pos.x;
