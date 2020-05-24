@@ -1,5 +1,6 @@
 <!doctype html><html><head>
 <title>Myt Framework : WebSocket Example</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <link rel="stylesheet" href="../src/css/myt.css"/>
 <script src="../src/js/jquery/jquery-3.5.0.min.js"></script>
 <script>var ROOT = '../src/js/';</script>
@@ -24,6 +25,10 @@
                 }
             }
         }]);
+        var nameView = new myt.InputText(btnsView, {y:4, height:20, bgColor:'#000000',
+            roundedCorners:4, border:[1,'solid','#006600'], textColor:'#00cc00', width:50,
+            value:'name'
+        });
         var msgView = new myt.InputText(btnsView, {y:4, height:20, bgColor:'#000000',
             roundedCorners:4, border:[1,'solid','#006600'], textColor:'#00cc00', layoutHint:1
         }, [{
@@ -40,36 +45,42 @@
             activeColor:'#222222', hoverColor:'#555555', readyColor:'#444444', roundedCorners:2
         }, [myt.TextButtonContent, {
             doActivated:function() {
-                var msg = msgView.value;
-                logView.setText(logView.text + '<font color="#999900">&gt; ' + msg + '</font><br/>');
-                try {
-                    msg = JSON.parse(msg);
-                } catch (ex) {
+                var msg = msgView.value,
+                    name = nameView.value;
+                if (msg && name) {
+                    logView.setText(logView.text + '<font color="#999900">&gt; ' + msg + '</font><br/>');
                     try {
-                        msg = JSON.parse('"' + msg + '"');
+                        msg = JSON.parse(msg);
                     } catch (ex) {
-                        console.error(ex);
+                        try {
+                            msg = JSON.parse('"' + msg + '"');
+                        } catch (ex) {
+                            console.error(ex);
+                        }
                     }
+                    ws.sendTypedMessage('message', {msg:msg, name:name});
                 }
-                ws.sendTypedMessage('message', msg);
             }
         }]);
         var sendActionBtn = new myt.SimpleButton(btnsView, {y:4, height:20, text:'action', shrinkToFit:true, inset:6, outset:6,
             activeColor:'#222222', hoverColor:'#555555', readyColor:'#444444', roundedCorners:2
         }, [myt.TextButtonContent, {
             doActivated:function() {
-                var msg = msgView.value;
-                logView.setText(logView.text + '<font color="#999900">* ' + msg + ' *</font><br/>');
-                try {
-                    msg = JSON.parse(msg);
-                } catch (ex) {
+                var msg = msgView.value,
+                    name = nameView.value;
+                if (msg && name) {
+                    logView.setText(logView.text + '<font color="#999900">* ' + msg + ' *</font><br/>');
                     try {
-                        msg = JSON.parse('"' + msg + '"');
+                        msg = JSON.parse(msg);
                     } catch (ex) {
-                        console.error(ex);
+                        try {
+                            msg = JSON.parse('"' + msg + '"');
+                        } catch (ex) {
+                            console.error(ex);
+                        }
                     }
+                    ws.sendTypedMessage('message.action', {msg:msg, name:name});
                 }
-                ws.sendTypedMessage('message.action', msg);
             }
         }]);
         var clearBtn = new myt.SimpleButton(btnsView, {y:4, height:20, text:'clear text', shrinkToFit:true, inset:6, outset:6,
@@ -85,12 +96,17 @@
             x:10, y:30, percentOfParentWidth:100, percentOfParentWidthOffset:-20, text:'', fontSize:'12px', fontFamily:'monospace'
         }, [myt.SizeToParent]);
         
-        var ws = new myt.MessageTypeWebSocket(rootView, {url:'ws://localhost:8124'}, [{
+        var ws = new myt.MessageTypeWebSocket(rootView, {url:'ws://' + window.location.hostname + ':8124'}, [{
+            close: function() {
+                this.sendTypedMessage('ctrl.close', {name:nameView.value});
+                this.callSuper();
+            },
             setStatus:function(v) {
                 this.callSuper(v);
                 switch (this.status) {
                     case 'open':
                         connectBtn.setText('disconnect');
+                        this.sendTypedMessage('ctrl.open', {name:nameView.value});
                         break;
                     case 'closed':
                         connectBtn.setText('connect');
@@ -111,25 +127,41 @@
             }
         }]);
         
-        var consoleLoggerFunc = function(msg) {console.log(msg);};
-        var messageMatcher = function(type) {return type === 'message' || type.startsWith('message.');};
-        var actionMatcher = function(type) {return type.startsWith('message.') && type.endsWith('.action');};
-        var processMessageFunc = function(msg) {
-            msg = msg.msg;
-            if (typeof msg !== 'string') {
-                logView.setText(logView.text + '<font color="#0099ff">< ' + msg + '</font><br/>');
-            } else {
-                logView.setText(logView.text + '< ' + msg + '<br/>');
-            }
-        };
-        var processActionFunc = function(msg) {
-            msg = msg.msg;
-            if (typeof msg !== 'string') {
-                logView.setText(logView.text + '<font color="#0099ff">* ' + msg + ' *</font><br/>');
-            } else {
-                logView.setText(logView.text + '* ' + msg + ' *<br/>');
-            }
-        };
+        const consoleLoggerFunc = (msg) => {console.log(msg);},
+            controlMatcher = (type) => type === 'ctrl' || type.startsWith('ctrl.'),
+            messageMatcher = (type) => type === 'message' || type.startsWith('message.'),
+            actionMatcher = (type) => type.startsWith('message.') && type.endsWith('.action'),
+            processMessageFunc = (msg) => {
+                msg = msg.msg;
+                const name = msg.name,
+                    chatMsg = msg.msg;
+                if (typeof msg !== 'string') {
+                    logView.setText(logView.text + '<font color="#0099ff">< <b>' + name + ':</b> ' + chatMsg + '</font><br/>');
+                } else {
+                    logView.setText(logView.text + '< <b>' + name + ':</b> ' + chatMsgg + '<br/>');
+                }
+            },
+            processActionFunc = (msg) => {
+                msg = msg.msg;
+                const name = msg.name,
+                    chatMsg = msg.msg;
+                if (typeof msg !== 'string') {
+                    logView.setText(logView.text + '<font color="#0099ff">* <b>' + name + ':</b> ' + chatMsg + ' *</font><br/>');
+                } else {
+                    logView.setText(logView.text + '* <b>' + name + ':</b> ' + chatMsg + ' *<br/>');
+                }
+            },
+            processControlFunc = (msg) => {
+                const type = msg.type;
+                msg = msg.msg;
+                const name = msg.name;
+                
+                if (type === 'ctrl.open') {
+                    logView.setText(logView.text + '<b>"' + name + '" CONNECTED</b><br/>');
+                } else if (type === 'ctrl.close') {
+                    logView.setText(logView.text + '<b>"' + name + '" DISCONNECTED</b><br/>');
+                }
+            };
         
         ws.registerListener(consoleLoggerFunc, 'message');
         ws.unregisterListener(consoleLoggerFunc, 'message');
@@ -137,6 +169,8 @@
         
         ws.registerListener(processMessageFunc, 'message');
         ws.registerListener(processActionFunc, actionMatcher);
+        
+        ws.registerListener(processControlFunc, controlMatcher);
     });
 </script>
 </body></html>
