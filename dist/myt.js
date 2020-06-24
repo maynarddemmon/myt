@@ -17166,14 +17166,6 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
                 nextMonth: 'Next month',
                 today: 'Today'
             },
-            ro:{
-                days: ['Dum', 'Lun', 'Mar', 'Mie', 'Joi', 'Vin', 'Sâm'],
-                months: ['Ian', 'Feb', 'Mar', 'Apr', 'Mai', 'Iun', 'Iul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                sep: '.',
-                prevMonth: 'Luna precedentă',
-                nextMonth: 'Luna următoare',
-                today: 'Azi'
-            },
             ja: {
                 days: ['日', '月', '火', '水', '木', '金', '土'],
                 months: [ "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" ],
@@ -17234,28 +17226,12 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
             fr: {
                 days: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
                 months: [ "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre" ]
-            },
-            pl: {
-                days: ['N', 'Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So'],
-                months: [ "Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień" ],
-                prevMonth: 'Poprzedni miesiąc',
-                nextMonth: 'Następny miesiąc',
-                today: 'Dzisiaj'
-            },
-            gr: {
-                days: ['Κυ', 'Δε', 'Τρ', 'Τε', 'Πε', 'Πα', 'Σα'],
-                months: [ "Ιαν", "Φεβ", "Μαρ", "Απρ", "Μαϊ", "Ιουν", "Ιουλ", "Αυγ", "Σεπ", "Οκτ", "Νοε", "Δεκ" ],
-                prevMonth: 'Προηγ. μήνας',
-                nextMonth: 'Επόμ. μήνας',
-                today: 'Σήμερα'
             }
         },
         
-        getParentPickerObject = function(obj) {
-            return $(obj).closest('.datepicker');
-        },
+        getParentPickerObject = (obj) => $(obj).closest('.datepicker'),
         
-        beforeMonth = function($obj) {
+        beforeMonth = ($obj) => {
             const $picker = getParentPickerObject($obj);
             
             if ($picker.data('stateAllowBeforeMonth') === false) return;
@@ -17275,7 +17251,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
             }
         },
         
-        nextMonth = function($obj) {
+        nextMonth = ($obj) => {
             const $picker = getParentPickerObject($obj),
                 date = getPickedDate($picker),
                 targetMonth_lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -17288,29 +17264,25 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
             draw($picker, date.getFullYear(), date.getMonth() + 1, date.getDate(), date.getHours(), date.getMinutes());
         },
         
-        beforeDay = function($obj) {
+        beforeDay = ($obj) => {
             const $picker = getParentPickerObject($obj),
                 date = getPickedDate($picker);
             date.setDate(date.getDate() - 1);
             draw($picker, date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes());
         },
         
-        afterDay = function($obj) {
+        afterDay = ($obj) => {
             const $picker = getParentPickerObject($obj),
                 date = getPickedDate($picker);
             date.setDate(date.getDate() + 1);
             draw($picker, date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes());
         },
         
-        getPickedDate = function($obj) {
-            return getParentPickerObject($obj).data("pickedDate");
-        },
+        getPickedDate = ($obj) => getParentPickerObject($obj).data("pickedDate"),
         
-        zpadding = function(num) {
-            return ("0" + num).slice(-2);
-        },
+        zpadding = (num) => ("0" + num).slice(-2),
         
-        translate = function(locale, s) {
+        translate = (locale, s) => {
             if (typeof lang[locale][s] !== "undefined") return lang[locale][s];
             return lang.en[s];
         },
@@ -17377,10 +17349,9 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
             
             /* Collect each part */
             const $header = $picker.children('.datepicker_header'),
-                $inner = $picker.children('.datepicker_inner_container'),
-                $calendar = $picker.children('.datepicker_inner_container').children('.datepicker_calendar'),
+                $calendar = $picker.children('.datepicker_calendar'),
                 $table = $calendar.children('.datepicker_table'),
-                $timelist = $picker.children('.datepicker_inner_container').children('.datepicker_timelist');
+                $timelist = $picker.children('.datepicker_timelist');
             
             /* Grasp a point that will be changed */
             let changePoint = "";
@@ -17427,9 +17398,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
                     $link_before_month.text('<');
                     $link_before_month.prop('alt', translate(locale,'prevMonth'));
                     $link_before_month.prop('title', translate(locale,'prevMonth') );
-                    $link_before_month.click(function() {
-                        beforeMonth($picker);
-                    });
+                    $link_before_month.click(() => {beforeMonth($picker);});
                     $picker.data('stateAllowBeforeMonth', true);
                 } else {
                     $picker.data('stateAllowBeforeMonth', false);
@@ -17450,9 +17419,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
                     $link_next_month.text('>');
                     $link_next_month.prop('alt', translate(locale,'nextMonth'));
                     $link_next_month.prop('title', translate(locale,'nextMonth'));
-                    $link_next_month.click(function() {
-                        nextMonth($picker);
-                    });
+                    $link_next_month.click(() => {nextMonth($picker);});
                 }
                 
                 if (isTodayButton) {
@@ -17464,7 +17431,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
                     $link_today.addClass('icon-home');
                     $link_today.prop('alt', translate(locale,'today'));
                     $link_today.prop('title', translate(locale,'today'));
-                    $link_today.click(function() {
+                    $link_today.click(() => {
                         const date = new Date();
                         draw(getParentPickerObject($picker), date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes());
                     });
@@ -17691,10 +17658,8 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         }, config);
         
         /* Container */
-        const $picker = $('<div>');
-        
+        const $picker = this;
         $picker.addClass('datepicker');
-        $(this).append($picker);
         
         /* Set current date */
         if (!opt.current) opt.current = new Date();
@@ -17739,11 +17704,6 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         $header.addClass('datepicker_header');
         $picker.append($header);
         
-        /* InnerContainer*/
-        const $inner = $('<div>');
-        $inner.addClass('datepicker_inner_container');
-        $picker.append($inner);
-        
         /* Calendar */
         const $calendar = $('<div>');
         $calendar.addClass('datepicker_calendar');
@@ -17751,44 +17711,30 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         const $table = $('<table>');
         $table.addClass('datepicker_table');
         $calendar.append($table);
-        $inner.append($calendar);
+        $picker.append($calendar);
         
         /* Timelist */
         const $timelist = $('<div>');
         $timelist.addClass('datepicker_timelist');
-        $inner.append($timelist);
+        $picker.append($timelist);
 
         /* Set event-handler to calendar */
-        if (window.sidebar) { // Mozilla Firefox
-            $calendar.bind('DOMMouseScroll', function(e){
-                const $picker = getParentPickerObject($(this));
-                
-                // up,left [delta < 0] down,right [delta > 0]
-                const delta = e.originalEvent.detail;
-                if (delta > 0) {
-                    afterDay($picker);
-                } else {
-                    beforeDay($picker);
-                }
-                return false;
-            });
-        } else { // Other browsers
-            $calendar.bind('mousewheel', function(e){
-                const $picker = getParentPickerObject($(this));
-                // up [delta > 0] down [delta < 0]
-                const threshold = 75, dtpicker = $.fn.dtpicker;
-                if (dtpicker._delta == null) dtpicker._delta = 0;
-                const delta = dtpicker._delta += e.originalEvent.wheelDeltaY;
-                if (delta > threshold) {
-                    dtpicker._delta -= threshold;
-                    beforeDay($picker);
-                } else if (delta < -threshold) {
-                    dtpicker._delta += threshold;
-                    afterDay($picker);
-                }
-                return false;
-            });
-        }
+        $calendar.bind('wheel', function(e){
+            const $picker = getParentPickerObject($(this));
+            // up [delta > 0] down [delta < 0]
+            const threshold = 75, 
+                dtpicker = $.fn.dtpicker;
+            if (dtpicker._delta == null) dtpicker._delta = 0;
+            const delta = dtpicker._delta += e.originalEvent.deltaY;
+            if (delta > threshold) {
+                dtpicker._delta -= threshold;
+                beforeDay($picker);
+            } else if (delta < -threshold) {
+                dtpicker._delta += threshold;
+                afterDay($picker);
+            }
+            return false;
+        });
         
         $.fn.dtpicker.dialog = dialog;
         
@@ -18773,8 +18719,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 name:'picker',
                 x:ModalPanel.DEFAULT_PADDING_X,
                 y:ModalPanel.DEFAULT_PADDING_Y + 24,
-                width:opts.dateOnly ? 195 : (opts.timeOnly ? 150 : 240),
-                height:185
+                width:opts.dateOnly ? 200 : (opts.timeOnly ? 150 : 260),
+                height:193
             });
             const pickerView = new View(picker);
             
