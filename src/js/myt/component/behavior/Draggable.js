@@ -1,17 +1,7 @@
 ((pkg) => {
     const G = pkg.global,
         globalMouse = G.mouse,
-        globalKeys = G.keys,
-        
-        /*  @param {!Object} draggable
-            @returns {undefined} */
-        requestDragPosition = (draggable) => {
-            const pos = draggable.__lastMousePosition;
-            draggable.requestDragPosition(
-                pos.x - draggable.dragInitX + draggable.dragOffsetX, 
-                pos.y - draggable.dragInitY + draggable.dragOffsetY
-            );
-        };
+        globalKeys = G.keys;
     
     /** Makes an myt.View draggable via the mouse.
         
@@ -109,14 +99,14 @@
         setDragOffsetX: function(v, supressUpdate) {
             if (this.dragOffsetX !== v) {
                 this.dragOffsetX = v;
-                if (this.inited && this.isDragging && !supressUpdate) requestDragPosition(this);
+                if (this.inited && this.isDragging && !supressUpdate) this.reRequestDragPosition();
             }
         },
         
         setDragOffsetY: function(v, supressUpdate) {
             if (this.dragOffsetY !== v) {
                 this.dragOffsetY = v;
-                if (this.inited && this.isDragging && !supressUpdate) requestDragPosition(this);
+                if (this.inited && this.isDragging && !supressUpdate) this.reRequestDragPosition();
             }
         },
         
@@ -221,7 +211,7 @@
             @returns {undefined} */
         updateDrag: function(event) {
             this.__lastMousePosition = pkg.MouseObservable.getMouseFromEvent(event);
-            requestDragPosition(this);
+            this.reRequestDragPosition();
         },
         
         /** @private
@@ -266,6 +256,15 @@
                 this.setX(x);
                 this.setY(y);
             }
+        },
+        
+        reRequestDragPosition: function() {
+            const self = this,
+                pos = self.__lastMousePosition;
+            self.requestDragPosition(
+                pos.x - self.dragInitX + self.dragOffsetX, 
+                pos.y - self.dragInitY + self.dragOffsetY
+            );
         }
     });
 })(myt);
