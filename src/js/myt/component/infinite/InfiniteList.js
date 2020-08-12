@@ -124,7 +124,7 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
         @param {number} v
         @returns {undefined} */
     _setDomScrollTop: function(v) {
-        this.getInnerDomElement().scrollTop = v;
+        this.scrollYTo(v, true);
     },
     
     /** @returns {undefined} */

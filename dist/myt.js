@@ -2561,11 +2561,10 @@ new JS.Singleton('GlobalError', {
                 // Special Case: hidden input elements should be considered not visible.
                 if (elem.nodeName === 'INPUT' && elem.type === 'hidden') return false;
                 
-                let style;
                 while (elem) {
                     if (elem === document) return true;
                     
-                    style = GLOBAL.getComputedStyle(elem);
+                    const style = GLOBAL.getComputedStyle(elem);
                     if (style.display === 'none' || style.visibility === 'hidden') break;
                     
                     elem = elem.parentNode;
@@ -2581,15 +2580,11 @@ new JS.Singleton('GlobalError', {
             getZIndexRelativeToAncestor: (elem, ancestor) => {
                 if (elem && ancestor) {
                     const ancestors = DomElementProxy.getAncestorArray(elem, ancestor);
-                    let i = ancestors.length - 1, 
-                        style, 
-                        zIdx, 
-                        isAuto;
-                    
+                    let i = ancestors.length - 1;
                     while (i) {
-                        style = GLOBAL.getComputedStyle(ancestors[--i]);
-                        zIdx = style.zIndex;
-                        isAuto = zIdx === 'auto';
+                        const style = GLOBAL.getComputedStyle(ancestors[--i]),
+                            zIdx = style.zIndex,
+                            isAuto = zIdx === 'auto';
                         
                         if (i !== 0 && isAuto && parseInt(style.opacity, 10) === 1) {
                             continue;
@@ -2625,18 +2620,15 @@ new JS.Singleton('GlobalError', {
             getHighestZIndex: (elem) => {
                 // See https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Understanding_z_index/The_stacking_context
                 const style = GLOBAL.getComputedStyle(elem);
-                let zIdx = style.zIndex, 
-                    isAuto = zIdx === 'auto',
-                    children,
-                    i,
-                    child;
+                let zIdx = style.zIndex;
+                const isAuto = zIdx === 'auto';
                 if (isAuto && parseInt(style.opacity, 10) === 1) {
                     // No new stacking context.
                     zIdx = 0;
-                    children = elem.childNodes;
-                    i = children.length;
+                    const children = elem.childNodes;
+                    let i = children.length;
                     while (i) {
-                        child = children[--i];
+                        const child = children[--i];
                         if (child.nodeType === 1) zIdx = Math.max(zIdx, DomElementProxy.getHighestZIndex(child));
                     }
                 } else {
@@ -2659,8 +2651,7 @@ new JS.Singleton('GlobalError', {
                 
                 const borderMultiplier = BrowserDetect.browser === 'Firefox' ? 2 : 1; // I have no idea why firefox needs it twice, but it does.
                 let x = 0, 
-                    y = 0, 
-                    s;
+                    y = 0;
                 
                 // elem.nodeName !== "BODY" test prevents looking at the body
                 // which causes problems when the document is scrolled on webkit.
@@ -2669,7 +2660,7 @@ new JS.Singleton('GlobalError', {
                     y += elem.offsetTop;
                     elem = elem.offsetParent;
                     if (elem && elem.nodeName !== "BODY") {
-                        s = GLOBAL.getComputedStyle(elem);
+                        const s = GLOBAL.getComputedStyle(elem);
                         x += borderMultiplier * parseInt(s.borderLeftWidth, 10) - elem.scrollLeft;
                         y += borderMultiplier * parseInt(s.borderTopWidth, 10) - elem.scrollTop;
                     }
@@ -2707,21 +2698,21 @@ new JS.Singleton('GlobalError', {
                             'HTMLEvents': /^(?:load|unload|abort|error|select|change|submit|reset|focus|blur|resize|scroll)$/,
                             'MouseEvents': /^(?:click|dblclick|mouse(?:down|up|over|move|out))$/
                         };
-                    let p,
-                        name,
-                        key,
-                        domEvent,
-                        eventType;
                     
                     if (customOpts) {
-                        for (p in customOpts) opts[p] = customOpts[p];
+                        for (let p in customOpts) opts[p] = customOpts[p];
                     }
                     
-                    for (name in eventMatchers) {
-                        if (eventMatchers[name].test(eventName)) {eventType = name; break;}
+                    let eventType;
+                    for (let name in eventMatchers) {
+                        if (eventMatchers[name].test(eventName)) {
+                            eventType = name;
+                            break;
+                        }
                     }
                     if (!eventType) throw new SyntaxError('Only HTMLEvent and MouseEvent interfaces supported');
                     
+                    let domEvent;
                     if (document.createEvent) {
                         domEvent = document.createEvent(eventType);
                         if (eventType === 'HTMLEvents') {
@@ -2739,7 +2730,7 @@ new JS.Singleton('GlobalError', {
                         opts.clientX = opts.pointerX;
                         opts.clientY = opts.pointerY;
                         domEvent = document.createEventObject();
-                        for (key in opts) domEvent[key] = opts[key];
+                        for (let key in opts) domEvent[key] = opts[key];
                         elem.fireEvent('on' + eventName, domEvent);
                     }
                 }
@@ -2796,8 +2787,8 @@ new JS.Singleton('GlobalError', {
         /** Removes this DomElementProxy's dom element from its parent node.
             @returns {undefined} */
         removeDomElement: function() {
-            const de = this.getOuterDomElement();
-            de.parentNode.removeChild(de);
+            const ode = this.getOuterDomElement();
+            ode.parentNode.removeChild(ode);
         },
         
         /** Called when this DomElementProxy is destroyed.
@@ -2832,11 +2823,9 @@ new JS.Singleton('GlobalError', {
             @returns {undefined} */
         removeDomClass: function(v) {
             const existing = this.domElement.className;
-            let parts,
-                i;
             if (existing) {
-                parts = existing.split(' ');
-                i = parts.length;
+                const parts = existing.split(' ');
+                let i = parts.length;
                 while (i) {
                     if (parts[--i] === v) parts.splice(i, 1);
                 }
@@ -2910,10 +2899,9 @@ new JS.Singleton('GlobalError', {
         getHighestChildZIndex: function(skipChild) {
             const children = this.domElement.childNodes;
             let i = children.length, 
-                child, 
                 zIdx = 0;
             while (i) {
-                child = children[--i];
+                const child = children[--i];
                 if (child.nodeType === 1 && child !== skipChild) zIdx = Math.max(zIdx, DomElementProxy.getHighestZIndex(child));
             }
             return zIdx;
@@ -2924,6 +2912,16 @@ new JS.Singleton('GlobalError', {
             @returns {undefined} */
         makeHighestZIndex: function() {
             this.setZIndex(this.parent.getHighestChildZIndex(this.domElement) + 1);
+        },
+        
+        /** Scrolls the dom element to the provided position or zero if no
+            value is provided.
+            @param {number} [value] - The value to scroll to.
+            @param {boolean} [scrollInner] - Indicates if the inner dom element
+                should be used instead of the outer dom element.
+            @returns {undefined} */
+        scrollYTo: function(value, scrollInner) {
+            (scrollInner ? this.getInnerDomElement() : this.getOuterDomElement()).scrollTop = value || 0;
         }
     });
 })(myt);
@@ -24055,7 +24053,7 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
         @param {number} v
         @returns {undefined} */
     _setDomScrollTop: function(v) {
-        this.getInnerDomElement().scrollTop = v;
+        this.scrollYTo(v, true);
     },
     
     /** @returns {undefined} */
