@@ -10,8 +10,6 @@
         retainFocusDuringDomUpdate = (viewBeingRemoved, wrappedFunc) => {
             const restoreFocus = pkg.global.focus.focusedView, 
                 elem = viewBeingRemoved.getInnerDomElement();
-            let restoreScrollTop, 
-                restoreScrollLeft;
             if (restoreFocus === viewBeingRemoved || (restoreFocus && restoreFocus.isDescendantOf(viewBeingRemoved))) {
                 restoreFocus._ignoreFocus = true;
             }
@@ -19,8 +17,8 @@
             // Also maintain scrollTop/scrollLeft since those also
             // get reset when a dom element is removed. Note: descendant
             // elements with scroll positions won't get maintained.
-            restoreScrollTop = elem.scrollTop;
-            restoreScrollLeft = elem.scrollLeft;
+            const restoreScrollTop = elem.scrollTop,
+                restoreScrollLeft = elem.scrollLeft;
             
             wrappedFunc.call();
             
@@ -87,11 +85,10 @@
         calculateEffectiveScale = (view) => {
             const ancestorsAndSelf = view.getAncestors();
             let i = ancestorsAndSelf.length, 
-                ancestor,
                 effectiveScaleX = 1,
                 effectiveScaleY = 1;
             while (i) {
-                ancestor = ancestorsAndSelf[--i];
+                const ancestor = ancestorsAndSelf[--i];
                 effectiveScaleX *= ancestor.scaleX || 1;
                 effectiveScaleY *= ancestor.scaleY || 1;
                 ancestor.__effectiveScaleX = effectiveScaleX;
@@ -102,11 +99,10 @@
         
         isPointVisible = (view, x, y) => {
             const ode = view.getOuterDomElement();
-            let parent,
-                pOde;
             if (pkg.Geometry.rectContainsPoint(x, y, 0, 0, ode.offsetWidth * view.__effectiveScaleX, ode.offsetHeight * view.__effectiveScaleY)) {
+                let parent;
                 if (parent = view.parent) {
-                    pOde = parent.getOuterDomElement();
+                    const pOde = parent.getOuterDomElement();
                     return isPointVisible(
                         parent, 
                         x + (ode.offsetLeft - pOde.scrollLeft) * parent.__effectiveScaleX, 
@@ -327,14 +323,14 @@
             self.visible = true;
             
             self.tagName = attrs.tagName;
-            if (self.tagName) delete attrs.tagName;
+            delete attrs.tagName;
             self.setDomElement(self.createOurDomElement(parent));
             
             // Necessary since x and y of 0 won't update deStyle so this gets
             // things initialized correctly. Without this RootViews will have
             // an incorrect initial position for x or y of 0.
-            const s = self.getOuterDomStyle();
-            s.left = s.top = '0px';
+            const ods = self.getOuterDomStyle();
+            ods.left = ods.top = '0px';
             
             self.callSuper(parent, attrs);
             
@@ -622,16 +618,16 @@
             if (existing !== v) {
                 this.overflow = v;
                 
-                const s = this.getInnerDomStyle();
+                const ids = this.getInnerDomStyle();
                 if (v === 'autox') {
-                    s.overflowX = 'auto';
-                    s.overflowY = 'hidden';
+                    ids.overflowX = 'auto';
+                    ids.overflowY = 'hidden';
                 } else if (v === 'autoy') {
-                    s.overflowY = 'auto';
-                    s.overflowX = 'hidden';
+                    ids.overflowY = 'auto';
+                    ids.overflowX = 'hidden';
                 } else {
-                    if (existing === 'autox' || existing === 'autoy') s.overflowX = s.overflowY = null;
-                    s.overflow = v || 'visible';
+                    if (existing === 'autox' || existing === 'autoy') ids.overflowX = ids.overflowY = null;
+                    ids.overflow = v || 'visible';
                 }
                 
                 if (this.inited) this.fireEvent('overflow', v);
@@ -643,14 +639,14 @@
             if (self.visible !== v) {
                 self.visible = v;
                 
-                const s = self.getOuterDomStyle();
-                s.visibility = v ? 'inherit' : 'hidden';
+                const ods = self.getOuterDomStyle();
+                ods.visibility = v ? 'inherit' : 'hidden';
                 
                 // Move invisible elements to a very negative location so they won't
                 // effect scrollable area. Ideally we could use display:none but we
                 // can't because that makes measuring bounds not work.
-                s.left = v ? self.x + 'px' : '-100000px';
-                s.top = v ? self.y + 'px' : '-100000px';
+                ods.left = v ? self.x + 'px' : '-100000px';
+                ods.top = v ? self.y + 'px' : '-100000px';
                 
                 if (self.inited) self.fireEvent('visible', v);
             }
@@ -1141,15 +1137,13 @@
                     innerElem = self.getInnerDomElement(),
                     nextDe = outerElem.nextSibling,
                     parentElem = outerElem.parentNode;
-                let i = 0,
-                    fragment;
                 // Remove this dom element from the dom
                 if (parentElem) parentElem.removeChild(outerElem);
                 
                 // Copy the dom elements in the correct order to a document
                 // fragment and then add that fragment back to the dom.
-                fragment = document.createDocumentFragment();
-                for (; len > i;) fragment.appendChild(svs[i++].getOuterDomElement());
+                const fragment = document.createDocumentFragment();
+                for (let i = 0; len > i;) fragment.appendChild(svs[i++].getOuterDomElement());
                 innerElem.appendChild(fragment);
                 
                 // Put this dom element back in the dom

@@ -71,6 +71,18 @@
         appendToLateAttrs: function() {Array.prototype.push.apply(this.lateAttrs || (this.lateAttrs = []), arguments);},
         prependToLateAttrs: function() {Array.prototype.unshift.apply(this.lateAttrs || (this.lateAttrs = []), arguments);},
         
+        /** Used to quickly extract and set attributes from the attrs object
+            passed to an initializer.
+            @param {?Array} attrNames - An array of attribute names.
+            @param {?Object} attrs - The attrs Object to extract values from.
+            @returns {undefined}. */
+        quickSet: function(attrNames, attrs) {
+            (attrNames || []).forEach((attrName) => {
+                this[attrName] = attrs[attrName];
+                delete attrs[attrName];
+            });
+        },
+        
         /** Calls a setter function for each attribute in the provided map.
             @param {?Object} attrs - A map of attributes to set.
             @returns {undefined}. */
