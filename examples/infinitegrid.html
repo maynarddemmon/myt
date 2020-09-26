@@ -15,7 +15,7 @@
         var ModelEntry = new JS.Class('ModelEntry', M.Eventable, {
             init: function(attrs) {
                 var count = attrs.id;
-                attrs.foo = 'foo ' + count;
+                attrs.foo = count + ' foo';
                 attrs.bar = 'bar ' + M.getRandomInt(0, 1000);
                 attrs.bar2 = 'bar2 ' + M.getRandomInt(0, 1000);
                 attrs.bar3 = 'bar3 ' + (1000 - count);
@@ -48,7 +48,7 @@
             include: [M.InfiniteGridRow],
             
             initNode: function(parent, attrs) {
-                attrs.bgColor = '#ffffff';
+                if (attrs.bgColor == null) attrs.bgColor = '#ffffff';
                 
                 this.callSuper(parent, attrs);
                 
@@ -57,7 +57,6 @@
                 this.barView = new M.Text(this, {valign:'middle'});
                 this.bar2View = new M.Text(this, {valign:'middle'});
                 this.bar3View = new M.Text(this, {valign:'middle'});
-                this.bazView = new M.Text(this, {valign:'middle'});
                 
                 this.setModel(this.model);
             },
@@ -71,7 +70,24 @@
                     this.barView.setText(model.bar);
                     this.bar2View.setText(model.bar2);
                     this.bar3View.setText(model.bar3);
-                    this.bazView.setText(model.baz);
+                }
+            }
+        });
+        
+        var RowClassTwo = new JS.Class('RowClassTwo', RowClass, {
+            initNode: function(parent, attrs) {
+                attrs.bgColor = '#ff9999';
+                
+                this.callSuper(parent, attrs);
+                
+                this.bazView = new M.Text(this, {valign:'middle'});
+            },
+            
+            setModel: function(model) {
+                this.callSuper(model);
+                
+                if (this.inited && model) {
+                    if (this.bazView) this.bazView.setText(model.baz);
                 }
             }
         });
@@ -152,11 +168,22 @@
           
         var grid = new M.InfiniteGrid(leftArea, {
             collectionModel:collectionModel,
-            rowClass:RowClass,
+            rowClasses:{
+                one:RowClass,
+                two:RowClassTwo
+            },
             gridHeader:gridHeader,
             rowHeight:35,
             layoutHint:1
-        });
+        }, [{
+            getClassKey: (model) => {
+                if (model.foo.startsWith('1')) {
+                    return 'one';
+                } else {
+                    return 'two';
+                }
+            }
+        }]);
         
         new M.ResizeLayout(leftArea, {axis:'y'});
         

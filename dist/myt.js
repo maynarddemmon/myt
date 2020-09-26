@@ -4246,247 +4246,294 @@ myt.Destructible = new JS.Module('Destructible', {
 });
 
 
-/** Objects that can be used in an myt.AbstractPool should use this mixin and 
-    implement the "clean" method. */
-myt.Reusable = new JS.Module('Reusable', {
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Puts this object back into a default state suitable for storage in
-        an myt.AbstractPool
-        @returns {undefined} */
-    clean: function() {}
-});
-
-
-/** Implements an object pool. Subclasses must at a minimum implement the 
-    createInstance method.
-    
-    Events:
-        None
-    
-    Attributes:
-        None
-    
-    Private Attributes:
-        __op:array The array of objects stored in the pool.
-    
-    @class */
-myt.AbstractPool = new JS.Class('AbstractPool', {
-    include: [myt.Destructible],
-    
-    
-    // Constructor /////////////////////////////////////////////////////////////
-    /** Initialize does nothing.
-        @returns {undefined} */
-    initialize: function() {},
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Destructible */
-    destroy: function() {
-        const objPool = this.__getObjPool();
-        if (objPool) objPool.length = 0;
+((pkg) => {
+    const JSClass = JS.Class,
+        JSModule = JS.Module,
         
-        this.callSuper();
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Get the object pool.
-        @private
-        @param {boolean} lazy - If true a pool will be lazily instantiated.
-        @returns {!Object} */
-    __getObjPool: function(lazy) {
-        return lazy ? this.__op || (this.__op = []) : this.__op;
-    },
-    
-    /** Get an instance from the pool.
-        The arguments passed in will be passed to the createInstance method.
-        Note: these have no effect if an object already exists in the pool.
-        @returns {!Object} */
-    getInstance: function() {
-        const objPool = this.__getObjPool(true);
-        return objPool.length ? objPool.pop() : this.createInstance.apply(this, arguments);
-    },
-    
-    /** Creates a new object that can be stored in the pool. The default
-        implementation does nothing.
-        @returns {?Object} */
-    createInstance: function() {
-        return null;
-    },
-    
-    /** Puts the object back in the pool. The object will be "cleaned"
-        before it is stored.
-        @param {!Object} obj - The object to put in the pool.
-        @returns {undefined} */
-    putInstance: function(obj) {
-        this.__getObjPool(true).push(this.cleanInstance(obj));
-    },
-    
-    /** Cleans the object in preparation for putting it back in the pool. The
-        default implementation calls the clean method on the object if it is
-        a myt.Reusable. Otherwise it does nothing.
-        @param {!Object} obj - The object to be cleaned.
-        @returns {!Object} - The cleaned object. */
-    cleanInstance: function(obj) {
-        if (typeof obj.clean === 'function') obj.clean();
-        return obj;
-    },
-    
-    /** Calls the destroy method on all object stored in the pool if they
-        have a destroy function.
-        @returns {undefined} */
-    destroyPooledInstances: function() {
-        const objPool = this.__getObjPool();
-        if (objPool) {
-            let i = objPool.length,
-                obj;
-            while (i) {
-                obj = objPool[--i];
-                if (typeof obj.destroy === 'function') obj.destroy();
-            }
-        }
-    }
-});
-
-
-/** An implementation of an myt.AbstractPool.
-    
-    Events
-        None
-    
-    Attributes:
-        instanceClass:JS.Class (initializer only) the class to use for 
-            new instances. Defaults to Object.
-        instanceParent:myt.Node (initializer only) The node to create new
-            instances on.
-    
-    @class */
-myt.SimplePool = new JS.Class('SimplePool', myt.AbstractPool, {
-    // Constructor /////////////////////////////////////////////////////////////
-    /** Create a new myt.SimplePool
-        @param {!Function} instanceClass - The JS.Class to create instances from.
-        @param {?Object} [instanceParent] - The place to create instances 
-            on. When instanceClass is an myt.Node this will be the node parent.
-        @returns {undefined} */
-    initialize: function(instanceClass, instanceParent) {
-        this.callSuper();
+        /*  Get the object pool.
+            @private
+            @param {boolean} lazy - If true a pool will be lazily instantiated.
+            @returns {!Object} */
+        getObjPool = (abstractPool, lazy) => lazy ? abstractPool.__op || (abstractPool.__op = []) : abstractPool.__op,
         
-        this.instanceClass = instanceClass || Object;
-        this.instanceParent = instanceParent;
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.AbstractPool
-        Creates an instance of this.instanceClass and passes in 
-        this.instanceParent as the first argument if it exists.
-        arguments[0]:object (optional) the attrs to be passed to a created myt.Node.
-        @returns {?Object} */
-    createInstance: function() {
-        // If we ever need full arguments with new, see:
-        // http://stackoverflow.com/questions/1606797/use-of-apply-with-new-operator-is-this-possible
-        const parent = this.instanceParent, 
-            instanceClass = this.instanceClass;
-        return parent ? new instanceClass(parent, arguments[0]) : new instanceClass();
-    }
-});
-
-
-/** An myt.SimplePool that tracks which objects are "active". An "active"
-    object is one that has been obtained by the getInstance method.
-    
-    Events:
-        None
-    
-    Attributes:
-        None
-    
-    Private Attributes:
-        __actives:array an array of active instances.
-    
-    @class */
-myt.TrackActivesPool = new JS.Class('TrackActivesPool', myt.SimplePool, {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Destructible */
-    destroy: function() {
-        const actives = this.__getActives();
-        if (actives) actives.length = 0;
+        /*  Get the active objects array.
+            @private
+            @param {boolean} lazy - If true a list will be lazily instantiated.
+            @returns {!Array} */
+        getActiveObjArray = (trackActivesPool, lazy) => lazy ? trackActivesPool.__actives || (trackActivesPool.__actives = []) : trackActivesPool.__actives,
         
-        this.callSuper();
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Get the active objects array.
-        @private
-        @param {boolean} lazy - If true a list will be lazily instantiated.
-        @returns {!Array} */
-    __getActives: function(lazy) {
-        return lazy ? this.__actives || (this.__actives = []) : this.__actives;
-    },
-    
-    /** @overrides myt.AbstractPool */
-    getInstance: function() {
-        const instance = this.callSuper();
-        this.__getActives(true).push(instance);
-        return instance;
-    },
-    
-    /** @overrides myt.AbstractPool */
-    putInstance: function(obj) {
-        const actives = this.__getActives();
-        let i,
-            warningType;
-        if (actives) {
-            i = actives.length;
-            while (i) {
-                if (actives[--i] === obj) {
-                    actives.splice(i, 1);
-                    this.callSuper(obj);
-                    return;
+        makeInstance = (parent, instanceClass, attrs) => parent ? new instanceClass(parent, attrs) : new instanceClass(),
+        
+        destroyObjectPool = (objPool) => {
+            if (objPool) {
+                let i = objPool.length;
+                while (i) {
+                    const obj = objPool[--i];
+                    if (typeof obj.destroy === 'function') obj.destroy();
                 }
             }
-            warningType = "non-active";
-        } else {
-            warningType = "non-existant";
-        }
-        console.warn("Attempt to put a " + warningType + " instance.", obj, this);
-    },
-    
-    /** Gets an array of the active instances.
-        @param {?Function} [filterFunc] - If provided filters the
-            results.
-        @returns {!Array} */
-    getActives: function(filterFunc) {
-        const actives = this.__getActives();
-        if (actives) {
-            if (filterFunc) {
-                const retval = [],
-                    len = actives.length;
-                let i = 0,
-                    active;
-                for (; len > i;) {
-                    active = actives[i++];
-                    if (filterFunc.call(this, active)) retval.push(active);
-                }
-                return retval;
+        },
+        
+        /** Implements an object pool. Subclasses must at a minimum implement the 
+            createInstance method.
+            
+            Private Attributes:
+                __op:array The array of objects stored in the pool.
+            
+            @class */
+        AbstractPool = new JSClass('AbstractPool', {
+            include: [pkg.Destructible],
+            
+            
+            // Constructor /////////////////////////////////////////////////////
+            /** Initialize does nothing.
+                @returns {undefined} */
+            initialize: () => {},
+            
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            /** @overrides myt.Destructible */
+            destroy: function() {
+                const objPool = getObjPool(this);
+                if (objPool) objPool.length = 0;
+                
+                this.callSuper();
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** Get an instance from the pool.
+                The arguments passed in will be passed to the createInstance method.
+                Note: these have no effect if an object already exists in the pool.
+                @returns {!Object} */
+            getInstance: function() {
+                const objPool = getObjPool(this, true);
+                return objPool.length ? objPool.pop() : this.createInstance.apply(this, arguments);
+            },
+            
+            /** Creates a new object that can be stored in the pool. The default
+                implementation does nothing.
+                @returns {?Object} */
+            createInstance: () => null,
+            
+            /** Puts the object back in the pool. The object will be "cleaned"
+                before it is stored.
+                @param {!Object} obj - The object to put in the pool.
+                @returns {undefined} */
+            putInstance: function(obj) {
+                getObjPool(this, true).push(this.cleanInstance(obj));
+            },
+            
+            /** Cleans the object in preparation for putting it back in the pool. The
+                default implementation calls the clean method on the object if it is
+                a function. Otherwise it does nothing.
+                @param {!Object} obj - The object to be cleaned.
+                @returns {!Object} - The cleaned object. */
+            cleanInstance: (obj) => {
+                if (typeof obj.clean === 'function') obj.clean();
+                return obj;
+            },
+            
+            /** Calls the destroy method on all object stored in the pool if they
+                have a destroy function.
+                @returns {undefined} */
+            destroyPooledInstances: function() {
+                destroyObjectPool(getObjPool(this));
             }
-            return actives.concat();
-        }
-        return [];
-    },
+        }),
+        
+        /** An implementation of an myt.AbstractPool.
+            
+            Attributes:
+                instanceClass:JS.Class (initializer only) the class to use for 
+                    new instances. Defaults to Object.
+                instanceParent:myt.Node (initializer only) The node to create new
+                    instances on.
+            
+            @class */
+        SimplePool = pkg.SimplePool = new JSClass('SimplePool', AbstractPool, {
+            // Constructor /////////////////////////////////////////////////////
+            /** Create a new myt.SimplePool
+                @param {!Function} instanceClass - The JS.Class to create instances from.
+                @param {?Object} [instanceParent] - The place to create instances 
+                    on. When instanceClass is an myt.Node this will be the node parent.
+                @returns {undefined} */
+            initialize: function(instanceClass, instanceParent) {
+                this.callSuper();
+                
+                this.instanceClass = instanceClass || Object;
+                this.instanceParent = instanceParent;
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @overrides myt.AbstractPool
+                Creates an instance of this.instanceClass and passes in 
+                this.instanceParent as the first argument if it exists.
+                arguments[0]:object (optional) the attrs to be passed to a created myt.Node.
+                @returns {?Object} */
+            createInstance: function() {
+                return makeInstance(this.instanceParent, this.instanceClass, arguments[0]);
+            }
+        }),
+        
+        /** Tracks which objects are "active". An "active" object is one that 
+            has been obtained by the getInstance method.
+            
+            Private Attributes:
+                __actives:array an array of active instances.
+            
+            @class */
+        TrackActives = new JSModule('TrackActives', {
+            // Life Cycle //////////////////////////////////////////////////////
+            /** @overrides myt.Destructible */
+            destroy: function() {
+                const actives = getActiveObjArray(this);
+                if (actives) actives.length = 0;
+                
+                this.callSuper();
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @overrides myt.AbstractPool */
+            getInstance: function() {
+                const instance = this.callSuper();
+                getActiveObjArray(this, true).push(instance);
+                return instance;
+            },
+            
+            /** @overrides myt.AbstractPool */
+            putInstance: function(obj) {
+                const actives = getActiveObjArray(this);
+                let warningType;
+                if (actives) {
+                    let i = actives.length;
+                    while (i) {
+                        if (actives[--i] === obj) {
+                            actives.splice(i, 1);
+                            this.callSuper(obj);
+                            return;
+                        }
+                    }
+                    warningType = "non-active";
+                } else {
+                    warningType = "non-existant";
+                }
+                console.warn("Attempt to put a " + warningType + " instance.", obj, this);
+            },
+            
+            /** Gets an array of the active instances.
+                @param {?Function} [filterFunc] - If provided filters the results.
+                @returns {!Array} */
+            getActives: function(filterFunc) {
+                const actives = getActiveObjArray(this);
+                if (actives) {
+                    if (filterFunc) {
+                        const retval = [],
+                            len = actives.length;
+                        for (let i = 0; len > i;) {
+                            const active = actives[i++];
+                            if (filterFunc.call(this, active)) retval.push(active);
+                        }
+                        return retval;
+                    }
+                    return actives.concat();
+                }
+                return [];
+            },
+            
+            /** Puts all the active instances back in the pool.
+                @returns {undefined} */
+            putActives: function() {
+                const actives = getActiveObjArray(this);
+                if (actives) {
+                    let i = actives.length;
+                    while (i) this.putInstance(actives[--i]);
+                }
+            }
+        }),
+        
+        /** An myt.SimplePool that tracks which objects are "active".
+            
+            @class */
+        TrackActivesPool = pkg.TrackActivesPool = new JSClass('TrackActivesPool', SimplePool, {
+            include: [TrackActives]
+        });
     
-    /** Puts all the active instances back in the pool.
-        @returns {undefined} */
-    putActives: function() {
-        const actives = this.__getActives();
-        if (actives) {
-            let i = actives.length;
-            while (i) this.putInstance(actives[--i]);
+    pkg.TrackActivesMultiPool = new JSClass('TrackActivesMultiPool', AbstractPool, {
+        // Constructor /////////////////////////////////////////////////////////
+        initialize: function(instanceClassesByKey, instanceParent) {
+            this.callSuper();
+            
+            this.instanceClassesByKey = instanceClassesByKey;
+            
+            const poolsByClassName = this._poolsByClassName = {},
+                poolsByKey = this._poolsByKey = {};
+            for (let key in instanceClassesByKey) {
+                const klass = instanceClassesByKey[key];
+                poolsByKey[key] = poolsByClassName[klass.__displayName] = new TrackActivesPool(klass, instanceParent);
+            }
+        },
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        destroy: function() {
+            const poolsByKey = this._poolsByKey;
+            for (let key in poolsByKey) poolsByKey[key].destroy();
+            
+            this.callSuper();
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        getInstance: function() {
+            const key = arguments[0],
+                pool = this._poolsByKey[key];
+            if (pool) {
+                return pool.getInstance(arguments);
+            } else {
+                console.warn('No pool found for key:', key);
+            }
+        },
+        
+        putInstance: function(obj) {
+            const pool = this._poolsByClassName[obj.klass.__displayName];
+            if (pool) {
+                pool.putInstance(obj);
+            } else {
+                console.warn('No pool found for obj:', obj);
+            }
+        },
+        
+        destroyPooledInstances: function() {
+            const poolsByKey = this._poolsByKey;
+            for (let key in poolsByKey) poolsByKey[key].destroyPooledInstances();
+        },
+        
+        getActives: function(filterFunc) {
+            let actives = [];
+            const poolsByKey = this._poolsByKey;
+            for (let key in poolsByKey) actives = actives.concat(poolsByKey[key].getActives(filterFunc));
+            return actives;
+        },
+        
+        putActives: function() {
+            const poolsByKey = this._poolsByKey;
+            for (let key in poolsByKey) poolsByKey[key].putActives();
         }
-    }
-});
+    });
+    
+    /** Objects that can be used in an myt.AbstractPool should use this mixin and 
+        implement the "clean" method. */
+    pkg.Reusable = new JSModule('Reusable', {
+        // Methods /////////////////////////////////////////////////////////////
+        /** Puts this object back into a default state suitable for storage in
+            an myt.AbstractPool
+            @returns {undefined} */
+        clean: () => {}
+    });
+})(myt);
 
 
 ((pkg) => {
@@ -23901,384 +23948,359 @@ myt.Grid = new JS.Class('Grid', myt.View, {
 })(myt);
 
 
-/** A mixin for rows in infinite scrolling lists
-    
-    Events:
-        None
-    
-    Attributes:
-        None
-    
-    Private Attributes:
-        None
-*/
-myt.InfiniteListRow = new JS.Module('InfiniteListRow', {
-    include: [myt.Reusable],
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setInfiniteOwner: function(v) {
-        this.infiniteOwner = v;
-    },
-    
-    setModel: function(model) {
-        this.model = model;
-    }
-});
-
-
-/** A base class for infinite scrolling lists
-    
-    Events:
-        None
-    
-    Attributes:
-        collectionModel
-        rowClass
-        modelIDName
-        numericSort
-        ascendingSort
-        rowHeight
-        rowInset
-        rowOutset
-        rowSpacing
-    
-    Private Attributes:
-        _listData:array The data for the rows in the list.
-        _startIdx:int The index into the data of the first row shown
-        _endIdx:int The index into the data of the last row shown
-        _visibleRowsByIdx:object A cache of what rows are currently shown by
-            the index of the data for the row. This is provides faster
-            performance when refreshing the list.
-        _listView:myt.View The view that contains the rows in the list.
-        _itemPool:myt.TrackActivesPool The pool for row views.
-    
-    @class */
-myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        DEFAULT_ROW_SPACING:1,
-        DEFAULT_ROW_HEIGHT:30,
-        DEFAULT_ROW_INSET:0,
-        DEFAULT_ROW_OUTSET:0,
-        DEFAULT_BG_COLOR:'#cccccc',
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        const self = this,
-            M = myt,
-            IL = M.InfiniteList,
-            rowClass = attrs.rowClass;
-        delete attrs.rowClass;
+((pkg) => {
+    const View = pkg.View,
+        DEFAULT_ROW_SPACING = 1,
+        DEFAULT_ROW_HEIGHT = 30,
+        DEFAULT_ROW_INSET = 0,
+        DEFAULT_ROW_OUTSET = 0,
+        DEFAULT_BG_COLOR = '#cccccc',
         
-        if (attrs.modelIDName == null) attrs.modelIDName = 'id';
-        if (attrs.numericSort == null) attrs.numericSort = true;
-        if (attrs.ascendingSort == null) attrs.ascendingSort = true;
-        if (attrs.overflow == null) attrs.overflow = 'autoy';
+        DEFAULT_CLASS_KEY = 'default',
         
-        if (attrs.bgColor == null) attrs.bgColor = IL.DEFAULT_BG_COLOR;
-        if (attrs.rowSpacing == null) attrs.rowSpacing = IL.DEFAULT_ROW_SPACING;
-        if (attrs.rowInset == null) attrs.rowInset = IL.DEFAULT_ROW_INSET;
-        if (attrs.rowOutset == null) attrs.rowOutset = IL.DEFAULT_ROW_OUTSET;
-        if (attrs.rowHeight == null) attrs.rowHeight = IL.DEFAULT_ROW_HEIGHT;
+        updateRowExtent = (infiniteList) => {
+            infiniteList._rowExtent = infiniteList.rowSpacing + infiniteList.rowHeight;
+        },
         
-        if (attrs.overscrollBehavior == null) attrs.overscrollBehavior = 'auto contain';
+        getDomScrollTop = (infiniteList) => infiniteList.getInnerDomElement().scrollTop,
         
-        self._rowExtent = self.rowSpacing = self.rowHeight = 
-            self._startIdx = self._endIdx = 0;
+        setDomScrollTop = (infiniteList, v) => {
+            infiniteList.scrollYTo(v, true);
+        };
         
-        self.callSuper(parent, attrs);
+    /** A mixin for rows in infinite scrolling lists
         
-        // Build UI
-        const listView = self._listView = new M.View(self);
-        self._scrollAnchorView = new M.View(listView, {width:1, height:1, bgColor:'transparent'});
-        self._itemPool = new M.TrackActivesPool(rowClass, listView);
+        Attributes:
+            infiniteOwner
+            model
         
-        self.attachTo(self, 'refreshListUI', 'height');
-        self.attachToDom(self, '_handleScrollChange', 'scroll');
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setOverscrollBehavior: function(v) {
-        this.overscrollBehavior = v;
-        this.getInnerDomStyle().overscrollBehavior = v;
-    },
-    
-    setCollectionModel: function(v) {this.collectionModel = v;},
-    setModelIDName: function(v) {this.modelIDName = v;},
-    setRowSpacing: function(v) {
-        this.rowSpacing = v;
-        this._updateRowExtent();
-    },
-    setRowHeight: function(v) {
-        this.rowHeight = v;
-        this._updateRowExtent();
-    },
-    
-    getListData: function() {return this._listData;},
-    
-    /** @private */
-    _updateRowExtent: function() {
-        this._rowExtent = this.rowSpacing + this.rowHeight;
-    },
-    
-    setWidth: function(v, supressEvent) {
-        if (v > 0) {
-            this.callSuper(v, supressEvent);
-            if (this.inited) {
-                const listView = this._listView,
-                    w = this.width;
-                listView.setWidth(w);
-                listView.getSubviews().forEach(sv => {sv.setWidth(w);});
-            }
+        @class */
+    pkg.InfiniteListRow = new JS.Module('InfiniteListRow', {
+        include: [pkg.Reusable],
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setInfiniteOwner: function(v) {
+            this.infiniteOwner = v;
+        },
+        
+        setModel: function(model) {
+            this.model = model;
         }
-    },
+    });
     
-    getVisibleRows: function() {
-        return Object.values(this._visibleRowsByIdx || {});
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @private
-        @returns {number} */
-    _getDomScrollTop: function() {
-        return this.getInnerDomElement().scrollTop;
-    },
-    
-    /** @private
-        @param {number} v
-        @returns {undefined} */
-    _setDomScrollTop: function(v) {
-        this.scrollYTo(v, true);
-    },
-    
-    /** @returns {undefined} */
-    isScrolledToEnd: function() {
-        return this._getDomScrollTop() + this.height === this._listView.height;
-    },
-    
-    getSortFunction: function() {
-        // Default to a numeric sort on the IDs
-        const modelIDName = this.modelIDName,
-            asc = this.ascendingSort ? 1 : -1;
-        if (this.numericSort) {
-            return (a, b) => (a[modelIDName] - b[modelIDName]) * asc;
-        } else {
-            return (a, b) => {
-                a = a[modelIDName];
-                b = b[modelIDName];
-                return (a > b ? 1 : (a < b ? -1 : 0)) * asc;
-            };
-        }
-    },
-    
-    getFilterFunction: function() {
-        // Unimplemented which means don't filter anything out.
-    },
-    
-    scrollModelIntoView: function(model) {
-        const self = this,
-            idx = self.getIndexOfModelInData(model),
-            rowExtent = self._rowExtent;
-        let viewportTop,
-            viewportBottom,
-            rowTop,
-            rowBottom;
-        if (idx >= 0) {
-            viewportTop = self._getDomScrollTop();
-            viewportBottom = viewportTop + self.height;
-            rowTop = self.rowInset + idx * rowExtent;
-            rowBottom = rowTop + rowExtent;
+    /** A base class for infinite scrolling lists
+        
+        Attributes:
+            collectionModel
+            rowClasses
+            modelIDName
+            numericSort
+            ascendingSort
+            rowHeight
+            rowInset
+            rowOutset
+            rowSpacing
+        
+        Private Attributes:
+            _listData:array The data for the rows in the list.
+            _startIdx:int The index into the data of the first row shown
+            _endIdx:int The index into the data of the last row shown
+            _visibleRowsByIdx:object A cache of what rows are currently shown by
+                the index of the data for the row. This is provides faster
+                performance when refreshing the list.
+            _listView:myt.View The view that contains the rows in the list.
+            _itemPool:myt.TrackActivesPool The pool for row views.
+        
+        @class */
+    pkg.InfiniteList = new JS.Class('InfiniteList', View, {
+        // Life Cycle //////////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            const self = this;
+            let rowClasses = attrs.rowClasses;
+            delete attrs.rowClasses;
             
-            // Only scroll if not overlapping visible area.
-            if (rowTop <= viewportTop) {
-                self._setDomScrollTop(rowTop);
-                return true;
-            } else if (rowBottom >= viewportBottom) {
-                self._setDomScrollTop(rowBottom - self.height);
-                return true;
+            if (typeof rowClasses === 'function') {
+                const defaultClassObj = {};
+                defaultClassObj[DEFAULT_CLASS_KEY] = rowClasses;
+                rowClasses = defaultClassObj;
             }
-        }
+            
+            if (attrs.modelIDName == null) attrs.modelIDName = 'id';
+            if (attrs.numericSort == null) attrs.numericSort = true;
+            if (attrs.ascendingSort == null) attrs.ascendingSort = true;
+            if (attrs.overflow == null) attrs.overflow = 'autoy';
+            
+            if (attrs.bgColor == null) attrs.bgColor = DEFAULT_BG_COLOR;
+            if (attrs.rowSpacing == null) attrs.rowSpacing = DEFAULT_ROW_SPACING;
+            if (attrs.rowInset == null) attrs.rowInset = DEFAULT_ROW_INSET;
+            if (attrs.rowOutset == null) attrs.rowOutset = DEFAULT_ROW_OUTSET;
+            if (attrs.rowHeight == null) attrs.rowHeight = DEFAULT_ROW_HEIGHT;
+            
+            if (attrs.overscrollBehavior == null) attrs.overscrollBehavior = 'auto contain';
+            
+            self._rowExtent = self.rowSpacing = self.rowHeight = 
+                self._startIdx = self._endIdx = 0;
+            
+            self.callSuper(parent, attrs);
+            
+            // Build UI
+            const listView = self._listView = new View(self);
+            self._scrollAnchorView = new View(listView, {width:1, height:1, bgColor:'transparent'});
+            self._itemPool = self.makePool(rowClasses, listView);
+            
+            self.attachTo(self, 'refreshListUI', 'height');
+            self.attachToDom(self, 'refreshListUI', 'scroll');
+        },
         
-        return false;
-    },
-    
-    isModelInData: function(model) {
-        return this.getIndexOfModelInData(model) !== -1;
-    },
-    
-    getNextModel: function(model, wrap=true, alwaysReturnAModel=true) {
-        const data = this.getListData(),
-            len = data.length;
-        let idx = this.getIndexOfModelInData(model);
-        if (idx >= 0) {
-            idx += 1;
-            if (idx >= len) {
-                return wrap ? data[0] : data[len - 1];
-            } else {
-                return data[idx];
+        makePool: (rowClasses, listView) => new pkg.TrackActivesMultiPool(rowClasses, listView),
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setOverscrollBehavior: function(v) {
+            this.overscrollBehavior = v;
+            this.getInnerDomStyle().overscrollBehavior = v;
+        },
+        
+        setCollectionModel: function(v) {this.collectionModel = v;},
+        setModelIDName: function(v) {this.modelIDName = v;},
+        setRowSpacing: function(v) {
+            this.rowSpacing = v;
+            updateRowExtent(this);
+        },
+        setRowHeight: function(v) {
+            this.rowHeight = v;
+            updateRowExtent(this);
+        },
+        
+        getListData: function() {return this._listData;},
+        
+        setWidth: function(v, supressEvent) {
+            if (v > 0) {
+                this.callSuper(v, supressEvent);
+                if (this.inited) {
+                    const listView = this._listView,
+                        w = this.width;
+                    listView.setWidth(w);
+                    listView.getSubviews().forEach(sv => {sv.setWidth(w);});
+                }
             }
-        } else {
-            // Return last model for no result if so indicated
-            if (alwaysReturnAModel && len > 0) return data[len - 1];
-        }
-    },
-    
-    getPrevModel: function(model, wrap=true, alwaysReturnAModel=true) {
-        const data = this.getListData(),
-            len = data.length;
-        let idx = this.getIndexOfModelInData(model);
-        if (idx >= 0) {
-            idx -= 1;
-            if (idx < 0) {
-                return wrap ? data[len - 1] : data[0];
+        },
+        
+        getVisibleRows: function() {
+            return Object.values(this._visibleRowsByIdx || {});
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @returns {undefined} */
+        isScrolledToEnd: function() {
+            return getDomScrollTop(this) + this.height === this._listView.height;
+        },
+        
+        getSortFunction: function() {
+            // Default to a numeric sort on the IDs
+            const modelIDName = this.modelIDName,
+                asc = this.ascendingSort ? 1 : -1;
+            if (this.numericSort) {
+                return (a, b) => (a[modelIDName] - b[modelIDName]) * asc;
             } else {
-                return data[idx];
+                return (a, b) => {
+                    a = a[modelIDName];
+                    b = b[modelIDName];
+                    return (a > b ? 1 : (a < b ? -1 : 0)) * asc;
+                };
             }
-        } else {
-            // Return first model for no result if so indicated
-            if (alwaysReturnAModel && len > 0) return data[0];
-        }
-    },
-    
-    getIndexOfModelInData: function(model) {
-        if (model) {
+        },
+        
+        getFilterFunction: function() {
+            // Unimplemented which means don't filter anything out.
+        },
+        
+        scrollModelIntoView: function(model) {
             const self = this,
-                modelIDName = self.modelIDName,
-                modelId = model[modelIDName],
-                data = self.getListData();
-            let i = data.length;
-            while (i) if (data[--i][modelIDName] === modelId) return i;
-        }
-        return -1;
-    },
-    
-    getActiveRowForModel: function(model) {
-        const activeRows = this._itemPool.getActives();
-        let i = activeRows.length,
-            row;
-        while (i) {
-            row = activeRows[--i];
-            if (row.model === model) return row;
-        }
-    },
-    
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    _handleScrollChange: function(event) {
-        this.refreshListUI();
-    },
-    
-    refreshListData: function(preserveScroll) {
-        this._listData = this.fetchListData();
-        this.resetListUI(preserveScroll);
-    },
-    
-    fetchListData: function() {
-        return this.collectionModel.getAsSortedList(this.getSortFunction(), this.getFilterFunction());
-    },
-    
-    resetListUI: function(preserveScroll) {
-        const self = this,
-            data = self.getListData(),
-            len = data.length,
-            visibleRowsByIdx = self._visibleRowsByIdx,
-            pool = self._itemPool,
-            listView = self._listView,
-            scrollAnchorView = self._scrollAnchorView;
-        let i;
-        
-        // Resize the listView to the height to accomodate all rows
-        listView.setHeight(len * self._rowExtent - (len > 0 ? self.rowSpacing : 0) + self.rowInset + self.rowOutset);
-        scrollAnchorView.setY(listView.height - scrollAnchorView.height);
-        
-        // Clear out existing rows
-        self._startIdx = self._endIdx = 0;
-        for (i in visibleRowsByIdx) self.putRowBackInPool(visibleRowsByIdx[i]);
-        self._visibleRowsByIdx = {};
-        
-        // Reset scroll position
-        if (preserveScroll || self._getDomScrollTop() === 0) {
-            // Just refresh since we won't move the scroll position
-            self.refreshListUI();
-        } else {
-            // Updating the scroll position triggers a refreshListUI 
-            // via _handleScrollChange
-            self._setDomScrollTop(0);
-        }
-    },
-    
-    putRowBackInPool: function(row) {
-        row.setVisible(false);
-        this._itemPool.putInstance(row);
-    },
-    
-    refreshListUI: function() {
-        const self = this,
-            rowWidth = self.width,
-            rowHeight = self.rowHeight,
-            rowExtent = self._rowExtent,
-            rowInset = self.rowInset,
-            scrollY = self._getDomScrollTop(),
-            data = self.getListData() || [],
-            visibleRowsByIdx = self._visibleRowsByIdx,
-            pool = self._itemPool;
-        let startIdx,
-            endIdx,
-            row,
-            i;
-        
-        startIdx = Math.max(0, Math.floor((scrollY - rowInset) / rowExtent));
-        endIdx = Math.min(data.length, Math.ceil((scrollY - rowInset + self.height) / rowExtent));
-        
-        if (self._startIdx !== startIdx || self._endIdx !== endIdx) {
-            self._startIdx = startIdx;
-            self._endIdx = endIdx;
-            
-            // Put all visible rows that are not within the idx range back 
-            // into the pool
-            for (i in visibleRowsByIdx) {
-                if (i < startIdx || i >= endIdx) {
-                    self.putRowBackInPool(visibleRowsByIdx[i]);
-                    delete visibleRowsByIdx[i];
+                idx = self.getIndexOfModelInData(model);
+            if (idx >= 0) {
+                const rowExtent = self._rowExtent,
+                    viewportTop = getDomScrollTop(self),
+                    viewportBottom = viewportTop + self.height,
+                    rowTop = self.rowInset + idx * rowExtent,
+                    rowBottom = rowTop + rowExtent;
+                
+                // Only scroll if not overlapping visible area.
+                if (rowTop <= viewportTop) {
+                    setDomScrollTop(self, rowTop);
+                    return true;
+                } else if (rowBottom >= viewportBottom) {
+                    setDomScrollTop(self, rowBottom - self.height);
+                    return true;
                 }
             }
             
-            for (i = startIdx; i < endIdx; i++) {
-                row = visibleRowsByIdx[i];
+            return false;
+        },
+        
+        isModelInData: function(model) {
+            return this.getIndexOfModelInData(model) !== -1;
+        },
+        
+        getNextModel: function(model, wrap=true, alwaysReturnAModel=true) {
+            const data = this.getListData(),
+                len = data.length;
+            let idx = this.getIndexOfModelInData(model);
+            if (idx >= 0) {
+                idx += 1;
+                if (idx >= len) {
+                    return wrap ? data[0] : data[len - 1];
+                } else {
+                    return data[idx];
+                }
+            } else {
+                // Return last model for no result if so indicated
+                if (alwaysReturnAModel && len > 0) return data[len - 1];
+            }
+        },
+        
+        getPrevModel: function(model, wrap=true, alwaysReturnAModel=true) {
+            const data = this.getListData(),
+                len = data.length;
+            let idx = this.getIndexOfModelInData(model);
+            if (idx >= 0) {
+                idx -= 1;
+                if (idx < 0) {
+                    return wrap ? data[len - 1] : data[0];
+                } else {
+                    return data[idx];
+                }
+            } else {
+                // Return first model for no result if so indicated
+                if (alwaysReturnAModel && len > 0) return data[0];
+            }
+        },
+        
+        getIndexOfModelInData: function(model) {
+            if (model) {
+                const self = this,
+                    modelIDName = self.modelIDName,
+                    modelId = model[modelIDName],
+                    data = self.getListData();
+                let i = data.length;
+                while (i) if (data[--i][modelIDName] === modelId) return i;
+            }
+            return -1;
+        },
+        
+        getActiveRowForModel: function(model) {
+            const activeRows = this._itemPool.getActives();
+            let i = activeRows.length;
+            while (i) {
+                const row = activeRows[--i];
+                if (row.model === model) return row;
+            }
+        },
+        
+        refreshListData: function(preserveScroll) {
+            this._listData = this.fetchListData();
+            this.resetListUI(preserveScroll);
+        },
+        
+        fetchListData: function() {
+            return this.collectionModel.getAsSortedList(this.getSortFunction(), this.getFilterFunction());
+        },
+        
+        resetListUI: function(preserveScroll) {
+            const self = this,
+                data = self.getListData(),
+                len = data.length,
+                visibleRowsByIdx = self._visibleRowsByIdx,
+                listView = self._listView,
+                scrollAnchorView = self._scrollAnchorView;
+            
+            // Resize the listView to the height to accomodate all rows
+            listView.setHeight(len * self._rowExtent - (len > 0 ? self.rowSpacing : 0) + self.rowInset + self.rowOutset);
+            scrollAnchorView.setY(listView.height - scrollAnchorView.height);
+            
+            // Clear out existing rows
+            self._startIdx = self._endIdx = 0;
+            for (let i in visibleRowsByIdx) self.putRowBackInPool(visibleRowsByIdx[i]);
+            self._visibleRowsByIdx = {};
+            
+            // Reset scroll position
+            if (preserveScroll || getDomScrollTop(self) === 0) {
+                // Just refresh since we won't move the scroll position
+                self.refreshListUI();
+            } else {
+                // Updating the scroll position triggers a refreshListUI 
+                // via the DOM scroll event
+                setDomScrollTop(self, 0);
+            }
+        },
+        
+        putRowBackInPool: function(row) {
+            row.setVisible(false);
+            this._itemPool.putInstance(row);
+        },
+        
+        refreshListUI: function(ignoredEvent) {
+            const self = this,
+                rowWidth = self.width,
+                rowHeight = self.rowHeight,
+                rowExtent = self._rowExtent,
+                rowInset = self.rowInset,
+                scrollY = getDomScrollTop(self),
+                data = self.getListData() || [],
+                visibleRowsByIdx = self._visibleRowsByIdx,
+                startIdx = Math.max(0, Math.floor((scrollY - rowInset) / rowExtent)),
+                endIdx = Math.min(data.length, Math.ceil((scrollY - rowInset + self.height) / rowExtent));
+            
+            if (self._startIdx !== startIdx || self._endIdx !== endIdx) {
+                self._startIdx = startIdx;
+                self._endIdx = endIdx;
                 
-                if (!row) {
-                    row = pool.getInstance();
-                    
-                    row.setWidth(rowWidth);
-                    row.setHeight(rowHeight);
-                    row.setY(rowInset + i * rowExtent);
-                    row.setModel(data[i]);
-                    row.setInfiniteOwner(self);
-                    row.setVisible(true);
-                    
-                    visibleRowsByIdx[i] = row;
-                    
-                    self.updateRow(row);
+                // Put all visible rows that are not within the idx range back 
+                // into the pool
+                let i;
+                for (i in visibleRowsByIdx) {
+                    if (i < startIdx || i >= endIdx) {
+                        self.putRowBackInPool(visibleRowsByIdx[i]);
+                        delete visibleRowsByIdx[i];
+                    }
                 }
                 
-                // Maintain tab ordering by updating the underlying dom order.
-                row.bringToFront();
+                for (i = startIdx; i < endIdx; i++) {
+                    let row = visibleRowsByIdx[i];
+                    
+                    if (!row) {
+                        const model = data[i];
+                        row = self._itemPool.getInstance(self.getClassKey(model));
+                        
+                        row.setWidth(rowWidth);
+                        row.setHeight(rowHeight);
+                        row.setY(rowInset + i * rowExtent);
+                        row.setModel(model);
+                        row.setInfiniteOwner(self);
+                        row.setVisible(true);
+                        
+                        visibleRowsByIdx[i] = row;
+                        
+                        self.updateRow(row);
+                    }
+                    
+                    // Maintain tab ordering by updating the underlying dom order.
+                    row.bringToFront();
+                }
             }
-        }
+            
+            self.doAfterListRefresh();
+        },
         
-        self.doAfterListRefresh();
-    },
-    
-    updateRow: (row) => {},
-    
-    doAfterListRefresh: () => {}
-});
+        getClassKey: (model) => DEFAULT_CLASS_KEY,
+        
+        updateRow: (row) => {},
+        
+        doAfterListRefresh: () => {}
+    });
+})(myt);
 
 
 ((pkg) => {
@@ -24447,228 +24469,200 @@ myt.InfiniteList = new JS.Class('InfiniteList', myt.View, {
 })(myt);
 
 
-/** A mixin for rows in infinite scrolling lists
+((pkg) => {
+    const JSClass = JS.Class,
+        DEFAULT_SELECTED_COLOR = '#ccccff',
+        DEFAULT_ACTIVE_COLOR = '#f8f8f8',
+        DEFAULT_HOVER_COLOR = '#eeeeee',
+        DEFAULT_READY_COLOR = '#ffffff',
+        
+        /* Clears the selectedRow while leaving the selectedRowModel. */
+        clearSelectedRow = (selectableInfiniteList) => {
+            const existing = selectableInfiniteList.selectedRow;
+            if (existing) {
+                existing.setSelected(false);
+                selectableInfiniteList.set('selectedRow', null, true);
+            }
+        },
+        
+        /** A mixin for rows in infinite scrolling lists
+            
+            @class */
+        SelectableInfiniteListRow = pkg.SelectableInfiniteListRow = new JS.Module('SelectableInfiniteListRow', {
+            include: [pkg.InfiniteListRow, pkg.Selectable]
+        });
     
-    Events:
-        None
-    
-    Attributes:
-        None
-    
-    Private Attributes:
-        None
-*/
-myt.SelectableInfiniteListRow = new JS.Module('SelectableInfiniteListRow', {
-    include: [myt.InfiniteListRow, myt.Selectable]
-});
+    /** A simple implementation of a SelectableInfiniteListRow.
+        
+        Attributes:
+            selectedColor
+        
+        @class */
+    pkg.SimpleSelectableInfiniteListRow = new JSClass('SimpleSelectableInfiniteListRow', pkg.SimpleButton, {
+        include: [SelectableInfiniteListRow],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            if (attrs.selectedColor == null) attrs.selectedColor = DEFAULT_SELECTED_COLOR;
+            if (attrs.activeColor == null) attrs.activeColor = DEFAULT_ACTIVE_COLOR;
+            if (attrs.hoverColor == null) attrs.hoverColor = DEFAULT_HOVER_COLOR;
+            if (attrs.readyColor == null) attrs.readyColor = DEFAULT_READY_COLOR;
+            
+            if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
+            if (attrs.activationKeys == null) attrs.activationKeys = [13,27,32,37,38,39,40];
+            
+            this.callSuper(parent, attrs);
+        },
+        
+        destroy: function() {
+            if (this.selected) this.infiniteOwner.setSelectedRow();
+            this.callSuper();
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setSelected: function(v) {
+            this.callSuper(v);
+            if (this.inited) this.updateUI();
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        clean: function() {
+            this.setMouseOver(false);
+            this.setMouseDown(false);
+            if (this.focused) this.blur();
+            this.callSuper();
+        },
+        
+        updateUI: function() {
+            this.callSuper();
+            if (this.selected) this.setBgColor(this.selectedColor);
+        },
+        
+        doActivated: function() {
+            this.callSuper();
+            this.infiniteOwner.setSelectedRow(this);
+        },
+        
+        doActivationKeyDown: function(key, isRepeat) {
+            const owner = this.infiniteOwner,
+                model = this.model;
+            switch (key) {
+                case 27: // Escape
+                    if (this.selected) owner.setSelectedRow();
+                    break;
+                case 37: // Left
+                case 38: // Up
+                    owner.selectPrevRowForModel(model);
+                    break;
+                case 39: // Right
+                case 40: // Down
+                    owner.selectNextRowForModel(model);
+                    break;
+            }
+        },
+        
+        doActivationKeyUp: function(key) {
+            switch (key) {
+                case 13: // Enter
+                case 32: // Space
+                    this.doActivated();
+                    break;
+            }
+        }
+    });
 
-
-/** A base class for infinite scrolling lists that support a selectable row.
-    
-    Events:
-        None
-    
-    Attributes:
-        selectedRow
-        selectedRowModel
-    
-    Private Attributes:
-        None
-*/
-myt.SelectableInfiniteList = new JS.Class('SelectableInfiniteList', myt.InfiniteList, {
-    // Accessors ///////////////////////////////////////////////////////////////
-    setSelectedRow: function(row) {
-        const existing = this.selectedRow;
-        if (row !== existing) {
-            if (existing) existing.setSelected(false);
-            this.setSelectedRowModel();
-            this.set('selectedRow', row, true);
+    /** A base class for infinite scrolling lists that support a selectable row.
+        
+        Attributes:
+            selectedRow
+            selectedRowModel
+        
+        @class */
+    pkg.SelectableInfiniteList = new JSClass('SelectableInfiniteList', pkg.InfiniteList, {
+        // Accessors ///////////////////////////////////////////////////////////
+        setSelectedRow: function(row) {
+            const existing = this.selectedRow;
+            if (row !== existing) {
+                if (existing) existing.setSelected(false);
+                this.setSelectedRowModel();
+                this.set('selectedRow', row, true);
+                if (row) {
+                    this.setSelectedRowModel(row.model);
+                    row.setSelected(true);
+                }
+            }
+        },
+        
+        setSelectedRowModel: function(v) {
+            this.set('selectedRowModel', v, true);
+            
+            // Scroll the selected row into view
+            this.scrollModelIntoView(this.selectedRowModel);
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        getActiveSelectedRow: function() {
+            return this.getActiveRowForModel(this.selectedRowModel);
+        },
+        
+        selectRowForModel: function(model, focus) {
+            if (model) {
+                clearSelectedRow(this);
+                this.setSelectedRowModel(model);
+                this.refreshListUI();
+                
+                // Focus on the newly selected row
+                if (focus) {
+                    const row = this.getActiveSelectedRow();
+                    if (row) row.focus();
+                }
+            }
+        },
+        
+        selectNextRowForModel: function(model, focus=true) {
+            this.selectRowForModel(this.getNextModel(model), focus);
+        },
+        
+        selectPrevRowForModel: function(model, focus=true) {
+            this.selectRowForModel(this.getPrevModel(model), focus);
+        },
+        
+        /** @overrides */
+        resetListUI: function(preserveScroll) {
+            if (this.isModelInData(this.selectedRowModel)) {
+                // Only clear the selected row since it's still in the data and
+                // thus may be shown again.
+                clearSelectedRow(this);
+            } else {
+                // Clear the row and model since the model can no longer be shown.
+                this.setSelectedRow();
+            }
+            
+            this.callSuper(preserveScroll);
+        },
+        
+        /** @overrides */
+        putRowBackInPool: function(row) {
+            if (row.selected) clearSelectedRow(this);
+            this.callSuper(row);
+        },
+        
+        /** @overrides */
+        doAfterListRefresh: function() {
+            const row = this.getActiveSelectedRow();
             if (row) {
-                this.setSelectedRowModel(row.model);
+                this.set('selectedRow', row, true);
                 row.setSelected(true);
             }
-        }
-    },
-    
-    setSelectedRowModel: function(v) {
-        this.set('selectedRowModel', v, true);
-        
-        // Scroll the selected row into view
-        this.scrollModelIntoView(this.selectedRowModel);
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Clears the selectedRow while leaving the selectedRowModel.
-        @private */
-    _clearSelectedRow: function() {
-        const existing = this.selectedRow;
-        if (existing) {
-            existing.setSelected(false);
-            this.set('selectedRow', null, true);
-        }
-    },
-    
-    getActiveSelectedRow: function() {
-        return this.getActiveRowForModel(this.selectedRowModel);
-    },
-    
-    selectRowForModel: function(model, focus) {
-        if (model) {
-            this._clearSelectedRow();
-            this.setSelectedRowModel(model);
-            this.refreshListUI();
             
-            // Focus on the newly selected row
-            if (focus) {
-                const row = this.getActiveSelectedRow();
-                if (row) row.focus();
-            }
+            this.callSuper();
         }
-    },
-    
-    selectNextRowForModel: function(model, focus=true) {
-        this.selectRowForModel(this.getNextModel(model), focus);
-    },
-    
-    selectPrevRowForModel: function(model, focus=true) {
-        this.selectRowForModel(this.getPrevModel(model), focus);
-    },
-    
-    /** @overrides */
-    resetListUI: function(preserveScroll) {
-        const self = this;
-        
-        if (self.isModelInData(self.selectedRowModel)) {
-            // Only clear the selected row since it's still in the data and
-            // thus may be shown again.
-            self._clearSelectedRow();
-        } else {
-            // Clear the row and model since the model can no longer be shown.
-            self.setSelectedRow();
-        }
-        
-        self.callSuper(preserveScroll);
-    },
-    
-    /** @overrides */
-    putRowBackInPool: function(row) {
-        if (row.selected) this._clearSelectedRow();
-        this.callSuper(row);
-    },
-    
-    /** @overrides */
-    doAfterListRefresh: function() {
-        const row = this.getActiveSelectedRow();
-        if (row) {
-            this.set('selectedRow', row, true);
-            row.setSelected(true);
-        }
-        
-        this.callSuper();
-    }
-});
-
-
-/** A simple implementation of a SelectableInfiniteListRow.
-    
-    Events:
-        None
-    
-    Attributes:
-        selectedColor
-    
-    Private Attributes:
-        None
-    
-    @class */
-myt.SimpleSelectableInfiniteListRow = new JS.Class('SimpleSelectableInfiniteListRow', myt.SimpleButton, {
-    include: [myt.SelectableInfiniteListRow],
-    
-    
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        DEFAULT_SELECTED_COLOR:'#ccccff',
-        DEFAULT_ACTIVE_COLOR:'#f8f8f8',
-        DEFAULT_HOVER_COLOR:'#eeeeee',
-        DEFAULT_READY_COLOR:'#ffffff'
-    },
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        const self = this,
-            SSILR = myt.SimpleSelectableInfiniteListRow;
-        
-        if (attrs.selectedColor == null) attrs.selectedColor = SSILR.DEFAULT_SELECTED_COLOR;
-        if (attrs.activeColor == null) attrs.activeColor = SSILR.DEFAULT_ACTIVE_COLOR;
-        if (attrs.hoverColor == null) attrs.hoverColor = SSILR.DEFAULT_HOVER_COLOR;
-        if (attrs.readyColor == null) attrs.readyColor = SSILR.DEFAULT_READY_COLOR;
-        
-        if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
-        if (attrs.activationKeys == null) attrs.activationKeys = [13,27,32,37,38,39,40];
-        
-        self.callSuper(parent, attrs);
-    },
-    
-    destroy: function() {
-        if (this.selected) this.infiniteOwner.setSelectedRow();
-        this.callSuper();
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setSelected: function(v) {
-        this.callSuper(v);
-        if (this.inited) this.updateUI();
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    clean: function() {
-        this.setMouseOver(false);
-        this.setMouseDown(false);
-        if (this.focused) this.blur();
-        this.callSuper();
-    },
-    
-    updateUI: function() {
-        this.callSuper();
-        if (this.selected) this.setBgColor(this.selectedColor);
-    },
-    
-    doActivated: function() {
-        this.callSuper();
-        this.infiniteOwner.setSelectedRow(this);
-    },
-    
-    doActivationKeyDown: function(key, isRepeat) {
-        const self = this,
-            owner = self.infiniteOwner,
-            model = self.model;
-        switch (key) {
-            case 27: // Escape
-                if (self.selected) owner.setSelectedRow();
-                break;
-            case 37: // Left
-            case 38: // Up
-                owner.selectPrevRowForModel(model);
-                break;
-            case 39: // Right
-            case 40: // Down
-                owner.selectNextRowForModel(model);
-                break;
-        }
-    },
-    
-    doActivationKeyUp: function(key) {
-        switch (key) {
-            case 13: // Enter
-            case 32: // Space
-                this.doActivated();
-                break;
-        }
-    }
-});
+    });
+})(myt);
 
 
 /** Makes a view act as a panel in a myt.PanelStack.

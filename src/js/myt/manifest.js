@@ -20,25 +20,29 @@ JS.Packages(function() {
     const MYT_CORE_ROOT = MYT_ROOT + 'core/';
     file(MYT_CORE_ROOT + 'myt.js').provides('myt').requires('BrowserDetect','Date.prototype.format','JS.Class','JS.Module','JS.Singleton');
     
-    file(MYT_CORE_ROOT + 'Destructible.js'   ).provides('myt.Destructible'   ).requires('myt');
     file(MYT_CORE_ROOT + 'AccessorSupport.js').provides('myt.AccessorSupport').requires('myt');
-    file(MYT_CORE_ROOT + 'Eventable.js'      ).provides('myt.Eventable'      ).requires('myt.AccessorSupport','myt.Destructible','myt.Constrainable');
-    file(MYT_CORE_ROOT + 'Node.js'           ).provides('myt.Node'           ).requires('myt.AccessorSupport','myt.Destructible','myt.Constrainable','myt.TrackActivesPool');
-    file(MYT_CORE_ROOT + 'Animator.js'       ).provides('myt.Animator'       ).requires('myt.Node','myt.global.idle','myt.Reusable');
-    file(MYT_CORE_ROOT + 'Layout.js'         ).provides('myt.Layout','myt.ConstantLayout','myt.VariableLayout').requires('myt.Node');
+    file(MYT_CORE_ROOT + 'Destructible.js').provides('myt.Destructible').requires('myt');
+    file(MYT_CORE_ROOT + 'Pool.js')
+        .provides('myt.Reusable','myt.SimplePool','myt.TrackActivesPool','myt.TrackActivesMultiPool')
+        .requires('myt.Destructible');
+    file(MYT_CORE_ROOT + 'Eventable.js')
+        .provides('myt.Eventable')
+        .requires('myt.AccessorSupport','myt.Destructible','myt.Constrainable');
+    file(MYT_CORE_ROOT + 'Animator.js')
+        .provides('myt.Animator')
+        .requires('myt.Node','myt.global.idle','myt.Reusable');
+    file(MYT_CORE_ROOT + 'Node.js')
+        .provides('myt.Node')
+        .requires('myt.AccessorSupport','myt.Destructible','myt.Constrainable','myt.TrackActivesPool');
+    file(MYT_CORE_ROOT + 'Layout.js')
+        .provides('myt.Layout','myt.ConstantLayout','myt.VariableLayout')
+        .requires('myt.Node');
     
     // Core : Events
     const MYT_EVENTS_ROOT = MYT_CORE_ROOT + 'events/';
     file(MYT_EVENTS_ROOT + 'Observable.js'   ).provides('myt.Observable'   ).requires('myt');
     file(MYT_EVENTS_ROOT + 'Observer.js'     ).provides('myt.Observer'     ).requires('myt.Observable');
     file(MYT_EVENTS_ROOT + 'Constrainable.js').provides('myt.Constrainable').requires('myt.Observer');
-    
-    // Core : Pool
-    const MYT_POOL_ROOT = MYT_CORE_ROOT + 'pool/';
-    file(MYT_POOL_ROOT + 'Reusable.js'        ).provides('myt.Reusable'        ).requires('myt');
-    file(MYT_POOL_ROOT + 'AbstractPool.js'    ).provides('myt.AbstractPool'    ).requires('myt.Destructible','myt.Reusable');
-    file(MYT_POOL_ROOT + 'SimplePool.js'      ).provides('myt.SimplePool'      ).requires('myt.AbstractPool');
-    file(MYT_POOL_ROOT + 'TrackActivesPool.js').provides('myt.TrackActivesPool').requires('myt.SimplePool');
     
     // Core : View
     const MYT_VIEW_ROOT = MYT_CORE_ROOT + 'view/';
@@ -172,12 +176,15 @@ JS.Packages(function() {
         .requires('myt.GridColumnHeader','myt.SimpleIconTextButton','myt.FontAwesome');
     
     // Component : Infinite
-    file(MYT_COMPONENT_ROOT + 'infinite/InfiniteListRow.js'                ).provides('myt.InfiniteListRow'                ).requires('myt','myt.Reusable');
-    file(MYT_COMPONENT_ROOT + 'infinite/InfiniteList.js'                   ).provides('myt.InfiniteList'                   ).requires('myt.View','myt.InfiniteListRow');
-    file(MYT_COMPONENT_ROOT + 'infinite/SelectableInfiniteListRow.js'      ).provides('myt.SelectableInfiniteListRow'      ).requires('myt.Selectable','myt.InfiniteListRow');
-    file(MYT_COMPONENT_ROOT + 'infinite/SimpleSelectableInfiniteListRow.js').provides('myt.SimpleSelectableInfiniteListRow').requires('myt.View','myt.SelectableInfiniteListRow');
-    file(MYT_COMPONENT_ROOT + 'infinite/SelectableInfiniteList.js'         ).provides('myt.SelectableInfiniteList'         ).requires('myt.InfiniteList','myt.SelectableInfiniteListRow');
-    file(MYT_COMPONENT_ROOT + 'infinite/InfiniteGrid.js'                   ).provides('myt.InfiniteGrid'                   ).requires('myt.InfiniteList','myt.GridController');
+    file(MYT_COMPONENT_ROOT + 'infinite/InfiniteList.js')
+        .provides('myt.InfiniteList','myt.InfiniteListRow')
+        .requires('myt.View','myt.Reusable');
+    file(MYT_COMPONENT_ROOT + 'infinite/SelectableInfiniteList.js')
+        .provides('myt.SelectableInfiniteList','myt.SelectableInfiniteListRow','myt.SimpleSelectableInfiniteListRow')
+        .requires('myt.InfiniteList','myt.Selectable','myt.SimpleButton');
+    file(MYT_COMPONENT_ROOT + 'infinite/InfiniteGrid.js')
+        .provides('myt.InfiniteGrid','myt.InfiniteGridRow','myt.InfiniteGridHeader')
+        .requires('myt.InfiniteList','myt.GridController');
     
     // Component : Floating Panel
     file(MYT_COMPONENT_ROOT + 'floatingpanel/FloatingPanel.js'      ).provides('myt.FloatingPanel'      ).requires('myt.RootView');
