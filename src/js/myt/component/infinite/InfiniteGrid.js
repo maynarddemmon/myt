@@ -1,28 +1,117 @@
 ((pkg) => {
     const JSClass = JS.Class,
+        JSModule = JS.Module,
         View = pkg.View,
         
-        getSubview = (gridRow, columnHeader) => gridRow[columnHeader.columnId + 'View'];
+        getSubview = (gridRow, columnHeader) => gridRow[columnHeader.columnId + 'View'],
+        
+        InfiniteGridRowMixin = new JSModule('InfiniteGridRowMixin', {
+            // Methods /////////////////////////////////////////////////////////
+            notifyXChange: function(columnHeader) {
+                const sv = getSubview(this, columnHeader);
+                if (sv) sv.setX(columnHeader.x + columnHeader.cellXAdj);
+            },
+            
+            notifyWidthChange: function(columnHeader) {
+                const sv = getSubview(this, columnHeader);
+                if (sv) sv.setWidth(columnHeader.width + columnHeader.cellWidthAdj);
+            },
+            
+            notifyVisibilityChange: function(columnHeader) {
+                const sv = getSubview(this, columnHeader);
+                if (sv) sv.setVisible(columnHeader.visible);
+            }
+        }),
+        
+        InfiniteGridMixin = new JSModule('InfiniteGridMixin', {
+            // Accessors ///////////////////////////////////////////////////////
+            setGridHeader: function(v) {
+                this.gridHeader = v;
+                if (v) v.setGrid(this);
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            makeReady: function(sortState) {
+                const gridHeader = this.gridHeader;
+                if (gridHeader) {
+                    gridHeader.setSort(sortState);
+                    gridHeader.setLocked(false);
+                } else {
+                    this.refreshListData(false);
+                }
+            },
+            
+            /** @overrides myt.InfiniteList */
+            getSortFunction: function() {
+                const sort = this.gridHeader.sort || ['',''],
+                    sortColumnId  = sort[0],
+                    sortOrder = sort[1];
+                if (sortColumnId) {
+                    const sortNum = sortOrder === 'ascending' ? 1 : -1;
+                    return (a, b) => {
+                        const aValue = a[sortColumnId],
+                            bValue = b[sortColumnId];
+                        if (aValue > bValue) {
+                            return sortNum;
+                        } else if (bValue > aValue) {
+                            return -sortNum;
+                        }
+                        return 0;
+                    };
+                } else {
+                    return this.callSuper();
+                }
+            },
+            
+            /** @overrides myt.InfiniteList */
+            updateRow: function(row) {
+                if (this.gridHeader) {
+                    this.gridHeader.columnHeaders.forEach((hdr) => {
+                        row.notifyXChange(hdr);
+                        row.notifyWidthChange(hdr);
+                        row.notifyVisibilityChange(hdr);
+                    });
+                }
+            },
+            
+            notifyXChange: function(columnHeader) {
+                this.getVisibleRows().forEach((row) => {row.notifyXChange(columnHeader);});
+            },
+            
+            notifyWidthChange: function(columnHeader) {
+                this.getVisibleRows().forEach((row) => {row.notifyWidthChange(columnHeader);});
+            },
+            
+            notifyVisibilityChange: function(columnHeader) {
+                this.getVisibleRows().forEach((row) => {row.notifyVisibilityChange(columnHeader);});
+            }
+        });
     
-    pkg.InfiniteGridRow = new JS.Module('InfiniteGridRow', {
-        include: [pkg.InfiniteListRow],
+    pkg.InfiniteGridRow = new JSModule('InfiniteGridRow', {
+        include: [pkg.InfiniteListRow, InfiniteGridRowMixin]
+    });
+    
+    pkg.SelectableInfiniteGridRow = new JSModule('SelectableInfiniteGridRow', {
+        include: [pkg.SelectableInfiniteListRow, InfiniteGridRowMixin]
+    });
+    
+    pkg.SimpleSelectableInfiniteGridRow = new JSClass('SimpleSelectableInfiniteGridRow', pkg.SimpleSelectableInfiniteListRow, {
+        include: [InfiniteGridRowMixin]
+    });
+    
+    /** A base class for infinite scrolling grids
         
+        @class */
+    pkg.InfiniteGrid = new JSClass('InfiniteGrid', pkg.InfiniteList, {
+        include: [InfiniteGridMixin]
+    });
+    
+    /** A base class for selectable infinite scrolling grids
         
-        // Methods /////////////////////////////////////////////////////////////
-        notifyXChange: function(columnHeader) {
-            const sv = getSubview(this, columnHeader);
-            if (sv) sv.setX(columnHeader.x + columnHeader.cellXAdj);
-        },
-        
-        notifyWidthChange: function(columnHeader) {
-            const sv = getSubview(this, columnHeader);
-            if (sv) sv.setWidth(columnHeader.width + columnHeader.cellWidthAdj);
-        },
-        
-        notifyVisibilityChange: function(columnHeader) {
-            const sv = getSubview(this, columnHeader);
-            if (sv) sv.setVisible(columnHeader.visible);
-        }
+        @class */
+    pkg.SelectableInfiniteGrid = new JSClass('InfiniteGrid', pkg.SelectableInfiniteList, {
+        include: [InfiniteGridMixin]
     });
     
     pkg.InfiniteGridHeader = new JSClass('InfiniteGridHeader', View, {
@@ -91,74 +180,6 @@
         /** @overrides myt.GridController */
         updateRowsForVisibilityChange: function(columnHeader) {
             this.grid.notifyVisibilityChange(columnHeader);
-        }
-    });
-    
-    /** A base class for infinite scrolling grids
-        
-        @class */
-    pkg.InfiniteGrid = new JSClass('InfiniteGrid', pkg.InfiniteList, {
-        // Accessors ///////////////////////////////////////////////////////////
-        setGridHeader: function(v) {
-            this.gridHeader = v;
-            if (v) v.setGrid(this);
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        makeReady: function(sortState) {
-            const gridHeader = this.gridHeader;
-            if (gridHeader) {
-                gridHeader.setSort(sortState);
-                gridHeader.setLocked(false);
-            } else {
-                this.refreshListData(false);
-            }
-        },
-        
-        /** @overrides myt.InfiniteList */
-        getSortFunction: function() {
-            const sort = this.gridHeader.sort || ['',''],
-                sortColumnId  = sort[0],
-                sortOrder = sort[1];
-            if (sortColumnId) {
-                const sortNum = sortOrder === 'ascending' ? 1 : -1;
-                return (a, b) => {
-                    const aValue = a[sortColumnId],
-                        bValue = b[sortColumnId];
-                    if (aValue > bValue) {
-                        return sortNum;
-                    } else if (bValue > aValue) {
-                        return -sortNum;
-                    }
-                    return 0;
-                };
-            } else {
-                return this.callSuper();
-            }
-        },
-        
-        /** @overrides myt.InfiniteList */
-        updateRow: function(row) {
-            if (this.gridHeader) {
-                this.gridHeader.columnHeaders.forEach((hdr) => {
-                    row.notifyXChange(hdr);
-                    row.notifyWidthChange(hdr);
-                    row.notifyVisibilityChange(hdr);
-                });
-            }
-        },
-        
-        notifyXChange: function(columnHeader) {
-            this.getVisibleRows().forEach((row) => {row.notifyXChange(columnHeader);});
-        },
-        
-        notifyWidthChange: function(columnHeader) {
-            this.getVisibleRows().forEach((row) => {row.notifyWidthChange(columnHeader);});
-        },
-        
-        notifyVisibilityChange: function(columnHeader) {
-            this.getVisibleRows().forEach((row) => {row.notifyVisibilityChange(columnHeader);});
         }
     });
 })(myt);

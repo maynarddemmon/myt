@@ -183,8 +183,8 @@ JS.Packages(function() {
         .provides('myt.SelectableInfiniteList','myt.SelectableInfiniteListRow','myt.SimpleSelectableInfiniteListRow')
         .requires('myt.InfiniteList','myt.Selectable','myt.SimpleButton');
     file(MYT_COMPONENT_ROOT + 'infinite/InfiniteGrid.js')
-        .provides('myt.InfiniteGrid','myt.InfiniteGridRow','myt.InfiniteGridHeader')
-        .requires('myt.InfiniteList','myt.GridController');
+        .provides('myt.InfiniteGrid','myt.InfiniteGridRow','myt.InfiniteGridHeader','myt.SelectableInfiniteGrid','myt.SelectableInfiniteGridRow','myt.SimpleSelectableInfiniteGridRow')
+        .requires('myt.SelectableInfiniteList','myt.GridController');
     
     // Component : Floating Panel
     file(MYT_COMPONENT_ROOT + 'floatingpanel/FloatingPanel.js'      ).provides('myt.FloatingPanel'      ).requires('myt.RootView');

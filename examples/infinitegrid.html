@@ -44,12 +44,8 @@
             }
         }]);
         
-        var RowClass = new JS.Class('RowClass', M.View, {
-            include: [M.InfiniteGridRow],
-            
+        var RowClass = new JS.Class('RowClass', M.SimpleSelectableInfiniteGridRow, {
             initNode: function(parent, attrs) {
-                if (attrs.bgColor == null) attrs.bgColor = '#ffffff';
-                
                 this.callSuper(parent, attrs);
                 
                 this.idView = new M.Text(this, {valign:'middle'});
@@ -76,7 +72,7 @@
         
         var RowClassTwo = new JS.Class('RowClassTwo', RowClass, {
             initNode: function(parent, attrs) {
-                attrs.bgColor = '#ff9999';
+                attrs.readyColor = '#ff9999';
                 
                 this.callSuper(parent, attrs);
                 
@@ -166,7 +162,7 @@
         var colFour =  new M.SimpleGridColumnHeader(gridHeader, {columnId:'bar3', flex:0, value:100, minValue:50,  maxValue:200, text:'Column Four',  cellXAdj:2, cellWidthAdj:-2});
         var colFive =  new M.SimpleGridColumnHeader(gridHeader, {columnId:'baz',  flex:1, value:25,                maxValue:400, text:'Column Five',  cellXAdj:2, cellWidthAdj:-2});
           
-        var grid = new M.InfiniteGrid(leftArea, {
+        var grid = new M.SelectableInfiniteGrid(leftArea, {
             collectionModel:collectionModel,
             rowClasses:{
                 one:RowClass,
