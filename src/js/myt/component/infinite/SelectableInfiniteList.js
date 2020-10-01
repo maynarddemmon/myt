@@ -138,7 +138,7 @@
             return this.getActiveRowForModel(this.selectedRowModel);
         },
         
-        selectRowForModel: function(model, focus) {
+        selectRowForModel: function(model, focus, isNext) {
             if (model) {
                 clearSelectedRow(this);
                 this.setSelectedRowModel(model);
@@ -153,11 +153,11 @@
         },
         
         selectNextRowForModel: function(model, focus=true) {
-            this.selectRowForModel(this.getNextModel(model), focus);
+            this.selectRowForModel(this.getNextModel(model), focus, true);
         },
         
         selectPrevRowForModel: function(model, focus=true) {
-            this.selectRowForModel(this.getPrevModel(model), focus);
+            this.selectRowForModel(this.getPrevModel(model), focus, false);
         },
         
         /** @overrides */

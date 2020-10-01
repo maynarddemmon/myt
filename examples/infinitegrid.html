@@ -94,9 +94,7 @@
                 var w = event.value - gridHeader.x;
                 leftArea.setWidth(w);
                 gridHeader.setWidth(w);
-                w = gridHeader.width;
-                grid.setWidth(w);
-                controls.setWidth(w);
+                controls.setWidth(gridHeader.width);
             }
         }]);
         

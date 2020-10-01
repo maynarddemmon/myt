@@ -146,8 +146,13 @@
         
         /** @overrides myt.View */
         setWidth: function(v, supressEvent) {
-            this.callSuper(Math.max(this.minWidth, v), supressEvent);
-            if (this.inited) this.setGridWidth(this.width);
+            const self = this;
+            self.callSuper(Math.max(self.minWidth, v), supressEvent);
+            if (self.inited) {
+                const width = self.width;
+                self.setGridWidth(width);
+                self.grid.setWidth(width);
+            }
         },
         
         

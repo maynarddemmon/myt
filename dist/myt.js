@@ -24452,7 +24452,7 @@ myt.Grid = new JS.Class('Grid', myt.View, {
             return this.getActiveRowForModel(this.selectedRowModel);
         },
         
-        selectRowForModel: function(model, focus) {
+        selectRowForModel: function(model, focus, isNext) {
             if (model) {
                 clearSelectedRow(this);
                 this.setSelectedRowModel(model);
@@ -24467,11 +24467,11 @@ myt.Grid = new JS.Class('Grid', myt.View, {
         },
         
         selectNextRowForModel: function(model, focus=true) {
-            this.selectRowForModel(this.getNextModel(model), focus);
+            this.selectRowForModel(this.getNextModel(model), focus, true);
         },
         
         selectPrevRowForModel: function(model, focus=true) {
-            this.selectRowForModel(this.getPrevModel(model), focus);
+            this.selectRowForModel(this.getPrevModel(model), focus, false);
         },
         
         /** @overrides */
@@ -24659,8 +24659,13 @@ myt.Grid = new JS.Class('Grid', myt.View, {
         
         /** @overrides myt.View */
         setWidth: function(v, supressEvent) {
-            this.callSuper(Math.max(this.minWidth, v), supressEvent);
-            if (this.inited) this.setGridWidth(this.width);
+            const self = this;
+            self.callSuper(Math.max(self.minWidth, v), supressEvent);
+            if (self.inited) {
+                const width = self.width;
+                self.setGridWidth(width);
+                self.grid.setWidth(width);
+            }
         },
         
         
