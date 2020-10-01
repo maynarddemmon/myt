@@ -181,14 +181,17 @@
         },
         
         /** @overrides */
-        doAfterListRefresh: function() {
+        refreshListUI: function(ignoredEvent) {
+            const currentFocus = pkg.global.focus.focusedView;
+            
+            this.callSuper();
+            
             const row = this.getActiveSelectedRow();
             if (row) {
                 this.set('selectedRow', row, true);
                 row.setSelected(true);
+                if (!currentFocus || currentFocus === row) row.focus(true);
             }
-            
-            this.callSuper();
         }
     });
 })(myt);

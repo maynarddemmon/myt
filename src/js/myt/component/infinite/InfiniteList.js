@@ -36,7 +36,13 @@
         
         setModel: function(model) {
             this.model = model;
-        }
+        },
+        
+        setClassKey: function(classKey) {
+            this.classKey = classKey;
+        },
+        
+        notifyRefreshed: () => {}
     });
     
     /** A base class for infinite scrolling lists
@@ -89,8 +95,9 @@
             
             if (attrs.overscrollBehavior == null) attrs.overscrollBehavior = 'auto contain';
             
-            self._rowExtent = self.rowSpacing = self.rowHeight = 
-                self._startIdx = self._endIdx = 0;
+            self._rowExtent = self.rowSpacing = self.rowHeight = 0;
+            self._startIdx = self._endIdx = -1;
+            self._visibleRowsByIdx = {};
             
             self.callSuper(parent, attrs);
             
@@ -231,38 +238,39 @@
         getIndexOfModelInData: function(model) {
             if (model) {
                 const self = this,
-                    modelIDName = self.modelIDName,
-                    modelId = model[modelIDName],
                     data = self.getListData();
                 let i = data.length;
-                while (i) if (data[--i][modelIDName] === modelId) return i;
+                while (i) if (self.areModelsEqual(data[--i], model)) return i;
             }
             return -1;
         },
         
+        areModelsEqual: function(modelA, modelB) {
+            const modelIDName = this.modelIDName;
+            return modelA[modelIDName] === modelB[modelIDName];
+        },
+        
         getActiveRowForModel: function(model) {
-            const activeRows = this._itemPool.getActives();
-            let i = activeRows.length;
-            while (i) {
-                const row = activeRows[--i];
-                if (row.model === model) return row;
+            if (model) {
+                const self = this,
+                    activeRows = self._itemPool.getActives();
+                let i = activeRows.length;
+                while (i) {
+                    const row = activeRows[--i];
+                    if (self.areModelsEqual(row.model, model)) return row;
+                }
             }
         },
         
         refreshListData: function(preserveScroll) {
-            this._listData = this.fetchListData();
+            this._listData = this.collectionModel.getAsSortedList(this.getSortFunction(), this.getFilterFunction());
             this.resetListUI(preserveScroll);
-        },
-        
-        fetchListData: function() {
-            return this.collectionModel.getAsSortedList(this.getSortFunction(), this.getFilterFunction());
         },
         
         resetListUI: function(preserveScroll) {
             const self = this,
                 data = self.getListData(),
                 len = data.length,
-                visibleRowsByIdx = self._visibleRowsByIdx,
                 listView = self._listView,
                 scrollAnchorView = self._scrollAnchorView;
             
@@ -270,10 +278,8 @@
             listView.setHeight(len * self._rowExtent - (len > 0 ? self.rowSpacing : 0) + self.rowInset + self.rowOutset);
             scrollAnchorView.setY(listView.height - scrollAnchorView.height);
             
-            // Clear out existing rows
-            self._startIdx = self._endIdx = 0;
-            for (let i in visibleRowsByIdx) self.putRowBackInPool(visibleRowsByIdx[i]);
-            self._visibleRowsByIdx = {};
+            // Ensure the next refreshListUI actually refreshes
+            self._startIdx = self._endIdx = -1;
             
             // Reset scroll position
             if (preserveScroll || getDomScrollTop(self) === 0) {
@@ -293,17 +299,18 @@
         
         refreshListUI: function(ignoredEvent) {
             const self = this,
-                rowWidth = self.width,
-                rowHeight = self.rowHeight,
                 rowExtent = self._rowExtent,
                 rowInset = self.rowInset,
                 scrollY = getDomScrollTop(self),
                 data = self.getListData() || [],
-                visibleRowsByIdx = self._visibleRowsByIdx,
                 startIdx = Math.max(0, Math.floor((scrollY - rowInset) / rowExtent)),
                 endIdx = Math.min(data.length, Math.ceil((scrollY - rowInset + self.height) / rowExtent));
             
             if (self._startIdx !== startIdx || self._endIdx !== endIdx) {
+                const rowWidth = self.width,
+                    rowHeight = self.rowHeight,
+                    visibleRowsByIdx = self._visibleRowsByIdx;
+                
                 self._startIdx = startIdx;
                 self._endIdx = endIdx;
                 
@@ -320,34 +327,36 @@
                 for (i = startIdx; i < endIdx; i++) {
                     let row = visibleRowsByIdx[i];
                     
-                    if (!row) {
-                        const model = data[i];
-                        row = self._itemPool.getInstance(self.getClassKey(model));
+                    const model = data[i],
+                        classKey = self.getClassKey(model);
+                    if (!row || row.classKey !== classKey) {
+                        if (row) self.putRowBackInPool(row);
                         
+                        visibleRowsByIdx[i] = row = self._itemPool.getInstance(classKey);
+                        
+                        row.setInfiniteOwner(self);
+                        row.setClassKey(classKey);
                         row.setWidth(rowWidth);
                         row.setHeight(rowHeight);
                         row.setY(rowInset + i * rowExtent);
-                        row.setModel(model);
-                        row.setInfiniteOwner(self);
                         row.setVisible(true);
-                        
-                        visibleRowsByIdx[i] = row;
-                        
+                    }
+                    
+                    if (!row.model || !self.areModelsEqual(row.model, model)) {
+                        row.setModel(model);
                         self.updateRow(row);
                     }
+                    
+                    row.notifyRefreshed();
                     
                     // Maintain tab ordering by updating the underlying dom order.
                     row.bringToFront();
                 }
             }
-            
-            self.doAfterListRefresh();
         },
         
         getClassKey: (model) => DEFAULT_CLASS_KEY,
         
-        updateRow: (row) => {},
-        
-        doAfterListRefresh: () => {}
+        updateRow: (row) => {}
     });
 })(myt);
