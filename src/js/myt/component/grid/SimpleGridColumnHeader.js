@@ -35,6 +35,8 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.View */
         initNode: function(parent, attrs) {
+            const self = this;
+            
             if (attrs.activeColor == null) attrs.activeColor = '#999999';
             if (attrs.hoverColor == null) attrs.hoverColor = '#bbbbbb';
             if (attrs.readyColor == null) attrs.readyColor = '#aaaaaa';
@@ -46,16 +48,7 @@
             if (attrs.contentAlign == null) attrs.contentAlign = 'left';
             if (attrs.sortIconColor == null) attrs.sortIconColor = '#666666';
             
-            this.callSuper(parent, attrs);
-            
-            this.setDisabled(!this.sortable);
-            updateTextWidth(this);
-            updateSortIcon(this);
-        },
-        
-        /** @overrides myt.View */
-        doAfterAdoption: function() {
-            const self = this;
+            self.callSuper(parent, attrs);
             
             new pkg.FontAwesome(self, {
                 name:'sortIcon', align:'right', alignOffset:3, valign:'middle',
@@ -63,9 +56,8 @@
             }, [{
                 initNode: function(parent, attrs) {
                     this.callSuper(parent, attrs);
-                    this.deStyle.fontSize = '0.7em'; // Looks better a bit smaller.
+                    this.getInnerDomStyle().fontSize = '0.7em'; // Looks better a bit smaller.
                 },
-                
                 sizeViewToDom:function() {
                     this.callSuper();
                     
@@ -74,9 +66,11 @@
                 }
             }]);
             
-            self.callSuper();
-            
             self.textView.enableEllipsis();
+            
+            self.setDisabled(!self.sortable);
+            updateTextWidth(self);
+            updateSortIcon(self);
         },
         
         

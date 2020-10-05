@@ -168,12 +168,18 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'model/BoundedRangeComponent.js').provides('myt.BoundedRangeComponent').requires('myt.RangeComponent','myt.BoundedValueComponent');
     
     // Component : Grid
-    file(MYT_COMPONENT_ROOT + 'grid/GridColumnHeader.js').provides('myt.GridColumnHeader').requires('myt.View','myt.BoundedValueComponent');
-    file(MYT_COMPONENT_ROOT + 'grid/GridRow.js'         ).provides('myt.GridRow'         ).requires('myt.GridColumnHeader');
-    file(MYT_COMPONENT_ROOT + 'grid/GridController.js'  ).provides('myt.GridController'  ).requires('myt.GridRow');
-    file(MYT_COMPONENT_ROOT + 'grid/Grid.js'            ).provides('myt.Grid'            ).requires('myt.GridController');
-    file(MYT_COMPONENT_ROOT + 'grid/SimpleGridColumnHeader.js').provides('myt.SimpleGridColumnHeader')
+    file(MYT_COMPONENT_ROOT + 'grid/GridColumnHeader.js')
+        .provides('myt.GridColumnHeader')
+        .requires('myt.View','myt.BoundedValueComponent');
+    file(MYT_COMPONENT_ROOT + 'grid/SimpleGridColumnHeader.js')
+        .provides('myt.SimpleGridColumnHeader')
         .requires('myt.GridColumnHeader','myt.SimpleIconTextButton','myt.FontAwesome');
+    file(MYT_COMPONENT_ROOT + 'grid/GridController.js')
+        .provides('myt.GridController')
+        .requires('myt');
+    file(MYT_COMPONENT_ROOT + 'grid/Grid.js')
+        .provides('myt.Grid','myt.GridRow')
+        .requires('myt.GridController','myt.GridColumnHeader');
     
     // Component : Infinite
     file(MYT_COMPONENT_ROOT + 'infinite/InfiniteList.js')

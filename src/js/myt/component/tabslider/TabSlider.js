@@ -1,4 +1,7 @@
 ((pkg) => {
+    const View = pkg.View,
+        SizeToParent = pkg.SizeToParent;
+    
     /** A tab slider component.
         
         Events:
@@ -24,8 +27,8 @@
                 Supported values are: 'expanded', 'expanding', 'collapsed' and
                 'collapsing'. Defaults to 'collapsed'.
     */
-    const TabSlider = pkg.TabSlider = new JS.Class('TabSlider', pkg.View, {
-        include: [pkg.Selectable, pkg.Disableable, pkg.SizeToParent],
+    const TabSlider = pkg.TabSlider = new JS.Class('TabSlider', View, {
+        include: [pkg.Selectable, pkg.Disableable, SizeToParent],
         
         
         // Class Methods and Attributes ////////////////////////////////////////
@@ -72,19 +75,6 @@
             
             self.callSuper(parent, attrs);
             
-            if (initiallySelected) self.tabContainer.select(self);
-            if (attrs.disabled === true) self.setDisabled(true);
-            
-            self.setHeight(self.getCollapsedHeight());
-        },
-        
-        doAfterAdoption: function() {
-            const self = this,
-                View = pkg.View,
-                SizeToParent = pkg.SizeToParent;
-            let wrapper,
-                container;
-            
             new self.buttonClass(self, {
                 name:'button', ignorePlacement:true, zIndex:1,
                 height:self.buttonHeight,
@@ -113,7 +103,7 @@
                 }
             }]);
             
-            wrapper = new View(self, {
+            const wrapper = new View(self, {
                 name:'wrapper', ignorePlacement:true,
                 y:self.buttonHeight, height:0,
                 visible:false, maskFocus:true,
@@ -128,12 +118,15 @@
                 }
             }]);
             
-            container = new View(wrapper, {name:'container'});
+            const container = new View(wrapper, {name:'container'});
             new pkg.SizeToChildren(container, {axis:'y'});
             
             self.constrain('__updateHeight', [wrapper, 'y', wrapper, 'height']);
             
-            self.callSuper();
+            if (initiallySelected) self.tabContainer.select(self);
+            if (attrs.disabled === true) self.setDisabled(true);
+            
+            self.setHeight(self.getCollapsedHeight());
         },
         
         

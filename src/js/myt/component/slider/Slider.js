@@ -15,10 +15,11 @@ myt.Slider = new JS.Class('Slider', myt.BaseSlider, {
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
-    doAfterAdoption: function() {
-        new this.thumbClass(this, {name:'thumb'});
+    /** @overrides myt.BaseSlider */
+    initNode: function(parent, attrs) {
+        this.callSuper(parent, attrs);
         
-        this.callSuper();
+        new this.thumbClass(this, {name:'thumb'});
     },
     
     

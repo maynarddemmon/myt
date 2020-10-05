@@ -14224,164 +14224,163 @@ myt.BAG = new JS.Class('BAG', {
 })(myt);
 
 
-/** A mixin that allows myt.TabSliders to be added to a view.
-    
-    Events:
-        None
-    
-    Attributes:
-        spacing:number The spacing between tab sliders. Defaults to
-            myt.TabSliderContainer.DEFAULT_SPACING which is 1.
-*/
-myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
-    include: [myt.SelectionManager],
-    
-    
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        DEFAULT_SPACING:1
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        this._tabSliders = [];
+((pkg) => {
+    /** A mixin that allows myt.TabSliders to be added to a view.
         
-        attrs.defaultPlacement = 'container';
+        Attributes:
+            spacing:number The spacing between tab sliders. Defaults to
+                myt.TabSliderContainer.DEFAULT_SPACING which is 1.
         
-        if (attrs.spacing == null) attrs.spacing = myt.TabSliderContainer.DEFAULT_SPACING;
-        if (attrs.overflow == null) attrs.overflow = 'autoy';
-        if (attrs.itemSelectionId == null) attrs.itemSelectionId = 'tabId';
-        if (attrs.maxSelected == null) attrs.maxSelected = 1;
+        @class */
+    pkg.TabSliderContainer = new JS.Module('TabSliderContainer', {
+        include: [pkg.SelectionManager],
         
-        this.updateLayout = myt.debounce(this.updateLayout);
         
-        this.callSuper(parent, attrs);
-    },
-    
-    doAfterAdoption: function() {
-        const self = this,
-            M = myt,
-            TS = M.TabSlider;
-        const container = new M.View(self, {
-            name:'container', ignorePlacement:true, percentOfParentWidth:100
-        }, [M.SizeToParent, {
-            /** @overrides myt.View */
-            subnodeAdded: function(node) {
-                this.callSuper(node);
-                if (node instanceof TS) {
-                    self._tabSliders.push(node);
-                    self.attachTo(node, 'updateLayout', 'selected');
-                }
-            },
+        // Class Methods and Attributes ////////////////////////////////////////
+        extend: {
+            DEFAULT_SPACING:1
+        },
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            const self = this;
             
-            /** @overrides myt.View */
-            subnodeRemoved: function(node) {
-                if (node instanceof TS) {
-                    const tabSliders = self._tabSliders;
-                    let i = tabSliders.length;
-                    while (i) {
-                        if (tabSliders[--i] === node) {
-                            self.detachFrom(node, 'updateLayout', 'selected');
-                            tabSliders.splice(i, 1);
-                            break;
+            self._tabSliders = [];
+            
+            attrs.defaultPlacement = 'container';
+            
+            if (attrs.spacing == null) attrs.spacing = pkg.TabSliderContainer.DEFAULT_SPACING;
+            if (attrs.overflow == null) attrs.overflow = 'autoy';
+            if (attrs.itemSelectionId == null) attrs.itemSelectionId = 'tabId';
+            if (attrs.maxSelected == null) attrs.maxSelected = 1;
+            
+            self.updateLayout = pkg.debounce(self.updateLayout);
+            
+            self.callSuper(parent, attrs);
+            
+            const TabSlider = pkg.TabSlider;
+            const container = new pkg.View(self, {
+                name:'container', ignorePlacement:true, percentOfParentWidth:100
+            }, [pkg.SizeToParent, {
+                /** @overrides myt.View */
+                subnodeAdded: function(node) {
+                    this.callSuper(node);
+                    if (node instanceof TabSlider) {
+                        self._tabSliders.push(node);
+                        self.attachTo(node, 'updateLayout', 'selected');
+                    }
+                },
+                
+                /** @overrides myt.View */
+                subnodeRemoved: function(node) {
+                    if (node instanceof TabSlider) {
+                        const tabSliders = self._tabSliders;
+                        let i = tabSliders.length;
+                        while (i) {
+                            if (tabSliders[--i] === node) {
+                                self.detachFrom(node, 'updateLayout', 'selected');
+                                tabSliders.splice(i, 1);
+                                break;
+                            }
                         }
                     }
+                    this.callSuper(node);
                 }
-                this.callSuper(node);
-            }
-        }]);
-        new M.SpacedLayout(container, {name:'layout', axis:'y', spacing:self.spacing, collapseParent:true});
-        
-        self.attachTo(self, 'updateLayout', 'height');
-        
-        self.callSuper();
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setSpacing: function(v) {
-        if (this.spacing !== v) {
-            this.spacing = v;
-            if (this.layout) this.layout.setSpacing(v);
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @param {!Object} event
-        @returns {undefined} */
-    updateLayout: function(event) {
-        const tabSliders = this._tabSliders;
-        let i = tabSliders.length, 
-            tabSlider,
-            min = 0, 
-            preferred = 0, 
-            visCount = 0, 
-            collapsedHeight;
-        
-        while (i) {
-            tabSlider = tabSliders[--i];
+            }]);
+            new pkg.SpacedLayout(container, {name:'layout', axis:'y', spacing:self.spacing, collapseParent:true});
             
-            if (tabSlider.visible) {
-                ++visCount;
-                if (tabSlider.selected) {
-                    min += tabSlider.getMinimumExpandedHeight();
-                    preferred += tabSlider.getPreferredExpandedHeight();
-                } else {
-                    collapsedHeight = tabSlider.getCollapsedHeight();
-                    min += collapsedHeight;
-                    preferred += collapsedHeight;
-                }
+            self.attachTo(self, 'updateLayout', 'height');
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setSpacing: function(v) {
+            if (this.spacing !== v) {
+                this.spacing = v;
+                if (this.layout) this.layout.setSpacing(v);
             }
-        }
+        },
         
-        const layout = this.container.layout,
-            layoutOverage = layout.inset + layout.outset + layout.spacing * (visCount - 1);
-        min += layoutOverage;
-        preferred += layoutOverage;
         
-        const h = this.height,
-            minIsOver = min > h,
-            preferredIsOver = preferred > h;
-        let overage = preferred - h,
-            tabPreferred, 
-            tabMin, 
-            newVal;
-        
-        i = tabSliders.length;
-        while (i) {
-            tabSlider = tabSliders[--i];
+        // Methods /////////////////////////////////////////////////////////////
+        /** @param {!Object} event
+            @returns {undefined} */
+        updateLayout: function(event) {
+            const tabSliders = this._tabSliders;
+            let i = tabSliders.length, 
+                tabSlider,
+                min = 0, 
+                preferred = 0, 
+                visCount = 0, 
+                collapsedHeight;
             
-            if (tabSlider.visible) {
-                if (tabSlider.selected) {
-                    if (minIsOver) {
-                        newVal = tabSlider.getMinimumExpandedHeight();
-                    } else if (preferredIsOver) {
-                        tabPreferred = tabSlider.getPreferredExpandedHeight();
-                        tabMin = tabSlider.getMinimumExpandedHeight();
-                        
-                        newVal = tabPreferred - overage;
-                        if (tabMin > newVal) {
-                            overage -= tabPreferred - tabMin;
-                            newVal = tabMin;
-                        } else {
-                            overage = 0;
-                        }
+            while (i) {
+                tabSlider = tabSliders[--i];
+                
+                if (tabSlider.visible) {
+                    ++visCount;
+                    if (tabSlider.selected) {
+                        min += tabSlider.getMinimumExpandedHeight();
+                        preferred += tabSlider.getPreferredExpandedHeight();
                     } else {
-                        newVal = tabSlider.getPreferredExpandedHeight();
+                        collapsedHeight = tabSlider.getCollapsedHeight();
+                        min += collapsedHeight;
+                        preferred += collapsedHeight;
                     }
-                    tabSlider.expand(newVal);
-                } else {
-                    tabSlider.collapse();
+                }
+            }
+            
+            const layout = this.container.layout,
+                layoutOverage = layout.inset + layout.outset + layout.spacing * (visCount - 1);
+            min += layoutOverage;
+            preferred += layoutOverage;
+            
+            const h = this.height,
+                minIsOver = min > h,
+                preferredIsOver = preferred > h;
+            let overage = preferred - h,
+                tabPreferred, 
+                tabMin, 
+                newVal;
+            
+            i = tabSliders.length;
+            while (i) {
+                tabSlider = tabSliders[--i];
+                
+                if (tabSlider.visible) {
+                    if (tabSlider.selected) {
+                        if (minIsOver) {
+                            newVal = tabSlider.getMinimumExpandedHeight();
+                        } else if (preferredIsOver) {
+                            tabPreferred = tabSlider.getPreferredExpandedHeight();
+                            tabMin = tabSlider.getMinimumExpandedHeight();
+                            
+                            newVal = tabPreferred - overage;
+                            if (tabMin > newVal) {
+                                overage -= tabPreferred - tabMin;
+                                newVal = tabMin;
+                            } else {
+                                overage = 0;
+                            }
+                        } else {
+                            newVal = tabSlider.getPreferredExpandedHeight();
+                        }
+                        tabSlider.expand(newVal);
+                    } else {
+                        tabSlider.collapse();
+                    }
                 }
             }
         }
-    }
-});
+    });
+})(myt);
 
 
 ((pkg) => {
+    const View = pkg.View,
+        SizeToParent = pkg.SizeToParent;
+    
     /** A tab slider component.
         
         Events:
@@ -14407,8 +14406,8 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
                 Supported values are: 'expanded', 'expanding', 'collapsed' and
                 'collapsing'. Defaults to 'collapsed'.
     */
-    const TabSlider = pkg.TabSlider = new JS.Class('TabSlider', pkg.View, {
-        include: [pkg.Selectable, pkg.Disableable, pkg.SizeToParent],
+    const TabSlider = pkg.TabSlider = new JS.Class('TabSlider', View, {
+        include: [pkg.Selectable, pkg.Disableable, SizeToParent],
         
         
         // Class Methods and Attributes ////////////////////////////////////////
@@ -14455,19 +14454,6 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
             
             self.callSuper(parent, attrs);
             
-            if (initiallySelected) self.tabContainer.select(self);
-            if (attrs.disabled === true) self.setDisabled(true);
-            
-            self.setHeight(self.getCollapsedHeight());
-        },
-        
-        doAfterAdoption: function() {
-            const self = this,
-                View = pkg.View,
-                SizeToParent = pkg.SizeToParent;
-            let wrapper,
-                container;
-            
             new self.buttonClass(self, {
                 name:'button', ignorePlacement:true, zIndex:1,
                 height:self.buttonHeight,
@@ -14496,7 +14482,7 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
                 }
             }]);
             
-            wrapper = new View(self, {
+            const wrapper = new View(self, {
                 name:'wrapper', ignorePlacement:true,
                 y:self.buttonHeight, height:0,
                 visible:false, maskFocus:true,
@@ -14511,12 +14497,15 @@ myt.TabSliderContainer = new JS.Module('TabSliderContainer', {
                 }
             }]);
             
-            container = new View(wrapper, {name:'container'});
+            const container = new View(wrapper, {name:'container'});
             new pkg.SizeToChildren(container, {axis:'y'});
             
             self.constrain('__updateHeight', [wrapper, 'y', wrapper, 'height']);
             
-            self.callSuper();
+            if (initiallySelected) self.tabContainer.select(self);
+            if (attrs.disabled === true) self.setDisabled(true);
+            
+            self.setHeight(self.getCollapsedHeight());
         },
         
         
@@ -18405,15 +18394,20 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides */
         initNode: function(parent, attrs) {
-            if (attrs.buttonClass == null) attrs.buttonClass = pkg.Dialog.DEFAULT_BUTTON_CLASS;
+            const Dialog = pkg.Dialog;
+            
+            if (attrs.buttonClass == null) attrs.buttonClass = Dialog.DEFAULT_BUTTON_CLASS;
             
             this.callSuper(parent, attrs);
-        },
-        
-        doAfterAdoption: function() {
-            this.setupDialog();
             
-            this.callSuper();
+            const content = this.content;
+            content.setRoundedCorners(Dialog.DEFAULT_RADIUS);
+            content.setBgColor(Dialog.DEFAULT_BGCOLOR);
+            content.setBoxShadow(Dialog.DEFAULT_SHADOW);
+            content.setBorder(Dialog.DEFAULT_BORDER);
+            content.setFocusCage(true);
+            
+            this.createCloseButton(content, this);
         },
         
         
@@ -18424,20 +18418,6 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Does basic styling of a dialog and creates a close button.
-            @returns {undefined} */
-        setupDialog: function() {
-            const D = pkg.Dialog,
-                content = this.content;
-            content.setRoundedCorners(D.DEFAULT_RADIUS);
-            content.setBgColor(D.DEFAULT_BGCOLOR);
-            content.setBoxShadow(D.DEFAULT_SHADOW);
-            content.setBorder(D.DEFAULT_BORDER);
-            content.setFocusCage(true);
-            
-            this.createCloseButton(content, this);
-        },
-        
         /** Creates a close button on the provided targetView.
             @param {!Object} targetView - The myt.View to create the button on.
             @param {!Object} callbackTarget - An object with a doCallback method
@@ -22059,10 +22039,11 @@ myt.Slider = new JS.Class('Slider', myt.BaseSlider, {
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
-    doAfterAdoption: function() {
-        new this.thumbClass(this, {name:'thumb'});
+    /** @overrides myt.BaseSlider */
+    initNode: function(parent, attrs) {
+        this.callSuper(parent, attrs);
         
-        this.callSuper();
+        new this.thumbClass(this, {name:'thumb'});
     },
     
     
@@ -22291,15 +22272,10 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         if (attrs.rangeFillClass == null) attrs.rangeFillClass = myt.SimpleSliderRangeFill;
         
         this.callSuper(parent, attrs);
-    },
-    
-    /** @overrides */
-    doAfterAdoption: function() {
+        
         new this.rangeFillClass(this, {name:'rangeFill'});
         new this.thumbClass(this, {name:'thumbLower'});
         new this.thumbClass(this, {name:'thumbUpper'});
-        
-        this.callSuper();
     },
     
     
@@ -22689,360 +22665,6 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         initNode: function(parent, attrs) {
             attrs.axis = 'y';
             this.callSuper(parent, attrs);
-        }
-    });
-})(myt);
-
-
-((pkg) => {
-    const defaultMaxValue = 9999,
-        
-        getPrevColumnHeader = (gridHeader) => gridHeader.gridController ? gridHeader.gridController.getPrevColumnHeader(gridHeader) : null,
-        
-        getNextColumnHeader = (gridHeader) => gridHeader.gridController ? gridHeader.gridController.getNextColumnHeader(gridHeader) : null,
-        
-        getGiveLeft = (gridHeader) => {
-            const hdr = getPrevColumnHeader(gridHeader);
-            return hdr ? hdr.maxValue - hdr.value + getGiveLeft(hdr) : 0;
-        },
-        
-        getGiveRight = (gridHeader) => {
-            const hdr = getNextColumnHeader(gridHeader);
-            return hdr ? hdr.maxValue - hdr.value + getGiveRight(hdr) : 0;
-        },
-        
-        getTakeLeft = (gridHeader) => {
-            const hdr = getPrevColumnHeader(gridHeader);
-            return hdr ? hdr.minValue - hdr.value + getTakeLeft(hdr) : 0;
-        },
-        
-        getTakeRight = (gridHeader) => {
-            const hdr = getNextColumnHeader(gridHeader);
-            return hdr ? hdr.minValue - hdr.value + getTakeRight(hdr) : 0;
-        },
-        
-        /*  @param {!Object} gridHeader
-            @returns {undefined} */
-        updateLast = (gridHeader) => {
-            gridHeader.resizer.setVisible(!(gridHeader.last && gridHeader.gridController.fitToWidth));
-        },
-        
-        /*  Steals width from previous column headers.
-            @param {!Object} gridHeader
-            @param {number} diff - The amount to steal. Will be a negative number.
-            @returns {number} - The amount of width actually stolen. */
-        stealPrevWidth = (gridHeader, diff) => {
-            const hdr = getPrevColumnHeader(gridHeader);
-            let usedDiff = 0;
-            if (hdr) {
-                const newValue = hdr.value + diff;
-                if (hdr.resizable) hdr.setValue(newValue);
-                const remainingDiff = newValue - hdr.value;
-                usedDiff = diff - remainingDiff;
-                if (remainingDiff < 0) usedDiff += stealPrevWidth(hdr, remainingDiff);
-            }
-            return usedDiff;
-        },
-        
-        /*  Gives width to previous column headers.
-            @param {!Object} gridHeader
-            @param {number} diff - The amount to give. Will be a positive number.
-            @returns {number} - The amount of width actually given. */
-        givePrevWidth = (gridHeader, diff) => {
-            const hdr = getPrevColumnHeader(gridHeader);
-            let usedDiff = 0;
-            if (hdr) {
-                const newValue = hdr.value + diff;
-                if (hdr.resizable) hdr.setValue(newValue);
-                const remainingDiff = newValue - hdr.value;
-                usedDiff = diff - remainingDiff;
-                if (remainingDiff > 0) usedDiff += givePrevWidth(hdr, remainingDiff);
-            }
-            return usedDiff;
-        },
-        
-        /*  Steals width from next column headers.
-            @param {!Object} gridHeader
-            @param {number} diff - The amount to steal. Will be a negative number.
-            @returns {number} - The amount of width actually stolen. */
-        stealNextWidth = (gridHeader, diff) => {
-            const hdr = getNextColumnHeader(gridHeader);
-            if (hdr) {
-                const newValue = hdr.value + diff;
-                if (hdr.resizable) hdr.setValue(newValue);
-                const remainingDiff = newValue - hdr.value;
-                if (remainingDiff < 0) stealNextWidth(hdr, remainingDiff);
-            }
-        },
-        
-        /*  Gives width to next column headers.
-            @param {!Object} gridHeader
-            @param {number} diff - The amount to give. Will be a positive number.
-            @returns {number} - The amount of width actually given. */
-        giveNextWidth = (gridHeader, diff) => {
-            const hdr = getNextColumnHeader(gridHeader);
-            if (hdr) {
-                const newValue = hdr.value + diff;
-                if (hdr.resizable) hdr.setValue(newValue);
-                const remainingDiff = newValue - hdr.value;
-                if (remainingDiff > 0) giveNextWidth(hdr, remainingDiff);
-            }
-        };
-    
-    /** Makes a view behave as a grid column header.
-        
-        Events:
-            sortable:boolean
-            sortState:string
-            resizable:boolean
-        
-        Attributes:
-            columnId:string The unique ID for this column relative to the grid it
-                is part of.
-            gridController:myt.GridController the controller for the grid this
-                component is part of.
-            flex:number If 1 or more the column will get extra space if any exists.
-            resizable:boolean Indicates if this column can be resized or not.
-                Defaults to true.
-            last:boolean Indicates if this is the last column header or not.
-            sortable:boolean Indicates if this column can be sorted or not.
-                Defaults to true.
-            sortState:string The sort state of this column. Allowed values are:
-                'ascending': Sorted in ascending order.
-                'descending': Sorted in descending order.
-                'none': Not currently an active sort column.
-            cellXAdj:number The amount to shift the x values of cells updated by
-                this column. Defaults to 0.
-            cellWidthAdj:number The amount to grow/shrink the width of cells 
-                updated by this column. Defaults to 0.
-        
-        @class */
-    pkg.GridColumnHeader = new JS.Module('GridColumnHeader', {
-        include: [pkg.BoundedValueComponent],
-        
-        
-        // Life Cycle //////////////////////////////////////////////////////////
-        initNode: function(parent, attrs) {
-            const self = this;
-            let gc;
-            
-            if (attrs.minValue == null) attrs.minValue = 16;
-            if (attrs.maxValue == null) attrs.maxValue = defaultMaxValue;
-            if (attrs.resizable == null) attrs.resizable = true;
-            if (attrs.flex == null) attrs.flex = 0;
-            if (attrs.cellXAdj == null) attrs.cellXAdj = 0;
-            if (attrs.cellWidthAdj == null) attrs.cellWidthAdj = 0;
-            
-            if (attrs.sortable == null) attrs.sortable = true;
-            if (attrs.sortState == null) attrs.sortState = 'none';
-            
-            // Ensure participation in determinePlacement method of myt.Grid
-            if (attrs.placement == null) attrs.placement = '*';
-            
-            self.callSuper(parent, attrs);
-            
-            gc = self.gridController;
-            
-            new pkg.View(self, {
-                name:'resizer', cursor:'col-resize', width:10, zIndex:1,
-                percentOfParentHeight:100, align:'right', alignOffset:-5,
-                draggableAllowBubble:false
-            }, [pkg.SizeToParent, pkg.Draggable, {
-                requestDragPosition: function(x, y) {
-                    let diff = x - this.x,
-                        growAmt,
-                        shrinkAmt,
-                        newValue;
-                    
-                    if (gc.fitToWidth) {
-                        if (diff > 0) {
-                            // Get amount that this header can grow
-                            growAmt = self.maxValue - self.value;
-                            diff = Math.min(diff, Math.min(-getTakeRight(self), growAmt + getGiveLeft(self)));
-                        } else if (diff < 0) {
-                            // Get amount that this header can shrink
-                            shrinkAmt = self.minValue - self.value;
-                            diff = Math.max(diff, Math.max(-getGiveRight(self), shrinkAmt + getTakeLeft(self)));
-                        }
-                        
-                        if (diff === 0) return;
-                    }
-                    
-                    newValue = self.value + diff;
-                    
-                    if (self.resizable) self.setValue(newValue);
-                    const remainingDiff = newValue - self.value;
-                    let stolenAmt = remainingDiff - diff,
-                        additionalActualDiff = 0;
-                    if (remainingDiff < 0) {
-                        additionalActualDiff = stealPrevWidth(self, remainingDiff);
-                    } else if (remainingDiff > 0) {
-                        additionalActualDiff = givePrevWidth(self, remainingDiff);
-                    }
-                    this.dragInitX += additionalActualDiff;
-                    stolenAmt -= additionalActualDiff;
-                    
-                    if (gc.fitToWidth) {
-                        if (stolenAmt < 0) {
-                            stealNextWidth(self, stolenAmt);
-                        } else if (stolenAmt > 0) {
-                            giveNextWidth(self, stolenAmt);
-                        }
-                    }
-                }
-            }]);
-            
-            if (gc) {
-                gc.notifyAddColumnHeader(self);
-                gc.notifyColumnHeaderXChange(self);
-                gc.notifyColumnHeaderVisibilityChange(self);
-            }
-            self.setWidth(self.value);
-            updateLast(self);
-        },
-        
-        destroy: function(v) {
-            this.setGridController();
-            this.callSuper(v);
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        setSortable: function(v) {this.set('sortable', v, true);},
-        setSortState: function(v) {this.set('sortState', v, true);},
-        setResizable: function(v) {this.set('resizable', v, true);},
-        setCellWidthAdj: function(v) {this.cellWidthAdj = v;},
-        setCellXAdj: function(v) {this.cellXAdj = v;},
-        setFlex: function(v) {this.flex = v;},
-        setColumnId: function(v) {this.columnId = v;},
-        
-        setLast: function(v) {
-            this.last = v;
-            if (this.inited) updateLast(this);
-        },
-        
-        setGridController: function(v) {
-            const existing = this.gridController;
-            if (existing !== v) {
-                if (existing) existing.notifyRemoveColumnHeader(this);
-                this.gridController = v;
-                if (this.inited && v) {
-                    v.notifyAddColumnHeader(this);
-                    v.notifyColumnHeaderXChange(this);
-                    v.notifyColumnHeaderWidthChange(this);
-                    v.notifyColumnHeaderVisibilityChange(this);
-                }
-            }
-        },
-        
-        /** @overrides myt.BoundedValueComponent */
-        setValue: function(v) {
-            this.callSuper(v);
-            if (this.inited) this.setWidth(this.value);
-        },
-        
-        /** @overrides myt.BoundedValueComponent */
-        setMinValue: function(v) {
-            const self = this,
-                oldMinValue = self.minValue || 0, 
-                gc = self.gridController;
-            self.callSuper(v);
-            if (self.inited && gc && oldMinValue !== self.minValue) gc.setMinWidth(gc.minWidth + self.minValue - oldMinValue);
-        },
-        
-        /** @overrides myt.BoundedValueComponent */
-        setMaxValue: function(v) {
-            const self = this,
-                oldMaxValue = self.maxValue || 0,
-                gc = self.gridController;
-            if (v == null) v = defaultMaxValue;
-            self.callSuper(v);
-            if (self.inited && gc && oldMaxValue !== self.maxValue) gc.setMaxWidth(gc.maxWidth + self.maxValue - oldMaxValue);
-        },
-        
-        /** @overrides myt.View */
-        setWidth: function(v, supressEvent) {
-            const self = this,
-                cur = self.width;
-            self.callSuper(v, supressEvent);
-            if (self.inited && self.gridController && cur !== self.width) self.gridController.notifyColumnHeaderWidthChange(self);
-        },
-        
-        /** @overrides myt.View */
-        setX: function(v) {
-            const self = this,
-                cur = self.x;
-            self.callSuper(v);
-            if (self.inited && self.gridController && cur !== self.x) self.gridController.notifyColumnHeaderXChange(self);
-        },
-        
-        /** @overrides myt.View */
-        setVisible: function(v) {
-            const self = this,
-                cur = self.visible;
-            self.callSuper(v);
-            if (self.inited && self.gridController && cur !== self.visible) self.gridController.notifyColumnHeaderVisibilityChange(self);
-        }
-    });
-})(myt);
-
-
-((pkg) => {
-    const getSubview = (gridRow, columnHeader) => gridRow[columnHeader.columnId + 'View'];
-    
-    /** Makes a view behave as a row in a grid.
-        
-        Events:
-            None
-        
-        Attributes:
-            gridController:myt.GridConstroller A reference to the grid controller
-                that is managing this row.
-        
-        @class */
-    pkg.GridRow = new JS.Module('GridRow', {
-        // Life Cycle //////////////////////////////////////////////////////////
-        initNode: function(parent, attrs) {
-            // Ensure participation in determinePlacement method of myt.Grid
-            if (attrs.placement == null) attrs.placement = '*';
-            
-            this.callSuper(parent, attrs);
-            
-            const gc = this.gridController;
-            if (gc) gc.notifyAddRow(this);
-        },
-        
-        destroy: function(v) {
-            this.setGridController();
-            this.callSuper(v);
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        setGridController: function(v) {
-            const existing = this.gridController;
-            if (existing !== v) {
-                if (existing) existing.notifyRemoveRow(this);
-                this.gridController = v;
-                if (this.inited && v) v.notifyAddRow(this);
-            }
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        notifyColumnHeaderXChange: function(columnHeader) {
-            const sv = getSubview(this, columnHeader);
-            if (sv) sv.setX(columnHeader.x + columnHeader.cellXAdj);
-        },
-        
-        notifyColumnHeaderWidthChange: function(columnHeader) {
-            const sv = getSubview(this, columnHeader);
-            if (sv) sv.setWidth(columnHeader.width + columnHeader.cellWidthAdj);
-        },
-        
-        notifyColumnHeaderVisibilityChange: function(columnHeader) {
-            const sv = getSubview(this, columnHeader);
-            if (sv) sv.setVisible(columnHeader.visible);
         }
     });
 })(myt);
@@ -23506,198 +23128,530 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
 })(myt);
 
 
-/** An implementation of a grid component.
-    
-    Events:
-        None
-    
-    Attributes:
-        rowSpacing:number The spacing between rows. Defaults to 1.
-        columnSpacing:number the spacing between columns. Defaults to 1.
-        sizeHeightToRows:boolean If true, this component will be sized to fit
-            all the rows without showing scrollbars. Defaults to undefined
-            which is equivalent to false.
-*/
-myt.Grid = new JS.Class('Grid', myt.View, {
-    include: [myt.GridController],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.View */
-    initNode: function(parent, attrs) {
-        // Allows horizontal scrolling if the grid columns are too wide.
-        if (attrs.overflow == null) attrs.overflow = 'autox';
+((pkg) => {
+    const defaultMaxValue = 9999,
         
-        if (attrs.bgColor == null) attrs.bgColor = '#cccccc';
-        if (attrs.rowSpacing == null) attrs.rowSpacing = 1;
-        if (attrs.columnSpacing == null) attrs.columnSpacing = 1;
+        getPrevColumnHeader = (gridHeader) => gridHeader.gridController ? gridHeader.gridController.getPrevColumnHeader(gridHeader) : null,
         
-        this.callSuper(parent, attrs);
-    },
-    
-    /** @overrides myt.View */
-    doAfterAdoption: function() {
-        const self = this,
-            M = myt,
-            V = M.View,
-            SL = M.SpacedLayout,
-            sizeHeightToRows = self.sizeHeightToRows;
+        getNextColumnHeader = (gridHeader) => gridHeader.gridController ? gridHeader.gridController.getNextColumnHeader(gridHeader) : null,
         
-        const header = new V(self, {name:'header', overflow:'hidden'});
-        new SL(header, {
-            name:'xLayout', locked:true, collapseParent:true, 
-            spacing:self.columnSpacing
-        });
-        new M.SizeToChildren(header, {name:'yLayout', locked:true, axis:'y'});
+        getGiveLeft = (gridHeader) => {
+            const hdr = getPrevColumnHeader(gridHeader);
+            return hdr ? hdr.maxValue - hdr.value + getGiveLeft(hdr) : 0;
+        },
         
-        const content = new V(self, {
-            name:'content', 
-            overflow:sizeHeightToRows ? 'hidden' : 'autoy'
-        });
-        new SL(content, {
-            name:'yLayout', locked:true, axis:'y', spacing:self.rowSpacing,
-            collapseParent:sizeHeightToRows
-        });
+        getGiveRight = (gridHeader) => {
+            const hdr = getNextColumnHeader(gridHeader);
+            return hdr ? hdr.maxValue - hdr.value + getGiveRight(hdr) : 0;
+        },
         
-        self.syncTo(self, 'setGridWidth', 'width');
-        self.syncTo(header, '_updateContentWidth', 'width');
+        getTakeLeft = (gridHeader) => {
+            const hdr = getPrevColumnHeader(gridHeader);
+            return hdr ? hdr.minValue - hdr.value + getTakeLeft(hdr) : 0;
+        },
         
-        self.constrain('_updateContentHeight', [
-            sizeHeightToRows ? content : self, 'height', 
-            header, 'height', 
-            header, 'y'
-        ]);
+        getTakeRight = (gridHeader) => {
+            const hdr = getNextColumnHeader(gridHeader);
+            return hdr ? hdr.minValue - hdr.value + getTakeRight(hdr) : 0;
+        },
         
-        self.callSuper();
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setSizeHeightToRows: function(v) {this.sizeHeightToRows = v;},
-    
-    setRowSpacing: function(v) {
-        if (this.rowSpacing !== v) {
-            this.rowSpacing = v;
-            if (this.inited) this.content.yLayout.setSpacing(v);
-        }
-    },
-    
-    setColumnSpacing: function(v) {
-        if (this.columnSpacing !== v) {
-            this.columnSpacing = v;
-            if (this.inited) this.header.xLayout.setSpacing(v);
-        }
-    },
-    
-    /** @overrides myt.GridController */
-    setLocked: function(v) {
-        // Performance: don't update layouts until the grid is unlocked.
-        if (this.inited) {
-            const header = this.header,
-                headerXLayout = header.xLayout,
-                headerYLayout = header.yLayout,
-                contentYLayout = this.content.yLayout;
-            if (v) {
-                headerXLayout.incrementLockedCounter();
-                headerYLayout.incrementLockedCounter();
-                contentYLayout.incrementLockedCounter();
-            } else {
-                headerXLayout.decrementLockedCounter();
-                headerXLayout.update();
-                headerYLayout.decrementLockedCounter();
-                headerYLayout.update();
-                contentYLayout.decrementLockedCounter();
-                contentYLayout.update();
+        /*  @param {!Object} gridHeader
+            @returns {undefined} */
+        updateLast = (gridHeader) => {
+            gridHeader.resizer.setVisible(!(gridHeader.last && gridHeader.gridController.fitToWidth));
+        },
+        
+        /*  Steals width from previous column headers.
+            @param {!Object} gridHeader
+            @param {number} diff - The amount to steal. Will be a negative number.
+            @returns {number} - The amount of width actually stolen. */
+        stealPrevWidth = (gridHeader, diff) => {
+            const hdr = getPrevColumnHeader(gridHeader);
+            let usedDiff = 0;
+            if (hdr) {
+                const newValue = hdr.value + diff;
+                if (hdr.resizable) hdr.setValue(newValue);
+                const remainingDiff = newValue - hdr.value;
+                usedDiff = diff - remainingDiff;
+                if (remainingDiff < 0) usedDiff += stealPrevWidth(hdr, remainingDiff);
             }
-        }
+            return usedDiff;
+        },
         
-        this.callSuper(v);
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    _updateContentWidth: function(event) {
-        this.content.setWidth(event.value);
-    },
-    
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    _updateContentHeight: function(event) {
-        const self = this,
-            header = self.header, 
-            content = self.content,
-            y = header.y + header.height;
-        content.setY(y);
+        /*  Gives width to previous column headers.
+            @param {!Object} gridHeader
+            @param {number} diff - The amount to give. Will be a positive number.
+            @returns {number} - The amount of width actually given. */
+        givePrevWidth = (gridHeader, diff) => {
+            const hdr = getPrevColumnHeader(gridHeader);
+            let usedDiff = 0;
+            if (hdr) {
+                const newValue = hdr.value + diff;
+                if (hdr.resizable) hdr.setValue(newValue);
+                const remainingDiff = newValue - hdr.value;
+                usedDiff = diff - remainingDiff;
+                if (remainingDiff > 0) usedDiff += givePrevWidth(hdr, remainingDiff);
+            }
+            return usedDiff;
+        },
         
-        if (self.sizeHeightToRows) {
-            self.setHeight(y + content.height);
-        } else {
-            content.setHeight(self.height - y);
-        }
-    },
+        /*  Steals width from next column headers.
+            @param {!Object} gridHeader
+            @param {number} diff - The amount to steal. Will be a negative number.
+            @returns {number} - The amount of width actually stolen. */
+        stealNextWidth = (gridHeader, diff) => {
+            const hdr = getNextColumnHeader(gridHeader);
+            if (hdr) {
+                const newValue = hdr.value + diff;
+                if (hdr.resizable) hdr.setValue(newValue);
+                const remainingDiff = newValue - hdr.value;
+                if (remainingDiff < 0) stealNextWidth(hdr, remainingDiff);
+            }
+        },
+        
+        /*  Gives width to next column headers.
+            @param {!Object} gridHeader
+            @param {number} diff - The amount to give. Will be a positive number.
+            @returns {number} - The amount of width actually given. */
+        giveNextWidth = (gridHeader, diff) => {
+            const hdr = getNextColumnHeader(gridHeader);
+            if (hdr) {
+                const newValue = hdr.value + diff;
+                if (hdr.resizable) hdr.setValue(newValue);
+                const remainingDiff = newValue - hdr.value;
+                if (remainingDiff > 0) giveNextWidth(hdr, remainingDiff);
+            }
+        };
     
-    /** @overrides myt.Node */
-    determinePlacement: function(placement, subnode) {
-        // Automatically place column headers and rows in the header and
-        // content views respectively.
-        if (placement === '*') {
-            let target;
-            if (subnode.isA(myt.GridRow)) {
-                target = this.content;
-            } else if (subnode.isA(myt.GridColumnHeader)) {
-                target = this.header;
+    /** Makes a view behave as a grid column header.
+        
+        Events:
+            sortable:boolean
+            sortState:string
+            resizable:boolean
+        
+        Attributes:
+            columnId:string The unique ID for this column relative to the grid it
+                is part of.
+            gridController:myt.GridController the controller for the grid this
+                component is part of.
+            flex:number If 1 or more the column will get extra space if any exists.
+            resizable:boolean Indicates if this column can be resized or not.
+                Defaults to true.
+            last:boolean Indicates if this is the last column header or not.
+            sortable:boolean Indicates if this column can be sorted or not.
+                Defaults to true.
+            sortState:string The sort state of this column. Allowed values are:
+                'ascending': Sorted in ascending order.
+                'descending': Sorted in descending order.
+                'none': Not currently an active sort column.
+            cellXAdj:number The amount to shift the x values of cells updated by
+                this column. Defaults to 0.
+            cellWidthAdj:number The amount to grow/shrink the width of cells 
+                updated by this column. Defaults to 0.
+        
+        @class */
+    pkg.GridColumnHeader = new JS.Module('GridColumnHeader', {
+        include: [pkg.BoundedValueComponent],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            const self = this;
+            let gc;
+            
+            if (attrs.minValue == null) attrs.minValue = 16;
+            if (attrs.maxValue == null) attrs.maxValue = defaultMaxValue;
+            if (attrs.resizable == null) attrs.resizable = true;
+            if (attrs.flex == null) attrs.flex = 0;
+            if (attrs.cellXAdj == null) attrs.cellXAdj = 0;
+            if (attrs.cellWidthAdj == null) attrs.cellWidthAdj = 0;
+            
+            if (attrs.sortable == null) attrs.sortable = true;
+            if (attrs.sortState == null) attrs.sortState = 'none';
+            
+            // Ensure participation in determinePlacement method of myt.Grid
+            if (attrs.placement == null) attrs.placement = '*';
+            
+            self.callSuper(parent, attrs);
+            
+            gc = self.gridController;
+            
+            new pkg.View(self, {
+                name:'resizer', cursor:'col-resize', width:10, zIndex:1,
+                percentOfParentHeight:100, align:'right', alignOffset:-5,
+                draggableAllowBubble:false
+            }, [pkg.SizeToParent, pkg.Draggable, {
+                requestDragPosition: function(x, y) {
+                    let diff = x - this.x,
+                        growAmt,
+                        shrinkAmt,
+                        newValue;
+                    
+                    if (gc.fitToWidth) {
+                        if (diff > 0) {
+                            // Get amount that this header can grow
+                            growAmt = self.maxValue - self.value;
+                            diff = Math.min(diff, Math.min(-getTakeRight(self), growAmt + getGiveLeft(self)));
+                        } else if (diff < 0) {
+                            // Get amount that this header can shrink
+                            shrinkAmt = self.minValue - self.value;
+                            diff = Math.max(diff, Math.max(-getGiveRight(self), shrinkAmt + getTakeLeft(self)));
+                        }
+                        
+                        if (diff === 0) return;
+                    }
+                    
+                    newValue = self.value + diff;
+                    
+                    if (self.resizable) self.setValue(newValue);
+                    const remainingDiff = newValue - self.value;
+                    let stolenAmt = remainingDiff - diff,
+                        additionalActualDiff = 0;
+                    if (remainingDiff < 0) {
+                        additionalActualDiff = stealPrevWidth(self, remainingDiff);
+                    } else if (remainingDiff > 0) {
+                        additionalActualDiff = givePrevWidth(self, remainingDiff);
+                    }
+                    this.dragInitX += additionalActualDiff;
+                    stolenAmt -= additionalActualDiff;
+                    
+                    if (gc.fitToWidth) {
+                        if (stolenAmt < 0) {
+                            stealNextWidth(self, stolenAmt);
+                        } else if (stolenAmt > 0) {
+                            giveNextWidth(self, stolenAmt);
+                        }
+                    }
+                }
+            }]);
+            
+            if (gc) {
+                gc.notifyAddColumnHeader(self);
+                gc.notifyColumnHeaderXChange(self);
+                gc.notifyColumnHeaderVisibilityChange(self);
+            }
+            self.setWidth(self.value);
+            updateLast(self);
+        },
+        
+        destroy: function(v) {
+            this.setGridController();
+            this.callSuper(v);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setSortable: function(v) {this.set('sortable', v, true);},
+        setSortState: function(v) {this.set('sortState', v, true);},
+        setResizable: function(v) {this.set('resizable', v, true);},
+        setCellWidthAdj: function(v) {this.cellWidthAdj = v;},
+        setCellXAdj: function(v) {this.cellXAdj = v;},
+        setFlex: function(v) {this.flex = v;},
+        setColumnId: function(v) {this.columnId = v;},
+        
+        setLast: function(v) {
+            this.last = v;
+            if (this.inited) updateLast(this);
+        },
+        
+        setGridController: function(v) {
+            const existing = this.gridController;
+            if (existing !== v) {
+                if (existing) existing.notifyRemoveColumnHeader(this);
+                this.gridController = v;
+                if (this.inited && v) {
+                    v.notifyAddColumnHeader(this);
+                    v.notifyColumnHeaderXChange(this);
+                    v.notifyColumnHeaderWidthChange(this);
+                    v.notifyColumnHeaderVisibilityChange(this);
+                }
+            }
+        },
+        
+        /** @overrides myt.BoundedValueComponent */
+        setValue: function(v) {
+            this.callSuper(v);
+            if (this.inited) this.setWidth(this.value);
+        },
+        
+        /** @overrides myt.BoundedValueComponent */
+        setMinValue: function(v) {
+            const self = this,
+                oldMinValue = self.minValue || 0, 
+                gc = self.gridController;
+            self.callSuper(v);
+            if (self.inited && gc && oldMinValue !== self.minValue) gc.setMinWidth(gc.minWidth + self.minValue - oldMinValue);
+        },
+        
+        /** @overrides myt.BoundedValueComponent */
+        setMaxValue: function(v) {
+            const self = this,
+                oldMaxValue = self.maxValue || 0,
+                gc = self.gridController;
+            if (v == null) v = defaultMaxValue;
+            self.callSuper(v);
+            if (self.inited && gc && oldMaxValue !== self.maxValue) gc.setMaxWidth(gc.maxWidth + self.maxValue - oldMaxValue);
+        },
+        
+        /** @overrides myt.View */
+        setWidth: function(v, supressEvent) {
+            const self = this,
+                cur = self.width;
+            self.callSuper(v, supressEvent);
+            if (self.inited && self.gridController && cur !== self.width) self.gridController.notifyColumnHeaderWidthChange(self);
+        },
+        
+        /** @overrides myt.View */
+        setX: function(v) {
+            const self = this,
+                cur = self.x;
+            self.callSuper(v);
+            if (self.inited && self.gridController && cur !== self.x) self.gridController.notifyColumnHeaderXChange(self);
+        },
+        
+        /** @overrides myt.View */
+        setVisible: function(v) {
+            const self = this,
+                cur = self.visible;
+            self.callSuper(v);
+            if (self.inited && self.gridController && cur !== self.visible) self.gridController.notifyColumnHeaderVisibilityChange(self);
+        }
+    });
+})(myt);
+
+
+((pkg) => {
+    const View = pkg.View,
+        
+        getRowSubview = (gridRow, columnHeader) => gridRow[columnHeader.columnId + 'View'];
+    
+    /** Makes a view behave as a row in a grid.
+        
+        Events:
+            None
+        
+        Attributes:
+            gridController:myt.GridConstroller A reference to the grid controller
+                that is managing this row.
+        
+        @class */
+    pkg.GridRow = new JS.Module('GridRow', {
+        // Life Cycle //////////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            // Ensure participation in determinePlacement method of myt.Grid
+            if (attrs.placement == null) attrs.placement = '*';
+            
+            this.callSuper(parent, attrs);
+            
+            const gc = this.gridController;
+            if (gc) gc.notifyAddRow(this);
+        },
+        
+        destroy: function(v) {
+            this.setGridController();
+            this.callSuper(v);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setGridController: function(v) {
+            const existing = this.gridController;
+            if (existing !== v) {
+                if (existing) existing.notifyRemoveRow(this);
+                this.gridController = v;
+                if (this.inited && v) v.notifyAddRow(this);
+            }
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        notifyColumnHeaderXChange: function(columnHeader) {
+            const sv = getRowSubview(this, columnHeader);
+            if (sv) sv.setX(columnHeader.x + columnHeader.cellXAdj);
+        },
+        
+        notifyColumnHeaderWidthChange: function(columnHeader) {
+            const sv = getRowSubview(this, columnHeader);
+            if (sv) sv.setWidth(columnHeader.width + columnHeader.cellWidthAdj);
+        },
+        
+        notifyColumnHeaderVisibilityChange: function(columnHeader) {
+            const sv = getRowSubview(this, columnHeader);
+            if (sv) sv.setVisible(columnHeader.visible);
+        }
+    });
+    
+    /** An implementation of a grid component.
+        
+        Attributes:
+            rowSpacing:number The spacing between rows. Defaults to 1.
+            columnSpacing:number the spacing between columns. Defaults to 1.
+            sizeHeightToRows:boolean If true, this component will be sized to 
+                fit all the rows without showing scrollbars. Defaults to 
+                undefined which is equivalent to false.
+        
+        @class */
+    pkg.Grid = new JS.Class('Grid', View, {
+        include: [pkg.GridController],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.View */
+        initNode: function(parent, attrs) {
+            const self = this,
+                SpacedLayout = pkg.SpacedLayout;
+            
+            // Allows horizontal scrolling if the grid columns are too wide.
+            if (attrs.overflow == null) attrs.overflow = 'autox';
+            
+            if (attrs.bgColor == null) attrs.bgColor = '#cccccc';
+            if (attrs.rowSpacing == null) attrs.rowSpacing = 1;
+            if (attrs.columnSpacing == null) attrs.columnSpacing = 1;
+            
+            const isAutoScrolling = attrs.isAutoScrolling;
+            delete attrs.isAutoScrolling;
+            
+            self.callSuper(parent, attrs);
+            
+            // Build UI
+            const header = new View(self, {name:'header', overflow:'hidden'});
+            new SpacedLayout(header, {name:'xLayout', locked:true, collapseParent:true, spacing:self.columnSpacing});
+            new pkg.SizeToChildren(header, {name:'yLayout', locked:true, axis:'y'});
+            
+            const sizeHeightToRows = self.sizeHeightToRows,
+                contentMixins = isAutoScrolling ? [pkg.AutoScroller] : [],
+                content = new View(self, {name:'content', overflow:sizeHeightToRows ? 'hidden' : 'autoy'}, contentMixins);
+            new SpacedLayout(content, {name:'yLayout', locked:true, axis:'y', spacing:self.rowSpacing, collapseParent:sizeHeightToRows});
+            
+            self.syncTo(self, 'setGridWidth', 'width');
+            self.syncTo(header, '_updateContentWidth', 'width');
+            self.constrain('_updateContentHeight', [sizeHeightToRows ? content : self, 'height', header, 'height', header, 'y']);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setSizeHeightToRows: function(v) {this.sizeHeightToRows = v;},
+        
+        setRowSpacing: function(v) {
+            if (this.rowSpacing !== v) {
+                this.rowSpacing = v;
+                if (this.inited) this.content.yLayout.setSpacing(v);
+            }
+        },
+        
+        setColumnSpacing: function(v) {
+            if (this.columnSpacing !== v) {
+                this.columnSpacing = v;
+                if (this.inited) this.header.xLayout.setSpacing(v);
+            }
+        },
+        
+        /** @overrides myt.GridController */
+        setLocked: function(v) {
+            // Performance: don't update layouts until the grid is unlocked.
+            if (this.inited) {
+                [this.header.xLayout, this.header.yLayout, this.content.yLayout].forEach(layout => {
+                    if (v) {
+                        layout.incrementLockedCounter();
+                    } else {
+                        layout.decrementLockedCounter();
+                        layout.update();
+                    }
+                });
+            }
+            this.callSuper(v);
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        _updateContentWidth: function(event) {
+            const content = this.content,
+                svs = content.getSubviews(),
+                w = event.value;
+            content.setWidth(w);
+            svs.forEach(sv => {sv.setWidth(w);});
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        _updateContentHeight: function(event) {
+            const self = this,
+                header = self.header, 
+                content = self.content,
+                y = header.y + header.height;
+            content.setY(y);
+            
+            if (self.sizeHeightToRows) {
+                self.setHeight(y + content.height);
+            } else {
+                content.setHeight(self.height - y);
+            }
+        },
+        
+        /** @overrides myt.Node */
+        determinePlacement: function(placement, subnode) {
+            // Automatically place column headers and rows in the header and
+            // content views respectively.
+            if (placement === '*') {
+                let target;
+                if (subnode.isA(pkg.GridRow)) {
+                    target = this.content;
+                } else if (subnode.isA(pkg.GridColumnHeader)) {
+                    target = this.header;
+                }
+                
+                if (target) {
+                    if (subnode.gridController !== this) subnode.setGridController(this);
+                    return target;
+                }
             }
             
-            if (target) {
-                if (subnode.gridController !== this) subnode.setGridController(this);
-                return target;
+            return this.callSuper(placement, subnode);
+        },
+        
+        /** @overrides myt.GridController */
+        doSort: function() {
+            const sort = this.sort || ['',''],
+                sortFunc = this.getSortFunction(sort[0], sort[1]);
+            if (sortFunc) {
+                const content = this.content, 
+                    yLayout = content.yLayout;
+                this.rows.sort(sortFunc);
+                content.sortSubviews(sortFunc);
+                yLayout.sortSubviews(sortFunc);
+                yLayout.update();
+            }
+        },
+        
+        /** Gets the sort function used to sort the rows. Subclasses and instances
+            should implement this as needed.
+            @param {string} sortColumnId,
+            @param {string} sortOrder
+            @returns {!Function}  a comparator function used for sorting. */
+        getSortFunction: (sortColumnId, sortOrder) => {
+            if (sortColumnId) {
+                // Default sort function uses the 'text' attribute of the subview.
+                const sortNum = sortOrder === 'ascending' ? 1 : -1,
+                    columnName = sortColumnId + 'View';
+                return (a, b) => {
+                    const aValue = a[columnName].text,
+                        bValue = b[columnName].text;
+                    if (aValue > bValue) {
+                        return sortNum;
+                    } else if (bValue > aValue) {
+                        return -sortNum;
+                    }
+                    return 0;
+                };
             }
         }
-        
-        return this.callSuper(placement, subnode);
-    },
-    
-    /** @overrides myt.GridController */
-    doSort: function() {
-        const sort = this.sort || ['',''],
-            sortFunc = this.getSortFunction(sort[0], sort[1]);
-        if (sortFunc) {
-            const content = this.content, 
-                yLayout = content.yLayout;
-            this.rows.sort(sortFunc);
-            content.sortSubviews(sortFunc);
-            yLayout.sortSubviews(sortFunc);
-            yLayout.update();
-        }
-    },
-    
-    /** Gets the sort function used to sort the rows. Subclasses and instances
-        should implement this as needed.
-        @param {string} sortColumnId,
-        @param {string} sortOrder
-        @returns {!Function}  a comparator function used for sorting. */
-    getSortFunction: (sortColumnId, sortOrder) => {
-        if (sortColumnId) {
-            // Default sort function uses the 'text' attribute of the subview.
-            const sortNum = sortOrder === 'ascending' ? 1 : -1,
-                columnName = sortColumnId + 'View';
-            return (a, b) => {
-                const aValue = a[columnName].text,
-                    bValue = b[columnName].text;
-                if (aValue > bValue) {
-                    return sortNum;
-                } else if (bValue > aValue) {
-                    return -sortNum;
-                }
-                return 0;
-            };
-        }
-    }
-});
+    });
+})(myt);
 
 
 ((pkg) => {
@@ -23845,6 +23799,8 @@ myt.Grid = new JS.Class('Grid', myt.View, {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.View */
         initNode: function(parent, attrs) {
+            const self = this;
+            
             if (attrs.activeColor == null) attrs.activeColor = '#999999';
             if (attrs.hoverColor == null) attrs.hoverColor = '#bbbbbb';
             if (attrs.readyColor == null) attrs.readyColor = '#aaaaaa';
@@ -23856,16 +23812,7 @@ myt.Grid = new JS.Class('Grid', myt.View, {
             if (attrs.contentAlign == null) attrs.contentAlign = 'left';
             if (attrs.sortIconColor == null) attrs.sortIconColor = '#666666';
             
-            this.callSuper(parent, attrs);
-            
-            this.setDisabled(!this.sortable);
-            updateTextWidth(this);
-            updateSortIcon(this);
-        },
-        
-        /** @overrides myt.View */
-        doAfterAdoption: function() {
-            const self = this;
+            self.callSuper(parent, attrs);
             
             new pkg.FontAwesome(self, {
                 name:'sortIcon', align:'right', alignOffset:3, valign:'middle',
@@ -23873,9 +23820,8 @@ myt.Grid = new JS.Class('Grid', myt.View, {
             }, [{
                 initNode: function(parent, attrs) {
                     this.callSuper(parent, attrs);
-                    this.deStyle.fontSize = '0.7em'; // Looks better a bit smaller.
+                    this.getInnerDomStyle().fontSize = '0.7em'; // Looks better a bit smaller.
                 },
-                
                 sizeViewToDom:function() {
                     this.callSuper();
                     
@@ -23884,9 +23830,11 @@ myt.Grid = new JS.Class('Grid', myt.View, {
                 }
             }]);
             
-            self.callSuper();
-            
             self.textView.enableEllipsis();
+            
+            self.setDisabled(!self.sortable);
+            updateTextWidth(self);
+            updateSortIcon(self);
         },
         
         

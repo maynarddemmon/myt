@@ -17,12 +17,10 @@
             
             initNode: function(parent, attrs) {
                 if (attrs.height === undefined) attrs.height = 22;
-                if (attrs.bgColor === undefined) attrs.bgColor = '#ffffff';
+                if (attrs.bgColor === undefined) attrs.bgColor = '#ffcccc';
                 
                 this.callSuper(parent, attrs);
-            },
-            
-            doAfterAdoption: function() {
+                
                 var foo = new M.Text(this, {name:'fooView', y:4, text:M.getRandomInt(0, 1000) + ' foo'});
                 foo.enableEllipsis();
                 var bar = new M.Text(this, {name:'barView', y:4, text:M.getRandomInt(0, 1000) + ' bar'});
@@ -31,19 +29,8 @@
                 bar2.enableEllipsis();
                 var bar3 = new M.Text(this, {name:'bar3View', y:4, text:M.getRandomInt(0, 1000) + ' bar 3'});
                 bar3.enableEllipsis();
-                var baz = new M.Text(this, {name:'bazView', y:4, text:M.getRandomInt(0, 1000) + ' baz'}, [{
-                    setWidth: function(v) {
-                        this.callSuper(v);
-                        this.parent.setWidth(this.x + v);
-                    },
-                    setX: function(v) {
-                        this.callSuper(v);
-                        this.parent.setWidth(v + this.width);
-                    }
-                }]);
+                var baz = new M.Text(this, {name:'bazView', y:4, text:M.getRandomInt(0, 1000) + ' baz'});
                 baz.enableEllipsis();
-                
-                this.callSuper();
             }
         });
         

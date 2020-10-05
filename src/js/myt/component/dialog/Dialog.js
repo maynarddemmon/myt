@@ -146,15 +146,20 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides */
         initNode: function(parent, attrs) {
-            if (attrs.buttonClass == null) attrs.buttonClass = pkg.Dialog.DEFAULT_BUTTON_CLASS;
+            const Dialog = pkg.Dialog;
+            
+            if (attrs.buttonClass == null) attrs.buttonClass = Dialog.DEFAULT_BUTTON_CLASS;
             
             this.callSuper(parent, attrs);
-        },
-        
-        doAfterAdoption: function() {
-            this.setupDialog();
             
-            this.callSuper();
+            const content = this.content;
+            content.setRoundedCorners(Dialog.DEFAULT_RADIUS);
+            content.setBgColor(Dialog.DEFAULT_BGCOLOR);
+            content.setBoxShadow(Dialog.DEFAULT_SHADOW);
+            content.setBorder(Dialog.DEFAULT_BORDER);
+            content.setFocusCage(true);
+            
+            this.createCloseButton(content, this);
         },
         
         
@@ -165,20 +170,6 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Does basic styling of a dialog and creates a close button.
-            @returns {undefined} */
-        setupDialog: function() {
-            const D = pkg.Dialog,
-                content = this.content;
-            content.setRoundedCorners(D.DEFAULT_RADIUS);
-            content.setBgColor(D.DEFAULT_BGCOLOR);
-            content.setBoxShadow(D.DEFAULT_SHADOW);
-            content.setBorder(D.DEFAULT_BORDER);
-            content.setFocusCage(true);
-            
-            this.createCloseButton(content, this);
-        },
-        
         /** Creates a close button on the provided targetView.
             @param {!Object} targetView - The myt.View to create the button on.
             @param {!Object} callbackTarget - An object with a doCallback method

@@ -21,15 +21,10 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         if (attrs.rangeFillClass == null) attrs.rangeFillClass = myt.SimpleSliderRangeFill;
         
         this.callSuper(parent, attrs);
-    },
-    
-    /** @overrides */
-    doAfterAdoption: function() {
+        
         new this.rangeFillClass(this, {name:'rangeFill'});
         new this.thumbClass(this, {name:'thumbLower'});
         new this.thumbClass(this, {name:'thumbUpper'});
-        
-        this.callSuper();
     },
     
     
