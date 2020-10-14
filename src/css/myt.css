@@ -274,7 +274,7 @@ select.mytNativeInput{margin:0px;}
             Author: Masanori Ohgita
             License: MIT
 ***/
-.datepicker {
+.myt-dp {
 	font:15px/1.5 Arial, Helvetica, sans-serif;
 	font-weight:300;
 	user-select:none;
@@ -283,7 +283,7 @@ select.mytNativeInput{margin:0px;}
 }
 
 /* datepicker_header */
-.datepicker > .datepicker_header {
+.myt-dp > .dp-header {
 	color:#3f3f3f;
 	text-align:center;
 	font-size:12px;
@@ -291,17 +291,17 @@ select.mytNativeInput{margin:0px;}
 	height:18px;
 }
 
-.datepicker > .datepicker_header > span {
+.myt-dp > .dp-header > span {
 	margin-left:20px;
 	margin-right:20px;
 }
 
 /* Next and prev month buttons */
-.datepicker > .datepicker_header > a {color:#3b7796;cursor:pointer;}
-.datepicker > .datepicker_header > a:hover {color:#303030;}
-.datepicker > .datepicker_header > a:active {color:#ffffff;}
+.myt-dp > .dp-header > a {color:#3b7796;cursor:pointer;}
+.myt-dp > .dp-header > a:hover {color:#303030;}
+.myt-dp > .dp-header > a:active {color:#ffffff;}
 
-.datepicker > .datepicker_header > .icon-home {
+.myt-dp > .dp-header > .icon-home {
 	position:absolute;
 	display:block;
 	float:left;
@@ -311,21 +311,21 @@ select.mytNativeInput{margin:0px;}
 	height:11pt;
 	vertical-align:middle;
 }
-.datepicker > .datepicker_header > .icon-home > svg > g > path {fill:#3b7796;}
-.datepicker > .datepicker_header > a:hover > svg > g > path {fill:#303030;}
+.myt-dp > .dp-header > .icon-home > svg > g > path {fill:#3b7796;}
+.myt-dp > .dp-header > a:hover > svg > g > path {fill:#303030;}
 
 /* Calendar */
-.datepicker > .datepicker_calendar {
+.myt-dp > .dp-calendar {
 	float:left;
 	width:175px;
 	height:175px;
 	border-right:1px solid #c8c8c8;
 }
 
-.datepicker > .datepicker_calendar > .datepicker_table {border-spacing:0px;}
+.myt-dp > .dp-calendar > .dp-table {border-spacing:0px;}
 
 /* Weekday Cell */
-.datepicker > .datepicker_calendar > .datepicker_table > tr > th {
+.myt-dp > .dp-calendar > .dp-table > tr > th {
 	color:#646464;
 	width:25px;
 	height:21px;
@@ -338,7 +338,7 @@ select.mytNativeInput{margin:0px;}
 	padding-bottom:3px;
 }
 /* Day Cell */
-.datepicker > .datepicker_calendar > .datepicker_table > tr > td {
+.myt-dp > .dp-calendar > .dp-table > tr > td {
 	color:#000000;
 	width:25px;
 	height:21px;
@@ -350,28 +350,28 @@ select.mytNativeInput{margin:0px;}
 	padding-top:2px;
 	padding-bottom:2px;
 }
-.datepicker > .datepicker_calendar > .datepicker_table > tr > td.today {
+.myt-dp > .dp-calendar > .dp-table > tr > td.today {
 	border-bottom:#bfbfbf solid 2px;
 	padding-bottom:0px;
 }
-.datepicker > .datepicker_calendar > .datepicker_table > tr > td.wday_sat {color:#0044aa;}
-.datepicker > .datepicker_calendar > .datepicker_table > tr > td.wday_sun {color:#e13b00;}
-.datepicker > .datepicker_calendar > .datepicker_table > tr > td.day_another_month {color:#cccccc;}
-.datepicker > .datepicker_calendar > .datepicker_table > tr > td.day_in_past {cursor:default;color:#cccccc;}
-.datepicker > .datepicker_calendar > .datepicker_table > tr > td.day_in_unallowed {cursor:default;color:#cccccc;}
-.datepicker > .datepicker_calendar > .datepicker_table > tr > td.out_of_range {cursor:default;color:#cccccc;}
-.datepicker > .datepicker_calendar > .datepicker_table > tr > td.active {color:#ffffff;background-color:#808080;}
-.datepicker > .datepicker_calendar > .datepicker_table > tr > td.hover {color:#000000;background-color:#c8c8c8;}
+.myt-dp > .dp-calendar > .dp-table > tr > td.wday_sat {color:#0044aa;}
+.myt-dp > .dp-calendar > .dp-table > tr > td.wday_sun {color:#e13b00;}
+.myt-dp > .dp-calendar > .dp-table > tr > td.day_another_month {color:#cccccc;}
+.myt-dp > .dp-calendar > .dp-table > tr > td.day_in_past {cursor:default;color:#cccccc;}
+.myt-dp > .dp-calendar > .dp-table > tr > td.day_in_unallowed {cursor:default;color:#cccccc;}
+.myt-dp > .dp-calendar > .dp-table > tr > td.out_of_range {cursor:default;color:#cccccc;}
+.myt-dp > .dp-calendar > .dp-table > tr > td.active {color:#ffffff;background-color:#808080;}
+.myt-dp > .dp-calendar > .dp-table > tr > td.hover {color:#000000;background-color:#c8c8c8;}
 
 /* Time List */
-.datepicker > .datepicker_timelist {
+.myt-dp > .dp-timelist {
 	float:left;
 	width:64px;
 	height:175px;
 	overflow:auto;
 	overflow-x:hidden;
 }
-.datepicker > .datepicker_timelist > div.timelist_item {
+.myt-dp > .dp-timelist > div.dp-timelist_item {
 	padding-top:3px;
 	padding-bottom:3px;
 	padding-left:14px;
@@ -380,8 +380,8 @@ select.mytNativeInput{margin:0px;}
 	font-size:12px;
 	cursor:pointer;
 }
-.datepicker > .datepicker_timelist > div.timelist_item.time_in_past {cursor:default;color:#cccccc;}
-.datepicker > .datepicker_timelist > div.timelist_item.out_of_range {cursor:default;color:#cccccc;}
-.datepicker > .datepicker_timelist > div.timelist_item.active {color:#ffffff;background-color:#808080;}
-.datepicker > .datepicker_timelist > div.timelist_item.hover {color:#000000;background-color:#c8c8c8;}
+.myt-dp > .dp-timelist > div.dp-timelist_item.time_in_past {cursor:default;color:#cccccc;}
+.myt-dp > .dp-timelist > div.dp-timelist_item.out_of_range {cursor:default;color:#cccccc;}
+.myt-dp > .dp-timelist > div.dp-timelist_item.active {color:#ffffff;background-color:#808080;}
+.myt-dp > .dp-timelist > div.dp-timelist_item.hover {color:#000000;background-color:#c8c8c8;}
 /*** END: jquery-simple-datetimepicker v1.12.0 ***/

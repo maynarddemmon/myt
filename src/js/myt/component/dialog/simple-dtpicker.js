@@ -77,7 +77,7 @@
             }
         },
         
-        getParentPickerObject = (obj) => $(obj).closest('.datepicker'),
+        getParentPickerObject = (obj) => $(obj).closest('.myt-dp'),
         
         beforeMonth = ($obj) => {
             const $picker = getParentPickerObject($obj);
@@ -196,23 +196,10 @@
             }
             
             /* Collect each part */
-            const $header = $picker.children('.datepicker_header'),
-                $calendar = $picker.children('.datepicker_calendar'),
-                $table = $calendar.children('.datepicker_table'),
-                $timelist = $picker.children('.datepicker_timelist');
-            
-            /* Grasp a point that will be changed */
-            let changePoint = "";
-            const oldDate = getPickedDate($picker);
-            if (oldDate != null) {
-                if (oldDate.getMonth() != date.getMonth() || oldDate.getDate() != date.getDate()){
-                    changePoint = "calendar";
-                } else if (oldDate.getHours() != date.getHours() || oldDate.getMinutes() != date.getMinutes()){
-                    if (date.getMinutes() === 0 || date.getMinutes() % minuteInterval === 0){
-                        changePoint = "timelist";
-                    }
-                }
-            }
+            const $header = $picker.children('.dp-header'),
+                $calendar = $picker.children('.dp-calendar'),
+                $table = $calendar.children('.dp-table'),
+                $timelist = $picker.children('.dp-timelist');
             
             /* Save new date to Picker data */
             $($picker).data("pickedDate", date);
@@ -429,7 +416,7 @@
                         is_past_time = hour_ < todayDate.getHours() || (hour_ == todayDate.getHours() && min_ < todayDate.getMinutes()),
                         is_past = isCurrentDay && is_past_time;
                     
-                    $o.addClass('timelist_item');
+                    $o.addClass('dp-timelist_item');
                     $o.text(zpadding(hour_) + ":" + zpadding(min_));
                     
                     $o.data("hour", hour_);
@@ -507,7 +494,7 @@
         
         /* Container */
         const $picker = this;
-        $picker.addClass('datepicker');
+        $picker.addClass('myt-dp');
         
         /* Set current date */
         if (!opt.current) opt.current = new Date();
@@ -549,31 +536,31 @@
         
         /* Header */
         const $header = $('<div>');
-        $header.addClass('datepicker_header');
+        $header.addClass('dp-header');
         $picker.append($header);
         
         /* Calendar */
         const $calendar = $('<div>');
-        $calendar.addClass('datepicker_calendar');
+        $calendar.addClass('dp-calendar');
         $calendar.css("height", '175px');
         const $table = $('<table>');
-        $table.addClass('datepicker_table');
+        $table.addClass('dp-table');
         $calendar.append($table);
         $picker.append($calendar);
         
         /* Timelist */
         const $timelist = $('<div>');
-        $timelist.addClass('datepicker_timelist');
+        $timelist.addClass('dp-timelist');
         $picker.append($timelist);
 
         /* Set event-handler to calendar */
-        $calendar.bind('wheel', function(e){
+        $calendar.bind('wheel', function(event) {
             const $picker = getParentPickerObject($(this));
             // up [delta > 0] down [delta < 0]
             const threshold = 75, 
                 dtpicker = $.fn.dtpicker;
             if (dtpicker._delta == null) dtpicker._delta = 0;
-            const delta = dtpicker._delta += e.originalEvent.deltaY;
+            const delta = dtpicker._delta += event.originalEvent.deltaY;
             if (delta > threshold) {
                 dtpicker._delta -= threshold;
                 beforeDay($picker);
