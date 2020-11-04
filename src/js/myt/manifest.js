@@ -106,6 +106,7 @@ JS.Packages(function() {
             'myt.EqualFieldsValidator','myt.EqualsIgnoreCaseValidator','myt.LengthValidator',
             'myt.NumericRangeValidator','myt.URLValidator','myt.RequiredFieldValidator','myt.JSONValidator'
         ).requires('myt.global','myt.URI');
+    file(MYT_COMPONENT_ROOT + 'WebSocket.js').provides('myt.WebSocket','myt.MessageTypeWebSocket').requires('myt.Node');
     
     // Component : Base
     file(MYT_COMPONENT_ROOT + 'base/Annulus.js').provides('myt.Annulus').requires('myt.View');
@@ -287,10 +288,6 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'uploader/Uploader.js'          ).provides('myt.Uploader'          )
         .requires('myt.View','myt.NativeInputWrapper','myt.DragDropSupport','myt.FormElement');
     file(MYT_COMPONENT_ROOT + 'uploader/ImageUploader.js'     ).provides('myt.ImageUploader'     ).requires('myt.Uploader');
-    
-    // Component : WebSocket
-    file(MYT_COMPONENT_ROOT + 'websocket/WebSocket.js').provides('myt.WebSocket').requires('myt.Node');
-    file(MYT_COMPONENT_ROOT + 'websocket/MessageTypeWebSocket.js').provides('myt.MessageTypeWebSocket').requires('myt.WebSocket');
     
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
