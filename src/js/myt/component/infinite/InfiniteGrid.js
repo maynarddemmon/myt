@@ -32,13 +32,14 @@
             
             
             // Methods /////////////////////////////////////////////////////////
-            makeReady: function(sortState) {
+            makeReady: function(sortState, forceFullReset) {
                 const gridHeader = this.gridHeader;
                 if (gridHeader) {
+                    this.__forceFullResetOnNextRefresh = forceFullReset;
                     gridHeader.setSort(sortState);
                     gridHeader.setLocked(false);
                 } else {
-                    this.refreshListData(false);
+                    this.refreshListData(false, forceFullReset);
                 }
             },
             
@@ -169,7 +170,7 @@
         
         /** @overrides myt.GridController */
         doSort: function() {
-            this.grid.refreshListData(true);
+            this.grid.refreshListData(true, this.grid.__forceFullResetOnNextRefresh);
         },
         
         /** @overrides myt.GridController */

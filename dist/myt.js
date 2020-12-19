@@ -24147,12 +24147,12 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
             }
         },
         
-        refreshListData: function(preserveScroll) {
+        refreshListData: function(preserveScroll, forceFullReset) {
             this._listData = this.collectionModel.getAsSortedList(this.getSortFunction(), this.getFilterFunction());
-            this.resetListUI(preserveScroll);
+            this.resetListUI(preserveScroll, forceFullReset);
         },
         
-        resetListUI: function(preserveScroll) {
+        resetListUI: function(preserveScroll, forceFullReset) {
             const self = this,
                 data = self.getListData(),
                 len = data.length,
@@ -24167,6 +24167,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
             self._startIdx = self._endIdx = -1;
             
             // Reset scroll position
+            self.__forceFullResetOnNextRefresh = forceFullReset;
             if (preserveScroll || getDomScrollTop(self) === 0) {
                 // Just refresh since we won't move the scroll position
                 self.refreshListUI();
@@ -24186,12 +24187,15 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
             const self = this,
                 rowExtent = self._rowExtent,
                 rowInset = self.rowInset,
+                forceFullReset = self.__forceFullResetOnNextRefresh,
                 scrollY = getDomScrollTop(self),
                 data = self.getListData() || [],
                 startIdx = Math.max(0, Math.floor((scrollY - rowInset) / rowExtent)),
                 endIdx = Math.min(data.length, Math.ceil((scrollY - rowInset + self.height) / rowExtent));
             
-            if (self._startIdx !== startIdx || self._endIdx !== endIdx) {
+            if (self.__forceFullResetOnNextRefresh) self.__forceFullResetOnNextRefresh = false;
+            
+            if (self._startIdx !== startIdx || self._endIdx !== endIdx || forceFullReset) {
                 const rowWidth = self.width,
                     rowHeight = self.rowHeight,
                     visibleRowsByIdx = self._visibleRowsByIdx;
@@ -24227,7 +24231,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
                         row.setVisible(true);
                     }
                     
-                    if (!row.model || !self.areModelsEqual(row.model, model)) {
+                    if (!row.model || !self.areModelsEqual(row.model, model) || forceFullReset) {
                         row.setModel(model);
                         self.updateRow(row);
                     }
@@ -24410,7 +24414,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         },
         
         /** @overrides */
-        resetListUI: function(preserveScroll) {
+        resetListUI: function(preserveScroll, forceFullReset) {
             if (this.isModelInData(this.selectedRowModel)) {
                 // Only clear the selected row since it's still in the data and
                 // thus may be shown again.
@@ -24420,7 +24424,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
                 this.setSelectedRow();
             }
             
-            this.callSuper(preserveScroll);
+            this.callSuper(preserveScroll, forceFullReset);
         },
         
         /** @overrides */
@@ -24480,13 +24484,14 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
             
             
             // Methods /////////////////////////////////////////////////////////
-            makeReady: function(sortState) {
+            makeReady: function(sortState, forceFullReset) {
                 const gridHeader = this.gridHeader;
                 if (gridHeader) {
+                    this.__forceFullResetOnNextRefresh = forceFullReset;
                     gridHeader.setSort(sortState);
                     gridHeader.setLocked(false);
                 } else {
-                    this.refreshListData(false);
+                    this.refreshListData(false, forceFullReset);
                 }
             },
             
@@ -24617,7 +24622,7 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         
         /** @overrides myt.GridController */
         doSort: function() {
-            this.grid.refreshListData(true);
+            this.grid.refreshListData(true, this.grid.__forceFullResetOnNextRefresh);
         },
         
         /** @overrides myt.GridController */
@@ -25927,8 +25932,7 @@ myt.Eventable = new JS.Class('Eventable', {
             onError: function(event) {
                 console.error(event);
                 
-                const ws = this._ws;
-                if (ws && ws.readyState !== 1) this.close();
+                if (this._ws && this._ws.readyState !== WebSocket.OPEN) this.close();
             },
             
             /** Invoked when a message is received over the WebSocket.

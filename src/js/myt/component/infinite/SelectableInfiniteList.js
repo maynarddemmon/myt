@@ -161,7 +161,7 @@
         },
         
         /** @overrides */
-        resetListUI: function(preserveScroll) {
+        resetListUI: function(preserveScroll, forceFullReset) {
             if (this.isModelInData(this.selectedRowModel)) {
                 // Only clear the selected row since it's still in the data and
                 // thus may be shown again.
@@ -171,7 +171,7 @@
                 this.setSelectedRow();
             }
             
-            this.callSuper(preserveScroll);
+            this.callSuper(preserveScroll, forceFullReset);
         },
         
         /** @overrides */

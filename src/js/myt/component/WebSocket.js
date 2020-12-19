@@ -132,8 +132,7 @@
             onError: function(event) {
                 console.error(event);
                 
-                const ws = this._ws;
-                if (ws && ws.readyState !== 1) this.close();
+                if (this._ws && this._ws.readyState !== WebSocket.OPEN) this.close();
             },
             
             /** Invoked when a message is received over the WebSocket.

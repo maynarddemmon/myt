@@ -262,12 +262,12 @@
             }
         },
         
-        refreshListData: function(preserveScroll) {
+        refreshListData: function(preserveScroll, forceFullReset) {
             this._listData = this.collectionModel.getAsSortedList(this.getSortFunction(), this.getFilterFunction());
-            this.resetListUI(preserveScroll);
+            this.resetListUI(preserveScroll, forceFullReset);
         },
         
-        resetListUI: function(preserveScroll) {
+        resetListUI: function(preserveScroll, forceFullReset) {
             const self = this,
                 data = self.getListData(),
                 len = data.length,
@@ -282,6 +282,7 @@
             self._startIdx = self._endIdx = -1;
             
             // Reset scroll position
+            self.__forceFullResetOnNextRefresh = forceFullReset;
             if (preserveScroll || getDomScrollTop(self) === 0) {
                 // Just refresh since we won't move the scroll position
                 self.refreshListUI();
@@ -301,12 +302,15 @@
             const self = this,
                 rowExtent = self._rowExtent,
                 rowInset = self.rowInset,
+                forceFullReset = self.__forceFullResetOnNextRefresh,
                 scrollY = getDomScrollTop(self),
                 data = self.getListData() || [],
                 startIdx = Math.max(0, Math.floor((scrollY - rowInset) / rowExtent)),
                 endIdx = Math.min(data.length, Math.ceil((scrollY - rowInset + self.height) / rowExtent));
             
-            if (self._startIdx !== startIdx || self._endIdx !== endIdx) {
+            if (self.__forceFullResetOnNextRefresh) self.__forceFullResetOnNextRefresh = false;
+            
+            if (self._startIdx !== startIdx || self._endIdx !== endIdx || forceFullReset) {
                 const rowWidth = self.width,
                     rowHeight = self.rowHeight,
                     visibleRowsByIdx = self._visibleRowsByIdx;
@@ -342,7 +346,7 @@
                         row.setVisible(true);
                     }
                     
-                    if (!row.model || !self.areModelsEqual(row.model, model)) {
+                    if (!row.model || !self.areModelsEqual(row.model, model) || forceFullReset) {
                         row.setModel(model);
                         self.updateRow(row);
                     }
