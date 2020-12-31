@@ -461,17 +461,17 @@
                     subsequent calls.
                 @returns {!Function} - The debounced function. */
             debounce: function(func, wait, immediate) {
-                let timeout;
                 return function() {
                     const context = this,
+                        timeout = context.__DBTO,
                         args = arguments,
                         later = function() {
-                            timeout = null;
+                            context.__DBTO = null;
                             if (!immediate) func.apply(context, args);
                         },
                         callNow = immediate && !timeout;
                     clearTimeout(timeout);
-                    timeout = setTimeout(later, wait);
+                    context.__DBTO = setTimeout(later, wait);
                     if (callNow) func.apply(context, args);
                 };
             },
