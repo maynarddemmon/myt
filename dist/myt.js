@@ -9828,6 +9828,10 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
             if (this.inited) this.doReplication();
         },
         
+        getActiveReplicants: function() {
+            return this.__pool.getActives();
+        },
+        
         
         // Methods /////////////////////////////////////////////////////////////
         /** Performs replication.
