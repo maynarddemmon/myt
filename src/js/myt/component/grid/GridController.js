@@ -104,14 +104,13 @@
                 this.__tempLock = false;
                 
                 const hdrs = this.columnHeaders;
-                let i = hdrs.length,
-                    hdr;
+                let i = hdrs.length;
                 // Reset min/max since notifyColumnHeaderVisibilityChange will
                 // update these values
                 this.setMaxWidth(0);
                 this.setMinWidth(0);
                 while (i) {
-                    hdr = hdrs[--i];
+                    const hdr = hdrs[--i];
                     this.notifyColumnHeaderXChange(hdr);
                     this.notifyColumnHeaderWidthChange(hdr);
                     this.notifyColumnHeaderVisibilityChange(hdr);
@@ -150,11 +149,10 @@
             @returns {?Object} The myt.GridColumnHeader or null if none exists. */
         getPrevColumnHeader: function(columnHeader) {
             const hdrs = this.columnHeaders;
-            let hdr,
-                idx = this.getColumnHeaderIndex(columnHeader);
+            let idx = this.getColumnHeaderIndex(columnHeader);
             if (idx > 0) {
                 while (idx) {
-                    hdr = hdrs[--idx];
+                    const hdr = hdrs[--idx];
                     if (hdr.visible) return hdr;
                 }
             }
@@ -167,11 +165,10 @@
         getNextColumnHeader: function(columnHeader) {
             const hdrs = this.columnHeaders,
                 len = hdrs.length;
-            let idx = this.getColumnHeaderIndex(columnHeader) + 1,
-                hdr;
+            let idx = this.getColumnHeaderIndex(columnHeader) + 1;
             if (idx > 0 && idx < len) {
                 for (; len > idx; idx++) {
-                    hdr = hdrs[idx];
+                    const hdr = hdrs[idx];
                     if (hdr.visible) return hdr;
                 }
             }
@@ -188,13 +185,16 @@
         
         getColumnHeaderById: function(columnId) {
             const hdrs = this.columnHeaders;
-            let i = hdrs.length,
-                hdr;
+            let i = hdrs.length;
             while (i) {
-                hdr = hdrs[--i];
+                const hdr = hdrs[--i];
                 if (hdr.columnId === columnId) return hdr;
             }
             return null;
+        },
+        
+        getVisibleColumnHeaders: function() {
+            return this.columnHeaders.filter(hdr => hdr.visible);
         },
         
         notifyAddColumnHeader: function(columnHeader) {
@@ -281,10 +281,9 @@
                 // Update cell positions
                 if (!this.locked) {
                     const hdrs = this.columnHeaders;
-                    let i = hdrs.length,
-                        hdr;
+                    let i = hdrs.length;
                     while (i) {
-                        hdr = hdrs[--i];
+                        const hdr = hdrs[--i];
                         row.notifyColumnHeaderXChange(hdr);
                         row.notifyColumnHeaderWidthChange(hdr);
                         row.notifyColumnHeaderVisibilityChange(hdr);
@@ -304,51 +303,46 @@
             const controller = this;
             if (controller.locked || !controller.fitToWidth) return;
             
-            const hdrs = controller.columnHeaders,
+            const hdrs = controller.getVisibleColumnHeaders(),
                 len = hdrs.length;
+            
+            // Determine extra space to distribute/consume
             let i = len, 
                 hdr,
-                maxExtent = 0,
-                extent,
                 extra,
-                isGrow, 
-                limit,
-                resizeCount,
-                idx = 0, 
-                fullCount = 0, 
-                incr, 
-                info,
-                resizeInfo = [];
-            
-            // Determine max extent
+                maxExtent = 0;
             while (i) {
                 hdr = hdrs[--i];
-                if (!hdr.visible) continue;
-                extent = hdr.x + hdr.width;
-                if (extent > maxExtent) maxExtent = extent;
+                maxExtent = Math.max(maxExtent, hdr.x + hdr.width);
             }
-            
             extra = controller.gridWidth - maxExtent;
             
             if (extra === 0) return;
-            isGrow = extra > 0;
+            const isGrow = extra > 0;
             
-            // Get resizable columns
+            // Get resizable flex columns
+            let resizeInfo = [];
             i = len;
             while (i) {
                 hdr = hdrs[--i];
-                if (!hdr.visible) continue;
                 if (hdr.resizable && hdr.flex > 0) {
-                    limit = (isGrow ? hdr.maxValue : hdr.minValue) - hdr.value;
-                    resizeInfo.push({hdr:hdr, limit:limit, amt:0});
+                    resizeInfo.push({
+                        hdr:hdr,
+                        limit:(isGrow ? hdr.maxValue : hdr.minValue) - hdr.value,
+                        amt:0
+                    });
                 }
             }
             
             // Abort if no resizable flex columns.
-            resizeCount = resizeInfo.length;
+            let resizeCount = resizeInfo.length;
             if (resizeCount <= 0) return;
             
             // Calculate resize amounts
+            let idx = 0,
+                info,
+                fullCount = 0, 
+                incr;
             while (extra !== 0) {
                 info = resizeInfo[idx];
                 hdr = info.hdr;
@@ -392,64 +386,66 @@
             
             // Distribute remaing extra to resizable non-flex columns
             if (extra !== 0) {
-                // Get resizable columns
+                // Get resizable non-flex columns
                 resizeInfo = [];
                 i = len;
                 while (i) {
                     hdr = hdrs[--i];
-                    if (!hdr.visible) continue;
                     if (hdr.resizable && hdr.flex === 0) {
-                        limit = (isGrow ? hdr.maxValue : hdr.minValue) - hdr.value;
-                        resizeInfo.push({hdr:hdr, limit:limit, amt:0});
+                        resizeInfo.push({
+                            hdr:hdr,
+                            limit:(isGrow ? hdr.maxValue : hdr.minValue) - hdr.value,
+                            amt:0
+                        });
                     }
                 }
-                
-                // Abort if no resizable columns.
                 resizeCount = resizeInfo.length;
-                if (resizeCount <= 0) return;
                 
-                // Calculate resize amounts
-                idx = 0;
-                fullCount = 0;
-                while (extra !== 0) {
-                    info = resizeInfo[idx];
-                    hdr = info.hdr;
-                    
-                    if (!info.full) {
-                        if (isGrow) {
-                            incr = Math.min(1, extra);
-                            if (info.amt + incr > info.limit) {
-                                incr = info.limit - info.amt;
-                                info.full = true;
+                // Only proceed if there are resizable columns.
+                if (resizeCount > 0) {
+                    // Calculate resize amounts
+                    idx = 0;
+                    fullCount = 0;
+                    while (extra !== 0) {
+                        info = resizeInfo[idx];
+                        hdr = info.hdr;
+                        
+                        if (!info.full) {
+                            if (isGrow) {
+                                incr = Math.min(1, extra);
+                                if (info.amt + incr > info.limit) {
+                                    incr = info.limit - info.amt;
+                                    info.full = true;
+                                }
+                            } else {
+                                incr = Math.max(-1, extra);
+                                if (info.amt + incr < info.limit) {
+                                    incr = info.limit - info.amt;
+                                    info.full = true;
+                                }
                             }
+                            info.amt += incr;
+                            extra -= incr;
                         } else {
-                            incr = Math.max(-1, extra);
-                            if (info.amt + incr < info.limit) {
-                                incr = info.limit - info.amt;
-                                info.full = true;
-                            }
+                            ++fullCount;
                         }
-                        info.amt += incr;
-                        extra -= incr;
-                    } else {
-                        ++fullCount;
+                        
+                        if (fullCount === resizeCount) break;
+                        
+                        ++idx;
+                        if (idx === resizeCount) {
+                            idx = 0;
+                            fullCount = 0;
+                        }
                     }
                     
-                    if (fullCount === resizeCount) break;
-                    
-                    ++idx;
-                    if (idx === resizeCount) {
-                        idx = 0;
-                        fullCount = 0;
+                    // Distribute amounts
+                    i = resizeCount;
+                    while (i) {
+                        info = resizeInfo[--i];
+                        hdr = info.hdr;
+                        hdr.setValue(hdr.value + info.amt);
                     }
-                }
-                
-                // Distribute amounts
-                i = resizeCount;
-                while (i) {
-                    info = resizeInfo[--i];
-                    hdr = info.hdr;
-                    hdr.setValue(hdr.value + info.amt);
                 }
             }
         }

@@ -68,7 +68,7 @@
             /** @overrides myt.InfiniteList */
             updateRow: function(row) {
                 if (this.gridHeader) {
-                    this.gridHeader.columnHeaders.forEach((hdr) => {
+                    this.gridHeader.columnHeaders.forEach(hdr => {
                         row.notifyXChange(hdr);
                         row.notifyWidthChange(hdr);
                         row.notifyVisibilityChange(hdr);
@@ -77,15 +77,15 @@
             },
             
             notifyXChange: function(columnHeader) {
-                this.getVisibleRows().forEach((row) => {row.notifyXChange(columnHeader);});
+                this.getVisibleRows().forEach(row => {row.notifyXChange(columnHeader);});
             },
             
             notifyWidthChange: function(columnHeader) {
-                this.getVisibleRows().forEach((row) => {row.notifyWidthChange(columnHeader);});
+                this.getVisibleRows().forEach(row => {row.notifyWidthChange(columnHeader);});
             },
             
             notifyVisibilityChange: function(columnHeader) {
-                this.getVisibleRows().forEach((row) => {row.notifyVisibilityChange(columnHeader);});
+                this.getVisibleRows().forEach(row => {row.notifyVisibilityChange(columnHeader);});
             }
         });
     
@@ -136,12 +136,16 @@
         setGrid: function(v) {this.grid = v;},
         setColumnSpacing: function(v) {this.columnSpacing = v;},
         
+        getColumnSpacingInUse: function() {
+            return this.columnSpacing === 0 ? 0 : Math.max(0, this.getVisibleColumnHeaders().length - 1) * this.columnSpacing;
+        },
+        
         /** @overrides myt.View */
         setHeight: function(v, supressEvent) {
             this.callSuper(v, supressEvent);
             if (this.inited) {
                 v = this.height;
-                this.columnHeaders.forEach((hdr) => {hdr.setHeight(v);});
+                this.columnHeaders.forEach(hdr => {hdr.setHeight(v);});
             }
         },
         
