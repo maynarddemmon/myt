@@ -294,6 +294,19 @@
         },
         
         putRowBackInPool: function(row) {
+            // Clear or reassign focus since the row will get reused and the 
+            // reused row will likely not be the appropriate focus.
+            const globalFocus = pkg.global.focus,
+                currentFocus = globalFocus.focusedView;
+            if (currentFocus && currentFocus.isDescendantOf(row)) {
+                const focusTrap = this.getFocusTrap();
+                if (focusTrap) {
+                    focusTrap.focus();
+                } else {
+                    globalFocus.clear();
+                }
+            }
+            
             row.setVisible(false);
             this._itemPool.putInstance(row);
         },
