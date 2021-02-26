@@ -22664,10 +22664,9 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
 ((pkg) => {
     const findLastColumn = (controller) => {
             const hdrs = controller.columnHeaders;
-            let i = hdrs.length,
-                hdr;
+            let i = hdrs.length;
             while (i) {
-                hdr = hdrs[--i];
+                const hdr = hdrs[--i];
                 if (hdr.visible) return hdr;
             }
             return null;
@@ -22678,14 +22677,80 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
                 sort = controller.sort,
                 sortColumnId = sort ? sort[0] : '',
                 sortOrder = sort ? sort[1] : '';
-            let i = hdrs.length, 
-                hdr;
+            let i = hdrs.length;
             while (i) {
-                hdr = hdrs[--i];
+                const hdr = hdrs[--i];
                 if (hdr.columnId === sortColumnId) {
                     if (hdr.sortable) hdr.setSortState(sortOrder);
                 } else {
                     hdr.setSortState('none');
+                }
+            }
+            if (!controller.locked) controller.doSort();
+        },
+        
+        /* Calculate resize amounts and distribute it to the headers */
+        calculateAndDistribute = (hdrs, extra, isFlex, nextFunc) => {
+            if (extra !== 0) {
+                const isGrow = extra > 0;
+                
+                // Get resizable column info
+                const resizeInfo = [];
+                let i = hdrs.length;
+                while (i) {
+                    const hdr = hdrs[--i];
+                    if (hdr.resizable && (isFlex ? (hdr.flex > 0) : (hdr.flex === 0))) {
+                        resizeInfo.push({
+                            hdr:hdr,
+                            limit:(isGrow ? hdr.maxValue : hdr.minValue) - hdr.value,
+                            amt:0
+                        });
+                    }
+                }
+                
+                // Calculate Amounts
+                let resizeCount = resizeInfo.length;
+                if (resizeCount > 0) {
+                    let idx = 0,
+                        fullCount = 0;
+                    while (extra !== 0) {
+                        const info = resizeInfo[idx],
+                            hdr = info.hdr;
+                        
+                        if (info.full) {
+                            ++fullCount;
+                        } else {
+                            let incr;
+                            if (isGrow) {
+                                incr = Math.min(isFlex ? hdr.flex : 1, extra);
+                                if (info.amt + incr > info.limit) {
+                                    incr = info.limit - info.amt;
+                                    info.full = true;
+                                }
+                            } else {
+                                incr = Math.max(isFlex ? -hdr.flex : -1, extra);
+                                if (info.amt + incr < info.limit) {
+                                    incr = info.limit - info.amt;
+                                    info.full = true;
+                                }
+                            }
+                            info.amt += incr;
+                            extra -= incr;
+                        }
+                        
+                        if (fullCount === resizeCount) break;
+                        
+                        ++idx;
+                        if (idx === resizeCount) {
+                            idx = 0;
+                            fullCount = 0;
+                        }
+                    }
+                    
+                    // Distribute
+                    resizeInfo.forEach(info => {info.hdr.setValue(info.hdr.value + info.amt);});
+                    
+                    if (nextFunc) nextFunc(extra);
                 }
             }
         };
@@ -22732,18 +22797,21 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
             
             self.fitHeadersToWidth();
             notifyHeadersOfSortState(self);
-            if (!self.locked) self.doSort();
         },
         
         
         // Accessors ///////////////////////////////////////////////////////////
+        setMaxWidth: function(v) {this.set('maxWidth', v, true);},
+        setMinWidth: function(v) {this.set('minWidth', v, true);},
+        
+        setFitToWidth: function(v) {this.fitToWidth = v;},
+        
         setSort: function(v) {
             if (!pkg.areArraysEqual(v, this.sort)) {
                 this.sort = v;
                 if (this.inited) {
                     this.fireEvent('sort', v);
                     notifyHeadersOfSortState(this);
-                    if (!this.locked) this.doSort();
                 }
             }
         },
@@ -22757,27 +22825,23 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
             }
         },
         
-        setFitToWidth: function(v) {this.fitToWidth = v;},
-        
         setLocked: function(v) {
             this.locked = v;
             if (this.inited && !v) {
-                this.__tempLock = true; // Prevent change calls during fitToWidth
+                // Prevent change calls during fitHeadersToWidth
+                this.__tempLock = true;
                 this.fitHeadersToWidth();
                 this.__tempLock = false;
                 
-                const hdrs = this.columnHeaders;
-                let i = hdrs.length;
                 // Reset min/max since notifyColumnHeaderVisibilityChange will
                 // update these values
                 this.setMaxWidth(0);
                 this.setMinWidth(0);
-                while (i) {
-                    const hdr = hdrs[--i];
+                this.columnHeaders.forEach(hdr => {
                     this.notifyColumnHeaderXChange(hdr);
                     this.notifyColumnHeaderWidthChange(hdr);
                     this.notifyColumnHeaderVisibilityChange(hdr);
-                }
+                });
                 
                 this.doSort();
             }
@@ -22786,9 +22850,6 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         isLocked: function() {
             return this.locked || this.__tempLock;
         },
-        
-        setMaxWidth: function(v) {this.set('maxWidth', v, true);},
-        setMinWidth: function(v) {this.set('minWidth', v, true);},
         
         setGridWidth: function(v) {
             if (v !== null && typeof v === 'object') v = v.value;
@@ -22876,11 +22937,11 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         },
         
         notifyColumnHeaderXChange: function(columnHeader) {
-            if (!this.isLocked()) this.rows.forEach((row) => {row.notifyColumnHeaderXChange(columnHeader);});
+            if (!this.isLocked()) this.rows.forEach(row => {row.notifyColumnHeaderXChange(columnHeader);});
         },
         
         notifyColumnHeaderWidthChange: function(columnHeader) {
-            if (!this.isLocked()) this.rows.forEach((row) => {row.notifyColumnHeaderWidthChange(columnHeader);});
+            if (!this.isLocked()) this.rows.forEach(row => {row.notifyColumnHeaderWidthChange(columnHeader);});
         },
         
         notifyColumnHeaderVisibilityChange: function(columnHeader) {
@@ -22888,19 +22949,17 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
                 this.updateRowsForVisibilityChange(columnHeader);
                 
                 this.setLastColumn(findLastColumn(this));
-                if (columnHeader.visible) {
-                    this.setMaxWidth(this.maxWidth + columnHeader.maxValue);
-                    this.setMinWidth(this.minWidth + columnHeader.minValue);
-                } else {
-                    this.setMaxWidth(this.maxWidth - columnHeader.maxValue);
-                    this.setMinWidth(this.minWidth - columnHeader.minValue);
-                }
+                
+                const adjMultiplier = columnHeader.visible ? 1 : -1;
+                this.setMaxWidth(this.maxWidth + columnHeader.maxValue * adjMultiplier);
+                this.setMinWidth(this.minWidth + columnHeader.minValue * adjMultiplier);
+                
                 this.fitHeadersToWidth();
             }
         },
         
         updateRowsForVisibilityChange: function(columnHeader) {
-            this.rows.forEach((row) => {row.notifyColumnHeaderVisibilityChange(columnHeader);});
+            this.rows.forEach(row => {row.notifyColumnHeaderVisibilityChange(columnHeader);});
         },
         
         // Rows
@@ -22924,35 +22983,30 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         },
         
         getPrevRow: function(row) {
-            const rows = this.rows;
-            let idx = this.getRowIndex(row) - 1;
-            if (idx < 0) idx = rows.length - 1;
-            return rows[idx];
+            const idx = this.getRowIndex(row) - 1;
+            return this.rows[idx < 0 ? this.rows.length - 1 : idx];
         },
         
         getNextRow: function(row) {
-            const rows = this.rows;
-            let idx = this.getRowIndex(row) + 1;
-            if (idx >= rows.length) idx = 0;
-            return rows[idx];
+            const idx = this.getRowIndex(row) + 1;
+            return this.rows[idx < this.rows.length ? idx : 0];
         },
         
-        notifyAddRow: function(row) {
+        notifyAddRow: function(row, doNotSort) {
             if (!this.hasRow(row)) {
                 this.rows.push(row);
                 
                 // Update cell positions
                 if (!this.locked) {
-                    const hdrs = this.columnHeaders;
-                    let i = hdrs.length;
-                    while (i) {
-                        const hdr = hdrs[--i];
+                    const w = this.width;
+                    this.columnHeaders.forEach(hdr => {
+                        row.setWidth(w);
                         row.notifyColumnHeaderXChange(hdr);
                         row.notifyColumnHeaderWidthChange(hdr);
                         row.notifyColumnHeaderVisibilityChange(hdr);
-                    }
+                    });
                     
-                    this.doSort();
+                    if (!doNotSort) this.doSort();
                 }
             }
         },
@@ -22963,153 +23017,16 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
         },
         
         fitHeadersToWidth: function() {
-            const controller = this;
-            if (controller.locked || !controller.fitToWidth) return;
-            
-            const hdrs = controller.getVisibleColumnHeaders(),
-                len = hdrs.length;
-            
-            // Determine extra space to distribute/consume
-            let i = len, 
-                hdr,
-                extra,
-                maxExtent = 0;
-            while (i) {
-                hdr = hdrs[--i];
-                maxExtent = Math.max(maxExtent, hdr.x + hdr.width);
-            }
-            extra = controller.gridWidth - maxExtent;
-            
-            if (extra === 0) return;
-            const isGrow = extra > 0;
-            
-            // Get resizable flex columns
-            let resizeInfo = [];
-            i = len;
-            while (i) {
-                hdr = hdrs[--i];
-                if (hdr.resizable && hdr.flex > 0) {
-                    resizeInfo.push({
-                        hdr:hdr,
-                        limit:(isGrow ? hdr.maxValue : hdr.minValue) - hdr.value,
-                        amt:0
-                    });
-                }
-            }
-            
-            // Abort if no resizable flex columns.
-            let resizeCount = resizeInfo.length;
-            if (resizeCount <= 0) return;
-            
-            // Calculate resize amounts
-            let idx = 0,
-                info,
-                fullCount = 0, 
-                incr;
-            while (extra !== 0) {
-                info = resizeInfo[idx];
-                hdr = info.hdr;
+            if (!this.locked && this.fitToWidth) {
+                // Determine extra width to distribute/consume
+                const hdrs = this.getVisibleColumnHeaders();
+                let maxExtent = 0;
+                hdrs.forEach(hdr => {maxExtent = Math.max(maxExtent, hdr.x + hdr.width);});
                 
-                if (!info.full) {
-                    if (isGrow) {
-                        incr = Math.min(hdr.flex, extra);
-                        if (info.amt + incr > info.limit) {
-                            incr = info.limit - info.amt;
-                            info.full = true;
-                        }
-                    } else {
-                        incr = Math.max(-hdr.flex, extra);
-                        if (info.amt + incr < info.limit) {
-                            incr = info.limit - info.amt;
-                            info.full = true;
-                        }
-                    }
-                    info.amt += incr;
-                    extra -= incr;
-                } else {
-                    ++fullCount;
-                }
-                
-                if (fullCount === resizeCount) break;
-                
-                ++idx;
-                if (idx === resizeCount) {
-                    idx = 0;
-                    fullCount = 0;
-                }
-            }
-            
-            // Distribute amounts
-            i = resizeCount;
-            while (i) {
-                info = resizeInfo[--i];
-                hdr = info.hdr;
-                hdr.setValue(hdr.value + info.amt);
-            }
-            
-            // Distribute remaing extra to resizable non-flex columns
-            if (extra !== 0) {
-                // Get resizable non-flex columns
-                resizeInfo = [];
-                i = len;
-                while (i) {
-                    hdr = hdrs[--i];
-                    if (hdr.resizable && hdr.flex === 0) {
-                        resizeInfo.push({
-                            hdr:hdr,
-                            limit:(isGrow ? hdr.maxValue : hdr.minValue) - hdr.value,
-                            amt:0
-                        });
-                    }
-                }
-                resizeCount = resizeInfo.length;
-                
-                // Only proceed if there are resizable columns.
-                if (resizeCount > 0) {
-                    // Calculate resize amounts
-                    idx = 0;
-                    fullCount = 0;
-                    while (extra !== 0) {
-                        info = resizeInfo[idx];
-                        hdr = info.hdr;
-                        
-                        if (!info.full) {
-                            if (isGrow) {
-                                incr = Math.min(1, extra);
-                                if (info.amt + incr > info.limit) {
-                                    incr = info.limit - info.amt;
-                                    info.full = true;
-                                }
-                            } else {
-                                incr = Math.max(-1, extra);
-                                if (info.amt + incr < info.limit) {
-                                    incr = info.limit - info.amt;
-                                    info.full = true;
-                                }
-                            }
-                            info.amt += incr;
-                            extra -= incr;
-                        } else {
-                            ++fullCount;
-                        }
-                        
-                        if (fullCount === resizeCount) break;
-                        
-                        ++idx;
-                        if (idx === resizeCount) {
-                            idx = 0;
-                            fullCount = 0;
-                        }
-                    }
-                    
-                    // Distribute amounts
-                    i = resizeCount;
-                    while (i) {
-                        info = resizeInfo[--i];
-                        hdr = info.hdr;
-                        hdr.setValue(hdr.value + info.amt);
-                    }
-                }
+                // Distribute extra width to resizable flex columns and then to non-flex columns.
+                calculateAndDistribute(hdrs, this.gridWidth - maxExtent, true, (extra) => {
+                    calculateAndDistribute(hdrs, extra, false, null);
+                });
             }
         }
     });
