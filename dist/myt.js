@@ -22696,9 +22696,10 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
                 
                 // Get resizable column info
                 const resizeInfo = [];
-                let i = hdrs.length;
+                let i = hdrs.length,
+                    hdr;
                 while (i) {
-                    const hdr = hdrs[--i];
+                    hdr = hdrs[--i];
                     if (hdr.resizable && (isFlex ? (hdr.flex > 0) : (hdr.flex === 0))) {
                         resizeInfo.push({
                             hdr:hdr,
@@ -22714,8 +22715,8 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
                     let idx = 0,
                         fullCount = 0;
                     while (extra !== 0) {
-                        const info = resizeInfo[idx],
-                            hdr = info.hdr;
+                        const info = resizeInfo[idx];
+                        hdr = info.hdr;
                         
                         if (info.full) {
                             ++fullCount;
