@@ -156,12 +156,10 @@ myt.Observable = new JS.Module('Observable', {
                 // detached by the event handler the index won't get messed up.
                 // FIXME: If necessary we could queue up detachObserver calls that 
                 // come in during iteration or make some sort of adjustment to 'i'.
-                let i = observers.length,
-                    observer,
-                    methodName;
+                let i = observers.length;
                 while (i) {
-                    observer = observers[--i];
-                    methodName = observers[--i];
+                    const observer = observers[--i],
+                        methodName = observers[--i];
                     
                     // Sometimes the list gets shortened by the method we called so
                     // just continue decrementing downwards.

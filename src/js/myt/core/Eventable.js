@@ -49,11 +49,10 @@ myt.Eventable = new JS.Class('Eventable', {
     
     /** @overrides myt.Destructible. */
     destroy: function() {
-        const self = this;
-        self.releaseAllConstraints();
-        self.detachFromAllObservables();
-        self.detachAllObservers();
+        this.releaseAllConstraints();
+        this.detachFromAllObservables();
+        this.detachAllObservers();
         
-        self.callSuper();
+        this.callSuper();
     }
 });

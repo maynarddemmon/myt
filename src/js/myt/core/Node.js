@@ -124,9 +124,7 @@
             const self = this;
             if (mixins) {
                 const len = mixins.length;
-                let i = 0,
-                    mixin;
-                for (; len > i;) {
+                for (let i = 0, mixin; len > i;) {
                     if (mixin = mixins[i++]) {
                         self.extend(mixin);
                     } else {
@@ -149,14 +147,13 @@
             @param {?Object} attrs - A map of attribute names and values.
             @returns {undefined} */
         initNode: function(parent, attrs) {
-            const self = this;
-            self.callSetters(attrs);
+            this.callSetters(attrs);
             
-            self.doBeforeAdoption();
-            self.setParent(parent);
-            self.doAfterAdoption();
+            this.doBeforeAdoption();
+            this.setParent(parent);
+            this.doAfterAdoption();
             
-            self.inited = true;
+            this.inited = true;
         },
         
         /** Provides a hook for subclasses to do things before this Node has its
@@ -272,17 +269,15 @@
             @param {string} name
             @returns {undefined} */
         setName: function(name) {
-            const self = this;
-            
-            if (self.name !== name) {
+            if (this.name !== name) {
                 // Remove "name" reference from parent.
-                const p = self.parent;
-                if (p && self.name) removeNameRef(p, self);
+                const p = this.parent;
+                if (p && this.name) removeNameRef(p, this);
                 
-                self.name = name;
+                this.name = name;
                 
                 // Add "name" reference to parent.
-                if (p && name) addNameRef(p, self);
+                if (p && name) addNameRef(p, this);
             }
         },
         
@@ -391,7 +386,7 @@
             @returns {?Object} - The myt.Node or null if no klass is provided 
                 or match found. */
         searchAncestorsForClass: function(klass) {
-            return klass ? this.searchAncestors((n) => n instanceof klass) : null;
+            return klass ? this.searchAncestors(node => node instanceof klass) : null;
         },
         
         /** Get the youngest ancestor of this Node for which the matcher function 
@@ -561,13 +556,11 @@
             @returns {undefined} */
         stopActiveAnimators: function(filterFunc, executeCallbacks=false) {
             const activeAnims = this.getActiveAnimators(filterFunc);
-            let i = activeAnims.length,
-                anim,
-                animPool;
+            let i = activeAnims.length;
             if (i > 0) {
-                animPool = getAnimPool(this);
+                const animPool = getAnimPool(this);
                 while (i) {
-                    anim = activeAnims[--i];
+                    const anim = activeAnims[--i];
                     anim.reset(executeCallbacks);
                     if (!executeCallbacks) animPool.putInstance(anim);
                 }

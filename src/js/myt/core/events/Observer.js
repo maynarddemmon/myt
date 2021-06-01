@@ -115,7 +115,7 @@ myt.Observer = new JS.Module('Observer', {
                 methodName = '__DO_ONCE_' + this.__methodNameCounter++;
                 
                 // Setup wrapper method that will do the detachFrom.
-                this[methodName] = function(event) {
+                this[methodName] = event => {
                     self.detachFrom(observable, methodName, eventType);
                     delete self[methodName];
                     return self[origMethodName](event);
@@ -173,12 +173,9 @@ myt.Observer = new JS.Module('Observer', {
     detachFromAllObservables: function() {
         const observablesByType = this.__obt;
         if (observablesByType) {
-            let observables, 
-                i, 
-                eventType;
-            for (eventType in observablesByType) {
-                observables = observablesByType[eventType];
-                i = observables.length;
+            for (const eventType in observablesByType) {
+                const observables = observablesByType[eventType];
+                let i = observables.length;
                 while (i) observables[--i].detachObserver(this, observables[--i], eventType);
                 observables.length = 0;
             }

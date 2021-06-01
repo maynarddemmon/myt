@@ -26,37 +26,32 @@ myt.Constrainable = new JS.Module('Constrainable', {
             // Make sure an even number of observable/type was provided
             const len = observables.length;
             if (len % 2 !== 0) {
-                console.log("Observables was not even.", this);
-                return;
-            }
-            
-            // Lazy instantiate constraints array.
-            const constraints = this.__cbmn || (this.__cbmn = {}),
-                constraint = constraints[methodName] || (constraints[methodName] = []);
-            
-            // Don't allow a constraint to be clobbered.
-            if (constraint.length > 0) {
-                console.log("Constraint already exists for " + methodName + " on " + this);
-                return;
-            }
-            
-            let observable, 
-                type, 
-                i = 0;
-            for (; len !== i;) {
-                observable = observables[i++];
-                type = observables[i++];
-                if (observable && type) {
-                    this.attachTo(observable, methodName, type);
-                    constraint.push(observable, type);
+                console.log("Observables not even.", this);
+            } else {
+                // Lazy instantiate constraints array.
+                const constraints = this.__cbmn || (this.__cbmn = {}),
+                    constraint = constraints[methodName] || (constraints[methodName] = []);
+                
+                // Don't allow a constraint to be clobbered.
+                if (constraint.length > 0) {
+                    console.log("Constraint already exists for " + methodName + " on " + this);
+                } else {
+                    for (let i = 0; len !== i;) {
+                        const observable = observables[i++],
+                            type = observables[i++];
+                        if (observable && type) {
+                            this.attachTo(observable, methodName, type);
+                            constraint.push(observable, type);
+                        }
+                    }
+                    
+                    // Call constraint method once so it can "sync" the constraint
+                    try {
+                        this[methodName]();
+                    } catch (err) {
+                        myt.dumpStack(err);
+                    }
                 }
-            }
-            
-            // Call constraint method once so it can "sync" the constraint
-            try {
-                this[methodName]();
-            } catch (err) {
-                myt.dumpStack(err);
             }
         }
     },
@@ -71,12 +66,10 @@ myt.Constrainable = new JS.Module('Constrainable', {
             if (constraints) {
                 const constraint = constraints[methodName];
                 if (constraint) {
-                    let i = constraint.length, 
-                        type, 
-                        observable;
+                    let i = constraint.length;
                     while (i) {
-                        type = constraint[--i];
-                        observable = constraint[--i];
+                        const type = constraint[--i],
+                            observable = constraint[--i];
                         this.detachFrom(observable, methodName, type);
                     }
                     constraint.length = 0;
@@ -90,7 +83,7 @@ myt.Constrainable = new JS.Module('Constrainable', {
     releaseAllConstraints: function() {
         const constraints = this.__cbmn;
         if (constraints) {
-            for (let methodName in constraints) this.releaseConstraint(methodName);
+            for (const methodName in constraints) this.releaseConstraint(methodName);
         }
     }
 });

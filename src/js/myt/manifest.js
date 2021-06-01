@@ -94,8 +94,6 @@ JS.Packages(function() {
             'myt.View','myt.Image','myt.Text'
         );
     file(MYT_COMPONENT_ROOT + 'Divider.js'         ).provides('myt.HorizontalDivider','myt.VerticalDivider').requires('myt.SimpleButton','myt.BoundedValueComponent','myt.Draggable');
-    file(MYT_COMPONENT_ROOT + 'DrawingMethod.js'   ).provides('myt.DrawingMethod').requires('myt.DrawingUtil');
-    file(MYT_COMPONENT_ROOT + 'DrawButton.js'      ).provides('myt.DrawButton' ).requires('myt.Canvas','myt.Button','myt.DrawingMethod');
     file(MYT_COMPONENT_ROOT + 'FontAwesome.js'     ).provides('myt.FontAwesome' ).requires('myt.Markup');
     file(MYT_COMPONENT_ROOT + 'Replicator.js'      ).provides('myt.Replicable','myt.Replicator').requires('myt.Reusable','myt.Node','myt.TrackActivesPool');
     file(MYT_COMPONENT_ROOT + 'SelectionManager.js').provides('myt.SelectionManager','myt.Selectable').requires('myt.global.keys');
@@ -291,7 +289,7 @@ JS.Packages(function() {
     
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
-        'myt.Cookie','myt.LocalStorage',
+        'myt.Cookie','myt.LocalStorage','myt.DrawingUtil',
         'myt.global.error','myt.global.keys','myt.global.touch',
         'myt.FlexBoxChildSupport','myt.FlexBox','myt.Text','myt.Image','myt.Markup','myt.Frame',
         'myt.SizeWidthToDom','myt.SizeHeightToDom','myt.SizeToParent',
@@ -299,7 +297,7 @@ JS.Packages(function() {
         'myt.Animator','myt.StateMachine',
         'myt.Replicator',
         'myt.WrappingLayout','myt.ResizeLayout','myt.AlignedLayout',
-        'myt.DrawButton','myt.SimpleIconTextButton',
+        'myt.SimpleIconTextButton',
         'myt.FloatingPanelAnchor',
         'myt.ListViewAnchor',
         'myt.Radio','myt.TextTabSlider','myt.Tab',

@@ -87,12 +87,9 @@ myt.DomObserver = new JS.Module('DomObserver', {
     detachFromAllDomSources: function() {
         const observablesByType = this.__dobt;
         if (observablesByType) {
-            let type,
-                observables,
-                i;
-            for (type in observablesByType) {
-                observables = observablesByType[type];
-                i = observables.length;
+            for (const type in observablesByType) {
+                const observables = observablesByType[type];
+                let i = observables.length;
                 while (i) observables[--i].detachDomObserver(this, observables[--i], type, observables[--i]);
                 observables.length = 0;
             }

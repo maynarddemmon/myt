@@ -141,17 +141,12 @@ myt.DomObservable = new JS.Module('DomObservable', {
         if (domElement) {
             const domObserversByType = this.__dobsbt;
             if (domObserversByType) {
-                let domObservers, 
-                    methodRef, 
-                    capture, 
-                    i, 
-                    type;
-                for (type in domObserversByType) {
-                    domObservers = domObserversByType[type];
-                    i = domObservers.length;
+                for (const type in domObserversByType) {
+                    const domObservers = domObserversByType[type];
+                    let i = domObservers.length;
                     while (i) {
-                        capture = domObservers[--i];
-                        methodRef = domObservers[--i];
+                        const capture = domObservers[--i],
+                            methodRef = domObservers[--i];
                         i -= 2; // methodName and domObserver
                         myt.removeEventListener(domElement, type, methodRef, capture);
                     }

@@ -494,12 +494,10 @@
                 const genNameFunc = myt.AccessorSupport.generateName,
                     isModuleOrClass = typeof scope === 'function' || scope instanceof JS.Module,
                     mod = {};
-                let incrName,
-                    decrName;
                 counterAttrName = counterAttrName || genNameFunc('counter', exceededAttrName);
                 
-                incrName = genNameFunc(counterAttrName, 'increment');
-                decrName = genNameFunc(counterAttrName, 'decrement');
+                let incrName = genNameFunc(counterAttrName, 'increment'),
+                    decrName = genNameFunc(counterAttrName, 'decrement');
                 
                 // Prevent clobbering
                 if ((isModuleOrClass ? scope.instanceMethod(incrName) : scope[incrName]) !== undefined) {

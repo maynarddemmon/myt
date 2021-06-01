@@ -47,9 +47,8 @@
         moveSubview = (layout, sv, target, after) => {
             const curIdx = layout.getSubviewIndex(sv),
                 svs = layout.subviews;
-            let targetIdx;
             if (curIdx >= 0) {
-                targetIdx = layout.getSubviewIndex(target);
+                let targetIdx = layout.getSubviewIndex(target);
                 
                 // Remove from current index
                 svs.splice(curIdx, 1);
@@ -366,13 +365,9 @@
                     value = this.targetValue, 
                     svs = this.subviews, 
                     len = svs.length; 
-                let sv,
-                    setter, 
-                    i = 0;
-                for (; len > i;) {
-                    sv = svs[i++];
-                    setter = sv[setterName];
-                    if (setter) setter.call(sv, value);
+                for (let i = 0; len > i;) {
+                    const setter = svs[i++][setterName];
+                    if (setter) setter(value);
                 }
             }
         }
