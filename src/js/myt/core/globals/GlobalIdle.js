@@ -33,10 +33,8 @@
         initialize: function() {
             const self = this,
                 vendors = ['webkit','moz','ms','o'];
-            let i = 0,
-                vendor;
-            for (; i < vendors.length && !win.requestAnimationFrame;) {
-                vendor = vendors[i++];
+            for (let i = 0; i < vendors.length && !win.requestAnimationFrame;) {
+                const vendor = vendors[i++];
                 win.requestAnimationFrame = win[vendor + 'RequestAnimationFrame'];
                 win.cancelAnimationFrame = win[vendor + 'CancelAnimationFrame'] || win[vendor + 'CancelRequestAnimationFrame'];
             }
