@@ -184,7 +184,7 @@ Date.prototype.format = Date.prototype.format || (() => {
 ((exports) => {
     const extendObj = (destination, source) => {
             if (destination && source) {
-                for (let field in source) {
+                for (const field in source) {
                     if (destination[field] !== source[field] && !destination.hasOwnProperty(field)) {
                         destination[field] = source[field];
                     }
@@ -195,8 +195,7 @@ Date.prototype.format = Date.prototype.format || (() => {
         
         makeClass = (parent) => {
             const constructor = function() {
-                    const init = this.initialize;
-                    return init ? init.apply(this, arguments) || this : this;
+                    return this.initialize ? this.initialize.apply(this, arguments) || this : this;
                 },
                 bridge = function() {};
             bridge.prototype = (parent || Object).prototype;
@@ -210,17 +209,15 @@ Date.prototype.format = Date.prototype.format || (() => {
                 be created.
             @returns {!Array} */
         ancestorClasses = (module, list) => {
-            const cachable = !list,
-                inc = module.__inc__,
-                n = inc.length;
-            let i = 0;
-            list = list || [];
-            
+            const cachable = !list;
             if (cachable && module.__anc__) return module.__anc__.slice();
             
-            for (; i < n;) ancestorClasses(inc[i++], list);
+            list = list || [];
+            const inc = module.__inc__,
+                n = inc.length;
+            for (let i = 0; i < n;) ancestorClasses(inc[i++], list);
             
-            if (list.indexOf(module) < 0) list.push(module);
+            if (!list.includes(module)) list.push(module);
             
             if (cachable) module.__anc__ = list.slice();
             return list;
@@ -236,86 +233,77 @@ Date.prototype.format = Date.prototype.format || (() => {
             const ancestors = ancestorClasses(module), 
                 n = ancestors.length,
                 methods = [];
-            let fns, 
-                i = 0;
-            for (; i < n;) {
-                fns = ancestors[i++].__fns__;
+            for (let i = 0; i < n;) {
+                const fns = ancestors[i++].__fns__;
                 if (fns.hasOwnProperty(name)) methods.push(fns[name]);
             }
             module.__mct__[name] = methods.slice();
             return methods;
         },
         
+        compile = (method, environment) => {
+            const callable = method.callable;
+            return method.__hs ? function() {
+                const existing = this.callSuper,
+                    prevOwn = this.hasOwnProperty('callSuper'),
+                    methods = lookup(environment, method.name);
+                let stackIndex = methods.length - 1;
+                if (stackIndex !== 0) {
+                    const params = Array.from(arguments),
+                        _super = this.callSuper = (...theArgs) => {
+                            let i = theArgs.length;
+                            while (i) params[--i] = theArgs[i];
+                            
+                            if (--stackIndex === 0) delete this.callSuper;
+                            const returnValue = methods[stackIndex].apply(this, params);
+                            this.callSuper = _super;
+                            stackIndex++;
+                            
+                            return returnValue;
+                        };
+                }
+                
+                const returnValue = callable.apply(this, arguments);
+                
+                if (prevOwn) {
+                    this.callSuper = existing;
+                } else {
+                    delete this.callSuper;
+                }
+                
+                return returnValue;
+            } : callable;
+        },
+        
         resolveModule = (module, host) => {
             host = host || module;
-            const target = host.__tgt__,
-                inc = module.__inc__,
-                fns = module.__fns__;
-            let i, 
-                n, 
-                key, 
-                method, 
-                compiled;
             
             if (host === module) {
                 module.__anc__ = null;
                 module.__mct__ = {};
-                i = module.__dep__.length;
+                let i = module.__dep__.length;
                 while (i) resolveModule(module.__dep__[--i]);
             }
             
+            const target = host.__tgt__;
             if (target) {
-                for (i = 0, n = inc.length; i < n;) resolveModule(inc[i++], host);
+                const inc = module.__inc__,
+                    fns = module.__fns__,
+                    n = inc.length;
+                for (let i = 0; i < n;) resolveModule(inc[i++], host);
                 
-                for (key in fns) {
+                for (const key in fns) {
                     // Compile method
-                    method = fns[key],
-                    compiled = method instanceof Method ? compile(method, host) : method;
+                    const method = fns[key],
+                        compiled = method instanceof Method ? compile(method, host) : method;
                     
                     if (target[key] !== compiled) target[key] = compiled;
                 }
             }
         },
         
-        compile = (method, environment) => {
-            const callable = method.callable,
-                keywordCallSuper = Method.keywordCallSuper,
-                superFunc = method._hasSuper && keywordCallSuper ? keywordCallSuper : null;
-            
-            return superFunc === null ? callable : function() {
-                const existing = this.callSuper,
-                    doSuper = !existing || existing.__kwd__;
-                let prevValue, 
-                    prevOwn, 
-                    kwd,
-                    returnValue;
-              
-                if (doSuper) {
-                    prevValue = existing;
-                    prevOwn = this.hasOwnProperty('callSuper');
-                    kwd = this.callSuper = superFunc(method, environment, this, arguments);
-                    if (kwd) kwd.__kwd__ = true;
-                }
-                
-                returnValue = callable.apply(this, arguments);
-                
-                if (doSuper) {
-                    if (prevOwn) {
-                        this.callSuper = prevValue;
-                    } else {
-                        delete this.callSuper;
-                    }
-                }
-                
-                return returnValue;
-            };
-        },
-        
         eigenFunc = (target) => {
-            let meta = target.__meta__;
-            if (meta) return meta;
-            meta = target.__meta__ = new Module('', null, {_target:target});
-            return meta.include(target.klass, {_resolve: false});
+            return target.__meta__ ? target.__meta__ : (target.__meta__ = new Module('', null, {_target:target})).include(target.klass, {_rslv:false});
         },
         
         ignore = (value) => typeof value !== 'function' || (value.__fns__ && value.__inc__),
@@ -328,7 +316,7 @@ Date.prototype.format = Date.prototype.format || (() => {
             this.module = module;
             this.name = name;
             this.callable = callable;
-            this._hasSuper = typeof callable === 'function' && callable.toString().indexOf('callSuper') !== -1;
+            this.__hs = typeof callable === 'function' && callable.toString().indexOf('callSuper') !== -1;
         },
         
         call: function(...args) {
@@ -351,7 +339,7 @@ Date.prototype.format = Date.prototype.format || (() => {
             
             this.__displayName = name;
             
-            this.include(methods, {_resolve:false});
+            this.include(methods, {_rslv:false});
         },
         
         /** Adds a single named method to a JS.Class/JS.Module. If you’re modifying 
@@ -363,7 +351,7 @@ Date.prototype.format = Date.prototype.format || (() => {
             @returns {undefined} */
         define: function(name, callable, options) {
             this.__fns__[name] = createMethod(this, name, callable);
-            if ((options || {})._resolve !== false) resolveModule(this);
+            if ((options || {})._rslv !== false) resolveModule(this);
         },
         
         /** Mixes in a module to this module.
@@ -372,39 +360,31 @@ Date.prototype.format = Date.prototype.format || (() => {
             @returns {!Function) this JS.Module. */
         include: function(module, options) {
             if (module) {
-                options = options || {};
-                const extend  = module.extend,
-                    include = module.include;
-                let field, 
-                    value, 
-                    mixins, 
-                    i, 
-                    n, 
-                    resolveFalse;
-                
                 if (module.__fns__ && module.__inc__) {
                     this.__inc__.push(module);
                     module.__dep__.push(this);
                 } else {
-                    resolveFalse = {_resolve:false};
+                    const extend  = module.extend,
+                        include = module.include,
+                        resolveFalse = {_rslv:false};
                     if (ignore(extend)) {
-                        mixins = [].concat(extend);
-                        for (i = 0, n = mixins.length; i < n;) this.extend(mixins[i++]);
+                        const mixins = [].concat(extend);
+                        for (let i = 0, n = mixins.length; i < n;) this.extend(mixins[i++]);
                     }
                     if (ignore(include)) {
-                        mixins = [].concat(include);
-                        for (i = 0, n = mixins.length; i < n;) this.include(mixins[i++], resolveFalse);
+                        const mixins = [].concat(include);
+                        for (let i = 0, n = mixins.length; i < n;) this.include(mixins[i++], resolveFalse);
                     }
-                    for (field in module) {
+                    for (const field in module) {
                         if (module.hasOwnProperty(field)) {
-                            value = module[field];
+                            const value = module[field];
                             if ((field === 'extend' || field === 'include') && ignore(value)) continue;
                             this.define(field, value, resolveFalse);
                         }
                     }
                 }
                 
-                if (options._resolve !== false) resolveModule(this);
+                if ((options || {})._rslv !== false) resolveModule(this);
             }
             return this;
         },
@@ -437,7 +417,7 @@ Date.prototype.format = Date.prototype.format || (() => {
         },
         
         extend: function(module, options) {
-            if (module) eigenFunc(this).include(module, {_resolve:(options || {})._resolve});
+            if (module) eigenFunc(this).include(module, {_rslv:(options || {})._rslv});
             return this;
         },
         
@@ -460,16 +440,15 @@ Date.prototype.format = Date.prototype.format || (() => {
             
             Module.prototype.initialize.call(this, name);
             
-            const resolve = (options || {})._resolve,
-                resolveFalse = {_resolve:false},
+            const resolve = (options || {})._rslv,
+                resolveFalse = {_rslv:false},
                 klass = makeClass(parent);
-            let parentModule;
             extendObj(klass, this);
             klass.prototype.constructor = klass.prototype.klass = klass;
-            eigenFunc(klass).include(parent.__meta__, {_resolve:resolve});
+            eigenFunc(klass).include(parent.__meta__, {_rslv:resolve});
             klass.__tgt__ = klass.prototype;
             
-            parentModule = parent === Object ? {} : (parent.__fns__ ? parent : new Module(parent.prototype, resolveFalse));
+            const parentModule = parent === Object ? {} : (parent.__fns__ ? parent : new Module(parent.prototype, resolveFalse));
             klass.include(Kernel, resolveFalse).include(parentModule, resolveFalse).include(methods, resolveFalse);
             
             if (resolve !== false) resolveModule(klass);
@@ -481,19 +460,14 @@ Date.prototype.format = Date.prototype.format || (() => {
     const classify = (klass, parent) => {
         klass.__inc__ = [];
         klass.__dep__ = [];
-        const proto = klass.prototype,
-            methods = {};
-        for (let field in proto) {
+        const proto = klass.__tgt__ = klass.prototype,
+            methods = klass.__fns__ = {};
+        for (const field in proto) {
             if (proto.hasOwnProperty(field)) methods[field] = createMethod(klass, field, proto[field]);
         }
-        klass.__fns__ = methods;
-        klass.__tgt__ = proto;
-        
         proto.constructor = proto.klass = klass;
-        
         extendObj(klass, Class.prototype);
         klass.include(parent);
-        
         klass.constructor = klass.klass = Class;
     };
     classify(Method, Kernel);
@@ -503,30 +477,6 @@ Date.prototype.format = Date.prototype.format || (() => {
     resolveModule(eigenFunc(Method));
     resolveModule(eigenFunc(Module));
     eigenFunc(Class).include(Module.__meta__);
-    
-    // Must come after classification.
-    Method.keywordCallSuper = (method, env, receiver, args) => {
-        const methods = lookup(env, method.name),
-            params = Array.from(args);
-        let stackIndex = methods.length - 1,
-            _super;
-        
-        if (stackIndex === 0) return undefined;
-        
-        return _super = (...theArgs) => {
-            let i = theArgs.length,
-                returnValue;
-            while (i) params[--i] = theArgs[i];
-            
-            stackIndex--;
-            if (stackIndex === 0) delete receiver.callSuper;
-            returnValue = methods[stackIndex].apply(receiver, params);
-            receiver.callSuper = _super;
-            stackIndex++;
-            
-            return returnValue;
-        };
-    };
     
     /** Create a single instance of a "private" class. */
     exports.Singleton = new Class('Singleton', {
@@ -601,7 +551,7 @@ Date.prototype.format = Date.prototype.format || (() => {
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was
                 created. */
-            version:20200514.1444,
+            version:20210609.1302,
             
             /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
                 should be set by the page that includes this script. */
@@ -24511,339 +24461,12 @@ myt.PanelStack = new JS.Class('PanelStack', myt.View, {
 });
 
 
-/** Adds drag group support to drag and drop related classes.
-    
-    Events:
-        None
-    
-    Attributes:
-        None
-    
-    Private Attributes:
-        __dragGroups:object The keys are the set of drag groups this view
-            supports. By default the special drag group of '*' which accepts
-            all drag groups is defined.
-        __acceptAny:boolean The precalculated return value for the
-            acceptAnyDragGroup method.
-*/
-myt.DragGroupSupport = new JS.Module('DragGroupSupport', {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides */
-    initNode: function(parent, attrs) {
-        this.__dragGroups = {'*':true};
-        this.__acceptAny = true;
-        
-        this.callSuper(parent, attrs);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setDragGroups: function(v) {
-        const newDragGroups = {};
-        for (let dragGroup in v) newDragGroups[dragGroup] = true;
-        this.__dragGroups = newDragGroups;
-        this.__acceptAny = newDragGroups.hasOwnProperty('*');
-    },
-    
-    getDragGroups: function() {
-        return this.__dragGroups;
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Adds the provided dragGroup to the dragGroups.
-        @param dragGroup:string The drag group to add.
-        @returns {undefined} */
-    addDragGroup: function(dragGroup) {
-        if (dragGroup) {
-            this.__dragGroups[dragGroup] = true;
-            if (dragGroup === '*') this.__acceptAny = true;
-        }
-    },
-    
-    /** Removes the provided dragGroup from the dragGroups.
-        @param dragGroup:string The drag group to remove.
-        @returns {undefined} */
-    removeDragGroup: function(dragGroup) {
-        if (dragGroup) {
-            delete this.__dragGroups[dragGroup];
-            if (dragGroup === '*') this.__acceptAny = false;
-        }
-    },
-    
-    /** Determines if this drop target will accept drops from any drag group.
-        @returns boolean: True if any drag group will be accepted, false
-            otherwise. */
-    acceptAnyDragGroup: function() {
-        return this.__acceptAny;
-    }
-});
-
-
-/** Makes an myt.View drag and dropable via the mouse.
-    
-    Events:
-        None
-    
-    Attributes:
-        dropped:boolean Indicates this dropable was just dropped.
-        dropFailed:boolean Indicates this dropable was just dropped outside
-            of a drop target.
-        dropTarget:myt.DropTarget The drop target this dropable is currently
-            over.
-*/
-myt.Dropable = new JS.Module('Dropable', {
-    include: [myt.Draggable, myt.DragGroupSupport],
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setDropTarget: function(v) {this.dropTarget = v;},
-    setDropped: function(v) {this.dropped = v;},
-    setDropFailed: function(v) {this.dropFailed = v;},
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Called by myt.GlobalDragManager when a dropable is dragged over a
-        target. Gives this dropable a chance to reject a drop regardless
-        of drag group. The default implementation returns true.
-        @param dropTarget:myt.DropTarget The drop target dragged over.
-        @returns boolean: True if the drop will be allowed, false otherwise. */
-    willPermitDrop: function(dropTarget) {
-        return true;
-    },
-    
-    /** @overrides myt.Draggable */
-    startDrag: function(event) {
-        this.setDropped(false);
-        this.setDropFailed(false);
-        
-        myt.global.dragManager.startDrag(this);
-        this.callSuper(event);
-    },
-    
-    /** @overrides myt.Draggable */
-    updateDrag: function(event) {
-        myt.global.dragManager.updateDrag(event, this);
-        this.callSuper(event);
-    },
-    
-    /** @overrides myt.Draggable */
-    stopDrag: function(event, isAbort) {
-        myt.global.dragManager.stopDrag(event, this, isAbort);
-        this.callSuper(event, isAbort);
-        
-        if (isAbort) {
-            this.notifyDropAborted();
-        } else if (this.dropFailed) {
-            this.notifyDropFailed();
-        }
-    },
-    
-    /** Called by myt.GlobalDragManager when this view is dragged over a drop
-        target.
-        @param dropTarget:myt.DropTarget The target that was dragged over.
-        @returns {undefined} */
-    notifyDragEnter: function(dropTarget) {
-        this.setDropTarget(dropTarget);
-    },
-    
-    /** Called by myt.GlobalDragManager when this view is dragged out of a drop
-        target.
-        @param dropTarget:myt.DropTarget The target that was dragged out of.
-        @returns {undefined} */
-    notifyDragLeave: function(dropTarget) {
-        this.setDropTarget();
-    },
-    
-    /** Called by myt.GlobalDragManager when this view is dropped.
-        @param dropTarget:myt.DropTarget The target that was dropped on. Will
-            be undefined if this dropable was dropped on no drop target.
-        @param isAbort:boolean Indicates if the drop was the result of an
-            abort or a normal drop.
-        @returns {undefined} */
-    notifyDropped: function(dropTarget, isAbort) {
-        this.setDropped(true);
-        
-        if (!this.dropTarget) this.setDropFailed(true);
-    },
-    
-    /** Called after dragging stops and the drop failed. The default
-        implementation does nothing.
-        @returns {undefined} */
-    notifyDropFailed: function() {},
-    
-    /** Called after dragging stops and the drop was aborted. The default
-        implementation does nothing.
-        @returns {undefined} */
-    notifyDropAborted: function() {}
-});
-
-
-/** Makes an myt.View support having myt.Dropable views dropped on it.
-    
-    Events:
-        None
-    
-    Attributes:
-        None
-*/
-myt.DropTarget = new JS.Module('DropTarget', {
-    include: [myt.DragGroupSupport],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides */
-    initNode: function(parent, attrs) {
-        this.callSuper(parent, attrs);
-        
-        myt.global.dragManager.registerDropTarget(this);
-    },
-    
-    /** @overrides */
-    destroyAfterOrphaning: function() {
-        myt.global.dragManager.unregisterDropTarget(this);
-        
-        this.callSuper();
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Called by myt.GlobalDragManager when a dropable is dragged over this
-        target. Gives this drop target a chance to reject a drop regardless
-        of drag group. The default implementation returns true if the view
-        is not disabled.
-        @param dropable:myt.Dropable The dropable being dragged.
-        @returns boolean: True if the drop will be allowed, false otherwise. */
-    willAcceptDrop: function(dropable) {
-        // Handle the common case of a disabled or not visible component.
-        if (this.disabled || !this.isVisible()) return false;
-        
-        return true;
-    },
-    
-    /** Called by myt.GlobalDragManager when a dropable starts being dragged
-        that has a matching drag group.
-        @param dropable:myt.Dropable The dropable being dragged.
-        @returns {undefined} */
-    notifyDragStart: function(dropable) {},
-    
-    /** Called by myt.GlobalDragManager when a dropable stops being dragged
-        that has a matching drag group.
-        @param dropable:myt.Dropable The dropable no longer being dragged.
-        @returns {undefined} */
-    notifyDragStop: function(dropable) {},
-    
-    /** Called by myt.GlobalDragManager when a dropable is dragged over this
-        view and has a matching drag group.
-        @param dropable:myt.Dropable The dropable being dragged over this view.
-        @returns {undefined} */
-    notifyDragEnter: function(dropable) {},
-    
-    /** Called by myt.GlobalDragManager when a dropable is dragged out of this
-        view and has a matching drag group.
-        @param dropable:myt.Dropable The dropable being dragged out of 
-            this view.
-        @returns {undefined} */
-    notifyDragLeave: function(dropable) {},
-    
-    /** Called by myt.GlobalDragManager when a dropable is dropped onto this
-        view and has a matching drag group.
-        @param dropable:myt.Dropable The dropable being dropped onto this view.
-        @returns {undefined} */
-    notifyDrop: function(dropable) {}
-});
-
-
-/** Makes an myt.View support being a source for myt.Dropable instances. Makes
-    use of myt.Draggable for handling drag initiation but this view is not
-    itself, actually draggable.
-    
-    Events:
-        None
-    
-    Attributes:
-        dropParent:myt.View The view to make the myt.Dropable instances in.
-            Defaults to the myt.RootView that contains this drop source.
-        dropClass:JS.Class The myt.Dropable class that gets created in the
-            default implementation of makeDropable.
-        dropClassAttrs:object The attrs to use when making the dropClass
-            instance.
-        dropable:mytDropable (read only) The dropable that was most 
-            recently created. Once the dropable has been dropped this will
-            be set to null.
-*/
-myt.DropSource = new JS.Module('DropSource', {
-    include: [myt.Draggable],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides */
-    initNode: function(parent, attrs) {
-        if (attrs.distanceBeforeDrag == null) attrs.distanceBeforeDrag = 2;
-        if (attrs.dropParent == null) attrs.dropParent = parent.getRoot();
-        
-        this.callSuper(parent, attrs);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setDropClass: function(v) {this.dropClass = myt.resolveClassname(v);},
-    setDropClassAttrs: function(v) {this.dropClassAttrs = v;},
-    setDropParent: function(v) {this.dropParent = v;},
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.Draggable */
-    startDrag: function(event) {
-        const dropable = this.dropable = this.makeDropable();
-        
-        // Emulate mouse down on the dropable
-        if (dropable) {
-            // Remember distance and set to zero so a drag will begin for sure.
-            const origDistance = dropable.distanceBeforeDrag;
-            dropable.distanceBeforeDrag = 0;
-            
-            dropable.doMouseDown(event); // Execute MouseDownMixin
-            dropable.__doMouseDown(event); // Execute Draggable
-            
-            // Restore distance
-            dropable.distanceBeforeDrag = origDistance;
-        }
-    },
-    
-    /** @overrides myt.MouseDown */
-    doMouseUp: function(event) {
-        this.callSuper(event);
-        
-        // Emulate mouse up on the dropable
-        const dropable = this.dropable;
-        if (dropable) {
-            dropable.__doMouseUp(event);
-            dropable.doMouseUp(event);
-            this.dropable = null;
-        }
-    },
-    
-    /** Called by startDrag to make a dropable.
-        @returns myt.Dropable or undefined if one can't be created. */
-    makeDropable: function() {
-        const dropClass = this.dropClass,
-            dropParent = this.dropParent;
-        if (dropClass && dropParent) {
-            const pos = myt.DomElementProxy.getPagePosition(this.getInnerDomElement(), dropParent.getInnerDomElement()),
-            attrs = Object.assign({}, this.dropClassAttrs);
-            attrs.x = pos.x || 0;
-            attrs.y = pos.y || 0;
-            return new dropClass(dropParent, attrs);
-        }
-    },
-});
-
-
 ((pkg) => {
-    const G = pkg.global,
+    const JSModule = JS.Module,
+        G = pkg.global,
         dragManager = G.dragManager,
         globalMouse = G.mouse,
+        Draggable = pkg.Draggable,
         
         /*  @param {!Object} autoScroller
             @param {string} dir - The direction to scroll.
@@ -24876,12 +24499,303 @@ myt.DropSource = new JS.Module('DropSource', {
         resetHScroll = (autoScroller) => {
             autoScroller.__isAutoscrollLeft = autoScroller.__isAutoscrollRight = false;
             autoScroller.__timerIdAutoscrollLeft = autoScroller.__timerIdAutoscrollRight = null;
-        };
+        },
+        
+        /* Adds drag group support to drag and drop related classes.
+            
+            Private Attributes:
+                __dragGroups:object The keys are the set of drag groups this view
+                    supports. By default the special drag group of '*' which accepts
+                    all drag groups is defined.
+                __acceptAny:boolean The precalculated return value for the
+                    acceptAnyDragGroup method. */
+        DragGroupSupport = pkg.DragGroupSupport = new JSModule('DragGroupSupport', {
+            // Life Cycle //////////////////////////////////////////////////////
+            /** @overrides */
+            initNode: function(parent, attrs) {
+                this.__dragGroups = {'*':true};
+                this.__acceptAny = true;
+                
+                this.callSuper(parent, attrs);
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setDragGroups: function(v) {
+                const newDragGroups = this.__dragGroups = {};
+                for (const dragGroup in v) newDragGroups[dragGroup] = true;
+                this.__acceptAny = newDragGroups.hasOwnProperty('*');
+            },
+            
+            getDragGroups: function() {
+                return this.__dragGroups;
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** Adds the provided dragGroup to the dragGroups.
+                @param dragGroup:string The drag group to add.
+                @returns {undefined} */
+            addDragGroup: function(dragGroup) {
+                if (dragGroup) {
+                    this.__dragGroups[dragGroup] = true;
+                    if (dragGroup === '*') this.__acceptAny = true;
+                }
+            },
+            
+            /** Removes the provided dragGroup from the dragGroups.
+                @param dragGroup:string The drag group to remove.
+                @returns {undefined} */
+            removeDragGroup: function(dragGroup) {
+                if (dragGroup) {
+                    delete this.__dragGroups[dragGroup];
+                    if (dragGroup === '*') this.__acceptAny = false;
+                }
+            },
+            
+            /** Determines if this drop target will accept drops from any drag group.
+                @returns boolean: True if any drag group will be accepted, false otherwise. */
+            acceptAnyDragGroup: function() {
+                return this.__acceptAny;
+            }
+        });
+    
+    /** Makes an myt.View support being a source for myt.Dropable instances. Makes
+        use of myt.Draggable for handling drag initiation but this view is not
+        actually draggable.
+        
+        Attributes:
+            dropParent:myt.View The view to make the myt.Dropable instances in.
+                Defaults to the myt.RootView that contains this drop source.
+            dropClass:JS.Class The myt.Dropable class that gets created in the
+                default implementation of makeDropable.
+            dropClassAttrs:object The attrs to use when making the dropClass instance.
+            dropable:mytDropable (read only) The dropable that was most 
+                recently created. Once the dropable has been dropped this will
+                be set to null. */
+    pkg.DropSource = new JSModule('DropSource', {
+        include: [Draggable],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides */
+        initNode: function(parent, attrs) {
+            if (attrs.distanceBeforeDrag == null) attrs.distanceBeforeDrag = 2;
+            if (attrs.dropParent == null) attrs.dropParent = parent.getRoot();
+            
+            this.callSuper(parent, attrs);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setDropClass: function(v) {this.dropClass = pkg.resolveClassname(v);},
+        setDropClassAttrs: function(v) {this.dropClassAttrs = v;},
+        setDropParent: function(v) {this.dropParent = v;},
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides myt.Draggable */
+        startDrag: function(event) {
+            const dropable = this.dropable = this.makeDropable();
+            
+            // Emulate mouse down on the dropable
+            if (dropable) {
+                // Remember distance and set to zero so a drag will begin for sure.
+                const origDistance = dropable.distanceBeforeDrag;
+                dropable.distanceBeforeDrag = 0;
+                
+                dropable.doMouseDown(event); // Execute MouseDownMixin
+                dropable.__doMouseDown(event); // Execute Draggable
+                
+                // Restore distance
+                dropable.distanceBeforeDrag = origDistance;
+            }
+        },
+        
+        /** @overrides myt.MouseDown */
+        doMouseUp: function(event) {
+            this.callSuper(event);
+            
+            // Emulate mouse up on the dropable
+            const dropable = this.dropable;
+            if (dropable) {
+                dropable.__doMouseUp(event);
+                dropable.doMouseUp(event);
+                this.dropable = null;
+            }
+        },
+        
+        /** Called by startDrag to make a dropable.
+            @returns myt.Dropable or undefined if one can't be created. */
+        makeDropable: function() {
+            const dropClass = this.dropClass,
+                dropParent = this.dropParent;
+            if (dropClass && dropParent) {
+                const pos = pkg.DomElementProxy.getPagePosition(this.getInnerDomElement(), dropParent.getInnerDomElement()),
+                attrs = Object.assign({}, this.dropClassAttrs);
+                attrs.x = pos.x || 0;
+                attrs.y = pos.y || 0;
+                return new dropClass(dropParent, attrs);
+            }
+        },
+    });
+    
+    /** Makes an myt.View support having myt.Dropable views dropped on it. */
+    pkg.DropTarget = new JSModule('DropTarget', {
+        include: [DragGroupSupport],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides */
+        initNode: function(parent, attrs) {
+            this.callSuper(parent, attrs);
+            
+            dragManager.registerDropTarget(this);
+        },
+        
+        /** @overrides */
+        destroyAfterOrphaning: function() {
+            dragManager.unregisterDropTarget(this);
+            
+            this.callSuper();
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Called by myt.GlobalDragManager when a dropable is dragged over this
+            target. Gives this drop target a chance to reject a drop regardless
+            of drag group. The default implementation returns true if the view
+            is not disabled.
+            @param dropable:myt.Dropable The dropable being dragged.
+            @returns boolean: True if the drop will be allowed, false otherwise. */
+        willAcceptDrop: function(dropable) {
+            // Components must be visible and not disabled to accept a drop.
+            return !this.disabled && this.isVisible();
+        },
+        
+        /** Called by myt.GlobalDragManager when a dropable starts being dragged
+            that has a matching drag group.
+            @param dropable:myt.Dropable The dropable being dragged.
+            @returns {undefined} */
+        notifyDragStart: (dropable) => {},
+        
+        /** Called by myt.GlobalDragManager when a dropable stops being dragged
+            that has a matching drag group.
+            @param dropable:myt.Dropable The dropable no longer being dragged.
+            @returns {undefined} */
+        notifyDragStop: (dropable) => {},
+        
+        /** Called by myt.GlobalDragManager when a dropable is dragged over this
+            view and has a matching drag group.
+            @param dropable:myt.Dropable The dropable being dragged over this view.
+            @returns {undefined} */
+        notifyDragEnter: (dropable) => {},
+        
+        /** Called by myt.GlobalDragManager when a dropable is dragged out of this
+            view and has a matching drag group.
+            @param dropable:myt.Dropable The dropable being dragged out of 
+                this view.
+            @returns {undefined} */
+        notifyDragLeave: (dropable) => {},
+        
+        /** Called by myt.GlobalDragManager when a dropable is dropped onto this
+            view and has a matching drag group.
+            @param dropable:myt.Dropable The dropable being dropped onto this view.
+            @returns {undefined} */
+        notifyDrop: (dropable) => {}
+    });
+    
+    /** Makes an myt.View drag and dropable via the mouse.
+        
+        Attributes:
+            dropped:boolean Indicates this dropable was just dropped.
+            dropFailed:boolean Indicates this dropable was just dropped outside
+                of a drop target.
+            dropTarget:myt.DropTarget The drop target this dropable is 
+                currently over. */
+    pkg.Dropable = new JSModule('Dropable', {
+        include: [Draggable, DragGroupSupport],
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setDropTarget: function(v) {this.dropTarget = v;},
+        setDropped: function(v) {this.dropped = v;},
+        setDropFailed: function(v) {this.dropFailed = v;},
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Called by myt.GlobalDragManager when a dropable is dragged over a
+            target. Gives this dropable a chance to reject a drop regardless
+            of drag group. The default implementation returns true.
+            @param dropTarget:myt.DropTarget The drop target dragged over.
+            @returns boolean: True if the drop will be allowed, false otherwise. */
+        willPermitDrop: (dropTarget) => true,
+        
+        /** @overrides myt.Draggable */
+        startDrag: function(event) {
+            this.setDropped(false);
+            this.setDropFailed(false);
+            
+            dragManager.startDrag(this);
+            this.callSuper(event);
+        },
+        
+        /** @overrides myt.Draggable */
+        updateDrag: function(event) {
+            dragManager.updateDrag(event, this);
+            this.callSuper(event);
+        },
+        
+        /** @overrides myt.Draggable */
+        stopDrag: function(event, isAbort) {
+            dragManager.stopDrag(event, this, isAbort);
+            this.callSuper(event, isAbort);
+            
+            if (isAbort) {
+                this.notifyDropAborted();
+            } else if (this.dropFailed) {
+                this.notifyDropFailed();
+            }
+        },
+        
+        /** Called by myt.GlobalDragManager when this view is dragged over a drop target.
+            @param dropTarget:myt.DropTarget The target that was dragged over.
+            @returns {undefined} */
+        notifyDragEnter: function(dropTarget) {
+            this.setDropTarget(dropTarget);
+        },
+        
+        /** Called by myt.GlobalDragManager when this view is dragged out of a drop target.
+            @param dropTarget:myt.DropTarget The target that was dragged out of.
+            @returns {undefined} */
+        notifyDragLeave: function(dropTarget) {
+            this.setDropTarget();
+        },
+        
+        /** Called by myt.GlobalDragManager when this view is dropped.
+            @param dropTarget:myt.DropTarget The target that was dropped on. Will
+                be undefined if this dropable was dropped on no drop target.
+            @param isAbort:boolean Indicates if the drop was the result of an
+                abort or a normal drop.
+            @returns {undefined} */
+        notifyDropped: function(dropTarget, isAbort) {
+            this.setDropped(true);
+            
+            if (!this.dropTarget) this.setDropFailed(true);
+        },
+        
+        /** Called after dragging stops and the drop failed. The default
+            implementation does nothing.
+            @returns {undefined} */
+        notifyDropFailed: () => {},
+        
+        /** Called after dragging stops and the drop was aborted. The default
+            implementation does nothing.
+            @returns {undefined} */
+        notifyDropAborted: () => {}
+    });
     
     /** Makes an myt.View auto scroll during drag and drop.
-        
-        Events:
-            None
         
         Attributes:
             scrollBorder:number The thickness of the auto scroll border. Defaults
@@ -24908,8 +24822,8 @@ myt.DropSource = new JS.Module('DropSource', {
             __isAutoscrollRight:boolean
             __timerIdAutoscrollRight:number
     */
-    pkg.AutoScroller = new JS.Module('AutoScroller', {
-        include: [pkg.DragGroupSupport],
+    pkg.AutoScroller = new JSModule('AutoScroller', {
+        include: [DragGroupSupport],
         
         
         // Life Cycle //////////////////////////////////////////////////////////

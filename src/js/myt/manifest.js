@@ -89,22 +89,26 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'Button.js'          ).provides(
             'myt.Button','myt.SimpleButtonStyle','myt.SimpleButton','myt.SimpleIconTextButton','myt.SimpleTextButton',
             'myt.IconTextButtonContent','myt.TextButtonContent'
-        ).requires(
-            'myt.UpdateableUI','myt.MouseOverAndDown','myt.KeyActivation','myt.Disableable',
-            'myt.View','myt.Image','myt.Text'
-        );
+        ).requires('myt.UpdateableUI','myt.MouseOverAndDown','myt.KeyActivation','myt.Disableable','myt.View','myt.Image','myt.Text');
+    file(MYT_COMPONENT_ROOT + 'Checkbox.js'        ).provides('myt.Checkbox').requires('myt.SimpleButtonStyle','myt.ValueComponent');
+    file(MYT_COMPONENT_ROOT + 'Dimmer.js'          ).provides('myt.Dimmer').requires('myt.View');
     file(MYT_COMPONENT_ROOT + 'Divider.js'         ).provides('myt.HorizontalDivider','myt.VerticalDivider').requires('myt.SimpleButton','myt.BoundedValueComponent','myt.Draggable');
-    file(MYT_COMPONENT_ROOT + 'FontAwesome.js'     ).provides('myt.FontAwesome' ).requires('myt.Markup');
+    file(MYT_COMPONENT_ROOT + 'FontAwesome.js'     ).provides('myt.FontAwesome').requires('myt.Markup');
+    file(MYT_COMPONENT_ROOT + 'ModalPanel.js'      ).provides('myt.ModalPanel').requires('myt.Dimmer','myt.SizeToChildren');
+    file(MYT_COMPONENT_ROOT + 'Radio.js'           ).provides('myt.Radio').requires('myt.SimpleButtonStyle','myt.BAG');
     file(MYT_COMPONENT_ROOT + 'Replicator.js'      ).provides('myt.Replicable','myt.Replicator').requires('myt.Reusable','myt.Node','myt.TrackActivesPool');
     file(MYT_COMPONENT_ROOT + 'SelectionManager.js').provides('myt.SelectionManager','myt.Selectable').requires('myt.global.keys');
-    file(MYT_COMPONENT_ROOT + 'Spinner.js'         ).provides('myt.Spinner' ).requires('myt.View');
-    file(MYT_COMPONENT_ROOT + 'StateMachine.js'    ).provides('myt.StateMachine' ).requires('myt.Node');
+    file(MYT_COMPONENT_ROOT + 'Spinner.js'         ).provides('myt.Spinner').requires('myt.View');
+    file(MYT_COMPONENT_ROOT + 'StateMachine.js'    ).provides('myt.StateMachine').requires('myt.Node');
     file(MYT_COMPONENT_ROOT + 'Validator.js'       ).provides(
             'myt.global.validators','myt.Validator','myt.CompoundValidator',
             'myt.EqualFieldsValidator','myt.EqualsIgnoreCaseValidator','myt.LengthValidator',
             'myt.NumericRangeValidator','myt.URLValidator','myt.RequiredFieldValidator','myt.JSONValidator'
         ).requires('myt.global','myt.URI');
-    file(MYT_COMPONENT_ROOT + 'WebSocket.js').provides('myt.WebSocket','myt.MessageTypeWebSocket').requires('myt.Node');
+    file(MYT_COMPONENT_ROOT + 'WebSocket.js'       ).provides('myt.WebSocket','myt.MessageTypeWebSocket').requires('myt.Node');
+    file(MYT_COMPONENT_ROOT + 'DragAndDrop.js'     ).provides(
+        'myt.DragGroupSupport','myt.Dropable','myt.DropTarget','myt.DropSource','myt.AutoScroller'
+    ).requires('myt.View','myt.Draggable','myt.global.mouse','myt.global.dragManager');
     
     // Component : Base
     file(MYT_COMPONENT_ROOT + 'base/Annulus.js').provides('myt.Annulus').requires('myt.View');
@@ -119,8 +123,7 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'behavior/Activateable.js'    ).provides('myt.Activateable'    ).requires('myt');
     file(MYT_COMPONENT_ROOT + 'behavior/UpdateableUI.js'    ).provides('myt.UpdateableUI'    ).requires('myt');
     file(MYT_COMPONENT_ROOT + 'behavior/Disableable.js'     ).provides('myt.Disableable'     ).requires('myt.UpdateableUI');
-    file(MYT_COMPONENT_ROOT + 'behavior/KeyActivation.js'   ).provides('myt.KeyActivation')
-        .requires('myt.Activateable','myt.Disableable','myt.KeyObservable','myt.FocusObservable');
+    file(MYT_COMPONENT_ROOT + 'behavior/KeyActivation.js'   ).provides('myt.KeyActivation'   ).requires('myt.Activateable','myt.Disableable','myt.KeyObservable','myt.FocusObservable');
     file(MYT_COMPONENT_ROOT + 'behavior/Draggable.js'       ).provides('myt.Draggable'       ).requires('myt.global.mouse','myt.global.dragManager','myt.Geometry');
     file(MYT_COMPONENT_ROOT + 'behavior/MouseOver.js'       ).provides('myt.MouseOver'       ).requires('myt.Disableable','myt.global.mouse','myt.MouseObservable');
     file(MYT_COMPONENT_ROOT + 'behavior/MouseDown.js'       ).provides('myt.MouseDown'       ).requires('myt.MouseOver');
@@ -140,13 +143,6 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'layout/ResizeLayout.js'  ).provides('myt.ResizeLayout'  ).requires('myt.SpacedLayout');
     file(MYT_COMPONENT_ROOT + 'layout/WrappingLayout.js').provides('myt.WrappingLayout').requires('myt.VariableLayout');
     file(MYT_COMPONENT_ROOT + 'layout/AlignedLayout.js' ).provides('myt.AlignedLayout' ).requires('myt.VariableLayout');
-    
-    // Component : Drag and Drop
-    file(MYT_COMPONENT_ROOT + 'dragdrop/DragGroupSupport.js').provides('myt.DragGroupSupport').requires('myt.View','myt.global.mouse');
-    file(MYT_COMPONENT_ROOT + 'dragdrop/Dropable.js'        ).provides('myt.Dropable'        ).requires('myt.Draggable','myt.DragGroupSupport');
-    file(MYT_COMPONENT_ROOT + 'dragdrop/DropTarget.js'      ).provides('myt.DropTarget'      ).requires('myt.Dropable','myt.DragGroupSupport');
-    file(MYT_COMPONENT_ROOT + 'dragdrop/DropSource.js'      ).provides('myt.DropSource'      ).requires('myt.Dropable');
-    file(MYT_COMPONENT_ROOT + 'dragdrop/AutoScroller.js'    ).provides('myt.AutoScroller'    ).requires('myt.global.dragManager','myt.DragGroupSupport');
     
     // Component : Drawing
     file(MYT_COMPONENT_ROOT + 'drawing/Color.js'      ).provides('myt.Color'      ).requires('myt');
@@ -202,12 +198,6 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'listview/ListView.js'         ).provides('myt.ListView'         ).requires('myt.FloatingPanel','myt.ListViewItem','myt.ListViewSeparator');
     file(MYT_COMPONENT_ROOT + 'listview/ListViewAnchor.js'   ).provides('myt.ListViewAnchor'   ).requires('myt.ListView','myt.FloatingPanelAnchor');
     
-    // Component : Checkbox
-    file(MYT_COMPONENT_ROOT + 'Checkbox.js').provides('myt.Checkbox').requires('myt.SimpleButtonStyle','myt.ValueComponent');
-    
-    // Component : Radio
-    file(MYT_COMPONENT_ROOT + 'Radio.js').provides('myt.Radio').requires('myt.SimpleButtonStyle','myt.BAG');
-    
     // Component : Slider
     file(MYT_COMPONENT_ROOT + 'slider/SliderThumbMixin.js'     ).provides('myt.SliderThumbMixin'     ).requires('myt.View','myt.Draggable');
     file(MYT_COMPONENT_ROOT + 'slider/SimpleSliderThumb.js'    ).provides('myt.SimpleSliderThumb'    ).requires('myt.SliderThumbMixin','myt.SimpleButton');
@@ -245,10 +235,6 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'input/EditableText.js'      ).provides('myt.EditableText'      ).requires('myt.BaseInputText');
     file(MYT_COMPONENT_ROOT + 'input/InputSelect.js'       ).provides('myt.InputSelect'       ).requires('myt.NativeInputWrapper','myt.SizeToDom');
     file(MYT_COMPONENT_ROOT + 'input/InputSelectOption.js' ).provides('myt.InputSelectOption' ).requires('myt.InputSelect','myt.Selectable');
-    
-    // Component : Dimmer
-    file(MYT_COMPONENT_ROOT + 'dimmer/Dimmer.js'    ).provides('myt.Dimmer'    ).requires('myt.View');
-    file(MYT_COMPONENT_ROOT + 'dimmer/ModalPanel.js').provides('myt.ModalPanel').requires('myt.Dimmer','myt.SizeToChildren');
     
     // Component : Dialog
     file(MYT_COMPONENT_ROOT + 'dialog/spectrum.js').provides('$.spectrum').requires('myt.Color'); // Requires JQuery 1.7.0+
@@ -312,7 +298,7 @@ JS.Packages(function() {
         'myt.InfiniteGrid',
         'myt.SelectableInfiniteList','myt.SimpleSelectableInfiniteListRow',
         'myt.PanelStack',
-        'myt.DropTarget','myt.DropSource','myt.AutoScroller',
+        'myt.AutoScroller',
         'myt.Eventable',
         'myt.Annulus',
         'myt.MessageTypeWebSocket',
