@@ -7358,17 +7358,36 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
                 // Determine geometry of the gradient
                 let geometry = v[0];
                 if (type === 'radial') {
-                    if (geometry !== undefined) {
-                        if (geometry === 'cover' || geometry === 'farthest-corner') {
-                            geometry = 'farthest-corner';
-                        } else {
-                            geometry = 'closest-side';
+                    if (geometry === undefined) {
+                        geometry = 'closest-side';
+                    } else {
+                        v.shift();
+                    }
+                    
+                    let shape = v[0];
+                    if (shape === undefined) {
+                        shape = 'circle';
+                    } else {
+                        switch (shape) {
+                            case 'circle':
+                            case 'ellipse':
+                                break;
+                            default:
+                                console.warn('Unexpected radial gradient shape: ' + shape);
+                                shape = 'circle';
                         }
                         v.shift();
-                    } else {
-                        geometry = 'closest-side';
                     }
-                    geometry = 'circle ' + geometry;
+                    
+                    let origin = v[0];
+                    if (origin === undefined) {
+                        origin = 'center';
+                    } else {
+                        origin = origin.replaceAll('middle', 'center');
+                        v.shift();
+                    }
+                    
+                    geometry = shape + ' ' + geometry + ' at ' + origin;
                 } else {
                     if (typeof geometry === 'number') {
                         geometry = geometry + 'deg';
