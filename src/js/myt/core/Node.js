@@ -3,15 +3,14 @@
         /*  Get the closest ancestor of the provided Node or the Node itself for 
             which the matcher function returns true. Returns a Node or null if 
             no match is found.
-                param n:myt.Node the Node to start searching from.
+                param node:myt.Node the Node to start searching from.
                 param matcher:function the function to test for matching 
-                    Nodes with.
-            */
-        getMatchingAncestorOrSelf = (n, matcherFunc) => {
+                    Nodes with. */
+        getMatchingAncestorOrSelf = (node, matcherFunc) => {
             if (matcherFunc) {
-                while (n) {
-                    if (matcherFunc(n)) return n;
-                    n = n.parent;
+                while (node) {
+                    if (matcherFunc(node)) return node;
+                    node = node.parent;
                 }
             }
             return null;
@@ -20,17 +19,15 @@
         /*  Get the youngest ancestor of the provided Node for which the 
             matcher function returns true. Returns a Node or null if no 
             match is found.
-                param n:myt.Node the Node to start searching from. This Node 
+                param node:myt.Node the Node to start searching from. This Node 
                     is not tested, but its parent is.
                 param matcher:function the function to test for matching 
-                    Nodes with.
-        */
-        getMatchingAncestor = (n, matcherFunc) => getMatchingAncestorOrSelf(n ? n.parent : null, matcherFunc),
+                    Nodes with. */
+        getMatchingAncestor = (node, matcherFunc) => getMatchingAncestorOrSelf(node ? node.parent : null, matcherFunc),
         
         /*  Adds a named reference to a subnode.
                 param node:Node the node to add the name reference to.
-                param nodeToAdd:Node the node to add the name reference for.
-        */
+                param nodeToAdd:Node the node to add the name reference for. */
         addNameRef = (node, nodeToAdd) => {
             const name = nodeToAdd.name;
             if (node[name] === undefined) {
@@ -42,8 +39,7 @@
         
         /*  Removes a named reference to a subnode.
                 param node:Node the node to remove the name reference from.
-                param nodeToRemove:Node the node to remove the name reference for.
-        */
+                param nodeToRemove:Node the node to remove the name reference for. */
         removeNameRef = (node, nodeToRemove) => {
             const name = nodeToRemove.name;
             if (node[name] === nodeToRemove) {
@@ -55,7 +51,7 @@
         
         /*  Gets the animation pool if it exists, or lazy instantiates it first
             if necessary. Returns a myt.TrackActivesPool */
-        getAnimPool = (node) => node.__animPool || (node.__animPool = new pkg.TrackActivesPool(pkg.Animator, node));
+        getAnimPool = node => node.__animPool || (node.__animPool = new pkg.TrackActivesPool(pkg.Animator, node));
         
     /** A single node within a tree data structure. A node has zero or one parent 
         node and zero or more child nodes. If a node has no parent it is a 'root' 
@@ -299,8 +295,7 @@
         determinePlacement: function(placement, subnode) {
             // Parse "active" placement and remaining placement.
             let idx = placement.indexOf('.'),
-                remainder,
-                loc;
+                remainder;
             if (idx !== -1) {
                 remainder = placement.substring(idx + 1);
                 placement = placement.substring(0, idx);
@@ -325,7 +320,7 @@
                 // returning 'this'.
             }
             
-            loc = this[placement];
+            const loc = this[placement];
             return loc ? (remainder ? loc.determinePlacement(remainder, subnode) : loc) : this;
         },
         
@@ -349,7 +344,6 @@
             @returns {boolean} */
         isDescendantOf: function(node) {
             const self = this;
-            
             if (node) {
                 if (node === self) return true;
                 if (self.parent) {
@@ -463,14 +457,14 @@
             method to add a subnode. Instead call addSubnode or setParent.
             @param {!Object} node - The sub myt.Node that was added.
             @returns {undefined} */
-        subnodeAdded: (node) => {},
+        subnodeAdded: node => {},
         
         /** Called when a subnode is removed from this node. Provides a hook for
             subclasses. No need for subclasses to call super. Do not call this
             method to remove a subnode. Instead call removeSubnode or setParent.
             @param {!Object} node - The sub myt.Node that was removed.
             @returns {undefined} */
-        subnodeRemoved: (node) => {},
+        subnodeRemoved: node => {},
         
         // Animation
         /** A wrapper on Node.animate that will only animate one time and that 
@@ -541,7 +535,7 @@
         getActiveAnimators: function(filterFunc) {
             if (typeof filterFunc === 'string') {
                 const attrName = filterFunc;
-                filterFunc = (anim) => anim.attribute === attrName;
+                filterFunc = anim => anim.attribute === attrName;
             }
             return getAnimPool(this).getActives(filterFunc);
         },

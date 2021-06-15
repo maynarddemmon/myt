@@ -219,7 +219,7 @@
                 events from the subview that should trigger the update method.
                 @param {?Object} sv - The myt.View to start monitoring for changes.
                 @returns {undefined} */
-            startMonitoringSubview: (sv) => {},
+            startMonitoringSubview: sv => {},
             
             /** Calls startMonitoringSubview for all views. Used by Layout 
                 implementations when a change occurs to the layout that requires
@@ -251,7 +251,7 @@
                 should remove all listeners that were setup in startMonitoringSubview.
                 @param {?Object} sv - The myt.View to stop monitoring for changes.
                 @returns {undefined} */
-            stopMonitoringSubview: (sv) => {},
+            stopMonitoringSubview: sv => {},
             
             /** Calls stopMonitoringSubview for all views. Used by Layout 
                 implementations when a change occurs to the layout that requires
@@ -268,7 +268,7 @@
                 @param {?Object} sv - The myt.View to check.
                 @returns {boolean} true means the subview will be skipped, false
                     otherwise. */
-            ignore: (sv) => sv.ignoreLayout,
+            ignore: sv => sv.ignoreLayout,
             
             /** If our parent adds a new subview we should add it.
                 @private
@@ -436,20 +436,19 @@
                     len = svs.length;
                 let value = this.targetValue,
                     i, 
-                    sv, 
                     count = 0;
                 
                 if (this.reverse) {
                     i = len;
                     while (i) {
-                        sv = svs[--i];
+                        const sv = svs[--i];
                         if (this.skipSubview(sv)) continue;
                         value = this.updateSubview(++count, sv, setterName, value);
                     }
                 } else {
                     i = 0;
                     while (len > i) {
-                        sv = svs[i++];
+                        const sv = svs[i++];
                         if (this.skipSubview(sv)) continue;
                         value = this.updateSubview(++count, sv, setterName, value);
                     }
@@ -516,7 +515,7 @@
             subview is not visible.
             @param {?Object} sv - The sub myt.View to test.
             @returns {boolean} true if the subview should be skipped during layout updates.*/
-        skipSubview: (sv) => !sv.visible,
+        skipSubview: sv => !sv.visible,
         
         /** Called if the collapseParent attribute is true. Subclasses should 
             implement this if they want to modify the parent view.

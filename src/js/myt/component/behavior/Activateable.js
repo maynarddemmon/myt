@@ -4,7 +4,7 @@ myt.Activateable = new JS.Module('Activateable', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Called when this view should be activated.
         @returns {undefined} */
-    doActivated: function() {
+    doActivated: () => {
         // Subclasses to implement as needed.
     }
 });

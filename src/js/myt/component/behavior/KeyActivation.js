@@ -134,7 +134,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         @param key:number the keycode that is down.
         @param isRepeat:boolean Indicates if this is a key repeat event or not.
         @returns {undefined} */
-    doActivationKeyDown: function(key, isRepeat) {
+    doActivationKeyDown: (key, isRepeat) => {
         // Subclasses to implement as needed.
     },
     
@@ -150,7 +150,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         implementation does nothing.
         @param key:number the keycode that is down.
         @returns {undefined} */
-    doActivationKeyAborted: function(key) {
+    doActivationKeyAborted: key => {
         // Subclasses to implement as needed.
     }
 });

@@ -1,12 +1,12 @@
 ((pkg) => {
-    const 
+    const DomElementProxy = pkg.DomElementProxy,
+        
         /*  Preserves focus and scroll position during dom updates. Focus can 
             get lost in webkit when an element is removed from the dom.
                 param viewBeingRemoved:myt.View
                 param wrapperFunc:function a function to execute that 
                     manipulates the dom in some way, typically a remove 
-                    followed by an insert.
-        */
+                    followed by an insert. */
         retainFocusDuringDomUpdate = (viewBeingRemoved, wrappedFunc) => {
             const restoreFocus = pkg.global.focus.focusedView, 
                 elem = viewBeingRemoved.getInnerDomElement();
@@ -40,17 +40,15 @@
                 param front:boolean indicates if this is the isInFrontOf 
                     test or not.
                 param checkZIndex:boolean If true z-index will 
-                    first be used to check if the view is in front or not.
-        */
+                    first be used to check if the view is in front or not. */
         comparePosition = (firstView, secondView, front, checkZIndex) => {
             if (secondView && typeof secondView === 'object') {
                 if (checkZIndex) {
                     const commonAncestor = firstView.getLeastCommonAncestor(secondView);
                     if (commonAncestor) {
-                        const commonAncestorElem = commonAncestor.getInnerDomElement(),
-                            DEP = pkg.DomElementProxy;
-                        let zIdx = DEP.getZIndexRelativeToAncestor(firstView.getOuterDomElement(), commonAncestorElem),
-                            otherZIdx = DEP.getZIndexRelativeToAncestor(secondView.getOuterDomElement(), commonAncestorElem);
+                        const commonAncestorElem = commonAncestor.getInnerDomElement();
+                        let zIdx = DomElementProxy.getZIndexRelativeToAncestor(firstView.getOuterDomElement(), commonAncestorElem),
+                            otherZIdx = DomElementProxy.getZIndexRelativeToAncestor(secondView.getOuterDomElement(), commonAncestorElem);
                         
                         // Reverse comparison order
                         if (front) {
@@ -82,7 +80,7 @@
         
         /*  Calculates the effective scale for the provided view and all its
             ancestors. Returns the effective scale for the provided view. */
-        calculateEffectiveScale = (view) => {
+        calculateEffectiveScale = view => {
             const ancestorsAndSelf = view.getAncestors();
             let i = ancestorsAndSelf.length, 
                 effectiveScaleX = 1,
@@ -114,7 +112,7 @@
             return false;
         },
         
-        teardownAlignConstraint = (view) => {
+        teardownAlignConstraint = view => {
             switch (view.align) {
                 case 'center': view.releaseConstraint('__doAlignCenter'); break;
                 case 'right': view.releaseConstraint('__doAlignRight'); break;
@@ -123,7 +121,7 @@
             }
         },
         
-        setupAlignConstraint = (view) => {
+        setupAlignConstraint = view => {
             const parent = view.parent;
             if (parent) {
                 switch (view.align) {
@@ -141,7 +139,7 @@
             }
         },
         
-        teardownValignConstraint = (view) => {
+        teardownValignConstraint = view => {
             switch (view.valign) {
                 case 'middle': view.releaseConstraint('__doValignMiddle'); break;
                 case 'bottom': view.releaseConstraint('__doValignBottom'); break;
@@ -150,7 +148,7 @@
             }
         },
         
-        setupValignConstraint = (view) => {
+        setupValignConstraint = view => {
             const parent = view.parent;
             if (parent) {
                 switch (view.valign) {
@@ -171,8 +169,7 @@
         /*  A convienence method to set a single rounded corner on an element.
             @param {!Object} view
             @param {number} radius - The radius of the corner.
-            @param {string} corner - One of 'TopLeft', 'TopRight', 'BottomLeft' or 'BottomRight'.
-        */
+            @param {string} corner - One of 'TopLeft', 'TopRight', 'BottomLeft' or 'BottomRight'. */
         setRoundedCorner = (view, radius, corner) => {
             view.getOuterDomStyle()['border' + corner + 'Radius'] = radius + 'px';
         };
@@ -297,7 +294,7 @@
         @class */
     pkg.View = new JS.Class('View', pkg.Node, {
         include: [
-            pkg.DomElementProxy, 
+            DomElementProxy, 
             pkg.DomObservable, 
             pkg.DomObserver, 
             pkg.ScrollObservable, 
@@ -369,13 +366,11 @@
         
         /** @overrides myt.Node */
         destroyAfterOrphaning: function() {
-            const self = this;
+            this.callSuper();
             
-            self.callSuper();
-            
-            self.detachFromAllDomSources();
-            self.detachAllDomObservers();
-            self.disposeOfDomElement();
+            this.detachFromAllDomSources();
+            this.detachAllDomObservers();
+            this.disposeOfDomElement();
         },
         
         
@@ -383,7 +378,6 @@
         /** @overrides myt.Node */
         setParent: function(parent) {
             const self = this;
-            
             if (self.parent !== parent) {
                 if (self.inited) {
                     teardownAlignConstraint(self);
@@ -405,20 +399,10 @@
             @returns {!Array} of myt.View or undefined if this view is orphaned. */
         getSiblingViews: function() {
             if (this.parent) {
-                // Get a copy of the subviews since we will modify it and do not
-                // want to modify the original array.
-                const svs = this.parent.getSubviews().concat();
-                let i = svs.length;
-                
+                // Using filter ensures we have a copy of the subviews since we 
+                // will modify it and do not want to modify the original array.
                 // Remove ourselves from the subviews since we only want siblings.
-                while (i) {
-                    if (svs[--i] === this) {
-                        svs.splice(i, 1);
-                        break;
-                    }
-                }
-                
-                return svs;
+                return this.parent.getSubviews().filter(sv => sv !== this);
             }
         },
         
@@ -438,7 +422,6 @@
         
         setIgnoreLayout: function(v) {
             const self = this;
-            
             if (self.ignoreLayout !== v) {
                 // Add or remove ourselves from any layouts on our parent.
                 const ready = self.inited && self.parent;
@@ -606,6 +589,12 @@
             }
         },
         
+        /** Used by myt.Animator to determine if an attribute is a color 
+            attribute or not.
+            @param {string} attrName
+            @returns {boolean} */
+        isColorAttr: attrName => attrName === 'bgColor' || attrName === 'textColor',
+        
         setOpacity: function(v) {
             if (this.opacity !== v) {
                 this.getOuterDomStyle().opacity = this.opacity = v;
@@ -674,15 +663,8 @@
             @param {number} h - the boundsHeight to set.
             @returns {undefined} */
         __updateBounds: function(w, h) {
-            if (this.boundsWidth !== w) {
-                this.boundsWidth = w;
-                this.fireEvent('boundsWidth', w);
-            }
-            
-            if (this.boundsHeight !== h) {
-                this.boundsHeight = h;
-                this.fireEvent('boundsHeight', h);
-            }
+            if (this.boundsWidth !== w) this.fireEvent('boundsWidth', this.boundsWidth = w);
+            if (this.boundsHeight !== h) this.fireEvent('boundsHeight', this.boundsHeight = h);
         },
         
         // Outlines
@@ -870,7 +852,7 @@
                 
                 // Use colors that may have already been configured if less
                 // than 2 color stops are provided
-                const pushColor = (color) => {
+                const pushColor = color => {
                     v.push(color && color !== 'inherit' ? color : 'transparent');
                 };
                 if (v.length < 2) pushColor(self.textColor);
@@ -897,13 +879,13 @@
         },
         
         
-        // Methods /////////////////////////////////////////////////////////////////
+        // Methods /////////////////////////////////////////////////////////////
         /** Checks if this view is visible and each view in the parent chain to
             the RootView is also visible. Dom elements are not explicitly
             checked. If you need to check that use myt.DomElementProxy.isDomElementVisible.
             @returns {boolean} true if this view is visible, false otherwise. */
         isVisible: function() {
-            return this.searchAncestorsOrSelf((v) => !v.visible) === null;
+            return this.searchAncestorsOrSelf(v => !v.visible) === null;
         },
         
         /** Finds the youngest ancestor (or self) that is a focusTrap or focusCage.
@@ -911,7 +893,7 @@
                 ignored.
             @returns {?Object} a View with focusTrap set to true or null if not found. */
         getFocusTrap: function(ignoreFocusTrap) {
-            return this.searchAncestorsOrSelf((v) => v.focusCage || (v.focusTrap && !ignoreFocusTrap));
+            return this.searchAncestorsOrSelf(v => v.focusCage || (v.focusTrap && !ignoreFocusTrap));
         },
         
         /** @overrides myt.Node
@@ -982,13 +964,13 @@
             add a View. Instead call addSubnode or setParent.
             @param {!Object} sv - The myt.View that was added.
             @returns {undefined} */
-        subviewAdded: (sv) => {},
+        subviewAdded: sv => {},
         
         /** Called when a View is removed from this View. Do not call this method 
             to remove a View. Instead call removeSubnode or setParent.
             @param {!Object} sv - The myt.View that was removed.
             @returns {undefined} */
-        subviewRemoved: (sv) => {},
+        subviewRemoved: sv => {},
         
         /** Gets the next sibling view based on lexical ordering of dom elements.
             @returns {?Object} - The next sibling myt.View or null if none exists. */
@@ -1029,13 +1011,13 @@
             add a Layout. Instead call addSubnode or setParent.
             @param {!Object} layout - The myt.Layout that was added.
             @returns {undefined} */
-        layoutAdded: (layout) => {},
+        layoutAdded: layout => {},
         
         /** Called when a Layout is removed from this View. Do not call this 
             method to remove a Layout. Instead call removeSubnode or setParent.
             @param {!Object} layout - The myt.Layout that was removed.
             @returns {undefined} */
-        layoutRemoved: (layout) => {},
+        layoutRemoved: layout => {},
         
         // Dom-Ordering //
         /** Test if the provided view is behind this view. The view to test can
@@ -1146,24 +1128,25 @@
         sortSubviews: function(sortFunc) {
             // Sort subviews
             const self = this,
-                svs = self.getSubviews();
-            svs.sort(sortFunc);
+                svs = self.getSubviews().sort(sortFunc);
             
             // Rearrange dom to match new sort order.
             retainFocusDuringDomUpdate(self, () => {
-                const len = svs.length,
-                    outerElem = self.getOuterDomElement(),
-                    innerElem = self.getInnerDomElement(),
-                    nextDe = outerElem.nextSibling,
+                const outerElem = self.getOuterDomElement(),
                     parentElem = outerElem.parentNode;
                 // Remove this dom element from the dom
-                if (parentElem) parentElem.removeChild(outerElem);
+                let nextDe;
+                if (parentElem) {
+                    nextDe = outerElem.nextSibling;
+                    parentElem.removeChild(outerElem);
+                }
                 
                 // Copy the dom elements in the correct order to a document
                 // fragment and then add that fragment back to the dom.
-                const fragment = document.createDocumentFragment();
+                const fragment = document.createDocumentFragment(),
+                    len = svs.length;
                 for (let i = 0; len > i;) fragment.appendChild(svs[i++].getOuterDomElement());
-                innerElem.appendChild(fragment);
+                self.getInnerDomElement().appendChild(fragment);
                 
                 // Put this dom element back in the dom
                 if (parentElem) parentElem.insertBefore(outerElem, nextDe);
@@ -1183,7 +1166,7 @@
             const outerElem = this.getOuterDomElement();
             if (!outerElem) return false;
             
-            const pos = pkg.DomElementProxy.getPagePosition(outerElem, referenceFrameDomElem);
+            const pos = DomElementProxy.getPagePosition(outerElem, referenceFrameDomElem);
             return pkg.Geometry.rectContainsPoint(locX, locY, pos.x, pos.y, this.width, this.height);
         },
         
@@ -1208,12 +1191,6 @@
         
         getEffectiveScaleY: function() {
             return calculateEffectiveScale(this).scaleY;
-        },
-        
-        /** Used by myt.Animator to determine if an attribute is a color 
-            attribute or not.
-            @param {string} attrName
-            @returns {boolean} */
-        isColorAttr: (attrName) => attrName === 'bgColor' || attrName === 'textColor'
+        }
     });
 })(myt);

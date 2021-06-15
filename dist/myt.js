@@ -4767,28 +4767,27 @@ myt.Destructible = new JS.Module('Destructible', {
         // See http://perfectionkills.com/understanding-delete/ for details
         // on how delete works. This is why we use Object.keys below since it
         // avoids iterating over many of the properties that are not deletable.
-        const self = this,
-            meta = self.__meta__;
-        let keys,
-            i;
-        
+        const self = this;
         if (self.destroyed) {
-            console.warn('No destroying the destroyed.');
-            return;
-        }
-        
-        // OPTIMIZATION: Improve garbage collection for JS.Class
-        if (meta) {
-            keys = Object.keys(meta);
+            console.warn('Already destroyed');
+        } else {
+            let keys,
+                i;
+            
+            // OPTIMIZATION: Improve garbage collection for JS.Class
+            const meta = self.__meta__;
+            if (meta) {
+                keys = Object.keys(meta);
+                i = keys.length;
+                while (i) delete meta[keys[--i]];
+            }
+            
+            keys = Object.keys(self);
             i = keys.length;
-            while (i) delete meta[keys[--i]];
+            while (i) delete self[keys[--i]];
+            
+            self.destroyed = true;
         }
-        
-        keys = Object.keys(self);
-        i = keys.length;
-        while (i) delete self[keys[--i]];
-        
-        self.destroyed = true;
     }
 });
 
@@ -4811,7 +4810,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         makeInstance = (parent, instanceClass, attrs) => parent ? new instanceClass(parent, attrs) : new instanceClass(),
         
-        destroyObjectPool = (objPool) => {
+        destroyObjectPool = objPool => {
             if (objPool) {
                 let i = objPool.length;
                 while (i) {
@@ -5088,15 +5087,14 @@ myt.Destructible = new JS.Module('Destructible', {
         /*  Get the closest ancestor of the provided Node or the Node itself for 
             which the matcher function returns true. Returns a Node or null if 
             no match is found.
-                param n:myt.Node the Node to start searching from.
+                param node:myt.Node the Node to start searching from.
                 param matcher:function the function to test for matching 
-                    Nodes with.
-            */
-        getMatchingAncestorOrSelf = (n, matcherFunc) => {
+                    Nodes with. */
+        getMatchingAncestorOrSelf = (node, matcherFunc) => {
             if (matcherFunc) {
-                while (n) {
-                    if (matcherFunc(n)) return n;
-                    n = n.parent;
+                while (node) {
+                    if (matcherFunc(node)) return node;
+                    node = node.parent;
                 }
             }
             return null;
@@ -5105,17 +5103,15 @@ myt.Destructible = new JS.Module('Destructible', {
         /*  Get the youngest ancestor of the provided Node for which the 
             matcher function returns true. Returns a Node or null if no 
             match is found.
-                param n:myt.Node the Node to start searching from. This Node 
+                param node:myt.Node the Node to start searching from. This Node 
                     is not tested, but its parent is.
                 param matcher:function the function to test for matching 
-                    Nodes with.
-        */
-        getMatchingAncestor = (n, matcherFunc) => getMatchingAncestorOrSelf(n ? n.parent : null, matcherFunc),
+                    Nodes with. */
+        getMatchingAncestor = (node, matcherFunc) => getMatchingAncestorOrSelf(node ? node.parent : null, matcherFunc),
         
         /*  Adds a named reference to a subnode.
                 param node:Node the node to add the name reference to.
-                param nodeToAdd:Node the node to add the name reference for.
-        */
+                param nodeToAdd:Node the node to add the name reference for. */
         addNameRef = (node, nodeToAdd) => {
             const name = nodeToAdd.name;
             if (node[name] === undefined) {
@@ -5127,8 +5123,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /*  Removes a named reference to a subnode.
                 param node:Node the node to remove the name reference from.
-                param nodeToRemove:Node the node to remove the name reference for.
-        */
+                param nodeToRemove:Node the node to remove the name reference for. */
         removeNameRef = (node, nodeToRemove) => {
             const name = nodeToRemove.name;
             if (node[name] === nodeToRemove) {
@@ -5140,7 +5135,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /*  Gets the animation pool if it exists, or lazy instantiates it first
             if necessary. Returns a myt.TrackActivesPool */
-        getAnimPool = (node) => node.__animPool || (node.__animPool = new pkg.TrackActivesPool(pkg.Animator, node));
+        getAnimPool = node => node.__animPool || (node.__animPool = new pkg.TrackActivesPool(pkg.Animator, node));
         
     /** A single node within a tree data structure. A node has zero or one parent 
         node and zero or more child nodes. If a node has no parent it is a 'root' 
@@ -5384,8 +5379,7 @@ myt.Destructible = new JS.Module('Destructible', {
         determinePlacement: function(placement, subnode) {
             // Parse "active" placement and remaining placement.
             let idx = placement.indexOf('.'),
-                remainder,
-                loc;
+                remainder;
             if (idx !== -1) {
                 remainder = placement.substring(idx + 1);
                 placement = placement.substring(0, idx);
@@ -5410,7 +5404,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 // returning 'this'.
             }
             
-            loc = this[placement];
+            const loc = this[placement];
             return loc ? (remainder ? loc.determinePlacement(remainder, subnode) : loc) : this;
         },
         
@@ -5434,7 +5428,6 @@ myt.Destructible = new JS.Module('Destructible', {
             @returns {boolean} */
         isDescendantOf: function(node) {
             const self = this;
-            
             if (node) {
                 if (node === self) return true;
                 if (self.parent) {
@@ -5548,14 +5541,14 @@ myt.Destructible = new JS.Module('Destructible', {
             method to add a subnode. Instead call addSubnode or setParent.
             @param {!Object} node - The sub myt.Node that was added.
             @returns {undefined} */
-        subnodeAdded: (node) => {},
+        subnodeAdded: node => {},
         
         /** Called when a subnode is removed from this node. Provides a hook for
             subclasses. No need for subclasses to call super. Do not call this
             method to remove a subnode. Instead call removeSubnode or setParent.
             @param {!Object} node - The sub myt.Node that was removed.
             @returns {undefined} */
-        subnodeRemoved: (node) => {},
+        subnodeRemoved: node => {},
         
         // Animation
         /** A wrapper on Node.animate that will only animate one time and that 
@@ -5626,7 +5619,7 @@ myt.Destructible = new JS.Module('Destructible', {
         getActiveAnimators: function(filterFunc) {
             if (typeof filterFunc === 'string') {
                 const attrName = filterFunc;
-                filterFunc = (anim) => anim.attribute === attrName;
+                filterFunc = anim => anim.attribute === attrName;
             }
             return getAnimPool(this).getActives(filterFunc);
         },
@@ -5885,7 +5878,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 events from the subview that should trigger the update method.
                 @param {?Object} sv - The myt.View to start monitoring for changes.
                 @returns {undefined} */
-            startMonitoringSubview: (sv) => {},
+            startMonitoringSubview: sv => {},
             
             /** Calls startMonitoringSubview for all views. Used by Layout 
                 implementations when a change occurs to the layout that requires
@@ -5917,7 +5910,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 should remove all listeners that were setup in startMonitoringSubview.
                 @param {?Object} sv - The myt.View to stop monitoring for changes.
                 @returns {undefined} */
-            stopMonitoringSubview: (sv) => {},
+            stopMonitoringSubview: sv => {},
             
             /** Calls stopMonitoringSubview for all views. Used by Layout 
                 implementations when a change occurs to the layout that requires
@@ -5934,7 +5927,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 @param {?Object} sv - The myt.View to check.
                 @returns {boolean} true means the subview will be skipped, false
                     otherwise. */
-            ignore: (sv) => sv.ignoreLayout,
+            ignore: sv => sv.ignoreLayout,
             
             /** If our parent adds a new subview we should add it.
                 @private
@@ -6102,20 +6095,19 @@ myt.Destructible = new JS.Module('Destructible', {
                     len = svs.length;
                 let value = this.targetValue,
                     i, 
-                    sv, 
                     count = 0;
                 
                 if (this.reverse) {
                     i = len;
                     while (i) {
-                        sv = svs[--i];
+                        const sv = svs[--i];
                         if (this.skipSubview(sv)) continue;
                         value = this.updateSubview(++count, sv, setterName, value);
                     }
                 } else {
                     i = 0;
                     while (len > i) {
-                        sv = svs[i++];
+                        const sv = svs[i++];
                         if (this.skipSubview(sv)) continue;
                         value = this.updateSubview(++count, sv, setterName, value);
                     }
@@ -6182,7 +6174,7 @@ myt.Destructible = new JS.Module('Destructible', {
             subview is not visible.
             @param {?Object} sv - The sub myt.View to test.
             @returns {boolean} true if the subview should be skipped during layout updates.*/
-        skipSubview: (sv) => !sv.visible,
+        skipSubview: sv => !sv.visible,
         
         /** Called if the collapseParent attribute is true. Subclasses should 
             implement this if they want to modify the parent view.
@@ -6531,14 +6523,14 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
 
 
 ((pkg) => {
-    const 
+    const DomElementProxy = pkg.DomElementProxy,
+        
         /*  Preserves focus and scroll position during dom updates. Focus can 
             get lost in webkit when an element is removed from the dom.
                 param viewBeingRemoved:myt.View
                 param wrapperFunc:function a function to execute that 
                     manipulates the dom in some way, typically a remove 
-                    followed by an insert.
-        */
+                    followed by an insert. */
         retainFocusDuringDomUpdate = (viewBeingRemoved, wrappedFunc) => {
             const restoreFocus = pkg.global.focus.focusedView, 
                 elem = viewBeingRemoved.getInnerDomElement();
@@ -6572,17 +6564,15 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
                 param front:boolean indicates if this is the isInFrontOf 
                     test or not.
                 param checkZIndex:boolean If true z-index will 
-                    first be used to check if the view is in front or not.
-        */
+                    first be used to check if the view is in front or not. */
         comparePosition = (firstView, secondView, front, checkZIndex) => {
             if (secondView && typeof secondView === 'object') {
                 if (checkZIndex) {
                     const commonAncestor = firstView.getLeastCommonAncestor(secondView);
                     if (commonAncestor) {
-                        const commonAncestorElem = commonAncestor.getInnerDomElement(),
-                            DEP = pkg.DomElementProxy;
-                        let zIdx = DEP.getZIndexRelativeToAncestor(firstView.getOuterDomElement(), commonAncestorElem),
-                            otherZIdx = DEP.getZIndexRelativeToAncestor(secondView.getOuterDomElement(), commonAncestorElem);
+                        const commonAncestorElem = commonAncestor.getInnerDomElement();
+                        let zIdx = DomElementProxy.getZIndexRelativeToAncestor(firstView.getOuterDomElement(), commonAncestorElem),
+                            otherZIdx = DomElementProxy.getZIndexRelativeToAncestor(secondView.getOuterDomElement(), commonAncestorElem);
                         
                         // Reverse comparison order
                         if (front) {
@@ -6614,7 +6604,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         
         /*  Calculates the effective scale for the provided view and all its
             ancestors. Returns the effective scale for the provided view. */
-        calculateEffectiveScale = (view) => {
+        calculateEffectiveScale = view => {
             const ancestorsAndSelf = view.getAncestors();
             let i = ancestorsAndSelf.length, 
                 effectiveScaleX = 1,
@@ -6646,7 +6636,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             return false;
         },
         
-        teardownAlignConstraint = (view) => {
+        teardownAlignConstraint = view => {
             switch (view.align) {
                 case 'center': view.releaseConstraint('__doAlignCenter'); break;
                 case 'right': view.releaseConstraint('__doAlignRight'); break;
@@ -6655,7 +6645,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             }
         },
         
-        setupAlignConstraint = (view) => {
+        setupAlignConstraint = view => {
             const parent = view.parent;
             if (parent) {
                 switch (view.align) {
@@ -6673,7 +6663,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             }
         },
         
-        teardownValignConstraint = (view) => {
+        teardownValignConstraint = view => {
             switch (view.valign) {
                 case 'middle': view.releaseConstraint('__doValignMiddle'); break;
                 case 'bottom': view.releaseConstraint('__doValignBottom'); break;
@@ -6682,7 +6672,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             }
         },
         
-        setupValignConstraint = (view) => {
+        setupValignConstraint = view => {
             const parent = view.parent;
             if (parent) {
                 switch (view.valign) {
@@ -6703,8 +6693,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         /*  A convienence method to set a single rounded corner on an element.
             @param {!Object} view
             @param {number} radius - The radius of the corner.
-            @param {string} corner - One of 'TopLeft', 'TopRight', 'BottomLeft' or 'BottomRight'.
-        */
+            @param {string} corner - One of 'TopLeft', 'TopRight', 'BottomLeft' or 'BottomRight'. */
         setRoundedCorner = (view, radius, corner) => {
             view.getOuterDomStyle()['border' + corner + 'Radius'] = radius + 'px';
         };
@@ -6829,7 +6818,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         @class */
     pkg.View = new JS.Class('View', pkg.Node, {
         include: [
-            pkg.DomElementProxy, 
+            DomElementProxy, 
             pkg.DomObservable, 
             pkg.DomObserver, 
             pkg.ScrollObservable, 
@@ -6901,13 +6890,11 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         
         /** @overrides myt.Node */
         destroyAfterOrphaning: function() {
-            const self = this;
+            this.callSuper();
             
-            self.callSuper();
-            
-            self.detachFromAllDomSources();
-            self.detachAllDomObservers();
-            self.disposeOfDomElement();
+            this.detachFromAllDomSources();
+            this.detachAllDomObservers();
+            this.disposeOfDomElement();
         },
         
         
@@ -6915,7 +6902,6 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         /** @overrides myt.Node */
         setParent: function(parent) {
             const self = this;
-            
             if (self.parent !== parent) {
                 if (self.inited) {
                     teardownAlignConstraint(self);
@@ -6937,20 +6923,10 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             @returns {!Array} of myt.View or undefined if this view is orphaned. */
         getSiblingViews: function() {
             if (this.parent) {
-                // Get a copy of the subviews since we will modify it and do not
-                // want to modify the original array.
-                const svs = this.parent.getSubviews().concat();
-                let i = svs.length;
-                
+                // Using filter ensures we have a copy of the subviews since we 
+                // will modify it and do not want to modify the original array.
                 // Remove ourselves from the subviews since we only want siblings.
-                while (i) {
-                    if (svs[--i] === this) {
-                        svs.splice(i, 1);
-                        break;
-                    }
-                }
-                
-                return svs;
+                return this.parent.getSubviews().filter(sv => sv !== this);
             }
         },
         
@@ -6970,7 +6946,6 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         
         setIgnoreLayout: function(v) {
             const self = this;
-            
             if (self.ignoreLayout !== v) {
                 // Add or remove ourselves from any layouts on our parent.
                 const ready = self.inited && self.parent;
@@ -7138,6 +7113,12 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             }
         },
         
+        /** Used by myt.Animator to determine if an attribute is a color 
+            attribute or not.
+            @param {string} attrName
+            @returns {boolean} */
+        isColorAttr: attrName => attrName === 'bgColor' || attrName === 'textColor',
+        
         setOpacity: function(v) {
             if (this.opacity !== v) {
                 this.getOuterDomStyle().opacity = this.opacity = v;
@@ -7206,15 +7187,8 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             @param {number} h - the boundsHeight to set.
             @returns {undefined} */
         __updateBounds: function(w, h) {
-            if (this.boundsWidth !== w) {
-                this.boundsWidth = w;
-                this.fireEvent('boundsWidth', w);
-            }
-            
-            if (this.boundsHeight !== h) {
-                this.boundsHeight = h;
-                this.fireEvent('boundsHeight', h);
-            }
+            if (this.boundsWidth !== w) this.fireEvent('boundsWidth', this.boundsWidth = w);
+            if (this.boundsHeight !== h) this.fireEvent('boundsHeight', this.boundsHeight = h);
         },
         
         // Outlines
@@ -7402,7 +7376,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
                 
                 // Use colors that may have already been configured if less
                 // than 2 color stops are provided
-                const pushColor = (color) => {
+                const pushColor = color => {
                     v.push(color && color !== 'inherit' ? color : 'transparent');
                 };
                 if (v.length < 2) pushColor(self.textColor);
@@ -7429,13 +7403,13 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         },
         
         
-        // Methods /////////////////////////////////////////////////////////////////
+        // Methods /////////////////////////////////////////////////////////////
         /** Checks if this view is visible and each view in the parent chain to
             the RootView is also visible. Dom elements are not explicitly
             checked. If you need to check that use myt.DomElementProxy.isDomElementVisible.
             @returns {boolean} true if this view is visible, false otherwise. */
         isVisible: function() {
-            return this.searchAncestorsOrSelf((v) => !v.visible) === null;
+            return this.searchAncestorsOrSelf(v => !v.visible) === null;
         },
         
         /** Finds the youngest ancestor (or self) that is a focusTrap or focusCage.
@@ -7443,7 +7417,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
                 ignored.
             @returns {?Object} a View with focusTrap set to true or null if not found. */
         getFocusTrap: function(ignoreFocusTrap) {
-            return this.searchAncestorsOrSelf((v) => v.focusCage || (v.focusTrap && !ignoreFocusTrap));
+            return this.searchAncestorsOrSelf(v => v.focusCage || (v.focusTrap && !ignoreFocusTrap));
         },
         
         /** @overrides myt.Node
@@ -7514,13 +7488,13 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             add a View. Instead call addSubnode or setParent.
             @param {!Object} sv - The myt.View that was added.
             @returns {undefined} */
-        subviewAdded: (sv) => {},
+        subviewAdded: sv => {},
         
         /** Called when a View is removed from this View. Do not call this method 
             to remove a View. Instead call removeSubnode or setParent.
             @param {!Object} sv - The myt.View that was removed.
             @returns {undefined} */
-        subviewRemoved: (sv) => {},
+        subviewRemoved: sv => {},
         
         /** Gets the next sibling view based on lexical ordering of dom elements.
             @returns {?Object} - The next sibling myt.View or null if none exists. */
@@ -7561,13 +7535,13 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             add a Layout. Instead call addSubnode or setParent.
             @param {!Object} layout - The myt.Layout that was added.
             @returns {undefined} */
-        layoutAdded: (layout) => {},
+        layoutAdded: layout => {},
         
         /** Called when a Layout is removed from this View. Do not call this 
             method to remove a Layout. Instead call removeSubnode or setParent.
             @param {!Object} layout - The myt.Layout that was removed.
             @returns {undefined} */
-        layoutRemoved: (layout) => {},
+        layoutRemoved: layout => {},
         
         // Dom-Ordering //
         /** Test if the provided view is behind this view. The view to test can
@@ -7678,24 +7652,25 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         sortSubviews: function(sortFunc) {
             // Sort subviews
             const self = this,
-                svs = self.getSubviews();
-            svs.sort(sortFunc);
+                svs = self.getSubviews().sort(sortFunc);
             
             // Rearrange dom to match new sort order.
             retainFocusDuringDomUpdate(self, () => {
-                const len = svs.length,
-                    outerElem = self.getOuterDomElement(),
-                    innerElem = self.getInnerDomElement(),
-                    nextDe = outerElem.nextSibling,
+                const outerElem = self.getOuterDomElement(),
                     parentElem = outerElem.parentNode;
                 // Remove this dom element from the dom
-                if (parentElem) parentElem.removeChild(outerElem);
+                let nextDe;
+                if (parentElem) {
+                    nextDe = outerElem.nextSibling;
+                    parentElem.removeChild(outerElem);
+                }
                 
                 // Copy the dom elements in the correct order to a document
                 // fragment and then add that fragment back to the dom.
-                const fragment = document.createDocumentFragment();
+                const fragment = document.createDocumentFragment(),
+                    len = svs.length;
                 for (let i = 0; len > i;) fragment.appendChild(svs[i++].getOuterDomElement());
-                innerElem.appendChild(fragment);
+                self.getInnerDomElement().appendChild(fragment);
                 
                 // Put this dom element back in the dom
                 if (parentElem) parentElem.insertBefore(outerElem, nextDe);
@@ -7715,7 +7690,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
             const outerElem = this.getOuterDomElement();
             if (!outerElem) return false;
             
-            const pos = pkg.DomElementProxy.getPagePosition(outerElem, referenceFrameDomElem);
+            const pos = DomElementProxy.getPagePosition(outerElem, referenceFrameDomElem);
             return pkg.Geometry.rectContainsPoint(locX, locY, pos.x, pos.y, this.width, this.height);
         },
         
@@ -7740,13 +7715,7 @@ myt.ScrollObservable = new JS.Module('ScrollObservable', {
         
         getEffectiveScaleY: function() {
             return calculateEffectiveScale(this).scaleY;
-        },
-        
-        /** Used by myt.Animator to determine if an attribute is a color 
-            attribute or not.
-            @param {string} attrName
-            @returns {boolean} */
-        isColorAttr: (attrName) => attrName === 'bgColor' || attrName === 'textColor'
+        }
     });
 })(myt);
 
@@ -11045,7 +11014,7 @@ myt.UpdateableUI = new JS.Module('UpdateableUI', {
     /** Updates the UI whenever a change occurs that requires a visual update.
         Subclasses should implement this as needed.
         @returns {undefined} */
-    updateUI: function() {
+    updateUI: () => {
         // Subclasses to implement as needed.
     }
 });
@@ -11483,7 +11452,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         @param key:number the keycode that is down.
         @param isRepeat:boolean Indicates if this is a key repeat event or not.
         @returns {undefined} */
-    doActivationKeyDown: function(key, isRepeat) {
+    doActivationKeyDown: (key, isRepeat) => {
         // Subclasses to implement as needed.
     },
     
@@ -11499,7 +11468,7 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
         implementation does nothing.
         @param key:number the keycode that is down.
         @returns {undefined} */
-    doActivationKeyAborted: function(key) {
+    doActivationKeyAborted: key => {
         // Subclasses to implement as needed.
     }
 });
@@ -21087,14 +21056,11 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
         // Accessors ///////////////////////////////////////////////////////////
         setIsDraggable: function(v) {
             const self = this;
-            let func,
-                dragviews,
-                dragview,
-                i;
             if (self.isDraggable !== v) {
                 self.isDraggable = v;
                 // No event needed.
                 
+                let func;
                 if (v) {
                     func = self.attachToDom;
                 } else if (self.inited) {
@@ -21102,10 +21068,10 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
                 }
                 
                 if (func) {
-                    dragviews = self.getDragViews();
-                    i = dragviews.length;
+                    const dragviews = self.getDragViews();
+                    let i = dragviews.length;
                     while (i) {
-                        dragview = dragviews[--i];
+                        const dragview = dragviews[--i];
                         func.call(self, dragview, '__doMouseDown', 'mousedown');
                         func.call(self, dragview, '__doContextMenu', 'contextmenu');
                     }

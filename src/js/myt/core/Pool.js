@@ -16,7 +16,7 @@
         
         makeInstance = (parent, instanceClass, attrs) => parent ? new instanceClass(parent, attrs) : new instanceClass(),
         
-        destroyObjectPool = (objPool) => {
+        destroyObjectPool = objPool => {
             if (objPool) {
                 let i = objPool.length;
                 while (i) {

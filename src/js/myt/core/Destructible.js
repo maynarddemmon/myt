@@ -17,27 +17,26 @@ myt.Destructible = new JS.Module('Destructible', {
         // See http://perfectionkills.com/understanding-delete/ for details
         // on how delete works. This is why we use Object.keys below since it
         // avoids iterating over many of the properties that are not deletable.
-        const self = this,
-            meta = self.__meta__;
-        let keys,
-            i;
-        
+        const self = this;
         if (self.destroyed) {
-            console.warn('No destroying the destroyed.');
-            return;
-        }
-        
-        // OPTIMIZATION: Improve garbage collection for JS.Class
-        if (meta) {
-            keys = Object.keys(meta);
+            console.warn('Already destroyed');
+        } else {
+            let keys,
+                i;
+            
+            // OPTIMIZATION: Improve garbage collection for JS.Class
+            const meta = self.__meta__;
+            if (meta) {
+                keys = Object.keys(meta);
+                i = keys.length;
+                while (i) delete meta[keys[--i]];
+            }
+            
+            keys = Object.keys(self);
             i = keys.length;
-            while (i) delete meta[keys[--i]];
+            while (i) delete self[keys[--i]];
+            
+            self.destroyed = true;
         }
-        
-        keys = Object.keys(self);
-        i = keys.length;
-        while (i) delete self[keys[--i]];
-        
-        self.destroyed = true;
     }
 });

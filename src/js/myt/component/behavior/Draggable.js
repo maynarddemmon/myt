@@ -66,14 +66,11 @@
         // Accessors ///////////////////////////////////////////////////////////
         setIsDraggable: function(v) {
             const self = this;
-            let func,
-                dragviews,
-                dragview,
-                i;
             if (self.isDraggable !== v) {
                 self.isDraggable = v;
                 // No event needed.
                 
+                let func;
                 if (v) {
                     func = self.attachToDom;
                 } else if (self.inited) {
@@ -81,10 +78,10 @@
                 }
                 
                 if (func) {
-                    dragviews = self.getDragViews();
-                    i = dragviews.length;
+                    const dragviews = self.getDragViews();
+                    let i = dragviews.length;
                     while (i) {
-                        dragview = dragviews[--i];
+                        const dragview = dragviews[--i];
                         func.call(self, dragview, '__doMouseDown', 'mousedown');
                         func.call(self, dragview, '__doContextMenu', 'contextmenu');
                     }

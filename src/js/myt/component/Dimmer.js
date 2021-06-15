@@ -79,7 +79,7 @@
         /** A handler for mouse events that does nothing and prevents propogation.
             @param {!Object} event
             @return boolean True so that the dom event gets eaten. */
-        eatMouseEvent: (event) => true,
+        eatMouseEvent: event => true,
         
         /** Shows the dimmer and remembers the focus location.
             @returns {undefined} */
