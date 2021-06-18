@@ -365,10 +365,7 @@
                     value = this.targetValue, 
                     svs = this.subviews, 
                     len = svs.length; 
-                for (let i = 0; len > i;) {
-                    const setter = svs[i++][setterName];
-                    if (setter) setter(value);
-                }
+                for (let i = 0; len > i;) svs[i++][setterName](value);
             }
         }
     });

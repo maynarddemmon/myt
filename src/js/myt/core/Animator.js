@@ -326,24 +326,15 @@
                 // Use default if invalid
                 if (!v) v = Animator.DEFAULT_EASING_FUNCTION;
                 
-                if (this.easingFunction !== v) {
-                    this.easingFunction = v;
-                    if (this.inited) this.fireEvent('easingFunction', v);
-                }
+                this.set('easingFunction', v, true);
             },
             
             setFrom: function(v) {
-                if (this.from !== v) {
-                    this.from = v;
-                    if (this.inited) this.fireEvent('from', v);
-                }
+                this.set('from', v, true);
             },
             
             setTo: function(v) {
-                if (this.to !== v) {
-                    this.to = v;
-                    if (this.inited) this.fireEvent('to', v);
-                }
+                this.set('to', v, true);
             },
             
             setCallback: function(v) {this.callback = v;},

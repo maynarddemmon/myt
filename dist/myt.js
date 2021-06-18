@@ -6024,10 +6024,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     value = this.targetValue, 
                     svs = this.subviews, 
                     len = svs.length; 
-                for (let i = 0; len > i;) {
-                    const setter = svs[i++][setterName];
-                    if (setter) setter(value);
-                }
+                for (let i = 0; len > i;) svs[i++][setterName](value);
             }
         }
     });
@@ -9839,24 +9836,15 @@ myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
                 // Use default if invalid
                 if (!v) v = Animator.DEFAULT_EASING_FUNCTION;
                 
-                if (this.easingFunction !== v) {
-                    this.easingFunction = v;
-                    if (this.inited) this.fireEvent('easingFunction', v);
-                }
+                this.set('easingFunction', v, true);
             },
             
             setFrom: function(v) {
-                if (this.from !== v) {
-                    this.from = v;
-                    if (this.inited) this.fireEvent('from', v);
-                }
+                this.set('from', v, true);
             },
             
             setTo: function(v) {
-                if (this.to !== v) {
-                    this.to = v;
-                    if (this.inited) this.fireEvent('to', v);
-                }
+                this.set('to', v, true);
             },
             
             setCallback: function(v) {this.callback = v;},
@@ -11310,7 +11298,7 @@ myt.Activateable = new JS.Module('Activateable', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Called when this view should be activated.
         @returns {undefined} */
-    doActivated: function() {
+    doActivated: () => {
         // Subclasses to implement as needed.
     }
 });
@@ -17378,7 +17366,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         /** A handler for mouse events that does nothing and prevents propogation.
             @param {!Object} event
             @return boolean True so that the dom event gets eaten. */
-        eatMouseEvent: (event) => true,
+        eatMouseEvent: event => true,
         
         /** Shows the dimmer and remembers the focus location.
             @returns {undefined} */
