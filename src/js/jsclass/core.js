@@ -65,7 +65,9 @@
                     prevOwn = this.hasOwnProperty('callSuper'),
                     methods = lookup(environment, method.name);
                 let stackIndex = methods.length - 1;
-                if (stackIndex !== 0) {
+                if (stackIndex === 0) {
+                    delete this.callSuper;
+                } else {
                     const params = Array.from(arguments),
                         _super = this.callSuper = (...theArgs) => {
                             let i = theArgs.length;
