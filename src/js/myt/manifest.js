@@ -87,12 +87,13 @@ JS.Packages(function() {
     
     // Component : Misc
     file(MYT_COMPONENT_ROOT + 'Button.js'          ).provides(
-            'myt.Button','myt.SimpleButtonStyle','myt.SimpleButton','myt.SimpleIconTextButton','myt.SimpleTextButton',
-            'myt.IconTextButtonContent','myt.TextButtonContent'
-        ).requires('myt.UpdateableUI','myt.MouseOverAndDown','myt.KeyActivation','myt.Disableable','myt.View','myt.Image','myt.Text');
+        'myt.Button','myt.SimpleButtonStyle','myt.SimpleButton','myt.SimpleIconTextButton','myt.SimpleTextButton',
+        'myt.IconTextButtonContent','myt.TextButtonContent'
+    ).requires('myt.UpdateableUI','myt.MouseOverAndDown','myt.KeyActivation','myt.Disableable','myt.View','myt.Image','myt.Text');
     file(MYT_COMPONENT_ROOT + 'Checkbox.js'        ).provides('myt.Checkbox').requires('myt.SimpleButtonStyle','myt.ValueComponent');
     file(MYT_COMPONENT_ROOT + 'Dimmer.js'          ).provides('myt.Dimmer').requires('myt.View');
     file(MYT_COMPONENT_ROOT + 'Divider.js'         ).provides('myt.HorizontalDivider','myt.VerticalDivider').requires('myt.SimpleButton','myt.BoundedValueComponent','myt.Draggable');
+    file(MYT_COMPONENT_ROOT + 'FloatingPanel.js'   ).provides('myt.FloatingPanelAnchor','myt.FloatingPanel').requires('myt.RootView','myt.global.mouse','myt.global.focus');
     file(MYT_COMPONENT_ROOT + 'FontAwesome.js'     ).provides('myt.FontAwesome').requires('myt.Markup');
     file(MYT_COMPONENT_ROOT + 'ModalPanel.js'      ).provides('myt.ModalPanel').requires('myt.Dimmer','myt.SizeToChildren');
     file(MYT_COMPONENT_ROOT + 'Radio.js'           ).provides('myt.Radio').requires('myt.SimpleButtonStyle','myt.BAG');
@@ -101,10 +102,10 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'Spinner.js'         ).provides('myt.Spinner').requires('myt.View');
     file(MYT_COMPONENT_ROOT + 'StateMachine.js'    ).provides('myt.StateMachine').requires('myt.Node');
     file(MYT_COMPONENT_ROOT + 'Validator.js'       ).provides(
-            'myt.global.validators','myt.Validator','myt.CompoundValidator',
-            'myt.EqualFieldsValidator','myt.EqualsIgnoreCaseValidator','myt.LengthValidator',
-            'myt.NumericRangeValidator','myt.URLValidator','myt.RequiredFieldValidator','myt.JSONValidator'
-        ).requires('myt.global','myt.URI');
+        'myt.global.validators','myt.Validator','myt.CompoundValidator',
+        'myt.EqualFieldsValidator','myt.EqualsIgnoreCaseValidator','myt.LengthValidator',
+        'myt.NumericRangeValidator','myt.URLValidator','myt.RequiredFieldValidator','myt.JSONValidator'
+    ).requires('myt.global','myt.URI');
     file(MYT_COMPONENT_ROOT + 'WebSocket.js'       ).provides('myt.WebSocket','myt.MessageTypeWebSocket').requires('myt.Node');
     file(MYT_COMPONENT_ROOT + 'DragAndDrop.js'     ).provides(
         'myt.DragGroupSupport','myt.Dropable','myt.DropTarget','myt.DropSource','myt.AutoScroller'
@@ -186,10 +187,6 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'infinite/InfiniteGrid.js')
         .provides('myt.InfiniteGrid','myt.InfiniteGridRow','myt.InfiniteGridHeader','myt.SelectableInfiniteGrid','myt.SelectableInfiniteGridRow','myt.SimpleSelectableInfiniteGridRow')
         .requires('myt.SelectableInfiniteList','myt.GridController');
-    
-    // Component : Floating Panel
-    file(MYT_COMPONENT_ROOT + 'floatingpanel/FloatingPanel.js'      ).provides('myt.FloatingPanel'      ).requires('myt.RootView');
-    file(MYT_COMPONENT_ROOT + 'floatingpanel/FloatingPanelAnchor.js').provides('myt.FloatingPanelAnchor').requires('myt.FloatingPanel');
     
     // Component : List View
     file(MYT_COMPONENT_ROOT + 'listview/ListViewItemMixin.js').provides('myt.ListViewItemMixin').requires('myt');
@@ -284,7 +281,7 @@ JS.Packages(function() {
         'myt.Replicator',
         'myt.WrappingLayout','myt.ResizeLayout','myt.AlignedLayout',
         'myt.SimpleIconTextButton',
-        'myt.FloatingPanelAnchor',
+        'myt.FloatingPanel',
         'myt.ListViewAnchor',
         'myt.Radio','myt.TextTabSlider','myt.Tab',
         'myt.ImageUploader','myt.Dialog',
