@@ -101,6 +101,9 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'SelectionManager.js').provides('myt.SelectionManager','myt.Selectable').requires('myt.global.keys');
     file(MYT_COMPONENT_ROOT + 'Spinner.js'         ).provides('myt.Spinner').requires('myt.View');
     file(MYT_COMPONENT_ROOT + 'StateMachine.js'    ).provides('myt.StateMachine').requires('myt.Node');
+    file(MYT_COMPONENT_ROOT + 'Tooltip.js'         ).provides(
+        'myt.TooltipMixin','myt.BaseTooltip','myt.Tooltip'
+    ).requires('myt.Canvas','myt.RootView','myt.global.mouse','myt.global.dragManager','myt.global.windowResize');
     file(MYT_COMPONENT_ROOT + 'Validator.js'       ).provides(
         'myt.global.validators','myt.Validator','myt.CompoundValidator',
         'myt.EqualFieldsValidator','myt.EqualsIgnoreCaseValidator','myt.LengthValidator',
@@ -149,11 +152,6 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'drawing/Color.js'      ).provides('myt.Color'      ).requires('myt');
     file(MYT_COMPONENT_ROOT + 'drawing/Path.js'       ).provides('myt.Path'       ).requires('myt');
     file(MYT_COMPONENT_ROOT + 'drawing/DrawingUtil.js').provides('myt.DrawingUtil').requires('myt.Color','myt.Path');
-    
-    // Component : Tooltip
-    file(MYT_COMPONENT_ROOT + 'tooltip/BaseTooltip.js' ).provides('myt.BaseTooltip' ).requires('myt.RootView');
-    file(MYT_COMPONENT_ROOT + 'tooltip/Tooltip.js'     ).provides('myt.Tooltip'     ).requires('myt.Canvas','myt.BaseTooltip');
-    file(MYT_COMPONENT_ROOT + 'tooltip/TooltipMixin.js').provides('myt.TooltipMixin').requires('myt.global','myt.Tooltip');
     
     // Component : Model
     file(MYT_COMPONENT_ROOT + 'model/BAGMembership.js'        ).provides('myt.BAGMembership'        ).requires('myt.Node');
