@@ -14,7 +14,7 @@
         
         /*  Called to set/unset the global lock. Updates all the currently 
             deferred layouts. */
-        setGlobalLock = (v) => {
+        setGlobalLock = v => {
             if (globalLock !== v) {
                 globalLock = v;
                 
@@ -35,7 +35,7 @@
             global lock is released.
                 param layout:myt.Layout the layout to defer an update for.
         */
-        deferLayoutUpdate = (layout) => {
+        deferLayoutUpdate = layout => {
             // Don't add a layout that is already deferred.
             if (!layout.__deferredLayout) {
                 deferredLayouts.push(layout);
@@ -154,7 +154,7 @@
                     // Start monitoring new parent
                     if (this.parent) {
                         svs = this.parent.getSubviews();
-                        for (i = 0, len = svs.length; len > i; ++i) this.addSubview(svs[i]);
+                        for (i = 0, len = svs.length; len > i;) this.addSubview(svs[i++]);
                         
                         this.attachTo(this.parent, '__handleParentSubviewAddedEvent', 'subviewAdded');
                         this.attachTo(this.parent, '__handleParentSubviewRemovedEvent', 'subviewRemoved');
@@ -365,7 +365,7 @@
                     value = this.targetValue, 
                     svs = this.subviews, 
                     len = svs.length; 
-                for (let i = 0; len > i;) svs[i++][setterName](value);
+                if (setterName) for (let i = 0; len > i;) svs[i++][setterName](value);
             }
         }
     });
