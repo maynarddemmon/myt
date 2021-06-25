@@ -1852,626 +1852,6 @@ Date.prototype.format = Date.prototype.format || (() => {
 })(myt);
 
 
-((pkg) => {
-    /** Models a color as individual color channels.
-        
-        Events:
-            None
-       
-        Attributes:
-            red:int The red channel. Will be an integer between 0 and 255.
-            green:int The green channel. Will be an integer between 0 and 255.
-            blue:int The blue channel. Will be an integer between 0 and 255.
-    */
-    const Color = pkg.Color = new JS.Class('Color', {
-        // Class Methods and Attributes ////////////////////////////////////////
-        extend: {
-            /** Converts a number or string representation of a number to a 
-                two character hex string.
-                @param {number|string} value - The number or string to convert.
-                @returns {string} A two character hex string such as: '0c' or 'c9'. */
-            toHex: function(value) {
-                value = this.cleanChannelValue(value).toString(16);
-                return value.length === 1 ? '0' + value : value;
-            },
-            
-            /** Converts red, green, and blue color channel numbers to a six 
-                character hex string.
-                @param {number} red - The red color channel.
-                @param {number} green - The green color channel.
-                @param {number} blue - The blue color channel.
-                @param {boolean} [prependHash] - If true a '#' character
-                    will be prepended to the return value.
-                @returns {string} Something like: '#ff9c02' or 'ff9c02' */
-            rgbToHex: function(red, green, blue, prependHash) {
-                const toHex = this.toHex.bind(this);
-                return [prependHash ? '#' : '', toHex(red), toHex(green), toHex(blue)].join('');
-            },
-            
-            /** Limits a channel value to integers between 0 and 255.
-                @param {number} value - The channel value to clean up.
-                @returns {number} */
-            cleanChannelValue: (value) => Math.min(255, Math.max(0, Math.round(value))),
-            
-            /** Gets the red channel from a "color" number.
-                @param {string} value
-                @returns {number} */
-            getRedChannel: (value) => (0xff0000 & value) >> 16,
-            
-            /** Gets the green channel from a "color" number.
-                @param {string} value
-                @returns {number} */
-            getGreenChannel: (value) => (0x00ff00 & value) >> 8,
-            
-            /** Gets the blue channel from a "color" number.
-                @param {string} value
-                @returns {number} */
-            getBlueChannel: (value) => (0x0000ff & value),
-            
-            /** Creates an myt.Color from a "color" number.
-                @param {string} value
-                @returns {!Object} myt.Color */
-            makeColorFromNumber: function(value) {
-                return new Color(
-                    this.getRedChannel(value),
-                    this.getGreenChannel(value),
-                    this.getBlueChannel(value)
-                );
-            },
-            
-            /** Creates an myt.Color from an html color string.
-                @param {string} value - A hex string representation of a color, such
-                    as '#ff339b'.
-                @returns {!Object} a myt.Color or null if no color could be parsed. */
-            makeColorFromHexString: function(value) {
-                if (value && value.indexOf('#') === 0) {
-                    return this.makeColorFromNumber(parseInt(value.substring(1), 16));
-                } else {
-                    return null;
-                }
-            },
-            
-            /** Returns the lighter of the two provided colors.
-                @param {number} a - A color number.
-                @param {number} b - A color number.
-                @returns {number} The number that represents the lighter color. */
-            getLighterColor: function(a, b) {
-                const cA = this.makeColorFromNumber(a),
-                    cB = this.makeColorFromNumber(b);
-                return cA.isLighterThan(cB) ? a : b;
-            },
-            
-            /** Creates a "color" number from the provided color channels.
-                @param {number} red - The red channel
-                @param {number} green - The green channel
-                @param {number} blue - The blue channel
-                @returns {number} */
-            makeColorNumberFromChannels: function(red, green, blue) {
-                red = this.cleanChannelValue(red);
-                green = this.cleanChannelValue(green);
-                blue = this.cleanChannelValue(blue);
-                return (red << 16) + (green << 8) + blue;
-            },
-            
-            /** Creates a new myt.Color object that is a blend of the two provided
-                colors.
-                @param {!Object} fromColor - The first myt.Color to blend.
-                @param {!Objecdt} toColor - The second myt.Color to blend.
-                @param {number} percent - The blend percent between the two colors
-                    where 0 is the fromColor and 1.0 is the toColor.
-                @returns {!Object} myt.Color */
-            makeBlendedColor: (fromColor, toColor, percent) => {
-                return new Color(
-                    fromColor.red + (percent * (toColor.red - fromColor.red)),
-                    fromColor.green + (percent * (toColor.green - fromColor.green)),
-                    fromColor.blue + (percent * (toColor.blue - fromColor.blue))
-                );
-            }
-        },
-        
-        
-        // Constructor /////////////////////////////////////////////////////////
-        /** Create a new Color.
-            @param {number} red - The red channel
-            @param {number} green - The green channel
-            @param {number} blue - The blue channel
-            @returns {undefined} */
-        initialize: function(red, green, blue) {
-            this.setRed(red);
-            this.setGreen(green);
-            this.setBlue(blue);
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        /** Sets the red channel value.
-            @param {number} red
-            @return {undefined} */
-        setRed: function(red) {
-            this.red = Color.cleanChannelValue(red);
-        },
-        
-        /** Sets the green channel value.
-            @param {number} green
-            @return {undefined} */
-        setGreen: function(green) {
-            this.green = Color.cleanChannelValue(green);
-        },
-        
-        /** Sets the blue channel value.
-            @param {number} blue
-            @return {undefined} */
-        setBlue: function(blue) {
-            this.blue = Color.cleanChannelValue(blue);
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** Gets the numerical representation of this color.
-            @returns {number} The number that represents this color. */
-        getColorNumber: function() {
-            return (this.red << 16) + (this.green << 8) + this.blue;
-        },
-        
-        /** Gets the hex string representation of this color.
-            @returns {string} A hex color such as '#a0bbcc'. */
-        getHtmlHexString: function() {
-            return Color.rgbToHex(this.red, this.green, this.blue, true);
-        },
-        
-        /** Tests if this color is lighter than the provided color.
-            @param {!Object} c - The myt.Color to compare to.
-            @returns {boolean} True if this color is lighter, false otherwise. */
-        isLighterThan: function(c) {
-            const diff = this.getDiffFrom(c);
-            
-            // Sum channel diffs to determine lightest color. A negative diff
-            // means a lighter color.
-            return 0 > (diff.red + diff.green + diff.blue);
-        },
-        
-        /** Gets an object holding color channel diffs.
-            @param {!Object} c - The myt.Color to diff from.
-            @returns {!Object} containing the diffs for the red, green and blue
-                channels. */
-        getDiffFrom: function(c) {
-            return {
-                red: c.red - this.red,
-                green: c.green - this.green,
-                blue: c.blue - this.blue
-            };
-        },
-        
-        /** Applies the provided diff object to this color.
-            @param {!Object} diff - The color diff to apply.
-            @returns {!Object} - This myt.Color to facilitate method chaining. */
-        applyDiff: function(diff) {
-            return this.add(diff);
-        },
-        
-        /** Adds the provided color to this color.
-            @param {!Object} c - The myt.Color to add.
-            @returns {!Object} - This myt.Color to facilitate method chaining. */
-        add: function(c) {
-            this.setRed(this.red + c.red);
-            this.setGreen(this.green + c.green);
-            this.setBlue(this.blue + c.blue);
-            return this;
-        },
-        
-        /** Subtracts the provided color from this color.
-            @param {!Object} c - The myt.Color to subtract.
-            @returns {!Object} - This myt.Color to facilitate method chaining. */
-        subtract: function(c) {
-            this.setRed(this.red - c.red);
-            this.setGreen(this.green - c.green);
-            this.setBlue(this.blue - c.blue);
-            return this;
-        },
-        
-        /** Multiplys this color by the provided scalar.
-            @param {number} s - The scaler to multiply by.
-            @returns {!Object} - This myt.Color to facilitate method chaining. */
-        multiply: function(s) {
-            this.setRed(this.red * s);
-            this.setGreen(this.green * s);
-            this.setBlue(this.blue * s);
-            return this;
-        },
-        
-        /** Divides this color by the provided scalar.
-            @param {number} s - The scaler to divide by.
-            @returns {!Object} - This myt.Color to facilitate method chaining. */
-        divide: function(s) {
-            this.setRed(this.red / s);
-            this.setGreen(this.green / s);
-            this.setBlue(this.blue / s);
-            return this;
-        },
-        
-        /** Clones this Color.
-            @returns {!Object} - A copy of this myt.Color. */
-        clone: function() {
-            return new Color(this.red, this.green, this.blue);
-        },
-        
-        /** Determine if this color has the same value as another color.
-            @param {?Object} obj - The color object to test against.
-            @returns {boolean} True if this color has the same color values as
-                this provided color, false otherwise. */
-        equals: function(obj) {
-            return obj === this || (obj && obj.isA && 
-                obj.isA(Color) && 
-                obj.red === this.red && 
-                obj.green === this.green && 
-                obj.blue === this.blue);
-        }
-    });
-})(myt);
-
-
-/** An ordered collection of points that can be applied to a canvas.
-    
-    Attributes:
-        vectors:array The data is stored in a single array with the x coordinate
-            first and the y coordinate second.
-        _boundingBox:object the cached bounding box if it has been calculated.
-    
-    @class */
-myt.Path = new JS.Class('Path', {
-    // Constructor /////////////////////////////////////////////////////////////
-    /** Create a new Path.
-        @param {?Array} vectors
-        @returns {undefined} */
-    initialize: function(vectors) {
-        this.setVectors(vectors || []);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setVectors: function(v) {
-        this._boundingBox = null;
-        this.vectors = v;
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Copy the data from the provided Path into this one.
-        @param {!Object} path - An myt.Path
-        @returns {undefined} */
-    copyFrom: function(path) {
-        this.vectors = path.vectors.slice();
-        this._boundingBox = null;
-    },
-    
-    /** Draws this path into the provided drawview.
-        @param {!Object} canvas
-        @returns {undefined} */
-    drawInto: function(canvas) {
-        canvas.beginPath();
-        const vecs = this.vectors;
-        let len = vecs.length, 
-            i = 0;
-        canvas.moveTo(vecs[i++], vecs[i++]);
-        for (; len > i;) canvas.lineTo(vecs[i++], vecs[i++]);
-        canvas.closePath();
-    },
-    
-    /** Shift this path by the provided x and y amount.
-        @param {number} dx
-        @param {number} dy
-        @returns {undefined} */
-    translate: function(dx, dy) {
-        const vecs = this.vectors;
-        let i = vecs.length;
-        while (i) {
-            vecs[--i] += dy;
-            vecs[--i] += dx;
-        }
-        this._boundingBox = null;
-    },
-    
-    /** Rotates this path around 0,0 by the provided angle in radians.
-        @param {number} a
-        @returns {undefined} */
-    rotate: function(a) {
-        const cosA = Math.cos(a), sinA = Math.sin(a),
-            vecs = this.vectors,
-            len = vecs.length;
-        let xNew, yNew, i = 0;
-        for (; len > i;) {
-            xNew = vecs[i] * cosA - vecs[i + 1] * sinA;
-            yNew = vecs[i] * sinA + vecs[i + 1] * cosA;
-            
-            vecs[i++] = xNew;
-            vecs[i++] = yNew;
-        }
-        this._boundingBox = null;
-    },
-    
-    /** Rotates this path around the provided origin by the provided angle 
-        in radians.
-        @param {number} angle - The angle in radians
-        @param {number} xOrigin - The x coordinate to rotate around.
-        @param {number} yOrigin - The y coordinate to rotate around.
-        @returns {undefined} */
-    rotateAroundOrigin: function(angle, xOrigin, yOrigin) {
-        this.translate(-xOrigin, -yOrigin);
-        this.rotate(angle);
-        this.translate(xOrigin, yOrigin);
-    },
-    
-    /** Gets the bounding box for this path.
-        @return {!Object} with properties x, y, width and height or null
-            if no bounding box could be calculated. */
-    getBoundingBox: function() {
-        if (this._boundingBox) return this._boundingBox;
-        
-        const vecs = this.vectors;
-        let i = vecs.length, x, y, minX, maxX, minY, maxY;
-        if (i >= 2) {
-            minY = maxY = vecs[--i];
-            minX = maxX = vecs[--i];
-            while (i) {
-                y = vecs[--i];
-                x = vecs[--i];
-                minY = Math.min(y, minY);
-                maxY = Math.max(y, maxY);
-                minX = Math.min(x, minX);
-                maxX = Math.max(x, maxX);
-            }
-            return this._boundingBox = {x:minX, y:minY, width:maxX - minX, height:maxY - minY};
-        }
-        
-        return this._boundingBox = null;
-    },
-    
-    /** Gets the center point of the bounding box for the path.
-        @returns {!Object} with properties x and y or null if no bounding box
-            could be calculated. */
-    getCenter: function() {
-        const box = this.getBoundingBox();
-        return box ? {
-            x:box.x + box.width / 2,
-            y:box.y + box.height / 2
-        } : null;
-    },
-    
-    /** Tests if the provided point is inside this path.
-        @param {number|!Object} x - The x coordinate to test. Or a point 
-            object with x and y properties.
-        @param {number} y - The y coordinate to test.
-        @returns {boolean} true if inside, false otherwise. */
-    isPointInPath: function(x, y) {
-        if (typeof x === 'object') {
-            y = x.y;
-            x = x.x;
-        }
-        return myt.Geometry.isPointInPath(x, y, this.getBoundingBox(), this.vectors);
-    }
-});
-
-
-/** A collection of common drawing routines. */
-myt.DrawingUtil = {
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Draws a rounded rect into the provided drawview.
-        @param {!Object} canvas
-        @param {number} r - The radius of the corners.
-        @param {number} thickness - The thickness of the line. If thickness is
-            zero or less a fill will be done rather than an outline.
-        @param {number} left
-        @param {number} top
-        @param {number} w
-        @param {number} h
-        @returns {undefined} */
-    drawRoundedRect: (canvas, r, thickness, left, top, w, h) => {
-        const PI = Math.PI;
-        let bottom = top + h,
-            right = left + w;
-        
-        // We create a single path for both an outer and inner rounded rect.
-        // The reason for this is that filling looks much better than stroking.
-        canvas.beginPath();
-        
-        canvas.moveTo(left, top + r);
-        
-        canvas.lineTo(left, bottom - r);
-        canvas.arc(left + r, bottom - r, r, PI, PI / 2, true);
-        
-        canvas.lineTo(right - r, bottom);
-        canvas.arc(right - r, bottom - r, r, PI / 2, 0, true);
-        
-        canvas.lineTo(right, top + r);
-        canvas.arc(right - r, top + r, r, 0, PI * 3 / 2, true);
-        
-        canvas.lineTo(left + r, top);
-        canvas.arc(left + r, top + r, r, PI * 3 / 2, PI, true);
-        
-        canvas.closePath();
-        
-        if (thickness > 0) {
-            r -= thickness;
-            left += thickness;
-            right -= thickness;
-            top += thickness;
-            bottom -= thickness;
-            
-            canvas.moveTo(left, top + r);
-            
-            canvas.arc(left + r, top + r, r, PI, PI * 3 / 2);
-            
-            canvas.lineTo(right - r, top);
-            canvas.arc(right - r, top + r, r, PI * 3 / 2, 0);
-            
-            canvas.lineTo(right, bottom - r);
-            canvas.arc(right - r, bottom - r, r, 0, PI / 2);
-            
-            canvas.lineTo(left + r, bottom);
-            canvas.arc(left + r, bottom - r, r, PI / 2, PI);
-            
-            canvas.closePath();
-        }
-    },
-    
-    /** Draws a rect outline into the provided drawview.
-        @param {!Object} canvas
-        @param {number} thickness - The thickness of the line.
-        @param {number} left
-        @param {number} top
-        @param {number} w
-        @param {number} h
-        @returns {undefined} */
-    drawRectOutline: (canvas, thickness, left, top, w, h) => {
-        const bottom = top + h, 
-            right = left + w,
-            ileft = left + thickness,
-            iright = right - thickness,
-            itop = top + thickness,
-            ibottom = bottom - thickness;
-        
-        canvas.beginPath();
-        
-        canvas.moveTo(left, top);
-        canvas.lineTo(left, bottom);
-        canvas.lineTo(right, bottom);
-        canvas.lineTo(right, top);
-        canvas.lineTo(left, top);
-        
-        canvas.lineTo(ileft, itop);
-        canvas.lineTo(iright, itop);
-        canvas.lineTo(iright, ibottom);
-        canvas.lineTo(ileft, ibottom);
-        canvas.lineTo(ileft, itop);
-        
-        canvas.closePath();
-    },
-    
-    /** Draws a rounded rect with one or more flat corners.
-        @param {!Object} canvas
-        @param {number} rTL - the radius for the top left corner.
-        @param {number} rTR - the radius for the top right corner.
-        @param {number} rBL - the radius for the bottom left corner.
-        @param {number} rBR - the radius for the bottom right corner.
-        @param {number} left
-        @param {number} top
-        @param {number} w
-        @param {number} h
-        @returns {undefined} */
-    drawPartiallyRoundedRect: (canvas, rTL, rTR, rBL, rBR, left, top, w, h) => {
-        const bottom = top + h, 
-            right = left + w;
-        
-        canvas.beginPath();
-        
-        canvas.moveTo(left, top + rTL);
-        
-        canvas.lineTo(left, bottom - rBL);
-        if (rBL > 0) canvas.quadraticCurveTo(left, bottom, left + rBL, bottom);
-        
-        canvas.lineTo(right - rBR, bottom);
-        if (rBR > 0) canvas.quadraticCurveTo(right, bottom, right, bottom - rBR);
-        
-        canvas.lineTo(right, top + rTR);
-        if (rTR > 0) canvas.quadraticCurveTo(right, top, right - rTR, top);
-        
-        canvas.lineTo(left + rTL, top);
-        if (rTL > 0) canvas.quadraticCurveTo(left, top, left, top + rTL);
-        
-        canvas.closePath();
-    },
-    
-    drawGradientArc: (canvas, centerX, centerY, r, ir, startAngle, endAngle, colors, segments) => {
-        if (segments == null) segments = 60;
-        
-        let angleDelta = Math.PI / segments,
-        
-        // Antialiasing issues means we need to draw each polygon with a small 
-        // overlap to fill the gap.
-            angleOverlap =  Math.PI / 360,
-        
-        // Calculate Colors
-            len = colors.length,
-            i = 0, 
-            angleDiff, 
-            slices, 
-            diff;
-        for (; len > i + 1; i++) {
-            angleDiff = colors[i + 1].angle - colors[i].angle;
-            slices = Math.round(angleDiff / angleDelta);
-            diff = colors[i].color.getDiffFrom(colors[i + 1].color);
-            colors[i].colorDelta = {red:diff.red / slices, green:diff.green / slices, blue:diff.blue / slices};
-        }
-        
-        const path = new myt.Path([centerX + r, centerY, centerX + ir, centerY]);
-        let prevAngle, ix1, iy1, x1, y1,
-            angle = startAngle;
-        
-        path.rotateAroundOrigin(angle, centerX, centerY);
-        const vectors = path.vectors;
-        let x2 = vectors[0], y2 = vectors[1],
-            ix2 = vectors[2], iy2 = vectors[3],
-            diffCount = 0;
-        
-        i = 0;
-        
-        while (endAngle > angle) {
-            // Shift angle and points
-            x1 = x2;
-            y1 = y2;
-            ix1 = ix2;
-            iy1 = iy2;
-            prevAngle = angle;
-            
-            // Calculate new angle and points
-            angle += angleDelta;
-            if (angle > endAngle) {
-                angleDelta += endAngle - angle;
-                angleOverlap = 0;
-                angle = endAngle;
-            }
-            path.rotateAroundOrigin(angleDelta + angleOverlap, centerX, centerY);
-            x2 = vectors[0];
-            y2 = vectors[1];
-            ix2 = vectors[2];
-            iy2 = vectors[3];
-            
-            // Draw part
-            canvas.beginPath();
-            canvas.moveTo(x1, y1);
-            canvas.lineTo(ix1, iy1);
-            canvas.lineTo(ix2, iy2);
-            canvas.lineTo(x2, y2);
-            canvas.closePath();
-            
-            const c = colors[i].color,
-                colorDelta = colors[i].colorDelta;
-            canvas.fillStyle = myt.Color.makeColorNumberFromChannels(
-                c.red + (diffCount * colorDelta.red),
-                c.green + (diffCount * colorDelta.green),
-                c.blue + (diffCount * colorDelta.blue)
-            );
-            canvas.fill();
-            
-            if (angleOverlap > 0) {
-                path.rotateAroundOrigin(-angleOverlap, centerX, centerY);
-                x2 = vectors[0];
-                y2 = vectors[1];
-                ix2 = vectors[2];
-                iy2 = vectors[3];
-            }
-            
-            // Increment color
-            diffCount++;
-            if (angle >= colors[i + 1].angle) {
-                diffCount = 0;
-                i++;
-            }
-        }
-    }
-};
-
-
 /** Apply this mixin to any Object that needs to fire events.
     
     Attributes:
@@ -15940,6 +15320,264 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
 });
 
 
+((pkg) => {
+    /** Models a color as individual color channels.
+        
+        Events:
+            None
+       
+        Attributes:
+            red:int The red channel. Will be an integer between 0 and 255.
+            green:int The green channel. Will be an integer between 0 and 255.
+            blue:int The blue channel. Will be an integer between 0 and 255.
+    */
+    const Color = pkg.Color = new JS.Class('Color', {
+        // Class Methods and Attributes ////////////////////////////////////////
+        extend: {
+            /** Converts a number or string representation of a number to a 
+                two character hex string.
+                @param {number|string} value - The number or string to convert.
+                @returns {string} A two character hex string such as: '0c' or 'c9'. */
+            toHex: function(value) {
+                value = this.cleanChannelValue(value).toString(16);
+                return value.length === 1 ? '0' + value : value;
+            },
+            
+            /** Converts red, green, and blue color channel numbers to a six 
+                character hex string.
+                @param {number} red - The red color channel.
+                @param {number} green - The green color channel.
+                @param {number} blue - The blue color channel.
+                @param {boolean} [prependHash] - If true a '#' character
+                    will be prepended to the return value.
+                @returns {string} Something like: '#ff9c02' or 'ff9c02' */
+            rgbToHex: function(red, green, blue, prependHash) {
+                const toHex = this.toHex.bind(this);
+                return [prependHash ? '#' : '', toHex(red), toHex(green), toHex(blue)].join('');
+            },
+            
+            /** Limits a channel value to integers between 0 and 255.
+                @param {number} value - The channel value to clean up.
+                @returns {number} */
+            cleanChannelValue: (value) => Math.min(255, Math.max(0, Math.round(value))),
+            
+            /** Gets the red channel from a "color" number.
+                @param {string} value
+                @returns {number} */
+            getRedChannel: (value) => (0xff0000 & value) >> 16,
+            
+            /** Gets the green channel from a "color" number.
+                @param {string} value
+                @returns {number} */
+            getGreenChannel: (value) => (0x00ff00 & value) >> 8,
+            
+            /** Gets the blue channel from a "color" number.
+                @param {string} value
+                @returns {number} */
+            getBlueChannel: (value) => (0x0000ff & value),
+            
+            /** Creates an myt.Color from a "color" number.
+                @param {string} value
+                @returns {!Object} myt.Color */
+            makeColorFromNumber: function(value) {
+                return new Color(
+                    this.getRedChannel(value),
+                    this.getGreenChannel(value),
+                    this.getBlueChannel(value)
+                );
+            },
+            
+            /** Creates an myt.Color from an html color string.
+                @param {string} value - A hex string representation of a color, such
+                    as '#ff339b'.
+                @returns {!Object} a myt.Color or null if no color could be parsed. */
+            makeColorFromHexString: function(value) {
+                if (value && value.indexOf('#') === 0) {
+                    return this.makeColorFromNumber(parseInt(value.substring(1), 16));
+                } else {
+                    return null;
+                }
+            },
+            
+            /** Returns the lighter of the two provided colors.
+                @param {number} a - A color number.
+                @param {number} b - A color number.
+                @returns {number} The number that represents the lighter color. */
+            getLighterColor: function(a, b) {
+                const cA = this.makeColorFromNumber(a),
+                    cB = this.makeColorFromNumber(b);
+                return cA.isLighterThan(cB) ? a : b;
+            },
+            
+            /** Creates a "color" number from the provided color channels.
+                @param {number} red - The red channel
+                @param {number} green - The green channel
+                @param {number} blue - The blue channel
+                @returns {number} */
+            makeColorNumberFromChannels: function(red, green, blue) {
+                red = this.cleanChannelValue(red);
+                green = this.cleanChannelValue(green);
+                blue = this.cleanChannelValue(blue);
+                return (red << 16) + (green << 8) + blue;
+            },
+            
+            /** Creates a new myt.Color object that is a blend of the two provided
+                colors.
+                @param {!Object} fromColor - The first myt.Color to blend.
+                @param {!Objecdt} toColor - The second myt.Color to blend.
+                @param {number} percent - The blend percent between the two colors
+                    where 0 is the fromColor and 1.0 is the toColor.
+                @returns {!Object} myt.Color */
+            makeBlendedColor: (fromColor, toColor, percent) => {
+                return new Color(
+                    fromColor.red + (percent * (toColor.red - fromColor.red)),
+                    fromColor.green + (percent * (toColor.green - fromColor.green)),
+                    fromColor.blue + (percent * (toColor.blue - fromColor.blue))
+                );
+            }
+        },
+        
+        
+        // Constructor /////////////////////////////////////////////////////////
+        /** Create a new Color.
+            @param {number} red - The red channel
+            @param {number} green - The green channel
+            @param {number} blue - The blue channel
+            @returns {undefined} */
+        initialize: function(red, green, blue) {
+            this.setRed(red);
+            this.setGreen(green);
+            this.setBlue(blue);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** Sets the red channel value.
+            @param {number} red
+            @return {undefined} */
+        setRed: function(red) {
+            this.red = Color.cleanChannelValue(red);
+        },
+        
+        /** Sets the green channel value.
+            @param {number} green
+            @return {undefined} */
+        setGreen: function(green) {
+            this.green = Color.cleanChannelValue(green);
+        },
+        
+        /** Sets the blue channel value.
+            @param {number} blue
+            @return {undefined} */
+        setBlue: function(blue) {
+            this.blue = Color.cleanChannelValue(blue);
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Gets the numerical representation of this color.
+            @returns {number} The number that represents this color. */
+        getColorNumber: function() {
+            return (this.red << 16) + (this.green << 8) + this.blue;
+        },
+        
+        /** Gets the hex string representation of this color.
+            @returns {string} A hex color such as '#a0bbcc'. */
+        getHtmlHexString: function() {
+            return Color.rgbToHex(this.red, this.green, this.blue, true);
+        },
+        
+        /** Tests if this color is lighter than the provided color.
+            @param {!Object} c - The myt.Color to compare to.
+            @returns {boolean} True if this color is lighter, false otherwise. */
+        isLighterThan: function(c) {
+            const diff = this.getDiffFrom(c);
+            
+            // Sum channel diffs to determine lightest color. A negative diff
+            // means a lighter color.
+            return 0 > (diff.red + diff.green + diff.blue);
+        },
+        
+        /** Gets an object holding color channel diffs.
+            @param {!Object} c - The myt.Color to diff from.
+            @returns {!Object} containing the diffs for the red, green and blue
+                channels. */
+        getDiffFrom: function(c) {
+            return {
+                red: c.red - this.red,
+                green: c.green - this.green,
+                blue: c.blue - this.blue
+            };
+        },
+        
+        /** Applies the provided diff object to this color.
+            @param {!Object} diff - The color diff to apply.
+            @returns {!Object} - This myt.Color to facilitate method chaining. */
+        applyDiff: function(diff) {
+            return this.add(diff);
+        },
+        
+        /** Adds the provided color to this color.
+            @param {!Object} c - The myt.Color to add.
+            @returns {!Object} - This myt.Color to facilitate method chaining. */
+        add: function(c) {
+            this.setRed(this.red + c.red);
+            this.setGreen(this.green + c.green);
+            this.setBlue(this.blue + c.blue);
+            return this;
+        },
+        
+        /** Subtracts the provided color from this color.
+            @param {!Object} c - The myt.Color to subtract.
+            @returns {!Object} - This myt.Color to facilitate method chaining. */
+        subtract: function(c) {
+            this.setRed(this.red - c.red);
+            this.setGreen(this.green - c.green);
+            this.setBlue(this.blue - c.blue);
+            return this;
+        },
+        
+        /** Multiplys this color by the provided scalar.
+            @param {number} s - The scaler to multiply by.
+            @returns {!Object} - This myt.Color to facilitate method chaining. */
+        multiply: function(s) {
+            this.setRed(this.red * s);
+            this.setGreen(this.green * s);
+            this.setBlue(this.blue * s);
+            return this;
+        },
+        
+        /** Divides this color by the provided scalar.
+            @param {number} s - The scaler to divide by.
+            @returns {!Object} - This myt.Color to facilitate method chaining. */
+        divide: function(s) {
+            this.setRed(this.red / s);
+            this.setGreen(this.green / s);
+            this.setBlue(this.blue / s);
+            return this;
+        },
+        
+        /** Clones this Color.
+            @returns {!Object} - A copy of this myt.Color. */
+        clone: function() {
+            return new Color(this.red, this.green, this.blue);
+        },
+        
+        /** Determine if this color has the same value as another color.
+            @param {?Object} obj - The color object to test against.
+            @returns {boolean} True if this color has the same color values as
+                this provided color, false otherwise. */
+        equals: function(obj) {
+            return obj === this || (obj && obj.isA && 
+                obj.isA(Color) && 
+                obj.red === this.red && 
+                obj.green === this.green && 
+                obj.blue === this.blue);
+        }
+    });
+})(myt);
+
+
 // Spectrum Colorpicker v1.4.1
 // https://github.com/bgrins/spectrum
 // Author: Brian Grinstead
@@ -25544,220 +25182,6 @@ myt.Eventable = new JS.Class('Eventable', {
 })(myt);
 
 
-/** A view for programatic drawing. This view is backed by an html 
-    canvas element.
-    
-    Events:
-        None
-    
-    Attributes:
-        Same as HTML canvas element.
-    
-    Private Attributes:
-        __canvas: A reference to the canvas dom element.
-        __ctx: A reference to the 2D drawing context.
-    
-    @class */
-myt.Canvas = new JS.Class('Canvas', myt.View, {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.View */
-    createOurDomElement: function(parent) {
-        const elements = this.callSuper(parent);
-        let innerElem;
-        if (Array.isArray(elements)) {
-            innerElem = elements[1];
-        } else {
-            innerElem = elements;
-        }
-        
-        const canvas = this.__canvas = document.createElement('canvas');
-        canvas.className = 'mytUnselectable';
-        innerElem.appendChild(canvas);
-        canvas.style.position = 'absolute';
-        
-        this.__ctx = canvas.getContext('2d');
-        
-        return elements;
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrides myt.View
-        Needed because canvas must also set width/height attribute.
-        See: http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#attr-canvas-width */
-    setWidth: function(v, supressEvent) {
-        if (0 > v) v = 0;
-        this.__canvas.setAttribute('width', v);
-        this.callSuper(v, supressEvent);
-    },
-    
-    /** @overrides myt.View
-        Needed because canvas must also set width/height attribute.
-        See: http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#attr-canvas-width */
-    setHeight: function(v, supressEvent) {
-        if (0 > v) v = 0;
-        this.__canvas.setAttribute('height', v);
-        this.callSuper(v, supressEvent);
-    },
-    
-    setFillStyle: function(v) {this.__ctx.fillStyle = v;},
-    getFillStyle: function() {return this.__ctx.fillStyle;},
-    
-    setStrokeStyle: function(v) {this.__ctx.strokeStyle = v;},
-    getStrokeStyle: function() {return this.__ctx.strokeStyle;},
-    
-    setShadowColor: function(v) {this.__ctx.shadowColor = v;},
-    getShadowColor: function() {return this.__ctx.shadowColor;},
-    
-    setShadowBlur: function(v) {this.__ctx.shadowBlur = v;},
-    getShadowBlur: function() {return this.__ctx.shadowBlur;},
-    
-    setShadowOffsetX: function(v) {this.__ctx.shadowOffsetX = v;},
-    getShadowOffsetX: function() {return this.__ctx.shadowOffsetX;},
-    
-    setShadowOffsetY: function(v) {this.__ctx.shadowOffsetY = v;},
-    getShadowOffsetY: function() {return this.__ctx.shadowOffsetY;},
-    
-    setLineWidth: function(v) {this.__ctx.lineWidth = v;},
-    getLineWidth: function() {return this.__ctx.lineWidth;},
-    
-    setLineCap: function(v) {this.__ctx.lineCap = v;},
-    getLineCap: function() {return this.__ctx.lineCap;},
-    
-    setLineJoin: function(v) {this.__ctx.lineJoin = v;},
-    getLineJoin: function() {return this.__ctx.lineJoin;},
-    
-    setMiterLimit: function(v) {this.__ctx.miterLimit = v;},
-    getMiterLimit: function() {return this.__ctx.miterLimit;},
-    
-    setFont: function(v) {this.__ctx.font = v;},
-    getFont: function() {return this.__ctx.font;},
-    
-    setTextAlign: function(v) {this.__ctx.textAlign = v;},
-    getTextAlign: function() {return this.__ctx.textAlign;},
-    
-    setTextBaseline: function(v) {this.__ctx.textBaseline = v;},
-    getTextBaseline: function() {return this.__ctx.textBaseline;},
-    
-    setGlobalAlpha: function(v) {this.__ctx.globalAlpha = v;},
-    getGlobalAlpha: function() {return this.__ctx.globalAlpha;},
-    
-    setGlobalCompositeOperation: function(v) {this.__ctx.globalCompositeOperation = v;},
-    getGlobalCompositeOperation: function() {return this.__ctx.globalCompositeOperation;},
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides
-        Prevent views from being sent behind the __canvas. This allows us to
-        add child views to a Canvas which is not directly supported in HTML. */
-    sendSubviewToBack: function(sv) {
-        if (sv.parent === this) {
-            const de = this.domElement,
-                firstChild = de.childNodes[1];
-            if (sv.domElement !== firstChild) {
-                const removedElem = de.removeChild(sv.domElement);
-                if (removedElem) de.insertBefore(removedElem, firstChild);
-            }
-        }
-    },
-    
-    /** Clears the drawing context. Anything currently drawn will be erased. */
-    clear: function() {
-        // Store the current transform matrix, then apply the identity matrix
-        // to make clearing simpler then restore the transform.
-        const ctx = this.__ctx;
-        ctx.save();
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.clearRect(0, 0, this.width, this.height);
-        ctx.restore();
-    },
-    
-    dataURItoBlob: function(dataURI, dataTYPE) {
-        const binary = atob(dataURI.split(',')[1]), 
-            array = [];
-        for (let i = 0; i < binary.length; i++) array.push(binary.charCodeAt(i));
-        return new Blob([new Uint8Array(array)], {type: dataTYPE});
-    },
-    
-    getDataURL: function(mimeType, opt) {
-        return this.__canvas.toDataURL(mimeType, opt);
-    },
-    
-    getImageFile: function(imageType, filename, opt) {
-        let extension;
-        switch (imageType) {
-            case 'png': case 'PNG':
-                extension = 'png';
-                break;
-            case 'jpg': case 'JPG': case 'jpeg': case 'JPEG':
-                extension = 'jpeg';
-                // opt should be a quality number between 0.0 (worst) and 1.0 (best)
-                if (opt == null) opt = 0.5;
-                break;
-            default:
-                console.warn('Unexpected image type: ', imageType);
-                extension = imageType.toLowerCase();
-        }
-        const mimeType = 'image/' + extension,
-            blob = this.dataURItoBlob(this.getDataURL(mimeType, opt), mimeType);
-        if (filename) blob.name = filename + '.' + extension;
-        return blob;
-    },
-    
-    /** Draws a circle
-        @param x:number the x location of the center of the circle.
-        @param y:number the y location of the center of the circle.
-        @param radius:number the radius of the circle.
-        @returns {undefined} */
-    circle: function(x, y, radius) {
-        this.__ctx.arc(x, y, radius, 0, 2 * Math.PI);
-    },
-    
-    save: function() {const ctx = this.__ctx; ctx.save.apply(ctx, arguments);},
-    restore: function() {const ctx = this.__ctx; ctx.restore.apply(ctx, arguments);},
-    
-    scale: function() {const ctx = this.__ctx; ctx.scale.apply(ctx, arguments);},
-    rotate: function() {const ctx = this.__ctx; ctx.rotate.apply(ctx, arguments);},
-    translate: function() {const ctx = this.__ctx; ctx.translate.apply(ctx, arguments);},
-    transform: function() {const ctx = this.__ctx; ctx.transform.apply(ctx, arguments);},
-    setTransform: function() {const ctx = this.__ctx; ctx.setTransform.apply(ctx, arguments);},
-    
-    createLinearGradient: function() {const ctx = this.__ctx; return ctx.createLinearGradient.apply(ctx, arguments);},
-    createRadialGradient: function() {const ctx = this.__ctx; return ctx.createRadialGradient.apply(ctx, arguments);},
-    createPattern: function() {const ctx = this.__ctx; return ctx.createPattern.apply(ctx, arguments);},
-    
-    clearRect: function() {const ctx = this.__ctx; ctx.clearRect.apply(ctx, arguments);},
-    fillRect: function() {const ctx = this.__ctx; ctx.fillRect.apply(ctx, arguments);},
-    strokeRect: function() {const ctx = this.__ctx; ctx.strokeRect.apply(ctx, arguments);},
-    
-    beginPath: function() {const ctx = this.__ctx; ctx.beginPath.apply(ctx, arguments);},
-    closePath: function() {const ctx = this.__ctx; ctx.closePath.apply(ctx, arguments);},
-    moveTo: function() {const ctx = this.__ctx; ctx.moveTo.apply(ctx, arguments);},
-    lineTo: function() {const ctx = this.__ctx; ctx.lineTo.apply(ctx, arguments);},
-    
-    quadraticCurveTo: function() {const ctx = this.__ctx; ctx.quadraticCurveTo.apply(ctx, arguments);},
-    bezierCurveTo: function() {const ctx = this.__ctx; ctx.bezierCurveTo.apply(ctx, arguments);},
-    arcTo: function() {const ctx = this.__ctx; ctx.arcTo.apply(ctx, arguments);},
-    rect: function() {const ctx = this.__ctx; ctx.rect.apply(ctx, arguments);},
-    arc: function() {const ctx = this.__ctx; ctx.arc.apply(ctx, arguments);},
-    
-    fill: function() {const ctx = this.__ctx; ctx.fill.apply(ctx, arguments);},
-    stroke: function() {const ctx = this.__ctx; ctx.stroke.apply(ctx, arguments);},
-    clip: function() {const ctx = this.__ctx; ctx.clip.apply(ctx, arguments);},
-    isPointInPath: function() {const ctx = this.__ctx; ctx.isPointInPath.apply(ctx, arguments);},
-    
-    fillText: function() {const ctx = this.__ctx; ctx.fillText.apply(ctx, arguments);},
-    strokeText: function() {const ctx = this.__ctx; ctx.strokeText.apply(ctx, arguments);},
-    measureText: function() {const ctx = this.__ctx; return ctx.measureText.apply(ctx, arguments);},
-    
-    drawImage: function() {const ctx = this.__ctx; ctx.drawImage.apply(ctx, arguments);},
-    createImageData: function() {const ctx = this.__ctx; ctx.createImageData.apply(ctx, arguments);},
-    getImageData: function() {const ctx = this.__ctx; return ctx.getImageData.apply(ctx, arguments);},
-    putImageData: function() {const ctx = this.__ctx; ctx.putImageData.apply(ctx, arguments);}
-});
-
-
-
 ((pkg) => {
     let tooltipView;
     
@@ -26082,6 +25506,528 @@ myt.Canvas = new JS.Class('Canvas', myt.View, {
                     tipalign:self.tipAlign, 
                     tipvalign:self.tipValign
                 });
+            }
+        }
+    });
+})(myt);
+
+
+/** An ordered collection of points that can be applied to a canvas.
+    
+    Attributes:
+        vectors:array The data is stored in a single array with the x coordinate
+            first and the y coordinate second.
+        _boundingBox:object the cached bounding box if it has been calculated.
+    
+    @class */
+myt.Path = new JS.Class('Path', {
+    // Constructor /////////////////////////////////////////////////////////////
+    /** Create a new Path.
+        @param {?Array} vectors
+        @returns {undefined} */
+    initialize: function(vectors) {
+        this.setVectors(vectors || []);
+    },
+    
+    
+    // Accessors ///////////////////////////////////////////////////////////////
+    setVectors: function(v) {
+        this._boundingBox = null;
+        this.vectors = v;
+    },
+    
+    
+    // Methods /////////////////////////////////////////////////////////////////
+    /** Copy the data from the provided Path into this one.
+        @param {!Object} path - An myt.Path
+        @returns {undefined} */
+    copyFrom: function(path) {
+        this.vectors = path.vectors.slice();
+        this._boundingBox = null;
+    },
+    
+    /** Draws this path into the provided drawview.
+        @param {!Object} canvas
+        @returns {undefined} */
+    drawInto: function(canvas) {
+        canvas.beginPath();
+        const vecs = this.vectors;
+        let len = vecs.length, 
+            i = 0;
+        canvas.moveTo(vecs[i++], vecs[i++]);
+        for (; len > i;) canvas.lineTo(vecs[i++], vecs[i++]);
+        canvas.closePath();
+    },
+    
+    /** Shift this path by the provided x and y amount.
+        @param {number} dx
+        @param {number} dy
+        @returns {undefined} */
+    translate: function(dx, dy) {
+        const vecs = this.vectors;
+        let i = vecs.length;
+        while (i) {
+            vecs[--i] += dy;
+            vecs[--i] += dx;
+        }
+        this._boundingBox = null;
+    },
+    
+    /** Rotates this path around 0,0 by the provided angle in radians.
+        @param {number} a
+        @returns {undefined} */
+    rotate: function(a) {
+        const cosA = Math.cos(a), sinA = Math.sin(a),
+            vecs = this.vectors,
+            len = vecs.length;
+        let xNew, yNew, i = 0;
+        for (; len > i;) {
+            xNew = vecs[i] * cosA - vecs[i + 1] * sinA;
+            yNew = vecs[i] * sinA + vecs[i + 1] * cosA;
+            
+            vecs[i++] = xNew;
+            vecs[i++] = yNew;
+        }
+        this._boundingBox = null;
+    },
+    
+    /** Rotates this path around the provided origin by the provided angle 
+        in radians.
+        @param {number} angle - The angle in radians
+        @param {number} xOrigin - The x coordinate to rotate around.
+        @param {number} yOrigin - The y coordinate to rotate around.
+        @returns {undefined} */
+    rotateAroundOrigin: function(angle, xOrigin, yOrigin) {
+        this.translate(-xOrigin, -yOrigin);
+        this.rotate(angle);
+        this.translate(xOrigin, yOrigin);
+    },
+    
+    /** Gets the bounding box for this path.
+        @return {!Object} with properties x, y, width and height or null
+            if no bounding box could be calculated. */
+    getBoundingBox: function() {
+        if (this._boundingBox) return this._boundingBox;
+        
+        const vecs = this.vectors;
+        let i = vecs.length, x, y, minX, maxX, minY, maxY;
+        if (i >= 2) {
+            minY = maxY = vecs[--i];
+            minX = maxX = vecs[--i];
+            while (i) {
+                y = vecs[--i];
+                x = vecs[--i];
+                minY = Math.min(y, minY);
+                maxY = Math.max(y, maxY);
+                minX = Math.min(x, minX);
+                maxX = Math.max(x, maxX);
+            }
+            return this._boundingBox = {x:minX, y:minY, width:maxX - minX, height:maxY - minY};
+        }
+        
+        return this._boundingBox = null;
+    },
+    
+    /** Gets the center point of the bounding box for the path.
+        @returns {!Object} with properties x and y or null if no bounding box
+            could be calculated. */
+    getCenter: function() {
+        const box = this.getBoundingBox();
+        return box ? {
+            x:box.x + box.width / 2,
+            y:box.y + box.height / 2
+        } : null;
+    },
+    
+    /** Tests if the provided point is inside this path.
+        @param {number|!Object} x - The x coordinate to test. Or a point 
+            object with x and y properties.
+        @param {number} y - The y coordinate to test.
+        @returns {boolean} true if inside, false otherwise. */
+    isPointInPath: function(x, y) {
+        if (typeof x === 'object') {
+            y = x.y;
+            x = x.x;
+        }
+        return myt.Geometry.isPointInPath(x, y, this.getBoundingBox(), this.vectors);
+    }
+});
+
+
+((pkg) => {
+    const PI = Math.PI,
+        HALF_PI = PI / 2,
+        ONE_AND_A_HALF_PI = PI * 3 / 2,
+        AccessorSupport = pkg.AccessorSupport,
+        
+        mixin = {};
+    
+    [
+        'save','restore','scale','rotate','translate','transform','setTransform',
+        'clearRect','fillRect','strokeRect','beginPath','closePath','moveTo','lineTo',
+        'quadraticCurveTo','bezierCurveTo','arcTo','rect','arc','fill','stroke','clip','isPointInPath',
+        'fillText','strokeText','drawImage','createImageData','putImageData'
+    ].forEach(funcName => {
+        mixin[funcName] = function() {
+            this.__ctx[funcName].apply(this.__ctx, arguments);
+        };
+    });
+    
+    [
+        'createLinearGradient','createRadialGradient','createPattern',
+        'measureText','getImageData'
+    ].forEach(funcName => {
+        mixin[funcName] = function() {
+            return this.__ctx[funcName].apply(this.__ctx, arguments);
+        };
+    });
+    
+    [
+        'fillStyle','strokeStyle','shadowColor','shadowBlur','shadowOffsetX','shadowOffsetY',
+        'lineWidth','lineCap','lineJoin','miterLimit','font','textAlign','textBaseline',
+        'globalAlpha','globalCompositeOperation'
+    ].forEach(propName => {
+        mixin[AccessorSupport.generateSetterName(propName)] = function(v) {
+            this.__ctx[propName] = v;
+        };
+        mixin[AccessorSupport.generateGetterName(propName)] = function() {
+            return this.__ctx[propName];
+        };
+    });
+    
+    /** A view for programatic drawing. This view is backed by an html 
+        canvas element.
+        
+        Attributes:
+            Same as HTML canvas element.
+        
+        Private Attributes:
+            __canvas: A reference to the canvas dom element.
+            __ctx: A reference to the 2D drawing context.
+        
+        @class */
+    pkg.Canvas = new JS.Class('Canvas', pkg.View, {
+        include:[mixin],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.View */
+        createOurDomElement: function(parent) {
+            const elements = this.callSuper(parent),
+                innerElem = Array.isArray(elements) ? elements[1] : elements,
+                canvas = this.__canvas = document.createElement('canvas');
+            canvas.className = 'mytUnselectable';
+            innerElem.appendChild(canvas);
+            canvas.style.position = 'absolute';
+            
+            this.__ctx = canvas.getContext('2d');
+            
+            return elements;
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** @overrides myt.View
+            Needed because canvas must also set width/height attribute.
+            See: http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#attr-canvas-width */
+        setWidth: function(v, supressEvent) {
+            if (0 > v) v = 0;
+            this.__canvas.setAttribute('width', v);
+            this.callSuper(v, supressEvent);
+        },
+        
+        /** @overrides myt.View
+            Needed because canvas must also set width/height attribute.
+            See: http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#attr-canvas-width */
+        setHeight: function(v, supressEvent) {
+            if (0 > v) v = 0;
+            this.__canvas.setAttribute('height', v);
+            this.callSuper(v, supressEvent);
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides
+            Prevent views from being sent behind the __canvas. This allows us to
+            add child views to a Canvas which is not directly supported in HTML. */
+        sendSubviewToBack: function(sv) {
+            if (sv.parent === this) {
+                const de = this.domElement,
+                    firstChild = de.childNodes[1];
+                if (sv.domElement !== firstChild) {
+                    const removedElem = de.removeChild(sv.domElement);
+                    if (removedElem) de.insertBefore(removedElem, firstChild);
+                }
+            }
+        },
+        
+        /** Clears the drawing context. Anything currently drawn will be erased. */
+        clear: function() {
+            // Store the current transform matrix, then apply the identity matrix
+            // to make clearing simpler then restore the transform.
+            const ctx = this.__ctx;
+            ctx.save();
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.clearRect(0, 0, this.width, this.height);
+            ctx.restore();
+        },
+        
+        dataURItoBlob: function(dataURI, dataTYPE) {
+            const binary = atob(dataURI.split(',')[1]), 
+                len = binary.length,
+                array = [];
+            for (let i = 0; i < len;) array.push(binary.charCodeAt(i++));
+            return new Blob([new Uint8Array(array)], {type: dataTYPE});
+        },
+        
+        getDataURL: function(mimeType, opt) {
+            return this.__canvas.toDataURL(mimeType, opt);
+        },
+        
+        getImageFile: function(imageType, filename, opt) {
+            let extension;
+            switch (imageType) {
+                case 'png': case 'PNG':
+                    extension = 'png';
+                    break;
+                case 'jpg': case 'JPG': case 'jpeg': case 'JPEG':
+                    extension = 'jpeg';
+                    // opt should be a quality number between 0.0 (worst) and 1.0 (best)
+                    if (opt == null) opt = 0.5;
+                    break;
+                default:
+                    console.warn('Unexpected image type: ', imageType);
+                    extension = imageType.toLowerCase();
+            }
+            const mimeType = 'image/' + extension,
+                blob = this.dataURItoBlob(this.getDataURL(mimeType, opt), mimeType);
+            if (filename) blob.name = filename + '.' + extension;
+            return blob;
+        },
+        
+        /** Draws a circle
+            @param x:number the x location of the center of the circle.
+            @param y:number the y location of the center of the circle.
+            @param radius:number the radius of the circle.
+            @returns {undefined} */
+        circle: function(x, y, radius) {
+            this.__ctx.arc(x, y, radius, 0, 2 * PI);
+        },
+        
+        /** Draws a rounded rect into the provided drawview.
+            @param {number} r - The radius of the corners.
+            @param {number} thickness - The thickness of the line. If thickness is
+                zero or less a fill will be done rather than an outline.
+            @param {number} left
+            @param {number} top
+            @param {number} w
+            @param {number} h
+            @returns {undefined} */
+        drawRoundedRect: function(r, thickness, left, top, w, h) {
+            const self = this;
+            
+            let bottom = top + h,
+                right = left + w;
+            
+            // We create a single path for both an outer and inner rounded rect.
+            // The reason for this is that filling looks much better than stroking.
+            self.beginPath();
+            
+            self.moveTo(left, top + r);
+            
+            self.lineTo(left, bottom - r);
+            self.arc(left + r, bottom - r, r, PI, HALF_PI, true);
+            
+            self.lineTo(right - r, bottom);
+            self.arc(right - r, bottom - r, r, HALF_PI, 0, true);
+            
+            self.lineTo(right, top + r);
+            self.arc(right - r, top + r, r, 0, ONE_AND_A_HALF_PI, true);
+            
+            self.lineTo(left + r, top);
+            self.arc(left + r, top + r, r, ONE_AND_A_HALF_PI, PI, true);
+            
+            self.closePath();
+            
+            if (thickness > 0) {
+                r -= thickness;
+                left += thickness;
+                right -= thickness;
+                top += thickness;
+                bottom -= thickness;
+                
+                self.moveTo(left, top + r);
+                
+                self.arc(left + r, top + r, r, PI, ONE_AND_A_HALF_PI);
+                
+                self.lineTo(right - r, top);
+                self.arc(right - r, top + r, r, ONE_AND_A_HALF_PI, 0);
+                
+                self.lineTo(right, bottom - r);
+                self.arc(right - r, bottom - r, r, 0, HALF_PI);
+                
+                self.lineTo(left + r, bottom);
+                self.arc(left + r, bottom - r, r, HALF_PI, PI);
+                
+                self.closePath();
+            }
+        },
+        
+        /** Draws a rect outline into the provided drawview.
+            @param {number} thickness - The thickness of the line.
+            @param {number} left
+            @param {number} top
+            @param {number} w
+            @param {number} h
+            @returns {undefined} */
+        drawRectOutline: function(thickness, left, top, w, h) {
+            const self = this,
+                bottom = top + h, 
+                right = left + w,
+                ileft = left + thickness,
+                iright = right - thickness,
+                itop = top + thickness,
+                ibottom = bottom - thickness;
+            
+            self.beginPath();
+            
+            self.moveTo(left, top);
+            self.lineTo(left, bottom);
+            self.lineTo(right, bottom);
+            self.lineTo(right, top);
+            self.lineTo(left, top);
+            
+            self.lineTo(ileft, itop);
+            self.lineTo(iright, itop);
+            self.lineTo(iright, ibottom);
+            self.lineTo(ileft, ibottom);
+            self.lineTo(ileft, itop);
+            
+            self.closePath();
+        },
+        
+        /** Draws a rounded rect with one or more flat corners.
+            @param {number} rTL - the radius for the top left corner.
+            @param {number} rTR - the radius for the top right corner.
+            @param {number} rBL - the radius for the bottom left corner.
+            @param {number} rBR - the radius for the bottom right corner.
+            @param {number} left
+            @param {number} top
+            @param {number} w
+            @param {number} h
+            @returns {undefined} */
+        drawPartiallyRoundedRect: function(rTL, rTR, rBL, rBR, left, top, w, h) {
+            const self = this,
+                bottom = top + h, 
+                right = left + w;
+            
+            self.beginPath();
+            
+            self.moveTo(left, top + rTL);
+            
+            self.lineTo(left, bottom - rBL);
+            if (rBL > 0) self.quadraticCurveTo(left, bottom, left + rBL, bottom);
+            
+            self.lineTo(right - rBR, bottom);
+            if (rBR > 0) self.quadraticCurveTo(right, bottom, right, bottom - rBR);
+            
+            self.lineTo(right, top + rTR);
+            if (rTR > 0) self.quadraticCurveTo(right, top, right - rTR, top);
+            
+            self.lineTo(left + rTL, top);
+            if (rTL > 0) self.quadraticCurveTo(left, top, left, top + rTL);
+            
+            self.closePath();
+        },
+        
+        drawGradientArc: function(centerX, centerY, r, ir, startAngle, endAngle, colors, segments) {
+            const self = this;
+            
+            if (segments == null) segments = 60;
+            
+            let angleDelta = PI / segments,
+            
+            // Antialiasing issues means we need to draw each polygon with a small 
+            // overlap to fill the gap.
+                angleOverlap =  PI / 360,
+            
+            // Calculate Colors
+                len = colors.length,
+                i = 0, 
+                angleDiff, 
+                slices, 
+                diff;
+            for (; len > i + 1; i++) {
+                angleDiff = colors[i + 1].angle - colors[i].angle;
+                slices = Math.round(angleDiff / angleDelta);
+                diff = colors[i].color.getDiffFrom(colors[i + 1].color);
+                colors[i].colorDelta = {red:diff.red / slices, green:diff.green / slices, blue:diff.blue / slices};
+            }
+            
+            const path = new pkg.Path([centerX + r, centerY, centerX + ir, centerY]);
+            let prevAngle, ix1, iy1, x1, y1,
+                angle = startAngle;
+            
+            path.rotateAroundOrigin(angle, centerX, centerY);
+            const vectors = path.vectors;
+            let x2 = vectors[0], y2 = vectors[1],
+                ix2 = vectors[2], iy2 = vectors[3],
+                diffCount = 0;
+            
+            i = 0;
+            
+            while (endAngle > angle) {
+                // Shift angle and points
+                x1 = x2;
+                y1 = y2;
+                ix1 = ix2;
+                iy1 = iy2;
+                prevAngle = angle;
+                
+                // Calculate new angle and points
+                angle += angleDelta;
+                if (angle > endAngle) {
+                    angleDelta += endAngle - angle;
+                    angleOverlap = 0;
+                    angle = endAngle;
+                }
+                path.rotateAroundOrigin(angleDelta + angleOverlap, centerX, centerY);
+                x2 = vectors[0];
+                y2 = vectors[1];
+                ix2 = vectors[2];
+                iy2 = vectors[3];
+                
+                // Draw part
+                self.beginPath();
+                self.moveTo(x1, y1);
+                self.lineTo(ix1, iy1);
+                self.lineTo(ix2, iy2);
+                self.lineTo(x2, y2);
+                self.closePath();
+                
+                const c = colors[i].color,
+                    colorDelta = colors[i].colorDelta;
+                self.fillStyle = pkg.Color.makeColorNumberFromChannels(
+                    c.red + (diffCount * colorDelta.red),
+                    c.green + (diffCount * colorDelta.green),
+                    c.blue + (diffCount * colorDelta.blue)
+                );
+                self.fill();
+                
+                if (angleOverlap > 0) {
+                    path.rotateAroundOrigin(-angleOverlap, centerX, centerY);
+                    x2 = vectors[0];
+                    y2 = vectors[1];
+                    ix2 = vectors[2];
+                    iy2 = vectors[3];
+                }
+                
+                // Increment color
+                diffCount++;
+                if (angle >= colors[i + 1].angle) {
+                    diffCount = 0;
+                    i++;
+                }
             }
         }
     });

@@ -103,7 +103,7 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'StateMachine.js'    ).provides('myt.StateMachine').requires('myt.Node');
     file(MYT_COMPONENT_ROOT + 'Tooltip.js'         ).provides(
         'myt.TooltipMixin','myt.BaseTooltip','myt.Tooltip'
-    ).requires('myt.Canvas','myt.RootView','myt.global.mouse','myt.global.dragManager','myt.global.windowResize');
+    ).requires('myt.RootView','myt.global.mouse','myt.global.dragManager','myt.global.windowResize');
     file(MYT_COMPONENT_ROOT + 'Validator.js'       ).provides(
         'myt.global.validators','myt.Validator','myt.CompoundValidator',
         'myt.EqualFieldsValidator','myt.EqualsIgnoreCaseValidator','myt.LengthValidator',
@@ -118,7 +118,7 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'base/Annulus.js').provides('myt.Annulus').requires('myt.View');
     file(MYT_COMPONENT_ROOT + 'base/Text.js'   ).provides('myt.Text'   ).requires('myt.TextSupport');
     file(MYT_COMPONENT_ROOT + 'base/Markup.js' ).provides('myt.Markup' ).requires('myt.SizeToDom');
-    file(MYT_COMPONENT_ROOT + 'base/Canvas.js' ).provides('myt.Canvas' ).requires('myt.View');
+    file(MYT_COMPONENT_ROOT + 'base/Canvas.js' ).provides('myt.Canvas' ).requires('myt.View','myt.Path','myt.Color');
     file(MYT_COMPONENT_ROOT + 'base/Frame.js'  ).provides('myt.Frame'  ).requires('myt.View');
     file(MYT_COMPONENT_ROOT + 'base/Image.js'  ).provides('myt.Image'  ).requires('myt.ImageSupport');
     file(MYT_COMPONENT_ROOT + 'base/FlexBox.js').provides('myt.FlexBox').requires('myt.View','myt.FlexBoxSupport');
@@ -149,9 +149,8 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'layout/AlignedLayout.js' ).provides('myt.AlignedLayout' ).requires('myt.VariableLayout');
     
     // Component : Drawing
-    file(MYT_COMPONENT_ROOT + 'drawing/Color.js'      ).provides('myt.Color'      ).requires('myt');
-    file(MYT_COMPONENT_ROOT + 'drawing/Path.js'       ).provides('myt.Path'       ).requires('myt');
-    file(MYT_COMPONENT_ROOT + 'drawing/DrawingUtil.js').provides('myt.DrawingUtil').requires('myt.Color','myt.Path');
+    file(MYT_COMPONENT_ROOT + 'drawing/Color.js').provides('myt.Color').requires('myt');
+    file(MYT_COMPONENT_ROOT + 'drawing/Path.js' ).provides('myt.Path' ).requires('myt');
     
     // Component : Model
     file(MYT_COMPONENT_ROOT + 'model/BAGMembership.js'        ).provides('myt.BAGMembership'        ).requires('myt.Node');
@@ -270,7 +269,7 @@ JS.Packages(function() {
     
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
-        'myt.Cookie','myt.LocalStorage','myt.DrawingUtil',
+        'myt.Cookie','myt.LocalStorage',
         'myt.global.error','myt.global.keys','myt.global.touch',
         'myt.FlexBoxChildSupport','myt.FlexBox','myt.Text','myt.Image','myt.Markup','myt.Frame',
         'myt.SizeWidthToDom','myt.SizeHeightToDom','myt.SizeToParent',
@@ -297,6 +296,7 @@ JS.Packages(function() {
         'myt.Eventable',
         'myt.Annulus',
         'myt.MessageTypeWebSocket',
-        'myt.TooltipMixin'
+        'myt.TooltipMixin',
+        'myt.Canvas'
     );
 });
