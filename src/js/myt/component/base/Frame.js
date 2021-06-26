@@ -29,13 +29,8 @@ myt.Frame = new JS.Class('Frame', myt.View, {
     
     /** @overrides myt.View */
     createOurDomElement: function(parent) {
-        const elements = this.callSuper(parent);
-        let innerElem;
-        if (Array.isArray(elements)) {
-            innerElem = elements[1];
-        } else {
-            innerElem = elements;
-        }
+        const elements = this.callSuper(parent),
+            innerElem = Array.isArray(elements) ? elements[1] : elements;
         innerElem.style.border = '0px';
         return elements;
     },

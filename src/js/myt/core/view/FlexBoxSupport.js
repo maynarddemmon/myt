@@ -174,13 +174,8 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides */
     createOurDomElement: function(parent) {
-        const elements = this.callSuper(parent);
-        let innerElem;
-        if (Array.isArray(elements)) {
-            innerElem = elements[1];
-        } else {
-            innerElem = elements;
-        }
+        const elements = this.callSuper(parent),
+            innerElem = Array.isArray(elements) ? elements[1] : elements;
         innerElem.style.display = 'flex';
         return elements;
     },

@@ -31,13 +31,8 @@ myt.NativeInputWrapper = new JS.Class('NativeInputWrapper', myt.View, {
     /** @overrides myt.View */
     createOurDomElement: function(parent) {
         const elements = this.callSuper(parent);
-        let innerElem;
         if (this.inputType) {
-            if (Array.isArray(elements)) {
-                innerElem = elements[1];
-            } else {
-                innerElem = elements;
-            }
+            const innerElem = Array.isArray(elements) ? elements[1] : elements;
             innerElem.type = this.inputType;
         }
         return elements;

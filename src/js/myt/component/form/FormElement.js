@@ -110,10 +110,9 @@ myt.FormElement = new JS.Module('FormElement', {
     removeValueProcessor: function(id) {
         if (id) {
             const processors = this.__vp;
-            let i = processors.length, 
-                processor;
+            let i = processors.length;
             while (i) {
-                processor = processors[--i];
+                const processor = processors[--i];
                 if (processor.id === id) {
                     processors.splice(i, 1);
                     return processor;
@@ -132,28 +131,26 @@ myt.FormElement = new JS.Module('FormElement', {
     __processValue: function(value, checkAttr) {
         const processors = this.__vp, 
             len = processors.length;
-        let processor, 
-            i = 0;
-        for (; len > i;) {
-            processor = processors[i++];
+        for (let i = 0; len > i;) {
+            const processor = processors[i++];
             if (processor[checkAttr]) value = processor.process(value);
         }
         return value;
     },
     
     /** @overrides myt.Form */
-    addSubForm: function(subform) {
+    addSubForm: subform => {
         myt.dumpStack("addSubForm not supported on form elements.");
     },
     
     /** @overrides myt.Form */
-    getSubForm: function(id) {
+    getSubForm: id => {
         myt.dumpStack("getSubForm not supported on form elements.");
         return null;
     },
     
     /** @overrides myt.Form */
-    removeSubForm: function(id) {
+    removeSubForm: id => {
         myt.dumpStack("removeSubForm not supported on form elements.");
         return null;
     },

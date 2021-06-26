@@ -130,16 +130,9 @@
         /** @overrides myt.View */
         createOurDomElement: function(parent) {
             const elements = this.callSuper(parent),
-                MSVG = pkg.Annulus.makeSVG;
-            let svg,
-                innerElem;
-            if (Array.isArray(elements)) {
-                innerElem = elements[1];
-            } else {
-                innerElem = elements;
-            }
-            
-            svg = this.__svg = MSVG('svg', innerElem);
+                innerElem = Array.isArray(elements) ? elements[1] : elements,
+                MSVG = pkg.Annulus.makeSVG,
+                svg = this.__svg = MSVG('svg', innerElem);
             this.__path = MSVG('path', svg);
             
             // Let the view handle mouse events

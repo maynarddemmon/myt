@@ -4,7 +4,7 @@
         // Safe as a closure variable because the registry is a singleton.,
         validators = {},
         
-        getValidator = (id) => validators[id],
+        getValidator = id => validators[id],
         
         doFuncOnIdentifiable = (identifiable, func) => {
             if (identifiable) {
@@ -19,8 +19,8 @@
             }
         },
         
-        register = (identifiable) => {
-            doFuncOnIdentifiable(identifiable, (id) => {validators[id] = identifiable;});
+        register = identifiable => {
+            doFuncOnIdentifiable(identifiable, id => {validators[id] = identifiable;});
         },
         
         /** Tests if a value is "valid" or not.
@@ -32,8 +32,7 @@
                 id:string the ideally unique ID for this Validator so it can be
                     stored and retreived from the myt.global.validators registry.
             
-            @class
-        */
+            @class */
         Validator = pkg.Validator = new JSClass('Validator', {
             /** Creates a new Validator
                 @param {string} id - The ideally unique ID for a validator instance. */
@@ -294,14 +293,7 @@
     });
     
     /** Stores myt.Validators by ID so they can be used in multiple
-        places easily.
-        
-        Events:
-            None
-        
-        Attributes:
-            None
-    */
+        places easily. */
     new JS.Singleton('GlobalValidatorRegistry', {
         // Life Cycle //////////////////////////////////////////////////////////
         initialize: function() {

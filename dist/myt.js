@@ -2865,301 +2865,6 @@ new JS.Singleton('GlobalError', {
 })(myt);
 
 
-/** Generates Dom Events and passes them on to one or more event observers.
-    Requires myt.DomElementProxy be included when this mixin is included.
-    
-    Events:
-        None
-    
-    Attributes:
-        None
-    
-    Private Attributes:
-        __dobsbt:object Stores arrays of myt.DomObservers and method names 
-            by event type.
-    
-    @class */
-myt.DomObservable = new JS.Module('DomObservable', {
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Adds the observer to the list of event recipients for the event type.
-        @param {!Object} domObserver - The myt.DomObserver that will be notified
-            when a dom event occurs.
-        @param {string} methodName - The method name to call on the dom observer.
-        @param {string} type - The type of dom event to register for.
-        @param {boolean} [capture] - Indicates if the event registration
-            is during capture or bubble phase. Defaults to false, bubble phase.
-        @param {boolean} [passive]
-        @returns {boolean} - True if the observer was successfully registered, 
-            false otherwise.*/
-    attachDomObserver: function(domObserver, methodName, type, capture, passive) {
-        if (domObserver && methodName && type) {
-            capture = !!capture;
-            
-            const methodRef = this.createDomMethodRef(domObserver, methodName, type);
-            if (methodRef) {
-                const domObserversByType = this.__dobsbt || (this.__dobsbt = {});
-                
-                // Lazy instantiate dom observers array for type and insert observer.
-                const domObservers = domObserversByType[type];
-                if (!domObservers) {
-                    // Create list with observer
-                    domObserversByType[type] = [domObserver, methodName, methodRef, capture];
-                } else {
-                    // Add dom observer to the end of the list
-                    domObservers.push(domObserver, methodName, methodRef, capture);
-                }
-                
-                myt.addEventListener(this.getInnerDomElement(), type, methodRef, capture, passive);
-                
-                return true;
-            }
-        }
-        return false;
-    },
-    
-    /** Creates a function that will handle the dom event when it is fired
-        by the browser. Must be implemented by the object this mixin is 
-        applied to.
-        @param {!Object} domObserver - The myt.DomObserver that must be notified
-            when the dom event fires.
-        @param {string} methodName - the name of the function to pass the event to.
-        @param {string} type - the type of the event to fire.
-        @returns {?Function} - A function to handle the dom event or null if 
-            the event is not supported. */
-    createDomMethodRef: (domObserver, methodName, type) => null,
-    
-    /** Used by the createDomMethodRef implementations of submixins of 
-        myt.DomObservable to implement the standard methodRef.
-        @param {!Object} domObserver - The myt.DomObserver that must be notified
-            when the dom event fires.
-        @param {string} methodName - The name of the function to pass the event to.
-        @param {string} type - The type of the event to fire.
-        @param {!Function} observableClass - The JS.Class that has the common event.
-        @param {boolean} [preventDefault] - If true the default behavior
-            of the domEvent will be prevented.
-        @returns {?Function} - A function to handle the dom event or undefined 
-            if the event will not be handled. */
-    createStandardDomMethodRef: function(domObserver, methodName, type, observableClass, preventDefault) {
-        if (observableClass.EVENT_TYPES[type]) {
-            const self = this, 
-                event = observableClass.EVENT;
-            return (domEvent) => {
-                if (!domEvent) domEvent = window.event;
-                
-                event.source = self;
-                event.type = domEvent.type;
-                event.value = domEvent;
-                
-                const allowBubble = domObserver[methodName](event);
-                if (!allowBubble) {
-                    domEvent.cancelBubble = true;
-                    if (domEvent.stopPropagation) domEvent.stopPropagation();
-                    
-                    if (preventDefault) domEvent.preventDefault();
-                }
-                
-                event.source = undefined;
-            };
-        }
-    },
-    
-    /** Removes the observer from the list of dom observers for the event type.
-        @param {!Object} domObserver - The myt.DomObserver to unregister.
-        @param {string} methodName - The method name to unregister for.
-        @param {string} type - The dom event type to unregister for.
-        @param {boolean} [capture] - The event phase to unregister for.
-            Defaults to false if not provided.
-        @returns {boolean} - True if the observer was successfully unregistered, 
-            false otherwise.*/
-    detachDomObserver: function(domObserver, methodName, type, capture) {
-        if (domObserver && methodName && type) {
-            capture = !!capture;
-            
-            const domObserversByType = this.__dobsbt;
-            if (domObserversByType) {
-                const domObservers = domObserversByType[type];
-                if (domObservers) {
-                    // Remove dom observer
-                    const domElement = this.getInnerDomElement();
-                    let retval = false,  
-                        i = domObservers.length;
-                    while (i) {
-                        i -= 4;
-                        if (domObserver === domObservers[i] && 
-                            methodName === domObservers[i + 1] && 
-                            capture === domObservers[i + 3]
-                        ) {
-                            if (domElement) myt.removeEventListener(domElement, type, domObservers[i + 2], capture);
-                            domObservers.splice(i, 4);
-                            retval = true;
-                        }
-                    }
-                    return retval;
-                }
-            }
-        }
-        return false;
-    },
-    
-    /** Detaches all dom observers from this DomObservable.
-        @returns {undefined} */
-    detachAllDomObservers: function() {
-        const domElement = this.getInnerDomElement();
-        if (domElement) {
-            const domObserversByType = this.__dobsbt;
-            if (domObserversByType) {
-                for (const type in domObserversByType) {
-                    const domObservers = domObserversByType[type];
-                    let i = domObservers.length;
-                    while (i) {
-                        const capture = domObservers[--i],
-                            methodRef = domObservers[--i];
-                        i -= 2; // methodName and domObserver
-                        myt.removeEventListener(domElement, type, methodRef, capture);
-                    }
-                    domObservers.length = 0;
-                }
-            }
-        }
-    }
-});
-
-
-/** Provides a mechanism to remember which DomObservables this DomObserver has 
-    attached itself to. This is useful when the instance is being destroyed
-    to automatically cleanup the observer/observable relationships.
-    
-    When this mixin is used attachment and detachment should be done 
-    using the 'attachToDom' and 'detachFromDom' methods of this mixin. If this 
-    is not done, it is possible for the relationship between observer and 
-    observable to become broken.
-    
-    Events:
-        None
-    
-    Attributes:
-        None
-    
-    Private Attributes:
-        __dobt: (Object) Holds arrays of DomObservables by event type.
-    
-    @class */
-myt.DomObserver = new JS.Module('DomObserver', {
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Attaches this DomObserver to the provided DomObservable for the 
-        provided type.
-        @param {!Object} observable
-        @param {string} methodName
-        @param {string} type
-        @param {boolean} [capture]
-        @param {boolean} [passive]
-        @returns {undefined} */
-    attachToDom: function(observable, methodName, type, capture, passive) {
-        if (observable && methodName && type) {
-            capture = !!capture;
-            
-            // Lazy instantiate __dobt map.
-            const observablesByType = this.__dobt || (this.__dobt = {}),
-                observables = observablesByType[type] || (observablesByType[type] = []);
-            
-            // Attach this DomObserver to the DomObservable
-            if (observable.attachDomObserver(this, methodName, type, capture, passive)) {
-                observables.push(capture, methodName, observable);
-            }
-        }
-    },
-    
-    /** Detaches this DomObserver from the DomObservable for the event type.
-        @param {!Object} observable
-        @param {string} methodName
-        @param {string} type
-        @param {boolean} [capture]
-        @returns {boolean} - True if detachment succeeded, false otherwise. */
-    detachFromDom: function(observable, methodName, type, capture) {
-        if (observable && methodName && type) {
-            capture = !!capture;
-            
-            // No need to detach if observable array doesn't exist.
-            const observablesByType = this.__dobt;
-            if (observablesByType) {
-                const observables = observablesByType[type];
-                if (observables) {
-                    // Remove all instances of this observer/methodName/type/capture 
-                    // from the observable
-                    let retval = false, 
-                        i = observables.length;
-                    while (i) {
-                        i -= 3;
-                        if (observable === observables[i + 2] && 
-                            methodName === observables[i + 1] && 
-                            capture === observables[i]
-                        ) {
-                            if (observable.detachDomObserver(this, methodName, type, capture)) {
-                                observables.splice(i, 3);
-                                retval = true;
-                            }
-                        }
-                    }
-                    
-                    // Observable wasn't found
-                    return retval;
-                }
-            }
-        }
-        return false;
-    },
-    
-    /** Detaches this DomObserver from all DomObservables it is attached to.
-        @returns {undefined} */
-    detachFromAllDomSources: function() {
-        const observablesByType = this.__dobt;
-        if (observablesByType) {
-            for (const type in observablesByType) {
-                const observables = observablesByType[type];
-                let i = observables.length;
-                while (i) observables[--i].detachDomObserver(this, observables[--i], type, observables[--i]);
-                observables.length = 0;
-            }
-        }
-    }
-});
-
-
-/** Generates Key Events and passes them on to one or more event observers.
-    Requires myt.DomObservable as a super mixin. */
-myt.KeyObservable = new JS.Module('KeyObservable', {
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        /** A map of supported key event types. */
-        EVENT_TYPES:{
-            keypress:true,
-            keydown:true,
-            keyup:true
-        },
-        
-        /** The common key event that gets reused. */
-        EVENT:{source:null, type:null, value:null},
-        
-        /** Gets the key code from the provided key event.
-            @param {!Object} event
-            @returns {number} The keycode from the event. */
-        getKeyCodeFromEvent: function(event) {
-            const domEvent = event.value, 
-                keyCode = domEvent.keyCode;
-            return keyCode || domEvent.charCode;
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.DomObservable */
-    createDomMethodRef: function(domObserver, methodName, type) {
-        return this.createStandardDomMethodRef(domObserver, methodName, type, myt.KeyObservable) || 
-            this.callSuper(domObserver, methodName, type);
-    }
-});
-
-
 ((pkg) => {
     let globalFocus;
         
@@ -3385,6 +3090,696 @@ myt.KeyObservable = new JS.Module('KeyObservable', {
                 elem = elem.parentNode;
             }
             return null;
+        }
+    });
+})(myt);
+
+
+((pkg) => {
+    const JSModule = JS.Module,
+        
+        GlobalFocus = pkg.global.focus,
+        
+        makeEmptyEvent = () => {
+            return {source:null, type:null, value:null};
+        };
+    
+    /** Generates Dom Events and passes them on to one or more event observers.
+        Requires myt.DomElementProxy be included when this mixin is included.
+        
+        Private Attributes:
+            __dobsbt:object Stores arrays of myt.DomObservers and method names 
+                by event type.
+        
+        @class */
+    pkg.DomObservable = new JSModule('DomObservable', {
+        // Methods /////////////////////////////////////////////////////////////
+        /** Adds the observer to the list of event recipients for the event type.
+            @param {!Object} domObserver - The myt.DomObserver that will be 
+                notified when a dom event occurs.
+            @param {string} methodName - The method name to call on the dom observer.
+            @param {string} type - The type of dom event to register for.
+            @param {boolean} [capture] - Indicates if the event registration is 
+                during capture or bubble phase. Defaults to false, bubble phase.
+            @param {boolean} [passive]
+            @returns {boolean} - True if the observer was successfully 
+                registered, false otherwise. */
+        attachDomObserver: function(domObserver, methodName, type, capture, passive) {
+            if (domObserver && methodName && type) {
+                capture = !!capture;
+                
+                const methodRef = this.createDomMethodRef(domObserver, methodName, type);
+                if (methodRef) {
+                    const domObserversByType = this.__dobsbt || (this.__dobsbt = {});
+                    
+                    // Lazy instantiate dom observers array for type and insert observer.
+                    const domObservers = domObserversByType[type];
+                    if (!domObservers) {
+                        // Create list with observer
+                        domObserversByType[type] = [domObserver, methodName, methodRef, capture];
+                    } else {
+                        // Add dom observer to the end of the list
+                        domObservers.push(domObserver, methodName, methodRef, capture);
+                    }
+                    
+                    pkg.addEventListener(this.getInnerDomElement(), type, methodRef, capture, passive);
+                    
+                    return true;
+                }
+            }
+            return false;
+        },
+        
+        /** Creates a function that will handle the dom event when it is fired
+            by the browser. Must be implemented by the object this mixin is 
+            applied to.
+            @param {!Object} domObserver - The myt.DomObserver that must be notified
+                when the dom event fires.
+            @param {string} methodName - the name of the function to pass the event to.
+            @param {string} type - the type of the event to fire.
+            @returns {?Function} - A function to handle the dom event or null if 
+                the event is not supported. */
+        createDomMethodRef: (domObserver, methodName, type) => null,
+        
+        /** Used by the createDomMethodRef implementations of submixins of 
+            myt.DomObservable to implement the standard methodRef.
+            @param {!Object} domObserver - The myt.DomObserver that must be notified
+                when the dom event fires.
+            @param {string} methodName - The name of the function to pass the event to.
+            @param {string} type - The type of the event to fire.
+            @param {!Function} observableClass - The JS.Class that has the common event.
+            @param {boolean} [preventDefault] - If true the default behavior
+                of the domEvent will be prevented.
+            @returns {?Function} - A function to handle the dom event or undefined 
+                if the event will not be handled. */
+        createStandardDomMethodRef: function(domObserver, methodName, type, observableClass, preventDefault) {
+            if (observableClass.EVENT_TYPES[type]) {
+                const self = this, 
+                    event = observableClass.EVENT;
+                return domEvent => {
+                    if (!domEvent) domEvent = window.event;
+                    
+                    event.source = self;
+                    event.type = domEvent.type;
+                    event.value = domEvent;
+                    
+                    // Execute handler function and prevent event bubbling if
+                    // the handler returned false.
+                    if (!domObserver[methodName](event)) {
+                        domEvent.cancelBubble = true;
+                        if (domEvent.stopPropagation) domEvent.stopPropagation();
+                        if (preventDefault) domEvent.preventDefault();
+                    }
+                    
+                    event.source = undefined;
+                };
+            }
+        },
+        
+        /** Removes the observer from the list of dom observers for the event type.
+            @param {!Object} domObserver - The myt.DomObserver to unregister.
+            @param {string} methodName - The method name to unregister for.
+            @param {string} type - The dom event type to unregister for.
+            @param {boolean} [capture] - The event phase to unregister for.
+                Defaults to false if not provided.
+            @returns {boolean} - True if the observer was successfully unregistered, 
+                false otherwise.*/
+        detachDomObserver: function(domObserver, methodName, type, capture) {
+            if (domObserver && methodName && type) {
+                capture = !!capture;
+                
+                const domObserversByType = this.__dobsbt;
+                if (domObserversByType) {
+                    const domObservers = domObserversByType[type];
+                    if (domObservers) {
+                        // Remove dom observer
+                        const domElement = this.getInnerDomElement();
+                        let retval = false,  
+                            i = domObservers.length;
+                        while (i) {
+                            i -= 4;
+                            if (domObserver === domObservers[i] && 
+                                methodName === domObservers[i + 1] && 
+                                capture === domObservers[i + 3]
+                            ) {
+                                if (domElement) pkg.removeEventListener(domElement, type, domObservers[i + 2], capture);
+                                domObservers.splice(i, 4);
+                                retval = true;
+                            }
+                        }
+                        return retval;
+                    }
+                }
+            }
+            return false;
+        },
+        
+        /** Detaches all dom observers from this DomObservable.
+            @returns {undefined} */
+        detachAllDomObservers: function() {
+            const domElement = this.getInnerDomElement();
+            if (domElement) {
+                const domObserversByType = this.__dobsbt;
+                if (domObserversByType) {
+                    for (const type in domObserversByType) {
+                        const domObservers = domObserversByType[type];
+                        let i = domObservers.length;
+                        while (i) {
+                            const capture = domObservers[--i],
+                                methodRef = domObservers[--i];
+                            i -= 2; // methodName and domObserver
+                            pkg.removeEventListener(domElement, type, methodRef, capture);
+                        }
+                        domObservers.length = 0;
+                    }
+                }
+            }
+        }
+    });
+    
+    /** Provides a mechanism to remember which DomObservables this DomObserver has 
+        attached itself to. This is useful when the instance is being destroyed
+        to automatically cleanup the observer/observable relationships.
+        
+        When this mixin is used attachment and detachment should be done 
+        using the 'attachToDom' and 'detachFromDom' methods of this mixin. If this 
+        is not done, it is possible for the relationship between observer and 
+        observable to become broken.
+        
+        Private Attributes:
+            __dobt: (Object) Holds arrays of DomObservables by event type.
+        
+        @class */
+    pkg.DomObserver = new JSModule('DomObserver', {
+        // Methods /////////////////////////////////////////////////////////////
+        /** Attaches this DomObserver to the provided DomObservable for the 
+            provided type.
+            @param {!Object} observable
+            @param {string} methodName
+            @param {string} type
+            @param {boolean} [capture]
+            @param {boolean} [passive]
+            @returns {undefined} */
+        attachToDom: function(observable, methodName, type, capture, passive) {
+            if (observable && methodName && type) {
+                capture = !!capture;
+                
+                // Lazy instantiate __dobt map.
+                const observablesByType = this.__dobt || (this.__dobt = {}),
+                    observables = observablesByType[type] || (observablesByType[type] = []);
+                
+                // Attach this DomObserver to the DomObservable
+                if (observable.attachDomObserver(this, methodName, type, capture, passive)) {
+                    observables.push(capture, methodName, observable);
+                }
+            }
+        },
+        
+        /** Detaches this DomObserver from the DomObservable for the event type.
+            @param {!Object} observable
+            @param {string} methodName
+            @param {string} type
+            @param {boolean} [capture]
+            @returns {boolean} - True if detachment succeeded, false otherwise. */
+        detachFromDom: function(observable, methodName, type, capture) {
+            if (observable && methodName && type) {
+                capture = !!capture;
+                
+                // No need to detach if observable array doesn't exist.
+                const observablesByType = this.__dobt;
+                if (observablesByType) {
+                    const observables = observablesByType[type];
+                    if (observables) {
+                        // Remove all instances of this observer/methodName/type/capture 
+                        // from the observable
+                        let retval = false, 
+                            i = observables.length;
+                        while (i) {
+                            i -= 3;
+                            if (observable === observables[i + 2] && 
+                                methodName === observables[i + 1] && 
+                                capture === observables[i]
+                            ) {
+                                if (observable.detachDomObserver(this, methodName, type, capture)) {
+                                    observables.splice(i, 3);
+                                    retval = true;
+                                }
+                            }
+                        }
+                        
+                        // Observable wasn't found
+                        return retval;
+                    }
+                }
+            }
+            return false;
+        },
+        
+        /** Detaches this DomObserver from all DomObservables it is attached to.
+            @returns {undefined} */
+        detachFromAllDomSources: function() {
+            const observablesByType = this.__dobt;
+            if (observablesByType) {
+                for (const type in observablesByType) {
+                    const observables = observablesByType[type];
+                    let i = observables.length;
+                    while (i) observables[--i].detachDomObserver(this, observables[--i], type, observables[--i]);
+                    observables.length = 0;
+                }
+            }
+        }
+    });
+    
+    /** Generates Key Events and passes them on to one or more event observers.
+        Requires myt.DomObservable as a super mixin. */
+    pkg.KeyObservable = new JSModule('KeyObservable', {
+        // Class Methods and Attributes ////////////////////////////////////////
+        extend: {
+            /** A map of supported key event types. */
+            EVENT_TYPES:{
+                keypress:true,
+                keydown:true,
+                keyup:true
+            },
+            
+            /** The common key event that gets reused. */
+            EVENT:makeEmptyEvent(),
+            
+            /** Gets the key code from the provided key event.
+                @param {!Object} event Event value is a dom event.
+                @returns {number} The keycode from the event. */
+            getKeyCodeFromEvent: event => event.value.keyCode || event.value.charCode
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides myt.DomObservable */
+        createDomMethodRef: function(domObserver, methodName, type) {
+            return this.createStandardDomMethodRef(domObserver, methodName, type, pkg.KeyObservable) || 
+                this.callSuper(domObserver, methodName, type);
+        }
+    });
+    
+    /** Generates Mouse Events and passes them on to one or more event observers.
+        Also provides the capability to capture contextmenu events and mouse
+        wheel events.
+        
+        Requires: myt.DomObservable super mixin. */
+    pkg.MouseObservable = new JSModule('MouseObservable', {
+        // Class Methods and Attributes ////////////////////////////////////////
+        extend: {
+            /** A map of supported mouse event types. */
+            EVENT_TYPES:{
+                mouseover:true,
+                mouseout:true,
+                mousedown:true,
+                mouseup:true,
+                click:true,
+                dblclick:true,
+                mousemove:true,
+                contextmenu:true,
+                wheel:true
+            },
+            
+            /** The common mouse event that gets reused. */
+            EVENT:makeEmptyEvent(),
+            
+            /** Gets the mouse coordinates from the provided event.
+                @param {!Object} event Event value is a dom event.
+                @returns {!Object} An object with 'x' and 'y' keys containing the
+                    x and y mouse position. */
+            getMouseFromEvent: event => {
+                return {x:event.value.pageX, y:event.value.pageY};
+            },
+            
+            getMouseFromEventRelativeToView: function(event, view) {
+                const viewPos = view.getPagePosition(),
+                    pos = this.getMouseFromEvent(event);
+                pos.x -= viewPos.x;
+                pos.y -= viewPos.y;
+                return pos;
+            }
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides myt.DomObservable */
+        createDomMethodRef: function(domObserver, methodName, type) {
+            return this.createStandardDomMethodRef(domObserver, methodName, type, pkg.MouseObservable, true) || 
+                this.callSuper(domObserver, methodName, type);
+        }
+    });
+    
+    /** Generates Scroll Events and passes them on to one or more event observers.
+        Requires myt.DomObservable as a super mixin. */
+    pkg.ScrollObservable = new JSModule('ScrollObservable', {
+        // Class Methods and Attributes ////////////////////////////////////////
+        extend: {
+            /** A map of supported scroll event types. */
+            EVENT_TYPES:{
+                scroll:true
+            },
+            
+            /** The common scroll event that gets reused. */
+            EVENT:makeEmptyEvent(),
+            
+            /** Gets the scrollLeft and scrollTop from the event.
+                @param {!Object} event Event value is a dom event.
+                @returns object with an x and y key each containing a number. */
+            getScrollFromEvent: event => {
+                const target = event.value.target || event.value.srcElement;
+                return {x:target.scrollLeft, y:target.scrollTop};
+            }
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides myt.DomObservable */
+        createDomMethodRef: function(domObserver, methodName, type) {
+            return this.createStandardDomMethodRef(domObserver, methodName, type, pkg.ScrollObservable) || 
+                this.callSuper(domObserver, methodName, type);
+        }
+    });
+    
+    /** Generates Touch Events and passes them on to one or more event observers.
+        
+        Requires: myt.DomObservable super mixin. */
+    pkg.TouchObservable = new JSModule('TouchObservable', {
+        // Class Methods and Attributes ////////////////////////////////////////
+        extend: {
+            /** A map of supported touch event types. */
+            EVENT_TYPES:{
+                touchstart:true,
+                touchend:true,
+                touchmove:true,
+                touchcancel:true
+            },
+            
+            /** The common touch event that gets reused. */
+            EVENT:makeEmptyEvent()
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides myt.DomObservable */
+        createDomMethodRef: function(domObserver, methodName, type) {
+            return this.createStandardDomMethodRef(domObserver, methodName, type, pkg.TouchObservable, false) || 
+                this.callSuper(domObserver, methodName, type);
+        }
+    });
+    
+    /** Generates focus and blur events and passes them on to one or more 
+        event observers. Also provides focus related events to a view. When a view
+        is focused or blurred, myt.global.focus will be notified via the
+        'notifyFocus' and 'notifyBlur' methods.
+        
+        Requires myt.DomObservable as a super mixin.
+        
+        Events:
+            focused:object Fired when this view gets focus. The value is this view.
+            focus:object Fired when this view gets focus. The value is a dom
+                focus event.
+            blur:object Fired when this view loses focus. The value is a dom
+                focus event.
+        
+        Attributes:
+            focused:boolean Indicates if this view has focus or not.
+            focusable:boolean Indicates if this view can have focus or not.
+            focusEmbellishment:boolean Indicates if the focus embellishment should
+                be shown for this view or not when it has focus.
+        
+        Virtual Methods:
+            getNextFocus() Implement this method to return the next view that 
+                should have focus. If null is returned or the method is not 
+                implemented, normal dom traversal will occur.
+            getPrevFocus() Implement this method to return the prev view that 
+                should have focus. If null is returned or the method is not 
+                implemented, normal dom traversal will occur. */
+    // TODO: fire focus and blur events rather than a focused event?
+    // FIXME: should we give away focus when we become not visible?
+    pkg.FocusObservable = new JSModule('FocusObservable', {
+        // Class Methods and Attributes ////////////////////////////////////////
+        extend: {
+            /** A map of supported focus event types. */
+            EVENT_TYPES:{
+                focus:true,
+                blur:true
+            },
+            
+            /** The common focus/blur event that gets reused. */
+            EVENT:makeEmptyEvent()
+        },
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.Node */
+        initNode: function(parent, attrs) {
+            this.focusable = false;
+            this.focusEmbellishment = true;
+            
+            this.callSuper(parent, attrs);
+        },
+        
+        /** @overrides myt.View */
+        destroyBeforeOrphaning: function() {
+            this.giveAwayFocus();
+            this.callSuper();
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setFocused: function(v) {
+            if (this.focused !== v) {
+                this.focused = v;
+                if (this.inited) {
+                    this.fireEvent('focused', v);
+                    if (v) {
+                        GlobalFocus.notifyFocus(this);
+                    } else {
+                        GlobalFocus.notifyBlur(this);
+                    }
+                }
+            }
+        },
+        
+        setFocusable: function(v) {
+            const self = this;
+            if (self.focusable !== v) {
+                const wasFocusable = self.focusable;
+                self.focusable = v;
+                
+                if (v) {
+                    self.getInnerDomElement().tabIndex = 0; // Make focusable. -1 is programmatic only
+                    self.attachToDom(self, '__doFocus', 'focus');
+                    self.attachToDom(self, '__doBlur', 'blur');
+                } else if (wasFocusable) {
+                    self.getInnerDomElement().removeAttribute('tabIndex'); // Make unfocusable
+                    self.detachFromDom(self, '__doFocus', 'focus');
+                    self.detachFromDom(self, '__doBlur', 'blur');
+                }
+                
+                if (self.inited) self.fireEvent('focusable', v);
+            }
+        },
+        
+        setFocusEmbellishment: function(v) {
+            if (this.focusEmbellishment !== v) {
+                this.focusEmbellishment = v;
+                if (this.focused) {
+                    if (v) {
+                        this.showFocusEmbellishment();
+                    } else {
+                        this.hideFocusEmbellishment();
+                    }
+                }
+            }
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Gives the focus to the next focusable element or, if nothing else
+            is focusable, blurs away from this element.
+            @returns {undefined} */
+        giveAwayFocus: function() {
+            if (this.focused) {
+                // Try to go to next focusable element.
+                GlobalFocus.next();
+                
+                // If focus loops around to ourself make sure we don't keep it.
+                if (this.focused) this.blur();
+            }
+        },
+        
+        /** Tests if this view is in a state where it can receive focus.
+            @returns boolean True if this view is visible, enabled, focusable and
+                not focus masked, false otherwise. */
+        isFocusable: function() {
+            return this.focusable && !this.disabled && this.isVisible() && 
+                this.searchAncestorsOrSelf(node => node.maskFocus === true) === null;
+        },
+        
+        /** Calling this method will set focus onto this view if it is focusable.
+            @param noScroll:boolean (optional) if true is provided no auto-scrolling
+                will occur when focus is set.
+            @returns {undefined} */
+        focus: function(noScroll) {
+            if (this.isFocusable()) this.getInnerDomElement().focus({preventScroll:noScroll});
+        },
+        
+        /** Removes the focus from this view. Do not call this method directly.
+            @private
+            @returns {undefined} */
+        blur: function() {
+            this.getInnerDomElement().blur();
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __doFocus: function(event) {
+            if (!this.focused) {
+                this.setFocused(true);
+                this.doFocus();
+            }
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __doBlur: function(event) {
+            if (this.focused) {
+                this.doBlur();
+                this.setFocused(false);
+            }
+        },
+        
+        /** @returns {undefined} */
+        doFocus: function() {
+            if (this.focusEmbellishment) {
+                this.showFocusEmbellishment();
+            } else {
+                this.hideFocusEmbellishment();
+            }
+        },
+        
+        /** @returns {undefined} */
+        doBlur: function() {
+            if (this.focusEmbellishment) this.hideFocusEmbellishment();
+        },
+        
+        /** @returns {undefined} */
+        showFocusEmbellishment: function() {
+            // IE
+            this.getInnerDomElement().hideFocus = false;
+            
+            // Mozilla and Webkit
+            const s = this.getInnerDomStyle();
+            s.outlineWidth = 'thin';
+            s.outlineColor = '#88bbff';
+            s.outlineStyle = 'solid';
+            s.outlineOffset = '0px';
+        },
+        
+        /** @returns {undefined} */
+        hideFocusEmbellishment: function() {
+            this.hideDefaultFocusEmbellishment();
+        },
+        
+        /** Hides the browser's default focus embellishment.
+            @returns {undefined}*/
+        hideDefaultFocusEmbellishment: function() {
+            // IE
+            this.getInnerDomElement().hideFocus = true;
+            
+            // Mozilla and Webkit
+            this.getInnerDomStyle().outlineStyle = 'none';
+        },
+        
+        /** @overrides myt.DomObservable */
+        createDomMethodRef: function(domObserver, methodName, type) {
+            if (pkg.FocusObservable.EVENT_TYPES[type]) {
+                const self = this;
+                return domEvent => {
+                    if (!domEvent) domEvent = window.event;
+                    
+                    // OPTIMIZATION: prevent extra focus events under special 
+                    // circumstances. See myt.VariableLayout for more detail.
+                    if (self._ignoreFocus) {
+                        domEvent.cancelBubble = true;
+                        if (domEvent.stopPropagation) domEvent.stopPropagation();
+                        domEvent.preventDefault();
+                        return;
+                    }
+                    
+                    // Configure common focus event.
+                    const event = pkg.FocusObservable.EVENT;
+                    event.source = self;
+                    event.type = domEvent.type;
+                    event.value = domEvent;
+                    
+                    const allowBubble = domObserver[methodName](event);
+                    if (!allowBubble) {
+                        domEvent.cancelBubble = true;
+                        if (domEvent.stopPropagation) domEvent.stopPropagation();
+                    }
+                    
+                    event.source = undefined;
+                };
+            }
+            
+            return this.callSuper(domObserver, methodName, type);
+        }
+    });
+    
+    /** Generates input events and passes them on to one or more event observers.
+        Requires myt.DomObservable as a super mixin. */
+    pkg.InputObservable = new JSModule('InputObservable', {
+        // Class Methods and Attributes ////////////////////////////////////////
+        extend: {
+            /** A map of supported input event types. */
+            EVENT_TYPES:{
+                input:true,
+                select:true,
+                change:true
+            },
+            
+            /** The common change/select event that gets reused. */
+            EVENT:makeEmptyEvent()
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides myt.DomObservable */
+        createDomMethodRef: function(domObserver, methodName, type) {
+            return this.createStandardDomMethodRef(domObserver, methodName, type, pkg.InputObservable) || 
+                this.callSuper(domObserver, methodName, type);
+        }
+    });
+    
+    /** Generates drag and drop events and passes them on to one or more event 
+        observers.
+        Requires myt.DomObservable as a super mixin. */
+    pkg.DragDropObservable = new JSModule('DragDropObservable', {
+        // Class Methods and Attributes ////////////////////////////////////////
+        extend: {
+            /** A map of supported drag and drop event types. */
+            EVENT_TYPES:{
+                dragleave:true,
+                dragenter:true,
+                dragover:true,
+                drop:true
+            },
+            
+            /** The common drag and drop event that gets reused. */
+            EVENT:makeEmptyEvent()
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides myt.DomObservable */
+        createDomMethodRef: function(domObserver, methodName, type) {
+            return this.createStandardDomMethodRef(domObserver, methodName, type, pkg.DragDropObservable, true) || 
+                this.callSuper(domObserver, methodName, type);
         }
     });
 })(myt);
@@ -3697,35 +4092,6 @@ myt.KeyObservable = new JS.Module('KeyObservable', {
         }
     });
 })(myt);
-
-
-/** Generates Touch Events and passes them on to one or more event observers.
-    
-    Requires: myt.DomObservable super mixin.
-*/
-myt.TouchObservable = new JS.Module('TouchObservable', {
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        /** A map of supported touch event types. */
-        EVENT_TYPES:{
-            touchstart:true,
-            touchend:true,
-            touchmove:true,
-            touchcancel:true
-        },
-        
-        /** The common touch event that gets reused. */
-        EVENT:{source:null, type:null, value:null}
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.DomObservable */
-    createDomMethodRef: function(domObserver, methodName, type) {
-        return this.createStandardDomMethodRef(domObserver, methodName, type, myt.TouchObservable, false) || 
-            this.callSuper(domObserver, methodName, type);
-    }
-});
 
 
 /** Provides global touch events by listening to touch events on the the
@@ -5568,339 +5934,6 @@ myt.Destructible = new JS.Module('Destructible', {
 })(myt);
 
 
-/** Generates Mouse Events and passes them on to one or more event observers.
-    Also provides the capability to capture contextmenu events and mouse
-    wheel events.
-    
-    Requires: myt.DomObservable super mixin.
-*/
-myt.MouseObservable = new JS.Module('MouseObservable', {
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        /** A map of supported mouse event types. */
-        EVENT_TYPES:{
-            mouseover:true,
-            mouseout:true,
-            mousedown:true,
-            mouseup:true,
-            click:true,
-            dblclick:true,
-            mousemove:true,
-            contextmenu:true,
-            wheel:true
-        },
-        
-        /** The common mouse event that gets reused. */
-        EVENT:{source:null, type:null, value:null},
-        
-        /** Gets the mouse coordinates from the provided event.
-            @param {!Object} event
-            @returns {!Object} An object with 'x' and 'y' keys containing the
-                x and y mouse position. */
-        getMouseFromEvent: function(event) {
-            const domEvent = event.value;
-            return {x:domEvent.pageX, y:domEvent.pageY};
-        },
-        
-        getMouseFromEventRelativeToView: function(event, view) {
-            const viewPos = view.getPagePosition(),
-                pos = this.getMouseFromEvent(event);
-            pos.x -= viewPos.x;
-            pos.y -= viewPos.y;
-            return pos;
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.DomObservable */
-    createDomMethodRef: function(domObserver, methodName, type) {
-        return this.createStandardDomMethodRef(domObserver, methodName, type, myt.MouseObservable, true) || 
-            this.callSuper(domObserver, methodName, type);
-    }
-});
-
-
-/** Generates focus and blur events and passes them on to one or more 
-    event observers. Also provides focus related events to a view. When a view
-    is focused or blurred, myt.global.focus will be notified via the
-    'notifyFocus' and 'notifyBlur' methods.
-    
-    Requires myt.DomObservable as a super mixin.
-    
-    Events:
-        focused:object Fired when this view gets focus. The value is this view.
-        focus:object Fired when this view gets focus. The value is a dom
-            focus event.
-        blur:object Fired when this view loses focus. The value is a dom
-            focus event.
-    
-    Attributes:
-        focused:boolean Indicates if this view has focus or not.
-        focusable:boolean Indicates if this view can have focus or not.
-        focusEmbellishment:boolean Indicates if the focus embellishment should
-            be shown for this view or not when it has focus.
-    
-    Virtual Methods:
-        getNextFocus() Implement this method to return the next view that 
-            should have focus. If null is returned or the method is not 
-            implemented, normal dom traversal will occur.
-        getPrevFocus() Implement this method to return the prev view that 
-            should have focus. If null is returned or the method is not 
-            implemented, normal dom traversal will occur.
-*/
-// TODO: fire focus and blur events rather than a focused event?
-// FIXME: should we give away focus when we become not visible?
-myt.FocusObservable = new JS.Module('FocusObservable', {
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        /** A map of supported focus event types. */
-        EVENT_TYPES:{
-            focus:true,
-            blur:true
-        },
-        
-        /** The common focus/blur event that gets reused. */
-        EVENT:{source:null, type:null, value:null}
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Node */
-    initNode: function(parent, attrs) {
-        this.focusable = false;
-        this.focusEmbellishment = true;
-        
-        this.callSuper(parent, attrs);
-    },
-    
-    /** @overrides myt.View */
-    destroyBeforeOrphaning: function() {
-        this.giveAwayFocus();
-        this.callSuper();
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setFocused: function(v) {
-        if (this.focused !== v) {
-            this.focused = v;
-            if (this.inited) {
-                this.fireEvent('focused', v);
-                const gf = myt.global.focus;
-                if (v) {
-                    gf.notifyFocus(this);
-                } else {
-                    gf.notifyBlur(this);
-                }
-            }
-        }
-    },
-    
-    setFocusable: function(v) {
-        const self = this;
-        
-        if (self.focusable !== v) {
-            const wasFocusable = self.focusable;
-            self.focusable = v;
-            
-            if (v) {
-                self.getInnerDomElement().tabIndex = 0; // Make focusable. -1 is programtic only
-                self.attachToDom(self, '__doFocus', 'focus');
-                self.attachToDom(self, '__doBlur', 'blur');
-            } else if (wasFocusable) {
-                self.getInnerDomElement().removeAttribute('tabIndex'); // Make unfocusable
-                self.detachFromDom(self, '__doFocus', 'focus');
-                self.detachFromDom(self, '__doBlur', 'blur');
-            }
-            
-            if (self.inited) self.fireEvent('focusable', v);
-        }
-    },
-    
-    setFocusEmbellishment: function(v) {
-        if (this.focusEmbellishment !== v) {
-            this.focusEmbellishment = v;
-            if (this.focused) {
-                if (v) {
-                    this.showFocusEmbellishment();
-                } else {
-                    this.hideFocusEmbellishment();
-                }
-            }
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Gives the focus to the next focusable element or, if nothing else
-        is focusable, blurs away from this element.
-        @returns {undefined} */
-    giveAwayFocus: function() {
-        if (this.focused) {
-            // Try to go to next focusable element.
-            myt.global.focus.next();
-            
-            // If focus loops around to ourself make sure we don't keep it.
-            if (this.focused) this.blur();
-        }
-    },
-    
-    /** Tests if this view is in a state where it can receive focus.
-        @returns boolean True if this view is visible, enabled, focusable and
-            not focus masked, false otherwise. */
-    isFocusable: function() {
-        return this.focusable && !this.disabled && this.isVisible() && 
-            this.searchAncestorsOrSelf((n) => n.maskFocus === true) === null;
-    },
-    
-    /** Calling this method will set focus onto this view if it is focusable.
-        @param noScroll:boolean (optional) if true is provided no auto-scrolling
-            will occur when focus is set.
-        @returns {undefined} */
-    focus: function(noScroll) {
-        if (this.isFocusable()) this.getInnerDomElement().focus({preventScroll:noScroll});
-    },
-    
-    /** Removes the focus from this view. Do not call this method directly.
-        @private
-        @returns {undefined} */
-    blur: function() {
-        this.getInnerDomElement().blur();
-    },
-    
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __doFocus: function(event) {
-        if (!this.focused) {
-            this.setFocused(true);
-            this.doFocus();
-        }
-    },
-    
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __doBlur: function(event) {
-        if (this.focused) {
-            this.doBlur();
-            this.setFocused(false);
-        }
-    },
-    
-    /** @returns {undefined} */
-    doFocus: function() {
-        if (this.focusEmbellishment) {
-            this.showFocusEmbellishment();
-        } else {
-            this.hideFocusEmbellishment();
-        }
-    },
-    
-    /** @returns {undefined} */
-    doBlur: function() {
-        if (this.focusEmbellishment) this.hideFocusEmbellishment();
-    },
-    
-    /** @returns {undefined} */
-    showFocusEmbellishment: function() {
-        // IE
-        this.getInnerDomElement().hideFocus = false;
-        
-        // Mozilla and Webkit
-        const s = this.getInnerDomStyle();
-        s.outlineWidth = 'thin';
-        s.outlineColor = '#88bbff';
-        s.outlineStyle = 'solid';
-        s.outlineOffset = '0px';
-    },
-    
-    /** @returns {undefined} */
-    hideFocusEmbellishment: function() {
-        this.hideDefaultFocusEmbellishment();
-    },
-    
-    /** Hides the browser's default focus embellishment.
-        @returns {undefined}*/
-    hideDefaultFocusEmbellishment: function() {
-        // IE
-        this.getInnerDomElement().hideFocus = true;
-        
-        // Mozilla and Webkit
-        this.getInnerDomStyle().outlineStyle = 'none';
-    },
-    
-    /** @overrides myt.DomObservable */
-    createDomMethodRef: function(domObserver, methodName, type) {
-        if (myt.FocusObservable.EVENT_TYPES[type]) {
-            const self = this;
-            return (domEvent) => {
-                if (!domEvent) domEvent = window.event;
-                
-                // OPTIMIZATION: prevent extra focus events under special 
-                // circumstances. See myt.VariableLayout for more detail.
-                if (self._ignoreFocus) {
-                    domEvent.cancelBubble = true;
-                    if (domEvent.stopPropagation) domEvent.stopPropagation();
-                    domEvent.preventDefault();
-                    return;
-                }
-                
-                // Configure common focus event.
-                const event = myt.FocusObservable.EVENT;
-                event.source = self;
-                event.type = domEvent.type;
-                event.value = domEvent;
-                
-                const allowBubble = domObserver[methodName](event);
-                if (!allowBubble) {
-                    domEvent.cancelBubble = true;
-                    if (domEvent.stopPropagation) domEvent.stopPropagation();
-                }
-                
-                event.source = undefined;
-            };
-        }
-        
-        return this.callSuper(domObserver, methodName, type);
-    }
-});
-
-
-/** Generates Scroll Events and passes them on to one or more event observers.
-    Requires myt.DomObservable as a super mixin. */
-myt.ScrollObservable = new JS.Module('ScrollObservable', {
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        /** A map of supported scroll event types. */
-        EVENT_TYPES:{
-            scroll:true
-        },
-        
-        /** The common scroll event that gets reused. */
-        EVENT:{source:null, type:null, value:null},
-        
-        /** Gets the scrollLeft and scrollTop from the event.
-            @param {!Object} event
-            @returns object with an x and y key each containing a number. */
-        getScrollFromEvent: function(event) {
-            const domEvent = event.value,
-                target = domEvent.target || domEvent.srcElement;
-            return {x: target.scrollLeft, y: target.scrollTop};
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.DomObservable */
-    createDomMethodRef: function(domObserver, methodName, type) {
-        return this.createStandardDomMethodRef(domObserver, methodName, type, myt.ScrollObservable) || 
-            this.callSuper(domObserver, methodName, type);
-    }
-});
-
-
 ((pkg) => {
     const DomElementProxy = pkg.DomElementProxy,
         
@@ -7275,13 +7308,8 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides */
     createOurDomElement: function(parent) {
-        const elements = this.callSuper(parent);
-        let innerElem;
-        if (Array.isArray(elements)) {
-            innerElem = elements[1];
-        } else {
-            innerElem = elements;
-        }
+        const elements = this.callSuper(parent),
+            innerElem = Array.isArray(elements) ? elements[1] : elements;
         innerElem.style.display = 'flex';
         return elements;
     },
@@ -8169,13 +8197,8 @@ myt.Frame = new JS.Class('Frame', myt.View, {
     
     /** @overrides myt.View */
     createOurDomElement: function(parent) {
-        const elements = this.callSuper(parent);
-        let innerElem;
-        if (Array.isArray(elements)) {
-            innerElem = elements[1];
-        } else {
-            innerElem = elements;
-        }
+        const elements = this.callSuper(parent),
+            innerElem = Array.isArray(elements) ? elements[1] : elements;
         innerElem.style.border = '0px';
         return elements;
     },
@@ -13897,32 +13920,6 @@ myt.TabMixin = new JS.Module('TabMixin', {
 })(myt);
 
 
-/** Generates input events and passes them on to one or more event observers.
-    Requires myt.DomObservable as a super mixin. */
-myt.InputObservable = new JS.Module('InputObservable', {
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        /** A map of supported input event types. */
-        EVENT_TYPES:{
-            input:true,
-            select:true,
-            change:true
-        },
-        
-        /** The common change/select event that gets reused. */
-        EVENT:{source:null, type:null, value:null}
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.DomObservable */
-    createDomMethodRef: function(domObserver, methodName, type) {
-        return this.createStandardDomMethodRef(domObserver, methodName, type, myt.InputObservable) || 
-            this.callSuper(domObserver, methodName, type);
-    }
-});
-
-
 /** A wrapper around a native browser input element.
     
     Events:
@@ -13956,13 +13953,8 @@ myt.NativeInputWrapper = new JS.Class('NativeInputWrapper', myt.View, {
     /** @overrides myt.View */
     createOurDomElement: function(parent) {
         const elements = this.callSuper(parent);
-        let innerElem;
         if (this.inputType) {
-            if (Array.isArray(elements)) {
-                innerElem = elements[1];
-            } else {
-                innerElem = elements;
-            }
+            const innerElem = Array.isArray(elements) ? elements[1] : elements;
             innerElem.type = this.inputType;
         }
         return elements;
@@ -14000,34 +13992,6 @@ myt.NativeInputWrapper = new JS.Class('NativeInputWrapper', myt.View, {
     setDomValue: function(v) {
         const de = this.getInnerDomElement();
         if (de.value !== v) de.value = v;
-    }
-});
-
-
-/** Generates drag and drop events and passes them on to one or more event 
-    observers.
-    Requires myt.DomObservable as a super mixin. */
-myt.DragDropObservable = new JS.Module('DragDropObservable', {
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        /** A map of supported drag and drop event types. */
-        EVENT_TYPES:{
-            dragleave:true,
-            dragenter:true,
-            dragover:true,
-            drop:true
-        },
-        
-        /** The common drag and drop event that gets reused. */
-        EVENT:{source:null, type:null, value:null}
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.DomObservable */
-    createDomMethodRef: function(domObserver, methodName, type) {
-        return this.createStandardDomMethodRef(domObserver, methodName, type, myt.DragDropObservable, true) || 
-            this.callSuper(domObserver, methodName, type);
     }
 });
 
@@ -14257,7 +14221,8 @@ myt.Form = new JS.Module('Form', {
             IDs of validators from the myt.global.validators registry.
         @returns {undefined} */
     setValidators: function(validators) {
-        let i = validators.length, validator;
+        let i = validators.length,
+            validator;
         while (i) {
             validator = validators[--i];
             if (typeof validator === 'string') {
@@ -14282,8 +14247,7 @@ myt.Form = new JS.Module('Form', {
         
         const retval = {}, 
             subForms = this.__sf;
-        let id;
-        for (id in subForms) retval[id] = subForms[id].getValue();
+        for (const id in subForms) retval[id] = subForms[id].getValue();
         return retval;
     },
     
@@ -14298,9 +14262,8 @@ myt.Form = new JS.Module('Form', {
         
         // Only do "form" behavior for true forms, not for form elements.
         if (typeof value === 'object' && !this.isA(myt.FormElement)) {
-            let subform, id;
-            for (id in value) {
-                subform = this.getSubForm(id);
+            for (const id in value) {
+                const subform = this.getSubForm(id);
                 if (subform) {
                     value[id] = subform.setValue(value[id]);
                 } else {
@@ -14321,9 +14284,8 @@ myt.Form = new JS.Module('Form', {
         @returns object */
     getDefaultValue: function() {
         const retval = {};
-        let subForms = this.__sf, 
-            id;
-        for (id in subForms) retval[id] = subForms[id].getDefaultValue();
+        let subForms = this.__sf;
+        for (const id in subForms) retval[id] = subForms[id].getDefaultValue();
         return retval;
     },
     
@@ -14334,9 +14296,8 @@ myt.Form = new JS.Module('Form', {
         @returns the value that was actually set. */
     setDefaultValue: function(value) {
         if (typeof value === 'object') {
-            let subform, id;
-            for (id in value) {
-                subform = this.getSubForm(id);
+            for (const id in value) {
+                const subform = this.getSubForm(id);
                 if (subform) {
                     value[id] = subform.setDefaultValue(value[id]);
                 } else {
@@ -14354,8 +14315,7 @@ myt.Form = new JS.Module('Form', {
     getRollbackValue: function() {
         const retval = {}, 
             subForms = this.__sf;
-        let id;
-        for (id in subForms) retval[id] = subForms[id].getRollbackValue();
+        for (const id in subForms) retval[id] = subForms[id].getRollbackValue();
         return retval;
     },
     
@@ -14366,9 +14326,8 @@ myt.Form = new JS.Module('Form', {
         @returns the value that was actually set. */
     setRollbackValue: function(value) {
         if (typeof value === 'object') {
-            let subform, id;
-            for (id in value) {
-                subform = this.getSubForm(id);
+            for (const id in value) {
+                const subform = this.getSubForm(id);
                 if (subform) {
                     value[id] = subform.setRollbackValue(value[id]);
                 } else {
@@ -14419,10 +14378,9 @@ myt.Form = new JS.Module('Form', {
     removeValidator: function(id) {
         if (id) {
             const validators = this.__v;
-            let i = validators.length, 
-                validator;
+            let i = validators.length;
             while (i) {
-                validator = validators[--i];
+                const validator = validators[--i];
                 if (validator.id === id) {
                     validators.splice(i, 1);
                     return validator;
@@ -14445,14 +14403,13 @@ myt.Form = new JS.Module('Form', {
         const id = subform.id;
         if (this.getSubForm(id) != null) {
             console.warn("ID in use for subform, add aborted.", id, subform);
-            return;
+        } else {
+            subform.setForm(this);
+            this.__sf[id] = subform;
+            
+            if (subform.isChanged) this.notifySubFormChanged();
+            if (!subform.isValid) this.notifySubFormInvalid();
         }
-        
-        subform.setForm(this);
-        this.__sf[id] = subform;
-        
-        if (subform.isChanged) this.notifySubFormChanged();
-        if (!subform.isValid) this.notifySubFormInvalid();
     },
     
     /** Removes the subform with the provided ID from this form.
@@ -14490,7 +14447,7 @@ myt.Form = new JS.Module('Form', {
                 if (!subform.isValid) retval.push(subform.getFullId());
             } else {
                 const subforms = subform.getSubForms();
-                for (let key in subforms) inspect(subforms[key]);
+                for (const key in subforms) inspect(subforms[key]);
             }
         })(this);
         
@@ -14501,9 +14458,8 @@ myt.Form = new JS.Module('Form', {
         @returns array of error messages strings. */
     getAllErrorMessages: function() {
         const subForms = this.__sf;
-        let msgs = (this.errorMessages || []).concat(),
-            id;
-        for (id in subForms) msgs = msgs.concat(subForms[id].getAllErrorMessages());
+        let msgs = (this.errorMessages || []).concat();
+        for (const id in subForms) msgs = msgs.concat(subForms[id].getAllErrorMessages());
         return msgs;
     },
     
@@ -14521,11 +14477,9 @@ myt.Form = new JS.Module('Form', {
         @returns boolean true if this form is valid, false otherwise. */
     verifyValidState: function(subformToIgnore) {
         const subForms = this.__sf;
-        let isValid = true, 
-            subform, 
-            id;
-        for (id in subForms) {
-            subform = subForms[id];
+        let isValid = true;
+        for (const id in subForms) {
+            const subform = subForms[id];
             if (subform !== subformToIgnore) isValid = subform.isValid && isValid;
         }
         return this.__applyValidation(isValid);
@@ -14537,9 +14491,8 @@ myt.Form = new JS.Module('Form', {
         @returns boolean true if this form is valid, false otherwise. */
     doValidation: function() {
         const subForms = this.__sf;
-        let isValid = true,
-            id;
-        for (id in subForms) isValid = subForms[id].doValidation() && isValid;
+        let isValid = true;
+        for (const id in subForms) isValid = subForms[id].doValidation() && isValid;
         
         this._lockCascade = true;
         isValid = this.__applyValidation(isValid);
@@ -14584,11 +14537,9 @@ myt.Form = new JS.Module('Form', {
         @returns boolean true if this form is changed, false otherwise. */
     verifyChangedState: function(subformToIgnore) {
         const subForms = this.__sf;
-        let isChanged = false, 
-            subform, 
-            id;
-        for (id in subForms) {
-            subform = subForms[id];
+        let isChanged = false;
+        for (const id in subForms) {
+            const subform = subForms[id];
             if (subform !== subformToIgnore) isChanged = subform.isChanged || isChanged;
         }
         this.setIsChanged(isChanged);
@@ -14612,7 +14563,7 @@ myt.Form = new JS.Module('Form', {
         if (value == null) value = {};
         
         const subForms = this.__sf;
-        for (let id in subForms) subForms[id].setup(defaultValue[id], rollbackValue[id], value[id]);
+        for (const id in subForms) subForms[id].setup(defaultValue[id], rollbackValue[id], value[id]);
     },
     
     /** Resets this form to the default values.
@@ -14621,7 +14572,7 @@ myt.Form = new JS.Module('Form', {
         this._lockCascade = true;
         
         const subForms = this.__sf;
-        for (let id in subForms) subForms[id].resetForm();
+        for (const id in subForms) subForms[id].resetForm();
         
         this.setIsChanged(false);
         this.setErrorMessages([]);
@@ -14636,7 +14587,7 @@ myt.Form = new JS.Module('Form', {
         this._lockCascade = true;
         
         const subForms = this.__sf;
-        for (let id in subForms) subForms[id].rollbackForm();
+        for (const id in subForms) subForms[id].rollbackForm();
         
         this.setIsChanged(false);
         this.setErrorMessages([]);
@@ -14652,10 +14603,8 @@ myt.Form = new JS.Module('Form', {
     getChangedValue: function() {
         const retval = {}, 
             subForms = this.__sf;
-        let subform, 
-            id;
-        for (id in subForms) {
-            subform = subForms[id];
+        for (const id in subForms) {
+            const subform = subForms[id];
             if (subform.isChanged) retval[id] = subform.getChangedValue();
         }
         return retval;
@@ -14830,10 +14779,9 @@ myt.FormElement = new JS.Module('FormElement', {
     removeValueProcessor: function(id) {
         if (id) {
             const processors = this.__vp;
-            let i = processors.length, 
-                processor;
+            let i = processors.length;
             while (i) {
-                processor = processors[--i];
+                const processor = processors[--i];
                 if (processor.id === id) {
                     processors.splice(i, 1);
                     return processor;
@@ -14852,28 +14800,26 @@ myt.FormElement = new JS.Module('FormElement', {
     __processValue: function(value, checkAttr) {
         const processors = this.__vp, 
             len = processors.length;
-        let processor, 
-            i = 0;
-        for (; len > i;) {
-            processor = processors[i++];
+        for (let i = 0; len > i;) {
+            const processor = processors[i++];
             if (processor[checkAttr]) value = processor.process(value);
         }
         return value;
     },
     
     /** @overrides myt.Form */
-    addSubForm: function(subform) {
+    addSubForm: subform => {
         myt.dumpStack("addSubForm not supported on form elements.");
     },
     
     /** @overrides myt.Form */
-    getSubForm: function(id) {
+    getSubForm: id => {
         myt.dumpStack("getSubForm not supported on form elements.");
         return null;
     },
     
     /** @overrides myt.Form */
-    removeSubForm: function(id) {
+    removeSubForm: id => {
         myt.dumpStack("removeSubForm not supported on form elements.");
         return null;
     },
@@ -18066,7 +18012,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         // Safe as a closure variable because the registry is a singleton.,
         validators = {},
         
-        getValidator = (id) => validators[id],
+        getValidator = id => validators[id],
         
         doFuncOnIdentifiable = (identifiable, func) => {
             if (identifiable) {
@@ -18081,8 +18027,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             }
         },
         
-        register = (identifiable) => {
-            doFuncOnIdentifiable(identifiable, (id) => {validators[id] = identifiable;});
+        register = identifiable => {
+            doFuncOnIdentifiable(identifiable, id => {validators[id] = identifiable;});
         },
         
         /** Tests if a value is "valid" or not.
@@ -18094,8 +18040,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 id:string the ideally unique ID for this Validator so it can be
                     stored and retreived from the myt.global.validators registry.
             
-            @class
-        */
+            @class */
         Validator = pkg.Validator = new JSClass('Validator', {
             /** Creates a new Validator
                 @param {string} id - The ideally unique ID for a validator instance. */
@@ -18356,14 +18301,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     });
     
     /** Stores myt.Validators by ID so they can be used in multiple
-        places easily.
-        
-        Events:
-            None
-        
-        Attributes:
-            None
-    */
+        places easily. */
     new JS.Singleton('GlobalValidatorRegistry', {
         // Life Cycle //////////////////////////////////////////////////////////
         initialize: function() {
@@ -18403,255 +18341,240 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
 })(myt);
 
 
-/** Modifies a value. Typically used to convert a form element value to its
-    canonical form.
-    
-    Events:
-        None
-    
-    Attributes:
-        id:string The ideally unique ID for this value processor.
-        runForDefault:boolean Indicates this processor should be run for
-            default form values. Defaults to true.
-        runForRollback:boolean Indicates this processor should be run for
-            rollback form values. Defaults to true.
-        runForCurrent:boolean Indicates this processor should be run for
-            current form values. Defaults to true.
-    
-    @class */
-myt.ValueProcessor = new JS.Class('ValueProcessor', {
-    // Class Methods ///////////////////////////////////////////////////////////
-    extend: {
-        DEFAULT_ATTR: 'runForDefault',
-        ROLLBACK_ATTR: 'runForRollback',
-        CURRENT_ATTR: 'runForCurrent'
-    },
-    
-    
-    // Constructor /////////////////////////////////////////////////////////////
-    /** Creates a new ValueProcessor
-        @param {string} id - The ideally unique ID for a processor instance.
-        @param {boolean} [runForDefault]
-        @param {boolean} [runForRollback]
-        @param {boolean} [runForCurrent]
-        @returns {undefined} */
-    initialize: function(id, runForDefault, runForRollback, runForCurrent) {
-        this.id = id;
+((pkg) => {
+    const JSClass = JS.Class,
         
-        const VP = myt.ValueProcessor;
-        this[VP.DEFAULT_ATTR] = runForDefault ? true : false;
-        this[VP.ROLLBACK_ATTR] = runForRollback ? true : false;
-        this[VP.CURRENT_ATTR] = runForCurrent ? true : false;
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Processes the value. The default implementation returns the value
-        unmodified.
-        @param {*} value - The value to modify.
-        @returns {*} - The modified value. */
-    process: function(value) {
-        return value;
-    }
-});
-
-
-/** Converts values to a Number if possible. If the value becomes NaN
-    the original value is returned. */
-myt.ToNumberValueProcessor = new JS.Class('ToNumberValueProcessor', myt.ValueProcessor, {
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.ValueProcessor */
-    process: function(v) {
-        // Don't convert "empty" values to a number since they'll become zero
-        // which is probably incorrect. Also catch undefined/null values since
-        // they will become NaN.
-        if (v == null || v === "" || v === "-") return v;
+        // Safe as a closure variable because the registry is a singleton.,
+        processorsById = {},
         
-        const numericValue = Number(v);
-        return isNaN(numericValue) ? v : numericValue;
-    }
-});
-
-
-/** Trims the whitespace from a value.
-    
-    Attributes:
-        trim:string Determines what kind of trimming to do. Supported values
-            are 'left', 'right' and 'both'. The default value is 'both'.
-    
-    @class */
-myt.TrimValueProcessor = new JS.Class('TrimValueProcessor', myt.ValueProcessor, {
-    // Constructor /////////////////////////////////////////////////////////////
-    /** @overrides myt.ValueProcessor
-        @param {string} id - The ideally unique ID for a processor instance.
-        @param {boolean} [runForDefault]
-        @param {boolean} [runForRollback]
-        @param {boolean} [runForCurrent]
-        @param trim:string Determines the type of trimming to do. Allowed
-            values are 'left', 'right' or 'both'. The default value 
-            is 'both'.
-        @returns {undefined} */
-    initialize: function(id, runForDefault, runForRollback, runForCurrent, trim) {
-        this.callSuper(id, runForDefault, runForRollback, runForCurrent);
+        getValueProcessor = id => processorsById[id],
         
-        this.trim = trim;
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides */
-    process: function(v) {
-        v += '';
-        switch (this.trim) {
-            case 'start':
-            case 'left':
-                return v.trimStart();
-            case 'end':
-            case 'right':
-                return v.trimEnd();
-            default:
-                return v.trim();
-        }
-    }
-});
-
-
-/** Converts undefined values to a default value.
-    
-    Attributes:
-        defaultValue:* The value to return when the processed value is
-            undefined.
-*/
-myt.UndefinedValueProcessor = new JS.Class('UndefinedValueProcessor', myt.ValueProcessor, {
-    // Constructor /////////////////////////////////////////////////////////////
-    /** @overrides myt.ValueProcessor
-        @param {string} id - The ideally unique ID for a processor instance.
-        @param {boolean} [runForDefault]
-        @param {boolean} [runForRollback]
-        @param {boolean} [runForCurrent]
-        @param {*} [defaultValue] - The default value to convert undefined to.
-        @returns {undefined} */
-    initialize: function(id, runForDefault, runForRollback, runForCurrent, defaultValue) {
-        this.callSuper(id, runForDefault, runForRollback, runForCurrent);
-        
-        this.defaultValue = defaultValue;
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.ValueProcessor */
-    process: function(v) {
-        return v === undefined ? this.defaultValue : v;
-    }
-});
-
-
-/** Stores myt.ValueProcessors by ID so they can be used in multiple
-    places easily.
-    
-    Events:
-        None
-    
-    Attributes:
-        None
-    
-    Private Attributes:
-        __c:object A map of myt.ValueProcessors by ID.
-*/
-new JS.Singleton('GlobalValueProcessorRegistry', {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initialize: function() {
-        const self = this,
-            M = myt;
-        
-        self.__c = {};
-        
-        M.global.register('valueProcessors', self);
-        
-        // Register a few common ValueProcessors
-        self.register(new M.UndefinedValueProcessor('undefToEmpty', true, true, true, ''));
-        self.register(new M.ToNumberValueProcessor('toNumber', true, true, true));
-        self.register(new M.TrimValueProcessor('trimLeft', true, true, true, 'left'));
-        self.register(new M.TrimValueProcessor('trimRight', true, true, true, 'right'));
-        self.register(new M.TrimValueProcessor('trimBoth', true, true, true, 'both'));
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** Gets a ValueProcessor for the ID.
-        @param id:string the ID of the ValueProcessor to get.
-        @returns an myt.ValueProcessor or undefined if not found. */
-    getValueProcessor: function(id) {
-        return this.__c[id];
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Adds a ValueProcessor to this registry.
-        @param identifiable:myt.ValueProcessor the ValueProcessor to add.
-        @returns {undefined} */
-    register: function(identifiable) {
-        if (identifiable) {
-            const id = identifiable.id;
-            if (id) {
-                this.__c[id] = identifiable;
+        doFuncOnIdentifiable = (identifiable, func) => {
+            if (identifiable) {
+                const id = identifiable.id;
+                if (identifiable.id) {
+                    func(id);
+                } else {
+                    pkg.dumpStack("No ID");
+                }
             } else {
-                myt.dumpStack("No ID");
+                pkg.dumpStack("No processor");
             }
-        } else {
-            myt.dumpStack("No processor");
-        }
-    },
-    
-    /** Removes a ValueProcessor from this registery.
-        @param identifiable:myt.ValueProcessor the ValueProcessor to remove.
-        @returns {undefined} */
-    unregister: function(identifiable) {
-        if (identifiable) {
-            const id = identifiable.id;
-            if (id) {
-                // Make sure it's in the repository and then delete
-                if (this.getValueProcessor(id)) delete this.__c[id];
-            } else {
-                myt.dumpStack("No ID");
-            }
-        } else {
-            myt.dumpStack("No processor");
-        }
-    }
-});
-
-
-/** Pulls the current value from another form field if the provided value
-    is undefined, null or empty string.
-    
-    Attributes:
-        otherField:myt.FormElement The form element to pull the current 
-            value from.
-    
-    @class */
-myt.UseOtherFieldIfEmptyValueProcessor = new JS.Class('UseOtherFieldIfEmptyValueProcessor', myt.ValueProcessor, {
-    // Constructor /////////////////////////////////////////////////////////////
-    /** @overrides myt.ValueProcessor
-        @param {string} id - The ideally unique ID for a processor instance.
-        @param {boolean} [runForDefault]
-        @param {boolean} [runForRollback]
-        @param {boolean} [runForCurrent]
-        @param {!Object} [otherField] - The myt.FormElement to pull the value from.
-        @returns {undefined} */
-    initialize: function(id, runForDefault, runForRollback, runForCurrent, otherField) {
-        this.callSuper(id, runForDefault, runForRollback, runForCurrent);
+        },
         
-        this.otherField = otherField;
-    },
+        register = identifiable => {
+            doFuncOnIdentifiable(identifiable, id => {processorsById[id] = identifiable;});
+        },
+        
+        /** Modifies a value. Typically used to convert a form element value to its
+            canonical form.
+            
+            Events:
+                None
+            
+            Attributes:
+                id:string The ideally unique ID for this value processor.
+                runForDefault:boolean Indicates this processor should be run for
+                    default form values. Defaults to true.
+                runForRollback:boolean Indicates this processor should be run for
+                    rollback form values. Defaults to true.
+                runForCurrent:boolean Indicates this processor should be run for
+                    current form values. Defaults to true.
+            
+            @class */
+        ValueProcessor = pkg.ValueProcessor = new JSClass('ValueProcessor', {
+            // Class Methods ///////////////////////////////////////////////////
+            extend: {
+                DEFAULT_ATTR: 'runForDefault',
+                ROLLBACK_ATTR: 'runForRollback',
+                CURRENT_ATTR: 'runForCurrent'
+            },
+            
+            
+            // Constructor /////////////////////////////////////////////////////
+            /** Creates a new ValueProcessor
+                @param {string} id - The ideally unique ID for a processor instance.
+                @param {boolean} [runForDefault]
+                @param {boolean} [runForRollback]
+                @param {boolean} [runForCurrent]
+                @returns {undefined} */
+            initialize: function(id, runForDefault, runForRollback, runForCurrent) {
+                this.id = id;
+                
+                this[ValueProcessor.DEFAULT_ATTR] = runForDefault ? true : false;
+                this[ValueProcessor.ROLLBACK_ATTR] = runForRollback ? true : false;
+                this[ValueProcessor.CURRENT_ATTR] = runForCurrent ? true : false;
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** Processes the value. The default implementation returns the value
+                unmodified.
+                @param {*} value - The value to modify.
+                @returns {*} - The modified value. */
+            process: value => value
+        }),
+        
+        /** Converts values to a Number if possible. If the value becomes NaN
+            the original value is returned.
+            
+            @class */
+        ToNumberValueProcessor = pkg.ToNumberValueProcessor = new JSClass('ToNumberValueProcessor', ValueProcessor, {
+            // Methods /////////////////////////////////////////////////////////
+            /** @overrides myt.ValueProcessor */
+            process: value => {
+                // Don't convert "empty" values to a number since they'll become zero
+                // which is probably incorrect. Also catch undefined/null values since
+                // they will become NaN.
+                if (value == null || value === "" || value === "-") return value;
+                
+                const numericValue = Number(value);
+                return isNaN(numericValue) ? value : numericValue;
+            }
+        }),
+        
+        /** Trims the whitespace from a value.
+            
+            Attributes:
+                trim:string Determines what kind of trimming to do. Supported values
+                    are 'left', 'right' and 'both'. The default value is 'both'.
+            
+            @class */
+        TrimValueProcessor = pkg.TrimValueProcessor = new JSClass('TrimValueProcessor', ValueProcessor, {
+            // Constructor /////////////////////////////////////////////////////
+            /** @overrides myt.ValueProcessor
+                @param {string} id - The ideally unique ID for a processor instance.
+                @param {boolean} [runForDefault]
+                @param {boolean} [runForRollback]
+                @param {boolean} [runForCurrent]
+                @param trim:string Determines the type of trimming to do. Allowed
+                    values are 'left', 'right' or 'both'. The default value 
+                    is 'both'.
+                @returns {undefined} */
+            initialize: function(id, runForDefault, runForRollback, runForCurrent, trim) {
+                this.callSuper(id, runForDefault, runForRollback, runForCurrent);
+                
+                this.trim = trim;
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @overrides */
+            process: function(value) {
+                value += '';
+                switch (this.trim) {
+                    case 'start':
+                    case 'left':
+                        return value.trimStart();
+                    case 'end':
+                    case 'right':
+                        return value.trimEnd();
+                    default:
+                        return value.trim();
+                }
+            }
+        }),
+        
+        /** Converts undefined values to a default value.
+            
+            Attributes:
+                defaultValue:* The value to return when the processed value is undefined.
+            
+            @class */
+        UndefinedValueProcessor = pkg.UndefinedValueProcessor = new JSClass('UndefinedValueProcessor', ValueProcessor, {
+            // Constructor /////////////////////////////////////////////////////
+            /** @overrides myt.ValueProcessor
+                @param {string} id - The ideally unique ID for a processor instance.
+                @param {boolean} [runForDefault]
+                @param {boolean} [runForRollback]
+                @param {boolean} [runForCurrent]
+                @param {*} [defaultValue] - The default value to convert undefined to.
+                @returns {undefined} */
+            initialize: function(id, runForDefault, runForRollback, runForCurrent, defaultValue) {
+                this.callSuper(id, runForDefault, runForRollback, runForCurrent);
+                
+                this.defaultValue = defaultValue;
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @overrides myt.ValueProcessor */
+            process: function(value) {
+                return value === undefined ? this.defaultValue : value;
+            }
+        });
     
+    /** Pulls the current value from another form field if the provided value
+        is undefined, null or empty string.
+        
+        Attributes:
+            otherField:myt.FormElement The form element to pull the current 
+                value from.
+        
+        @class */
+    pkg.UseOtherFieldIfEmptyValueProcessor = new JSClass('UseOtherFieldIfEmptyValueProcessor', ValueProcessor, {
+        // Constructor /////////////////////////////////////////////////////////
+        /** @overrides myt.ValueProcessor
+            @param {string} id - The ideally unique ID for a processor instance.
+            @param {boolean} [runForDefault]
+            @param {boolean} [runForRollback]
+            @param {boolean} [runForCurrent]
+            @param {!Object} [otherField] - The myt.FormElement to pull the value from.
+            @returns {undefined} */
+        initialize: function(id, runForDefault, runForRollback, runForCurrent, otherField) {
+            this.callSuper(id, runForDefault, runForRollback, runForCurrent);
+            
+            this.otherField = otherField;
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides */
+        process: function(value) {
+            return (value == null || value === "") ? this.otherField.getValue() : value;
+        }
+    });
     
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides */
-    process: function(v) {
-        return (v == null || v === "") ? this.otherField.getValue() : v;
-    }
-});
+    /** Stores myt.ValueProcessors by ID so they can be used in multiple
+        places easily. */
+    new JS.Singleton('GlobalValueProcessorRegistry', {
+        // Life Cycle //////////////////////////////////////////////////////////
+        initialize: function() {
+            // Register a few common ValueProcessors
+            register(new UndefinedValueProcessor('undefToEmpty', true, true, true, ''));
+            register(new ToNumberValueProcessor('toNumber', true, true, true));
+            register(new TrimValueProcessor('trimLeft', true, true, true, 'left'));
+            register(new TrimValueProcessor('trimRight', true, true, true, 'right'));
+            register(new TrimValueProcessor('trimBoth', true, true, true, 'both'));
+            
+            pkg.global.register('valueProcessors', this);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** Gets a ValueProcessor for the ID.
+            @param id:string the ID of the ValueProcessor to get.
+            @returns an myt.ValueProcessor or undefined if not found. */
+        getValueProcessor: getValueProcessor,
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Adds a ValueProcessor to this registry.
+            @param identifiable:myt.ValueProcessor the ValueProcessor to add.
+            @returns {undefined} */
+        register: register,
+        
+        /** Removes a ValueProcessor from this registery.
+            @param identifiable:myt.ValueProcessor the ValueProcessor to remove.
+            @returns {undefined} */
+        unregister: identifiable => {
+            doFuncOnIdentifiable(identifiable, (id) => {
+                // Make sure the processor is in the repository then delete.
+                if (getValueProcessor(id)) delete processorsById[id];
+            });
+        }
+    });
+})(myt);
 
 
 /** A wrapper around a native browser select component.
@@ -24722,16 +24645,9 @@ myt.Eventable = new JS.Class('Eventable', {
         /** @overrides myt.View */
         createOurDomElement: function(parent) {
             const elements = this.callSuper(parent),
-                MSVG = pkg.Annulus.makeSVG;
-            let svg,
-                innerElem;
-            if (Array.isArray(elements)) {
-                innerElem = elements[1];
-            } else {
-                innerElem = elements;
-            }
-            
-            svg = this.__svg = MSVG('svg', innerElem);
+                innerElem = Array.isArray(elements) ? elements[1] : elements,
+                MSVG = pkg.Annulus.makeSVG,
+                svg = this.__svg = MSVG('svg', innerElem);
             this.__path = MSVG('path', svg);
             
             // Let the view handle mouse events
