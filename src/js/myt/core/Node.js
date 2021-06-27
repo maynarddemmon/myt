@@ -96,7 +96,7 @@
             pkg.AccessorSupport, 
             pkg.Destructible, 
             pkg.Observable, 
-            pkg.Constrainable
+            pkg.Observer
         ],
         
         

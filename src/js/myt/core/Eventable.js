@@ -10,7 +10,7 @@
             initializing.
 */
 myt.Eventable = new JS.Class('Eventable', {
-    include: [myt.AccessorSupport, myt.Destructible, myt.Observable, myt.Constrainable],
+    include: [myt.AccessorSupport, myt.Destructible, myt.Observable, myt.Observer],
     
     
     // Constructor /////////////////////////////////////////////////////////////
