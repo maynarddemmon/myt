@@ -73,6 +73,9 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'Divider.js'         ).provides('myt.HorizontalDivider','myt.VerticalDivider').requires('myt.SimpleButton','myt.BoundedValueComponent','myt.Draggable');
     file(MYT_COMPONENT_ROOT + 'FloatingPanel.js'   ).provides('myt.FloatingPanelAnchor','myt.FloatingPanel').requires('myt.RootView','myt.global.mouse','myt.global.focus');
     file(MYT_COMPONENT_ROOT + 'FontAwesome.js'     ).provides('myt.FontAwesome').requires('myt.Markup');
+    file(MYT_COMPONENT_ROOT + 'ListView.js'        )
+        .provides('myt.ListView','myt.ListViewAnchor','myt.ListViewItemMixin','myt.ListViewSeparator','myt.ListViewItem')
+        .requires('myt.FloatingPanel','myt.FloatingPanelAnchor','myt.SimpleIconTextButton');
     file(MYT_COMPONENT_ROOT + 'ModalPanel.js'      ).provides('myt.ModalPanel').requires('myt.Dimmer','myt.SizeToChildren');
     file(MYT_COMPONENT_ROOT + 'Path.js'            ).provides('myt.Path' ).requires('myt');
     file(MYT_COMPONENT_ROOT + 'Radio.js'           ).provides('myt.Radio').requires('myt.SimpleButtonStyle','myt.BAG');
@@ -147,13 +150,6 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'infinite/InfiniteGrid.js'          )
         .provides('myt.InfiniteGrid','myt.InfiniteGridRow','myt.InfiniteGridHeader','myt.SelectableInfiniteGrid','myt.SelectableInfiniteGridRow','myt.SimpleSelectableInfiniteGridRow')
         .requires('myt.SelectableInfiniteList','myt.GridController');
-    
-    // Component : List View
-    file(MYT_COMPONENT_ROOT + 'listview/ListViewItemMixin.js').provides('myt.ListViewItemMixin').requires('myt');
-    file(MYT_COMPONENT_ROOT + 'listview/ListViewSeparator.js').provides('myt.ListViewSeparator').requires('myt.View','myt.ListViewItemMixin');
-    file(MYT_COMPONENT_ROOT + 'listview/ListViewItem.js'     ).provides('myt.ListViewItem'     ).requires('myt.SimpleIconTextButton','myt.ListViewItemMixin');
-    file(MYT_COMPONENT_ROOT + 'listview/ListView.js'         ).provides('myt.ListView'         ).requires('myt.FloatingPanel','myt.ListViewItem','myt.ListViewSeparator');
-    file(MYT_COMPONENT_ROOT + 'listview/ListViewAnchor.js'   ).provides('myt.ListViewAnchor'   ).requires('myt.ListView','myt.FloatingPanelAnchor');
     
     // Component : Slider
     file(MYT_COMPONENT_ROOT + 'slider/SliderThumbMixin.js'     ).provides('myt.SliderThumbMixin'     ).requires('myt.View','myt.Draggable');
