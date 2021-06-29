@@ -490,9 +490,9 @@ Date.prototype.format = Date.prototype.format || (() => {
     /*
      * http://github.com/maynarddemmon/myt
      * Maynard Demmon <maynarddemmon@gmail.com>
-     * @copyright Copyright (c) 2012-2020 Maynard Demmon and contributors
+     * @copyright Copyright (c) 2012-2021 Maynard Demmon and contributors
      * Myt: A simple javascript UI framework
-     * Version: 20200514.1444
+     * Version: 20210628.2027
      * MIT License
      * 
      * Parts of the Software incorporates code from the following open-source projects:
@@ -531,7 +531,7 @@ Date.prototype.format = Date.prototype.format || (() => {
         },
         docFonts = document.fonts,
         
-        notifyFontLoaded = (fontFace) => {
+        notifyFontLoaded = fontFace => {
             let fontName = fontFace.family + ' ' + fontFace.weight,
                 targets;
             
@@ -546,14 +546,14 @@ Date.prototype.format = Date.prototype.format || (() => {
             }
         },
         
-        notifyInstanceThatFontLoaded = (instance) => {
+        notifyInstanceThatFontLoaded = instance => {
             if (instance && !instance.destroyed) instance.sizeViewToDom();
         },
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was
                 created. */
-            version:20210609.1302,
+            version:20210628.2027,
             
             /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
                 should be set by the page that includes this script. */
@@ -622,7 +622,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                 @param {*} value - The value to resolve and/or verify.
                 @returns {?Function} - A JS.Class or null if the string could not 
                     be resolved or the value was not a JS.Class object. */
-            resolveClassname: (value) => {
+            resolveClassname: value => {
                 if (typeof value === 'string') value = myt.resolveName(value);
                 
                 // Make sure what we found is really a JS.Class otherwise return null.
@@ -633,7 +633,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                 @param {string} fileName - The filename to extract the extension from.
                 @returns {string) The file extension or null if a falsy fileName
                     argument was provided. */
-            getExtension: (fileName) => fileName ? fileName.split('.')[1] : null,
+            getExtension: fileName => fileName ? fileName.split('.')[1] : null,
             
             /** Dynamically load a script into the dom.
                 @param {string} src - The URL to the script file.
@@ -708,7 +708,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                         - function(v) {return 0.9999999999 - v * v;} will skew the 
                           value towards a value very close to 1.
                 @returns {number} a random number between 0 and almost 1. */
-            getRandom: (func) => {
+            getRandom: func => {
                 let v = Math.random();
                 if (func) {
                     v = func(v);
@@ -846,13 +846,13 @@ Date.prototype.format = Date.prototype.format || (() => {
                 the document.
                 @param {string} fontFamily
                 @returns {undefined} */
-            createBaseFontCSSRule: (fontFamily) => {
+            createBaseFontCSSRule: fontFamily => {
                 myt.addCSSRule(myt.createStylesheet(), 'body, input', 'font-family:' + fontFamily, 0);
             },
             
             /** @param {?Array} fontUrls
                 @returns {undefined} */
-            loadCSSFonts: (fontUrls) => {
+            loadCSSFonts: fontUrls => {
                 (fontUrls || []).forEach(fontUrl => {
                     const link = document.createElement('link');
                     link.rel = 'stylesheet';
@@ -878,7 +878,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                 }
             },
             
-            removeCSSRules: (sheet) => {
+            removeCSSRules: sheet => {
                 let i = sheet.cssRules.length;
                 while (i) {
                     i--;
@@ -925,13 +925,13 @@ Date.prototype.format = Date.prototype.format || (() => {
             
             // Misc
             /** Memoize a function.
-                @param {!Function} f - The function to memoize
+                @param {!Function} func - The function to memoize
                 @returns {!Function} - The memoized function. */
-            memoize: (f) => {
+            memoize: func => {
                 return function() {
                     const hash = JSON.stringify(arguments),
-                        cache = f.__cache || (f.__cache = {});
-                    return (hash in cache) ? cache[hash] : cache[hash] = f.apply(this, arguments);
+                        cache = func.__cache || (func.__cache = {});
+                    return (hash in cache) ? cache[hash] : cache[hash] = func.apply(this, arguments);
                 };
             },
             
@@ -1027,10 +1027,8 @@ Date.prototype.format = Date.prototype.format || (() => {
             // Fetch
             makeURLSearchParams: (params={}) => {
                 const urlSearchParams = new URLSearchParams();
-                let key,
-                    value;
-                for (key in params) {
-                    value = params[key];
+                for (const key in params) {
+                    const value = params[key];
                     if (value !== undefined) urlSearchParams.set(key, value);
                 }
                 return urlSearchParams;
@@ -1083,7 +1081,7 @@ Date.prototype.format = Date.prototype.format || (() => {
             )
         };
     
-    docFonts.onloadingdone = (fontFaceSetEvent) => {
+    docFonts.onloadingdone = fontFaceSetEvent => {
         fontFaceSetEvent.fontfaces.forEach(fontFace => {notifyFontLoaded(fontFace);});
     };
 })(global);
