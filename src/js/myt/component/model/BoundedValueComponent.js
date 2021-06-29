@@ -23,7 +23,7 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
         
         if (!attrs.valueFilter) {
             const self = this;
-            attrs.valueFilter = function(v) {
+            attrs.valueFilter = v => {
                 const max = self.maxValue;
                 if (max != null && v > max) return max;
                 

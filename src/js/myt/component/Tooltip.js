@@ -138,7 +138,7 @@
                     this.setVisible(true);
                 }
             }
-        });
+        }),
         
         /*  An implementation of a tooltip.
             

@@ -66,11 +66,9 @@ myt.Path = new JS.Class('Path', {
         const cosA = Math.cos(a), sinA = Math.sin(a),
             vecs = this.vectors,
             len = vecs.length;
-        let xNew, yNew, i = 0;
-        for (; len > i;) {
-            xNew = vecs[i] * cosA - vecs[i + 1] * sinA;
-            yNew = vecs[i] * sinA + vecs[i + 1] * cosA;
-            
+        for (let i = 0; len > i;) {
+            const xNew = vecs[i] * cosA - vecs[i + 1] * sinA,
+                yNew = vecs[i] * sinA + vecs[i + 1] * cosA;
             vecs[i++] = xNew;
             vecs[i++] = yNew;
         }
@@ -96,13 +94,13 @@ myt.Path = new JS.Class('Path', {
         if (this._boundingBox) return this._boundingBox;
         
         const vecs = this.vectors;
-        let i = vecs.length, x, y, minX, maxX, minY, maxY;
+        let i = vecs.length, minX, maxX, minY, maxY;
         if (i >= 2) {
             minY = maxY = vecs[--i];
             minX = maxX = vecs[--i];
             while (i) {
-                y = vecs[--i];
-                x = vecs[--i];
+                const y = vecs[--i],
+                    x = vecs[--i];
                 minY = Math.min(y, minY);
                 maxY = Math.max(y, maxY);
                 minX = Math.min(x, minX);

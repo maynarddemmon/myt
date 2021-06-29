@@ -7527,110 +7527,192 @@ myt.FlexBox = new JS.Class('FlexBox', myt.View, {
 })(myt);
 
 
-/** A mixin that sizes the view to the width and height of the dom element.
-    
-    Events:
-        None
-    
-    Attributes:
-        width:number:string If a number the behavior is defined by the
-            superclass. If a string value of 'auto' is provided sizing to
-            the dom will occur. Using 'auto' allows the original SizeToDom
-            behavior to be restored after an explicit width has been set.
-        height:number:string If a number the behavior is defined by the
-            superclass. If a string value of 'auto' is provided sizing to
-            the dom will occur. Using 'auto' allows the original SizeToDom
-            behavior to be restored after an explicit height has been set.
-    
-    Private Attributes:
-        __hasSetWidth:boolean Indicates the an explicit width has been set
-            so that should be used rather than sizing to the dom element.
-        __hasSetHeight:boolean Indicates the an explicit height has been set
-            so that should be used rather than sizing to the dom element.
-    
-    @class */
-myt.SizeToDom = new JS.Module('SizeToDom', {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.View 
-        Subclasses should call super. */
-    doAfterAdoption: function() {
-        this.sizeViewToDom();
-        this.callSuper();
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrides myt.View */
-    setWidth: function(v, supressEvent) {
-        if (v === 'auto') {
-            this.__hasSetWidth = false;
-            this.getOuterDomStyle().width = 'auto';
-            this.sizeViewToDom();
-        } else {
-            this.__hasSetWidth = true;
-            this.callSuper(v, supressEvent);
-        }
-    },
-    
-    /** @overrides myt.View */
-    setHeight: function(v, supressEvent) {
-        if (v === 'auto') {
-            this.__hasSetHeight = false;
-            this.getOuterDomStyle().height = 'auto';
-            this.sizeViewToDom();
-        } else {
-            this.__hasSetHeight = true;
-            this.callSuper(v, supressEvent);
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Call this method after any change to the width or height of the dom
-        element would have occurred.
-        @returns {undefined} */
-    sizeViewToDom: function() {
-        const self = this;
-        let de,
-            scaling,
-            w,
-            h;
+((pkg) => {
+    const JSModule = JS.Module,
         
-        if (!self.__hasSetWidth) {
-            de = self.getOuterDomElement();
-            w = de.offsetWidth;
-            
-            // Bounding rect doesn't factor in scaling so we need to calculate
-            // this ourselves.
-            scaling = self.getEffectiveScale();
-            w /= scaling.scaleX;
-            
-            // Circumvent setter
-            if (self.width !== w) {
-                self.width = w;
-                if (self.inited) self.__updateBounds(w, self.height);
-                self.fireEvent('width', w);
+        setWidth = (view, value) => {
+            if (value === 'auto') {
+                view.__hasSetWidth = false;
+                view.getOuterDomStyle().width = 'auto';
+                view.sizeViewToDom();
+            } else {
+                view.__hasSetWidth = true;
+                return true; // Tells callee to callSuper
             }
-        }
+        },
         
-        if (!self.__hasSetHeight) {
-            if (!de) de = self.getOuterDomElement();
-            h = de.offsetHeight;
-            
-            // Bounding rect doesn't factor in scaling so we need to calculate
-            // this ourselves.
-            if (!scaling) scaling = self.getEffectiveScale();
-            h /= scaling.scaleY;
-            
-            // Circumvent setter
-            if (self.height !== h) {
-                self.height = h;
-                if (self.inited) self.__updateBounds(self.width, h);
-                self.fireEvent('height', h);
+        setHeight = (view, value) => {
+            if (value === 'auto') {
+                view.__hasSetHeight = false;
+                view.getOuterDomStyle().height = 'auto';
+                view.sizeViewToDom();
+            } else {
+                view.__hasSetHeight = true;
+                return true; // Tells callee to callSuper
             }
+        },
+        
+        sizeWidth = view => {
+            if (!view.__hasSetWidth) {
+                // Bounding rect doesn't factor in scaling so we need to 
+                // calculate this ourselves.
+                const w = view.getOuterDomElement().offsetWidth / view.getEffectiveScaleX();
+                
+                // Circumvent setter
+                if (view.width !== w) {
+                    view.width = w;
+                    if (view.inited) view.__updateBounds(w, view.height);
+                    view.fireEvent('width', w);
+                }
+            }
+        },
+        
+        sizeHeight = view => {
+            if (!view.__hasSetHeight) {
+                // Bounding rect doesn't factor in scaling so we need to 
+                // calculate this ourselves.
+                const h = view.getOuterDomElement().offsetHeight / view.getEffectiveScaleY();
+                
+                // Circumvent setter
+                if (view.height !== h) {
+                    view.height = h;
+                    if (view.inited) view.__updateBounds(view.width, h);
+                    view.fireEvent('height', h);
+                }
+            }
+        };
+    
+    /** A mixin that sizes the view to the width and height of the dom element.
+        
+        Attributes:
+            width:number:string If a number the behavior is defined by the
+                superclass. If a string value of 'auto' is provided sizing to
+                the dom will occur. Using 'auto' allows the original SizeToDom
+                behavior to be restored after an explicit width has been set.
+            height:number:string If a number the behavior is defined by the
+                superclass. If a string value of 'auto' is provided sizing to
+                the dom will occur. Using 'auto' allows the original SizeToDom
+                behavior to be restored after an explicit height has been set.
+        
+        Private Attributes:
+            __hasSetWidth:boolean Indicates the an explicit width has been set
+                so that should be used rather than sizing to the dom element.
+            __hasSetHeight:boolean Indicates the an explicit height has been set
+                so that should be used rather than sizing to the dom element.
+        
+        @class */
+    pkg.SizeToDom = new JSModule('SizeToDom', {
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.View 
+            Subclasses should call super. */
+        doAfterAdoption: function() {
+            this.sizeViewToDom();
+            this.callSuper();
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** @overrides myt.View */
+        setWidth: function(v, supressEvent) {
+            if (setWidth(this, v)) this.callSuper(v, supressEvent);
+        },
+        
+        /** @overrides myt.View */
+        setHeight: function(v, supressEvent) {
+            if (setHeight(this, v)) this.callSuper(v, supressEvent);
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Call this method after any change to the width or height of the dom
+            element would have occurred.
+            @returns {undefined} */
+        sizeViewToDom: function() {
+            sizeWidth(this);
+            sizeHeight(this);
         }
-    }
-});
+    });
+    
+    /** A variation of myt.SizeToDom that sizes the view to the width of the 
+        dom element only.
+        
+        Attributes:
+            width:number:string If a number the behavior is defined by the
+                superclass. If a string value of 'auto' is provided sizing to
+                the dom will occur. Using 'auto' allows the original SizeToDom
+                behavior to be restored after an explicit width has been set.
+        
+        Private Attributes:
+            __hasSetWidth:boolean Indicates the an explicit width has been set
+                so that should be used rather than sizing to the dom element.
+        
+        @class */
+    pkg.SizeWidthToDom = new JSModule('SizeWidthToDom', {
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.View 
+            Subclasses should call super. */
+        doAfterAdoption: function() {
+            this.sizeViewToDom();
+            this.callSuper();
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** @overrides myt.View */
+        setWidth: function(v, supressEvent) {
+            if (setWidth(this, v)) this.callSuper(v, supressEvent);
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Call this method after any change to the width of the dom
+            element would have occurred.
+            @returns {undefined} */
+        sizeViewToDom: function() {
+            sizeWidth(this);
+        }
+    });
+    
+    /** A variation of myt.SizeToDom that sizes the view to the height of the 
+        dom element only.
+        
+        Attributes:
+            height:number:string If a number the behavior is defined by the
+                superclass. If a string value of 'auto' is provided sizing to
+                the dom will occur. Using 'auto' allows the original SizeToDom
+                behavior to be restored after an explicit height has been set.
+        
+        Private Attributes:
+            __hasSetHeight:boolean Indicates the an explicit height has been set
+                so that should be used rather than sizing to the dom element.
+        
+        @class */
+    pkg.SizeHeightToDom = new JSModule('SizeHeightToDom', {
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.View 
+            Subclasses should call super. */
+        doAfterAdoption: function() {
+            this.sizeViewToDom();
+            this.callSuper();
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** @overrides myt.View */
+        setHeight: function(v, supressEvent) {
+            if (setHeight(this, v)) this.callSuper(v, supressEvent);
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Call this method after any change to the height of the dom
+            element would have occurred.
+            @returns {undefined} */
+        sizeViewToDom: function() {
+            sizeHeight(this);
+        }
+    });
+})(myt);
 
 
 /** Adds support for text display to a View.
@@ -8215,257 +8297,131 @@ myt.Frame = new JS.Class('Frame', myt.View, {
 });
 
 
-/** A variation of myt.SizeToDom that sizes the view to the width of the 
-    dom element only.
-    
-    Events:
-        None
-    
-    Attributes:
-        width:number:string If a number the behavior is defined by the
-            superclass. If a string value of 'auto' is provided sizing to
-            the dom will occur. Using 'auto' allows the original SizeToDom
-            behavior to be restored after an explicit width has been set.
-    
-    Private Attributes:
-        __hasSetWidth:boolean Indicates the an explicit width has been set
-            so that should be used rather than sizing to the dom element.
-*/
-myt.SizeWidthToDom = new JS.Module('SizeWidthToDom', {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.View 
-        Subclasses should call super. */
-    doAfterAdoption: function() {
-        this.sizeViewToDom();
-        this.callSuper();
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrides myt.View */
-    setWidth: function(v, supressEvent) {
-        if (v === 'auto') {
-            this.__hasSetWidth = false;
-            this.deStyle.width = 'auto';
-            this.sizeViewToDom();
-        } else {
-            this.__hasSetWidth = true;
-            this.callSuper(v, supressEvent);
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Call this method after any change to the width of the dom
-        element would have occurred.
-        @returns {undefined} */
-    sizeViewToDom: function() {
-        if (!this.__hasSetWidth) {
-            // Bounding rect doesn't factor in scaling so we need to calculate
-            // this ourselves.
-            const w = this.getOuterDomElement().offsetWidth / this.getEffectiveScaleX();
-            
-            // Circumvent setter
-            if (this.width !== w) {
-                this.width = w;
-                if (this.inited) this.__updateBounds(w, this.height);
-                this.fireEvent('width', w);
-            }
-        }
-    }
-});
-
-
-/** A variation of myt.SizeToDom that sizes the view to the height of the 
-    dom element only.
-    
-    Events:
-        None
-    
-    Attributes:
-        height:number:string If a number the behavior is defined by the
-            superclass. If a string value of 'auto' is provided sizing to
-            the dom will occur. Using 'auto' allows the original SizeToDom
-            behavior to be restored after an explicit height has been set.
-    
-    Private Attributes:
-        __hasSetHeight:boolean Indicates the an explicit height has been set
-            so that should be used rather than sizing to the dom element.
-*/
-myt.SizeHeightToDom = new JS.Module('SizeHeightToDom', {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.View 
-        Subclasses should call super. */
-    doAfterAdoption: function() {
-        this.sizeViewToDom();
-        this.callSuper();
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrides myt.View */
-    setHeight: function(v, supressEvent) {
-        if (v === 'auto') {
-            this.__hasSetHeight = false;
-            this.deStyle.height = 'auto';
-            this.sizeViewToDom();
-        } else {
-            this.__hasSetHeight = true;
-            this.callSuper(v, supressEvent);
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Call this method after any change to the height of the dom
-        element would have occurred.
-        @returns {undefined} */
-    sizeViewToDom: function() {
-        if (!this.__hasSetHeight) {
-            // Bounding rect doesn't factor in scaling so we need to calculate
-            // this ourselves.
-            const h = this.getOuterDomElement().offsetHeight / this.getEffectiveScaleY();
-            
-            // Circumvent setter
-            if (this.height !== h) {
-                this.height = h;
-                if (this.inited) this.__updateBounds(this.width, h);
-                this.fireEvent('height', h);
-            }
-        }
-    }
-});
-
-
-/** A mixin that sizes a view to a percentage of its parent view.
-    
-    This is the inverse of a layout since the child is responsible for sizing
-    itself to the parent rather than in a layout where the layout positions
-    and sizes the children.
-    
-    Events:
-        percentOfParentWidthOffset:number
-        percentOfParentHeightOffset:number
-        percentOfParentWidth:number
-        percentOfParentHeight:number
+((pkg) => {
+    const
+        setupPercentOfParentWidthConstraint = stp => {
+            const p = stp.parent;
+            if (p && stp.percentOfParentWidth >= 0) stp.syncTo(p, '__doPOPW', 'width');
+        },
         
-    Attributes:
-        percentOfParentWidthOffset:number An additional offset used to adjust
-            the width of the parent. Defaults to undefined which is
-            equivalent to 0.
-        percentOfParentHeightOffset:number An additional offset used to adjust
-            the height of the parent. Defaults to undefined which is
-            equivalent to 0.
-        percentOfParentWidth:number The percent of the parent views width
-            to size this views width to. Should be a number between 0 and 100 
-            or a negative value which means don't do resizing. Defaults to 
-            undefined which is equivalent to a negative value.
-        percentOfParentHeight:number The percent of the parent views height
-            to size this views height to. Should be a number between 0 and 100 
-            or a negative value which means don't do resizing. Defaults to 
-            undefined which is equivalent to a negative value.
-*/
-myt.SizeToParent = new JS.Module('SizeToParent', {
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrides myt.View */
-    setParent: function(parent) {
-        if (this.parent !== parent) {
-            if (this.inited) {
-                this.__teardownPercentOfParentWidthConstraint();
-                this.__teardownPercentOfParentHeightConstraint();
+        teardownPercentOfParentWidthConstraint = stp => {
+            if (stp.percentOfParentWidth >= 0) stp.detachFrom(stp.parent, '__doPOPW', 'width');
+        },
+        
+        setupPercentOfParentHeightConstraint = stp => {
+            const p = stp.parent;
+            if (p && stp.percentOfParentHeight >= 0) stp.syncTo(p, '__doPOPH', 'height');
+        },
+        
+        teardownPercentOfParentHeightConstraint = stp => {
+            if (stp.percentOfParentHeight >= 0) stp.detachFrom(stp.parent, '__doPOPH', 'height');
+        };
+    
+    /** A mixin that sizes a view to a percentage of its parent view.
+        
+        This is the inverse of a layout since the child is responsible for sizing
+        itself to the parent rather than in a layout where the layout positions
+        and sizes the children.
+        
+        Events:
+            percentOfParentWidthOffset:number
+            percentOfParentHeightOffset:number
+            percentOfParentWidth:number
+            percentOfParentHeight:number
+            
+        Attributes:
+            percentOfParentWidthOffset:number An additional offset used to adjust
+                the width of the parent. Defaults to undefined which is
+                equivalent to 0.
+            percentOfParentHeightOffset:number An additional offset used to adjust
+                the height of the parent. Defaults to undefined which is
+                equivalent to 0.
+            percentOfParentWidth:number The percent of the parent views width
+                to size this views width to. Should be a number between 0 and 100 
+                or a negative value which means don't do resizing. Defaults to 
+                undefined which is equivalent to a negative value.
+            percentOfParentHeight:number The percent of the parent views height
+                to size this views height to. Should be a number between 0 and 100 
+                or a negative value which means don't do resizing. Defaults to 
+                undefined which is equivalent to a negative value.
+        
+        @class */
+    pkg.SizeToParent = new JS.Module('SizeToParent', {
+        // Accessors ///////////////////////////////////////////////////////////
+        /** @overrides myt.View */
+        setParent: function(parent) {
+            if (this.parent !== parent) {
+                if (this.inited) {
+                    teardownPercentOfParentWidthConstraint(this);
+                    teardownPercentOfParentHeightConstraint(this);
+                }
+                this.callSuper(parent);
+                setupPercentOfParentWidthConstraint(this);
+                setupPercentOfParentHeightConstraint(this);
             }
-            this.callSuper(parent);
-            this.__setupPercentOfParentWidthConstraint();
-            this.__setupPercentOfParentHeightConstraint();
-        }
-    },
-    
-    setPercentOfParentWidthOffset: function(v) {
-        if (this.percentOfParentWidthOffset !== v) {
-            this.percentOfParentWidthOffset = v;
-            if (this.inited) {
-                this.fireEvent('percentOfParentWidthOffset', v);
-                this.__doPercentOfParentWidth();
+        },
+        
+        setPercentOfParentWidthOffset: function(v) {
+            if (this.percentOfParentWidthOffset !== v) {
+                this.percentOfParentWidthOffset = v;
+                if (this.inited) {
+                    this.fireEvent('percentOfParentWidthOffset', v);
+                    this.__doPOPW();
+                }
             }
-        }
-    },
-    
-    setPercentOfParentWidth: function(v) {
-        if (this.percentOfParentWidth !== v) {
-            if (this.inited) this.__teardownPercentOfParentWidthConstraint();
-            this.percentOfParentWidth = v;
-            if (this.inited) this.fireEvent('percentOfParentWidth', v);
-            this.__setupPercentOfParentWidthConstraint();
-        }
-    },
-    
-    setPercentOfParentHeightOffset: function(v) {
-        if (this.percentOfParentHeightOffset !== v) {
-            this.percentOfParentHeightOffset = v;
-            if (this.inited) {
-                this.fireEvent('percentOfParentHeightOffset', v);
-                this.__doPercentOfParentHeight();
+        },
+        
+        setPercentOfParentWidth: function(v) {
+            if (this.percentOfParentWidth !== v) {
+                if (this.inited) teardownPercentOfParentWidthConstraint(this);
+                this.percentOfParentWidth = v;
+                if (this.inited) this.fireEvent('percentOfParentWidth', v);
+                setupPercentOfParentWidthConstraint(this);
             }
+        },
+        
+        setPercentOfParentHeightOffset: function(v) {
+            if (this.percentOfParentHeightOffset !== v) {
+                this.percentOfParentHeightOffset = v;
+                if (this.inited) {
+                    this.fireEvent('percentOfParentHeightOffset', v);
+                    this.__doPOPH();
+                }
+            }
+        },
+        
+        setPercentOfParentHeight: function(v) {
+            if (this.percentOfParentHeight !== v) {
+                if (this.inited) teardownPercentOfParentHeightConstraint(this);
+                this.percentOfParentHeight = v;
+                if (this.inited) this.fireEvent('percentOfParentHeight', v);
+                setupPercentOfParentHeightConstraint(this);
+            }
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __doPOPW: function(event) {
+            this.setWidth((this.percentOfParentWidthOffset || 0) + Math.round(this.parent.width * (this.percentOfParentWidth / 100)));
+            // Force width event if not inited yet so that align constraint
+            // in myt.View will work.
+            if (!this.inited) this.fireEvent('width', this.width);
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __doPOPH: function(event) {
+            this.setHeight((this.percentOfParentHeightOffset || 0) + Math.round(this.parent.height * (this.percentOfParentHeight / 100)));
+            // Force height event if not inited yet so that valign constraint
+            // in myt.View will work.
+            if (!this.inited) this.fireEvent('height', this.height);
         }
-    },
-    
-    setPercentOfParentHeight: function(v) {
-        if (this.percentOfParentHeight !== v) {
-            if (this.inited) this.__teardownPercentOfParentHeightConstraint();
-            this.percentOfParentHeight = v;
-            if (this.inited) this.fireEvent('percentOfParentHeight', v);
-            this.__setupPercentOfParentHeightConstraint();
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @private
-        @returns {undefined} */
-    __teardownPercentOfParentWidthConstraint: function() {
-        if (this.percentOfParentWidth >= 0) this.detachFrom(this.parent, '__doPercentOfParentWidth', 'width');
-    },
-    
-    /** @private
-        @returns {undefined} */
-    __setupPercentOfParentWidthConstraint: function() {
-        const p = this.parent;
-        if (p && this.percentOfParentWidth >= 0) this.syncTo(p, '__doPercentOfParentWidth', 'width');
-    },
-    
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __doPercentOfParentWidth: function(event) {
-        this.setWidth((this.percentOfParentWidthOffset || 0) + Math.round(this.parent.width * (this.percentOfParentWidth / 100)));
-        // Force width event if not inited yet so that align constraint
-        // in myt.View will work.
-        if (!this.inited) this.fireEvent('width', this.width);
-    },
-    
-    /** @private
-        @returns {undefined} */
-    __teardownPercentOfParentHeightConstraint: function() {
-        if (this.percentOfParentHeight >= 0) this.detachFrom(this.parent, '__doPercentOfParentHeight', 'height');
-    },
-    
-    /** @private
-        @returns {undefined} */
-    __setupPercentOfParentHeightConstraint: function() {
-        const p = this.parent;
-        if (p && this.percentOfParentHeight >= 0) this.syncTo(p, '__doPercentOfParentHeight', 'height');
-    },
-    
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __doPercentOfParentHeight: function(event) {
-        this.setHeight((this.percentOfParentHeightOffset || 0) + Math.round(this.parent.height * (this.percentOfParentHeight / 100)));
-        // Force height event if not inited yet so that valign constraint
-        // in myt.View will work.
-        if (!this.inited) this.fireEvent('height', this.height);
-    }
-});
+    });
+})(myt);
 
 
 ((pkg) => {
@@ -8713,98 +8669,104 @@ myt.RootView = new JS.Module('RootView', {
 })(myt);
 
 
-/** A mixin that sizes a RootView to the window width, height or both.
-    
-    Events:
-        None
-    
-    Attributes:
-        resizeDimension:string The dimension to resize in. Supported values
-            are 'width', 'height' and 'both'. Defaults to 'both'.
-        minWidth:number the minimum width below which this view will not 
-            resize its width. Defaults to 0.
-        minWidth:number the minimum height below which this view will not
-            resize its height. Defaults to 0.
-*/
-myt.SizeToWindow = new JS.Module('SizeToWindow', {
-    include: [myt.RootView],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides */
-    initNode: function(parent, attrs) {
-        this.minWidth = this.minHeight = 0;
-        if (attrs.resizeDimension == null) attrs.resizeDimension = 'both';
+((pkg) => {
+    const JSModule = JS.Module,
+        GlobalWindowResize = pkg.global.windowResize,
         
-        this.attachTo(myt.global.windowResize, '__handleResize', 'resize');
-        this.callSuper(parent, attrs);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setResizeDimension: function(v) {
-        if (this.resizeDimension !== v) {
-            this.resizeDimension = v;
-            this.__handleResize();
-        }
-    },
-    
-    setMinWidth: function(v) {
-        if (this.minWidth !== v) {
-            this.minWidth = v;
-            this.__handleResize();
-        }
-    },
-    
-    setMinHeight: function(v) {
-        if (this.minHeight !== v) {
-            this.minHeight = v;
-            this.__handleResize();
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __handleResize: function(event) {
-        const WR = myt.global.windowResize,
-            dim = this.resizeDimension;
-        if (dim === 'width' || dim === 'both') this.setWidth(Math.max(this.minWidth, WR.getWidth()));
-        if (dim === 'height' || dim === 'both') this.setHeight(Math.max(this.minHeight, WR.getHeight()));
-    }
-});
-
-
-/** A mixin that sizes a RootView to the window width. */
-myt.SizeToWindowWidth = new JS.Module('SizeToWindowWidth', {
-    include: [myt.SizeToWindow],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.SizeToWindow */
-    initNode: function(parent, attrs) {
-        if (attrs.resizeDimension == null) attrs.resizeDimension = 'width';
+        handleResize = stw => {
+            const dim = stw.resizeDimension;
+            if (dim === 'width' || dim === 'both') stw.setWidth(Math.max(stw.minWidth, GlobalWindowResize.getWidth()));
+            if (dim === 'height' || dim === 'both') stw.setHeight(Math.max(stw.minHeight, GlobalWindowResize.getHeight()));
+        },
         
-        this.callSuper(parent, attrs);
-    }
-});
-
-
-/** A mixin that sizes a RootView to the window height. */
-myt.SizeToWindowHeight = new JS.Module('SizeToWindowHeight', {
-    include: [myt.SizeToWindow],
+        /** A mixin that sizes a RootView to the window width, height or both.
+            
+            Attributes:
+                resizeDimension:string The dimension to resize in. Supported
+                    values are 'width', 'height' and 'both'. Defaults to 'both'.
+                minWidth:number the minimum width below which this view will
+                    not resize its width. Defaults to 0.
+                minWidth:number the minimum height below which this view will
+                    not resize its height. Defaults to 0.
+            
+            @class */
+        SizeToWindow = pkg.SizeToWindow = new JSModule('SizeToWindow', {
+            include: [pkg.RootView],
+            
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            /** @overrides */
+            initNode: function(parent, attrs) {
+                this.minWidth = this.minHeight = 0;
+                if (attrs.resizeDimension == null) attrs.resizeDimension = 'both';
+                
+                this.attachTo(GlobalWindowResize, '__handleResize', 'resize');
+                this.callSuper(parent, attrs);
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setResizeDimension: function(v) {
+                if (this.resizeDimension !== v) {
+                    this.resizeDimension = v;
+                    handleResize(this);
+                }
+            },
+            
+            setMinWidth: function(v) {
+                if (this.minWidth !== v) {
+                    this.minWidth = v;
+                    handleResize(this);
+                }
+            },
+            
+            setMinHeight: function(v) {
+                if (this.minHeight !== v) {
+                    this.minHeight = v;
+                    handleResize(this);
+                }
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @private
+                @param {!Object} ignoredEvent
+                @returns {undefined} */
+            __handleResize: function(ignoredEvent) {
+                handleResize(this);
+            }
+        });
     
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.SizeToWindow */
-    initNode: function(parent, attrs) {
-        if (attrs.resizeDimension == null) attrs.resizeDimension = 'height';
+    /** A mixin that sizes a RootView to the window width.
         
-        this.callSuper(parent, attrs);
-    }
-});
+        @class */
+    pkg.SizeToWindowWidth = new JSModule('SizeToWindowWidth', {
+        include: [SizeToWindow],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.SizeToWindow */
+        initNode: function(parent, attrs) {
+            if (attrs.resizeDimension == null) attrs.resizeDimension = 'width';
+            this.callSuper(parent, attrs);
+        }
+    });
+    
+    /** A mixin that sizes a RootView to the window height.
+        
+        @class */
+    pkg.SizeToWindowHeight = new JSModule('SizeToWindowHeight', {
+        include: [SizeToWindow],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.SizeToWindow */
+        initNode: function(parent, attrs) {
+            if (attrs.resizeDimension == null) attrs.resizeDimension = 'height';
+            this.callSuper(parent, attrs);
+        }
+    });
+})(myt);
 
 
 ((pkg) => {
@@ -12594,13 +12556,12 @@ myt.BAG = new JS.Class('BAG', {
             const attrName = this.attrName,
                 setterName = myt.AccessorSupport.generateSetterName(attrName),
                 nodes = this.__nodes;
-            let i = nodes.length,
-                n;
+            let i = nodes.length;
             
             this.setTrueNode(node);
             
             while (i) {
-                n = nodes[--i];
+                const n = nodes[--i];
                 if (node === n) {
                     if (!n[attrName]) n[setterName](true);
                 } else {
@@ -12923,8 +12884,7 @@ myt.BAG = new JS.Class('BAG', {
             getSelected: function() {
                 const retval = [], 
                     items = this.__selected;
-                let key;
-                for (key in items) retval.push(items[key]);
+                for (const key in items) retval.push(items[key]);
                 return retval;
             },
             
@@ -12947,7 +12907,7 @@ myt.BAG = new JS.Class('BAG', {
             /** Called when an item is selected.
                 @param {!Objectd} item - The newly selected myt.Selectable..
                 @returns {undefined} */
-            doSelected: (item) => {},
+            doSelected: item => {},
             
             /** Selects the item with the provided item selection ID.
                 @param {string} itemSelectionId
@@ -13025,14 +12985,13 @@ myt.BAG = new JS.Class('BAG', {
                 @returns {undefined} */
             deselectAll: function() {
                 const items = this.__selected;
-                let key;
-                for (key in items) this.deselect(items[key]);
+                for (const key in items) this.deselect(items[key]);
             },
             
             /** Checks if the item is selected.
                 @param {!Objecdt} item - The item to test.
                 @returns {boolean} */
-            isSelectedItem: (item) => item ? item.isSelected() : false,
+            isSelectedItem: item => item ? item.isSelected() : false,
             
             /** Checks if all selectable items are selected.
                 @returns {boolean} */
@@ -13047,10 +13006,9 @@ myt.BAG = new JS.Class('BAG', {
             getManagedItems: function() {
                 const retval = [], 
                     svs = this.getSubviews();
-                let i = svs.length, 
-                    sv;
+                let i = svs.length;
                 while (i) {
-                    sv = svs[--i];
+                    const sv = svs[--i];
                     if (sv.isA(Selectable)) retval.push(sv);
                 }
                 return retval;
@@ -13073,10 +13031,9 @@ myt.BAG = new JS.Class('BAG', {
             getSelectableItem: function(itemSelectionId) {
                 const items = this.getSelectableItems(),
                     selectionAttr = this.itemSelectionId;
-                let i = items.length, 
-                    item;
+                let i = items.length;
                 while (i) {
-                    item = items[--i];
+                    const item = items[--i];
                     if (item[selectionAttr] === itemSelectionId) return item;
                 }
                 return null;
@@ -13086,671 +13043,485 @@ myt.BAG = new JS.Class('BAG', {
 
 
 ((pkg) => {
-    /** A mixin that allows myt.TabSliders to be added to a view.
-        
-        Attributes:
-            spacing:number The spacing between tab sliders. Defaults to
-                myt.TabSliderContainer.DEFAULT_SPACING which is 1.
-        
-        @class */
-    pkg.TabSliderContainer = new JS.Module('TabSliderContainer', {
-        include: [pkg.SelectionManager],
-        
-        
-        // Class Methods and Attributes ////////////////////////////////////////
-        extend: {
-            DEFAULT_SPACING:1
-        },
-        
-        
-        // Life Cycle //////////////////////////////////////////////////////////
-        initNode: function(parent, attrs) {
-            const self = this;
+    const JSClass = JS.Class,
+        View = pkg.View,
+        SizeToParent = pkg.SizeToParent,
+    
+        /** A tab slider component.
             
-            self._tabSliders = [];
+            Events:
+                expansionState:string Fired when the tab slider changes expansion state.
             
-            attrs.defaultPlacement = 'container';
+            Attributes:
+                tabId:string The unique ID for this tab slider relative to the
+                    tab slider container that manages this tab slider.
+                tabContainer:myt.TabSliderContainer The tab slider container that 
+                    manages this tab.
+                buttonClass:JS.Class The class to use for the button portion of the
+                    tab slider. Defaults to myt.SimpleButton.
+                fillColorSelected:color The color of the button when selected.
+                fillColorHover:color The color of the button when moused over.
+                fillColorActive:color The color of the button while active.
+                fillColorReady:color The color of the button when ready for interaction.
+                buttonHeight:number The height of the button portion of the tab slider.
+                    Defaults to myt.TabSlider.DEFAULT_BUTTON_HEIGHT which is 30.
+                minContainerHeight:number The minimum height of the content container
+                    inside this tab slider. Defaults to 
+                    myt.TabSlider.DEFAULT_MINIMUM_CONTAINER_HEIGHT which is 100.
+                expansionState:string Indicates the expansion state of the tab slider.
+                    Supported values are: 'expanded', 'expanding', 'collapsed' and
+                    'collapsing'. Defaults to 'collapsed'.
             
-            if (attrs.spacing == null) attrs.spacing = pkg.TabSliderContainer.DEFAULT_SPACING;
-            if (attrs.overflow == null) attrs.overflow = 'autoy';
-            if (attrs.itemSelectionId == null) attrs.itemSelectionId = 'tabId';
-            if (attrs.maxSelected == null) attrs.maxSelected = 1;
+            @class */
+        TabSlider = pkg.TabSlider = new JSClass('TabSlider', View, {
+            include: [pkg.Selectable, pkg.Disableable, SizeToParent],
             
-            self.updateLayout = pkg.debounce(self.updateLayout);
             
-            self.callSuper(parent, attrs);
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                DEFAULT_BUTTON_HEIGHT:30,
+                /** The minimum height of the container when expanded. */
+                DEFAULT_MINIMUM_CONTAINER_HEIGHT:100,
+                DEFAULT_FILL_COLOR_SELECTED:'#666666',
+                DEFAULT_FILL_COLOR_HOVER:'#eeeeee',
+                DEFAULT_FILL_COLOR_ACTIVE:'#cccccc',
+                DEFAULT_FILL_COLOR_READY:'#ffffff',
+                DEFAULT_ANIMATION_MILLIS:500
+            },
             
-            const TabSlider = pkg.TabSlider;
-            const container = new pkg.View(self, {
-                name:'container', ignorePlacement:true, percentOfParentWidth:100
-            }, [pkg.SizeToParent, {
-                /** @overrides myt.View */
-                subnodeAdded: function(node) {
-                    this.callSuper(node);
-                    if (node instanceof TabSlider) {
-                        self._tabSliders.push(node);
-                        self.attachTo(node, 'updateLayout', 'selected');
-                    }
-                },
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            initNode: function(parent, attrs) {
+                const self = this;
+                let initiallySelected;
                 
-                /** @overrides myt.View */
-                subnodeRemoved: function(node) {
-                    if (node instanceof TabSlider) {
-                        const tabSliders = self._tabSliders;
-                        let i = tabSliders.length;
-                        while (i) {
-                            if (tabSliders[--i] === node) {
-                                self.detachFrom(node, 'updateLayout', 'selected');
-                                tabSliders.splice(i, 1);
-                                break;
-                            }
-                        }
-                    }
-                    this.callSuper(node);
+                attrs.defaultPlacement = 'wrapper.container';
+                attrs.percentOfParentWidth = 100;
+                attrs.expansionState = 'collapsed';
+                
+                if (attrs.tabId == null) attrs.tabId = pkg.generateGuid();
+                if (attrs.tabContainer == null) attrs.tabContainer = parent;
+                
+                if (attrs.selected == null) attrs.selected = false;
+                if (attrs.buttonClass == null) attrs.buttonClass = pkg.SimpleButton;
+                if (attrs.zIndex == null) attrs.zIndex = 0;
+                
+                if (attrs.buttonHeight == null) attrs.buttonHeight = TabSlider.DEFAULT_BUTTON_HEIGHT;
+                if (attrs.fillColorSelected == null) attrs.fillColorSelected = TabSlider.DEFAULT_FILL_COLOR_SELECTED;
+                if (attrs.fillColorHover == null) attrs.fillColorHover = TabSlider.DEFAULT_FILL_COLOR_HOVER;
+                if (attrs.fillColorActive == null) attrs.fillColorActive = TabSlider.DEFAULT_FILL_COLOR_ACTIVE;
+                if (attrs.fillColorReady == null) attrs.fillColorReady = TabSlider.DEFAULT_FILL_COLOR_READY;
+                if (attrs.minContainerHeight == null) attrs.minContainerHeight = TabSlider.DEFAULT_MINIMUM_CONTAINER_HEIGHT;
+                
+                // Selection must be done via the select method on the tabContainer
+                if (attrs.selected) {
+                    initiallySelected = true;
+                    delete attrs.selected;
                 }
-            }]);
-            new pkg.SpacedLayout(container, {name:'layout', axis:'y', spacing:self.spacing, collapseParent:true});
-            
-            self.attachTo(self, 'updateLayout', 'height');
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        setSpacing: function(v) {
-            if (this.spacing !== v) {
-                this.spacing = v;
-                if (this.layout) this.layout.setSpacing(v);
-            }
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** @param {!Object} event
-            @returns {undefined} */
-        updateLayout: function(event) {
-            const tabSliders = this._tabSliders;
-            let i = tabSliders.length, 
-                tabSlider,
-                min = 0, 
-                preferred = 0, 
-                visCount = 0, 
-                collapsedHeight;
-            
-            while (i) {
-                tabSlider = tabSliders[--i];
                 
-                if (tabSlider.visible) {
-                    ++visCount;
-                    if (tabSlider.selected) {
-                        min += tabSlider.getMinimumExpandedHeight();
-                        preferred += tabSlider.getPreferredExpandedHeight();
-                    } else {
-                        collapsedHeight = tabSlider.getCollapsedHeight();
-                        min += collapsedHeight;
-                        preferred += collapsedHeight;
-                    }
-                }
-            }
-            
-            const layout = this.container.layout,
-                layoutOverage = layout.inset + layout.outset + layout.spacing * (visCount - 1);
-            min += layoutOverage;
-            preferred += layoutOverage;
-            
-            const h = this.height,
-                minIsOver = min > h,
-                preferredIsOver = preferred > h;
-            let overage = preferred - h,
-                tabPreferred, 
-                tabMin, 
-                newVal;
-            
-            i = tabSliders.length;
-            while (i) {
-                tabSlider = tabSliders[--i];
+                self.callSuper(parent, attrs);
                 
-                if (tabSlider.visible) {
-                    if (tabSlider.selected) {
-                        if (minIsOver) {
-                            newVal = tabSlider.getMinimumExpandedHeight();
-                        } else if (preferredIsOver) {
-                            tabPreferred = tabSlider.getPreferredExpandedHeight();
-                            tabMin = tabSlider.getMinimumExpandedHeight();
-                            
-                            newVal = tabPreferred - overage;
-                            if (tabMin > newVal) {
-                                overage -= tabPreferred - tabMin;
-                                newVal = tabMin;
-                            } else {
-                                overage = 0;
-                            }
+                new self.buttonClass(self, {
+                    name:'button', ignorePlacement:true, zIndex:1,
+                    height:self.buttonHeight,
+                    focusEmbellishment:true,
+                    groupId:self.parent.parent.groupId,
+                    percentOfParentWidth:100,
+                    hoverColor:self.fillColorHover,
+                    activeColor:self.fillColorActive,
+                    readyColor:self.fillColorReady
+                }, [SizeToParent, {
+                    /** @overrides myt.Button */
+                    doActivated: function() {
+                        const tc = self.tabContainer;
+                        if (self.isSelected() && tc.maxSelected !== 1) {
+                            tc.deselect(self);
                         } else {
-                            newVal = tabSlider.getPreferredExpandedHeight();
+                            tc.select(self);
                         }
-                        tabSlider.expand(newVal);
-                    } else {
-                        tabSlider.collapse();
+                    },
+                    
+                    /** @overrides myt.Button. */
+                    updateUI: function() {
+                        this.callSuper();
+                        if (self.selected && self.tabContainer.maxSelected !== -1) this.setBgColor(self.fillColorSelected);
+                        self.notifyButtonRedraw();
+                    }
+                }]);
+                
+                const wrapper = new View(self, {
+                    name:'wrapper', ignorePlacement:true,
+                    y:self.buttonHeight, height:0,
+                    visible:false, maskFocus:true,
+                    overflow:'hidden', percentOfParentWidth:100
+                }, [SizeToParent, {
+                    setHeight: function(v, supressEvent) {
+                        this.callSuper(Math.round(v), supressEvent);
+                    },
+                    setWidth: function(v, supressEvent) {
+                        this.callSuper(v, supressEvent);
+                        if (this.inited) this.container.setWidth(v);
+                    }
+                }]);
+                
+                const container = new View(wrapper, {name:'container'});
+                new pkg.SizeToChildren(container, {axis:'y'});
+                
+                self.constrain('__updateHeight', [wrapper, 'y', wrapper, 'height']);
+                
+                if (initiallySelected) self.tabContainer.select(self);
+                if (attrs.disabled === true) self.setDisabled(true);
+                
+                self.setHeight(self.getCollapsedHeight());
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            /** @overrides myt.Selectable */
+            setSelected: function(v) {
+                this.callSuper(v);
+                if (this.button) this.button.updateUI();
+            },
+            
+            setTabId: function(v) {this.tabId = v;},
+            setTabContainer: function(v) {this.tabContainer = v;},
+            
+            setMinContainerHeight: function(v) {this.minContainerHeight = v;},
+            setButtonClass: function(v) {this.buttonClass = v;},
+            setFillColorSelected: function(v) {this.fillColorSelected = v;},
+            setFillColorHover: function(v) {this.fillColorHover = v;},
+            setFillColorActive: function(v) {this.fillColorActive = v;},
+            setFillColorReady: function(v) {this.fillColorReady = v;},
+            
+            setButtonHeight: function(v) {
+                if (this.buttonHeight !== v) {
+                    this.buttonHeight = v;
+                    if (this.button) {
+                        this.button.setHeight(v);
+                        this.wrapper.setY(v);
+                    }
+                }
+            },
+            
+            setExpansionState: function(v) {
+                if (this.expansionState !== v) {
+                    this.expansionState = v;
+                    if (this.inited) this.fireEvent('expansionState', v);
+                    
+                    const wrapper = this.wrapper;
+                    if (wrapper) {
+                        if (v === 'expanded') {
+                            wrapper.setMaskFocus(false);
+                            wrapper.setOverflow('auto');
+                        } else if (v === 'expanding') {
+                            wrapper.setVisible(true);
+                        } else if (v === 'collapsed') {
+                            wrapper.setVisible(false);
+                        } else if (v === 'collapsing') {
+                            wrapper.setMaskFocus(true);
+                            wrapper.setOverflow('hidden');
+                        }
+                    }
+                }
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @overrides myt.Disableable */
+            doDisabled: function() {
+                const btn = this.button;
+                if (btn) btn.setDisabled(this.disabled);
+            },
+            
+            /** Called whenever the button is redrawn. Gives subclasses/instances
+                a chance to do additional things when the button is redrawn.
+                @returns {undefined} */
+            notifyButtonRedraw: () => {},
+            
+            /** @private
+                @param {!Object} event
+                @returns {undefined} */
+            __updateHeight: function(event) {
+                this.setHeight(this.wrapper.y + this.wrapper.height);
+            },
+            
+            /** Should only be called from the TabSliderContainer.
+                @private */
+            expand: function(targetHeight) {
+                const self = this,
+                    wrapper = self.wrapper,
+                    to = targetHeight - self.getCollapsedHeight();
+                
+                self.setExpansionState('expanding');
+                
+                wrapper.stopActiveAnimators();
+                
+                if (wrapper.height !== to) {
+                    wrapper.animate({
+                        attribute:'height', to:to, 
+                        duration:TabSlider.DEFAULT_ANIMATION_MILLIS
+                    }).next((success) => {self.setExpansionState('expanded');});
+                } else {
+                    self.setExpansionState('expanded');
+                }
+            },
+            
+            /** Should only be called from the TabSliderContainer.
+                @private */
+            collapse: function() {
+                const self = this,
+                    wrapper = self.wrapper;
+                
+                self.setExpansionState('collapsing');
+                
+                wrapper.stopActiveAnimators();
+                
+                if (wrapper.height !== 0) {
+                    wrapper.animate({
+                        attribute:'height', to:0, 
+                        duration:TabSlider.DEFAULT_ANIMATION_MILLIS
+                    }).next((success) => {self.setExpansionState('collapsed');});
+                } else {
+                    self.setExpansionState('collapsed');
+                }
+            },
+            
+            /** Gets the height of the tab slider when it is collapsed. Will be the
+                height of the button portion of the tab slider.
+                @returns number */
+            getCollapsedHeight: function() {
+                return this.buttonHeight;
+            },
+            
+            /** Gets the minimum height. Will be the smaller of the preferred height
+                or the buttonHeight + minContainerHeight. Thus, if the content is
+                smaller than the minContainerHeight extra space will not be shown.
+                @returns number */
+            getMinimumExpandedHeight: function() {
+                return Math.min(this.getPreferredExpandedHeight(), this.buttonHeight + this.minContainerHeight);
+            },
+            
+            /** Gets the preferred height that would allow the container to be shown
+                without vertical scrollbars.
+                @returns number */
+            getPreferredExpandedHeight: function() {
+                return this.buttonHeight + this.wrapper.container.height;
+            }
+        }),
+        
+        /** A tab slider with a text label.
+            
+            Attributes:
+                labelTextColorChecked:color
+                labelTextColor:color
+                text:string The text for the tab slider.
+            
+            @class */
+        TextTabSlider = pkg.TextTabSlider = new JSClass('TextTabSlider', TabSlider, {
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                DEFAULT_LABEL_TEXT_COLOR_CHECKED: '#ffffff',
+                DEFAULT_LABEL_TEXT_COLOR: '#333333'
+            },
+            
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            initNode: function(parent, attrs) {
+                if (attrs.labelTextColorChecked == null) attrs.labelTextColorChecked = TextTabSlider.DEFAULT_LABEL_TEXT_COLOR_CHECKED;
+                if (attrs.labelTextColor == null) attrs.labelTextColor = TextTabSlider.DEFAULT_LABEL_TEXT_COLOR;
+                
+                this.callSuper(parent, attrs);
+                
+                new pkg.Text(this.button, {
+                    name:'label', domClass:'myt-Text mytTextTabSliderLabel', ignorePlacement:true,
+                    text:this.text, align:'center', valign:'middle', 
+                    textColor:this.__getTextColor()
+                });
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////////////
+            setLabelTextColorChecked: function(v) {this.labelTextColorChecked = v;},
+            setLabelTextColor: function(v) {this.labelTextColor = v;},
+            
+            setText: function(v) {
+                if (this.text !== v) {
+                    this.text = v;
+                    const button = this.button;
+                    if (button && button.label) button.label.setText(v);
+                }
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////////////
+            /** @overrides myt.TabSlider */
+            notifyButtonRedraw: function() {
+                const label = this.button.label;
+                if (label) label.setTextColor(this.__getTextColor());
+            },
+            
+            /** @private
+                @returns {string} */
+            __getTextColor: function() {
+                return (this.selected && this.tabContainer.maxSelected !== -1) ? this.labelTextColorChecked : this.labelTextColor;
+            }
+        }),
+        
+        /** A mixin that allows myt.TabSliders to be added to a view.
+            
+            Attributes:
+                spacing:number The spacing between tab sliders. Defaults to
+                    myt.TabSliderContainer.DEFAULT_SPACING which is 1.
+            
+            @class */
+        TabSliderContainer = pkg.TabSliderContainer = new JS.Module('TabSliderContainer', {
+            include: [pkg.SelectionManager],
+            
+            
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                DEFAULT_SPACING:1
+            },
+            
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            initNode: function(parent, attrs) {
+                const self = this;
+                
+                self._tabSliders = [];
+                
+                attrs.defaultPlacement = 'container';
+                
+                if (attrs.spacing == null) attrs.spacing = TabSliderContainer.DEFAULT_SPACING;
+                if (attrs.overflow == null) attrs.overflow = 'autoy';
+                if (attrs.itemSelectionId == null) attrs.itemSelectionId = 'tabId';
+                if (attrs.maxSelected == null) attrs.maxSelected = 1;
+                
+                self.updateLayout = pkg.debounce(self.updateLayout);
+                
+                self.callSuper(parent, attrs);
+                
+                const TabSlider = pkg.TabSlider;
+                const container = new pkg.View(self, {
+                    name:'container', ignorePlacement:true, percentOfParentWidth:100
+                }, [pkg.SizeToParent, {
+                    /** @overrides myt.View */
+                    subnodeAdded: function(node) {
+                        this.callSuper(node);
+                        if (node instanceof TabSlider) {
+                            self._tabSliders.push(node);
+                            self.attachTo(node, 'updateLayout', 'selected');
+                        }
+                    },
+                    
+                    /** @overrides myt.View */
+                    subnodeRemoved: function(node) {
+                        if (node instanceof TabSlider) {
+                            const tabSliders = self._tabSliders;
+                            let i = tabSliders.length;
+                            while (i) {
+                                if (tabSliders[--i] === node) {
+                                    self.detachFrom(node, 'updateLayout', 'selected');
+                                    tabSliders.splice(i, 1);
+                                    break;
+                                }
+                            }
+                        }
+                        this.callSuper(node);
+                    }
+                }]);
+                new pkg.SpacedLayout(container, {name:'layout', axis:'y', spacing:self.spacing, collapseParent:true});
+                
+                self.attachTo(self, 'updateLayout', 'height');
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setSpacing: function(v) {
+                if (this.spacing !== v) {
+                    this.spacing = v;
+                    if (this.layout) this.layout.setSpacing(v);
+                }
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @param {!Object} event
+                @returns {undefined} */
+            updateLayout: function(event) {
+                const tabSliders = this._tabSliders,
+                    tabSlidersLen = tabSliders.length;
+                let i = tabSlidersLen, 
+                    min = 0, 
+                    preferred = 0, 
+                    visCount = 0;
+                
+                while (i) {
+                    const tabSlider = tabSliders[--i];
+                    if (tabSlider.visible) {
+                        ++visCount;
+                        if (tabSlider.selected) {
+                            min += tabSlider.getMinimumExpandedHeight();
+                            preferred += tabSlider.getPreferredExpandedHeight();
+                        } else {
+                            const collapsedHeight = tabSlider.getCollapsedHeight();
+                            min += collapsedHeight;
+                            preferred += collapsedHeight;
+                        }
+                    }
+                }
+                
+                const layout = this.container.layout,
+                    layoutOverage = layout.inset + layout.outset + layout.spacing * (visCount - 1);
+                min += layoutOverage;
+                preferred += layoutOverage;
+                
+                const h = this.height,
+                    minIsOver = min > h,
+                    preferredIsOver = preferred > h;
+                let overage = preferred - h;
+                
+                i = tabSlidersLen;
+                while (i) {
+                    const tabSlider = tabSliders[--i];
+                    if (tabSlider.visible) {
+                        if (tabSlider.selected) {
+                            let newVal;
+                            if (minIsOver) {
+                                newVal = tabSlider.getMinimumExpandedHeight();
+                            } else if (preferredIsOver) {
+                                const tabPreferred = tabSlider.getPreferredExpandedHeight(),
+                                    tabMin = tabSlider.getMinimumExpandedHeight();
+                                
+                                newVal = tabPreferred - overage;
+                                if (tabMin > newVal) {
+                                    overage -= tabPreferred - tabMin;
+                                    newVal = tabMin;
+                                } else {
+                                    overage = 0;
+                                }
+                            } else {
+                                newVal = tabSlider.getPreferredExpandedHeight();
+                            }
+                            tabSlider.expand(newVal);
+                        } else {
+                            tabSlider.collapse();
+                        }
                     }
                 }
             }
-        }
-    });
+        });
 })(myt);
 
 
 ((pkg) => {
-    const View = pkg.View,
-        SizeToParent = pkg.SizeToParent;
-    
-    /** A tab slider component.
+    const JSModule = JS.Module,
         
-        Events:
-            expansionState:string Fired when the tab slider changes expansion state.
-        
-        Attributes:
-            tabId:string The unique ID for this tab slider relative to the
-                tab slider container that manages this tab slider.
-            tabContainer:myt.TabSliderContainer The tab slider container that 
-                manages this tab.
-            buttonClass:JS.Class The class to use for the button portion of the
-                tab slider. Defaults to myt.SimpleButton.
-            fillColorSelected:color The color of the button when selected.
-            fillColorHover:color The color of the button when moused over.
-            fillColorActive:color The color of the button while active.
-            fillColorReady:color The color of the button when ready for interaction.
-            buttonHeight:number The height of the button portion of the tab slider.
-                Defaults to myt.TabSlider.DEFAULT_BUTTON_HEIGHT which is 30.
-            minContainerHeight:number The minimum height of the content container
-                inside this tab slider. Defaults to 
-                myt.TabSlider.DEFAULT_MINIMUM_CONTAINER_HEIGHT which is 100.
-            expansionState:string Indicates the expansion state of the tab slider.
-                Supported values are: 'expanded', 'expanding', 'collapsed' and
-                'collapsing'. Defaults to 'collapsed'.
-    */
-    const TabSlider = pkg.TabSlider = new JS.Class('TabSlider', View, {
-        include: [pkg.Selectable, pkg.Disableable, SizeToParent],
-        
-        
-        // Class Methods and Attributes ////////////////////////////////////////
-        extend: {
-            DEFAULT_BUTTON_HEIGHT:30,
-            /** The minimum height of the container when expanded. */
-            DEFAULT_MINIMUM_CONTAINER_HEIGHT:100,
-            DEFAULT_FILL_COLOR_SELECTED:'#666666',
-            DEFAULT_FILL_COLOR_HOVER:'#eeeeee',
-            DEFAULT_FILL_COLOR_ACTIVE:'#cccccc',
-            DEFAULT_FILL_COLOR_READY:'#ffffff',
-            DEFAULT_ANIMATION_MILLIS:500
-        },
-        
-        
-        // Life Cycle //////////////////////////////////////////////////////////
-        initNode: function(parent, attrs) {
-            const self = this;
-            let initiallySelected;
-            
-            attrs.defaultPlacement = 'wrapper.container';
-            attrs.percentOfParentWidth = 100;
-            attrs.expansionState = 'collapsed';
-            
-            if (attrs.tabId == null) attrs.tabId = pkg.generateGuid();
-            if (attrs.tabContainer == null) attrs.tabContainer = parent;
-            
-            if (attrs.selected == null) attrs.selected = false;
-            if (attrs.buttonClass == null) attrs.buttonClass = pkg.SimpleButton;
-            if (attrs.zIndex == null) attrs.zIndex = 0;
-            
-            if (attrs.buttonHeight == null) attrs.buttonHeight = TabSlider.DEFAULT_BUTTON_HEIGHT;
-            if (attrs.fillColorSelected == null) attrs.fillColorSelected = TabSlider.DEFAULT_FILL_COLOR_SELECTED;
-            if (attrs.fillColorHover == null) attrs.fillColorHover = TabSlider.DEFAULT_FILL_COLOR_HOVER;
-            if (attrs.fillColorActive == null) attrs.fillColorActive = TabSlider.DEFAULT_FILL_COLOR_ACTIVE;
-            if (attrs.fillColorReady == null) attrs.fillColorReady = TabSlider.DEFAULT_FILL_COLOR_READY;
-            if (attrs.minContainerHeight == null) attrs.minContainerHeight = TabSlider.DEFAULT_MINIMUM_CONTAINER_HEIGHT;
-            
-            // Selection must be done via the select method on the tabContainer
-            if (attrs.selected) {
-                initiallySelected = true;
-                delete attrs.selected;
-            }
-            
-            self.callSuper(parent, attrs);
-            
-            new self.buttonClass(self, {
-                name:'button', ignorePlacement:true, zIndex:1,
-                height:self.buttonHeight,
-                focusEmbellishment:true,
-                groupId:self.parent.parent.groupId,
-                percentOfParentWidth:100,
-                hoverColor:self.fillColorHover,
-                activeColor:self.fillColorActive,
-                readyColor:self.fillColorReady
-            }, [SizeToParent, {
-                /** @overrides myt.Button */
-                doActivated: function() {
-                    const tc = self.tabContainer;
-                    if (self.isSelected() && tc.maxSelected !== 1) {
-                        tc.deselect(self);
-                    } else {
-                        tc.select(self);
-                    }
-                },
-                
-                /** @overrides myt.Button. */
-                updateUI: function() {
-                    this.callSuper();
-                    if (self.selected && self.tabContainer.maxSelected !== -1) this.setBgColor(self.fillColorSelected);
-                    self.notifyButtonRedraw();
-                }
-            }]);
-            
-            const wrapper = new View(self, {
-                name:'wrapper', ignorePlacement:true,
-                y:self.buttonHeight, height:0,
-                visible:false, maskFocus:true,
-                overflow:'hidden', percentOfParentWidth:100
-            }, [SizeToParent, {
-                setHeight: function(v, supressEvent) {
-                    this.callSuper(Math.round(v), supressEvent);
-                },
-                setWidth: function(v, supressEvent) {
-                    this.callSuper(v, supressEvent);
-                    if (this.inited) this.container.setWidth(v);
-                }
-            }]);
-            
-            const container = new View(wrapper, {name:'container'});
-            new pkg.SizeToChildren(container, {axis:'y'});
-            
-            self.constrain('__updateHeight', [wrapper, 'y', wrapper, 'height']);
-            
-            if (initiallySelected) self.tabContainer.select(self);
-            if (attrs.disabled === true) self.setDisabled(true);
-            
-            self.setHeight(self.getCollapsedHeight());
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        /** @overrides myt.Selectable */
-        setSelected: function(v) {
-            this.callSuper(v);
-            if (this.button) this.button.updateUI();
-        },
-        
-        setTabId: function(v) {this.tabId = v;},
-        setTabContainer: function(v) {this.tabContainer = v;},
-        
-        setMinContainerHeight: function(v) {this.minContainerHeight = v;},
-        setButtonClass: function(v) {this.buttonClass = v;},
-        setFillColorSelected: function(v) {this.fillColorSelected = v;},
-        setFillColorHover: function(v) {this.fillColorHover = v;},
-        setFillColorActive: function(v) {this.fillColorActive = v;},
-        setFillColorReady: function(v) {this.fillColorReady = v;},
-        
-        setButtonHeight: function(v) {
-            if (this.buttonHeight !== v) {
-                this.buttonHeight = v;
-                if (this.button) {
-                    this.button.setHeight(v);
-                    this.wrapper.setY(v);
-                }
-            }
-        },
-        
-        setExpansionState: function(v) {
-            if (this.expansionState !== v) {
-                this.expansionState = v;
-                if (this.inited) this.fireEvent('expansionState', v);
-                
-                const wrapper = this.wrapper;
-                if (wrapper) {
-                    if (v === 'expanded') {
-                        wrapper.setMaskFocus(false);
-                        wrapper.setOverflow('auto');
-                    } else if (v === 'expanding') {
-                        wrapper.setVisible(true);
-                    } else if (v === 'collapsed') {
-                        wrapper.setVisible(false);
-                    } else if (v === 'collapsing') {
-                        wrapper.setMaskFocus(true);
-                        wrapper.setOverflow('hidden');
-                    }
-                }
-            }
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** @overrides myt.Disableable */
-        doDisabled: function() {
-            const btn = this.button;
-            if (btn) btn.setDisabled(this.disabled);
-        },
-        
-        /** Called whenever the button is redrawn. Gives subclasses/instances
-            a chance to do additional things when the button is redrawn.
-            @returns {undefined} */
-        notifyButtonRedraw: () => {},
-        
-        /** @private
-            @param {!Object} event
-            @returns {undefined} */
-        __updateHeight: function(event) {
-            this.setHeight(this.wrapper.y + this.wrapper.height);
-        },
-        
-        /** Should only be called from the TabSliderContainer.
-            @private */
-        expand: function(targetHeight) {
-            const self = this,
-                wrapper = self.wrapper,
-                to = targetHeight - self.getCollapsedHeight();
-            
-            self.setExpansionState('expanding');
-            
-            wrapper.stopActiveAnimators();
-            
-            if (wrapper.height !== to) {
-                wrapper.animate({
-                    attribute:'height', to:to, 
-                    duration:TabSlider.DEFAULT_ANIMATION_MILLIS
-                }).next((success) => {self.setExpansionState('expanded');});
-            } else {
-                self.setExpansionState('expanded');
-            }
-        },
-        
-        /** Should only be called from the TabSliderContainer.
-            @private */
-        collapse: function() {
-            const self = this,
-                wrapper = self.wrapper;
-            
-            self.setExpansionState('collapsing');
-            
-            wrapper.stopActiveAnimators();
-            
-            if (wrapper.height !== 0) {
-                wrapper.animate({
-                    attribute:'height', to:0, 
-                    duration:TabSlider.DEFAULT_ANIMATION_MILLIS
-                }).next((success) => {self.setExpansionState('collapsed');});
-            } else {
-                self.setExpansionState('collapsed');
-            }
-        },
-        
-        /** Gets the height of the tab slider when it is collapsed. Will be the
-            height of the button portion of the tab slider.
-            @returns number */
-        getCollapsedHeight: function() {
-            return this.buttonHeight;
-        },
-        
-        /** Gets the minimum height. Will be the smaller of the preferred height
-            or the buttonHeight + minContainerHeight. Thus, if the content is
-            smaller than the minContainerHeight extra space will not be shown.
-            @returns number */
-        getMinimumExpandedHeight: function() {
-            return Math.min(this.getPreferredExpandedHeight(), this.buttonHeight + this.minContainerHeight);
-        },
-        
-        /** Gets the preferred height that would allow the container to be shown
-            without vertical scrollbars.
-            @returns number */
-        getPreferredExpandedHeight: function() {
-            return this.buttonHeight + this.wrapper.container.height;
-        }
-    });
-})(myt);
-
-
-/** A tab slider with a text label.
-    
-    Events:
-        None
-    
-    Attributes:
-        labelTextColorChecked:color
-        labelTextColor:color
-        text:string The text for the tab slider.
-    
-    @class
-*/
-myt.TextTabSlider = new JS.Class('TextTabSlider', myt.TabSlider, {
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        DEFAULT_LABEL_TEXT_COLOR_CHECKED: '#ffffff',
-        DEFAULT_LABEL_TEXT_COLOR: '#333333'
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        const TTS = myt.TextTabSlider;
-        if (attrs.labelTextColorChecked == null) attrs.labelTextColorChecked = TTS.DEFAULT_LABEL_TEXT_COLOR_CHECKED;
-        if (attrs.labelTextColor == null) attrs.labelTextColor = TTS.DEFAULT_LABEL_TEXT_COLOR;
-        
-        this.callSuper(parent, attrs);
-        
-        new myt.Text(this.button, {
-            name:'label', domClass:'myt-Text mytTextTabSliderLabel', ignorePlacement:true,
-            text:this.text, align:'center', valign:'middle', 
-            textColor:this.__getTextColor()
-        });
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setLabelTextColorChecked: function(v) {this.labelTextColorChecked = v;},
-    setLabelTextColor: function(v) {this.labelTextColor = v;},
-    
-    setText: function(v) {
-        if (this.text !== v) {
-            this.text = v;
-            const button = this.button;
-            if (button && button.label) button.label.setText(v);
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.TabSlider */
-    notifyButtonRedraw: function() {
-        const label = this.button.label;
-        if (label) label.setTextColor(this.__getTextColor());
-    },
-    
-    /** @private
-        @returns {string} */
-    __getTextColor: function() {
-        return (this.selected && this.tabContainer.maxSelected !== -1) ? this.labelTextColorChecked : this.labelTextColor;
-    }
-});
-
-
-/** A mixin that allows myt.Tabs to be added to a view.
-    
-    Events:
-        None
-    
-    Attributes:
-        layout:myt.SpacedLayout The layout for the tabs.
-        location:string The location of the tabs relative to the container.
-            Supported values are: 'top', 'bottom', 'left' and 'right'. Defaults
-            to 'top'.
-        spacing:number The spacing between tabs. Defaults to 1.
-        inset:number The inset for the layout. Defaults to 0.
-*/
-myt.TabContainer = new JS.Module('TabContainer', {
-    include: [myt.SelectionManager],
-    
-    
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        DEFAULT_SPACING:1,
-        DEFAULT_INSET:0
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        this.__tabs = [];
-        
-        const TC = myt.TabContainer;
-        if (attrs.spacing == null) attrs.spacing = TC.DEFAULT_SPACING;
-        if (attrs.inset == null) attrs.inset = TC.DEFAULT_INSET;
-        
-        if (attrs.location == null) attrs.location = 'top';
-        
-        if (attrs.itemSelectionId == null) attrs.itemSelectionId = 'tabId';
-        if (attrs.maxSelected == null) attrs.maxSelected = 1;
-        
-        this.callSuper(parent, attrs);
-        
-        let axis;
-        switch (this.location) {
-            case 'top':
-            case 'bottom':
-                axis = 'x';
-                break;
-            case 'left':
-            case 'right':
-                axis = 'y';
-                break;
-        }
-        
-        new myt.SpacedLayout(this, {
-            name:'layout', axis:axis, spacing:this.spacing, inset:this.inset,
-            collapseParent:true
-        });
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setLocation: function(v) {this.location = v;},
-    
-    setSpacing: function(v) {
-        if (this.spacing !== v) {
-            this.spacing = v;
-            if (this.layout) this.layout.setSpacing(v);
-        }
-    },
-    
-    setInset: function(v) {
-        if (this.inset !== v) {
-            this.inset = v;
-            if (this.layout) this.layout.setInset(v);
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    getFirstTab: function() {
-        return this.__tabs[0];
-    },
-    
-    /** Gets the currently selected tab.
-        @returns myt.Tab or undefined if no tab is selected. */
-    getSelectedTab: function() {
-        return this.getSelected()[0];
-    },
-    
-    /** @overrides myt.View */
-    subnodeAdded: function(node) {
-        this.callSuper(node);
-        if (node.isA(myt.TabMixin)) {
-            this.__tabs.push(node);
-            
-            switch (this.location) {
-                case 'top':
-                    node.setValign('bottom');
-                    break;
-                case 'bottom':
-                    node.setValign('top');
-                    break;
-                case 'left':
-                    node.setAlign('right');
-                    break;
-                case 'right':
-                    node.setAlign('left');
-                    break;
-            }
-        }
-    },
-    
-    /** @overrides myt.View */
-    subnodeRemoved: function(node) {
-        if (node.isA(myt.TabMixin)) {
-            const tabs = this.__tabs;
-            let i = tabs.length;
-            while (i) {
-                if (tabs[--i] === node) {
-                    tabs.splice(i, 1);
-                    break;
-                }
-            }
-        }
-        this.callSuper(node);
-    }
-});
-
-
-/** A tab component.
-    
-    Requires:
-        myt.Activateable
-    
-    Events:
-        None
-    
-    Attributes:
-        tabId:string The unique ID of this tab relative to its tab container.
-        tabContainer:myt.TabContainer The tab container that manages this tab.
-*/
-myt.TabMixin = new JS.Module('TabMixin', {
-    include: [myt.Selectable],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides */
-    initNode: function(parent, attrs) {
-        if (attrs.tabId == null) attrs.tabId = myt.generateGuid();
-        if (attrs.tabContainer == null) attrs.tabContainer = parent;
-        
-        // Selection must be done via the select method on the tabContainer
-        let initiallySelected;
-        if (attrs.selected) {
-            initiallySelected = true;
-            delete attrs.selected;
-        }
-        
-        this.callSuper(parent, attrs);
-        
-        if (initiallySelected) this.tabContainer.select(this);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setTabId: function(v) {this.tabId = v;},
-    setTabContainer: function(v) {this.tabContainer = v;},
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.Activateable */
-    doActivated: function() {
-        if (!this.selected) this.tabContainer.select(this);
-    }
-});
-
-
-((pkg) => {
-    const
-        updateTextColor = (tab) => {
+        updateTextColor = tab => {
             tab.textView.setTextColor(tab.selected ? tab.labelTextSelectedColor : tab.labelTextColor);
         },
         
-        updateCornerRadius = (tab) => {
+        updateCornerRadius = tab => {
             const r = tab.cornerRadius != null ? tab.cornerRadius : Tab.DEFAULT_RADIUS;
             switch (tab.tabContainer.location) {
                 case 'top':
@@ -13772,10 +13543,52 @@ myt.TabMixin = new JS.Module('TabMixin', {
             }
         },
         
-        /** A simple tab component.
+        /** A tab component.
             
-            Events:
-                None
+            Requires:
+                myt.Activateable
+            
+            Attributes:
+                tabId:string The unique ID of this tab relative to its tab container.
+                tabContainer:myt.TabContainer The tab container that manages this tab.
+            
+            @class */
+        TabMixin = pkg.TabMixin = new JSModule('TabMixin', {
+            include: [pkg.Selectable],
+            
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            /** @overrides */
+            initNode: function(parent, attrs) {
+                if (attrs.tabId == null) attrs.tabId = pkg.generateGuid();
+                if (attrs.tabContainer == null) attrs.tabContainer = parent;
+                
+                // Selection must be done via the select method on the tabContainer
+                let initiallySelected;
+                if (attrs.selected) {
+                    initiallySelected = true;
+                    delete attrs.selected;
+                }
+                
+                this.callSuper(parent, attrs);
+                
+                if (initiallySelected) this.tabContainer.select(this);
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setTabId: function(v) {this.tabId = v;},
+            setTabContainer: function(v) {this.tabContainer = v;},
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @overrides myt.Activateable */
+            doActivated: function() {
+                if (!this.selected) this.tabContainer.select(this);
+            }
+        }),
+        
+        /** A simple tab component.
             
             Attributes:
                 tabId:string The unique ID of this tab relative to its 
@@ -13791,11 +13604,10 @@ myt.TabMixin = new JS.Module('TabMixin', {
                 cornerRadius:number Passed into the drawing config to determine
                     if a rounded corner is drawn or not. Defaults to undefined 
                     which causes myt.Tab.DEFAULT_RADIUS to be used.
-                    
-            @class
-        */
+            
+            @class */
         Tab = pkg.Tab = new JS.Class('Tab', pkg.SimpleIconTextButton, {
-            include: [pkg.TabMixin],
+            include: [TabMixin],
             
             
             // Class Methods and Attributes ////////////////////////////////////
@@ -13865,6 +13677,129 @@ myt.TabMixin = new JS.Module('TabMixin', {
             updateUI: function() {
                 this.callSuper();
                 if (this.selected) this.setBgColor(this.selectedColor);
+            }
+        }),
+        
+        /** A mixin that allows myt.Tabs to be added to a view.
+            
+            Attributes:
+                layout:myt.SpacedLayout The layout for the tabs.
+                location:string The location of the tabs relative to the container.
+                    Supported values are: 'top', 'bottom', 'left' and 'right'. Defaults
+                    to 'top'.
+                spacing:number The spacing between tabs. Defaults to 1.
+                inset:number The inset for the layout. Defaults to 0.
+            
+            @class */
+        TabContainer = pkg.TabContainer = new JSModule('TabContainer', {
+            include: [pkg.SelectionManager],
+            
+            
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                DEFAULT_SPACING:1,
+                DEFAULT_INSET:0
+            },
+            
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            initNode: function(parent, attrs) {
+                this.__tabs = [];
+                
+                if (attrs.spacing == null) attrs.spacing = TabContainer.DEFAULT_SPACING;
+                if (attrs.inset == null) attrs.inset = TabContainer.DEFAULT_INSET;
+                
+                if (attrs.location == null) attrs.location = 'top';
+                
+                if (attrs.itemSelectionId == null) attrs.itemSelectionId = 'tabId';
+                if (attrs.maxSelected == null) attrs.maxSelected = 1;
+                
+                this.callSuper(parent, attrs);
+                
+                let axis;
+                switch (this.location) {
+                    case 'top':
+                    case 'bottom':
+                        axis = 'x';
+                        break;
+                    case 'left':
+                    case 'right':
+                        axis = 'y';
+                        break;
+                }
+                
+                new pkg.SpacedLayout(this, {
+                    name:'layout', axis:axis, spacing:this.spacing, inset:this.inset,
+                    collapseParent:true
+                });
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setLocation: function(v) {this.location = v;},
+            
+            setSpacing: function(v) {
+                if (this.spacing !== v) {
+                    this.spacing = v;
+                    if (this.layout) this.layout.setSpacing(v);
+                }
+            },
+            
+            setInset: function(v) {
+                if (this.inset !== v) {
+                    this.inset = v;
+                    if (this.layout) this.layout.setInset(v);
+                }
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            getFirstTab: function() {
+                return this.__tabs[0];
+            },
+            
+            /** Gets the currently selected tab.
+                @returns myt.Tab or undefined if no tab is selected. */
+            getSelectedTab: function() {
+                return this.getSelected()[0];
+            },
+            
+            /** @overrides myt.View */
+            subnodeAdded: function(node) {
+                this.callSuper(node);
+                if (node.isA(TabMixin)) {
+                    this.__tabs.push(node);
+                    
+                    switch (this.location) {
+                        case 'top':
+                            node.setValign('bottom');
+                            break;
+                        case 'bottom':
+                            node.setValign('top');
+                            break;
+                        case 'left':
+                            node.setAlign('right');
+                            break;
+                        case 'right':
+                            node.setAlign('left');
+                            break;
+                    }
+                }
+            },
+            
+            /** @overrides myt.View */
+            subnodeRemoved: function(node) {
+                if (node.isA(TabMixin)) {
+                    const tabs = this.__tabs;
+                    let i = tabs.length;
+                    while (i) {
+                        if (tabs[--i] === node) {
+                            tabs.splice(i, 1);
+                            break;
+                        }
+                    }
+                }
+                this.callSuper(node);
             }
         });
 })(myt);
@@ -16926,152 +16861,138 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
 })(myt);
 
 
-/** A special "layout" that resizes the parent to fit the children rather than
-    laying out the children.
+((pkg) => {
+    const updateMonitoringSubview = (stc, sv, func) => {
+            const axis = stc.axis;
+            func = func.bind(stc);
+            if (axis !== 'y') {
+                func(sv, 'update', 'x');
+                func(sv, 'update', 'boundsWidth');
+            }
+            if (axis !== 'x') {
+                func(sv, 'update', 'y');
+                func(sv, 'update', 'boundsHeight');
+            }
+            func(sv, 'update', 'visible');
+        };
     
-    Events:
-        axis:string
-        paddingX:number
-        paddingY:number
-    
-    Attributes:
-        axis:string The axis along which to resize this view to fit its
-            children. Supported values are 'x', 'y' and 'both'. Defaults to 'x'.
-        paddingX:number Additional space added on the child extent along the
-            x-axis. Defaults to 0.
-        paddingY:number Additional space added on the child extent along the
-            y-axis. Defaults to 0.
-*/
-myt.SizeToChildren = new JS.Class('SizeToChildren', myt.Layout, {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Node */
-    initNode: function(parent, attrs) {
-        this.axis = 'x';
-        this.paddingX = this.paddingY = 0;
+    /** A special "layout" that resizes the parent to fit the children rather than
+        laying out the children.
         
-        this.callSuper(parent, attrs);
-    },
-    
-    
-    // Acessors ////////////////////////////////////////////////////////////////
-    setAxis: function(v) {
-        if (this.axis !== v) {
-            if (this.inited) {
-                this.stopMonitoringAllSubviews();
-                this.axis = v;
-                this.startMonitoringAllSubviews();
-                this.fireEvent('axis', v);
-                this.update();
-            } else {
-                this.axis = v;
-            }
-        }
-    },
-    
-    setPaddingX: function(v) {
-        if (this.paddingX !== v) {
-            this.paddingX = v;
-            if (this.inited) {
-                this.fireEvent('paddingX', v);
-                this.update();
-            }
-        }
-    },
-    
-    setPaddingY: function(v) {
-        if (this.paddingY !== v) {
-            this.paddingY = v;
-            if (this.inited) {
-                this.fireEvent('paddingY', v);
-                this.update();
-            }
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.ConstantLayout */
-    update: function() {
-        if (this.canUpdate()) {
-            // Prevent inadvertent loops
-            this.incrementLockedCounter();
+        Events:
+            axis:string
+            paddingX:number
+            paddingY:number
+        
+        Attributes:
+            axis:string The axis along which to resize this view to fit its
+                children. Supported values are 'x', 'y' and 'both'. Defaults to 'x'.
+            paddingX:number Additional space added on the child extent along the
+                x-axis. Defaults to 0.
+            paddingY:number Additional space added on the child extent along the
+                y-axis. Defaults to 0.
+        
+        @class */
+    pkg.SizeToChildren = new JS.Class('SizeToChildren', pkg.Layout, {
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.Node */
+        initNode: function(parent, attrs) {
+            this.axis = 'x';
+            this.paddingX = this.paddingY = 0;
             
-            const p = this.parent;
-            
-            if (!p.isBeingDestroyed) {
-                const svs = this.subviews, 
-                    len = svs.length,
-                    axis = this.axis,
-                    maxFunc = Math.max;
-                let i, 
-                    sv,
-                    max, 
-                    bound;
-                if (axis !== 'y') {
-                    i = len;
-                    max = 0;
-                    while (i) {
-                        sv = svs[--i];
-                        if (sv.visible) {
-                            bound = sv.boundsWidth;
-                            bound = bound > 0 ? bound : 0;
-                            max = maxFunc(max, sv.x + bound);
-                        }
-                    }
-                    p.setWidth(max + this.paddingX);
-                }
-                if (axis !== 'x') {
-                    i = len;
-                    max = 0;
-                    while (i) {
-                        sv = svs[--i];
-                        if (sv.visible) {
-                            bound = sv.boundsHeight;
-                            bound = bound > 0 ? bound : 0;
-                            max = maxFunc(max, sv.y + bound);
-                        }
-                    }
-                    p.setHeight(max + this.paddingY);
+            this.callSuper(parent, attrs);
+        },
+        
+        
+        // Acessors ////////////////////////////////////////////////////////////
+        setAxis: function(v) {
+            if (this.axis !== v) {
+                if (this.inited) {
+                    this.stopMonitoringAllSubviews();
+                    this.axis = v;
+                    this.startMonitoringAllSubviews();
+                    this.fireEvent('axis', v);
+                    this.update();
+                } else {
+                    this.axis = v;
                 }
             }
-            
-            this.decrementLockedCounter();
+        },
+        
+        setPaddingX: function(v) {
+            if (this.paddingX !== v) {
+                this.paddingX = v;
+                if (this.inited) {
+                    this.fireEvent('paddingX', v);
+                    this.update();
+                }
+            }
+        },
+        
+        setPaddingY: function(v) {
+            if (this.paddingY !== v) {
+                this.paddingY = v;
+                if (this.inited) {
+                    this.fireEvent('paddingY', v);
+                    this.update();
+                }
+            }
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides myt.ConstantLayout */
+        update: function() {
+            if (this.canUpdate()) {
+                // Prevent inadvertent loops
+                this.incrementLockedCounter();
+                
+                const p = this.parent;
+                if (!p.isBeingDestroyed) {
+                    const svs = this.subviews, 
+                        len = svs.length,
+                        axis = this.axis;
+                    let i,
+                        max;
+                    if (axis !== 'y') {
+                        i = len;
+                        max = 0;
+                        while (i) {
+                            const sv = svs[--i];
+                            if (sv.visible) max = Math.max(max, sv.x + (sv.boundsWidth > 0 ? sv.boundsWidth : 0));
+                        }
+                        p.setWidth(max + this.paddingX);
+                    }
+                    if (axis !== 'x') {
+                        i = len;
+                        max = 0;
+                        while (i) {
+                            const sv = svs[--i];
+                            if (sv.visible) max = Math.max(max, sv.y + (sv.boundsHeight > 0 ? sv.boundsHeight : 0));
+                        }
+                        p.setHeight(max + this.paddingY);
+                    }
+                }
+                
+                this.decrementLockedCounter();
+            }
+        },
+        
+        /** @overrides myt.Layout
+            Provides a default implementation that calls update when the
+            visibility of a subview changes. */
+        startMonitoringSubview: function(sv) {
+            updateMonitoringSubview(this, sv, this.attachTo);
+        },
+        
+        /** @overrides myt.Layout
+            Provides a default implementation that calls update when the
+            visibility of a subview changes. */
+        stopMonitoringSubview: function(sv) {
+            updateMonitoringSubview(this, sv, this.detachFrom);
         }
-    },
-    
-    /** @overrides myt.Layout
-        Provides a default implementation that calls update when the
-        visibility of a subview changes. */
-    startMonitoringSubview: function(sv) {
-        this.__updateMonitoringSubview(sv, this.attachTo);
-    },
-    
-    /** @overrides myt.Layout
-        Provides a default implementation that calls update when the
-        visibility of a subview changes. */
-    stopMonitoringSubview: function(sv) {
-        this.__updateMonitoringSubview(sv, this.detachFrom);
-    },
-    
-    /** Wrapped by startMonitoringSubview and stopMonitoringSubview.
-        @private
-        @param {!Object} sv
-        @param {!Function} func
-        @returns {undefined} */
-    __updateMonitoringSubview: function(sv, func) {
-        const axis = this.axis;
-        func = func.bind(this);
-        if (axis !== 'y') {
-            func(sv, 'update', 'x');
-            func(sv, 'update', 'boundsWidth');
-        }
-        if (axis !== 'x') {
-            func(sv, 'update', 'y');
-            func(sv, 'update', 'boundsHeight');
-        }
-        func(sv, 'update', 'visible');
-    }
-});
+    });
+})(myt);
 
 
 /** An myt.Dimmer that also provides a content panel.
@@ -20141,108 +20062,6 @@ myt.FormEditableText = new JS.Class('FormEditableText', myt.EditableText, {
 });
 
 
-/** A numeric value component that stays within a minimum and maximum value.
-    
-    Events:
-        minValue:number
-        maxValue:number
-        snapToInt:boolean
-    
-    Attributes:
-        minValue:number the largest value allowed. If undefined or null no
-            min value is enforced.
-        maxValue:number the lowest value allowed. If undefined or null no
-            max value is enforced.
-        snapToInt:boolean If true values can only be integers. Defaults to true.
-*/
-myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
-    include: [myt.ValueComponent],
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        this.appendToEarlyAttrs('snapToInt','minValue','maxValue');
-        
-        if (attrs.snapToInt == null) attrs.snapToInt = true;
-        
-        if (!attrs.valueFilter) {
-            const self = this;
-            attrs.valueFilter = function(v) {
-                const max = self.maxValue;
-                if (max != null && v > max) return max;
-                
-                const min = self.minValue;
-                if (min != null && v < min) return min;
-                
-                return v;
-            };
-        }
-        
-        this.callSuper(parent, attrs);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setSnapToInt: function(v) {
-        if (this.snapToInt !== v) {
-            this.snapToInt = v;
-            if (this.inited) {
-                this.fireEvent('snapToInt', v);
-                
-                // Update min, max and value since snap has been turned on
-                if (v) {
-                    this.setMinValue(this.minValue);
-                    this.setMaxValue(this.maxValue);
-                    this.setValue(this.value);
-                }
-            }
-        }
-    },
-    
-    setMinValue: function(v) {
-        if (this.snapToInt && v != null) v = Math.round(v);
-        
-        if (this.minValue !== v) {
-            const max = this.maxValue;
-            if (max != null && v > max) v = max;
-            
-            if (this.minValue !== v) {
-                this.minValue = v;
-                if (this.inited) {
-                    this.fireEvent('minValue', v);
-                    
-                    // Rerun setValue since the filter has changed.
-                    this.setValue(this.value);
-                }
-            }
-        }
-    },
-    
-    setMaxValue: function(v) {
-        if (this.snapToInt && v != null) v = Math.round(v);
-        
-        if (this.maxValue !== v) {
-            const min = this.minValue;
-            if (min != null && v < min) v = min;
-            
-            if (this.maxValue !== v) {
-                this.maxValue = v;
-                if (this.inited) {
-                    this.fireEvent('maxValue', v);
-                    
-                    // Rerun setValue since the filter has changed.
-                    this.setValue(this.value);
-                }
-            }
-        }
-    },
-    
-    /** @overrides myt.ValueComponent */
-    setValue: function(v) {
-        this.callSuper(this.snapToInt && v != null && !isNaN(v) ? Math.round(v) : v);
-    }
-});
-
-
 ((pkg) => {
     let globalDragManager,
         
@@ -20750,371 +20569,104 @@ myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
 })(myt);
 
 
-/** Provides Slider thumb functionality.
-    
-    Requires:
-        myt.Button
+/** A numeric value component that stays within a minimum and maximum value.
     
     Events:
-        None
+        minValue:number
+        maxValue:number
+        snapToInt:boolean
     
     Attributes:
-        None
+        minValue:number the largest value allowed. If undefined or null no
+            min value is enforced.
+        maxValue:number the lowest value allowed. If undefined or null no
+            max value is enforced.
+        snapToInt:boolean If true values can only be integers. Defaults to true.
 */
-myt.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
-    include: [myt.Draggable],
-    
+myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
+    include: [myt.ValueComponent],
     
     // Life Cycle //////////////////////////////////////////////////////////////
     initNode: function(parent, attrs) {
-        if (attrs.width == null) attrs.width = parent.thumbWidth;
-        if (attrs.height == null) attrs.height = parent.thumbHeight;
+        this.appendToEarlyAttrs('snapToInt','minValue','maxValue');
         
-        if (attrs.repeatKeyDown == null) attrs.repeatKeyDown = true;
-        if (attrs.activationKeys == null) {
-            attrs.activationKeys = [
-                37, // left arrow
-                38, // up arrow
-                39, // right arrow
-                40 // down arrow
-            ];
+        if (attrs.snapToInt == null) attrs.snapToInt = true;
+        
+        if (!attrs.valueFilter) {
+            const self = this;
+            attrs.valueFilter = v => {
+                const max = self.maxValue;
+                if (max != null && v > max) return max;
+                
+                const min = self.minValue;
+                if (min != null && v < min) return min;
+                
+                return v;
+            };
         }
         
         this.callSuper(parent, attrs);
-        
-        if (parent.axis === 'x') {
-            this.setY(parent.thumbOffset);
-        } else {
-            this.setX(parent.thumbOffset);
-        }
-        
-        this.syncTo(parent, 'setDisabled', 'disabled');
-        
-        parent._syncThumbToValue(this, parent.getValue());
     },
     
     
     // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrides myt.Disableable */
-    setDisabled: function(v) {
-        // Adapt to event from syncTo
-        if (v != null && typeof v === 'object') v = v.value;
-        
-        this.callSuper(v);
-    },
-    
-    /** @overrides myt.FocusObservable */
-    setFocused: function(v) {
-        this.callSuper(v);
-        if (v) this.makeHighestZIndex();
-    },
-    
-    /** @overrides myt.View */
-    setX: function(v) {
-        if (this.x !== v) {
-            this.callSuper(v);
-            
-            const p = this.parent;
-            if (p.axis === 'x') p._syncValueToThumb(this);
-        }
-    },
-    
-    /** @overrides myt.View */
-    setY: function(v) {
-        if (this.y !== v) {
-            this.callSuper(v);
-            
-            const p = this.parent;
-            if (p.axis === 'y') p._syncValueToThumb(this);
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.Draggable */
-    requestDragPosition: function(x, y) {
-        if (!this.disabled) {
-            const parent = this.parent,
-                minPx = parent.getMinPixelValueForThumb(this),
-                maxPx = parent.getMaxPixelValueForThumb(this);
-            let halfSize,
-                pos,
-                func;
-            
-            if (parent.axis === 'x') {
-                halfSize = this.width / 2;
-                pos = x;
-                func = this.setX;
-            } else {
-                halfSize = this.height / 2;
-                pos = y;
-                func = this.setY;
+    setSnapToInt: function(v) {
+        if (this.snapToInt !== v) {
+            this.snapToInt = v;
+            if (this.inited) {
+                this.fireEvent('snapToInt', v);
+                
+                // Update min, max and value since snap has been turned on
+                if (v) {
+                    this.setMinValue(this.minValue);
+                    this.setMaxValue(this.maxValue);
+                    this.setValue(this.value);
+                }
             }
+        }
+    },
+    
+    setMinValue: function(v) {
+        if (this.snapToInt && v != null) v = Math.round(v);
+        
+        if (this.minValue !== v) {
+            const max = this.maxValue;
+            if (max != null && v > max) v = max;
             
-            func.call(this, Math.min(Math.max(pos, minPx - halfSize), maxPx - halfSize));
+            if (this.minValue !== v) {
+                this.minValue = v;
+                if (this.inited) {
+                    this.fireEvent('minValue', v);
+                    
+                    // Rerun setValue since the filter has changed.
+                    this.setValue(this.value);
+                }
+            }
         }
     },
     
-    /** @overrides myt.Button. */
-    doActivationKeyDown: function(key, isRepeat) {
-        const parent = this.parent;
-        switch (key) {
-            case 37: // Left
-                parent.nudgeValueLeft(this);
-                break;
-            case 38: // Up
-                parent.nudgeValueUp(this);
-                break;
-            case 39: // Right
-                parent.nudgeValueRight(this);
-                break;
-            case 40: // Down
-                parent.nudgeValueDown(this);
-                break;
+    setMaxValue: function(v) {
+        if (this.snapToInt && v != null) v = Math.round(v);
+        
+        if (this.maxValue !== v) {
+            const min = this.minValue;
+            if (min != null && v < min) v = min;
+            
+            if (this.maxValue !== v) {
+                this.maxValue = v;
+                if (this.inited) {
+                    this.fireEvent('maxValue', v);
+                    
+                    // Rerun setValue since the filter has changed.
+                    this.setValue(this.value);
+                }
+            }
         }
-        
-        this.callSuper(key, isRepeat);
-    }
-});
-
-
-/** A simple implementation of a slider thumb. */
-myt.SimpleSliderThumb = new JS.Class('SimpleSliderThumb', myt.SimpleButton, {
-    include: [myt.SliderThumbMixin],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.SimpleButton */
-    initNode: function(parent, attrs) {
-        if (attrs.activeColor == null) attrs.activeColor = '#bbbbbb';
-        if (attrs.readyColor == null) attrs.readyColor = '#cccccc';
-        if (attrs.hoverColor == null) attrs.hoverColor = '#dddddd';
-        
-        if (attrs.boxShadow == null) attrs.boxShadow = [0, 0, 4, '#666666'];
-        
-        this.callSuper(parent, attrs);
-        
-        if (attrs.roundedCorners == null) this.setRoundedCorners(Math.min(this.height, this.width) / 2);
     },
     
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.FocusObservable */
-    showFocusEmbellishment: function() {
-        this.hideDefaultFocusEmbellishment();
-        this.setBoxShadow([0, 0, 9, '#666666']);
-    },
-    
-    /** @overrides myt.FocusObservable */
-    hideFocusEmbellishment: function() {
-        this.hideDefaultFocusEmbellishment();
-        this.setBoxShadow([0, 0, 4, '#666666']);
-    }
-});
-
-
-/** A base class for slider components.
-    
-    Events:
-        None
-    
-    Attributes:
-        axis:string Indicates the direction the slider moves in. Allowed values
-            are 'x' and 'y'. Defaults to 'x'.
-        trackInset:number the number of pixels to inset the start of the track
-            from the top/left edge of the component. Defaults to 0.
-        trackOutset:number the number of pixels to inset the end of the track
-            from the bottom/right edge of the component. Default to 0.
-        thumbWidth:number The width of the thumb.
-        thumbHeight:number The height of the thumb.
-        thumbOffset:number The x/y offset of the thumb. Will applied to the
-            opposite dimension to the axis.
-        thumbClass:JS.Class the class to use to create the thumb.
-        nudgeAmount:number the amount to nudge the value when the arrows keys
-            are invoked. Defaults to 1.
-*/
-myt.BaseSlider = new JS.Class('BaseSlider', myt.View, {
-    include: [myt.Disableable],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.View */
-    initNode: function(parent, attrs) {
-        if (attrs.axis == null) attrs.axis = 'x';
-        if (attrs.axis === 'x') {
-            if (attrs.width == null) attrs.width = 100;
-            if (attrs.height == null) attrs.height = 18;
-        } else {
-            if (attrs.width == null) attrs.width = 18;
-            if (attrs.height == null) attrs.height = 100;
-        }
-        
-        if (attrs.bgColor == null) attrs.bgColor = '#999999';
-        if (attrs.roundedCorners == null) attrs.roundedCorners = 9;
-        
-        if (attrs.trackInset == null) attrs.trackInset = 9;
-        if (attrs.trackOutset == null) attrs.trackOutset = 9;
-        if (attrs.thumbWidth == null) attrs.thumbWidth = 16;
-        if (attrs.thumbHeight == null) attrs.thumbHeight = 16;
-        if (attrs.thumbOffset == null) attrs.thumbOffset = 1;
-        
-        if (attrs.nudgeAmount == null) attrs.nudgeAmount = 1;
-        
-        if (attrs.thumbClass == null) attrs.thumbClass = myt.SimpleSliderThumb;
-        
-        this.callSuper(parent, attrs);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setAxis: function(v) {this.axis = v;},
-    setTrackInset: function(v) {this.trackInset = v;},
-    setTrackOutset: function(v) {this.trackOutset = v;},
-    setThumbWidth: function(v) {this.thumbWidth = v;},
-    setThumbHeight: function(v) {this.thumbHeight = v;},
-    setThumbOffset: function(v) {this.thumbOffset = v;},
-    setThumbClass: function(v) {this.thumbClass = v;},
-    setNudgeAmount: function(v) {this.nudgeAmount = v;},
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    convertValueToPixels: function(v) {
-        const self = this,
-            minV = self.minValue, ti = self.trackInset,
-            pxRange = (self.axis === 'x' ? self.width : self.height) - ti - self.trackOutset,
-            valueRange = self.maxValue - minV;
-        return ti + ((v - minV) * (pxRange / valueRange));
-    },
-    
-    convertPixelsToValue: function(px) {
-        const self = this,
-            minV = self.minValue, ti = self.trackInset,
-            pxRange = (self.axis === 'x' ? self.width : self.height) - ti - self.trackOutset,
-            valueRange = self.maxValue - minV;
-        return ((px - ti) * (valueRange / pxRange)) + minV;
-    },
-    
-    nudgeValueLeft: function(thumb) {
-        this._nudge(thumb, false);
-    },
-    
-    nudgeValueUp: function(thumb) {
-        this._nudge(thumb, false);
-    },
-    
-    nudgeValueRight: function(thumb) {
-        this._nudge(thumb, true);
-    },
-    
-    nudgeValueDown: function(thumb) {
-        this._nudge(thumb, true);
-    },
-    
-    _nudge: function(thumb, up) {
-        // Subclasses to implement
-    },
-    
-    _syncThumbToValue: function(thumb, value) {
-        value = this.convertValueToPixels(value);
-        if (this.axis === 'x') {
-            thumb.setX(value - thumb.width / 2);
-        } else {
-            thumb.setY(value - thumb.height / 2);
-        }
-    }
-});
-
-
-/** A slider component.
-    
-    Events:
-        None
-    
-    Attributes:
-        None
-    
-    Private Attributes:
-        __lockSync:boolean Used internally to prevent infinite loops.
-    
-    @class */
-myt.Slider = new JS.Class('Slider', myt.BaseSlider, {
-    include: [myt.BoundedValueComponent],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.BaseSlider */
-    initNode: function(parent, attrs) {
-        this.callSuper(parent, attrs);
-        
-        new this.thumbClass(this, {name:'thumb'});
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrides */
+    /** @overrides myt.ValueComponent */
     setValue: function(v) {
-        this.callSuper(v);
-        
-        // Sync position of thumb
-        if (this.inited && !this.__lockSync) this._syncThumbToValue(this.thumb, this.getValue());
-    },
-    
-    /** @overrides
-        Update the thumb position if the width changes. */
-    setWidth: function(v, supressEvent) {
-        const existing = this.width;
-        this.callSuper(v, supressEvent);
-        if (this.inited && this.axis === 'x' && this.width !== existing) this._syncThumbToValue(this.thumb, this.getValue());
-    },
-    
-    /** @overrides
-        Update the thumb position if the height changes. */
-    setHeight: function(v, supressEvent) {
-        const existing = this.height;
-        this.callSuper(v, supressEvent);
-        if (this.inited && this.axis === 'y' && this.height !== existing) this._syncThumbToValue(this.thumb, this.getValue());
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Should only be called by myt.SliderThumbMixin.
-        @private
-        @param {!Object} thumb
-        @returns {undefined} */
-    _syncValueToThumb: function(thumb) {
-        if (this.inited && !this.__lockSync) {
-            this.__lockSync = true;
-            
-            this.setValue(this.convertPixelsToValue(
-                this.axis === 'x' ? thumb.x + thumb.width / 2 : thumb.y + thumb.height / 2
-            ));
-            
-            // Update thumb position since value may have been adjusted
-            this._syncThumbToValue(thumb, this.getValue());
-            
-            this.__lockSync = false;
-        }
-    },
-    
-    /** @overrides myt.BaseSlider */
-    _nudge: function(thumb, up) {
-        this.setValue(this.getValue() + this.nudgeAmount * (up ? 1 : -1));
-    },
-    
-    /** Should only be called by myt.SliderThumbMixin.
-        @private
-        @param {!Object} thumb
-        @returns {number} */
-    getMinPixelValueForThumb: function(thumb) {
-        return this.convertValueToPixels(this.minValue);
-    },
-    
-    /** Should only be called by myt.SliderThumbMixin.
-        @private
-        @param {!Object} thumb
-        @returns {number} */
-    getMaxPixelValueForThumb: function(thumb) {
-        return this.convertValueToPixels(this.maxValue);
+        this.callSuper(this.snapToInt && v != null && !isNaN(v) ? Math.round(v) : v);
     }
 });
 
@@ -21203,7 +20755,7 @@ myt.BoundedRangeComponent = new JS.Module('BoundedRangeComponent', {
     initNode: function(parent, attrs) {
         if (!attrs.valueFilter) {
             const self = this;
-            attrs.valueFilter = function(v) {
+            attrs.valueFilter = v => {
                 if (v) {
                     const max = self.maxValue,
                         min = self.minValue;
@@ -21230,187 +20782,544 @@ myt.BoundedRangeComponent = new JS.Module('BoundedRangeComponent', {
 });
 
 
-/** A simple implementation of the range fill for a RangeSlider. */
-myt.SimpleSliderRangeFill = new JS.Class('SimpleSliderRangeFill', myt.View, {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        if (attrs.bgColor == null) attrs.bgColor = '#666666';
+((pkg) => {
+    const JSClass = JS.Class,
+        View = pkg.View,
         
-        this.callSuper(parent, attrs);
-        
-        if (parent.axis === 'x') {
-            this.setY(parent.thumbOffset);
-            this.setHeight(parent.thumbHeight);
-            this.setRoundedCorners(parent.thumbHeight / 2);
-        } else {
-            this.setX(parent.thumbOffset);
-            this.setWidth(parent.thumbWidth);
-            this.setRoundedCorners(parent.thumbWidth / 2);
-        }
-        parent._syncRangeFillToValue();
-    }
-});
-
-
-/** A slider component that support two thumbs.
-    
-    Events:
-        None
-    
-    Attributes:
-        rangeFillClass:JS.Class The class used to instantiate the rangeFill
-    
-    Private Attributes:
-        __lockSync:boolean Used internally to prevent infinite loops.
-    
-    @class
-*/
-myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
-    include: [myt.BoundedRangeComponent],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.BaseSlider */
-    initNode: function(parent, attrs) {
-        if (attrs.rangeFillClass == null) attrs.rangeFillClass = myt.SimpleSliderRangeFill;
-        
-        this.callSuper(parent, attrs);
-        
-        new this.rangeFillClass(this, {name:'rangeFill'});
-        new this.thumbClass(this, {name:'thumbLower'});
-        new this.thumbClass(this, {name:'thumbUpper'});
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setRangeFillClass: function(v) {this.rangeFillClass = v;},
-    
-    /** @overrides */
-    setValue: function(v) {
-        this.callSuper(v);
-        
-        if (this.inited) {
-            // Sync position of thumb
-            if (!this.__lockSync) {
-                v = this.getValue();
-                this._syncThumbToValue(this.thumbLower, v);
-                this._syncThumbToValue(this.thumbUpper, v);
+        /** Provides Slider thumb functionality.
+            
+            Requires:
+                myt.Button
+            
+            @class */
+        SliderThumbMixin = pkg.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
+            include: [pkg.Draggable],
+            
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            initNode: function(parent, attrs) {
+                if (attrs.width == null) attrs.width = parent.thumbWidth;
+                if (attrs.height == null) attrs.height = parent.thumbHeight;
+                
+                if (attrs.repeatKeyDown == null) attrs.repeatKeyDown = true;
+                if (attrs.activationKeys == null) {
+                    attrs.activationKeys = [
+                        37, // left arrow
+                        38, // up arrow
+                        39, // right arrow
+                        40 // down arrow
+                    ];
+                }
+                
+                this.callSuper(parent, attrs);
+                
+                if (parent.axis === 'x') {
+                    this.setY(parent.thumbOffset);
+                } else {
+                    this.setX(parent.thumbOffset);
+                }
+                
+                this.syncTo(parent, 'setDisabled', 'disabled');
+                
+                parent._syncThumbToValue(this, parent.getValue());
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            /** @overrides myt.Disableable */
+            setDisabled: function(v) {
+                // Adapt to event from syncTo
+                if (v != null && typeof v === 'object') v = v.value;
+                
+                this.callSuper(v);
+            },
+            
+            /** @overrides myt.FocusObservable */
+            setFocused: function(v) {
+                this.callSuper(v);
+                if (v) this.makeHighestZIndex();
+            },
+            
+            /** @overrides myt.View */
+            setX: function(v) {
+                if (this.x !== v) {
+                    this.callSuper(v);
+                    
+                    const p = this.parent;
+                    if (p.axis === 'x') p._syncValueToThumb(this);
+                }
+            },
+            
+            /** @overrides myt.View */
+            setY: function(v) {
+                if (this.y !== v) {
+                    this.callSuper(v);
+                    
+                    const p = this.parent;
+                    if (p.axis === 'y') p._syncValueToThumb(this);
+                }
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////////////
+            /** @overrides myt.Draggable */
+            requestDragPosition: function(x, y) {
+                if (!this.disabled) {
+                    const parent = this.parent,
+                        minPx = parent.getMinPixelValueForThumb(this),
+                        maxPx = parent.getMaxPixelValueForThumb(this);
+                    let halfSize,
+                        pos,
+                        func;
+                    
+                    if (parent.axis === 'x') {
+                        halfSize = this.width / 2;
+                        pos = x;
+                        func = this.setX;
+                    } else {
+                        halfSize = this.height / 2;
+                        pos = y;
+                        func = this.setY;
+                    }
+                    
+                    func.call(this, Math.min(Math.max(pos, minPx - halfSize), maxPx - halfSize));
+                }
+            },
+            
+            /** @overrides myt.Button. */
+            doActivationKeyDown: function(key, isRepeat) {
+                const parent = this.parent;
+                switch (key) {
+                    case 37: // Left
+                        parent.nudgeValueLeft(this);
+                        break;
+                    case 38: // Up
+                        parent.nudgeValueUp(this);
+                        break;
+                    case 39: // Right
+                        parent.nudgeValueRight(this);
+                        break;
+                    case 40: // Down
+                        parent.nudgeValueDown(this);
+                        break;
+                }
+                
+                this.callSuper(key, isRepeat);
             }
+        }),
+        
+        /** A simple implementation of a slider thumb.
             
-            this._syncRangeFillToValue();
-        }
-    },
-    
-    /** @overrides
-        Update the thumb position if the width changes. */
-    setWidth: function(v, supressEvent) {
-        const existing = this.width;
-        this.callSuper(v, supressEvent);
-        if (this.inited && this.axis === 'x' && this.width !== existing) {
-            const value = this.getValue();
-            this._syncThumbToValue(this.thumbLower, value);
-            this._syncThumbToValue(this.thumbUpper, value);
-        }
-    },
-    
-    /** @overrides
-        Update the thumb position if the height changes. */
-    setHeight: function(v, supressEvent) {
-        const existing = this.height;
-        this.callSuper(v, supressEvent);
-        if (this.inited && this.axis === 'y' && this.height !== existing) {
-            const value = this.getValue();
-            this._syncThumbToValue(this.thumbLower, value);
-            this._syncThumbToValue(this.thumbUpper, value);
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Should only be called by myt.SimpleSliderRangeFill.
-        @private
-        @returns {undefined} */
-    _syncRangeFillToValue: function() {
-        const rangeFill = this.rangeFill, value = this.getValue(),
-            lowerPx = this.convertValueToPixels(value.lower),
-            extent = this.convertValueToPixels(value.upper) - lowerPx;
-        if (this.axis === 'x') {
-            rangeFill.setX(lowerPx);
-            rangeFill.setWidth(extent);
-        } else {
-            rangeFill.setY(lowerPx);
-            rangeFill.setHeight(extent);
-        }
-    },
-    
-    /** @overrides myt.BaseSlider */
-    _syncThumbToValue: function(thumb, value) {
-        this.callSuper(thumb, thumb.name === 'thumbLower' ? value.lower : value.upper);
-    },
-    
-    /** Should only be called by myt.SliderThumbMixin.
-        @private
-        @param {!Object} thumb
-        @returns {undefined} */
-    _syncValueToThumb: function(thumb) {
-        if (this.inited && !this.__lockSync) {
-            this.__lockSync = true;
+            @class */
+        SimpleSliderThumb = pkg.SimpleSliderThumb = new JSClass('SimpleSliderThumb', pkg.SimpleButton, {
+            include: [SliderThumbMixin],
             
-            const converted = this.convertPixelsToValue(
-                this.axis === 'x' ? thumb.x + thumb.width / 2 : thumb.y + thumb.height / 2
-            );
             
-            let value = this.getValueCopy();
-            if (thumb.name === 'thumbLower') {
-                value.lower = converted;
+            // Life Cycle //////////////////////////////////////////////////////
+            /** @overrides myt.SimpleButton */
+            initNode: function(parent, attrs) {
+                if (attrs.activeColor == null) attrs.activeColor = '#bbbbbb';
+                if (attrs.readyColor == null) attrs.readyColor = '#cccccc';
+                if (attrs.hoverColor == null) attrs.hoverColor = '#dddddd';
+                
+                if (attrs.boxShadow == null) attrs.boxShadow = [0, 0, 4, '#666666'];
+                
+                this.callSuper(parent, attrs);
+                
+                if (attrs.roundedCorners == null) this.setRoundedCorners(Math.min(this.height, this.width) / 2);
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @overrides myt.FocusObservable */
+            showFocusEmbellishment: function() {
+                this.hideDefaultFocusEmbellishment();
+                this.setBoxShadow([0, 0, 9, '#666666']);
+            },
+            
+            /** @overrides myt.FocusObservable */
+            hideFocusEmbellishment: function() {
+                this.hideDefaultFocusEmbellishment();
+                this.setBoxShadow([0, 0, 4, '#666666']);
+            }
+        }),
+        
+        /** A base class for slider components.
+            
+            Attributes:
+                axis:string Indicates the direction the slider moves in. Allowed 
+                    values are 'x' and 'y'. Defaults to 'x'.
+                trackInset:number the number of pixels to inset the start of the 
+                    track from the top/left edge of the component. Defaults to 0.
+                trackOutset:number the number of pixels to inset the end of the track
+                    from the bottom/right edge of the component. Default to 0.
+                thumbWidth:number The width of the thumb.
+                thumbHeight:number The height of the thumb.
+                thumbOffset:number The x/y offset of the thumb. Will applied to 
+                    the opposite dimension to the axis.
+                thumbClass:JS.Class the class to use to create the thumb.
+                nudgeAmount:number the amount to nudge the value when the arrows 
+                    keys are invoked. Defaults to 1.
+            
+            @class */
+        BaseSlider = pkg.BaseSlider = new JSClass('BaseSlider', View, {
+            include: [pkg.Disableable],
+            
+            
+            // Life Cycle //////////////////////////////////////////////////////////
+            /** @overrides myt.View */
+            initNode: function(parent, attrs) {
+                if (attrs.axis == null) attrs.axis = 'x';
+                if (attrs.axis === 'x') {
+                    if (attrs.width == null) attrs.width = 100;
+                    if (attrs.height == null) attrs.height = 18;
+                } else {
+                    if (attrs.width == null) attrs.width = 18;
+                    if (attrs.height == null) attrs.height = 100;
+                }
+                
+                if (attrs.bgColor == null) attrs.bgColor = '#999999';
+                if (attrs.roundedCorners == null) attrs.roundedCorners = 9;
+                
+                if (attrs.trackInset == null) attrs.trackInset = 9;
+                if (attrs.trackOutset == null) attrs.trackOutset = 9;
+                if (attrs.thumbWidth == null) attrs.thumbWidth = 16;
+                if (attrs.thumbHeight == null) attrs.thumbHeight = 16;
+                if (attrs.thumbOffset == null) attrs.thumbOffset = 1;
+                
+                if (attrs.nudgeAmount == null) attrs.nudgeAmount = 1;
+                
+                if (attrs.thumbClass == null) attrs.thumbClass = SimpleSliderThumb;
+                
+                this.callSuper(parent, attrs);
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setAxis: function(v) {this.axis = v;},
+            setTrackInset: function(v) {this.trackInset = v;},
+            setTrackOutset: function(v) {this.trackOutset = v;},
+            setThumbWidth: function(v) {this.thumbWidth = v;},
+            setThumbHeight: function(v) {this.thumbHeight = v;},
+            setThumbOffset: function(v) {this.thumbOffset = v;},
+            setThumbClass: function(v) {this.thumbClass = v;},
+            setNudgeAmount: function(v) {this.nudgeAmount = v;},
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            convertValueToPixels: function(v) {
+                const self = this,
+                    minV = self.minValue, ti = self.trackInset,
+                    pxRange = (self.axis === 'x' ? self.width : self.height) - ti - self.trackOutset,
+                    valueRange = self.maxValue - minV;
+                return ti + ((v - minV) * (pxRange / valueRange));
+            },
+            
+            convertPixelsToValue: function(px) {
+                const self = this,
+                    minV = self.minValue, ti = self.trackInset,
+                    pxRange = (self.axis === 'x' ? self.width : self.height) - ti - self.trackOutset,
+                    valueRange = self.maxValue - minV;
+                return ((px - ti) * (valueRange / pxRange)) + minV;
+            },
+            
+            nudgeValueLeft: function(thumb) {
+                this._nudge(thumb, false);
+            },
+            
+            nudgeValueUp: function(thumb) {
+                this._nudge(thumb, false);
+            },
+            
+            nudgeValueRight: function(thumb) {
+                this._nudge(thumb, true);
+            },
+            
+            nudgeValueDown: function(thumb) {
+                this._nudge(thumb, true);
+            },
+            
+            _nudge: (thumb, up) => {
+                // Subclasses to implement
+            },
+            
+            _syncThumbToValue: function(thumb, value) {
+                value = this.convertValueToPixels(value);
+                if (this.axis === 'x') {
+                    thumb.setX(value - thumb.width / 2);
+                } else {
+                    thumb.setY(value - thumb.height / 2);
+                }
+            }
+        }),
+        
+        /** A simple implementation of the range fill for a RangeSlider.
+            
+            @class */
+        SimpleSliderRangeFill = pkg.SimpleSliderRangeFill = new JSClass('SimpleSliderRangeFill', View, {
+            // Life Cycle //////////////////////////////////////////////////////////
+            initNode: function(parent, attrs) {
+                if (attrs.bgColor == null) attrs.bgColor = '#666666';
+                
+                this.callSuper(parent, attrs);
+                
+                if (parent.axis === 'x') {
+                    this.setY(parent.thumbOffset);
+                    this.setHeight(parent.thumbHeight);
+                    this.setRoundedCorners(parent.thumbHeight / 2);
+                } else {
+                    this.setX(parent.thumbOffset);
+                    this.setWidth(parent.thumbWidth);
+                    this.setRoundedCorners(parent.thumbWidth / 2);
+                }
+                parent._syncRangeFillToValue();
+            }
+        });
+    
+    /** A slider component that support two thumbs.
+        
+        Attributes:
+            rangeFillClass:JS.Class The class used to instantiate the rangeFill
+        
+        Private Attributes:
+            __lockSync:boolean Used internally to prevent infinite loops.
+        
+        @class */
+    pkg.RangeSlider = new JSClass('RangeSlider', BaseSlider, {
+        include: [pkg.BoundedRangeComponent],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.BaseSlider */
+        initNode: function(parent, attrs) {
+            if (attrs.rangeFillClass == null) attrs.rangeFillClass = SimpleSliderRangeFill;
+            
+            this.callSuper(parent, attrs);
+            
+            new this.rangeFillClass(this, {name:'rangeFill'});
+            new this.thumbClass(this, {name:'thumbLower'});
+            new this.thumbClass(this, {name:'thumbUpper'});
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setRangeFillClass: function(v) {this.rangeFillClass = v;},
+        
+        /** @overrides */
+        setValue: function(v) {
+            this.callSuper(v);
+            
+            if (this.inited) {
+                // Sync position of thumb
+                if (!this.__lockSync) {
+                    v = this.getValue();
+                    this._syncThumbToValue(this.thumbLower, v);
+                    this._syncThumbToValue(this.thumbUpper, v);
+                }
+                
+                this._syncRangeFillToValue();
+            }
+        },
+        
+        /** @overrides
+            Update the thumb position if the width changes. */
+        setWidth: function(v, supressEvent) {
+            const existing = this.width;
+            this.callSuper(v, supressEvent);
+            if (this.inited && this.axis === 'x' && this.width !== existing) {
+                const value = this.getValue();
+                this._syncThumbToValue(this.thumbLower, value);
+                this._syncThumbToValue(this.thumbUpper, value);
+            }
+        },
+        
+        /** @overrides
+            Update the thumb position if the height changes. */
+        setHeight: function(v, supressEvent) {
+            const existing = this.height;
+            this.callSuper(v, supressEvent);
+            if (this.inited && this.axis === 'y' && this.height !== existing) {
+                const value = this.getValue();
+                this._syncThumbToValue(this.thumbLower, value);
+                this._syncThumbToValue(this.thumbUpper, value);
+            }
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Should only be called by myt.SimpleSliderRangeFill.
+            @private
+            @returns {undefined} */
+        _syncRangeFillToValue: function() {
+            const rangeFill = this.rangeFill,
+                value = this.getValue(),
+                lowerPx = this.convertValueToPixels(value.lower),
+                extent = this.convertValueToPixels(value.upper) - lowerPx;
+            if (this.axis === 'x') {
+                rangeFill.setX(lowerPx);
+                rangeFill.setWidth(extent);
             } else {
-                value.upper = converted;
+                rangeFill.setY(lowerPx);
+                rangeFill.setHeight(extent);
+            }
+        },
+        
+        /** @overrides myt.BaseSlider */
+        _syncThumbToValue: function(thumb, value) {
+            this.callSuper(thumb, thumb.name === 'thumbLower' ? value.lower : value.upper);
+        },
+        
+        /** Should only be called by myt.SliderThumbMixin.
+            @private
+            @param {!Object} thumb
+            @returns {undefined} */
+        _syncValueToThumb: function(thumb) {
+            if (this.inited && !this.__lockSync) {
+                this.__lockSync = true;
+                
+                const converted = this.convertPixelsToValue(
+                    this.axis === 'x' ? thumb.x + thumb.width / 2 : thumb.y + thumb.height / 2
+                );
+                
+                let value = this.getValueCopy();
+                if (thumb.name === 'thumbLower') {
+                    value.lower = converted;
+                } else {
+                    value.upper = converted;
+                }
+                this.setValue(value);
+                
+                // Update thumb position since value may have been adjusted
+                value = this.getValue();
+                if (this.thumbLower) this._syncThumbToValue(this.thumbLower, value);
+                if (this.thumbUpper) this._syncThumbToValue(this.thumbUpper, value);
+                
+                this.__lockSync = false;
+            }
+        },
+        
+        /** @overrides myt.BaseSlider */
+        _nudge: function(thumb, up) {
+            const value = this.getValueCopy(),
+                adj = this.nudgeAmount * (up ? 1 : -1);
+            if (thumb.name === 'thumbLower') {
+                value.lower += adj;
+                if (value.lower > value.upper) value.lower = value.upper;
+            } else {
+                value.upper += adj;
+                if (value.lower > value.upper) value.upper = value.lower;
             }
             this.setValue(value);
-            
-            // Update thumb position since value may have been adjusted
-            value = this.getValue();
-            if (this.thumbLower) this._syncThumbToValue(this.thumbLower, value);
-            if (this.thumbUpper) this._syncThumbToValue(this.thumbUpper, value);
-            
-            this.__lockSync = false;
+        },
+        
+        /** Should only be called by myt.SliderThumbMixin.
+            @private
+            @param {!Object} thumb
+            @returns {number} */
+        getMinPixelValueForThumb: function(thumb) {
+            return this.convertValueToPixels(
+                thumb.name === 'thumbLower' ? this.minValue : this.getValue().lower
+            );
+        },
+        
+        /** Should only be called by myt.SliderThumbMixin.
+            @private
+            @param {!Object} thumb
+            @returns {number} */
+        getMaxPixelValueForThumb: function(thumb) {
+            return this.convertValueToPixels(
+                thumb.name === 'thumbLower' ? this.getValue().upper : this.maxValue
+            );
         }
-    },
+    });
     
-    /** @overrides myt.BaseSlider */
-    _nudge: function(thumb, up) {
-        const value = this.getValueCopy(),
-            adj = this.nudgeAmount * (up ? 1 : -1);
-        if (thumb.name === 'thumbLower') {
-            value.lower += adj;
-            if (value.lower > value.upper) value.lower = value.upper;
-        } else {
-            value.upper += adj;
-            if (value.lower > value.upper) value.upper = value.lower;
+    /** A slider component.
+        
+        Private Attributes:
+            __lockSync:boolean Used internally to prevent infinite loops.
+        
+        @class */
+    pkg.Slider = new JSClass('Slider', BaseSlider, {
+        include: [pkg.BoundedValueComponent],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.BaseSlider */
+        initNode: function(parent, attrs) {
+            this.callSuper(parent, attrs);
+            
+            new this.thumbClass(this, {name:'thumb'});
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** @overrides */
+        setValue: function(v) {
+            this.callSuper(v);
+            
+            // Sync position of thumb
+            if (this.inited && !this.__lockSync) this._syncThumbToValue(this.thumb, this.getValue());
+        },
+        
+        /** @overrides
+            Update the thumb position if the width changes. */
+        setWidth: function(v, supressEvent) {
+            const existing = this.width;
+            this.callSuper(v, supressEvent);
+            if (this.inited && this.axis === 'x' && this.width !== existing) this._syncThumbToValue(this.thumb, this.getValue());
+        },
+        
+        /** @overrides
+            Update the thumb position if the height changes. */
+        setHeight: function(v, supressEvent) {
+            const existing = this.height;
+            this.callSuper(v, supressEvent);
+            if (this.inited && this.axis === 'y' && this.height !== existing) this._syncThumbToValue(this.thumb, this.getValue());
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Should only be called by myt.SliderThumbMixin.
+            @private
+            @param {!Object} thumb
+            @returns {undefined} */
+        _syncValueToThumb: function(thumb) {
+            if (this.inited && !this.__lockSync) {
+                this.__lockSync = true;
+                
+                this.setValue(this.convertPixelsToValue(
+                    this.axis === 'x' ? thumb.x + thumb.width / 2 : thumb.y + thumb.height / 2
+                ));
+                
+                // Update thumb position since value may have been adjusted
+                this._syncThumbToValue(thumb, this.getValue());
+                
+                this.__lockSync = false;
+            }
+        },
+        
+        /** @overrides myt.BaseSlider */
+        _nudge: function(thumb, up) {
+            this.setValue(this.getValue() + this.nudgeAmount * (up ? 1 : -1));
+        },
+        
+        /** Should only be called by myt.SliderThumbMixin.
+            @private
+            @param {!Object} thumb
+            @returns {number} */
+        getMinPixelValueForThumb: function(thumb) {
+            return this.convertValueToPixels(this.minValue);
+        },
+        
+        /** Should only be called by myt.SliderThumbMixin.
+            @private
+            @param {!Object} thumb
+            @returns {number} */
+        getMaxPixelValueForThumb: function(thumb) {
+            return this.convertValueToPixels(this.maxValue);
         }
-        this.setValue(value);
-    },
-    
-    /** Should only be called by myt.SliderThumbMixin.
-        @private
-        @param {!Object} thumb
-        @returns {number} */
-    getMinPixelValueForThumb: function(thumb) {
-        return this.convertValueToPixels(
-            thumb.name === 'thumbLower' ? this.minValue : this.getValue().lower
-        );
-    },
-    
-    /** Should only be called by myt.SliderThumbMixin.
-        @private
-        @param {!Object} thumb
-        @returns {number} */
-    getMaxPixelValueForThumb: function(thumb) {
-        return this.convertValueToPixels(
-            thumb.name === 'thumbLower' ? this.getValue().upper : this.maxValue
-        );
-    }
-});
+    });
+})(myt);
 
 
 ((pkg) => {
@@ -23591,350 +23500,349 @@ myt.RangeSlider = new JS.Class('RangeSlider', myt.BaseSlider, {
 })(myt);
 
 
-/** Makes a view act as a panel in a myt.PanelStack.
+((pkg) => {
+    const JSClass = JS.Class,
     
-    Events:
-        None
-    
-    Attributes:
-        panelId:string The unique ID of the panel.
-        panelStack:myt.PanelStack A reference to the panel stack this panel
-            belongs to. If undefined the parent view will be used.
-*/
-myt.StackablePanel = new JS.Module('StackablePanel', {
-    include: [myt.Selectable],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides */
-    initNode: function(parent, attrs) {
-        attrs.visible = attrs.selected = false;
-        
-        if (attrs.bgColor == null) attrs.bgColor = '#ffffff';
-        if (attrs.panelId == null) attrs.panelId = attrs.name;
-        
-        this.callSuper(parent, attrs);
-        
-        if (this.selected) this.doStackTransition();
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setPanelStack: function(v) {this.panelStack = v;},
-    
-    getPanelStack: function() {
-        return this.panelStack || this.parent;
-    },
-    
-    setPanelId: function(v) {this.panelId = v;},
-    
-    /** @overrides myt.Selectable */
-    setSelected: function(v) {
-        if (this.selected !== v) {
-            this.callSuper(v);
-            if (this.inited) this.doStackTransition();
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Called whenever a transition between panels is initiated by this panel.
-        Default behavior is to defer to the panelStack's doStackTransition
-        method.
-        @returns {undefined} */
-    doStackTransition: function() {
-        this.getPanelStack().doStackTransition(this);
-    }
-});
-
-
-/** Use this to implement more complex transitions in a PanelStack. */
-myt.PanelStackTransition = new JS.Class('PanelStackTransition', myt.Node, {
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Called when transitioning to the provided panel.
-        The default implementation keeps the promise right away.
-        @param panel:myt.StackablePanel
-        @returns a promise object that has a next function. */
-    to: (panel) => Promise.resolve(panel),
-    
-    /** Called when transitioning from the provided panel.
-        The default implementation keeps the promise right away.
-        @param panel:myt.StackablePanel
-        @returns a promise object that has a next function. */
-    from: (panel) => Promise.resolve(panel)
-});
-
-
-/** A PanelStackTransition that fades the opacity between the two panels. */
-myt.PanelStackFadeTransition = new JS.Class('PanelStackFadeTransition', myt.PanelStackTransition, {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides */
-    initNode: function(parent, attrs) {
-        if (attrs.duration == null) attrs.duration = 1000;
-        
-        this.callSuper(parent, attrs);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setDuration: function(duration) {this.duration = duration;},
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    to: function(panel) {
-        return new Promise((resolve, reject) => {
-            panel.stopActiveAnimators('opacity');
-            panel.setVisible(true);
-            panel.animate({attribute:'opacity', to:1, duration:this.duration}).next((success) => {
-                panel.makeHighestZIndex();
-                resolve(panel);
-            });
+        /** Use this to implement more complex transitions in a PanelStack.
+            
+            @class */
+        PanelStackTransition = pkg.PanelStackTransition = new JSClass('PanelStackTransition', pkg.Node, {
+            // Methods /////////////////////////////////////////////////////////
+            /** Called when transitioning to the provided panel.
+                The default implementation keeps the promise right away.
+                @param panel:myt.StackablePanel
+                @returns a promise object that has a next function. */
+            to: panel => Promise.resolve(panel),
+            
+            /** Called when transitioning from the provided panel.
+                The default implementation keeps the promise right away.
+                @param panel:myt.StackablePanel
+                @returns a promise object that has a next function. */
+            from: panel => Promise.resolve(panel)
         });
-    },
     
-    from: function(panel) {
-        return new Promise((resolve, reject) => {
-            panel.stopActiveAnimators('opacity');
-            panel.animate({attribute:'opacity', to:0, duration:this.duration}).next((success) => {
-                panel.setVisible(false);
-                resolve(panel);
-            });
-        });
-    }
-});
-
-
-/** A PanelStackTransition that slides between the from and to panel. */
-myt.PanelStackSlideTransition = new JS.Class('PanelStackSlideTransition', myt.PanelStackTransition, {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides */
-    initNode: function(parent, attrs) {
-        if (attrs.duration == null) attrs.duration = 1000;
-        if (attrs.direction == null) attrs.direction = 'right';
+    /** Manages a stack of myt.View panel children that can be transitioned to
+        an "active" state as they are selected. The active panel will be sized
+        to fit the bounds of the stack.
         
-        this.callSuper(parent, attrs);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setDuration: function(duration) {this.duration = duration;},
-    setDirection: function(direction) {this.direction = direction;},
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    to: function(panel) {
-        const panelStack = panel.getPanelStack(),
-            duration = this.duration;
-        let toValue,
-            axis;
-        switch (this.direction) {
-            case 'left':
-                axis = 'x';
-                toValue = panelStack.width;
-                break;
-            case 'right':
-                axis = 'x';
-                toValue = -panelStack.width;
-                break;
-            case 'up':
-                axis = 'y';
-                toValue = panelStack.height;
-                break;
-            case 'down':
-                axis = 'y';
-                toValue = -panelStack.height;
-                break;
-        }
+        @class */
+    // FIXME: handle panel destruction
+    // FIXME: handle panel insertion
+    pkg.PanelStack = new JSClass('PanelStack', pkg.View, {
+        include: [pkg.SelectionManager],
         
-        panel.stopActiveAnimators(axis);
-        panel.set(axis, toValue);
-        panel.setVisible(true);
         
-        return new Promise((resolve, reject) => {
-            const nextFunc = (success) => {
-                panel.makeHighestZIndex();
-                resolve(panel);
-            };
-            if (duration > 0) {
-                panel.animate({attribute:axis, to:0, duration:duration}).next(nextFunc);
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.View */
+        initNode: function(parent, attrs) {
+            attrs.overflow = 'hidden';
+            
+            if (attrs.itemSelectionId == null) attrs.itemSelectionId = 'panelId';
+            if (attrs.maxSelected == null) attrs.maxSelected = 1;
+            
+            this.callSuper(parent, attrs);
+            
+            this.syncTo(this, '__updateHeight', 'height');
+            this.syncTo(this, '__updateWidth', 'width');
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setTransition: function(transition) {this.set('transition', transition, true);},
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __updateWidth: function(event) {
+            // Only resize the active panel
+            const panel = this.getActivePanel();
+            if (panel) panel.setWidth(event.value);
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __updateHeight: function(event) {
+            // Only resize the active panel
+            const panel = this.getActivePanel();
+            if (panel) panel.setHeight(event.value);
+        },
+        
+        /** Gets the selected panel.
+            @returns myt.StackablePanel: The selected panel or undefined if
+                none selected. */
+        getActivePanel: function() {
+            return this.getSelected()[0];
+        },
+        
+        getPanel: function(panelId) {
+            return this.getSelectableItem(panelId);
+        },
+        
+        selectPanel: function(panelId) {
+            this.selectById(panelId);
+        },
+        
+        /** @overrides myt.SelectionManager */
+        doSelected: function(item) {
+            item.setWidth(this.width);
+            item.setHeight(this.height);
+        },
+        
+        /** Called by a panel when it transitions between selected states. Should
+            not be called directly. Instead change the panel selection.
+            @param panel:myt.StackablePanel The panel that is transitioning.
+            @returns {undefined} */
+        doStackTransition: function(panel) {
+            this['doStackTransition' + (panel.selected ? 'To' : 'From')](panel);
+        },
+        
+        /** Called by PanelStack.doStackTransition when the provided panel will be 
+            the newly selected panel in the stack. Should not be called directly. 
+            Instead change the panel selection.
+            @param panel:myt.StackablePanel The panel that is transitioning.
+            @returns {undefined} */
+        doStackTransitionTo: function(panel) {
+            const self = this;
+            
+            self.doBeforeTransitionTo(panel);
+            
+            const transition = self.transition;
+            if (transition) {
+                transition.to(panel).then(panel => {self.doAfterTransitionTo(panel);});
             } else {
-                panel.set(axis, 0);
-                nextFunc();
+                panel.makeHighestZIndex();
+                panel.setVisible(true);
+                
+                self.doAfterTransitionTo(panel);
             }
-        });
-    },
-    
-    from: function(panel) {
-        const panelStack = panel.getPanelStack(),
-            duration = this.duration;
-        let toValue,
-            axis;
-        switch (this.direction) {
-            case 'left':
-                axis = 'x';
-                toValue = -panelStack.width;
-                break;
-            case 'right':
-                axis = 'x';
-                toValue = panelStack.width;
-                break;
-            case 'up':
-                axis = 'y';
-                toValue = -panelStack.height;
-                break;
-            case 'down':
-                axis = 'y';
-                toValue = panelStack.height;
-                break;
-        }
+        },
         
-        panel.stopActiveAnimators(axis);
+        doBeforeTransitionTo: panel => {},
+        doAfterTransitionTo: panel => {},
         
-        return new Promise((resolve, reject) => {
-            const nextFunc = (success) => {
-                panel.setVisible(false);
-                resolve(panel);
-            };
-            if (duration > 0) {
-                panel.animate({attribute:axis, to:toValue, duration:duration}).next(nextFunc);
+        /** Called by PanelStack.doStackTransition when the provided panel will be 
+            the newly deselected panel in the stack. Should not be called directly. 
+            Instead change the panel selection.
+            @param panel:myt.StackablePanel The panel that is transitioning.
+            @returns {undefined} */
+        doStackTransitionFrom: function(panel) {
+            const self = this;
+            
+            self.doBeforeTransitionFrom(panel);
+            
+            const transition = self.transition;
+            if (transition) {
+                transition.from(panel).then(panel => {self.doAfterTransitionFrom(panel);});
             } else {
-                panel.set(axis, toValue);
-                nextFunc();
+                panel.setVisible(false);
+                self.doAfterTransitionFrom(panel);
             }
-        });
-    }
-});
-
-
-/** Manages a stack of myt.View panel children that can be transitioned to
-    an "active" state as they are selected. The active panel will be sized
-    to fit the bounds of the stack.
-    
-    Events:
-        None
-    
-    Attributes:
-        None
-*/
-// FIXME: handle panel destruction
-// FIXME: handle panel insertion
-myt.PanelStack = new JS.Class('PanelStack', myt.View, {
-    include: [myt.SelectionManager],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.View */
-    initNode: function(parent, attrs) {
-        attrs.overflow = 'hidden';
+        },
         
-        if (attrs.itemSelectionId == null) attrs.itemSelectionId = 'panelId';
-        if (attrs.maxSelected == null) attrs.maxSelected = 1;
+        doBeforeTransitionFrom: panel => {},
+        doAfterTransitionFrom: panel => {}
+    });
+    
+    /** Makes a view act as a panel in a myt.PanelStack.
         
-        this.callSuper(parent, attrs);
+        Attributes:
+            panelId:string The unique ID of the panel.
+            panelStack:myt.PanelStack A reference to the panel stack this panel
+                belongs to. If undefined the parent view will be used.
         
-        this.syncTo(this, '__updateHeight', 'height');
-        this.syncTo(this, '__updateWidth', 'width');
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setTransition: function(transition) {this.set('transition', transition, true);},
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __updateWidth: function(event) {
-        // Only resize the active panel
-        const panel = this.getActivePanel();
-        if (panel) panel.setWidth(event.value);
-    },
-    
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __updateHeight: function(event) {
-        // Only resize the active panel
-        const panel = this.getActivePanel();
-        if (panel) panel.setHeight(event.value);
-    },
-    
-    /** Gets the selected panel.
-        @returns myt.StackablePanel: The selected panel or undefined if
-            none selected. */
-    getActivePanel: function() {
-        return this.getSelected()[0];
-    },
-    
-    getPanel: function(panelId) {
-        return this.getSelectableItem(panelId);
-    },
-    
-    selectPanel: function(panelId) {
-        this.selectById(panelId);
-    },
-    
-    /** @overrides myt.SelectionManager */
-    doSelected: function(item) {
-        item.setWidth(this.width);
-        item.setHeight(this.height);
-    },
-    
-    /** Called by a panel when it transitions between selected states. Should
-        not be called directly. Instead change the panel selection.
-        @param panel:myt.StackablePanel The panel that is transitioning.
-        @returns {undefined} */
-    doStackTransition: function(panel) {
-        this['doStackTransition' + (panel.selected ? 'To' : 'From')](panel);
-    },
-    
-    /** Called by PanelStack.doStackTransition when the provided panel will be 
-        the newly selected panel in the stack. Should not be called directly. 
-        Instead change the panel selection.
-        @param panel:myt.StackablePanel The panel that is transitioning.
-        @returns {undefined} */
-    doStackTransitionTo: function(panel) {
-        const self = this;
+        @class */
+    pkg.StackablePanel = new JS.Module('StackablePanel', {
+        include: [pkg.Selectable],
         
-        self.doBeforeTransitionTo(panel);
         
-        const transition = self.transition;
-        if (transition) {
-            transition.to(panel).then((panel) => {self.doAfterTransitionTo(panel);});
-        } else {
-            panel.makeHighestZIndex();
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides */
+        initNode: function(parent, attrs) {
+            attrs.visible = attrs.selected = false;
+            
+            if (attrs.bgColor == null) attrs.bgColor = '#ffffff';
+            if (attrs.panelId == null) attrs.panelId = attrs.name;
+            
+            this.callSuper(parent, attrs);
+            
+            if (this.selected) this.doStackTransition();
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setPanelStack: function(v) {this.panelStack = v;},
+        
+        getPanelStack: function() {
+            return this.panelStack || this.parent;
+        },
+        
+        setPanelId: function(v) {this.panelId = v;},
+        
+        /** @overrides myt.Selectable */
+        setSelected: function(v) {
+            if (this.selected !== v) {
+                this.callSuper(v);
+                if (this.inited) this.doStackTransition();
+            }
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Called whenever a transition between panels is initiated by this 
+            panel. Default behavior is to defer to the panelStack's 
+            doStackTransition method.
+            @returns {undefined} */
+        doStackTransition: function() {
+            this.getPanelStack().doStackTransition(this);
+        }
+    });
+    
+    /** A PanelStackTransition that fades the opacity between the two panels.
+        
+        @class */
+    pkg.PanelStackFadeTransition = new JSClass('PanelStackFadeTransition', PanelStackTransition, {
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides */
+        initNode: function(parent, attrs) {
+            if (attrs.duration == null) attrs.duration = 1000;
+            
+            this.callSuper(parent, attrs);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setDuration: function(duration) {this.duration = duration;},
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        to: function(panel) {
+            return new Promise((resolve, reject) => {
+                panel.stopActiveAnimators('opacity');
+                panel.setVisible(true);
+                panel.animate({attribute:'opacity', to:1, duration:this.duration}).next(success => {
+                    panel.makeHighestZIndex();
+                    resolve(panel);
+                });
+            });
+        },
+        
+        from: function(panel) {
+            return new Promise((resolve, reject) => {
+                panel.stopActiveAnimators('opacity');
+                panel.animate({attribute:'opacity', to:0, duration:this.duration}).next(success => {
+                    panel.setVisible(false);
+                    resolve(panel);
+                });
+            });
+        }
+    });
+    
+    /** A PanelStackTransition that slides between the from and to panel.
+        
+        @class */
+    pkg.PanelStackSlideTransition = new JSClass('PanelStackSlideTransition', PanelStackTransition, {
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides */
+        initNode: function(parent, attrs) {
+            if (attrs.duration == null) attrs.duration = 1000;
+            if (attrs.direction == null) attrs.direction = 'right';
+            
+            this.callSuper(parent, attrs);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setDuration: function(duration) {this.duration = duration;},
+        setDirection: function(direction) {this.direction = direction;},
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        to: function(panel) {
+            const panelStack = panel.getPanelStack(),
+                duration = this.duration;
+            let toValue,
+                axis;
+            switch (this.direction) {
+                case 'left':
+                    axis = 'x';
+                    toValue = panelStack.width;
+                    break;
+                case 'right':
+                    axis = 'x';
+                    toValue = -panelStack.width;
+                    break;
+                case 'up':
+                    axis = 'y';
+                    toValue = panelStack.height;
+                    break;
+                case 'down':
+                    axis = 'y';
+                    toValue = -panelStack.height;
+                    break;
+            }
+            
+            panel.stopActiveAnimators(axis);
+            panel.set(axis, toValue);
             panel.setVisible(true);
             
-            self.doAfterTransitionTo(panel);
-        }
-    },
-    
-    doBeforeTransitionTo: function(panel) {},
-    doAfterTransitionTo: function(panel) {},
-    
-    /** Called by PanelStack.doStackTransition when the provided panel will be 
-        the newly deselected panel in the stack. Should not be called directly. 
-        Instead change the panel selection.
-        @param panel:myt.StackablePanel The panel that is transitioning.
-        @returns {undefined} */
-    doStackTransitionFrom: function(panel) {
-        const self = this;
+            return new Promise((resolve, reject) => {
+                const nextFunc = (success) => {
+                    panel.makeHighestZIndex();
+                    resolve(panel);
+                };
+                if (duration > 0) {
+                    panel.animate({attribute:axis, to:0, duration:duration}).next(nextFunc);
+                } else {
+                    panel.set(axis, 0);
+                    nextFunc();
+                }
+            });
+        },
         
-        self.doBeforeTransitionFrom(panel);
-        
-        const transition = self.transition;
-        if (transition) {
-            transition.from(panel).then((panel) => {self.doAfterTransitionFrom(panel);});
-        } else {
-            panel.setVisible(false);
-            self.doAfterTransitionFrom(panel);
+        from: function(panel) {
+            const panelStack = panel.getPanelStack(),
+                duration = this.duration;
+            let toValue,
+                axis;
+            switch (this.direction) {
+                case 'left':
+                    axis = 'x';
+                    toValue = -panelStack.width;
+                    break;
+                case 'right':
+                    axis = 'x';
+                    toValue = panelStack.width;
+                    break;
+                case 'up':
+                    axis = 'y';
+                    toValue = -panelStack.height;
+                    break;
+                case 'down':
+                    axis = 'y';
+                    toValue = panelStack.height;
+                    break;
+            }
+            
+            panel.stopActiveAnimators(axis);
+            
+            return new Promise((resolve, reject) => {
+                const nextFunc = (success) => {
+                    panel.setVisible(false);
+                    resolve(panel);
+                };
+                if (duration > 0) {
+                    panel.animate({attribute:axis, to:toValue, duration:duration}).next(nextFunc);
+                } else {
+                    panel.set(axis, toValue);
+                    nextFunc();
+                }
+            });
         }
-    },
-    
-    doBeforeTransitionFrom: function(panel) {},
-    doAfterTransitionFrom: function(panel) {},
-});
+    });
+})(myt);
 
 
 ((pkg) => {
@@ -25188,7 +25096,7 @@ myt.Eventable = new JS.Class('Eventable', {
                     this.setVisible(true);
                 }
             }
-        });
+        }),
         
         /*  An implementation of a tooltip.
             
@@ -25446,11 +25354,9 @@ myt.Path = new JS.Class('Path', {
         const cosA = Math.cos(a), sinA = Math.sin(a),
             vecs = this.vectors,
             len = vecs.length;
-        let xNew, yNew, i = 0;
-        for (; len > i;) {
-            xNew = vecs[i] * cosA - vecs[i + 1] * sinA;
-            yNew = vecs[i] * sinA + vecs[i + 1] * cosA;
-            
+        for (let i = 0; len > i;) {
+            const xNew = vecs[i] * cosA - vecs[i + 1] * sinA,
+                yNew = vecs[i] * sinA + vecs[i + 1] * cosA;
             vecs[i++] = xNew;
             vecs[i++] = yNew;
         }
@@ -25476,13 +25382,13 @@ myt.Path = new JS.Class('Path', {
         if (this._boundingBox) return this._boundingBox;
         
         const vecs = this.vectors;
-        let i = vecs.length, x, y, minX, maxX, minY, maxY;
+        let i = vecs.length, minX, maxX, minY, maxY;
         if (i >= 2) {
             minY = maxY = vecs[--i];
             minX = maxX = vecs[--i];
             while (i) {
-                y = vecs[--i];
-                x = vecs[--i];
+                const y = vecs[--i],
+                    x = vecs[--i];
                 minY = Math.min(y, minY);
                 maxY = Math.max(y, maxY);
                 minX = Math.min(x, minX);

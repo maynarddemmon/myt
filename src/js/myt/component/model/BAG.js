@@ -145,13 +145,12 @@ myt.BAG = new JS.Class('BAG', {
             const attrName = this.attrName,
                 setterName = myt.AccessorSupport.generateSetterName(attrName),
                 nodes = this.__nodes;
-            let i = nodes.length,
-                n;
+            let i = nodes.length;
             
             this.setTrueNode(node);
             
             while (i) {
-                n = nodes[--i];
+                const n = nodes[--i];
                 if (node === n) {
                     if (!n[attrName]) n[setterName](true);
                 } else {

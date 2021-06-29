@@ -127,8 +127,7 @@
             getSelected: function() {
                 const retval = [], 
                     items = this.__selected;
-                let key;
-                for (key in items) retval.push(items[key]);
+                for (const key in items) retval.push(items[key]);
                 return retval;
             },
             
@@ -151,7 +150,7 @@
             /** Called when an item is selected.
                 @param {!Objectd} item - The newly selected myt.Selectable..
                 @returns {undefined} */
-            doSelected: (item) => {},
+            doSelected: item => {},
             
             /** Selects the item with the provided item selection ID.
                 @param {string} itemSelectionId
@@ -229,14 +228,13 @@
                 @returns {undefined} */
             deselectAll: function() {
                 const items = this.__selected;
-                let key;
-                for (key in items) this.deselect(items[key]);
+                for (const key in items) this.deselect(items[key]);
             },
             
             /** Checks if the item is selected.
                 @param {!Objecdt} item - The item to test.
                 @returns {boolean} */
-            isSelectedItem: (item) => item ? item.isSelected() : false,
+            isSelectedItem: item => item ? item.isSelected() : false,
             
             /** Checks if all selectable items are selected.
                 @returns {boolean} */
@@ -251,10 +249,9 @@
             getManagedItems: function() {
                 const retval = [], 
                     svs = this.getSubviews();
-                let i = svs.length, 
-                    sv;
+                let i = svs.length;
                 while (i) {
-                    sv = svs[--i];
+                    const sv = svs[--i];
                     if (sv.isA(Selectable)) retval.push(sv);
                 }
                 return retval;
@@ -277,10 +274,9 @@
             getSelectableItem: function(itemSelectionId) {
                 const items = this.getSelectableItems(),
                     selectionAttr = this.itemSelectionId;
-                let i = items.length, 
-                    item;
+                let i = items.length;
                 while (i) {
-                    item = items[--i];
+                    const item = items[--i];
                     if (item[selectionAttr] === itemSelectionId) return item;
                 }
                 return null;

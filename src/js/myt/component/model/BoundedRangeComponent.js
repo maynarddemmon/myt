@@ -7,7 +7,7 @@ myt.BoundedRangeComponent = new JS.Module('BoundedRangeComponent', {
     initNode: function(parent, attrs) {
         if (!attrs.valueFilter) {
             const self = this;
-            attrs.valueFilter = function(v) {
+            attrs.valueFilter = v => {
                 if (v) {
                     const max = self.maxValue,
                         min = self.minValue;
