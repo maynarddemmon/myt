@@ -2,13 +2,10 @@
     Useful as a light weight alternative to myt.Node when parent child
     relationships are not needed.
     
-    Events:
-        None.
-    
     Attributes:
-        inited:boolean Set to true after this Eventable has completed 
-            initializing.
-*/
+        inited:boolean Set to true after this Eventable has completed initializing.
+    
+    @class */
 myt.Eventable = new JS.Class('Eventable', {
     include: [myt.AccessorSupport, myt.Destructible, myt.Observable, myt.Observer],
     

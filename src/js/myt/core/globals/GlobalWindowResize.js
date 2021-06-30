@@ -27,7 +27,7 @@
         initialize: function() {
             // Handle the window resize event and broadcast it to the observers.
             pkg.addEventListener(win, 'resize', 
-                (domEvent) => {
+                domEvent => {
                     this.fireEvent('resize', {w:innerWidth = win.innerWidth, h:innerHeight = win.innerHeight});
                 }
             );

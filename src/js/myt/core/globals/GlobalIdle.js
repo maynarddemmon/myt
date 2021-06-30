@@ -40,7 +40,7 @@
             }
             
             // Setup callback function
-            idleFunc = (time) => {
+            idleFunc = time => {
                 timerId = win.requestAnimationFrame(idleFunc);
                 if (lastTime !== -1) {
                     time = Math.round(time);

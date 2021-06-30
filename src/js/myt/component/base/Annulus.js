@@ -4,7 +4,7 @@
         /*  Redraws the annulus
             @param {!Object} annulus - The Annulus to redraw.
             @returns {undefined} */
-        redraw = (annulus) => {
+        redraw = annulus => {
             pkg.Annulus.draw(
                 annulus.__path, 
                 degreesToRadians(annulus.startAngle), 
@@ -21,7 +21,7 @@
         /*  Ensures the size of the view exactly fits the annulus.
             @param {!Object} annulus - The Annulus to update.
             @returns {undefined} */
-        updateSize = (annulus) => {
+        updateSize = annulus => {
             const size = 2*(annulus.radius + annulus.thickness),
                 svg = annulus.__svg;
             annulus.setWidth(size);

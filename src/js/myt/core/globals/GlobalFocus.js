@@ -200,7 +200,7 @@
         /** Move focus to the next focusable element.
             @param {boolean} ignoreFocusTrap - If true focus traps will be skipped over.
             @returns {undefined} */
-        next: (ignoreFocusTrap) => {
+        next: ignoreFocusTrap => {
             const next = traverse(true, ignoreFocusTrap);
             if (next) next.focus();
         },
@@ -208,7 +208,7 @@
         /** Move focus to the previous focusable element.
             @param {boolean} ignoreFocusTrap - If true focus traps will be skipped over.
             @returns {undefined} */
-        prev: (ignoreFocusTrap) => {
+        prev: ignoreFocusTrap => {
             const prev = traverse(false, ignoreFocusTrap);
             if (prev) prev.focus();
         },
@@ -216,7 +216,7 @@
         /** Finds the closest model for the provided dom element.
             @param {!Object} elem - The domElement to start looking from.
             @returns {?Object} - A myt.View or null if not found. */
-        findModelForDomElement: (elem) => {
+        findModelForDomElement: elem => {
             while (elem) {
                 let model = elem.model;
                 if (model && model instanceof pkg.View) return model;

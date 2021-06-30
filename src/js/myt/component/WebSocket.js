@@ -165,14 +165,14 @@
         
         /*  @param {string|?Function} matcher
             @return {?Function} */
-        makeMatcherFunction = (matcher) => {
+        makeMatcherFunction = matcher => {
             let matcherFunc;
             if (typeof matcher === 'string') {
                 // Use the provided string as an exact match function. We must
                 // generate a unique function for each string key (and reuse it)
                 // so that the === tests will work in the registerListener and
                 // unregisterListener functions.
-                matcherFunc = matcherFunctionsByKey[matcher] || (matcherFunctionsByKey[matcher] = (type) => type === matcher);
+                matcherFunc = matcherFunctionsByKey[matcher] || (matcherFunctionsByKey[matcher] = type => type === matcher);
             } else if (typeof matcher === 'function') {
                 matcherFunc = matcher;
             } else if (matcher == null) {

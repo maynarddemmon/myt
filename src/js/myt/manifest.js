@@ -157,14 +157,13 @@ JS.Packages(function() {
         .requires('myt.SelectableInfiniteList','myt.GridController');
     
     // Component : Input
-    file(MYT_COMPONENT_ROOT + 'input/NativeInputWrapper.js').provides('myt.NativeInputWrapper').requires('myt.View','myt.InputObservable','myt.Disableable');
-    file(MYT_COMPONENT_ROOT + 'input/BaseInputText.js'     ).provides('myt.BaseInputText'     ).requires('myt.NativeInputWrapper','myt.TextSupport');
-    file(MYT_COMPONENT_ROOT + 'input/InputText.js'         ).provides('myt.InputText'         ).requires('myt.BaseInputText');
-    file(MYT_COMPONENT_ROOT + 'input/ComboBox.js'          ).provides('myt.ComboBox'          ).requires('myt.InputText','myt.ListViewAnchor');
-    file(MYT_COMPONENT_ROOT + 'input/InputTextArea.js'     ).provides('myt.InputTextArea'     ).requires('myt.BaseInputText');
-    file(MYT_COMPONENT_ROOT + 'input/EditableText.js'      ).provides('myt.EditableText'      ).requires('myt.BaseInputText');
-    file(MYT_COMPONENT_ROOT + 'input/InputSelect.js'       ).provides('myt.InputSelect'       ).requires('myt.NativeInputWrapper','myt.SizeToDom');
-    file(MYT_COMPONENT_ROOT + 'input/InputSelectOption.js' ).provides('myt.InputSelectOption' ).requires('myt.InputSelect','myt.Selectable');
+    file(MYT_COMPONENT_ROOT + 'input/NativeInputWrapper.js').provides('myt.NativeInputWrapper'                 ).requires('myt.View','myt.InputObservable','myt.Disableable');
+    file(MYT_COMPONENT_ROOT + 'input/BaseInputText.js'     ).provides('myt.BaseInputText'                      ).requires('myt.NativeInputWrapper','myt.TextSupport');
+    file(MYT_COMPONENT_ROOT + 'input/InputText.js'         ).provides('myt.InputText'                          ).requires('myt.BaseInputText');
+    file(MYT_COMPONENT_ROOT + 'input/ComboBox.js'          ).provides('myt.ComboBox'                           ).requires('myt.InputText','myt.ListViewAnchor');
+    file(MYT_COMPONENT_ROOT + 'input/InputTextArea.js'     ).provides('myt.InputTextArea'                      ).requires('myt.BaseInputText');
+    file(MYT_COMPONENT_ROOT + 'input/EditableText.js'      ).provides('myt.EditableText'                       ).requires('myt.BaseInputText');
+    file(MYT_COMPONENT_ROOT + 'input/InputSelect.js'       ).provides('myt.InputSelect','myt.InputSelectOption').requires('myt.NativeInputWrapper','myt.SizeToDom','myt.Selectable');
     
     // Component : Layout
     file(MYT_COMPONENT_ROOT + 'layout/SpacedLayout.js'  ).provides('myt.SpacedLayout'  ).requires('myt.VariableLayout');

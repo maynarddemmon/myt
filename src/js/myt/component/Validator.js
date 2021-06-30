@@ -12,10 +12,10 @@
                 if (identifiable.id) {
                     func(id);
                 } else {
-                    pkg.dumpStack("No ID");
+                    pkg.dumpStack('No ID');
                 }
             } else {
-                pkg.dumpStack("No validator");
+                pkg.dumpStack('No validator');
             }
         },
         
@@ -71,7 +71,7 @@
             /** @overrides myt.Validator */
             isValid: function(value, config, errorMessages) {
                 if (value == null || value === '' || (typeof value === 'string' && value.trim() === '')) {
-                    if (errorMessages) errorMessages.push("This value is required.");
+                    if (errorMessages) errorMessages.push('This value is required.');
                     return false;
                 }
                 
@@ -87,7 +87,7 @@
             isValid: function(value, config, errorMessages) {
                 const rbv = config.form.getRollbackValue();
                 if (value && rbv && value.toLowerCase() === rbv.toLowerCase()) {
-                    if (errorMessages) errorMessages.push("Value must differ by more than just case.");
+                    if (errorMessages) errorMessages.push('Value must differ by more than just case.');
                     return false;
                 }
                 
@@ -111,7 +111,7 @@
             isValid: function(value, config, errorMessages) {
                 const uri = new pkg.URI(value);
                 if (uri.toString(this.originalRawQuery) !== value) {
-                    if (errorMessages) errorMessages.push("Not a valid URL.");
+                    if (errorMessages) errorMessages.push('Invalid URL.');
                     return false;
                 }
                 return true;
@@ -213,7 +213,7 @@
                 min = this.min,
                 max = this.max;
             if (isNaN(numericValue)) {
-                if (errorMessages) errorMessages.push("Value is not a number.");
+                if (errorMessages) errorMessages.push('Value is not a number.');
                 return false;
             }
             
@@ -235,16 +235,11 @@
     
     /** A Validator composed from multiple Validators.
         
-        Events:
-            None
-        
-        Attributes:
-            None
-        
         Private Attributes:
             __v:array The array of myt.Validators that compose 
                 this Validator.
-    */
+        
+        @class */
     pkg.CompoundValidator = new JSClass('CompoundValidator', Validator, {
         // Constructor /////////////////////////////////////////////////////////
         /** Creates a new CompoundValidator for the ID and 0 or more Validators

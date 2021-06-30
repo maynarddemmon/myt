@@ -4,9 +4,6 @@
     /** A dimmer that can be placed on another myt.View to obscure the subviews
         of that view.
         
-        Events:
-            None
-        
         Attributes:
             restoreFocus:boolean when true focus will be sent back to the view
                 that had focus before the dimmer was shown when the dimmer is
@@ -43,7 +40,7 @@
             self.callSuper(parent, attrs);
             
             // Eat mouse events
-            ['mouseover','mouseout','mousedown','mouseup','click','dblclick','mousemove'].forEach((eventName) => {self.attachDomObserver(self, 'eatMouseEvent', eventName);});
+            ['mouseover','mouseout','mousedown','mouseup','click','dblclick','mousemove'].forEach(eventName => {self.attachDomObserver(self, 'eatMouseEvent', eventName);});
             
             pkg.RootView.setupCaptureDrop(self);
         },

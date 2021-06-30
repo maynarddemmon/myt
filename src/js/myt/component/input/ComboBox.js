@@ -64,14 +64,10 @@ myt.ComboBox = new JS.Class('ComboBox', myt.InputText, {
                     normalizedCurValue = curValue == null ? '' : ('' + curValue).toLowerCase(),
                     fullItemConfig = this.fullItemConfig,
                     len = fullItemConfig.length;
-                let i = 0, 
-                    item, 
-                    normalizedItemValue, 
-                    idx;
-                for (; len > i;) {
-                    item = fullItemConfig[i++];
-                    normalizedItemValue = item.attrs.text.toLowerCase();
-                    idx = normalizedItemValue.indexOf(normalizedCurValue);
+                for (let i = 0; len > i;) {
+                    const item = fullItemConfig[i++],
+                        normalizedItemValue = item.attrs.text.toLowerCase(),
+                        idx = normalizedItemValue.indexOf(normalizedCurValue);
                     if (idx === 0) {
                         if (normalizedItemValue !== normalizedCurValue) itemConfig.push(item);
                     } else if (idx > 0) {

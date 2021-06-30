@@ -3047,7 +3047,7 @@ new JS.Singleton('GlobalError', {
         /** Move focus to the next focusable element.
             @param {boolean} ignoreFocusTrap - If true focus traps will be skipped over.
             @returns {undefined} */
-        next: (ignoreFocusTrap) => {
+        next: ignoreFocusTrap => {
             const next = traverse(true, ignoreFocusTrap);
             if (next) next.focus();
         },
@@ -3055,7 +3055,7 @@ new JS.Singleton('GlobalError', {
         /** Move focus to the previous focusable element.
             @param {boolean} ignoreFocusTrap - If true focus traps will be skipped over.
             @returns {undefined} */
-        prev: (ignoreFocusTrap) => {
+        prev: ignoreFocusTrap => {
             const prev = traverse(false, ignoreFocusTrap);
             if (prev) prev.focus();
         },
@@ -3063,7 +3063,7 @@ new JS.Singleton('GlobalError', {
         /** Finds the closest model for the provided dom element.
             @param {!Object} elem - The domElement to start looking from.
             @returns {?Object} - A myt.View or null if not found. */
-        findModelForDomElement: (elem) => {
+        findModelForDomElement: elem => {
             while (elem) {
                 let model = elem.model;
                 if (model && model instanceof pkg.View) return model;
@@ -8466,14 +8466,13 @@ myt.Frame = new JS.Class('Frame', myt.View, {
         },
         
         /** Remove a rootable from the global list of root views.
-            @param {!Object} r - The RootView to remove.
+            @param {!Object} rootToRemove - The RootView to remove.
             @returns {undefined} */
-        removeRoot: (r) => {
-            let i = roots.length,
-                root;
+        removeRoot: rootToRemove => {
+            let i = roots.length;
             while (i) {
-                root = roots[--i];
-                if (root === r) {
+                const root = roots[--i];
+                if (root === rootToRemove) {
                     roots.splice(i, 1);
                     globalRootViewRegistry.fireEvent('rootRemoved', root);
                     break;
@@ -8646,7 +8645,7 @@ myt.RootView = new JS.Module('RootView', {
         initialize: function() {
             // Handle the window resize event and broadcast it to the observers.
             pkg.addEventListener(win, 'resize', 
-                (domEvent) => {
+                domEvent => {
                     this.fireEvent('resize', {w:innerWidth = win.innerWidth, h:innerHeight = win.innerHeight});
                 }
             );
@@ -8809,7 +8808,7 @@ myt.RootView = new JS.Module('RootView', {
             }
             
             // Setup callback function
-            idleFunc = (time) => {
+            idleFunc = time => {
                 timerId = win.requestAnimationFrame(idleFunc);
                 if (lastTime !== -1) {
                     time = Math.round(time);
@@ -8856,9 +8855,9 @@ myt.RootView = new JS.Module('RootView', {
 
 
 ((pkg) => {
-    const getTarget = (animator) => animator.target || animator.parent,
+    const getTarget = animator => animator.target || animator.parent,
         
-        isColorAttr = (animator) => {
+        isColorAttr = animator => {
             const target = getTarget(animator);
             animator.__isColorAnim = (target && typeof target.isColorAttr === 'function') ? target.isColorAttr(animator.attribute) : undefined;
         },
@@ -8894,7 +8893,7 @@ myt.RootView = new JS.Module('RootView', {
             target.set(attr, animator.__isColorAnim ? getColorValue(animator.from, to, motionValue, relative, value) : value + ((to - animator.from) * motionValue));
         },
         
-        reset = (animator) => {
+        reset = animator => {
             animator.__temporaryFrom = false;
             animator.__loopCount = animator.reverse ? animator.repeat - 1 : 0;
             animator.__progress = animator.reverse ? animator.duration : 0;
@@ -9206,15 +9205,15 @@ myt.RootView = new JS.Module('RootView', {
                     be replaced with the new callback.
                 @returns {undefined} */
             next: function(callback, replace) {
-                const existingCallback = this.callback;
+                const self = this,
+                    existingCallback = self.callback;
                 if (existingCallback && !replace) {
-                    const anim = this;
-                    this.setCallback(function(success) {
-                        existingCallback.call(anim, success);
-                        callback.call(anim, success);
+                    self.setCallback(success => {
+                        existingCallback.call(self, success);
+                        callback.call(self, success);
                     });
                 } else {
-                    this.setCallback(callback);
+                    self.setCallback(callback);
                 }
             },
             
@@ -15150,260 +15149,245 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
 
 
 ((pkg) => {
-    /** Models a color as individual color channels.
+    const cleanChannelValue = value => Math.min(255, Math.max(0, Math.round(value))),
+        toHex = value => {
+            value = cleanChannelValue(value).toString(16);
+            return value.length === 1 ? '0' + value : value;
+        },
+        rgbToHex = (red, green, blue, prependHash) => [prependHash ? '#' : '', toHex(red), toHex(green), toHex(blue)].join(''),
+        getRedChannel = value => (0xff0000 & value) >> 16,
+        getGreenChannel = value => (0x00ff00 & value) >> 8,
+        getBlueChannel = value => (0x0000ff & value),
+        makeColorFromNumber = value => new Color(getRedChannel(value), getGreenChannel(value), getBlueChannel(value)),
         
-        Events:
-            None
-       
-        Attributes:
-            red:int The red channel. Will be an integer between 0 and 255.
-            green:int The green channel. Will be an integer between 0 and 255.
-            blue:int The blue channel. Will be an integer between 0 and 255.
-    */
-    const Color = pkg.Color = new JS.Class('Color', {
-        // Class Methods and Attributes ////////////////////////////////////////
-        extend: {
-            /** Converts a number or string representation of a number to a 
-                two character hex string.
-                @param {number|string} value - The number or string to convert.
-                @returns {string} A two character hex string such as: '0c' or 'c9'. */
-            toHex: function(value) {
-                value = this.cleanChannelValue(value).toString(16);
-                return value.length === 1 ? '0' + value : value;
-            },
+        /** Models a color as individual color channels.
             
-            /** Converts red, green, and blue color channel numbers to a six 
-                character hex string.
-                @param {number} red - The red color channel.
-                @param {number} green - The green color channel.
-                @param {number} blue - The blue color channel.
-                @param {boolean} [prependHash] - If true a '#' character
-                    will be prepended to the return value.
-                @returns {string} Something like: '#ff9c02' or 'ff9c02' */
-            rgbToHex: function(red, green, blue, prependHash) {
-                const toHex = this.toHex.bind(this);
-                return [prependHash ? '#' : '', toHex(red), toHex(green), toHex(blue)].join('');
-            },
+            Attributes:
+                red:int The red channel. Will be an integer between 0 and 255.
+                green:int The green channel. Will be an integer between 0 and 255.
+                blue:int The blue channel. Will be an integer between 0 and 255.
             
-            /** Limits a channel value to integers between 0 and 255.
-                @param {number} value - The channel value to clean up.
-                @returns {number} */
-            cleanChannelValue: (value) => Math.min(255, Math.max(0, Math.round(value))),
-            
-            /** Gets the red channel from a "color" number.
-                @param {string} value
-                @returns {number} */
-            getRedChannel: (value) => (0xff0000 & value) >> 16,
-            
-            /** Gets the green channel from a "color" number.
-                @param {string} value
-                @returns {number} */
-            getGreenChannel: (value) => (0x00ff00 & value) >> 8,
-            
-            /** Gets the blue channel from a "color" number.
-                @param {string} value
-                @returns {number} */
-            getBlueChannel: (value) => (0x0000ff & value),
-            
-            /** Creates an myt.Color from a "color" number.
-                @param {string} value
-                @returns {!Object} myt.Color */
-            makeColorFromNumber: function(value) {
-                return new Color(
-                    this.getRedChannel(value),
-                    this.getGreenChannel(value),
-                    this.getBlueChannel(value)
-                );
-            },
-            
-            /** Creates an myt.Color from an html color string.
-                @param {string} value - A hex string representation of a color, such
-                    as '#ff339b'.
-                @returns {!Object} a myt.Color or null if no color could be parsed. */
-            makeColorFromHexString: function(value) {
-                if (value && value.indexOf('#') === 0) {
-                    return this.makeColorFromNumber(parseInt(value.substring(1), 16));
-                } else {
-                    return null;
+            @class */
+        Color = pkg.Color = new JS.Class('Color', {
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                /** Converts a number or string representation of a number to a 
+                    two character hex string.
+                    @param {number|string} value - The number or string to convert.
+                    @returns {string} A two character hex string such as: '0c' or 'c9'. */
+                toHex: toHex,
+                
+                /** Converts red, green, and blue color channel numbers to a six 
+                    character hex string.
+                    @param {number} red - The red color channel.
+                    @param {number} green - The green color channel.
+                    @param {number} blue - The blue color channel.
+                    @param {boolean} [prependHash] - If true a '#' character
+                        will be prepended to the return value.
+                    @returns {string} Something like: '#ff9c02' or 'ff9c02' */
+                rgbToHex: rgbToHex,
+                
+                /** Limits a channel value to integers between 0 and 255.
+                    @param {number} value - The channel value to clean up.
+                    @returns {number} */
+                cleanChannelValue: cleanChannelValue,
+                
+                /** Gets the red channel from a "color" number.
+                    @param {string} value
+                    @returns {number} */
+                getRedChannel: getRedChannel,
+                
+                /** Gets the green channel from a "color" number.
+                    @param {string} value
+                    @returns {number} */
+                getGreenChannel: getGreenChannel,
+                
+                /** Gets the blue channel from a "color" number.
+                    @param {string} value
+                    @returns {number} */
+                getBlueChannel: getBlueChannel,
+                
+                /** Creates an myt.Color from a "color" number.
+                    @param {string} value
+                    @returns {!Object} myt.Color */
+                makeColorFromNumber: makeColorFromNumber,
+                
+                /** Creates an myt.Color from an html color string.
+                    @param {string} value - A hex string representation of a 
+                        color, such as '#ff339b'.
+                    @returns {!Object} a myt.Color or null if no color could 
+                        be parsed. */
+                makeColorFromHexString: value => (value && value.indexOf('#') === 0) ? makeColorFromNumber(parseInt(value.substring(1), 16)) : null,
+                
+                /** Returns the lighter of the two provided colors.
+                    @param {number} a - A color number.
+                    @param {number} b - A color number.
+                    @returns {number} The number that represents the 
+                        lighter color. */
+                getLighterColor: (a, b) => makeColorFromNumber(a).isLighterThan(makeColorFromNumber(b)) ? a : b,
+                
+                /** Creates a "color" number from the provided color channels.
+                    @param {number} red - The red channel
+                    @param {number} green - The green channel
+                    @param {number} blue - The blue channel
+                    @returns {number} */
+                makeColorNumberFromChannels: (red, green, blue) => (cleanChannelValue(red) << 16) + (cleanChannelValue(green) << 8) + cleanChannelValue(blue),
+                
+                /** Creates a new myt.Color object that is a blend of the two 
+                    provided colors.
+                    @param {!Object} fromColor - The first myt.Color to blend.
+                    @param {!Objecdt} toColor - The second myt.Color to blend.
+                    @param {number} percent - The blend percent between the two
+                        colors where 0 is the fromColor and 1.0 is the toColor.
+                    @returns {!Object} myt.Color */
+                makeBlendedColor: (fromColor, toColor, percent) => {
+                    return new Color(
+                        fromColor.red + (percent * (toColor.red - fromColor.red)),
+                        fromColor.green + (percent * (toColor.green - fromColor.green)),
+                        fromColor.blue + (percent * (toColor.blue - fromColor.blue))
+                    );
                 }
             },
             
-            /** Returns the lighter of the two provided colors.
-                @param {number} a - A color number.
-                @param {number} b - A color number.
-                @returns {number} The number that represents the lighter color. */
-            getLighterColor: function(a, b) {
-                const cA = this.makeColorFromNumber(a),
-                    cB = this.makeColorFromNumber(b);
-                return cA.isLighterThan(cB) ? a : b;
-            },
             
-            /** Creates a "color" number from the provided color channels.
+            // Constructor /////////////////////////////////////////////////////
+            /** Create a new Color.
                 @param {number} red - The red channel
                 @param {number} green - The green channel
                 @param {number} blue - The blue channel
-                @returns {number} */
-            makeColorNumberFromChannels: function(red, green, blue) {
-                red = this.cleanChannelValue(red);
-                green = this.cleanChannelValue(green);
-                blue = this.cleanChannelValue(blue);
-                return (red << 16) + (green << 8) + blue;
+                @returns {undefined} */
+            initialize: function(red, green, blue) {
+                this.setRed(red);
+                this.setGreen(green);
+                this.setBlue(blue);
             },
             
-            /** Creates a new myt.Color object that is a blend of the two provided
-                colors.
-                @param {!Object} fromColor - The first myt.Color to blend.
-                @param {!Objecdt} toColor - The second myt.Color to blend.
-                @param {number} percent - The blend percent between the two colors
-                    where 0 is the fromColor and 1.0 is the toColor.
-                @returns {!Object} myt.Color */
-            makeBlendedColor: (fromColor, toColor, percent) => {
-                return new Color(
-                    fromColor.red + (percent * (toColor.red - fromColor.red)),
-                    fromColor.green + (percent * (toColor.green - fromColor.green)),
-                    fromColor.blue + (percent * (toColor.blue - fromColor.blue))
-                );
-            }
-        },
-        
-        
-        // Constructor /////////////////////////////////////////////////////////
-        /** Create a new Color.
-            @param {number} red - The red channel
-            @param {number} green - The green channel
-            @param {number} blue - The blue channel
-            @returns {undefined} */
-        initialize: function(red, green, blue) {
-            this.setRed(red);
-            this.setGreen(green);
-            this.setBlue(blue);
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        /** Sets the red channel value.
-            @param {number} red
-            @return {undefined} */
-        setRed: function(red) {
-            this.red = Color.cleanChannelValue(red);
-        },
-        
-        /** Sets the green channel value.
-            @param {number} green
-            @return {undefined} */
-        setGreen: function(green) {
-            this.green = Color.cleanChannelValue(green);
-        },
-        
-        /** Sets the blue channel value.
-            @param {number} blue
-            @return {undefined} */
-        setBlue: function(blue) {
-            this.blue = Color.cleanChannelValue(blue);
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** Gets the numerical representation of this color.
-            @returns {number} The number that represents this color. */
-        getColorNumber: function() {
-            return (this.red << 16) + (this.green << 8) + this.blue;
-        },
-        
-        /** Gets the hex string representation of this color.
-            @returns {string} A hex color such as '#a0bbcc'. */
-        getHtmlHexString: function() {
-            return Color.rgbToHex(this.red, this.green, this.blue, true);
-        },
-        
-        /** Tests if this color is lighter than the provided color.
-            @param {!Object} c - The myt.Color to compare to.
-            @returns {boolean} True if this color is lighter, false otherwise. */
-        isLighterThan: function(c) {
-            const diff = this.getDiffFrom(c);
             
-            // Sum channel diffs to determine lightest color. A negative diff
-            // means a lighter color.
-            return 0 > (diff.red + diff.green + diff.blue);
-        },
-        
-        /** Gets an object holding color channel diffs.
-            @param {!Object} c - The myt.Color to diff from.
-            @returns {!Object} containing the diffs for the red, green and blue
-                channels. */
-        getDiffFrom: function(c) {
-            return {
-                red: c.red - this.red,
-                green: c.green - this.green,
-                blue: c.blue - this.blue
-            };
-        },
-        
-        /** Applies the provided diff object to this color.
-            @param {!Object} diff - The color diff to apply.
-            @returns {!Object} - This myt.Color to facilitate method chaining. */
-        applyDiff: function(diff) {
-            return this.add(diff);
-        },
-        
-        /** Adds the provided color to this color.
-            @param {!Object} c - The myt.Color to add.
-            @returns {!Object} - This myt.Color to facilitate method chaining. */
-        add: function(c) {
-            this.setRed(this.red + c.red);
-            this.setGreen(this.green + c.green);
-            this.setBlue(this.blue + c.blue);
-            return this;
-        },
-        
-        /** Subtracts the provided color from this color.
-            @param {!Object} c - The myt.Color to subtract.
-            @returns {!Object} - This myt.Color to facilitate method chaining. */
-        subtract: function(c) {
-            this.setRed(this.red - c.red);
-            this.setGreen(this.green - c.green);
-            this.setBlue(this.blue - c.blue);
-            return this;
-        },
-        
-        /** Multiplys this color by the provided scalar.
-            @param {number} s - The scaler to multiply by.
-            @returns {!Object} - This myt.Color to facilitate method chaining. */
-        multiply: function(s) {
-            this.setRed(this.red * s);
-            this.setGreen(this.green * s);
-            this.setBlue(this.blue * s);
-            return this;
-        },
-        
-        /** Divides this color by the provided scalar.
-            @param {number} s - The scaler to divide by.
-            @returns {!Object} - This myt.Color to facilitate method chaining. */
-        divide: function(s) {
-            this.setRed(this.red / s);
-            this.setGreen(this.green / s);
-            this.setBlue(this.blue / s);
-            return this;
-        },
-        
-        /** Clones this Color.
-            @returns {!Object} - A copy of this myt.Color. */
-        clone: function() {
-            return new Color(this.red, this.green, this.blue);
-        },
-        
-        /** Determine if this color has the same value as another color.
-            @param {?Object} obj - The color object to test against.
-            @returns {boolean} True if this color has the same color values as
-                this provided color, false otherwise. */
-        equals: function(obj) {
-            return obj === this || (obj && obj.isA && 
-                obj.isA(Color) && 
-                obj.red === this.red && 
-                obj.green === this.green && 
-                obj.blue === this.blue);
-        }
-    });
+            // Accessors ///////////////////////////////////////////////////////
+            /** Sets the red channel value.
+                @param {number} red
+                @return {undefined} */
+            setRed: function(red) {
+                this.red = cleanChannelValue(red);
+            },
+            
+            /** Sets the green channel value.
+                @param {number} green
+                @return {undefined} */
+            setGreen: function(green) {
+                this.green = cleanChannelValue(green);
+            },
+            
+            /** Sets the blue channel value.
+                @param {number} blue
+                @return {undefined} */
+            setBlue: function(blue) {
+                this.blue = cleanChannelValue(blue);
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** Gets the numerical representation of this color.
+                @returns {number} The number that represents this color. */
+            getColorNumber: function() {
+                return (this.red << 16) + (this.green << 8) + this.blue;
+            },
+            
+            /** Gets the hex string representation of this color.
+                @returns {string} A hex color such as '#a0bbcc'. */
+            getHtmlHexString: function() {
+                return rgbToHex(this.red, this.green, this.blue, true);
+            },
+            
+            /** Tests if this color is lighter than the provided color.
+                @param {!Object} c - The myt.Color to compare to.
+                @returns {boolean} True if this color is lighter, 
+                    false otherwise. */
+            isLighterThan: function(c) {
+                const diff = this.getDiffFrom(c);
+                
+                // Sum channel diffs to determine lightest color. A negative
+                // diff means a lighter color.
+                return 0 > (diff.red + diff.green + diff.blue);
+            },
+            
+            /** Gets an object holding color channel diffs.
+                @param {!Object} c - The myt.Color to diff from.
+                @returns {!Object} containing the diffs for the red, green and 
+                    blue channels. */
+            getDiffFrom: function(c) {
+                return {
+                    red: c.red - this.red,
+                    green: c.green - this.green,
+                    blue: c.blue - this.blue
+                };
+            },
+            
+            /** Applies the provided diff object to this color.
+                @param {!Object} diff - The color diff to apply.
+                @returns {!Object} - This myt.Color for method chaining. */
+            applyDiff: function(diff) {
+                return this.add(diff);
+            },
+            
+            /** Adds the provided color to this color.
+                @param {!Object} c - The myt.Color to add.
+                @returns {!Object} - This myt.Color for method chaining. */
+            add: function(c) {
+                this.setRed(this.red + c.red);
+                this.setGreen(this.green + c.green);
+                this.setBlue(this.blue + c.blue);
+                return this;
+            },
+            
+            /** Subtracts the provided color from this color.
+                @param {!Object} c - The myt.Color to subtract.
+                @returns {!Object} - This myt.Color for method chaining. */
+            subtract: function(c) {
+                this.setRed(this.red - c.red);
+                this.setGreen(this.green - c.green);
+                this.setBlue(this.blue - c.blue);
+                return this;
+            },
+            
+            /** Multiplys this color by the provided scalar.
+                @param {number} s - The scaler to multiply by.
+                @returns {!Object} - This myt.Color for method chaining. */
+            multiply: function(s) {
+                this.setRed(this.red * s);
+                this.setGreen(this.green * s);
+                this.setBlue(this.blue * s);
+                return this;
+            },
+            
+            /** Divides this color by the provided scalar.
+                @param {number} s - The scaler to divide by.
+                @returns {!Object} - This myt.Color for method chaining. */
+            divide: function(s) {
+                this.setRed(this.red / s);
+                this.setGreen(this.green / s);
+                this.setBlue(this.blue / s);
+                return this;
+            },
+            
+            /** Clones this Color.
+                @returns {!Object} - A copy of this myt.Color. */
+            clone: function() {
+                return new Color(this.red, this.green, this.blue);
+            },
+            
+            /** Determine if this color has the same value as another color.
+                @param {?Object} obj - The color object to test against.
+                @returns {boolean} True if this color has the same color values 
+                    as this provided color, false otherwise. */
+            equals: function(obj) {
+                return obj === this || (obj && obj.isA && 
+                    obj.isA(Color) && 
+                    obj.red === this.red && 
+                    obj.green === this.green && 
+                    obj.blue === this.blue);
+            }
+        });
 })(myt);
 
 
@@ -16752,9 +16736,6 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
     /** A dimmer that can be placed on another myt.View to obscure the subviews
         of that view.
         
-        Events:
-            None
-        
         Attributes:
             restoreFocus:boolean when true focus will be sent back to the view
                 that had focus before the dimmer was shown when the dimmer is
@@ -16791,7 +16772,7 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
             self.callSuper(parent, attrs);
             
             // Eat mouse events
-            ['mouseover','mouseout','mousedown','mouseup','click','dblclick','mousemove'].forEach((eventName) => {self.attachDomObserver(self, 'eatMouseEvent', eventName);});
+            ['mouseover','mouseout','mousedown','mouseup','click','dblclick','mousemove'].forEach(eventName => {self.attachDomObserver(self, 'eatMouseEvent', eventName);});
             
             pkg.RootView.setupCaptureDrop(self);
         },
@@ -17889,10 +17870,10 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 if (identifiable.id) {
                     func(id);
                 } else {
-                    pkg.dumpStack("No ID");
+                    pkg.dumpStack('No ID');
                 }
             } else {
-                pkg.dumpStack("No validator");
+                pkg.dumpStack('No validator');
             }
         },
         
@@ -17948,7 +17929,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             /** @overrides myt.Validator */
             isValid: function(value, config, errorMessages) {
                 if (value == null || value === '' || (typeof value === 'string' && value.trim() === '')) {
-                    if (errorMessages) errorMessages.push("This value is required.");
+                    if (errorMessages) errorMessages.push('This value is required.');
                     return false;
                 }
                 
@@ -17964,7 +17945,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             isValid: function(value, config, errorMessages) {
                 const rbv = config.form.getRollbackValue();
                 if (value && rbv && value.toLowerCase() === rbv.toLowerCase()) {
-                    if (errorMessages) errorMessages.push("Value must differ by more than just case.");
+                    if (errorMessages) errorMessages.push('Value must differ by more than just case.');
                     return false;
                 }
                 
@@ -17988,7 +17969,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             isValid: function(value, config, errorMessages) {
                 const uri = new pkg.URI(value);
                 if (uri.toString(this.originalRawQuery) !== value) {
-                    if (errorMessages) errorMessages.push("Not a valid URL.");
+                    if (errorMessages) errorMessages.push('Invalid URL.');
                     return false;
                 }
                 return true;
@@ -18090,7 +18071,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 min = this.min,
                 max = this.max;
             if (isNaN(numericValue)) {
-                if (errorMessages) errorMessages.push("Value is not a number.");
+                if (errorMessages) errorMessages.push('Value is not a number.');
                 return false;
             }
             
@@ -18112,16 +18093,11 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     
     /** A Validator composed from multiple Validators.
         
-        Events:
-            None
-        
-        Attributes:
-            None
-        
         Private Attributes:
             __v:array The array of myt.Validators that compose 
                 this Validator.
-    */
+        
+        @class */
     pkg.CompoundValidator = new JSClass('CompoundValidator', Validator, {
         // Constructor /////////////////////////////////////////////////////////
         /** Creates a new CompoundValidator for the ID and 0 or more Validators
@@ -18446,330 +18422,330 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
 })(myt);
 
 
-/** A wrapper around a native browser select component.
+((pkg) => {
+    const JSClass = JS.Class,
     
-    Events:
-        multiple:boolean
-        size:int
-        value:string
-    
-    Attributes:
-        multiple:boolean Indicates if multiple options can be selected or not.
-            Defaults to false.
-        size:int The number of options to show. The default value is 4 for
-            multiple == true and 1 for multiple == false. It is recommended
-            that a size of at least 4 be used when multiple is 2.
-        options:array (write only) Adds a list of options to this select list.
-            The value should be an array of myt.InputSelectOptions attrs that 
-            will be used to instantiate new myt.InputSelectOption instances on
-            this select list.
-*/
-myt.InputSelect = new JS.Class('InputSelect', myt.NativeInputWrapper, {
-    include: [myt.SizeToDom],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.NativeInputWrapper */
-    initNode: function(parent, attrs) {
-        if (attrs.tagName == null) attrs.tagName = 'select';
-        attrs.inputType = null;
-        
-        if (attrs.multiple == null) attrs.multiple = false;
-        if (attrs.size == null) attrs.size = attrs.multiple ? 4 : 1;
-        
-        this.callSuper(parent, attrs);
-        
-        this.attachToDom(this, '__syncToDom', 'change');
-        
-        // Make sure initial value is in sync with the UI
-        this.__syncToDom();
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setMultiple: function(v) {
-        if (this.multiple !== v) {
-            this.multiple = this.getInnerDomElement().multiple = v;
-            if (this.inited) this.fireEvent('multiple', v);
-        }
-    },
-    
-    setSize: function(v) {
-        if (this.size !== v) {
-            this.size = this.getInnerDomElement().size = v;
-            if (this.inited) this.fireEvent('size', v);
-        }
-    },
-    
-    setOptions: function(v) {
-        this.destroyAllOptions();
-        if (Array.isArray(v)) {
-            const len = v.length;
-            for (let i = 0; len > i; ++i) this.addOption(v[i]);
-        }
-    },
-    
-    /** The options are just the subviews.
-        @returns an array of options for this select list. */
-    getOptions: function() {
-        return this.getSubviews().concat();
-    },
-    
-    /** @overrides myt.NativeInputWrapper
-        Does not update the dom since the dom element's 'value' attribute
-        doesn't support lists. */
-    setValue: function(v) {
-        if (Array.isArray(v) && myt.areArraysEqual(v, this.value)) return;
-        
-        if (this.value !== v) {
-            this.value = v;
-            if (this.inited) this.fireEvent('value', v);
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.View */
-    subviewAdded: function(sv) {
-        // Destroy subview if it's not supported.
-        if (!(sv instanceof myt.InputSelectOption)) {
-            myt.dumpStack("Subview not supported. Destroying it.");
-            sv.destroy();
-        }
-    },
-    
-    /** @overrides myt.FocusObservable */
-    showFocusEmbellishment: function() {
-        this.hideDefaultFocusEmbellishment();
-        this.setBoxShadow(myt.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
-    },
-    
-    /** @overrides myt.FocusObservable */
-    hideFocusEmbellishment: function() {
-        this.hideDefaultFocusEmbellishment();
-        this.setBoxShadow();
-    },
-    
-    // Options //
-    /** Gets an array of selected myt.InputSelectOptions.
-        @returns {!Array} - An array of selected myt.InputSelectOptions. */
-    getSelectedOptions: function() {
-        const options = this.getOptions(), 
-            retval = []; 
-        let i = options.length, 
-            option;
-        while (i) {
-            option = options[--i];
-            if (option.isSelected()) retval.push(option);
-        }
-        return retval;
-    },
-    
-    /** Gets an array of selected myt.InputSelectOption values.
-        @returns {!Array} - An array of selected option values. */
-    getSelectedOptionValues: function() {
-        const options = this.getOptions(), 
-            retval = []; 
-        let i = options.length, 
-            option;
-        while (i) {
-            option = options[--i];
-            if (option.isSelected()) retval.push(option.value);
-        }
-        return retval;
-    },
-    
-    /** Gets the myt.InputSelectOption with the provided value.
-        @param {*} value - The value of the option to get.
-        @returns {?Object} - The matching myt.InputSelectOption option or null 
-            if not found. */
-    getOptionForValue: function(value) {
-        const options = this.getOptions();
-        let i = options.length, 
-            option;
-        while (i) {
-            option = options[--i];
-            if (option.value === value) return option;
-        }
-        return null;
-    },
-    
-    /** Adds a new myt.InputSelectionOption to this select list.
-        @param attrs:object The attrs for the new option
-        @returns myt.InputSelectOption: The newly created option. */
-    addOption: function(attrs) {
-        new myt.InputSelectOption(this, attrs);
-    },
-    
-    destroyAllOptions: function() {
-        const options = this.getOptions();
-        let i = options.length;
-        while (i) options[--i].destroy();
-    },
-    
-    /** Destroys an option that has the provided value.
-        @param value:* The value of the option to remove.
-        @returns boolean: true if the option is destroyed, false otherwise. */
-    destroyOptionWithValue: function(value) {
-        const option = this.getOptionForValue(value);
-        if (option) {
-            option.destroy();
-            if (option.destroyed) return true;
-        }
-        return false;
-    },
-    
-    // Selection //
-    /** Deselects all selected options included disabled options.
-        @returns {undefined} */
-    deselectAll: function() {
-        const options = this.getOptions();
-        let i = options.length, 
-            option, 
-            changed = false;
-        while (i) {
-            option = options[--i];
-            if (option.isSelected()) {
-                option.setSelected(false);
-                changed = true;
+        /** An option in a native browser select element.
+            
+            Events:
+                value:*
+                label:string
+            
+            Attributes:
+                value:* the value of the option.
+                label:string the text label for the option.
+            
+            @class */
+        InputSelectOption = pkg.InputSelectOption = new JSClass('InputSelectOption', pkg.View, {
+            include: [pkg.Disableable, pkg.Selectable],
+            
+            
+            // Life Cycle //////////////////////////////////////////////////////////////
+            /** @overrides myt.Input */
+            createOurDomElement: function(parent) {
+                return document.createElement('option');
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////////////
+            /** @overrideds myt.Selectable */
+            setSelected: function(v) {
+                // Adapt to event from syncTo
+                if (v !== null && typeof v === 'object') v = v.value;
+                
+                const de = this.getInnerDomElement();
+                if (de.selected !== v) de.selected = v;
+            },
+            
+            /** @overrides myt.Disableable */
+            setDisabled: function(v) {
+                if (this.disabled !== v) {
+                    this.getInnerDomElement().disabled = v;
+                    this.callSuper(v);
+                }
+            },
+            
+            setValue: function(v) {
+                if (this.value !== v) {
+                    this.value = v;
+                    if (this.getInnerDomElement().value !== v) this.getInnerDomElement().value = v;
+                    if (this.inited) this.fireEvent('value', v);
+                }
+            },
+            
+            setLabel: function(v) {
+                if (this.label !== v) {
+                    this.getInnerDomElement().textContent = this.label = v;
+                    if (this.inited) this.fireEvent('label', v);
+                }
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////////////
+            /** @overrideds myt.Selectable */
+            isSelected: function() {
+                return this.getInnerDomElement().selected;
+            },
+            
+            /** @overrideds myt.Selectable */
+            canSelect: function(selectionManager) {
+                return !this.disabled && !this.getInnerDomElement().selected && this.parent === selectionManager;
+            },
+            
+            /** @overrideds myt.Selectable */
+            canDeselect: function(selectionManager) {
+                return !this.disabled && this.getInnerDomElement().selected && this.parent === selectionManager;
             }
-        }
+        });
+    
+    /** A wrapper around a native browser select component.
         
-        if (changed) this.__doChanged();
-    },
-    
-    selectValues: function(values) {
-        values = Array.isArray(values) ? values : [values];
-        let i = values.length;
-        while (i) this.selectValue(values[--i]);
-    },
-    
-    /** Selects the option that has the provided value.
-        @param value:* The value of the option to select.
-        @returns {undefined} */
-    selectValue: function(value) {
-        this.select(this.getOptionForValue(value));
-    },
-    
-    /** Selects the provided option.
-        @param option:myt.InputSelectOption The option to select.
-        @returns {undefined} */
-    select: function(option) {
-        if (option && option.canSelect(this)) {
-            option.setSelected(true);
-            this.__syncToDom();
-        }
-    },
-    
-    /** Deselects the option that has the provided value.
-        @param {*} value - The value of the option to deselect.
-        @returns {undefined} */
-    deselectValue: function(value) {
-        this.deselect(this.getOptionForValue(value));
-    },
-    
-    /** Deselects the provided option.
-        @param option:myt.InputSelectOption The option to deselect.
-        @returns {undefined} */
-    deselect: function(option) {
-        if (option && option.canDeselect(this)) {
-            option.setSelected(false);
-            this.__syncToDom();
-        }
-    },
-    
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __doChanged: function(event) {
-        this.__syncToDom();
-        this.doChanged();
-    },
-    
-    /** Called whenever the underlying dom element fires a "change" event.
-        @returns {undefined} */
-    doChanged: () => {},
-    
-    /** @private
-        @returns {undefined} */
-    __syncToDom: function() {
-        this.setValue(this.multiple ? this.getSelectedOptionValues() : this.getDomValue());
-    }
-});
-
-
-/** An option in a native browser select element.
-    
-    Events:
-        value:*
-        label:string
-    
-    Attributes:
-        value:* the value of the option.
-        label:string the text label for the option.
-    
-    @class */
-myt.InputSelectOption = new JS.Class('InputSelectOption', myt.View, {
-    include: [myt.Disableable, myt.Selectable],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Input */
-    createOurDomElement: function(parent) {
-        return document.createElement('option');
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrideds myt.Selectable */
-    setSelected: function(v) {
-        // Adapt to event from syncTo
-        if (v !== null && typeof v === 'object') v = v.value;
+        Events:
+            multiple:boolean
+            size:int
+            value:string
         
-        const de = this.getInnerDomElement();
-        if (de.selected !== v) de.selected = v;
-    },
-    
-    /** @overrides myt.Disableable */
-    setDisabled: function(v) {
-        if (this.disabled !== v) {
-            this.getInnerDomElement().disabled = v;
-            this.callSuper(v);
+        Attributes:
+            multiple:boolean Indicates if multiple options can be selected or not.
+                Defaults to false.
+            size:int The number of options to show. The default value is 4 for
+                multiple == true and 1 for multiple == false. It is recommended
+                that a size of at least 4 be used when multiple is 2.
+            options:array (write only) Adds a list of options to this select list.
+                The value should be an array of myt.InputSelectOptions attrs that 
+                will be used to instantiate new myt.InputSelectOption instances on
+                this select list.
+        
+        @class */
+    pkg.InputSelect = new JSClass('InputSelect', pkg.NativeInputWrapper, {
+        include: [pkg.SizeToDom],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////////
+        /** @overrides myt.NativeInputWrapper */
+        initNode: function(parent, attrs) {
+            if (attrs.tagName == null) attrs.tagName = 'select';
+            attrs.inputType = null;
+            
+            if (attrs.multiple == null) attrs.multiple = false;
+            if (attrs.size == null) attrs.size = attrs.multiple ? 4 : 1;
+            
+            this.callSuper(parent, attrs);
+            
+            this.attachToDom(this, '__syncToDom', 'change');
+            
+            // Make sure initial value is in sync with the UI
+            this.__syncToDom();
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////////
+        setMultiple: function(v) {
+            if (this.multiple !== v) {
+                this.multiple = this.getInnerDomElement().multiple = v;
+                if (this.inited) this.fireEvent('multiple', v);
+            }
+        },
+        
+        setSize: function(v) {
+            if (this.size !== v) {
+                this.size = this.getInnerDomElement().size = v;
+                if (this.inited) this.fireEvent('size', v);
+            }
+        },
+        
+        setOptions: function(v) {
+            this.destroyAllOptions();
+            if (Array.isArray(v)) {
+                const len = v.length;
+                for (let i = 0; len > i; ++i) this.addOption(v[i]);
+            }
+        },
+        
+        /** The options are just the subviews.
+            @returns an array of options for this select list. */
+        getOptions: function() {
+            return this.getSubviews().concat();
+        },
+        
+        /** @overrides myt.NativeInputWrapper
+            Does not update the dom since the dom element's 'value' attribute
+            doesn't support lists. */
+        setValue: function(v) {
+            if (Array.isArray(v) && pkg.areArraysEqual(v, this.value)) return;
+            
+            if (this.value !== v) {
+                this.value = v;
+                if (this.inited) this.fireEvent('value', v);
+            }
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////////
+        /** @overrides myt.View */
+        subviewAdded: function(sv) {
+            // Destroy subview if it's not supported.
+            if (!(sv instanceof InputSelectOption)) {
+                pkg.dumpStack("Subview not supported. Destroying it.");
+                sv.destroy();
+            }
+        },
+        
+        /** @overrides myt.FocusObservable */
+        showFocusEmbellishment: function() {
+            this.hideDefaultFocusEmbellishment();
+            this.setBoxShadow(pkg.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
+        },
+        
+        /** @overrides myt.FocusObservable */
+        hideFocusEmbellishment: function() {
+            this.hideDefaultFocusEmbellishment();
+            this.setBoxShadow();
+        },
+        
+        // Options //
+        /** Gets an array of selected myt.InputSelectOptions.
+            @returns {!Array} - An array of selected myt.InputSelectOptions. */
+        getSelectedOptions: function() {
+            const options = this.getOptions(), 
+                retval = []; 
+            let i = options.length;
+            while (i) {
+                const option = options[--i];
+                if (option.isSelected()) retval.push(option);
+            }
+            return retval;
+        },
+        
+        /** Gets an array of selected myt.InputSelectOption values.
+            @returns {!Array} - An array of selected option values. */
+        getSelectedOptionValues: function() {
+            const options = this.getOptions(), 
+                retval = []; 
+            let i = options.length;
+            while (i) {
+                const option = options[--i];
+                if (option.isSelected()) retval.push(option.value);
+            }
+            return retval;
+        },
+        
+        /** Gets the myt.InputSelectOption with the provided value.
+            @param {*} value - The value of the option to get.
+            @returns {?Object} - The matching myt.InputSelectOption option or null 
+                if not found. */
+        getOptionForValue: function(value) {
+            const options = this.getOptions();
+            let i = options.length;
+            while (i) {
+                const option = options[--i];
+                if (option.value === value) return option;
+            }
+            return null;
+        },
+        
+        /** Adds a new myt.InputSelectionOption to this select list.
+            @param attrs:object The attrs for the new option
+            @returns myt.InputSelectOption: The newly created option. */
+        addOption: function(attrs) {
+            new InputSelectOption(this, attrs);
+        },
+        
+        destroyAllOptions: function() {
+            const options = this.getOptions();
+            let i = options.length;
+            while (i) options[--i].destroy();
+        },
+        
+        /** Destroys an option that has the provided value.
+            @param value:* The value of the option to remove.
+            @returns boolean: true if the option is destroyed, false otherwise. */
+        destroyOptionWithValue: function(value) {
+            const option = this.getOptionForValue(value);
+            if (option) {
+                option.destroy();
+                if (option.destroyed) return true;
+            }
+            return false;
+        },
+        
+        // Selection //
+        /** Deselects all selected options included disabled options.
+            @returns {undefined} */
+        deselectAll: function() {
+            const options = this.getOptions();
+            let i = options.length, 
+                changed = false;
+            while (i) {
+                const option = options[--i];
+                if (option.isSelected()) {
+                    option.setSelected(false);
+                    changed = true;
+                }
+            }
+            
+            if (changed) this.__doChanged();
+        },
+        
+        selectValues: function(values) {
+            values = Array.isArray(values) ? values : [values];
+            let i = values.length;
+            while (i) this.selectValue(values[--i]);
+        },
+        
+        /** Selects the option that has the provided value.
+            @param value:* The value of the option to select.
+            @returns {undefined} */
+        selectValue: function(value) {
+            this.select(this.getOptionForValue(value));
+        },
+        
+        /** Selects the provided option.
+            @param option:myt.InputSelectOption The option to select.
+            @returns {undefined} */
+        select: function(option) {
+            if (option && option.canSelect(this)) {
+                option.setSelected(true);
+                this.__syncToDom();
+            }
+        },
+        
+        /** Deselects the option that has the provided value.
+            @param {*} value - The value of the option to deselect.
+            @returns {undefined} */
+        deselectValue: function(value) {
+            this.deselect(this.getOptionForValue(value));
+        },
+        
+        /** Deselects the provided option.
+            @param option:myt.InputSelectOption The option to deselect.
+            @returns {undefined} */
+        deselect: function(option) {
+            if (option && option.canDeselect(this)) {
+                option.setSelected(false);
+                this.__syncToDom();
+            }
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __doChanged: function(event) {
+            this.__syncToDom();
+            this.doChanged();
+        },
+        
+        /** Called whenever the underlying dom element fires a "change" event.
+            @returns {undefined} */
+        doChanged: () => {},
+        
+        /** @private
+            @returns {undefined} */
+        __syncToDom: function() {
+            this.setValue(this.multiple ? this.getSelectedOptionValues() : this.getDomValue());
         }
-    },
-    
-    setValue: function(v) {
-        if (this.value !== v) {
-            this.value = v;
-            if (this.getInnerDomElement().value !== v) this.getInnerDomElement().value = v;
-            if (this.inited) this.fireEvent('value', v);
-        }
-    },
-    
-    setLabel: function(v) {
-        if (this.label !== v) {
-            this.getInnerDomElement().textContent = this.label = v;
-            if (this.inited) this.fireEvent('label', v);
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrideds myt.Selectable */
-    isSelected: function() {
-        return this.getInnerDomElement().selected;
-    },
-    
-    /** @overrideds myt.Selectable */
-    canSelect: function(selectionManager) {
-        return !this.disabled && !this.getInnerDomElement().selected && this.parent === selectionManager;
-    },
-    
-    /** @overrideds myt.Selectable */
-    canDeselect: function(selectionManager) {
-        return !this.disabled && this.getInnerDomElement().selected && this.parent === selectionManager;
-    }
-});
+    });
+})(myt);
 
 
 /** An myt.InputSelect that is also a FormElement.
@@ -19372,15 +19348,13 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
         implementation returns the value unchanged.
         @param {string} v - the current value of the form element.
         @returns {string} The new value of the form element. */
-    filterInput: function(v) {
-        return v;
-    },
+    filterInput: v => v,
     
     /** A hook for subclasses/instances to do input filtering during key press.
         The default implementation does nothing.
         @param {!Object} domEvent - The dom key press event.
         @returns {undefined} */
-    filterInputPress: function(domEvent) {},
+    filterInputPress: domEvent => {},
     
     /** @private
         @param {!Object} event
@@ -19569,14 +19543,10 @@ myt.ComboBox = new JS.Class('ComboBox', myt.InputText, {
                     normalizedCurValue = curValue == null ? '' : ('' + curValue).toLowerCase(),
                     fullItemConfig = this.fullItemConfig,
                     len = fullItemConfig.length;
-                let i = 0, 
-                    item, 
-                    normalizedItemValue, 
-                    idx;
-                for (; len > i;) {
-                    item = fullItemConfig[i++];
-                    normalizedItemValue = item.attrs.text.toLowerCase();
-                    idx = normalizedItemValue.indexOf(normalizedCurValue);
+                for (let i = 0; len > i;) {
+                    const item = fullItemConfig[i++],
+                        normalizedItemValue = item.attrs.text.toLowerCase(),
+                        idx = normalizedItemValue.indexOf(normalizedCurValue);
                     if (idx === 0) {
                         if (normalizedItemValue !== normalizedCurValue) itemConfig.push(item);
                     } else if (idx > 0) {
@@ -19813,230 +19783,227 @@ myt.FormInputTextArea = new JS.Class('FormInputTextArea', myt.InputTextArea, {
 });
 
 
-/** Text content that can be edited.
-    
-    Events:
-        contentEditable:boolean
-        minWidth:number
-    
-    Attributes:
-        contentEditble:boolean Makes the text editable or not.
-        minWidth:number The minimum width for the component. Defaults to 
-            undefined which is effectively 0.
-        minHeight:number The minimum height for the component. Defaults to 
-            undefined which is effectively 0.
-    
-    Private Attributes:
-        _selRange:object Stores the start and end of the selection.
-    
-    @class */
-myt.EditableText = new JS.Class('EditableText', myt.BaseInputText, {
-    include: [myt.SizeToDom],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.BaseInputText */
-    initNode: function(parent, attrs) {
-        const self = this;
-        
-        if (attrs.tagName == null) attrs.tagName = 'div';
-        attrs.inputType = null;
-        
-        if (attrs.whiteSpace == null) attrs.whiteSpace = 'pre';
-        if (attrs.contentEditable == null) attrs.contentEditable = true;
-        
-        self.callSuper(parent, attrs);
-        
-        self.attachToDom(self, '__cleanInput', 'keydown');
-        
-        self.attachToDom(self, '__userInteraction', 'keyup');
-        self.attachToDom(self, '__userInteraction', 'mouseup');
-        
-        self.setCaretToEnd();
-    },
-    
-    
-    // Attributes //////////////////////////////////////////////////////////////
-    setMinWidth: function(v) {this.__setProp(v, 'minWidth');},
-    setMinHeight: function(v) {
-        if (BrowserDetect.browser === 'Firefox') v += 2;
-        
-        this.__setProp(v, 'minHeight');
-    },
-    setPadding: function(v) {
-        this.setPaddingTop(v);
-        this.setPaddingRight(v);
-        this.setPaddingBottom(v);
-        this.setPaddingLeft(v);
-    },
-    setPaddingTop: function(v) {this.__setProp(v, 'paddingTop');},
-    setPaddingRight: function(v) {this.__setProp(v, 'paddingRight');},
-    setPaddingBottom: function(v) {this.__setProp(v, 'paddingBottom');},
-    setPaddingLeft: function(v) {this.__setProp(v, 'paddingLeft');},
-    
-    /** @private
-        @param {*} v
-        @param {string} propName
-        @returns {undefined} */
-    __setProp: function(v, propName) {
-        if (this[propName] !== v) {
-            this[propName] = v;
-            this.deStyle[propName] = v + 'px';
-            if (this.inited) {
-                this.fireEvent(propName, v);
-                this.sizeViewToDom();
+((pkg) => {
+    const setProp = (editableText, v, propName) => {
+            if (editableText[propName] !== v) {
+                editableText[propName] = v;
+                editableText.deStyle[propName] = v + 'px';
+                if (editableText.inited) {
+                    editableText.fireEvent(propName, v);
+                    editableText.sizeViewToDom();
+                }
             }
-        }
-    },
-    
-    setContentEditable: function(v) {
-        if (this.contentEditable !== v) {
-            this.contentEditable = this.getInnerDomElement().contentEditable = v;
-            if (this.inited) this.fireEvent('contentEditable', v);
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.BaseInputText */
-    filterInputPress: function(domEvent) {
-        // Implement maxLength
-        const maxLength = this.maxLength;
-        if (maxLength >= 0 && this.getCharacterCount() === maxLength) domEvent.preventDefault();
+        };
         
-        this.callSuper(domEvent);
-    },
-    
-    /** @overrides myt.NativeInputWrapper */
-    getDomValue: function() {
-        return this.getInnerDomElement().innerHTML;
-    },
-    
-    /** @overrides myt.NativeInputWrapper */
-    setDomValue: function(v) {
-        const de = this.getInnerDomElement();
-        if (de.innerHTML !== v) {
-            de.innerHTML = v;
+    /** Text content that can be edited.
+        
+        Events:
+            contentEditable:boolean
+            minWidth:number
+        
+        Attributes:
+            contentEditble:boolean Makes the text editable or not.
+            minWidth:number The minimum width for the component. Defaults to 
+                undefined which is effectively 0.
+            minHeight:number The minimum height for the component. Defaults to 
+                undefined which is effectively 0.
+        
+        Private Attributes:
+            _selRange:object Stores the start and end of the selection.
+        
+        @class */
+    pkg.EditableText = new JS.Class('EditableText', pkg.BaseInputText, {
+        include: [pkg.SizeToDom],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////////
+        /** @overrides myt.BaseInputText */
+        initNode: function(parent, attrs) {
+            const self = this;
+            
+            if (attrs.tagName == null) attrs.tagName = 'div';
+            attrs.inputType = null;
+            
+            if (attrs.whiteSpace == null) attrs.whiteSpace = 'pre';
+            if (attrs.contentEditable == null) attrs.contentEditable = true;
+            
+            self.callSuper(parent, attrs);
+            
+            self.attachToDom(self, '__cleanInput', 'keydown');
+            
+            self.attachToDom(self, '__userInteraction', 'keyup');
+            self.attachToDom(self, '__userInteraction', 'mouseup');
+            
+            self.setCaretToEnd();
+        },
+        
+        
+        // Attributes //////////////////////////////////////////////////////////////
+        setMinWidth: function(v) {setProp(this, v, 'minWidth');},
+        setMinHeight: function(v) {
+            if (BrowserDetect.browser === 'Firefox') v += 2;
+            setProp(this, v, 'minHeight');
+        },
+        setPadding: function(v) {
+            this.setPaddingTop(v);
+            this.setPaddingRight(v);
+            this.setPaddingBottom(v);
+            this.setPaddingLeft(v);
+        },
+        setPaddingTop: function(v) {setProp(this, v, 'paddingTop');},
+        setPaddingRight: function(v) {setProp(this, v, 'paddingRight');},
+        setPaddingBottom: function(v) {setProp(this, v, 'paddingBottom');},
+        setPaddingLeft: function(v) {setProp(this, v, 'paddingLeft');},
+        
+        setContentEditable: function(v) {
+            if (this.contentEditable !== v) {
+                this.contentEditable = this.getInnerDomElement().contentEditable = v;
+                if (this.inited) this.fireEvent('contentEditable', v);
+            }
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////////
+        /** @overrides myt.BaseInputText */
+        filterInputPress: function(domEvent) {
+            // Implement maxLength
+            const maxLength = this.maxLength;
+            if (maxLength >= 0 && this.getCharacterCount() === maxLength) domEvent.preventDefault();
+            
+            this.callSuper(domEvent);
+        },
+        
+        /** @overrides myt.NativeInputWrapper */
+        getDomValue: function() {
+            return this.getInnerDomElement().innerHTML;
+        },
+        
+        /** @overrides myt.NativeInputWrapper */
+        setDomValue: function(v) {
+            const de = this.getInnerDomElement();
+            if (de.innerHTML !== v) {
+                de.innerHTML = v;
+                this.sizeViewToDom();
+                this.restoreSelection();
+            }
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __cleanInput: function(event) {
+            // Prevent enter key from inserting a div
+            if (pkg.KeyObservable.getKeyCodeFromEvent(event) === 13) {
+                event.value.preventDefault();
+                
+                // Instead, insert a linefeed if wrapping is allowed.
+                if (this.whitespace !== 'nowrap') {
+                    document.execCommand('insertHTML', false, this.isCaretAtEnd() ? '\n\n' : '\n');
+                }
+            }
+        },
+        
+        /** @overrides myt.BaseInputText */
+        __syncToDom: function(event) {
+            this.callSuper(event);
+            
+            this.saveSelection();
             this.sizeViewToDom();
             this.restoreSelection();
-        }
-    },
-    
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __cleanInput: function(event) {
-        // Prevent enter key from inserting a div
-        if (myt.KeyObservable.getKeyCodeFromEvent(event) === 13) {
-            event.value.preventDefault();
-            
-            // Instead, insert a linefeed if wrapping is allowed.
-            if (this.whitespace !== 'nowrap') {
-                document.execCommand('insertHTML', false, this.isCaretAtEnd() ? '\n\n' : '\n');
-            }
-        }
-    },
-    
-    /** @overrides myt.BaseInputText */
-    __syncToDom: function(event) {
-        this.callSuper(event);
+        },
         
-        this.saveSelection();
-        this.sizeViewToDom();
-        this.restoreSelection();
-    },
-    
-    // Caret handling
-    getCharacterCount: function() {
-        const elem = this.getInnerDomElement().firstChild;
-        return elem ? elem.length : 0;
-    },
-    
-    isCaretAtEnd: function() {
-        return this.getCaretPosition() === this.getCharacterCount();
-    },
-    
-    /** @overrides myt.BaseInputText */
-    getCaretPosition: function() {
-        const selection = this.getSelection();
-        return selection ? selection.end : 0;
-    },
-    
-    /** @overrides myt.BaseInputText */
-    setCaretPosition: function(start, end) {
-        if (end == null || start === end) {
-            // Don't update if the current position already matches.
-            if (this.getCaretPosition() === start) return;
-            
-            end = start;
-        }
-        this.saveSelection({
-            start:start,
-            startElem:this.getInnerDomElement().firstChild,
-            end:end,
-            endElem:this.getInnerDomElement().firstChild
-        });
-    },
-    
-    // Selection handling
-    /** @overrides myt.FocusObservable */
-    doFocus: function() {
-        this.callSuper();
-        this.restoreSelection();
-    },
-    
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __userInteraction: function(event) {
-        this.saveSelection();
-        return true;
-    },
-    
-    /** @overrides myt.BaseInputText */
-    getSelection: function() {
-        let range;
-        if (window.getSelection) {
-            const sel = window.getSelection();
-            if (sel.rangeCount > 0) {
-                // Sometimes when deleting we get an unexpected node
-                if (sel.extentNode === this.getInnerDomElement()) return null;
-                
-                range = sel.getRangeAt(0);
-            }
-        } else if (document.selection) {
-            range = document.selection.createRange();
-        }
+        // Caret handling
+        getCharacterCount: function() {
+            const elem = this.getInnerDomElement().firstChild;
+            return elem ? elem.length : 0;
+        },
         
-        return {
-            start:range ? range.startOffset : 0,
-            startElem:range ? range.startContainer : this.getInnerDomElement().firstChild,
-            end:range ? range.endOffset : 0,
-            endElem:range ? range.endContainer : this.getInnerDomElement().firstChild
-        };
-    },
-    
-    /** @overrides myt.BaseInputText */
-    setSelection: function(selection) {
-        if (selection) {
-            const startElem = selection.startElem,
-                endElem = selection.endElem;
-            if (startElem && startElem.parentNode && endElem && endElem.parentNode) {
-                const range = document.createRange();
-                range.setStart(startElem, Math.min(selection.start, startElem.length));
-                range.setEnd(endElem, Math.min(selection.end, endElem.length));
+        isCaretAtEnd: function() {
+            return this.getCaretPosition() === this.getCharacterCount();
+        },
+        
+        /** @overrides myt.BaseInputText */
+        getCaretPosition: function() {
+            const selection = this.getSelection();
+            return selection ? selection.end : 0;
+        },
+        
+        /** @overrides myt.BaseInputText */
+        setCaretPosition: function(start, end) {
+            if (end == null || start === end) {
+                // Don't update if the current position already matches.
+                if (this.getCaretPosition() === start) return;
                 
-                if (window.getSelection) {
-                    const sel = window.getSelection();
-                    if (sel.rangeCount > 0) sel.removeAllRanges();
-                    sel.addRange(range);
-                } else if (document.selection) {
-                    range.select();
+                end = start;
+            }
+            this.saveSelection({
+                start:start,
+                startElem:this.getInnerDomElement().firstChild,
+                end:end,
+                endElem:this.getInnerDomElement().firstChild
+            });
+        },
+        
+        // Selection handling
+        /** @overrides myt.FocusObservable */
+        doFocus: function() {
+            this.callSuper();
+            this.restoreSelection();
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __userInteraction: function(event) {
+            this.saveSelection();
+            return true;
+        },
+        
+        /** @overrides myt.BaseInputText */
+        getSelection: function() {
+            let range;
+            if (window.getSelection) {
+                const sel = window.getSelection();
+                if (sel.rangeCount > 0) {
+                    // Sometimes when deleting we get an unexpected node
+                    if (sel.extentNode === this.getInnerDomElement()) return null;
+                    
+                    range = sel.getRangeAt(0);
+                }
+            } else if (document.selection) {
+                range = document.selection.createRange();
+            }
+            
+            return {
+                start:range ? range.startOffset : 0,
+                startElem:range ? range.startContainer : this.getInnerDomElement().firstChild,
+                end:range ? range.endOffset : 0,
+                endElem:range ? range.endContainer : this.getInnerDomElement().firstChild
+            };
+        },
+        
+        /** @overrides myt.BaseInputText */
+        setSelection: function(selection) {
+            if (selection) {
+                const startElem = selection.startElem,
+                    endElem = selection.endElem;
+                if (startElem && startElem.parentNode && endElem && endElem.parentNode) {
+                    const range = document.createRange();
+                    range.setStart(startElem, Math.min(selection.start, startElem.length));
+                    range.setEnd(endElem, Math.min(selection.end, endElem.length));
+                    
+                    if (window.getSelection) {
+                        const sel = window.getSelection();
+                        if (sel.rangeCount > 0) sel.removeAllRanges();
+                        sel.addRange(range);
+                    } else if (document.selection) {
+                        range.select();
+                    }
                 }
             }
         }
-    }
-});
+    });
+})(myt);
 
 
 /** An myt.EditableText that is also a FormElement.
@@ -20097,7 +20064,7 @@ myt.FormEditableText = new JS.Class('FormEditableText', myt.EditableText, {
             }
         },
         
-        setDragView = (v) => {
+        setDragView = v => {
             let existingDragView = dragView,
                 funcName, 
                 eventName,
@@ -20134,39 +20101,30 @@ myt.FormEditableText = new JS.Class('FormEditableText', myt.EditableText, {
             @param {!Array} list
             @returns {!Array} */
         filterList = (dropable, list) => {
-            let retval;
-            
             if (dropable.destroyed) {
-                retval = [];
+                return [];
+            } else if (dropable.acceptAnyDragGroup()) {
+                return list;
             } else {
-                if (dropable.acceptAnyDragGroup()) {
-                    retval = list;
-                } else {
-                    retval = [];
-                    
-                    const dragGroups = dropable.getDragGroups();
-                    let i = list.length, 
-                        item, 
-                        targetGroups, 
-                        dragGroup;
-                    while (i) {
-                        item = list[--i];
-                        if (item.acceptAnyDragGroup()) {
-                            retval.push(item);
-                        } else {
-                            targetGroups = item.getDragGroups();
-                            for (dragGroup in dragGroups) {
-                                if (targetGroups[dragGroup]) {
-                                    retval.push(item);
-                                    break;
-                                }
+                const retval = [],
+                    dragGroups = dropable.getDragGroups();
+                let i = list.length;
+                while (i) {
+                    const item = list[--i];
+                    if (item.acceptAnyDragGroup()) {
+                        retval.push(item);
+                    } else {
+                        const targetGroups = item.getDragGroups();
+                        for (const dragGroup in dragGroups) {
+                            if (targetGroups[dragGroup]) {
+                                retval.push(item);
+                                break;
                             }
                         }
                     }
                 }
+                return retval;
             }
-            
-            return retval;
         };
     
     /** Provides global drag and drop functionality.
@@ -20204,14 +20162,14 @@ myt.FormEditableText = new JS.Class('FormEditableText', myt.EditableText, {
         /** Registers the provided auto scroller to receive notifications.
             @param {!Object} autoScroller - The myt.AutoScroller to register.
             @returns {undefined} */
-        registerAutoScroller: (autoScroller) => {
+        registerAutoScroller: autoScroller => {
             autoScrollers.push(autoScroller);
         },
         
         /** Unregisters the provided auto scroller.
             @param {!Object} autoScroller - The myt.AutoScroller to unregister.
             @returns {undefined} */
-        unregisterAutoScroller: (autoScroller) => {
+        unregisterAutoScroller: autoScroller => {
             let i = autoScrollers.length;
             while (i) {
                 if (autoScrollers[--i] === autoScroller) {
@@ -20224,14 +20182,14 @@ myt.FormEditableText = new JS.Class('FormEditableText', myt.EditableText, {
         /** Registers the provided drop target to receive notifications.
             @param {!Object} dropTarget - The myt.DropTarget to register.
             @returns {undefined} */
-        registerDropTarget: (dropTarget) => {
+        registerDropTarget: dropTarget => {
             dropTargets.push(dropTarget);
         },
         
         /** Unregisters the provided drop target.
             @param {!Object} dropTarget - The myt.DropTarget to unregister.
             @returns {undefined} */
-        unregisterDropTarget: (dropTarget) => {
+        unregisterDropTarget: dropTarget => {
             let i = dropTargets.length;
             while (i) {
                 if (dropTargets[--i] === dropTarget) {
@@ -20244,7 +20202,7 @@ myt.FormEditableText = new JS.Class('FormEditableText', myt.EditableText, {
         /** Called by a myt.Dropable when a drag starts.
             @param {!Object} dropable - The myt.Dropable that started the drag.
             @returns {undefined} */
-        startDrag: (dropable) => {
+        startDrag: dropable => {
             setDragView(dropable);
         },
         
@@ -24313,13 +24271,10 @@ myt.BoundedRangeComponent = new JS.Module('BoundedRangeComponent', {
     Useful as a light weight alternative to myt.Node when parent child
     relationships are not needed.
     
-    Events:
-        None.
-    
     Attributes:
-        inited:boolean Set to true after this Eventable has completed 
-            initializing.
-*/
+        inited:boolean Set to true after this Eventable has completed initializing.
+    
+    @class */
 myt.Eventable = new JS.Class('Eventable', {
     include: [myt.AccessorSupport, myt.Destructible, myt.Observable, myt.Observer],
     
@@ -24375,7 +24330,7 @@ myt.Eventable = new JS.Class('Eventable', {
         /*  Redraws the annulus
             @param {!Object} annulus - The Annulus to redraw.
             @returns {undefined} */
-        redraw = (annulus) => {
+        redraw = annulus => {
             pkg.Annulus.draw(
                 annulus.__path, 
                 degreesToRadians(annulus.startAngle), 
@@ -24392,7 +24347,7 @@ myt.Eventable = new JS.Class('Eventable', {
         /*  Ensures the size of the view exactly fits the annulus.
             @param {!Object} annulus - The Annulus to update.
             @returns {undefined} */
-        updateSize = (annulus) => {
+        updateSize = annulus => {
             const size = 2*(annulus.radius + annulus.thickness),
                 svg = annulus.__svg;
             annulus.setWidth(size);
@@ -24775,14 +24730,14 @@ myt.Eventable = new JS.Class('Eventable', {
         
         /*  @param {string|?Function} matcher
             @return {?Function} */
-        makeMatcherFunction = (matcher) => {
+        makeMatcherFunction = matcher => {
             let matcherFunc;
             if (typeof matcher === 'string') {
                 // Use the provided string as an exact match function. We must
                 // generate a unique function for each string key (and reuse it)
                 // so that the === tests will work in the registerListener and
                 // unregisterListener functions.
-                matcherFunc = matcherFunctionsByKey[matcher] || (matcherFunctionsByKey[matcher] = (type) => type === matcher);
+                matcherFunc = matcherFunctionsByKey[matcher] || (matcherFunctionsByKey[matcher] = type => type === matcher);
             } else if (typeof matcher === 'function') {
                 matcherFunc = matcher;
             } else if (matcher == null) {

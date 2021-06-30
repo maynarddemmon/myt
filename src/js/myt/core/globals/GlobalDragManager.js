@@ -35,7 +35,7 @@
             }
         },
         
-        setDragView = (v) => {
+        setDragView = v => {
             let existingDragView = dragView,
                 funcName, 
                 eventName,
@@ -72,39 +72,30 @@
             @param {!Array} list
             @returns {!Array} */
         filterList = (dropable, list) => {
-            let retval;
-            
             if (dropable.destroyed) {
-                retval = [];
+                return [];
+            } else if (dropable.acceptAnyDragGroup()) {
+                return list;
             } else {
-                if (dropable.acceptAnyDragGroup()) {
-                    retval = list;
-                } else {
-                    retval = [];
-                    
-                    const dragGroups = dropable.getDragGroups();
-                    let i = list.length, 
-                        item, 
-                        targetGroups, 
-                        dragGroup;
-                    while (i) {
-                        item = list[--i];
-                        if (item.acceptAnyDragGroup()) {
-                            retval.push(item);
-                        } else {
-                            targetGroups = item.getDragGroups();
-                            for (dragGroup in dragGroups) {
-                                if (targetGroups[dragGroup]) {
-                                    retval.push(item);
-                                    break;
-                                }
+                const retval = [],
+                    dragGroups = dropable.getDragGroups();
+                let i = list.length;
+                while (i) {
+                    const item = list[--i];
+                    if (item.acceptAnyDragGroup()) {
+                        retval.push(item);
+                    } else {
+                        const targetGroups = item.getDragGroups();
+                        for (const dragGroup in dragGroups) {
+                            if (targetGroups[dragGroup]) {
+                                retval.push(item);
+                                break;
                             }
                         }
                     }
                 }
+                return retval;
             }
-            
-            return retval;
         };
     
     /** Provides global drag and drop functionality.
@@ -142,14 +133,14 @@
         /** Registers the provided auto scroller to receive notifications.
             @param {!Object} autoScroller - The myt.AutoScroller to register.
             @returns {undefined} */
-        registerAutoScroller: (autoScroller) => {
+        registerAutoScroller: autoScroller => {
             autoScrollers.push(autoScroller);
         },
         
         /** Unregisters the provided auto scroller.
             @param {!Object} autoScroller - The myt.AutoScroller to unregister.
             @returns {undefined} */
-        unregisterAutoScroller: (autoScroller) => {
+        unregisterAutoScroller: autoScroller => {
             let i = autoScrollers.length;
             while (i) {
                 if (autoScrollers[--i] === autoScroller) {
@@ -162,14 +153,14 @@
         /** Registers the provided drop target to receive notifications.
             @param {!Object} dropTarget - The myt.DropTarget to register.
             @returns {undefined} */
-        registerDropTarget: (dropTarget) => {
+        registerDropTarget: dropTarget => {
             dropTargets.push(dropTarget);
         },
         
         /** Unregisters the provided drop target.
             @param {!Object} dropTarget - The myt.DropTarget to unregister.
             @returns {undefined} */
-        unregisterDropTarget: (dropTarget) => {
+        unregisterDropTarget: dropTarget => {
             let i = dropTargets.length;
             while (i) {
                 if (dropTargets[--i] === dropTarget) {
@@ -182,7 +173,7 @@
         /** Called by a myt.Dropable when a drag starts.
             @param {!Object} dropable - The myt.Dropable that started the drag.
             @returns {undefined} */
-        startDrag: (dropable) => {
+        startDrag: dropable => {
             setDragView(dropable);
         },
         

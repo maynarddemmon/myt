@@ -120,15 +120,13 @@ myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
         implementation returns the value unchanged.
         @param {string} v - the current value of the form element.
         @returns {string} The new value of the form element. */
-    filterInput: function(v) {
-        return v;
-    },
+    filterInput: v => v,
     
     /** A hook for subclasses/instances to do input filtering during key press.
         The default implementation does nothing.
         @param {!Object} domEvent - The dom key press event.
         @returns {undefined} */
-    filterInputPress: function(domEvent) {},
+    filterInputPress: domEvent => {},
     
     /** @private
         @param {!Object} event

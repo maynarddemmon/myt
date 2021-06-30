@@ -42,14 +42,13 @@
         },
         
         /** Remove a rootable from the global list of root views.
-            @param {!Object} r - The RootView to remove.
+            @param {!Object} rootToRemove - The RootView to remove.
             @returns {undefined} */
-        removeRoot: (r) => {
-            let i = roots.length,
-                root;
+        removeRoot: rootToRemove => {
+            let i = roots.length;
             while (i) {
-                root = roots[--i];
-                if (root === r) {
+                const root = roots[--i];
+                if (root === rootToRemove) {
                     roots.splice(i, 1);
                     globalRootViewRegistry.fireEvent('rootRemoved', root);
                     break;

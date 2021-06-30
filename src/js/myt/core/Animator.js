@@ -1,7 +1,7 @@
 ((pkg) => {
-    const getTarget = (animator) => animator.target || animator.parent,
+    const getTarget = animator => animator.target || animator.parent,
         
-        isColorAttr = (animator) => {
+        isColorAttr = animator => {
             const target = getTarget(animator);
             animator.__isColorAnim = (target && typeof target.isColorAttr === 'function') ? target.isColorAttr(animator.attribute) : undefined;
         },
@@ -37,7 +37,7 @@
             target.set(attr, animator.__isColorAnim ? getColorValue(animator.from, to, motionValue, relative, value) : value + ((to - animator.from) * motionValue));
         },
         
-        reset = (animator) => {
+        reset = animator => {
             animator.__temporaryFrom = false;
             animator.__loopCount = animator.reverse ? animator.repeat - 1 : 0;
             animator.__progress = animator.reverse ? animator.duration : 0;
@@ -349,15 +349,15 @@
                     be replaced with the new callback.
                 @returns {undefined} */
             next: function(callback, replace) {
-                const existingCallback = this.callback;
+                const self = this,
+                    existingCallback = self.callback;
                 if (existingCallback && !replace) {
-                    const anim = this;
-                    this.setCallback(function(success) {
-                        existingCallback.call(anim, success);
-                        callback.call(anim, success);
+                    self.setCallback(success => {
+                        existingCallback.call(self, success);
+                        callback.call(self, success);
                     });
                 } else {
-                    this.setCallback(callback);
+                    self.setCallback(callback);
                 }
             },
             
