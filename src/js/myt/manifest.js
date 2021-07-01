@@ -128,10 +128,7 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'form/ValueProcessor.js')
         .provides('myt.ValueProcessor','myt.ToNumberValueProcessor','myt.TrimValueProcessor','myt.UndefinedValueProcessor','myt.UseOtherFieldIfEmptyValueProcessor','myt.global.valueProcessors')
         .requires('myt.global');
-    
-    file(MYT_COMPONENT_ROOT + 'form/Form.js'       ).provides('myt.Form'       ).requires('myt.Node');
-    file(MYT_COMPONENT_ROOT + 'form/RootForm.js'   ).provides('myt.RootForm'   ).requires('myt.Form');
-    file(MYT_COMPONENT_ROOT + 'form/FormElement.js').provides('myt.FormElement').requires('myt.RootForm');
+    file(MYT_COMPONENT_ROOT + 'form/Form.js').provides('myt.Form','myt.FormElement','myt.RootForm').requires('myt.Node','myt.ValueProcessor');
     
     file(MYT_COMPONENT_ROOT + 'form/elements/FormInputSelect.js'   ).provides('myt.FormInputSelect'   ).requires('myt.FormElement','myt.InputSelectOption');
     file(MYT_COMPONENT_ROOT + 'form/elements/FormRadioGroup.js'    ).provides('myt.FormRadioGroup'    ).requires('myt.FormElement','myt.Radio','myt.ValueComponent');
