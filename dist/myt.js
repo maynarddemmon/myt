@@ -25057,7 +25057,6 @@ myt.Eventable = new JS.Class('Eventable', {
                 shadowColor:string The color of the shadow.
                 insetH:number The horizontal inset of the text from the edge.
                 insetV:number The vertical inset of the text from the edge.
-                maxTextWidth:number The maximum width for the text view in the tooltip.
                 tipBgColor:string The color to use for the tip background.
                 tipTextColor:string The color to use for the tip text. */
         Tooltip = pkg.Tooltip = new JSClass('Tooltip', BaseTooltip, {
@@ -25069,7 +25068,6 @@ myt.Eventable = new JS.Class('Eventable', {
                 DEFAULT_SHADOW_COLOR:'#00000033', // Extra nums are opacity
                 DEFAULT_HORIZONTAL_INSET:6,
                 DEFAULT_VERTICAL_INSET:3,
-                DEFAULT_MAX_TEXT_WIDTH:280,
                 DEFAULT_TIP_BG_COLOR:'#444444',
                 DEFAULT_TIP_TEXT_COLOR:'#eeeeee'
             },
@@ -25083,7 +25081,6 @@ myt.Eventable = new JS.Class('Eventable', {
                 if (attrs.shadowColor == null) attrs.shadowColor = Tooltip.DEFAULT_SHADOW_COLOR;
                 if (attrs.insetH == null) attrs.insetH = Tooltip.DEFAULT_HORIZONTAL_INSET;
                 if (attrs.insetV == null) attrs.insetV = Tooltip.DEFAULT_VERTICAL_INSET;
-                if (attrs.maxTextWidth == null) attrs.maxTextWidth = Tooltip.DEFAULT_MAX_TEXT_WIDTH;
                 if (attrs.tipBgColor == null) attrs.tipBgColor = Tooltip.DEFAULT_TIP_BG_COLOR;
                 if (attrs.tipTextColor == null) attrs.tipTextColor = Tooltip.DEFAULT_TIP_TEXT_COLOR;
                 
@@ -25105,7 +25102,6 @@ myt.Eventable = new JS.Class('Eventable', {
             setShadowColor: function(v) {this.shadowColor = v;},
             setInsetH: function(v) {this.insetH = v;},
             setInsetV: function(v) {this.insetV = v;},
-            setMaxTextWidth: function(v) {this.maxTextWidth = v;},
             setTipBgColor: function(v) {this.tipBgColor = v;},
             setTipTextColor: function(v) {this.tipTextColor = v;},
             
@@ -25124,7 +25120,7 @@ myt.Eventable = new JS.Class('Eventable', {
                 // Size tip text and size it to fit within the maximum text width.
                 if (tipText.text !== txt) tipText.setText(txt);
                 tipText.setWidth('auto');
-                const tipTextWidth = Math.min(tipText.measureNoWrapWidth(), self.maxTextWidth),
+                const tipTextWidth = Math.min(tipText.measureNoWrapWidth(), tt.maxTextWidth),
                     tipWidth = tipTextWidth + 2*tipText.x,
                     tipExtentX = tipWidth + 2*edgeSize;
                 tipText.setWidth(tipTextWidth);
@@ -25134,8 +25130,20 @@ myt.Eventable = new JS.Class('Eventable', {
                 const parentPos = ttp.getPagePosition(),
                     tipHeight = tipText.height + 2*tipText.y,
                     tipExtentY = tipHeight + 2*edgeSize,
-                    tipY = parentPos.y - tipExtentY + (tt.tipvalign === 'below' ? ttp.height + tipExtentY : 0),
-                    tipX = parentPos.x + (tt.tipalign === 'right' ? ttp.width - tipExtentX : 0);
+                    tipY = parentPos.y - tipExtentY + (tt.tipvalign === 'below' ? ttp.height + tipExtentY : 0);
+                let tipX = parentPos.x;
+                switch (tt.tipalign) {
+                    case 'right':
+                        tipX -= tipExtentX;
+                        // Fall through
+                    case 'farright':
+                        tipX += ttp.width;
+                        break;
+                    case 'farleft':
+                        tipX -= tipExtentX;
+                        break;
+                    default: // left
+                }
                 
                 // Apply values and prevent out-of-bounds
                 self.setX(Math.round(Math.min(Math.max(tipX, 0), GlobalWindowResize.getWidth() - tipExtentX)));
@@ -25148,91 +25156,96 @@ myt.Eventable = new JS.Class('Eventable', {
                 
                 self.callSuper();
             }
-        });
-    
-    /** A mixin that adds tooltip support to a view.
+        }),
         
-        Requires:
-            myt.MouseOver
-        
-        Events:
-            tooltip:string
-            tipAlign:string
-            tipValign:string
-            tipClass:JS.Class
-        
-        Attributes:
-            tooltip:string The tip text to display.
-            tipAlign:string The horizontal alignment of the tooltip relative to
-                the view the tip is being shown for. Supported values are 'left'
-                and 'right'. Defaults to 'left'.
-            tipValign:string The vertical alignment of the tooltip relative to
-                the view the tip is being shown for. Supported values are 'above'
-                and 'below'. Defaults to 'above'.
-            tipClass:JS.Class The class to use to instantiate the tooltip.
-    */
-    pkg.TooltipMixin = new JS.Module('TooltipMixin', {
-        // Class Methods and Attributes ////////////////////////////////////////
-        extend: {
-            /** The default class to use for tooltip views. If a project wants to use
-                a special tip class everywhere it should override this. */
-            DEFAULT_TIP_CLASS:Tooltip
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        setTooltip: function(v) {
-            // Supresses the myt.View tooltip behavior.
-            this.callSuper('');
+        /** A mixin that adds tooltip support to a view.
             
-            this.set('tooltip', v, true);
-        },
-        setTipAlign: function(v) {this.set('tipAlign', v, true);},
-        setTipValign: function(v) {this.set('tipValign', v, true);},
-        setTipClass: function(v) {this.set('tipClass', v, true);},
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** @overrides myt.MouseOver. */
-        doSmoothMouseOver: function(isOver) {
-            const self = this,
-                tooltip = self.tooltip;
+            Requires:
+                myt.MouseOver
             
-            self.callSuper(isOver);
+            Events:
+                tooltip:string
+                tipAlign:string
+                tipValign:string
+                tipClass:JS.Class
             
-            if (isOver && tooltip) {
-                // Use configured class or default if none defined.
-                const tipClass = self.tipClass || pkg.TooltipMixin.DEFAULT_TIP_CLASS;
+            Attributes:
+                tooltip:string The tip text to display.
+                tipAlign:string The horizontal alignment of the tooltip relative to
+                    the view the tip is being shown for. Supported values are 'left'
+                    'farleft', 'right' and 'farright'. Defaults to 'left'.
+                tipValign:string The vertical alignment of the tooltip relative to
+                    the view the tip is being shown for. Supported values are 'above'
+                    and 'below'. Defaults to 'above'.
+                maxTextWidth:number The maximum width of the tooltip text.
+                tipClass:JS.Class The class to use to instantiate the tooltip.
+            
+            @class */
+        TooltipMixin = pkg.TooltipMixin = new JS.Module('TooltipMixin', {
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                /** The default class to use for tooltip views. If a project wants to use
+                    a special tip class everywhere it should override this. */
+                DEFAULT_TIP_CLASS:Tooltip,
+                DEFAULT_MAX_TEXT_WIDTH:280
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setTooltip: function(v) {
+                // Supresses the myt.View tooltip behavior.
+                this.callSuper('');
                 
-                // Destroy tip if it's not the correct class.
-                if (tooltipView && !(tooltipView instanceof tipClass)) {
-                    tooltipView.destroy();
-                    tooltipView = null;
-                }
+                this.set('tooltip', v, true);
+            },
+            setTipAlign: function(v) {this.set('tipAlign', v, true);},
+            setTipValign: function(v) {this.set('tipValign', v, true);},
+            setMaxTextWidth: function(v) {this.set('maxTextWidth', v, true);},
+            setTipClass: function(v) {this.set('tipClass', v, true);},
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @overrides myt.MouseOver. */
+            doSmoothMouseOver: function(isOver) {
+                const self = this,
+                    tooltip = self.tooltip;
                 
-                // Create new instance.
-                if (!tooltipView) {
-                    // Create tooltip div if necessary
-                    let elem = document.getElementById(tooltipDomId);
-                    if (!elem) {
-                        elem = pkg.DomElementProxy.createDomElement('div', {position:'absolute'});
-                        
-                        // Make the div a child of the body element so it can be
-                        // in front of pretty much anything in the document.
-                        pkg.getElement().appendChild(elem);
+                self.callSuper(isOver);
+                
+                if (isOver && tooltip) {
+                    // Use configured class or default if none defined.
+                    const tipClass = self.tipClass || TooltipMixin.DEFAULT_TIP_CLASS;
+                    
+                    // Destroy tip if it's not the correct class.
+                    if (tooltipView && !(tooltipView instanceof tipClass)) {
+                        tooltipView.destroy();
+                        tooltipView = null;
                     }
-                    tooltipView = new tipClass(elem, {domId:tooltipDomId});
+                    
+                    // Create new instance.
+                    if (!tooltipView) {
+                        // Create tooltip div if necessary
+                        let elem = document.getElementById(tooltipDomId);
+                        if (!elem) {
+                            elem = pkg.DomElementProxy.createDomElement('div', {position:'absolute'});
+                            
+                            // Make the div a child of the body element so it can be
+                            // in front of pretty much anything in the document.
+                            pkg.getElement().appendChild(elem);
+                        }
+                        tooltipView = new tipClass(elem, {domId:tooltipDomId});
+                    }
+                    
+                    tooltipView.setTooltip({
+                        parent:self, 
+                        text:tooltip, 
+                        tipalign:self.tipAlign, 
+                        tipvalign:self.tipValign,
+                        maxTextWidth:self.maxTextWidth || TooltipMixin.DEFAULT_MAX_TEXT_WIDTH
+                    });
                 }
-                
-                tooltipView.setTooltip({
-                    parent:self, 
-                    text:tooltip, 
-                    tipalign:self.tipAlign, 
-                    tipvalign:self.tipValign
-                });
             }
-        }
-    });
+        });
 })(myt);
 
 
