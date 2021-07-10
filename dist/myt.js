@@ -14810,9 +14810,426 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
 
 
 ((pkg) => {
-    const JSClass = JS.Class,
+    const JSModule = JS.Module,
         
-        // Safe as a closure variable because the registry is a singleton.,
+        /** Provides a setValue and getValue method.
+            
+            Events:
+                value:*
+            
+            Attributes:
+                value:* The stored value.
+                valueFilter:function If it exists, values will be run through 
+                    this filter function before being set on the component. By 
+                    default no valueFilter exists. A value filter function must 
+                    take a single value as an argument and return a value.
+            
+            @class */
+        ValueComponent = pkg.ValueComponent = new JSModule('ValueComponent', {
+            // Life Cycle //////////////////////////////////////////////////////
+            initNode: function(parent, attrs) {
+                this.appendToEarlyAttrs('valueFilter','value');
+                this.callSuper(parent, attrs);
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setValueFilter: function(v) {
+                this.valueFilter = v;
+                
+                if (this.inited && v) this.setValue(this.value);
+            },
+            
+            setValue: function(v) {
+                if (this.valueFilter) v = this.valueFilter(v);
+                
+                if (this.value !== v) {
+                    this.value = v;
+                    if (this.inited) this.fireEvent('value', this.getValue());
+                }
+            },
+            
+            getValue: function() {
+                return this.value;
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** Combines a value filter with any existing value filter.
+                @param filter:function the value filter to add.
+                @param where:string (optional) Determines where to add the 
+                    filter. Supported values are 'first' and 'last'. Defaults 
+                    to 'first'.
+                @returns {undefined} */
+            chainValueFilter: function(filter, where) {
+                const existingFilter = this.valueFilter;
+                let chainedFilter;
+                if (existingFilter) {
+                    if (where === 'last') {
+                        chainedFilter = v => filter(existingFilter(v));
+                    } else {
+                        // "where" is 'first' or not provided.
+                        chainedFilter = v => existingFilter(filter(v));
+                    }
+                } else {
+                    chainedFilter = filter;
+                }
+                this.setValueFilter(chainedFilter);
+            }
+        }),
+        
+        /** A value that consists of an upper and lower value. The lower value 
+            must be less than or equal to the upper value. The value object 
+            that must be passed into setValue and returned from getValue is 
+            an object of the form: {lower:number, upper:number}.
+            
+            @class */
+        RangeComponent = pkg.RangeComponent = new JSModule('RangeComponent', {
+            include: [ValueComponent],
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setLowerValue: function(v) {
+                this.setValue({
+                    lower:v, 
+                    upper:(this.value && this.value.upper !== undefined) ? this.value.upper : v
+                });
+            },
+            
+            getLowerValue: function() {
+                return this.value ? this.value.lower : undefined;
+            },
+            
+            setUpperValue: function(v) {
+                this.setValue({
+                    lower:(this.value && this.value.lower !== undefined) ? this.value.lower : v,
+                    upper:v
+                });
+            },
+            
+            getUpperValue: function() {
+                return this.value ? this.value.upper : undefined;
+            },
+            
+            setValue: function(v) {
+                if (v) {
+                    const existing = this.value,
+                        existingLower = existing ? existing.lower : undefined,
+                        existingUpper = existing ? existing.upper : undefined;
+                    
+                    if (this.valueFilter) v = this.valueFilter(v);
+                    
+                    // Do nothing if value is identical
+                    if (v.lower === existingLower && v.upper === existingUpper) return;
+                    
+                    // Assign upper to lower if no lower was provided.
+                    if (v.lower == null) v.lower = v.upper;
+                    
+                    // Assign lower to upper if no upper was provided.
+                    if (v.upper == null) v.upper = v.lower;
+                    
+                    // Swap lower and upper if they are in the wrong order
+                    if (v.lower !== undefined && v.upper !== undefined && v.lower > v.upper) {
+                        const temp = v.lower;
+                        v.lower = v.upper;
+                        v.upper = temp;
+                    }
+                    
+                    this.value = v;
+                    if (this.inited) {
+                        this.fireEvent('value', this.getValue());
+                        if (v.lower !== existingLower) this.fireEvent('lowerValue', v.lower);
+                        if (v.upper !== existingUpper) this.fireEvent('upperValue', v.upper);
+                    }
+                } else {
+                    this.callSuper(v);
+                }
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            getValueCopy: function() {
+                const v = this.value;
+                return {lower:v.lower, upper:v.upper};
+            }
+        }),
+        
+        /** A numeric value component that stays within a minimum and 
+            maximum value.
+            
+            Events:
+                minValue:number
+                maxValue:number
+                snapToInt:boolean
+            
+            Attributes:
+                minValue:number the largest value allowed. If undefined or 
+                    null no min value is enforced.
+                maxValue:number the lowest value allowed. If undefined or 
+                    null no max value is enforced.
+                snapToInt:boolean If true values can only be integers. 
+                    Defaults to true.
+            
+            @class */
+        BoundedValueComponent = pkg.BoundedValueComponent = new JSModule('BoundedValueComponent', {
+            include: [ValueComponent],
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            initNode: function(parent, attrs) {
+                const self = this;
+                
+                self.appendToEarlyAttrs('snapToInt','minValue','maxValue');
+                
+                if (attrs.snapToInt == null) attrs.snapToInt = true;
+                
+                if (!attrs.valueFilter) {
+                    attrs.valueFilter = v => {
+                        const max = self.maxValue;
+                        if (max != null && v > max) return max;
+                        
+                        const min = self.minValue;
+                        if (min != null && v < min) return min;
+                        
+                        return v;
+                    };
+                }
+                
+                self.callSuper(parent, attrs);
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setSnapToInt: function(v) {
+                if (this.snapToInt !== v) {
+                    this.snapToInt = v;
+                    if (this.inited) {
+                        this.fireEvent('snapToInt', v);
+                        
+                        // Update min, max and value since snap has been turned on
+                        if (v) {
+                            this.setMinValue(this.minValue);
+                            this.setMaxValue(this.maxValue);
+                            this.setValue(this.value);
+                        }
+                    }
+                }
+            },
+            
+            setMinValue: function(v) {
+                if (this.snapToInt && v != null) v = Math.round(v);
+                
+                if (this.minValue !== v) {
+                    const max = this.maxValue;
+                    if (max != null && v > max) v = max;
+                    
+                    if (this.minValue !== v) {
+                        this.minValue = v;
+                        if (this.inited) {
+                            this.fireEvent('minValue', v);
+                            
+                            // Rerun setValue since the filter has changed.
+                            this.setValue(this.value);
+                        }
+                    }
+                }
+            },
+            
+            setMaxValue: function(v) {
+                if (this.snapToInt && v != null) v = Math.round(v);
+                
+                if (this.maxValue !== v) {
+                    const min = this.minValue;
+                    if (min != null && v < min) v = min;
+                    
+                    if (this.maxValue !== v) {
+                        this.maxValue = v;
+                        if (this.inited) {
+                            this.fireEvent('maxValue', v);
+                            
+                            // Rerun setValue since the filter has changed.
+                            this.setValue(this.value);
+                        }
+                    }
+                }
+            },
+            
+            /** @overrides myt.ValueComponent */
+            setValue: function(v) {
+                this.callSuper(this.snapToInt && v != null && !isNaN(v) ? Math.round(v) : v);
+            }
+        });
+    
+    /** A numeric value component that stays within an upper and lower value 
+        and where the value is a range.
+        
+        @class */
+    pkg.BoundedRangeComponent = new JSModule('BoundedRangeComponent', {
+        include: [BoundedValueComponent, RangeComponent],
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            const self = this;
+            if (!attrs.valueFilter) {
+                attrs.valueFilter = v => {
+                    if (v) {
+                        const max = self.maxValue,
+                            min = self.minValue;
+                        if (max != null && v.upper > max) v.upper = max;
+                        if (min != null && v.lower < min) v.lower = min;
+                    }
+                    return v;
+                };
+            }
+            
+            self.callSuper(parent, attrs);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** @overrides myt.ValueComponent */
+        setValue: function(v) {
+            if (this.snapToInt && v != null) {
+                if (v.lower != null && !isNaN(v.lower)) v.lower = Math.round(v.lower);
+                if (v.upper != null && !isNaN(v.upper)) v.upper = Math.round(v.upper);
+            }
+            this.callSuper(v);
+        }
+    });
+})(myt);
+
+
+((pkg) => {
+    const STYLE_SOLID = 'solid',
+        STYLE_OUTLINE = 'outline',
+        DEFAULT_STYLE = STYLE_OUTLINE,
+        
+        updateUI = (checkbox) => {
+            const label = checkbox.label || '',
+                checkboxStyle = checkbox.checkboxStyle || DEFAULT_STYLE;
+            checkbox.setText(
+                '<i class="' + 
+                (checkboxStyle === STYLE_SOLID ? 'fas' : 'far') + 
+                ' fa-' + (checkbox.isChecked() ? 'check-' : '') + 'square"></i>' +
+                (label.length > 0 ? ' ' : '') + label
+            );
+        };
+    
+    /** A checkbox component.
+        
+        Attributes:
+            label:string
+            checkboxStyle:string Determines what style of checkbox to display.
+                Supported values are "solid" and "outline".
+    */
+    pkg.Checkbox = new JS.Class('Checkbox', pkg.Text, {
+        include: [pkg.SimpleButtonStyle, pkg.ValueComponent],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            if (attrs.value == null) attrs.value = false;
+            if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
+            if (attrs.checkboxStyle == null) attrs.checkboxStyle = DEFAULT_STYLE;
+            
+            if (attrs.activeColor == null) attrs.activeColor = 'inherits';
+            if (attrs.hoverColor == null) attrs.hoverColor = 'inherits';
+            if (attrs.readyColor == null) attrs.readyColor = 'inherits';
+            
+            this.callSuper(parent, attrs);
+            
+            pkg.FontAwesome.registerForNotification(this);
+            
+            updateUI(this);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** @overrides myt.ValueComponent */
+        setValue: function(v) {
+            if (this.value !== v) {
+                this.callSuper(v);
+                if (this.inited) updateUI(this);
+            }
+        },
+        
+        setLabel: function(v) {
+            if (this.label !== v) {
+                this.set('label', v, true);
+                if (this.inited) updateUI(this);
+            }
+        },
+        
+        setCheckboxStyle: function(v) {
+            if (this.checkboxStyle !== v) {
+                this.set('checkboxStyle', v, true);
+                if (this.inited) updateUI(this);
+            }
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        isChecked: function() {
+            return this.value === true;
+        },
+        
+        /** @overrides myt.Button
+            Toggle the value attribute when activated. */
+        doActivated: function() {
+            this.setValue(!this.value);
+        },
+        
+        /** @overrides myt.SimpleButtonStyle */
+        drawDisabledState: function() {
+            this.setOpacity(pkg.Button.DEFAULT_DISABLED_OPACITY);
+            this.setTextColor(this.readyColor);
+        },
+        
+        /** @overrides myt.SimpleButtonStyle */
+        drawHoverState: function() {
+            this.setOpacity(1);
+            this.setTextColor(this.hoverColor);
+        },
+        
+        /** @overrides myt.SimpleButtonStyle */
+        drawActiveState: function() {
+            this.setOpacity(1);
+            this.setTextColor(this.activeColor);
+        },
+        
+        /** @overrides myt.SimpleButtonStyle */
+        drawReadyState: function() {
+            this.setOpacity(1);
+            this.setTextColor(this.readyColor);
+        }
+    });
+})(myt);
+
+
+((pkg) => {
+    let undefToEmptyValueProcessor;
+    
+    const JSClass = JS.Class,
+        JSModule = JS.Module,
+        G = pkg.global,
+        GlobalFocus = G.focus,
+        
+        DEFAULT_ATTR = 'runForDefault',
+        ROLLBACK_ATTR = 'runForRollback',
+        CURRENT_ATTR = 'runForCurrent',
+        
+        ACCELERATOR_SUBMIT = 'submit',
+        ACCELERATOR_CANCEL = 'cancel',
+        ACCELERATOR_ACCEPT = 'accept',
+        ACCELERATOR_REJECT = 'reject',
+        
+        ACCELERATOR_SCOPE_ROOT = 'root',
+        ACCELERATOR_SCOPE_ELEMENT = 'element',
+        ACCELERATOR_SCOPE_NONE = 'none',
+        
+        WHEN_BLUR_WITH_KEY_FIX = 'blurWithKeyFix',
+        WHEN_BLUR = 'blur',
+        WHEN_KEY = 'key',
+        
         processorsById = {},
         
         getValueProcessor = id => processorsById[id],
@@ -14830,35 +15247,90 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
             }
         },
         
-        register = identifiable => {
+        registerValueProcessor = identifiable => {
             doFuncOnIdentifiable(identifiable, id => {processorsById[id] = identifiable;});
         },
         
-        /** Modifies a value. Typically used to convert a form element value to its
-            canonical form.
+        getBooleanAttributeGroup = formRadioGroup => pkg.BAG.getGroup('selected', formRadioGroup.groupId),
+        
+        /*  Search the radio group for a matching node and make that one the
+            true node.
+            @param {!Object} formRadioGroup
+            @returns {undefined} */
+        updateRadioGroupValue = formRadioGroup => {
+            const bag = getBooleanAttributeGroup(formRadioGroup);
+            if (bag) {
+                const nodes = bag.getNodes(),
+                    v = formRadioGroup.value;
+                let i = nodes.length;
+                while (i) {
+                    const node = nodes[--i];
+                    if (node.optionValue === v) {
+                        bag.setTrue(node);
+                        break;
+                    }
+                }
+            }
+        },
+        
+        startMonitoringRadioGroup = formRadioGroup => {
+            if (formRadioGroup.groupId) {
+                const bag = getBooleanAttributeGroup(formRadioGroup);
+                if (bag) formRadioGroup.syncTo(bag, '__syncValue', 'trueNode');
+            }
+        },
+        
+        stopMonitoringRadioGroup = formRadioGroup => {
+            if (formRadioGroup.groupId) {
+                const bag = getBooleanAttributeGroup(formRadioGroup);
+                if (bag) formRadioGroup.detachFrom(bag, '__syncValue', 'trueNode');
+            }
+        },
+        
+        /*  Runs the validators on the form.
+            @param isValid:boolean The currently determined validity.
+            @returns boolean true if this form is valid, false otherwise. */
+        applyValidation = (form, isValid) => {
+            const validators = form.__v,
+                len = validators.length, 
+                errorMessages = [];
+            for (let i = 0; len > i;) isValid = validators[i++].isFormValid(form, null, errorMessages) && isValid;
             
-            Events:
-                None
+            form.setErrorMessages(errorMessages);
+            form.setIsValid(isValid);
+            
+            return isValid;
+        },
+        
+        /*  Runs the provided value through all the ValueProcessors.
+            @param value:* The value to process.
+            @param checkAttr:string The name of the attribute on each processor 
+                that is checked to see if that processor should be run or not.
+            @returns * The processed value. */
+        processValue = (formElement, value, checkAttr) => {
+            const processors = formElement.__vp, 
+                len = processors.length;
+            for (let i = 0; len > i;) {
+                const processor = processors[i++];
+                if (processor[checkAttr]) value = processor.process(value);
+            }
+            return value;
+        },
+        
+        /** Modifies a value. Typically used to convert a form element value to 
+            its canonical form.
             
             Attributes:
                 id:string The ideally unique ID for this value processor.
-                runForDefault:boolean Indicates this processor should be run for
-                    default form values. Defaults to true.
-                runForRollback:boolean Indicates this processor should be run for
-                    rollback form values. Defaults to true.
-                runForCurrent:boolean Indicates this processor should be run for
-                    current form values. Defaults to true.
+                runForDefault:boolean Indicates this processor should be run 
+                    for default form values. Defaults to true.
+                runForRollback:boolean Indicates this processor should be run 
+                    for rollback form values. Defaults to true.
+                runForCurrent:boolean Indicates this processor should be run 
+                    for current form values. Defaults to true.
             
             @class */
         ValueProcessor = pkg.ValueProcessor = new JSClass('ValueProcessor', {
-            // Class Methods ///////////////////////////////////////////////////
-            extend: {
-                DEFAULT_ATTR: 'runForDefault',
-                ROLLBACK_ATTR: 'runForRollback',
-                CURRENT_ATTR: 'runForCurrent'
-            },
-            
-            
             // Constructor /////////////////////////////////////////////////////
             /** Creates a new ValueProcessor
                 @param {string} id - The ideally unique ID for a processor instance.
@@ -14869,15 +15341,15 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
             initialize: function(id, runForDefault, runForRollback, runForCurrent) {
                 this.id = id;
                 
-                this[ValueProcessor.DEFAULT_ATTR] = runForDefault ? true : false;
-                this[ValueProcessor.ROLLBACK_ATTR] = runForRollback ? true : false;
-                this[ValueProcessor.CURRENT_ATTR] = runForCurrent ? true : false;
+                this[DEFAULT_ATTR] = runForDefault ? true : false;
+                this[ROLLBACK_ATTR] = runForRollback ? true : false;
+                this[CURRENT_ATTR] = runForCurrent ? true : false;
             },
             
             
             // Methods /////////////////////////////////////////////////////////
-            /** Processes the value. The default implementation returns the value
-                unmodified.
+            /** Processes the value. The default implementation returns the 
+                value unmodified.
                 @param {*} value - The value to modify.
                 @returns {*} - The modified value. */
             process: value => value
@@ -14904,8 +15376,9 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
         /** Trims the whitespace from a value.
             
             Attributes:
-                trim:string Determines what kind of trimming to do. Supported values
-                    are 'left', 'right' and 'both'. The default value is 'both'.
+                trim:string Determines what kind of trimming to do. Supported 
+                    values are 'left', 'right' and 'both'. The default value 
+                    is 'both'.
             
             @class */
         TrimValueProcessor = pkg.TrimValueProcessor = new JSClass('TrimValueProcessor', ValueProcessor, {
@@ -14915,9 +15388,9 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
                 @param {boolean} [runForDefault]
                 @param {boolean} [runForRollback]
                 @param {boolean} [runForCurrent]
-                @param trim:string Determines the type of trimming to do. Allowed
-                    values are 'left', 'right' or 'both'. The default value 
-                    is 'both'.
+                @param trim:string Determines the type of trimming to do. 
+                    Allowed values are 'left', 'right' or 'both'. The default 
+                    value is 'both'.
                 @returns {undefined} */
             initialize: function(id, runForDefault, runForRollback, runForCurrent, trim) {
                 this.callSuper(id, runForDefault, runForRollback, runForCurrent);
@@ -14946,7 +15419,8 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
         /** Converts undefined values to a default value.
             
             Attributes:
-                defaultValue:* The value to return when the processed value is undefined.
+                defaultValue:* The value to return when the processed value 
+                    is undefined.
             
             @class */
         UndefinedValueProcessor = pkg.UndefinedValueProcessor = new JSClass('UndefinedValueProcessor', ValueProcessor, {
@@ -14970,141 +15444,36 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
             process: function(value) {
                 return value === undefined ? this.defaultValue : value;
             }
-        });
-    
-    /** Pulls the current value from another form field if the provided value
-        is undefined, null or empty string.
+        }),
         
-        Attributes:
-            otherField:myt.FormElement The form element to pull the current 
-                value from.
-        
-        @class */
-    pkg.UseOtherFieldIfEmptyValueProcessor = new JSClass('UseOtherFieldIfEmptyValueProcessor', ValueProcessor, {
-        // Constructor /////////////////////////////////////////////////////////
-        /** @overrides myt.ValueProcessor
-            @param {string} id - The ideally unique ID for a processor instance.
-            @param {boolean} [runForDefault]
-            @param {boolean} [runForRollback]
-            @param {boolean} [runForCurrent]
-            @param {!Object} [otherField] - The myt.FormElement to pull the value from.
-            @returns {undefined} */
-        initialize: function(id, runForDefault, runForRollback, runForCurrent, otherField) {
-            this.callSuper(id, runForDefault, runForRollback, runForCurrent);
-            
-            this.otherField = otherField;
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** @overrides */
-        process: function(value) {
-            return (value == null || value === "") ? this.otherField.getValue() : value;
-        }
-    });
-    
-    /** Stores myt.ValueProcessors by ID so they can be used in multiple
-        places easily. */
-    new JS.Singleton('GlobalValueProcessorRegistry', {
-        // Life Cycle //////////////////////////////////////////////////////////
-        initialize: function() {
-            // Register a few common ValueProcessors
-            register(new UndefinedValueProcessor('undefToEmpty', true, true, true, ''));
-            register(new ToNumberValueProcessor('toNumber', true, true, true));
-            register(new TrimValueProcessor('trimLeft', true, true, true, 'left'));
-            register(new TrimValueProcessor('trimRight', true, true, true, 'right'));
-            register(new TrimValueProcessor('trimBoth', true, true, true, 'both'));
-            
-            pkg.global.register('valueProcessors', this);
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        /** Gets a ValueProcessor for the ID.
-            @param id:string the ID of the ValueProcessor to get.
-            @returns an myt.ValueProcessor or undefined if not found. */
-        getValueProcessor: getValueProcessor,
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** Adds a ValueProcessor to this registry.
-            @param identifiable:myt.ValueProcessor the ValueProcessor to add.
-            @returns {undefined} */
-        register: register,
-        
-        /** Removes a ValueProcessor from this registery.
-            @param identifiable:myt.ValueProcessor the ValueProcessor to remove.
-            @returns {undefined} */
-        unregister: identifiable => {
-            doFuncOnIdentifiable(identifiable, (id) => {
-                // Make sure the processor is in the repository then delete.
-                if (getValueProcessor(id)) delete processorsById[id];
-            });
-        }
-    });
-})(myt);
-
-
-((pkg) => {
-    const JSModule = JS.Module,
-        G = pkg.global,
-        ValueProcessor = pkg.ValueProcessor,
-        
-        /*  Runs the validators on this form.
-            @private
-            @param isValid:boolean The currently determined validity.
-            @returns boolean true if this form is valid, false otherwise. */
-        applyValidation = (form, isValid) => {
-            const validators = form.__v, len = validators.length, 
-                errorMessages = [];
-            for (let i = 0; len > i;) isValid = validators[i++].isFormValid(form, null, errorMessages) && isValid;
-            
-            form.setErrorMessages(errorMessages);
-            form.setIsValid(isValid);
-            
-            return isValid;
-        },
-        
-        /*  Runs the provided value through all the ValueProcessors.
-            @private
-            @param value:* The value to process.
-            @param checkAttr:string The name of the attribute on each processor 
-                that is checked to see if that processor should be run or not.
-            @returns * The processed value. */
-        processValue = (formElement, value, checkAttr) => {
-            const processors = formElement.__vp, 
-                len = processors.length;
-            for (let i = 0; len > i;) {
-                const processor = processors[i++];
-                if (processor[checkAttr]) value = processor.process(value);
-            }
-            return value;
-        },
-        
-        /** Provides "form" functionality to a node. Forms can be nested to build
-            up larger forms from one or more subforms.
+        /** Provides "form" functionality to a node. Forms can be nested to 
+            build up larger forms from one or more subforms.
             
             Events:
                 isValid:boolean Fired when the form changes validity.
-                isChanged:boolean Fired when the form becomes changed or unchanged.
+                isChanged:boolean Fired when the form becomes changed
+                    or unchanged.
             
             Attributes:
-                id:string The unique ID for this form relative to its parent form.
+                id:string The unique ID for this form relative to its 
+                    parent form.
                 form:myt.Form A reference to the parent form if it exists.
-                errorMessages:array A list of error messages that occurred during the
-                    last execution of doValidation.
-                isValid:boolean Indicates if the data in this form is valid or not.
-                isChanged:boolean Indicates if the data in this form is different
-                    from the rollback value or not.
+                errorMessages:array A list of error messages that occurred 
+                    during the last execution of doValidation.
+                isValid:boolean Indicates if the data in this form is 
+                    valid or not.
+                isChanged:boolean Indicates if the data in this form is 
+                    different from the rollback value or not.
             
             Private Attributes:
-                _lockCascade:boolean Prevents changes to "isChanged" and "isValid" 
-                    from cascading upwards to the parent form. Used during reset 
-                    and rollback.
+                _lockCascade:boolean Prevents changes to "isChanged" and 
+                    "isValid" from cascading upwards to the parent form. Used 
+                    during reset and rollback.
                 __sf:object A map of child forms/elements by ID.
-                __acc:object A map of method references by accelerator identifier. 
-                    The values will be function references. An intended use of these 
-                    is to submit or cancel a form by keystroke.
+                __acc:object A map of method references by accelerator 
+                    identifier. The values will be function references. An 
+                    intended use of these is to submit or cancel a form 
+                    by keystroke.
                 __v:array A list of validators to apply to this form.
             
             @class */
@@ -15169,9 +15538,9 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
             },
             
             setIsValid: function(v) {
-                // Don't abort when value hasn't changed. The reason this form is
-                // invalid may have changed so we want an event to fire so any new
-                // error messages can be shown.
+                // Don't abort when value hasn't changed. The reason this form 
+                // is invalid may have changed so we want an event to fire so 
+                // any new error messages can be shown.
                 this.isValid = v;
                 if (this.inited) this.fireEvent('isValid', v);
                 
@@ -15262,9 +15631,9 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
                 return value;
             },
             
-            /** Gets the default value of this form. For a form this will be a map of
-                all the subform default values by ID. Form elements should override this
-                to return an element specific default value.
+            /** Gets the default value of this form. For a form this will be a 
+                map of all the subform default values by ID. Form elements 
+                should override this to return an element specific default value.
                 @returns object */
             getDefaultValue: function() {
                 const retval = {};
@@ -15273,9 +15642,10 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
                 return retval;
             },
             
-            /** Sets the default value of this form. For a form the value should be a 
-                map containing default values for each of the subform elements. The 
-                entries in the map will be applied to each of the subforms.
+            /** Sets the default value of this form. For a form the value should
+                be a map containing default values for each of the subform 
+                elements. The entries in the map will be applied to each of 
+                the subforms.
                 @param value:object the value to set.
                 @returns the value that was actually set. */
             setDefaultValue: function(value) {
@@ -15292,9 +15662,9 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
                 return value;
             },
             
-            /** Gets the rollback value of this form. For a form this will be a map of
-                all the subform rollback values by ID. Form elements should override this
-                to return an element specific rollback value.
+            /** Gets the rollback value of this form. For a form this will be a 
+                map of all the subform rollback values by ID. Form elements 
+                should override this to return an element specific rollback value.
                 @returns object */
             getRollbackValue: function() {
                 const retval = {}, 
@@ -15303,9 +15673,10 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
                 return retval;
             },
             
-            /** Sets the rollback value of this form. For a form the value should be a 
-                map containing rollback values for each of the subform elements. The 
-                entries in the map will be applied to each of the subforms.
+            /** Sets the rollback value of this form. For a form the value 
+                should be a map containing rollback values for each of the 
+                subform elements. The entries in the map will be applied to 
+                each of the subforms.
                 @param value:object the value to set.
                 @returns the value that was actually set. */
             setRollbackValue: function(value) {
@@ -15452,11 +15823,11 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
                 this.setIsValid(false);
             },
             
-            /** Tests if this form is valid or not and updates the isValid attribute 
-                if necessary. Allows upwards cascade of validity.
-                @param subformToIgnore:myt.Form (optional) A subform that will not
-                    be checked for validity. This is typically the subform that is
-                    invoking this method.
+            /** Tests if this form is valid or not and updates the isValid 
+                attribute if necessary. Allows upwards cascade of validity.
+                @param subformToIgnore:myt.Form (optional) A subform that will 
+                    not be checked for validity. This is typically the subform 
+                    that is invoking this method.
                 @returns boolean true if this form is valid, false otherwise. */
             verifyValidState: function(subformToIgnore) {
                 const subForms = this.__sf;
@@ -15468,9 +15839,10 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
                 return applyValidation(this, isValid);
             },
             
-            /** Tests if this form is valid or not. Performs a top down validation 
-                check across the entire form tree. Does not allow upwards cascade of
-                validity check since this is intended to be a top down check.
+            /** Tests if this form is valid or not. Performs a top down 
+                validation check across the entire form tree. Does not allow 
+                upwards cascade of validity check since this is intended to be 
+                a top down check.
                 @returns boolean true if this form is valid, false otherwise. */
             doValidation: function() {
                 const subForms = this.__sf;
@@ -15484,7 +15856,8 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
                 return isValid;
             },
             
-            /** Called whenever a value changes for the form or any subform therein.
+            /** Called whenever a value changes for the form or any subform 
+                therein.
                 @param sourceForm:myt.Form the form that had a value change.
                 @returns {undefined} */
             notifyValueChanged: function(sourceForm) {
@@ -15499,9 +15872,9 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
             
             /** Tests if this form is changed or not and updates the isChanged 
                 attribute if necessary. Allows upwards cascade of changed state.
-                @param subformToIgnore:myt.Form (optional) A subform that will not
-                    be checked for changed state. This is typically the subform that is
-                    invoking this method.
+                @param subformToIgnore:myt.Form (optional) A subform that will 
+                    not be checked for changed state. This is typically the 
+                    subform that is invoking this method.
                 @returns boolean true if this form is changed, false otherwise. */
             verifyChangedState: function(subformToIgnore) {
                 const subForms = this.__sf;
@@ -15564,9 +15937,10 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
                 this._lockCascade = false;
             },
             
-            /** Gets the changed values of this form. For a form this will be a map of
-                all the subform values by ID that are in the "changed" state. Form 
-                elements should override this to return an element specific value.
+            /** Gets the changed values of this form. For a form this will be 
+                a map of all the subform values by ID that are in the "changed" 
+                state. Form elements should override this to return an element 
+                specific value.
                 @returns object */
             getChangedValue: function() {
                 const retval = {}, 
@@ -15579,8 +15953,8 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
             }
         }),
         
-        /** Provides "form" element functionality to a node. A form element is a
-            form that actually has a value.
+        /** Provides "form" element functionality to a node. A form element 
+            is a form that actually has a value.
             
             Events:
                 defaultValue:* Fired when the default value changes.
@@ -15612,7 +15986,7 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
             // Accessors ///////////////////////////////////////////////////////
             /** @overrides myt.Form */
             getValue: function() {
-                return processValue(this, this.callSuper ? this.callSuper() : this.value, ValueProcessor.CURRENT_ATTR);
+                return processValue(this, this.callSuper ? this.callSuper() : this.value, CURRENT_ATTR);
             },
             
             /** @overrides myt.Form */
@@ -15627,7 +16001,7 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
             
             /** @overrides myt.Form */
             getDefaultValue: function() {
-                return processValue(this, this.defaultValue, ValueProcessor.DEFAULT_ATTR);
+                return processValue(this, this.defaultValue, DEFAULT_ATTR);
             },
             
             /** @overrides myt.Form */
@@ -15642,7 +16016,7 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
             
             /** @overrides myt.Form */
             getRollbackValue: function() {
-                return processValue(this, this.rollbackValue, ValueProcessor.ROLLBACK_ATTR);
+                return processValue(this, this.rollbackValue, ROLLBACK_ATTR);
             },
             
             /** @overrides myt.Form */
@@ -15657,16 +16031,16 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
             },
             
             /** Allows bulk setting of ValueProcessors.
-                @param processors:array An array of myt.ValueProcessor instances or
-                    IDs of value processors from the myt.global.valueProcessors 
-                    registry.
+                @param processors:array An array of myt.ValueProcessor 
+                    instances or IDs of value processors from the 
+                    myt.global.valueProcessors registry.
                 @returns {undefined} */
             setValueProcessors: function(processors) {
                 let i = processors.length;
                 while (i) {
                     const processor = processors[--i];
                     if (typeof processor === 'string') {
-                        processors[i] = G.valueProcessors.getValueProcessor(processor);
+                        processors[i] = getValueProcessor(processor);
                         if (!processors[i]) processors.splice(i, 1);
                     }
                 }
@@ -15703,18 +16077,18 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
             
             /** @overrides myt.Form */
             addSubForm: subform => {
-                pkg.dumpStack("addSubForm not supported on form elements.");
+                pkg.dumpStack("addSubForm not supported on FormElement.");
             },
             
             /** @overrides myt.Form */
             getSubForm: id => {
-                pkg.dumpStack("getSubForm not supported on form elements.");
+                pkg.dumpStack("getSubForm not supported on FormElement.");
                 return null;
             },
             
             /** @overrides myt.Form */
             removeSubForm: id => {
-                pkg.dumpStack("removeSubForm not supported on form elements.");
+                pkg.dumpStack("removeSubForm not supported on FormElement.");
                 return null;
             },
             
@@ -15782,6 +16156,166 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
             getChangedValue: function() {
                 return this.isChanged ? this.getValue() : undefined;
             }
+        }),
+        
+        /** Provides common functionality for text related form elements.
+            
+            Accelerators:
+                accept: Invokes the doAccept function. Activated upon key down 
+                    of the ENTER key.
+                reject: Invokes the doReject function. Activated upon key up 
+                    of the ESC key.
+            
+            Attributes:
+                errorColor:color_string The color to use when a validation 
+                    error exists. Defaults to '#ff9999'.
+                actionRequiredColor:color_string The color to use when a 
+                    validation error exists but the user has not modified the 
+                    value. Defaults to '#996666'.
+                normalColor:color_string The color to use when no validation 
+                    error exists. Defaults to '#999999'.
+                validateWhen:string Indicates when to run validation.
+                    Supported values are:
+                        key: Validate as the user types.
+                        blur: Validate when blurring out of the UI control
+                        blurWithKeyFix: The same as blur except we also validate 
+                            as the user types if currently invalid.
+                        none: Don't do any validation when interacting with 
+                            the field.
+                    The default value is 'key'.
+                acceleratorScope:string The scope the accelerators will be 
+                    applied to.
+                    Supported values are:
+                        element: Take action on this element only
+                        root: Take action on the root form.
+                        none: Take no action.
+                    The default value is 'element'.
+            
+            @class */
+        FormInputTextMixin = pkg.FormInputTextMixin = new JSModule('FormInputTextMixin', {
+            include: [FormElement, pkg.UpdateableUI],
+            
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            /** @overrides myt.Input */
+            initNode: function(parent, attrs) {
+                const self = this;
+                
+                self.acceleratorScope = ACCELERATOR_SCOPE_ELEMENT;
+                self.validateWhen = WHEN_KEY;
+                self.errorColor = '#ff9999';
+                self.actionRequiredColor = '#996666';
+                self.normalColor = '#999999';
+                
+                if (attrs.bgColor == null) attrs.bgColor = '#ffffff';
+                if (attrs.borderWidth == null) attrs.borderWidth = 1;
+                if (attrs.borderStyle == null) attrs.borderStyle = 'solid';
+                if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = true;
+                
+                self.callSuper(parent, attrs);
+                
+                self.addValueProcessor(undefToEmptyValueProcessor);
+                
+                self.attachToDom(self, '__handleKeyDown', 'keydown');
+                self.attachToDom(self, '__handleKeyUp', 'keyup');
+                
+                self.addAccelerator(ACCELERATOR_ACCEPT, self.doAccept);
+                self.addAccelerator(ACCELERATOR_REJECT, self.doReject);
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setValidateWhen: function(v) {this.validateWhen = v;},
+            setAcceleratorScope: function(v) {this.acceleratorScope = v;},
+            setErrorColor: function(v) {this.errorColor = v;},
+            setActionRequiredColor: function(v) {this.actionRequiredColor = v;},
+            setNormalColor: function(v) {this.normalColor = v;},
+            
+            setIsChanged: function(v) {
+                this.callSuper(v);
+                if (this.inited) this.updateUI();
+            },
+            
+            setIsValid: function(v) {
+                this.callSuper(v);
+                if (this.inited) this.updateUI();
+            },
+            
+            /** @overrides myt.FormElement */
+            setValue: function(v) {
+                const retval = this.callSuper(v);
+                
+                // Validate as we type.
+                const when = this.validateWhen;
+                if (when === WHEN_KEY || when === WHEN_BLUR_WITH_KEY_FIX) this.verifyValidState();
+                
+                return retval;
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            doAccept: function() {
+                if (!this.disabled) {
+                    switch (this.acceleratorScope) {
+                        case ACCELERATOR_SCOPE_ROOT:
+                            this.getRootForm().invokeAccelerator(ACCELERATOR_SUBMIT);
+                            break;
+                        case ACCELERATOR_SCOPE_ELEMENT:
+                            // Tab navigate forward
+                            GlobalFocus.next(false);
+                            break;
+                        case ACCELERATOR_SCOPE_NONE:
+                        default:
+                    }
+                }
+            },
+            
+            doReject: function() {
+                if (!this.disabled) {
+                    switch (this.acceleratorScope) {
+                        case ACCELERATOR_SCOPE_ROOT:
+                            this.getRootForm().invokeAccelerator(ACCELERATOR_CANCEL);
+                            break;
+                        case ACCELERATOR_SCOPE_ELEMENT:
+                            this.rollbackForm();
+                            this.getRootForm().doValidation();
+                            if (this.form) this.form.verifyChangedState(this);
+                            break;
+                        case ACCELERATOR_SCOPE_NONE:
+                        default:
+                    }
+                }
+            },
+            
+            /** @private
+                @param {!Object} event
+                @returns {undefined} */
+            __handleKeyDown: function(event) {
+                if (pkg.KeyObservable.getKeyCodeFromEvent(event) === 13) this.invokeAccelerator(ACCELERATOR_ACCEPT);
+            },
+            
+            /** @private
+                @param {!Object} event
+                @returns {undefined} */
+            __handleKeyUp: function(event) {
+                if (pkg.KeyObservable.getKeyCodeFromEvent(event) === 27) this.invokeAccelerator(ACCELERATOR_REJECT);
+            },
+            
+            /** @overrides myt.FocusObservable */
+            doBlur: function() {
+                this.callSuper();
+                
+                // Validate on blur
+                const when = this.validateWhen;
+                if (when === WHEN_BLUR || when === WHEN_BLUR_WITH_KEY_FIX) this.verifyValidState();
+            },
+            
+            /** @overrides myt.UpdateableUI */
+            updateUI: function() {
+                this.setBorderColor(
+                    this.isValid ? this.normalColor : (this.isChanged ? this.errorColor : this.actionRequiredColor)
+                );
+            }
         });
         
     /** Provides additional common functionality for a root level form.
@@ -15800,8 +16334,8 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
         initNode: function(parent, attrs) {
             this.callSuper(parent, attrs);
             
-            this.addAccelerator('submit', this.doSubmit);
-            this.addAccelerator('cancel', this.doCancel);
+            this.addAccelerator(ACCELERATOR_SUBMIT, this.doSubmit);
+            this.addAccelerator(ACCELERATOR_CANCEL, this.doCancel);
         },
         
         
@@ -15830,6 +16364,339 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
         doCancel: function() {
             this.rollbackForm();
             this.doValidation();
+        }
+    });
+    
+    /** An myt.Checkbox that is also a FormElement.
+        
+        @class */
+    pkg.FormCheckbox = new JSClass('FormCheckbox', pkg.Checkbox, {
+        include: [FormElement],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides */
+        initNode: function(parent, attrs) {
+            this.rollbackValue = this.defaultValue = false;
+            this.callSuper(parent, attrs);
+        }
+    });
+    
+    /** An myt.ComboBox that is also a FormElement.
+        
+        @class */
+    pkg.FormComboBox = new JSClass('FormComboBox', pkg.ComboBox, {
+        include: [FormElement, pkg.UpdateableUI],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.Input */
+        initNode: function(parent, attrs) {
+            this.acceleratorScope = ACCELERATOR_SCOPE_ELEMENT;
+            this.validateWhen = WHEN_KEY;
+            this.errorColor = '#ff9999';
+            this.actionRequiredColor = '#996666';
+            this.normalColor = '#999999';
+            
+            this.callSuper(parent, attrs);
+            
+            this.addValueProcessor(undefToEmptyValueProcessor);
+            
+            this.addAccelerator(ACCELERATOR_ACCEPT, this.doAccept);
+            this.addAccelerator(ACCELERATOR_REJECT, this.doReject);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setValidateWhen: function(v) {this.validateWhen = v;},
+        setAcceleratorScope: function(v) {this.acceleratorScope = v;},
+        setErrorColor: function(v) {this.errorColor = v;},
+        setActionRequiredColor: function(v) {this.actionRequiredColor = v;},
+        setNormalColor: function(v) {this.normalColor = v;},
+        
+        setIsChanged: function(v) {
+            this.callSuper(v);
+            if (this.inited) this.updateUI();
+        },
+        
+        setIsValid: function(v) {
+            this.callSuper(v);
+            if (this.inited) this.updateUI();
+        },
+        
+        /** @overrides myt.FormElement */
+        setValue: function(v) {
+            const retval = this.callSuper(v);
+            
+            // Validate as we type.
+            const when = this.validateWhen;
+            if (when === WHEN_KEY || when === WHEN_BLUR_WITH_KEY_FIX) this.verifyValidState();
+            
+            return retval;
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        doAccept: function() {
+            if (!this.disabled) {
+                switch (this.acceleratorScope) {
+                    case ACCELERATOR_SCOPE_ROOT:
+                        this.getRootForm().invokeAccelerator(ACCELERATOR_SUBMIT);
+                        break;
+                    case ACCELERATOR_SCOPE_ELEMENT:
+                        // Tab navigate forward
+                        GlobalFocus.next(false);
+                        break;
+                    case ACCELERATOR_SCOPE_NONE:
+                    default:
+                }
+            }
+        },
+        
+        doReject: function() {
+            if (!this.disabled) {
+                switch (this.acceleratorScope) {
+                    case ACCELERATOR_SCOPE_ROOT:
+                        this.getRootForm().invokeAccelerator(ACCELERATOR_CANCEL);
+                        break;
+                    case ACCELERATOR_SCOPE_ELEMENT:
+                        this.rollbackForm();
+                        this.getRootForm().doValidation();
+                        if (this.form) this.form.verifyChangedState(this);
+                        break;
+                    case ACCELERATOR_SCOPE_NONE:
+                    default:
+                }
+            }
+        },
+        
+        notifyPanelShown: function(panel) {
+            this._isShown = true;
+        },
+        
+        notifyPanelHidden: function(panel) {
+            this._isShown = false;
+        },
+        
+        /** @overrides myt.ListViewAnchor. */
+        doActivationKeyDown: function(key, isRepeat) {
+            if (key === 27 && !this._isShown) {
+                this.invokeAccelerator(ACCELERATOR_REJECT);
+            } else {
+                this.callSuper(key, isRepeat);
+            }
+        },
+        
+        /** @overrides myt.ListViewAnchor. */
+        doActivationKeyUp: function(key) {
+            if (key === 13 && !this._isShown) {
+                this.invokeAccelerator(ACCELERATOR_ACCEPT);
+            } else {
+                this.callSuper(key);
+            }
+        },
+        
+        /** @overrides myt.FocusObservable */
+        doBlur: function() {
+            this.callSuper();
+            
+            // Validate on blur
+            const when = this.validateWhen;
+            if (when === WHEN_BLUR || when === WHEN_BLUR_WITH_KEY_FIX) this.verifyValidState();
+        },
+        
+        /** @overrides myt.UpdateableUI */
+        updateUI: function() {
+            this.setBorderColor(
+                this.isValid ? this.normalColor : (this.isChanged ? this.errorColor : this.actionRequiredColor)
+            );
+        }
+    });
+    
+    /** An myt.EditableText that is also a FormElement.
+        
+        @class */
+    pkg.FormEditableText = new JSClass('FormEditableText', pkg.EditableText, {
+        include: [FormInputTextMixin],
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides myt.FormInputTextMixin */
+        __handleKeyDown: function(event) {
+            // Only allow enter key as accelerator if no wrapping is occurring
+            if (this.whitespace === 'nowrap') this.callSuper(event);
+        },
+    });
+    
+    /** An myt.InputText that is also a FormElement.
+        
+        @class */
+    pkg.FormInputText = new JSClass('FormInputText', pkg.InputText, {
+        include: [FormInputTextMixin]
+    });
+    
+    /** An myt.InputTextArea that is also a FormElement.
+        
+        Accelerators:
+            Only "reject" from myt.FormInputTextMixin.
+        
+        @class */
+    pkg.FormInputTextArea = new JSClass('FormInputTextArea', pkg.InputTextArea, {
+        include: [FormInputTextMixin],
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides myt.FormInputTextMixin */
+        __handleKeyDown: function(event) {
+            // Do nothing so the "accept" accelerator is not invoked.
+        },
+    });
+    
+    /** An myt.InputSelect that is also a FormElement.
+        
+        Private Attributes:
+            __abortSetValue:boolean Prevents setValue from being called again
+                when performing operations from within setValue.
+        
+        @class */
+    pkg.FormInputSelect = new JSClass('FormInputSelect', pkg.InputSelect, {
+        include: [FormElement],
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** @overrides myt.FormElement */
+        setValue: function(v) {
+            if (this.__abortSetValue) return;
+            
+            const retval = this.callSuper(v);
+            
+            // Clear Selection and then reselect
+            this.__abortSetValue = true;
+            this.deselectAll();
+            this.selectValues(retval);
+            this.__abortSetValue = false;
+            
+            return retval;
+        }
+    });
+    
+    /** Monitors a radio button group for a form.
+        
+        Attributes:
+            groupId:string The ID of the radio group to monitor.
+        
+        @class */
+    pkg.FormRadioGroup = new JSClass('FormRadioGroup', pkg.Node, {
+        include: [pkg.ValueComponent, FormElement],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides */
+        initNode: function(parent, attrs) {
+            if (attrs.groupId == null) attrs.groupId = pkg.generateGuid();
+            
+            this.callSuper(parent, attrs);
+            
+            if (this.value !== undefined) updateRadioGroupValue(this);
+            startMonitoringRadioGroup(this);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** @overrides myt.FormElement */
+        setValue: function(v) {
+            const retval = this.callSuper(v);
+            if (this.inited) updateRadioGroupValue(this);
+            return retval;
+        },
+        
+        setGroupId: function(v) {
+            if (this.groupId !== v) {
+                stopMonitoringRadioGroup(this);
+                this.groupId = v;
+                if (this.inited) startMonitoringRadioGroup(this);
+            }
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __syncValue: function(event) {
+            this.setValue(event.value ? event.value.optionValue : null);
+        }
+    });
+    
+    /** Pulls the current value from another form field if the provided value
+        is undefined, null or empty string.
+        
+        Attributes:
+            otherField:myt.FormElement The form element to pull the current 
+                value from.
+        
+        @class */
+    pkg.UseOtherFieldIfEmptyValueProcessor = new JSClass('UseOtherFieldIfEmptyValueProcessor', ValueProcessor, {
+        // Constructor /////////////////////////////////////////////////////////
+        /** @overrides myt.ValueProcessor
+            @param {string} id - The ideally unique ID for a processor instance.
+            @param {boolean} [runForDefault]
+            @param {boolean} [runForRollback]
+            @param {boolean} [runForCurrent]
+            @param {!Object} [otherField] - The myt.FormElement to pull the 
+                value from.
+            @returns {undefined} */
+        initialize: function(id, runForDefault, runForRollback, runForCurrent, otherField) {
+            this.callSuper(id, runForDefault, runForRollback, runForCurrent);
+            
+            this.otherField = otherField;
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides */
+        process: function(value) {
+            return (value == null || value === "") ? this.otherField.getValue() : value;
+        }
+    });
+    
+    /** Stores myt.ValueProcessors by ID so they can be used in multiple
+        places easily. */
+    new JS.Singleton('GlobalValueProcessorRegistry', {
+        // Life Cycle //////////////////////////////////////////////////////////
+        initialize: function() {
+            // Register a few common ValueProcessors
+            registerValueProcessor(undefToEmptyValueProcessor = new UndefinedValueProcessor('undefToEmpty', true, true, true, ''));
+            registerValueProcessor(new ToNumberValueProcessor('toNumber', true, true, true));
+            registerValueProcessor(new TrimValueProcessor('trimLeft', true, true, true, 'left'));
+            registerValueProcessor(new TrimValueProcessor('trimRight', true, true, true, 'right'));
+            registerValueProcessor(new TrimValueProcessor('trimBoth', true, true, true, 'both'));
+            
+            G.register('valueProcessors', this);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** Gets a ValueProcessor for the ID.
+            @param id:string the ID of the ValueProcessor to get.
+            @returns an myt.ValueProcessor or undefined if not found. */
+        getValueProcessor: getValueProcessor,
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Adds a ValueProcessor to this registry.
+            @param identifiable:myt.ValueProcessor the ValueProcessor to add.
+            @returns {undefined} */
+        register: registerValueProcessor,
+        
+        /** Removes a ValueProcessor from this registery.
+            @param identifiable:myt.ValueProcessor the ValueProcessor to remove.
+            @returns {undefined} */
+        unregister: identifiable => {
+            doFuncOnIdentifiable(identifiable, (id) => {
+                // Make sure the processor is in the repository then delete.
+                if (getValueProcessor(id)) delete processorsById[id];
+            });
         }
     });
 })(myt);
@@ -19247,902 +20114,6 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         }
     });
 })(myt);
-
-
-/** An myt.InputSelect that is also a FormElement.
-    
-    Events:
-        None
-    
-    Attributes:
-        None
-    
-    Private Attributes:
-        __abortSetValue:boolean Prevents setValue from being called again
-            when performing operations from within setValue.
-*/
-myt.FormInputSelect = new JS.Class('FormInputSelect', myt.InputSelect, {
-    include: [myt.FormElement],
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrides myt.FormElement */
-    setValue: function(v) {
-        if (this.__abortSetValue) return;
-        
-        const retval = this.callSuper(v);
-        
-        // Clear Selection and then reselect
-        this.__abortSetValue = true;
-        this.deselectAll();
-        this.selectValues(retval);
-        this.__abortSetValue = false;
-        
-        return retval;
-    }
-});
-
-
-((pkg) => {
-    const JSModule = JS.Module,
-        
-        /** Provides a setValue and getValue method.
-            
-            Events:
-                value:*
-            
-            Attributes:
-                value:* The stored value.
-                valueFilter:function If it exists, values will be run through 
-                    this filter function before being set on the component. By 
-                    default no valueFilter exists. A value filter function must 
-                    take a single value as an argument and return a value.
-            
-            @class */
-        ValueComponent = pkg.ValueComponent = new JSModule('ValueComponent', {
-            // Life Cycle //////////////////////////////////////////////////////
-            initNode: function(parent, attrs) {
-                this.appendToEarlyAttrs('valueFilter','value');
-                this.callSuper(parent, attrs);
-            },
-            
-            
-            // Accessors ///////////////////////////////////////////////////////
-            setValueFilter: function(v) {
-                this.valueFilter = v;
-                
-                if (this.inited && v) this.setValue(this.value);
-            },
-            
-            setValue: function(v) {
-                if (this.valueFilter) v = this.valueFilter(v);
-                
-                if (this.value !== v) {
-                    this.value = v;
-                    if (this.inited) this.fireEvent('value', this.getValue());
-                }
-            },
-            
-            getValue: function() {
-                return this.value;
-            },
-            
-            
-            // Methods /////////////////////////////////////////////////////////
-            /** Combines a value filter with any existing value filter.
-                @param filter:function the value filter to add.
-                @param where:string (optional) Determines where to add the 
-                    filter. Supported values are 'first' and 'last'. Defaults 
-                    to 'first'.
-                @returns {undefined} */
-            chainValueFilter: function(filter, where) {
-                const existingFilter = this.valueFilter;
-                let chainedFilter;
-                if (existingFilter) {
-                    if (where === 'last') {
-                        chainedFilter = v => filter(existingFilter(v));
-                    } else {
-                        // "where" is 'first' or not provided.
-                        chainedFilter = v => existingFilter(filter(v));
-                    }
-                } else {
-                    chainedFilter = filter;
-                }
-                this.setValueFilter(chainedFilter);
-            }
-        }),
-        
-        /** A value that consists of an upper and lower value. The lower value 
-            must be less than or equal to the upper value. The value object 
-            that must be passed into setValue and returned from getValue is 
-            an object of the form: {lower:number, upper:number}.
-            
-            @class */
-        RangeComponent = pkg.RangeComponent = new JSModule('RangeComponent', {
-            include: [ValueComponent],
-            
-            
-            // Accessors ///////////////////////////////////////////////////////
-            setLowerValue: function(v) {
-                this.setValue({
-                    lower:v, 
-                    upper:(this.value && this.value.upper !== undefined) ? this.value.upper : v
-                });
-            },
-            
-            getLowerValue: function() {
-                return this.value ? this.value.lower : undefined;
-            },
-            
-            setUpperValue: function(v) {
-                this.setValue({
-                    lower:(this.value && this.value.lower !== undefined) ? this.value.lower : v,
-                    upper:v
-                });
-            },
-            
-            getUpperValue: function() {
-                return this.value ? this.value.upper : undefined;
-            },
-            
-            setValue: function(v) {
-                if (v) {
-                    const existing = this.value,
-                        existingLower = existing ? existing.lower : undefined,
-                        existingUpper = existing ? existing.upper : undefined;
-                    
-                    if (this.valueFilter) v = this.valueFilter(v);
-                    
-                    // Do nothing if value is identical
-                    if (v.lower === existingLower && v.upper === existingUpper) return;
-                    
-                    // Assign upper to lower if no lower was provided.
-                    if (v.lower == null) v.lower = v.upper;
-                    
-                    // Assign lower to upper if no upper was provided.
-                    if (v.upper == null) v.upper = v.lower;
-                    
-                    // Swap lower and upper if they are in the wrong order
-                    if (v.lower !== undefined && v.upper !== undefined && v.lower > v.upper) {
-                        const temp = v.lower;
-                        v.lower = v.upper;
-                        v.upper = temp;
-                    }
-                    
-                    this.value = v;
-                    if (this.inited) {
-                        this.fireEvent('value', this.getValue());
-                        if (v.lower !== existingLower) this.fireEvent('lowerValue', v.lower);
-                        if (v.upper !== existingUpper) this.fireEvent('upperValue', v.upper);
-                    }
-                } else {
-                    this.callSuper(v);
-                }
-            },
-            
-            
-            // Methods /////////////////////////////////////////////////////////
-            getValueCopy: function() {
-                const v = this.value;
-                return {lower:v.lower, upper:v.upper};
-            }
-        }),
-        
-        /** A numeric value component that stays within a minimum and 
-            maximum value.
-            
-            Events:
-                minValue:number
-                maxValue:number
-                snapToInt:boolean
-            
-            Attributes:
-                minValue:number the largest value allowed. If undefined or 
-                    null no min value is enforced.
-                maxValue:number the lowest value allowed. If undefined or 
-                    null no max value is enforced.
-                snapToInt:boolean If true values can only be integers. 
-                    Defaults to true.
-            
-            @class */
-        BoundedValueComponent = pkg.BoundedValueComponent = new JSModule('BoundedValueComponent', {
-            include: [ValueComponent],
-            
-            // Life Cycle //////////////////////////////////////////////////////
-            initNode: function(parent, attrs) {
-                const self = this;
-                
-                self.appendToEarlyAttrs('snapToInt','minValue','maxValue');
-                
-                if (attrs.snapToInt == null) attrs.snapToInt = true;
-                
-                if (!attrs.valueFilter) {
-                    attrs.valueFilter = v => {
-                        const max = self.maxValue;
-                        if (max != null && v > max) return max;
-                        
-                        const min = self.minValue;
-                        if (min != null && v < min) return min;
-                        
-                        return v;
-                    };
-                }
-                
-                self.callSuper(parent, attrs);
-            },
-            
-            
-            // Accessors ///////////////////////////////////////////////////////
-            setSnapToInt: function(v) {
-                if (this.snapToInt !== v) {
-                    this.snapToInt = v;
-                    if (this.inited) {
-                        this.fireEvent('snapToInt', v);
-                        
-                        // Update min, max and value since snap has been turned on
-                        if (v) {
-                            this.setMinValue(this.minValue);
-                            this.setMaxValue(this.maxValue);
-                            this.setValue(this.value);
-                        }
-                    }
-                }
-            },
-            
-            setMinValue: function(v) {
-                if (this.snapToInt && v != null) v = Math.round(v);
-                
-                if (this.minValue !== v) {
-                    const max = this.maxValue;
-                    if (max != null && v > max) v = max;
-                    
-                    if (this.minValue !== v) {
-                        this.minValue = v;
-                        if (this.inited) {
-                            this.fireEvent('minValue', v);
-                            
-                            // Rerun setValue since the filter has changed.
-                            this.setValue(this.value);
-                        }
-                    }
-                }
-            },
-            
-            setMaxValue: function(v) {
-                if (this.snapToInt && v != null) v = Math.round(v);
-                
-                if (this.maxValue !== v) {
-                    const min = this.minValue;
-                    if (min != null && v < min) v = min;
-                    
-                    if (this.maxValue !== v) {
-                        this.maxValue = v;
-                        if (this.inited) {
-                            this.fireEvent('maxValue', v);
-                            
-                            // Rerun setValue since the filter has changed.
-                            this.setValue(this.value);
-                        }
-                    }
-                }
-            },
-            
-            /** @overrides myt.ValueComponent */
-            setValue: function(v) {
-                this.callSuper(this.snapToInt && v != null && !isNaN(v) ? Math.round(v) : v);
-            }
-        });
-    
-    /** A numeric value component that stays within an upper and lower value 
-        and where the value is a range.
-        
-        @class */
-    pkg.BoundedRangeComponent = new JSModule('BoundedRangeComponent', {
-        include: [BoundedValueComponent, RangeComponent],
-        
-        // Life Cycle //////////////////////////////////////////////////////////
-        initNode: function(parent, attrs) {
-            const self = this;
-            if (!attrs.valueFilter) {
-                attrs.valueFilter = v => {
-                    if (v) {
-                        const max = self.maxValue,
-                            min = self.minValue;
-                        if (max != null && v.upper > max) v.upper = max;
-                        if (min != null && v.lower < min) v.lower = min;
-                    }
-                    return v;
-                };
-            }
-            
-            self.callSuper(parent, attrs);
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        /** @overrides myt.ValueComponent */
-        setValue: function(v) {
-            if (this.snapToInt && v != null) {
-                if (v.lower != null && !isNaN(v.lower)) v.lower = Math.round(v.lower);
-                if (v.upper != null && !isNaN(v.upper)) v.upper = Math.round(v.upper);
-            }
-            this.callSuper(v);
-        }
-    });
-})(myt);
-
-
-((pkg) => {
-    const getBooleanAttributeGroup = (formRadioGroup) => pkg.BAG.getGroup('selected', formRadioGroup.groupId),
-        
-        /*  Search the radio group for a matching node and make that one the
-            true node.
-            @param {!Object} formRadioGroup
-            @returns {undefined} */
-        updateGroupValue = (formRadioGroup) => {
-            const bag = getBooleanAttributeGroup(formRadioGroup);
-            if (bag) {
-                const nodes = bag.getNodes(),
-                    v = formRadioGroup.value;
-                let i = nodes.length, 
-                    node;
-                while (i) {
-                    node = nodes[--i];
-                    if (node.optionValue === v) {
-                        bag.setTrue(node);
-                        break;
-                    }
-                }
-            }
-        },
-        
-        startMonitoring = (formRadioGroup) => {
-            if (formRadioGroup.groupId) {
-                const bag = getBooleanAttributeGroup(formRadioGroup);
-                if (bag) formRadioGroup.syncTo(bag, '__syncValue', 'trueNode');
-            }
-        },
-        
-        stopMonitoring = (formRadioGroup) => {
-            if (formRadioGroup.groupId) {
-                const bag = getBooleanAttributeGroup(formRadioGroup);
-                if (bag) formRadioGroup.detachFrom(bag, '__syncValue', 'trueNode');
-            }
-        };
-    
-    /** Monitors a radio button group for a form.
-        
-        Attributes:
-            groupId:string The ID of the radio group to monitor.
-        
-        @class
-    */
-    pkg.FormRadioGroup = new JS.Class('FormRadioGroup', pkg.Node, {
-        include: [pkg.ValueComponent, pkg.FormElement],
-        
-        
-        // Life Cycle //////////////////////////////////////////////////////////
-        /** @overrides */
-        initNode: function(parent, attrs) {
-            if (attrs.groupId == null) attrs.groupId = pkg.generateGuid();
-            
-            this.callSuper(parent, attrs);
-            
-            if (this.value !== undefined) updateGroupValue(this);
-            startMonitoring(this);
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        /** @overrides myt.FormElement */
-        setValue: function(v) {
-            const retval = this.callSuper(v);
-            if (this.inited) updateGroupValue(this);
-            return retval;
-        },
-        
-        setGroupId: function(v) {
-            if (this.groupId !== v) {
-                stopMonitoring(this);
-                this.groupId = v;
-                if (this.inited) startMonitoring(this);
-            }
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** @private
-            @param {!Object} event
-            @returns {undefined} */
-        __syncValue: function(event) {
-            this.setValue(event.value ? event.value.optionValue : null);
-        }
-    });
-})(myt);
-
-
-((pkg) => {
-    const STYLE_SOLID = 'solid',
-        STYLE_OUTLINE = 'outline',
-        DEFAULT_STYLE = STYLE_OUTLINE,
-        
-        updateUI = (checkbox) => {
-            const label = checkbox.label || '',
-                checkboxStyle = checkbox.checkboxStyle || DEFAULT_STYLE;
-            checkbox.setText(
-                '<i class="' + 
-                (checkboxStyle === STYLE_SOLID ? 'fas' : 'far') + 
-                ' fa-' + (checkbox.isChecked() ? 'check-' : '') + 'square"></i>' +
-                (label.length > 0 ? ' ' : '') + label
-            );
-        };
-    
-    /** A checkbox component.
-        
-        Attributes:
-            label:string
-            checkboxStyle:string Determines what style of checkbox to display.
-                Supported values are "solid" and "outline".
-    */
-    pkg.Checkbox = new JS.Class('Checkbox', pkg.Text, {
-        include: [pkg.SimpleButtonStyle, pkg.ValueComponent],
-        
-        
-        // Life Cycle //////////////////////////////////////////////////////////
-        initNode: function(parent, attrs) {
-            if (attrs.value == null) attrs.value = false;
-            if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
-            if (attrs.checkboxStyle == null) attrs.checkboxStyle = DEFAULT_STYLE;
-            
-            if (attrs.activeColor == null) attrs.activeColor = 'inherits';
-            if (attrs.hoverColor == null) attrs.hoverColor = 'inherits';
-            if (attrs.readyColor == null) attrs.readyColor = 'inherits';
-            
-            this.callSuper(parent, attrs);
-            
-            pkg.FontAwesome.registerForNotification(this);
-            
-            updateUI(this);
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        /** @overrides myt.ValueComponent */
-        setValue: function(v) {
-            if (this.value !== v) {
-                this.callSuper(v);
-                if (this.inited) updateUI(this);
-            }
-        },
-        
-        setLabel: function(v) {
-            if (this.label !== v) {
-                this.set('label', v, true);
-                if (this.inited) updateUI(this);
-            }
-        },
-        
-        setCheckboxStyle: function(v) {
-            if (this.checkboxStyle !== v) {
-                this.set('checkboxStyle', v, true);
-                if (this.inited) updateUI(this);
-            }
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        isChecked: function() {
-            return this.value === true;
-        },
-        
-        /** @overrides myt.Button
-            Toggle the value attribute when activated. */
-        doActivated: function() {
-            this.setValue(!this.value);
-        },
-        
-        /** @overrides myt.SimpleButtonStyle */
-        drawDisabledState: function() {
-            this.setOpacity(pkg.Button.DEFAULT_DISABLED_OPACITY);
-            this.setTextColor(this.readyColor);
-        },
-        
-        /** @overrides myt.SimpleButtonStyle */
-        drawHoverState: function() {
-            this.setOpacity(1);
-            this.setTextColor(this.hoverColor);
-        },
-        
-        /** @overrides myt.SimpleButtonStyle */
-        drawActiveState: function() {
-            this.setOpacity(1);
-            this.setTextColor(this.activeColor);
-        },
-        
-        /** @overrides myt.SimpleButtonStyle */
-        drawReadyState: function() {
-            this.setOpacity(1);
-            this.setTextColor(this.readyColor);
-        }
-    });
-})(myt);
-
-
-/** An myt.Checkbox that is also a FormElement.
-    
-    Events:
-        None
-    
-    Attributes:
-        None
-*/
-myt.FormCheckbox = new JS.Class('FormCheckbox', myt.Checkbox, {
-    include: [myt.FormElement],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides */
-    initNode: function(parent, attrs) {
-        this.rollbackValue = this.defaultValue = false;
-        
-        this.callSuper(parent, attrs);
-    }
-});
-
-
-/** Provides common functionality for text related form elements.
-    
-    Accelerators:
-        accept: Invokes the doAccept function. Activated upon key down of
-            the ENTER key.
-        reject: Invokes the doReject function. Activated upon key up of 
-            the ESC key.
-    
-    Events:
-        None
-    
-    Attributes:
-        errorColor:color_string The color to use when a validation 
-            error exists. Defaults to '#ff9999'.
-        actionRequiredColor:color_string The color to use when a validation 
-            error exists but the user has not modified the value. Defaults
-            to '#996666'.
-        normalColor:color_string The color to use when no validation 
-            error exists. Defaults to '#999999'.
-        validateWhen:string Indicates when to run validation.
-            Supported values are:
-                key: Validate as the user types.
-                blur: Validate when blurring out of the UI control
-                blurWithKeyFix: The same as blur except we also validate as 
-                    the user types if currently invalid.
-                none: Don't do any validation when interacting with the field.
-            The default value is 'key'.
-        acceleratorScope:string The scope the accelerators will be applied to.
-            Supported values are:
-                element: Take action on this element only
-                root: Take action on the root form.
-                none: Take no action.
-            The default value is 'element'.
-*/
-myt.FormInputTextMixin = new JS.Module('FormInputTextMixin', {
-    include: [myt.FormElement, myt.UpdateableUI],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Input */
-    initNode: function(parent, attrs) {
-        const self = this;
-        
-        self.acceleratorScope = 'element';
-        self.validateWhen = 'key';
-        self.errorColor = '#ff9999';
-        self.actionRequiredColor = '#996666';
-        self.normalColor = '#999999';
-        
-        if (attrs.bgColor == null) attrs.bgColor = '#ffffff';
-        if (attrs.borderWidth == null) attrs.borderWidth = 1;
-        if (attrs.borderStyle == null) attrs.borderStyle = 'solid';
-        if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = true;
-        
-        self.callSuper(parent, attrs);
-        
-        self.addValueProcessor(myt.global.valueProcessors.getValueProcessor('undefToEmpty'));
-        
-        self.attachToDom(self, '__handleKeyDown', 'keydown');
-        self.attachToDom(self, '__handleKeyUp', 'keyup');
-        
-        self.addAccelerator('accept', self.doAccept);
-        self.addAccelerator('reject', self.doReject);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setValidateWhen: function(v) {this.validateWhen = v;},
-    setAcceleratorScope: function(v) {this.acceleratorScope = v;},
-    setErrorColor: function(v) {this.errorColor = v;},
-    setActionRequiredColor: function(v) {this.actionRequiredColor = v;},
-    setNormalColor: function(v) {this.normalColor = v;},
-    
-    setIsChanged: function(v) {
-        this.callSuper(v);
-        if (this.inited) this.updateUI();
-    },
-    
-    setIsValid: function(v) {
-        this.callSuper(v);
-        if (this.inited) this.updateUI();
-    },
-    
-    /** @overrides myt.FormElement */
-    setValue: function(v) {
-        const retval = this.callSuper(v);
-        
-        // Validate as we type.
-        const when = this.validateWhen;
-        if (when === 'key' || when === 'blurWithKeyFix') this.verifyValidState();
-        
-        return retval;
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    doAccept: function() {
-        if (!this.disabled) {
-            switch (this.acceleratorScope) {
-                case 'root':
-                    this.getRootForm().invokeAccelerator("submit");
-                    break;
-                case 'element':
-                    // Tab navigate forward
-                    myt.global.focus.next(false);
-                    break;
-                case 'none':
-                default:
-            }
-        }
-    },
-    
-    doReject: function() {
-        if (!this.disabled) {
-            switch (this.acceleratorScope) {
-                case 'root':
-                    this.getRootForm().invokeAccelerator("cancel");
-                    break;
-                case 'element':
-                    this.rollbackForm();
-                    this.getRootForm().doValidation();
-                    if (this.form) this.form.verifyChangedState(this);
-                    break;
-                case 'none':
-                default:
-            }
-        }
-    },
-    
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __handleKeyDown: function(event) {
-        if (myt.KeyObservable.getKeyCodeFromEvent(event) === 13) this.invokeAccelerator("accept");
-    },
-    
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __handleKeyUp: function(event) {
-        if (myt.KeyObservable.getKeyCodeFromEvent(event) === 27) this.invokeAccelerator("reject");
-    },
-    
-    /** @overrides myt.FocusObservable */
-    doBlur: function() {
-        this.callSuper();
-        
-        // Validate on blur
-        const when = this.validateWhen;
-        if (when === 'blur' || when === 'blurWithKeyFix') this.verifyValidState();
-    },
-    
-    /** @overrides myt.UpdateableUI */
-    updateUI: function() {
-        this.setBorderColor(
-            this.isValid ? this.normalColor : (this.isChanged ? this.errorColor : this.actionRequiredColor)
-        );
-    }
-});
-
-
-/** An myt.InputText that is also a FormElement.
-    
-    Events:
-        None
-    
-    Attributes:
-        None
-*/
-myt.FormInputText = new JS.Class('FormInputText', myt.InputText, {
-    include: [myt.FormInputTextMixin]
-});
-
-
-/** An myt.ComboBox that is also a FormElement.
-    
-    Events:
-        None
-    
-    Attributes:
-        None
-*/
-myt.FormComboBox = new JS.Class('FormComboBox', myt.ComboBox, {
-    include: [myt.FormElement, myt.UpdateableUI],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Input */
-    initNode: function(parent, attrs) {
-        this.acceleratorScope = 'element';
-        this.validateWhen = 'key';
-        this.errorColor = '#ff9999';
-        this.actionRequiredColor = '#996666';
-        this.normalColor = '#999999';
-        
-        this.callSuper(parent, attrs);
-        
-        this.addValueProcessor(myt.global.valueProcessors.getValueProcessor('undefToEmpty'));
-        
-        this.addAccelerator('accept', this.doAccept);
-        this.addAccelerator('reject', this.doReject);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setValidateWhen: function(v) {this.validateWhen = v;},
-    setAcceleratorScope: function(v) {this.acceleratorScope = v;},
-    setErrorColor: function(v) {this.errorColor = v;},
-    setActionRequiredColor: function(v) {this.actionRequiredColor = v;},
-    setNormalColor: function(v) {this.normalColor = v;},
-    
-    setIsChanged: function(v) {
-        this.callSuper(v);
-        if (this.inited) this.updateUI();
-    },
-    
-    setIsValid: function(v) {
-        this.callSuper(v);
-        if (this.inited) this.updateUI();
-    },
-    
-    /** @overrides myt.FormElement */
-    setValue: function(v) {
-        const retval = this.callSuper(v);
-        
-        // Validate as we type.
-        const when = this.validateWhen;
-        if (when === 'key' || when === 'blurWithKeyFix') this.verifyValidState();
-        
-        return retval;
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    doAccept: function() {
-        if (!this.disabled) {
-            switch (this.acceleratorScope) {
-                case 'root':
-                    this.getRootForm().invokeAccelerator("submit");
-                    break;
-                case 'element':
-                    // Tab navigate forward
-                    myt.global.focus.next(false);
-                    break;
-                case 'none':
-                default:
-            }
-        }
-    },
-    
-    doReject: function() {
-        if (!this.disabled) {
-            switch (this.acceleratorScope) {
-                case 'root':
-                    this.getRootForm().invokeAccelerator("cancel");
-                    break;
-                case 'element':
-                    this.rollbackForm();
-                    this.getRootForm().doValidation();
-                    if (this.form) this.form.verifyChangedState(this);
-                    break;
-                case 'none':
-                default:
-            }
-        }
-    },
-    
-    notifyPanelShown: function(panel) {
-        this._isShown = true;
-    },
-    
-    notifyPanelHidden: function(panel) {
-        this._isShown = false;
-    },
-    
-    /** @overrides myt.ListViewAnchor. */
-    doActivationKeyDown: function(key, isRepeat) {
-        if (key === 27 && !this._isShown) {
-            this.invokeAccelerator("reject");
-        } else {
-            this.callSuper(key, isRepeat);
-        }
-    },
-    
-    /** @overrides myt.ListViewAnchor. */
-    doActivationKeyUp: function(key) {
-        if (key === 13 && !this._isShown) {
-            this.invokeAccelerator("accept");
-        } else {
-            this.callSuper(key);
-        }
-    },
-    
-    /** @overrides myt.FocusObservable */
-    doBlur: function() {
-        this.callSuper();
-        
-        // Validate on blur
-        const when = this.validateWhen;
-        if (when === 'blur' || when === 'blurWithKeyFix') this.verifyValidState();
-    },
-    
-    /** @overrides myt.UpdateableUI */
-    updateUI: function() {
-        this.setBorderColor(
-            this.isValid ? this.normalColor : (this.isChanged ? this.errorColor : this.actionRequiredColor)
-        );
-    }
-});
-
-
-/** An myt.InputTextArea that is also a FormElement.
-    
-    Accelerators:
-        Only "reject" from myt.FormInputTextMixin.
-    
-    Events:
-        None
-    
-    Attributes:
-        None
-*/
-myt.FormInputTextArea = new JS.Class('FormInputTextArea', myt.InputTextArea, {
-    include: [myt.FormInputTextMixin],
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.FormInputTextMixin */
-    __handleKeyDown: function(event) {
-        // Do nothing so the "accept" accelerator is not invoked.
-    },
-});
-
-
-/** An myt.EditableText that is also a FormElement.
-    
-    Events:
-        None
-    
-    Attributes:
-        None
-*/
-myt.FormEditableText = new JS.Class('FormEditableText', myt.EditableText, {
-    include: [myt.FormInputTextMixin],
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.FormInputTextMixin */
-    __handleKeyDown: function(event) {
-        // Only allow enter key as accelerator if no wrapping is occurring
-        if (this.whitespace === 'nowrap') this.callSuper(event);
-    },
-});
 
 
 ((pkg) => {
