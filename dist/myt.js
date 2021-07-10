@@ -12289,309 +12289,287 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
 })(myt);
 
 
-/** Provides the capability for a Node to participate in a BAG.
+((pkg) => {
+    const AccessorSupport = pkg.AccessorSupport,
     
-    Events:
-        None
-    
-    Attributes:
-        None
-    
-    Private Attributes:
-        __bags:array A list of BAGs this node is a member of.
-*/
-myt.BAGMembership = new JS.Module('BAGMembership', {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Node */
-    initNode: function(parent, attrs) {
-        this.__bags = [];
-        
-        this.callSuper(parent, attrs);
-    },
-    
-    /** @overrides myt.Node */
-    destroyAfterOrphaning: function() {
-        this.callSuper();
-        
-        const groups = this.__bags;
-        let i = groups.length,
-            group;
-        while (i) {
-            group = groups[--i];
-            this.removeFromBAG(group.attrName, group.groupId);
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    isRegisteredWithBAG: function(group) {
-        const groups = this.__bags;
-        let i = groups.length;
-        while (i) {
-            if (groups[--i] === group) return true;
-        }
-        return false;
-    },
-    
-    getBAG: function(attrName, groupId) {
-        return myt.BAG.getGroup(attrName, groupId);
-    },
-    
-    /** Adds this node to the BAG for the groupId and
-        attribute name.
-        @param attrName:string
-        @param groupId:string
-        @returns {undefined} */
-    addToBAG: function(attrName, groupId) {
-        const group = this.getBAG(attrName, groupId);
-        if (!this.isRegisteredWithBAG(group)) {
-            this.__bags.push(group);
-            group.register(this);
-            
-            // Monitor attribute
-            if (!this.isAttachedTo(this, '__updateForBAG', attrName)) {
-                this.attachTo(this, '__updateForBAG', attrName);
-            }
-        }
-    },
-    
-    /** Removes this node from the BAG for the groupId and
-        attribute name.
-        @param attrName:string
-        @param groupId:string
-        @returns {undefined} */
-    removeFromBAG: function(attrName, groupId) {
-        const group = this.getBAG(attrName, groupId);
-        if (this.isRegisteredWithBAG(group)) {
-            const groups = this.__bags;
-            let i = groups.length,
-                g,
-                detach = true;
-            while (i) {
-                g = groups[--i];
-                if (g === group) {
-                    groups.splice(i, 1);
-                    group.unregister(this);
-                } else if (g.attrName === attrName) {
-                    // Don't detach if another group is listening to the same attr.
-                    detach = false;
-                }
-            }
-            
-            if (detach) this.detachFrom(this, '__updateForBAG', attrName);
-        }
-    },
-    
-    /** Called whenever an event for the attrName is fired.
-        @private 
-        @param {!Object} event
-        @returns {undefined} */
-    __updateForBAG: function(event) {
-        const type = event.type,
-            value = event.value,
-            groups = this.__bags;
-        let i = groups.length,
-            group;
-        while (i) {
-            group = groups[--i];
-            if (group.attrName === type) {
-                if (value) {
-                    group.setTrue(this);
-                } else {
-                    group.setFalse(this);
-                }
-            }
-        }
-    }
-});
-
-
-/** Manages a boolean attribute on a collection of Nodes. Ensures that no more
-    than one of the Nodes has the attribute set to true at one time.
-    
-    Events:
-        attrName:string
-        groupId:string
-        trueNode:myt.Node
-    
-    Attributes:
-        attrName:string The name of the boolean attribute to monitor and update.
-        groupId:string The unqiue ID of the group.
-        trueNode:myt.Node The node that is currently true. Will be null if no
-            node is true.
-    
-    Private Attributes:
-        __nodes:array A list of the currently registered nodes.
-*/
-myt.BAG = new JS.Class('BAG', {
-    include: [myt.AccessorSupport, myt.Destructible, myt.Observable],
-    
-    
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        /** A data structure of groups stored as a map of maps. First level 
-            is attribute name second level is group ID.
+        /*  A data structure of groups stored as a map of maps. First 
+            level is attribute name second level is group ID.
             @private */
-        __groups: {},
+        BAGsByAttrName = {},
         
-        /** Generates a unique group id
-            @return number */
-        generateUniqueGroupId: function() {
-            return myt.generateGuid();
-        },
+        /** Manages a boolean attribute on a collection of Nodes. Ensures that 
+            no more than one of the Nodes has the attribute set to true at 
+            one time.
+            
+            Events:
+                attrName:string
+                groupId:string
+                trueNode:myt.Node
+            
+            Attributes:
+                attrName:string The name of the boolean attribute to monitor 
+                    and update.
+                groupId:string The unqiue ID of the group.
+                trueNode:myt.Node The node that is currently true. Will be null 
+                    if no node is true.
+            
+            Private Attributes:
+                __nodes:array A list of the currently registered nodes.
+            
+            @class */
+        BAG = pkg.BAG = new JS.Class('BAG', {
+            include: [AccessorSupport, pkg.Destructible, pkg.Observable],
+            
+            
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                /** Gets a BAG for the attribute name and group ID.
+                    @param attrName:string the name of the attribute to monitor.
+                    @param groupId:string the unique ID of the group.
+                    @returns the BAG */
+                getGroup: (attrName, groupId) => {
+                    if (attrName && groupId) {
+                        const groupIdMap = BAGsByAttrName[attrName] || (BAGsByAttrName[attrName] = {});
+                        return groupIdMap[groupId] || (groupIdMap[groupId] = new BAG(attrName, groupId));
+                    }
+                    return null;
+                },
+                
+                /** Removes a BAG for the attribute name and group id.
+                    @param attrName:string the name of the attribute to monitor.
+                    @param groupId:string the unique ID of the group.
+                    @returns the removed BAG */
+                removeGroup: (attrName, groupId) => {
+                    if (attrName && groupId) {
+                        const groupIdMap = BAGsByAttrName[attrName];
+                        if (groupIdMap) {
+                            const group = groupIdMap[groupId];
+                            if (group) delete groupIdMap[groupId];
+                            return group;
+                        }
+                    }
+                    return null;
+                }
+            },
+            
+            
+            // Constructor /////////////////////////////////////////////////////
+            initialize: function(attrName, groupId) {
+                this.__nodes = [];
+                this.trueNode = null;
+                
+                this.attrName = attrName;
+                this.groupId = groupId;
+            },
         
-        /** Creates a new BAG.
-            @param attrName:string
-            @returns a new BAG. */
-        createGroup: function(attrName) {
-            return new myt.BAG(attrName, this.generateUniqueGroupId());
-        },
-        
-        /** Gets a BAG for the attribute name and group ID.
-            @param attrName:string the name of the attribute to monitor.
-            @param groupId:string the unique ID of the group.
-            @returns the BAG */
-        getGroup: function(attrName, groupId) {
-            if (attrName && groupId) {
-                const groups = this.__groups,
-                    groupIdMap = groups[attrName] || (groups[attrName] = {});
-                return groupIdMap[groupId] || (groupIdMap[groupId] = new myt.BAG(attrName, groupId));
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            /** @overrides myt.Destructible */
+            destroy: function() {
+                if (this.trueNode) this.setTrueNode(null);
+                
+                if (this.__nodes.length === 0) BAG.removeGroup(this.attrName, this.groupId);
+                
+                this.__nodes.length = 0;
+                this.detachAllObservers();
+                this.callSuper();
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setGroupId: function(v) {this.set('groupId', v, true);},
+            setAttrName: function(v) {this.set('attrName', v, true);},
+            setTrueNode: function(v) {this.set('trueNode', v, true);},
+            getNodes: function() {return this.__nodes;},
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** Registeres a node with this group.
+                @param node:myt.Node the node to register with this group.
+                @returns {undefined} */
+            register: function(node) {
+                if (node && !this.isRegistered(node)) {
+                    this.__nodes.push(node);
+                    
+                    // If node is true then update for this.
+                    if (node[this.attrName]) this.setTrue(node);
+                }
+            },
+            
+            /** Unregisteres a node from this group.
+                @param node:myt.Node the node to unregister from this group.
+                @returns {undefined} */
+            unregister: function(node) {
+                if (node) {
+                    const nodes = this.__nodes;
+                    let i = nodes.length;
+                    while (i) {
+                        if (node === nodes[--i]) {
+                            nodes.splice(i, 1);
+                            break;
+                        }
+                    }
+                    
+                    if (this.trueNode === node) this.setTrueNode(null);
+                    
+                    if (nodes.length === 0) this.destroy();
+                }
+            },
+            
+            /** Sets the attribute to true on the provided registered node and 
+                sets it to false on all other registered nodes.
+                @param node:myt.Node the node to set the attribute to true on.
+                @returns {undefined} */
+            setTrue: function(node) {
+                if (node && this.trueNode !== node && this.isRegistered(node)) {
+                    const attrName = this.attrName,
+                        setterName = AccessorSupport.generateSetterName(attrName),
+                        nodes = this.__nodes;
+                    let i = nodes.length;
+                    
+                    this.setTrueNode(node);
+                    
+                    while (i) {
+                        const n = nodes[--i];
+                        if (node === n) {
+                            if (!n[attrName]) n[setterName](true);
+                        } else {
+                            if (n[attrName]) n[setterName](false);
+                        }
+                    }
+                    
+                }
+            },
+            
+            /** Sets the attribute to false on the provided registered node.
+                @param node:myt.Node the node to set the attribute to false on.
+                @returns {undefined} */
+            setFalse: function(node) {
+                if (node && this.trueNode === node) {
+                    node[AccessorSupport.generateSetterName(this.attrName)](false);
+                    this.setTrueNode(null);
+                }
+            },
+            
+            /** Checks if a node is already registered or not.
+                @param node:myt.Node the node to test.
+                @returns {undefined} */
+            isRegistered: function(node) {
+                const nodes = this.__nodes;
+                let i = nodes.length;
+                while (i) {
+                    if (node === nodes[--i]) return true;
+                }
+                return false;
             }
-            return null;
+        });
+    
+    /** Provides the capability for a Node to participate in a BAG.
+        
+        Private Attributes:
+            __bags:array A list of BAGs this node is a member of.
+        
+        @class */
+    pkg.BAGMembership = new JS.Module('BAGMembership', {
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.Node */
+        initNode: function(parent, attrs) {
+            this.__bags = [];
+            
+            this.callSuper(parent, attrs);
         },
         
-        /** Removes a BAG for the attribute name and group id.
-            @param attrName:string the name of the attribute to monitor.
-            @param groupId:string the unique ID of the group.
-            @returns the removed BAG */
-        removeGroup: function(attrName, groupId) {
-            if (attrName && groupId) {
-                const groups = this.__groups;
-                if (groups) {
-                    const groupIdMap = groups[attrName];
-                    if (groupIdMap) {
-                        const group = groupIdMap[groupId];
-                        if (group) delete groupIdMap[groupId];
-                        return group;
+        /** @overrides myt.Node */
+        destroyAfterOrphaning: function() {
+            this.callSuper();
+            
+            const groups = this.__bags;
+            let i = groups.length;
+            while (i) {
+                const group = groups[--i];
+                this.removeFromBAG(group.attrName, group.groupId);
+            }
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        isRegisteredWithBAG: function(group) {
+            const groups = this.__bags;
+            let i = groups.length;
+            while (i) {
+                if (groups[--i] === group) return true;
+            }
+            return false;
+        },
+        
+        getBAG: (attrName, groupId) => BAG.getGroup(attrName, groupId),
+        
+        /** Adds this node to the BAG for the groupId and
+            attribute name.
+            @param attrName:string
+            @param groupId:string
+            @returns {undefined} */
+        addToBAG: function(attrName, groupId) {
+            const group = this.getBAG(attrName, groupId);
+            if (!this.isRegisteredWithBAG(group)) {
+                this.__bags.push(group);
+                group.register(this);
+                
+                // Monitor attribute
+                if (!this.isAttachedTo(this, '__updateForBAG', attrName)) {
+                    this.attachTo(this, '__updateForBAG', attrName);
+                }
+            }
+        },
+        
+        /** Removes this node from the BAG for the groupId and
+            attribute name.
+            @param attrName:string
+            @param groupId:string
+            @returns {undefined} */
+        removeFromBAG: function(attrName, groupId) {
+            const group = this.getBAG(attrName, groupId);
+            if (this.isRegisteredWithBAG(group)) {
+                const groups = this.__bags;
+                let i = groups.length,
+                    detach = true;
+                while (i) {
+                    const g = groups[--i];
+                    if (g === group) {
+                        groups.splice(i, 1);
+                        group.unregister(this);
+                    } else if (g.attrName === attrName) {
+                        // Don't detach if another group is listening to the same attr.
+                        detach = false;
+                    }
+                }
+                
+                if (detach) this.detachFrom(this, '__updateForBAG', attrName);
+            }
+        },
+        
+        /** Called whenever an event for the attrName is fired.
+            @private 
+            @param {!Object} event
+            @returns {undefined} */
+        __updateForBAG: function(event) {
+            const type = event.type,
+                value = event.value,
+                groups = this.__bags;
+            let i = groups.length;
+            while (i) {
+                const group = groups[--i];
+                if (group.attrName === type) {
+                    if (value) {
+                        group.setTrue(this);
+                    } else {
+                        group.setFalse(this);
                     }
                 }
             }
-            return null;
         }
-    },
-    
-    
-    // Constructor /////////////////////////////////////////////////////////////
-    initialize: function(attrName, groupId) {
-        this.__nodes = [];
-        this.trueNode = null;
-        
-        this.attrName = attrName;
-        this.groupId = groupId;
-    },
-
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Destructible */
-    destroy: function() {
-        if (this.trueNode) this.setTrueNode(null);
-        
-        if (this.__nodes.length === 0) myt.BAG.removeGroup(this.attrName, this.groupId);
-        
-        this.__nodes.length = 0;
-        this.detachAllObservers();
-        this.callSuper();
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setGroupId: function(v) {this.set('groupId', v, true);},
-    setAttrName: function(v) {this.set('attrName', v, true);},
-    setTrueNode: function(v) {this.set('trueNode', v, true);},
-    getNodes: function() {return this.__nodes;},
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Registeres a node with this group.
-        @param node:myt.Node the node to register with this group.
-        @returns {undefined} */
-    register: function(node) {
-        if (node && !this.isRegistered(node)) {
-            this.__nodes.push(node);
-            
-            // If node is true then update for this.
-            if (node[this.attrName]) this.setTrue(node);
-        }
-    },
-    
-    /** Unregisteres a node from this group.
-        @param node:myt.Node the node to unregister from this group.
-        @returns {undefined} */
-    unregister: function(node) {
-        if (node) {
-            const nodes = this.__nodes;
-            let i = nodes.length;
-            while (i) {
-                if (node === nodes[--i]) {
-                    nodes.splice(i, 1);
-                    break;
-                }
-            }
-            
-            if (this.trueNode === node) this.setTrueNode(null);
-            
-            if (nodes.length === 0) this.destroy();
-        }
-    },
-    
-    /** Sets the attribute to true on the provided registered node and sets 
-        it to false on all other registered nodes.
-        @param node:myt.Node the node to set the attribute to true on.
-        @returns {undefined} */
-    setTrue: function(node) {
-        if (node && this.trueNode !== node && this.isRegistered(node)) {
-            const attrName = this.attrName,
-                setterName = myt.AccessorSupport.generateSetterName(attrName),
-                nodes = this.__nodes;
-            let i = nodes.length;
-            
-            this.setTrueNode(node);
-            
-            while (i) {
-                const n = nodes[--i];
-                if (node === n) {
-                    if (!n[attrName]) n[setterName](true);
-                } else {
-                    if (n[attrName]) n[setterName](false);
-                }
-            }
-            
-        }
-    },
-    
-    /** Sets the attribute to false on the provided registered node.
-        @param node:myt.Node the node to set the attribute to false on.
-        @returns {undefined} */
-    setFalse: function(node) {
-        if (node && this.trueNode === node) {
-            const setterName = myt.AccessorSupport.generateSetterName(this.attrName);
-            node[setterName](false);
-            this.setTrueNode(null);
-        }
-    },
-    
-    /** Checks if a node is already registered or not.
-        @param node:myt.Node the node to test.
-        @returns {undefined} */
-    isRegistered: function(node) {
-        const nodes = this.__nodes;
-        let i = nodes.length;
-        while (i) {
-            if (node === nodes[--i]) return true;
-        }
-        return false;
-    }
-});
+    });
+})(myt);
 
 
 ((pkg) => {
@@ -13398,10 +13376,9 @@ myt.BAG = new JS.Class('BAG', {
                 
                 self.callSuper(parent, attrs);
                 
-                const TabSlider = pkg.TabSlider;
-                const container = new pkg.View(self, {
+                const container = new View(self, {
                     name:'container', ignorePlacement:true, percentOfParentWidth:100
-                }, [pkg.SizeToParent, {
+                }, [SizeToParent, {
                     /** @overrides myt.View */
                     subnodeAdded: function(node) {
                         this.callSuper(node);
@@ -13802,80 +13779,933 @@ myt.BAG = new JS.Class('BAG', {
 })(myt);
 
 
-/** A wrapper around a native browser input element.
-    
-    Events:
-        value:* Fired when the setValue setter is called.
-    
-    Attributes:
-        value:* the current value of the input element.
-        inputType:string (read only) the type of the input element to create. 
-            Changing this value after initialization will modify the type of the
-            underlying dom element and is not generally supported.
-            See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#attr-type
-            for more info and a list of allowed values.
-    
-    @class */
-myt.NativeInputWrapper = new JS.Class('NativeInputWrapper', myt.View, {
-    include: [myt.Disableable, myt.InputObservable],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.View */
-    initNode: function(parent, attrs) {
-        if (attrs.tagName == null) attrs.tagName = 'input';
-        if (attrs.focusable == null) attrs.focusable = true;
+((pkg) => {
+    const JSClass = JS.Class,
+        SizeToDom = pkg.SizeToDom,
+        View = pkg.View,
+        Disableable = pkg.Disableable,
         
-        this.callSuper(parent, attrs);
+        DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE = pkg.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE,
         
-        // Set a css class to allow scoping of CSS rules
-        this.addDomClass('mytNativeInput');
-    },
+        setEditableTextAttr = (editableText, v, propName) => {
+            if (editableText[propName] !== v) {
+                editableText[propName] = v;
+                editableText.deStyle[propName] = v + 'px';
+                if (editableText.inited) {
+                    editableText.fireEvent(propName, v);
+                    editableText.sizeViewToDom();
+                }
+            }
+        },
+        
+        setDomAttr = (inputView, attrName, value) => {
+            if (inputView[attrName] !== value) {
+                inputView.getInnerDomElement()[attrName] = inputView[attrName] = value;
+                if (inputView.inited) inputView.fireEvent(attrName, value);
+            }
+        },
+        
+        /** A wrapper around a native HTML input element.
+            
+            Events:
+                value:* Fired when the setValue setter is called.
+            
+            Attributes:
+                value:* the current value of the input element.
+                inputType:string (read only) the type of the input element to 
+                    create. Changing this value after initialization will modify
+                    the type of the underlying dom element and is not generally 
+                    supported. See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#attr-type
+                    for more info and a list of allowed values.
+            
+            @class */
+        NativeInputWrapper = pkg.NativeInputWrapper = new JSClass('NativeInputWrapper', View, {
+            include: [Disableable, pkg.InputObservable],
+            
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            /** @overrides myt.View */
+            initNode: function(parent, attrs) {
+                if (attrs.tagName == null) attrs.tagName = 'input';
+                if (attrs.focusable == null) attrs.focusable = true;
+                
+                this.callSuper(parent, attrs);
+                
+                // Set a css class to allow scoping of CSS rules
+                this.addDomClass('mytNativeInput');
+            },
+            
+            /** @overrides myt.View */
+            createOurDomElement: function(parent) {
+                const elements = this.callSuper(parent);
+                if (this.inputType) (Array.isArray(elements) ? elements[1] : elements).type = this.inputType;
+                return elements;
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            /** @overrides myt.Disableable */
+            setDisabled: function(v) {
+                if (this.disabled !== v) {
+                    this.getInnerDomElement().disabled = v;
+                    this.callSuper(v);
+                }
+            },
+            
+            setValue: function(v) {
+                if (this.value !== v) {
+                    this.value = v;
+                    this.setDomValue(v);
+                    if (this.inited) this.fireEvent('value', v);
+                }
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** Gets the value from the DOM.
+                @returns * The value */
+            getDomValue: function() {
+                return this.getInnerDomElement().value;
+            },
+            
+            /** Sets the value on the DOM.
+                @param v:* The value to set.
+                @returns {undefined} */
+            setDomValue: function(v) {
+                const de = this.getInnerDomElement();
+                if (de.value !== v) de.value = v;
+            }
+        }),
+        
+        /** An option in a native HTML select element.
+            
+            Events:
+                value:*
+                label:string
+            
+            Attributes:
+                value:* the value of the option.
+                label:string the text label for the option.
+            
+            @class */
+        InputSelectOption = pkg.InputSelectOption = new JSClass('InputSelectOption', View, {
+            include: [Disableable, pkg.Selectable],
+            
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            /** @overrides myt.Input */
+            createOurDomElement: parent => document.createElement('option'),
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            /** @overrideds myt.Selectable */
+            setSelected: function(v) {
+                // Adapt to event from syncTo
+                if (v !== null && typeof v === 'object') v = v.value;
+                
+                const de = this.getInnerDomElement();
+                if (de.selected !== v) de.selected = v;
+            },
+            
+            /** @overrides myt.Disableable */
+            setDisabled: function(v) {
+                if (this.disabled !== v) {
+                    this.getInnerDomElement().disabled = v;
+                    this.callSuper(v);
+                }
+            },
+            
+            setValue: function(v) {setDomAttr(this, 'value', v);},
+            
+            setLabel: function(v) {
+                if (this.label !== v) {
+                    this.getInnerDomElement().textContent = this.label = v;
+                    if (this.inited) this.fireEvent('label', v);
+                }
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @overrideds myt.Selectable */
+            isSelected: function() {
+                return this.getInnerDomElement().selected;
+            },
+            
+            /** @overrideds myt.Selectable */
+            canSelect: function(selectionManager) {
+                return !this.disabled && !this.getInnerDomElement().selected && this.parent === selectionManager;
+            },
+            
+            /** @overrideds myt.Selectable */
+            canDeselect: function(selectionManager) {
+                return !this.disabled && this.getInnerDomElement().selected && this.parent === selectionManager;
+            }
+        }),
+        
+        /** A base class for input:text and textarea components.
+            
+            Events:
+                spellcheck:boolean
+                maxLength:int
+                placeholder:string
+            
+            Attributes:
+                spellcheck:boolean Turns browser spellchecking on and off. 
+                    Defaults to false.
+                maxLength:int Sets a maximum number of input characters. Set to
+                    a negative number to turn off max length. Defaults to 
+                    undefined which is equivalent to a negative number.
+                allowedChars:string Each character in the string is an allowed
+                    input character. If not set or empty all characters are 
+                    allowed. Defaults to undefined.
+                placeholder:string Text that will be shown if the value 
+                    is empty.
+            
+            @class */
+        BaseInputText = pkg.BaseInputText = new JSClass('BaseInputText', NativeInputWrapper, {
+            include: [pkg.TextSupport],
+            
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            /** @overrides myt.NativeInputWrapper */
+            initNode: function(parent, attrs) {
+                const self = this;
+                
+                if (attrs.bgColor == null) attrs.bgColor = 'transparent';
+                if (attrs.spellcheck == null) attrs.spellcheck = false;
+                
+                self.callSuper(parent, attrs);
+                
+                self.attachToDom(self, '__syncToDom', 'input');
+                
+                // Allow filtering of input
+                self.attachToDom(self, '__filterInputPress', 'keypress');
+                self.attachToDom(self, '__filterInput', 'keyup');
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            /** @overrides myt.TextSupport
+                Alias setText to setValue. */
+            setText: function(v) {
+                this.callSuper(v);
+                this.setValue(v);
+            },
+            
+            setSpellcheck: function(v) {setDomAttr(this, 'spellcheck', v);},
+            setMaxLength: function(v) {setDomAttr(this, 'maxLength', v == null || v < 0 ? undefined : v);},
+            setAllowedChars: function(v) {this.allowedChars = v;},
+            setPlaceholder: function(v) {setDomAttr(this, 'placeholder', v);},
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @overrides myt.FocusObservable */
+            showFocusEmbellishment: function() {
+                this.hideDefaultFocusEmbellishment();
+                this.setBoxShadow(DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
+            },
+            
+            /** @overrides myt.FocusObservable */
+            hideFocusEmbellishment: function() {
+                this.hideDefaultFocusEmbellishment();
+                this.setBoxShadow();
+            },
+            
+            /** @private
+                @param {!Object} event
+                @returns {undefined} */
+            __filterInput: function(event) {
+                this.setDomValue(this.filterInput(this.getDomValue()));
+            },
+            
+            /** @private
+                @param {!Object} event
+                @returns {undefined} */
+            __filterInputPress: function(event) {
+                const domEvent = event.value,
+                    charCode = domEvent.which;
+                
+                // Firefox fires events for arrow keys and backspace which should be
+                // ignored completely.
+                switch (charCode) {
+                    case 8: // backspace key
+                    case 0: // arrow keys have a "charCode" of 0 in firefox.
+                        return;
+                }
+                
+                // Filter for allowed characters
+                const allowedChars = this.allowedChars;
+                if (allowedChars && allowedChars.indexOf(String.fromCharCode(charCode)) === -1) domEvent.preventDefault();
+                
+                this.filterInputPress(domEvent);
+            },
+            
+            /** A hook for subclasses/instances to do input filtering. The default
+                implementation returns the value unchanged.
+                @param {string} v - the current value of the form element.
+                @returns {string} The new value of the form element. */
+            filterInput: v => v,
+            
+            /** A hook for subclasses/instances to do input filtering during key press.
+                The default implementation does nothing.
+                @param {!Object} domEvent - The dom key press event.
+                @returns {undefined} */
+            filterInputPress: domEvent => {},
+            
+            /** @private
+                @param {!Object} event
+                @returns {undefined} */
+            __syncToDom: function(event) {
+                this.setValue(this.getDomValue());
+            },
+            
+            /** Gets the location of the caret.
+                @returns {number} An integer. */
+            getCaretPosition: function() {
+                // IE Support
+                if (document.selection) {
+                    const selection = document.selection.createRange();
+                    selection.moveStart('character', -this.getDomValue().length);
+                    return selection.text.length;
+                }
+                
+                return this.getInnerDomElement().selectionStart || 0;
+            },
+            
+            /** Sets the caret and selection.
+                @param start:int the start of the selection or location of the caret
+                    if no end is provided.
+                @param end:int (optional) the end of the selection.
+                @returns {undefined} */
+            setCaretPosition: function(start, end) {
+                if (end == null || start === end) {
+                    // Don't update if the current position already matches.
+                    if (this.getCaretPosition() === start) return;
+                    
+                    end = start;
+                }
+                const elem = this.getInnerDomElement();
+                
+                if (elem.setSelectionRange) {
+                    elem.setSelectionRange(start, end);
+                } else if (elem.createTextRange) {
+                    const range = elem.createTextRange();
+                    range.collapse(true);
+                    range.moveEnd('character', end);
+                    range.moveStart('character', start);
+                    range.select();
+                }
+            },
+            
+            /** Sets the caret to the start of the text input.
+                @returns {undefined} */
+            setCaretToStart: function() {
+                this.setCaretPosition(0);
+            },
+            
+            /** Sets the caret to the end of the text input.
+                @returns {undefined} */
+            setCaretToEnd: function() {
+                this.setCaretPosition(this.getDomValue().length);
+            },
+            
+            // Selection //
+            /** Selects all the text in the input element.
+                @returns {undefined} */
+            selectAll: function() {
+                this.getInnerDomElement().select();
+            },
+            
+            getSelection: function() {
+                const de = this.getInnerDomElement();
+                return {
+                    start:de.selectionStart,
+                    startElem:de,
+                    end:de.selectionEnd,
+                    endElem:de
+                };
+            },
+            
+            setSelection: function(selection) {
+                if (selection) this.setCaretPosition(selection.start, selection.end);
+            },
+            
+            saveSelection: function(selection) {
+                this._selRange = selection || this.getSelection() || this._selRange;
+            },
+            
+            restoreSelection: function() {
+                this.setSelection(this._selRange);
+            }
+        }),
+        
+        /** A view that accepts single line user text input.
+            
+            @class */
+        InputText = pkg.InputText = new JSClass('InputText', BaseInputText, {
+            include: [pkg.SizeHeightToDom],
+            
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            /** @overrides myt.Input */
+            initNode: function(parent, attrs) {
+                this.inputType = attrs.password === true ? 'password' : 'text';
+                
+                this.callSuper(parent, attrs);
+                
+                this.setCaretToEnd();
+            },
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setPassword: function(v) {this.password = v;}
+        });
     
-    /** @overrides myt.View */
-    createOurDomElement: function(parent) {
-        const elements = this.callSuper(parent);
-        if (this.inputType) {
-            const innerElem = Array.isArray(elements) ? elements[1] : elements;
-            innerElem.type = this.inputType;
+    /** Text content that can be edited.
+        
+        Events:
+            contentEditable:boolean
+            minWidth:number
+        
+        Attributes:
+            contentEditble:boolean Makes the text editable or not.
+            minWidth:number The minimum width for the component. Defaults to 
+                undefined which is effectively 0.
+            minHeight:number The minimum height for the component. Defaults to 
+                undefined which is effectively 0.
+        
+        Private Attributes:
+            _selRange:object Stores the start and end of the selection.
+        
+        @class */
+    pkg.EditableText = new JSClass('EditableText', BaseInputText, {
+        include: [SizeToDom],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.BaseInputText */
+        initNode: function(parent, attrs) {
+            const self = this;
+            
+            if (attrs.tagName == null) attrs.tagName = 'div';
+            attrs.inputType = null;
+            
+            if (attrs.whiteSpace == null) attrs.whiteSpace = 'pre';
+            if (attrs.contentEditable == null) attrs.contentEditable = true;
+            
+            self.callSuper(parent, attrs);
+            
+            self.attachToDom(self, '__cleanInput', 'keydown');
+            
+            self.attachToDom(self, '__userInteraction', 'keyup');
+            self.attachToDom(self, '__userInteraction', 'mouseup');
+            
+            self.setCaretToEnd();
+        },
+        
+        
+        // Attributes //////////////////////////////////////////////////////////
+        setMinWidth: function(v) {setEditableTextAttr(this, v, 'minWidth');},
+        setMinHeight: function(v) {
+            if (BrowserDetect.browser === 'Firefox') v += 2;
+            setEditableTextAttr(this, v, 'minHeight');
+        },
+        setPadding: function(v) {
+            this.setPaddingTop(v);
+            this.setPaddingRight(v);
+            this.setPaddingBottom(v);
+            this.setPaddingLeft(v);
+        },
+        setPaddingTop: function(v) {setEditableTextAttr(this, v, 'paddingTop');},
+        setPaddingRight: function(v) {setEditableTextAttr(this, v, 'paddingRight');},
+        setPaddingBottom: function(v) {setEditableTextAttr(this, v, 'paddingBottom');},
+        setPaddingLeft: function(v) {setEditableTextAttr(this, v, 'paddingLeft');},
+        setContentEditable: function(v) {setDomAttr(this, 'contentEditable', v);},
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides myt.BaseInputText */
+        filterInputPress: function(domEvent) {
+            // Implement maxLength
+            const maxLength = this.maxLength;
+            if (maxLength >= 0 && this.getCharacterCount() === maxLength) domEvent.preventDefault();
+            
+            this.callSuper(domEvent);
+        },
+        
+        /** @overrides myt.NativeInputWrapper */
+        getDomValue: function() {
+            return this.getInnerDomElement().innerHTML;
+        },
+        
+        /** @overrides myt.NativeInputWrapper */
+        setDomValue: function(v) {
+            const de = this.getInnerDomElement();
+            if (de.innerHTML !== v) {
+                de.innerHTML = v;
+                this.sizeViewToDom();
+                this.restoreSelection();
+            }
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __cleanInput: function(event) {
+            // Prevent enter key from inserting a div
+            if (pkg.KeyObservable.getKeyCodeFromEvent(event) === 13) {
+                event.value.preventDefault();
+                
+                // Instead, insert a linefeed if wrapping is allowed.
+                if (this.whitespace !== 'nowrap') {
+                    document.execCommand('insertHTML', false, this.isCaretAtEnd() ? '\n\n' : '\n');
+                }
+            }
+        },
+        
+        /** @overrides myt.BaseInputText */
+        __syncToDom: function(event) {
+            this.callSuper(event);
+            
+            this.saveSelection();
+            this.sizeViewToDom();
+            this.restoreSelection();
+        },
+        
+        // Caret handling
+        getCharacterCount: function() {
+            const elem = this.getInnerDomElement().firstChild;
+            return elem ? elem.length : 0;
+        },
+        
+        isCaretAtEnd: function() {
+            return this.getCaretPosition() === this.getCharacterCount();
+        },
+        
+        /** @overrides myt.BaseInputText */
+        getCaretPosition: function() {
+            const selection = this.getSelection();
+            return selection ? selection.end : 0;
+        },
+        
+        /** @overrides myt.BaseInputText */
+        setCaretPosition: function(start, end) {
+            if (end == null || start === end) {
+                // Don't update if the current position already matches.
+                if (this.getCaretPosition() === start) return;
+                
+                end = start;
+            }
+            this.saveSelection({
+                start:start,
+                startElem:this.getInnerDomElement().firstChild,
+                end:end,
+                endElem:this.getInnerDomElement().firstChild
+            });
+        },
+        
+        // Selection handling
+        /** @overrides myt.FocusObservable */
+        doFocus: function() {
+            this.callSuper();
+            this.restoreSelection();
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __userInteraction: function(event) {
+            this.saveSelection();
+            return true;
+        },
+        
+        /** @overrides myt.BaseInputText */
+        getSelection: function() {
+            let range;
+            if (window.getSelection) {
+                const sel = window.getSelection();
+                if (sel.rangeCount > 0) {
+                    // Sometimes when deleting we get an unexpected node
+                    if (sel.extentNode === this.getInnerDomElement()) return null;
+                    
+                    range = sel.getRangeAt(0);
+                }
+            } else if (document.selection) {
+                range = document.selection.createRange();
+            }
+            
+            return {
+                start:range ? range.startOffset : 0,
+                startElem:range ? range.startContainer : this.getInnerDomElement().firstChild,
+                end:range ? range.endOffset : 0,
+                endElem:range ? range.endContainer : this.getInnerDomElement().firstChild
+            };
+        },
+        
+        /** @overrides myt.BaseInputText */
+        setSelection: function(selection) {
+            if (selection) {
+                const startElem = selection.startElem,
+                    endElem = selection.endElem;
+                if (startElem && startElem.parentNode && endElem && endElem.parentNode) {
+                    const range = document.createRange();
+                    range.setStart(startElem, Math.min(selection.start, startElem.length));
+                    range.setEnd(endElem, Math.min(selection.end, endElem.length));
+                    
+                    if (window.getSelection) {
+                        const sel = window.getSelection();
+                        if (sel.rangeCount > 0) sel.removeAllRanges();
+                        sel.addRange(range);
+                    } else if (document.selection) {
+                        range.select();
+                    }
+                }
+            }
         }
-        return elements;
-    },
+    });
     
+    /** A view that accepts multi line user text input.
+        
+        Events:
+            resize:string
+            wrap:string
+        
+        Attributes:
+            resize:string Sets how the textarea can be resized. Defaults to 'none'.
+                Allowed values: 'none', 'both', 'horizontal', 'vertical'.
+            wrap:string Sets how text will wrap. Defaults to 'soft'.
+                Allowed values: 'off', 'hard', 'soft'.
+        
+        @class */
+    pkg.InputTextArea = new JSClass('InputTextArea', BaseInputText, {
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.BaseInputText */
+        initNode: function(parent, attrs) {
+            if (attrs.tagName == null) attrs.tagName = 'textarea';
+            attrs.inputType = null;
+            
+            if (attrs.resize == null) attrs.resize = 'none';
+            if (attrs.wrap == null) attrs.wrap = 'soft';
+            
+            this.callSuper(parent, attrs);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setResize: function(v) {
+            if (this.resize !== v) {
+                this.resize = this.getInnerDomStyle().resize = v || 'none';
+                if (this.inited) this.fireEvent('resize', v);
+            }
+        },
+        
+        setWrap: function(v) {setDomAttr(this, 'wrap', v);}
+    });
     
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrides myt.Disableable */
-    setDisabled: function(v) {
-        if (this.disabled !== v) {
-            this.getInnerDomElement().disabled = v;
-            this.callSuper(v);
+    /** A text input with select list.
+        
+        Attributes:
+            filterItems:boolean Indicates if the list items should be filtered
+                down based on the current value. Defaults to true.
+            fullItemConfig:array The full list of items that can be shown in the
+                list. The actual itemConfig used will be filtered based on the
+                current value of the input text.
+        
+        @class */
+    pkg.ComboBox = new JSClass('ComboBox', InputText, {
+        include: [
+            pkg.Activateable,
+            pkg.KeyActivation,
+            pkg.ListViewAnchor
+        ],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.Input */
+        initNode: function(parent, attrs) {
+            this.filterItems = true;
+            
+            if (attrs.activationKeys == null) attrs.activationKeys = [13,27,38,40];
+            if (attrs.bgColor == null) attrs.bgColor = '#ffffff';
+            if (attrs.borderWidth == null) attrs.borderWidth = 1;
+            if (attrs.borderStyle == null) attrs.borderStyle = 'solid';
+            if (attrs.floatingAlignOffset == null) attrs.floatingAlignOffset = attrs.borderWidth;
+            if (attrs.listViewAttrs == null) attrs.listViewAttrs = {maxHeight:99};
+            if (attrs.fullItemConfig == null) attrs.fullItemConfig = [];
+            
+            this.callSuper(parent, attrs);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setFullItemConfig: function(v) {this.fullItemConfig = v;},
+        setFilterItems: function(v) {this.filterItems = v;},
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides
+            Show floating panel if the value has changed during during
+            user interaction. */
+        __syncToDom: function(event) {
+            const existing = this.value;
+            this.callSuper(event);
+            if (existing !== this.value) this.showFloatingPanel();
+        },
+        
+        /** @overrides */
+        showFloatingPanel: function(panelId) {
+            const fp = this.getFloatingPanel(panelId);
+            if (fp) {
+                // Filter config
+                let itemConfig;
+                if (this.filterItems) {
+                    itemConfig = [];
+                    
+                    const curValue = this.value,
+                        normalizedCurValue = curValue == null ? '' : ('' + curValue).toLowerCase(),
+                        fullItemConfig = this.fullItemConfig,
+                        len = fullItemConfig.length;
+                    for (let i = 0; len > i;) {
+                        const item = fullItemConfig[i++],
+                            normalizedItemValue = item.attrs.text.toLowerCase(),
+                            idx = normalizedItemValue.indexOf(normalizedCurValue);
+                        if (idx === 0) {
+                            if (normalizedItemValue !== normalizedCurValue) itemConfig.push(item);
+                        } else if (idx > 0) {
+                            itemConfig.push(item);
+                        }
+                    }
+                } else {
+                    itemConfig = this.fullItemConfig;
+                }
+                
+                if (itemConfig.length > 0) {
+                    fp.setMinWidth(this.width - 2 * this.borderWidth); // Must be set before setItemConfig
+                    this.setItemConfig(itemConfig);
+                    this.callSuper(panelId);
+                } else {
+                    this.hideFloatingPanel(panelId);
+                }
+            }
+        },
+        
+        /** @overrides */
+        doItemActivated: function(itemView) {
+            this.setValue(itemView.text);
+            this.callSuper(itemView);
+        },
+        
+        /** @overrides */
+        doActivated: function() {
+            this.toggleFloatingPanel();
         }
-    },
+    });
     
-    setValue: function(v) {
-        if (this.value !== v) {
-            this.value = v;
-            this.setDomValue(v);
-            if (this.inited) this.fireEvent('value', v);
+    /** A wrapper around a native HTML select component.
+        
+        Events:
+            multiple:boolean
+            size:int
+            value:string
+        
+        Attributes:
+            multiple:boolean Indicates if multiple options can be selected or not.
+                Defaults to false.
+            size:int The number of options to show. The default value is 4 for
+                multiple == true and 1 for multiple == false. It is recommended
+                that a size of at least 4 be used when multiple is 2.
+            options:array (write only) Adds a list of options to this select list.
+                The value should be an array of myt.InputSelectOptions attrs that 
+                will be used to instantiate new myt.InputSelectOption instances on
+                this select list.
+        
+        @class */
+    pkg.InputSelect = new JSClass('InputSelect', NativeInputWrapper, {
+        include: [SizeToDom],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.NativeInputWrapper */
+        initNode: function(parent, attrs) {
+            if (attrs.tagName == null) attrs.tagName = 'select';
+            attrs.inputType = null;
+            
+            if (attrs.multiple == null) attrs.multiple = false;
+            if (attrs.size == null) attrs.size = attrs.multiple ? 4 : 1;
+            
+            this.callSuper(parent, attrs);
+            
+            this.attachToDom(this, '__syncToDom', 'change');
+            
+            // Make sure initial value is in sync with the UI
+            this.__syncToDom();
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setMultiple: function(v) {setDomAttr(this, 'multiple', v);},
+        setSize: function(v) {setDomAttr(this, 'size', v);},
+        
+        setOptions: function(v) {
+            this.destroyAllOptions();
+            if (Array.isArray(v)) v.forEach(option => {this.addOption(option);});
+        },
+        
+        /** The options are just the subviews.
+            @returns an array of options for this select list. */
+        getOptions: function() {
+            return this.getSubviews().concat();
+        },
+        
+        /** @overrides myt.NativeInputWrapper
+            Does not update the dom since the dom element's 'value' attribute
+            doesn't support lists. */
+        setValue: function(v) {
+            if (Array.isArray(v) && pkg.areArraysEqual(v, this.value)) return;
+            
+            if (this.value !== v) {
+                this.value = v;
+                if (this.inited) this.fireEvent('value', v);
+            }
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides myt.View */
+        subviewAdded: function(sv) {
+            // Destroy subview if it's not supported.
+            if (!(sv instanceof InputSelectOption)) {
+                pkg.dumpStack("Subview not supported. Destroying it.");
+                sv.destroy();
+            }
+        },
+        
+        /** @overrides myt.FocusObservable */
+        showFocusEmbellishment: function() {
+            this.hideDefaultFocusEmbellishment();
+            this.setBoxShadow(DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
+        },
+        
+        /** @overrides myt.FocusObservable */
+        hideFocusEmbellishment: function() {
+            this.hideDefaultFocusEmbellishment();
+            this.setBoxShadow();
+        },
+        
+        // Options //
+        /** Gets an array of selected myt.InputSelectOptions.
+            @returns {!Array} - An array of selected myt.InputSelectOptions. */
+        getSelectedOptions: function() {
+            return this.getOptions().filter(option => option.isSelected());
+        },
+        
+        /** Gets an array of selected myt.InputSelectOption values.
+            @returns {!Array} - An array of selected option values. */
+        getSelectedOptionValues: function() {
+            return this.getSelectedOptions().map(option => option.value);
+        },
+        
+        /** Gets the myt.InputSelectOption with the provided value.
+            @param {*} value - The value of the option to get.
+            @returns {?Object} - The matching myt.InputSelectOption option 
+                or undefined if not found. */
+        getOptionForValue: function(value) {
+            return this.getOptions().find(option => option.value === value);
+        },
+        
+        /** Adds a new myt.InputSelectionOption to this select list.
+            @param attrs:object The attrs for the new option
+            @returns myt.InputSelectOption: The newly created option. */
+        addOption: function(attrs) {
+            return new InputSelectOption(this, attrs);
+        },
+        
+        destroyAllOptions: function() {
+            this.getOptions().forEach(option => {option.destroy();});
+        },
+        
+        /** Destroys an option that has the provided value.
+            @param value:* The value of the option to remove.
+            @returns boolean: true if the option is destroyed, false otherwise. */
+        destroyOptionWithValue: function(value) {
+            const option = this.getOptionForValue(value);
+            if (option) {
+                option.destroy();
+                if (option.destroyed) return true;
+            }
+            return false;
+        },
+        
+        // Selection //
+        /** Deselects all selected options included disabled options.
+            @returns {undefined} */
+        deselectAll: function() {
+            let changed = false;
+            this.getOptions().forEach(option => {
+                if (option.isSelected()) {
+                    option.setSelected(false);
+                    changed = true;
+                }
+            });
+            if (changed) this.__doChanged();
+        },
+        
+        selectValues: function(values) {
+            (Array.isArray(values) ? values : [values]).forEach(value => {this.selectValue(value);});
+        },
+        
+        /** Selects the option that has the provided value.
+            @param value:* The value of the option to select.
+            @returns {undefined} */
+        selectValue: function(value) {
+            this.select(this.getOptionForValue(value));
+        },
+        
+        /** Selects the provided option.
+            @param option:myt.InputSelectOption The option to select.
+            @returns {undefined} */
+        select: function(option) {
+            if (option && option.canSelect(this)) {
+                option.setSelected(true);
+                this.__syncToDom();
+            }
+        },
+        
+        /** Deselects the option that has the provided value.
+            @param {*} value - The value of the option to deselect.
+            @returns {undefined} */
+        deselectValue: function(value) {
+            this.deselect(this.getOptionForValue(value));
+        },
+        
+        /** Deselects the provided option.
+            @param option:myt.InputSelectOption The option to deselect.
+            @returns {undefined} */
+        deselect: function(option) {
+            if (option && option.canDeselect(this)) {
+                option.setSelected(false);
+                this.__syncToDom();
+            }
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __doChanged: function(event) {
+            this.__syncToDom();
+            this.doChanged();
+        },
+        
+        /** Called whenever the underlying dom element fires a "change" event.
+            @returns {undefined} */
+        doChanged: () => {},
+        
+        /** @private
+            @returns {undefined} */
+        __syncToDom: function() {
+            this.setValue(this.multiple ? this.getSelectedOptionValues() : this.getDomValue());
         }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Gets the value from the DOM.
-        @returns * The value */
-    getDomValue: function() {
-        return this.getInnerDomElement().value;
-    },
-    
-    /** Sets the value on the DOM.
-        @param v:* The value to set.
-        @returns {undefined} */
-    setDomValue: function(v) {
-        const de = this.getInnerDomElement();
-        if (de.value !== v) de.value = v;
-    }
-});
+    });
+})(myt);
 
 
 /** Provides browser drag and drop support.
@@ -18419,332 +19249,6 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
 })(myt);
 
 
-((pkg) => {
-    const JSClass = JS.Class,
-    
-        /** An option in a native browser select element.
-            
-            Events:
-                value:*
-                label:string
-            
-            Attributes:
-                value:* the value of the option.
-                label:string the text label for the option.
-            
-            @class */
-        InputSelectOption = pkg.InputSelectOption = new JSClass('InputSelectOption', pkg.View, {
-            include: [pkg.Disableable, pkg.Selectable],
-            
-            
-            // Life Cycle //////////////////////////////////////////////////////////////
-            /** @overrides myt.Input */
-            createOurDomElement: function(parent) {
-                return document.createElement('option');
-            },
-            
-            
-            // Accessors ///////////////////////////////////////////////////////////////
-            /** @overrideds myt.Selectable */
-            setSelected: function(v) {
-                // Adapt to event from syncTo
-                if (v !== null && typeof v === 'object') v = v.value;
-                
-                const de = this.getInnerDomElement();
-                if (de.selected !== v) de.selected = v;
-            },
-            
-            /** @overrides myt.Disableable */
-            setDisabled: function(v) {
-                if (this.disabled !== v) {
-                    this.getInnerDomElement().disabled = v;
-                    this.callSuper(v);
-                }
-            },
-            
-            setValue: function(v) {
-                if (this.value !== v) {
-                    this.value = v;
-                    if (this.getInnerDomElement().value !== v) this.getInnerDomElement().value = v;
-                    if (this.inited) this.fireEvent('value', v);
-                }
-            },
-            
-            setLabel: function(v) {
-                if (this.label !== v) {
-                    this.getInnerDomElement().textContent = this.label = v;
-                    if (this.inited) this.fireEvent('label', v);
-                }
-            },
-            
-            
-            // Methods /////////////////////////////////////////////////////////////////
-            /** @overrideds myt.Selectable */
-            isSelected: function() {
-                return this.getInnerDomElement().selected;
-            },
-            
-            /** @overrideds myt.Selectable */
-            canSelect: function(selectionManager) {
-                return !this.disabled && !this.getInnerDomElement().selected && this.parent === selectionManager;
-            },
-            
-            /** @overrideds myt.Selectable */
-            canDeselect: function(selectionManager) {
-                return !this.disabled && this.getInnerDomElement().selected && this.parent === selectionManager;
-            }
-        });
-    
-    /** A wrapper around a native browser select component.
-        
-        Events:
-            multiple:boolean
-            size:int
-            value:string
-        
-        Attributes:
-            multiple:boolean Indicates if multiple options can be selected or not.
-                Defaults to false.
-            size:int The number of options to show. The default value is 4 for
-                multiple == true and 1 for multiple == false. It is recommended
-                that a size of at least 4 be used when multiple is 2.
-            options:array (write only) Adds a list of options to this select list.
-                The value should be an array of myt.InputSelectOptions attrs that 
-                will be used to instantiate new myt.InputSelectOption instances on
-                this select list.
-        
-        @class */
-    pkg.InputSelect = new JSClass('InputSelect', pkg.NativeInputWrapper, {
-        include: [pkg.SizeToDom],
-        
-        
-        // Life Cycle //////////////////////////////////////////////////////////////
-        /** @overrides myt.NativeInputWrapper */
-        initNode: function(parent, attrs) {
-            if (attrs.tagName == null) attrs.tagName = 'select';
-            attrs.inputType = null;
-            
-            if (attrs.multiple == null) attrs.multiple = false;
-            if (attrs.size == null) attrs.size = attrs.multiple ? 4 : 1;
-            
-            this.callSuper(parent, attrs);
-            
-            this.attachToDom(this, '__syncToDom', 'change');
-            
-            // Make sure initial value is in sync with the UI
-            this.__syncToDom();
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////////
-        setMultiple: function(v) {
-            if (this.multiple !== v) {
-                this.multiple = this.getInnerDomElement().multiple = v;
-                if (this.inited) this.fireEvent('multiple', v);
-            }
-        },
-        
-        setSize: function(v) {
-            if (this.size !== v) {
-                this.size = this.getInnerDomElement().size = v;
-                if (this.inited) this.fireEvent('size', v);
-            }
-        },
-        
-        setOptions: function(v) {
-            this.destroyAllOptions();
-            if (Array.isArray(v)) {
-                const len = v.length;
-                for (let i = 0; len > i; ++i) this.addOption(v[i]);
-            }
-        },
-        
-        /** The options are just the subviews.
-            @returns an array of options for this select list. */
-        getOptions: function() {
-            return this.getSubviews().concat();
-        },
-        
-        /** @overrides myt.NativeInputWrapper
-            Does not update the dom since the dom element's 'value' attribute
-            doesn't support lists. */
-        setValue: function(v) {
-            if (Array.isArray(v) && pkg.areArraysEqual(v, this.value)) return;
-            
-            if (this.value !== v) {
-                this.value = v;
-                if (this.inited) this.fireEvent('value', v);
-            }
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////////
-        /** @overrides myt.View */
-        subviewAdded: function(sv) {
-            // Destroy subview if it's not supported.
-            if (!(sv instanceof InputSelectOption)) {
-                pkg.dumpStack("Subview not supported. Destroying it.");
-                sv.destroy();
-            }
-        },
-        
-        /** @overrides myt.FocusObservable */
-        showFocusEmbellishment: function() {
-            this.hideDefaultFocusEmbellishment();
-            this.setBoxShadow(pkg.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
-        },
-        
-        /** @overrides myt.FocusObservable */
-        hideFocusEmbellishment: function() {
-            this.hideDefaultFocusEmbellishment();
-            this.setBoxShadow();
-        },
-        
-        // Options //
-        /** Gets an array of selected myt.InputSelectOptions.
-            @returns {!Array} - An array of selected myt.InputSelectOptions. */
-        getSelectedOptions: function() {
-            const options = this.getOptions(), 
-                retval = []; 
-            let i = options.length;
-            while (i) {
-                const option = options[--i];
-                if (option.isSelected()) retval.push(option);
-            }
-            return retval;
-        },
-        
-        /** Gets an array of selected myt.InputSelectOption values.
-            @returns {!Array} - An array of selected option values. */
-        getSelectedOptionValues: function() {
-            const options = this.getOptions(), 
-                retval = []; 
-            let i = options.length;
-            while (i) {
-                const option = options[--i];
-                if (option.isSelected()) retval.push(option.value);
-            }
-            return retval;
-        },
-        
-        /** Gets the myt.InputSelectOption with the provided value.
-            @param {*} value - The value of the option to get.
-            @returns {?Object} - The matching myt.InputSelectOption option or null 
-                if not found. */
-        getOptionForValue: function(value) {
-            const options = this.getOptions();
-            let i = options.length;
-            while (i) {
-                const option = options[--i];
-                if (option.value === value) return option;
-            }
-            return null;
-        },
-        
-        /** Adds a new myt.InputSelectionOption to this select list.
-            @param attrs:object The attrs for the new option
-            @returns myt.InputSelectOption: The newly created option. */
-        addOption: function(attrs) {
-            new InputSelectOption(this, attrs);
-        },
-        
-        destroyAllOptions: function() {
-            const options = this.getOptions();
-            let i = options.length;
-            while (i) options[--i].destroy();
-        },
-        
-        /** Destroys an option that has the provided value.
-            @param value:* The value of the option to remove.
-            @returns boolean: true if the option is destroyed, false otherwise. */
-        destroyOptionWithValue: function(value) {
-            const option = this.getOptionForValue(value);
-            if (option) {
-                option.destroy();
-                if (option.destroyed) return true;
-            }
-            return false;
-        },
-        
-        // Selection //
-        /** Deselects all selected options included disabled options.
-            @returns {undefined} */
-        deselectAll: function() {
-            const options = this.getOptions();
-            let i = options.length, 
-                changed = false;
-            while (i) {
-                const option = options[--i];
-                if (option.isSelected()) {
-                    option.setSelected(false);
-                    changed = true;
-                }
-            }
-            
-            if (changed) this.__doChanged();
-        },
-        
-        selectValues: function(values) {
-            values = Array.isArray(values) ? values : [values];
-            let i = values.length;
-            while (i) this.selectValue(values[--i]);
-        },
-        
-        /** Selects the option that has the provided value.
-            @param value:* The value of the option to select.
-            @returns {undefined} */
-        selectValue: function(value) {
-            this.select(this.getOptionForValue(value));
-        },
-        
-        /** Selects the provided option.
-            @param option:myt.InputSelectOption The option to select.
-            @returns {undefined} */
-        select: function(option) {
-            if (option && option.canSelect(this)) {
-                option.setSelected(true);
-                this.__syncToDom();
-            }
-        },
-        
-        /** Deselects the option that has the provided value.
-            @param {*} value - The value of the option to deselect.
-            @returns {undefined} */
-        deselectValue: function(value) {
-            this.deselect(this.getOptionForValue(value));
-        },
-        
-        /** Deselects the provided option.
-            @param option:myt.InputSelectOption The option to deselect.
-            @returns {undefined} */
-        deselect: function(option) {
-            if (option && option.canDeselect(this)) {
-                option.setSelected(false);
-                this.__syncToDom();
-            }
-        },
-        
-        /** @private
-            @param {!Object} event
-            @returns {undefined} */
-        __doChanged: function(event) {
-            this.__syncToDom();
-            this.doChanged();
-        },
-        
-        /** Called whenever the underlying dom element fires a "change" event.
-            @returns {undefined} */
-        doChanged: () => {},
-        
-        /** @private
-            @returns {undefined} */
-        __syncToDom: function() {
-            this.setValue(this.multiple ? this.getSelectedOptionValues() : this.getDomValue());
-        }
-    });
-})(myt);
-
-
 /** An myt.InputSelect that is also a FormElement.
     
     Events:
@@ -18779,69 +19283,293 @@ myt.FormInputSelect = new JS.Class('FormInputSelect', myt.InputSelect, {
 });
 
 
-/** Provides a setValue and getValue method.
-    
-    Events:
-        value:*
-    
-    Attributes:
-        value:* The stored value.
-        valueFilter:function If it exists, values will be run through this
-            filter function before being set on the component. By default
-            no valueFilter exists. A value filter function must take a 
-            single value as an argument and return a value.
-*/
-myt.ValueComponent = new JS.Module('ValueComponent', {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        this.appendToEarlyAttrs('valueFilter','value');
-        this.callSuper(parent, attrs);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setValueFilter: function(v) {
-        this.valueFilter = v;
+((pkg) => {
+    const JSModule = JS.Module,
         
-        if (this.inited && v) this.setValue(this.value);
-    },
-    
-    setValue: function(v) {
-        if (this.valueFilter) v = this.valueFilter(v);
-        
-        if (this.value !== v) {
-            this.value = v;
-            if (this.inited) this.fireEvent('value', this.getValue());
-        }
-    },
-    
-    getValue: function() {
-        return this.value;
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Combines a value filter with any existing value filter.
-        @param filter:function the value filter to add.
-        @param where:string (optional) Determines where to add the filter.
-            Supported values are 'first' and 'last'. Defaults to 'first'.
-        @returns {undefined} */
-    chainValueFilter: function(filter, where) {
-        const existingFilter = this.valueFilter;
-        let chainedFilter;
-        if (existingFilter) {
-            if (where === 'last') {
-                chainedFilter = (v) => filter(existingFilter(v));
-            } else {
-                // "where" is 'first' or not provided.
-                chainedFilter = (v) => existingFilter(filter(v));
+        /** Provides a setValue and getValue method.
+            
+            Events:
+                value:*
+            
+            Attributes:
+                value:* The stored value.
+                valueFilter:function If it exists, values will be run through 
+                    this filter function before being set on the component. By 
+                    default no valueFilter exists. A value filter function must 
+                    take a single value as an argument and return a value.
+            
+            @class */
+        ValueComponent = pkg.ValueComponent = new JSModule('ValueComponent', {
+            // Life Cycle //////////////////////////////////////////////////////
+            initNode: function(parent, attrs) {
+                this.appendToEarlyAttrs('valueFilter','value');
+                this.callSuper(parent, attrs);
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setValueFilter: function(v) {
+                this.valueFilter = v;
+                
+                if (this.inited && v) this.setValue(this.value);
+            },
+            
+            setValue: function(v) {
+                if (this.valueFilter) v = this.valueFilter(v);
+                
+                if (this.value !== v) {
+                    this.value = v;
+                    if (this.inited) this.fireEvent('value', this.getValue());
+                }
+            },
+            
+            getValue: function() {
+                return this.value;
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** Combines a value filter with any existing value filter.
+                @param filter:function the value filter to add.
+                @param where:string (optional) Determines where to add the 
+                    filter. Supported values are 'first' and 'last'. Defaults 
+                    to 'first'.
+                @returns {undefined} */
+            chainValueFilter: function(filter, where) {
+                const existingFilter = this.valueFilter;
+                let chainedFilter;
+                if (existingFilter) {
+                    if (where === 'last') {
+                        chainedFilter = v => filter(existingFilter(v));
+                    } else {
+                        // "where" is 'first' or not provided.
+                        chainedFilter = v => existingFilter(filter(v));
+                    }
+                } else {
+                    chainedFilter = filter;
+                }
+                this.setValueFilter(chainedFilter);
             }
-        } else {
-            chainedFilter = filter;
+        }),
+        
+        /** A value that consists of an upper and lower value. The lower value 
+            must be less than or equal to the upper value. The value object 
+            that must be passed into setValue and returned from getValue is 
+            an object of the form: {lower:number, upper:number}.
+            
+            @class */
+        RangeComponent = pkg.RangeComponent = new JSModule('RangeComponent', {
+            include: [ValueComponent],
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setLowerValue: function(v) {
+                this.setValue({
+                    lower:v, 
+                    upper:(this.value && this.value.upper !== undefined) ? this.value.upper : v
+                });
+            },
+            
+            getLowerValue: function() {
+                return this.value ? this.value.lower : undefined;
+            },
+            
+            setUpperValue: function(v) {
+                this.setValue({
+                    lower:(this.value && this.value.lower !== undefined) ? this.value.lower : v,
+                    upper:v
+                });
+            },
+            
+            getUpperValue: function() {
+                return this.value ? this.value.upper : undefined;
+            },
+            
+            setValue: function(v) {
+                if (v) {
+                    const existing = this.value,
+                        existingLower = existing ? existing.lower : undefined,
+                        existingUpper = existing ? existing.upper : undefined;
+                    
+                    if (this.valueFilter) v = this.valueFilter(v);
+                    
+                    // Do nothing if value is identical
+                    if (v.lower === existingLower && v.upper === existingUpper) return;
+                    
+                    // Assign upper to lower if no lower was provided.
+                    if (v.lower == null) v.lower = v.upper;
+                    
+                    // Assign lower to upper if no upper was provided.
+                    if (v.upper == null) v.upper = v.lower;
+                    
+                    // Swap lower and upper if they are in the wrong order
+                    if (v.lower !== undefined && v.upper !== undefined && v.lower > v.upper) {
+                        const temp = v.lower;
+                        v.lower = v.upper;
+                        v.upper = temp;
+                    }
+                    
+                    this.value = v;
+                    if (this.inited) {
+                        this.fireEvent('value', this.getValue());
+                        if (v.lower !== existingLower) this.fireEvent('lowerValue', v.lower);
+                        if (v.upper !== existingUpper) this.fireEvent('upperValue', v.upper);
+                    }
+                } else {
+                    this.callSuper(v);
+                }
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            getValueCopy: function() {
+                const v = this.value;
+                return {lower:v.lower, upper:v.upper};
+            }
+        }),
+        
+        /** A numeric value component that stays within a minimum and 
+            maximum value.
+            
+            Events:
+                minValue:number
+                maxValue:number
+                snapToInt:boolean
+            
+            Attributes:
+                minValue:number the largest value allowed. If undefined or 
+                    null no min value is enforced.
+                maxValue:number the lowest value allowed. If undefined or 
+                    null no max value is enforced.
+                snapToInt:boolean If true values can only be integers. 
+                    Defaults to true.
+            
+            @class */
+        BoundedValueComponent = pkg.BoundedValueComponent = new JSModule('BoundedValueComponent', {
+            include: [ValueComponent],
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            initNode: function(parent, attrs) {
+                const self = this;
+                
+                self.appendToEarlyAttrs('snapToInt','minValue','maxValue');
+                
+                if (attrs.snapToInt == null) attrs.snapToInt = true;
+                
+                if (!attrs.valueFilter) {
+                    attrs.valueFilter = v => {
+                        const max = self.maxValue;
+                        if (max != null && v > max) return max;
+                        
+                        const min = self.minValue;
+                        if (min != null && v < min) return min;
+                        
+                        return v;
+                    };
+                }
+                
+                self.callSuper(parent, attrs);
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setSnapToInt: function(v) {
+                if (this.snapToInt !== v) {
+                    this.snapToInt = v;
+                    if (this.inited) {
+                        this.fireEvent('snapToInt', v);
+                        
+                        // Update min, max and value since snap has been turned on
+                        if (v) {
+                            this.setMinValue(this.minValue);
+                            this.setMaxValue(this.maxValue);
+                            this.setValue(this.value);
+                        }
+                    }
+                }
+            },
+            
+            setMinValue: function(v) {
+                if (this.snapToInt && v != null) v = Math.round(v);
+                
+                if (this.minValue !== v) {
+                    const max = this.maxValue;
+                    if (max != null && v > max) v = max;
+                    
+                    if (this.minValue !== v) {
+                        this.minValue = v;
+                        if (this.inited) {
+                            this.fireEvent('minValue', v);
+                            
+                            // Rerun setValue since the filter has changed.
+                            this.setValue(this.value);
+                        }
+                    }
+                }
+            },
+            
+            setMaxValue: function(v) {
+                if (this.snapToInt && v != null) v = Math.round(v);
+                
+                if (this.maxValue !== v) {
+                    const min = this.minValue;
+                    if (min != null && v < min) v = min;
+                    
+                    if (this.maxValue !== v) {
+                        this.maxValue = v;
+                        if (this.inited) {
+                            this.fireEvent('maxValue', v);
+                            
+                            // Rerun setValue since the filter has changed.
+                            this.setValue(this.value);
+                        }
+                    }
+                }
+            },
+            
+            /** @overrides myt.ValueComponent */
+            setValue: function(v) {
+                this.callSuper(this.snapToInt && v != null && !isNaN(v) ? Math.round(v) : v);
+            }
+        });
+    
+    /** A numeric value component that stays within an upper and lower value 
+        and where the value is a range.
+        
+        @class */
+    pkg.BoundedRangeComponent = new JSModule('BoundedRangeComponent', {
+        include: [BoundedValueComponent, RangeComponent],
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            const self = this;
+            if (!attrs.valueFilter) {
+                attrs.valueFilter = v => {
+                    if (v) {
+                        const max = self.maxValue,
+                            min = self.minValue;
+                        if (max != null && v.upper > max) v.upper = max;
+                        if (min != null && v.lower < min) v.lower = min;
+                    }
+                    return v;
+                };
+            }
+            
+            self.callSuper(parent, attrs);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** @overrides myt.ValueComponent */
+        setValue: function(v) {
+            if (this.snapToInt && v != null) {
+                if (v.lower != null && !isNaN(v.lower)) v.lower = Math.round(v.lower);
+                if (v.upper != null && !isNaN(v.upper)) v.upper = Math.round(v.upper);
+            }
+            this.callSuper(v);
         }
-        this.setValueFilter(chainedFilter);
-    }
-});
+    });
+})(myt);
 
 
 ((pkg) => {
@@ -19223,244 +19951,6 @@ myt.FormInputTextMixin = new JS.Module('FormInputTextMixin', {
 });
 
 
-/** A base class for input:text and textarea components.
-    
-    Events:
-        spellcheck:boolean
-        maxLength:int
-        placeholder:string
-    
-    Attributes:
-        spellcheck:boolean Turns browser spellchecking on and off. Defaults
-            to false.
-        maxLength:int Sets a maximum number of input characters. Set to a
-            negative number to turn off max length. Defaults to undefined
-            which is equivalent to a negative number.
-        allowedChars:string Each character in the string is an allowed
-            input character. If not set or empty all characters are allowed. 
-            Defaults to undefined.
-        placeholder:string Text that will be shown if the value is empty.
-    
-    @class */
-myt.BaseInputText = new JS.Class('BaseInputText', myt.NativeInputWrapper, {
-    include: [myt.TextSupport],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.NativeInputWrapper */
-    initNode: function(parent, attrs) {
-        const self = this;
-        
-        if (attrs.bgColor == null) attrs.bgColor = 'transparent';
-        if (attrs.spellcheck == null) attrs.spellcheck = false;
-        
-        self.callSuper(parent, attrs);
-        
-        self.attachToDom(self, '__syncToDom', 'input');
-        
-        // Allow filtering of input
-        self.attachToDom(self, '__filterInputPress', 'keypress');
-        self.attachToDom(self, '__filterInput', 'keyup');
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrides myt.TextSupport
-        Alias setText to setValue. */
-    setText: function(v) {
-        this.callSuper(v);
-        
-        this.setValue(v);
-    },
-    
-    setSpellcheck: function(v) {
-        if (this.spellcheck !== v) {
-            this.spellcheck = this.getInnerDomElement().spellcheck = v;
-            if (this.inited) this.fireEvent('spellcheck', v);
-        }
-    },
-    
-    setMaxLength: function(v) {
-        if (v == null || 0 > v) v = undefined;
-        
-        if (this.maxLength !== v) {
-            this.maxLength = this.getInnerDomElement().maxLength = v;
-            if (this.inited) this.fireEvent('maxLength', v);
-        }
-    },
-    
-    setAllowedChars: function(v) {this.allowedChars = v;},
-    
-    setPlaceholder: function(v) {
-        if (this.placeholder !== v) {
-            this.getInnerDomElement().placeholder = this.placeholder = v;
-            if (this.inited) this.fireEvent('placeholder', v);
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.FocusObservable */
-    showFocusEmbellishment: function() {
-        this.hideDefaultFocusEmbellishment();
-        this.setBoxShadow(myt.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
-    },
-    
-    /** @overrides myt.FocusObservable */
-    hideFocusEmbellishment: function() {
-        this.hideDefaultFocusEmbellishment();
-        this.setBoxShadow();
-    },
-    
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __filterInput: function(event) {
-        this.setDomValue(this.filterInput(this.getDomValue()));
-    },
-    
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __filterInputPress: function(event) {
-        const domEvent = event.value,
-            charCode = domEvent.which;
-        
-        // Firefox fires events for arrow keys and backspace which should be
-        // ignored completely.
-        switch (charCode) {
-            case 8: // backspace key
-            case 0: // arrow keys have a "charCode" of 0 in firefox.
-                return;
-        }
-        
-        // Filter for allowed characters
-        const allowedChars = this.allowedChars;
-        if (allowedChars && allowedChars.indexOf(String.fromCharCode(charCode)) === -1) domEvent.preventDefault();
-        
-        this.filterInputPress(domEvent);
-    },
-    
-    /** A hook for subclasses/instances to do input filtering. The default
-        implementation returns the value unchanged.
-        @param {string} v - the current value of the form element.
-        @returns {string} The new value of the form element. */
-    filterInput: v => v,
-    
-    /** A hook for subclasses/instances to do input filtering during key press.
-        The default implementation does nothing.
-        @param {!Object} domEvent - The dom key press event.
-        @returns {undefined} */
-    filterInputPress: domEvent => {},
-    
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __syncToDom: function(event) {
-        this.setValue(this.getDomValue());
-    },
-    
-    /** Gets the location of the caret.
-        @returns {number} An integer. */
-    getCaretPosition: function() {
-        // IE Support
-        if (document.selection) {
-            const selection = document.selection.createRange();
-            selection.moveStart('character', -this.getDomValue().length);
-            return selection.text.length;
-        }
-        
-        return this.getInnerDomElement().selectionStart || 0;
-    },
-    
-    /** Sets the caret and selection.
-        @param start:int the start of the selection or location of the caret
-            if no end is provided.
-        @param end:int (optional) the end of the selection.
-        @returns {undefined} */
-    setCaretPosition: function(start, end) {
-        if (end == null || start === end) {
-            // Don't update if the current position already matches.
-            if (this.getCaretPosition() === start) return;
-            
-            end = start;
-        }
-        const elem = this.getInnerDomElement();
-        
-        if (elem.setSelectionRange) {
-            elem.setSelectionRange(start, end);
-        } else if (elem.createTextRange) {
-            const range = elem.createTextRange();
-            range.collapse(true);
-            range.moveEnd('character', end);
-            range.moveStart('character', start);
-            range.select();
-        }
-    },
-    
-    /** Sets the caret to the start of the text input.
-        @returns {undefined} */
-    setCaretToStart: function() {
-        this.setCaretPosition(0);
-    },
-    
-    /** Sets the caret to the end of the text input.
-        @returns {undefined} */
-    setCaretToEnd: function() {
-        this.setCaretPosition(this.getDomValue().length);
-    },
-    
-    // Selection //
-    /** Selects all the text in the input element.
-        @returns {undefined} */
-    selectAll: function() {
-        this.getInnerDomElement().select();
-    },
-    
-    getSelection: function() {
-        const de = this.getInnerDomElement();
-        return {
-            start:de.selectionStart,
-            startElem:de,
-            end:de.selectionEnd,
-            endElem:de
-        };
-    },
-    
-    setSelection: function(selection) {
-        if (selection) this.setCaretPosition(selection.start, selection.end);
-    },
-    
-    saveSelection: function(selection) {
-        this._selRange = selection || this.getSelection() || this._selRange;
-    },
-    
-    restoreSelection: function() {
-        this.setSelection(this._selRange);
-    }
-});
-
-
-/** A view that accepts single line user text input. */
-myt.InputText = new JS.Class('InputText', myt.BaseInputText, {
-    include: [myt.SizeHeightToDom],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Input */
-    initNode: function(parent, attrs) {
-        this.inputType = attrs.password === true ? 'password' : 'text';
-        
-        this.callSuper(parent, attrs);
-        
-        this.setCaretToEnd();
-    },
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setPassword: function(v) {this.password = v;}
-});
-
-
 /** An myt.InputText that is also a FormElement.
     
     Events:
@@ -19471,109 +19961,6 @@ myt.InputText = new JS.Class('InputText', myt.BaseInputText, {
 */
 myt.FormInputText = new JS.Class('FormInputText', myt.InputText, {
     include: [myt.FormInputTextMixin]
-});
-
-
-/** A text input with select list.
-    
-    Events:
-        None
-    
-    Attributes:
-        filterItems:boolean Indicates if the list items should be filtered
-            down based on the current value. Defaults to true.
-        fullItemConfig:array The full list of items that can be shown in the
-            list. The actual itemConfig used will be filtered based on the
-            current value of the input text.
-    
-    @class */
-myt.ComboBox = new JS.Class('ComboBox', myt.InputText, {
-    include: [
-        myt.Activateable,
-        myt.KeyActivation,
-        myt.ListViewAnchor
-    ],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Input */
-    initNode: function(parent, attrs) {
-        this.filterItems = true;
-        
-        if (attrs.activationKeys == null) attrs.activationKeys = [13,27,38,40];
-        if (attrs.bgColor == null) attrs.bgColor = '#ffffff';
-        if (attrs.borderWidth == null) attrs.borderWidth = 1;
-        if (attrs.borderStyle == null) attrs.borderStyle = 'solid';
-        if (attrs.floatingAlignOffset == null) attrs.floatingAlignOffset = attrs.borderWidth;
-        if (attrs.listViewAttrs == null) attrs.listViewAttrs = {maxHeight:99};
-        if (attrs.fullItemConfig == null) attrs.fullItemConfig = [];
-        
-        this.callSuper(parent, attrs);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setFullItemConfig: function(v) {this.fullItemConfig = v;},
-    setFilterItems: function(v) {this.filterItems = v;},
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides
-        Show floating panel if the value has changed during during
-        user interaction. */
-    __syncToDom: function(event) {
-        const existing = this.value;
-        this.callSuper(event);
-        if (existing !== this.value) this.showFloatingPanel();
-    },
-    
-    /** @overrides */
-    showFloatingPanel: function(panelId) {
-        const fp = this.getFloatingPanel(panelId);
-        if (fp) {
-            // Filter config
-            let itemConfig;
-            if (this.filterItems) {
-                itemConfig = [];
-                
-                const curValue = this.value,
-                    normalizedCurValue = curValue == null ? '' : ('' + curValue).toLowerCase(),
-                    fullItemConfig = this.fullItemConfig,
-                    len = fullItemConfig.length;
-                for (let i = 0; len > i;) {
-                    const item = fullItemConfig[i++],
-                        normalizedItemValue = item.attrs.text.toLowerCase(),
-                        idx = normalizedItemValue.indexOf(normalizedCurValue);
-                    if (idx === 0) {
-                        if (normalizedItemValue !== normalizedCurValue) itemConfig.push(item);
-                    } else if (idx > 0) {
-                        itemConfig.push(item);
-                    }
-                }
-            } else {
-                itemConfig = this.fullItemConfig;
-            }
-            
-            if (itemConfig.length > 0) {
-                fp.setMinWidth(this.width - 2 * this.borderWidth); // Must be set before setItemConfig
-                this.setItemConfig(itemConfig);
-                this.callSuper(panelId);
-            } else {
-                this.hideFloatingPanel(panelId);
-            }
-        }
-    },
-    
-    /** @overrides */
-    doItemActivated: function(itemView) {
-        this.setValue(itemView.text);
-        this.callSuper(itemView);
-    },
-    
-    /** @overrides */
-    doActivated: function() {
-        this.toggleFloatingPanel();
-    }
 });
 
 
@@ -19714,49 +20101,6 @@ myt.FormComboBox = new JS.Class('FormComboBox', myt.ComboBox, {
 });
 
 
-/** A view that accepts multi line user text input.
-    
-    Events:
-        resize:string
-        wrap:string
-    
-    Attributes:
-        resize:string Sets how the textarea can be resized. Defaults to 'none'.
-            Allowed values: 'none', 'both', 'horizontal', 'vertical'.
-        wrap:string Sets how text will wrap. Defaults to 'soft'.
-            Allowed values: 'off', 'hard', 'soft'.
-*/
-myt.InputTextArea = new JS.Class('InputTextArea', myt.BaseInputText, {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.BaseInputText */
-    initNode: function(parent, attrs) {
-        if (attrs.tagName == null) attrs.tagName = 'textarea';
-        attrs.inputType = null;
-        
-        if (attrs.resize == null) attrs.resize = 'none';
-        if (attrs.wrap == null) attrs.wrap = 'soft';
-        
-        this.callSuper(parent, attrs);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setResize: function(v) {
-        if (this.resize !== v) {
-            this.resize = this.getInnerDomStyle().resize = v || 'none';
-            if (this.inited) this.fireEvent('resize', v);
-        }
-    },
-    
-    setWrap: function(v) {
-        if (this.wrap !== v) {
-            this.wrap = this.getInnerDomElement().wrap = v;
-            if (this.inited) this.fireEvent('wrap', v);
-        }
-    }
-});
-
-
 /** An myt.InputTextArea that is also a FormElement.
     
     Accelerators:
@@ -19778,229 +20122,6 @@ myt.FormInputTextArea = new JS.Class('FormInputTextArea', myt.InputTextArea, {
         // Do nothing so the "accept" accelerator is not invoked.
     },
 });
-
-
-((pkg) => {
-    const setProp = (editableText, v, propName) => {
-            if (editableText[propName] !== v) {
-                editableText[propName] = v;
-                editableText.deStyle[propName] = v + 'px';
-                if (editableText.inited) {
-                    editableText.fireEvent(propName, v);
-                    editableText.sizeViewToDom();
-                }
-            }
-        };
-        
-    /** Text content that can be edited.
-        
-        Events:
-            contentEditable:boolean
-            minWidth:number
-        
-        Attributes:
-            contentEditble:boolean Makes the text editable or not.
-            minWidth:number The minimum width for the component. Defaults to 
-                undefined which is effectively 0.
-            minHeight:number The minimum height for the component. Defaults to 
-                undefined which is effectively 0.
-        
-        Private Attributes:
-            _selRange:object Stores the start and end of the selection.
-        
-        @class */
-    pkg.EditableText = new JS.Class('EditableText', pkg.BaseInputText, {
-        include: [pkg.SizeToDom],
-        
-        
-        // Life Cycle //////////////////////////////////////////////////////////////
-        /** @overrides myt.BaseInputText */
-        initNode: function(parent, attrs) {
-            const self = this;
-            
-            if (attrs.tagName == null) attrs.tagName = 'div';
-            attrs.inputType = null;
-            
-            if (attrs.whiteSpace == null) attrs.whiteSpace = 'pre';
-            if (attrs.contentEditable == null) attrs.contentEditable = true;
-            
-            self.callSuper(parent, attrs);
-            
-            self.attachToDom(self, '__cleanInput', 'keydown');
-            
-            self.attachToDom(self, '__userInteraction', 'keyup');
-            self.attachToDom(self, '__userInteraction', 'mouseup');
-            
-            self.setCaretToEnd();
-        },
-        
-        
-        // Attributes //////////////////////////////////////////////////////////////
-        setMinWidth: function(v) {setProp(this, v, 'minWidth');},
-        setMinHeight: function(v) {
-            if (BrowserDetect.browser === 'Firefox') v += 2;
-            setProp(this, v, 'minHeight');
-        },
-        setPadding: function(v) {
-            this.setPaddingTop(v);
-            this.setPaddingRight(v);
-            this.setPaddingBottom(v);
-            this.setPaddingLeft(v);
-        },
-        setPaddingTop: function(v) {setProp(this, v, 'paddingTop');},
-        setPaddingRight: function(v) {setProp(this, v, 'paddingRight');},
-        setPaddingBottom: function(v) {setProp(this, v, 'paddingBottom');},
-        setPaddingLeft: function(v) {setProp(this, v, 'paddingLeft');},
-        
-        setContentEditable: function(v) {
-            if (this.contentEditable !== v) {
-                this.contentEditable = this.getInnerDomElement().contentEditable = v;
-                if (this.inited) this.fireEvent('contentEditable', v);
-            }
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////////
-        /** @overrides myt.BaseInputText */
-        filterInputPress: function(domEvent) {
-            // Implement maxLength
-            const maxLength = this.maxLength;
-            if (maxLength >= 0 && this.getCharacterCount() === maxLength) domEvent.preventDefault();
-            
-            this.callSuper(domEvent);
-        },
-        
-        /** @overrides myt.NativeInputWrapper */
-        getDomValue: function() {
-            return this.getInnerDomElement().innerHTML;
-        },
-        
-        /** @overrides myt.NativeInputWrapper */
-        setDomValue: function(v) {
-            const de = this.getInnerDomElement();
-            if (de.innerHTML !== v) {
-                de.innerHTML = v;
-                this.sizeViewToDom();
-                this.restoreSelection();
-            }
-        },
-        
-        /** @private
-            @param {!Object} event
-            @returns {undefined} */
-        __cleanInput: function(event) {
-            // Prevent enter key from inserting a div
-            if (pkg.KeyObservable.getKeyCodeFromEvent(event) === 13) {
-                event.value.preventDefault();
-                
-                // Instead, insert a linefeed if wrapping is allowed.
-                if (this.whitespace !== 'nowrap') {
-                    document.execCommand('insertHTML', false, this.isCaretAtEnd() ? '\n\n' : '\n');
-                }
-            }
-        },
-        
-        /** @overrides myt.BaseInputText */
-        __syncToDom: function(event) {
-            this.callSuper(event);
-            
-            this.saveSelection();
-            this.sizeViewToDom();
-            this.restoreSelection();
-        },
-        
-        // Caret handling
-        getCharacterCount: function() {
-            const elem = this.getInnerDomElement().firstChild;
-            return elem ? elem.length : 0;
-        },
-        
-        isCaretAtEnd: function() {
-            return this.getCaretPosition() === this.getCharacterCount();
-        },
-        
-        /** @overrides myt.BaseInputText */
-        getCaretPosition: function() {
-            const selection = this.getSelection();
-            return selection ? selection.end : 0;
-        },
-        
-        /** @overrides myt.BaseInputText */
-        setCaretPosition: function(start, end) {
-            if (end == null || start === end) {
-                // Don't update if the current position already matches.
-                if (this.getCaretPosition() === start) return;
-                
-                end = start;
-            }
-            this.saveSelection({
-                start:start,
-                startElem:this.getInnerDomElement().firstChild,
-                end:end,
-                endElem:this.getInnerDomElement().firstChild
-            });
-        },
-        
-        // Selection handling
-        /** @overrides myt.FocusObservable */
-        doFocus: function() {
-            this.callSuper();
-            this.restoreSelection();
-        },
-        
-        /** @private
-            @param {!Object} event
-            @returns {undefined} */
-        __userInteraction: function(event) {
-            this.saveSelection();
-            return true;
-        },
-        
-        /** @overrides myt.BaseInputText */
-        getSelection: function() {
-            let range;
-            if (window.getSelection) {
-                const sel = window.getSelection();
-                if (sel.rangeCount > 0) {
-                    // Sometimes when deleting we get an unexpected node
-                    if (sel.extentNode === this.getInnerDomElement()) return null;
-                    
-                    range = sel.getRangeAt(0);
-                }
-            } else if (document.selection) {
-                range = document.selection.createRange();
-            }
-            
-            return {
-                start:range ? range.startOffset : 0,
-                startElem:range ? range.startContainer : this.getInnerDomElement().firstChild,
-                end:range ? range.endOffset : 0,
-                endElem:range ? range.endContainer : this.getInnerDomElement().firstChild
-            };
-        },
-        
-        /** @overrides myt.BaseInputText */
-        setSelection: function(selection) {
-            if (selection) {
-                const startElem = selection.startElem,
-                    endElem = selection.endElem;
-                if (startElem && startElem.parentNode && endElem && endElem.parentNode) {
-                    const range = document.createRange();
-                    range.setStart(startElem, Math.min(selection.start, startElem.length));
-                    range.setEnd(endElem, Math.min(selection.end, endElem.length));
-                    
-                    if (window.getSelection) {
-                        const sel = window.getSelection();
-                        if (sel.rangeCount > 0) sel.removeAllRanges();
-                        sel.addRange(range);
-                    } else if (document.selection) {
-                        range.select();
-                    }
-                }
-            }
-        }
-    });
-})(myt);
 
 
 /** An myt.EditableText that is also a FormElement.
@@ -20520,219 +20641,6 @@ myt.FormEditableText = new JS.Class('FormEditableText', myt.EditableText, {
         }
     });
 })(myt);
-
-
-/** A numeric value component that stays within a minimum and maximum value.
-    
-    Events:
-        minValue:number
-        maxValue:number
-        snapToInt:boolean
-    
-    Attributes:
-        minValue:number the largest value allowed. If undefined or null no
-            min value is enforced.
-        maxValue:number the lowest value allowed. If undefined or null no
-            max value is enforced.
-        snapToInt:boolean If true values can only be integers. Defaults to true.
-*/
-myt.BoundedValueComponent = new JS.Module('BoundedValueComponent', {
-    include: [myt.ValueComponent],
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        this.appendToEarlyAttrs('snapToInt','minValue','maxValue');
-        
-        if (attrs.snapToInt == null) attrs.snapToInt = true;
-        
-        if (!attrs.valueFilter) {
-            const self = this;
-            attrs.valueFilter = v => {
-                const max = self.maxValue;
-                if (max != null && v > max) return max;
-                
-                const min = self.minValue;
-                if (min != null && v < min) return min;
-                
-                return v;
-            };
-        }
-        
-        this.callSuper(parent, attrs);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setSnapToInt: function(v) {
-        if (this.snapToInt !== v) {
-            this.snapToInt = v;
-            if (this.inited) {
-                this.fireEvent('snapToInt', v);
-                
-                // Update min, max and value since snap has been turned on
-                if (v) {
-                    this.setMinValue(this.minValue);
-                    this.setMaxValue(this.maxValue);
-                    this.setValue(this.value);
-                }
-            }
-        }
-    },
-    
-    setMinValue: function(v) {
-        if (this.snapToInt && v != null) v = Math.round(v);
-        
-        if (this.minValue !== v) {
-            const max = this.maxValue;
-            if (max != null && v > max) v = max;
-            
-            if (this.minValue !== v) {
-                this.minValue = v;
-                if (this.inited) {
-                    this.fireEvent('minValue', v);
-                    
-                    // Rerun setValue since the filter has changed.
-                    this.setValue(this.value);
-                }
-            }
-        }
-    },
-    
-    setMaxValue: function(v) {
-        if (this.snapToInt && v != null) v = Math.round(v);
-        
-        if (this.maxValue !== v) {
-            const min = this.minValue;
-            if (min != null && v < min) v = min;
-            
-            if (this.maxValue !== v) {
-                this.maxValue = v;
-                if (this.inited) {
-                    this.fireEvent('maxValue', v);
-                    
-                    // Rerun setValue since the filter has changed.
-                    this.setValue(this.value);
-                }
-            }
-        }
-    },
-    
-    /** @overrides myt.ValueComponent */
-    setValue: function(v) {
-        this.callSuper(this.snapToInt && v != null && !isNaN(v) ? Math.round(v) : v);
-    }
-});
-
-
-/** A value that consists of an upper and lower value. The lower value must
-    be less than or equal to the upper value. The value object that must be
-    passed into setValue and returned from getValue is an object of the
-    form: {lower:number, upper:number}. */
-myt.RangeComponent = new JS.Module('RangeComponent', {
-    include: [myt.ValueComponent],
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setLowerValue: function(v) {
-        this.setValue({
-            lower:v, 
-            upper:(this.value && this.value.upper !== undefined) ? this.value.upper : v
-        });
-    },
-    
-    getLowerValue: function() {
-        return this.value ? this.value.lower : undefined;
-    },
-    
-    setUpperValue: function(v) {
-        this.setValue({
-            lower:(this.value && this.value.lower !== undefined) ? this.value.lower : v,
-            upper:v
-        });
-    },
-    
-    getUpperValue: function() {
-        return this.value ? this.value.upper : undefined;
-    },
-    
-    setValue: function(v) {
-        if (v) {
-            const existing = this.value,
-                existingLower = existing ? existing.lower : undefined,
-                existingUpper = existing ? existing.upper : undefined;
-            
-            if (this.valueFilter) v = this.valueFilter(v);
-            
-            // Do nothing if value is identical
-            if (v.lower === existingLower && v.upper === existingUpper) return;
-            
-            // Assign upper to lower if no lower was provided.
-            if (v.lower == null) v.lower = v.upper;
-            
-            // Assign lower to upper if no upper was provided.
-            if (v.upper == null) v.upper = v.lower;
-            
-            // Swap lower and upper if they are in the wrong order
-            if (v.lower !== undefined && v.upper !== undefined && v.lower > v.upper) {
-                const temp = v.lower;
-                v.lower = v.upper;
-                v.upper = temp;
-            }
-            
-            this.value = v;
-            if (this.inited) {
-                this.fireEvent('value', this.getValue());
-                if (v.lower !== existingLower) this.fireEvent('lowerValue', v.lower);
-                if (v.upper !== existingUpper) this.fireEvent('upperValue', v.upper);
-            }
-        } else {
-            this.callSuper(v);
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    getValueCopy: function() {
-        const v = this.value;
-        return {lower:v.lower, upper:v.upper};
-    }
-});
-
-
-/** A numeric value component that stays within an upper and lower value and
-    where the value is a range. */
-myt.BoundedRangeComponent = new JS.Module('BoundedRangeComponent', {
-    include: [myt.BoundedValueComponent, myt.RangeComponent],
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        if (!attrs.valueFilter) {
-            const self = this;
-            attrs.valueFilter = v => {
-                if (v) {
-                    const max = self.maxValue,
-                        min = self.minValue;
-                    if (max != null && v.upper > max) v.upper = max;
-                    if (min != null && v.lower < min) v.lower = min;
-                }
-                return v;
-            };
-        }
-        
-        this.callSuper(parent, attrs);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrides myt.ValueComponent */
-    setValue: function(v) {
-        if (this.snapToInt && v != null) {
-            if (v.lower != null && !isNaN(v.lower)) v.lower = Math.round(v.lower);
-            if (v.upper != null && !isNaN(v.upper)) v.upper = Math.round(v.upper);
-        }
-        this.callSuper(v);
-    }
-});
 
 
 ((pkg) => {

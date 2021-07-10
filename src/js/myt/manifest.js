@@ -63,6 +63,7 @@ JS.Packages(function() {
     
     // Component
     const MYT_COMPONENT_ROOT = MYT_ROOT + 'component/';
+    file(MYT_COMPONENT_ROOT + 'BAG.js'             ).provides('myt.BAG','myt.BAGMembership').requires('myt.Node');
     file(MYT_COMPONENT_ROOT + 'Button.js'          )
         .provides('myt.Button','myt.SimpleButtonStyle','myt.SimpleButton','myt.SimpleIconTextButton','myt.SimpleTextButton','myt.IconTextButtonContent','myt.TextButtonContent')
         .requires('myt.UpdateableUI','myt.MouseOverAndDown','myt.KeyActivation','myt.Disableable','myt.View','myt.Image','myt.Text');
@@ -75,6 +76,9 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'ListView.js'        ).provides('myt.ListView','myt.ListViewAnchor','myt.ListViewItemMixin','myt.ListViewSeparator','myt.ListViewItem')
         .requires('myt.FloatingPanel','myt.FloatingPanelAnchor','myt.SimpleIconTextButton');
     file(MYT_COMPONENT_ROOT + 'ModalPanel.js'      ).provides('myt.ModalPanel').requires('myt.Dimmer','myt.SizeToChildren');
+    file(MYT_COMPONENT_ROOT + 'ModelMixins.js'     ).provides('myt.ValueComponent','myt.RangeComponent','myt.BoundedValueComponent','myt.BoundedRangeComponent').requires('myt');
+    file(MYT_COMPONENT_ROOT + 'NativeInput.js'     ).provides('myt.NativeInputWrapper','myt.BaseInputText','myt.InputText','myt.ComboBox','myt.InputTextArea','myt.EditableText','myt.InputSelect','myt.InputSelectOption')
+        .requires('myt.Button','myt.InputObservable','myt.ListViewAnchor','myt.SizeToDom','myt.Selectable');
     file(MYT_COMPONENT_ROOT + 'PanelStack.js'      ).provides('myt.PanelStack','myt.StackablePanel','myt.PanelStackTransition','myt.PanelStackFadeTransition','myt.PanelStackSlideTransition')
         .requires('myt.View','myt.SelectionManager');
     file(MYT_COMPONENT_ROOT + 'Path.js'            ).provides('myt.Path' ).requires('myt');
@@ -153,28 +157,11 @@ JS.Packages(function() {
         .provides('myt.InfiniteGrid','myt.InfiniteGridRow','myt.InfiniteGridHeader','myt.SelectableInfiniteGrid','myt.SelectableInfiniteGridRow','myt.SimpleSelectableInfiniteGridRow')
         .requires('myt.SelectableInfiniteList','myt.GridController');
     
-    // Component : Input
-    file(MYT_COMPONENT_ROOT + 'input/NativeInputWrapper.js').provides('myt.NativeInputWrapper'                 ).requires('myt.View','myt.InputObservable','myt.Disableable');
-    file(MYT_COMPONENT_ROOT + 'input/BaseInputText.js'     ).provides('myt.BaseInputText'                      ).requires('myt.NativeInputWrapper','myt.TextSupport');
-    file(MYT_COMPONENT_ROOT + 'input/InputText.js'         ).provides('myt.InputText'                          ).requires('myt.BaseInputText');
-    file(MYT_COMPONENT_ROOT + 'input/ComboBox.js'          ).provides('myt.ComboBox'                           ).requires('myt.InputText','myt.ListViewAnchor');
-    file(MYT_COMPONENT_ROOT + 'input/InputTextArea.js'     ).provides('myt.InputTextArea'                      ).requires('myt.BaseInputText');
-    file(MYT_COMPONENT_ROOT + 'input/EditableText.js'      ).provides('myt.EditableText'                       ).requires('myt.BaseInputText');
-    file(MYT_COMPONENT_ROOT + 'input/InputSelect.js'       ).provides('myt.InputSelect','myt.InputSelectOption').requires('myt.NativeInputWrapper','myt.SizeToDom','myt.Selectable');
-    
     // Component : Layout
     file(MYT_COMPONENT_ROOT + 'layout/SpacedLayout.js'  ).provides('myt.SpacedLayout'  ).requires('myt.VariableLayout');
     file(MYT_COMPONENT_ROOT + 'layout/ResizeLayout.js'  ).provides('myt.ResizeLayout'  ).requires('myt.SpacedLayout');
     file(MYT_COMPONENT_ROOT + 'layout/WrappingLayout.js').provides('myt.WrappingLayout').requires('myt.VariableLayout');
     file(MYT_COMPONENT_ROOT + 'layout/AlignedLayout.js' ).provides('myt.AlignedLayout' ).requires('myt.VariableLayout');
-    
-    // Component : Model
-    file(MYT_COMPONENT_ROOT + 'model/BAGMembership.js'        ).provides('myt.BAGMembership'        ).requires('myt.Node');
-    file(MYT_COMPONENT_ROOT + 'model/BAG.js'                  ).provides('myt.BAG'                  ).requires('myt.BAGMembership');
-    file(MYT_COMPONENT_ROOT + 'model/ValueComponent.js'       ).provides('myt.ValueComponent'       ).requires('myt');
-    file(MYT_COMPONENT_ROOT + 'model/BoundedValueComponent.js').provides('myt.BoundedValueComponent').requires('myt.ValueComponent');
-    file(MYT_COMPONENT_ROOT + 'model/RangeComponent.js'       ).provides('myt.RangeComponent'       ).requires('myt.ValueComponent');
-    file(MYT_COMPONENT_ROOT + 'model/BoundedRangeComponent.js').provides('myt.BoundedRangeComponent').requires('myt.RangeComponent','myt.BoundedValueComponent');
     
     // Component : Uploader
     file(MYT_COMPONENT_ROOT + 'uploader/DragDropSupport.js').provides('myt.DragDropSupport').requires('myt.DragDropObservable','myt.Disableable');

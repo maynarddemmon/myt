@@ -357,10 +357,9 @@
                 
                 self.callSuper(parent, attrs);
                 
-                const TabSlider = pkg.TabSlider;
-                const container = new pkg.View(self, {
+                const container = new View(self, {
                     name:'container', ignorePlacement:true, percentOfParentWidth:100
-                }, [pkg.SizeToParent, {
+                }, [SizeToParent, {
                     /** @overrides myt.View */
                     subnodeAdded: function(node) {
                         this.callSuper(node);
