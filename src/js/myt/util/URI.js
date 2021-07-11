@@ -47,21 +47,21 @@
             const self = this,
                 m = (loose ? looseParser : strictParser).exec(str);
             
-            self.setSource(m[0] || "");
+            self.setSource(m[0] || '');
             
-            self.setProtocol(m[1] || "");
-            self.setAuthority(m[2] || "");
-            self.setUserInfo(m[3] || "");
-            self.setUser(m[4] || "");
-            self.setPassword(m[5] || "");
-            self.setHost(m[6] || "");
-            self.setPort(m[7] || "");
-            self.setRelative(m[8] || "");
-            self.setPath(m[9] || "");
-            self.setDirectory(m[10] || "");
-            self.setFile(m[11] || "");
-            self.setQuery(m[12] || "");
-            self.setAnchor(m[13] || "");
+            self.setProtocol(m[1] || '');
+            self.setAuthority(m[2] || '');
+            self.setUserInfo(m[3] || '');
+            self.setUser(m[4] || '');
+            self.setPassword(m[5] || '');
+            self.setHost(m[6] || '');
+            self.setPort(m[7] || '');
+            self.setRelative(m[8] || '');
+            self.setPath(m[9] || '');
+            self.setDirectory(m[10] || '');
+            self.setFile(m[11] || '');
+            self.setQuery(m[12] || '');
+            self.setAnchor(m[13] || '');
             
             // Parse the query into pairs
             self.queryPairs = {};
@@ -71,20 +71,15 @@
         },
         
         /** Unescape a query param value.
-            @param {string} v
+            @param {string} paramValue
             @returns {string} */
-        decodeQueryParam: function(v) {
-            v = decodeURIComponent(v);
-            return v.replace('+', ' ');
-        },
+        decodeQueryParam: paramValue => decodeURIComponent(paramValue).replace('+', ' '),
         
         getQuery: function() {
             const pairs = this.queryPairs,
                 parts = [];
-            let key,
-                s;
-            for (key in pairs) parts.push(key + '=' + encodeURIComponent(this.getQueryParam(key)));
-            s = parts.join('&');
+            for (const key in pairs) parts.push(key + '=' + encodeURIComponent(this.getQueryParam(key)));
+            const s = parts.join('&');
             return s.length > 0 ? '?' + s : s;
         },
         

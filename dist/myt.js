@@ -1091,10 +1091,10 @@ Date.prototype.format = Date.prototype.format || (() => {
     const pluses = /\+/g,
         
         /* Function to return a raw cookie name/value. */
-        raw = (s) => s,
+        raw = s => s,
         
         /* Function to return a URI decoded cookie name/value. */
-        decoded = (s) => decodeURIComponent(s.replace(pluses, ' ')),
+        decoded = s => decodeURIComponent(s.replace(pluses, ' ')),
         
         /*  Function to convert a stored cookie value into a value that can
             be returned. */
@@ -1142,17 +1142,14 @@ Date.prototype.format = Date.prototype.format || (() => {
                 
                 const decodeFunc = options.raw ? raw : decoded,
                     useJson = options.json,
-                    cookies = document.cookie.split('; ');
-                let result = key ? undefined : {},
-                    parts, 
-                    name, 
-                    cookie, 
-                    i = 0, 
+                    cookies = document.cookie.split('; '),
                     len = cookies.length;
+                let result = key ? undefined : {},
+                    i = 0;
                 for (; i < len;) {
-                    parts = cookies[i++].split('=');
-                    name = decodeFunc(parts.shift());
-                    cookie = decodeFunc(parts.join('='));
+                    const parts = cookies[i++].split('='),
+                        name = decodeFunc(parts.shift()),
+                        cookie = decodeFunc(parts.join('='));
                     
                     if (key && key === name) {
                         result = converted(cookie, useJson);
@@ -1220,7 +1217,7 @@ Date.prototype.format = Date.prototype.format || (() => {
 ((pkg) => {
     const localStorage = global.localStorage,
         
-        getStoreId = (storeId) => storeId = storeId || 'myt',
+        getStoreId = storeId => storeId = storeId || 'myt',
         
         doFunc = (func, delay, timerKey) => {
             if (delay > 0) {
@@ -1326,13 +1323,13 @@ Date.prototype.format = Date.prototype.format || (() => {
                     not provided the default "myt" storeId will be used.
                 @returns {boolean} - false if an undefined or null value is found,
                     otherwise true. */
-            hasData: (storeId) => LocalStorage.getItem(getStoreId(storeId)) != null,
+            hasData: storeId => LocalStorage.getItem(getStoreId(storeId)) != null,
             
             /** Get the data store stored under storage id.
                 @param {string} [storeId] - The id of the data store to get data for.
                     If not provided the default "myt" storeId will be used.
                 @returns {!Object} - The store object. */
-            getData: (storeId) => {
+            getData: storeId => {
                 const data = LocalStorage.getItem(getStoreId(storeId));
                 if (data) {
                     try {
@@ -1387,11 +1384,11 @@ Date.prototype.format = Date.prototype.format || (() => {
             
             /** @param {number} n - The index of the key name to retrieve.
                 @returns {string} The name of the nth key in the storage. */
-            getKey: (n) => localStorage.key(n),
+            getKey: n => localStorage.key(n),
             
             /** @param {string} key - The name of the storage entry to return.
                 @returns {*} - The value of the storage entry or null if not found. */
-            getItem: (key) => localStorage.getItem(key),
+            getItem: key => localStorage.getItem(key),
             
             /** Stores the value under the key. If a value already exists for
                 the key the value will be replaced with the new value.
@@ -1405,7 +1402,7 @@ Date.prototype.format = Date.prototype.format || (() => {
             /** Removes the storage entry for the key.
                 @param {string} key - The key to remove.
                 @returns {undefined} */
-            removeItem: (key) => {
+            removeItem: key => {
                 localStorage.removeItem(key);
             },
             
@@ -1419,7 +1416,7 @@ Date.prototype.format = Date.prototype.format || (() => {
             /** An alias for getItem.
                 @param {string} key - The name of the storage entry to return.
                 @returns {*} - The value of the storage entry or null if not found. */
-            get: (key) => LocalStorage.getItem(key),
+            get: key => LocalStorage.getItem(key),
             
             /** An alias for setItem.
                 @param {string} key - The key to store the value under.
@@ -1432,7 +1429,7 @@ Date.prototype.format = Date.prototype.format || (() => {
             /** An alias for removeItem.
                 @param {string} key - The key to remove.
                 @returns {undefined} */
-            remove: (key) => {
+            remove: key => {
                 LocalStorage.removeItem(key);
             },
             
@@ -1494,21 +1491,21 @@ Date.prototype.format = Date.prototype.format || (() => {
             const self = this,
                 m = (loose ? looseParser : strictParser).exec(str);
             
-            self.setSource(m[0] || "");
+            self.setSource(m[0] || '');
             
-            self.setProtocol(m[1] || "");
-            self.setAuthority(m[2] || "");
-            self.setUserInfo(m[3] || "");
-            self.setUser(m[4] || "");
-            self.setPassword(m[5] || "");
-            self.setHost(m[6] || "");
-            self.setPort(m[7] || "");
-            self.setRelative(m[8] || "");
-            self.setPath(m[9] || "");
-            self.setDirectory(m[10] || "");
-            self.setFile(m[11] || "");
-            self.setQuery(m[12] || "");
-            self.setAnchor(m[13] || "");
+            self.setProtocol(m[1] || '');
+            self.setAuthority(m[2] || '');
+            self.setUserInfo(m[3] || '');
+            self.setUser(m[4] || '');
+            self.setPassword(m[5] || '');
+            self.setHost(m[6] || '');
+            self.setPort(m[7] || '');
+            self.setRelative(m[8] || '');
+            self.setPath(m[9] || '');
+            self.setDirectory(m[10] || '');
+            self.setFile(m[11] || '');
+            self.setQuery(m[12] || '');
+            self.setAnchor(m[13] || '');
             
             // Parse the query into pairs
             self.queryPairs = {};
@@ -1518,20 +1515,15 @@ Date.prototype.format = Date.prototype.format || (() => {
         },
         
         /** Unescape a query param value.
-            @param {string} v
+            @param {string} paramValue
             @returns {string} */
-        decodeQueryParam: function(v) {
-            v = decodeURIComponent(v);
-            return v.replace('+', ' ');
-        },
+        decodeQueryParam: paramValue => decodeURIComponent(paramValue).replace('+', ' '),
         
         getQuery: function() {
             const pairs = this.queryPairs,
                 parts = [];
-            let key,
-                s;
-            for (key in pairs) parts.push(key + '=' + encodeURIComponent(this.getQueryParam(key)));
-            s = parts.join('&');
+            for (const key in pairs) parts.push(key + '=' + encodeURIComponent(this.getQueryParam(key)));
+            const s = parts.join('&');
             return s.length > 0 ? '?' + s : s;
         },
         

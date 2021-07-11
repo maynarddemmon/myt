@@ -1,7 +1,7 @@
 ((pkg) => {
     const localStorage = global.localStorage,
         
-        getStoreId = (storeId) => storeId = storeId || 'myt',
+        getStoreId = storeId => storeId = storeId || 'myt',
         
         doFunc = (func, delay, timerKey) => {
             if (delay > 0) {
@@ -107,13 +107,13 @@
                     not provided the default "myt" storeId will be used.
                 @returns {boolean} - false if an undefined or null value is found,
                     otherwise true. */
-            hasData: (storeId) => LocalStorage.getItem(getStoreId(storeId)) != null,
+            hasData: storeId => LocalStorage.getItem(getStoreId(storeId)) != null,
             
             /** Get the data store stored under storage id.
                 @param {string} [storeId] - The id of the data store to get data for.
                     If not provided the default "myt" storeId will be used.
                 @returns {!Object} - The store object. */
-            getData: (storeId) => {
+            getData: storeId => {
                 const data = LocalStorage.getItem(getStoreId(storeId));
                 if (data) {
                     try {
@@ -168,11 +168,11 @@
             
             /** @param {number} n - The index of the key name to retrieve.
                 @returns {string} The name of the nth key in the storage. */
-            getKey: (n) => localStorage.key(n),
+            getKey: n => localStorage.key(n),
             
             /** @param {string} key - The name of the storage entry to return.
                 @returns {*} - The value of the storage entry or null if not found. */
-            getItem: (key) => localStorage.getItem(key),
+            getItem: key => localStorage.getItem(key),
             
             /** Stores the value under the key. If a value already exists for
                 the key the value will be replaced with the new value.
@@ -186,7 +186,7 @@
             /** Removes the storage entry for the key.
                 @param {string} key - The key to remove.
                 @returns {undefined} */
-            removeItem: (key) => {
+            removeItem: key => {
                 localStorage.removeItem(key);
             },
             
@@ -200,7 +200,7 @@
             /** An alias for getItem.
                 @param {string} key - The name of the storage entry to return.
                 @returns {*} - The value of the storage entry or null if not found. */
-            get: (key) => LocalStorage.getItem(key),
+            get: key => LocalStorage.getItem(key),
             
             /** An alias for setItem.
                 @param {string} key - The key to store the value under.
@@ -213,7 +213,7 @@
             /** An alias for removeItem.
                 @param {string} key - The key to remove.
                 @returns {undefined} */
-            remove: (key) => {
+            remove: key => {
                 LocalStorage.removeItem(key);
             },
             

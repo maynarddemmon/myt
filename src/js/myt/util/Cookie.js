@@ -2,10 +2,10 @@
     const pluses = /\+/g,
         
         /* Function to return a raw cookie name/value. */
-        raw = (s) => s,
+        raw = s => s,
         
         /* Function to return a URI decoded cookie name/value. */
-        decoded = (s) => decodeURIComponent(s.replace(pluses, ' ')),
+        decoded = s => decodeURIComponent(s.replace(pluses, ' ')),
         
         /*  Function to convert a stored cookie value into a value that can
             be returned. */
@@ -53,17 +53,14 @@
                 
                 const decodeFunc = options.raw ? raw : decoded,
                     useJson = options.json,
-                    cookies = document.cookie.split('; ');
-                let result = key ? undefined : {},
-                    parts, 
-                    name, 
-                    cookie, 
-                    i = 0, 
+                    cookies = document.cookie.split('; '),
                     len = cookies.length;
+                let result = key ? undefined : {},
+                    i = 0;
                 for (; i < len;) {
-                    parts = cookies[i++].split('=');
-                    name = decodeFunc(parts.shift());
-                    cookie = decodeFunc(parts.join('='));
+                    const parts = cookies[i++].split('='),
+                        name = decodeFunc(parts.shift()),
+                        cookie = decodeFunc(parts.join('='));
                     
                     if (key && key === name) {
                         result = converted(cookie, useJson);
