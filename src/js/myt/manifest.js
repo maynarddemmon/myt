@@ -131,9 +131,9 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'behavior/MouseOverAndDown.js').provides('myt.MouseOverAndDown').requires('myt.MouseDown');
     
     // Component : Dialog
-    file(MYT_COMPONENT_ROOT + 'dialog/spectrum.js').provides('$.spectrum').requires('myt.Color'); // Requires JQuery 1.7.0+
+    file(MYT_COMPONENT_ROOT + 'dialog/ColorPicker.js').provides('myt.ColorPicker').requires('myt.Color','myt.Text','myt.FontAwesome', 'myt.Draggable');
     file(MYT_COMPONENT_ROOT + 'dialog/simple-dtpicker.js').provides('$.fn.dtpicker'); // Requires JQuery 1.7.2+
-    file(MYT_COMPONENT_ROOT + 'dialog/Dialog.js').provides('myt.Dialog').requires('$.spectrum','$.fn.dtpicker','myt.ModalPanel','myt.Spinner','myt.SimpleButton');
+    file(MYT_COMPONENT_ROOT + 'dialog/Dialog.js').provides('myt.Dialog').requires('myt.ColorPicker','$.fn.dtpicker','myt.ModalPanel','myt.Spinner','myt.SimpleButton');
     
     // Component : Grid
     file(MYT_COMPONENT_ROOT + 'grid/GridColumnHeader.js'      ).provides('myt.GridColumnHeader'      ).requires('myt.View','myt.BoundedValueComponent');

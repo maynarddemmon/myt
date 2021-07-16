@@ -924,6 +924,26 @@ Date.prototype.format = Date.prototype.format || (() => {
             },
             
             // Misc
+            /** Format a number between 0 and 1 as a percentage.
+                @param {number} num The number to convert.
+                @param {number} [fixed] The number of decimal places to use during
+                    formatting. If the percentage is a whole number no decimal
+                    places will be used. For example 0.55781 -> 55.78% and
+                    0.55 -> 55%
+                @returns (string) */
+            formatAsPercentage: (num, fixed=2) => {
+                if (typeof num === 'number') {
+                    fixed = Math.max(16, Math.min(0, fixed));
+                    const percent = Math.round(Math.max(0, Math.min(1, num)) * Math.pow(10, 2+fixed)) / Math.pow(10, fixed);
+                    return (percent % 1 === 0 ? percent : percent.toFixed(fixed)) + '%';
+                } else if (typeof num === 'string') {
+                    return num;
+                } else {
+                    console.warn('formatAsPercentage: expects a number');
+                    return num;
+                }
+            },
+            
             /** Memoize a function.
                 @param {!Function} func - The function to memoize
                 @returns {!Function} - The memoized function. */
@@ -17071,7 +17091,11 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
 
 
 ((pkg) => {
-    const cleanChannelValue = value => Math.min(255, Math.max(0, Math.round(value))),
+    const math = Math,
+        mathMax = math.max,
+        mathMin = math.min,
+        
+        cleanChannelValue = value => mathMin(255, mathMax(0, math.round(value))),
         toHex = value => {
             value = cleanChannelValue(value).toString(16);
             return value.length === 1 ? '0' + value : value;
@@ -17081,6 +17105,63 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         getGreenChannel = value => (0x00ff00 & value) >> 8,
         getBlueChannel = value => (0x0000ff & value),
         makeColorFromNumber = value => new Color(getRedChannel(value), getGreenChannel(value), getBlueChannel(value)),
+        makeColorNumberFromChannels = (red, green, blue) => (cleanChannelValue(red) << 16) + (cleanChannelValue(green) << 8) + cleanChannelValue(blue),
+        toUnitRange = (num, max) => {
+            if (typeof num === 'string') {
+                if (num.endsWith('%')) {
+                    num = parseFloat(num.substring(0, num.length - 1)) * max / 100;
+                } else {
+                    return 0;
+                }
+            }
+            num = mathMin(max, mathMax(0, num)) / max;
+            return math.abs(1 - num) < 0.000001 ? 1 : num;
+        },
+        
+        rgbToHsv = (r, g, b) => {
+            r = toUnitRange(r, 255);
+            g = toUnitRange(g, 255);
+            b = toUnitRange(b, 255);
+            
+            const max = mathMax(r, g, b),
+                diff = max - mathMin(r, g, b);
+            if (diff === 0) {
+                // achromatic
+                return {h:0, s:0, v:max};
+            } else {
+                let h;
+                switch (max) {
+                    case r:
+                        h = (g - b) / diff + (g < b ? 6 : 0);
+                        break;
+                    case g:
+                        h = (b - r) / diff + 2;
+                        break;
+                    case b:
+                        h = (r - g) / diff + 4;
+                        break;
+                }
+                return {h:h * 60, s:max === 0 ? 0 : diff / max, v:max};
+            }
+        },
+        
+        hsvToRgb = (h, s, v) => {
+            h = toUnitRange(h, 360) * 6;
+            s = toUnitRange(s, 100);
+            v = toUnitRange(v, 100);
+            
+            const i = math.floor(h),
+                f = h - i,
+                p = v * (1 - s),
+                q = v * (1 - f * s),
+                t = v * (1 - (1 - f) * s),
+                mod = i % 6,
+                red = [v, q, p, p, t, v][mod],
+                green = [t, v, v, q, p, p][mod],
+                blue = [p, p, t, v, v, q][mod];
+            
+            return {red:red * 255, green:green * 255, blue:blue * 255};
+        },
         
         /** Models a color as individual color channels.
             
@@ -17093,6 +17174,10 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
         Color = pkg.Color = new JS.Class('Color', {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
+                toUnitRange:toUnitRange,
+                rgbToHsv:rgbToHsv,
+                hsvToRgb:hsvToRgb,
+                
                 /** Converts a number or string representation of a number to a 
                     two character hex string.
                     @param {number|string} value - The number or string to convert.
@@ -17139,7 +17224,25 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
                         color, such as '#ff339b'.
                     @returns {!Object} a myt.Color or null if no color could 
                         be parsed. */
-                makeColorFromHexString: value => (value && value.indexOf('#') === 0) ? makeColorFromNumber(parseInt(value.substring(1), 16)) : null,
+                makeColorFromHexString: value => {
+                    if (value) {
+                        if (!value.startsWith('#')) value = '#' + value;
+                        return makeColorFromNumber(parseInt(value.substring(1), 16));
+                    } else {
+                        return null;
+                    }
+                },
+                
+                /** Creates an myt.Color from hue, saturation and value
+                    parameters.
+                    @param {number} h - The hue. A number from 0 to 360.
+                    @param {number} s - The saturation. A number from 0 to 100.
+                    @param {number} v - The value. A number from 0 to 100.
+                    @returns {!Object} myt.Color */
+                makeColorFromHSV: (h, s, v) => {
+                    const rgb = hsvToRgb(h, s, v);
+                    return makeColorFromNumber(makeColorNumberFromChannels(rgb.red, rgb.green, rgb.blue));
+                },
                 
                 /** Returns the lighter of the two provided colors.
                     @param {number} a - A color number.
@@ -17148,12 +17251,12 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
                         lighter color. */
                 getLighterColor: (a, b) => makeColorFromNumber(a).isLighterThan(makeColorFromNumber(b)) ? a : b,
                 
-                /** Creates a "color" number from the provided color channels.
+                /** Creates an RGB "color" number from the provided color channels.
                     @param {number} red - The red channel
                     @param {number} green - The green channel
                     @param {number} blue - The blue channel
                     @returns {number} */
-                makeColorNumberFromChannels: (red, green, blue) => (cleanChannelValue(red) << 16) + (cleanChannelValue(green) << 8) + cleanChannelValue(blue),
+                makeColorNumberFromChannels: makeColorNumberFromChannels,
                 
                 /** Creates a new myt.Color object that is a blend of the two 
                     provided colors.
@@ -17219,6 +17322,12 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
                 @returns {string} A hex color such as '#a0bbcc'. */
             getHtmlHexString: function() {
                 return rgbToHex(this.red, this.green, this.blue, true);
+            },
+            
+            /** Gets an HSV representation of this Color.
+                @returns {!Object} With keys h, s and v. */
+            getHSV: function() {
+                return rgbToHsv(this.red, this.green, this.blue);
             },
             
             /** Tests if this color is lighter than the provided color.
@@ -17313,762 +17422,821 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
 })(myt);
 
 
-// Spectrum Colorpicker v1.4.1
-// https://github.com/bgrins/spectrum
-// Author: Brian Grinstead
-// License: MIT
-(function (window, $) {
-    "use strict";
-    
-    const defaultOpts = {
-            color: false,
-            allowEmpty: true,
-            showSelectionPalette: true,
-            localStorageKey: false,
-            selectionWrapSize: 8,
-            maxSelectionSize: 56,
-            clearText: "Clear Color Selection",
-            noColorSelectedText: "No Color Selected",
-            palette: [],
-            selectionPalette: []
-        },
-        spectrums = [],
-        markup = [
-            "<div class='sp-container'>",
-                "<div class='sp-palette-container'>",
-                    "<div class='sp-palette sp-thumb sp-cf'></div>",
-                "</div>",
-                "<div class='sp-picker-container'>",
-                    "<div class='sp-top sp-cf'>",
-                        "<div class='sp-fill'></div>",
-                        "<div class='sp-top-inner'>",
-                            "<div class='sp-color'>",
-                                "<div class='sp-sat'>",
-                                    "<div class='sp-val'>",
-                                        "<div class='sp-dragger'></div>",
-                                    "</div>",
-                                "</div>",
-                            "</div>",
-                            "<div class='sp-clear sp-clear-display'></div>",
-                            "<div class='sp-hue'>",
-                                "<div class='sp-slider'></div>",
-                            "</div>",
-                        "</div>",
-                    "</div>",
-                    "<div class='sp-input-container sp-cf'>",
-                        "<input class='sp-input' type='text' spellcheck='false'/>",
-                    "</div>",
-                    "<div class='sp-initial sp-thumb sp-cf'></div>",
-                "</div>",
-            "</div>"
-        ].join("");
-    
-    function paletteTemplate(p, color, opts) {
-        const html = [];
-        let i = 0,
-            current,
-            tiny,
-            c;
-        for (;i < p.length;) {
-            current = p[i++];
-            if (current) {
-                tiny = tinycolor(current);
-                c = tiny.toHsl().l < 0.5 ? "sp-thumb-el sp-thumb-dark" : "sp-thumb-el sp-thumb-light";
-                c += tinycolor.equals(color, current) ? " sp-thumb-active" : "";
-                html.push('<span title="' + tiny.toHexString() + '" data-color="' + tiny.toHexString() + '" class="' + c + '"><span class="sp-thumb-inner" style="background-color:' + tiny.toHexString() + ';"></span></span>');
-            } else {
-                html.push($('<div />')
-                    .append($('<span data-color="" style="background-color:transparent;" class="sp-clear-display"></span>')
-                        .attr('title', opts.noColorSelectedText)
-                    ).html()
-                );
-            }
-        }
-        return "<div class='sp-cf'>" + html.join('') + "</div>";
-    }
-    
-    function spectrum(element, o) {
-        const opts = Object.assign({}, defaultOpts, o),
-            showSelectionPalette = opts.showSelectionPalette,
-            localStorageKey = opts.localStorageKey,
-            initialColor = opts.color,
-            doc = element.ownerDocument,
-            body = doc.body,
-            boundElement = $(element),
-            container = $(markup, doc),
-            pickerContainer = container.find(".sp-picker-container"),
-            dragger = container.find(".sp-color"),
-            dragHelper = container.find(".sp-dragger"),
-            slider = container.find(".sp-hue"),
-            slideHelper = container.find(".sp-slider"),
-            textInput = container.find(".sp-input"),
-            paletteContainer = container.find(".sp-palette"),
-            initialColorContainer = container.find(".sp-initial"),
-            clearButton = container.find(".sp-clear"),
-            allowEmpty = opts.allowEmpty,
-            dialog = opts.dialog;
+((pkg) => {
+    const sizeClasses = ['','fa-lg','fa-2x','fa-3x','fa-4x','fa-5x'],
         
-        let dragWidth = 0,
-            dragHeight = 0,
-            dragHelperHeight = 0,
-            slideHeight = 0,
-            slideWidth = 0,
-            slideHelperHeight = 0,
-            currentHue = 0,
-            currentSaturation = 0,
-            currentValue = 0,
-            palette = [],
-            paletteArray = [],
-            paletteLookup = {},
-            selectionPalette = opts.selectionPalette.slice(0),
-            selectionWrapSize = opts.selectionWrapSize,
-            maxSelectionSize = opts.maxSelectionSize,
-            draggingClass = "sp-dragging",
-            shiftMovementDirection = null,
-            isEmpty = !initialColor,
-            colorOnShow = false;
-        
-        function applyOptions() {
-            if (opts.palette) {
-                palette = opts.palette.slice(0);
-                paletteArray = Array.isArray(palette[0]) ? palette : [palette];
-                paletteLookup = {};
-                for (let i = 0; i < paletteArray.length; i++) {
-                    for (let j = 0; j < paletteArray[i].length; j++) {
-                        const rgb = tinycolor(paletteArray[i][j]).toHexString();
-                        paletteLookup[rgb] = true;
-                    }
-                }
-            }
-            container.toggleClass("sp-clear-enabled", allowEmpty);
-            reflow();
-        }
-        
-        function initialize() {
-            applyOptions();
-            
-            if (!allowEmpty) clearButton.hide();
-            
-            boundElement.after(container).hide();
-            
-            updateSelectionPaletteFromStorage();
-            
-            // Handle user typed input
-            textInput.change(setFromTextInput);
-            textInput.bind("paste", function() {
-                setTimeout(setFromTextInput, 1);
-            });
-            textInput.keydown(function(e) {if (e.keyCode == 13) {setFromTextInput();}});
-            
-            clearButton.attr("title", opts.clearText);
-            clearButton.bind("click.spectrum", function(e) {
-                e.stopPropagation();
-                e.preventDefault();
-                isEmpty = true;
-                updateUI();
-            });
-            
-            draggable(slider, function(dragX, dragY) {
-                currentHue = parseFloat(dragY / slideHeight);
-                isEmpty = false;
-                updateUI();
-            }, dragStart, dragStop);
-            
-            draggable(dragger, function(dragX, dragY, e) {
-                // shift+drag should snap the movement to either the x or y axis.
-                if (!e.shiftKey) {
-                    shiftMovementDirection = null;
-                } else if (!shiftMovementDirection) {
-                    const oldDragX = currentSaturation * dragWidth,
-                        oldDragY = dragHeight - (currentValue * dragHeight),
-                        furtherFromX = Math.abs(dragX - oldDragX) > Math.abs(dragY - oldDragY);
-                    shiftMovementDirection = furtherFromX ? "x" : "y";
-                }
-                
-                const setSaturation = !shiftMovementDirection || shiftMovementDirection === "x",
-                    setValue = !shiftMovementDirection || shiftMovementDirection === "y";
-                
-                if (setSaturation) currentSaturation = parseFloat(dragX / dragWidth);
-                if (setValue) currentValue = parseFloat((dragHeight - dragY) / dragHeight);
-                
-                isEmpty = false;
-                
-                updateUI();
-            }, dragStart, dragStop);
-            
-            if (!!initialColor) {
-                set(initialColor);
-                addColorToSelectionPalette(initialColor);
-            }
-            
-            reflow();
-            colorOnShow = get();
-            updateUI();
-            
-            function paletteElementClick(e) {
-                set($(e.target).closest(".sp-thumb-el").data("color"));
-                updateUI();
-                return false;
-            }
-            
-            const paletteEvent = "click.spectrum";
-            paletteContainer.delegate(".sp-thumb-el", paletteEvent, paletteElementClick);
-            initialColorContainer.delegate(".sp-thumb-el:nth-child(1)", paletteEvent, paletteElementClick);
-        }
-        
-        function updateSelectionPaletteFromStorage() {
-            if (localStorageKey && window.localStorage) {
-                try {
-                    selectionPalette = window.localStorage[localStorageKey].split(";");
-                } catch (e) {}
-            }
-        }
-        
-        function addColorToSelectionPalette(color) {
-            if (showSelectionPalette) {
-                const rgb = tinycolor(color).toHexString();
-                if (!paletteLookup[rgb] && $.inArray(rgb, selectionPalette) === -1) {
-                    selectionPalette.push(rgb);
-                    while (selectionPalette.length > maxSelectionSize) selectionPalette.shift();
-                }
-                
-                if (localStorageKey && window.localStorage) {
-                    try {
-                        window.localStorage[localStorageKey] = selectionPalette.join(";");
-                    } catch(e) {}
-                }
-            }
-        }
-        
-        function getUniqueSelectionPalette() {
-            const unique = [];
-            for (let i = 0; i < selectionPalette.length; i++) {
-                const rgb = tinycolor(selectionPalette[i]).toHexString();
-                if (!paletteLookup[rgb]) unique.push(selectionPalette[i]);
-            }
-            return unique.reverse().slice(0, opts.maxSelectionSize);
-        }
-        
-        function drawPalette() {
-            const currentColor = get();
-            
-            const html = $.map(paletteArray, function (palette, i) {
-                return paletteTemplate(palette, currentColor, opts);
-            });
-            
-            updateSelectionPaletteFromStorage();
-            
-            if (selectionPalette) {
-                const uniquePalette = getUniqueSelectionPalette(),
-                    len = uniquePalette.length;
-                for (let i = 0; len > i; i += selectionWrapSize) {
-                    html.push(paletteTemplate(uniquePalette.slice(i, i + selectionWrapSize), currentColor, opts));
-                }
-            }
-            
-            paletteContainer.html(html.join(""));
-        }
-        
-        function dragStart() {
-            if (dragHeight <= 0 || dragWidth <= 0 || slideHeight <= 0) reflow();
-            container.addClass(draggingClass);
-            shiftMovementDirection = null;
-            boundElement.trigger('dragstart.spectrum', [get()]);
-        }
-        
-        function dragStop() {
-            container.removeClass(draggingClass);
-            boundElement.trigger('dragstop.spectrum', [get()]);
-        }
-        
-        function setFromTextInput() {
-            const value = textInput.val();
-            if ((value === null || value === "") && allowEmpty) {
-                set(null);
-            } else {
-                const tiny = tinycolor(value);
-                if (tiny.isValid()) {
-                    set(tiny);
+        updateInstance = (instance) => {
+            let props = instance.properties;
+            if (props) {
+                if (typeof props === 'string') {
+                    props = props.split(' ');
                 } else {
-                    textInput.addClass("sp-validation-error");
+                    props = props.concat();
                 }
-            }
-        }
-        
-        function set(color) {
-            if (!tinycolor.equals(color, get())) {
-                let newColor,
-                    newHsv;
-                if (!color && allowEmpty) {
-                    isEmpty = true;
-                } else {
-                    isEmpty = false;
-                    newColor = tinycolor(color);
-                    newHsv = newColor.toHsv();
-                    currentHue = (newHsv.h % 360) / 360;
-                    currentSaturation = newHsv.s;
-                    currentValue = newHsv.v;
-                }
-            }
-            
-            // Update UI just in case a validation error needs to be cleared.
-            updateUI();
-        }
-        
-        function get() {
-            if (allowEmpty && isEmpty) return null;
-            
-            return tinycolor.fromRatio({
-                h: currentHue,
-                s: currentSaturation,
-                v: currentValue
-            });
-        }
-        
-        function updateUI() {
-            textInput.removeClass("sp-validation-error");
-            
-            updateHelperLocations();
-            
-            // Update dragger background color (gradients take care of saturation and value).
-            const flatColor = tinycolor.fromRatio({h:currentHue, s:1, v:1});
-            dragger.css("background-color", flatColor.toHexString());
-            
-            const realColor = get(),
-                displayColor = (realColor || !allowEmpty) ? realColor.toHexString() : '';
-            
-            // Update the text entry input as it changes happen
-            textInput.val(displayColor);
-            
-            drawPalette();
-            
-            // Draw initial
-            const initial = colorOnShow,
-                current = get();
-            initialColorContainer.html(paletteTemplate([initial, current], current, opts));
-        }
-        
-        function updateHelperLocations() {
-            if (allowEmpty && isEmpty) {
-                // if selected color is empty, hide the helpers
-                slideHelper.hide();
-                dragHelper.hide();
+                props.unshift(instance.size);
+                props.unshift(instance.icon);
             } else {
-                // make sure helpers are visible
-                slideHelper.show();
-                dragHelper.show();
-                
-                // Where to show the little circle in that displays your current selected color
-                let dragX = currentSaturation * dragWidth,
-                    dragY = dragHeight - (currentValue * dragHeight);
-                dragX = Math.max(
-                    -dragHelperHeight,
-                    Math.min(dragWidth - dragHelperHeight, dragX - dragHelperHeight)
-                );
-                dragY = Math.max(
-                    -dragHelperHeight,
-                    Math.min(dragHeight - dragHelperHeight, dragY - dragHelperHeight)
-                );
-                dragHelper.css({
-                    "top": dragY + "px",
-                    "left": dragX + "px"
-                });
-                
-                // Where to show the bar that displays your current selected hue
-                const slideY = currentHue * slideHeight;
-                slideHelper.css({
-                    "top": (slideY - slideHelperHeight) + "px"
-                });
+                props = [instance.icon, instance.size];
             }
-        }
-        
-        function reflow() {
-            dragWidth = dragger.width();
-            dragHeight = dragger.height();
-            dragHelperHeight = dragHelper.height();
-            slideWidth = slider.width();
-            slideHeight = slider.height();
-            slideHelperHeight = slideHelper.height();
             
-            updateHelperLocations();
-            drawPalette();
-            
-            boundElement.trigger('reflow.spectrum');
-        }
-        
-        function destroy() {
-            boundElement.show();
-            container.remove();
-            spectrums[spect.id] = null;
-        }
-        
-        function option(optionName, optionValue) {
-            if (optionName == null) return Object.assign({}, opts);
-            if (optionValue == null) return opts[optionName];
-            
-            opts[optionName] = optionValue;
-            applyOptions();
-        }
-        
-        initialize();
-        
-        const spect = {
-            reflow: reflow,
-            option: option,
-            set: set,
-            addColorToSelectionPalette: addColorToSelectionPalette,
-            get: get,
-            destroy: destroy,
-            container: container
+            instance.setHtml(FontAwesome.makeTag(props));
         };
-        
-        spect.id = spectrums.push(spect) - 1;
-        
-        dialog._spectrumCallback(spect);
-        
-        return spect;
-    }
     
-    /*  Lightweight drag helper.  Handles containment within the element, so that
-        when dragging, the x is within [0,element.width] and y is within [0,element.height] */
-    function draggable(element, onmove, onstart, onstop) {
-        onmove = onmove || function () { };
-        onstart = onstart || function () { };
-        onstop = onstop || function () { };
-        const doc = element.ownerDocument || document;
-        let dragging = false,
-            offset = {},
-            maxHeight = 0,
-            maxWidth = 0;
+    pkg.loadCSSFonts(['//use.fontawesome.com/releases/v5.0.8/css/all.css']);
+    
+    /** An adapter for FontAwesome.
         
-        const duringDragEvents = {};
-        duringDragEvents["selectstart"] = prevent;
-        duringDragEvents["dragstart"] = prevent;
-        duringDragEvents["mousemove"] = move;
-        duringDragEvents["mouseup"] = stop;
-        
-        function prevent(e) {
-            if (e.stopPropagation) e.stopPropagation();
-            if (e.preventDefault) e.preventDefault();
-            e.returnValue = false;
-        }
-        
-        function move(e) {
-            if (dragging) {
-                const dragX = Math.max(0, Math.min(e.pageX - offset.left, maxWidth)),
-                    dragY = Math.max(0, Math.min(e.pageY - offset.top, maxHeight));
-                onmove.apply(element, [dragX, dragY, e]);
-            }
-        }
-        
-        function start(e) {
-            const rightclick = (e.which) ? (e.which == 3) : (e.button == 2);
+        Attributes:
+            icon:string The name of the FA icon to set.
+            size:number A number from 0 to 5 with 0 being normal size and 5 being
+                the largest size.
+            propeties:string || array A space separated string or list of FA
+                CSS classes to set.
+    */
+    const FontAwesome = pkg.FontAwesome = new JS.Class('FontAwesome', pkg.Markup, {
+        // Class Methods and Attributes ////////////////////////////////////////
+        extend: {
+            makeTag: function(props) {
+                if (Array.isArray(props)) {
+                    let len = props.length,
+                        prop,
+                        i;
+                    if (len > 0) {
+                        props.unshift('fa');
+                        ++len;
+                        
+                        if (props[1].indexOf('fa-') !== 0) props[1] = 'fa-' + props[1];
+                        
+                        if (len >= 3) props[2] = sizeClasses[props[2]] || '';
+                        
+                        if (len > 3) {
+                            i = 3;
+                            for (; len > i; ++i) {
+                                prop = props[i];
+                                if (prop.indexOf('fa-') !== 0) props[i] = 'fa-' + prop;
+                            }
+                        }
+                        
+                        return '<i class="' + props.join(' ') + '"></i>';
+                    }
+                }
+                
+                pkg.dumpStack('Error making tag');
+                console.error(props);
+                return '';
+            },
             
-            if (!rightclick && !dragging) {
-                if (onstart.apply(element, arguments) !== false) {
-                    dragging = true;
-                    maxHeight = $(element).height();
-                    maxWidth = $(element).width();
-                    offset = $(element).offset();
-                    
-                    $(doc).bind(duringDragEvents);
-                    $(doc.body).addClass("sp-dragging");
-                    
-                    move(e);
-                    prevent(e);
+            registerForNotification: (instance) => {
+                pkg.registerForFontNotification(instance, 'Font Awesome\ 5 Free 400'); // regular
+                pkg.registerForFontNotification(instance, 'Font Awesome\ 5 Free 900'); // solid
+                pkg.registerForFontNotification(instance, 'Font Awesome\ 5 Brands 400'); // brands
+            },
+        },
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.View */
+        initNode: function(parent, attrs) {
+            this.size = 0;
+            this.icon = '';
+            
+            this.callSuper(parent, attrs);
+            
+            updateInstance(this);
+            
+            FontAwesome.registerForNotification(this);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setIcon: function(v) {
+            const existing = this.icon;
+            this.set('icon', v, true);
+            if (this.inited && existing !== v) updateInstance(this);
+        },
+        
+        setSize: function(v) {
+            const existing = this.size;
+            this.set('size', v, true);
+            if (this.inited && existing !== v) updateInstance(this);
+        },
+        
+        setProperties: function(v) {
+            this.properties = v;
+            this.fireEvent('properties', v);
+            if (this.inited) updateInstance(this);
+        }
+    });
+})(myt);
+
+
+((pkg) => {
+    let globalDragManager,
+        
+        /* The view currently being dragged. */
+        dragView,
+        
+        /* The view currently being dragged over. */
+        overView;
+        
+    const
+        /* The list of myt.AutoScrollers currently registered for notification
+            when drags start and stop. */
+        autoScrollers = [],
+        
+        /* The list of myt.DropTargets currently registered for notification 
+            when drag and drop events occur. */
+        dropTargets = [],
+        
+        setOverView = (v) => {
+            const existingOverView = overView;
+            if (existingOverView !== v) {
+                if (existingOverView) {
+                    existingOverView.notifyDragLeave(dragView);
+                    if (!dragView.destroyed) dragView.notifyDragLeave(existingOverView);
+                    globalDragManager.fireEvent('dragLeave', existingOverView);
+                }
+                
+                overView = v;
+                
+                if (v) {
+                    v.notifyDragEnter(dragView);
+                    if (!dragView.destroyed) dragView.notifyDragEnter(v);
+                    globalDragManager.fireEvent('dragEnter', existingOverView);
                 }
             }
-        }
+        },
         
-        function stop() {
-            if (dragging) {
-                $(doc).unbind(duringDragEvents);
-                $(doc.body).removeClass("sp-dragging");
-                onstop.apply(element, arguments);
+        setDragView = v => {
+            let existingDragView = dragView,
+                funcName, 
+                eventName,
+                targets,
+                i;
+            if (existingDragView !== v) {
+                dragView = v;
+                
+                if (!!v) {
+                    existingDragView = v;
+                    funcName = 'notifyDragStart';
+                    eventName = 'startDrag';
+                } else {
+                    funcName = 'notifyDragStop';
+                    eventName = 'stopDrag';
+                }
+                
+                targets = filterList(existingDragView, dropTargets);
+                i = targets.length;
+                while (i) targets[--i][funcName](existingDragView);
+                
+                targets = filterList(existingDragView, autoScrollers);
+                i = targets.length;
+                while (i) targets[--i][funcName](existingDragView);
+                
+                globalDragManager.fireEvent(eventName, v);
             }
-            dragging = false;
-        }
+        },
         
-        $(element).bind("mousedown", start);
-    }
-    
-    /* Define a jQuery plugin */
-    const dataID = "spectrum.id";
-    $.fn.spectrum = function (opts, ...args) {
-        if (typeof opts == "string") {
-            let returnValue = this;
-            this.each(function () {
-                const spect = spectrums[$(this).data(dataID)];
-                if (spect) {
-                    const method = spect[opts];
-                    if (!method) {
-                        throw new Error( "Spectrum: no such method: '" + opts + "'" );
-                    }
-                    
-                    if (opts == "get") {
-                        returnValue = spect.get();
-                    } else if (opts == "container") {
-                        returnValue = spect.container;
-                    } else if (opts == "option") {
-                        returnValue = spect.option.apply(spect, args);
-                    } else if (opts == "destroy") {
-                        spect.destroy();
-                        $(this).removeData(dataID);
+        /*  Filters the provided array of myt.DragGroupSupport items for the
+            provided myt.Dropable. Returns an array of the matching list
+            items.
+            @param {!Object} dropable
+            @param {!Array} list
+            @returns {!Array} */
+        filterList = (dropable, list) => {
+            if (dropable.destroyed) {
+                return [];
+            } else if (dropable.acceptAnyDragGroup()) {
+                return list;
+            } else {
+                const retval = [],
+                    dragGroups = dropable.getDragGroups();
+                let i = list.length;
+                while (i) {
+                    const item = list[--i];
+                    if (item.acceptAnyDragGroup()) {
+                        retval.push(item);
                     } else {
-                        method.apply(spect, args);
+                        const targetGroups = item.getDragGroups();
+                        for (const dragGroup in dragGroups) {
+                            if (targetGroups[dragGroup]) {
+                                retval.push(item);
+                                break;
+                            }
+                        }
                     }
                 }
-            });
-            return returnValue;
-        }
+                return retval;
+            }
+        };
+    
+    /** Provides global drag and drop functionality.
         
-        // Initializing a new instance of spectrum
-        return this.spectrum("destroy").each(function () {
-            const options = Object.assign({}, opts, $(this).data()),
-                spect = spectrum(this, options);
-            $(this).data(dataID, spect.id);
+        Events:
+            dragLeave:myt.DropTarget Fired when a myt.Dropable is dragged out of
+                the drop target.
+            dragEnter:myt.DropTarget Fired when a myt.Dropable is dragged over
+                the drop target.
+            startDrag:object Fired when a drag starts. Value is the object
+                being dragged.
+            stopDrag:object Fired when a drag ends. Value is the object 
+                that is no longer being dragged.
+            drop:object Fired when a drag ends over a drop target. The value is
+                an array containing the dropable at index 0 and the drop target
+                at index 1.
+        
+        @class
+    */
+    new JS.Singleton('GlobalDragManager', {
+        include: [pkg.Observable],
+        
+        
+        // Constructor /////////////////////////////////////////////////////////
+        initialize: function() {
+            pkg.global.register('dragManager', globalDragManager = this);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        getDragView: () => dragView,
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Registers the provided auto scroller to receive notifications.
+            @param {!Object} autoScroller - The myt.AutoScroller to register.
+            @returns {undefined} */
+        registerAutoScroller: autoScroller => {
+            autoScrollers.push(autoScroller);
+        },
+        
+        /** Unregisters the provided auto scroller.
+            @param {!Object} autoScroller - The myt.AutoScroller to unregister.
+            @returns {undefined} */
+        unregisterAutoScroller: autoScroller => {
+            let i = autoScrollers.length;
+            while (i) {
+                if (autoScrollers[--i] === autoScroller) {
+                    autoScrollers.splice(i, 1);
+                    break;
+                }
+            }
+        },
+        
+        /** Registers the provided drop target to receive notifications.
+            @param {!Object} dropTarget - The myt.DropTarget to register.
+            @returns {undefined} */
+        registerDropTarget: dropTarget => {
+            dropTargets.push(dropTarget);
+        },
+        
+        /** Unregisters the provided drop target.
+            @param {!Object} dropTarget - The myt.DropTarget to unregister.
+            @returns {undefined} */
+        unregisterDropTarget: dropTarget => {
+            let i = dropTargets.length;
+            while (i) {
+                if (dropTargets[--i] === dropTarget) {
+                    dropTargets.splice(i, 1);
+                    break;
+                }
+            }
+        },
+        
+        /** Called by a myt.Dropable when a drag starts.
+            @param {!Object} dropable - The myt.Dropable that started the drag.
+            @returns {undefined} */
+        startDrag: dropable => {
+            setDragView(dropable);
+        },
+        
+        /** Called by a myt.Dropable when a drag stops.
+            @param {!Object} event -The mouse event that triggered the stop drag.
+            @param {!Object} dropable - The myt.Dropable that stopped being dragged.
+            @param {boolean} isAbort
+            @returns {undefined} */
+        stopDrag: (event, dropable, isAbort) => {
+            dropable.notifyDropped(overView, isAbort);
+            if (overView && !isAbort) overView.notifyDrop(dropable);
+            
+            setOverView();
+            setDragView();
+            
+            if (overView && !isAbort) globalDragManager.fireEvent('drop', [dropable, overView]);
+        },
+        
+        /** Called by a myt.Dropable during dragging.
+            @param {!Object} event - The mousemove event for the drag update.
+            @param {!Object} dropable - The myt.Dropable that is being dragged.
+            @returns {undefined} */
+        updateDrag: (event, dropable) => {
+            // Get the frontmost myt.DropTarget that is registered with this 
+            // manager and is under the current mouse location and has a 
+            // matching drag group.
+            const filteredDropTargets = filterList(dropable, dropTargets);
+            let i = filteredDropTargets.length,
+                topDropTarget;
+            
+            if (i > 0) {
+                const domMouseEvent = event.value,
+                    mouseX = domMouseEvent.pageX,
+                    mouseY = domMouseEvent.pageY;
+                
+                while (i) {
+                    let dropTarget = filteredDropTargets[--i];
+                    if (dropTarget.willAcceptDrop(dropable) &&
+                        dropable.willPermitDrop(dropTarget) &&
+                        dropTarget.isPointVisible(mouseX, mouseY) && 
+                        (!topDropTarget || dropTarget.isInFrontOf(topDropTarget))
+                    ) {
+                        topDropTarget = dropTarget;
+                    }
+                }
+            }
+            
+            setOverView(topDropTarget);
+        }
+    });
+})(myt);
+
+
+((pkg) => {
+    const G = pkg.global,
+        globalMouse = G.mouse,
+        globalKeys = G.keys;
+    
+    /** Makes an myt.View draggable via the mouse.
+        
+        Also supresses context menus since the mouse down to open it causes bad
+        behavior since a mouseup event is not always fired.
+        
+        Events:
+            isDragging:boolean Fired when the isDragging attribute is modified
+                via setIsDragging.
+        
+        Attributes:
+            allowAbort:boolean Allows a drag to be aborted by the user by
+                pressing the 'esc' key. Defaults to undefined which is equivalent
+                to false.
+            isDraggable:boolean Configures the view to be draggable or not. The 
+                default value is true.
+            distanceBeforeDrag:number The distance, in pixels, before a mouse 
+                down and drag is considered a drag action. Defaults to 0.
+            isDragging:boolean Indicates that this view is currently being dragged.
+            draggableAllowBubble:boolean Determines if mousedown and mouseup
+                dom events handled by this component will bubble or not. Defaults
+                to true.
+            dragOffsetX:number The x amount to offset the position during dragging.
+                Defaults to 0.
+            dragOffsetY:number The y amount to offset the position during dragging.
+                Defaults to 0.
+            dragInitX:number Stores initial mouse x position during dragging.
+            dragInitY:number Stores initial mouse y position during dragging.
+            centerOnMouse:boolean If true this draggable will update the dragInitX
+                and dragInitY to keep the view centered on the mouse. Defaults
+                to undefined which is equivalent to false.
+        
+        Private Attributes:
+            __lastMousePosition:object The last position of the mouse during
+                dragging.
+        
+        @class */
+    pkg.Draggable = new JS.Module('Draggable', {
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.View */
+        initNode: function(parent, attrs) {
+            const self = this;
+            let isDraggable = true;
+            
+            self.isDraggable = self.isDragging = false;
+            self.draggableAllowBubble = true;
+            self.distanceBeforeDrag = self.dragOffsetX = self.dragOffsetY = 0;
+            
+            // Will be set after init since the draggable subview probably
+            // doesn't exist yet.
+            if (attrs.isDraggable != null) {
+                isDraggable = attrs.isDraggable;
+                delete attrs.isDraggable;
+            }
+            
+            self.callSuper(parent, attrs);
+            
+            self.setIsDraggable(isDraggable);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setIsDraggable: function(v) {
+            const self = this;
+            if (self.isDraggable !== v) {
+                self.isDraggable = v;
+                // No event needed.
+                
+                let func;
+                if (v) {
+                    func = self.attachToDom;
+                } else if (self.inited) {
+                    func = self.detachFromDom;
+                }
+                
+                if (func) {
+                    const dragviews = self.getDragViews();
+                    let i = dragviews.length;
+                    while (i) {
+                        const dragview = dragviews[--i];
+                        func.call(self, dragview, '__doMouseDown', 'mousedown');
+                        func.call(self, dragview, '__doContextMenu', 'contextmenu');
+                    }
+                }
+            }
+        },
+        
+        setIsDragging: function(v) {
+            this.set('isDragging', v, true);
+        },
+        
+        setDragOffsetX: function(v, supressUpdate) {
+            if (this.dragOffsetX !== v) {
+                this.dragOffsetX = v;
+                if (this.inited && this.isDragging && !supressUpdate) this.reRequestDragPosition();
+            }
+        },
+        
+        setDragOffsetY: function(v, supressUpdate) {
+            if (this.dragOffsetY !== v) {
+                this.dragOffsetY = v;
+                if (this.inited && this.isDragging && !supressUpdate) this.reRequestDragPosition();
+            }
+        },
+        
+        setDistanceBeforeDrag: function(v) {this.distanceBeforeDrag = v;},
+        setDraggableAllowBubble: function(v) {this.draggableAllowBubble = v;},
+        setCenterOnMouse: function(v) {this.centerOnMouse = v;},
+        setAllowAbort: function(v) {this.allowAbort = v;},
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @returns {!Array} - An array of views that can be moused down on to 
+            start the drag. Subclasses should override this to return an 
+            appropriate list of views. By default this view is returned thus 
+            making the entire view capable of starting a drag. */
+        getDragViews: function() {
+            return [this];
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __doContextMenu: (event) => {
+            // Do nothing so the context menu event is supressed.
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __doMouseDown: function(event) {
+            const self = this,
+                pos = pkg.MouseObservable.getMouseFromEvent(event),
+                de = self.getOuterDomElement();
+            self.dragInitX = pos.x - de.offsetLeft;
+            self.dragInitY = pos.y - de.offsetTop;
+            
+            self.attachToDom(globalMouse, '__doMouseUp', 'mouseup', true);
+            if (self.distanceBeforeDrag > 0) {
+                self.attachToDom(globalMouse, '__doDragCheck', 'mousemove', true);
+            } else {
+                self.startDrag(event);
+            }
+            
+            event.value.preventDefault();
+            return self.draggableAllowBubble;
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __doMouseUp: function(event) {
+            if (this.isDragging) {
+                this.stopDrag(event, false);
+            } else {
+                this.detachFromDom(globalMouse, '__doMouseUp', 'mouseup', true);
+                this.detachFromDom(globalMouse, '__doDragCheck', 'mousemove', true);
+            }
+            return this.draggableAllowBubble;
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __watchForAbort: function(event) {
+            if (event.value === 27) this.stopDrag(event, true);
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __doDragCheck: function(event) {
+            const self = this,
+                pos = pkg.MouseObservable.getMouseFromEvent(event),
+                distance = pkg.Geometry.measureDistance(pos.x, pos.y, self.dragInitX + self.x, self.dragInitY + self.y);
+            if (distance >= self.distanceBeforeDrag) {
+                self.detachFromDom(pkg.global.mouse, '__doDragCheck', 'mousemove', true);
+                self.startDrag(event);
+            }
+        },
+        
+        /** Active until stopDrag is called. The view position will be bound
+            to the mouse position. Subclasses typically call this onmousedown for
+            subviews that allow dragging the view.
+            @param {!Object} event - The event the mouse event when the drag started.
+            @returns {undefined} */
+        startDrag: function(event) {
+            const self = this;
+            
+            if (self.centerOnMouse) {
+                self.syncTo(self, '__updateDragInitX', 'width');
+                self.syncTo(self, '__updateDragInitY', 'height');
+            }
+            
+            if (self.allowAbort) self.attachTo(globalKeys, '__watchForAbort', 'keyup');
+            
+            self.setIsDragging(true);
+            self.attachToDom(globalMouse, 'updateDrag', 'mousemove', true);
+            self.updateDrag(event);
+        },
+        
+        /** Called on every mousemove event while dragging.
+            @param {!Object} event
+            @returns {undefined} */
+        updateDrag: function(event) {
+            this.__lastMousePosition = pkg.MouseObservable.getMouseFromEvent(event);
+            this.reRequestDragPosition();
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __updateDragInitX: function(event) {
+            this.dragInitX = this.width / 2 * (this.scaleX || 1);
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __updateDragInitY: function(event) {
+            this.dragInitY = this.height / 2 * (this.scaleY || 1);
+        },
+        
+        /** Stop the drag. (see startDrag for more details)
+            @param {!Object} event - The event that ended the drag.
+            @param {boolean} isAbort - Indicates if the drag ended normally or was
+                aborted.
+            @returns {undefined} */
+        stopDrag: function(event, isAbort) {
+            const self = this;
+            self.detachFromDom(globalMouse, '__doMouseUp', 'mouseup', true);
+            self.detachFromDom(globalMouse, 'updateDrag', 'mousemove', true);
+            if (self.centerOnMouse) {
+                self.detachFrom(self, '__updateDragInitX', 'width');
+                self.detachFrom(self, '__updateDragInitY', 'height');
+            }
+            if (self.allowAbort) self.detachFrom(globalKeys, '__watchForAbort', 'keyup');
+            self.setIsDragging(false);
+        },
+        
+        /** Repositions the view to the provided values. The default implementation
+            is to directly set x and y. Subclasses should override this method
+            when it is necessary to constrain the position.
+            @param {number} x - the new x position.
+            @param {number} y - the new y position.
+            @returns {undefined} */
+        requestDragPosition: function(x, y) {
+            if (!this.disabled) {
+                this.setX(x);
+                this.setY(y);
+            }
+        },
+        
+        reRequestDragPosition: function() {
+            const self = this,
+                pos = self.__lastMousePosition;
+            self.requestDragPosition(
+                pos.x - self.dragInitX + self.dragOffsetX, 
+                pos.y - self.dragInitY + self.dragOffsetY
+            );
+        }
+    });
+})(myt);
+
+
+((pkg) => {
+    let colorPicker,
+        
+        isEmpty,
+        initialColorHex,
+        currentColorHex,
+        
+        currentHue = 0,
+        currentSaturation = 0,
+        currentValue = 0,
+        
+        selectionPalette = [],
+        defaultPalette,
+        
+        paletteContainer,
+        colorView,
+        colorThumb,
+        hueView,
+        hueThumb,
+        inputView,
+        currentColorButton;
+    
+    const JSClass = JS.Class,
+        Color = pkg.Color,
+        LocalStorage = pkg.LocalStorage,
+        View = pkg.View,
+        Button = pkg.Button,
+        Draggable = pkg.Draggable,
+        
+        mathMin = Math.min,
+        mathMax = Math.max,
+        
+        TRANSPARENT = 'transparent',
+        LOCAL_STORAGE_KEY = 'myt.default',
+        DOM_CLASS_CHECKERBOARD = 'mytCheckerboardPattern',
+        CHECKMARK = pkg.FontAwesome.makeTag(['check']),
+        BORDER_333 = [1, 'solid', '#333'],
+        BORDER_999 = [1, 'solid', '#999'],
+        
+        paletteLookup = {},
+        
+        hsvToHex = (h, s, v) => Color.makeColorFromHSV(h * 360, s * 100, v * 100).getHtmlHexString(),
+        
+        Swatch = new JSClass('Swatch', View, {
+            include:[Button],
+            initNode: function(parent, attrs) {
+                attrs.width = attrs.height = 16;
+                attrs.border = BORDER_999;
+                this.callSuper(parent, attrs);
+                
+                if (this.bgColor === currentColorHex) {
+                    const color = Color.makeColorFromHexString(currentColorHex);
+                    new pkg.Text(this, {
+                        x:2, y:2, text:CHECKMARK, fontSize:'12px', 
+                        textColor:color.red + color.green + color.blue < 3*255/2 ? '#fff' : '#000'
+                    });
+                }
+            },
+            setBgColor: function(v) {
+                this.callSuper(v);
+                this.setTooltip(v);
+            },
+            doActivated: function() {colorPicker.setColor(this.bgColor);},
+            drawHoverState: function() {this.setBorder(BORDER_333);},
+            drawReadyState: function() {this.setBorder(BORDER_999);}
         });
-    };
     
-    $.fn.spectrum.load = true;
-    $.fn.spectrum.draggable = draggable;
-    $.fn.spectrum.defaults = defaultOpts;
-    $.spectrum = {};
-    
-    // TinyColor v1.0.0
-    // https://github.com/bgrins/TinyColor
-    // Brian Grinstead, MIT License
-    const trimHash = /^[#]+/,
-        math = Math,
-        mathRound = math.round,
-        mathMin = math.min,
-        mathMax = math.max;
-    
-    const tinycolor = function tinycolor(color) {
-        color = color ? color : '';
-        
-        // If input is already a tinycolor, return itself
-        if (color instanceof tinycolor) return color;
-        
-        // If we are called as a function, call using new instead
-        if (!(this instanceof tinycolor)) return new tinycolor(color);
-        
-        // Input to RGB
-        let rgb = {r:0, g:0, b:0},
-            ok = false;
-        if (typeof color == "string") color = stringInputToObject(color);
-        if (typeof color == "object") {
-            if (color.hasOwnProperty("r") && color.hasOwnProperty("g") && color.hasOwnProperty("b")) {
-                rgb = rgbToRgb(color.r, color.g, color.b);
-                ok = true;
-            } else if (color.hasOwnProperty("h") && color.hasOwnProperty("s") && color.hasOwnProperty("v")) {
-                color.s = convertToPercentage(color.s);
-                color.v = convertToPercentage(color.v);
-                rgb = hsvToRgb(color.h, color.s, color.v);
-                ok = true;
+    pkg.ColorPicker = new JSClass('ColorPicker', View, {
+        // Life Cycle //////////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            colorPicker = this;
+            
+            initialColorHex = attrs.color || TRANSPARENT;
+            delete attrs.color;
+            
+            defaultPalette = attrs.palette || [];
+            defaultPalette.forEach(color => {paletteLookup[color] = true;});
+            delete attrs.palette;
+            
+            isEmpty = initialColorHex === TRANSPARENT;
+            
+            colorPicker.callSuper(parent, attrs);
+            
+            // Build UI
+            paletteContainer = new View(colorPicker, {width:160, height:170});
+            new pkg.WrappingLayout(paletteContainer, {spacing:4, lineSpacing:4});
+            
+            colorView = new View(colorPicker, {x:170, width:139, height:139, border:BORDER_333}, [Draggable, {
+                requestDragPosition: function(x, y) {
+                    colorView.callSuper(colorView.x, colorView.y);
+                    const pos = this.getPagePosition();
+                    currentSaturation = parseFloat(mathMax(0, mathMin(1, (x + this.dragInitX - pos.x) / this.width)));
+                    currentValue = parseFloat(1 - mathMax(0, mathMin(1, (y + this.dragInitY - pos.y) / this.height)));
+                    isEmpty = false;
+                    colorPicker.updateUI();
+                }
+            }]);
+            const satView = new View(colorView, {width:139, height:139}),
+                valView = new View(satView, {width:139, height:139});
+            satView.getInnerDomStyle().backgroundImage = 'linear-gradient(to right, #fff, rgba(204, 154, 129, 0))';
+            valView.getInnerDomStyle().backgroundImage = 'linear-gradient(to top, #000, rgba(204, 154, 129, 0))';
+            colorThumb = new View(valView, {width:6, height:6, bgColor:'#000', border:[1, 'solid', '#ffffff'], roundedCorners:4});
+            
+            hueView = new View(colorPicker, {x:315, y:30, width:24, height:109, border:BORDER_333}, [Draggable, {
+                requestDragPosition: function(x, y) {
+                    this.callSuper(hueView.x, hueView.y);
+                    currentHue = parseFloat(mathMax(0, mathMin(1, (y + this.dragInitY - this.getPagePosition().y) / this.height)));
+                    isEmpty = false;
+                    colorPicker.updateUI();
+                }
+            }]);
+            hueView.getInnerDomStyle().background = 'linear-gradient(to top, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%)';
+            hueThumb = new View(hueView, {x:-1, width:24, height:2, bgColor:'#fff', border:[1, 'solid', '#000']});
+            
+            new View(colorPicker, {
+                x:315, width:24, height:24, border:BORDER_333, tooltip:'Set to transparent.', domClass:DOM_CLASS_CHECKERBOARD
+            }, [Button, {doActivated: () => {colorPicker.setColor(TRANSPARENT);}}]);
+            
+            inputView = new pkg.InputText(colorPicker, {x:236, y:146, width:105, height:25, roundedCorners:3, textColor:'#333', border:BORDER_333, maxLength:11});
+            colorPicker.attachToDom(inputView, '_submitInput', 'blur');
+            colorPicker.attachToDom(inputView, '_handleKeyDown', 'keydown');
+            inputView.getInnerDomStyle().paddingLeft = '6px';
+            
+            const initialColorContainer = new View(colorPicker, {x:170, y:146, width:60, height:23, border:BORDER_333});
+            new View(initialColorContainer, {
+                width:30, height:23, focusEmbellishment:false,
+                bgColor:initialColorHex, domClass:isEmpty ? DOM_CLASS_CHECKERBOARD : ''
+            }, [Button, {doActivated: () => {colorPicker.setColor(initialColorHex);}}]);
+            currentColorButton = new View(initialColorContainer, {x:30, width:30, height:23}, [{
+                setBgColor: function(v) {
+                    this.callSuper(v);
+                    this[(v === TRANSPARENT ? 'add' : 'remove') + 'DomClass'](DOM_CLASS_CHECKERBOARD);
+                }
+            }]);
+            
+            // Load Palette
+            const savedPalette = LocalStorage.getItem(LOCAL_STORAGE_KEY);
+            if (savedPalette) {
+                selectionPalette = savedPalette.split(';');
+                selectionPalette.forEach(color => {paletteLookup[color] = true;});
             }
-        }
-        
-        this._r = mathMin(255, mathMax(rgb.r, 0));
-        this._g = mathMin(255, mathMax(rgb.g, 0));
-        this._b = mathMin(255, mathMax(rgb.b, 0));
-        this._ok = ok;
-        
-        // Don't let the range of [0,255] come back in [0,1].
-        // Potentially lose a little bit of precision here, but will fix issues where
-        // .5 gets interpreted as half of the total, instead of half of 1
-        // If it was supposed to be 128, this was already taken care of by `inputToRgb`
-        if (this._r < 1) this._r = mathRound(this._r);
-        if (this._g < 1) this._g = mathRound(this._g);
-        if (this._b < 1) this._b = mathRound(this._b);
-    };
-    
-    tinycolor.prototype = {
-        isValid: function() {
-            return this._ok;
+            
+            colorPicker.setColor(initialColorHex);
         },
-        toHsv: function() {
-            const hsv = rgbToHsv(this._r, this._g, this._b);
-            return {h:hsv.h * 360, s:hsv.s, v:hsv.v};
+        
+        /** @private */
+        _handleKeyDown: event => {
+            if (pkg.KeyObservable.getKeyCodeFromEvent(event) === 13) colorPicker._submitInput();
         },
-        toHsl: function() {
-            const hsl = rgbToHsl(this._r, this._g, this._b);
-            return {h:hsl.h * 360, s:hsl.s, l:hsl.l};
+        
+        /** @private */
+        _submitInput: () => {
+            colorPicker.setColor(inputView.value);
         },
-        toHexString: function() {
-            return myt.Color.rgbToHex(this._r, this._g, this._b, true);
-        }
-    };
-    
-    // If input is an object, force 1 into "1.0" to handle ratios properly
-    // String input requires "1.0" as input, so 1 will be treated as 1
-    tinycolor.fromRatio = function(color) {
-        if (typeof color == "object") {
-            let newColor = {};
-            for (let i in color) {
-                if (color.hasOwnProperty(i)) newColor[i] = convertToPercentage(color[i]);
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        addToPalette: hexColor => {
+            if (hexColor && hexColor !== TRANSPARENT && !paletteLookup[hexColor]) {
+                selectionPalette.unshift(hexColor);
+                selectionPalette.length = mathMin(selectionPalette.length, 56);
+                LocalStorage.setItem(LOCAL_STORAGE_KEY, selectionPalette.join(';'));
             }
-            color = newColor;
-        }
-        return tinycolor(color);
-    };
-    
-    // `equals`
-    // Can be called with any tinycolor input
-    tinycolor.equals = function (color1, color2) {
-        if (!color1 || !color2) return false;
-        return tinycolor(color1).toHexString() == tinycolor(color2).toHexString();
-    };
-    
-    // `rgbToHsl`, `rgbToHsv`, `hsvToRgb` modified from:
-    // <http://mjijackson.com/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript>
-    
-    // `rgbToRgb`
-    // Handle bounds / percentage checking to conform to CSS color spec
-    // <http://www.w3.org/TR/css3-color/>
-    // *Assumes:* r, g, b in [0, 255] or [0, 1]
-    // *Returns:* { r, g, b } in [0, 255]
-    function rgbToRgb(r, g, b){
-        return {
-            r:bound01(r, 255) * 255,
-            g:bound01(g, 255) * 255,
-            b:bound01(b, 255) * 255
-        };
-    }
-    
-    // `rgbToHsl`
-    // Converts an RGB color value to HSL.
-    // *Assumes:* r, g, and b are contained in [0, 255] or [0, 1]
-    // *Returns:* { h, s, l } in [0,1]
-    function rgbToHsl(r, g, b) {
-        r = bound01(r, 255);
-        g = bound01(g, 255);
-        b = bound01(b, 255);
+        },
         
-        const max = mathMax(r, g, b),
-            min = mathMin(r, g, b),
-            l = (max + min) / 2;
-        let h, s;
-        
-        if (max == min) {
-            h = s = 0; // achromatic
-        } else {
-            const d = max - min;
-            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-            switch(max) {
-                case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-                case g: h = (b - r) / d + 2; break;
-                case b: h = (r - g) / d + 4; break;
+        setColor: color => {
+            if (color && color !== TRANSPARENT) {
+                const newHsv = (Color.makeColorFromHexString(color)).getHSV();
+                currentHue = newHsv.h / 360;
+                currentSaturation = newHsv.s;
+                currentValue = newHsv.v;
+                isEmpty = false;
+            } else {
+                isEmpty = true;
             }
-            h /= 6;
-        }
-        return {h:h, s:s, l:l};
-    }
-    
-    // `rgbToHsv`
-    // Converts an RGB color value to HSV
-    // *Assumes:* r, g, and b are contained in the set [0, 255] or [0, 1]
-    // *Returns:* { h, s, v } in [0,1]
-    function rgbToHsv(r, g, b) {
-        r = bound01(r, 255);
-        g = bound01(g, 255);
-        b = bound01(b, 255);
-
-        const max = mathMax(r, g, b), min = mathMin(r, g, b);
-        let h, s, v = max;
-
-        const d = max - min;
-        s = max === 0 ? 0 : d / max;
-
-        if (max == min) {
-            h = 0; // achromatic
-        } else {
-            switch(max) {
-                case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-                case g: h = (b - r) / d + 2; break;
-                case b: h = (r - g) / d + 4; break;
+            colorPicker.updateUI();
+        },
+        
+        getColor: () => isEmpty ? TRANSPARENT : hsvToHex(currentHue, currentSaturation, currentValue),
+        
+        updateUI: () => {
+            const isNotEmpty = !isEmpty;
+            hueThumb.setVisible(isNotEmpty);
+            colorThumb.setVisible(isNotEmpty);
+            if (isNotEmpty) {
+                colorThumb.setX(mathMax(0, mathMin(1, currentSaturation) * (colorView.width + 2)) - 5);
+                colorThumb.setY(mathMax(0, mathMin(1, 1 - currentValue) * (colorView.height + 2)) - 5);
+                hueThumb.setY((currentHue * (hueView.height - 2)) - 1);
             }
-            h /= 6;
-        }
-        return {h:h, s:s, v:v};
-    }
-    
-    // `hsvToRgb`
-    // Converts an HSV color value to RGB.
-    // *Assumes:* h is contained in [0, 1] or [0, 360] and s and v are contained in [0, 1] or [0, 100]
-    // *Returns:* { r, g, b } in the set [0, 255]
-    function hsvToRgb(h, s, v) {
-        h = bound01(h, 360) * 6;
-        s = bound01(s, 100);
-        v = bound01(v, 100);
+            
+            colorView.setBgColor(hsvToHex(currentHue, 1, 1));
+            
+            // Update input
+            currentColorHex = colorPicker.getColor();
+            inputView.setValue(currentColorHex);
+            currentColorButton.setBgColor(currentColorHex);
+            
+            colorPicker.redrawPalette();
+        },
         
-        const i = math.floor(h),
-            f = h - i,
-            p = v * (1 - s),
-            q = v * (1 - f * s),
-            t = v * (1 - (1 - f) * s),
-            mod = i % 6,
-            r = [v, q, p, p, t, v][mod],
-            g = [t, v, v, q, p, p][mod],
-            b = [p, p, t, v, v, q][mod];
-        
-        return {r:r * 255, g:g * 255, b:b * 255};
-    }
-    
-    // Take input from [0, n] and return it as [0, 1]
-    function bound01(n, max) {
-        const isString = typeof n == "string";
-        if (isString && n.indexOf('.') != -1 && parseFloat(n) === 1) n = "100%";
-        
-        const isPercentage = isString && n.indexOf('%') != -1;
-        n = mathMin(max, mathMax(0, parseFloat(n)));
-        
-        // Automatically convert percentage into number
-        if (isPercentage) n = parseInt(n * max, 10) / 100;
-        
-        // Handle floating point rounding errors
-        if (math.abs(n - max) < 0.000001) return 1;
-        
-        // Convert into [0, 1] range if it isn't already
-        return (n % max) / parseFloat(max);
-    }
-    
-    // Replace a decimal with it's percentage value
-    function convertToPercentage(n) {
-        return n <= 1 ? (n * 100) + "%" : n;
-    }
-    
-    const matchers = (function() {
-        // Allow positive/negative integer/number. Don't capture the either/or, just the entire outcome.
-        const CSS_UNIT = "(?:[-\\+]?\\d*\\.\\d+%?)|(?:[-\\+]?\\d+%?)";
-        return {
-            rgb: new RegExp("rgb[\\s|\\(]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")[,|\\s]+(" + CSS_UNIT + ")\\s*\\)?"),
-            hex6: /^([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/
-        };
-    })();
-    
-    // `stringInputToObject`
-    // Permissive string parsing.  Take in a number of formats, and output an object
-    // based on detected format.  Returns `{ r, g, b }` or `{ h, s, l }` or `{ h, s, v}`
-    function stringInputToObject(color) {
-        color = color.trim().toLowerCase().replace(trimHash, '');
-        
-        // Try to match string input using regular expressions.
-        // Keep most of the number bounding out of this function - don't worry about [0,1] or [0,100] or [0,360]
-        // Just return an object and let the conversion functions handle that.
-        // This way the result will be the same whether the tinycolor is initialized with string or object.
-        let match;
-        if (match = matchers.rgb.exec(color)) return {r:match[1], g:match[2], b:match[3]};
-        if (match = matchers.hex6.exec(color)) {
-            return {
-                r: parseInt(match[1], 16),
-                g: parseInt(match[2], 16),
-                b: parseInt(match[3], 16)
-            };
-        }
-        return false;
-    }
-})(window, jQuery);
+        redrawPalette: pkg.debounce(() => {
+            const subs = paletteContainer.getSubviews();
+            let i = subs.length;
+            while (i) subs[--i].destroy();
+            defaultPalette.forEach(color => {new Swatch(paletteContainer, {bgColor:color});});
+            selectionPalette.forEach(color => {new Swatch(paletteContainer, {bgColor:color});});
+        }, 50)
+    });
+})(myt);
 
 
 // jquery-simple-datetimepicker (jquery.simple-dtpicker.js)
@@ -19102,6 +19270,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         View = pkg.View,
         Text = pkg.Text,
         ModalPanel = pkg.ModalPanel,
+        SizeToChildren = pkg.SizeToChildren,
         
         
         /* Hide spinner related elements. */
@@ -19170,611 +19339,592 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     this.setWidth(inset + textView.width + this.outset);
                 }
             }
-        });
+        }),
     
-    
-    /** A modal panel that contains a Dialog.
-        
-        Events:
-            None
-        
-        Attributes:
-            displayMode:string (read only) Indicates what kind of dialog this 
-                component is currently configured as. Allowed values are: 'blank',
-                'message', 'spinner', 'color_picker', 'date_picker' and 'confirm'.
-            callbackFunction:function (read only) A function that gets called when 
-                the dialog is about to be closed. A single argument is passed in 
-                that indicates the UI element interacted with that should close the 
-                dialog. Supported values are: 'closeBtn', 'cancelBtn' and 
-                'confirmBtn'. The function should return true if the close should 
-                be aborted.
-    */
-    pkg.Dialog = new JS.Class('Dialog', ModalPanel, {
-        // Class Methods and Attributes ////////////////////////////////////////
-        extend: {
-            DEFAULT_RADIUS: 12,
-            DEFAULT_SHADOW: [0, 4, 20, '#666666'],
-            DEFAULT_BORDER: [1, 'solid', '#ffffff'],
-            DEFAULT_BGCOLOR: '#ffffff',
-            DEFAULT_BUTTON_CLASS: DialogButton,
+        /** A modal panel that contains a Dialog.
             
-            /** Makes the text wrap at 200px and the dialog will be at
-                least 200px wide. */
-            WRAP_TEXT_DEFAULTS: {
-                width:200,
-                fontWeight:'bold',
-                whiteSpace:'normal',
-                wordWrap:'break-word'
-            },
+            Attributes:
+                displayMode:string (read only) Indicates what kind of dialog this 
+                    component is currently configured as. Allowed values are: 'blank',
+                    'message', 'spinner', 'color_picker', 'date_picker' and 'confirm'.
+                callbackFunction:function (read only) A function that gets called when 
+                    the dialog is about to be closed. A single argument is passed in 
+                    that indicates the UI element interacted with that should close the 
+                    dialog. Supported values are: 'closeBtn', 'cancelBtn' and 
+                    'confirmBtn'. The function should return true if the close should 
+                    be aborted.
             
-            /** Makes the text stay on a single line and the dialog sizes to fit. */
-            NO_WRAP_TEXT_DEFAULTS: {
-                width:'auto',
-                fontWeight:'bold',
-                whiteSpace:'nowrap',
-                wordWrap:'break-word'
-            },
-            
-            /** Defaults used in a confirm dialog. */
-            CONFIRM_DEFAULTS: {
-                cancelTxt:'Cancel',
-                confirmTxt:'Confirm',
-                maxContainerHeight:300,
-                showClose:false
-            },
-            
-            /** Defaults used in a color picker dialog. */
-            PICKER_DEFAULTS: {
-                cancelTxt:'Cancel',
-                confirmTxt:'Choose',
-                titleText:'Choose a Color',
-                color:'#000000'
-            },
-            
-            /** Defaults used in a date picker dialog. */
-            DATE_PICKER_DEFAULTS: {
-                cancelTxt:'Cancel',
-                confirmTxt:'Choose',
-                titleText:'Choose a Date',
-                timeOnlyTitleText:'Choose a Time',
-                color:'#000000'
-            }
-        },
-        
-        
-        // Life Cycle //////////////////////////////////////////////////////////
-        /** @overrides */
-        initNode: function(parent, attrs) {
-            const Dialog = pkg.Dialog;
-            
-            if (attrs.buttonClass == null) attrs.buttonClass = Dialog.DEFAULT_BUTTON_CLASS;
-            
-            this.callSuper(parent, attrs);
-            
-            const content = this.content;
-            content.setRoundedCorners(Dialog.DEFAULT_RADIUS);
-            content.setBgColor(Dialog.DEFAULT_BGCOLOR);
-            content.setBoxShadow(Dialog.DEFAULT_SHADOW);
-            content.setBorder(Dialog.DEFAULT_BORDER);
-            content.setFocusCage(true);
-            
-            this.createCloseButton(content, this);
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        setButtonClass: function(v) {this.buttonClass = v;},
-        setDisplayMode: function(v) {this.displayMode = v;},
-        setCallbackFunction: function(v) {this.callbackFunction = v;},
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** Creates a close button on the provided targetView.
-            @param {!Object} targetView - The myt.View to create the button on.
-            @param {!Object} callbackTarget - An object with a doCallback method
-                that will get called when the close button is activated.
-            @param {string} [hoverColor] - The color used when the mouse 
-                hovers over the button. Defaults to '#666666'.
-            @param {string} [activeColor] - The color used when the button 
-                is active. Defaults to '#000000'.
-            @param {string} [readyColor] - The color used when the button 
-                is ready to be activated. Defaults to '#333333'.
-            @param {string} [iconColor] - The color used to draw the 
-                close icon. Defaults to '#ffffff'.
-            @returns {!Object} - The created myt.Button. */
-        createCloseButton: function(
-            targetView, callbackTarget, hoverColor, activeColor, readyColor, iconColor
-        ) {
-            return new this.buttonClass(targetView, {
-                name:'closeBtn',
-                ignoreLayout:true, width:16, height:16, y:4, align:'right', alignOffset:4,
-                inset:4, textY:2, shrinkToFit:false,
-                roundedCorners:8,
-                activeColor:activeColor || '#cc0000',
-                hoverColor:hoverColor || '#ff3333',
-                readyColor:readyColor || '#ff0000',
-                textColor:'#ffffff',
-                fontSize:'11px',
-                text:pkg.FontAwesome.makeTag(['times']),
-                tooltip:'Close Dialog.',
-            }, [{
-                doActivated: function() {callbackTarget.doCallback(this);}
-            }]);
-        },
-        
-        /** @overrides myt.Dimmer */
-        hide: function(ignoreRestoreFocus) {
-            hideSpinner(this);
-            
-            this.callSuper(ignoreRestoreFocus);
-        },
-        
-        /** @overrides myt.Dimmer */
-        eatMouseEvent: function(event) {
-            if (this.displayMode === 'message') this.content.closeBtn.focus();
-            return this.callSuper(event);
-        },
-        
-        /** Called before a dialog is shown to reset state and cleanup UI elements
-            from the previous display of the Dialog.
-            @returns {undefined} */
-        destroyContent: function() {
-            hideSpinner(this);
-            
-            const MD = pkg.Dialog,
-                content = this.content, 
-                stc = content.sizeToChildren,
-                svs = content.getSubviews();
-            let i = svs.length,
-                sv;
-            
-            // Destroy all children except the close button since that gets reused.
-            while (i) {
-                sv = svs[--i];
-                if (sv.name !== 'closeBtn') sv.destroy();
-            }
-            
-            // The blank dialog sets this.
-            content.setVisible(true);
-            this.overlay.setBgColor(pkg.Dimmer.DEFAULT_COLOR);
-            
-            // Message and Confirm dialogs set this.
-            this.setCallbackFunction();
-            
-            // The confirm dialog modifies this.
-            stc.setPaddingY(ModalPanel.DEFAULT_PADDING_Y);
-            
-            // The confirm content dialog modifies this.
-            stc.setPaddingX(ModalPanel.DEFAULT_PADDING_X);
-            
-            // Any opts could modify this
-            content.setRoundedCorners(MD.DEFAULT_RADIUS);
-            content.setBgColor(MD.DEFAULT_BGCOLOR);
-            content.setBoxShadow(MD.DEFAULT_SHADOW);
-            content.setBorder(MD.DEFAULT_BORDER);
-        },
-        
-        /** Called by each of the buttons that can trigger the dialog to be hidden.
-            @param {!Object} sourceView - The myt.View that triggered the hiding 
-                of the dialog.
-            @returns {undefined} */
-        doCallback: function(sourceView) {
-            const cbf = this.callbackFunction;
-            if (!cbf || !cbf.call(this, sourceView.name)) this.hide();
-        },
-        
-        /** Shows this dialog as a regular dimmer.
-            @param {?Object} opts - If opts.bgColor is provided it will be used for
-                the bgColor of the overlay.
-            @returns {undefined} */
-        showBlank: function(opts) {
-            this.destroyContent();
-            
-            this.content.setVisible(false);
-            if (opts && opts.bgColor) this.overlay.setBgColor(opts.bgColor);
-            
-            this.show();
-            
-            this.setDisplayMode('blank');
-        },
-        
-        /** Shows a dialog with a message and the standard cancel button.
-            @param {string} msg - The message to show.
-            @param {?Function} [callbackFunction] - A function that gets 
-                called when the close button is activated. A single argument is
-                passed in that indicates the UI element interacted with that should
-                close the dialog. Supported values are: 'closeBtn', 'cancelBtn' and
-                'confirmBtn'. The function should return true if the close should 
-                be aborted.
-            @param {?Object} [opts] - Options that modify how the message is 
-                displayed. Supports: fontWeight, whiteSpace, wordWrap and width.
-            @returns {undefined} */
-        showMessage: function(msg, callbackFunction, opts) {
-            const self = this,
-                D = pkg.Dialog,
-                content = self.content, 
-                closeBtn = content.closeBtn;
-            
-            opts = Object.assign({}, D.WRAP_TEXT_DEFAULTS, opts);
-            
-            self.destroyContent();
-            
-            self.setCallbackFunction(callbackFunction);
-            
-            const msgView = new Text(content, {
-                name:'msg',
-                text:msg,
-                whiteSpace:opts.whiteSpace,
-                wordWrap:opts.wordWrap,
-                fontWeight:opts.fontWeight,
-                x:opts.msgX == null ? ModalPanel.DEFAULT_PADDING_X : opts.msgX,
-                y:opts.msgY == null ? ModalPanel.DEFAULT_PADDING_Y : opts.msgY,
-                width:opts.width
-            });
-            
-            if (opts.titleText) {
-                self.setupTitle(content, opts.titleText, D.DEFAULT_RADIUS);
-                msgView.setY(msgView.y + 24);
-            }
-            
-            self.show();
-            
-            if (opts.showClose === false) {
-                closeBtn.setVisible(false);
-            } else {
-                closeBtn.setVisible(true);
-                closeBtn.focus();
-            }
-            
-            self.setDisplayMode('message');
-        },
-        
-        showSimple: function(contentBuilderFunc, callbackFunction, opts) {
-            opts = opts || {};
-            
-            const self = this,
-                content = self.content,
-                closeBtn = content.closeBtn,
-                maxHeight = opts.maxContainerHeight;
-            
-            self.destroyContent();
-            
-            if (opts.bgColor) content.setBgColor(opts.bgColor);
-            if (opts.roundedCorners) content.setRoundedCorners(opts.roundedCorners);
-            if (opts.boxShadow) content.setBoxShadow(opts.boxShadow);
-            if (opts.border) content.setBorder(opts.border);
-            
-            content.sizeToChildren.setPaddingX(1);
-            self.setCallbackFunction(callbackFunction);
-            
-            const contentContainer = new View(content, {
-                name:'contentContainer', x:1, y:25, overflow:'auto'
-            }, [{
-                setHeight: function(v) {
-                    if (v > maxHeight) v = maxHeight;
-                    this.callSuper(v);
+            @class */
+        Dialog = pkg.Dialog = new JSClass('Dialog', ModalPanel, {
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                DEFAULT_RADIUS: 12,
+                DEFAULT_SHADOW: [0, 4, 20, '#666666'],
+                DEFAULT_BORDER: [1, 'solid', '#ffffff'],
+                DEFAULT_BGCOLOR: '#ffffff',
+                DEFAULT_BUTTON_CLASS: DialogButton,
+                
+                /** Makes the text wrap at 200px and the dialog will be at
+                    least 200px wide. */
+                WRAP_TEXT_DEFAULTS: {
+                    width:200,
+                    fontWeight:'bold',
+                    whiteSpace:'normal',
+                    wordWrap:'break-word'
+                },
+                
+                /** Makes the text stay on a single line and the dialog sizes 
+                    to fit. */
+                NO_WRAP_TEXT_DEFAULTS: {
+                    width:'auto',
+                    fontWeight:'bold',
+                    whiteSpace:'nowrap',
+                    wordWrap:'break-word'
+                },
+                
+                /** Defaults used in a confirm dialog. */
+                CONFIRM_DEFAULTS: {
+                    cancelTxt:'Cancel',
+                    confirmTxt:'Confirm',
+                    maxContainerHeight:300,
+                    showClose:false
+                },
+                
+                /** Defaults used in a color picker dialog. */
+                PICKER_DEFAULTS: {
+                    cancelTxt:'Cancel',
+                    confirmTxt:'Choose',
+                    titleText:'Choose a Color',
+                    color:'#000000'
+                },
+                
+                /** Defaults used in a date picker dialog. */
+                DATE_PICKER_DEFAULTS: {
+                    cancelTxt:'Cancel',
+                    confirmTxt:'Choose',
+                    titleText:'Choose a Date',
+                    timeOnlyTitleText:'Choose a Time',
+                    color:'#000000'
                 }
-            }]);
+            },
             
-            contentBuilderFunc.call(self, contentContainer);
             
-            new pkg.SizeToChildren(contentContainer, {axis:'both'});
+            // Life Cycle //////////////////////////////////////////////////////
+            /** @overrides */
+            initNode: function(parent, attrs) {
+                if (attrs.buttonClass == null) attrs.buttonClass = Dialog.DEFAULT_BUTTON_CLASS;
+                
+                this.callSuper(parent, attrs);
+                
+                const content = this.content;
+                content.setRoundedCorners(Dialog.DEFAULT_RADIUS);
+                content.setBgColor(Dialog.DEFAULT_BGCOLOR);
+                content.setBoxShadow(Dialog.DEFAULT_SHADOW);
+                content.setBorder(Dialog.DEFAULT_BORDER);
+                content.setFocusCage(true);
+                
+                this.createCloseButton(content, this);
+            },
             
-            self.show();
             
-            closeBtn.setVisible(true);
-            closeBtn.focus();
+            // Accessors ///////////////////////////////////////////////////////
+            setButtonClass: function(v) {this.buttonClass = v;},
+            setDisplayMode: function(v) {this.displayMode = v;},
+            setCallbackFunction: function(v) {this.callbackFunction = v;},
             
-            self.setDisplayMode('content');
             
-            // Set initial focus
-            if (contentContainer.initialFocus) contentContainer.initialFocus.focus();
-        },
-        
-        /** Shows a dialog with a spinner and a message and no standard cancel
-            button.
-            @param {string} msg - the message to show.
-            @param {?Objecft} opts - Options that modify how the message is displayed.
-                Supports: fontWeight, whiteSpace, wordWrap and width.
-            @returns {undefined} */
-        showSpinner: function(msg, opts) {
-            const self = this,
-                content = self.content;
+            // Methods /////////////////////////////////////////////////////////
+            /** Creates a close button on the provided targetView.
+                @param {!Object} targetView - The myt.View to create the 
+                    button on.
+                @param {!Object} callbackTarget - An object with a doCallback 
+                    method that will get called when the close button is activated.
+                @param {string} [hoverColor] - The color used when the mouse 
+                    hovers over the button. Defaults to '#666666'.
+                @param {string} [activeColor] - The color used when the button 
+                    is active. Defaults to '#000000'.
+                @param {string} [readyColor] - The color used when the button 
+                    is ready to be activated. Defaults to '#333333'.
+                @param {string} [iconColor] - The color used to draw the 
+                    close icon. Defaults to '#ffffff'.
+                @returns {!Object} - The created myt.Button. */
+            createCloseButton: function(
+                targetView, callbackTarget, hoverColor, activeColor, readyColor, iconColor
+            ) {
+                return new this.buttonClass(targetView, {
+                    name:'closeBtn',
+                    ignoreLayout:true, width:16, height:16, y:4, align:'right', alignOffset:4,
+                    inset:4, textY:2, shrinkToFit:false,
+                    roundedCorners:8,
+                    activeColor:activeColor || '#cc0000',
+                    hoverColor:hoverColor || '#ff3333',
+                    readyColor:readyColor || '#ff0000',
+                    textColor:'#ffffff',
+                    fontSize:'11px',
+                    text:pkg.FontAwesome.makeTag(['times']),
+                    tooltip:'Close Dialog.',
+                }, [{
+                    doActivated: function() {callbackTarget.doCallback(this);}
+                }]);
+            },
             
-            opts = Object.assign({}, pkg.Dialog.NO_WRAP_TEXT_DEFAULTS, opts);
+            /** @overrides myt.Dimmer */
+            hide: function(ignoreRestoreFocus) {
+                hideSpinner(this);
+                
+                this.callSuper(ignoreRestoreFocus);
+            },
             
-            self.destroyContent();
+            /** @overrides myt.Dimmer */
+            eatMouseEvent: function(event) {
+                if (this.displayMode === 'message') this.content.closeBtn.focus();
+                return this.callSuper(event);
+            },
             
-            const spinner = self.spinner = new pkg.Spinner(content, {
-                align:'center', visible:true,
-                borderColor:'#cccccc',
-                size:50, y:opts.msgY == null ? ModalPanel.DEFAULT_PADDING_Y : opts.msgY,
-            });
-            if (msg) {
-                new Text(content, {
+            /** Called before a dialog is shown to reset state and cleanup 
+                UI elements from the previous display of the Dialog.
+                @returns {undefined} */
+            destroyContent: function() {
+                hideSpinner(this);
+                
+                const content = this.content, 
+                    stc = content.sizeToChildren,
+                    svs = content.getSubviews();
+                let i = svs.length,
+                    sv;
+                
+                // Destroy all children except the close button since that gets reused.
+                while (i) {
+                    sv = svs[--i];
+                    if (sv.name !== 'closeBtn') sv.destroy();
+                }
+                
+                // The blank dialog sets this.
+                content.setVisible(true);
+                this.overlay.setBgColor(pkg.Dimmer.DEFAULT_COLOR);
+                
+                // Message and Confirm dialogs set this.
+                this.setCallbackFunction();
+                
+                // The confirm dialog modifies this.
+                stc.setPaddingY(ModalPanel.DEFAULT_PADDING_Y);
+                
+                // The confirm content dialog modifies this.
+                stc.setPaddingX(ModalPanel.DEFAULT_PADDING_X);
+                
+                // Any opts could modify this
+                content.setRoundedCorners(Dialog.DEFAULT_RADIUS);
+                content.setBgColor(Dialog.DEFAULT_BGCOLOR);
+                content.setBoxShadow(Dialog.DEFAULT_SHADOW);
+                content.setBorder(Dialog.DEFAULT_BORDER);
+            },
+            
+            /** Called by each of the buttons that can trigger the dialog to 
+                be hidden.
+                @param {!Object} sourceView - The myt.View that triggered 
+                    the hiding of the dialog.
+                @returns {undefined} */
+            doCallback: function(sourceView) {
+                const cbf = this.callbackFunction;
+                if (!cbf || !cbf.call(this, sourceView.name)) this.hide();
+            },
+            
+            /** Shows this dialog as a regular dimmer.
+                @param {?Object} opts - If opts.bgColor is provided it will 
+                    be used for the bgColor of the overlay.
+                @returns {undefined} */
+            showBlank: function(opts) {
+                this.destroyContent();
+                
+                this.content.setVisible(false);
+                if (opts && opts.bgColor) this.overlay.setBgColor(opts.bgColor);
+                
+                this.show();
+                
+                this.setDisplayMode('blank');
+            },
+            
+            /** Shows a dialog with a message and the standard cancel button.
+                @param {string} msg - The message to show.
+                @param {?Function} [callbackFunction] - A function that gets 
+                    called when the close button is activated. A single 
+                    argument is passed in that indicates the UI element 
+                    interacted with that should close the dialog. Supported 
+                    values are: 'closeBtn', 'cancelBtn' and 'confirmBtn'. The 
+                    function should return true if the close should be aborted.
+                @param {?Object} [opts] - Options that modify how the message 
+                    is displayed. Supports: fontWeight, whiteSpace, wordWrap 
+                    and width.
+                @returns {undefined} */
+            showMessage: function(msg, callbackFunction, opts) {
+                const self = this,
+                    content = self.content, 
+                    closeBtn = content.closeBtn;
+                
+                opts = Object.assign({}, Dialog.WRAP_TEXT_DEFAULTS, opts);
+                
+                self.destroyContent();
+                
+                self.setCallbackFunction(callbackFunction);
+                
+                const msgView = new Text(content, {
+                    name:'msg',
                     text:msg,
                     whiteSpace:opts.whiteSpace,
                     wordWrap:opts.wordWrap,
                     fontWeight:opts.fontWeight,
                     x:opts.msgX == null ? ModalPanel.DEFAULT_PADDING_X : opts.msgX,
-                    y:spinner.y + spinner.size + ModalPanel.DEFAULT_PADDING_Y,
+                    y:opts.msgY == null ? ModalPanel.DEFAULT_PADDING_Y : opts.msgY,
                     width:opts.width
                 });
+                
+                if (opts.titleText) {
+                    self.setupTitle(content, opts.titleText, Dialog.DEFAULT_RADIUS);
+                    msgView.setY(msgView.y + 24);
+                }
+                
+                self.show();
+                
+                if (opts.showClose === false) {
+                    closeBtn.setVisible(false);
+                } else {
+                    closeBtn.setVisible(true);
+                    closeBtn.focus();
+                }
+                
+                self.setDisplayMode('message');
+            },
+            
+            showSimple: function(contentBuilderFunc, callbackFunction, opts) {
+                opts = opts || {};
+                
+                const self = this,
+                    content = self.content,
+                    closeBtn = content.closeBtn,
+                    maxHeight = opts.maxContainerHeight;
+                
+                self.destroyContent();
+                
+                if (opts.bgColor) content.setBgColor(opts.bgColor);
+                if (opts.roundedCorners) content.setRoundedCorners(opts.roundedCorners);
+                if (opts.boxShadow) content.setBoxShadow(opts.boxShadow);
+                if (opts.border) content.setBorder(opts.border);
+                
+                content.sizeToChildren.setPaddingX(1);
+                self.setCallbackFunction(callbackFunction);
+                
+                const contentContainer = new View(content, {
+                    name:'contentContainer', x:1, y:25, overflow:'auto'
+                }, [{
+                    setHeight: function(v) {
+                        if (v > maxHeight) v = maxHeight;
+                        this.callSuper(v);
+                    }
+                }]);
+                
+                contentBuilderFunc.call(self, contentContainer);
+                
+                new SizeToChildren(contentContainer, {axis:'both'});
+                
+                self.show();
+                
+                closeBtn.setVisible(true);
+                closeBtn.focus();
+                
+                self.setDisplayMode('content');
+                
+                // Set initial focus
+                if (contentContainer.initialFocus) contentContainer.initialFocus.focus();
+            },
+            
+            /** Shows a dialog with a spinner and a message and no standard 
+                cancel button.
+                @param {string} msg - the message to show.
+                @param {?Objecft} opts - Options that modify how the message 
+                    is displayed. Supports: fontWeight, whiteSpace, wordWrap 
+                    and width.
+                @returns {undefined} */
+            showSpinner: function(msg, opts) {
+                const self = this,
+                    content = self.content;
+                
+                opts = Object.assign({}, Dialog.NO_WRAP_TEXT_DEFAULTS, opts);
+                
+                self.destroyContent();
+                
+                const spinner = self.spinner = new pkg.Spinner(content, {
+                    align:'center', visible:true,
+                    borderColor:'#cccccc',
+                    size:50, y:opts.msgY == null ? ModalPanel.DEFAULT_PADDING_Y : opts.msgY,
+                });
+                if (msg) {
+                    new Text(content, {
+                        text:msg,
+                        whiteSpace:opts.whiteSpace,
+                        wordWrap:opts.wordWrap,
+                        fontWeight:opts.fontWeight,
+                        x:opts.msgX == null ? ModalPanel.DEFAULT_PADDING_X : opts.msgX,
+                        y:spinner.y + spinner.size + ModalPanel.DEFAULT_PADDING_Y,
+                        width:opts.width
+                    });
+                }
+                
+                self.show();
+                
+                content.closeBtn.setVisible(false);
+                self.focus(); // Focus on the dimmer itself to prevent user interaction.
+                
+                self.setDisplayMode('spinner');
+            },
+            
+            showColorPicker: function(callbackFunction, opts) {
+                const self = this,
+                    content = self.content,
+                    closeBtn = content.closeBtn,
+                    r = Dialog.DEFAULT_RADIUS;
+                
+                opts = Object.assign({}, Dialog.PICKER_DEFAULTS, opts);
+                
+                self.destroyContent();
+                
+                // Set the callback function to one wrapped to handle each button type.
+                self.setCallbackFunction(action => {
+                    switch (action) {
+                        case 'closeBtn':
+                        case 'cancelBtn':
+                            callbackFunction.call(self, action);
+                            break;
+                        case 'confirmBtn':
+                            const colorAsHex = colorPickerView.getColor();
+                            colorPickerView.addToPalette(colorAsHex);
+                            callbackFunction.call(self, action, colorAsHex);
+                            break;
+                    }
+                    colorPickerView.destroy();
+                });
+                
+                // Build Picker
+                const picker = new View(content, {
+                        name:'picker',
+                        x:ModalPanel.DEFAULT_PADDING_X,
+                        y:ModalPanel.DEFAULT_PADDING_Y + 24,
+                        width:337,
+                        height:177
+                    }),
+                    colorPickerView = new pkg.ColorPicker(picker, {
+                        color:opts.color,
+                        palette:['#000000','#111111','#222222','#333333','#444444','#555555','#666666','#777777','#888888','#999999','#aaaaaa','#bbbbbb','#cccccc','#dddddd','#eeeeee','#ffffff']
+                    });
+                
+                self.show();
+                
+                closeBtn.setVisible(true);
+                closeBtn.focus();
+                
+                self.setupFooterButtons(picker, opts);
+                self.setupTitle(content, opts.titleText, r);
+                
+                self.setDisplayMode('color_picker');
+            },
+            
+            showDatePicker: function(callbackFunction, opts) {
+                const self = this,
+                    content = self.content,
+                    closeBtn = content.closeBtn,
+                    r = Dialog.DEFAULT_RADIUS;
+                
+                opts = Object.assign({}, Dialog.DATE_PICKER_DEFAULTS, opts);
+                
+                self.destroyContent();
+                
+                content.sizeToChildren.setPaddingX(0);
+                
+                // Set the callback function to one wrapped to handle each button type.
+                self.setCallbackFunction(function(action) {
+                    switch(action) {
+                        case 'closeBtn':
+                        case 'cancelBtn':
+                            callbackFunction.call(this, action);
+                            break;
+                        case 'confirmBtn':
+                            callbackFunction.call(this, action, this._pickedDateTime);
+                            break;
+                    }
+                });
+                
+                // Build Picker
+                const picker = new View(content, {
+                    name:'picker',
+                    x:ModalPanel.DEFAULT_PADDING_X,
+                    y:ModalPanel.DEFAULT_PADDING_Y + 24,
+                    width:opts.dateOnly ? 200 : (opts.timeOnly ? 150 : 260),
+                    height:193
+                });
+                const pickerView = new View(picker);
+                
+                $(pickerView.getInnerDomElement()).dtpicker({
+                    current:new Date(opts.initialDate || Date.now()),
+                    dateOnly:opts.dateOnly || false,
+                    timeOnly:opts.timeOnly || false,
+                    dialog:self
+                });
+                
+                self.show();
+                
+                closeBtn.setVisible(true);
+                closeBtn.focus();
+                
+                self.setupFooterButtons(picker, opts);
+                self.setupTitle(content, opts.timeOnly ? opts.timeOnlyTitleText : opts.titleText, r);
+                
+                self.setDisplayMode('date_picker');
+            },
+            
+            /** Called by the simple-dtpicker.
+                @param {!Object} dtpicker
+                @returns {undefined} */
+            _dtpickerCallback: function(dtpicker) {
+                this._pickedDateTime = dtpicker;
+            },
+            
+            showConfirm: function(msg, callbackFunction, opts) {
+                const self = this;
+                
+                opts = Object.assign({}, Dialog.CONFIRM_DEFAULTS, opts);
+                
+                self.showMessage(msg, callbackFunction, opts);
+                self.setupFooterButtons(self.content.msg, opts);
+                
+                self.setDisplayMode('confirm');
+            },
+            
+            showContentConfirm: function(contentBuilderFunc, callbackFunction, opts) {
+                opts = Object.assign({}, Dialog.CONFIRM_DEFAULTS, opts);
+                
+                const self = this,
+                    content = self.content,
+                    closeBtn = content.closeBtn,
+                    r = Dialog.DEFAULT_RADIUS,
+                    maxHeight = opts.maxContainerHeight;
+                
+                self.destroyContent();
+                
+                content.sizeToChildren.setPaddingX(1);
+                self.setCallbackFunction(callbackFunction);
+                
+                // Setup form
+                const contentContainer = new View(content, {
+                    name:'contentContainer', x:1, y:25, overflow:'auto'
+                }, [{
+                    setHeight: function(v) {
+                        this.callSuper(v > maxHeight ? maxHeight : v);
+                    }
+                }]);
+                
+                contentBuilderFunc.call(self, contentContainer);
+                
+                new SizeToChildren(contentContainer, {axis:'both'});
+                
+                self.show();
+                
+                closeBtn.setVisible(true);
+                closeBtn.focus();
+                
+                self.setupTitle(content, opts.titleText, r);
+                contentContainer.setY(self.header.height + 1);
+                self.setupFooterButtons(contentContainer, opts);
+                
+                self.setDisplayMode('content');
+                
+                // Set initial focus
+                if (contentContainer.initialFocus) contentContainer.initialFocus.focus();
+            },
+            
+            setupTitle: function(content, titleTxt, r) {
+                (this.header = new View(content, {
+                    ignoreLayout:true,
+                    width:content.width,
+                    height:24,
+                    bgColor:'#eeeeee',
+                    roundedTopLeftCorner:r,
+                    roundedTopRightCorner:r
+                })).sendToBack();
+                
+                new Text(content, {
+                    name:'title', x:r, y:4, text:titleTxt, fontWeight:'bold'
+                });
+            },
+            
+            /** @private 
+                @param {!Object} mainView
+                @param {!Object} opts
+                @returns {undefined} */
+            setupFooterButtons: function(mainView, opts) {
+                const self = this,
+                    content = self.content, 
+                    DPY = ModalPanel.DEFAULT_PADDING_Y,
+                    r = Dialog.DEFAULT_RADIUS,
+                    BUTTON_CLASS = self.buttonClass,
+                    btnContainer = new View(content, {
+                        y:mainView.y + mainView.height + DPY, align:'center'
+                    });
+                
+                // Cancel Button
+                let attrs = opts.cancelAttrs || {};
+                if (attrs.name == null) attrs.name = 'cancelBtn';
+                if (attrs.text == null) attrs.text = opts.cancelTxt;
+                if (opts.activeColor != null) attrs.activeColor = opts.activeColor;
+                if (opts.hoverColor != null) attrs.hoverColor = opts.hoverColor;
+                if (opts.readyColor != null) attrs.readyColor = opts.readyColor;
+                if (opts.textColor != null) attrs.textColor = opts.textColor;
+                const cancelBtn = new BUTTON_CLASS(btnContainer, attrs, [{
+                    doActivated: function() {self.doCallback(this);}
+                }]);
+                
+                // Confirm Button
+                attrs = opts.confirmAttrs || {};
+                if (attrs.name == null) attrs.name = 'confirmBtn';
+                if (attrs.text == null) attrs.text = opts.confirmTxt;
+                if (opts.activeColorConfirm != null) attrs.activeColor = opts.activeColorConfirm;
+                if (opts.hoverColorConfirm != null) attrs.hoverColor = opts.hoverColorConfirm;
+                if (opts.readyColorConfirm != null) attrs.readyColor = opts.readyColorConfirm;
+                if (opts.textColorConfirm != null) attrs.textColor = opts.textColorConfirm;
+                new BUTTON_CLASS(btnContainer, attrs, [{
+                    doActivated: function() {self.doCallback(this);}
+                }]);
+                
+                // Additional Buttons
+                const buttons = opts.buttons;
+                if (buttons) {
+                    const len = buttons.length;
+                    for (let i = 0; len > i; i++) {
+                        attrs = buttons[i];
+                        if (attrs.name == null) attrs.name = 'btn_' + i;
+                        new BUTTON_CLASS(btnContainer, attrs, [{
+                            doActivated: function() {self.doCallback(this);}
+                        }]);
+                    }
+                }
+                
+                new SizeToChildren(btnContainer, {axis:'y'});
+                new pkg.SpacedLayout(btnContainer, {spacing:4, collapseParent:true});
+                
+                content.sizeToChildren.setPaddingY(DPY / 2);
+                
+                const bg = new View(content, {
+                    ignoreLayout:true,
+                    y:btnContainer.y - (DPY / 2),
+                    width:content.width,
+                    bgColor:'#eeeeee',
+                    roundedBottomLeftCorner:r,
+                    roundedBottomRightCorner:r
+                });
+                bg.setHeight(content.height - bg.y); // WHY: is this not in the attrs?
+                bg.sendToBack();
+                
+                if (opts.showClose === false) cancelBtn.focus();
             }
-            
-            self.show();
-            
-            content.closeBtn.setVisible(false);
-            self.focus(); // Focus on the dimmer itself to prevent user interaction.
-            
-            self.setDisplayMode('spinner');
-        },
-        
-        showColorPicker: function(callbackFunction, opts) {
-            const self = this,
-                content = self.content,
-                closeBtn = content.closeBtn,
-                r = pkg.Dialog.DEFAULT_RADIUS;
-            
-            opts = Object.assign({}, pkg.Dialog.PICKER_DEFAULTS, opts);
-            
-            self.destroyContent();
-            
-            // Set the callback function to one wrapped to handle each button type.
-            self.setCallbackFunction(function(action) {
-                switch(action) {
-                    case 'closeBtn':
-                    case 'cancelBtn':
-                        callbackFunction.call(this, action);
-                        break;
-                    case 'confirmBtn':
-                        const color = this._spectrum.get();
-                        this._spectrum.addColorToSelectionPalette(color);
-                        callbackFunction.call(this, action, color ? color.toHexString() : 'transparent');
-                        break;
-                }
-                this._spectrum.destroy();
-            });
-            
-            // Build Picker
-            const picker = new View(content, {
-                name:'picker',
-                x:ModalPanel.DEFAULT_PADDING_X,
-                y:ModalPanel.DEFAULT_PADDING_Y + 24,
-                width:337,
-                height:177
-            });
-            const spectrumView = new View(picker);
-            $(spectrumView.getInnerDomElement()).spectrum({
-                color:opts.color,
-                palette: [['#000000','#111111','#222222','#333333','#444444','#555555','#666666','#777777'],
-                          ['#888888','#999999','#aaaaaa','#bbbbbb','#cccccc','#dddddd','#eeeeee','#ffffff']],
-                localStorageKey: "myt.default",
-                dialog:self
-            });
-            
-            self.show();
-            
-            closeBtn.setVisible(true);
-            closeBtn.focus();
-            
-            self.setupFooterButtons(picker, opts);
-            self.setupTitle(content, opts.titleText, r);
-            
-            self.setDisplayMode('color_picker');
-        },
-        
-        /** Called by the spectrum color picker.
-            @param {!Object} spectrum
-            @returns {undefined} */
-        _spectrumCallback: function(spectrum) {
-            this._spectrum = spectrum;
-        },
-        
-        showDatePicker: function(callbackFunction, opts) {
-            const self = this,
-                content = self.content,
-                closeBtn = content.closeBtn,
-                r = pkg.Dialog.DEFAULT_RADIUS;
-            
-            opts = Object.assign({}, pkg.Dialog.DATE_PICKER_DEFAULTS, opts);
-            
-            self.destroyContent();
-            
-            content.sizeToChildren.setPaddingX(0);
-            
-            // Set the callback function to one wrapped to handle each button type.
-            self.setCallbackFunction(function(action) {
-                switch(action) {
-                    case 'closeBtn':
-                    case 'cancelBtn':
-                        callbackFunction.call(this, action);
-                        break;
-                    case 'confirmBtn':
-                        callbackFunction.call(this, action, this._pickedDateTime);
-                        break;
-                }
-            });
-            
-            // Build Picker
-            const picker = new View(content, {
-                name:'picker',
-                x:ModalPanel.DEFAULT_PADDING_X,
-                y:ModalPanel.DEFAULT_PADDING_Y + 24,
-                width:opts.dateOnly ? 200 : (opts.timeOnly ? 150 : 260),
-                height:193
-            });
-            const pickerView = new View(picker);
-            
-            $(pickerView.getInnerDomElement()).dtpicker({
-                current:new Date(opts.initialDate || Date.now()),
-                dateOnly:opts.dateOnly || false,
-                timeOnly:opts.timeOnly || false,
-                dialog:self
-            });
-            
-            self.show();
-            
-            closeBtn.setVisible(true);
-            closeBtn.focus();
-            
-            self.setupFooterButtons(picker, opts);
-            self.setupTitle(content, opts.timeOnly ? opts.timeOnlyTitleText : opts.titleText, r);
-            
-            self.setDisplayMode('date_picker');
-        },
-        
-        /** Called by the simple-dtpicker.
-            @param {!Object} dtpicker
-            @returns {undefined} */
-        _dtpickerCallback: function(dtpicker) {
-            this._pickedDateTime = dtpicker;
-        },
-        
-        showConfirm: function(msg, callbackFunction, opts) {
-            const self = this;
-            
-            opts = Object.assign({}, pkg.Dialog.CONFIRM_DEFAULTS, opts);
-            
-            self.showMessage(msg, callbackFunction, opts);
-            self.setupFooterButtons(self.content.msg, opts);
-            
-            self.setDisplayMode('confirm');
-        },
-        
-        showContentConfirm: function(contentBuilderFunc, callbackFunction, opts) {
-            const self = this,
-                content = self.content,
-                closeBtn = content.closeBtn,
-                r = pkg.Dialog.DEFAULT_RADIUS;
-            let maxHeight;
-            
-            opts = Object.assign({}, pkg.Dialog.CONFIRM_DEFAULTS, opts);
-            
-            maxHeight = opts.maxContainerHeight;
-            
-            self.destroyContent();
-            
-            content.sizeToChildren.setPaddingX(1);
-            self.setCallbackFunction(callbackFunction);
-            
-            // Setup form
-            const contentContainer = new View(content, {
-                name:'contentContainer', x:1, y:25, overflow:'auto'
-            }, [{
-                setHeight: function(v) {
-                    this.callSuper(v > maxHeight ? maxHeight : v);
-                }
-            }]);
-            
-            contentBuilderFunc.call(self, contentContainer);
-            
-            new pkg.SizeToChildren(contentContainer, {axis:'both'});
-            
-            self.show();
-            
-            closeBtn.setVisible(true);
-            closeBtn.focus();
-            
-            self.setupTitle(content, opts.titleText, r);
-            contentContainer.setY(self.header.height + 1);
-            self.setupFooterButtons(contentContainer, opts);
-            
-            self.setDisplayMode('content');
-            
-            // Set initial focus
-            if (contentContainer.initialFocus) contentContainer.initialFocus.focus();
-        },
-        
-        setupTitle: function(content, titleTxt, r) {
-            (this.header = new View(content, {
-                ignoreLayout:true,
-                width:content.width,
-                height:24,
-                bgColor:'#eeeeee',
-                roundedTopLeftCorner:r,
-                roundedTopRightCorner:r
-            })).sendToBack();
-            
-            new Text(content, {
-                name:'title', x:r, y:4, text:titleTxt, fontWeight:'bold'
-            });
-        },
-        
-        /** @private 
-            @param {!Object} mainView
-            @param {!Object} opts
-            @returns {undefined} */
-        setupFooterButtons: function(mainView, opts) {
-            const self = this,
-                content = self.content, 
-                DPY = ModalPanel.DEFAULT_PADDING_Y,
-                r = pkg.Dialog.DEFAULT_RADIUS,
-                BUTTON_CLASS = self.buttonClass;
-            let attrs,
-                buttons,
-                cancelBtn;
-            
-            const btnContainer = new View(content, {
-                y:mainView.y + mainView.height + DPY, align:'center'
-            });
-            
-            // Cancel Button
-            attrs = opts.cancelAttrs || {};
-            if (attrs.name == null) attrs.name = 'cancelBtn';
-            if (attrs.text == null) attrs.text = opts.cancelTxt;
-            if (opts.activeColor != null) attrs.activeColor = opts.activeColor;
-            if (opts.hoverColor != null) attrs.hoverColor = opts.hoverColor;
-            if (opts.readyColor != null) attrs.readyColor = opts.readyColor;
-            if (opts.textColor != null) attrs.textColor = opts.textColor;
-            cancelBtn = new BUTTON_CLASS(btnContainer, attrs, [{
-                doActivated: function() {self.doCallback(this);}
-            }]);
-            
-            // Confirm Button
-            attrs = opts.confirmAttrs || {};
-            if (attrs.name == null) attrs.name = 'confirmBtn';
-            if (attrs.text == null) attrs.text = opts.confirmTxt;
-            if (opts.activeColorConfirm != null) attrs.activeColor = opts.activeColorConfirm;
-            if (opts.hoverColorConfirm != null) attrs.hoverColor = opts.hoverColorConfirm;
-            if (opts.readyColorConfirm != null) attrs.readyColor = opts.readyColorConfirm;
-            if (opts.textColorConfirm != null) attrs.textColor = opts.textColorConfirm;
-            new BUTTON_CLASS(btnContainer, attrs, [{
-                doActivated: function() {self.doCallback(this);}
-            }]);
-            
-            // Additional Buttons
-            buttons = opts.buttons;
-            if (buttons) {
-                const len = buttons.length;
-                for (let i = 0; len > i; i++) {
-                    attrs = buttons[i];
-                    if (attrs.name == null) attrs.name = 'btn_' + i;
-                    new BUTTON_CLASS(btnContainer, attrs, [{
-                        doActivated: function() {self.doCallback(this);}
-                    }]);
-                }
-            }
-            
-            new pkg.SizeToChildren(btnContainer, {axis:'y'});
-            new pkg.SpacedLayout(btnContainer, {spacing:4, collapseParent:true});
-            
-            content.sizeToChildren.setPaddingY(DPY / 2);
-            
-            const bg = new View(content, {
-                ignoreLayout:true,
-                y:btnContainer.y - (DPY / 2),
-                width:content.width,
-                bgColor:'#eeeeee',
-                roundedBottomLeftCorner:r,
-                roundedBottomRightCorner:r
-            });
-            bg.setHeight(content.height - bg.y); // WHY: is this not in the attrs?
-            bg.sendToBack();
-            
-            if (opts.showClose === false) cancelBtn.focus();
-        }
-    });
+        });
 })(myt);
 
 
@@ -20103,504 +20253,6 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 // Make sure the validator is in the repository then delete.
                 if (getValidator(id)) delete validators[id];
             });
-        }
-    });
-})(myt);
-
-
-((pkg) => {
-    let globalDragManager,
-        
-        /* The view currently being dragged. */
-        dragView,
-        
-        /* The view currently being dragged over. */
-        overView;
-        
-    const
-        /* The list of myt.AutoScrollers currently registered for notification
-            when drags start and stop. */
-        autoScrollers = [],
-        
-        /* The list of myt.DropTargets currently registered for notification 
-            when drag and drop events occur. */
-        dropTargets = [],
-        
-        setOverView = (v) => {
-            const existingOverView = overView;
-            if (existingOverView !== v) {
-                if (existingOverView) {
-                    existingOverView.notifyDragLeave(dragView);
-                    if (!dragView.destroyed) dragView.notifyDragLeave(existingOverView);
-                    globalDragManager.fireEvent('dragLeave', existingOverView);
-                }
-                
-                overView = v;
-                
-                if (v) {
-                    v.notifyDragEnter(dragView);
-                    if (!dragView.destroyed) dragView.notifyDragEnter(v);
-                    globalDragManager.fireEvent('dragEnter', existingOverView);
-                }
-            }
-        },
-        
-        setDragView = v => {
-            let existingDragView = dragView,
-                funcName, 
-                eventName,
-                targets,
-                i;
-            if (existingDragView !== v) {
-                dragView = v;
-                
-                if (!!v) {
-                    existingDragView = v;
-                    funcName = 'notifyDragStart';
-                    eventName = 'startDrag';
-                } else {
-                    funcName = 'notifyDragStop';
-                    eventName = 'stopDrag';
-                }
-                
-                targets = filterList(existingDragView, dropTargets);
-                i = targets.length;
-                while (i) targets[--i][funcName](existingDragView);
-                
-                targets = filterList(existingDragView, autoScrollers);
-                i = targets.length;
-                while (i) targets[--i][funcName](existingDragView);
-                
-                globalDragManager.fireEvent(eventName, v);
-            }
-        },
-        
-        /*  Filters the provided array of myt.DragGroupSupport items for the
-            provided myt.Dropable. Returns an array of the matching list
-            items.
-            @param {!Object} dropable
-            @param {!Array} list
-            @returns {!Array} */
-        filterList = (dropable, list) => {
-            if (dropable.destroyed) {
-                return [];
-            } else if (dropable.acceptAnyDragGroup()) {
-                return list;
-            } else {
-                const retval = [],
-                    dragGroups = dropable.getDragGroups();
-                let i = list.length;
-                while (i) {
-                    const item = list[--i];
-                    if (item.acceptAnyDragGroup()) {
-                        retval.push(item);
-                    } else {
-                        const targetGroups = item.getDragGroups();
-                        for (const dragGroup in dragGroups) {
-                            if (targetGroups[dragGroup]) {
-                                retval.push(item);
-                                break;
-                            }
-                        }
-                    }
-                }
-                return retval;
-            }
-        };
-    
-    /** Provides global drag and drop functionality.
-        
-        Events:
-            dragLeave:myt.DropTarget Fired when a myt.Dropable is dragged out of
-                the drop target.
-            dragEnter:myt.DropTarget Fired when a myt.Dropable is dragged over
-                the drop target.
-            startDrag:object Fired when a drag starts. Value is the object
-                being dragged.
-            stopDrag:object Fired when a drag ends. Value is the object 
-                that is no longer being dragged.
-            drop:object Fired when a drag ends over a drop target. The value is
-                an array containing the dropable at index 0 and the drop target
-                at index 1.
-        
-        @class
-    */
-    new JS.Singleton('GlobalDragManager', {
-        include: [pkg.Observable],
-        
-        
-        // Constructor /////////////////////////////////////////////////////////
-        initialize: function() {
-            pkg.global.register('dragManager', globalDragManager = this);
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        getDragView: () => dragView,
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** Registers the provided auto scroller to receive notifications.
-            @param {!Object} autoScroller - The myt.AutoScroller to register.
-            @returns {undefined} */
-        registerAutoScroller: autoScroller => {
-            autoScrollers.push(autoScroller);
-        },
-        
-        /** Unregisters the provided auto scroller.
-            @param {!Object} autoScroller - The myt.AutoScroller to unregister.
-            @returns {undefined} */
-        unregisterAutoScroller: autoScroller => {
-            let i = autoScrollers.length;
-            while (i) {
-                if (autoScrollers[--i] === autoScroller) {
-                    autoScrollers.splice(i, 1);
-                    break;
-                }
-            }
-        },
-        
-        /** Registers the provided drop target to receive notifications.
-            @param {!Object} dropTarget - The myt.DropTarget to register.
-            @returns {undefined} */
-        registerDropTarget: dropTarget => {
-            dropTargets.push(dropTarget);
-        },
-        
-        /** Unregisters the provided drop target.
-            @param {!Object} dropTarget - The myt.DropTarget to unregister.
-            @returns {undefined} */
-        unregisterDropTarget: dropTarget => {
-            let i = dropTargets.length;
-            while (i) {
-                if (dropTargets[--i] === dropTarget) {
-                    dropTargets.splice(i, 1);
-                    break;
-                }
-            }
-        },
-        
-        /** Called by a myt.Dropable when a drag starts.
-            @param {!Object} dropable - The myt.Dropable that started the drag.
-            @returns {undefined} */
-        startDrag: dropable => {
-            setDragView(dropable);
-        },
-        
-        /** Called by a myt.Dropable when a drag stops.
-            @param {!Object} event -The mouse event that triggered the stop drag.
-            @param {!Object} dropable - The myt.Dropable that stopped being dragged.
-            @param {boolean} isAbort
-            @returns {undefined} */
-        stopDrag: (event, dropable, isAbort) => {
-            dropable.notifyDropped(overView, isAbort);
-            if (overView && !isAbort) overView.notifyDrop(dropable);
-            
-            setOverView();
-            setDragView();
-            
-            if (overView && !isAbort) globalDragManager.fireEvent('drop', [dropable, overView]);
-        },
-        
-        /** Called by a myt.Dropable during dragging.
-            @param {!Object} event - The mousemove event for the drag update.
-            @param {!Object} dropable - The myt.Dropable that is being dragged.
-            @returns {undefined} */
-        updateDrag: (event, dropable) => {
-            // Get the frontmost myt.DropTarget that is registered with this 
-            // manager and is under the current mouse location and has a 
-            // matching drag group.
-            const filteredDropTargets = filterList(dropable, dropTargets);
-            let i = filteredDropTargets.length,
-                topDropTarget;
-            
-            if (i > 0) {
-                const domMouseEvent = event.value,
-                    mouseX = domMouseEvent.pageX,
-                    mouseY = domMouseEvent.pageY;
-                
-                while (i) {
-                    let dropTarget = filteredDropTargets[--i];
-                    if (dropTarget.willAcceptDrop(dropable) &&
-                        dropable.willPermitDrop(dropTarget) &&
-                        dropTarget.isPointVisible(mouseX, mouseY) && 
-                        (!topDropTarget || dropTarget.isInFrontOf(topDropTarget))
-                    ) {
-                        topDropTarget = dropTarget;
-                    }
-                }
-            }
-            
-            setOverView(topDropTarget);
-        }
-    });
-})(myt);
-
-
-((pkg) => {
-    const G = pkg.global,
-        globalMouse = G.mouse,
-        globalKeys = G.keys;
-    
-    /** Makes an myt.View draggable via the mouse.
-        
-        Also supresses context menus since the mouse down to open it causes bad
-        behavior since a mouseup event is not always fired.
-        
-        Events:
-            isDragging:boolean Fired when the isDragging attribute is modified
-                via setIsDragging.
-        
-        Attributes:
-            allowAbort:boolean Allows a drag to be aborted by the user by
-                pressing the 'esc' key. Defaults to undefined which is equivalent
-                to false.
-            isDraggable:boolean Configures the view to be draggable or not. The 
-                default value is true.
-            distanceBeforeDrag:number The distance, in pixels, before a mouse 
-                down and drag is considered a drag action. Defaults to 0.
-            isDragging:boolean Indicates that this view is currently being dragged.
-            draggableAllowBubble:boolean Determines if mousedown and mouseup
-                dom events handled by this component will bubble or not. Defaults
-                to true.
-            dragOffsetX:number The x amount to offset the position during dragging.
-                Defaults to 0.
-            dragOffsetY:number The y amount to offset the position during dragging.
-                Defaults to 0.
-            dragInitX:number Stores initial mouse x position during dragging.
-            dragInitY:number Stores initial mouse y position during dragging.
-            centerOnMouse:boolean If true this draggable will update the dragInitX
-                and dragInitY to keep the view centered on the mouse. Defaults
-                to undefined which is equivalent to false.
-        
-        Private Attributes:
-            __lastMousePosition:object The last position of the mouse during
-                dragging.
-        
-        @class */
-    pkg.Draggable = new JS.Module('Draggable', {
-        // Life Cycle //////////////////////////////////////////////////////////
-        /** @overrides myt.View */
-        initNode: function(parent, attrs) {
-            const self = this;
-            let isDraggable = true;
-            
-            self.isDraggable = self.isDragging = false;
-            self.draggableAllowBubble = true;
-            self.distanceBeforeDrag = self.dragOffsetX = self.dragOffsetY = 0;
-            
-            // Will be set after init since the draggable subview probably
-            // doesn't exist yet.
-            if (attrs.isDraggable != null) {
-                isDraggable = attrs.isDraggable;
-                delete attrs.isDraggable;
-            }
-            
-            self.callSuper(parent, attrs);
-            
-            self.setIsDraggable(isDraggable);
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        setIsDraggable: function(v) {
-            const self = this;
-            if (self.isDraggable !== v) {
-                self.isDraggable = v;
-                // No event needed.
-                
-                let func;
-                if (v) {
-                    func = self.attachToDom;
-                } else if (self.inited) {
-                    func = self.detachFromDom;
-                }
-                
-                if (func) {
-                    const dragviews = self.getDragViews();
-                    let i = dragviews.length;
-                    while (i) {
-                        const dragview = dragviews[--i];
-                        func.call(self, dragview, '__doMouseDown', 'mousedown');
-                        func.call(self, dragview, '__doContextMenu', 'contextmenu');
-                    }
-                }
-            }
-        },
-        
-        setIsDragging: function(v) {
-            this.set('isDragging', v, true);
-        },
-        
-        setDragOffsetX: function(v, supressUpdate) {
-            if (this.dragOffsetX !== v) {
-                this.dragOffsetX = v;
-                if (this.inited && this.isDragging && !supressUpdate) this.reRequestDragPosition();
-            }
-        },
-        
-        setDragOffsetY: function(v, supressUpdate) {
-            if (this.dragOffsetY !== v) {
-                this.dragOffsetY = v;
-                if (this.inited && this.isDragging && !supressUpdate) this.reRequestDragPosition();
-            }
-        },
-        
-        setDistanceBeforeDrag: function(v) {this.distanceBeforeDrag = v;},
-        setDraggableAllowBubble: function(v) {this.draggableAllowBubble = v;},
-        setCenterOnMouse: function(v) {this.centerOnMouse = v;},
-        setAllowAbort: function(v) {this.allowAbort = v;},
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** @returns {!Array} - An array of views that can be moused down on to 
-            start the drag. Subclasses should override this to return an 
-            appropriate list of views. By default this view is returned thus 
-            making the entire view capable of starting a drag. */
-        getDragViews: function() {
-            return [this];
-        },
-        
-        /** @private
-            @param {!Object} event
-            @returns {undefined} */
-        __doContextMenu: (event) => {
-            // Do nothing so the context menu event is supressed.
-        },
-        
-        /** @private
-            @param {!Object} event
-            @returns {undefined} */
-        __doMouseDown: function(event) {
-            const self = this,
-                pos = pkg.MouseObservable.getMouseFromEvent(event),
-                de = self.getOuterDomElement();
-            self.dragInitX = pos.x - de.offsetLeft;
-            self.dragInitY = pos.y - de.offsetTop;
-            
-            self.attachToDom(globalMouse, '__doMouseUp', 'mouseup', true);
-            if (self.distanceBeforeDrag > 0) {
-                self.attachToDom(globalMouse, '__doDragCheck', 'mousemove', true);
-            } else {
-                self.startDrag(event);
-            }
-            
-            event.value.preventDefault();
-            return self.draggableAllowBubble;
-        },
-        
-        /** @private
-            @param {!Object} event
-            @returns {undefined} */
-        __doMouseUp: function(event) {
-            if (this.isDragging) {
-                this.stopDrag(event, false);
-            } else {
-                this.detachFromDom(globalMouse, '__doMouseUp', 'mouseup', true);
-                this.detachFromDom(globalMouse, '__doDragCheck', 'mousemove', true);
-            }
-            return this.draggableAllowBubble;
-        },
-        
-        /** @private
-            @param {!Object} event
-            @returns {undefined} */
-        __watchForAbort: function(event) {
-            if (event.value === 27) this.stopDrag(event, true);
-        },
-        
-        /** @private
-            @param {!Object} event
-            @returns {undefined} */
-        __doDragCheck: function(event) {
-            const self = this,
-                pos = pkg.MouseObservable.getMouseFromEvent(event),
-                distance = pkg.Geometry.measureDistance(pos.x, pos.y, self.dragInitX + self.x, self.dragInitY + self.y);
-            if (distance >= self.distanceBeforeDrag) {
-                self.detachFromDom(pkg.global.mouse, '__doDragCheck', 'mousemove', true);
-                self.startDrag(event);
-            }
-        },
-        
-        /** Active until stopDrag is called. The view position will be bound
-            to the mouse position. Subclasses typically call this onmousedown for
-            subviews that allow dragging the view.
-            @param {!Object} event - The event the mouse event when the drag started.
-            @returns {undefined} */
-        startDrag: function(event) {
-            const self = this;
-            
-            if (self.centerOnMouse) {
-                self.syncTo(self, '__updateDragInitX', 'width');
-                self.syncTo(self, '__updateDragInitY', 'height');
-            }
-            
-            if (self.allowAbort) self.attachTo(globalKeys, '__watchForAbort', 'keyup');
-            
-            self.setIsDragging(true);
-            self.attachToDom(globalMouse, 'updateDrag', 'mousemove', true);
-            self.updateDrag(event);
-        },
-        
-        /** Called on every mousemove event while dragging.
-            @param {!Object} event
-            @returns {undefined} */
-        updateDrag: function(event) {
-            this.__lastMousePosition = pkg.MouseObservable.getMouseFromEvent(event);
-            this.reRequestDragPosition();
-        },
-        
-        /** @private
-            @param {!Object} event
-            @returns {undefined} */
-        __updateDragInitX: function(event) {
-            this.dragInitX = this.width / 2 * (this.scaleX || 1);
-        },
-        
-        /** @private
-            @param {!Object} event
-            @returns {undefined} */
-        __updateDragInitY: function(event) {
-            this.dragInitY = this.height / 2 * (this.scaleY || 1);
-        },
-        
-        /** Stop the drag. (see startDrag for more details)
-            @param {!Object} event - The event that ended the drag.
-            @param {boolean} isAbort - Indicates if the drag ended normally or was
-                aborted.
-            @returns {undefined} */
-        stopDrag: function(event, isAbort) {
-            const self = this;
-            self.detachFromDom(globalMouse, '__doMouseUp', 'mouseup', true);
-            self.detachFromDom(globalMouse, 'updateDrag', 'mousemove', true);
-            if (self.centerOnMouse) {
-                self.detachFrom(self, '__updateDragInitX', 'width');
-                self.detachFrom(self, '__updateDragInitY', 'height');
-            }
-            if (self.allowAbort) self.detachFrom(globalKeys, '__watchForAbort', 'keyup');
-            self.setIsDragging(false);
-        },
-        
-        /** Repositions the view to the provided values. The default implementation
-            is to directly set x and y. Subclasses should override this method
-            when it is necessary to constrain the position.
-            @param {number} x - the new x position.
-            @param {number} y - the new y position.
-            @returns {undefined} */
-        requestDragPosition: function(x, y) {
-            if (!this.disabled) {
-                this.setX(x);
-                this.setY(y);
-            }
-        },
-        
-        reRequestDragPosition: function() {
-            const self = this,
-                pos = self.__lastMousePosition;
-            self.requestDragPosition(
-                pos.x - self.dragInitX + self.dragOffsetX, 
-                pos.y - self.dragInitY + self.dragOffsetY
-            );
         }
     });
 })(myt);
@@ -22300,114 +21952,6 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     return 0;
                 };
             }
-        }
-    });
-})(myt);
-
-
-((pkg) => {
-    const sizeClasses = ['','fa-lg','fa-2x','fa-3x','fa-4x','fa-5x'],
-        
-        updateInstance = (instance) => {
-            let props = instance.properties;
-            if (props) {
-                if (typeof props === 'string') {
-                    props = props.split(' ');
-                } else {
-                    props = props.concat();
-                }
-                props.unshift(instance.size);
-                props.unshift(instance.icon);
-            } else {
-                props = [instance.icon, instance.size];
-            }
-            
-            instance.setHtml(FontAwesome.makeTag(props));
-        };
-    
-    pkg.loadCSSFonts(['//use.fontawesome.com/releases/v5.0.8/css/all.css']);
-    
-    /** An adapter for FontAwesome.
-        
-        Attributes:
-            icon:string The name of the FA icon to set.
-            size:number A number from 0 to 5 with 0 being normal size and 5 being
-                the largest size.
-            propeties:string || array A space separated string or list of FA
-                CSS classes to set.
-    */
-    const FontAwesome = pkg.FontAwesome = new JS.Class('FontAwesome', pkg.Markup, {
-        // Class Methods and Attributes ////////////////////////////////////////
-        extend: {
-            makeTag: function(props) {
-                if (Array.isArray(props)) {
-                    let len = props.length,
-                        prop,
-                        i;
-                    if (len > 0) {
-                        props.unshift('fa');
-                        ++len;
-                        
-                        if (props[1].indexOf('fa-') !== 0) props[1] = 'fa-' + props[1];
-                        
-                        if (len >= 3) props[2] = sizeClasses[props[2]] || '';
-                        
-                        if (len > 3) {
-                            i = 3;
-                            for (; len > i; ++i) {
-                                prop = props[i];
-                                if (prop.indexOf('fa-') !== 0) props[i] = 'fa-' + prop;
-                            }
-                        }
-                        
-                        return '<i class="' + props.join(' ') + '"></i>';
-                    }
-                }
-                
-                pkg.dumpStack('Error making tag');
-                console.error(props);
-                return '';
-            },
-            
-            registerForNotification: (instance) => {
-                pkg.registerForFontNotification(instance, 'Font Awesome\ 5 Free 400'); // regular
-                pkg.registerForFontNotification(instance, 'Font Awesome\ 5 Free 900'); // solid
-                pkg.registerForFontNotification(instance, 'Font Awesome\ 5 Brands 400'); // brands
-            },
-        },
-        
-        
-        // Life Cycle //////////////////////////////////////////////////////////
-        /** @overrides myt.View */
-        initNode: function(parent, attrs) {
-            this.size = 0;
-            this.icon = '';
-            
-            this.callSuper(parent, attrs);
-            
-            updateInstance(this);
-            
-            FontAwesome.registerForNotification(this);
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        setIcon: function(v) {
-            const existing = this.icon;
-            this.set('icon', v, true);
-            if (this.inited && existing !== v) updateInstance(this);
-        },
-        
-        setSize: function(v) {
-            const existing = this.size;
-            this.set('size', v, true);
-            if (this.inited && existing !== v) updateInstance(this);
-        },
-        
-        setProperties: function(v) {
-            this.properties = v;
-            this.fireEvent('properties', v);
-            if (this.inited) updateInstance(this);
         }
     });
 })(myt);

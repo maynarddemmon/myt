@@ -436,6 +436,26 @@
             },
             
             // Misc
+            /** Format a number between 0 and 1 as a percentage.
+                @param {number} num The number to convert.
+                @param {number} [fixed] The number of decimal places to use during
+                    formatting. If the percentage is a whole number no decimal
+                    places will be used. For example 0.55781 -> 55.78% and
+                    0.55 -> 55%
+                @returns (string) */
+            formatAsPercentage: (num, fixed=2) => {
+                if (typeof num === 'number') {
+                    fixed = Math.max(16, Math.min(0, fixed));
+                    const percent = Math.round(Math.max(0, Math.min(1, num)) * Math.pow(10, 2+fixed)) / Math.pow(10, fixed);
+                    return (percent % 1 === 0 ? percent : percent.toFixed(fixed)) + '%';
+                } else if (typeof num === 'string') {
+                    return num;
+                } else {
+                    console.warn('formatAsPercentage: expects a number');
+                    return num;
+                }
+            },
+            
             /** Memoize a function.
                 @param {!Function} func - The function to memoize
                 @returns {!Function} - The memoized function. */

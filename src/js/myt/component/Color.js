@@ -1,5 +1,9 @@
 ((pkg) => {
-    const cleanChannelValue = value => Math.min(255, Math.max(0, Math.round(value))),
+    const math = Math,
+        mathMax = math.max,
+        mathMin = math.min,
+        
+        cleanChannelValue = value => mathMin(255, mathMax(0, math.round(value))),
         toHex = value => {
             value = cleanChannelValue(value).toString(16);
             return value.length === 1 ? '0' + value : value;
@@ -9,6 +13,63 @@
         getGreenChannel = value => (0x00ff00 & value) >> 8,
         getBlueChannel = value => (0x0000ff & value),
         makeColorFromNumber = value => new Color(getRedChannel(value), getGreenChannel(value), getBlueChannel(value)),
+        makeColorNumberFromChannels = (red, green, blue) => (cleanChannelValue(red) << 16) + (cleanChannelValue(green) << 8) + cleanChannelValue(blue),
+        toUnitRange = (num, max) => {
+            if (typeof num === 'string') {
+                if (num.endsWith('%')) {
+                    num = parseFloat(num.substring(0, num.length - 1)) * max / 100;
+                } else {
+                    return 0;
+                }
+            }
+            num = mathMin(max, mathMax(0, num)) / max;
+            return math.abs(1 - num) < 0.000001 ? 1 : num;
+        },
+        
+        rgbToHsv = (r, g, b) => {
+            r = toUnitRange(r, 255);
+            g = toUnitRange(g, 255);
+            b = toUnitRange(b, 255);
+            
+            const max = mathMax(r, g, b),
+                diff = max - mathMin(r, g, b);
+            if (diff === 0) {
+                // achromatic
+                return {h:0, s:0, v:max};
+            } else {
+                let h;
+                switch (max) {
+                    case r:
+                        h = (g - b) / diff + (g < b ? 6 : 0);
+                        break;
+                    case g:
+                        h = (b - r) / diff + 2;
+                        break;
+                    case b:
+                        h = (r - g) / diff + 4;
+                        break;
+                }
+                return {h:h * 60, s:max === 0 ? 0 : diff / max, v:max};
+            }
+        },
+        
+        hsvToRgb = (h, s, v) => {
+            h = toUnitRange(h, 360) * 6;
+            s = toUnitRange(s, 100);
+            v = toUnitRange(v, 100);
+            
+            const i = math.floor(h),
+                f = h - i,
+                p = v * (1 - s),
+                q = v * (1 - f * s),
+                t = v * (1 - (1 - f) * s),
+                mod = i % 6,
+                red = [v, q, p, p, t, v][mod],
+                green = [t, v, v, q, p, p][mod],
+                blue = [p, p, t, v, v, q][mod];
+            
+            return {red:red * 255, green:green * 255, blue:blue * 255};
+        },
         
         /** Models a color as individual color channels.
             
@@ -21,6 +82,10 @@
         Color = pkg.Color = new JS.Class('Color', {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
+                toUnitRange:toUnitRange,
+                rgbToHsv:rgbToHsv,
+                hsvToRgb:hsvToRgb,
+                
                 /** Converts a number or string representation of a number to a 
                     two character hex string.
                     @param {number|string} value - The number or string to convert.
@@ -67,7 +132,25 @@
                         color, such as '#ff339b'.
                     @returns {!Object} a myt.Color or null if no color could 
                         be parsed. */
-                makeColorFromHexString: value => (value && value.indexOf('#') === 0) ? makeColorFromNumber(parseInt(value.substring(1), 16)) : null,
+                makeColorFromHexString: value => {
+                    if (value) {
+                        if (!value.startsWith('#')) value = '#' + value;
+                        return makeColorFromNumber(parseInt(value.substring(1), 16));
+                    } else {
+                        return null;
+                    }
+                },
+                
+                /** Creates an myt.Color from hue, saturation and value
+                    parameters.
+                    @param {number} h - The hue. A number from 0 to 360.
+                    @param {number} s - The saturation. A number from 0 to 100.
+                    @param {number} v - The value. A number from 0 to 100.
+                    @returns {!Object} myt.Color */
+                makeColorFromHSV: (h, s, v) => {
+                    const rgb = hsvToRgb(h, s, v);
+                    return makeColorFromNumber(makeColorNumberFromChannels(rgb.red, rgb.green, rgb.blue));
+                },
                 
                 /** Returns the lighter of the two provided colors.
                     @param {number} a - A color number.
@@ -76,12 +159,12 @@
                         lighter color. */
                 getLighterColor: (a, b) => makeColorFromNumber(a).isLighterThan(makeColorFromNumber(b)) ? a : b,
                 
-                /** Creates a "color" number from the provided color channels.
+                /** Creates an RGB "color" number from the provided color channels.
                     @param {number} red - The red channel
                     @param {number} green - The green channel
                     @param {number} blue - The blue channel
                     @returns {number} */
-                makeColorNumberFromChannels: (red, green, blue) => (cleanChannelValue(red) << 16) + (cleanChannelValue(green) << 8) + cleanChannelValue(blue),
+                makeColorNumberFromChannels: makeColorNumberFromChannels,
                 
                 /** Creates a new myt.Color object that is a blend of the two 
                     provided colors.
@@ -147,6 +230,12 @@
                 @returns {string} A hex color such as '#a0bbcc'. */
             getHtmlHexString: function() {
                 return rgbToHex(this.red, this.green, this.blue, true);
+            },
+            
+            /** Gets an HSV representation of this Color.
+                @returns {!Object} With keys h, s and v. */
+            getHSV: function() {
+                return rgbToHsv(this.red, this.green, this.blue);
             },
             
             /** Tests if this color is lighter than the provided color.
