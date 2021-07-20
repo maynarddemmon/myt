@@ -1,11 +1,9 @@
 ((pkg) => {
-    const GLOBAL = global;
+    const GLOBAL = global,
+        DOCUMENT_ELEMENT = document;
     
     /** Provides a dom element for this instance. Also assigns a reference to this
         DomElementProxy to a property named "model" on the dom element.
-        
-        Events:
-            None
         
         Attributes:
             domElement:domElement the dom element hidden we are a proxy for.
@@ -24,7 +22,7 @@
                     the new element.
                 @returns {!Object} the created element. */
             createDomElement: (tagname, styles, props) => {
-                const de = document.createElement(tagname);
+                const de = DOCUMENT_ELEMENT.createElement(tagname);
                 let key;
                 if (props) for (key in props) de[key] = props[key];
                 if (styles) for (key in styles) de.style[key] = styles[key];
@@ -39,7 +37,7 @@
                 if (elem.nodeName === 'INPUT' && elem.type === 'hidden') return false;
                 
                 while (elem) {
-                    if (elem === document) return true;
+                    if (elem === DOCUMENT_ELEMENT) return true;
                     
                     const style = GLOBAL.getComputedStyle(elem);
                     if (style.display === 'none' || style.visibility === 'hidden') break;
@@ -190,13 +188,13 @@
                     if (!eventType) throw new SyntaxError('Only HTMLEvent and MouseEvent interfaces supported');
                     
                     let domEvent;
-                    if (document.createEvent) {
-                        domEvent = document.createEvent(eventType);
+                    if (DOCUMENT_ELEMENT.createEvent) {
+                        domEvent = DOCUMENT_ELEMENT.createEvent(eventType);
                         if (eventType === 'HTMLEvents') {
                             domEvent.initEvent(eventName, opts.bubbles, opts.cancelable);
                         } else {
                             domEvent.initMouseEvent(
-                                eventName, opts.bubbles, opts.cancelable, document.defaultView,
+                                eventName, opts.bubbles, opts.cancelable, DOCUMENT_ELEMENT.defaultView,
                                 opts.button, opts.pointerX, opts.pointerY, opts.pointerX, opts.pointerY,
                                 opts.ctrlKey, opts.altKey, opts.shiftKey, opts.metaKey, 
                                 opts.button, null
@@ -206,12 +204,22 @@
                     } else {
                         opts.clientX = opts.pointerX;
                         opts.clientY = opts.pointerY;
-                        domEvent = document.createEventObject();
-                        for (let key in opts) domEvent[key] = opts[key];
+                        domEvent = DOCUMENT_ELEMENT.createEventObject();
+                        for (const key in opts) domEvent[key] = opts[key];
                         elem.fireEvent('on' + eventName, domEvent);
                     }
                 }
-            }
+            },
+            
+            getScrollbarSize: pkg.memoize(() => {
+                // Detect if scrollbars take up space or not
+                const body = DOCUMENT_ELEMENT.body,
+                    elem = DomElementProxy.createDomElement('div', {width:'100px', height:'100px', overflow:'scroll'});
+                body.appendChild(elem);
+                const scrollbarSize = elem.offsetWidth - elem.clientWidth;
+                body.removeChild(elem);
+                return scrollbarSize;
+            })
         },
         
         

@@ -65,7 +65,7 @@ JS.Packages(function() {
     const MYT_COMPONENT_ROOT = MYT_ROOT + 'component/';
     file(MYT_COMPONENT_ROOT + 'BAG.js'             ).provides('myt.BAG','myt.BAGMembership').requires('myt.Node');
     file(MYT_COMPONENT_ROOT + 'Button.js'          )
-        .provides('myt.Button','myt.SimpleButtonStyle','myt.SimpleButton','myt.SimpleIconTextButton','myt.SimpleTextButton','myt.IconTextButtonContent','myt.TextButtonContent')
+        .provides('myt.Button','myt.SimpleButtonStyle','myt.SimpleButton','myt.SimpleIconTextButton','myt.SimpleTextButton','myt.IconTextButtonContent','myt.TextButtonContent','myt.TextButton')
         .requires('myt.UpdateableUI','myt.MouseOverAndDown','myt.KeyActivation','myt.Disableable','myt.View','myt.Image','myt.Text');
     file(MYT_COMPONENT_ROOT + 'Checkbox.js'        ).provides('myt.Checkbox').requires('myt.SimpleButtonStyle','myt.ValueComponent');
     file(MYT_COMPONENT_ROOT + 'Color.js'           ).provides('myt.Color').requires('myt');
@@ -132,8 +132,8 @@ JS.Packages(function() {
     
     // Component : Dialog
     file(MYT_COMPONENT_ROOT + 'dialog/ColorPicker.js').provides('myt.ColorPicker').requires('myt.Color','myt.Text','myt.FontAwesome', 'myt.Draggable');
-    file(MYT_COMPONENT_ROOT + 'dialog/simple-dtpicker.js').provides('$.fn.dtpicker'); // Requires JQuery 1.7.2+
-    file(MYT_COMPONENT_ROOT + 'dialog/Dialog.js').provides('myt.Dialog').requires('myt.ColorPicker','$.fn.dtpicker','myt.ModalPanel','myt.Spinner','myt.SimpleButton');
+    file(MYT_COMPONENT_ROOT + 'dialog/DatePicker.js').provides('myt.DatePicker').requires('myt.Text','myt.FontAwesome','myt.SelectionManager');
+    file(MYT_COMPONENT_ROOT + 'dialog/Dialog.js').provides('myt.Dialog').requires('myt.ColorPicker','myt.DatePicker','myt.ModalPanel','myt.Spinner','myt.SimpleButton');
     
     // Component : Grid
     file(MYT_COMPONENT_ROOT + 'grid/GridColumnHeader.js'      ).provides('myt.GridColumnHeader'      ).requires('myt.View','myt.BoundedValueComponent');

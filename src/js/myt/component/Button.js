@@ -1,6 +1,9 @@
 ((pkg) => {
     const JSClass = JS.Class,
         JSModule = JS.Module,
+        
+        View = pkg.View,
+        
         defaultDisabledOpacity = 0.5,
         defaultFocusShadowPropertyValue = [0, 0, 7, '#666666'],
         
@@ -229,7 +232,7 @@
             attributes to fill the button.
             
             @class */
-        SimpleButton = pkg.SimpleButton = new JSClass('SimpleButton', pkg.View, {
+        SimpleButton = pkg.SimpleButton = new JSClass('SimpleButton', View, {
             include: [SimpleButtonStyle],
             
             // Life Cycle //////////////////////////////////////////////////////
@@ -626,5 +629,46 @@
         @class */
     pkg.SimpleTextButton = new JSClass('SimpleTextButton', SimpleButton, {
         include: [pkg.TextButtonContent]
+    });
+    
+    pkg.TextButton = new JSClass('TextButton', View, {
+        include: [
+            SimpleButtonStyle,
+            pkg.SizeToDom,
+            pkg.TextSupport
+        ],
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
+            if (attrs.roundedCorners == null) attrs.roundedCorners = 3;
+            if (attrs.textAlign == null) attrs.textAlign = 'center';
+            if (attrs.paddingTop == null) attrs.paddingTop = 1;
+            if (attrs.height == null) attrs.height = 23 - (attrs.paddingTop || 0);
+            
+            if (attrs.activeColor == null) attrs.activeColor = '#dddddd';
+            if (attrs.hoverColor == null) attrs.hoverColor = '#eeeeee';
+            if (attrs.readyColor == null) attrs.readyColor = '#ffffff';
+            
+            this.callSuper(parent, attrs);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setPaddingLeft: function(v) {
+            this.getInnerDomStyle().paddingLeft = (this.paddingLeft = v) + 'px';
+        },
+        
+        setPaddingRight: function(v) {
+            this.getInnerDomStyle().paddingRight = (this.paddingRight = v) + 'px';
+        },
+        
+        setPaddingTop: function(v) {
+            this.getInnerDomStyle().paddingTop = (this.paddingTop = v) + 'px';
+        },
+        
+        setPaddingBottom: function(v) {
+            this.getInnerDomStyle().paddingBottom = (this.paddingBottom = v) + 'px';
+        }
     });
 })(myt);

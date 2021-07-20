@@ -24,7 +24,6 @@ Parts of the Software incorporates code from the following open-source projects:
 *                                             Ubilabs http://ubilabs.net
 *   jQuery Cookie Plugin v1.3.1, Copyright (c) 2013 Klaus Hartl (MIT License)
 *   date.format Date:03/10/15, Copyright (c) 2005 Jacob Wright https://github.com/jacwright/date.format
-*   jquery-simple-datetimepicker v1.12.0, Copyright (c) 2014 Masanori Ohgita https://github.com/mugifly/jquery-simple-datetimepicker
 *
 * BSD-3-Clause
 *   Font Face Observer v2.1.0, Copyright (c) 2014 Bram Stein https://github.com/bramstein/fontfaceobserver
