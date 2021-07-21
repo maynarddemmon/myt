@@ -5426,10 +5426,9 @@ myt.Destructible = new JS.Module('Destructible', {
                 globalLock = v;
                 
                 if (!v) {
-                    let i = deferredLayouts.length, 
-                        layout;
+                    let i = deferredLayouts.length;
                     while (i) {
-                        layout = deferredLayouts[--i];
+                        const layout = deferredLayouts[--i];
                         layout.__deferredLayout = false;
                         layout.update();
                     }
@@ -5440,8 +5439,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /*  Adds a Layout to the list of layouts that will get updated when the
             global lock is released.
-                param layout:myt.Layout the layout to defer an update for.
-        */
+                param layout:myt.Layout the layout to defer an update for. */
         deferLayoutUpdate = layout => {
             // Don't add a layout that is already deferred.
             if (!layout.__deferredLayout) {
@@ -5474,10 +5472,17 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         },
         
+        setAndUpdate = (layout, attrName, value) => {
+            if (layout[attrName] !== value) {
+                layout[attrName] = value;
+                if (layout.inited) {
+                    layout.fireEvent(attrName, value);
+                    layout.update();
+                }
+            }
+        },
+        
         /** A layout controls the positioning of views within a parent view.
-            
-            Events:
-                None
             
             Attributes:
                 locked:boolean When true, the layout will not update.
@@ -5539,38 +5544,42 @@ myt.Destructible = new JS.Module('Destructible', {
             // Accessors ///////////////////////////////////////////////////////
             /** @overrides */
             setParent: function(parent) {
-                if (this.parent !== parent) {
+                const curParent = this.parent;
+                if (curParent !== parent) {
                     // Lock during parent change so that old parent is not updated by
                     // the calls to removeSubview and addSubview.
                     const wasNotLocked = !this.locked;
                     if (wasNotLocked) this.locked = true;
                     
                     // Stop monitoring parent
-                    let svs, i, len;
-                    if (this.parent) {
+                    let svs,
+                        i,
+                        len;
+                    if (curParent) {
                         svs = this.subviews;
                         i = svs.length;
                         while (i) this.removeSubview(svs[--i]);
                         
-                        this.detachFrom(this.parent, '__handleParentSubviewAddedEvent', 'subviewAdded');
-                        this.detachFrom(this.parent, '__handleParentSubviewRemovedEvent', 'subviewRemoved');
+                        this.detachFrom(curParent, '__hndlPSAV', 'subviewAdded');
+                        this.detachFrom(curParent, '__hndlPSRV', 'subviewRemoved');
                     }
                     
                     this.callSuper(parent);
+                    parent = this.parent;
                     
                     // Start monitoring new parent
-                    if (this.parent) {
-                        svs = this.parent.getSubviews();
+                    if (parent) {
+                        svs = parent.getSubviews();
                         for (i = 0, len = svs.length; len > i;) this.addSubview(svs[i++]);
                         
-                        this.attachTo(this.parent, '__handleParentSubviewAddedEvent', 'subviewAdded');
-                        this.attachTo(this.parent, '__handleParentSubviewRemovedEvent', 'subviewRemoved');
+                        this.attachTo(parent, '__hndlPSAV', 'subviewAdded');
+                        this.attachTo(parent, '__hndlPSRV', 'subviewRemoved');
                     }
                     
                     // Clear temporary lock and update if this happened after initialization.
                     if (wasNotLocked) {
                         this.locked = false;
-                        if (this.inited && this.parent) this.update();
+                        if (this.inited && parent) this.update();
                     }
                 }
             },
@@ -5681,7 +5690,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 @private
                 @param {!Object} event
                 @returns {undefined} */
-            __handleParentSubviewAddedEvent: function(event) {
+            __hndlPSAV: function(event) {
                 if (event.value.parent === this.parent) this.addSubview(event.value);
             },
             
@@ -5689,7 +5698,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 @private
                 @param {!Object} event
                 @returns {undefined} */
-            __handleParentSubviewRemovedEvent: function(event) {
+            __hndlPSRV: function(event) {
                 if (event.value.parent === this.parent) this.removeSubview(event.value);
             },
             
@@ -5720,217 +5729,691 @@ myt.Destructible = new JS.Module('Destructible', {
             moveSubviewAfter: function(sv, target) {
                 moveSubview(this, sv, target, true);
             }
+        }),
+        
+        /** A layout that sets the target attribute name to the target value for 
+            each subview.
+            
+            Events:
+                targetAttrName:string
+                targetValue:*
+            
+            Attributes:
+                targetAttrName:string the name of the attribute to set on each 
+                    subview.
+                targetValue:* the value to set the attribute to.
+                setterName:string the name of the setter method to call on 
+                    the subview for the targetAttrName. This value is updated 
+                    when setTargetAttrName is called.
+            
+            @class */
+        ConstantLayout = pkg.ConstantLayout = new JSClass('ConstantLayout', Layout, {
+            // Accessors ///////////////////////////////////////////////////////
+            setTargetAttrName: function(v) {
+                this.setterName = pkg.AccessorSupport.generateSetterName(v);
+                setAndUpdate(this, 'targetAttrName', v);
+            },
+            
+            setTargetValue: function(v) {setAndUpdate(this, 'targetValue', v);},
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @overrides */
+            update: function() {
+                if (this.canUpdate()) {
+                    const setterName = this.setterName, 
+                        value = this.targetValue, 
+                        svs = this.subviews, 
+                        len = svs.length; 
+                    if (setterName) for (let i = 0; len > i;) svs[i++][setterName](value);
+                }
+            }
+        }),
+        
+        /** An extension of ConstantLayout that allows for variation based on 
+            the index and subview. An updateSubview method is provided that can 
+            be overriden to provide variable behavior.
+            
+            Events:
+                collapseParent:boolean
+                reverse:boolean
+            
+            Attributes:
+                collapseParent:boolean If true the updateParent method will be 
+                    called. The updateParent method will typically resize the 
+                    parent to fit the newly layed out child views. Defaults 
+                    to false.
+                reverse:boolean If true the layout will position the items in 
+                    the opposite order. For example, right to left instead of 
+                    left to right. Defaults to false.
+            
+            @class */
+        VariableLayout = pkg.VariableLayout = new JSClass('VariableLayout', ConstantLayout, {
+            // Life Cycle //////////////////////////////////////////////////////
+            /** @overrides */
+            initNode: function(parent, attrs) {
+                this.collapseParent = this.reverse = false;
+                
+                this.callSuper(parent, attrs);
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setCollapseParent: function(v) {setAndUpdate(this, 'collapseParent', v);},
+            setReverse: function(v) {setAndUpdate(this, 'reverse', v);},
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @overrides */
+            update: function() {
+                if (this.canUpdate()) {
+                    // Prevent inadvertent loops
+                    this.incrementLockedCounter();
+                    
+                    this.doBeforeUpdate();
+                    
+                    const setterName = this.setterName, 
+                        svs = this.subviews, 
+                        len = svs.length;
+                    let value = this.targetValue,
+                        i, 
+                        count = 0;
+                    
+                    if (this.reverse) {
+                        i = len;
+                        while (i) {
+                            const sv = svs[--i];
+                            if (this.skipSubview(sv)) continue;
+                            value = this.updateSubview(++count, sv, setterName, value);
+                        }
+                    } else {
+                        i = 0;
+                        while (len > i) {
+                            const sv = svs[i++];
+                            if (this.skipSubview(sv)) continue;
+                            value = this.updateSubview(++count, sv, setterName, value);
+                        }
+                    }
+                    
+                    this.doAfterUpdate();
+                    
+                    if (this.collapseParent && !this.parent.isBeingDestroyed) {
+                        this.updateParent(setterName, value);
+                    }
+                    
+                    this.decrementLockedCounter();
+                }
+            },
+            
+            /** Called by update before any processing is done. Gives subviews a
+                chance to do any special setup before update is processed.
+                @returns {undefined} */
+            doBeforeUpdate: () => {
+                // Subclasses to implement as needed.
+            },
+            
+            /** Called by update after any processing is done but before the 
+                optional collapsing of parent is done. Gives subviews a chance 
+                to do any special teardown after update is processed.
+                @returns {undefined} */
+            doAfterUpdate: () => {
+                // Subclasses to implement as needed.
+            },
+            
+            /** Provides a default implementation that calls update when the
+                visibility of a subview changes.
+                @overrides myt.Layout
+                @param {?Object} sv
+                @returns {undefined} */
+            startMonitoringSubview: function(sv) {
+                this.attachTo(sv, 'update', 'visible');
+            },
+            
+            /** Provides a default implementation that calls update when the
+                visibility of a subview changes.
+                @overrides myt.Layout
+                @param {?Object} sv
+                @returns {undefined} */
+            stopMonitoringSubview: function(sv) {
+                this.detachFrom(sv, 'update', 'visible');
+            },
+            
+            /** Called for each subview in the layout.
+                @param {number} count - The number of subviews that have been 
+                    layed out including the current one. i.e. count will be 1 
+                    for the first subview layed out.
+                @param {!Object} sv - The sub myt.View being layed out.
+                @param {string} setterName - The name of the setter method to call.
+                @param {*} value - The layout value.
+                @returns {*} - The value to use for the next subview. */
+            updateSubview: (count, sv, setterName, value) => {
+                sv[setterName](value);
+                return value;
+            },
+            
+            /** Called for each subview in the layout to determine if the view 
+                should be positioned or not. The default implementation returns 
+                true if the subview is not visible.
+                @param {?Object} sv - The sub myt.View to test.
+                @returns {boolean} true if the subview should be skipped during 
+                    layout updates. */
+            skipSubview: sv => !sv.visible,
+            
+            /** Called if the collapseParent attribute is true. Subclasses 
+                should implement this if they want to modify the parent view.
+                @param {string} setterName - The name of the setter method to 
+                    call on the parent.
+                @param {*} value - The value to set on the parent.
+                @returns {undefined} */
+            updateParent: (setterName, value) => {
+                // Subclasses to implement as needed.
+            }
+        }),
+        
+        /** An extension of VariableLayout that positions views along an axis 
+            using an inset, outset and spacing value.
+            
+            Events:
+                spacing:number
+                outset:number
+            
+            Attributes:
+                axis:string The orientation of the layout. An alias 
+                    for setTargetAttrName.
+                inset:number Padding before the first subview that gets 
+                    positioned. An alias for setTargetValue.
+                spacing:number Spacing between each subview.
+                outset:number Padding at the end of the layout. Only gets used
+                    if collapseParent is true.
+                noAddSubviewOptimization:boolean Turns the optimization to 
+                    suppress layout updates when a subview is added off/on. 
+                    Defaults to undefined which is equivalent to false and 
+                    thus leaves the optimization on.
+            
+            @class */
+        SpacedLayout = pkg.SpacedLayout = new JSClass('SpacedLayout', VariableLayout, {
+            // Life Cycle //////////////////////////////////////////////////////
+            /** @overrides myt.VariableLayout */
+            initNode: function(parent, attrs) {
+                const self = this;
+                
+                self.targetAttrName = self.axis = 'x';
+                self.setterName = 'setX';
+                self.measureAttrName = 'boundsWidth';
+                self.measureAttrBaseName = 'width';
+                self.parentSetterName = 'setWidth';
+                self.targetValue = self.spacing = self.inset = self.outset = 0;
+                
+                self.callSuper(parent, attrs);
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            /** @overrides myt.ConstantLayout */
+            setTargetAttrName: function(v) {
+                if (this.targetAttrName !== v) {
+                    const isY = v === 'y',
+                        inited = this.inited;
+                    if (inited) this.stopMonitoringAllSubviews();
+                    this.measureAttrName = isY ? 'boundsHeight' : 'boundsWidth';
+                    this.measureAttrBaseName = isY ? 'height' : 'width';
+                    this.parentSetterName = isY ? 'setHeight' : 'setWidth';
+                    if (inited) this.startMonitoringAllSubviews();
+                    this.callSuper(v);
+                }
+            },
+            
+            setNoAddSubviewOptimization: function(v) {this.noAddSubviewOptimization = v;},
+            setAxis: function(v) {this.setTargetAttrName(this.axis = v);},
+            setInset: function(v) {this.setTargetValue(this.inset = v);},
+            
+            setSpacing: function(v) {setAndUpdate(this, 'spacing', v);},
+            setOutset: function(v) {setAndUpdate(this, 'outset', v);},
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @overrides myt.Layout */
+            addSubview: function(sv) {
+                // OPTIMIZATION: Skip the update call that happens during 
+                // subview add. The boundsWidth/boundsHeight events will be 
+                // fired immediately after and are a more appropriate time to 
+                // do the update.
+                const isLocked = this.locked; // Remember original locked state.
+                if (!this.noAddSubviewOptimization) this.locked = true; // Lock the layout so no updates occur.
+                this.callSuper(sv);
+                this.locked = isLocked; // Restore original locked state.
+            },
+            
+            /** @overrides myt.VariableLayout */
+            startMonitoringSubview: function(sv) {
+                this.attachTo(sv, 'update', this.measureAttrName);
+                this.callSuper(sv);
+            },
+            
+            /** @overrides myt.VariableLayout */
+            stopMonitoringSubview: function(sv) {
+                this.detachFrom(sv, 'update', this.measureAttrName);
+                this.callSuper(sv);
+            },
+            
+            /** @overrides myt.ConstantLayout */
+            updateSubview: function(count, sv, setterName, value) {
+                const size = sv[this.measureAttrName];
+                sv[setterName](value + (size - sv[this.measureAttrBaseName])/2.0); // Adj for transform
+                return value + size + this.spacing;
+            },
+            
+            /** @overrides myt.VariableLayout */
+            updateParent: function(setterName, value) {
+                this.parent[this.parentSetterName](value + this.outset - this.spacing);
+            }
         });
     
-    /* Create locked counter functions for the myt.Layout class. */
-    pkg.createFixedThresholdCounter(Layout, 1, 'locked');
-    
-    /** A layout that sets the target attribute name to the target value for 
-        each subview.
-        
-        Events:
-            targetAttrName:string
-            targetValue:*
-        
-        Attributes:
-            targetAttrName:string the name of the attribute to set on each subview.
-            targetValue:* the value to set the attribute to.
-            setterName:string the name of the setter method to call on the subview
-                for the targetAttrName. This value is updated when
-                setTargetAttrName is called.
+    /** An extension of SpacedLayout that resizes one or more views to fill in
+        any remaining space. The resizable subviews should not have a transform
+        applied to it. The non-resized views may have transforms applied 
+        to them.
         
         @class */
-    pkg.ConstantLayout = new JSClass('ConstantLayout', Layout, {
+    pkg.ResizeLayout = new JSClass('ResizeLayout', SpacedLayout, {
         // Accessors ///////////////////////////////////////////////////////////
+        /** @overrides myt.VariableLayout */
+        setCollapseParent: function(v) {
+            // collapseParent attribute is unused in ResizeLayout.
+        },
+        
+        /** @overrides myt.SpacedLayout */
         setTargetAttrName: function(v) {
             if (this.targetAttrName !== v) {
-                this.targetAttrName = v;
-                this.setterName = pkg.AccessorSupport.generateSetterName(v);
                 if (this.inited) {
-                    this.fireEvent('targetAttrName', v);
-                    this.update();
+                    const isX = v === 'x';
+                    this.stopMonitoringParent(isX ? 'height' : 'width');
+                    this.startMonitoringParent(isX ? 'width' : 'height');
                 }
+                
+                this.callSuper(v);
             }
         },
         
-        setTargetValue: function(v) {
-            if (this.targetValue !== v) {
-                this.targetValue = v;
-                if (this.inited) {
-                    this.fireEvent('targetValue', v);
-                    this.update();
-                }
+        /** @overrides myt.Layout */
+        setParent: function(parent) {
+            if (this.parent !== parent) {
+                const dim = this.targetAttrName === 'x' ? 'width' : 'height';
+                if (this.parent) this.stopMonitoringParent(dim);
+                
+                this.callSuper(parent);
+                
+                if (this.parent) this.startMonitoringParent(dim);
             }
         },
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** @overrides */
-        update: function() {
-            if (this.canUpdate()) {
-                const setterName = this.setterName, 
-                    value = this.targetValue, 
-                    svs = this.subviews, 
-                    len = svs.length; 
-                if (setterName) for (let i = 0; len > i;) svs[i++][setterName](value);
-            }
-        }
-    });
-    
-    /** An extension of ConstantLayout that allows for variation based on the
-        index and subview. An updateSubview method is provided that can be
-        overriden to provide variable behavior.
+        /** Called when monitoring of width/height should start on our parent.
+            @param {string} attrName - The name of the attribute to 
+                start monitoring.
+            @returns {undefined} */
+        startMonitoringParent: function(attrName) {
+            this.attachTo(this.parent, 'update', attrName);
+        },
         
-        Events:
-            collapseParent:boolean
-            reverse:boolean
+        /** Called when monitoring of width/height should stop on our parent.
+            @param {string} attrName - The name of the attribute to 
+                stop monitoring.
+            @returns {undefined} */
+        stopMonitoringParent: function(attrName) {
+            this.detachFrom(this.parent, 'update', attrName);
+        },
         
-        Attributes:
-            collapseParent:boolean If true the updateParent method will be called.
-                The updateParent method will typically resize the parent to fit
-                the newly layed out child views. Defaults to false.
-            reverse:boolean If true the layout will position the items in the
-                opposite order. For example, right to left instead of left to right.
-                Defaults to false.
-        
-        @class */
-    pkg.VariableLayout = new JSClass('VariableLayout', pkg.ConstantLayout, {
-        // Life Cycle //////////////////////////////////////////////////////////
-        /** @overrides */
-        initNode: function(parent, attrs) {
-            this.collapseParent = this.reverse = false;
+        /** @overrides myt.VariableLayout */
+        doBeforeUpdate: function() {
+            // Get size to fill
+            const measureAttrName = this.measureAttrName,
+                measureAttrBaseName = this.measureAttrBaseName,
+                svs = this.subviews;
             
-            this.callSuper(parent, attrs);
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        setCollapseParent: function(v) {
-            if (this.collapseParent !== v) {
-                this.collapseParent = v;
-                if (this.inited) {
-                    this.fireEvent('collapseParent', v);
-                    this.update();
-                }
-            }
-        },
-        
-        setReverse: function(v) {
-            if (this.reverse !== v) {
-                this.reverse = v;
-                if (this.inited) {
-                    this.fireEvent('reverse', v);
-                    this.update();
-                }
-            }
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** @overrides */
-        update: function() {
-            if (this.canUpdate()) {
-                // Prevent inadvertent loops
-                this.incrementLockedCounter();
-                
-                this.doBeforeUpdate();
-                
-                const setterName = this.setterName, 
-                    svs = this.subviews, 
-                    len = svs.length;
-                let value = this.targetValue,
-                    i, 
-                    count = 0;
-                
-                if (this.reverse) {
-                    i = len;
-                    while (i) {
-                        const sv = svs[--i];
-                        if (this.skipSubview(sv)) continue;
-                        value = this.updateSubview(++count, sv, setterName, value);
-                    }
+            // Calculate minimum required size
+            let remainder = this.parent[measureAttrBaseName] - this.targetValue - this.outset,
+                i = svs.length, 
+                count = 0, 
+                resizeSum = 0;
+            while (i) {
+                const sv = svs[--i];
+                if (this.skipSubview(sv)) continue;
+                ++count;
+                if (sv.layoutHint > 0) {
+                    resizeSum += sv.layoutHint;
                 } else {
-                    i = 0;
-                    while (len > i) {
-                        const sv = svs[i++];
-                        if (this.skipSubview(sv)) continue;
-                        value = this.updateSubview(++count, sv, setterName, value);
-                    }
+                    remainder -= sv[measureAttrName];
                 }
+            }
+            
+            if (count !== 0) {
+                remainder -= (count - 1) * this.spacing;
                 
-                this.doAfterUpdate();
-                
-                if (this.collapseParent && !this.parent.isBeingDestroyed) {
-                    this.updateParent(setterName, value);
-                }
-                
-                this.decrementLockedCounter();
+                // Store for update
+                this.remainder = remainder;
+                this.resizeSum = resizeSum;
+                this.scalingFactor = remainder / resizeSum;
+                this.resizeSumUsed = this.remainderUsed = 0;
+                this.measureSetter = measureAttrName === 'boundsWidth' ? 'setWidth' : 'setHeight';
             }
         },
         
-        /** Called by update before any processing is done. Gives subviews a
-            chance to do any special setup before update is processed.
-            @returns {undefined} */
-        doBeforeUpdate: () => {
-            // Subclasses to implement as needed.
+        /** @overrides myt.SpacedLayout */
+        updateSubview: function(count, sv, setterName, value) {
+            const hint = sv.layoutHint;
+            if (hint > 0) {
+                this.resizeSumUsed += hint;
+                
+                const size = this.resizeSum === this.resizeSumUsed ? 
+                    this.remainder - this.remainderUsed : 
+                    Math.round(hint * this.scalingFactor);
+                
+                this.remainderUsed += size;
+                sv[this.measureSetter](size);
+            }
+            return this.callSuper(count, sv, setterName, value);
         },
         
-        /** Called by update after any processing is done but before the optional
-            collapsing of parent is done. Gives subviews a chance to do any 
-            special teardown after update is processed.
-            @returns {undefined} */
-        doAfterUpdate: () => {
-            // Subclasses to implement as needed.
-        },
-        
-        /** Provides a default implementation that calls update when the
-            visibility of a subview changes.
-            @overrides myt.Layout
-            @param {?Object} sv
-            @returns {undefined} */
+        /** @overrides myt.SpacedLayout */
         startMonitoringSubview: function(sv) {
+            // Don't monitor width/height of the "stretchy" subviews since this
+            // layout changes them.
+            if (!(sv.layoutHint > 0)) this.attachTo(sv, 'update', this.measureAttrName);
             this.attachTo(sv, 'update', 'visible');
         },
         
-        /** Provides a default implementation that calls update when the
-            visibility of a subview changes.
-            @overrides myt.Layout
-            @param {?Object} sv
-            @returns {undefined} */
+        /** @overrides myt.SpacedLayout */
         stopMonitoringSubview: function(sv) {
+            // Don't monitor width/height of the "stretchy" subviews since this
+            // layout changes them.
+            if (!(sv.layoutHint > 0)) this.detachFrom(sv, 'update', this.measureAttrName);
             this.detachFrom(sv, 'update', 'visible');
         },
         
-        /** Called for each subview in the layout.
-            @param {number} count - The number of subviews that have been layed out
-                including the current one. i.e. count will be 1 for the first
-                subview layed out.
-            @param {!Object} sv - The sub myt.View being layed out.
-            @param {string} setterName - The name of the setter method to call.
-            @param {*} value - The layout value.
-            @returns {*} - The value to use for the next subview. */
-        updateSubview: (count, sv, setterName, value) => {
-            sv[setterName](value);
+        /** @overrides myt.SpacedLayout */
+        updateParent: function(setterName, value) {
+            // No resizing of parent since this view expands to fill the parent.
+        }
+    });
+
+    /** An extension of VariableLayout that also aligns each view vertically
+        or horizontally.
+        
+        Events:
+            align:string
+        
+        Attributes:
+            align:string Determines which way the views are aligned. Allowed
+                values are 'left', 'center', 'right' and 'top', 'middle', 
+                'bottom'. Defaults to 'middle'.
+        
+        @class */
+    pkg.AlignedLayout = new JSClass('AlignedLayout', VariableLayout, {
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.VariableLayout */
+        initNode: function(parent, attrs) {
+            const self = this;
+            
+            self.align = 'middle';
+            self.targetAttrName = 'y';
+            self.setterName = 'setY';
+            self.measureAttrName = 'boundsHeight';
+            self.measureAttrBaseName = 'height';
+            self.parentSetterName = 'setHeight';
+            self.targetValue = 0;
+            
+            self.callSuper(parent, attrs);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** @overrides myt.ConstantLayout */
+        setTargetAttrName: function(v) {
+            if (this.targetAttrName !== v) {
+                const isY = v === 'y',
+                    inited = this.inited;
+                if (inited) this.stopMonitoringAllSubviews();
+                this.measureAttrName = isY ? 'boundsHeight' : 'boundsWidth';
+                this.measureAttrBaseName = isY ? 'height' : 'width';
+                this.parentSetterName = isY ? 'setHeight' : 'setWidth';
+                if (inited) this.startMonitoringAllSubviews();
+                this.callSuper(v);
+            }
+        },
+        
+        setAlign: function(v) {
+            if (this.align !== v) {
+                this.align = v;
+                
+                // Update orientation but don't trigger an update since we
+                // already call update at the end of this setter.
+                const isLocked = this.locked;
+                this.locked = true;
+                this.setTargetAttrName((v === 'middle' || v === 'bottom' || v === 'top') ? 'y' : 'x');
+                this.locked = isLocked;
+                
+                if (this.inited) {
+                    this.fireEvent('align', v);
+                    this.update();
+                }
+            }
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides myt.VariableLayout */
+        startMonitoringSubview: function(sv) {
+            this.attachTo(sv, 'update', this.measureAttrName);
+            this.callSuper(sv);
+        },
+        
+        /** @overrides myt.VariableLayout */
+        stopMonitoringSubview: function(sv) {
+            this.detachFrom(sv, 'update', this.measureAttrName);
+            this.callSuper(sv);
+        },
+        
+        /** Determine the maximum subview width/height according to the axis.
+            @overrides myt.VariableLayout */
+        doBeforeUpdate: function() {
+            const measureAttrName = this.measureAttrName, 
+                svs = this.subviews;
+            let value = 0, 
+                sv, 
+                i = svs.length;
+            while (i) {
+                sv = svs[--i];
+                if (this.skipSubview(sv)) continue;
+                value = value > sv[measureAttrName] ? value : sv[measureAttrName];
+            }
+            
+            this.setTargetValue(value);
+        },
+        
+        /** @overrides myt.VariableLayout */
+        updateSubview: function(count, sv, setterName, value) {
+            switch (this.align) {
+                case 'center': case 'middle':
+                    sv[setterName]((value - sv[this.measureAttrName]) / 2);
+                    break;
+                case 'right': case 'bottom':
+                    sv[setterName](value - sv[this.measureAttrName]);
+                    break;
+                default:
+                    sv[setterName](0);
+            }
             return value;
         },
         
-        /** Called for each subview in the layout to determine if the view should
-            be positioned or not. The default implementation returns true if the 
-            subview is not visible.
-            @param {?Object} sv - The sub myt.View to test.
-            @returns {boolean} true if the subview should be skipped during layout updates.*/
-        skipSubview: sv => !sv.visible,
-        
-        /** Called if the collapseParent attribute is true. Subclasses should 
-            implement this if they want to modify the parent view.
-            @param {string} setterName - The name of the setter method to call on
-                the parent.
-            @param {*} value - The value to set on the parent.
-            @returns {undefined} */
-        updateParent: (setterName, value) => {
-            // Subclasses to implement as needed.
+        /** @overrides myt.VariableLayout */
+        updateParent: function(setterName, value) {
+            this.parent[this.parentSetterName](value);
         }
     });
+    
+    /** An extension of VariableLayout that positions views along an axis using
+        an inset, outset and spacing value. Views will be wrapped when they
+        overflow the available space.
+        
+        Supported Layout Hints:
+            break:string Will force the subview to start a new line/column.
+        
+        @class */
+    pkg.WrappingLayout = new JSClass('WrappingLayout', VariableLayout, {
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.VariableLayout */
+        initNode: function(parent, attrs) {
+            const self = this;
+            
+            self.targetAttrName = self.axis = 'x';
+            self.setterName = 'setX';
+            self.otherSetterName = 'setY';
+            self.measureAttrName = 'boundsWidth';
+            self.measureAttrBaseName = 'width';
+            self.otherMeasureAttrName = 'boundsHeight';
+            self.otherMeasureAttrBaseName = 'height';
+            self.parentSetterName = 'setHeight';
+            self.targetValue = self.spacing = self.inset = self.outset = self.lineSpacing = self.lineInset = self.lineOutset = 0;
+            
+            self.callSuper(parent, attrs);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** @overrides myt.ConstantLayout */
+        setTargetAttrName: function(v) {
+            if (this.targetAttrName !== v) {
+                const isY = v === 'y',
+                    inited = this.inited;
+                
+                if (inited) this.stopMonitoringAllSubviews();
+                
+                this.measureAttrName = isY ? 'boundsHeight' : 'boundsWidth';
+                const mabn = this.measureAttrBaseName = isY ? 'height' : 'width';
+                this.otherMeasureAttrName = isY ? 'boundsWidth' : 'boundsHeight';
+                const omabn = this.otherMeasureAttrBaseName = isY ? 'width' : 'height';
+                this.parentSetterName = isY ? 'setWidth' : 'setHeight';
+                this.otherSetterName = isY ? 'setX' : 'setY';
+                
+                if (inited) {
+                    this.startMonitoringAllSubviews();
+                    this.stopMonitoringParent(omabn);
+                    this.startMonitoringParent(mabn);
+                }
+                this.callSuper(v);
+            }
+        },
+        
+        /** @overrides myt.Layout */
+        setParent: function(parent) {
+            if (this.parent !== parent) {
+                const isY = this.targetAttrName === 'y';
+                if (this.parent) this.stopMonitoringParent(isY ? 'height' : 'width');
+                this.callSuper(parent);
+                if (this.parent) this.startMonitoringParent(isY ? 'height' : 'width');
+            }
+        },
+        
+        setAxis: function(v) {this.setTargetAttrName(this.axis = v);},
+        setInset: function(v) {this.setTargetValue(this.inset = v);},
+        
+        setSpacing: function(v) {setAndUpdate(this, 'spacing', v);},
+        setOutset: function(v) {setAndUpdate(this, 'outset', v);},
+        setLineSpacing: function(v) {setAndUpdate(this, 'lineSpacing', v);},
+        setLineInset: function(v) {setAndUpdate(this, 'lineInset', v);},
+        setLineOutset: function(v) {setAndUpdate(this, 'lineOutset', v);},
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Called when monitoring of width/height should start on our parent.
+            @param {string} measureAttrName - The name of the attribute to 
+                start monitoring.
+            @returns {undefined} */
+        startMonitoringParent: function(measureAttrName) {
+            this.attachTo(this.parent, 'update', measureAttrName);
+        },
+        
+        /** Called when monitoring of width/height should stop on our parent.
+            @param {string} measureAttrName - The name of the attribute to 
+                stop monitoring.
+            @returns {undefined} */
+        stopMonitoringParent: function(measureAttrName) {
+            this.detachFrom(this.parent, 'update', measureAttrName);
+        },
+        
+        /** @overrides myt.Layout */
+        startMonitoringSubview: function(sv) {
+            this.attachTo(sv, 'update', this.measureAttrName);
+            this.attachTo(sv, 'update', this.otherMeasureAttrName);
+            this.callSuper(sv);
+        },
+        
+        /** @overrides myt.Layout */
+        stopMonitoringSubview: function(sv) {
+            this.detachFrom(sv, 'update', this.measureAttrName);
+            this.detachFrom(sv, 'update', this.otherMeasureAttrName);
+            this.callSuper(sv);
+        },
+        
+        
+        /** @overrides myt.VariableLayout */
+        doBeforeUpdate: function() {
+            // The number of lines layed out.
+            this.lineCount = 1;
+            
+            // The maximum size achieved by any line.
+            this.maxSize = 0;
+            
+            // Track the maximum size of a line. Used to determine how much to
+            // update linePos by when wrapping occurs.
+            this.lineSize = 0;
+            
+            // The position for each subview in a line. Gets updated for each 
+            // new line of subviews.
+            this.linePos = this.lineInset;
+            
+            // The size of the parent view. Needed to determine when to wrap. 
+            // The outset is already subtracted as a performance optimization.
+            this.parentSizeLessOutset = this.parent[this.measureAttrName] - this.outset;
+        },
+        
+        /** @overrides myt.ConstantLayout */
+        updateSubview: function(count, sv, setterName, value) {
+            const size = sv[this.measureAttrName],
+                otherSize = sv[this.otherMeasureAttrName];
+            
+            if (value + size > this.parentSizeLessOutset || sv.layoutHint === 'break') {
+                // Check for overflow
+                value = this.targetValue; // Reset to inset.
+                this.linePos += this.lineSize + this.lineSpacing;
+                this.lineSize = otherSize;
+                
+                ++this.lineCount;
+            } else if (otherSize > this.lineSize) {
+                // Update line size if this subview is larger
+                this.lineSize = otherSize;
+            }
+            
+            sv[this.otherSetterName](this.linePos + (otherSize - sv[this.otherMeasureAttrBaseName])/2.0); // adj is for transform
+            sv[setterName](value + (size - sv[this.measureAttrBaseName])/2.0); // adj is for transform
+            
+            // Track max size achieved during layout.
+            this.maxSize = Math.max(this.maxSize, value + size + this.outset);
+            
+            return value + size + this.spacing;
+        },
+        
+        /** @overrides myt.VariableLayout */
+        updateParent: function(setterName, value) {
+            // Collapse in the other direction
+            this.parent[this.parentSetterName](this.linePos + this.lineSize + this.lineOutset);
+        }
+    });
+    
+    /* Create locked counter functions for the myt.Layout class. */
+    pkg.createFixedThresholdCounter(Layout, 1, 'locked');
 })(myt);
 
 
@@ -7348,12 +7831,6 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
 });
 
 
-/** A base class for flex box views. */
-myt.FlexBox = new JS.Class('FlexBox', myt.View, {
-    include: [myt.FlexBoxSupport]
-});
-
-
 ((pkg) => {
     const
         /*  Sets the 'transformOrigin' style property of the provided
@@ -7943,44 +8420,6 @@ myt.TextSupport = new JS.Module('TextSupport', {
 });
 
 
-/** Displays text content.
-    
-    Performance Note: If you set the bgColor of a text element it will render
-    about 10% faster than if the background is set to 'transparent'. */
-myt.Text = new JS.Class('Text', myt.View, {
-    include: [myt.SizeToDom, myt.TextSupport],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.View */
-    initNode: function(parent, attrs) {
-        if (attrs.whiteSpace == null) attrs.whiteSpace = 'nowrap';
-        if (attrs.userUnselectable == null) attrs.userUnselectable = true;
-        
-        this.callSuper(parent, attrs);
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Measures the width of this element as if the wrapping was set 
-        to 'nowrap'. The dom element is manipulated directly so that no 
-        events get fired.
-        @returns number the unwrapped width of this text view. */
-    measureNoWrapWidth: function() {
-        if (this.whiteSpace === 'nowrap') return this.width;
-        
-        // Temporarily set wrapping to 'nowrap', take measurement and
-        // then restore wrapping.
-        const s = this.deStyle,
-            oldValue = s.whiteSpace;
-        s.whiteSpace = 'nowrap';
-        const measuredWidth = this.getOuterDomElement().offsetWidth;
-        s.whiteSpace = oldValue;
-        return measuredWidth;
-    }
-});
-
-
 /** Adds support for image display to a View.
     
     Events:
@@ -8209,110 +8648,164 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
 });
 
 
-/** A view that displays an image. By default useNaturalSize is set to true
-    so the Image will take on the size of the image data. */
-myt.Image = new JS.Class('Image', myt.View, {
-    include: [myt.ImageSupport],
+((pkg) => {
+    const JSClass = JS.Class,
+        View = pkg.View,
+        SizeToDom = pkg.SizeToDom;
     
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.View */
-    initNode: function(parent, attrs) {
-        if (attrs.useNaturalSize == null) attrs.useNaturalSize = true;
+    /** A base class for flex box views.
         
-        this.callSuper(parent, attrs);
-    }
-});
-
-
-/** Displays HTML markup and resizes the view to fit the markup.
+        @class */
+    pkg.FlexBox = new JSClass('FlexBox', View, {
+        include: [pkg.FlexBoxSupport]
+    });
     
-    Attributes:
-        html:string The HTML to insert into the view.
-*/
-myt.Markup = new JS.Class('Markup', myt.View, {
-    include: [myt.SizeToDom],
+    /** A view for an iframe. This component also listens to global mousedown/up
+        events and turns off point-events so that the iframe will interfere
+        less with mouse behavior in the parent document.
+        
+        Events:
+            src:string
+        
+        Attributes:
+            src:string The URL to an HTML document to load into the iframe.
+        
+        Private Attributes:
+            __restorePointerEvents:string The value of pointerEvents before a
+                mousedown occurs. Used as part of turning off pointer-events
+                so that the iframe messes less with mouse behavior in the 
+                parent document.
+        
+        @class */
+    pkg.Frame = new JSClass('Frame', View, {
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.View */
+        initNode: function(parent, attrs) {
+            if (attrs.tagName == null) attrs.tagName = 'iframe';
+            
+            this.callSuper(parent, attrs);
+            
+            const GlobalMouse = pkg.global.mouse;
+            this.attachToDom(GlobalMouse, '__doMouseDown', 'mousedown', true);
+            this.attachToDom(GlobalMouse, '__doMouseUp', 'mouseup', true);
+        },
+        
+        /** @overrides myt.View */
+        createOurDomElement: function(parent) {
+            const elements = this.callSuper(parent),
+                innerElem = Array.isArray(elements) ? elements[1] : elements;
+            innerElem.style.border = '0px';
+            return elements;
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setSrc: function(v) {
+            if (this.src !== v) {
+                this.src = this.getInnerDomElement().src = v;
+                if (this.inited) this.fireEvent('src', v);
+            }
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __doMouseDown: function(event) {
+            this.__restorePointerEvents = this.pointerEvents;
+            this.setPointerEvents('none');
+            return true;
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __doMouseUp: function(event) {
+            this.setPointerEvents(this.__restorePointerEvents);
+            return true;
+        }
+    });
     
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setHtml: function(v) {
-        const self = this;
-        if (self.html !== v) {
-            self.getInnerDomElement().innerHTML = self.html = v;
-            if (self.inited) {
-                self.fireEvent('html', v);
-                self.sizeViewToDom();
+    /** Displays HTML markup and resizes the view to fit the markup.
+        
+        Attributes:
+            html:string The HTML to insert into the view.
+        
+        @class */
+    pkg.Markup = new JSClass('Markup', View, {
+        include: [SizeToDom],
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setHtml: function(v) {
+            const self = this;
+            if (self.html !== v) {
+                self.getInnerDomElement().innerHTML = self.html = v;
+                if (self.inited) {
+                    self.fireEvent('html', v);
+                    self.sizeViewToDom();
+                }
             }
         }
-    }
-});
+    });
 
-
-/** A view for an iframe. This component also listens to global mousedown/up
-    events and turns off point-events so that the iframe will interfere
-    less with mouse behavior in the parent document.
-    
-    Events:
-        src:string
-    
-    Attributes:
-        src:string The URL to an HTML document to load into the iframe.
-    
-    Private Attributes:
-        __restorePointerEvents:string The value of pointerEvents before a
-            mousedown occurs. Used as part of turning off pointer-events
-            so that the iframe messes less with mouse behavior in the 
-            parent document.
-*/
-myt.Frame = new JS.Class('Frame', myt.View, {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.View */
-    initNode: function(parent, attrs) {
-        if (attrs.tagName == null) attrs.tagName = 'iframe';
+    /** Displays text content.
         
-        this.callSuper(parent, attrs);
+        Performance Note: If you set the bgColor of a text element it will 
+        render about 10% faster than if the background is set to 'transparent'.
         
-        const gm = myt.global.mouse;
-        this.attachToDom(gm, '__doMouseDown', 'mousedown', true);
-        this.attachToDom(gm, '__doMouseUp', 'mouseup', true);
-    },
-    
-    /** @overrides myt.View */
-    createOurDomElement: function(parent) {
-        const elements = this.callSuper(parent),
-            innerElem = Array.isArray(elements) ? elements[1] : elements;
-        innerElem.style.border = '0px';
-        return elements;
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setSrc: function(v) {
-        if (this.src !== v) {
-            this.src = this.getInnerDomElement().src = v;
-            if (this.inited) this.fireEvent('src', v);
+        @class */
+    pkg.Text = new JSClass('Text', View, {
+        include: [SizeToDom, pkg.TextSupport],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.View */
+        initNode: function(parent, attrs) {
+            if (attrs.whiteSpace == null) attrs.whiteSpace = 'nowrap';
+            if (attrs.userUnselectable == null) attrs.userUnselectable = true;
+            
+            this.callSuper(parent, attrs);
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Measures the width of this element as if the wrapping was set 
+            to 'nowrap'. The dom element is manipulated directly so that no 
+            events get fired.
+            @returns number the unwrapped width of this text view. */
+        measureNoWrapWidth: function() {
+            if (this.whiteSpace === 'nowrap') return this.width;
+            
+            // Temporarily set wrapping to 'nowrap', take measurement and
+            // then restore wrapping.
+            const ids = this.getInnerDomStyle(),
+                oldValue = ids.whiteSpace;
+            ids.whiteSpace = 'nowrap';
+            const measuredWidth = this.getOuterDomElement().offsetWidth;
+            ids.whiteSpace = oldValue;
+            return measuredWidth;
         }
-    },
+    });
     
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __doMouseDown: function(event) {
-        this.__restorePointerEvents = this.pointerEvents;
-        this.setPointerEvents('none');
-        return true;
-    },
-    
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __doMouseUp: function(event) {
-        this.setPointerEvents(this.__restorePointerEvents);
-        return true;
-    }
-});
+    /** A view that displays an image. By default useNaturalSize is set to true
+        so the Image will take on the size of the image data.
+        
+        @class */
+    pkg.Image = new JSClass('Image', View, {
+        include: [pkg.ImageSupport],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.View */
+        initNode: function(parent, attrs) {
+            if (attrs.useNaturalSize == null) attrs.useNaturalSize = true;
+            
+            this.callSuper(parent, attrs);
+        }
+    });
+})(myt);
 
 
 ((pkg) => {
@@ -9779,652 +10272,6 @@ myt.RootView = new JS.Module('RootView', {
 })(myt);
 
 
-/** An extension of VariableLayout that positions views along an axis using
-    an inset, outset and spacing value. Views will be wrapped when they
-    overflow the available space.
-    
-    Supported Layout Hints:
-        break:string Will force the subview to start a new line/column.
-    
-    @class */
-myt.WrappingLayout = new JS.Class('WrappingLayout', myt.VariableLayout, {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.VariableLayout */
-    initNode: function(parent, attrs) {
-        const self = this;
-        
-        self.targetAttrName = self.axis = 'x';
-        self.setterName = 'setX';
-        self.otherSetterName = 'setY';
-        self.measureAttrName = 'boundsWidth';
-        self.measureAttrBaseName = 'width';
-        self.otherMeasureAttrName = 'boundsHeight';
-        self.otherMeasureAttrBaseName = 'height';
-        self.parentSetterName = 'setHeight';
-        self.targetValue = self.spacing = self.inset = self.outset = self.lineSpacing = self.lineInset = self.lineOutset = 0;
-        
-        self.callSuper(parent, attrs);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrides myt.ConstantLayout */
-    setTargetAttrName: function(v) {
-        if (this.targetAttrName !== v) {
-            const isY = v === 'y',
-                inited = this.inited;
-            
-            if (inited) this.stopMonitoringAllSubviews();
-            
-            this.measureAttrName = isY ? 'boundsHeight' : 'boundsWidth';
-            const mabn = this.measureAttrBaseName = isY ? 'height' : 'width';
-            this.otherMeasureAttrName = isY ? 'boundsWidth' : 'boundsHeight';
-            const omabn = this.otherMeasureAttrBaseName = isY ? 'width' : 'height';
-            this.parentSetterName = isY ? 'setWidth' : 'setHeight';
-            this.otherSetterName = isY ? 'setX' : 'setY';
-            
-            if (inited) {
-                this.startMonitoringAllSubviews();
-                this.stopMonitoringParent(omabn);
-                this.startMonitoringParent(mabn);
-            }
-            this.callSuper(v);
-        }
-    },
-    
-    /** @overrides myt.Layout */
-    setParent: function(parent) {
-        if (this.parent !== parent) {
-            const isY = this.targetAttrName === 'y';
-            if (this.parent) this.stopMonitoringParent(isY ? 'height' : 'width');
-            this.callSuper(parent);
-            if (this.parent) this.startMonitoringParent(isY ? 'height' : 'width');
-        }
-    },
-    
-    setAxis: function(v) {this.setTargetAttrName(this.axis = v);},
-    setInset: function(v) {this.setTargetValue(this.inset = v);},
-    
-    setSpacing: function(v) {
-        if (this.spacing !== v) {
-            this.spacing = v;
-            if (this.inited) {
-                this.fireEvent('spacing', v);
-                this.update();
-            }
-        }
-    },
-    
-    setOutset: function(v) {
-        if (this.outset !== v) {
-            this.outset = v;
-            if (this.inited) {
-                this.fireEvent('outset', v);
-                this.update();
-            }
-        }
-    },
-    
-    setLineSpacing: function(v) {
-        if (this.lineSpacing !== v) {
-            this.lineSpacing = v;
-            if (this.inited) {
-                this.fireEvent('lineSpacing', v);
-                this.update();
-            }
-        }
-    },
-    
-    setLineInset: function(v) {
-        if (this.lineInset !== v) {
-            this.lineInset = v;
-            if (this.inited) {
-                this.fireEvent('lineInset', v);
-                this.update();
-            }
-        }
-    },
-    
-    setLineOutset: function(v) {
-        if (this.lineOutset !== v) {
-            this.lineOutset = v;
-            if (this.inited) {
-                this.fireEvent('lineOutset', v);
-                this.update();
-            }
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Called when monitoring of width/height should start on our parent.
-        @param {string} measureAttrName - The name of the attribute to start monitoring.
-        @returns {undefined} */
-    startMonitoringParent: function(measureAttrName) {
-        this.attachTo(this.parent, 'update', measureAttrName);
-    },
-    
-    /** Called when monitoring of width/height should stop on our parent.
-        @param {string} measureAttrName - The name of the attribute to stop monitoring.
-        @returns {undefined} */
-    stopMonitoringParent: function(measureAttrName) {
-        this.detachFrom(this.parent, 'update', measureAttrName);
-    },
-    
-    /** @overrides myt.Layout */
-    startMonitoringSubview: function(sv) {
-        this.attachTo(sv, 'update', this.measureAttrName);
-        this.attachTo(sv, 'update', this.otherMeasureAttrName);
-        this.callSuper(sv);
-    },
-    
-    /** @overrides myt.Layout */
-    stopMonitoringSubview: function(sv) {
-        this.detachFrom(sv, 'update', this.measureAttrName);
-        this.detachFrom(sv, 'update', this.otherMeasureAttrName);
-        this.callSuper(sv);
-    },
-    
-    
-    /** @overrides myt.VariableLayout */
-    doBeforeUpdate: function() {
-        // The number of lines layed out.
-        this.lineCount = 1;
-        
-        // The maximum size achieved by any line.
-        this.maxSize = 0;
-        
-        // Track the maximum size of a line. Used to determine how much to
-        // update linePos by when wrapping occurs.
-        this.lineSize = 0;
-        
-        // The position for each subview in a line. Gets updated for each new
-        // line of subviews.
-        this.linePos = this.lineInset;
-        
-        // The size of the parent view. Needed to determine when to wrap. The
-        // outset is already subtracted as a performance optimization.
-        this.parentSizeLessOutset = this.parent[this.measureAttrName] - this.outset;
-    },
-    
-    /** @overrides myt.ConstantLayout */
-    updateSubview: function(count, sv, setterName, value) {
-        const size = sv[this.measureAttrName],
-            otherSize = sv[this.otherMeasureAttrName];
-        
-        if (value + size > this.parentSizeLessOutset || sv.layoutHint === 'break') {
-            // Check for overflow
-            value = this.targetValue; // Reset to inset.
-            this.linePos += this.lineSize + this.lineSpacing;
-            this.lineSize = otherSize;
-            
-            ++this.lineCount;
-        } else if (otherSize > this.lineSize) {
-            // Update line size if this subview is larger
-            this.lineSize = otherSize;
-        }
-        
-        sv[this.otherSetterName](this.linePos + (otherSize - sv[this.otherMeasureAttrBaseName])/2.0); // adj is for transform
-        sv[setterName](value + (size - sv[this.measureAttrBaseName])/2.0); // adj is for transform
-        
-        // Track max size achieved during layout.
-        this.maxSize = Math.max(this.maxSize, value + size + this.outset);
-        
-        return value + size + this.spacing;
-    },
-    
-    /** @overrides myt.VariableLayout */
-    updateParent: function(setterName, value) {
-        // Collapse in the other direction
-        this.parent[this.parentSetterName](this.linePos + this.lineSize + this.lineOutset);
-    }
-});
-
-
-/** An extension of VariableLayout that positions views along an axis using
-    an inset, outset and spacing value.
-    
-    Events:
-        spacing:number
-        outset:number
-    
-    Attributes:
-        axis:string The orientation of the layout. An alias 
-            for setTargetAttrName.
-        inset:number Padding before the first subview that gets positioned.
-            An alias for setTargetValue.
-        spacing:number Spacing between each subview.
-        outset:number Padding at the end of the layout. Only gets used
-            if collapseParent is true.
-        noAddSubviewOptimization:boolean Turns the optimization to supress
-            layout updates when a subview is added off/on. Defaults to 
-            undefined which is equivalent to false and thus leaves the
-            optimization on.
-    
-    @class */
-myt.SpacedLayout = new JS.Class('SpacedLayout', myt.VariableLayout, {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.VariableLayout */
-    initNode: function(parent, attrs) {
-        const self = this;
-        
-        self.targetAttrName = self.axis = 'x';
-        self.setterName = 'setX';
-        self.measureAttrName = 'boundsWidth';
-        self.measureAttrBaseName = 'width';
-        self.parentSetterName = 'setWidth';
-        self.targetValue = self.spacing = self.inset = self.outset = 0;
-        
-        self.callSuper(parent, attrs);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrides myt.ConstantLayout */
-    setTargetAttrName: function(v) {
-        if (this.targetAttrName !== v) {
-            const isY = v === 'y',
-                inited = this.inited;
-            if (inited) this.stopMonitoringAllSubviews();
-            this.measureAttrName = isY ? 'boundsHeight' : 'boundsWidth';
-            this.measureAttrBaseName = isY ? 'height' : 'width';
-            this.parentSetterName = isY ? 'setHeight' : 'setWidth';
-            if (inited) this.startMonitoringAllSubviews();
-            this.callSuper(v);
-        }
-    },
-    
-    setNoAddSubviewOptimization: function(v) {this.noAddSubviewOptimization = v;},
-    setAxis: function(v) {this.setTargetAttrName(this.axis = v);},
-    setInset: function(v) {this.setTargetValue(this.inset = v);},
-    
-    setSpacing: function(v) {
-        if (this.spacing !== v) {
-            this.spacing = v;
-            if (this.inited) {
-                this.fireEvent('spacing', v);
-                this.update();
-            }
-        }
-    },
-    
-    setOutset: function(v) {
-        if (this.outset !== v) {
-            this.outset = v;
-            if (this.inited) {
-                this.fireEvent('outset', v);
-                this.update();
-            }
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.Layout */
-    addSubview: function(sv) {
-        // OPTIMIZATION: Skip the update call that happens during subview add.
-        // The boundsWidth/boundsHeight events will be fired immediately 
-        // after and are a more appropriate time to do the update.
-        const isLocked = this.locked; // Remember original locked state.
-        if (!this.noAddSubviewOptimization) this.locked = true; // Lock the layout so no updates occur.
-        this.callSuper(sv);
-        this.locked = isLocked; // Restore original locked state.
-    },
-    
-    /** @overrides myt.VariableLayout */
-    startMonitoringSubview: function(sv) {
-        this.attachTo(sv, 'update', this.measureAttrName);
-        this.callSuper(sv);
-    },
-    
-    /** @overrides myt.VariableLayout */
-    stopMonitoringSubview: function(sv) {
-        this.detachFrom(sv, 'update', this.measureAttrName);
-        this.callSuper(sv);
-    },
-    
-    /** @overrides myt.ConstantLayout */
-    updateSubview: function(count, sv, setterName, value) {
-        const size = sv[this.measureAttrName];
-        sv[setterName](value + (size - sv[this.measureAttrBaseName])/2.0); // Adj for transform
-        return value + size + this.spacing;
-    },
-    
-    /** @overrides myt.VariableLayout */
-    updateParent: function(setterName, value) {
-        this.parent[this.parentSetterName](value + this.outset - this.spacing);
-    }
-});
-
-
-/** An extension of SpacedLayout that resizes one or more views to fill in
-    any remaining space. The resizable subviews should not have a transform
-    applied to it. The non-resized views may have transforms applied to them.
-    
-    @class */
-myt.ResizeLayout = new JS.Class('SpacedLayout', myt.SpacedLayout, {
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrides myt.VariableLayout */
-    setCollapseParent: function(v) {
-        // collapseParent attribute is unused in ResizeLayout.
-    },
-    
-    /** @overrides myt.SpacedLayout */
-    setTargetAttrName: function(v) {
-        if (this.targetAttrName !== v) {
-            if (this.inited) {
-                const isX = v === 'x';
-                this.stopMonitoringParent(isX ? 'height' : 'width');
-                this.startMonitoringParent(isX ? 'width' : 'height');
-            }
-            
-            this.callSuper(v);
-        }
-    },
-    
-    /** @overrides myt.Layout */
-    setParent: function(parent) {
-        if (this.parent !== parent) {
-            const dim = this.targetAttrName === 'x' ? 'width' : 'height';
-            if (this.parent) this.stopMonitoringParent(dim);
-            
-            this.callSuper(parent);
-            
-            if (this.parent) this.startMonitoringParent(dim);
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Called when monitoring of width/height should start on our parent.
-        @param {string} attrName - The name of the attribute to start monitoring.
-        @returns {undefined} */
-    startMonitoringParent: function(attrName) {
-        this.attachTo(this.parent, 'update', attrName);
-    },
-    
-    /** Called when monitoring of width/height should stop on our parent.
-        @param {string} attrName - The name of the attribute to stop monitoring.
-        @returns {undefined} */
-    stopMonitoringParent: function(attrName) {
-        this.detachFrom(this.parent, 'update', attrName);
-    },
-    
-    /** @overrides myt.VariableLayout */
-    doBeforeUpdate: function() {
-        // Get size to fill
-        const measureAttrName = this.measureAttrName,
-            measureAttrBaseName = this.measureAttrBaseName;
-        let remainder = this.parent[measureAttrBaseName];
-        
-        // Calculate minimum required size
-        remainder -= this.targetValue + this.outset;
-        
-        const svs = this.subviews;
-        let i = svs.length, 
-            sv,
-            count = 0, 
-            resizeSum = 0;
-        
-        while (i) {
-            sv = svs[--i];
-            if (this.skipSubview(sv)) continue;
-            ++count;
-            if (sv.layoutHint > 0) {
-                resizeSum += sv.layoutHint;
-            } else {
-                remainder -= sv[measureAttrName];
-            }
-        }
-        
-        if (count !== 0) {
-            remainder -= (count - 1) * this.spacing;
-            
-            // Store for update
-            this.remainder = remainder;
-            this.resizeSum = resizeSum;
-            this.scalingFactor = remainder / resizeSum;
-            this.resizeSumUsed = this.remainderUsed = 0;
-            this.measureSetter = measureAttrName === 'boundsWidth' ? 'setWidth' : 'setHeight';
-        }
-    },
-    
-    /** @overrides myt.SpacedLayout */
-    updateSubview: function(count, sv, setterName, value) {
-        const hint = sv.layoutHint;
-        if (hint > 0) {
-            this.resizeSumUsed += hint;
-            
-            const size = this.resizeSum === this.resizeSumUsed ? 
-                this.remainder - this.remainderUsed : 
-                Math.round(hint * this.scalingFactor);
-            
-            this.remainderUsed += size;
-            sv[this.measureSetter](size);
-        }
-        return this.callSuper(count, sv, setterName, value);
-    },
-    
-    /** @overrides myt.SpacedLayout */
-    startMonitoringSubview: function(sv) {
-        // Don't monitor width/height of the "stretchy" subviews since this
-        // layout changes them.
-        if (!(sv.layoutHint > 0)) this.attachTo(sv, 'update', this.measureAttrName);
-        this.attachTo(sv, 'update', 'visible');
-    },
-    
-    /** @overrides myt.SpacedLayout */
-    stopMonitoringSubview: function(sv) {
-        // Don't monitor width/height of the "stretchy" subviews since this
-        // layout changes them.
-        if (!(sv.layoutHint > 0)) this.detachFrom(sv, 'update', this.measureAttrName);
-        this.detachFrom(sv, 'update', 'visible');
-    },
-    
-    /** @overrides myt.SpacedLayout */
-    updateParent: function(setterName, value) {
-        // No resizing of parent since this view expands to fill the parent.
-    }
-});
-
-
-/** An extension of VariableLayout that also aligns each view vertically
-    or horizontally.
-    
-    Events:
-        align:string
-    
-    Attributes:
-        align:string Determines which way the views are aligned. Allowed
-            values are 'left', 'center', 'right' and 'top', 'middle', 'bottom'.
-            Defaults to 'middle'.
-*/
-myt.AlignedLayout = new JS.Class('AlignedLayout', myt.VariableLayout, {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.VariableLayout */
-    initNode: function(parent, attrs) {
-        const self = this;
-        
-        self.align = 'middle';
-        self.targetAttrName = 'y';
-        self.setterName = 'setY';
-        self.measureAttrName = 'boundsHeight';
-        self.measureAttrBaseName = 'height';
-        self.parentSetterName = 'setHeight';
-        self.targetValue = 0;
-        
-        self.callSuper(parent, attrs);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrides myt.ConstantLayout */
-    setTargetAttrName: function(v) {
-        if (this.targetAttrName !== v) {
-            const isY = v === 'y',
-                inited = this.inited;
-            if (inited) this.stopMonitoringAllSubviews();
-            this.measureAttrName = isY ? 'boundsHeight' : 'boundsWidth';
-            this.measureAttrBaseName = isY ? 'height' : 'width';
-            this.parentSetterName = isY ? 'setHeight' : 'setWidth';
-            if (inited) this.startMonitoringAllSubviews();
-            this.callSuper(v);
-        }
-    },
-    
-    setAlign: function(v) {
-        if (this.align !== v) {
-            this.align = v;
-            
-            // Update orientation but don't trigger an update since we
-            // already call update at the end of this setter.
-            const isLocked = this.locked;
-            this.locked = true;
-            this.setTargetAttrName((v === 'middle' || v === 'bottom' || v === 'top') ? 'y' : 'x');
-            this.locked = isLocked;
-            
-            if (this.inited) {
-                this.fireEvent('align', v);
-                this.update();
-            }
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.VariableLayout */
-    startMonitoringSubview: function(sv) {
-        this.attachTo(sv, 'update', this.measureAttrName);
-        this.callSuper(sv);
-    },
-    
-    /** @overrides myt.VariableLayout */
-    stopMonitoringSubview: function(sv) {
-        this.detachFrom(sv, 'update', this.measureAttrName);
-        this.callSuper(sv);
-    },
-    
-    /** Determine the maximum subview width/height according to the axis.
-        @overrides myt.VariableLayout */
-    doBeforeUpdate: function() {
-        const measureAttrName = this.measureAttrName, 
-            svs = this.subviews;
-        let value = 0, 
-            sv, 
-            i = svs.length;
-        while (i) {
-            sv = svs[--i];
-            if (this.skipSubview(sv)) continue;
-            value = value > sv[measureAttrName] ? value : sv[measureAttrName];
-        }
-        
-        this.setTargetValue(value);
-    },
-    
-    /** @overrides myt.VariableLayout */
-    updateSubview: function(count, sv, setterName, value) {
-        switch (this.align) {
-            case 'center': case 'middle':
-                sv[setterName]((value - sv[this.measureAttrName]) / 2);
-                break;
-            case 'right': case 'bottom':
-                sv[setterName](value - sv[this.measureAttrName]);
-                break;
-            default:
-                sv[setterName](0);
-        }
-        return value;
-    },
-    
-    /** @overrides myt.VariableLayout */
-    updateParent: function(setterName, value) {
-        this.parent[this.parentSetterName](value);
-    }
-});
-
-
-/** Adds an udpateUI method that should be called to update the UI. Various
-    mixins will rely on the updateUI method to trigger visual updates.
-    
-    Events:
-        None
-    
-    Attributes:
-        None
-*/
-myt.UpdateableUI = new JS.Module('UpdateableUI', {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides */
-    initNode: function(parent, attrs) {
-        this.callSuper(parent, attrs);
-        
-        // Call updateUI one time after initialization is complete to give
-        // this View a chance to update itself.
-        this.updateUI();
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Updates the UI whenever a change occurs that requires a visual update.
-        Subclasses should implement this as needed.
-        @returns {undefined} */
-    updateUI: () => {
-        // Subclasses to implement as needed.
-    }
-});
-
-
-/** Adds the capability to be "disabled" to an myt.Node. When an myt.Node is 
-    disabled the user should typically not be able to interact with it.
-    
-    When disabled becomes true an attempt will be made to give away the focus
-    using myt.FocusObservable's giveAwayFocus method.
-    
-    Events:
-        disabled:boolean Fired when the disabled attribute is modified
-            via setDisabled.
-    
-    Attributes:
-        disabled:boolean Indicates that this component is disabled.
-*/
-myt.Disableable = new JS.Module('Disableable', {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides */
-    initNode: function(parent, attrs) {
-        if (attrs.disabled == null) attrs.disabled = false;
-        
-        this.callSuper(parent, attrs);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setDisabled: function(v) {
-        if (this.disabled !== v) {
-            this.disabled = v;
-            if (this.inited) this.fireEvent('disabled', v);
-            
-            this.doDisabled();
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Called after the disabled attribute is set. Default behavior attempts
-        to give away focus and calls the updateUI method of myt.UpdateableUI if 
-        it is defined.
-        @returns {undefined} */
-    doDisabled: function() {
-        if (this.inited) {
-            // Give away focus if we become disabled and this instance is
-            // a FocusObservable
-            if (this.disabled && this.giveAwayFocus) this.giveAwayFocus();
-            
-            if (this.updateUI) this.updateUI();
-        }
-    }
-});
-
-
 /** Provides global mouse events by listening to mouse events on the 
     document. Registered with myt.global as 'mouse'. */
 new JS.Singleton('GlobalMouse', {
@@ -10440,392 +10287,961 @@ new JS.Singleton('GlobalMouse', {
 });
 
 
-/** Provides a 'mouseOver' attribute that tracks mouse over/out state. Also
-    provides a mechanism to smoothe over/out events so only one call to
-    'doSmoothMouseOver' occurs per idle event.
-    
-    Requires myt.Disableable and myt.MouseObservable super mixins.
-    
-    Events:
-        None
-    
-    Attributes:
-        mouseOver:boolean Indicates if the mouse is over this view or not.
-    
-    Private Attributes:
-        __attachedToOverIdle:boolean Used by the code that smoothes out
-            mouseover events. Indicates that we are registered with the
-            idle event.
-        __lastOverIdleValue:boolean Used by the code that smoothes out
-            mouseover events. Stores the last mouseOver value.
-        __disabledOver:boolean Tracks mouse over/out state while a view is
-            disabled. This allows correct restoration of mouseOver state if
-            a view becomes enabled while the mouse is already over it.
-*/
-myt.MouseOver = new JS.Module('MouseOver', {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides */
-    initNode: function(parent, attrs) {
-        if (attrs.mouseOver == null) attrs.mouseOver = false;
+((pkg) => {
+    let globalDragManager,
         
-        this.callSuper(parent, attrs);
+        /* The view currently being dragged. */
+        dragView,
         
-        this.attachToDom(this, 'doMouseOver', 'mouseover');
-        this.attachToDom(this, 'doMouseOut', 'mouseout');
-    },
+        /* The view currently being dragged over. */
+        overView;
+        
+    const
+        /* The list of myt.AutoScrollers currently registered for notification
+            when drags start and stop. */
+        autoScrollers = [],
+        
+        /* The list of myt.DropTargets currently registered for notification 
+            when drag and drop events occur. */
+        dropTargets = [],
+        
+        setOverView = (v) => {
+            const existingOverView = overView;
+            if (existingOverView !== v) {
+                if (existingOverView) {
+                    existingOverView.notifyDragLeave(dragView);
+                    if (!dragView.destroyed) dragView.notifyDragLeave(existingOverView);
+                    globalDragManager.fireEvent('dragLeave', existingOverView);
+                }
+                
+                overView = v;
+                
+                if (v) {
+                    v.notifyDragEnter(dragView);
+                    if (!dragView.destroyed) dragView.notifyDragEnter(v);
+                    globalDragManager.fireEvent('dragEnter', existingOverView);
+                }
+            }
+        },
+        
+        setDragView = v => {
+            let existingDragView = dragView,
+                funcName, 
+                eventName,
+                targets,
+                i;
+            if (existingDragView !== v) {
+                dragView = v;
+                
+                if (!!v) {
+                    existingDragView = v;
+                    funcName = 'notifyDragStart';
+                    eventName = 'startDrag';
+                } else {
+                    funcName = 'notifyDragStop';
+                    eventName = 'stopDrag';
+                }
+                
+                targets = filterList(existingDragView, dropTargets);
+                i = targets.length;
+                while (i) targets[--i][funcName](existingDragView);
+                
+                targets = filterList(existingDragView, autoScrollers);
+                i = targets.length;
+                while (i) targets[--i][funcName](existingDragView);
+                
+                globalDragManager.fireEvent(eventName, v);
+            }
+        },
+        
+        /*  Filters the provided array of myt.DragGroupSupport items for the
+            provided myt.Dropable. Returns an array of the matching list
+            items.
+            @param {!Object} dropable
+            @param {!Array} list
+            @returns {!Array} */
+        filterList = (dropable, list) => {
+            if (dropable.destroyed) {
+                return [];
+            } else if (dropable.acceptAnyDragGroup()) {
+                return list;
+            } else {
+                const retval = [],
+                    dragGroups = dropable.getDragGroups();
+                let i = list.length;
+                while (i) {
+                    const item = list[--i];
+                    if (item.acceptAnyDragGroup()) {
+                        retval.push(item);
+                    } else {
+                        const targetGroups = item.getDragGroups();
+                        for (const dragGroup in dragGroups) {
+                            if (targetGroups[dragGroup]) {
+                                retval.push(item);
+                                break;
+                            }
+                        }
+                    }
+                }
+                return retval;
+            }
+        };
     
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setMouseOver: function(v) {
-        if (this.mouseOver !== v) {
-            this.mouseOver = v;
-            // No event needed
+    /** Provides global drag and drop functionality.
+        
+        Events:
+            dragLeave:myt.DropTarget Fired when a myt.Dropable is dragged out of
+                the drop target.
+            dragEnter:myt.DropTarget Fired when a myt.Dropable is dragged over
+                the drop target.
+            startDrag:object Fired when a drag starts. Value is the object
+                being dragged.
+            stopDrag:object Fired when a drag ends. Value is the object 
+                that is no longer being dragged.
+            drop:object Fired when a drag ends over a drop target. The value is
+                an array containing the dropable at index 0 and the drop target
+                at index 1.
+        
+        @class
+    */
+    new JS.Singleton('GlobalDragManager', {
+        include: [pkg.Observable],
+        
+        
+        // Constructor /////////////////////////////////////////////////////////
+        initialize: function() {
+            pkg.global.register('dragManager', globalDragManager = this);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        getDragView: () => dragView,
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Registers the provided auto scroller to receive notifications.
+            @param {!Object} autoScroller - The myt.AutoScroller to register.
+            @returns {undefined} */
+        registerAutoScroller: autoScroller => {
+            autoScrollers.push(autoScroller);
+        },
+        
+        /** Unregisters the provided auto scroller.
+            @param {!Object} autoScroller - The myt.AutoScroller to unregister.
+            @returns {undefined} */
+        unregisterAutoScroller: autoScroller => {
+            let i = autoScrollers.length;
+            while (i) {
+                if (autoScrollers[--i] === autoScroller) {
+                    autoScrollers.splice(i, 1);
+                    break;
+                }
+            }
+        },
+        
+        /** Registers the provided drop target to receive notifications.
+            @param {!Object} dropTarget - The myt.DropTarget to register.
+            @returns {undefined} */
+        registerDropTarget: dropTarget => {
+            dropTargets.push(dropTarget);
+        },
+        
+        /** Unregisters the provided drop target.
+            @param {!Object} dropTarget - The myt.DropTarget to unregister.
+            @returns {undefined} */
+        unregisterDropTarget: dropTarget => {
+            let i = dropTargets.length;
+            while (i) {
+                if (dropTargets[--i] === dropTarget) {
+                    dropTargets.splice(i, 1);
+                    break;
+                }
+            }
+        },
+        
+        /** Called by a myt.Dropable when a drag starts.
+            @param {!Object} dropable - The myt.Dropable that started the drag.
+            @returns {undefined} */
+        startDrag: dropable => {
+            setDragView(dropable);
+        },
+        
+        /** Called by a myt.Dropable when a drag stops.
+            @param {!Object} event -The mouse event that triggered the stop drag.
+            @param {!Object} dropable - The myt.Dropable that stopped being dragged.
+            @param {boolean} isAbort
+            @returns {undefined} */
+        stopDrag: (event, dropable, isAbort) => {
+            dropable.notifyDropped(overView, isAbort);
+            if (overView && !isAbort) overView.notifyDrop(dropable);
             
-            // Smooth out over/out events by delaying until the next idle event.
-            if (this.inited && !this.__attachedToOverIdle) {
-                this.__attachedToOverIdle = true;
-                this.attachTo(myt.global.idle, '__doMouseOverOnIdle', 'idle');
+            setOverView();
+            setDragView();
+            
+            if (overView && !isAbort) globalDragManager.fireEvent('drop', [dropable, overView]);
+        },
+        
+        /** Called by a myt.Dropable during dragging.
+            @param {!Object} event - The mousemove event for the drag update.
+            @param {!Object} dropable - The myt.Dropable that is being dragged.
+            @returns {undefined} */
+        updateDrag: (event, dropable) => {
+            // Get the frontmost myt.DropTarget that is registered with this 
+            // manager and is under the current mouse location and has a 
+            // matching drag group.
+            const filteredDropTargets = filterList(dropable, dropTargets);
+            let i = filteredDropTargets.length,
+                topDropTarget;
+            
+            if (i > 0) {
+                const domMouseEvent = event.value,
+                    mouseX = domMouseEvent.pageX,
+                    mouseY = domMouseEvent.pageY;
+                
+                while (i) {
+                    let dropTarget = filteredDropTargets[--i];
+                    if (dropTarget.willAcceptDrop(dropable) &&
+                        dropable.willPermitDrop(dropTarget) &&
+                        dropTarget.isPointVisible(mouseX, mouseY) && 
+                        (!topDropTarget || dropTarget.isInFrontOf(topDropTarget))
+                    ) {
+                        topDropTarget = dropTarget;
+                    }
+                }
             }
+            
+            setOverView(topDropTarget);
         }
-    },
-    
-    /** @overrides myt.Disableable */
-    setDisabled: function(v) {
-        this.callSuper(v);
-        
-        if (this.disabled) {
-            // When disabling make sure exposed mouseOver is not true. This 
-            // helps prevent unwanted behavior of a disabled view such as a
-            // disabled button looking like it is moused over.
-            if (this.mouseOver) {
-                this.__disabledOver = true;
-                this.setMouseOver(false);
-            }
-        } else {
-            // Restore exposed mouse over state when enabling
-            if (this.__disabledOver) this.setMouseOver(true);
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @private
-        @returns {undefined} */
-    __doMouseOverOnIdle: function() {
-        this.detachFrom(myt.global.idle, '__doMouseOverOnIdle', 'idle');
-        this.__attachedToOverIdle = false;
-        
-        // Only call doSmoothOver if the over/out state has changed since the
-        // last time it was called.
-        const isOver = this.mouseOver;
-        if (this.__lastOverIdleValue !== isOver) {
-            this.__lastOverIdleValue = isOver;
-            this.doSmoothMouseOver(isOver);
-        }
-    },
-    
-    /** Called when mouseOver state changes. This method is called after
-        an event filtering process has reduced frequent over/out events
-        originating from the dom.
-        @param {boolean} isOver
-        @returns {undefined} */
-    doSmoothMouseOver: function(isOver) {
-        if (this.inited && this.updateUI) this.updateUI();
-    },
-    
-    /** Called when the mouse is over this view. Subclasses must call super.
-        @param {!Object} event
-        @returns {undefined} */
-    doMouseOver: function(event) {
-        this.__disabledOver = true;
-        
-        if (!this.disabled) this.setMouseOver(true);
-    },
-    
-    /** Called when the mouse leaves this view. Subclasses must call super.
-        @param {!Object} event
-        @returns {undefined} */
-    doMouseOut: function(event) {
-        this.__disabledOver = false;
-        
-        if (!this.disabled) this.setMouseOver(false);
-    }
-});
+    });
+})(myt);
 
 
-/** Provides a 'mouseDown' attribute that tracks mouse up/down state.
-    
-    Requires: myt.MouseOver, myt.Disableable, myt.MouseObservable super mixins.
-    
-    Suggested: myt.UpdateableUI and myt.Activateable super mixins.
-    
-    Events:
-        None
-    
-    Attributes:
-        mouseDown:boolean Indicates if the mouse is down or not. */
-myt.MouseDown = new JS.Module('MouseDown', {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides */
-    initNode: function(parent, attrs) {
-        if (attrs.mouseDown == null) attrs.mouseDown = false;
+((pkg) => {
+    const JSModule = JS.Module,
+        G = pkg.global,
+        GlobalMouse = G.mouse,
+        GlobalKeys = G.keys,
+        GlobalIdle = G.idle,
         
-        this.callSuper(parent, attrs);
+        getKeyCodeFromEvent = event => pkg.KeyObservable.getKeyCodeFromEvent(event),
+        getMouseFromEvent = event => pkg.MouseObservable.getMouseFromEvent(event);
+    
+    /** Adds the capability for an myt.View to be "activated". A doActivated 
+        method is added that gets called when the view is "activated".
         
-        this.attachToDom(this, 'doMouseDown', 'mousedown');
-        this.attachToDom(this, 'doMouseUp', 'mouseup');
-    },
+        @class */
+    pkg.Activateable = new JSModule('Activateable', {
+        // Methods /////////////////////////////////////////////////////////////
+        /** Called when this view should be activated.
+            @returns {undefined} */
+        doActivated: () => {/* Subclasses to implement as needed. */}
+    });
     
+    /** Adds an udpateUI method that should be called to update the UI. Various
+        mixins will rely on the updateUI method to trigger visual updates.
+        
+        @class */
+    pkg.UpdateableUI = new JSModule('UpdateableUI', {
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides */
+        initNode: function(parent, attrs) {
+            this.callSuper(parent, attrs);
+            
+            // Call updateUI one time after initialization is complete to give
+            // this View a chance to update itself.
+            this.updateUI();
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Updates the UI whenever a change occurs that requires a visual 
+            update. Subclasses should implement this as needed.
+            @returns {undefined} */
+        updateUI: () => {/* Subclasses to implement as needed. */}
+    });
     
-    // Accessors ///////////////////////////////////////////////////////////////
-    setMouseDown: function(v) {
-        if (this.mouseDown !== v) {
-            this.mouseDown = v;
-            // No event needed
+    /** Adds the capability to be "disabled" to an myt.Node. When an myt.Node is 
+        disabled the user should typically not be able to interact with it.
+        
+        When disabled becomes true an attempt will be made to give away the 
+        focus using myt.FocusObservable's giveAwayFocus method.
+        
+        Events:
+            disabled:boolean Fired when the disabled attribute is modified
+                via setDisabled.
+        
+        Attributes:
+            disabled:boolean Indicates that this component is disabled.
+        
+        @class */
+    pkg.Disableable = new JSModule('Disableable', {
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides */
+        initNode: function(parent, attrs) {
+            if (attrs.disabled == null) attrs.disabled = false;
+            
+            this.callSuper(parent, attrs);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setDisabled: function(v) {
+            if (this.disabled !== v) {
+                this.disabled = v;
+                if (this.inited) this.fireEvent('disabled', v);
+                
+                this.doDisabled();
+            }
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Called after the disabled attribute is set. Default behavior 
+            attempts to give away focus and calls the updateUI method of 
+            myt.UpdateableUI if it is defined.
+            @returns {undefined} */
+        doDisabled: function() {
             if (this.inited) {
-                if (v && this.isFocusable()) this.focus(true);
+                // Give away focus if we become disabled and this instance is
+                // a FocusObservable
+                if (this.disabled && this.giveAwayFocus) this.giveAwayFocus();
                 if (this.updateUI) this.updateUI();
             }
         }
-    },
+    });
     
-    /** @overrides myt.Disableable */
-    setDisabled: function(v) {
-        // When about to disable the view make sure mouseDown is not true. This 
-        // helps prevent unwanted activation of a disabled view.
-        if (v && this.mouseDown) this.setMouseDown(false);
+    /** Provides keyboard handling to "activate" the component when a key is 
+        pressed down or released up. By default, when a keyup event occurs for
+        an activation key and this view is not disabled, the 'doActivated' 
+        method will get called.
         
-        this.callSuper(v);
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.MouseOver */
-    doMouseOver: function(event) {
-        this.callSuper(event);
-        if (this.mouseDown) this.detachFromDom(myt.global.mouse, 'doMouseUp', 'mouseup', true);
-    },
-    
-    /** @overrides myt.MouseOver */
-    doMouseOut: function(event) {
-        this.callSuper(event);
+        Requires: myt.Activateable, myt.Disableable, myt.KeyObservable and 
+            myt.FocusObservable super mixins.
         
-        // Wait for a mouse up anywhere if the user moves the mouse out of the
-        // view while the mouse is still down. This allows the user to move
-        // the mouse in and out of the view with the view still behaving 
-        // as moused down.
-        if (!this.disabled && this.mouseDown) this.attachToDom(myt.global.mouse, 'doMouseUp', 'mouseup', true);
-    },
-    
-    /** Called when the mouse is down on this view. Subclasses must call super.
-        @param {!Object} event
-        @returns {undefined} */
-    doMouseDown: function(event) {
-        if (!this.disabled) this.setMouseDown(true);
-    },
-    
-    /** Called when the mouse is up on this view. Subclasses must call super.
-        @param {!Object} event
-        @returns {undefined} */
-    doMouseUp: function(event) {
-        // Cleanup global mouse listener since the mouseUp occurred outside
-        // the view.
-        if (!this.mouseOver) this.detachFromDom(myt.global.mouse, 'doMouseUp', 'mouseup', true);
+        Attributes:
+            activationKeys:array of chars The keys that when keyed down will
+                activate this component. Note: The value is not copied so
+                modification of the array outside the scope of this object will
+                effect behavior.
+            activateKeyDown:number the keycode of the activation key that is
+                currently down. This will be -1 when no key is down.
+            repeatKeyDown:boolean Indicates if doActivationKeyDown will be 
+                called for repeated keydown events or not. Defaults to false.
         
-        if (!this.disabled && this.mouseDown) {
-            this.setMouseDown(false);
+        @class */
+    pkg.KeyActivation = new JSModule('KeyActivation', {
+        // Class Methods and Attributes ////////////////////////////////////////
+        extend: {
+            /** The default activation keys are enter (13) and spacebar (32). */
+            DEFAULT_ACTIVATION_KEYS: [13,32]
+        },
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides */
+        initNode: function(parent, attrs) {
+            const self = this;
             
-            // Only do mouseUpInside if the mouse is actually over the view.
-            // This means the user can mouse down on a view, move the mouse
-            // out and then mouse up and not "activate" the view.
-            if (this.mouseOver) this.doMouseUpInside(event);
-        }
-    },
-    
-    /** Called when the mouse is up and we are still over the view. Executes
-        the 'doActivated' method by default.
-        @param {!Object} event
-        @returns {undefined} */
-    doMouseUpInside: function(event) {
-        if (this.doActivated) this.doActivated();
-    }
-});
-
-
-/** Provides both MouseOver and MouseDown mixins as a single mixin. */
-myt.MouseOverAndDown = new JS.Module('MouseOverAndDown', {
-    include: [myt.MouseOver, myt.MouseDown]
-});
-
-
-/** Adds the capability for an myt.View to be "activated". A doActivated method
-    is added that gets called when the view is "activated". */
-myt.Activateable = new JS.Module('Activateable', {
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Called when this view should be activated.
-        @returns {undefined} */
-    doActivated: () => {
-        // Subclasses to implement as needed.
-    }
-});
-
-
-/** Provides keyboard handling to "activate" the component when a key is 
-    pressed down or released up. By default, when a keyup event occurs for
-    an activation key and this view is not disabled, the 'doActivated' method
-    will get called.
-    
-    Requires: myt.Activateable, myt.Disableable, myt.KeyObservable and 
-        myt.FocusObservable super mixins.
-    
-    Events:
-        None
-    
-    Attributes:
-        activationKeys:array of chars The keys that when keyed down will
-            activate this component. Note: The value is not copied so
-            modification of the array outside the scope of this object will
-            effect behavior.
-        activateKeyDown:number the keycode of the activation key that is
-            currently down. This will be -1 when no key is down.
-        repeatKeyDown:boolean Indicates if doActivationKeyDown will be called
-            for repeated keydown events or not. Defaults to false.
-*/
-myt.KeyActivation = new JS.Module('KeyActivation', {
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        /** The default activation keys are enter (13) and spacebar (32). */
-        DEFAULT_ACTIVATION_KEYS: [13,32]
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides */
-    initNode: function(parent, attrs) {
-        const self = this;
+            self.activateKeyDown = -1;
+            
+            if (attrs.activationKeys == null) attrs.activationKeys = pkg.KeyActivation.DEFAULT_ACTIVATION_KEYS;
+            
+            self.callSuper(parent, attrs);
+            
+            self.attachToDom(self, '__handleKeyDown', 'keydown');
+            self.attachToDom(self, '__handleKeyPress', 'keypress');
+            self.attachToDom(self, '__handleKeyUp', 'keyup');
+            self.attachToDom(self, '__doDomBlur', 'blur');
+        },
         
-        self.activateKeyDown = -1;
         
-        if (attrs.activationKeys == null) attrs.activationKeys = myt.KeyActivation.DEFAULT_ACTIVATION_KEYS;
+        // Accessors ///////////////////////////////////////////////////////////
+        setActivationKeys: function(v) {this.activationKeys = v;},
+        setRepeatKeyDown: function(v) {this.repeatKeyDown = v;},
         
-        self.callSuper(parent, attrs);
         
-        self.attachToDom(self, '__handleKeyDown', 'keydown');
-        self.attachToDom(self, '__handleKeyPress', 'keypress');
-        self.attachToDom(self, '__handleKeyUp', 'keyup');
-        self.attachToDom(self, '__doDomBlur', 'blur');
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setActivationKeys: function(v) {this.activationKeys = v;},
-    setRepeatKeyDown: function(v) {this.repeatKeyDown = v;},
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __handleKeyDown: function(event) {
-        if (!this.disabled) {
-            if (this.activateKeyDown === -1 || this.repeatKeyDown) {
-                const keyCode = myt.KeyObservable.getKeyCodeFromEvent(event),
-                    keys = this.activationKeys;
-                let i = keys.length;
-                while (i) {
-                    if (keyCode === keys[--i]) {
-                        if (this.activateKeyDown === keyCode) {
-                            this.doActivationKeyDown(keyCode, true);
-                        } else {
-                            this.activateKeyDown = keyCode;
-                            this.doActivationKeyDown(keyCode, false);
+        // Methods /////////////////////////////////////////////////////////////
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __handleKeyDown: function(event) {
+            if (!this.disabled) {
+                if (this.activateKeyDown === -1 || this.repeatKeyDown) {
+                    const keyCode = getKeyCodeFromEvent(event),
+                        keys = this.activationKeys;
+                    let i = keys.length;
+                    while (i) {
+                        if (keyCode === keys[--i]) {
+                            if (this.activateKeyDown === keyCode) {
+                                this.doActivationKeyDown(keyCode, true);
+                            } else {
+                                this.activateKeyDown = keyCode;
+                                this.doActivationKeyDown(keyCode, false);
+                            }
+                            event.value.preventDefault();
+                            return;
                         }
-                        event.value.preventDefault();
-                        return;
                     }
                 }
             }
-        }
-    },
-    
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __handleKeyPress: function(event) {
-        if (!this.disabled) {
-            const keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
-            if (this.activateKeyDown === keyCode) {
-                const keys = this.activationKeys;
-                let i = keys.length;
-                while (i) {
-                    if (keyCode === keys[--i]) {
-                        event.value.preventDefault();
-                        return;
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __handleKeyPress: function(event) {
+            if (!this.disabled) {
+                const keyCode = getKeyCodeFromEvent(event);
+                if (this.activateKeyDown === keyCode) {
+                    const keys = this.activationKeys;
+                    let i = keys.length;
+                    while (i) {
+                        if (keyCode === keys[--i]) {
+                            event.value.preventDefault();
+                            return;
+                        }
                     }
                 }
             }
-        }
-    },
-    
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __handleKeyUp: function(event) {
-        if (!this.disabled) {
-            const keyCode = myt.KeyObservable.getKeyCodeFromEvent(event);
-            if (this.activateKeyDown === keyCode) {
-                const keys = this.activationKeys;
-                let i = keys.length;
-                while (i) {
-                    if (keyCode === keys[--i]) {
-                        this.activateKeyDown = -1;
-                        this.doActivationKeyUp(keyCode);
-                        event.value.preventDefault();
-                        return;
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __handleKeyUp: function(event) {
+            if (!this.disabled) {
+                const keyCode = getKeyCodeFromEvent(event);
+                if (this.activateKeyDown === keyCode) {
+                    const keys = this.activationKeys;
+                    let i = keys.length;
+                    while (i) {
+                        if (keyCode === keys[--i]) {
+                            this.activateKeyDown = -1;
+                            this.doActivationKeyUp(keyCode);
+                            event.value.preventDefault();
+                            return;
+                        }
                     }
                 }
             }
-        }
-    },
-    
-    /** @private
-        @param {!Object} event
-        @returns {undefined} */
-    __doDomBlur: function(event) {
-        if (!this.disabled) {
-            const keyThatWasDown = this.activateKeyDown;
-            if (keyThatWasDown !== -1) {
-                this.activateKeyDown = -1;
-                this.doActivationKeyAborted(keyThatWasDown);
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __doDomBlur: function(event) {
+            if (!this.disabled) {
+                const keyThatWasDown = this.activateKeyDown;
+                if (keyThatWasDown !== -1) {
+                    this.activateKeyDown = -1;
+                    this.doActivationKeyAborted(keyThatWasDown);
+                }
             }
+        },
+        
+        /** Called when an activation key is pressed down. Default 
+            implementation does nothing.
+            @param key:number the keycode that is down.
+            @param isRepeat:boolean Indicates if this is a key repeat event 
+                or not.
+            @returns {undefined} */
+        doActivationKeyDown: (key, isRepeat) => {/* Subclasses to implement as needed. */},
+        
+        /** Called when an activation key is release up. This executes the
+            'doActivated' method by default. 
+            @param key:number the keycode that is up.
+            @returns {undefined} */
+        doActivationKeyUp: function(key) {
+            this.doActivated();
+        },
+        
+        /** Called when focus is lost while an activation key is down. Default 
+            implementation does nothing.
+            @param key:number the keycode that is down.
+            @returns {undefined} */
+        doActivationKeyAborted: key => {/* Subclasses to implement as needed. */}
+    });
+    
+    /** Provides a 'mouseOver' attribute that tracks mouse over/out state. Also
+        provides a mechanism to smoothe over/out events so only one call to
+        'doSmoothMouseOver' occurs per idle event.
+        
+        Requires myt.Disableable and myt.MouseObservable super mixins.
+        
+        Attributes:
+            mouseOver:boolean Indicates if the mouse is over this view or not.
+        
+        Private Attributes:
+            __attachedToOverIdle:boolean Used by the code that smoothes out
+                mouseover events. Indicates that we are registered with the
+                idle event.
+            __lastOverIdleValue:boolean Used by the code that smoothes out
+                mouseover events. Stores the last mouseOver value.
+            __disabledOver:boolean Tracks mouse over/out state while a view is
+                disabled. This allows correct restoration of mouseOver state if
+                a view becomes enabled while the mouse is already over it.
+        
+        @class */
+    pkg.MouseOver = new JSModule('MouseOver', {
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides */
+        initNode: function(parent, attrs) {
+            if (attrs.mouseOver == null) attrs.mouseOver = false;
+            
+            this.callSuper(parent, attrs);
+            
+            this.attachToDom(this, 'doMouseOver', 'mouseover');
+            this.attachToDom(this, 'doMouseOut', 'mouseout');
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setMouseOver: function(v) {
+            if (this.mouseOver !== v) {
+                this.mouseOver = v;
+                // No event needed
+                
+                // Smooth out over/out events by delaying until the next 
+                // idle event.
+                if (this.inited && !this.__attachedToOverIdle) {
+                    this.__attachedToOverIdle = true;
+                    this.attachTo(GlobalIdle, '__doMouseOverOnIdle', 'idle');
+                }
+            }
+        },
+        
+        /** @overrides myt.Disableable */
+        setDisabled: function(v) {
+            this.callSuper(v);
+            
+            if (this.disabled) {
+                // When disabling make sure exposed mouseOver is not true. This 
+                // helps prevent unwanted behavior of a disabled view such as a
+                // disabled button looking like it is moused over.
+                if (this.mouseOver) {
+                    this.__disabledOver = true;
+                    this.setMouseOver(false);
+                }
+            } else {
+                // Restore exposed mouse over state when enabling
+                if (this.__disabledOver) this.setMouseOver(true);
+            }
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @private
+            @returns {undefined} */
+        __doMouseOverOnIdle: function() {
+            this.detachFrom(GlobalIdle, '__doMouseOverOnIdle', 'idle');
+            this.__attachedToOverIdle = false;
+            
+            // Only call doSmoothOver if the over/out state has changed since 
+            // the last time it was called.
+            const isOver = this.mouseOver;
+            if (this.__lastOverIdleValue !== isOver) {
+                this.__lastOverIdleValue = isOver;
+                this.doSmoothMouseOver(isOver);
+            }
+        },
+        
+        /** Called when mouseOver state changes. This method is called after
+            an event filtering process has reduced frequent over/out events
+            originating from the dom.
+            @param {boolean} isOver
+            @returns {undefined} */
+        doSmoothMouseOver: function(isOver) {
+            if (this.inited && this.updateUI) this.updateUI();
+        },
+        
+        /** Called when the mouse is over this view. Subclasses must call super.
+            @param {!Object} event
+            @returns {undefined} */
+        doMouseOver: function(event) {
+            this.__disabledOver = true;
+            
+            if (!this.disabled) this.setMouseOver(true);
+        },
+        
+        /** Called when the mouse leaves this view. Subclasses must call super.
+            @param {!Object} event
+            @returns {undefined} */
+        doMouseOut: function(event) {
+            this.__disabledOver = false;
+            
+            if (!this.disabled) this.setMouseOver(false);
         }
-    },
+    });
     
-    /** Called when an activation key is pressed down. Default implementation
-        does nothing.
-        @param key:number the keycode that is down.
-        @param isRepeat:boolean Indicates if this is a key repeat event or not.
-        @returns {undefined} */
-    doActivationKeyDown: (key, isRepeat) => {
-        // Subclasses to implement as needed.
-    },
+    /** Provides a 'mouseDown' attribute that tracks mouse up/down state.
+        
+        Requires: myt.MouseOver, myt.Disableable, myt.MouseObservable super 
+            mixins.
+        
+        Suggested: myt.UpdateableUI and myt.Activateable super mixins.
+        
+        Attributes:
+            mouseDown:boolean Indicates if the mouse is down or not.
+        
+        @class */
+    pkg.MouseDown = new JSModule('MouseDown', {
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides */
+        initNode: function(parent, attrs) {
+            if (attrs.mouseDown == null) attrs.mouseDown = false;
+            
+            this.callSuper(parent, attrs);
+            
+            this.attachToDom(this, 'doMouseDown', 'mousedown');
+            this.attachToDom(this, 'doMouseUp', 'mouseup');
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setMouseDown: function(v) {
+            if (this.mouseDown !== v) {
+                this.mouseDown = v;
+                // No event needed
+                if (this.inited) {
+                    if (v && this.isFocusable()) this.focus(true);
+                    if (this.updateUI) this.updateUI();
+                }
+            }
+        },
+        
+        /** @overrides myt.Disableable */
+        setDisabled: function(v) {
+            // When about to disable the view make sure mouseDown is not true. 
+            // This helps prevent unwanted activation of a disabled view.
+            if (v && this.mouseDown) this.setMouseDown(false);
+            
+            this.callSuper(v);
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides myt.MouseOver */
+        doMouseOver: function(event) {
+            this.callSuper(event);
+            if (this.mouseDown) this.detachFromDom(GlobalMouse, 'doMouseUp', 'mouseup', true);
+        },
+        
+        /** @overrides myt.MouseOver */
+        doMouseOut: function(event) {
+            this.callSuper(event);
+            
+            // Wait for a mouse up anywhere if the user moves the mouse out of 
+            // the view while the mouse is still down. This allows the user to 
+            // move the mouse in and out of the view with the view still 
+            // behaving as moused down.
+            if (!this.disabled && this.mouseDown) this.attachToDom(GlobalMouse, 'doMouseUp', 'mouseup', true);
+        },
+        
+        /** Called when the mouse is down on this view. Subclasses must call super.
+            @param {!Object} event
+            @returns {undefined} */
+        doMouseDown: function(event) {
+            if (!this.disabled) this.setMouseDown(true);
+        },
+        
+        /** Called when the mouse is up on this view. Subclasses must call super.
+            @param {!Object} event
+            @returns {undefined} */
+        doMouseUp: function(event) {
+            // Cleanup global mouse listener since the mouseUp occurred outside
+            // the view.
+            if (!this.mouseOver) this.detachFromDom(GlobalMouse, 'doMouseUp', 'mouseup', true);
+            
+            if (!this.disabled && this.mouseDown) {
+                this.setMouseDown(false);
+                
+                // Only do mouseUpInside if the mouse is actually over the view.
+                // This means the user can mouse down on a view, move the mouse
+                // out and then mouse up and not "activate" the view.
+                if (this.mouseOver) this.doMouseUpInside(event);
+            }
+        },
+        
+        /** Called when the mouse is up and we are still over the view. Executes
+            the 'doActivated' method by default.
+            @param {!Object} event
+            @returns {undefined} */
+        doMouseUpInside: function(event) {
+            if (this.doActivated) this.doActivated();
+        }
+    });
     
-    /** Called when an activation key is release up. This executes the
-        'doActivated' method by default. 
-        @param key:number the keycode that is up.
-        @returns {undefined} */
-    doActivationKeyUp: function(key) {
-        this.doActivated();
-    },
+    /** Provides both MouseOver and MouseDown mixins as a single mixin.
+        
+        @class */
+    pkg.MouseOverAndDown = new JSModule('MouseOverAndDown', {
+        include: [pkg.MouseOver, pkg.MouseDown]
+    });
     
-    /** Called when focus is lost while an activation key is down. Default 
-        implementation does nothing.
-        @param key:number the keycode that is down.
-        @returns {undefined} */
-    doActivationKeyAborted: key => {
-        // Subclasses to implement as needed.
-    }
-});
+    /** Makes an myt.View draggable via the mouse.
+        
+        Also supresses context menus since the mouse down to open it causes bad
+        behavior since a mouseup event is not always fired.
+        
+        Events:
+            isDragging:boolean Fired when the isDragging attribute is modified
+                via setIsDragging.
+        
+        Attributes:
+            allowAbort:boolean Allows a drag to be aborted by the user by
+                pressing the 'esc' key. Defaults to undefined which is 
+                equivalent to false.
+            isDraggable:boolean Configures the view to be draggable or not. The 
+                default value is true.
+            distanceBeforeDrag:number The distance, in pixels, before a mouse 
+                down and drag is considered a drag action. Defaults to 0.
+            isDragging:boolean Indicates that this view is currently 
+                being dragged.
+            draggableAllowBubble:boolean Determines if mousedown and mouseup
+                dom events handled by this component will bubble or not. 
+                Defaults to true.
+            dragOffsetX:number The x amount to offset the position during 
+                dragging. Defaults to 0.
+            dragOffsetY:number The y amount to offset the position during 
+                dragging. Defaults to 0.
+            dragInitX:number Stores initial mouse x position during dragging.
+            dragInitY:number Stores initial mouse y position during dragging.
+            centerOnMouse:boolean If true this draggable will update the 
+                dragInitX and dragInitY to keep the view centered on the mouse. 
+                Defaults to undefined which is equivalent to false.
+        
+        Private Attributes:
+            __lastMousePosition:object The last position of the mouse during
+                dragging.
+        
+        @class */
+    pkg.Draggable = new JSModule('Draggable', {
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.View */
+        initNode: function(parent, attrs) {
+            const self = this;
+            let isDraggable = true;
+            
+            self.isDraggable = self.isDragging = false;
+            self.draggableAllowBubble = true;
+            self.distanceBeforeDrag = self.dragOffsetX = self.dragOffsetY = 0;
+            
+            // Will be set after init since the draggable subview probably
+            // doesn't exist yet.
+            if (attrs.isDraggable != null) {
+                isDraggable = attrs.isDraggable;
+                delete attrs.isDraggable;
+            }
+            
+            self.callSuper(parent, attrs);
+            
+            self.setIsDraggable(isDraggable);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setIsDraggable: function(v) {
+            const self = this;
+            if (self.isDraggable !== v) {
+                self.isDraggable = v;
+                // No event needed.
+                
+                let func;
+                if (v) {
+                    func = self.attachToDom;
+                } else if (self.inited) {
+                    func = self.detachFromDom;
+                }
+                
+                if (func) {
+                    const dragviews = self.getDragViews();
+                    let i = dragviews.length;
+                    while (i) {
+                        const dragview = dragviews[--i];
+                        func.call(self, dragview, '__doMouseDown', 'mousedown');
+                        func.call(self, dragview, '__doContextMenu', 'contextmenu');
+                    }
+                }
+            }
+        },
+        
+        setIsDragging: function(v) {
+            this.set('isDragging', v, true);
+        },
+        
+        setDragOffsetX: function(v, supressUpdate) {
+            if (this.dragOffsetX !== v) {
+                this.dragOffsetX = v;
+                if (this.inited && this.isDragging && !supressUpdate) this.reRequestDragPosition();
+            }
+        },
+        
+        setDragOffsetY: function(v, supressUpdate) {
+            if (this.dragOffsetY !== v) {
+                this.dragOffsetY = v;
+                if (this.inited && this.isDragging && !supressUpdate) this.reRequestDragPosition();
+            }
+        },
+        
+        setDistanceBeforeDrag: function(v) {this.distanceBeforeDrag = v;},
+        setDraggableAllowBubble: function(v) {this.draggableAllowBubble = v;},
+        setCenterOnMouse: function(v) {this.centerOnMouse = v;},
+        setAllowAbort: function(v) {this.allowAbort = v;},
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @returns {!Array} - An array of views that can be moused down on to 
+            start the drag. Subclasses should override this to return an 
+            appropriate list of views. By default this view is returned thus 
+            making the entire view capable of starting a drag. */
+        getDragViews: function() {
+            return [this];
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __doContextMenu: event => {
+            // Do nothing so the context menu event is supressed.
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __doMouseDown: function(event) {
+            const self = this,
+                pos = getMouseFromEvent(event),
+                de = self.getOuterDomElement();
+            self.dragInitX = pos.x - de.offsetLeft;
+            self.dragInitY = pos.y - de.offsetTop;
+            
+            self.attachToDom(GlobalMouse, '__doMouseUp', 'mouseup', true);
+            if (self.distanceBeforeDrag > 0) {
+                self.attachToDom(GlobalMouse, '__doDragCheck', 'mousemove', true);
+            } else {
+                self.startDrag(event);
+            }
+            
+            event.value.preventDefault();
+            return self.draggableAllowBubble;
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __doMouseUp: function(event) {
+            if (this.isDragging) {
+                this.stopDrag(event, false);
+            } else {
+                this.detachFromDom(GlobalMouse, '__doMouseUp', 'mouseup', true);
+                this.detachFromDom(GlobalMouse, '__doDragCheck', 'mousemove', true);
+            }
+            return this.draggableAllowBubble;
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __watchForAbort: function(event) {
+            if (event.value === 27) this.stopDrag(event, true);
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __doDragCheck: function(event) {
+            const self = this,
+                pos = getMouseFromEvent(event),
+                distance = pkg.Geometry.measureDistance(pos.x, pos.y, self.dragInitX + self.x, self.dragInitY + self.y);
+            if (distance >= self.distanceBeforeDrag) {
+                self.detachFromDom(pkg.global.mouse, '__doDragCheck', 'mousemove', true);
+                self.startDrag(event);
+            }
+        },
+        
+        /** Active until stopDrag is called. The view position will be bound
+            to the mouse position. Subclasses typically call this onmousedown 
+            for subviews that allow dragging the view.
+            @param {!Object} event - The event the mouse event when the 
+                drag started.
+            @returns {undefined} */
+        startDrag: function(event) {
+            const self = this;
+            
+            if (self.centerOnMouse) {
+                self.syncTo(self, '__updateDragInitX', 'width');
+                self.syncTo(self, '__updateDragInitY', 'height');
+            }
+            
+            if (self.allowAbort) self.attachTo(GlobalKeys, '__watchForAbort', 'keyup');
+            
+            self.setIsDragging(true);
+            self.attachToDom(GlobalMouse, 'updateDrag', 'mousemove', true);
+            self.updateDrag(event);
+        },
+        
+        /** Called on every mousemove event while dragging.
+            @param {!Object} event
+            @returns {undefined} */
+        updateDrag: function(event) {
+            this.__lastMousePosition = getMouseFromEvent(event);
+            this.reRequestDragPosition();
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __updateDragInitX: function(event) {
+            this.dragInitX = this.width / 2 * (this.scaleX || 1);
+        },
+        
+        /** @private
+            @param {!Object} event
+            @returns {undefined} */
+        __updateDragInitY: function(event) {
+            this.dragInitY = this.height / 2 * (this.scaleY || 1);
+        },
+        
+        /** Stop the drag. (see startDrag for more details)
+            @param {!Object} event - The event that ended the drag.
+            @param {boolean} isAbort - Indicates if the drag ended normally 
+                or was aborted.
+            @returns {undefined} */
+        stopDrag: function(event, isAbort) {
+            const self = this;
+            self.detachFromDom(GlobalMouse, '__doMouseUp', 'mouseup', true);
+            self.detachFromDom(GlobalMouse, 'updateDrag', 'mousemove', true);
+            if (self.centerOnMouse) {
+                self.detachFrom(self, '__updateDragInitX', 'width');
+                self.detachFrom(self, '__updateDragInitY', 'height');
+            }
+            if (self.allowAbort) self.detachFrom(GlobalKeys, '__watchForAbort', 'keyup');
+            self.setIsDragging(false);
+        },
+        
+        /** Repositions the view to the provided values. The default 
+            implementation is to directly set x and y. Subclasses should 
+            override this method when it is necessary to constrain the position.
+            @param {number} x - the new x position.
+            @param {number} y - the new y position.
+            @returns {undefined} */
+        requestDragPosition: function(x, y) {
+            if (!this.disabled) {
+                this.setX(x);
+                this.setY(y);
+            }
+        },
+        
+        reRequestDragPosition: function() {
+            const self = this,
+                pos = self.__lastMousePosition;
+            self.requestDragPosition(
+                pos.x - self.dragInitX + self.dragOffsetX, 
+                pos.y - self.dragInitY + self.dragOffsetY
+            );
+        }
+    });
+})(myt);
 
 
 ((pkg) => {
@@ -14772,107 +15188,6 @@ myt.KeyActivation = new JS.Module('KeyActivation', {
 })(myt);
 
 
-/** Provides browser drag and drop support.
-    
-    Requires myt.Disableable as a super mixin. */
-myt.DragDropSupport = new JS.Module('DragDropSupport', {
-    include: [myt.DragDropObservable],
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.View */
-    initNode: function(parent, attrs) {
-        this.callSuper(parent, attrs);
-        
-        if (!this.disabled) this.setupDragListeners();
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrides myt.Disableable */
-    setDisabled: function(v) {
-        if (this.disabled !== v) {
-            this.getInnerDomElement().disabled = v;
-            this.callSuper(v);
-            
-            if (this.inited) {
-                if (v) {
-                    this.teardownDragListeners();
-                } else {
-                    this.setupDragListeners();
-                }
-            }
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
-    setupDragListeners: function() {
-        this.attachToDom(this, 'doDragOver', 'dragover', false);
-        this.attachToDom(this, 'doDragEnter', 'dragenter', false);
-        this.attachToDom(this, 'doDragLeave', 'dragleave', false);
-        this.attachToDom(this, 'doDrop', 'drop', false);
-    },
-    
-    /** @private */
-    teardownDragListeners: function() {
-        this.detachFromDom(this, 'doDragOver', 'dragover', false);
-        this.detachFromDom(this, 'doDragEnter', 'dragenter', false);
-        this.detachFromDom(this, 'doDragLeave', 'dragleave', false);
-        this.detachFromDom(this, 'doDrop', 'drop', false);
-    },
-    
-    /** @param {!Object} event
-        @returns {undefined} */
-    doDragOver: function(event) {},
-    
-    /** @param {!Object} event
-        @returns {undefined} */
-    doDragEnter: function(event) {},
-    
-    /** @param {!Object} event
-        @returns {undefined} */
-    doDragLeave: function(event) {},
-    
-    /** @param {!Object} event
-        @returns {undefined} */
-    doDrop: function(event) {
-        this.handleFiles(event.value.dataTransfer.files, event);
-    },
-    
-    /** @param {?Array} files
-        @param {!Object} event
-        @returns {undefined} */
-    handleFiles: function(files, event) {
-        if (files !== undefined) {
-            let i = files.length,
-                file;
-            while (i) {
-                file = this.filterFiles(files[--i]);
-                if (file) this.handleDroppedFile(file, event);
-            }
-        } else {
-            myt.dumpStack("Browser doesn't support the File API");
-        }
-    },
-    
-    /** Provides an opportunity to prevent a file from being handled. The
-        default implementation returns the provided file argument.
-        @param file:File the file to be checked for handleability.
-        @returns file:File the file to be handled (possibly modified by this
-            function) or something falsy if the file should not be handled. */
-    filterFiles: function(file) {
-        return file;
-    },
-    
-    /** @param {!Object} file
-        @param {!Object} event
-        @returns {undefined} */
-    handleDroppedFile: function(file, event) {}
-});
-
-
 ((pkg) => {
     const JSModule = JS.Module,
         
@@ -16766,380 +17081,475 @@ myt.DragDropSupport = new JS.Module('DragDropSupport', {
 })(myt);
 
 
-/** Component to upload files. */
-myt.Uploader = new JS.Class('Uploader', myt.View, {
-    include: [myt.DragDropSupport, myt.Disableable, myt.FormElement],
-    
-    
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        /** The attribute key used in a file to store the path for the file
-            on the server. */
-        FILE_ATTR_SERVER_PATH: 'serverPath',
+((pkg) => {
+    const JSClass = JS.Class,
         
-        MIME_TYPES_BY_EXTENSION: {
+        MIME_TYPES_BY_EXTENSION = {
             gif:'image/gif',
             png:'image/png',
             jpg:'image/jpeg',
             jpeg:'image/jpeg'
         },
         
-        readFile: function(file, handlerFunc) {
-            if (FileReader !== undefined) {
-                const reader = new FileReader();
-                reader.onload = handlerFunc;
-                reader.readAsDataURL(file);
-            }
-        },
-        
-        isSameFile: function(f1, f2) {
-            if (f1 == null || f2 == null) return false;
-            return f1.name === f2.name && f1.type === f2.type && f1.size === f2.size;
-        },
-        
-        createFile: function(urlStr) {
-            const fileName = (new myt.URI(urlStr)).file;
-            return {
-                name: fileName,
-                serverPath: urlStr,
-                size: -1,
-                type: this.MIME_TYPES_BY_EXTENSION[myt.getExtension(fileName)]
-            };
-        }
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.View */
-    initNode: function(parent, attrs) {
-        const self = this;
-        
-        self.files = [];
-        
-        // Modify attrs so setter gets called.
-        if (attrs.requestFileParam == null) attrs.requestFileParam = 'file';
-        if (attrs.maxFiles == null) attrs.maxFiles = -1;
-        
-        self.callSuper(parent, attrs);
-        
-        // Support click to upload too.
-        new myt.NativeInputWrapper(self, {
-            name:'fileInput', percentOfParentWidth:100, percentOfParentHeight:100,
-            opacity:0.01, disabled:self.disabled, overflow:'hidden'
-        }, [myt.SizeToParent, {
+        /** Provides browser drag and drop support.
+            
+            Requires myt.Disableable as a super mixin.
+            
+            @class */
+        DragDropSupport = pkg.DragDropSupport = new JS.Module('DragDropSupport', {
+            include: [pkg.DragDropObservable],
+            
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            /** @overrides myt.View */
             initNode: function(parent, attrs) {
-                this.inputType = 'file';
                 this.callSuper(parent, attrs);
-                this.attachToDom(this, '_handleInput', 'change');
                 
-                this.domElement.multiple = self.maxFiles > 1;
+                if (!this.disabled) this.setupDragListeners();
             },
             
-            _handleInput: function(event) {
-                self.handleFiles(this.domElement.files, event);
-            }
-        }]);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** Add a "remote" file when the value is set.
-        @param {string} v - the URI for a remote image file.
-        @returns {string} */
-    setValue: function(v) {
-        this.clearFiles();
-        
-        if (v) {
-            if (!Array.isArray(v)) v = [v];
-            const len = v.length;
-            let i = 0;
-            for(; len > i; ++i) this.addFile(myt.Uploader.createFile(v[i]));
-        }
-        
-        return this.callSuper ? this.callSuper(v) : v;
-    },
-    
-    /** @returns {string} The path to the uploaded files. */
-    getValue: function() {
-        return this.value;
-    },
-    
-    /** @overrides myt.Disableable */
-    setDisabled: function(v) {
-        this.callSuper(v);
-        
-        if (this.fileInput) this.fileInput.setDisabled(v);
-    },
-    
-    setMaxFiles: function(v) {
-        if (this.maxFiles !== v) {
-            this.maxFiles = v;
-            if (this.inited) this.fireEvent('maxFiles', v);
-            if (this.fileInput) this.fileInput.domElement.multiple = v > 1;
-        }
-    },
-    
-    setUploadUrl: function(v) {this.set('uploadUrl', v, true);},
-    setRequestFileParam: function(v) {this.set('requestFileParam', v, true);},
-    
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.View */
-    bringSubviewToFront: function(sv) {
-        if (sv === this.fileInput) {
-            this.callSuper(sv);
-        } else {
-            this.sendSubviewBehind(sv, this.fileInput);
-        }
-    },
-    
-    /** @overrides myt.View */
-    subviewAdded: function(sv) {
-        this.callSuper(sv);
-        
-        if (this.fileInput) this.bringSubviewToFront(this.fileInput);
-    },
-    
-    handleDroppedFile: function(file, event) {
-        this.addFile(file);
-    },
-    
-    /** @overrides myt.DragDropSupport */
-    filterFiles: function(file) {
-        // Prevent max files from being exceeded.
-        return this.maxFiles >= 0 && this.files.length >= this.maxFiles ? null : file;
-    },
-    
-    uploadFiles: function(url, fileParam) {
-        url = url || this.uploadUrl;
-        
-        const files = this.files;
-        let i = files.length;
-        while (i) this.uploadFile(files[--i], url, fileParam);
-    },
-    
-    uploadFile: function(file, url, fileParam) {
-        const self = this,
-            formData = new FormData();
-        formData.append(fileParam || self.requestFileParam, file, file.name);
-        myt.doFetch(
-            url || self.uploadUrl,
-            {
-                method:'POST',
-                body:formData
+            
+            // Accessors ///////////////////////////////////////////////////////
+            /** @overrides myt.Disableable */
+            setDisabled: function(v) {
+                if (this.disabled !== v) {
+                    this.getInnerDomElement().disabled = v;
+                    this.callSuper(v);
+                    
+                    if (this.inited) {
+                        if (v) {
+                            this.teardownDragListeners();
+                        } else {
+                            this.setupDragListeners();
+                        }
+                    }
+                }
             },
-            false,
-            data => {
-                self.handleUploadSuccess(file, data);
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @private */
+            setupDragListeners: function() {
+                this.attachToDom(this, 'doDragOver', 'dragover', false);
+                this.attachToDom(this, 'doDragEnter', 'dragenter', false);
+                this.attachToDom(this, 'doDragLeave', 'dragleave', false);
+                this.attachToDom(this, 'doDrop', 'drop', false);
             },
-            error => {
-                self.handleUploadFailure(file, error);
-            }
-        );
-    },
-    
-    handleUploadSuccess: function(file, data) {
-        file[myt.Uploader.FILE_ATTR_SERVER_PATH] = this.parseServerPathFromResponse(file, data);
-        this.updateValueFromFiles();
-    },
-    
-    handleUploadFailure: (file, error) => {
-        myt.dumpStack("Upload failure: " + error.status + " : " + error.message);
-    },
-    
-    /** Subclasses must implement this to extract the uploaded file path from
-        the response. By default this return null.
-        @param {!Object} file
-        @param {!Object} data
-        @returns {undefined} */
-    parseServerPathFromResponse: (file, data) => null,
-    
-    addFile: function(file) {
-        this.files.push(file);
-        this.updateValueFromFiles();
-        this.fireEvent('addFile', file);
-    },
-    
-    removeFile: function(file) {
-        const files = this.files;
-        let i = files.length;
-        while (i) {
-            if (myt.Uploader.isSameFile(files[--i], file)) {
-                files.splice(i, 1);
+            
+            /** @private */
+            teardownDragListeners: function() {
+                this.detachFromDom(this, 'doDragOver', 'dragover', false);
+                this.detachFromDom(this, 'doDragEnter', 'dragenter', false);
+                this.detachFromDom(this, 'doDragLeave', 'dragleave', false);
+                this.detachFromDom(this, 'doDrop', 'drop', false);
+            },
+            
+            /** @param {!Object} event
+                @returns {undefined} */
+            doDragOver: event => {},
+            
+            /** @param {!Object} event
+                @returns {undefined} */
+            doDragEnter: event => {},
+            
+            /** @param {!Object} event
+                @returns {undefined} */
+            doDragLeave: event => {},
+            
+            /** @param {!Object} event
+                @returns {undefined} */
+            doDrop: function(event) {
+                this.handleFiles(event.value.dataTransfer.files, event);
+            },
+            
+            /** @param {?Array} files
+                @param {!Object} event
+                @returns {undefined} */
+            handleFiles: function(files, event) {
+                if (files !== undefined) {
+                    let i = files.length;
+                    while (i) {
+                        const file = this.filterFiles(files[--i]);
+                        if (file) this.handleDroppedFile(file, event);
+                    }
+                } else {
+                    pkg.dumpStack('File API not supported.');
+                }
+            },
+            
+            /** Provides an opportunity to prevent a file from being handled. The
+                default implementation returns the provided file argument.
+                @param file:File the file to be checked for handleability.
+                @returns file:File the file to be handled (possibly modified by this
+                    function) or something falsy if the file should not be handled. */
+            filterFiles: file => file,
+            
+            /** @param {!Object} file
+                @param {!Object} event
+                @returns {undefined} */
+            handleDroppedFile: (file, event) => {}
+        }),
+        
+        /** Component to upload files.
+            
+            @class */
+        Uploader = pkg.Uploader = new JSClass('Uploader', pkg.View, {
+            include: [DragDropSupport, pkg.Disableable, pkg.FormElement],
+            
+            
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                /** The attribute key used in a file to store the path for the file
+                    on the server. */
+                FILE_ATTR_SERVER_PATH: 'serverPath',
+                
+                readFile: (file, handlerFunc) => {
+                    if (FileReader !== undefined) {
+                        const reader = new FileReader();
+                        reader.onload = handlerFunc;
+                        reader.readAsDataURL(file);
+                    }
+                },
+                
+                isSameFile: (f1, f2) => f1 != null && f2 != null && f1.name === f2.name && f1.type === f2.type && f1.size === f2.size,
+                
+                createFile: urlStr => {
+                    const fileName = (new pkg.URI(urlStr)).file;
+                    return {
+                        name: fileName,
+                        serverPath: urlStr,
+                        size: -1,
+                        type: MIME_TYPES_BY_EXTENSION[pkg.getExtension(fileName)]
+                    };
+                }
+            },
+            
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            /** @overrides myt.View */
+            initNode: function(parent, attrs) {
+                const self = this;
+                
+                self.files = [];
+                
+                // Modify attrs so setter gets called.
+                if (attrs.requestFileParam == null) attrs.requestFileParam = 'file';
+                if (attrs.maxFiles == null) attrs.maxFiles = -1;
+                
+                self.callSuper(parent, attrs);
+                
+                // Support click to upload too.
+                new pkg.NativeInputWrapper(self, {
+                    name:'fileInput', percentOfParentWidth:100, percentOfParentHeight:100,
+                    opacity:0.01, disabled:self.disabled, overflow:'hidden'
+                }, [pkg.SizeToParent, {
+                    initNode: function(parent, attrs) {
+                        this.inputType = 'file';
+                        this.callSuper(parent, attrs);
+                        this.attachToDom(this, '_handleInput', 'change');
+                        
+                        this.domElement.multiple = self.maxFiles > 1;
+                    },
+                    
+                    _handleInput: function(event) {
+                        self.handleFiles(this.domElement.files, event);
+                    }
+                }]);
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            /** Add a "remote" file when the value is set.
+                @param {string} v - the URI for a remote file.
+                @returns {string} */
+            setValue: function(v) {
+                this.clearFiles();
+                
+                if (v) {
+                    if (!Array.isArray(v)) v = [v];
+                    v.forEach(urlStr => {this.addFile(Uploader.createFile(urlStr));});
+                }
+                
+                return this.callSuper ? this.callSuper(v) : v;
+            },
+            
+            /** @returns {string} The path to the uploaded files. */
+            getValue: function() {
+                return this.value;
+            },
+            
+            /** @overrides myt.Disableable */
+            setDisabled: function(v) {
+                this.callSuper(v);
+                
+                if (this.fileInput) this.fileInput.setDisabled(v);
+            },
+            
+            setMaxFiles: function(v) {
+                if (this.maxFiles !== v) {
+                    this.maxFiles = v;
+                    if (this.inited) this.fireEvent('maxFiles', v);
+                    if (this.fileInput) this.fileInput.domElement.multiple = v > 1;
+                }
+            },
+            
+            setUploadUrl: function(v) {this.set('uploadUrl', v, true);},
+            setRequestFileParam: function(v) {this.set('requestFileParam', v, true);},
+            
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @overrides myt.View */
+            bringSubviewToFront: function(sv) {
+                if (sv === this.fileInput) {
+                    this.callSuper(sv);
+                } else {
+                    this.sendSubviewBehind(sv, this.fileInput);
+                }
+            },
+            
+            /** @overrides myt.View */
+            subviewAdded: function(sv) {
+                this.callSuper(sv);
+                
+                if (this.fileInput) this.bringSubviewToFront(this.fileInput);
+            },
+            
+            handleDroppedFile: function(file, event) {
+                this.addFile(file);
+            },
+            
+            /** @overrides myt.DragDropSupport */
+            filterFiles: function(file) {
+                // Prevent max files from being exceeded.
+                return this.maxFiles >= 0 && this.files.length >= this.maxFiles ? null : file;
+            },
+            
+            uploadFiles: function(url, fileParam) {
+                url = url || this.uploadUrl;
+                
+                const files = this.files;
+                let i = files.length;
+                while (i) this.uploadFile(files[--i], url, fileParam);
+            },
+            
+            uploadFile: function(file, url, fileParam) {
+                const self = this,
+                    formData = new FormData();
+                formData.append(fileParam || self.requestFileParam, file, file.name);
+                pkg.doFetch(
+                    url || self.uploadUrl,
+                    {
+                        method:'POST',
+                        body:formData
+                    },
+                    false,
+                    data => {
+                        self.handleUploadSuccess(file, data);
+                    },
+                    error => {
+                        self.handleUploadFailure(file, error);
+                    }
+                );
+            },
+            
+            handleUploadSuccess: function(file, data) {
+                file[Uploader.FILE_ATTR_SERVER_PATH] = this.parseServerPathFromResponse(file, data);
                 this.updateValueFromFiles();
-                this.fireEvent('removeFile', file);
-                break;
-            }
-        }
-    },
-    
-    updateValueFromFiles: function() {
-        const value = [],
-            files = this.files;
-        let i = files.length,
-            serverPath;
-        while (i) {
-            serverPath = files[--i][myt.Uploader.FILE_ATTR_SERVER_PATH];
-            if (serverPath) value.push(serverPath);
-        }
-        
-        const len = value.length;
-        this.value = len === 1 ? value[0] : (len === 0 ? undefined : value);
-        
-        // Reset the form element if empty. Otherwise uploading the 
-        // same file again won't trigger a change event.
-        if (!this.value) this.fileInput.domElement.value = '';
-        
-        this.verifyChangedState(); // FIXME: mimics what happens in myt.FormElement setValue
-        if (this.form) this.form.notifyValueChanged(this); // FIXME: mimics what happens in myt.Form setValue
-        
-        this.fireEvent('value', this.value);
-    },
-    
-    clearFiles: function() {
-        const files = this.files;
-        let i = files.length;
-        while (i) this.removeFile(files[--i]);
-    }
-});
-
-
-/** Component to upload image files. */
-myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        isImageFile: function(file) {
-            return (/image/i).test(file.type);
-        }
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.View */
-    initNode: function(parent, attrs) {
-        attrs.maxFiles = 1;
-        
-        this.callSuper(parent, attrs);
-    },
-    
-    
-    // Attributes //////////////////////////////////////////////////////////////
-    setWidth: function(v, supressEvent) {
-        this.callSuper(v, supressEvent);
-        if (this.inited) this.updateImageSize();
-    },
-    
-    setHeight: function(v, supressEvent) {
-        this.callSuper(v, supressEvent);
-        if (this.inited) this.updateImageSize();
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    filterFiles: function(file) {
-        if (!myt.ImageUploader.isImageFile(file)) return null;
-        
-        // Remove existing file
-        while (this.files.length > 0) this.removeFile(this.files[0]);
-        
-        return this.callSuper(file);
-    },
-    
-    addFile: function(file) {
-        const self = this;
-        
-        self.callSuper(file);
-        
-        const image = self.image = new myt.Image(self, {useNaturalSize:false, align:'center', valign:'middle'});
-        
-        image.file = file;
-        
-        // Read into image
-        if (file.size === -1) {
-            const img = new Image();
-            img.onload = function() {
-                file.width = this.width;
-                file.height = this.height;
+            },
+            
+            handleUploadFailure: (file, error) => {
+                pkg.dumpStack('Upload failure:' + error.status + ':' + error.message);
+            },
+            
+            /** Subclasses must implement this to extract the uploaded file path from
+                the response. By default this return null.
+                @param {!Object} file
+                @param {!Object} data
+                @returns {undefined} */
+            parseServerPathFromResponse: (file, data) => null,
+            
+            addFile: function(file) {
+                this.files.push(file);
+                this.updateValueFromFiles();
+                this.fireEvent('addFile', file);
+            },
+            
+            removeFile: function(file) {
+                const files = this.files;
+                let i = files.length;
+                while (i) {
+                    if (Uploader.isSameFile(files[--i], file)) {
+                        files.splice(i, 1);
+                        this.updateValueFromFiles();
+                        this.fireEvent('removeFile', file);
+                        break;
+                    }
+                }
+            },
+            
+            updateValueFromFiles: function() {
+                const value = [],
+                    files = this.files;
+                let i = files.length;
+                while (i) {
+                    const serverPath = files[--i][Uploader.FILE_ATTR_SERVER_PATH];
+                    if (serverPath) value.push(serverPath);
+                }
                 
-                if (!image || image.destroyed) return;
+                const len = value.length;
+                this.value = len === 1 ? value[0] : (len === 0 ? undefined : value);
                 
-                self.updateImage(file, image, this.src);
-            };
-            img.src = file.serverPath;
-        } else if (FileReader !== undefined && myt.ImageUploader.isImageFile(file)) {
-            myt.Uploader.readFile(file, function(event) {
-                const img = new Image();
-                img.onload = function() {
-                    file.width = this.width;
-                    file.height = this.height;
-                    
-                    if (!image || image.destroyed) return;
-                    
-                    self.updateImage(file, image, this.src);
-                };
-                img.src = event.target.result;
-            });
-        }
-    },
-    
-    scaleToFit: function(boundsWidth, boundsHeight, imgWidth, imgHeight) {
-        const boundsRatio = boundsWidth / boundsHeight,
-            imgRatio = imgWidth / imgHeight;
-        
-        if (imgRatio > boundsRatio) {
-            return [boundsWidth, imgHeight * boundsWidth / imgWidth];
-        } else {
-            return [imgWidth * boundsHeight / imgHeight, boundsHeight];
-        }
-    },
-    
-    removeFile: function(file) {
-        this.callSuper(file);
-        
-        const images = this.getSubviews();
-        let i = images.length,
-            image;
-        while (i) {
-            image = images[--i];
-            if (myt.Uploader.isSameFile(image.file, file)) {
-                image.destroy();
-                break;
+                // Reset the form element if empty. Otherwise uploading the 
+                // same file again won't trigger a change event.
+                if (!this.value) this.fileInput.domElement.value = '';
+                
+                this.verifyChangedState(); // FIXME: mimics what happens in myt.FormElement setValue
+                if (this.form) this.form.notifyValueChanged(this); // FIXME: mimics what happens in myt.Form setValue
+                
+                this.fireEvent('value', this.value);
+            },
+            
+            clearFiles: function() {
+                const files = this.files;
+                let i = files.length;
+                while (i) this.removeFile(files[--i]);
             }
-        }
-    },
-    
-    handleDroppedFile: function(file, event) {
-        this.callSuper(file, event);
+        }),
         
-        this.uploadFile(file, this.uploadUrl);
-    },
-    
-    updateImage: function(file, image, src) {
-        this.nativeWidth = file.width;
-        this.nativeHeight = file.height;
-        
-        this.updateImageSize();
-        
-        image.setImageUrl(src);
-    },
-    
-    updateImageSize: function() {
-        const image = this.image;
-        if (image && !image.destroyed) {
-            const size = this.scaleToFit(this.width, this.height, this.nativeWidth, this.nativeHeight),
-                w = Math.round(size[0]), 
-                h = Math.round(size[1]);
-            image.setImageSize(w + 'px ' + h + 'px');
-            image.setWidth(w);
-            image.setHeight(h);
-        }
-    },
-    
-    getImageSize: function() {
-        return this.files.length ? {width:this.nativeWidth, height:this.nativeHeight} : null;
-    }
-});
+        /** Component to upload image files.
+            
+            @class */
+        ImageUploader = pkg.ImageUploader = new JSClass('ImageUploader', Uploader, {
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                isImageFile: file => (/image/i).test(file.type)
+            },
+            
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            /** @overrides myt.View */
+            initNode: function(parent, attrs) {
+                attrs.maxFiles = 1;
+                
+                this.callSuper(parent, attrs);
+            },
+            
+            
+            // Attributes //////////////////////////////////////////////////////
+            setWidth: function(v, supressEvent) {
+                this.callSuper(v, supressEvent);
+                if (this.inited) this.updateImageSize();
+            },
+            
+            setHeight: function(v, supressEvent) {
+                this.callSuper(v, supressEvent);
+                if (this.inited) this.updateImageSize();
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            filterFiles: function(file) {
+                if (ImageUploader.isImageFile(file)) {
+                    // Remove existing file
+                    while (this.files.length > 0) this.removeFile(this.files[0]);
+                    return this.callSuper(file);
+                }
+            },
+            
+            addFile: function(file) {
+                const self = this;
+                
+                self.callSuper(file);
+                
+                const image = self.image = new pkg.Image(self, {useNaturalSize:false, align:'center', valign:'middle'});
+                
+                image.file = file;
+                
+                // Read into image
+                if (file.size === -1) {
+                    const img = new Image();
+                    img.onload = function() {
+                        file.width = this.width;
+                        file.height = this.height;
+                        
+                        if (!image || image.destroyed) return;
+                        
+                        self.updateImage(file, image, this.src);
+                    };
+                    img.src = file.serverPath;
+                } else if (FileReader !== undefined && ImageUploader.isImageFile(file)) {
+                    Uploader.readFile(file, function(event) {
+                        const img = new Image();
+                        img.onload = function() {
+                            file.width = this.width;
+                            file.height = this.height;
+                            
+                            if (!image || image.destroyed) return;
+                            
+                            self.updateImage(file, image, this.src);
+                        };
+                        img.src = event.target.result;
+                    });
+                }
+            },
+            
+            scaleToFit: (boundsWidth, boundsHeight, imgWidth, imgHeight) => {
+                const boundsRatio = boundsWidth / boundsHeight,
+                    imgRatio = imgWidth / imgHeight;
+                if (imgRatio > boundsRatio) {
+                    return [boundsWidth, imgHeight * boundsWidth / imgWidth];
+                } else {
+                    return [imgWidth * boundsHeight / imgHeight, boundsHeight];
+                }
+            },
+            
+            removeFile: function(file) {
+                this.callSuper(file);
+                
+                const images = this.getSubviews();
+                let i = images.length;
+                while (i) {
+                    const image = images[--i];
+                    if (Uploader.isSameFile(image.file, file)) {
+                        image.destroy();
+                        break;
+                    }
+                }
+            },
+            
+            handleDroppedFile: function(file, event) {
+                this.callSuper(file, event);
+                
+                this.uploadFile(file, this.uploadUrl);
+            },
+            
+            updateImage: function(file, image, src) {
+                this.nativeWidth = file.width;
+                this.nativeHeight = file.height;
+                
+                this.updateImageSize();
+                
+                image.setImageUrl(src);
+            },
+            
+            updateImageSize: function() {
+                const image = this.image;
+                if (image && !image.destroyed) {
+                    const size = this.scaleToFit(this.width, this.height, this.nativeWidth, this.nativeHeight),
+                        w = Math.round(size[0]), 
+                        h = Math.round(size[1]);
+                    image.setImageSize(w + 'px ' + h + 'px');
+                    image.setWidth(w);
+                    image.setHeight(h);
+                }
+            },
+            
+            getImageSize: function() {
+                return this.files.length ? {width:this.nativeWidth, height:this.nativeHeight} : null;
+            }
+        });
+})(myt);
 
 
 ((pkg) => {
@@ -17577,504 +17987,6 @@ myt.ImageUploader = new JS.Class('ImageUploader', myt.Uploader, {
             this.properties = v;
             this.fireEvent('properties', v);
             if (this.inited) updateInstance(this);
-        }
-    });
-})(myt);
-
-
-((pkg) => {
-    let globalDragManager,
-        
-        /* The view currently being dragged. */
-        dragView,
-        
-        /* The view currently being dragged over. */
-        overView;
-        
-    const
-        /* The list of myt.AutoScrollers currently registered for notification
-            when drags start and stop. */
-        autoScrollers = [],
-        
-        /* The list of myt.DropTargets currently registered for notification 
-            when drag and drop events occur. */
-        dropTargets = [],
-        
-        setOverView = (v) => {
-            const existingOverView = overView;
-            if (existingOverView !== v) {
-                if (existingOverView) {
-                    existingOverView.notifyDragLeave(dragView);
-                    if (!dragView.destroyed) dragView.notifyDragLeave(existingOverView);
-                    globalDragManager.fireEvent('dragLeave', existingOverView);
-                }
-                
-                overView = v;
-                
-                if (v) {
-                    v.notifyDragEnter(dragView);
-                    if (!dragView.destroyed) dragView.notifyDragEnter(v);
-                    globalDragManager.fireEvent('dragEnter', existingOverView);
-                }
-            }
-        },
-        
-        setDragView = v => {
-            let existingDragView = dragView,
-                funcName, 
-                eventName,
-                targets,
-                i;
-            if (existingDragView !== v) {
-                dragView = v;
-                
-                if (!!v) {
-                    existingDragView = v;
-                    funcName = 'notifyDragStart';
-                    eventName = 'startDrag';
-                } else {
-                    funcName = 'notifyDragStop';
-                    eventName = 'stopDrag';
-                }
-                
-                targets = filterList(existingDragView, dropTargets);
-                i = targets.length;
-                while (i) targets[--i][funcName](existingDragView);
-                
-                targets = filterList(existingDragView, autoScrollers);
-                i = targets.length;
-                while (i) targets[--i][funcName](existingDragView);
-                
-                globalDragManager.fireEvent(eventName, v);
-            }
-        },
-        
-        /*  Filters the provided array of myt.DragGroupSupport items for the
-            provided myt.Dropable. Returns an array of the matching list
-            items.
-            @param {!Object} dropable
-            @param {!Array} list
-            @returns {!Array} */
-        filterList = (dropable, list) => {
-            if (dropable.destroyed) {
-                return [];
-            } else if (dropable.acceptAnyDragGroup()) {
-                return list;
-            } else {
-                const retval = [],
-                    dragGroups = dropable.getDragGroups();
-                let i = list.length;
-                while (i) {
-                    const item = list[--i];
-                    if (item.acceptAnyDragGroup()) {
-                        retval.push(item);
-                    } else {
-                        const targetGroups = item.getDragGroups();
-                        for (const dragGroup in dragGroups) {
-                            if (targetGroups[dragGroup]) {
-                                retval.push(item);
-                                break;
-                            }
-                        }
-                    }
-                }
-                return retval;
-            }
-        };
-    
-    /** Provides global drag and drop functionality.
-        
-        Events:
-            dragLeave:myt.DropTarget Fired when a myt.Dropable is dragged out of
-                the drop target.
-            dragEnter:myt.DropTarget Fired when a myt.Dropable is dragged over
-                the drop target.
-            startDrag:object Fired when a drag starts. Value is the object
-                being dragged.
-            stopDrag:object Fired when a drag ends. Value is the object 
-                that is no longer being dragged.
-            drop:object Fired when a drag ends over a drop target. The value is
-                an array containing the dropable at index 0 and the drop target
-                at index 1.
-        
-        @class
-    */
-    new JS.Singleton('GlobalDragManager', {
-        include: [pkg.Observable],
-        
-        
-        // Constructor /////////////////////////////////////////////////////////
-        initialize: function() {
-            pkg.global.register('dragManager', globalDragManager = this);
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        getDragView: () => dragView,
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** Registers the provided auto scroller to receive notifications.
-            @param {!Object} autoScroller - The myt.AutoScroller to register.
-            @returns {undefined} */
-        registerAutoScroller: autoScroller => {
-            autoScrollers.push(autoScroller);
-        },
-        
-        /** Unregisters the provided auto scroller.
-            @param {!Object} autoScroller - The myt.AutoScroller to unregister.
-            @returns {undefined} */
-        unregisterAutoScroller: autoScroller => {
-            let i = autoScrollers.length;
-            while (i) {
-                if (autoScrollers[--i] === autoScroller) {
-                    autoScrollers.splice(i, 1);
-                    break;
-                }
-            }
-        },
-        
-        /** Registers the provided drop target to receive notifications.
-            @param {!Object} dropTarget - The myt.DropTarget to register.
-            @returns {undefined} */
-        registerDropTarget: dropTarget => {
-            dropTargets.push(dropTarget);
-        },
-        
-        /** Unregisters the provided drop target.
-            @param {!Object} dropTarget - The myt.DropTarget to unregister.
-            @returns {undefined} */
-        unregisterDropTarget: dropTarget => {
-            let i = dropTargets.length;
-            while (i) {
-                if (dropTargets[--i] === dropTarget) {
-                    dropTargets.splice(i, 1);
-                    break;
-                }
-            }
-        },
-        
-        /** Called by a myt.Dropable when a drag starts.
-            @param {!Object} dropable - The myt.Dropable that started the drag.
-            @returns {undefined} */
-        startDrag: dropable => {
-            setDragView(dropable);
-        },
-        
-        /** Called by a myt.Dropable when a drag stops.
-            @param {!Object} event -The mouse event that triggered the stop drag.
-            @param {!Object} dropable - The myt.Dropable that stopped being dragged.
-            @param {boolean} isAbort
-            @returns {undefined} */
-        stopDrag: (event, dropable, isAbort) => {
-            dropable.notifyDropped(overView, isAbort);
-            if (overView && !isAbort) overView.notifyDrop(dropable);
-            
-            setOverView();
-            setDragView();
-            
-            if (overView && !isAbort) globalDragManager.fireEvent('drop', [dropable, overView]);
-        },
-        
-        /** Called by a myt.Dropable during dragging.
-            @param {!Object} event - The mousemove event for the drag update.
-            @param {!Object} dropable - The myt.Dropable that is being dragged.
-            @returns {undefined} */
-        updateDrag: (event, dropable) => {
-            // Get the frontmost myt.DropTarget that is registered with this 
-            // manager and is under the current mouse location and has a 
-            // matching drag group.
-            const filteredDropTargets = filterList(dropable, dropTargets);
-            let i = filteredDropTargets.length,
-                topDropTarget;
-            
-            if (i > 0) {
-                const domMouseEvent = event.value,
-                    mouseX = domMouseEvent.pageX,
-                    mouseY = domMouseEvent.pageY;
-                
-                while (i) {
-                    let dropTarget = filteredDropTargets[--i];
-                    if (dropTarget.willAcceptDrop(dropable) &&
-                        dropable.willPermitDrop(dropTarget) &&
-                        dropTarget.isPointVisible(mouseX, mouseY) && 
-                        (!topDropTarget || dropTarget.isInFrontOf(topDropTarget))
-                    ) {
-                        topDropTarget = dropTarget;
-                    }
-                }
-            }
-            
-            setOverView(topDropTarget);
-        }
-    });
-})(myt);
-
-
-((pkg) => {
-    const G = pkg.global,
-        globalMouse = G.mouse,
-        globalKeys = G.keys;
-    
-    /** Makes an myt.View draggable via the mouse.
-        
-        Also supresses context menus since the mouse down to open it causes bad
-        behavior since a mouseup event is not always fired.
-        
-        Events:
-            isDragging:boolean Fired when the isDragging attribute is modified
-                via setIsDragging.
-        
-        Attributes:
-            allowAbort:boolean Allows a drag to be aborted by the user by
-                pressing the 'esc' key. Defaults to undefined which is equivalent
-                to false.
-            isDraggable:boolean Configures the view to be draggable or not. The 
-                default value is true.
-            distanceBeforeDrag:number The distance, in pixels, before a mouse 
-                down and drag is considered a drag action. Defaults to 0.
-            isDragging:boolean Indicates that this view is currently being dragged.
-            draggableAllowBubble:boolean Determines if mousedown and mouseup
-                dom events handled by this component will bubble or not. Defaults
-                to true.
-            dragOffsetX:number The x amount to offset the position during dragging.
-                Defaults to 0.
-            dragOffsetY:number The y amount to offset the position during dragging.
-                Defaults to 0.
-            dragInitX:number Stores initial mouse x position during dragging.
-            dragInitY:number Stores initial mouse y position during dragging.
-            centerOnMouse:boolean If true this draggable will update the dragInitX
-                and dragInitY to keep the view centered on the mouse. Defaults
-                to undefined which is equivalent to false.
-        
-        Private Attributes:
-            __lastMousePosition:object The last position of the mouse during
-                dragging.
-        
-        @class */
-    pkg.Draggable = new JS.Module('Draggable', {
-        // Life Cycle //////////////////////////////////////////////////////////
-        /** @overrides myt.View */
-        initNode: function(parent, attrs) {
-            const self = this;
-            let isDraggable = true;
-            
-            self.isDraggable = self.isDragging = false;
-            self.draggableAllowBubble = true;
-            self.distanceBeforeDrag = self.dragOffsetX = self.dragOffsetY = 0;
-            
-            // Will be set after init since the draggable subview probably
-            // doesn't exist yet.
-            if (attrs.isDraggable != null) {
-                isDraggable = attrs.isDraggable;
-                delete attrs.isDraggable;
-            }
-            
-            self.callSuper(parent, attrs);
-            
-            self.setIsDraggable(isDraggable);
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        setIsDraggable: function(v) {
-            const self = this;
-            if (self.isDraggable !== v) {
-                self.isDraggable = v;
-                // No event needed.
-                
-                let func;
-                if (v) {
-                    func = self.attachToDom;
-                } else if (self.inited) {
-                    func = self.detachFromDom;
-                }
-                
-                if (func) {
-                    const dragviews = self.getDragViews();
-                    let i = dragviews.length;
-                    while (i) {
-                        const dragview = dragviews[--i];
-                        func.call(self, dragview, '__doMouseDown', 'mousedown');
-                        func.call(self, dragview, '__doContextMenu', 'contextmenu');
-                    }
-                }
-            }
-        },
-        
-        setIsDragging: function(v) {
-            this.set('isDragging', v, true);
-        },
-        
-        setDragOffsetX: function(v, supressUpdate) {
-            if (this.dragOffsetX !== v) {
-                this.dragOffsetX = v;
-                if (this.inited && this.isDragging && !supressUpdate) this.reRequestDragPosition();
-            }
-        },
-        
-        setDragOffsetY: function(v, supressUpdate) {
-            if (this.dragOffsetY !== v) {
-                this.dragOffsetY = v;
-                if (this.inited && this.isDragging && !supressUpdate) this.reRequestDragPosition();
-            }
-        },
-        
-        setDistanceBeforeDrag: function(v) {this.distanceBeforeDrag = v;},
-        setDraggableAllowBubble: function(v) {this.draggableAllowBubble = v;},
-        setCenterOnMouse: function(v) {this.centerOnMouse = v;},
-        setAllowAbort: function(v) {this.allowAbort = v;},
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** @returns {!Array} - An array of views that can be moused down on to 
-            start the drag. Subclasses should override this to return an 
-            appropriate list of views. By default this view is returned thus 
-            making the entire view capable of starting a drag. */
-        getDragViews: function() {
-            return [this];
-        },
-        
-        /** @private
-            @param {!Object} event
-            @returns {undefined} */
-        __doContextMenu: (event) => {
-            // Do nothing so the context menu event is supressed.
-        },
-        
-        /** @private
-            @param {!Object} event
-            @returns {undefined} */
-        __doMouseDown: function(event) {
-            const self = this,
-                pos = pkg.MouseObservable.getMouseFromEvent(event),
-                de = self.getOuterDomElement();
-            self.dragInitX = pos.x - de.offsetLeft;
-            self.dragInitY = pos.y - de.offsetTop;
-            
-            self.attachToDom(globalMouse, '__doMouseUp', 'mouseup', true);
-            if (self.distanceBeforeDrag > 0) {
-                self.attachToDom(globalMouse, '__doDragCheck', 'mousemove', true);
-            } else {
-                self.startDrag(event);
-            }
-            
-            event.value.preventDefault();
-            return self.draggableAllowBubble;
-        },
-        
-        /** @private
-            @param {!Object} event
-            @returns {undefined} */
-        __doMouseUp: function(event) {
-            if (this.isDragging) {
-                this.stopDrag(event, false);
-            } else {
-                this.detachFromDom(globalMouse, '__doMouseUp', 'mouseup', true);
-                this.detachFromDom(globalMouse, '__doDragCheck', 'mousemove', true);
-            }
-            return this.draggableAllowBubble;
-        },
-        
-        /** @private
-            @param {!Object} event
-            @returns {undefined} */
-        __watchForAbort: function(event) {
-            if (event.value === 27) this.stopDrag(event, true);
-        },
-        
-        /** @private
-            @param {!Object} event
-            @returns {undefined} */
-        __doDragCheck: function(event) {
-            const self = this,
-                pos = pkg.MouseObservable.getMouseFromEvent(event),
-                distance = pkg.Geometry.measureDistance(pos.x, pos.y, self.dragInitX + self.x, self.dragInitY + self.y);
-            if (distance >= self.distanceBeforeDrag) {
-                self.detachFromDom(pkg.global.mouse, '__doDragCheck', 'mousemove', true);
-                self.startDrag(event);
-            }
-        },
-        
-        /** Active until stopDrag is called. The view position will be bound
-            to the mouse position. Subclasses typically call this onmousedown for
-            subviews that allow dragging the view.
-            @param {!Object} event - The event the mouse event when the drag started.
-            @returns {undefined} */
-        startDrag: function(event) {
-            const self = this;
-            
-            if (self.centerOnMouse) {
-                self.syncTo(self, '__updateDragInitX', 'width');
-                self.syncTo(self, '__updateDragInitY', 'height');
-            }
-            
-            if (self.allowAbort) self.attachTo(globalKeys, '__watchForAbort', 'keyup');
-            
-            self.setIsDragging(true);
-            self.attachToDom(globalMouse, 'updateDrag', 'mousemove', true);
-            self.updateDrag(event);
-        },
-        
-        /** Called on every mousemove event while dragging.
-            @param {!Object} event
-            @returns {undefined} */
-        updateDrag: function(event) {
-            this.__lastMousePosition = pkg.MouseObservable.getMouseFromEvent(event);
-            this.reRequestDragPosition();
-        },
-        
-        /** @private
-            @param {!Object} event
-            @returns {undefined} */
-        __updateDragInitX: function(event) {
-            this.dragInitX = this.width / 2 * (this.scaleX || 1);
-        },
-        
-        /** @private
-            @param {!Object} event
-            @returns {undefined} */
-        __updateDragInitY: function(event) {
-            this.dragInitY = this.height / 2 * (this.scaleY || 1);
-        },
-        
-        /** Stop the drag. (see startDrag for more details)
-            @param {!Object} event - The event that ended the drag.
-            @param {boolean} isAbort - Indicates if the drag ended normally or was
-                aborted.
-            @returns {undefined} */
-        stopDrag: function(event, isAbort) {
-            const self = this;
-            self.detachFromDom(globalMouse, '__doMouseUp', 'mouseup', true);
-            self.detachFromDom(globalMouse, 'updateDrag', 'mousemove', true);
-            if (self.centerOnMouse) {
-                self.detachFrom(self, '__updateDragInitX', 'width');
-                self.detachFrom(self, '__updateDragInitY', 'height');
-            }
-            if (self.allowAbort) self.detachFrom(globalKeys, '__watchForAbort', 'keyup');
-            self.setIsDragging(false);
-        },
-        
-        /** Repositions the view to the provided values. The default implementation
-            is to directly set x and y. Subclasses should override this method
-            when it is necessary to constrain the position.
-            @param {number} x - the new x position.
-            @param {number} y - the new y position.
-            @returns {undefined} */
-        requestDragPosition: function(x, y) {
-            if (!this.disabled) {
-                this.setX(x);
-                this.setY(y);
-            }
-        },
-        
-        reRequestDragPosition: function() {
-            const self = this,
-                pos = self.__lastMousePosition;
-            self.requestDragPosition(
-                pos.x - self.dragInitX + self.dragOffsetX, 
-                pos.y - self.dragInitY + self.dragOffsetY
-            );
         }
     });
 })(myt);
@@ -20832,7 +20744,13 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
 
 
 ((pkg) => {
-    const findLastColumn = (controller) => {
+    const JSClass = JS.Class,
+        JSModule = JS.Module,
+        
+        View = pkg.View,
+        
+        // GridController
+        findLastColumn = controller => {
             const hdrs = controller.columnHeaders;
             let i = hdrs.length;
             while (i) {
@@ -20842,7 +20760,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             return null;
         },
         
-        notifyHeadersOfSortState = (controller) => {
+        notifyHeadersOfSortState = controller => {
             const hdrs = controller.columnHeaders,
                 sort = controller.sort,
                 sortColumnId = sort ? sort[0] : '',
@@ -20924,316 +20842,38 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     if (nextFunc) nextFunc(extra);
                 }
             }
-        };
-    
-    /** Coordinates the behavior of a grid.
-        
-        Events:
-            sort:array
-            maxWidth:number
-            minWidth:number
-        
-        Attributes:
-            maxWidth:number the sum of the maximum widths of the columns.
-            minWidth:number the sum of the minimum widths of the columns.
-            gridWidth:number the width of the grid component.
-            fitToWidth:boolean determines if the columns will always fill up the
-                width of the grid or not. Defaults to true.
-            lastColumn:myt.GridColumnHeader Holds a reference to the last
-                column header.
-            sort:array An array containing the id of the column to sort by and
-                the order to sort by.
-            locked:boolean Prevents the grid from updating the UI. Defaults to
-                true. After a grid has been setup a call should be made to
-                setLocked(false)
-        
-        Private Attributes:
-            columnHeaders:array An array of column headers in this grid.
-            rows:array An array of rows in this grid.
-            __tempLock:boolean Prevents "change" notifications from being processed.
-        
-        @class */
-    pkg.GridController = new JS.Module('GridController', {
-        // Life Cycle //////////////////////////////////////////////////////////
-        initNode: function(parent, attrs) {
-            const self = this;
-            
-            self.columnHeaders = [];
-            self.rows = [];
-            
-            self.maxWidth = self.minWidth = self.gridWidth = 0;
-            self.fitToWidth = self.locked = true;
-            
-            self.callSuper(parent, attrs);
-            
-            self.fitHeadersToWidth();
-            notifyHeadersOfSortState(self);
         },
         
+        // GridColumnHeader
+        defaultMaxValue = 9999,
         
-        // Accessors ///////////////////////////////////////////////////////////
-        setMaxWidth: function(v) {this.set('maxWidth', v, true);},
-        setMinWidth: function(v) {this.set('minWidth', v, true);},
+        getPrevColumnHeader = gridHeader => gridHeader.gridController ? gridHeader.gridController.getPrevColumnHeader(gridHeader) : null,
         
-        setFitToWidth: function(v) {this.fitToWidth = v;},
+        getNextColumnHeader = gridHeader => gridHeader.gridController ? gridHeader.gridController.getNextColumnHeader(gridHeader) : null,
         
-        setSort: function(v) {
-            if (!pkg.areArraysEqual(v, this.sort)) {
-                this.sort = v;
-                if (this.inited) {
-                    this.fireEvent('sort', v);
-                    notifyHeadersOfSortState(this);
-                }
-            }
-        },
-        
-        setLastColumn: function(v) {
-            const cur = this.lastColumn;
-            if (cur !== v) {
-                if (cur) cur.setLast(false);
-                this.lastColumn = v;
-                if (v) v.setLast(true);
-            }
-        },
-        
-        setLocked: function(v) {
-            this.locked = v;
-            if (this.inited && !v) {
-                // Prevent change calls during fitHeadersToWidth
-                this.__tempLock = true;
-                this.fitHeadersToWidth();
-                this.__tempLock = false;
-                
-                // Reset min/max since notifyColumnHeaderVisibilityChange will
-                // update these values
-                this.setMaxWidth(0);
-                this.setMinWidth(0);
-                this.columnHeaders.forEach(hdr => {
-                    this.notifyColumnHeaderXChange(hdr);
-                    this.notifyColumnHeaderWidthChange(hdr);
-                    this.notifyColumnHeaderVisibilityChange(hdr);
-                });
-                
-                this.doSort();
-            }
-        },
-        
-        isLocked: function() {
-            return this.locked || this.__tempLock;
-        },
-        
-        setGridWidth: function(v) {
-            if (v !== null && typeof v === 'object') v = v.value;
-            
-            if (this.gridWidth !== v) {
-                this.gridWidth = v;
-                if (this.inited) this.fitHeadersToWidth();
-            }
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** Sorts the rows according to the current sort criteria. Subclasses and
-            instances should implement this as needed.
-            @returns {undefined} */
-        doSort: () => {},
-        
-        // Column Headers
-        /** Gets the column header before the provided one.
-            @param {!Object} columnHeader
-            @returns {?Object} The myt.GridColumnHeader or null if none exists. */
-        getPrevColumnHeader: function(columnHeader) {
-            const hdrs = this.columnHeaders;
-            let idx = this.getColumnHeaderIndex(columnHeader);
-            if (idx > 0) {
-                while (idx) {
-                    const hdr = hdrs[--idx];
-                    if (hdr.visible) return hdr;
-                }
-            }
-            return null;
-        },
-        
-        /** Gets the column header after the provided one.
-            @param {!Object} columnHeader
-            @returns {?Object} The myt.GridColumnHeader or null if none exists. */
-        getNextColumnHeader: function(columnHeader) {
-            const hdrs = this.columnHeaders,
-                len = hdrs.length;
-            let idx = this.getColumnHeaderIndex(columnHeader) + 1;
-            if (idx > 0 && idx < len) {
-                for (; len > idx; idx++) {
-                    const hdr = hdrs[idx];
-                    if (hdr.visible) return hdr;
-                }
-            }
-            return null;
-        },
-        
-        hasColumnHeader: function(columnHeader) {
-            return this.getColumnHeaderIndex(columnHeader) !== -1;
-        },
-        
-        getColumnHeaderIndex: function(columnHeader) {
-            return this.columnHeaders.indexOf(columnHeader);
-        },
-        
-        getColumnHeaderById: function(columnId) {
-            const hdrs = this.columnHeaders;
-            let i = hdrs.length;
-            while (i) {
-                const hdr = hdrs[--i];
-                if (hdr.columnId === columnId) return hdr;
-            }
-            return null;
-        },
-        
-        getVisibleColumnHeaders: function() {
-            return this.columnHeaders.filter(hdr => hdr.visible);
-        },
-        
-        notifyAddColumnHeader: function(columnHeader) {
-            if (!this.hasColumnHeader(columnHeader)) {
-                this.columnHeaders.push(columnHeader);
-                if (columnHeader.visible) this.setLastColumn(columnHeader);
-            }
-        },
-        
-        notifyRemoveColumnHeader: function(columnHeader) {
-            const idx = this.getColumnHeaderIndex(columnHeader);
-            if (idx >= 0) {
-                this.columnHeaders.splice(idx, 1);
-                if (columnHeader.visible && columnHeader.last) this.setLastColumn(this.getPrevColumnHeader(columnHeader));
-            }
-        },
-        
-        notifyColumnHeaderXChange: function(columnHeader) {
-            if (!this.isLocked()) this.rows.forEach(row => {row.notifyColumnHeaderXChange(columnHeader);});
-        },
-        
-        notifyColumnHeaderWidthChange: function(columnHeader) {
-            if (!this.isLocked()) this.rows.forEach(row => {row.notifyColumnHeaderWidthChange(columnHeader);});
-        },
-        
-        notifyColumnHeaderVisibilityChange: function(columnHeader) {
-            if (!this.isLocked()) {
-                this.updateRowsForVisibilityChange(columnHeader);
-                
-                this.setLastColumn(findLastColumn(this));
-                
-                const adjMultiplier = columnHeader.visible ? 1 : -1;
-                this.setMaxWidth(this.maxWidth + columnHeader.maxValue * adjMultiplier);
-                this.setMinWidth(this.minWidth + columnHeader.minValue * adjMultiplier);
-                
-                this.fitHeadersToWidth();
-            }
-        },
-        
-        updateRowsForVisibilityChange: function(columnHeader) {
-            this.rows.forEach(row => {row.notifyColumnHeaderVisibilityChange(columnHeader);});
-        },
-        
-        // Rows
-        hasRow: function(row) {
-            return this.getRowIndex(row) !== -1;
-        },
-        
-        getRowIndex: function(row) {
-            return this.rows.indexOf(row);
-        },
-        
-        /** Gets a row for the provided id and matcher function. If no matcher
-            function is provided a default function will be used that assumes
-            each row has a model property and that model property has an id
-            property.
-            @param {string} id
-            @param {?Function} [matcherFunc]
-            @returns {?Objecdt} */
-        getRowById: function(id, matcherFunc=row => row.model.id === id) {
-            return this.rows.find(matcherFunc);
-        },
-        
-        getPrevRow: function(row) {
-            const idx = this.getRowIndex(row) - 1;
-            return this.rows[idx < 0 ? this.rows.length - 1 : idx];
-        },
-        
-        getNextRow: function(row) {
-            const idx = this.getRowIndex(row) + 1;
-            return this.rows[idx < this.rows.length ? idx : 0];
-        },
-        
-        notifyAddRow: function(row, doNotSort) {
-            if (!this.hasRow(row)) {
-                this.rows.push(row);
-                
-                // Update cell positions
-                if (!this.locked) {
-                    const w = this.width;
-                    this.columnHeaders.forEach(hdr => {
-                        row.setWidth(w);
-                        row.notifyColumnHeaderXChange(hdr);
-                        row.notifyColumnHeaderWidthChange(hdr);
-                        row.notifyColumnHeaderVisibilityChange(hdr);
-                    });
-                    
-                    if (!doNotSort) this.doSort();
-                }
-            }
-        },
-        
-        notifyRemoveRow: function(row) {
-            const idx = this.getRowIndex(row);
-            if (idx >= 0) this.rows.splice(idx, 1);
-        },
-        
-        fitHeadersToWidth: function() {
-            if (!this.locked && this.fitToWidth) {
-                // Determine extra width to distribute/consume
-                const hdrs = this.getVisibleColumnHeaders();
-                let maxExtent = 0;
-                hdrs.forEach(hdr => {maxExtent = Math.max(maxExtent, hdr.x + hdr.width);});
-                
-                // Distribute extra width to resizable flex columns and then to non-flex columns.
-                calculateAndDistribute(hdrs, this.gridWidth - maxExtent, true, (extra) => {
-                    calculateAndDistribute(hdrs, extra, false, null);
-                });
-            }
-        }
-    });
-})(myt);
-
-
-((pkg) => {
-    const defaultMaxValue = 9999,
-        
-        getPrevColumnHeader = (gridHeader) => gridHeader.gridController ? gridHeader.gridController.getPrevColumnHeader(gridHeader) : null,
-        
-        getNextColumnHeader = (gridHeader) => gridHeader.gridController ? gridHeader.gridController.getNextColumnHeader(gridHeader) : null,
-        
-        getGiveLeft = (gridHeader) => {
+        getGiveLeft = gridHeader => {
             const hdr = getPrevColumnHeader(gridHeader);
             return hdr ? hdr.maxValue - hdr.value + getGiveLeft(hdr) : 0;
         },
         
-        getGiveRight = (gridHeader) => {
+        getGiveRight = gridHeader => {
             const hdr = getNextColumnHeader(gridHeader);
             return hdr ? hdr.maxValue - hdr.value + getGiveRight(hdr) : 0;
         },
         
-        getTakeLeft = (gridHeader) => {
+        getTakeLeft = gridHeader => {
             const hdr = getPrevColumnHeader(gridHeader);
             return hdr ? hdr.minValue - hdr.value + getTakeLeft(hdr) : 0;
         },
         
-        getTakeRight = (gridHeader) => {
+        getTakeRight = gridHeader => {
             const hdr = getNextColumnHeader(gridHeader);
             return hdr ? hdr.minValue - hdr.value + getTakeRight(hdr) : 0;
         },
         
         /*  @param {!Object} gridHeader
             @returns {undefined} */
-        updateLast = (gridHeader) => {
+        updateLast = gridHeader => {
             gridHeader.resizer.setVisible(!(gridHeader.last && gridHeader.gridController.fitToWidth));
         },
         
@@ -21297,266 +20937,562 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 const remainingDiff = newValue - hdr.value;
                 if (remainingDiff > 0) giveNextWidth(hdr, remainingDiff);
             }
-        };
-    
-    /** Makes a view behave as a grid column header.
+        },
         
-        Events:
-            sortable:boolean
-            sortState:string
-            resizable:boolean
+        // GridRow
+        getRowSubview = (gridRow, columnHeader) => gridRow[columnHeader.columnId + 'View'],
         
-        Attributes:
-            columnId:string The unique ID for this column relative to the grid it
-                is part of.
-            gridController:myt.GridController the controller for the grid this
-                component is part of.
-            flex:number If 1 or more the column will get extra space if any exists.
-            resizable:boolean Indicates if this column can be resized or not.
-                Defaults to true.
-            last:boolean Indicates if this is the last column header or not.
-            sortable:boolean Indicates if this column can be sorted or not.
-                Defaults to true.
-            sortState:string The sort state of this column. Allowed values are:
-                'ascending': Sorted in ascending order.
-                'descending': Sorted in descending order.
-                'none': Not currently an active sort column.
-            cellXAdj:number The amount to shift the x values of cells updated by
-                this column. Defaults to 0.
-            cellWidthAdj:number The amount to grow/shrink the width of cells 
-                updated by this column. Defaults to 0.
+        // SimpleGridColumnHeader
+        updateSortIcon = gridHeader => {
+            let glyph = '';
+            if (gridHeader.sortable) {
+                switch (gridHeader.sortState) {
+                    case 'ascending':
+                        glyph = 'chevron-up';
+                        break;
+                    case 'descending':
+                        glyph = 'chevron-down';
+                        break;
+                }
+            }
+            gridHeader.sortIcon.setIcon(glyph);
+        },
         
-        @class */
-    pkg.GridColumnHeader = new JS.Module('GridColumnHeader', {
-        include: [pkg.BoundedValueComponent],
+        updateTextWidth = gridHeader => {
+            if (gridHeader.contentAlign === 'left') {
+                const tv = gridHeader.textView;
+                if (tv) tv.setWidth(gridHeader.width - gridHeader.outset - tv.x);
+            }
+        },
         
-        
-        // Life Cycle //////////////////////////////////////////////////////////
-        initNode: function(parent, attrs) {
-            const self = this;
-            let gc;
+        /** Coordinates the behavior of a grid.
             
-            if (attrs.minValue == null) attrs.minValue = 16;
-            if (attrs.maxValue == null) attrs.maxValue = defaultMaxValue;
-            if (attrs.resizable == null) attrs.resizable = true;
-            if (attrs.flex == null) attrs.flex = 0;
-            if (attrs.cellXAdj == null) attrs.cellXAdj = 0;
-            if (attrs.cellWidthAdj == null) attrs.cellWidthAdj = 0;
+            Events:
+                sort:array
+                maxWidth:number
+                minWidth:number
             
-            if (attrs.sortable == null) attrs.sortable = true;
-            if (attrs.sortState == null) attrs.sortState = 'none';
+            Attributes:
+                maxWidth:number the sum of the maximum widths of the columns.
+                minWidth:number the sum of the minimum widths of the columns.
+                gridWidth:number the width of the grid component.
+                fitToWidth:boolean determines if the columns will always fill 
+                    up the width of the grid or not. Defaults to true.
+                lastColumn:myt.GridColumnHeader Holds a reference to the last
+                    column header.
+                sort:array An array containing the id of the column to sort by 
+                    and the order to sort by.
+                locked:boolean Prevents the grid from updating the UI. Defaults 
+                    to true. After a grid has been setup a call should be made 
+                    to setLocked(false)
             
-            // Ensure participation in determinePlacement method of myt.Grid
-            if (attrs.placement == null) attrs.placement = '*';
+            Private Attributes:
+                columnHeaders:array An array of column headers in this grid.
+                rows:array An array of rows in this grid.
+                __tempLock:boolean Prevents "change" notifications from 
+                    being processed.
             
-            self.callSuper(parent, attrs);
+            @class */
+        GridController = pkg.GridController = new JSModule('GridController', {
+            // Life Cycle //////////////////////////////////////////////////////
+            initNode: function(parent, attrs) {
+                const self = this;
+                
+                self.columnHeaders = [];
+                self.rows = [];
+                
+                self.maxWidth = self.minWidth = self.gridWidth = 0;
+                self.fitToWidth = self.locked = true;
+                
+                self.callSuper(parent, attrs);
+                
+                self.fitHeadersToWidth();
+                notifyHeadersOfSortState(self);
+            },
             
-            gc = self.gridController;
             
-            new pkg.View(self, {
-                name:'resizer', cursor:'col-resize', width:10, zIndex:1,
-                percentOfParentHeight:100, align:'right', alignOffset:-5,
-                draggableAllowBubble:false
-            }, [pkg.SizeToParent, pkg.Draggable, {
-                requestDragPosition: function(x, y) {
-                    let diff = x - this.x,
-                        growAmt,
-                        shrinkAmt,
-                        newValue;
+            // Accessors ///////////////////////////////////////////////////////
+            setMaxWidth: function(v) {this.set('maxWidth', v, true);},
+            setMinWidth: function(v) {this.set('minWidth', v, true);},
+            
+            setFitToWidth: function(v) {this.fitToWidth = v;},
+            
+            setSort: function(v) {
+                if (!pkg.areArraysEqual(v, this.sort)) {
+                    this.sort = v;
+                    if (this.inited) {
+                        this.fireEvent('sort', v);
+                        notifyHeadersOfSortState(this);
+                    }
+                }
+            },
+            
+            setLastColumn: function(v) {
+                const cur = this.lastColumn;
+                if (cur !== v) {
+                    if (cur) cur.setLast(false);
+                    this.lastColumn = v;
+                    if (v) v.setLast(true);
+                }
+            },
+            
+            setLocked: function(v) {
+                this.locked = v;
+                if (this.inited && !v) {
+                    // Prevent change calls during fitHeadersToWidth
+                    this.__tempLock = true;
+                    this.fitHeadersToWidth();
+                    this.__tempLock = false;
                     
-                    if (gc.fitToWidth) {
-                        if (diff > 0) {
-                            // Get amount that this header can grow
-                            growAmt = self.maxValue - self.value;
-                            diff = Math.min(diff, Math.min(-getTakeRight(self), growAmt + getGiveLeft(self)));
-                        } else if (diff < 0) {
-                            // Get amount that this header can shrink
-                            shrinkAmt = self.minValue - self.value;
-                            diff = Math.max(diff, Math.max(-getGiveRight(self), shrinkAmt + getTakeLeft(self)));
+                    // Reset min/max since notifyColumnHeaderVisibilityChange 
+                    // will update these values
+                    this.setMaxWidth(0);
+                    this.setMinWidth(0);
+                    this.columnHeaders.forEach(hdr => {
+                        this.notifyColumnHeaderXChange(hdr);
+                        this.notifyColumnHeaderWidthChange(hdr);
+                        this.notifyColumnHeaderVisibilityChange(hdr);
+                    });
+                    
+                    this.doSort();
+                }
+            },
+            
+            isLocked: function() {
+                return this.locked || this.__tempLock;
+            },
+            
+            setGridWidth: function(v) {
+                if (v !== null && typeof v === 'object') v = v.value;
+                
+                if (this.gridWidth !== v) {
+                    this.gridWidth = v;
+                    if (this.inited) this.fitHeadersToWidth();
+                }
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** Sorts the rows according to the current sort criteria. 
+                Subclasses and instances should implement this as needed.
+                @returns {undefined} */
+            doSort: () => {},
+            
+            // Column Headers
+            /** Gets the column header before the provided one.
+                @param {!Object} columnHeader
+                @returns {?Object} The myt.GridColumnHeader or null if none 
+                    exists. */
+            getPrevColumnHeader: function(columnHeader) {
+                const hdrs = this.columnHeaders;
+                let idx = this.getColumnHeaderIndex(columnHeader);
+                if (idx > 0) {
+                    while (idx) {
+                        const hdr = hdrs[--idx];
+                        if (hdr.visible) return hdr;
+                    }
+                }
+                return null;
+            },
+            
+            /** Gets the column header after the provided one.
+                @param {!Object} columnHeader
+                @returns {?Object} The myt.GridColumnHeader or null if 
+                    none exists. */
+            getNextColumnHeader: function(columnHeader) {
+                const hdrs = this.columnHeaders,
+                    len = hdrs.length;
+                let idx = this.getColumnHeaderIndex(columnHeader) + 1;
+                if (idx > 0 && idx < len) {
+                    for (; len > idx; idx++) {
+                        const hdr = hdrs[idx];
+                        if (hdr.visible) return hdr;
+                    }
+                }
+                return null;
+            },
+            
+            hasColumnHeader: function(columnHeader) {
+                return this.getColumnHeaderIndex(columnHeader) !== -1;
+            },
+            
+            getColumnHeaderIndex: function(columnHeader) {
+                return this.columnHeaders.indexOf(columnHeader);
+            },
+            
+            getColumnHeaderById: function(columnId) {
+                const hdrs = this.columnHeaders;
+                let i = hdrs.length;
+                while (i) {
+                    const hdr = hdrs[--i];
+                    if (hdr.columnId === columnId) return hdr;
+                }
+                return null;
+            },
+            
+            getVisibleColumnHeaders: function() {
+                return this.columnHeaders.filter(hdr => hdr.visible);
+            },
+            
+            notifyAddColumnHeader: function(columnHeader) {
+                if (!this.hasColumnHeader(columnHeader)) {
+                    this.columnHeaders.push(columnHeader);
+                    if (columnHeader.visible) this.setLastColumn(columnHeader);
+                }
+            },
+            
+            notifyRemoveColumnHeader: function(columnHeader) {
+                const idx = this.getColumnHeaderIndex(columnHeader);
+                if (idx >= 0) {
+                    this.columnHeaders.splice(idx, 1);
+                    if (columnHeader.visible && columnHeader.last) this.setLastColumn(this.getPrevColumnHeader(columnHeader));
+                }
+            },
+            
+            notifyColumnHeaderXChange: function(columnHeader) {
+                if (!this.isLocked()) this.rows.forEach(row => {row.notifyColumnHeaderXChange(columnHeader);});
+            },
+            
+            notifyColumnHeaderWidthChange: function(columnHeader) {
+                if (!this.isLocked()) this.rows.forEach(row => {row.notifyColumnHeaderWidthChange(columnHeader);});
+            },
+            
+            notifyColumnHeaderVisibilityChange: function(columnHeader) {
+                if (!this.isLocked()) {
+                    this.updateRowsForVisibilityChange(columnHeader);
+                    
+                    this.setLastColumn(findLastColumn(this));
+                    
+                    const adjMultiplier = columnHeader.visible ? 1 : -1;
+                    this.setMaxWidth(this.maxWidth + columnHeader.maxValue * adjMultiplier);
+                    this.setMinWidth(this.minWidth + columnHeader.minValue * adjMultiplier);
+                    
+                    this.fitHeadersToWidth();
+                }
+            },
+            
+            updateRowsForVisibilityChange: function(columnHeader) {
+                this.rows.forEach(row => {row.notifyColumnHeaderVisibilityChange(columnHeader);});
+            },
+            
+            // Rows
+            hasRow: function(row) {
+                return this.getRowIndex(row) !== -1;
+            },
+            
+            getRowIndex: function(row) {
+                return this.rows.indexOf(row);
+            },
+            
+            /** Gets a row for the provided id and matcher function. If no 
+                matcher function is provided a default function will be used 
+                that assumes each row has a model property and that model 
+                property has an id property.
+                @param {string} id
+                @param {?Function} [matcherFunc]
+                @returns {?Objecdt} */
+            getRowById: function(id, matcherFunc=row => row.model.id === id) {
+                return this.rows.find(matcherFunc);
+            },
+            
+            getPrevRow: function(row) {
+                const idx = this.getRowIndex(row) - 1;
+                return this.rows[idx < 0 ? this.rows.length - 1 : idx];
+            },
+            
+            getNextRow: function(row) {
+                const idx = this.getRowIndex(row) + 1;
+                return this.rows[idx < this.rows.length ? idx : 0];
+            },
+            
+            notifyAddRow: function(row, doNotSort) {
+                if (!this.hasRow(row)) {
+                    this.rows.push(row);
+                    
+                    // Update cell positions
+                    if (!this.locked) {
+                        const w = this.width;
+                        this.columnHeaders.forEach(hdr => {
+                            row.setWidth(w);
+                            row.notifyColumnHeaderXChange(hdr);
+                            row.notifyColumnHeaderWidthChange(hdr);
+                            row.notifyColumnHeaderVisibilityChange(hdr);
+                        });
+                        
+                        if (!doNotSort) this.doSort();
+                    }
+                }
+            },
+            
+            notifyRemoveRow: function(row) {
+                const idx = this.getRowIndex(row);
+                if (idx >= 0) this.rows.splice(idx, 1);
+            },
+            
+            fitHeadersToWidth: function() {
+                if (!this.locked && this.fitToWidth) {
+                    // Determine extra width to distribute/consume
+                    const hdrs = this.getVisibleColumnHeaders();
+                    let maxExtent = 0;
+                    hdrs.forEach(hdr => {maxExtent = Math.max(maxExtent, hdr.x + hdr.width);});
+                    
+                    // Distribute extra width to resizable flex columns and then to non-flex columns.
+                    calculateAndDistribute(hdrs, this.gridWidth - maxExtent, true, extra => {
+                        calculateAndDistribute(hdrs, extra, false, null);
+                    });
+                }
+            }
+        }),
+        
+        /** Makes a view behave as a grid column header.
+            
+            Events:
+                sortable:boolean
+                sortState:string
+                resizable:boolean
+            
+            Attributes:
+                columnId:string The unique ID for this column relative to the 
+                    grid it is part of.
+                gridController:myt.GridController the controller for the grid 
+                    this component is part of.
+                flex:number If 1 or more the column will get extra space if 
+                    any exists.
+                resizable:boolean Indicates if this column can be resized or 
+                    not. Defaults to true.
+                last:boolean Indicates if this is the last column header or not.
+                sortable:boolean Indicates if this column can be sorted or not.
+                    Defaults to true.
+                sortState:string The sort state of this column. Allowed 
+                    values are:
+                        'ascending': Sorted in ascending order.
+                        'descending': Sorted in descending order.
+                        'none': Not currently an active sort column.
+                cellXAdj:number The amount to shift the x values of cells 
+                    updated by this column. Defaults to 0.
+                cellWidthAdj:number The amount to grow/shrink the width of cells 
+                    updated by this column. Defaults to 0.
+            
+            @class */
+        GridColumnHeader = pkg.GridColumnHeader = new JSModule('GridColumnHeader', {
+            include: [pkg.BoundedValueComponent],
+            
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            initNode: function(parent, attrs) {
+                const self = this;
+                
+                if (attrs.minValue == null) attrs.minValue = 16;
+                if (attrs.maxValue == null) attrs.maxValue = defaultMaxValue;
+                if (attrs.resizable == null) attrs.resizable = true;
+                if (attrs.flex == null) attrs.flex = 0;
+                if (attrs.cellXAdj == null) attrs.cellXAdj = 0;
+                if (attrs.cellWidthAdj == null) attrs.cellWidthAdj = 0;
+                
+                if (attrs.sortable == null) attrs.sortable = true;
+                if (attrs.sortState == null) attrs.sortState = 'none';
+                
+                // Ensure participation in determinePlacement method of myt.Grid
+                if (attrs.placement == null) attrs.placement = '*';
+                
+                self.callSuper(parent, attrs);
+                
+                const gc = self.gridController;
+                
+                new View(self, {
+                    name:'resizer', cursor:'col-resize', width:10, zIndex:1,
+                    percentOfParentHeight:100, align:'right', alignOffset:-5,
+                    draggableAllowBubble:false
+                }, [pkg.SizeToParent, pkg.Draggable, {
+                    requestDragPosition: function(x, y) {
+                        let diff = x - this.x,
+                            growAmt,
+                            shrinkAmt,
+                            newValue;
+                        
+                        if (gc.fitToWidth) {
+                            if (diff > 0) {
+                                // Get amount that this header can grow
+                                growAmt = self.maxValue - self.value;
+                                diff = Math.min(diff, Math.min(-getTakeRight(self), growAmt + getGiveLeft(self)));
+                            } else if (diff < 0) {
+                                // Get amount that this header can shrink
+                                shrinkAmt = self.minValue - self.value;
+                                diff = Math.max(diff, Math.max(-getGiveRight(self), shrinkAmt + getTakeLeft(self)));
+                            }
+                            
+                            if (diff === 0) return;
                         }
                         
-                        if (diff === 0) return;
-                    }
-                    
-                    newValue = self.value + diff;
-                    
-                    if (self.resizable) self.setValue(newValue);
-                    const remainingDiff = newValue - self.value;
-                    let stolenAmt = remainingDiff - diff,
-                        additionalActualDiff = 0;
-                    if (remainingDiff < 0) {
-                        additionalActualDiff = stealPrevWidth(self, remainingDiff);
-                    } else if (remainingDiff > 0) {
-                        additionalActualDiff = givePrevWidth(self, remainingDiff);
-                    }
-                    this.dragInitX += additionalActualDiff;
-                    stolenAmt -= additionalActualDiff;
-                    
-                    if (gc.fitToWidth) {
-                        if (stolenAmt < 0) {
-                            stealNextWidth(self, stolenAmt);
-                        } else if (stolenAmt > 0) {
-                            giveNextWidth(self, stolenAmt);
+                        newValue = self.value + diff;
+                        
+                        if (self.resizable) self.setValue(newValue);
+                        const remainingDiff = newValue - self.value;
+                        let stolenAmt = remainingDiff - diff,
+                            additionalActualDiff = 0;
+                        if (remainingDiff < 0) {
+                            additionalActualDiff = stealPrevWidth(self, remainingDiff);
+                        } else if (remainingDiff > 0) {
+                            additionalActualDiff = givePrevWidth(self, remainingDiff);
+                        }
+                        this.dragInitX += additionalActualDiff;
+                        stolenAmt -= additionalActualDiff;
+                        
+                        if (gc.fitToWidth) {
+                            if (stolenAmt < 0) {
+                                stealNextWidth(self, stolenAmt);
+                            } else if (stolenAmt > 0) {
+                                giveNextWidth(self, stolenAmt);
+                            }
                         }
                     }
+                }]);
+                
+                if (gc) {
+                    gc.notifyAddColumnHeader(self);
+                    gc.notifyColumnHeaderXChange(self);
+                    gc.notifyColumnHeaderVisibilityChange(self);
                 }
-            }]);
+                self.setWidth(self.value);
+                updateLast(self);
+            },
             
-            if (gc) {
-                gc.notifyAddColumnHeader(self);
-                gc.notifyColumnHeaderXChange(self);
-                gc.notifyColumnHeaderVisibilityChange(self);
-            }
-            self.setWidth(self.value);
-            updateLast(self);
-        },
-        
-        destroy: function(v) {
-            this.setGridController();
-            this.callSuper(v);
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        setSortable: function(v) {this.set('sortable', v, true);},
-        setSortState: function(v) {this.set('sortState', v, true);},
-        setResizable: function(v) {this.set('resizable', v, true);},
-        setCellWidthAdj: function(v) {this.cellWidthAdj = v;},
-        setCellXAdj: function(v) {this.cellXAdj = v;},
-        setFlex: function(v) {this.flex = v;},
-        setColumnId: function(v) {this.columnId = v;},
-        
-        setLast: function(v) {
-            this.last = v;
-            if (this.inited) updateLast(this);
-        },
-        
-        setGridController: function(v) {
-            const existing = this.gridController;
-            if (existing !== v) {
-                if (existing) existing.notifyRemoveColumnHeader(this);
-                this.gridController = v;
-                if (this.inited && v) {
-                    v.notifyAddColumnHeader(this);
-                    v.notifyColumnHeaderXChange(this);
-                    v.notifyColumnHeaderWidthChange(this);
-                    v.notifyColumnHeaderVisibilityChange(this);
+            destroy: function(v) {
+                this.setGridController();
+                this.callSuper(v);
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setSortable: function(v) {this.set('sortable', v, true);},
+            setSortState: function(v) {this.set('sortState', v, true);},
+            setResizable: function(v) {this.set('resizable', v, true);},
+            setCellWidthAdj: function(v) {this.cellWidthAdj = v;},
+            setCellXAdj: function(v) {this.cellXAdj = v;},
+            setFlex: function(v) {this.flex = v;},
+            setColumnId: function(v) {this.columnId = v;},
+            
+            setLast: function(v) {
+                this.last = v;
+                if (this.inited) updateLast(this);
+            },
+            
+            setGridController: function(v) {
+                const existing = this.gridController;
+                if (existing !== v) {
+                    if (existing) existing.notifyRemoveColumnHeader(this);
+                    this.gridController = v;
+                    if (this.inited && v) {
+                        v.notifyAddColumnHeader(this);
+                        v.notifyColumnHeaderXChange(this);
+                        v.notifyColumnHeaderWidthChange(this);
+                        v.notifyColumnHeaderVisibilityChange(this);
+                    }
                 }
-            }
-        },
-        
-        /** @overrides myt.BoundedValueComponent */
-        setValue: function(v) {
-            this.callSuper(v);
-            if (this.inited) this.setWidth(this.value);
-        },
-        
-        /** @overrides myt.BoundedValueComponent */
-        setMinValue: function(v) {
-            const self = this,
-                oldMinValue = self.minValue || 0, 
-                gc = self.gridController;
-            self.callSuper(v);
-            if (self.inited && gc && oldMinValue !== self.minValue) gc.setMinWidth(gc.minWidth + self.minValue - oldMinValue);
-        },
-        
-        /** @overrides myt.BoundedValueComponent */
-        setMaxValue: function(v) {
-            const self = this,
-                oldMaxValue = self.maxValue || 0,
-                gc = self.gridController;
-            if (v == null) v = defaultMaxValue;
-            self.callSuper(v);
-            if (self.inited && gc && oldMaxValue !== self.maxValue) gc.setMaxWidth(gc.maxWidth + self.maxValue - oldMaxValue);
-        },
-        
-        /** @overrides myt.View */
-        setWidth: function(v, supressEvent) {
-            const self = this,
-                cur = self.width;
-            self.callSuper(v, supressEvent);
-            if (self.inited && self.gridController && cur !== self.width) self.gridController.notifyColumnHeaderWidthChange(self);
-        },
-        
-        /** @overrides myt.View */
-        setX: function(v) {
-            const self = this,
-                cur = self.x;
-            self.callSuper(v);
-            if (self.inited && self.gridController && cur !== self.x) self.gridController.notifyColumnHeaderXChange(self);
-        },
-        
-        /** @overrides myt.View */
-        setVisible: function(v) {
-            const self = this,
-                cur = self.visible;
-            self.callSuper(v);
-            if (self.inited && self.gridController && cur !== self.visible) self.gridController.notifyColumnHeaderVisibilityChange(self);
-        }
-    });
-})(myt);
-
-
-((pkg) => {
-    const View = pkg.View,
-        
-        getRowSubview = (gridRow, columnHeader) => gridRow[columnHeader.columnId + 'View'];
-    
-    /** Makes a view behave as a row in a grid.
-        
-        Events:
-            None
-        
-        Attributes:
-            gridController:myt.GridConstroller A reference to the grid controller
-                that is managing this row.
-        
-        @class */
-    pkg.GridRow = new JS.Module('GridRow', {
-        // Life Cycle //////////////////////////////////////////////////////////
-        initNode: function(parent, attrs) {
-            // Ensure participation in determinePlacement method of myt.Grid
-            if (attrs.placement == null) attrs.placement = '*';
+            },
             
-            this.callSuper(parent, attrs);
+            /** @overrides myt.BoundedValueComponent */
+            setValue: function(v) {
+                this.callSuper(v);
+                if (this.inited) this.setWidth(this.value);
+            },
             
-            const gc = this.gridController;
-            if (gc) gc.notifyAddRow(this);
-        },
-        
-        destroy: function(v) {
-            this.setGridController();
-            this.callSuper(v);
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        setGridController: function(v) {
-            const existing = this.gridController;
-            if (existing !== v) {
-                if (existing) existing.notifyRemoveRow(this);
-                this.gridController = v;
-                if (this.inited && v) v.notifyAddRow(this);
+            /** @overrides myt.BoundedValueComponent */
+            setMinValue: function(v) {
+                const self = this,
+                    oldMinValue = self.minValue || 0, 
+                    gc = self.gridController;
+                self.callSuper(v);
+                if (self.inited && gc && oldMinValue !== self.minValue) gc.setMinWidth(gc.minWidth + self.minValue - oldMinValue);
+            },
+            
+            /** @overrides myt.BoundedValueComponent */
+            setMaxValue: function(v) {
+                const self = this,
+                    oldMaxValue = self.maxValue || 0,
+                    gc = self.gridController;
+                if (v == null) v = defaultMaxValue;
+                self.callSuper(v);
+                if (self.inited && gc && oldMaxValue !== self.maxValue) gc.setMaxWidth(gc.maxWidth + self.maxValue - oldMaxValue);
+            },
+            
+            /** @overrides myt.View */
+            setWidth: function(v, supressEvent) {
+                const self = this,
+                    cur = self.width;
+                self.callSuper(v, supressEvent);
+                if (self.inited && self.gridController && cur !== self.width) self.gridController.notifyColumnHeaderWidthChange(self);
+            },
+            
+            /** @overrides myt.View */
+            setX: function(v) {
+                const self = this,
+                    cur = self.x;
+                self.callSuper(v);
+                if (self.inited && self.gridController && cur !== self.x) self.gridController.notifyColumnHeaderXChange(self);
+            },
+            
+            /** @overrides myt.View */
+            setVisible: function(v) {
+                const self = this,
+                    cur = self.visible;
+                self.callSuper(v);
+                if (self.inited && self.gridController && cur !== self.visible) self.gridController.notifyColumnHeaderVisibilityChange(self);
             }
-        },
+        }),
         
-        
-        // Methods /////////////////////////////////////////////////////////////
-        notifyColumnHeaderXChange: function(columnHeader) {
-            const sv = getRowSubview(this, columnHeader);
-            if (sv) sv.setX(columnHeader.x + columnHeader.cellXAdj);
-        },
-        
-        notifyColumnHeaderWidthChange: function(columnHeader) {
-            const sv = getRowSubview(this, columnHeader);
-            if (sv) sv.setWidth(columnHeader.width + columnHeader.cellWidthAdj);
-        },
-        
-        notifyColumnHeaderVisibilityChange: function(columnHeader) {
-            const sv = getRowSubview(this, columnHeader);
-            if (sv) sv.setVisible(columnHeader.visible);
-        }
-    });
+        /** Makes a view behave as a row in a grid.
+            
+            Attributes:
+                gridController:myt.GridConstroller A reference to the grid 
+                    controller that is managing this row.
+            
+            @class */
+        GridRow = pkg.GridRow = new JSModule('GridRow', {
+            // Life Cycle //////////////////////////////////////////////////////
+            initNode: function(parent, attrs) {
+                // Ensure participation in determinePlacement method of myt.Grid
+                if (attrs.placement == null) attrs.placement = '*';
+                
+                this.callSuper(parent, attrs);
+                
+                const gc = this.gridController;
+                if (gc) gc.notifyAddRow(this);
+            },
+            
+            destroy: function(v) {
+                this.setGridController();
+                this.callSuper(v);
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setGridController: function(v) {
+                const existing = this.gridController;
+                if (existing !== v) {
+                    if (existing) existing.notifyRemoveRow(this);
+                    this.gridController = v;
+                    if (this.inited && v) v.notifyAddRow(this);
+                }
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            notifyColumnHeaderXChange: function(columnHeader) {
+                const sv = getRowSubview(this, columnHeader);
+                if (sv) sv.setX(columnHeader.x + columnHeader.cellXAdj);
+            },
+            
+            notifyColumnHeaderWidthChange: function(columnHeader) {
+                const sv = getRowSubview(this, columnHeader);
+                if (sv) sv.setWidth(columnHeader.width + columnHeader.cellWidthAdj);
+            },
+            
+            notifyColumnHeaderVisibilityChange: function(columnHeader) {
+                const sv = getRowSubview(this, columnHeader);
+                if (sv) sv.setVisible(columnHeader.visible);
+            }
+        });
     
     /** An implementation of a grid component.
         
@@ -21568,8 +21504,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 undefined which is equivalent to false.
         
         @class */
-    pkg.Grid = new JS.Class('Grid', View, {
-        include: [pkg.GridController],
+    pkg.Grid = new JSClass('Grid', View, {
+        include: [GridController],
         
         
         // Life Cycle //////////////////////////////////////////////////////////
@@ -21675,9 +21611,9 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             // content views respectively.
             if (placement === '*') {
                 let target;
-                if (subnode.isA(pkg.GridRow)) {
+                if (subnode.isA(GridRow)) {
                     target = this.content;
-                } else if (subnode.isA(pkg.GridColumnHeader)) {
+                } else if (subnode.isA(GridColumnHeader)) {
                     target = this.header;
                 }
                 
@@ -21727,31 +21663,6 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             }
         }
     });
-})(myt);
-
-
-((pkg) => {
-    const updateSortIcon = (gridHeader) => {
-            let glyph = '';
-            if (gridHeader.sortable) {
-                switch (gridHeader.sortState) {
-                    case 'ascending':
-                        glyph = 'chevron-up';
-                        break;
-                    case 'descending':
-                        glyph = 'chevron-down';
-                        break;
-                }
-            }
-            gridHeader.sortIcon.setIcon(glyph);
-        },
-        
-        updateTextWidth = (gridHeader) => {
-            if (gridHeader.contentAlign === 'left') {
-                const tv = gridHeader.textView;
-                if (tv) tv.setWidth(gridHeader.width - gridHeader.outset - tv.x);
-            }
-        };
     
     /** A simple implementation of a grid column header.
         
@@ -21760,8 +21671,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 Defaults to '#666666'.
         
         @class */
-    pkg.SimpleGridColumnHeader = new JS.Class('SimpleGridColumnHeader', pkg.SimpleIconTextButton, {
-        include: [pkg.GridColumnHeader],
+    pkg.SimpleGridColumnHeader = new JSClass('SimpleGridColumnHeader', pkg.SimpleIconTextButton, {
+        include: [GridColumnHeader],
         
         
         // Life Cycle //////////////////////////////////////////////////////////
@@ -21774,17 +21685,14 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             if (attrs.readyColor == null) attrs.readyColor = '#aaaaaa';
             if (attrs.inset == null) attrs.inset = 2;
             if (attrs.outset == null) attrs.outset = 2;
-            
             if (attrs.height == null) attrs.height = 18;
-            
             if (attrs.contentAlign == null) attrs.contentAlign = 'left';
             if (attrs.sortIconColor == null) attrs.sortIconColor = '#666666';
             
             self.callSuper(parent, attrs);
             
             new pkg.FontAwesome(self, {
-                name:'sortIcon', align:'right', alignOffset:3, valign:'middle',
-                textColor:self.sortIconColor
+                name:'sortIcon', align:'right', alignOffset:3, valign:'middle', textColor:self.sortIconColor
             }, [{
                 initNode: function(parent, attrs) {
                     this.callSuper(parent, attrs);
@@ -21792,7 +21700,6 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 },
                 sizeViewToDom:function() {
                     this.callSuper();
-                    
                     self.setOutset(this.width + 2);
                     updateTextWidth(self);
                 }
@@ -21815,7 +21722,6 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         /** @overrides myt.GridColumnHeader */
         setSortable: function(v) {
             this.callSuper(v);
-            
             if (this.inited) {
                 if (v) this.setOutset(14);
                 this.setDisabled(!v);
@@ -21826,14 +21732,12 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         /** @overrides myt.GridColumnHeader */
         setSortState: function(v) {
             this.callSuper(v);
-            
             if (this.inited) updateSortIcon(this);
         },
         
         /** @overrides myt.View */
         setWidth: function(v, supressEvent) {
             this.callSuper(v, supressEvent);
-            
             if (this.inited) updateTextWidth(this);
         },
         
@@ -21851,9 +21755,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         },
         
         /** @overrides myt.SimpleButton */
-        drawDisabledState: function() {
-            this.setBgColor(this.readyColor);
-        },
+        drawDisabledState: function() {this.setBgColor(this.readyColor);},
         
         /** @overrides myt.Button */
         showFocusEmbellishment: function() {this.hideDefaultFocusEmbellishment();},
@@ -21865,395 +21767,25 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
 
 
 ((pkg) => {
-    const View = pkg.View,
+    const JSClass = JS.Class,
+        JSModule = JS.Module,
+        
+        View = pkg.View,
         DEFAULT_ROW_SPACING = 1,
         DEFAULT_ROW_HEIGHT = 30,
         DEFAULT_ROW_INSET = 0,
         DEFAULT_ROW_OUTSET = 0,
-        DEFAULT_BG_COLOR = '#cccccc',
+        DEFAULT_BG_COLOR = '#ccc',
         
         DEFAULT_CLASS_KEY = 'default',
         
-        updateRowExtent = (infiniteList) => {
-            infiniteList._rowExtent = infiniteList.rowSpacing + infiniteList.rowHeight;
-        },
-        
-        getDomScrollTop = (infiniteList) => infiniteList.getInnerDomElement().scrollTop,
-        
-        setDomScrollTop = (infiniteList, v) => {
-            infiniteList.scrollYTo(v, true);
-        };
-        
-    /** A mixin for rows in infinite scrolling lists
-        
-        Attributes:
-            infiniteOwner
-            model
-        
-        @class */
-    pkg.InfiniteListRow = new JS.Module('InfiniteListRow', {
-        include: [pkg.Reusable],
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        setInfiniteOwner: function(v) {
-            this.infiniteOwner = v;
-        },
-        
-        setModel: function(model) {
-            this.model = model;
-        },
-        
-        setClassKey: function(classKey) {
-            this.classKey = classKey;
-        },
-        
-        notifyRefreshed: () => {}
-    });
-    
-    /** A base class for infinite scrolling lists
-        
-        Attributes:
-            collectionModel
-            rowClasses
-            modelIDName
-            numericSort
-            ascendingSort
-            rowHeight
-            rowInset
-            rowOutset
-            rowSpacing
-        
-        Private Attributes:
-            _listData:array The data for the rows in the list.
-            _startIdx:int The index into the data of the first row shown
-            _endIdx:int The index into the data of the last row shown
-            _visibleRowsByIdx:object A cache of what rows are currently shown by
-                the index of the data for the row. This is provides faster
-                performance when refreshing the list.
-            _listView:myt.View The view that contains the rows in the list.
-            _itemPool:myt.TrackActivesPool The pool for row views.
-        
-        @class */
-    pkg.InfiniteList = new JS.Class('InfiniteList', View, {
-        // Life Cycle //////////////////////////////////////////////////////////
-        initNode: function(parent, attrs) {
-            const self = this;
-            let rowClasses = attrs.rowClasses;
-            delete attrs.rowClasses;
-            
-            if (typeof rowClasses === 'function') {
-                const defaultClassObj = {};
-                defaultClassObj[DEFAULT_CLASS_KEY] = rowClasses;
-                rowClasses = defaultClassObj;
-            }
-            
-            if (attrs.modelIDName == null) attrs.modelIDName = 'id';
-            if (attrs.numericSort == null) attrs.numericSort = true;
-            if (attrs.ascendingSort == null) attrs.ascendingSort = true;
-            if (attrs.overflow == null) attrs.overflow = 'autoy';
-            
-            if (attrs.bgColor == null) attrs.bgColor = DEFAULT_BG_COLOR;
-            if (attrs.rowSpacing == null) attrs.rowSpacing = DEFAULT_ROW_SPACING;
-            if (attrs.rowInset == null) attrs.rowInset = DEFAULT_ROW_INSET;
-            if (attrs.rowOutset == null) attrs.rowOutset = DEFAULT_ROW_OUTSET;
-            if (attrs.rowHeight == null) attrs.rowHeight = DEFAULT_ROW_HEIGHT;
-            
-            if (attrs.overscrollBehavior == null) attrs.overscrollBehavior = 'auto contain';
-            
-            self._rowExtent = self.rowSpacing = self.rowHeight = 0;
-            self._startIdx = self._endIdx = -1;
-            self._visibleRowsByIdx = {};
-            
-            self.callSuper(parent, attrs);
-            
-            // Build UI
-            const listView = self._listView = new View(self);
-            self._scrollAnchorView = new View(listView, {width:1, height:1, bgColor:'transparent'});
-            self._itemPool = self.makePool(rowClasses, listView);
-            
-            self.attachTo(self, 'refreshListUI', 'height');
-            self.attachToDom(self, 'refreshListUI', 'scroll');
-        },
-        
-        makePool: (rowClasses, listView) => new pkg.TrackActivesMultiPool(rowClasses, listView),
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        setOverscrollBehavior: function(v) {
-            this.overscrollBehavior = v;
-            this.getInnerDomStyle().overscrollBehavior = v;
-        },
-        
-        setCollectionModel: function(v) {this.collectionModel = v;},
-        setModelIDName: function(v) {this.modelIDName = v;},
-        setRowSpacing: function(v) {
-            this.rowSpacing = v;
-            updateRowExtent(this);
-        },
-        setRowHeight: function(v) {
-            this.rowHeight = v;
-            updateRowExtent(this);
-        },
-        
-        getListData: function() {return this._listData;},
-        
-        setWidth: function(v, supressEvent) {
-            if (v > 0) {
-                this.callSuper(v, supressEvent);
-                if (this.inited) {
-                    const listView = this._listView,
-                        w = this.width;
-                    listView.setWidth(w);
-                    listView.getSubviews().forEach(sv => {sv.setWidth(w);});
-                }
-            }
-        },
-        
-        getVisibleRows: function() {
-            return Object.values(this._visibleRowsByIdx || {});
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** @returns {undefined} */
-        isScrolledToEnd: function() {
-            return getDomScrollTop(this) + this.height === this._listView.height;
-        },
-        
-        getSortFunction: function() {
-            // Default to a numeric sort on the IDs
-            const modelIDName = this.modelIDName,
-                asc = this.ascendingSort ? 1 : -1;
-            if (this.numericSort) {
-                return (a, b) => (a[modelIDName] - b[modelIDName]) * asc;
-            } else {
-                return (a, b) => {
-                    a = a[modelIDName];
-                    b = b[modelIDName];
-                    return (a > b ? 1 : (a < b ? -1 : 0)) * asc;
-                };
-            }
-        },
-        
-        getFilterFunction: function() {
-            // Unimplemented which means don't filter anything out.
-        },
-        
-        scrollModelIntoView: function(model) {
-            const self = this,
-                idx = self.getIndexOfModelInData(model);
-            if (idx >= 0) {
-                const rowExtent = self._rowExtent,
-                    viewportTop = getDomScrollTop(self),
-                    viewportBottom = viewportTop + self.height,
-                    rowTop = self.rowInset + idx * rowExtent,
-                    rowBottom = rowTop + rowExtent;
-                
-                // Only scroll if not overlapping visible area.
-                if (rowTop <= viewportTop) {
-                    setDomScrollTop(self, rowTop);
-                    return true;
-                } else if (rowBottom >= viewportBottom) {
-                    setDomScrollTop(self, rowBottom - self.height);
-                    return true;
-                }
-            }
-            
-            return false;
-        },
-        
-        isModelInData: function(model) {
-            return this.getIndexOfModelInData(model) !== -1;
-        },
-        
-        getNextModel: function(model, wrap=true, alwaysReturnAModel=true) {
-            const data = this.getListData(),
-                len = data.length;
-            let idx = this.getIndexOfModelInData(model);
-            if (idx >= 0) {
-                idx += 1;
-                if (idx >= len) {
-                    return wrap ? data[0] : data[len - 1];
-                } else {
-                    return data[idx];
-                }
-            } else {
-                // Return last model for no result if so indicated
-                if (alwaysReturnAModel && len > 0) return data[len - 1];
-            }
-        },
-        
-        getPrevModel: function(model, wrap=true, alwaysReturnAModel=true) {
-            const data = this.getListData(),
-                len = data.length;
-            let idx = this.getIndexOfModelInData(model);
-            if (idx >= 0) {
-                idx -= 1;
-                if (idx < 0) {
-                    return wrap ? data[len - 1] : data[0];
-                } else {
-                    return data[idx];
-                }
-            } else {
-                // Return first model for no result if so indicated
-                if (alwaysReturnAModel && len > 0) return data[0];
-            }
-        },
-        
-        getIndexOfModelInData: function(model) {
-            if (model) {
-                const self = this,
-                    data = self.getListData();
-                let i = data.length;
-                while (i) if (self.areModelsEqual(data[--i], model)) return i;
-            }
-            return -1;
-        },
-        
-        areModelsEqual: function(modelA, modelB) {
-            const modelIDName = this.modelIDName;
-            return modelA[modelIDName] === modelB[modelIDName];
-        },
-        
-        getActiveRowForModel: function(model) {
-            if (model) {
-                const self = this,
-                    activeRows = self._itemPool.getActives();
-                let i = activeRows.length;
-                while (i) {
-                    const row = activeRows[--i];
-                    if (self.areModelsEqual(row.model, model)) return row;
-                }
-            }
-        },
-        
-        refreshListData: function(preserveScroll, forceFullReset) {
-            this._listData = this.collectionModel.getAsSortedList(this.getSortFunction(), this.getFilterFunction());
-            this.resetListUI(preserveScroll, forceFullReset);
-        },
-        
-        resetListUI: function(preserveScroll, forceFullReset) {
-            const self = this,
-                data = self.getListData(),
-                len = data.length,
-                listView = self._listView,
-                scrollAnchorView = self._scrollAnchorView;
-            
-            // Resize the listView to the height to accomodate all rows
-            listView.setHeight(len * self._rowExtent - (len > 0 ? self.rowSpacing : 0) + self.rowInset + self.rowOutset);
-            scrollAnchorView.setY(listView.height - scrollAnchorView.height);
-            
-            // Ensure the next refreshListUI actually refreshes
-            self._startIdx = self._endIdx = -1;
-            
-            // Reset scroll position
-            self.__forceFullResetOnNextRefresh = forceFullReset;
-            if (preserveScroll || getDomScrollTop(self) === 0) {
-                // Just refresh since we won't move the scroll position
-                self.refreshListUI();
-            } else {
-                // Updating the scroll position triggers a refreshListUI 
-                // via the DOM scroll event
-                setDomScrollTop(self, 0);
-            }
-        },
-        
-        putRowBackInPool: function(row) {
-            // Clear or reassign focus since the row will get reused and the 
-            // reused row will likely not be the appropriate focus.
-            const globalFocus = pkg.global.focus,
-                currentFocus = globalFocus.focusedView;
-            if (currentFocus && currentFocus.isDescendantOf(row)) {
-                const focusTrap = this.getFocusTrap();
-                if (focusTrap) {
-                    focusTrap.focus();
-                } else {
-                    globalFocus.clear();
-                }
-            }
-            
-            row.setVisible(false);
-            this._itemPool.putInstance(row);
-        },
-        
-        refreshListUI: function(ignoredEvent) {
-            const self = this,
-                rowExtent = self._rowExtent,
-                rowInset = self.rowInset,
-                forceFullReset = self.__forceFullResetOnNextRefresh,
-                scrollY = getDomScrollTop(self),
-                data = self.getListData() || [],
-                startIdx = Math.max(0, Math.floor((scrollY - rowInset) / rowExtent)),
-                endIdx = Math.min(data.length, Math.ceil((scrollY - rowInset + self.height) / rowExtent));
-            
-            if (self.__forceFullResetOnNextRefresh) self.__forceFullResetOnNextRefresh = false;
-            
-            if (self._startIdx !== startIdx || self._endIdx !== endIdx || forceFullReset) {
-                const rowWidth = self.width,
-                    rowHeight = self.rowHeight,
-                    visibleRowsByIdx = self._visibleRowsByIdx;
-                
-                self._startIdx = startIdx;
-                self._endIdx = endIdx;
-                
-                // Put all visible rows that are not within the idx range back 
-                // into the pool
-                let i;
-                for (i in visibleRowsByIdx) {
-                    if (i < startIdx || i >= endIdx) {
-                        self.putRowBackInPool(visibleRowsByIdx[i]);
-                        delete visibleRowsByIdx[i];
-                    }
-                }
-                
-                for (i = startIdx; i < endIdx; i++) {
-                    let row = visibleRowsByIdx[i];
-                    
-                    const model = data[i],
-                        classKey = self.getClassKey(model);
-                    if (!row || row.classKey !== classKey) {
-                        if (row) self.putRowBackInPool(row);
-                        
-                        visibleRowsByIdx[i] = row = self._itemPool.getInstance(classKey);
-                        
-                        row.setInfiniteOwner(self);
-                        row.setClassKey(classKey);
-                        row.setWidth(rowWidth);
-                        row.setHeight(rowHeight);
-                        row.setY(rowInset + i * rowExtent);
-                        row.setVisible(true);
-                    }
-                    
-                    if (!row.model || !self.areModelsEqual(row.model, model) || forceFullReset) {
-                        row.setModel(model);
-                        self.updateRow(row);
-                    }
-                    
-                    row.notifyRefreshed();
-                    
-                    // Maintain tab ordering by updating the underlying dom order.
-                    row.bringToFront();
-                }
-            }
-        },
-        
-        getClassKey: (model) => DEFAULT_CLASS_KEY,
-        
-        updateRow: (row) => {}
-    });
-})(myt);
-
-
-((pkg) => {
-    const JSClass = JS.Class,
-        DEFAULT_SELECTED_COLOR = '#ccccff',
+        DEFAULT_SELECTED_COLOR = '#ccf',
         DEFAULT_ACTIVE_COLOR = '#f8f8f8',
-        DEFAULT_HOVER_COLOR = '#eeeeee',
-        DEFAULT_READY_COLOR = '#ffffff',
+        DEFAULT_HOVER_COLOR = '#eee',
+        DEFAULT_READY_COLOR = '#fff',
         
         /* Clears the selectedRow while leaving the selectedRowModel. */
-        clearSelectedRow = (selectableInfiniteList) => {
+        clearSelectedRow = selectableInfiniteList => {
             const existing = selectableInfiniteList.selectedRow;
             if (existing) {
                 existing.setSelected(false);
@@ -22261,195 +21793,559 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             }
         },
         
+        updateRowExtent = infiniteList => {
+            infiniteList._rowExtent = infiniteList.rowSpacing + infiniteList.rowHeight;
+        },
+        
+        getDomScrollTop = infiniteList => infiniteList.getInnerDomElement().scrollTop,
+        
+        setDomScrollTop = (infiniteList, v) => {
+            infiniteList.scrollYTo(v, true);
+        },
+        
+        getSubview = (gridRow, columnHeader) => gridRow[columnHeader.columnId + 'View'],
+        
+        /** A mixin for rows in infinite scrolling lists
+            
+            Attributes:
+                infiniteOwner
+                model
+            
+            @class */
+        InfiniteListRow = pkg.InfiniteListRow = new JSModule('InfiniteListRow', {
+            include: [pkg.Reusable],
+            
+            
+            // Accessors ///////////////////////////////////////////////////////////
+            setInfiniteOwner: function(v) {
+                this.infiniteOwner = v;
+            },
+            
+            setModel: function(model) {
+                this.model = model;
+            },
+            
+            setClassKey: function(classKey) {
+                this.classKey = classKey;
+            },
+            
+            notifyRefreshed: () => {}
+        }),
+        
         /** A mixin for rows in infinite scrolling lists
             
             @class */
-        SelectableInfiniteListRow = pkg.SelectableInfiniteListRow = new JS.Module('SelectableInfiniteListRow', {
-            include: [pkg.InfiniteListRow, pkg.Selectable]
-        });
-    
-    /** A simple implementation of a SelectableInfiniteListRow.
+        SelectableInfiniteListRow = pkg.SelectableInfiniteListRow = new JSModule('SelectableInfiniteListRow', {
+            include: [InfiniteListRow, pkg.Selectable]
+        }),
         
-        Attributes:
-            selectedColor
-        
-        @class */
-    pkg.SimpleSelectableInfiniteListRow = new JSClass('SimpleSelectableInfiniteListRow', pkg.SimpleButton, {
-        include: [SelectableInfiniteListRow],
-        
-        
-        // Life Cycle //////////////////////////////////////////////////////////
-        initNode: function(parent, attrs) {
-            if (attrs.selectedColor == null) attrs.selectedColor = DEFAULT_SELECTED_COLOR;
-            if (attrs.activeColor == null) attrs.activeColor = DEFAULT_ACTIVE_COLOR;
-            if (attrs.hoverColor == null) attrs.hoverColor = DEFAULT_HOVER_COLOR;
-            if (attrs.readyColor == null) attrs.readyColor = DEFAULT_READY_COLOR;
+        /** A base class for infinite scrolling lists
             
-            if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
-            if (attrs.activationKeys == null) attrs.activationKeys = [13,27,32,37,38,39,40];
+            Attributes:
+                collectionModel
+                rowClasses
+                modelIDName
+                numericSort
+                ascendingSort
+                rowHeight
+                rowInset
+                rowOutset
+                rowSpacing
             
-            this.callSuper(parent, attrs);
-        },
-        
-        destroy: function() {
-            if (this.selected) this.infiniteOwner.setSelectedRow();
-            this.callSuper();
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        setSelected: function(v) {
-            this.callSuper(v);
-            if (this.inited) this.updateUI();
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        clean: function() {
-            this.setMouseOver(false);
-            this.setMouseDown(false);
-            if (this.focused) this.blur();
-            this.callSuper();
-        },
-        
-        updateUI: function() {
-            this.callSuper();
-            if (this.selected) this.setBgColor(this.selectedColor);
-        },
-        
-        doActivated: function() {
-            this.callSuper();
-            this.infiniteOwner.setSelectedRow(this);
-        },
-        
-        doActivationKeyDown: function(key, isRepeat) {
-            const owner = this.infiniteOwner,
-                model = this.model;
-            switch (key) {
-                case 27: // Escape
-                    if (this.selected) owner.setSelectedRow();
-                    break;
-                case 37: // Left
-                case 38: // Up
-                    owner.selectPrevRowForModel(model);
-                    break;
-                case 39: // Right
-                case 40: // Down
-                    owner.selectNextRowForModel(model);
-                    break;
-            }
-        },
-        
-        doActivationKeyUp: function(key) {
-            switch (key) {
-                case 13: // Enter
-                case 32: // Space
-                    this.doActivated();
-                    break;
-            }
-        }
-    });
-
-    /** A base class for infinite scrolling lists that support a selectable row.
-        
-        Attributes:
-            selectedRow
-            selectedRowModel
-        
-        @class */
-    pkg.SelectableInfiniteList = new JSClass('SelectableInfiniteList', pkg.InfiniteList, {
-        // Accessors ///////////////////////////////////////////////////////////
-        setSelectedRow: function(row) {
-            const existing = this.selectedRow;
-            if (row !== existing) {
-                if (existing) existing.setSelected(false);
-                this.setSelectedRowModel();
-                this.set('selectedRow', row, true);
-                if (row) {
-                    this.setSelectedRowModel(row.model);
-                    row.setSelected(true);
-                }
-            }
-        },
-        
-        setSelectedRowModel: function(v) {
-            this.set('selectedRowModel', v, true);
+            Private Attributes:
+                _listData:array The data for the rows in the list.
+                _startIdx:int The index into the data of the first row shown
+                _endIdx:int The index into the data of the last row shown
+                _visibleRowsByIdx:object A cache of what rows are currently shown by
+                    the index of the data for the row. This is provides faster
+                    performance when refreshing the list.
+                _listView:myt.View The view that contains the rows in the list.
+                _itemPool:myt.TrackActivesPool The pool for row views.
             
-            // Scroll the selected row into view
-            this.scrollModelIntoView(this.selectedRowModel);
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        getActiveSelectedRow: function() {
-            return this.getActiveRowForModel(this.selectedRowModel);
-        },
-        
-        selectRowForModel: function(model, focus, isNext) {
-            if (model) {
-                clearSelectedRow(this);
-                this.setSelectedRowModel(model);
-                this.refreshListUI();
+            @class */
+        InfiniteList = pkg.InfiniteList = new JSClass('InfiniteList', View, {
+            // Life Cycle //////////////////////////////////////////////////////
+            initNode: function(parent, attrs) {
+                const self = this;
+                let rowClasses = attrs.rowClasses;
+                delete attrs.rowClasses;
                 
-                // Focus on the newly selected row
-                if (focus) {
-                    const row = this.getActiveSelectedRow();
-                    if (row) row.focus();
+                if (typeof rowClasses === 'function') {
+                    const defaultClassObj = {};
+                    defaultClassObj[DEFAULT_CLASS_KEY] = rowClasses;
+                    rowClasses = defaultClassObj;
+                }
+                
+                if (attrs.modelIDName == null) attrs.modelIDName = 'id';
+                if (attrs.numericSort == null) attrs.numericSort = true;
+                if (attrs.ascendingSort == null) attrs.ascendingSort = true;
+                if (attrs.overflow == null) attrs.overflow = 'autoy';
+                
+                if (attrs.bgColor == null) attrs.bgColor = DEFAULT_BG_COLOR;
+                if (attrs.rowSpacing == null) attrs.rowSpacing = DEFAULT_ROW_SPACING;
+                if (attrs.rowInset == null) attrs.rowInset = DEFAULT_ROW_INSET;
+                if (attrs.rowOutset == null) attrs.rowOutset = DEFAULT_ROW_OUTSET;
+                if (attrs.rowHeight == null) attrs.rowHeight = DEFAULT_ROW_HEIGHT;
+                
+                if (attrs.overscrollBehavior == null) attrs.overscrollBehavior = 'auto contain';
+                
+                self._rowExtent = self.rowSpacing = self.rowHeight = 0;
+                self._startIdx = self._endIdx = -1;
+                self._visibleRowsByIdx = {};
+                
+                self.callSuper(parent, attrs);
+                
+                // Build UI
+                const listView = self._listView = new View(self);
+                self._scrollAnchorView = new View(listView, {width:1, height:1, bgColor:'transparent'});
+                self._itemPool = self.makePool(rowClasses, listView);
+                
+                self.attachTo(self, 'refreshListUI', 'height');
+                self.attachToDom(self, 'refreshListUI', 'scroll');
+            },
+            
+            makePool: (rowClasses, listView) => new pkg.TrackActivesMultiPool(rowClasses, listView),
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setOverscrollBehavior: function(v) {
+                this.overscrollBehavior = v;
+                this.getInnerDomStyle().overscrollBehavior = v;
+            },
+            
+            setCollectionModel: function(v) {this.collectionModel = v;},
+            setModelIDName: function(v) {this.modelIDName = v;},
+            setRowSpacing: function(v) {
+                this.rowSpacing = v;
+                updateRowExtent(this);
+            },
+            setRowHeight: function(v) {
+                this.rowHeight = v;
+                updateRowExtent(this);
+            },
+            
+            getListData: function() {return this._listData;},
+            
+            setWidth: function(v, supressEvent) {
+                if (v > 0) {
+                    this.callSuper(v, supressEvent);
+                    if (this.inited) {
+                        const listView = this._listView,
+                            w = this.width;
+                        listView.setWidth(w);
+                        listView.getSubviews().forEach(sv => {sv.setWidth(w);});
+                    }
+                }
+            },
+            
+            getVisibleRows: function() {
+                return Object.values(this._visibleRowsByIdx || {});
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @returns {undefined} */
+            isScrolledToEnd: function() {
+                return getDomScrollTop(this) + this.height === this._listView.height;
+            },
+            
+            getSortFunction: function() {
+                // Default to a numeric sort on the IDs
+                const modelIDName = this.modelIDName,
+                    asc = this.ascendingSort ? 1 : -1;
+                if (this.numericSort) {
+                    return (a, b) => (a[modelIDName] - b[modelIDName]) * asc;
+                } else {
+                    return (a, b) => {
+                        a = a[modelIDName];
+                        b = b[modelIDName];
+                        return (a > b ? 1 : (a < b ? -1 : 0)) * asc;
+                    };
+                }
+            },
+            
+            getFilterFunction: function() {
+                // Unimplemented which means don't filter anything out.
+            },
+            
+            scrollModelIntoView: function(model) {
+                const self = this,
+                    idx = self.getIndexOfModelInData(model);
+                if (idx >= 0) {
+                    const rowExtent = self._rowExtent,
+                        viewportTop = getDomScrollTop(self),
+                        viewportBottom = viewportTop + self.height,
+                        rowTop = self.rowInset + idx * rowExtent,
+                        rowBottom = rowTop + rowExtent;
+                    
+                    // Only scroll if not overlapping visible area.
+                    if (rowTop <= viewportTop) {
+                        setDomScrollTop(self, rowTop);
+                        return true;
+                    } else if (rowBottom >= viewportBottom) {
+                        setDomScrollTop(self, rowBottom - self.height);
+                        return true;
+                    }
+                }
+                
+                return false;
+            },
+            
+            isModelInData: function(model) {
+                return this.getIndexOfModelInData(model) !== -1;
+            },
+            
+            getNextModel: function(model, wrap=true, alwaysReturnAModel=true) {
+                const data = this.getListData(),
+                    len = data.length;
+                let idx = this.getIndexOfModelInData(model);
+                if (idx >= 0) {
+                    idx += 1;
+                    if (idx >= len) {
+                        return wrap ? data[0] : data[len - 1];
+                    } else {
+                        return data[idx];
+                    }
+                } else {
+                    // Return last model for no result if so indicated
+                    if (alwaysReturnAModel && len > 0) return data[len - 1];
+                }
+            },
+            
+            getPrevModel: function(model, wrap=true, alwaysReturnAModel=true) {
+                const data = this.getListData(),
+                    len = data.length;
+                let idx = this.getIndexOfModelInData(model);
+                if (idx >= 0) {
+                    idx -= 1;
+                    if (idx < 0) {
+                        return wrap ? data[len - 1] : data[0];
+                    } else {
+                        return data[idx];
+                    }
+                } else {
+                    // Return first model for no result if so indicated
+                    if (alwaysReturnAModel && len > 0) return data[0];
+                }
+            },
+            
+            getIndexOfModelInData: function(model) {
+                if (model) {
+                    const self = this,
+                        data = self.getListData();
+                    let i = data.length;
+                    while (i) if (self.areModelsEqual(data[--i], model)) return i;
+                }
+                return -1;
+            },
+            
+            areModelsEqual: function(modelA, modelB) {
+                const modelIDName = this.modelIDName;
+                return modelA[modelIDName] === modelB[modelIDName];
+            },
+            
+            getActiveRowForModel: function(model) {
+                if (model) {
+                    const self = this,
+                        activeRows = self._itemPool.getActives();
+                    let i = activeRows.length;
+                    while (i) {
+                        const row = activeRows[--i];
+                        if (self.areModelsEqual(row.model, model)) return row;
+                    }
+                }
+            },
+            
+            refreshListData: function(preserveScroll, forceFullReset) {
+                this._listData = this.collectionModel.getAsSortedList(this.getSortFunction(), this.getFilterFunction());
+                this.resetListUI(preserveScroll, forceFullReset);
+            },
+            
+            resetListUI: function(preserveScroll, forceFullReset) {
+                const self = this,
+                    data = self.getListData(),
+                    len = data.length,
+                    listView = self._listView,
+                    scrollAnchorView = self._scrollAnchorView;
+                
+                // Resize the listView to the height to accomodate all rows
+                listView.setHeight(len * self._rowExtent - (len > 0 ? self.rowSpacing : 0) + self.rowInset + self.rowOutset);
+                scrollAnchorView.setY(listView.height - scrollAnchorView.height);
+                
+                // Ensure the next refreshListUI actually refreshes
+                self._startIdx = self._endIdx = -1;
+                
+                // Reset scroll position
+                self.__forceFullResetOnNextRefresh = forceFullReset;
+                if (preserveScroll || getDomScrollTop(self) === 0) {
+                    // Just refresh since we won't move the scroll position
+                    self.refreshListUI();
+                } else {
+                    // Updating the scroll position triggers a refreshListUI 
+                    // via the DOM scroll event
+                    setDomScrollTop(self, 0);
+                }
+            },
+            
+            putRowBackInPool: function(row) {
+                // Clear or reassign focus since the row will get reused and the 
+                // reused row will likely not be the appropriate focus.
+                const globalFocus = pkg.global.focus,
+                    currentFocus = globalFocus.focusedView;
+                if (currentFocus && currentFocus.isDescendantOf(row)) {
+                    const focusTrap = this.getFocusTrap();
+                    if (focusTrap) {
+                        focusTrap.focus();
+                    } else {
+                        globalFocus.clear();
+                    }
+                }
+                
+                row.setVisible(false);
+                this._itemPool.putInstance(row);
+            },
+            
+            refreshListUI: function(ignoredEvent) {
+                const self = this,
+                    rowExtent = self._rowExtent,
+                    rowInset = self.rowInset,
+                    forceFullReset = self.__forceFullResetOnNextRefresh,
+                    scrollY = getDomScrollTop(self),
+                    data = self.getListData() || [],
+                    startIdx = Math.max(0, Math.floor((scrollY - rowInset) / rowExtent)),
+                    endIdx = Math.min(data.length, Math.ceil((scrollY - rowInset + self.height) / rowExtent));
+                
+                if (self.__forceFullResetOnNextRefresh) self.__forceFullResetOnNextRefresh = false;
+                
+                if (self._startIdx !== startIdx || self._endIdx !== endIdx || forceFullReset) {
+                    const rowWidth = self.width,
+                        rowHeight = self.rowHeight,
+                        visibleRowsByIdx = self._visibleRowsByIdx;
+                    
+                    self._startIdx = startIdx;
+                    self._endIdx = endIdx;
+                    
+                    // Put all visible rows that are not within the idx range 
+                    // back into the pool
+                    let i;
+                    for (i in visibleRowsByIdx) {
+                        if (i < startIdx || i >= endIdx) {
+                            self.putRowBackInPool(visibleRowsByIdx[i]);
+                            delete visibleRowsByIdx[i];
+                        }
+                    }
+                    
+                    for (i = startIdx; i < endIdx; i++) {
+                        let row = visibleRowsByIdx[i];
+                        
+                        const model = data[i],
+                            classKey = self.getClassKey(model);
+                        if (!row || row.classKey !== classKey) {
+                            if (row) self.putRowBackInPool(row);
+                            
+                            visibleRowsByIdx[i] = row = self._itemPool.getInstance(classKey);
+                            
+                            row.setInfiniteOwner(self);
+                            row.setClassKey(classKey);
+                            row.setWidth(rowWidth);
+                            row.setHeight(rowHeight);
+                            row.setY(rowInset + i * rowExtent);
+                            row.setVisible(true);
+                        }
+                        
+                        if (!row.model || !self.areModelsEqual(row.model, model) || forceFullReset) {
+                            row.setModel(model);
+                            self.updateRow(row);
+                        }
+                        
+                        row.notifyRefreshed();
+                        
+                        // Maintain tab ordering by updating the underlying 
+                        // dom order.
+                        row.bringToFront();
+                    }
+                }
+            },
+            
+            getClassKey: model => DEFAULT_CLASS_KEY,
+            
+            updateRow: row => {}
+        }),
+        
+        /** A simple implementation of a SelectableInfiniteListRow.
+            
+            Attributes:
+                selectedColor
+            
+            @class */
+        SimpleSelectableInfiniteListRow = pkg.SimpleSelectableInfiniteListRow = new JSClass('SimpleSelectableInfiniteListRow', pkg.SimpleButton, {
+            include: [SelectableInfiniteListRow],
+            
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            initNode: function(parent, attrs) {
+                if (attrs.selectedColor == null) attrs.selectedColor = DEFAULT_SELECTED_COLOR;
+                if (attrs.activeColor == null) attrs.activeColor = DEFAULT_ACTIVE_COLOR;
+                if (attrs.hoverColor == null) attrs.hoverColor = DEFAULT_HOVER_COLOR;
+                if (attrs.readyColor == null) attrs.readyColor = DEFAULT_READY_COLOR;
+                
+                if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
+                if (attrs.activationKeys == null) attrs.activationKeys = [13,27,32,37,38,39,40];
+                
+                this.callSuper(parent, attrs);
+            },
+            
+            destroy: function() {
+                if (this.selected) this.infiniteOwner.setSelectedRow();
+                this.callSuper();
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setSelected: function(v) {
+                this.callSuper(v);
+                if (this.inited) this.updateUI();
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            clean: function() {
+                this.setMouseOver(false);
+                this.setMouseDown(false);
+                if (this.focused) this.blur();
+                this.callSuper();
+            },
+            
+            updateUI: function() {
+                this.callSuper();
+                if (this.selected) this.setBgColor(this.selectedColor);
+            },
+            
+            doActivated: function() {
+                this.callSuper();
+                this.infiniteOwner.setSelectedRow(this);
+            },
+            
+            doActivationKeyDown: function(key, isRepeat) {
+                const owner = this.infiniteOwner,
+                    model = this.model;
+                switch (key) {
+                    case 27: // Escape
+                        if (this.selected) owner.setSelectedRow();
+                        break;
+                    case 37: // Left
+                    case 38: // Up
+                        owner.selectPrevRowForModel(model);
+                        break;
+                    case 39: // Right
+                    case 40: // Down
+                        owner.selectNextRowForModel(model);
+                        break;
+                }
+            },
+            
+            doActivationKeyUp: function(key) {
+                switch (key) {
+                    case 13: // Enter
+                    case 32: // Space
+                        this.doActivated();
+                        break;
                 }
             }
-        },
+        }),
         
-        selectNextRowForModel: function(model, focus=true) {
-            this.selectRowForModel(this.getNextModel(model), focus, true);
-        },
-        
-        selectPrevRowForModel: function(model, focus=true) {
-            this.selectRowForModel(this.getPrevModel(model), focus, false);
-        },
-        
-        /** @overrides */
-        resetListUI: function(preserveScroll, forceFullReset) {
-            if (this.isModelInData(this.selectedRowModel)) {
-                // Only clear the selected row since it's still in the data and
-                // thus may be shown again.
-                clearSelectedRow(this);
-            } else {
-                // Clear the row and model since the model can no longer be shown.
-                this.setSelectedRow();
+        /** A base class for infinite scrolling lists that support a selectable row.
+            
+            Attributes:
+                selectedRow
+                selectedRowModel
+            
+            @class */
+        SelectableInfiniteList = pkg.SelectableInfiniteList = new JSClass('SelectableInfiniteList', InfiniteList, {
+            // Accessors ///////////////////////////////////////////////////////
+            setSelectedRow: function(row) {
+                const existing = this.selectedRow;
+                if (row !== existing) {
+                    if (existing) existing.setSelected(false);
+                    this.setSelectedRowModel();
+                    this.set('selectedRow', row, true);
+                    if (row) {
+                        this.setSelectedRowModel(row.model);
+                        row.setSelected(true);
+                    }
+                }
+            },
+            
+            setSelectedRowModel: function(v) {
+                this.set('selectedRowModel', v, true);
+                
+                // Scroll the selected row into view
+                this.scrollModelIntoView(this.selectedRowModel);
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            getActiveSelectedRow: function() {
+                return this.getActiveRowForModel(this.selectedRowModel);
+            },
+            
+            selectRowForModel: function(model, focus, isNext) {
+                if (model) {
+                    clearSelectedRow(this);
+                    this.setSelectedRowModel(model);
+                    this.refreshListUI();
+                    
+                    // Focus on the newly selected row
+                    if (focus) {
+                        const row = this.getActiveSelectedRow();
+                        if (row) row.focus();
+                    }
+                }
+            },
+            
+            selectNextRowForModel: function(model, focus=true) {
+                this.selectRowForModel(this.getNextModel(model), focus, true);
+            },
+            
+            selectPrevRowForModel: function(model, focus=true) {
+                this.selectRowForModel(this.getPrevModel(model), focus, false);
+            },
+            
+            /** @overrides */
+            resetListUI: function(preserveScroll, forceFullReset) {
+                if (this.isModelInData(this.selectedRowModel)) {
+                    // Only clear the selected row since it's still in the data 
+                    // and thus may be shown again.
+                    clearSelectedRow(this);
+                } else {
+                    // Clear the row and model since the model can no longer 
+                    // be shown.
+                    this.setSelectedRow();
+                }
+                
+                this.callSuper(preserveScroll, forceFullReset);
+            },
+            
+            /** @overrides */
+            putRowBackInPool: function(row) {
+                if (row.selected) clearSelectedRow(this);
+                this.callSuper(row);
+            },
+            
+            /** @overrides */
+            refreshListUI: function(ignoredEvent) {
+                const currentFocus = pkg.global.focus.focusedView;
+                
+                this.callSuper();
+                
+                const row = this.getActiveSelectedRow();
+                if (row) {
+                    this.set('selectedRow', row, true);
+                    row.setSelected(true);
+                    if (!currentFocus || currentFocus === row) row.focus(true);
+                }
             }
-            
-            this.callSuper(preserveScroll, forceFullReset);
-        },
-        
-        /** @overrides */
-        putRowBackInPool: function(row) {
-            if (row.selected) clearSelectedRow(this);
-            this.callSuper(row);
-        },
-        
-        /** @overrides */
-        refreshListUI: function(ignoredEvent) {
-            const currentFocus = pkg.global.focus.focusedView;
-            
-            this.callSuper();
-            
-            const row = this.getActiveSelectedRow();
-            if (row) {
-                this.set('selectedRow', row, true);
-                row.setSelected(true);
-                if (!currentFocus || currentFocus === row) row.focus(true);
-            }
-        }
-    });
-})(myt);
-
-
-((pkg) => {
-    const JSClass = JS.Class,
-        JSModule = JS.Module,
-        View = pkg.View,
-        
-        getSubview = (gridRow, columnHeader) => gridRow[columnHeader.columnId + 'View'],
+        }),
         
         InfiniteGridRowMixin = new JSModule('InfiniteGridRowMixin', {
             // Methods /////////////////////////////////////////////////////////
@@ -22536,28 +22432,28 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         });
     
     pkg.InfiniteGridRow = new JSModule('InfiniteGridRow', {
-        include: [pkg.InfiniteListRow, InfiniteGridRowMixin]
+        include: [InfiniteListRow, InfiniteGridRowMixin]
     });
     
     pkg.SelectableInfiniteGridRow = new JSModule('SelectableInfiniteGridRow', {
-        include: [pkg.SelectableInfiniteListRow, InfiniteGridRowMixin]
+        include: [SelectableInfiniteListRow, InfiniteGridRowMixin]
     });
     
-    pkg.SimpleSelectableInfiniteGridRow = new JSClass('SimpleSelectableInfiniteGridRow', pkg.SimpleSelectableInfiniteListRow, {
+    pkg.SimpleSelectableInfiniteGridRow = new JSClass('SimpleSelectableInfiniteGridRow', SimpleSelectableInfiniteListRow, {
         include: [InfiniteGridRowMixin]
     });
     
     /** A base class for infinite scrolling grids
         
         @class */
-    pkg.InfiniteGrid = new JSClass('InfiniteGrid', pkg.InfiniteList, {
+    pkg.InfiniteGrid = new JSClass('InfiniteGrid', InfiniteList, {
         include: [InfiniteGridMixin]
     });
     
     /** A base class for selectable infinite scrolling grids
         
         @class */
-    pkg.SelectableInfiniteGrid = new JSClass('InfiniteGrid', pkg.SelectableInfiniteList, {
+    pkg.SelectableInfiniteGrid = new JSClass('InfiniteGrid', SelectableInfiniteList, {
         include: [InfiniteGridMixin]
     });
     
@@ -23543,6 +23439,26 @@ myt.Eventable = new JS.Class('Eventable', {
             svg.setAttribute('height', size);
             
             redraw(annulus);
+        },
+        
+        setAndRedraw = (annulus, attrName, value) => {
+            if (annulus[attrName] !== value) {
+                annulus[attrName] = value;
+                if (annulus.inited) {
+                    redraw(annulus);
+                    annulus.fireEvent(attrName, value);
+                }
+            }
+        },
+        
+        setAndUpdateSize = (annulus, attrName, value) => {
+            if (annulus[attrName] !== value) {
+                annulus[attrName] = value = Math.max(0, value);
+                if (annulus.inited) {
+                    updateSize(annulus);
+                    annulus.fireEvent(attrName, value);
+                }
+            }
         };
      
     /** An annulus component.
@@ -23654,75 +23570,13 @@ myt.Eventable = new JS.Class('Eventable', {
         
         
         // Accessors ///////////////////////////////////////////////////////////
-        setRadius: function(v) {
-            if (this.radius !== v) {
-                this.radius = v = Math.max(0, v);
-                if (this.inited) {
-                    updateSize(this);
-                    this.fireEvent('radius', v);
-                }
-            }
-        },
-        
-        setThickness: function(v) {
-            if (this.thickness !== v) {
-                this.thickness = v = Math.max(0, v);
-                if (this.inited) {
-                    updateSize(this);
-                    this.fireEvent('thickness', v);
-                }
-            }
-        },
-        
-        setStartAngle: function(v) {
-            if (this.startAngle !== v) {
-                this.startAngle = v;
-                if (this.inited) {
-                    redraw(this);
-                    this.fireEvent('startAngle', v);
-                }
-            }
-        },
-        
-        setEndAngle: function(v) {
-            if (this.endAngle !== v) {
-                this.endAngle = v;
-                if (this.inited) {
-                    redraw(this);
-                    this.fireEvent('endAngle', v);
-                }
-            }
-        },
-        
-        setStartCapRounding: function(v) {
-            if (this.startCapRounding !== v) {
-                this.startCapRounding = v;
-                if (this.inited) {
-                    redraw(this);
-                    this.fireEvent('startCapRounding', v);
-                }
-            }
-        },
-        
-        setEndCapRounding: function(v) {
-            if (this.endCapRounding !== v) {
-                this.endCapRounding = v;
-                if (this.inited) {
-                    redraw(this);
-                    this.fireEvent('endCapRounding', v);
-                }
-            }
-        },
-        
-        setColor: function(v) {
-            if (this.color !== v) {
-                this.color = v;
-                if (this.inited) {
-                    redraw(this);
-                    this.fireEvent('color', v);
-                }
-            }
-        },
+        setRadius: function(v) {setAndUpdateSize(this, 'radius', v);},
+        setThickness: function(v) {setAndUpdateSize(this, 'thickness', v);},
+        setStartAngle: function(v) {setAndRedraw(this, 'startAngle', v);},
+        setEndAngle: function(v) {setAndRedraw(this, 'endAngle', v);},
+        setStartCapRounding: function(v) {setAndRedraw(this, 'startCapRounding', v);},
+        setEndCapRounding: function(v) {setAndRedraw(this, 'endCapRounding', v);},
+        setColor: function(v) {setAndRedraw(this, 'color', v);},
         
         
         // Methods /////////////////////////////////////////////////////////////
@@ -23731,11 +23585,11 @@ myt.Eventable = new JS.Class('Eventable', {
             @overrides */
         sendSubviewToBack: function(sv) {
             if (sv.parent === this) {
-                const de = this.getInnerDomElement(),
-                    firstChild = de.childNodes[1];
+                const ide = this.getInnerDomElement(),
+                    firstChild = ide.childNodes[1];
                 if (sv.getOuterDomElement() !== firstChild) {
-                    const removedElem = de.removeChild(sv.getOuterDomElement());
-                    if (removedElem) de.insertBefore(removedElem, firstChild);
+                    const removedElem = ide.removeChild(sv.getOuterDomElement());
+                    if (removedElem) ide.insertBefore(removedElem, firstChild);
                 }
             }
         },

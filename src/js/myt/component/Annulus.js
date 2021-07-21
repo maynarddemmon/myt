@@ -32,6 +32,26 @@
             svg.setAttribute('height', size);
             
             redraw(annulus);
+        },
+        
+        setAndRedraw = (annulus, attrName, value) => {
+            if (annulus[attrName] !== value) {
+                annulus[attrName] = value;
+                if (annulus.inited) {
+                    redraw(annulus);
+                    annulus.fireEvent(attrName, value);
+                }
+            }
+        },
+        
+        setAndUpdateSize = (annulus, attrName, value) => {
+            if (annulus[attrName] !== value) {
+                annulus[attrName] = value = Math.max(0, value);
+                if (annulus.inited) {
+                    updateSize(annulus);
+                    annulus.fireEvent(attrName, value);
+                }
+            }
         };
      
     /** An annulus component.
@@ -143,75 +163,13 @@
         
         
         // Accessors ///////////////////////////////////////////////////////////
-        setRadius: function(v) {
-            if (this.radius !== v) {
-                this.radius = v = Math.max(0, v);
-                if (this.inited) {
-                    updateSize(this);
-                    this.fireEvent('radius', v);
-                }
-            }
-        },
-        
-        setThickness: function(v) {
-            if (this.thickness !== v) {
-                this.thickness = v = Math.max(0, v);
-                if (this.inited) {
-                    updateSize(this);
-                    this.fireEvent('thickness', v);
-                }
-            }
-        },
-        
-        setStartAngle: function(v) {
-            if (this.startAngle !== v) {
-                this.startAngle = v;
-                if (this.inited) {
-                    redraw(this);
-                    this.fireEvent('startAngle', v);
-                }
-            }
-        },
-        
-        setEndAngle: function(v) {
-            if (this.endAngle !== v) {
-                this.endAngle = v;
-                if (this.inited) {
-                    redraw(this);
-                    this.fireEvent('endAngle', v);
-                }
-            }
-        },
-        
-        setStartCapRounding: function(v) {
-            if (this.startCapRounding !== v) {
-                this.startCapRounding = v;
-                if (this.inited) {
-                    redraw(this);
-                    this.fireEvent('startCapRounding', v);
-                }
-            }
-        },
-        
-        setEndCapRounding: function(v) {
-            if (this.endCapRounding !== v) {
-                this.endCapRounding = v;
-                if (this.inited) {
-                    redraw(this);
-                    this.fireEvent('endCapRounding', v);
-                }
-            }
-        },
-        
-        setColor: function(v) {
-            if (this.color !== v) {
-                this.color = v;
-                if (this.inited) {
-                    redraw(this);
-                    this.fireEvent('color', v);
-                }
-            }
-        },
+        setRadius: function(v) {setAndUpdateSize(this, 'radius', v);},
+        setThickness: function(v) {setAndUpdateSize(this, 'thickness', v);},
+        setStartAngle: function(v) {setAndRedraw(this, 'startAngle', v);},
+        setEndAngle: function(v) {setAndRedraw(this, 'endAngle', v);},
+        setStartCapRounding: function(v) {setAndRedraw(this, 'startCapRounding', v);},
+        setEndCapRounding: function(v) {setAndRedraw(this, 'endCapRounding', v);},
+        setColor: function(v) {setAndRedraw(this, 'color', v);},
         
         
         // Methods /////////////////////////////////////////////////////////////
@@ -220,11 +178,11 @@
             @overrides */
         sendSubviewToBack: function(sv) {
             if (sv.parent === this) {
-                const de = this.getInnerDomElement(),
-                    firstChild = de.childNodes[1];
+                const ide = this.getInnerDomElement(),
+                    firstChild = ide.childNodes[1];
                 if (sv.getOuterDomElement() !== firstChild) {
-                    const removedElem = de.removeChild(sv.getOuterDomElement());
-                    if (removedElem) de.insertBefore(removedElem, firstChild);
+                    const removedElem = ide.removeChild(sv.getOuterDomElement());
+                    if (removedElem) ide.insertBefore(removedElem, firstChild);
                 }
             }
         },
