@@ -155,13 +155,13 @@
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
                 DEFAULT_EDGE_SIZE:0,
-                DEFAULT_EDGE_COLOR:'#444444',
+                DEFAULT_EDGE_COLOR:'#444',
                 DEFAULT_SHADOW_SIZE:2,
                 DEFAULT_SHADOW_COLOR:'#00000033', // Extra nums are opacity
                 DEFAULT_HORIZONTAL_INSET:6,
                 DEFAULT_VERTICAL_INSET:3,
-                DEFAULT_TIP_BG_COLOR:'#444444',
-                DEFAULT_TIP_TEXT_COLOR:'#eeeeee'
+                DEFAULT_TIP_BG_COLOR:'#444',
+                DEFAULT_TIP_TEXT_COLOR:'#eee'
             },
             
             

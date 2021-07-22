@@ -87,8 +87,8 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         if (attrs.xConversionFuncVToPx == null) attrs.xConversionFuncVToPx = SG.convertXValueToPixel;
         if (attrs.yConversionFuncVToPx == null) attrs.yConversionFuncVToPx = SG.convertYValueToPixel;
         
-        if (attrs.highlightColor == null) attrs.highlightColor = '#000000';
-        if (attrs.highlightSelectedColor == null) attrs.highlightSelectedColor = '#000000';
+        if (attrs.highlightColor == null) attrs.highlightColor = '#000';
+        if (attrs.highlightSelectedColor == null) attrs.highlightSelectedColor = '#000';
         if (attrs.highlightWidth == null) attrs.highlightWidth = 1;
         if (attrs.highlightOffset == null) attrs.highlightOffset = 2;
         

@@ -8,7 +8,9 @@
         
         generateName = (attrName, prefix) => prefix + attrName.substring(0,1).toUpperCase() + attrName.substring(1),
         generateSetterName = (attrName) => SETTER_NAMES[attrName] || (SETTER_NAMES[attrName] = generateName(attrName, 'set')),
-        generateGetterName = (attrName) => GETTER_NAMES[attrName] || (GETTER_NAMES[attrName] = generateName(attrName, 'get'));
+        generateGetterName = (attrName) => GETTER_NAMES[attrName] || (GETTER_NAMES[attrName] = generateName(attrName, 'get')),
+        
+        defAttr = (attrs, attrName, defaultValue) => {if (attrs[attrName] == null) attrs[attrName] = defaultValue;};
     
     /** Provides support for getter and setter functions on an object.
         
@@ -61,7 +63,9 @@
                 const getterName = generateGetterName(attrName);
                 if (target[getterName]) console.log("Overwriting getter", getterName);
                 target[getterName] = () => target[attrName];
-            }
+            },
+            
+            defAttr: defAttr
         },
         
         
@@ -70,6 +74,8 @@
         prependToEarlyAttrs: function() {Array.prototype.unshift.apply(this.earlyAttrs || (this.earlyAttrs = []), arguments);},
         appendToLateAttrs: function() {Array.prototype.push.apply(this.lateAttrs || (this.lateAttrs = []), arguments);},
         prependToLateAttrs: function() {Array.prototype.unshift.apply(this.lateAttrs || (this.lateAttrs = []), arguments);},
+        
+        defAttr: defAttr,
         
         /** Used to quickly extract and set attributes from the attrs object
             passed to an initializer.

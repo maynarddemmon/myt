@@ -6,6 +6,8 @@
         G = pkg.global,
         GlobalFocus = G.focus,
         
+        defAttr = pkg.AccessorSupport.defAttr,
+        
         DEFAULT_ATTR = 'runForDefault',
         ROLLBACK_ATTR = 'runForRollback',
         CURRENT_ATTR = 'runForCurrent',
@@ -996,14 +998,14 @@
                 
                 self.acceleratorScope = ACCELERATOR_SCOPE_ELEMENT;
                 self.validateWhen = WHEN_KEY;
-                self.errorColor = '#ff9999';
-                self.actionRequiredColor = '#996666';
-                self.normalColor = '#999999';
+                self.errorColor = '#f99';
+                self.actionRequiredColor = '#966';
+                self.normalColor = '#999';
                 
-                if (attrs.bgColor == null) attrs.bgColor = '#ffffff';
-                if (attrs.borderWidth == null) attrs.borderWidth = 1;
-                if (attrs.borderStyle == null) attrs.borderStyle = 'solid';
-                if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = true;
+                defAttr(attrs, 'bgColor', '#fff');
+                defAttr(attrs, 'borderWidth', 1);
+                defAttr(attrs, 'borderStyle', 'solid');
+                defAttr(attrs, 'borderStyle', true);
                 
                 self.callSuper(parent, attrs);
                 
@@ -1187,9 +1189,9 @@
         initNode: function(parent, attrs) {
             this.acceleratorScope = ACCELERATOR_SCOPE_ELEMENT;
             this.validateWhen = WHEN_KEY;
-            this.errorColor = '#ff9999';
-            this.actionRequiredColor = '#996666';
-            this.normalColor = '#999999';
+            this.errorColor = '#f99';
+            this.actionRequiredColor = '#966';
+            this.normalColor = '#999';
             
             this.callSuper(parent, attrs);
             

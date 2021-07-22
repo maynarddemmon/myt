@@ -38,10 +38,10 @@
                 DEFAULT_BUTTON_HEIGHT:30,
                 /** The minimum height of the container when expanded. */
                 DEFAULT_MINIMUM_CONTAINER_HEIGHT:100,
-                DEFAULT_FILL_COLOR_SELECTED:'#666666',
-                DEFAULT_FILL_COLOR_HOVER:'#eeeeee',
-                DEFAULT_FILL_COLOR_ACTIVE:'#cccccc',
-                DEFAULT_FILL_COLOR_READY:'#ffffff',
+                DEFAULT_FILL_COLOR_SELECTED:'#666',
+                DEFAULT_FILL_COLOR_HOVER:'#eee',
+                DEFAULT_FILL_COLOR_ACTIVE:'#ccc',
+                DEFAULT_FILL_COLOR_READY:'#fff',
                 DEFAULT_ANIMATION_MILLIS:500
             },
             
@@ -276,8 +276,8 @@
         TextTabSlider = pkg.TextTabSlider = new JSClass('TextTabSlider', TabSlider, {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                DEFAULT_LABEL_TEXT_COLOR_CHECKED: '#ffffff',
-                DEFAULT_LABEL_TEXT_COLOR: '#333333'
+                DEFAULT_LABEL_TEXT_COLOR_CHECKED: '#fff',
+                DEFAULT_LABEL_TEXT_COLOR: '#333'
             },
             
             

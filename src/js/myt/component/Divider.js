@@ -1,6 +1,8 @@
 ((pkg) => {
     const JSClass = JS.Class,
         
+        defAttr = pkg.AccessorSupport.defAttr,
+        
         /*  Setup the limitToParent constraint.
             @param {!BaseDivider} divider
             @returns {undefined} */
@@ -42,35 +44,30 @@
             initNode: function(parent, attrs) {
                 const self = this;
                 
-                if (attrs.activeColor == null) attrs.activeColor = '#bbbbbb';
-                if (attrs.hoverColor == null) attrs.hoverColor = '#dddddd';
-                if (attrs.readyColor == null) attrs.readyColor = '#cccccc';
-                
-                if (attrs.axis == null) attrs.axis = 'x';
-                if (attrs.minValue == null) attrs.minValue = 0;
-                if (attrs.value == null) attrs.value = attrs.minValue;
-                if (attrs.expansionState == null) attrs.expansionState = 2;
-                
-                if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
-                if (attrs.repeatKeyDown == null) attrs.repeatKeyDown = true;
-                
-                if (attrs.activationKeys == null) {
-                    attrs.activationKeys = [
-                        37, // left arrow
-                        38, // up arrow
-                        39, // right arrow
-                        40, // down arrow
-                        13, // enter
-                        32  // spacebar
-                    ];
-                }
+                defAttr(attrs, 'activeColor', '#bbb');
+                defAttr(attrs, 'hoverColor', '#ddd');
+                defAttr(attrs, 'readyColor', '#ccc');
+                defAttr(attrs, 'axis', 'x');
+                defAttr(attrs, 'minValue', 0);
+                defAttr(attrs, 'value', attrs.minValue);
+                defAttr(attrs, 'expansionState', 2);
+                defAttr(attrs, 'focusEmbellishment', false);
+                defAttr(attrs, 'repeatKeyDown', true);
+                defAttr(attrs, 'activationKeys', [
+                    37, // left arrow
+                    38, // up arrow
+                    39, // right arrow
+                    40, // down arrow
+                    13, // enter
+                    32  // spacebar
+                ]);
                 
                 if (attrs.axis === 'y') {
-                    if (attrs.height == null) attrs.height = 6;
-                    if (attrs.cursor == null) attrs.cursor = 'row-resize';
+                    defAttr(attrs, 'height', 6);
+                    defAttr(attrs, 'cursor', 'row-resize');
                 } else {
-                    if (attrs.width == null) attrs.width = 6;
-                    if (attrs.cursor == null) attrs.cursor = 'col-resize';
+                    defAttr(attrs, 'width', 6);
+                    defAttr(attrs, 'cursor', 'col-resize');
                 }
                 
                 // Controls acceleration of the nudge amount
@@ -78,8 +75,8 @@
                 
                 self.callSuper(parent, attrs);
                 
-                // Do afterwards since value might have been constrained from the
-                // value provided in attrs.
+                // Do afterwards since value might have been constrained from 
+                // the value provided in attrs.
                 if (attrs.restoreValue == null) self.setRestoreValue(self.value);
                 
                 if (self.limitToParent != null) updateLimitToParentConstraint(self);

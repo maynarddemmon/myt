@@ -27,7 +27,7 @@
             // Determine what "from" to use if none was provided.
             if (animator.from == null) {
                 animator.__temporaryFrom = true;
-                animator.from = relative ? (animator.__isColorAnim ? '#000000' : 0) : target.get(attr);
+                animator.from = relative ? (animator.__isColorAnim ? '#000' : 0) : target.get(attr);
             }
             
             const motionValue = animator.easingFunction(progressPercent) - (relative ? animator.easingFunction(oldProgressPercent) : 0),

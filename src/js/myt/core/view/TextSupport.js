@@ -189,7 +189,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
         let shadow = (x || 0) + 'px ' + 
             (y || 0) + 'px ' + 
             (blur != null ? blur : 2) + 'px ' + 
-            (color || '#000000');
+            (color || '#000');
             
         if (extraStrength > 0) {
             const value = [shadow];

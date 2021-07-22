@@ -691,7 +691,7 @@
         },
         
         setOutlineColor: function(v) {
-            this.getOuterDomStyle().outlineColor = this.outlineColor = v || '#000000';
+            this.getOuterDomStyle().outlineColor = this.outlineColor = v || '#000';
         },
         
         // Borders
@@ -718,7 +718,7 @@
         },
         
         setBorderColor: function(v) {
-            this.getOuterDomStyle().borderColor = this.borderColor = v || '#000000';
+            this.getOuterDomStyle().borderColor = this.borderColor = v || '#000';
         },
         
         // Edge treatements

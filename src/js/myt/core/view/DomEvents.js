@@ -578,7 +578,7 @@
             // Mozilla and Webkit
             const s = this.getInnerDomStyle();
             s.outlineWidth = 'thin';
-            s.outlineColor = '#88bbff';
+            s.outlineColor = '#8bf';
             s.outlineStyle = 'solid';
             s.outlineOffset = '0px';
         },

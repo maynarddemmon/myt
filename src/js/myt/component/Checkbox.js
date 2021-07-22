@@ -3,6 +3,8 @@
         STYLE_OUTLINE = 'outline',
         DEFAULT_STYLE = STYLE_OUTLINE,
         
+        defAttr = pkg.AccessorSupport.defAttr,
+        
         updateUI = (checkbox) => {
             const label = checkbox.label || '',
                 checkboxStyle = checkbox.checkboxStyle || DEFAULT_STYLE;
@@ -20,20 +22,20 @@
             label:string
             checkboxStyle:string Determines what style of checkbox to display.
                 Supported values are "solid" and "outline".
-    */
+        
+        @class */
     pkg.Checkbox = new JS.Class('Checkbox', pkg.Text, {
         include: [pkg.SimpleButtonStyle, pkg.ValueComponent],
         
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            if (attrs.value == null) attrs.value = false;
-            if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
-            if (attrs.checkboxStyle == null) attrs.checkboxStyle = DEFAULT_STYLE;
-            
-            if (attrs.activeColor == null) attrs.activeColor = 'inherits';
-            if (attrs.hoverColor == null) attrs.hoverColor = 'inherits';
-            if (attrs.readyColor == null) attrs.readyColor = 'inherits';
+            defAttr(attrs, 'value', false);
+            defAttr(attrs, 'focusEmbellishment', false);
+            defAttr(attrs, 'checkboxStyle', DEFAULT_STYLE);
+            defAttr(attrs, 'activeColor', 'inherits');
+            defAttr(attrs, 'hoverColor', 'inherits');
+            defAttr(attrs, 'readyColor', 'inherits');
             
             this.callSuper(parent, attrs);
             

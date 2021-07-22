@@ -1,5 +1,8 @@
 ((pkg) => {
-    const SizeToParent = pkg.SizeToParent;
+    const SizeToParent = pkg.SizeToParent,
+        View = pkg.View,
+        
+        defAttr = pkg.AccessorSupport.defAttr;
     
     /** A dimmer that can be placed on another myt.View to obscure the subviews
         of that view.
@@ -12,14 +15,14 @@
                 the dimmer is hidden if restoreFocus is true.
         
         @class */
-    pkg.Dimmer = new JS.Class('Dimmer', pkg.View, {
+    pkg.Dimmer = new JS.Class('Dimmer', View, {
         include: [SizeToParent],
         
         
         // Class Methods and Attributes ////////////////////////////////////////
         extend: {
             DEFAULT_OPACITY: 0.35,
-            DEFAULT_COLOR: '#000000'
+            DEFAULT_COLOR: '#000'
         },
         
         
@@ -32,10 +35,10 @@
             
             attrs.focusable = attrs.focusCage = true;
             
-            if (attrs.percentOfParentWidth == null) attrs.percentOfParentWidth = 100;
-            if (attrs.percentOfParentHeight == null) attrs.percentOfParentHeight = 100;
-            if (attrs.visible == null) attrs.visible = false;
-            if (attrs.ignoreLayout == null) attrs.ignoreLayout = true;
+            defAttr(attrs, 'percentOfParentWidth', 100);
+            defAttr(attrs, 'percentOfParentHeight', 100);
+            defAttr(attrs, 'visible', false);
+            defAttr(attrs, 'ignoreLayout', true);
             
             self.callSuper(parent, attrs);
             
@@ -50,7 +53,7 @@
             this.callSuper();
             
             const Dimmer = pkg.Dimmer;
-            new pkg.View(this, {
+            new View(this, {
                 name:'overlay',
                 ignorePlacement:true, 
                 opacity:Dimmer.DEFAULT_OPACITY,

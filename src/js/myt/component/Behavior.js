@@ -5,6 +5,8 @@
         GlobalKeys = G.keys,
         GlobalIdle = G.idle,
         
+        defAttr = pkg.AccessorSupport.defAttr,
+        
         getKeyCodeFromEvent = event => pkg.KeyObservable.getKeyCodeFromEvent(event),
         getMouseFromEvent = event => pkg.MouseObservable.getMouseFromEvent(event);
     
@@ -60,7 +62,7 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides */
         initNode: function(parent, attrs) {
-            if (attrs.disabled == null) attrs.disabled = false;
+            defAttr(attrs, 'disabled', false);
             
             this.callSuper(parent, attrs);
         },
@@ -126,7 +128,7 @@
             
             self.activateKeyDown = -1;
             
-            if (attrs.activationKeys == null) attrs.activationKeys = pkg.KeyActivation.DEFAULT_ACTIVATION_KEYS;
+            defAttr(attrs, 'activationKeys', pkg.KeyActivation.DEFAULT_ACTIVATION_KEYS);
             
             self.callSuper(parent, attrs);
             
@@ -268,7 +270,7 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides */
         initNode: function(parent, attrs) {
-            if (attrs.mouseOver == null) attrs.mouseOver = false;
+            defAttr(attrs, 'mouseOver', false);
             
             this.callSuper(parent, attrs);
             
@@ -370,7 +372,7 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides */
         initNode: function(parent, attrs) {
-            if (attrs.mouseDown == null) attrs.mouseDown = false;
+            defAttr(attrs, 'mouseDown', false);
             
             this.callSuper(parent, attrs);
             

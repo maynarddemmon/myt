@@ -5,6 +5,8 @@
         ModalPanel = pkg.ModalPanel,
         SizeToChildren = pkg.SizeToChildren,
         
+        defAttr = pkg.AccessorSupport.defAttr,
+        
         objectAssign = Object.assign,
         
         /* Hide spinner related elements. */
@@ -19,15 +21,15 @@
         DialogButton = new JSClass('DialogButton', pkg.SimpleTextButton, {
             /** @overrides */
             initNode: function(parent, attrs) {
-                if (attrs.height == null) attrs.height = 20;
-                if (attrs.shrinkToFit == null) attrs.shrinkToFit = true;
-                if (attrs.inset == null) attrs.inset = 10;
-                if (attrs.outset == null) attrs.outset = 10;
-                if (attrs.textY == null) attrs.textY = 3;
-                if (attrs.roundedCorners == null) attrs.roundedCorners = 3;
-                if (attrs.activeColor == null) attrs.activeColor = '#bbbbbb';
-                if (attrs.hoverColor == null) attrs.hoverColor = '#dddddd';
-                if (attrs.readyColor == null) attrs.readyColor = '#cccccc';
+                defAttr(attrs, 'height', 20);
+                defAttr(attrs, 'shrinkToFit', true);
+                defAttr(attrs, 'inset', 10);
+                defAttr(attrs, 'outset', 10);
+                defAttr(attrs, 'textY', 3);
+                defAttr(attrs, 'roundedCorners', 3);
+                defAttr(attrs, 'activeColor', '#bbb');
+                defAttr(attrs, 'hoverColor', '#ddd');
+                defAttr(attrs, 'readyColor', '#ccc');
                 
                 this.callSuper(parent, attrs);
             }
@@ -48,9 +50,9 @@
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
                 DEFAULT_RADIUS: 12,
-                DEFAULT_SHADOW: [0, 4, 20, '#666666'],
-                DEFAULT_BORDER: [1, 'solid', '#ffffff'],
-                DEFAULT_BGCOLOR: '#ffffff',
+                DEFAULT_SHADOW: [0, 4, 20, '#666'],
+                DEFAULT_BORDER: [1, 'solid', '#fff'],
+                DEFAULT_BGCOLOR: '#fff',
                 DEFAULT_BUTTON_CLASS: DialogButton,
                 
                 /** Makes the text wrap at 200px and the dialog will be at
@@ -84,7 +86,7 @@
                     cancelTxt:'Cancel',
                     confirmTxt:'Choose',
                     titleText:'Choose a Color',
-                    color:'#000000'
+                    color:'#000'
                 },
                 
                 /** Defaults used in a date picker dialog. */
@@ -93,7 +95,7 @@
                     confirmTxt:'Choose',
                     titleText:'Choose a Date',
                     timeOnlyTitleText:'Choose a Time',
-                    color:'#000000',
+                    color:'#000',
                     locales:{
                         en: {
                             days: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
@@ -111,7 +113,7 @@
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides */
             initNode: function(parent, attrs) {
-                if (attrs.buttonClass == null) attrs.buttonClass = Dialog.DEFAULT_BUTTON_CLASS;
+                defAttr(attrs, 'buttonClass', Dialog.DEFAULT_BUTTON_CLASS);
                 
                 this.callSuper(parent, attrs);
                 
@@ -159,10 +161,10 @@
                     inset:5,
                     outset:14,
                     roundedCorners:9,
-                    activeColor:'#cc0000',
-                    hoverColor:'#ff3333',
-                    readyColor:'#ff0000',
-                    textColor:'#ffffff',
+                    activeColor:'#c00',
+                    hoverColor:'#f33',
+                    readyColor:'#f00',
+                    textColor:'#fff',
                     text:pkg.FontAwesome.makeTag(['times']),
                     tooltip:'Close Dialog.',
                 });
@@ -389,7 +391,7 @@
                 
                 const spinner = self.spinner = new pkg.Spinner(content, {
                     align:'center', visible:true,
-                    borderColor:'#cccccc',
+                    borderColor:'#ccc',
                     size:50, y:opts.msgY == null ? ModalPanel.DEFAULT_PADDING_Y : opts.msgY,
                 });
                 if (msg) {
@@ -440,7 +442,7 @@
                     width:337,
                     height:177,
                     color:opts.color,
-                    palette:['#000000','#111111','#222222','#333333','#444444','#555555','#666666','#777777','#888888','#999999','#aaaaaa','#bbbbbb','#cccccc','#dddddd','#eeeeee','#ffffff']
+                    palette:['#000','#111','#222','#333','#444','#555','#666','#777','#888','#999','#aaa','#bbb','#ccc','#ddd','#eee','#fff']
                 });
                 self.show();
                 closeBtn.setVisible(true);
@@ -498,7 +500,7 @@
                     ignoreLayout:true,
                     width:content.width,
                     height:24,
-                    bgColor:'#eeeeee',
+                    bgColor:'#eee',
                     roundedTopLeftCorner:R,
                     roundedTopRightCorner:R
                 })).sendToBack();
@@ -518,8 +520,8 @@
                 
                 // Cancel Button
                 let attrs = opts.cancelAttrs || {};
-                if (attrs.name == null) attrs.name = 'cancelBtn';
-                if (attrs.text == null) attrs.text = opts.cancelTxt;
+                defAttr(attrs, 'name', 'cancelBtn');
+                defAttr(attrs, 'text', opts.cancelTxt);
                 if (opts.activeColor != null) attrs.activeColor = opts.activeColor;
                 if (opts.hoverColor != null) attrs.hoverColor = opts.hoverColor;
                 if (opts.readyColor != null) attrs.readyColor = opts.readyColor;
@@ -528,8 +530,8 @@
                 
                 // Confirm Button
                 attrs = opts.confirmAttrs || {};
-                if (attrs.name == null) attrs.name = 'confirmBtn';
-                if (attrs.text == null) attrs.text = opts.confirmTxt;
+                defAttr(attrs, 'name', 'confirmBtn');
+                defAttr(attrs, 'name', opts.confirmTxt);
                 if (opts.activeColorConfirm != null) attrs.activeColor = opts.activeColorConfirm;
                 if (opts.hoverColorConfirm != null) attrs.hoverColor = opts.hoverColorConfirm;
                 if (opts.readyColorConfirm != null) attrs.readyColor = opts.readyColorConfirm;
@@ -551,7 +553,7 @@
                     y:bgY,
                     width:content.width,
                     height:content.height - bgY,
-                    bgColor:'#eeeeee',
+                    bgColor:'#eee',
                     roundedBottomLeftCorner:r,
                     roundedBottomRightCorner:r
                 })).sendToBack();

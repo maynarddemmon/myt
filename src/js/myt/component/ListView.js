@@ -2,6 +2,8 @@
     const JSClass = JS.Class,
         JSModule = JS.Module,
         
+        defAttr = pkg.AccessorSupport.defAttr,
+        
         /** Defines the interface list view items must support.
             
             Attributes:
@@ -50,10 +52,10 @@
             this.maxHeight = -1;
             this.minWidth = 0;
             
-            if (attrs.defaultItemClass == null) attrs.defaultItemClass = pkg.ListViewItem;
-            if (attrs.overflow == null) attrs.overflow = 'autoy';
-            if (attrs.bgColor == null) attrs.bgColor = '#cccccc';
-            if (attrs.boxShadow == null) attrs.boxShadow = pkg.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE;
+            defAttr(attrs, 'defaultItemClass', pkg.ListViewItem);
+            defAttr(attrs, 'overflow', 'autoy');
+            defAttr(attrs, 'bgColor', '#ccc');
+            defAttr(attrs, 'boxShadow', pkg.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
             
             this.callSuper(parent, attrs);
             
@@ -244,13 +246,13 @@
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            if (attrs.listViewClass == null) attrs.listViewClass = pkg.ListView;
-            if (attrs.listViewAttrs == null) attrs.listViewAttrs = {};
-            if (attrs.itemConfig == null) attrs.itemConfig = [];
+            defAttr(attrs, 'listViewClass', pkg.ListView);
+            defAttr(attrs, 'listViewAttrs', {});
+            defAttr(attrs, 'itemConfig', []);
             
             // Assume this will be mixed onto something that implements 
             // myt.KeyActivation since it probably will.
-            if (attrs.activationKeys == null) attrs.activationKeys = [13,27,32,37,38,39,40];
+            defAttr(attrs, 'activationKeys', [13,27,32,37,38,39,40]);
             
             this.callSuper(parent, attrs);
         },
@@ -352,17 +354,14 @@
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            if (attrs.height == null) attrs.height = 24;
-            
-            if (attrs.activeColor == null) attrs.activeColor = '#bbbbbb';
-            if (attrs.hoverColor == null) attrs.hoverColor = '#ffffff';
-            if (attrs.readyColor == null) attrs.readyColor = '#eeeeee';
-            
-            if (attrs.contentAlign == null) attrs.contentAlign = 'left';
-            if (attrs.inset == null) attrs.inset = 8;
-            if (attrs.outset == null) attrs.outset = 8;
-            
-            if (attrs.activationKeys == null) attrs.activationKeys = [13,27,32,37,38,39,40];
+            defAttr(attrs, 'height', 24);
+            defAttr(attrs, 'activeColor', '#bbb');
+            defAttr(attrs, 'hoverColor', '#fff');
+            defAttr(attrs, 'readyColor', '#eee');
+            defAttr(attrs, 'contentAlign', 'left');
+            defAttr(attrs, 'inset', 8);
+            defAttr(attrs, 'outset', 8);
+            defAttr(attrs, 'activationKeys', [13,27,32,37,38,39,40]);
             
             this.callSuper(parent, attrs);
         },
@@ -430,8 +429,8 @@
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            if (attrs.height == null) attrs.height = 1;
-            if (attrs.bgColor == null) attrs.bgColor = '#666666';
+            defAttr(attrs, 'height', 1);
+            defAttr(attrs, 'bgColor', '#666');
             
             this.callSuper(parent, attrs);
         }

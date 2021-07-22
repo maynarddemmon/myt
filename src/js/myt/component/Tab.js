@@ -99,11 +99,11 @@
                 DEFAULT_HEIGHT: 24,
                 DEFAULT_INSET: 8,
                 DEFAULT_OUTSET: 8,
-                DEFAULT_FILL_COLOR_SELECTED: '#ffffff',
-                DEFAULT_FILL_COLOR_HOVER: '#eeeeee',
-                DEFAULT_FILL_COLOR_ACTIVE: '#aaaaaa',
-                DEFAULT_FILL_COLOR_READY: '#cccccc',
-                DEFAULT_LABEL_TEXT_COLOR_SELECTED:'#333333',
+                DEFAULT_FILL_COLOR_SELECTED: '#fff',
+                DEFAULT_FILL_COLOR_HOVER: '#eee',
+                DEFAULT_FILL_COLOR_ACTIVE: '#aaa',
+                DEFAULT_FILL_COLOR_READY: '#ccc',
+                DEFAULT_LABEL_TEXT_COLOR_SELECTED:'#333',
                 DEFAULT_RADIUS:6
             },
             

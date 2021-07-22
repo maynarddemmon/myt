@@ -377,9 +377,9 @@ test("Outlines", function() {
     ok(v1.outlineStyle === 'solid', "Outline style is now solid.");
     ok(v1.deStyle.outlineStyle === 'solid', "Outline style is solid.");
     
-    v1.setOutlineColor('#ffffff');
+    v1.setOutlineColor('#fff');
     
-    ok(v1.outlineColor === '#ffffff', "Outline color is now #ffffff.");
+    ok(v1.outlineColor === '#fff', "Outline color is now #fff.");
     ok(v1.deStyle.outlineColor === 'rgb(255, 255, 255)', "Outline color is now rgb(255, 255, 255).");
     
     v1.setOutline(null);
@@ -390,10 +390,10 @@ test("Outlines", function() {
     ok(v1.outlineStyle === 'none', "Outline style is now none.");
     ok(v1.deStyle.outlineStyle === 'none', "Outline style is now none.");
     
-    ok(v1.outlineColor === '#000000', "Outline color is now #000000.");
+    ok(v1.outlineColor === '#000', "Outline color is now #000.");
     ok(v1.deStyle.outlineColor === 'rgb(0, 0, 0)', "Outline color is now rgb(0, 0, 0).");
     
-    v1.setOutline([2, 'dotted', '#ffffff']);
+    v1.setOutline([2, 'dotted', '#fff']);
     
     ok(v1.outlineWidth === 2, "Outline width is now 2.");
     ok(v1.deStyle.outlineWidth === '2px', "Outline width is now 2px.");
@@ -401,7 +401,7 @@ test("Outlines", function() {
     ok(v1.outlineStyle === 'dotted', "Outline style is now dotted.");
     ok(v1.deStyle.outlineStyle === 'dotted', "Outline style is now dotted.");
     
-    ok(v1.outlineColor === '#ffffff', "Outline color is now #ffffff.");
+    ok(v1.outlineColor === '#fff', "Outline color is now #fff.");
     ok(v1.deStyle.outlineColor === 'rgb(255, 255, 255)', "Outline color is now rgb(255, 255, 255).");
     
     v1.setOutlineWidth();
@@ -416,7 +416,7 @@ test("Outlines", function() {
     
     v1.setOutlineColor(0);
     
-    ok(v1.outlineColor === '#000000', "Outline color is now #000000.");
+    ok(v1.outlineColor === '#000', "Outline color is now #000.");
     ok(v1.deStyle.outlineColor === 'rgb(0, 0, 0)', "Outline color is now rgb(0, 0, 0).");
     
     v.destroy();
@@ -446,9 +446,9 @@ test("Borders", function() {
     ok(v1.borderStyle === 'solid', "Border style is now solid.");
     ok(v1.deStyle.borderStyle === 'solid', "Border style is solid.");
     
-    v1.setBorderColor('#ffffff');
+    v1.setBorderColor('#fff');
     
-    ok(v1.borderColor === '#ffffff', "Border color is now #ffffff.");
+    ok(v1.borderColor === '#fff', "Border color is now #fff.");
     ok(v1.deStyle.borderColor === 'rgb(255, 255, 255)', "Border color is now rgb(255, 255, 255).");
     
     v1.setBorder(null);
@@ -459,10 +459,10 @@ test("Borders", function() {
     ok(v1.borderStyle === 'none', "Border style is now none.");
     ok(v1.deStyle.borderStyle === 'none', "Border style is now none.");
     
-    ok(v1.borderColor === '#000000', "Border color is now #000000.");
+    ok(v1.borderColor === '#000', "Border color is now #000.");
     ok(v1.deStyle.borderColor === 'rgb(0, 0, 0)', "Border color is now rgb(0, 0, 0).");
     
-    v1.setBorder([2, 'dotted', '#ffffff']);
+    v1.setBorder([2, 'dotted', '#fff']);
     
     ok(v1.borderWidth === 2, "Border width is now 2.");
     ok(v1.deStyle.borderWidth === '2px', "Border width is now 2px.");
@@ -470,7 +470,7 @@ test("Borders", function() {
     ok(v1.borderStyle === 'dotted', "Border style is now dotted.");
     ok(v1.deStyle.borderStyle === 'dotted', "Border style is now dotted.");
     
-    ok(v1.borderColor === '#ffffff', "Border color is now #ffffff.");
+    ok(v1.borderColor === '#fff', "Border color is now #fff.");
     ok(v1.deStyle.borderColor === 'rgb(255, 255, 255)', "Border color is now rgb(255, 255, 255).");
     
     v1.setBorderWidth();
@@ -485,7 +485,7 @@ test("Borders", function() {
     
     v1.setBorderColor(0);
     
-    ok(v1.borderColor === '#000000', "Border color is now #000000.");
+    ok(v1.borderColor === '#000', "Border color is now #000.");
     ok(v1.deStyle.borderColor === 'rgb(0, 0, 0)', "Border color is now rgb(0, 0, 0).");
     
     v.destroy();

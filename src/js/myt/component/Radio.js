@@ -1,6 +1,8 @@
 ((pkg) => {
     const BAGAttrName = 'selected',
         
+        defAttr = pkg.AccessorSupport.defAttr,
+        
         updateUI = (radio) => {
             const label = radio.label || '';
             radio.setText(
@@ -39,21 +41,19 @@
             radioStyle:string Determines what style of radio to display.
                 Supported values are "solid" and "outline".
         
-        @class
-    */
+        @class */
     pkg.Radio = new JS.Class('Radio', pkg.Text, {
         include: [pkg.SimpleButtonStyle, pkg.BAGMembership],
         
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            if (attrs.selected == null) attrs.selected = false;
+            defAttr(attrs, 'selected', false);
             if (attrs.groupId == null) attrs.groupId = pkg.generateGuid();
-            if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
-            
-            if (attrs.activeColor == null) attrs.activeColor = 'inherits';
-            if (attrs.hoverColor == null) attrs.hoverColor = 'inherits';
-            if (attrs.readyColor == null) attrs.readyColor = 'inherits';
+            defAttr(attrs, 'focusEmbellishment', false);
+            defAttr(attrs, 'activeColor', 'inherits');
+            defAttr(attrs, 'hoverColor', 'inherits');
+            defAttr(attrs, 'readyColor', 'inherits');
             
             const value = attrs.value;
             delete attrs.value;

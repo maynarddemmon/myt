@@ -5,6 +5,8 @@
         globalMouse = G.mouse,
         Draggable = pkg.Draggable,
         
+        defAttr = pkg.AccessorSupport.defAttr,
+        
         /*  @param {!Object} autoScroller
             @param {string} dir - The direction to scroll.
             @param {number} amt - The amount to scroll.
@@ -26,14 +28,14 @@
         
         /*  @param {!Object} autoScroller
             @returns {undefined} */
-        resetVScroll = (autoScroller) => {
+        resetVScroll = autoScroller => {
             autoScroller.__isAutoscrollUp = autoScroller.__isAutoscrollDown = false;
             autoScroller.__timerIdAutoscrollUp = autoScroller.__timerIdAutoscrollDown = null;
         },
         
         /*  @param {!Object} autoScroller
             @returns {undefined} */
-        resetHScroll = (autoScroller) => {
+        resetHScroll = autoScroller => {
             autoScroller.__isAutoscrollLeft = autoScroller.__isAutoscrollRight = false;
             autoScroller.__timerIdAutoscrollLeft = autoScroller.__timerIdAutoscrollRight = null;
         },
@@ -117,8 +119,8 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides */
         initNode: function(parent, attrs) {
-            if (attrs.distanceBeforeDrag == null) attrs.distanceBeforeDrag = 2;
-            if (attrs.dropParent == null) attrs.dropParent = parent.getRoot();
+            defAttr(attrs, 'distanceBeforeDrag', 2);
+            defAttr(attrs, 'dropParent', parent.getRoot());
             
             this.callSuper(parent, attrs);
         },
@@ -214,32 +216,32 @@
             that has a matching drag group.
             @param dropable:myt.Dropable The dropable being dragged.
             @returns {undefined} */
-        notifyDragStart: (dropable) => {},
+        notifyDragStart: dropable => {},
         
         /** Called by myt.GlobalDragManager when a dropable stops being dragged
             that has a matching drag group.
             @param dropable:myt.Dropable The dropable no longer being dragged.
             @returns {undefined} */
-        notifyDragStop: (dropable) => {},
+        notifyDragStop: dropable => {},
         
         /** Called by myt.GlobalDragManager when a dropable is dragged over this
             view and has a matching drag group.
             @param dropable:myt.Dropable The dropable being dragged over this view.
             @returns {undefined} */
-        notifyDragEnter: (dropable) => {},
+        notifyDragEnter: dropable => {},
         
         /** Called by myt.GlobalDragManager when a dropable is dragged out of this
             view and has a matching drag group.
             @param dropable:myt.Dropable The dropable being dragged out of 
                 this view.
             @returns {undefined} */
-        notifyDragLeave: (dropable) => {},
+        notifyDragLeave: dropable => {},
         
         /** Called by myt.GlobalDragManager when a dropable is dropped onto this
             view and has a matching drag group.
             @param dropable:myt.Dropable The dropable being dropped onto this view.
             @returns {undefined} */
-        notifyDrop: (dropable) => {}
+        notifyDrop: dropable => {}
     });
     
     /** Makes an myt.View drag and dropable via the mouse.
@@ -266,7 +268,7 @@
             of drag group. The default implementation returns true.
             @param dropTarget:myt.DropTarget The drop target dragged over.
             @returns boolean: True if the drop will be allowed, false otherwise. */
-        willPermitDrop: (dropTarget) => true,
+        willPermitDrop: dropTarget => true,
         
         /** @overrides myt.Draggable */
         startDrag: function(event) {
@@ -371,7 +373,7 @@
             this.scrollAmount = 2;
             this.scrollAcceleration = 7;
             
-            if (attrs.overflow == null) attrs.overflow = 'auto';
+            defAttr(attrs, 'overflow', 'auto');
             
             this.callSuper(parent, attrs);
             

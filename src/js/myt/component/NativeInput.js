@@ -4,6 +4,8 @@
         View = pkg.View,
         Disableable = pkg.Disableable,
         
+        defAttr = pkg.AccessorSupport.defAttr,
+        
         DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE = pkg.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE,
         
         setEditableTextAttr = (editableText, v, propName) => {
@@ -45,8 +47,8 @@
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides myt.View */
             initNode: function(parent, attrs) {
-                if (attrs.tagName == null) attrs.tagName = 'input';
-                if (attrs.focusable == null) attrs.focusable = true;
+                defAttr(attrs, 'tagName', 'input');
+                defAttr(attrs, 'focusable', true);
                 
                 this.callSuper(parent, attrs);
                 
@@ -190,8 +192,8 @@
             initNode: function(parent, attrs) {
                 const self = this;
                 
-                if (attrs.bgColor == null) attrs.bgColor = 'transparent';
-                if (attrs.spellcheck == null) attrs.spellcheck = false;
+                defAttr(attrs, 'bgColor', 'transparent');
+                defAttr(attrs, 'spellcheck', false);
                 
                 self.callSuper(parent, attrs);
                 
@@ -405,16 +407,15 @@
         initNode: function(parent, attrs) {
             const self = this;
             
-            if (attrs.tagName == null) attrs.tagName = 'div';
+            defAttr(attrs, 'tagName', 'div');
             attrs.inputType = null;
             
-            if (attrs.whiteSpace == null) attrs.whiteSpace = 'pre';
-            if (attrs.contentEditable == null) attrs.contentEditable = true;
+            defAttr(attrs, 'whiteSpace', 'pre');
+            defAttr(attrs, 'contentEditable', true);
             
             self.callSuper(parent, attrs);
             
             self.attachToDom(self, '__cleanInput', 'keydown');
-            
             self.attachToDom(self, '__userInteraction', 'keyup');
             self.attachToDom(self, '__userInteraction', 'mouseup');
             
@@ -599,11 +600,10 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.BaseInputText */
         initNode: function(parent, attrs) {
-            if (attrs.tagName == null) attrs.tagName = 'textarea';
+            defAttr(attrs, 'tagName', 'textarea');
             attrs.inputType = null;
-            
-            if (attrs.resize == null) attrs.resize = 'none';
-            if (attrs.wrap == null) attrs.wrap = 'soft';
+            defAttr(attrs, 'resize', 'none');
+            defAttr(attrs, 'wrap', 'soft');
             
             this.callSuper(parent, attrs);
         },
@@ -643,13 +643,13 @@
         initNode: function(parent, attrs) {
             this.filterItems = true;
             
-            if (attrs.activationKeys == null) attrs.activationKeys = [13,27,38,40];
-            if (attrs.bgColor == null) attrs.bgColor = '#ffffff';
-            if (attrs.borderWidth == null) attrs.borderWidth = 1;
-            if (attrs.borderStyle == null) attrs.borderStyle = 'solid';
-            if (attrs.floatingAlignOffset == null) attrs.floatingAlignOffset = attrs.borderWidth;
-            if (attrs.listViewAttrs == null) attrs.listViewAttrs = {maxHeight:99};
-            if (attrs.fullItemConfig == null) attrs.fullItemConfig = [];
+            defAttr(attrs, 'activationKeys', [13,27,38,40]);
+            defAttr(attrs, 'bgColor', '#fff');
+            defAttr(attrs, 'borderWidth', 1);
+            defAttr(attrs, 'borderStyle', 'solid');
+            defAttr(attrs, 'floatingAlignOffset', attrs.borderWidth);
+            defAttr(attrs, 'listViewAttrs', {maxHeight:99});
+            defAttr(attrs, 'fullItemConfig', []);
             
             this.callSuper(parent, attrs);
         },
@@ -745,12 +745,10 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.NativeInputWrapper */
         initNode: function(parent, attrs) {
-            if (attrs.tagName == null) attrs.tagName = 'select';
+            defAttr(attrs, 'tagName', 'select');
             attrs.inputType = null;
-            
-            if (attrs.multiple == null) attrs.multiple = false;
-            if (attrs.size == null) attrs.size = attrs.multiple ? 4 : 1;
-            
+            defAttr(attrs, 'multiple', false);
+            defAttr(attrs, 'size', attrs.multiple ? 4 : 1);
             this.callSuper(parent, attrs);
             
             this.attachToDom(this, '__syncToDom', 'change');

@@ -4,6 +4,8 @@
         
         View = pkg.View,
         
+        defAttr = pkg.AccessorSupport.defAttr,
+        
         // GridController
         findLastColumn = controller => {
             const hdrs = controller.columnHeaders;
@@ -537,18 +539,17 @@
             initNode: function(parent, attrs) {
                 const self = this;
                 
-                if (attrs.minValue == null) attrs.minValue = 16;
-                if (attrs.maxValue == null) attrs.maxValue = defaultMaxValue;
-                if (attrs.resizable == null) attrs.resizable = true;
-                if (attrs.flex == null) attrs.flex = 0;
-                if (attrs.cellXAdj == null) attrs.cellXAdj = 0;
-                if (attrs.cellWidthAdj == null) attrs.cellWidthAdj = 0;
-                
-                if (attrs.sortable == null) attrs.sortable = true;
-                if (attrs.sortState == null) attrs.sortState = 'none';
+                defAttr(attrs, 'minValue', 16);
+                defAttr(attrs, 'maxValue', defaultMaxValue);
+                defAttr(attrs, 'resizable', true);
+                defAttr(attrs, 'flex', 0);
+                defAttr(attrs, 'cellXAdj', 0);
+                defAttr(attrs, 'cellWidthAdj', 0);
+                defAttr(attrs, 'sortable', true);
+                defAttr(attrs, 'sortState', 'none');
                 
                 // Ensure participation in determinePlacement method of myt.Grid
-                if (attrs.placement == null) attrs.placement = '*';
+                defAttr(attrs, 'placement', '*');
                 
                 self.callSuper(parent, attrs);
                 
@@ -707,7 +708,7 @@
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
                 // Ensure participation in determinePlacement method of myt.Grid
-                if (attrs.placement == null) attrs.placement = '*';
+                defAttr(attrs, 'placement', '*');
                 
                 this.callSuper(parent, attrs);
                 
@@ -770,11 +771,11 @@
                 SpacedLayout = pkg.SpacedLayout;
             
             // Allows horizontal scrolling if the grid columns are too wide.
-            if (attrs.overflow == null) attrs.overflow = 'autox';
+            defAttr(attrs, 'overflow', 'autox');
             
-            if (attrs.bgColor == null) attrs.bgColor = '#cccccc';
-            if (attrs.rowSpacing == null) attrs.rowSpacing = 1;
-            if (attrs.columnSpacing == null) attrs.columnSpacing = 1;
+            defAttr(attrs, 'bgColor', '#ccc');
+            defAttr(attrs, 'rowSpacing', 1);
+            defAttr(attrs, 'columnSpacing', 1);
             
             const isAutoScrolling = attrs.isAutoScrolling;
             delete attrs.isAutoScrolling;
@@ -935,14 +936,14 @@
         initNode: function(parent, attrs) {
             const self = this;
             
-            if (attrs.activeColor == null) attrs.activeColor = '#999999';
-            if (attrs.hoverColor == null) attrs.hoverColor = '#bbbbbb';
-            if (attrs.readyColor == null) attrs.readyColor = '#aaaaaa';
-            if (attrs.inset == null) attrs.inset = 2;
-            if (attrs.outset == null) attrs.outset = 2;
-            if (attrs.height == null) attrs.height = 18;
-            if (attrs.contentAlign == null) attrs.contentAlign = 'left';
-            if (attrs.sortIconColor == null) attrs.sortIconColor = '#666666';
+            defAttr(attrs, 'activeColor', '#999');
+            defAttr(attrs, 'hoverColor', '#bbb');
+            defAttr(attrs, 'readyColor', '#aaa');
+            defAttr(attrs, 'inset', 2);
+            defAttr(attrs, 'outset', 2);
+            defAttr(attrs, 'height', 18);
+            defAttr(attrs, 'contentAlign', 'left');
+            defAttr(attrs, 'sortIconColor', '#666');
             
             self.callSuper(parent, attrs);
             

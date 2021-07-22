@@ -1,7 +1,9 @@
 ((pkg) => {
     const JSClass = JS.Class,
         View = pkg.View,
-        SizeToDom = pkg.SizeToDom;
+        SizeToDom = pkg.SizeToDom,
+        
+        defAttr = pkg.AccessorSupport.defAttr;
     
     /** A base class for flex box views.
         
@@ -31,7 +33,7 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.View */
         initNode: function(parent, attrs) {
-            if (attrs.tagName == null) attrs.tagName = 'iframe';
+            defAttr(attrs, 'tagName', 'iframe');
             
             this.callSuper(parent, attrs);
             
@@ -113,8 +115,8 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.View */
         initNode: function(parent, attrs) {
-            if (attrs.whiteSpace == null) attrs.whiteSpace = 'nowrap';
-            if (attrs.userUnselectable == null) attrs.userUnselectable = true;
+            defAttr(attrs, 'whiteSpace', 'nowrap');
+            defAttr(attrs, 'userUnselectable', true);
             
             this.callSuper(parent, attrs);
         },
@@ -150,7 +152,7 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.View */
         initNode: function(parent, attrs) {
-            if (attrs.useNaturalSize == null) attrs.useNaturalSize = true;
+            defAttr(attrs, 'useNaturalSize', true);
             
             this.callSuper(parent, attrs);
         }

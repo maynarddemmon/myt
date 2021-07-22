@@ -2,6 +2,8 @@
     const JSClass = JS.Class,
         View = pkg.View,
         
+        defAttr = pkg.AccessorSupport.defAttr,
+        
         /** Provides Slider thumb functionality.
             
             Requires:
@@ -14,18 +16,15 @@
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                if (attrs.width == null) attrs.width = parent.thumbWidth;
-                if (attrs.height == null) attrs.height = parent.thumbHeight;
-                
-                if (attrs.repeatKeyDown == null) attrs.repeatKeyDown = true;
-                if (attrs.activationKeys == null) {
-                    attrs.activationKeys = [
-                        37, // left arrow
-                        38, // up arrow
-                        39, // right arrow
-                        40 // down arrow
-                    ];
-                }
+                defAttr(attrs, 'width', parent.thumbWidth);
+                defAttr(attrs, 'height', parent.thumbHeight);
+                defAttr(attrs, 'repeatKeyDown', true);
+                defAttr(attrs, 'activationKeys', [
+                    37, // left arrow
+                    38, // up arrow
+                    39, // right arrow
+                    40 // down arrow
+                ]);
                 
                 this.callSuper(parent, attrs);
                 
@@ -134,11 +133,10 @@
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides myt.SimpleButton */
             initNode: function(parent, attrs) {
-                if (attrs.activeColor == null) attrs.activeColor = '#bbbbbb';
-                if (attrs.readyColor == null) attrs.readyColor = '#cccccc';
-                if (attrs.hoverColor == null) attrs.hoverColor = '#dddddd';
-                
-                if (attrs.boxShadow == null) attrs.boxShadow = [0, 0, 4, '#666666'];
+                defAttr(attrs, 'activeColor', '#bbb');
+                defAttr(attrs, 'readyColor', '#ccc');
+                defAttr(attrs, 'hoverColor', '#ddd');
+                defAttr(attrs, 'boxShadow', [0, 0, 4, '#666']);
                 
                 this.callSuper(parent, attrs);
                 
@@ -150,13 +148,13 @@
             /** @overrides myt.FocusObservable */
             showFocusEmbellishment: function() {
                 this.hideDefaultFocusEmbellishment();
-                this.setBoxShadow([0, 0, 9, '#666666']);
+                this.setBoxShadow([0, 0, 9, '#666']);
             },
             
             /** @overrides myt.FocusObservable */
             hideFocusEmbellishment: function() {
                 this.hideDefaultFocusEmbellishment();
-                this.setBoxShadow([0, 0, 4, '#666666']);
+                this.setBoxShadow([0, 0, 4, '#666']);
             }
         }),
         
@@ -185,27 +183,23 @@
             // Life Cycle //////////////////////////////////////////////////////////
             /** @overrides myt.View */
             initNode: function(parent, attrs) {
-                if (attrs.axis == null) attrs.axis = 'x';
+                defAttr(attrs, 'axis', 'x');
                 if (attrs.axis === 'x') {
-                    if (attrs.width == null) attrs.width = 100;
-                    if (attrs.height == null) attrs.height = 18;
+                    defAttr(attrs, 'width', 100);
+                    defAttr(attrs, 'height', 18);
                 } else {
-                    if (attrs.width == null) attrs.width = 18;
-                    if (attrs.height == null) attrs.height = 100;
+                    defAttr(attrs, 'width', 18);
+                    defAttr(attrs, 'height', 100);
                 }
-                
-                if (attrs.bgColor == null) attrs.bgColor = '#999999';
-                if (attrs.roundedCorners == null) attrs.roundedCorners = 9;
-                
-                if (attrs.trackInset == null) attrs.trackInset = 9;
-                if (attrs.trackOutset == null) attrs.trackOutset = 9;
-                if (attrs.thumbWidth == null) attrs.thumbWidth = 16;
-                if (attrs.thumbHeight == null) attrs.thumbHeight = 16;
-                if (attrs.thumbOffset == null) attrs.thumbOffset = 1;
-                
-                if (attrs.nudgeAmount == null) attrs.nudgeAmount = 1;
-                
-                if (attrs.thumbClass == null) attrs.thumbClass = SimpleSliderThumb;
+                defAttr(attrs, 'bgColor', '#999');
+                defAttr(attrs, 'roundedCorners', 9);
+                defAttr(attrs, 'trackInset', 9);
+                defAttr(attrs, 'trackOutset', 9);
+                defAttr(attrs, 'thumbWidth', 16);
+                defAttr(attrs, 'thumbHeight', 16);
+                defAttr(attrs, 'thumbOffset', 1);
+                defAttr(attrs, 'nudgeAmount', 1);
+                defAttr(attrs, 'thumbClass', SimpleSliderThumb);
                 
                 this.callSuper(parent, attrs);
             },
@@ -275,7 +269,7 @@
         SimpleSliderRangeFill = pkg.SimpleSliderRangeFill = new JSClass('SimpleSliderRangeFill', View, {
             // Life Cycle //////////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                if (attrs.bgColor == null) attrs.bgColor = '#666666';
+                defAttr(attrs, 'bgColor', '#666');
                 
                 this.callSuper(parent, attrs);
                 
@@ -308,7 +302,7 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.BaseSlider */
         initNode: function(parent, attrs) {
-            if (attrs.rangeFillClass == null) attrs.rangeFillClass = SimpleSliderRangeFill;
+            defAttr(attrs, 'rangeFillClass', SimpleSliderRangeFill);
             
             this.callSuper(parent, attrs);
             

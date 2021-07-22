@@ -2,6 +2,8 @@
     const JSClass = JS.Class,
         JSModule = JS.Module,
         
+        defAttr = pkg.AccessorSupport.defAttr,
+        
         View = pkg.View,
         DEFAULT_ROW_SPACING = 1,
         DEFAULT_ROW_HEIGHT = 30,
@@ -108,18 +110,16 @@
                     rowClasses = defaultClassObj;
                 }
                 
-                if (attrs.modelIDName == null) attrs.modelIDName = 'id';
-                if (attrs.numericSort == null) attrs.numericSort = true;
-                if (attrs.ascendingSort == null) attrs.ascendingSort = true;
-                if (attrs.overflow == null) attrs.overflow = 'autoy';
-                
-                if (attrs.bgColor == null) attrs.bgColor = DEFAULT_BG_COLOR;
-                if (attrs.rowSpacing == null) attrs.rowSpacing = DEFAULT_ROW_SPACING;
-                if (attrs.rowInset == null) attrs.rowInset = DEFAULT_ROW_INSET;
-                if (attrs.rowOutset == null) attrs.rowOutset = DEFAULT_ROW_OUTSET;
-                if (attrs.rowHeight == null) attrs.rowHeight = DEFAULT_ROW_HEIGHT;
-                
-                if (attrs.overscrollBehavior == null) attrs.overscrollBehavior = 'auto contain';
+                defAttr(attrs, 'modelIDName', 'id');
+                defAttr(attrs, 'numericSort', true);
+                defAttr(attrs, 'ascendingSort', true);
+                defAttr(attrs, 'overflow', 'autoy');
+                defAttr(attrs, 'bgColor', DEFAULT_BG_COLOR);
+                defAttr(attrs, 'rowSpacing', DEFAULT_ROW_SPACING);
+                defAttr(attrs, 'rowInset', DEFAULT_ROW_INSET);
+                defAttr(attrs, 'rowOutset', DEFAULT_ROW_OUTSET);
+                defAttr(attrs, 'rowHeight', DEFAULT_ROW_HEIGHT);
+                defAttr(attrs, 'overscrollBehavior', 'auto contain');
                 
                 self._rowExtent = self.rowSpacing = self.rowHeight = 0;
                 self._startIdx = self._endIdx = -1;
@@ -416,13 +416,12 @@
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                if (attrs.selectedColor == null) attrs.selectedColor = DEFAULT_SELECTED_COLOR;
-                if (attrs.activeColor == null) attrs.activeColor = DEFAULT_ACTIVE_COLOR;
-                if (attrs.hoverColor == null) attrs.hoverColor = DEFAULT_HOVER_COLOR;
-                if (attrs.readyColor == null) attrs.readyColor = DEFAULT_READY_COLOR;
-                
-                if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
-                if (attrs.activationKeys == null) attrs.activationKeys = [13,27,32,37,38,39,40];
+                defAttr(attrs, 'selectedColor', DEFAULT_SELECTED_COLOR);
+                defAttr(attrs, 'activeColor', DEFAULT_ACTIVE_COLOR);
+                defAttr(attrs, 'hoverColor', DEFAULT_HOVER_COLOR);
+                defAttr(attrs, 'readyColor', DEFAULT_READY_COLOR);
+                defAttr(attrs, 'focusEmbellishment', false);
+                defAttr(attrs, 'activationKeys', [13,27,32,37,38,39,40]);
                 
                 this.callSuper(parent, attrs);
             },
@@ -696,7 +695,7 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides */
         initNode: function(parent, attrs) {
-            if (attrs.columnSpacing == null) attrs.columnSpacing = 1;
+            defAttr(attrs, 'columnSpacing', 1);
             
             attrs.overflow = 'hidden';
             

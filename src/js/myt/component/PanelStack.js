@@ -1,6 +1,8 @@
 ((pkg) => {
     const JSClass = JS.Class,
-    
+        
+        defAttr = pkg.AccessorSupport.defAttr,
+        
         /** Use this to implement more complex transitions in a PanelStack.
             
             @class */
@@ -35,8 +37,8 @@
         initNode: function(parent, attrs) {
             attrs.overflow = 'hidden';
             
-            if (attrs.itemSelectionId == null) attrs.itemSelectionId = 'panelId';
-            if (attrs.maxSelected == null) attrs.maxSelected = 1;
+            defAttr(attrs, 'itemSelectionId', 'panelId');
+            defAttr(attrs, 'maxSelected', 1);
             
             this.callSuper(parent, attrs);
             
@@ -161,8 +163,8 @@
         initNode: function(parent, attrs) {
             attrs.visible = attrs.selected = false;
             
-            if (attrs.bgColor == null) attrs.bgColor = '#ffffff';
-            if (attrs.panelId == null) attrs.panelId = attrs.name;
+            defAttr(attrs, 'bgColor', '#fff');
+            defAttr(attrs, 'panelId', attrs.name);
             
             this.callSuper(parent, attrs);
             
@@ -205,7 +207,7 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides */
         initNode: function(parent, attrs) {
-            if (attrs.duration == null) attrs.duration = 1000;
+            defAttr(attrs, 'duration', 1000);
             
             this.callSuper(parent, attrs);
         },
@@ -245,8 +247,8 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides */
         initNode: function(parent, attrs) {
-            if (attrs.duration == null) attrs.duration = 1000;
-            if (attrs.direction == null) attrs.direction = 'right';
+            defAttr(attrs, 'duration', 1000);
+            defAttr(attrs, 'direction', 'right');
             
             this.callSuper(parent, attrs);
         },

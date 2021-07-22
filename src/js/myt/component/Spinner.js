@@ -21,9 +21,9 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         if (attrs.visible == null) attrs.visible = false;
         if (attrs.borderWidth == null) attrs.borderWidth = 5;
-        if (attrs.borderColor == null) attrs.borderColor = '#ffffff';
+        if (attrs.borderColor == null) attrs.borderColor = '#fff';
         if (attrs.borderStyle == null) attrs.borderStyle = 'solid';
-        if (attrs.spinColor == null) attrs.spinColor = '#000000';
+        if (attrs.spinColor == null) attrs.spinColor = '#000';
         
         self.callSuper(parent, attrs);
         

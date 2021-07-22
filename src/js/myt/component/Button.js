@@ -4,8 +4,10 @@
         
         View = pkg.View,
         
+        defAttr = pkg.AccessorSupport.defAttr,
+        
         defaultDisabledOpacity = 0.5,
-        defaultFocusShadowPropertyValue = [0, 0, 7, '#666666'],
+        defaultFocusShadowPropertyValue = [0, 0, 7, '#666'],
         
         /** Provides button functionality to an myt.View. Most of the functionality 
             comes from the mixins included by this mixin. This mixin resolves issues 
@@ -44,8 +46,8 @@
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides */
             initNode: function(parent, attrs) {
-                if (attrs.focusable == null) attrs.focusable = true;
-                if (attrs.cursor == null) attrs.cursor = 'pointer';
+                defAttr(attrs, 'focusable', true);
+                defAttr(attrs, 'cursor', 'pointer');
                 
                 this.callSuper(parent, attrs);
             },
@@ -292,8 +294,8 @@
             self.iconSpacing = 2;
             self.inset = self.outset = 0;
             
-            if (attrs.shrinkToFit == null) attrs.shrinkToFit = false;
-            if (attrs.contentAlign == null) attrs.contentAlign = 'center';
+            defAttr(attrs, 'shrinkToFit', false);
+            defAttr(attrs, 'contentAlign', 'center');
             
             self.callSuper(parent, attrs);
             
@@ -493,11 +495,10 @@
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
             const self = this;
-            let textView;
             
             self.inset = self.outset = 0;
             
-            if (attrs.shrinkToFit == null) attrs.shrinkToFit = false;
+            defAttr(attrs, 'shrinkToFit', false);
             
             // Use appropriate default based on mutliline text or not.
             self.textY = attrs.shrinkToFit ? 'middle' : 0;
@@ -506,7 +507,7 @@
             
             // Setup the constraint after adoption since the textView won't have
             // been sized to the dom until it's added in.
-            textView = self.textView;
+            let textView = self.textView;
             self.constrain('__updateContentPosition', [
                 self, 'inset', self, 'outset',
                 self, 'width', self, 'shrinkToFit',
@@ -640,15 +641,14 @@
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
-            if (attrs.roundedCorners == null) attrs.roundedCorners = 3;
-            if (attrs.textAlign == null) attrs.textAlign = 'center';
-            if (attrs.paddingTop == null) attrs.paddingTop = 1;
-            if (attrs.height == null) attrs.height = 23 - (attrs.paddingTop || 0);
-            
-            if (attrs.activeColor == null) attrs.activeColor = '#dddddd';
-            if (attrs.hoverColor == null) attrs.hoverColor = '#eeeeee';
-            if (attrs.readyColor == null) attrs.readyColor = '#ffffff';
+            defAttr(attrs, 'focusEmbellishment', false);
+            defAttr(attrs, 'roundedCorners', 3);
+            defAttr(attrs, 'textAlign', 'center');
+            defAttr(attrs, 'paddingTop', 1);
+            defAttr(attrs, 'height', 23 - (attrs.paddingTop || 0));
+            defAttr(attrs, 'activeColor', '#ddd');
+            defAttr(attrs, 'hoverColor', '#eee');
+            defAttr(attrs, 'readyColor', '#fff');
             
             this.callSuper(parent, attrs);
         },

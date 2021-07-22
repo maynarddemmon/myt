@@ -3675,7 +3675,7 @@ new JS.Singleton('GlobalError', {
             // Mozilla and Webkit
             const s = this.getInnerDomStyle();
             s.outlineWidth = 'thin';
-            s.outlineColor = '#88bbff';
+            s.outlineColor = '#8bf';
             s.outlineStyle = 'solid';
             s.outlineOffset = '0px';
         },
@@ -4328,7 +4328,9 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
         
         generateName = (attrName, prefix) => prefix + attrName.substring(0,1).toUpperCase() + attrName.substring(1),
         generateSetterName = (attrName) => SETTER_NAMES[attrName] || (SETTER_NAMES[attrName] = generateName(attrName, 'set')),
-        generateGetterName = (attrName) => GETTER_NAMES[attrName] || (GETTER_NAMES[attrName] = generateName(attrName, 'get'));
+        generateGetterName = (attrName) => GETTER_NAMES[attrName] || (GETTER_NAMES[attrName] = generateName(attrName, 'get')),
+        
+        defAttr = (attrs, attrName, defaultValue) => {if (attrs[attrName] == null) attrs[attrName] = defaultValue;};
     
     /** Provides support for getter and setter functions on an object.
         
@@ -4381,7 +4383,9 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
                 const getterName = generateGetterName(attrName);
                 if (target[getterName]) console.log("Overwriting getter", getterName);
                 target[getterName] = () => target[attrName];
-            }
+            },
+            
+            defAttr: defAttr
         },
         
         
@@ -4390,6 +4394,8 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
         prependToEarlyAttrs: function() {Array.prototype.unshift.apply(this.earlyAttrs || (this.earlyAttrs = []), arguments);},
         appendToLateAttrs: function() {Array.prototype.push.apply(this.lateAttrs || (this.lateAttrs = []), arguments);},
         prependToLateAttrs: function() {Array.prototype.unshift.apply(this.lateAttrs || (this.lateAttrs = []), arguments);},
+        
+        defAttr: defAttr,
         
         /** Used to quickly extract and set attributes from the attrs object
             passed to an initializer.
@@ -7110,7 +7116,7 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         setOutlineColor: function(v) {
-            this.getOuterDomStyle().outlineColor = this.outlineColor = v || '#000000';
+            this.getOuterDomStyle().outlineColor = this.outlineColor = v || '#000';
         },
         
         // Borders
@@ -7137,7 +7143,7 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         setBorderColor: function(v) {
-            this.getOuterDomStyle().borderColor = this.borderColor = v || '#000000';
+            this.getOuterDomStyle().borderColor = this.borderColor = v || '#000';
         },
         
         // Edge treatements
@@ -8401,7 +8407,7 @@ myt.TextSupport = new JS.Module('TextSupport', {
         let shadow = (x || 0) + 'px ' + 
             (y || 0) + 'px ' + 
             (blur != null ? blur : 2) + 'px ' + 
-            (color || '#000000');
+            (color || '#000');
             
         if (extraStrength > 0) {
             const value = [shadow];
@@ -8651,7 +8657,9 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
 ((pkg) => {
     const JSClass = JS.Class,
         View = pkg.View,
-        SizeToDom = pkg.SizeToDom;
+        SizeToDom = pkg.SizeToDom,
+        
+        defAttr = pkg.AccessorSupport.defAttr;
     
     /** A base class for flex box views.
         
@@ -8681,7 +8689,7 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.View */
         initNode: function(parent, attrs) {
-            if (attrs.tagName == null) attrs.tagName = 'iframe';
+            defAttr(attrs, 'tagName', 'iframe');
             
             this.callSuper(parent, attrs);
             
@@ -8763,8 +8771,8 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.View */
         initNode: function(parent, attrs) {
-            if (attrs.whiteSpace == null) attrs.whiteSpace = 'nowrap';
-            if (attrs.userUnselectable == null) attrs.userUnselectable = true;
+            defAttr(attrs, 'whiteSpace', 'nowrap');
+            defAttr(attrs, 'userUnselectable', true);
             
             this.callSuper(parent, attrs);
         },
@@ -8800,7 +8808,7 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.View */
         initNode: function(parent, attrs) {
-            if (attrs.useNaturalSize == null) attrs.useNaturalSize = true;
+            defAttr(attrs, 'useNaturalSize', true);
             
             this.callSuper(parent, attrs);
         }
@@ -9396,7 +9404,7 @@ myt.RootView = new JS.Module('RootView', {
             // Determine what "from" to use if none was provided.
             if (animator.from == null) {
                 animator.__temporaryFrom = true;
-                animator.from = relative ? (animator.__isColorAnim ? '#000000' : 0) : target.get(attr);
+                animator.from = relative ? (animator.__isColorAnim ? '#000' : 0) : target.get(attr);
             }
             
             const motionValue = animator.easingFunction(progressPercent) - (relative ? animator.easingFunction(oldProgressPercent) : 0),
@@ -10523,6 +10531,8 @@ new JS.Singleton('GlobalMouse', {
         GlobalKeys = G.keys,
         GlobalIdle = G.idle,
         
+        defAttr = pkg.AccessorSupport.defAttr,
+        
         getKeyCodeFromEvent = event => pkg.KeyObservable.getKeyCodeFromEvent(event),
         getMouseFromEvent = event => pkg.MouseObservable.getMouseFromEvent(event);
     
@@ -10578,7 +10588,7 @@ new JS.Singleton('GlobalMouse', {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides */
         initNode: function(parent, attrs) {
-            if (attrs.disabled == null) attrs.disabled = false;
+            defAttr(attrs, 'disabled', false);
             
             this.callSuper(parent, attrs);
         },
@@ -10644,7 +10654,7 @@ new JS.Singleton('GlobalMouse', {
             
             self.activateKeyDown = -1;
             
-            if (attrs.activationKeys == null) attrs.activationKeys = pkg.KeyActivation.DEFAULT_ACTIVATION_KEYS;
+            defAttr(attrs, 'activationKeys', pkg.KeyActivation.DEFAULT_ACTIVATION_KEYS);
             
             self.callSuper(parent, attrs);
             
@@ -10786,7 +10796,7 @@ new JS.Singleton('GlobalMouse', {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides */
         initNode: function(parent, attrs) {
-            if (attrs.mouseOver == null) attrs.mouseOver = false;
+            defAttr(attrs, 'mouseOver', false);
             
             this.callSuper(parent, attrs);
             
@@ -10888,7 +10898,7 @@ new JS.Singleton('GlobalMouse', {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides */
         initNode: function(parent, attrs) {
-            if (attrs.mouseDown == null) attrs.mouseDown = false;
+            defAttr(attrs, 'mouseDown', false);
             
             this.callSuper(parent, attrs);
             
@@ -11250,8 +11260,10 @@ new JS.Singleton('GlobalMouse', {
         
         View = pkg.View,
         
+        defAttr = pkg.AccessorSupport.defAttr,
+        
         defaultDisabledOpacity = 0.5,
-        defaultFocusShadowPropertyValue = [0, 0, 7, '#666666'],
+        defaultFocusShadowPropertyValue = [0, 0, 7, '#666'],
         
         /** Provides button functionality to an myt.View. Most of the functionality 
             comes from the mixins included by this mixin. This mixin resolves issues 
@@ -11290,8 +11302,8 @@ new JS.Singleton('GlobalMouse', {
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides */
             initNode: function(parent, attrs) {
-                if (attrs.focusable == null) attrs.focusable = true;
-                if (attrs.cursor == null) attrs.cursor = 'pointer';
+                defAttr(attrs, 'focusable', true);
+                defAttr(attrs, 'cursor', 'pointer');
                 
                 this.callSuper(parent, attrs);
             },
@@ -11538,8 +11550,8 @@ new JS.Singleton('GlobalMouse', {
             self.iconSpacing = 2;
             self.inset = self.outset = 0;
             
-            if (attrs.shrinkToFit == null) attrs.shrinkToFit = false;
-            if (attrs.contentAlign == null) attrs.contentAlign = 'center';
+            defAttr(attrs, 'shrinkToFit', false);
+            defAttr(attrs, 'contentAlign', 'center');
             
             self.callSuper(parent, attrs);
             
@@ -11739,11 +11751,10 @@ new JS.Singleton('GlobalMouse', {
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
             const self = this;
-            let textView;
             
             self.inset = self.outset = 0;
             
-            if (attrs.shrinkToFit == null) attrs.shrinkToFit = false;
+            defAttr(attrs, 'shrinkToFit', false);
             
             // Use appropriate default based on mutliline text or not.
             self.textY = attrs.shrinkToFit ? 'middle' : 0;
@@ -11752,7 +11763,7 @@ new JS.Singleton('GlobalMouse', {
             
             // Setup the constraint after adoption since the textView won't have
             // been sized to the dom until it's added in.
-            textView = self.textView;
+            let textView = self.textView;
             self.constrain('__updateContentPosition', [
                 self, 'inset', self, 'outset',
                 self, 'width', self, 'shrinkToFit',
@@ -11886,15 +11897,14 @@ new JS.Singleton('GlobalMouse', {
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
-            if (attrs.roundedCorners == null) attrs.roundedCorners = 3;
-            if (attrs.textAlign == null) attrs.textAlign = 'center';
-            if (attrs.paddingTop == null) attrs.paddingTop = 1;
-            if (attrs.height == null) attrs.height = 23 - (attrs.paddingTop || 0);
-            
-            if (attrs.activeColor == null) attrs.activeColor = '#dddddd';
-            if (attrs.hoverColor == null) attrs.hoverColor = '#eeeeee';
-            if (attrs.readyColor == null) attrs.readyColor = '#ffffff';
+            defAttr(attrs, 'focusEmbellishment', false);
+            defAttr(attrs, 'roundedCorners', 3);
+            defAttr(attrs, 'textAlign', 'center');
+            defAttr(attrs, 'paddingTop', 1);
+            defAttr(attrs, 'height', 23 - (attrs.paddingTop || 0));
+            defAttr(attrs, 'activeColor', '#ddd');
+            defAttr(attrs, 'hoverColor', '#eee');
+            defAttr(attrs, 'readyColor', '#fff');
             
             this.callSuper(parent, attrs);
         },
@@ -12332,6 +12342,8 @@ new JS.Singleton('GlobalMouse', {
     const JSClass = JS.Class,
         JSModule = JS.Module,
         
+        defAttr = pkg.AccessorSupport.defAttr,
+        
         /** Defines the interface list view items must support.
             
             Attributes:
@@ -12380,10 +12392,10 @@ new JS.Singleton('GlobalMouse', {
             this.maxHeight = -1;
             this.minWidth = 0;
             
-            if (attrs.defaultItemClass == null) attrs.defaultItemClass = pkg.ListViewItem;
-            if (attrs.overflow == null) attrs.overflow = 'autoy';
-            if (attrs.bgColor == null) attrs.bgColor = '#cccccc';
-            if (attrs.boxShadow == null) attrs.boxShadow = pkg.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE;
+            defAttr(attrs, 'defaultItemClass', pkg.ListViewItem);
+            defAttr(attrs, 'overflow', 'autoy');
+            defAttr(attrs, 'bgColor', '#ccc');
+            defAttr(attrs, 'boxShadow', pkg.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
             
             this.callSuper(parent, attrs);
             
@@ -12574,13 +12586,13 @@ new JS.Singleton('GlobalMouse', {
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            if (attrs.listViewClass == null) attrs.listViewClass = pkg.ListView;
-            if (attrs.listViewAttrs == null) attrs.listViewAttrs = {};
-            if (attrs.itemConfig == null) attrs.itemConfig = [];
+            defAttr(attrs, 'listViewClass', pkg.ListView);
+            defAttr(attrs, 'listViewAttrs', {});
+            defAttr(attrs, 'itemConfig', []);
             
             // Assume this will be mixed onto something that implements 
             // myt.KeyActivation since it probably will.
-            if (attrs.activationKeys == null) attrs.activationKeys = [13,27,32,37,38,39,40];
+            defAttr(attrs, 'activationKeys', [13,27,32,37,38,39,40]);
             
             this.callSuper(parent, attrs);
         },
@@ -12682,17 +12694,14 @@ new JS.Singleton('GlobalMouse', {
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            if (attrs.height == null) attrs.height = 24;
-            
-            if (attrs.activeColor == null) attrs.activeColor = '#bbbbbb';
-            if (attrs.hoverColor == null) attrs.hoverColor = '#ffffff';
-            if (attrs.readyColor == null) attrs.readyColor = '#eeeeee';
-            
-            if (attrs.contentAlign == null) attrs.contentAlign = 'left';
-            if (attrs.inset == null) attrs.inset = 8;
-            if (attrs.outset == null) attrs.outset = 8;
-            
-            if (attrs.activationKeys == null) attrs.activationKeys = [13,27,32,37,38,39,40];
+            defAttr(attrs, 'height', 24);
+            defAttr(attrs, 'activeColor', '#bbb');
+            defAttr(attrs, 'hoverColor', '#fff');
+            defAttr(attrs, 'readyColor', '#eee');
+            defAttr(attrs, 'contentAlign', 'left');
+            defAttr(attrs, 'inset', 8);
+            defAttr(attrs, 'outset', 8);
+            defAttr(attrs, 'activationKeys', [13,27,32,37,38,39,40]);
             
             this.callSuper(parent, attrs);
         },
@@ -12760,8 +12769,8 @@ new JS.Singleton('GlobalMouse', {
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            if (attrs.height == null) attrs.height = 1;
-            if (attrs.bgColor == null) attrs.bgColor = '#666666';
+            defAttr(attrs, 'height', 1);
+            defAttr(attrs, 'bgColor', '#666');
             
             this.callSuper(parent, attrs);
         }
@@ -13055,6 +13064,8 @@ new JS.Singleton('GlobalMouse', {
 ((pkg) => {
     const BAGAttrName = 'selected',
         
+        defAttr = pkg.AccessorSupport.defAttr,
+        
         updateUI = (radio) => {
             const label = radio.label || '';
             radio.setText(
@@ -13093,21 +13104,19 @@ new JS.Singleton('GlobalMouse', {
             radioStyle:string Determines what style of radio to display.
                 Supported values are "solid" and "outline".
         
-        @class
-    */
+        @class */
     pkg.Radio = new JS.Class('Radio', pkg.Text, {
         include: [pkg.SimpleButtonStyle, pkg.BAGMembership],
         
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            if (attrs.selected == null) attrs.selected = false;
+            defAttr(attrs, 'selected', false);
             if (attrs.groupId == null) attrs.groupId = pkg.generateGuid();
-            if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
-            
-            if (attrs.activeColor == null) attrs.activeColor = 'inherits';
-            if (attrs.hoverColor == null) attrs.hoverColor = 'inherits';
-            if (attrs.readyColor == null) attrs.readyColor = 'inherits';
+            defAttr(attrs, 'focusEmbellishment', false);
+            defAttr(attrs, 'activeColor', 'inherits');
+            defAttr(attrs, 'hoverColor', 'inherits');
+            defAttr(attrs, 'readyColor', 'inherits');
             
             const value = attrs.value;
             delete attrs.value;
@@ -13537,10 +13546,10 @@ new JS.Singleton('GlobalMouse', {
                 DEFAULT_BUTTON_HEIGHT:30,
                 /** The minimum height of the container when expanded. */
                 DEFAULT_MINIMUM_CONTAINER_HEIGHT:100,
-                DEFAULT_FILL_COLOR_SELECTED:'#666666',
-                DEFAULT_FILL_COLOR_HOVER:'#eeeeee',
-                DEFAULT_FILL_COLOR_ACTIVE:'#cccccc',
-                DEFAULT_FILL_COLOR_READY:'#ffffff',
+                DEFAULT_FILL_COLOR_SELECTED:'#666',
+                DEFAULT_FILL_COLOR_HOVER:'#eee',
+                DEFAULT_FILL_COLOR_ACTIVE:'#ccc',
+                DEFAULT_FILL_COLOR_READY:'#fff',
                 DEFAULT_ANIMATION_MILLIS:500
             },
             
@@ -13775,8 +13784,8 @@ new JS.Singleton('GlobalMouse', {
         TextTabSlider = pkg.TextTabSlider = new JSClass('TextTabSlider', TabSlider, {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                DEFAULT_LABEL_TEXT_COLOR_CHECKED: '#ffffff',
-                DEFAULT_LABEL_TEXT_COLOR: '#333333'
+                DEFAULT_LABEL_TEXT_COLOR_CHECKED: '#fff',
+                DEFAULT_LABEL_TEXT_COLOR: '#333'
             },
             
             
@@ -14069,11 +14078,11 @@ new JS.Singleton('GlobalMouse', {
                 DEFAULT_HEIGHT: 24,
                 DEFAULT_INSET: 8,
                 DEFAULT_OUTSET: 8,
-                DEFAULT_FILL_COLOR_SELECTED: '#ffffff',
-                DEFAULT_FILL_COLOR_HOVER: '#eeeeee',
-                DEFAULT_FILL_COLOR_ACTIVE: '#aaaaaa',
-                DEFAULT_FILL_COLOR_READY: '#cccccc',
-                DEFAULT_LABEL_TEXT_COLOR_SELECTED:'#333333',
+                DEFAULT_FILL_COLOR_SELECTED: '#fff',
+                DEFAULT_FILL_COLOR_HOVER: '#eee',
+                DEFAULT_FILL_COLOR_ACTIVE: '#aaa',
+                DEFAULT_FILL_COLOR_READY: '#ccc',
+                DEFAULT_LABEL_TEXT_COLOR_SELECTED:'#333',
                 DEFAULT_RADIUS:6
             },
             
@@ -14265,6 +14274,8 @@ new JS.Singleton('GlobalMouse', {
         View = pkg.View,
         Disableable = pkg.Disableable,
         
+        defAttr = pkg.AccessorSupport.defAttr,
+        
         DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE = pkg.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE,
         
         setEditableTextAttr = (editableText, v, propName) => {
@@ -14306,8 +14317,8 @@ new JS.Singleton('GlobalMouse', {
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides myt.View */
             initNode: function(parent, attrs) {
-                if (attrs.tagName == null) attrs.tagName = 'input';
-                if (attrs.focusable == null) attrs.focusable = true;
+                defAttr(attrs, 'tagName', 'input');
+                defAttr(attrs, 'focusable', true);
                 
                 this.callSuper(parent, attrs);
                 
@@ -14451,8 +14462,8 @@ new JS.Singleton('GlobalMouse', {
             initNode: function(parent, attrs) {
                 const self = this;
                 
-                if (attrs.bgColor == null) attrs.bgColor = 'transparent';
-                if (attrs.spellcheck == null) attrs.spellcheck = false;
+                defAttr(attrs, 'bgColor', 'transparent');
+                defAttr(attrs, 'spellcheck', false);
                 
                 self.callSuper(parent, attrs);
                 
@@ -14666,16 +14677,15 @@ new JS.Singleton('GlobalMouse', {
         initNode: function(parent, attrs) {
             const self = this;
             
-            if (attrs.tagName == null) attrs.tagName = 'div';
+            defAttr(attrs, 'tagName', 'div');
             attrs.inputType = null;
             
-            if (attrs.whiteSpace == null) attrs.whiteSpace = 'pre';
-            if (attrs.contentEditable == null) attrs.contentEditable = true;
+            defAttr(attrs, 'whiteSpace', 'pre');
+            defAttr(attrs, 'contentEditable', true);
             
             self.callSuper(parent, attrs);
             
             self.attachToDom(self, '__cleanInput', 'keydown');
-            
             self.attachToDom(self, '__userInteraction', 'keyup');
             self.attachToDom(self, '__userInteraction', 'mouseup');
             
@@ -14860,11 +14870,10 @@ new JS.Singleton('GlobalMouse', {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.BaseInputText */
         initNode: function(parent, attrs) {
-            if (attrs.tagName == null) attrs.tagName = 'textarea';
+            defAttr(attrs, 'tagName', 'textarea');
             attrs.inputType = null;
-            
-            if (attrs.resize == null) attrs.resize = 'none';
-            if (attrs.wrap == null) attrs.wrap = 'soft';
+            defAttr(attrs, 'resize', 'none');
+            defAttr(attrs, 'wrap', 'soft');
             
             this.callSuper(parent, attrs);
         },
@@ -14904,13 +14913,13 @@ new JS.Singleton('GlobalMouse', {
         initNode: function(parent, attrs) {
             this.filterItems = true;
             
-            if (attrs.activationKeys == null) attrs.activationKeys = [13,27,38,40];
-            if (attrs.bgColor == null) attrs.bgColor = '#ffffff';
-            if (attrs.borderWidth == null) attrs.borderWidth = 1;
-            if (attrs.borderStyle == null) attrs.borderStyle = 'solid';
-            if (attrs.floatingAlignOffset == null) attrs.floatingAlignOffset = attrs.borderWidth;
-            if (attrs.listViewAttrs == null) attrs.listViewAttrs = {maxHeight:99};
-            if (attrs.fullItemConfig == null) attrs.fullItemConfig = [];
+            defAttr(attrs, 'activationKeys', [13,27,38,40]);
+            defAttr(attrs, 'bgColor', '#fff');
+            defAttr(attrs, 'borderWidth', 1);
+            defAttr(attrs, 'borderStyle', 'solid');
+            defAttr(attrs, 'floatingAlignOffset', attrs.borderWidth);
+            defAttr(attrs, 'listViewAttrs', {maxHeight:99});
+            defAttr(attrs, 'fullItemConfig', []);
             
             this.callSuper(parent, attrs);
         },
@@ -15006,12 +15015,10 @@ new JS.Singleton('GlobalMouse', {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.NativeInputWrapper */
         initNode: function(parent, attrs) {
-            if (attrs.tagName == null) attrs.tagName = 'select';
+            defAttr(attrs, 'tagName', 'select');
             attrs.inputType = null;
-            
-            if (attrs.multiple == null) attrs.multiple = false;
-            if (attrs.size == null) attrs.size = attrs.multiple ? 4 : 1;
-            
+            defAttr(attrs, 'multiple', false);
+            defAttr(attrs, 'size', attrs.multiple ? 4 : 1);
             this.callSuper(parent, attrs);
             
             this.attachToDom(this, '__syncToDom', 'change');
@@ -15482,6 +15489,8 @@ new JS.Singleton('GlobalMouse', {
         STYLE_OUTLINE = 'outline',
         DEFAULT_STYLE = STYLE_OUTLINE,
         
+        defAttr = pkg.AccessorSupport.defAttr,
+        
         updateUI = (checkbox) => {
             const label = checkbox.label || '',
                 checkboxStyle = checkbox.checkboxStyle || DEFAULT_STYLE;
@@ -15499,20 +15508,20 @@ new JS.Singleton('GlobalMouse', {
             label:string
             checkboxStyle:string Determines what style of checkbox to display.
                 Supported values are "solid" and "outline".
-    */
+        
+        @class */
     pkg.Checkbox = new JS.Class('Checkbox', pkg.Text, {
         include: [pkg.SimpleButtonStyle, pkg.ValueComponent],
         
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            if (attrs.value == null) attrs.value = false;
-            if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
-            if (attrs.checkboxStyle == null) attrs.checkboxStyle = DEFAULT_STYLE;
-            
-            if (attrs.activeColor == null) attrs.activeColor = 'inherits';
-            if (attrs.hoverColor == null) attrs.hoverColor = 'inherits';
-            if (attrs.readyColor == null) attrs.readyColor = 'inherits';
+            defAttr(attrs, 'value', false);
+            defAttr(attrs, 'focusEmbellishment', false);
+            defAttr(attrs, 'checkboxStyle', DEFAULT_STYLE);
+            defAttr(attrs, 'activeColor', 'inherits');
+            defAttr(attrs, 'hoverColor', 'inherits');
+            defAttr(attrs, 'readyColor', 'inherits');
             
             this.callSuper(parent, attrs);
             
@@ -15591,6 +15600,8 @@ new JS.Singleton('GlobalMouse', {
         JSModule = JS.Module,
         G = pkg.global,
         GlobalFocus = G.focus,
+        
+        defAttr = pkg.AccessorSupport.defAttr,
         
         DEFAULT_ATTR = 'runForDefault',
         ROLLBACK_ATTR = 'runForRollback',
@@ -16582,14 +16593,14 @@ new JS.Singleton('GlobalMouse', {
                 
                 self.acceleratorScope = ACCELERATOR_SCOPE_ELEMENT;
                 self.validateWhen = WHEN_KEY;
-                self.errorColor = '#ff9999';
-                self.actionRequiredColor = '#996666';
-                self.normalColor = '#999999';
+                self.errorColor = '#f99';
+                self.actionRequiredColor = '#966';
+                self.normalColor = '#999';
                 
-                if (attrs.bgColor == null) attrs.bgColor = '#ffffff';
-                if (attrs.borderWidth == null) attrs.borderWidth = 1;
-                if (attrs.borderStyle == null) attrs.borderStyle = 'solid';
-                if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = true;
+                defAttr(attrs, 'bgColor', '#fff');
+                defAttr(attrs, 'borderWidth', 1);
+                defAttr(attrs, 'borderStyle', 'solid');
+                defAttr(attrs, 'borderStyle', true);
                 
                 self.callSuper(parent, attrs);
                 
@@ -16773,9 +16784,9 @@ new JS.Singleton('GlobalMouse', {
         initNode: function(parent, attrs) {
             this.acceleratorScope = ACCELERATOR_SCOPE_ELEMENT;
             this.validateWhen = WHEN_KEY;
-            this.errorColor = '#ff9999';
-            this.actionRequiredColor = '#996666';
-            this.normalColor = '#999999';
+            this.errorColor = '#f99';
+            this.actionRequiredColor = '#966';
+            this.normalColor = '#999';
             
             this.callSuper(parent, attrs);
             
@@ -18605,7 +18616,10 @@ new JS.Singleton('GlobalMouse', {
 
 
 ((pkg) => {
-    const SizeToParent = pkg.SizeToParent;
+    const SizeToParent = pkg.SizeToParent,
+        View = pkg.View,
+        
+        defAttr = pkg.AccessorSupport.defAttr;
     
     /** A dimmer that can be placed on another myt.View to obscure the subviews
         of that view.
@@ -18618,14 +18632,14 @@ new JS.Singleton('GlobalMouse', {
                 the dimmer is hidden if restoreFocus is true.
         
         @class */
-    pkg.Dimmer = new JS.Class('Dimmer', pkg.View, {
+    pkg.Dimmer = new JS.Class('Dimmer', View, {
         include: [SizeToParent],
         
         
         // Class Methods and Attributes ////////////////////////////////////////
         extend: {
             DEFAULT_OPACITY: 0.35,
-            DEFAULT_COLOR: '#000000'
+            DEFAULT_COLOR: '#000'
         },
         
         
@@ -18638,10 +18652,10 @@ new JS.Singleton('GlobalMouse', {
             
             attrs.focusable = attrs.focusCage = true;
             
-            if (attrs.percentOfParentWidth == null) attrs.percentOfParentWidth = 100;
-            if (attrs.percentOfParentHeight == null) attrs.percentOfParentHeight = 100;
-            if (attrs.visible == null) attrs.visible = false;
-            if (attrs.ignoreLayout == null) attrs.ignoreLayout = true;
+            defAttr(attrs, 'percentOfParentWidth', 100);
+            defAttr(attrs, 'percentOfParentHeight', 100);
+            defAttr(attrs, 'visible', false);
+            defAttr(attrs, 'ignoreLayout', true);
             
             self.callSuper(parent, attrs);
             
@@ -18656,7 +18670,7 @@ new JS.Singleton('GlobalMouse', {
             this.callSuper();
             
             const Dimmer = pkg.Dimmer;
-            new pkg.View(this, {
+            new View(this, {
                 name:'overlay',
                 ignorePlacement:true, 
                 opacity:Dimmer.DEFAULT_OPACITY,
@@ -18848,117 +18862,116 @@ new JS.Singleton('GlobalMouse', {
 })(myt);
 
 
-/** An myt.Dimmer that also provides a content panel.
-    
-    Attributes:
-        content:myt.View The content view placed inside the dimmer.
-        sizingStrategy:string Determines how the content view is positioned
-            relative to the bounds of the dimmer. Supported values are:
-                children: The content will be sized to fit the children it
-                    contains. The content will be positioned in the center and
-                    middle of the dimmer. This is the default sizingStrategy
-                parent: The content will be sized to the bounds of the dimmer.
-                basic: The content will not be sized in any way. It will be
-                    positioned in the center and middle of the dimmer.
-                none: The content will not be sized or positioned in any way.
-        marginTop:number The margin above the content when the sizingStrategy
-            is "parent". Defaults to 40 if not provided.
-        marginLeft:number The margin on the left side of the content when 
-            the sizingStrategy is "parent". Defaults to 40 if not provided.
-        marginBottom:number The margin below the content when the 
-            sizingStrategy is "parent". Defaults to 40 if not provided.
-        marginRight:number The margin on the right side of the content when 
-            the sizingStrategy is "parent". Defaults to 40 if not provided.
-        paddingX:number The internal horizontal padding when the sizingStrategy
-            is "children". Defaults to 20 if not provided.
-        paddingY:number The internal vertical padding when the sizingStrategy
-            is "children". Defaults to 15 if not provided.
+((pkg) => {
+    const defAttr = pkg.AccessorSupport.defAttr,
         
-    Events:
-        None
-*/
-myt.ModalPanel = new JS.Class('ModalPanel', myt.Dimmer, {
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        DEFAULT_PADDING_X:20,
-        DEFAULT_PADDING_Y:15,
-        
-        DEFAULT_MARGIN_TOP:40,
-        DEFAULT_MARGIN_LEFT:40,
-        DEFAULT_MARGIN_BOTTOM:40,
-        DEFAULT_MARGIN_RIGHT:40
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        this.defaultPlacement = 'content';
-        
-        if (attrs.sizingStrategy == null) attrs.sizingStrategy = 'children';
-        
-        const MP = myt.ModalPanel;
-        
-        // Used for parent sizing strategy
-        if (attrs.marginTop == null) attrs.marginTop = MP.DEFAULT_MARGIN_TOP;
-        if (attrs.marginLeft == null) attrs.marginLeft = MP.DEFAULT_MARGIN_LEFT;
-        if (attrs.marginBottom == null) attrs.marginBottom = MP.DEFAULT_MARGIN_BOTTOM;
-        if (attrs.marginRight == null) attrs.marginRight = MP.DEFAULT_MARGIN_RIGHT;
-        
-        // Used for "children" sizing strategy
-        if (attrs.paddingX == null) attrs.paddingX = MP.DEFAULT_PADDING_X;
-        if (attrs.paddingY == null) attrs.paddingY = MP.DEFAULT_PADDING_Y;
-        
-        this.callSuper(parent, attrs);
-    },
-    
-    doBeforeAdoption: function() {
-        const self = this,
-            M = myt,
-            V = M.View,
-            viewAttrs = {name:'content', ignorePlacement:true},
-            centeredViewAttrs = Object.assign({}, viewAttrs, {align:'center', valign:'middle'});
-        
-        self.callSuper();
-        
-        switch (self.sizingStrategy) {
-            case 'children':
-                new M.SizeToChildren(new V(self, centeredViewAttrs), {
-                    name:'sizeToChildren', axis:'both',
-                    paddingX:self.paddingX, 
-                    paddingY:self.paddingY
-                });
-                break;
-            case 'parent':
-                new V(self, Object.assign(viewAttrs, {
-                    x:self.marginLeft,
-                    y:self.marginTop,
-                    percentOfParentWidthOffset:-self.marginLeft - self.marginRight,
-                    percentOfParentHeightOffset:-self.marginTop - self.marginBottom,
-                    percentOfParentWidth:100,
-                    percentOfParentHeight:100,
-                }), [M.SizeToParent]);
-                break;
-            case 'basic':
-                new V(self, centeredViewAttrs);
-                break;
-            case 'none':
-            default:
-                new V(self, viewAttrs);
-        }
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setSizingStrategy: function(v) {this.sizingStrategy = v;},
-    
-    setMarginTop: function(v) {this.marginTop = v;},
-    setMarginLeft: function(v) {this.marginLeft = v;},
-    setMarginBottom: function(v) {this.marginBottom = v;},
-    setMarginRight: function(v) {this.marginRight = v;},
-    
-    setPaddingX: function(v) {this.paddingX = v;},
-    setPaddingY: function(v) {this.paddingY = v;}
-});
+        /** An myt.Dimmer that also provides a content panel.
+            
+            Attributes:
+                content:myt.View The content view placed inside the dimmer.
+                sizingStrategy:string Determines how the content view is positioned
+                    relative to the bounds of the dimmer. Supported values are:
+                        children: The content will be sized to fit the children it
+                            contains. The content will be positioned in the center and
+                            middle of the dimmer. This is the default sizingStrategy
+                        parent: The content will be sized to the bounds of the dimmer.
+                        basic: The content will not be sized in any way. It will be
+                            positioned in the center and middle of the dimmer.
+                        none: The content will not be sized or positioned in any way.
+                marginTop:number The margin above the content when the sizingStrategy
+                    is "parent". Defaults to 40 if not provided.
+                marginLeft:number The margin on the left side of the content when 
+                    the sizingStrategy is "parent". Defaults to 40 if not provided.
+                marginBottom:number The margin below the content when the 
+                    sizingStrategy is "parent". Defaults to 40 if not provided.
+                marginRight:number The margin on the right side of the content when 
+                    the sizingStrategy is "parent". Defaults to 40 if not provided.
+                paddingX:number The internal horizontal padding when the sizingStrategy
+                    is "children". Defaults to 20 if not provided.
+                paddingY:number The internal vertical padding when the sizingStrategy
+                    is "children". Defaults to 15 if not provided.
+                
+            @class */
+        ModalPanel = pkg.ModalPanel = new JS.Class('ModalPanel', pkg.Dimmer, {
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                DEFAULT_PADDING_X:20,
+                DEFAULT_PADDING_Y:15,
+                
+                DEFAULT_MARGIN_TOP:40,
+                DEFAULT_MARGIN_LEFT:40,
+                DEFAULT_MARGIN_BOTTOM:40,
+                DEFAULT_MARGIN_RIGHT:40
+            },
+            
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            initNode: function(parent, attrs) {
+                this.defaultPlacement = 'content';
+                
+                defAttr(attrs, 'sizingStrategy', 'children');
+                
+                // Used for parent sizing strategy
+                defAttr(attrs, 'marginTop', ModalPanel.DEFAULT_MARGIN_TOP);
+                defAttr(attrs, 'marginLeft', ModalPanel.DEFAULT_MARGIN_LEFT);
+                defAttr(attrs, 'marginBottom', ModalPanel.DEFAULT_MARGIN_BOTTOM);
+                defAttr(attrs, 'marginRight', ModalPanel.DEFAULT_MARGIN_RIGHT);
+                
+                // Used for "children" sizing strategy
+                defAttr(attrs, 'paddingX', ModalPanel.DEFAULT_PADDING_X);
+                defAttr(attrs, 'paddingY', ModalPanel.DEFAULT_PADDING_Y);
+                
+                this.callSuper(parent, attrs);
+            },
+            
+            doBeforeAdoption: function() {
+                const self = this,
+                    View = pkg.View,
+                    viewAttrs = {name:'content', ignorePlacement:true},
+                    centeredViewAttrs = Object.assign({}, viewAttrs, {align:'center', valign:'middle'});
+                
+                self.callSuper();
+                
+                switch (self.sizingStrategy) {
+                    case 'children':
+                        new pkg.SizeToChildren(new View(self, centeredViewAttrs), {
+                            name:'sizeToChildren', axis:'both',
+                            paddingX:self.paddingX, 
+                            paddingY:self.paddingY
+                        });
+                        break;
+                    case 'parent':
+                        new View(self, Object.assign(viewAttrs, {
+                            x:self.marginLeft,
+                            y:self.marginTop,
+                            percentOfParentWidthOffset:-self.marginLeft - self.marginRight,
+                            percentOfParentHeightOffset:-self.marginTop - self.marginBottom,
+                            percentOfParentWidth:100,
+                            percentOfParentHeight:100,
+                        }), [pkg.SizeToParent]);
+                        break;
+                    case 'basic':
+                        new View(self, centeredViewAttrs);
+                        break;
+                    case 'none':
+                    default:
+                        new View(self, viewAttrs);
+                }
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setSizingStrategy: function(v) {this.sizingStrategy = v;},
+            
+            setMarginTop: function(v) {this.marginTop = v;},
+            setMarginLeft: function(v) {this.marginLeft = v;},
+            setMarginBottom: function(v) {this.marginBottom = v;},
+            setMarginRight: function(v) {this.marginRight = v;},
+            
+            setPaddingX: function(v) {this.paddingX = v;},
+            setPaddingY: function(v) {this.paddingY = v;}
+        });
+})(myt);
 
 
 /** A spinner that uses the CSS border property and a CSS rotation animation
@@ -18984,9 +18997,9 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         if (attrs.visible == null) attrs.visible = false;
         if (attrs.borderWidth == null) attrs.borderWidth = 5;
-        if (attrs.borderColor == null) attrs.borderColor = '#ffffff';
+        if (attrs.borderColor == null) attrs.borderColor = '#fff';
         if (attrs.borderStyle == null) attrs.borderStyle = 'solid';
-        if (attrs.spinColor == null) attrs.spinColor = '#000000';
+        if (attrs.spinColor == null) attrs.spinColor = '#000';
         
         self.callSuper(parent, attrs);
         
@@ -19056,6 +19069,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         ModalPanel = pkg.ModalPanel,
         SizeToChildren = pkg.SizeToChildren,
         
+        defAttr = pkg.AccessorSupport.defAttr,
+        
         objectAssign = Object.assign,
         
         /* Hide spinner related elements. */
@@ -19070,15 +19085,15 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         DialogButton = new JSClass('DialogButton', pkg.SimpleTextButton, {
             /** @overrides */
             initNode: function(parent, attrs) {
-                if (attrs.height == null) attrs.height = 20;
-                if (attrs.shrinkToFit == null) attrs.shrinkToFit = true;
-                if (attrs.inset == null) attrs.inset = 10;
-                if (attrs.outset == null) attrs.outset = 10;
-                if (attrs.textY == null) attrs.textY = 3;
-                if (attrs.roundedCorners == null) attrs.roundedCorners = 3;
-                if (attrs.activeColor == null) attrs.activeColor = '#bbbbbb';
-                if (attrs.hoverColor == null) attrs.hoverColor = '#dddddd';
-                if (attrs.readyColor == null) attrs.readyColor = '#cccccc';
+                defAttr(attrs, 'height', 20);
+                defAttr(attrs, 'shrinkToFit', true);
+                defAttr(attrs, 'inset', 10);
+                defAttr(attrs, 'outset', 10);
+                defAttr(attrs, 'textY', 3);
+                defAttr(attrs, 'roundedCorners', 3);
+                defAttr(attrs, 'activeColor', '#bbb');
+                defAttr(attrs, 'hoverColor', '#ddd');
+                defAttr(attrs, 'readyColor', '#ccc');
                 
                 this.callSuper(parent, attrs);
             }
@@ -19099,9 +19114,9 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
                 DEFAULT_RADIUS: 12,
-                DEFAULT_SHADOW: [0, 4, 20, '#666666'],
-                DEFAULT_BORDER: [1, 'solid', '#ffffff'],
-                DEFAULT_BGCOLOR: '#ffffff',
+                DEFAULT_SHADOW: [0, 4, 20, '#666'],
+                DEFAULT_BORDER: [1, 'solid', '#fff'],
+                DEFAULT_BGCOLOR: '#fff',
                 DEFAULT_BUTTON_CLASS: DialogButton,
                 
                 /** Makes the text wrap at 200px and the dialog will be at
@@ -19135,7 +19150,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     cancelTxt:'Cancel',
                     confirmTxt:'Choose',
                     titleText:'Choose a Color',
-                    color:'#000000'
+                    color:'#000'
                 },
                 
                 /** Defaults used in a date picker dialog. */
@@ -19144,7 +19159,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     confirmTxt:'Choose',
                     titleText:'Choose a Date',
                     timeOnlyTitleText:'Choose a Time',
-                    color:'#000000',
+                    color:'#000',
                     locales:{
                         en: {
                             days: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
@@ -19162,7 +19177,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides */
             initNode: function(parent, attrs) {
-                if (attrs.buttonClass == null) attrs.buttonClass = Dialog.DEFAULT_BUTTON_CLASS;
+                defAttr(attrs, 'buttonClass', Dialog.DEFAULT_BUTTON_CLASS);
                 
                 this.callSuper(parent, attrs);
                 
@@ -19210,10 +19225,10 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     inset:5,
                     outset:14,
                     roundedCorners:9,
-                    activeColor:'#cc0000',
-                    hoverColor:'#ff3333',
-                    readyColor:'#ff0000',
-                    textColor:'#ffffff',
+                    activeColor:'#c00',
+                    hoverColor:'#f33',
+                    readyColor:'#f00',
+                    textColor:'#fff',
                     text:pkg.FontAwesome.makeTag(['times']),
                     tooltip:'Close Dialog.',
                 });
@@ -19440,7 +19455,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 
                 const spinner = self.spinner = new pkg.Spinner(content, {
                     align:'center', visible:true,
-                    borderColor:'#cccccc',
+                    borderColor:'#ccc',
                     size:50, y:opts.msgY == null ? ModalPanel.DEFAULT_PADDING_Y : opts.msgY,
                 });
                 if (msg) {
@@ -19491,7 +19506,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     width:337,
                     height:177,
                     color:opts.color,
-                    palette:['#000000','#111111','#222222','#333333','#444444','#555555','#666666','#777777','#888888','#999999','#aaaaaa','#bbbbbb','#cccccc','#dddddd','#eeeeee','#ffffff']
+                    palette:['#000','#111','#222','#333','#444','#555','#666','#777','#888','#999','#aaa','#bbb','#ccc','#ddd','#eee','#fff']
                 });
                 self.show();
                 closeBtn.setVisible(true);
@@ -19549,7 +19564,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     ignoreLayout:true,
                     width:content.width,
                     height:24,
-                    bgColor:'#eeeeee',
+                    bgColor:'#eee',
                     roundedTopLeftCorner:R,
                     roundedTopRightCorner:R
                 })).sendToBack();
@@ -19569,8 +19584,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 
                 // Cancel Button
                 let attrs = opts.cancelAttrs || {};
-                if (attrs.name == null) attrs.name = 'cancelBtn';
-                if (attrs.text == null) attrs.text = opts.cancelTxt;
+                defAttr(attrs, 'name', 'cancelBtn');
+                defAttr(attrs, 'text', opts.cancelTxt);
                 if (opts.activeColor != null) attrs.activeColor = opts.activeColor;
                 if (opts.hoverColor != null) attrs.hoverColor = opts.hoverColor;
                 if (opts.readyColor != null) attrs.readyColor = opts.readyColor;
@@ -19579,8 +19594,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 
                 // Confirm Button
                 attrs = opts.confirmAttrs || {};
-                if (attrs.name == null) attrs.name = 'confirmBtn';
-                if (attrs.text == null) attrs.text = opts.confirmTxt;
+                defAttr(attrs, 'name', 'confirmBtn');
+                defAttr(attrs, 'name', opts.confirmTxt);
                 if (opts.activeColorConfirm != null) attrs.activeColor = opts.activeColorConfirm;
                 if (opts.hoverColorConfirm != null) attrs.hoverColor = opts.hoverColorConfirm;
                 if (opts.readyColorConfirm != null) attrs.readyColor = opts.readyColorConfirm;
@@ -19602,7 +19617,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     y:bgY,
                     width:content.width,
                     height:content.height - bgY,
-                    bgColor:'#eeeeee',
+                    bgColor:'#eee',
                     roundedBottomLeftCorner:r,
                     roundedBottomRightCorner:r
                 })).sendToBack();
@@ -19947,6 +19962,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     const JSClass = JS.Class,
         View = pkg.View,
         
+        defAttr = pkg.AccessorSupport.defAttr,
+        
         /** Provides Slider thumb functionality.
             
             Requires:
@@ -19959,18 +19976,15 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                if (attrs.width == null) attrs.width = parent.thumbWidth;
-                if (attrs.height == null) attrs.height = parent.thumbHeight;
-                
-                if (attrs.repeatKeyDown == null) attrs.repeatKeyDown = true;
-                if (attrs.activationKeys == null) {
-                    attrs.activationKeys = [
-                        37, // left arrow
-                        38, // up arrow
-                        39, // right arrow
-                        40 // down arrow
-                    ];
-                }
+                defAttr(attrs, 'width', parent.thumbWidth);
+                defAttr(attrs, 'height', parent.thumbHeight);
+                defAttr(attrs, 'repeatKeyDown', true);
+                defAttr(attrs, 'activationKeys', [
+                    37, // left arrow
+                    38, // up arrow
+                    39, // right arrow
+                    40 // down arrow
+                ]);
                 
                 this.callSuper(parent, attrs);
                 
@@ -20079,11 +20093,10 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides myt.SimpleButton */
             initNode: function(parent, attrs) {
-                if (attrs.activeColor == null) attrs.activeColor = '#bbbbbb';
-                if (attrs.readyColor == null) attrs.readyColor = '#cccccc';
-                if (attrs.hoverColor == null) attrs.hoverColor = '#dddddd';
-                
-                if (attrs.boxShadow == null) attrs.boxShadow = [0, 0, 4, '#666666'];
+                defAttr(attrs, 'activeColor', '#bbb');
+                defAttr(attrs, 'readyColor', '#ccc');
+                defAttr(attrs, 'hoverColor', '#ddd');
+                defAttr(attrs, 'boxShadow', [0, 0, 4, '#666']);
                 
                 this.callSuper(parent, attrs);
                 
@@ -20095,13 +20108,13 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             /** @overrides myt.FocusObservable */
             showFocusEmbellishment: function() {
                 this.hideDefaultFocusEmbellishment();
-                this.setBoxShadow([0, 0, 9, '#666666']);
+                this.setBoxShadow([0, 0, 9, '#666']);
             },
             
             /** @overrides myt.FocusObservable */
             hideFocusEmbellishment: function() {
                 this.hideDefaultFocusEmbellishment();
-                this.setBoxShadow([0, 0, 4, '#666666']);
+                this.setBoxShadow([0, 0, 4, '#666']);
             }
         }),
         
@@ -20130,27 +20143,23 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             // Life Cycle //////////////////////////////////////////////////////////
             /** @overrides myt.View */
             initNode: function(parent, attrs) {
-                if (attrs.axis == null) attrs.axis = 'x';
+                defAttr(attrs, 'axis', 'x');
                 if (attrs.axis === 'x') {
-                    if (attrs.width == null) attrs.width = 100;
-                    if (attrs.height == null) attrs.height = 18;
+                    defAttr(attrs, 'width', 100);
+                    defAttr(attrs, 'height', 18);
                 } else {
-                    if (attrs.width == null) attrs.width = 18;
-                    if (attrs.height == null) attrs.height = 100;
+                    defAttr(attrs, 'width', 18);
+                    defAttr(attrs, 'height', 100);
                 }
-                
-                if (attrs.bgColor == null) attrs.bgColor = '#999999';
-                if (attrs.roundedCorners == null) attrs.roundedCorners = 9;
-                
-                if (attrs.trackInset == null) attrs.trackInset = 9;
-                if (attrs.trackOutset == null) attrs.trackOutset = 9;
-                if (attrs.thumbWidth == null) attrs.thumbWidth = 16;
-                if (attrs.thumbHeight == null) attrs.thumbHeight = 16;
-                if (attrs.thumbOffset == null) attrs.thumbOffset = 1;
-                
-                if (attrs.nudgeAmount == null) attrs.nudgeAmount = 1;
-                
-                if (attrs.thumbClass == null) attrs.thumbClass = SimpleSliderThumb;
+                defAttr(attrs, 'bgColor', '#999');
+                defAttr(attrs, 'roundedCorners', 9);
+                defAttr(attrs, 'trackInset', 9);
+                defAttr(attrs, 'trackOutset', 9);
+                defAttr(attrs, 'thumbWidth', 16);
+                defAttr(attrs, 'thumbHeight', 16);
+                defAttr(attrs, 'thumbOffset', 1);
+                defAttr(attrs, 'nudgeAmount', 1);
+                defAttr(attrs, 'thumbClass', SimpleSliderThumb);
                 
                 this.callSuper(parent, attrs);
             },
@@ -20220,7 +20229,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         SimpleSliderRangeFill = pkg.SimpleSliderRangeFill = new JSClass('SimpleSliderRangeFill', View, {
             // Life Cycle //////////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                if (attrs.bgColor == null) attrs.bgColor = '#666666';
+                defAttr(attrs, 'bgColor', '#666');
                 
                 this.callSuper(parent, attrs);
                 
@@ -20253,7 +20262,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.BaseSlider */
         initNode: function(parent, attrs) {
-            if (attrs.rangeFillClass == null) attrs.rangeFillClass = SimpleSliderRangeFill;
+            defAttr(attrs, 'rangeFillClass', SimpleSliderRangeFill);
             
             this.callSuper(parent, attrs);
             
@@ -20486,6 +20495,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
 ((pkg) => {
     const JSClass = JS.Class,
         
+        defAttr = pkg.AccessorSupport.defAttr,
+        
         /*  Setup the limitToParent constraint.
             @param {!BaseDivider} divider
             @returns {undefined} */
@@ -20527,35 +20538,30 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             initNode: function(parent, attrs) {
                 const self = this;
                 
-                if (attrs.activeColor == null) attrs.activeColor = '#bbbbbb';
-                if (attrs.hoverColor == null) attrs.hoverColor = '#dddddd';
-                if (attrs.readyColor == null) attrs.readyColor = '#cccccc';
-                
-                if (attrs.axis == null) attrs.axis = 'x';
-                if (attrs.minValue == null) attrs.minValue = 0;
-                if (attrs.value == null) attrs.value = attrs.minValue;
-                if (attrs.expansionState == null) attrs.expansionState = 2;
-                
-                if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
-                if (attrs.repeatKeyDown == null) attrs.repeatKeyDown = true;
-                
-                if (attrs.activationKeys == null) {
-                    attrs.activationKeys = [
-                        37, // left arrow
-                        38, // up arrow
-                        39, // right arrow
-                        40, // down arrow
-                        13, // enter
-                        32  // spacebar
-                    ];
-                }
+                defAttr(attrs, 'activeColor', '#bbb');
+                defAttr(attrs, 'hoverColor', '#ddd');
+                defAttr(attrs, 'readyColor', '#ccc');
+                defAttr(attrs, 'axis', 'x');
+                defAttr(attrs, 'minValue', 0);
+                defAttr(attrs, 'value', attrs.minValue);
+                defAttr(attrs, 'expansionState', 2);
+                defAttr(attrs, 'focusEmbellishment', false);
+                defAttr(attrs, 'repeatKeyDown', true);
+                defAttr(attrs, 'activationKeys', [
+                    37, // left arrow
+                    38, // up arrow
+                    39, // right arrow
+                    40, // down arrow
+                    13, // enter
+                    32  // spacebar
+                ]);
                 
                 if (attrs.axis === 'y') {
-                    if (attrs.height == null) attrs.height = 6;
-                    if (attrs.cursor == null) attrs.cursor = 'row-resize';
+                    defAttr(attrs, 'height', 6);
+                    defAttr(attrs, 'cursor', 'row-resize');
                 } else {
-                    if (attrs.width == null) attrs.width = 6;
-                    if (attrs.cursor == null) attrs.cursor = 'col-resize';
+                    defAttr(attrs, 'width', 6);
+                    defAttr(attrs, 'cursor', 'col-resize');
                 }
                 
                 // Controls acceleration of the nudge amount
@@ -20563,8 +20569,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 
                 self.callSuper(parent, attrs);
                 
-                // Do afterwards since value might have been constrained from the
-                // value provided in attrs.
+                // Do afterwards since value might have been constrained from 
+                // the value provided in attrs.
                 if (attrs.restoreValue == null) self.setRestoreValue(self.value);
                 
                 if (self.limitToParent != null) updateLimitToParentConstraint(self);
@@ -20748,6 +20754,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         JSModule = JS.Module,
         
         View = pkg.View,
+        
+        defAttr = pkg.AccessorSupport.defAttr,
         
         // GridController
         findLastColumn = controller => {
@@ -21282,18 +21290,17 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             initNode: function(parent, attrs) {
                 const self = this;
                 
-                if (attrs.minValue == null) attrs.minValue = 16;
-                if (attrs.maxValue == null) attrs.maxValue = defaultMaxValue;
-                if (attrs.resizable == null) attrs.resizable = true;
-                if (attrs.flex == null) attrs.flex = 0;
-                if (attrs.cellXAdj == null) attrs.cellXAdj = 0;
-                if (attrs.cellWidthAdj == null) attrs.cellWidthAdj = 0;
-                
-                if (attrs.sortable == null) attrs.sortable = true;
-                if (attrs.sortState == null) attrs.sortState = 'none';
+                defAttr(attrs, 'minValue', 16);
+                defAttr(attrs, 'maxValue', defaultMaxValue);
+                defAttr(attrs, 'resizable', true);
+                defAttr(attrs, 'flex', 0);
+                defAttr(attrs, 'cellXAdj', 0);
+                defAttr(attrs, 'cellWidthAdj', 0);
+                defAttr(attrs, 'sortable', true);
+                defAttr(attrs, 'sortState', 'none');
                 
                 // Ensure participation in determinePlacement method of myt.Grid
-                if (attrs.placement == null) attrs.placement = '*';
+                defAttr(attrs, 'placement', '*');
                 
                 self.callSuper(parent, attrs);
                 
@@ -21452,7 +21459,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
                 // Ensure participation in determinePlacement method of myt.Grid
-                if (attrs.placement == null) attrs.placement = '*';
+                defAttr(attrs, 'placement', '*');
                 
                 this.callSuper(parent, attrs);
                 
@@ -21515,11 +21522,11 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 SpacedLayout = pkg.SpacedLayout;
             
             // Allows horizontal scrolling if the grid columns are too wide.
-            if (attrs.overflow == null) attrs.overflow = 'autox';
+            defAttr(attrs, 'overflow', 'autox');
             
-            if (attrs.bgColor == null) attrs.bgColor = '#cccccc';
-            if (attrs.rowSpacing == null) attrs.rowSpacing = 1;
-            if (attrs.columnSpacing == null) attrs.columnSpacing = 1;
+            defAttr(attrs, 'bgColor', '#ccc');
+            defAttr(attrs, 'rowSpacing', 1);
+            defAttr(attrs, 'columnSpacing', 1);
             
             const isAutoScrolling = attrs.isAutoScrolling;
             delete attrs.isAutoScrolling;
@@ -21680,14 +21687,14 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         initNode: function(parent, attrs) {
             const self = this;
             
-            if (attrs.activeColor == null) attrs.activeColor = '#999999';
-            if (attrs.hoverColor == null) attrs.hoverColor = '#bbbbbb';
-            if (attrs.readyColor == null) attrs.readyColor = '#aaaaaa';
-            if (attrs.inset == null) attrs.inset = 2;
-            if (attrs.outset == null) attrs.outset = 2;
-            if (attrs.height == null) attrs.height = 18;
-            if (attrs.contentAlign == null) attrs.contentAlign = 'left';
-            if (attrs.sortIconColor == null) attrs.sortIconColor = '#666666';
+            defAttr(attrs, 'activeColor', '#999');
+            defAttr(attrs, 'hoverColor', '#bbb');
+            defAttr(attrs, 'readyColor', '#aaa');
+            defAttr(attrs, 'inset', 2);
+            defAttr(attrs, 'outset', 2);
+            defAttr(attrs, 'height', 18);
+            defAttr(attrs, 'contentAlign', 'left');
+            defAttr(attrs, 'sortIconColor', '#666');
             
             self.callSuper(parent, attrs);
             
@@ -21769,6 +21776,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
 ((pkg) => {
     const JSClass = JS.Class,
         JSModule = JS.Module,
+        
+        defAttr = pkg.AccessorSupport.defAttr,
         
         View = pkg.View,
         DEFAULT_ROW_SPACING = 1,
@@ -21876,18 +21885,16 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     rowClasses = defaultClassObj;
                 }
                 
-                if (attrs.modelIDName == null) attrs.modelIDName = 'id';
-                if (attrs.numericSort == null) attrs.numericSort = true;
-                if (attrs.ascendingSort == null) attrs.ascendingSort = true;
-                if (attrs.overflow == null) attrs.overflow = 'autoy';
-                
-                if (attrs.bgColor == null) attrs.bgColor = DEFAULT_BG_COLOR;
-                if (attrs.rowSpacing == null) attrs.rowSpacing = DEFAULT_ROW_SPACING;
-                if (attrs.rowInset == null) attrs.rowInset = DEFAULT_ROW_INSET;
-                if (attrs.rowOutset == null) attrs.rowOutset = DEFAULT_ROW_OUTSET;
-                if (attrs.rowHeight == null) attrs.rowHeight = DEFAULT_ROW_HEIGHT;
-                
-                if (attrs.overscrollBehavior == null) attrs.overscrollBehavior = 'auto contain';
+                defAttr(attrs, 'modelIDName', 'id');
+                defAttr(attrs, 'numericSort', true);
+                defAttr(attrs, 'ascendingSort', true);
+                defAttr(attrs, 'overflow', 'autoy');
+                defAttr(attrs, 'bgColor', DEFAULT_BG_COLOR);
+                defAttr(attrs, 'rowSpacing', DEFAULT_ROW_SPACING);
+                defAttr(attrs, 'rowInset', DEFAULT_ROW_INSET);
+                defAttr(attrs, 'rowOutset', DEFAULT_ROW_OUTSET);
+                defAttr(attrs, 'rowHeight', DEFAULT_ROW_HEIGHT);
+                defAttr(attrs, 'overscrollBehavior', 'auto contain');
                 
                 self._rowExtent = self.rowSpacing = self.rowHeight = 0;
                 self._startIdx = self._endIdx = -1;
@@ -22184,13 +22191,12 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                if (attrs.selectedColor == null) attrs.selectedColor = DEFAULT_SELECTED_COLOR;
-                if (attrs.activeColor == null) attrs.activeColor = DEFAULT_ACTIVE_COLOR;
-                if (attrs.hoverColor == null) attrs.hoverColor = DEFAULT_HOVER_COLOR;
-                if (attrs.readyColor == null) attrs.readyColor = DEFAULT_READY_COLOR;
-                
-                if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
-                if (attrs.activationKeys == null) attrs.activationKeys = [13,27,32,37,38,39,40];
+                defAttr(attrs, 'selectedColor', DEFAULT_SELECTED_COLOR);
+                defAttr(attrs, 'activeColor', DEFAULT_ACTIVE_COLOR);
+                defAttr(attrs, 'hoverColor', DEFAULT_HOVER_COLOR);
+                defAttr(attrs, 'readyColor', DEFAULT_READY_COLOR);
+                defAttr(attrs, 'focusEmbellishment', false);
+                defAttr(attrs, 'activationKeys', [13,27,32,37,38,39,40]);
                 
                 this.callSuper(parent, attrs);
             },
@@ -22464,7 +22470,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides */
         initNode: function(parent, attrs) {
-            if (attrs.columnSpacing == null) attrs.columnSpacing = 1;
+            defAttr(attrs, 'columnSpacing', 1);
             
             attrs.overflow = 'hidden';
             
@@ -22539,7 +22545,9 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
 
 ((pkg) => {
     const JSClass = JS.Class,
-    
+        
+        defAttr = pkg.AccessorSupport.defAttr,
+        
         /** Use this to implement more complex transitions in a PanelStack.
             
             @class */
@@ -22574,8 +22582,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         initNode: function(parent, attrs) {
             attrs.overflow = 'hidden';
             
-            if (attrs.itemSelectionId == null) attrs.itemSelectionId = 'panelId';
-            if (attrs.maxSelected == null) attrs.maxSelected = 1;
+            defAttr(attrs, 'itemSelectionId', 'panelId');
+            defAttr(attrs, 'maxSelected', 1);
             
             this.callSuper(parent, attrs);
             
@@ -22700,8 +22708,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         initNode: function(parent, attrs) {
             attrs.visible = attrs.selected = false;
             
-            if (attrs.bgColor == null) attrs.bgColor = '#ffffff';
-            if (attrs.panelId == null) attrs.panelId = attrs.name;
+            defAttr(attrs, 'bgColor', '#fff');
+            defAttr(attrs, 'panelId', attrs.name);
             
             this.callSuper(parent, attrs);
             
@@ -22744,7 +22752,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides */
         initNode: function(parent, attrs) {
-            if (attrs.duration == null) attrs.duration = 1000;
+            defAttr(attrs, 'duration', 1000);
             
             this.callSuper(parent, attrs);
         },
@@ -22784,8 +22792,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides */
         initNode: function(parent, attrs) {
-            if (attrs.duration == null) attrs.duration = 1000;
-            if (attrs.direction == null) attrs.direction = 'right';
+            defAttr(attrs, 'duration', 1000);
+            defAttr(attrs, 'direction', 'right');
             
             this.callSuper(parent, attrs);
         },
@@ -22889,6 +22897,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         globalMouse = G.mouse,
         Draggable = pkg.Draggable,
         
+        defAttr = pkg.AccessorSupport.defAttr,
+        
         /*  @param {!Object} autoScroller
             @param {string} dir - The direction to scroll.
             @param {number} amt - The amount to scroll.
@@ -22910,14 +22920,14 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         /*  @param {!Object} autoScroller
             @returns {undefined} */
-        resetVScroll = (autoScroller) => {
+        resetVScroll = autoScroller => {
             autoScroller.__isAutoscrollUp = autoScroller.__isAutoscrollDown = false;
             autoScroller.__timerIdAutoscrollUp = autoScroller.__timerIdAutoscrollDown = null;
         },
         
         /*  @param {!Object} autoScroller
             @returns {undefined} */
-        resetHScroll = (autoScroller) => {
+        resetHScroll = autoScroller => {
             autoScroller.__isAutoscrollLeft = autoScroller.__isAutoscrollRight = false;
             autoScroller.__timerIdAutoscrollLeft = autoScroller.__timerIdAutoscrollRight = null;
         },
@@ -23001,8 +23011,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides */
         initNode: function(parent, attrs) {
-            if (attrs.distanceBeforeDrag == null) attrs.distanceBeforeDrag = 2;
-            if (attrs.dropParent == null) attrs.dropParent = parent.getRoot();
+            defAttr(attrs, 'distanceBeforeDrag', 2);
+            defAttr(attrs, 'dropParent', parent.getRoot());
             
             this.callSuper(parent, attrs);
         },
@@ -23098,32 +23108,32 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             that has a matching drag group.
             @param dropable:myt.Dropable The dropable being dragged.
             @returns {undefined} */
-        notifyDragStart: (dropable) => {},
+        notifyDragStart: dropable => {},
         
         /** Called by myt.GlobalDragManager when a dropable stops being dragged
             that has a matching drag group.
             @param dropable:myt.Dropable The dropable no longer being dragged.
             @returns {undefined} */
-        notifyDragStop: (dropable) => {},
+        notifyDragStop: dropable => {},
         
         /** Called by myt.GlobalDragManager when a dropable is dragged over this
             view and has a matching drag group.
             @param dropable:myt.Dropable The dropable being dragged over this view.
             @returns {undefined} */
-        notifyDragEnter: (dropable) => {},
+        notifyDragEnter: dropable => {},
         
         /** Called by myt.GlobalDragManager when a dropable is dragged out of this
             view and has a matching drag group.
             @param dropable:myt.Dropable The dropable being dragged out of 
                 this view.
             @returns {undefined} */
-        notifyDragLeave: (dropable) => {},
+        notifyDragLeave: dropable => {},
         
         /** Called by myt.GlobalDragManager when a dropable is dropped onto this
             view and has a matching drag group.
             @param dropable:myt.Dropable The dropable being dropped onto this view.
             @returns {undefined} */
-        notifyDrop: (dropable) => {}
+        notifyDrop: dropable => {}
     });
     
     /** Makes an myt.View drag and dropable via the mouse.
@@ -23150,7 +23160,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             of drag group. The default implementation returns true.
             @param dropTarget:myt.DropTarget The drop target dragged over.
             @returns boolean: True if the drop will be allowed, false otherwise. */
-        willPermitDrop: (dropTarget) => true,
+        willPermitDrop: dropTarget => true,
         
         /** @overrides myt.Draggable */
         startDrag: function(event) {
@@ -23255,7 +23265,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             this.scrollAmount = 2;
             this.scrollAcceleration = 7;
             
-            if (attrs.overflow == null) attrs.overflow = 'auto';
+            defAttr(attrs, 'overflow', 'auto');
             
             this.callSuper(parent, attrs);
             
@@ -24105,13 +24115,13 @@ myt.Eventable = new JS.Class('Eventable', {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
                 DEFAULT_EDGE_SIZE:0,
-                DEFAULT_EDGE_COLOR:'#444444',
+                DEFAULT_EDGE_COLOR:'#444',
                 DEFAULT_SHADOW_SIZE:2,
                 DEFAULT_SHADOW_COLOR:'#00000033', // Extra nums are opacity
                 DEFAULT_HORIZONTAL_INSET:6,
                 DEFAULT_VERTICAL_INSET:3,
-                DEFAULT_TIP_BG_COLOR:'#444444',
-                DEFAULT_TIP_TEXT_COLOR:'#eeeeee'
+                DEFAULT_TIP_BG_COLOR:'#444',
+                DEFAULT_TIP_TEXT_COLOR:'#eee'
             },
             
             
