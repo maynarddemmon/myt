@@ -14,9 +14,6 @@
     
     /** Provides support for getter and setter functions on an object.
         
-        Events:
-            None
-        
         Attributes:
             earlyAttrs:array An array of attribute names that will be set first.
             lateAttrs:array An array of attribute names that will be set last.
@@ -38,8 +35,8 @@
                 @returns {string} */
             generateName: generateName,
             
-            /** Creates a standard setter function for the provided attrName on the
-                target. This assumes the target is an myt.Observable.
+            /** Creates a standard setter function for the provided attrName 
+                on the target. This assumes the target is an myt.Observable.
                 @param {!Object} target
                 @param {string} attrName
                 @returns {undefined} */
@@ -54,8 +51,8 @@
                 };
             },
             
-            /** Creates a standard getter function for the provided attrName on the
-                target.
+            /** Creates a standard getter function for the provided attrName 
+                on the target.
                 @param {!Object} target
                 @param {string} attrName
                 @returns {undefined} */
@@ -96,15 +93,14 @@
             const self = this,
                 earlyAttrs = self.earlyAttrs,
                 lateAttrs = self.lateAttrs;
-            let attrName, 
-                extractedLateAttrs, 
+            let extractedLateAttrs, 
                 i, 
                 len;
             if (earlyAttrs || lateAttrs) {
                 // Make a shallow copy of attrs since we can't guarantee that
                 // attrs won't be reused
                 const copyOfAttrs = {};
-                for (attrName in attrs) copyOfAttrs[attrName] = attrs[attrName];
+                for (const attrName in attrs) copyOfAttrs[attrName] = attrs[attrName];
                 attrs = copyOfAttrs;
                 
                 // Do early setters
@@ -112,7 +108,7 @@
                     i = 0;
                     len = earlyAttrs.length;
                     while (len > i) {
-                        attrName = earlyAttrs[i++];
+                        const attrName = earlyAttrs[i++];
                         if (attrName in attrs) {
                             self.set(attrName, attrs[attrName]);
                             delete attrs[attrName];
@@ -126,7 +122,7 @@
                     i = 0;
                     len = lateAttrs.length;
                     while (len > i) {
-                        attrName = lateAttrs[i++];
+                        const attrName = lateAttrs[i++];
                         if (attrName in attrs) {
                             extractedLateAttrs.push(attrName, attrs[attrName]);
                             delete attrs[attrName];
@@ -136,7 +132,7 @@
             }
             
             // Do normal setters
-            for (attrName in attrs) self.set(attrName, attrs[attrName]);
+            for (const attrName in attrs) self.set(attrName, attrs[attrName]);
             
             // Do late setters
             if (extractedLateAttrs) {
@@ -146,8 +142,8 @@
             }
         },
         
-        /** A generic getter function that can be called to get a value from this
-            object. Will defer to a defined getter if it exists.
+        /** A generic getter function that can be called to get a value from 
+            this object. Will defer to a defined getter if it exists.
             @param {string} attrName - The name of the attribute to get.
             @returns {*} - The attribute value. */
         get: function(attrName) {
@@ -156,14 +152,15 @@
         },
         
         /** A generic setter function that can be called to set a value on this
-            object. Will defer to a defined setter if it exists. The implementation
-            assumes this object is an Observable so it will have a 'fireEvent'
-            method.
+            object. Will defer to a defined setter if it exists. The 
+            implementation assumes this object is an Observable so it will 
+            have a 'fireEvent' method.
             @param {string} attrName - The name of the attribute to set.
             @param {*} v -The value to set.
             @param {boolean} [skipSetter] - If true no attempt will be made to
-                invoke a setter function. Useful when you want to invoke standard 
-                setter behavior. Defaults to undefined which is equivalent to false.
+                invoke a setter function. Useful when you want to invoke 
+                standard setter behavior. Defaults to undefined which is 
+                equivalent to false.
             @returns {undefined} */
         set: function(attrName, v, skipSetter) {
             const self = this;

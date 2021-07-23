@@ -1,10 +1,11 @@
 ((pkg) => {
     const JSClass = JS.Class,
         JSModule = JS.Module,
+        View = pkg.View,
+        GlobalFocus = pkg.global.focus,
         
         defAttr = pkg.AccessorSupport.defAttr,
         
-        View = pkg.View,
         DEFAULT_ROW_SPACING = 1,
         DEFAULT_ROW_HEIGHT = 30,
         DEFAULT_ROW_INSET = 0,
@@ -44,13 +45,14 @@
             Attributes:
                 infiniteOwner
                 model
+                classKey
             
             @class */
         InfiniteListRow = pkg.InfiniteListRow = new JSModule('InfiniteListRow', {
             include: [pkg.Reusable],
             
             
-            // Accessors ///////////////////////////////////////////////////////////
+            // Accessors ///////////////////////////////////////////////////////
             setInfiniteOwner: function(v) {
                 this.infiniteOwner = v;
             },
@@ -90,9 +92,9 @@
                 _listData:array The data for the rows in the list.
                 _startIdx:int The index into the data of the first row shown
                 _endIdx:int The index into the data of the last row shown
-                _visibleRowsByIdx:object A cache of what rows are currently shown by
-                    the index of the data for the row. This is provides faster
-                    performance when refreshing the list.
+                _visibleRowsByIdx:object A cache of what rows are currently 
+                    shown by the index of the data for the row. This is 
+                    provides faster performance when refreshing the list.
                 _listView:myt.View The view that contains the rows in the list.
                 _itemPool:myt.TrackActivesPool The pool for row views.
             
@@ -196,7 +198,7 @@
                 }
             },
             
-            getFilterFunction: function() {
+            getFilterFunction: () => {
                 // Unimplemented which means don't filter anything out.
             },
             
@@ -308,7 +310,7 @@
                 self._startIdx = self._endIdx = -1;
                 
                 // Reset scroll position
-                self.__forceFullResetOnNextRefresh = forceFullReset;
+                self.forceFullResetOnNextRefresh = forceFullReset;
                 if (preserveScroll || getDomScrollTop(self) === 0) {
                     // Just refresh since we won't move the scroll position
                     self.refreshListUI();
@@ -322,14 +324,13 @@
             putRowBackInPool: function(row) {
                 // Clear or reassign focus since the row will get reused and the 
                 // reused row will likely not be the appropriate focus.
-                const globalFocus = pkg.global.focus,
-                    currentFocus = globalFocus.focusedView;
+                const currentFocus = GlobalFocus.focusedView;
                 if (currentFocus && currentFocus.isDescendantOf(row)) {
                     const focusTrap = this.getFocusTrap();
                     if (focusTrap) {
                         focusTrap.focus();
                     } else {
-                        globalFocus.clear();
+                        GlobalFocus.clear();
                     }
                 }
                 
@@ -341,13 +342,13 @@
                 const self = this,
                     rowExtent = self._rowExtent,
                     rowInset = self.rowInset,
-                    forceFullReset = self.__forceFullResetOnNextRefresh,
+                    forceFullReset = self.forceFullResetOnNextRefresh,
                     scrollY = getDomScrollTop(self),
                     data = self.getListData() || [],
                     startIdx = Math.max(0, Math.floor((scrollY - rowInset) / rowExtent)),
                     endIdx = Math.min(data.length, Math.ceil((scrollY - rowInset + self.height) / rowExtent));
                 
-                if (self.__forceFullResetOnNextRefresh) self.__forceFullResetOnNextRefresh = false;
+                if (self.forceFullResetOnNextRefresh) self.forceFullResetOnNextRefresh = false;
                 
                 if (self._startIdx !== startIdx || self._endIdx !== endIdx || forceFullReset) {
                     const rowWidth = self.width,
@@ -359,15 +360,14 @@
                     
                     // Put all visible rows that are not within the idx range 
                     // back into the pool
-                    let i;
-                    for (i in visibleRowsByIdx) {
-                        if (i < startIdx || i >= endIdx) {
-                            self.putRowBackInPool(visibleRowsByIdx[i]);
-                            delete visibleRowsByIdx[i];
+                    for (const idx in visibleRowsByIdx) {
+                        if (idx < startIdx || idx >= endIdx) {
+                            self.putRowBackInPool(visibleRowsByIdx[idx]);
+                            delete visibleRowsByIdx[idx];
                         }
                     }
                     
-                    for (i = startIdx; i < endIdx; i++) {
+                    for (let i = startIdx; i < endIdx; i++) {
                         let row = visibleRowsByIdx[i];
                         
                         const model = data[i],
@@ -485,7 +485,8 @@
             }
         }),
         
-        /** A base class for infinite scrolling lists that support a selectable row.
+        /** A base class for infinite scrolling lists that support a 
+            selectable row.
             
             Attributes:
                 selectedRow
@@ -565,7 +566,7 @@
             
             /** @overrides */
             refreshListUI: function(ignoredEvent) {
-                const currentFocus = pkg.global.focus.focusedView;
+                const currentFocus = GlobalFocus.focusedView;
                 
                 this.callSuper();
                 
@@ -608,7 +609,7 @@
             makeReady: function(sortState, forceFullReset) {
                 const gridHeader = this.gridHeader;
                 if (gridHeader) {
-                    this.__forceFullResetOnNextRefresh = forceFullReset;
+                    this.forceFullResetOnNextRefresh = forceFullReset;
                     gridHeader.setSort(sortState);
                     gridHeader.setLocked(false);
                 } else {
@@ -747,7 +748,7 @@
         
         /** @overrides myt.GridController */
         doSort: function() {
-            this.grid.refreshListData(true, this.grid.__forceFullResetOnNextRefresh);
+            this.grid.refreshListData(true, this.grid.forceFullResetOnNextRefresh);
         },
         
         /** @overrides myt.GridController */

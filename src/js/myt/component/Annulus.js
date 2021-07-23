@@ -173,8 +173,9 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Prevent views from being sent behind the __svg. This allows us to
-            add child views to an Annulus which is not directly supported in HTML.
+        /** Prevent views from being sent behind the __svg. This allows us 
+            to add child views to an Annulus which is not directly supported 
+            in HTML.
             @overrides */
         sendSubviewToBack: function(sv) {
             if (sv.parent === this) {

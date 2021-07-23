@@ -23,9 +23,8 @@
                 @returns {!Object} the created element. */
             createDomElement: (tagname, styles, props) => {
                 const de = DOCUMENT_ELEMENT.createElement(tagname);
-                let key;
-                if (props) for (key in props) de[key] = props[key];
-                if (styles) for (key in styles) de.style[key] = styles[key];
+                if (props) for (const key in props) de[key] = props[key];
+                if (styles) for (const key in styles) de.style[key] = styles[key];
                 return de;
             },
             
@@ -175,17 +174,17 @@
                         };
                     
                     if (customOpts) {
-                        for (let p in customOpts) opts[p] = customOpts[p];
+                        for (const p in customOpts) opts[p] = customOpts[p];
                     }
                     
                     let eventType;
-                    for (let name in eventMatchers) {
+                    for (const name in eventMatchers) {
                         if (eventMatchers[name].test(eventName)) {
                             eventType = name;
                             break;
                         }
                     }
-                    if (!eventType) throw new SyntaxError('Only HTMLEvent and MouseEvent interfaces supported');
+                    if (!eventType) throw new SyntaxError('Only supports HTMLEvent and MouseEvent interfaces');
                     
                     let domEvent;
                     if (DOCUMENT_ELEMENT.createEvent) {

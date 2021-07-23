@@ -4,7 +4,7 @@
      * Maynard Demmon <maynarddemmon@gmail.com>
      * @copyright Copyright (c) 2012-2021 Maynard Demmon and contributors
      * Myt: A simple javascript UI framework
-     * Version: 20210628.2027
+     * Version: 20210723.1606
      * MIT License
      * 
      * Parts of the Software incorporates code from the following open-source projects:
@@ -65,10 +65,11 @@
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was
                 created. */
-            version:20210628.2027,
+            version:20210723.1606,
             
-            /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
-                should be set by the page that includes this script. */
+            /** The root path to image assets for the myt package. 
+                MYT_IMAGE_ROOT should be set by the page that includes 
+                this script. */
             IMAGE_ROOT: global.MYT_IMAGE_ROOT || '',
             
             /** Generates a globally unique id, (GUID).
@@ -78,8 +79,8 @@
             /** Adds an event listener to a dom element. 
                 @param {!Object} elem - The DomElement to listen to.
                 @param {string} type - The name of the event to listen to.
-                @param {!Function} callback - The callback function that will be
-                    registered for the event.
+                @param {!Function} callback - The callback function that will 
+                    be registered for the event.
                 @param {boolean} [capture]  - Indicates if the listener is 
                     registered during the capture phase or bubble phase.
                 @param {boolean} passive
@@ -94,8 +95,8 @@
             /** Removes an event listener from a dom element. 
                 @param elem:DomElement The dom element to listen to.
                 @param {string} type - The name of the event to listen to.
-                @param {!Function} callback - The callback function that will be
-                    registered for the event.
+                @param {!Function} callback - The callback function that will 
+                    be registered for the event.
                 @param {boolean} [capture] indicates if the listener is 
                     registered during the capture phase or bubble phase.
                 @returns {undefined} */
@@ -103,11 +104,11 @@
                 elem.removeEventListener(type, callback, capture || false);
             },
             
-            /** Takes a '.' separated string such as "foo.bar.baz" and resolves it
-                into the value found at that location relative to a starting scope.
-                If no scope is provided global scope is used.
-                @param {string|?Array} objName - The name to resolve or an array of path
-                    parts in descending order.
+            /** Takes a '.' separated string such as "foo.bar.baz" and resolves 
+                it into the value found at that location relative to a starting 
+                scope. If no scope is provided global scope is used.
+                @param {string|?Array} objName - The name to resolve or an 
+                    array of path parts in descending order.
                 @param {?Object} [scope] - The scope to resolve from. If not
                     provided global scope is used.
                 @returns {?Object} The referenced object or undefined if 
@@ -129,8 +130,9 @@
                 return scope;
             },
             
-            /** Resolves a provided string into a JS.Class object. If a non-string 
-                value is provided it is verified to be a JS.Class object.
+            /** Resolves a provided string into a JS.Class object. If a 
+                non-string value is provided it is verified to be a JS.Class 
+                object.
                 @param {*} value - The value to resolve and/or verify.
                 @returns {?Function} - A JS.Class or null if the string could not 
                     be resolved or the value was not a JS.Class object. */
@@ -142,7 +144,8 @@
             },
             
             /** Gets the file extension from a file name.
-                @param {string} fileName - The filename to extract the extension from.
+                @param {string} fileName - The filename to extract the 
+                    extension from.
                 @returns {string) The file extension or null if a falsy fileName
                     argument was provided. */
             getExtension: fileName => fileName ? fileName.split('.')[1] : null,
@@ -152,8 +155,8 @@
                 @param {?Function} [callback] - A function that will be called
                     when the script loads.
                 @param {boolean} [noCacheBust] - If true, not cacheBust query
-                    param will be added. Defaults to undefined which is equivalent
-                    to false.
+                    param will be added. Defaults to undefined which is 
+                    equivalent to false.
                 @returns {?Object} The created script element or null if the 
                     script has already been loaded. */
             loadScript: function(src, callback, noCacheBust) {
@@ -196,7 +199,8 @@
             },
             
             /** A wrapper on myt.global.error.notify
-                @param {string|?Error} err - The error or message to dump stack for.
+                @param {string|?Error} err - The error or message to dump 
+                    stack for.
                 @param {string} [type] - The type of console message to write.
                     Allowed values are 'error', 'warn', 'log' and 'debug'. 
                     Defaults to 'error'.
@@ -213,12 +217,14 @@
             // Random numbers
             /** Generates a random number between 0 (inclusive) and 1 (exclusive)
                 @param {?Function} [func] - A distribution function for the
-                    random numbers. The function should map a number between 0 and 1
-                    to another number between 0 (inclusive) and 1 (exclusive). If not 
-                    provided a flat distribution will be used. Example functions:
-                        - function(v) {return v * v;} will skew the value towards 0.
-                        - function(v) {return 0.9999999999 - v * v;} will skew the 
-                          value towards a value very close to 1.
+                    random numbers. The function should map a number between 0 
+                    and 1 to another number between 0 (inclusive) and 1 
+                    (exclusive). If not provided a flat distribution will be 
+                    used. Example functions:
+                        - function(v) {return v * v;} will skew the value 
+                          towards 0.
+                        - function(v) {return 0.9999999999 - v * v;} will skew 
+                          the value towards a value very close to 1.
                 @returns {number} a random number between 0 and almost 1. */
             getRandom: func => {
                 let v = Math.random();
@@ -235,7 +241,8 @@
                 return v;
             },
             
-            /** @returns a random number between min (inclusive) and max (exclusive).
+            /** @returns a random number between min (inclusive) and 
+                max (exclusive).
                 @param {number} min - the minimum value returned.
                 @param {number} max - the maximum value returned.
                 @param {?Function} [func] - A distribution function. 
@@ -250,7 +257,8 @@
                 return myt.getRandom(func) * (max - min) + min;
             },
             
-            /** Generates a random integer between min (inclusive) and max (inclusive)
+            /** Generates a random integer between min (inclusive) and 
+                max (inclusive)
                 @param {number} min - the minimum value returned.
                 @param {number} max - the maximum value returned.
                 @param {?Function} [func] - A distribution function. 
@@ -303,9 +311,8 @@
             areObjectsEqual: (a, b) => {
                 if (a !== b) {
                     if (a == null || b == null) return false;
-                    let key;
-                    for (key in a) if (a[key] !== b[key]) return false;
-                    for (key in b) if (a[key] !== b[key]) return false;
+                    for (const key in a) if (a[key] !== b[key]) return false;
+                    for (const key in b) if (a[key] !== b[key]) return false;
                 }
                 return true;
             },
@@ -314,8 +321,8 @@
             /** Gets the dom element of the provided tagname and index.
                 @param {string} [tagname] - The name of the tag to search for.
                     Defaults to 'body' if not provided
-                @param {number} [index] - The index of the tag to get. Defaults to
-                    0 if not provided.
+                @param {number} [index] - The index of the tag to get. 
+                    Defaults to 0 if not provided.
                 @returns {?Object} a dom element or undefined if none exist. */
             getElement: (tagname, index) => document.getElementsByTagName(tagname || 'body')[index > 0 ? index : 0],
             
@@ -438,10 +445,10 @@
             // Misc
             /** Format a number between 0 and 1 as a percentage.
                 @param {number} num The number to convert.
-                @param {number} [fixed] The number of decimal places to use during
-                    formatting. If the percentage is a whole number no decimal
-                    places will be used. For example 0.55781 -> 55.78% and
-                    0.55 -> 55%
+                @param {number} [fixed] The number of decimal places to use 
+                    during formatting. If the percentage is a whole number 
+                    no decimal places will be used. 
+                    For example 0.55781 -> 55.78% and 0.55 -> 55%
                 @returns (string) */
             formatAsPercentage: (num, fixed=2) => {
                 if (typeof num === 'number') {
@@ -467,18 +474,18 @@
                 };
             },
             
-            /** Returns a function that wraps the provided function and that, as long 
-                as it continues to be invoked, will not invoke the wrapped function. 
-                The wrapped function will be called after the returned function stops 
-                being called for "wait" milliseconds. If "immediate" is passed, the
-                wrapped function will be invoked on the leading edge instead of 
-                the trailing edge.
+            /** Returns a function that wraps the provided function and that, 
+                as long as it continues to be invoked, will not invoke the 
+                wrapped function. The wrapped function will be called after the 
+                returned function stops being called for "wait" milliseconds. 
+                If "immediate" is passed, the wrapped function will be invoked 
+                on the leading edge instead of the trailing edge.
                 @param {!Function} func - The function to wrap.
-                @param {number} [wait] - The time in millis to delay invocation by.
-                    If not provided 0 is used.
+                @param {number} [wait] - The time in millis to delay 
+                    invocation by. If not provided 0 is used.
                 @param {boolean} [immediate] - If true the function will be
-                    invoked immediately and then the wait time will be used to block
-                    subsequent calls.
+                    invoked immediately and then the wait time will be used 
+                    to block subsequent calls.
                 @returns {!Function} - The debounced function. */
             debounce: function(func, wait, immediate) {
                 return function() {
@@ -502,14 +509,16 @@
                 @param {!Object|!Function} scope - Either an myt.Observable,
                     JS.Class or JS.Module to mix onto.
                 @param {number} thresholdValue - The fixed threshold value.
-                @param {string} exceededAttrName - The name of the boolean attribute
-                    that will indicate if the threshold is exceeded or not.
+                @param {string} exceededAttrName - The name of the boolean 
+                    attribute that will indicate if the threshold is exceeded 
+                    or not.
                 @param {string} [counterAttrName] - The name of the number
-                    attribute that will get adjusted up and down. If not provided
-                    the 'exceeded' attribute name will be used with 'Counter'
-                    appended to it. For example if the exceeded
+                    attribute that will get adjusted up and down. If not 
+                    provided the 'exceeded' attribute name will be used 
+                    with 'Counter' appended to it. For example if the exceeded
                     attribute was 'locked' this would be 'lockedCounter'.
-                @returns {boolean} - True if creation succeeded, false otherwise. */
+                @returns {boolean} - True if creation succeeded, 
+                    false otherwise. */
             createFixedThresholdCounter: (scope, thresholdValue, exceededAttrName, counterAttrName) => {
                 const genNameFunc = myt.AccessorSupport.generateName,
                     isModuleOrClass = typeof scope === 'function' || scope instanceof JS.Module,

@@ -1,5 +1,7 @@
 ((pkg) => {
     const JSModule = JS.Module,
+    
+        defAttr = pkg.AccessorSupport.defAttr,
         
         updateTextColor = tab => {
             tab.textView.setTextColor(tab.selected ? tab.labelTextSelectedColor : tab.labelTextColor);
@@ -111,19 +113,19 @@
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
                 // myt.SimpleIconTextButton
-                if (attrs.inset == null) attrs.inset = Tab.DEFAULT_INSET;
-                if (attrs.outset == null) attrs.outset = Tab.DEFAULT_OUTSET;
+                defAttr(attrs, 'inset', Tab.DEFAULT_INSET);
+                defAttr(attrs, 'outset', Tab.DEFAULT_OUTSET);
                 
                 // myt.Tab
-                if (attrs.selectedColor == null) attrs.selectedColor = Tab.DEFAULT_FILL_COLOR_SELECTED;
-                if (attrs.hoverColor == null) attrs.hoverColor = Tab.DEFAULT_FILL_COLOR_HOVER;
-                if (attrs.activeColor == null) attrs.activeColor = Tab.DEFAULT_FILL_COLOR_ACTIVE;
-                if (attrs.readyColor == null) attrs.readyColor = Tab.DEFAULT_FILL_COLOR_READY;
-                if (attrs.labelTextSelectedColor == null) attrs.labelTextSelectedColor = Tab.DEFAULT_LABEL_TEXT_COLOR_SELECTED;
+                defAttr(attrs, 'selectedColor', Tab.DEFAULT_FILL_COLOR_SELECTED);
+                defAttr(attrs, 'hoverColor', Tab.DEFAULT_FILL_COLOR_HOVER);
+                defAttr(attrs, 'activeColor', Tab.DEFAULT_FILL_COLOR_ACTIVE);
+                defAttr(attrs, 'readyColor', Tab.DEFAULT_FILL_COLOR_READY);
+                defAttr(attrs, 'labelTextSelectedColor', Tab.DEFAULT_LABEL_TEXT_COLOR_SELECTED);
                 
                 // Other
-                if (attrs.height == null) attrs.height = Tab.DEFAULT_HEIGHT;
-                if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
+                defAttr(attrs, 'height', Tab.DEFAULT_HEIGHT);
+                defAttr(attrs, 'focusEmbellishment', false);
                 
                 this.callSuper(parent, attrs);
                 
@@ -190,30 +192,19 @@
             initNode: function(parent, attrs) {
                 this.__tabs = [];
                 
-                if (attrs.spacing == null) attrs.spacing = TabContainer.DEFAULT_SPACING;
-                if (attrs.inset == null) attrs.inset = TabContainer.DEFAULT_INSET;
-                
-                if (attrs.location == null) attrs.location = 'top';
-                
-                if (attrs.itemSelectionId == null) attrs.itemSelectionId = 'tabId';
-                if (attrs.maxSelected == null) attrs.maxSelected = 1;
+                defAttr(attrs, 'spacing', TabContainer.DEFAULT_SPACING);
+                defAttr(attrs, 'inset', TabContainer.DEFAULT_INSET);
+                defAttr(attrs, 'location', 'top');
+                defAttr(attrs, 'itemSelectionId', 'tabId');
+                defAttr(attrs, 'maxSelected', 1);
                 
                 this.callSuper(parent, attrs);
                 
-                let axis;
-                switch (this.location) {
-                    case 'top':
-                    case 'bottom':
-                        axis = 'x';
-                        break;
-                    case 'left':
-                    case 'right':
-                        axis = 'y';
-                        break;
-                }
-                
                 new pkg.SpacedLayout(this, {
-                    name:'layout', axis:axis, spacing:this.spacing, inset:this.inset,
+                    name:'layout',
+                    axis:this.location === 'left' || this.location === 'right' ? 'y' : 'x',
+                    spacing:this.spacing,
+                    inset:this.inset,
                     collapseParent:true
                 });
             },

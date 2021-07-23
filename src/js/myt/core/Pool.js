@@ -26,8 +26,8 @@
             }
         },
         
-        /** Implements an object pool. Subclasses must at a minimum implement the 
-            createInstance method.
+        /** Implements an object pool. Subclasses must at a minimum implement 
+            the createInstance method.
             
             Private Attributes:
                 __op:array The array of objects stored in the pool.
@@ -55,8 +55,9 @@
             
             // Methods /////////////////////////////////////////////////////////
             /** Get an instance from the pool.
-                The arguments passed in will be passed to the createInstance method.
-                Note: these have no effect if an object already exists in the pool.
+                The arguments passed in will be passed to the createInstance 
+                method. Note: these have no effect if an object already exists 
+                in the pool.
                 @returns {!Object} */
             getInstance: function() {
                 const objPool = getObjPool(this, true);
@@ -76,9 +77,9 @@
                 getObjPool(this, true).push(this.cleanInstance(obj));
             },
             
-            /** Cleans the object in preparation for putting it back in the pool. The
-                default implementation calls the clean method on the object if it is
-                a function. Otherwise it does nothing.
+            /** Cleans the object in preparation for putting it back in the 
+                pool. The default implementation calls the clean method on the 
+                object if it is a function. Otherwise it does nothing.
                 @param {!Object} obj - The object to be cleaned.
                 @returns {!Object} - The cleaned object. */
             cleanInstance: (obj) => {
@@ -86,8 +87,8 @@
                 return obj;
             },
             
-            /** Calls the destroy method on all object stored in the pool if they
-                have a destroy function.
+            /** Calls the destroy method on all object stored in the pool if 
+                they have a destroy function.
                 @returns {undefined} */
             destroyPooledInstances: function() {
                 destroyObjectPool(getObjPool(this));
@@ -99,16 +100,18 @@
             Attributes:
                 instanceClass:JS.Class (initializer only) the class to use for 
                     new instances. Defaults to Object.
-                instanceParent:myt.Node (initializer only) The node to create new
-                    instances on.
+                instanceParent:myt.Node (initializer only) The node to create 
+                    new instances on.
             
             @class */
         SimplePool = pkg.SimplePool = new JSClass('SimplePool', AbstractPool, {
             // Constructor /////////////////////////////////////////////////////
             /** Create a new myt.SimplePool
-                @param {!Function} instanceClass - The JS.Class to create instances from.
-                @param {?Object} [instanceParent] - The place to create instances 
-                    on. When instanceClass is an myt.Node this will be the node parent.
+                @param {!Function} instanceClass - The JS.Class to create 
+                    instances from.
+                @param {?Object} [instanceParent] - The place to create 
+                    instances on. When instanceClass is an myt.Node this will 
+                    be the node parent.
                 @returns {undefined} */
             initialize: function(instanceClass, instanceParent) {
                 this.callSuper();
@@ -122,7 +125,8 @@
             /** @overrides myt.AbstractPool
                 Creates an instance of this.instanceClass and passes in 
                 this.instanceParent as the first argument if it exists.
-                arguments[0]:object (optional) the attrs to be passed to a created myt.Node.
+                arguments[0]:object (optional) the attrs to be passed to a 
+                created myt.Node.
                 @returns {?Object} */
             createInstance: function() {
                 return makeInstance(this.instanceParent, this.instanceClass, arguments[0]);
@@ -172,7 +176,7 @@
                 } else {
                     warningType = "non-existant";
                 }
-                console.warn("Attempt to put a " + warningType + " instance.", obj, this);
+                console.warn("Tried to put a " + warningType + " instance.", obj, this);
             },
             
             /** Gets an array of the active instances.
@@ -208,6 +212,9 @@
         
         /** An myt.SimplePool that tracks which objects are "active".
             
+            Private Attributes:
+                __pbk:object Stores Pools by key.
+            
             @class */
         TrackActivesPool = pkg.TrackActivesPool = new JSClass('TrackActivesPool', SimplePool, {
             include: [TrackActives]
@@ -221,8 +228,8 @@
             this.instanceClassesByKey = instanceClassesByKey;
             
             const poolsByClassName = this._poolsByClassName = {},
-                poolsByKey = this._poolsByKey = {};
-            for (let key in instanceClassesByKey) {
+                poolsByKey = this.__pbk = {};
+            for (const key in instanceClassesByKey) {
                 const klass = instanceClassesByKey[key];
                 poolsByKey[key] = poolsByClassName[klass.__displayName] = new TrackActivesPool(klass, instanceParent);
             }
@@ -231,8 +238,8 @@
         
         // Life Cycle //////////////////////////////////////////////////////////
         destroy: function() {
-            const poolsByKey = this._poolsByKey;
-            for (let key in poolsByKey) poolsByKey[key].destroy();
+            const poolsByKey = this.__pbk;
+            for (const key in poolsByKey) poolsByKey[key].destroy();
             
             this.callSuper();
         },
@@ -241,11 +248,11 @@
         // Methods /////////////////////////////////////////////////////////////
         getInstance: function() {
             const key = arguments[0],
-                pool = this._poolsByKey[key];
+                pool = this.__pbk[key];
             if (pool) {
                 return pool.getInstance(arguments);
             } else {
-                console.warn('No pool found for key:', key);
+                console.warn('No pool for key:', key);
             }
         },
         
@@ -254,30 +261,30 @@
             if (pool) {
                 pool.putInstance(obj);
             } else {
-                console.warn('No pool found for obj:', obj);
+                console.warn('No pool for obj:', obj);
             }
         },
         
         destroyPooledInstances: function() {
-            const poolsByKey = this._poolsByKey;
-            for (let key in poolsByKey) poolsByKey[key].destroyPooledInstances();
+            const poolsByKey = this.__pbk;
+            for (const key in poolsByKey) poolsByKey[key].destroyPooledInstances();
         },
         
         getActives: function(filterFunc) {
             let actives = [];
-            const poolsByKey = this._poolsByKey;
-            for (let key in poolsByKey) actives = actives.concat(poolsByKey[key].getActives(filterFunc));
+            const poolsByKey = this.__pbk;
+            for (const key in poolsByKey) actives = actives.concat(poolsByKey[key].getActives(filterFunc));
             return actives;
         },
         
         putActives: function() {
-            const poolsByKey = this._poolsByKey;
-            for (let key in poolsByKey) poolsByKey[key].putActives();
+            const poolsByKey = this.__pbk;
+            for (const key in poolsByKey) poolsByKey[key].putActives();
         }
     });
     
-    /** Objects that can be used in an myt.AbstractPool should use this mixin and 
-        implement the "clean" method. */
+    /** Objects that can be used in an myt.AbstractPool should use this mixin 
+        and implement the "clean" method. */
     pkg.Reusable = new JSModule('Reusable', {
         // Methods /////////////////////////////////////////////////////////////
         /** Puts this object back into a default state suitable for storage in

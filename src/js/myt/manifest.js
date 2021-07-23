@@ -97,7 +97,7 @@ JS.Packages(function() {
             'myt.InfiniteList','myt.InfiniteListRow','myt.SelectableInfiniteList','myt.SelectableInfiniteListRow','myt.SimpleSelectableInfiniteListRow',
             'myt.InfiniteGrid','myt.InfiniteGridRow','myt.InfiniteGridHeader','myt.SelectableInfiniteGrid','myt.SelectableInfiniteGridRow','myt.SimpleSelectableInfiniteGridRow'
         )
-        .requires('myt.View','myt.Reusable','myt.Selectable','myt.SimpleButton','myt.GridController');
+        .requires('myt.Reusable','myt.Selectable','myt.SimpleButton','myt.GridController','myt.global.focus');
     file(MYT_COMPONENT_ROOT + 'ListView.js'        ).provides('myt.ListView','myt.ListViewAnchor','myt.ListViewItemMixin','myt.ListViewSeparator','myt.ListViewItem')
         .requires('myt.FloatingPanel','myt.FloatingPanelAnchor','myt.SimpleIconTextButton');
     file(MYT_COMPONENT_ROOT + 'ModalPanel.js'      ).provides('myt.ModalPanel').requires('myt.Dimmer','myt.SizeToChildren');

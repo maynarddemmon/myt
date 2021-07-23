@@ -5,7 +5,7 @@
         
         defAttr = pkg.AccessorSupport.defAttr,
         
-        updateUI = (checkbox) => {
+        updateUI = checkbox => {
             const label = checkbox.label || '',
                 checkboxStyle = checkbox.checkboxStyle || DEFAULT_STYLE;
             checkbox.setText(

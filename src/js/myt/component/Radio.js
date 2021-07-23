@@ -3,7 +3,7 @@
         
         defAttr = pkg.AccessorSupport.defAttr,
         
-        updateUI = (radio) => {
+        updateUI = radio => {
             const label = radio.label || '';
             radio.setText(
                 '<i class="far fa-' + (radio.selected === true ? 'dot-' : '') + 'circle"></i>' +
@@ -20,10 +20,9 @@
             const bag = getBooleanAttributeGroup(radio);
             if (bag) {
                 const nodes = bag.getNodes();
-                let i = nodes.length, 
-                    node;
+                let i = nodes.length;
                 while (i) {
-                    node = nodes[--i];
+                    const node = nodes[--i];
                     if (node.optionValue === value) {
                         bag.setTrue(node);
                         break;
@@ -32,7 +31,7 @@
             }
         },
         
-        getBooleanAttributeGroup = (radio) => radio.getBAG(BAGAttrName, radio.groupId);
+        getBooleanAttributeGroup = radio => radio.getBAG(BAGAttrName, radio.groupId);
     
     /** A radio component.
         

@@ -492,7 +492,7 @@ Date.prototype.format = Date.prototype.format || (() => {
      * Maynard Demmon <maynarddemmon@gmail.com>
      * @copyright Copyright (c) 2012-2021 Maynard Demmon and contributors
      * Myt: A simple javascript UI framework
-     * Version: 20210628.2027
+     * Version: 20210723.1606
      * MIT License
      * 
      * Parts of the Software incorporates code from the following open-source projects:
@@ -553,10 +553,11 @@ Date.prototype.format = Date.prototype.format || (() => {
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was
                 created. */
-            version:20210628.2027,
+            version:20210723.1606,
             
-            /** The root path to image assets for the myt package. MYT_IMAGE_ROOT
-                should be set by the page that includes this script. */
+            /** The root path to image assets for the myt package. 
+                MYT_IMAGE_ROOT should be set by the page that includes 
+                this script. */
             IMAGE_ROOT: global.MYT_IMAGE_ROOT || '',
             
             /** Generates a globally unique id, (GUID).
@@ -566,8 +567,8 @@ Date.prototype.format = Date.prototype.format || (() => {
             /** Adds an event listener to a dom element. 
                 @param {!Object} elem - The DomElement to listen to.
                 @param {string} type - The name of the event to listen to.
-                @param {!Function} callback - The callback function that will be
-                    registered for the event.
+                @param {!Function} callback - The callback function that will 
+                    be registered for the event.
                 @param {boolean} [capture]  - Indicates if the listener is 
                     registered during the capture phase or bubble phase.
                 @param {boolean} passive
@@ -582,8 +583,8 @@ Date.prototype.format = Date.prototype.format || (() => {
             /** Removes an event listener from a dom element. 
                 @param elem:DomElement The dom element to listen to.
                 @param {string} type - The name of the event to listen to.
-                @param {!Function} callback - The callback function that will be
-                    registered for the event.
+                @param {!Function} callback - The callback function that will 
+                    be registered for the event.
                 @param {boolean} [capture] indicates if the listener is 
                     registered during the capture phase or bubble phase.
                 @returns {undefined} */
@@ -591,11 +592,11 @@ Date.prototype.format = Date.prototype.format || (() => {
                 elem.removeEventListener(type, callback, capture || false);
             },
             
-            /** Takes a '.' separated string such as "foo.bar.baz" and resolves it
-                into the value found at that location relative to a starting scope.
-                If no scope is provided global scope is used.
-                @param {string|?Array} objName - The name to resolve or an array of path
-                    parts in descending order.
+            /** Takes a '.' separated string such as "foo.bar.baz" and resolves 
+                it into the value found at that location relative to a starting 
+                scope. If no scope is provided global scope is used.
+                @param {string|?Array} objName - The name to resolve or an 
+                    array of path parts in descending order.
                 @param {?Object} [scope] - The scope to resolve from. If not
                     provided global scope is used.
                 @returns {?Object} The referenced object or undefined if 
@@ -617,8 +618,9 @@ Date.prototype.format = Date.prototype.format || (() => {
                 return scope;
             },
             
-            /** Resolves a provided string into a JS.Class object. If a non-string 
-                value is provided it is verified to be a JS.Class object.
+            /** Resolves a provided string into a JS.Class object. If a 
+                non-string value is provided it is verified to be a JS.Class 
+                object.
                 @param {*} value - The value to resolve and/or verify.
                 @returns {?Function} - A JS.Class or null if the string could not 
                     be resolved or the value was not a JS.Class object. */
@@ -630,7 +632,8 @@ Date.prototype.format = Date.prototype.format || (() => {
             },
             
             /** Gets the file extension from a file name.
-                @param {string} fileName - The filename to extract the extension from.
+                @param {string} fileName - The filename to extract the 
+                    extension from.
                 @returns {string) The file extension or null if a falsy fileName
                     argument was provided. */
             getExtension: fileName => fileName ? fileName.split('.')[1] : null,
@@ -640,8 +643,8 @@ Date.prototype.format = Date.prototype.format || (() => {
                 @param {?Function} [callback] - A function that will be called
                     when the script loads.
                 @param {boolean} [noCacheBust] - If true, not cacheBust query
-                    param will be added. Defaults to undefined which is equivalent
-                    to false.
+                    param will be added. Defaults to undefined which is 
+                    equivalent to false.
                 @returns {?Object} The created script element or null if the 
                     script has already been loaded. */
             loadScript: function(src, callback, noCacheBust) {
@@ -684,7 +687,8 @@ Date.prototype.format = Date.prototype.format || (() => {
             },
             
             /** A wrapper on myt.global.error.notify
-                @param {string|?Error} err - The error or message to dump stack for.
+                @param {string|?Error} err - The error or message to dump 
+                    stack for.
                 @param {string} [type] - The type of console message to write.
                     Allowed values are 'error', 'warn', 'log' and 'debug'. 
                     Defaults to 'error'.
@@ -701,12 +705,14 @@ Date.prototype.format = Date.prototype.format || (() => {
             // Random numbers
             /** Generates a random number between 0 (inclusive) and 1 (exclusive)
                 @param {?Function} [func] - A distribution function for the
-                    random numbers. The function should map a number between 0 and 1
-                    to another number between 0 (inclusive) and 1 (exclusive). If not 
-                    provided a flat distribution will be used. Example functions:
-                        - function(v) {return v * v;} will skew the value towards 0.
-                        - function(v) {return 0.9999999999 - v * v;} will skew the 
-                          value towards a value very close to 1.
+                    random numbers. The function should map a number between 0 
+                    and 1 to another number between 0 (inclusive) and 1 
+                    (exclusive). If not provided a flat distribution will be 
+                    used. Example functions:
+                        - function(v) {return v * v;} will skew the value 
+                          towards 0.
+                        - function(v) {return 0.9999999999 - v * v;} will skew 
+                          the value towards a value very close to 1.
                 @returns {number} a random number between 0 and almost 1. */
             getRandom: func => {
                 let v = Math.random();
@@ -723,7 +729,8 @@ Date.prototype.format = Date.prototype.format || (() => {
                 return v;
             },
             
-            /** @returns a random number between min (inclusive) and max (exclusive).
+            /** @returns a random number between min (inclusive) and 
+                max (exclusive).
                 @param {number} min - the minimum value returned.
                 @param {number} max - the maximum value returned.
                 @param {?Function} [func] - A distribution function. 
@@ -738,7 +745,8 @@ Date.prototype.format = Date.prototype.format || (() => {
                 return myt.getRandom(func) * (max - min) + min;
             },
             
-            /** Generates a random integer between min (inclusive) and max (inclusive)
+            /** Generates a random integer between min (inclusive) and 
+                max (inclusive)
                 @param {number} min - the minimum value returned.
                 @param {number} max - the maximum value returned.
                 @param {?Function} [func] - A distribution function. 
@@ -791,9 +799,8 @@ Date.prototype.format = Date.prototype.format || (() => {
             areObjectsEqual: (a, b) => {
                 if (a !== b) {
                     if (a == null || b == null) return false;
-                    let key;
-                    for (key in a) if (a[key] !== b[key]) return false;
-                    for (key in b) if (a[key] !== b[key]) return false;
+                    for (const key in a) if (a[key] !== b[key]) return false;
+                    for (const key in b) if (a[key] !== b[key]) return false;
                 }
                 return true;
             },
@@ -802,8 +809,8 @@ Date.prototype.format = Date.prototype.format || (() => {
             /** Gets the dom element of the provided tagname and index.
                 @param {string} [tagname] - The name of the tag to search for.
                     Defaults to 'body' if not provided
-                @param {number} [index] - The index of the tag to get. Defaults to
-                    0 if not provided.
+                @param {number} [index] - The index of the tag to get. 
+                    Defaults to 0 if not provided.
                 @returns {?Object} a dom element or undefined if none exist. */
             getElement: (tagname, index) => document.getElementsByTagName(tagname || 'body')[index > 0 ? index : 0],
             
@@ -926,10 +933,10 @@ Date.prototype.format = Date.prototype.format || (() => {
             // Misc
             /** Format a number between 0 and 1 as a percentage.
                 @param {number} num The number to convert.
-                @param {number} [fixed] The number of decimal places to use during
-                    formatting. If the percentage is a whole number no decimal
-                    places will be used. For example 0.55781 -> 55.78% and
-                    0.55 -> 55%
+                @param {number} [fixed] The number of decimal places to use 
+                    during formatting. If the percentage is a whole number 
+                    no decimal places will be used. 
+                    For example 0.55781 -> 55.78% and 0.55 -> 55%
                 @returns (string) */
             formatAsPercentage: (num, fixed=2) => {
                 if (typeof num === 'number') {
@@ -955,18 +962,18 @@ Date.prototype.format = Date.prototype.format || (() => {
                 };
             },
             
-            /** Returns a function that wraps the provided function and that, as long 
-                as it continues to be invoked, will not invoke the wrapped function. 
-                The wrapped function will be called after the returned function stops 
-                being called for "wait" milliseconds. If "immediate" is passed, the
-                wrapped function will be invoked on the leading edge instead of 
-                the trailing edge.
+            /** Returns a function that wraps the provided function and that, 
+                as long as it continues to be invoked, will not invoke the 
+                wrapped function. The wrapped function will be called after the 
+                returned function stops being called for "wait" milliseconds. 
+                If "immediate" is passed, the wrapped function will be invoked 
+                on the leading edge instead of the trailing edge.
                 @param {!Function} func - The function to wrap.
-                @param {number} [wait] - The time in millis to delay invocation by.
-                    If not provided 0 is used.
+                @param {number} [wait] - The time in millis to delay 
+                    invocation by. If not provided 0 is used.
                 @param {boolean} [immediate] - If true the function will be
-                    invoked immediately and then the wait time will be used to block
-                    subsequent calls.
+                    invoked immediately and then the wait time will be used 
+                    to block subsequent calls.
                 @returns {!Function} - The debounced function. */
             debounce: function(func, wait, immediate) {
                 return function() {
@@ -990,14 +997,16 @@ Date.prototype.format = Date.prototype.format || (() => {
                 @param {!Object|!Function} scope - Either an myt.Observable,
                     JS.Class or JS.Module to mix onto.
                 @param {number} thresholdValue - The fixed threshold value.
-                @param {string} exceededAttrName - The name of the boolean attribute
-                    that will indicate if the threshold is exceeded or not.
+                @param {string} exceededAttrName - The name of the boolean 
+                    attribute that will indicate if the threshold is exceeded 
+                    or not.
                 @param {string} [counterAttrName] - The name of the number
-                    attribute that will get adjusted up and down. If not provided
-                    the 'exceeded' attribute name will be used with 'Counter'
-                    appended to it. For example if the exceeded
+                    attribute that will get adjusted up and down. If not 
+                    provided the 'exceeded' attribute name will be used 
+                    with 'Counter' appended to it. For example if the exceeded
                     attribute was 'locked' this would be 'lockedCounter'.
-                @returns {boolean} - True if creation succeeded, false otherwise. */
+                @returns {boolean} - True if creation succeeded, 
+                    false otherwise. */
             createFixedThresholdCounter: (scope, thresholdValue, exceededAttrName, counterAttrName) => {
                 const genNameFunc = myt.AccessorSupport.generateName,
                     isModuleOrClass = typeof scope === 'function' || scope instanceof JS.Module,
@@ -2476,9 +2485,8 @@ new JS.Singleton('GlobalError', {
                 @returns {!Object} the created element. */
             createDomElement: (tagname, styles, props) => {
                 const de = DOCUMENT_ELEMENT.createElement(tagname);
-                let key;
-                if (props) for (key in props) de[key] = props[key];
-                if (styles) for (key in styles) de.style[key] = styles[key];
+                if (props) for (const key in props) de[key] = props[key];
+                if (styles) for (const key in styles) de.style[key] = styles[key];
                 return de;
             },
             
@@ -2628,17 +2636,17 @@ new JS.Singleton('GlobalError', {
                         };
                     
                     if (customOpts) {
-                        for (let p in customOpts) opts[p] = customOpts[p];
+                        for (const p in customOpts) opts[p] = customOpts[p];
                     }
                     
                     let eventType;
-                    for (let name in eventMatchers) {
+                    for (const name in eventMatchers) {
                         if (eventMatchers[name].test(eventName)) {
                             eventType = name;
                             break;
                         }
                     }
-                    if (!eventType) throw new SyntaxError('Only HTMLEvent and MouseEvent interfaces supported');
+                    if (!eventType) throw new SyntaxError('Only supports HTMLEvent and MouseEvent interfaces');
                     
                     let domEvent;
                     if (DOCUMENT_ELEMENT.createEvent) {
@@ -4334,9 +4342,6 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
     
     /** Provides support for getter and setter functions on an object.
         
-        Events:
-            None
-        
         Attributes:
             earlyAttrs:array An array of attribute names that will be set first.
             lateAttrs:array An array of attribute names that will be set last.
@@ -4358,8 +4363,8 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
                 @returns {string} */
             generateName: generateName,
             
-            /** Creates a standard setter function for the provided attrName on the
-                target. This assumes the target is an myt.Observable.
+            /** Creates a standard setter function for the provided attrName 
+                on the target. This assumes the target is an myt.Observable.
                 @param {!Object} target
                 @param {string} attrName
                 @returns {undefined} */
@@ -4374,8 +4379,8 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
                 };
             },
             
-            /** Creates a standard getter function for the provided attrName on the
-                target.
+            /** Creates a standard getter function for the provided attrName 
+                on the target.
                 @param {!Object} target
                 @param {string} attrName
                 @returns {undefined} */
@@ -4416,15 +4421,14 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
             const self = this,
                 earlyAttrs = self.earlyAttrs,
                 lateAttrs = self.lateAttrs;
-            let attrName, 
-                extractedLateAttrs, 
+            let extractedLateAttrs, 
                 i, 
                 len;
             if (earlyAttrs || lateAttrs) {
                 // Make a shallow copy of attrs since we can't guarantee that
                 // attrs won't be reused
                 const copyOfAttrs = {};
-                for (attrName in attrs) copyOfAttrs[attrName] = attrs[attrName];
+                for (const attrName in attrs) copyOfAttrs[attrName] = attrs[attrName];
                 attrs = copyOfAttrs;
                 
                 // Do early setters
@@ -4432,7 +4436,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
                     i = 0;
                     len = earlyAttrs.length;
                     while (len > i) {
-                        attrName = earlyAttrs[i++];
+                        const attrName = earlyAttrs[i++];
                         if (attrName in attrs) {
                             self.set(attrName, attrs[attrName]);
                             delete attrs[attrName];
@@ -4446,7 +4450,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
                     i = 0;
                     len = lateAttrs.length;
                     while (len > i) {
-                        attrName = lateAttrs[i++];
+                        const attrName = lateAttrs[i++];
                         if (attrName in attrs) {
                             extractedLateAttrs.push(attrName, attrs[attrName]);
                             delete attrs[attrName];
@@ -4456,7 +4460,7 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
             }
             
             // Do normal setters
-            for (attrName in attrs) self.set(attrName, attrs[attrName]);
+            for (const attrName in attrs) self.set(attrName, attrs[attrName]);
             
             // Do late setters
             if (extractedLateAttrs) {
@@ -4466,8 +4470,8 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
             }
         },
         
-        /** A generic getter function that can be called to get a value from this
-            object. Will defer to a defined getter if it exists.
+        /** A generic getter function that can be called to get a value from 
+            this object. Will defer to a defined getter if it exists.
             @param {string} attrName - The name of the attribute to get.
             @returns {*} - The attribute value. */
         get: function(attrName) {
@@ -4476,14 +4480,15 @@ myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
         },
         
         /** A generic setter function that can be called to set a value on this
-            object. Will defer to a defined setter if it exists. The implementation
-            assumes this object is an Observable so it will have a 'fireEvent'
-            method.
+            object. Will defer to a defined setter if it exists. The 
+            implementation assumes this object is an Observable so it will 
+            have a 'fireEvent' method.
             @param {string} attrName - The name of the attribute to set.
             @param {*} v -The value to set.
             @param {boolean} [skipSetter] - If true no attempt will be made to
-                invoke a setter function. Useful when you want to invoke standard 
-                setter behavior. Defaults to undefined which is equivalent to false.
+                invoke a setter function. Useful when you want to invoke 
+                standard setter behavior. Defaults to undefined which is 
+                equivalent to false.
             @returns {undefined} */
         set: function(attrName, v, skipSetter) {
             const self = this;
@@ -4574,8 +4579,8 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         },
         
-        /** Implements an object pool. Subclasses must at a minimum implement the 
-            createInstance method.
+        /** Implements an object pool. Subclasses must at a minimum implement 
+            the createInstance method.
             
             Private Attributes:
                 __op:array The array of objects stored in the pool.
@@ -4603,8 +4608,9 @@ myt.Destructible = new JS.Module('Destructible', {
             
             // Methods /////////////////////////////////////////////////////////
             /** Get an instance from the pool.
-                The arguments passed in will be passed to the createInstance method.
-                Note: these have no effect if an object already exists in the pool.
+                The arguments passed in will be passed to the createInstance 
+                method. Note: these have no effect if an object already exists 
+                in the pool.
                 @returns {!Object} */
             getInstance: function() {
                 const objPool = getObjPool(this, true);
@@ -4624,9 +4630,9 @@ myt.Destructible = new JS.Module('Destructible', {
                 getObjPool(this, true).push(this.cleanInstance(obj));
             },
             
-            /** Cleans the object in preparation for putting it back in the pool. The
-                default implementation calls the clean method on the object if it is
-                a function. Otherwise it does nothing.
+            /** Cleans the object in preparation for putting it back in the 
+                pool. The default implementation calls the clean method on the 
+                object if it is a function. Otherwise it does nothing.
                 @param {!Object} obj - The object to be cleaned.
                 @returns {!Object} - The cleaned object. */
             cleanInstance: (obj) => {
@@ -4634,8 +4640,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 return obj;
             },
             
-            /** Calls the destroy method on all object stored in the pool if they
-                have a destroy function.
+            /** Calls the destroy method on all object stored in the pool if 
+                they have a destroy function.
                 @returns {undefined} */
             destroyPooledInstances: function() {
                 destroyObjectPool(getObjPool(this));
@@ -4647,16 +4653,18 @@ myt.Destructible = new JS.Module('Destructible', {
             Attributes:
                 instanceClass:JS.Class (initializer only) the class to use for 
                     new instances. Defaults to Object.
-                instanceParent:myt.Node (initializer only) The node to create new
-                    instances on.
+                instanceParent:myt.Node (initializer only) The node to create 
+                    new instances on.
             
             @class */
         SimplePool = pkg.SimplePool = new JSClass('SimplePool', AbstractPool, {
             // Constructor /////////////////////////////////////////////////////
             /** Create a new myt.SimplePool
-                @param {!Function} instanceClass - The JS.Class to create instances from.
-                @param {?Object} [instanceParent] - The place to create instances 
-                    on. When instanceClass is an myt.Node this will be the node parent.
+                @param {!Function} instanceClass - The JS.Class to create 
+                    instances from.
+                @param {?Object} [instanceParent] - The place to create 
+                    instances on. When instanceClass is an myt.Node this will 
+                    be the node parent.
                 @returns {undefined} */
             initialize: function(instanceClass, instanceParent) {
                 this.callSuper();
@@ -4670,7 +4678,8 @@ myt.Destructible = new JS.Module('Destructible', {
             /** @overrides myt.AbstractPool
                 Creates an instance of this.instanceClass and passes in 
                 this.instanceParent as the first argument if it exists.
-                arguments[0]:object (optional) the attrs to be passed to a created myt.Node.
+                arguments[0]:object (optional) the attrs to be passed to a 
+                created myt.Node.
                 @returns {?Object} */
             createInstance: function() {
                 return makeInstance(this.instanceParent, this.instanceClass, arguments[0]);
@@ -4720,7 +4729,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 } else {
                     warningType = "non-existant";
                 }
-                console.warn("Attempt to put a " + warningType + " instance.", obj, this);
+                console.warn("Tried to put a " + warningType + " instance.", obj, this);
             },
             
             /** Gets an array of the active instances.
@@ -4756,6 +4765,9 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** An myt.SimplePool that tracks which objects are "active".
             
+            Private Attributes:
+                __pbk:object Stores Pools by key.
+            
             @class */
         TrackActivesPool = pkg.TrackActivesPool = new JSClass('TrackActivesPool', SimplePool, {
             include: [TrackActives]
@@ -4769,8 +4781,8 @@ myt.Destructible = new JS.Module('Destructible', {
             this.instanceClassesByKey = instanceClassesByKey;
             
             const poolsByClassName = this._poolsByClassName = {},
-                poolsByKey = this._poolsByKey = {};
-            for (let key in instanceClassesByKey) {
+                poolsByKey = this.__pbk = {};
+            for (const key in instanceClassesByKey) {
                 const klass = instanceClassesByKey[key];
                 poolsByKey[key] = poolsByClassName[klass.__displayName] = new TrackActivesPool(klass, instanceParent);
             }
@@ -4779,8 +4791,8 @@ myt.Destructible = new JS.Module('Destructible', {
         
         // Life Cycle //////////////////////////////////////////////////////////
         destroy: function() {
-            const poolsByKey = this._poolsByKey;
-            for (let key in poolsByKey) poolsByKey[key].destroy();
+            const poolsByKey = this.__pbk;
+            for (const key in poolsByKey) poolsByKey[key].destroy();
             
             this.callSuper();
         },
@@ -4789,11 +4801,11 @@ myt.Destructible = new JS.Module('Destructible', {
         // Methods /////////////////////////////////////////////////////////////
         getInstance: function() {
             const key = arguments[0],
-                pool = this._poolsByKey[key];
+                pool = this.__pbk[key];
             if (pool) {
                 return pool.getInstance(arguments);
             } else {
-                console.warn('No pool found for key:', key);
+                console.warn('No pool for key:', key);
             }
         },
         
@@ -4802,30 +4814,30 @@ myt.Destructible = new JS.Module('Destructible', {
             if (pool) {
                 pool.putInstance(obj);
             } else {
-                console.warn('No pool found for obj:', obj);
+                console.warn('No pool for obj:', obj);
             }
         },
         
         destroyPooledInstances: function() {
-            const poolsByKey = this._poolsByKey;
-            for (let key in poolsByKey) poolsByKey[key].destroyPooledInstances();
+            const poolsByKey = this.__pbk;
+            for (const key in poolsByKey) poolsByKey[key].destroyPooledInstances();
         },
         
         getActives: function(filterFunc) {
             let actives = [];
-            const poolsByKey = this._poolsByKey;
-            for (let key in poolsByKey) actives = actives.concat(poolsByKey[key].getActives(filterFunc));
+            const poolsByKey = this.__pbk;
+            for (const key in poolsByKey) actives = actives.concat(poolsByKey[key].getActives(filterFunc));
             return actives;
         },
         
         putActives: function() {
-            const poolsByKey = this._poolsByKey;
-            for (let key in poolsByKey) poolsByKey[key].putActives();
+            const poolsByKey = this.__pbk;
+            for (const key in poolsByKey) poolsByKey[key].putActives();
         }
     });
     
-    /** Objects that can be used in an myt.AbstractPool should use this mixin and 
-        implement the "clean" method. */
+    /** Objects that can be used in an myt.AbstractPool should use this mixin 
+        and implement the "clean" method. */
     pkg.Reusable = new JSModule('Reusable', {
         // Methods /////////////////////////////////////////////////////////////
         /** Puts this object back into a default state suitable for storage in
@@ -13060,7 +13072,7 @@ new JS.Singleton('GlobalMouse', {
         
         defAttr = pkg.AccessorSupport.defAttr,
         
-        updateUI = (radio) => {
+        updateUI = radio => {
             const label = radio.label || '';
             radio.setText(
                 '<i class="far fa-' + (radio.selected === true ? 'dot-' : '') + 'circle"></i>' +
@@ -13077,10 +13089,9 @@ new JS.Singleton('GlobalMouse', {
             const bag = getBooleanAttributeGroup(radio);
             if (bag) {
                 const nodes = bag.getNodes();
-                let i = nodes.length, 
-                    node;
+                let i = nodes.length;
                 while (i) {
-                    node = nodes[--i];
+                    const node = nodes[--i];
                     if (node.optionValue === value) {
                         bag.setTrue(node);
                         break;
@@ -13089,7 +13100,7 @@ new JS.Singleton('GlobalMouse', {
             }
         },
         
-        getBooleanAttributeGroup = (radio) => radio.getBAG(BAGAttrName, radio.groupId);
+        getBooleanAttributeGroup = radio => radio.getBAG(BAGAttrName, radio.groupId);
     
     /** A radio component.
         
@@ -13973,6 +13984,8 @@ new JS.Singleton('GlobalMouse', {
 
 ((pkg) => {
     const JSModule = JS.Module,
+    
+        defAttr = pkg.AccessorSupport.defAttr,
         
         updateTextColor = tab => {
             tab.textView.setTextColor(tab.selected ? tab.labelTextSelectedColor : tab.labelTextColor);
@@ -14084,19 +14097,19 @@ new JS.Singleton('GlobalMouse', {
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
                 // myt.SimpleIconTextButton
-                if (attrs.inset == null) attrs.inset = Tab.DEFAULT_INSET;
-                if (attrs.outset == null) attrs.outset = Tab.DEFAULT_OUTSET;
+                defAttr(attrs, 'inset', Tab.DEFAULT_INSET);
+                defAttr(attrs, 'outset', Tab.DEFAULT_OUTSET);
                 
                 // myt.Tab
-                if (attrs.selectedColor == null) attrs.selectedColor = Tab.DEFAULT_FILL_COLOR_SELECTED;
-                if (attrs.hoverColor == null) attrs.hoverColor = Tab.DEFAULT_FILL_COLOR_HOVER;
-                if (attrs.activeColor == null) attrs.activeColor = Tab.DEFAULT_FILL_COLOR_ACTIVE;
-                if (attrs.readyColor == null) attrs.readyColor = Tab.DEFAULT_FILL_COLOR_READY;
-                if (attrs.labelTextSelectedColor == null) attrs.labelTextSelectedColor = Tab.DEFAULT_LABEL_TEXT_COLOR_SELECTED;
+                defAttr(attrs, 'selectedColor', Tab.DEFAULT_FILL_COLOR_SELECTED);
+                defAttr(attrs, 'hoverColor', Tab.DEFAULT_FILL_COLOR_HOVER);
+                defAttr(attrs, 'activeColor', Tab.DEFAULT_FILL_COLOR_ACTIVE);
+                defAttr(attrs, 'readyColor', Tab.DEFAULT_FILL_COLOR_READY);
+                defAttr(attrs, 'labelTextSelectedColor', Tab.DEFAULT_LABEL_TEXT_COLOR_SELECTED);
                 
                 // Other
-                if (attrs.height == null) attrs.height = Tab.DEFAULT_HEIGHT;
-                if (attrs.focusEmbellishment == null) attrs.focusEmbellishment = false;
+                defAttr(attrs, 'height', Tab.DEFAULT_HEIGHT);
+                defAttr(attrs, 'focusEmbellishment', false);
                 
                 this.callSuper(parent, attrs);
                 
@@ -14163,30 +14176,19 @@ new JS.Singleton('GlobalMouse', {
             initNode: function(parent, attrs) {
                 this.__tabs = [];
                 
-                if (attrs.spacing == null) attrs.spacing = TabContainer.DEFAULT_SPACING;
-                if (attrs.inset == null) attrs.inset = TabContainer.DEFAULT_INSET;
-                
-                if (attrs.location == null) attrs.location = 'top';
-                
-                if (attrs.itemSelectionId == null) attrs.itemSelectionId = 'tabId';
-                if (attrs.maxSelected == null) attrs.maxSelected = 1;
+                defAttr(attrs, 'spacing', TabContainer.DEFAULT_SPACING);
+                defAttr(attrs, 'inset', TabContainer.DEFAULT_INSET);
+                defAttr(attrs, 'location', 'top');
+                defAttr(attrs, 'itemSelectionId', 'tabId');
+                defAttr(attrs, 'maxSelected', 1);
                 
                 this.callSuper(parent, attrs);
                 
-                let axis;
-                switch (this.location) {
-                    case 'top':
-                    case 'bottom':
-                        axis = 'x';
-                        break;
-                    case 'left':
-                    case 'right':
-                        axis = 'y';
-                        break;
-                }
-                
                 new pkg.SpacedLayout(this, {
-                    name:'layout', axis:axis, spacing:this.spacing, inset:this.inset,
+                    name:'layout',
+                    axis:this.location === 'left' || this.location === 'right' ? 'y' : 'x',
+                    spacing:this.spacing,
+                    inset:this.inset,
                     collapseParent:true
                 });
             },
@@ -15485,7 +15487,7 @@ new JS.Singleton('GlobalMouse', {
         
         defAttr = pkg.AccessorSupport.defAttr,
         
-        updateUI = (checkbox) => {
+        updateUI = checkbox => {
             const label = checkbox.label || '',
                 checkboxStyle = checkbox.checkboxStyle || DEFAULT_STYLE;
             checkbox.setText(
@@ -21759,10 +21761,11 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
 ((pkg) => {
     const JSClass = JS.Class,
         JSModule = JS.Module,
+        View = pkg.View,
+        GlobalFocus = pkg.global.focus,
         
         defAttr = pkg.AccessorSupport.defAttr,
         
-        View = pkg.View,
         DEFAULT_ROW_SPACING = 1,
         DEFAULT_ROW_HEIGHT = 30,
         DEFAULT_ROW_INSET = 0,
@@ -21802,13 +21805,14 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             Attributes:
                 infiniteOwner
                 model
+                classKey
             
             @class */
         InfiniteListRow = pkg.InfiniteListRow = new JSModule('InfiniteListRow', {
             include: [pkg.Reusable],
             
             
-            // Accessors ///////////////////////////////////////////////////////////
+            // Accessors ///////////////////////////////////////////////////////
             setInfiniteOwner: function(v) {
                 this.infiniteOwner = v;
             },
@@ -21848,9 +21852,9 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 _listData:array The data for the rows in the list.
                 _startIdx:int The index into the data of the first row shown
                 _endIdx:int The index into the data of the last row shown
-                _visibleRowsByIdx:object A cache of what rows are currently shown by
-                    the index of the data for the row. This is provides faster
-                    performance when refreshing the list.
+                _visibleRowsByIdx:object A cache of what rows are currently 
+                    shown by the index of the data for the row. This is 
+                    provides faster performance when refreshing the list.
                 _listView:myt.View The view that contains the rows in the list.
                 _itemPool:myt.TrackActivesPool The pool for row views.
             
@@ -21954,7 +21958,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 }
             },
             
-            getFilterFunction: function() {
+            getFilterFunction: () => {
                 // Unimplemented which means don't filter anything out.
             },
             
@@ -22066,7 +22070,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 self._startIdx = self._endIdx = -1;
                 
                 // Reset scroll position
-                self.__forceFullResetOnNextRefresh = forceFullReset;
+                self.forceFullResetOnNextRefresh = forceFullReset;
                 if (preserveScroll || getDomScrollTop(self) === 0) {
                     // Just refresh since we won't move the scroll position
                     self.refreshListUI();
@@ -22080,14 +22084,13 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             putRowBackInPool: function(row) {
                 // Clear or reassign focus since the row will get reused and the 
                 // reused row will likely not be the appropriate focus.
-                const globalFocus = pkg.global.focus,
-                    currentFocus = globalFocus.focusedView;
+                const currentFocus = GlobalFocus.focusedView;
                 if (currentFocus && currentFocus.isDescendantOf(row)) {
                     const focusTrap = this.getFocusTrap();
                     if (focusTrap) {
                         focusTrap.focus();
                     } else {
-                        globalFocus.clear();
+                        GlobalFocus.clear();
                     }
                 }
                 
@@ -22099,13 +22102,13 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 const self = this,
                     rowExtent = self._rowExtent,
                     rowInset = self.rowInset,
-                    forceFullReset = self.__forceFullResetOnNextRefresh,
+                    forceFullReset = self.forceFullResetOnNextRefresh,
                     scrollY = getDomScrollTop(self),
                     data = self.getListData() || [],
                     startIdx = Math.max(0, Math.floor((scrollY - rowInset) / rowExtent)),
                     endIdx = Math.min(data.length, Math.ceil((scrollY - rowInset + self.height) / rowExtent));
                 
-                if (self.__forceFullResetOnNextRefresh) self.__forceFullResetOnNextRefresh = false;
+                if (self.forceFullResetOnNextRefresh) self.forceFullResetOnNextRefresh = false;
                 
                 if (self._startIdx !== startIdx || self._endIdx !== endIdx || forceFullReset) {
                     const rowWidth = self.width,
@@ -22117,15 +22120,14 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     
                     // Put all visible rows that are not within the idx range 
                     // back into the pool
-                    let i;
-                    for (i in visibleRowsByIdx) {
-                        if (i < startIdx || i >= endIdx) {
-                            self.putRowBackInPool(visibleRowsByIdx[i]);
-                            delete visibleRowsByIdx[i];
+                    for (const idx in visibleRowsByIdx) {
+                        if (idx < startIdx || idx >= endIdx) {
+                            self.putRowBackInPool(visibleRowsByIdx[idx]);
+                            delete visibleRowsByIdx[idx];
                         }
                     }
                     
-                    for (i = startIdx; i < endIdx; i++) {
+                    for (let i = startIdx; i < endIdx; i++) {
                         let row = visibleRowsByIdx[i];
                         
                         const model = data[i],
@@ -22243,7 +22245,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             }
         }),
         
-        /** A base class for infinite scrolling lists that support a selectable row.
+        /** A base class for infinite scrolling lists that support a 
+            selectable row.
             
             Attributes:
                 selectedRow
@@ -22323,7 +22326,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             
             /** @overrides */
             refreshListUI: function(ignoredEvent) {
-                const currentFocus = pkg.global.focus.focusedView;
+                const currentFocus = GlobalFocus.focusedView;
                 
                 this.callSuper();
                 
@@ -22366,7 +22369,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             makeReady: function(sortState, forceFullReset) {
                 const gridHeader = this.gridHeader;
                 if (gridHeader) {
-                    this.__forceFullResetOnNextRefresh = forceFullReset;
+                    this.forceFullResetOnNextRefresh = forceFullReset;
                     gridHeader.setSort(sortState);
                     gridHeader.setLocked(false);
                 } else {
@@ -22505,7 +22508,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         /** @overrides myt.GridController */
         doSort: function() {
-            this.grid.refreshListData(true, this.grid.__forceFullResetOnNextRefresh);
+            this.grid.refreshListData(true, this.grid.forceFullResetOnNextRefresh);
         },
         
         /** @overrides myt.GridController */
@@ -23581,8 +23584,9 @@ myt.Eventable = new JS.Class('Eventable', {
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Prevent views from being sent behind the __svg. This allows us to
-            add child views to an Annulus which is not directly supported in HTML.
+        /** Prevent views from being sent behind the __svg. This allows us 
+            to add child views to an Annulus which is not directly supported 
+            in HTML.
             @overrides */
         sendSubviewToBack: function(sv) {
             if (sv.parent === this) {
