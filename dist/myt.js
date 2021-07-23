@@ -11271,12 +11271,6 @@ new JS.Singleton('GlobalMouse', {
             
             By default myt.Button instances are focusable.
             
-            Events:
-                None
-            
-            Attributes:
-                None
-            
             Private Attributes:
                 __restoreCursor:string The cursor to restore to when the button is
                     no longer disabled.
@@ -17564,1058 +17558,6 @@ new JS.Singleton('GlobalMouse', {
 
 
 ((pkg) => {
-    const math = Math,
-        mathMax = math.max,
-        mathMin = math.min,
-        
-        cleanChannelValue = value => mathMin(255, mathMax(0, math.round(value))),
-        toHex = value => {
-            value = cleanChannelValue(value).toString(16);
-            return value.length === 1 ? '0' + value : value;
-        },
-        rgbToHex = (red, green, blue, prependHash) => [prependHash ? '#' : '', toHex(red), toHex(green), toHex(blue)].join(''),
-        getRedChannel = value => (0xff0000 & value) >> 16,
-        getGreenChannel = value => (0x00ff00 & value) >> 8,
-        getBlueChannel = value => (0x0000ff & value),
-        makeColorFromNumber = value => new Color(getRedChannel(value), getGreenChannel(value), getBlueChannel(value)),
-        makeColorNumberFromChannels = (red, green, blue) => (cleanChannelValue(red) << 16) + (cleanChannelValue(green) << 8) + cleanChannelValue(blue),
-        toUnitRange = (num, max) => {
-            if (typeof num === 'string') {
-                if (num.endsWith('%')) {
-                    num = parseFloat(num.substring(0, num.length - 1)) * max / 100;
-                } else {
-                    return 0;
-                }
-            }
-            num = mathMin(max, mathMax(0, num)) / max;
-            return math.abs(1 - num) < 0.000001 ? 1 : num;
-        },
-        
-        rgbToHsv = (r, g, b) => {
-            r = toUnitRange(r, 255);
-            g = toUnitRange(g, 255);
-            b = toUnitRange(b, 255);
-            
-            const max = mathMax(r, g, b),
-                diff = max - mathMin(r, g, b);
-            if (diff === 0) {
-                // achromatic
-                return {h:0, s:0, v:max};
-            } else {
-                let h;
-                switch (max) {
-                    case r:
-                        h = (g - b) / diff + (g < b ? 6 : 0);
-                        break;
-                    case g:
-                        h = (b - r) / diff + 2;
-                        break;
-                    case b:
-                        h = (r - g) / diff + 4;
-                        break;
-                }
-                return {h:h * 60, s:max === 0 ? 0 : diff / max, v:max};
-            }
-        },
-        
-        hsvToRgb = (h, s, v) => {
-            h = toUnitRange(h, 360) * 6;
-            s = toUnitRange(s, 100);
-            v = toUnitRange(v, 100);
-            
-            const i = math.floor(h),
-                f = h - i,
-                p = v * (1 - s),
-                q = v * (1 - f * s),
-                t = v * (1 - (1 - f) * s),
-                mod = i % 6,
-                red = [v, q, p, p, t, v][mod],
-                green = [t, v, v, q, p, p][mod],
-                blue = [p, p, t, v, v, q][mod];
-            
-            return {red:red * 255, green:green * 255, blue:blue * 255};
-        },
-        
-        /** Models a color as individual color channels.
-            
-            Attributes:
-                red:int The red channel. Will be an integer between 0 and 255.
-                green:int The green channel. Will be an integer between 0 and 255.
-                blue:int The blue channel. Will be an integer between 0 and 255.
-            
-            @class */
-        Color = pkg.Color = new JS.Class('Color', {
-            // Class Methods and Attributes ////////////////////////////////////
-            extend: {
-                toUnitRange:toUnitRange,
-                rgbToHsv:rgbToHsv,
-                hsvToRgb:hsvToRgb,
-                
-                /** Converts a number or string representation of a number to a 
-                    two character hex string.
-                    @param {number|string} value - The number or string to convert.
-                    @returns {string} A two character hex string such as: '0c' or 'c9'. */
-                toHex: toHex,
-                
-                /** Converts red, green, and blue color channel numbers to a six 
-                    character hex string.
-                    @param {number} red - The red color channel.
-                    @param {number} green - The green color channel.
-                    @param {number} blue - The blue color channel.
-                    @param {boolean} [prependHash] - If true a '#' character
-                        will be prepended to the return value.
-                    @returns {string} Something like: '#ff9c02' or 'ff9c02' */
-                rgbToHex: rgbToHex,
-                
-                /** Limits a channel value to integers between 0 and 255.
-                    @param {number} value - The channel value to clean up.
-                    @returns {number} */
-                cleanChannelValue: cleanChannelValue,
-                
-                /** Gets the red channel from a "color" number.
-                    @param {string} value
-                    @returns {number} */
-                getRedChannel: getRedChannel,
-                
-                /** Gets the green channel from a "color" number.
-                    @param {string} value
-                    @returns {number} */
-                getGreenChannel: getGreenChannel,
-                
-                /** Gets the blue channel from a "color" number.
-                    @param {string} value
-                    @returns {number} */
-                getBlueChannel: getBlueChannel,
-                
-                /** Creates an myt.Color from a "color" number.
-                    @param {string} value
-                    @returns {!Object} myt.Color */
-                makeColorFromNumber: makeColorFromNumber,
-                
-                /** Creates an myt.Color from an html color string.
-                    @param {string} value - A hex string representation of a 
-                        color, such as '#ff339b'.
-                    @returns {!Object} a myt.Color or null if no color could 
-                        be parsed. */
-                makeColorFromHexString: value => {
-                    if (value) {
-                        if (!value.startsWith('#')) value = '#' + value;
-                        return makeColorFromNumber(parseInt(value.substring(1), 16));
-                    } else {
-                        return null;
-                    }
-                },
-                
-                /** Creates an myt.Color from hue, saturation and value
-                    parameters.
-                    @param {number} h - The hue. A number from 0 to 360.
-                    @param {number} s - The saturation. A number from 0 to 100.
-                    @param {number} v - The value. A number from 0 to 100.
-                    @returns {!Object} myt.Color */
-                makeColorFromHSV: (h, s, v) => {
-                    const rgb = hsvToRgb(h, s, v);
-                    return makeColorFromNumber(makeColorNumberFromChannels(rgb.red, rgb.green, rgb.blue));
-                },
-                
-                /** Returns the lighter of the two provided colors.
-                    @param {number} a - A color number.
-                    @param {number} b - A color number.
-                    @returns {number} The number that represents the 
-                        lighter color. */
-                getLighterColor: (a, b) => makeColorFromNumber(a).isLighterThan(makeColorFromNumber(b)) ? a : b,
-                
-                /** Creates an RGB "color" number from the provided color channels.
-                    @param {number} red - The red channel
-                    @param {number} green - The green channel
-                    @param {number} blue - The blue channel
-                    @returns {number} */
-                makeColorNumberFromChannels: makeColorNumberFromChannels,
-                
-                /** Creates a new myt.Color object that is a blend of the two 
-                    provided colors.
-                    @param {!Object} fromColor - The first myt.Color to blend.
-                    @param {!Objecdt} toColor - The second myt.Color to blend.
-                    @param {number} percent - The blend percent between the two
-                        colors where 0 is the fromColor and 1.0 is the toColor.
-                    @returns {!Object} myt.Color */
-                makeBlendedColor: (fromColor, toColor, percent) => {
-                    return new Color(
-                        fromColor.red + (percent * (toColor.red - fromColor.red)),
-                        fromColor.green + (percent * (toColor.green - fromColor.green)),
-                        fromColor.blue + (percent * (toColor.blue - fromColor.blue))
-                    );
-                }
-            },
-            
-            
-            // Constructor /////////////////////////////////////////////////////
-            /** Create a new Color.
-                @param {number} red - The red channel
-                @param {number} green - The green channel
-                @param {number} blue - The blue channel
-                @returns {undefined} */
-            initialize: function(red, green, blue) {
-                this.setRed(red);
-                this.setGreen(green);
-                this.setBlue(blue);
-            },
-            
-            
-            // Accessors ///////////////////////////////////////////////////////
-            /** Sets the red channel value.
-                @param {number} red
-                @return {undefined} */
-            setRed: function(red) {
-                this.red = cleanChannelValue(red);
-            },
-            
-            /** Sets the green channel value.
-                @param {number} green
-                @return {undefined} */
-            setGreen: function(green) {
-                this.green = cleanChannelValue(green);
-            },
-            
-            /** Sets the blue channel value.
-                @param {number} blue
-                @return {undefined} */
-            setBlue: function(blue) {
-                this.blue = cleanChannelValue(blue);
-            },
-            
-            
-            // Methods /////////////////////////////////////////////////////////
-            /** Gets the numerical representation of this color.
-                @returns {number} The number that represents this color. */
-            getColorNumber: function() {
-                return (this.red << 16) + (this.green << 8) + this.blue;
-            },
-            
-            /** Gets the hex string representation of this color.
-                @returns {string} A hex color such as '#a0bbcc'. */
-            getHtmlHexString: function() {
-                return rgbToHex(this.red, this.green, this.blue, true);
-            },
-            
-            /** Gets an HSV representation of this Color.
-                @returns {!Object} With keys h, s and v. */
-            getHSV: function() {
-                return rgbToHsv(this.red, this.green, this.blue);
-            },
-            
-            /** Tests if this color is lighter than the provided color.
-                @param {!Object} c - The myt.Color to compare to.
-                @returns {boolean} True if this color is lighter, 
-                    false otherwise. */
-            isLighterThan: function(c) {
-                const diff = this.getDiffFrom(c);
-                
-                // Sum channel diffs to determine lightest color. A negative
-                // diff means a lighter color.
-                return 0 > (diff.red + diff.green + diff.blue);
-            },
-            
-            /** Gets an object holding color channel diffs.
-                @param {!Object} c - The myt.Color to diff from.
-                @returns {!Object} containing the diffs for the red, green and 
-                    blue channels. */
-            getDiffFrom: function(c) {
-                return {
-                    red: c.red - this.red,
-                    green: c.green - this.green,
-                    blue: c.blue - this.blue
-                };
-            },
-            
-            /** Applies the provided diff object to this color.
-                @param {!Object} diff - The color diff to apply.
-                @returns {!Object} - This myt.Color for method chaining. */
-            applyDiff: function(diff) {
-                return this.add(diff);
-            },
-            
-            /** Adds the provided color to this color.
-                @param {!Object} c - The myt.Color to add.
-                @returns {!Object} - This myt.Color for method chaining. */
-            add: function(c) {
-                this.setRed(this.red + c.red);
-                this.setGreen(this.green + c.green);
-                this.setBlue(this.blue + c.blue);
-                return this;
-            },
-            
-            /** Subtracts the provided color from this color.
-                @param {!Object} c - The myt.Color to subtract.
-                @returns {!Object} - This myt.Color for method chaining. */
-            subtract: function(c) {
-                this.setRed(this.red - c.red);
-                this.setGreen(this.green - c.green);
-                this.setBlue(this.blue - c.blue);
-                return this;
-            },
-            
-            /** Multiplys this color by the provided scalar.
-                @param {number} s - The scaler to multiply by.
-                @returns {!Object} - This myt.Color for method chaining. */
-            multiply: function(s) {
-                this.setRed(this.red * s);
-                this.setGreen(this.green * s);
-                this.setBlue(this.blue * s);
-                return this;
-            },
-            
-            /** Divides this color by the provided scalar.
-                @param {number} s - The scaler to divide by.
-                @returns {!Object} - This myt.Color for method chaining. */
-            divide: function(s) {
-                this.setRed(this.red / s);
-                this.setGreen(this.green / s);
-                this.setBlue(this.blue / s);
-                return this;
-            },
-            
-            /** Clones this Color.
-                @returns {!Object} - A copy of this myt.Color. */
-            clone: function() {
-                return new Color(this.red, this.green, this.blue);
-            },
-            
-            /** Determine if this color has the same value as another color.
-                @param {?Object} obj - The color object to test against.
-                @returns {boolean} True if this color has the same color values 
-                    as this provided color, false otherwise. */
-            equals: function(obj) {
-                return obj === this || (obj && obj.isA && 
-                    obj.isA(Color) && 
-                    obj.red === this.red && 
-                    obj.green === this.green && 
-                    obj.blue === this.blue);
-            }
-        });
-})(myt);
-
-
-((pkg) => {
-    const sizeClasses = ['','fa-lg','fa-2x','fa-3x','fa-4x','fa-5x'],
-        
-        updateInstance = (instance) => {
-            let props = instance.properties;
-            if (props) {
-                if (typeof props === 'string') {
-                    props = props.split(' ');
-                } else {
-                    props = props.concat();
-                }
-                props.unshift(instance.size);
-                props.unshift(instance.icon);
-            } else {
-                props = [instance.icon, instance.size];
-            }
-            
-            instance.setHtml(FontAwesome.makeTag(props));
-        };
-    
-    pkg.loadCSSFonts(['//use.fontawesome.com/releases/v5.0.8/css/all.css']);
-    
-    /** An adapter for FontAwesome.
-        
-        Attributes:
-            icon:string The name of the FA icon to set.
-            size:number A number from 0 to 5 with 0 being normal size and 5 being
-                the largest size.
-            propeties:string || array A space separated string or list of FA
-                CSS classes to set.
-    */
-    const FontAwesome = pkg.FontAwesome = new JS.Class('FontAwesome', pkg.Markup, {
-        // Class Methods and Attributes ////////////////////////////////////////
-        extend: {
-            makeTag: function(props) {
-                if (Array.isArray(props)) {
-                    let len = props.length,
-                        prop,
-                        i;
-                    if (len > 0) {
-                        props.unshift('fa');
-                        ++len;
-                        
-                        if (props[1].indexOf('fa-') !== 0) props[1] = 'fa-' + props[1];
-                        
-                        if (len >= 3) props[2] = sizeClasses[props[2]] || '';
-                        
-                        if (len > 3) {
-                            i = 3;
-                            for (; len > i; ++i) {
-                                prop = props[i];
-                                if (prop.indexOf('fa-') !== 0) props[i] = 'fa-' + prop;
-                            }
-                        }
-                        
-                        return '<i class="' + props.join(' ') + '"></i>';
-                    }
-                }
-                
-                pkg.dumpStack('Error making tag');
-                console.error(props);
-                return '';
-            },
-            
-            registerForNotification: (instance) => {
-                pkg.registerForFontNotification(instance, 'Font Awesome\ 5 Free 400'); // regular
-                pkg.registerForFontNotification(instance, 'Font Awesome\ 5 Free 900'); // solid
-                pkg.registerForFontNotification(instance, 'Font Awesome\ 5 Brands 400'); // brands
-            },
-        },
-        
-        
-        // Life Cycle //////////////////////////////////////////////////////////
-        /** @overrides myt.View */
-        initNode: function(parent, attrs) {
-            this.size = 0;
-            this.icon = '';
-            
-            this.callSuper(parent, attrs);
-            
-            updateInstance(this);
-            
-            FontAwesome.registerForNotification(this);
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        setIcon: function(v) {
-            const existing = this.icon;
-            this.set('icon', v, true);
-            if (this.inited && existing !== v) updateInstance(this);
-        },
-        
-        setSize: function(v) {
-            const existing = this.size;
-            this.set('size', v, true);
-            if (this.inited && existing !== v) updateInstance(this);
-        },
-        
-        setProperties: function(v) {
-            this.properties = v;
-            this.fireEvent('properties', v);
-            if (this.inited) updateInstance(this);
-        }
-    });
-})(myt);
-
-
-((pkg) => {
-    let colorPicker,
-        
-        isEmpty,
-        initialColorHex,
-        currentColorHex,
-        
-        currentHue = 0,
-        currentSaturation = 0,
-        currentValue = 0,
-        
-        selectionPalette = [],
-        defaultPalette,
-        
-        paletteContainer,
-        colorView,
-        colorThumb,
-        hueView,
-        hueThumb,
-        inputView,
-        currentColorButton;
-    
-    const JSClass = JS.Class,
-        Color = pkg.Color,
-        LocalStorage = pkg.LocalStorage,
-        View = pkg.View,
-        Button = pkg.Button,
-        Draggable = pkg.Draggable,
-        
-        mathMin = Math.min,
-        mathMax = Math.max,
-        
-        TRANSPARENT = 'transparent',
-        LOCAL_STORAGE_KEY = 'myt.default',
-        DOM_CLASS_CHECKERBOARD = 'mytCheckerboardPattern',
-        CHECKMARK = pkg.FontAwesome.makeTag(['check']),
-        BORDER_333 = [1, 'solid', '#333'],
-        BORDER_999 = [1, 'solid', '#999'],
-        
-        paletteLookup = {},
-        
-        hsvToHex = (h, s, v) => Color.makeColorFromHSV(h * 360, s * 100, v * 100).getHtmlHexString(),
-        
-        Swatch = new JSClass('Swatch', View, {
-            include:[Button],
-            initNode: function(parent, attrs) {
-                attrs.width = attrs.height = 16;
-                attrs.border = BORDER_999;
-                this.callSuper(parent, attrs);
-                
-                if (this.bgColor === currentColorHex) {
-                    const color = Color.makeColorFromHexString(currentColorHex);
-                    new pkg.Text(this, {
-                        x:2, y:2, text:CHECKMARK, fontSize:'12px', 
-                        textColor:color.red + color.green + color.blue < 3*255/2 ? '#fff' : '#000'
-                    });
-                }
-            },
-            setBgColor: function(v) {
-                this.callSuper(v);
-                this.setTooltip(v);
-            },
-            doActivated: function() {colorPicker.setColor(this.bgColor);},
-            drawHoverState: function() {this.setBorder(BORDER_333);},
-            drawReadyState: function() {this.setBorder(BORDER_999);}
-        });
-    
-    pkg.ColorPicker = new JSClass('ColorPicker', View, {
-        // Life Cycle //////////////////////////////////////////////////////////
-        initNode: function(parent, attrs) {
-            colorPicker = this;
-            
-            initialColorHex = attrs.color || TRANSPARENT;
-            delete attrs.color;
-            
-            defaultPalette = attrs.palette || [];
-            defaultPalette.forEach(color => {paletteLookup[color] = true;});
-            delete attrs.palette;
-            
-            isEmpty = initialColorHex === TRANSPARENT;
-            
-            colorPicker.callSuper(parent, attrs);
-            
-            // Build UI
-            paletteContainer = new View(colorPicker, {width:160, height:170});
-            new pkg.WrappingLayout(paletteContainer, {spacing:4, lineSpacing:4});
-            
-            colorView = new View(colorPicker, {x:170, width:139, height:139, border:BORDER_333}, [Draggable, {
-                requestDragPosition: function(x, y) {
-                    colorView.callSuper(colorView.x, colorView.y);
-                    const pos = this.getPagePosition();
-                    currentSaturation = parseFloat(mathMax(0, mathMin(1, (x + this.dragInitX - pos.x) / this.width)));
-                    currentValue = parseFloat(1 - mathMax(0, mathMin(1, (y + this.dragInitY - pos.y) / this.height)));
-                    isEmpty = false;
-                    colorPicker.updateUI();
-                }
-            }]);
-            const satView = new View(colorView, {width:139, height:139}),
-                valView = new View(satView, {width:139, height:139});
-            satView.getInnerDomStyle().backgroundImage = 'linear-gradient(to right, #fff, rgba(204, 154, 129, 0))';
-            valView.getInnerDomStyle().backgroundImage = 'linear-gradient(to top, #000, rgba(204, 154, 129, 0))';
-            colorThumb = new View(valView, {width:6, height:6, bgColor:'#000', border:[1, 'solid', '#ffffff'], roundedCorners:4});
-            
-            hueView = new View(colorPicker, {x:315, y:30, width:24, height:109, border:BORDER_333}, [Draggable, {
-                requestDragPosition: function(x, y) {
-                    this.callSuper(hueView.x, hueView.y);
-                    currentHue = parseFloat(mathMax(0, mathMin(1, (y + this.dragInitY - this.getPagePosition().y) / this.height)));
-                    isEmpty = false;
-                    colorPicker.updateUI();
-                }
-            }]);
-            hueView.getInnerDomStyle().background = 'linear-gradient(to top, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%)';
-            hueThumb = new View(hueView, {x:-1, width:24, height:2, bgColor:'#fff', border:[1, 'solid', '#000']});
-            
-            new View(colorPicker, {
-                x:315, width:24, height:24, border:BORDER_333, tooltip:'Set to transparent.', domClass:DOM_CLASS_CHECKERBOARD
-            }, [Button, {doActivated: () => {colorPicker.setColor(TRANSPARENT);}}]);
-            
-            inputView = new pkg.InputText(colorPicker, {x:236, y:146, width:105, height:25, roundedCorners:3, textColor:'#333', border:BORDER_333, maxLength:11});
-            colorPicker.attachToDom(inputView, '_submitInput', 'blur');
-            colorPicker.attachToDom(inputView, '_handleKeyDown', 'keydown');
-            inputView.getInnerDomStyle().paddingLeft = '6px';
-            
-            const initialColorContainer = new View(colorPicker, {x:170, y:146, width:60, height:23, border:BORDER_333});
-            new View(initialColorContainer, {
-                width:30, height:23, focusEmbellishment:false,
-                bgColor:initialColorHex, domClass:isEmpty ? DOM_CLASS_CHECKERBOARD : ''
-            }, [Button, {doActivated: () => {colorPicker.setColor(initialColorHex);}}]);
-            currentColorButton = new View(initialColorContainer, {x:30, width:30, height:23}, [{
-                setBgColor: function(v) {
-                    this.callSuper(v);
-                    this[(v === TRANSPARENT ? 'add' : 'remove') + 'DomClass'](DOM_CLASS_CHECKERBOARD);
-                }
-            }]);
-            
-            // Load Palette
-            const savedPalette = LocalStorage.getItem(LOCAL_STORAGE_KEY);
-            if (savedPalette) {
-                selectionPalette = savedPalette.split(';');
-                selectionPalette.forEach(color => {paletteLookup[color] = true;});
-            }
-            
-            colorPicker.setColor(initialColorHex);
-        },
-        
-        /** @private */
-        _handleKeyDown: event => {
-            if (pkg.KeyObservable.getKeyCodeFromEvent(event) === 13) colorPicker._submitInput();
-        },
-        
-        /** @private */
-        _submitInput: () => {
-            colorPicker.setColor(inputView.value);
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        addToPalette: hexColor => {
-            if (hexColor && hexColor !== TRANSPARENT && !paletteLookup[hexColor]) {
-                selectionPalette.unshift(hexColor);
-                selectionPalette.length = mathMin(selectionPalette.length, 56);
-                LocalStorage.setItem(LOCAL_STORAGE_KEY, selectionPalette.join(';'));
-            }
-        },
-        
-        setColor: color => {
-            if (color && color !== TRANSPARENT) {
-                const newHsv = (Color.makeColorFromHexString(color)).getHSV();
-                currentHue = newHsv.h / 360;
-                currentSaturation = newHsv.s;
-                currentValue = newHsv.v;
-                isEmpty = false;
-            } else {
-                isEmpty = true;
-            }
-            colorPicker.updateUI();
-        },
-        
-        getColor: () => isEmpty ? TRANSPARENT : hsvToHex(currentHue, currentSaturation, currentValue),
-        
-        updateUI: () => {
-            const isNotEmpty = !isEmpty;
-            hueThumb.setVisible(isNotEmpty);
-            colorThumb.setVisible(isNotEmpty);
-            if (isNotEmpty) {
-                colorThumb.setX(mathMax(0, mathMin(1, currentSaturation) * (colorView.width + 2)) - 5);
-                colorThumb.setY(mathMax(0, mathMin(1, 1 - currentValue) * (colorView.height + 2)) - 5);
-                hueThumb.setY((currentHue * (hueView.height - 2)) - 1);
-            }
-            
-            colorView.setBgColor(hsvToHex(currentHue, 1, 1));
-            
-            // Update input
-            currentColorHex = colorPicker.getColor();
-            inputView.setValue(currentColorHex);
-            currentColorButton.setBgColor(currentColorHex);
-            
-            colorPicker.redrawPalette();
-        },
-        
-        redrawPalette: pkg.debounce(() => {
-            const subs = paletteContainer.getSubviews();
-            let i = subs.length;
-            while (i) subs[--i].destroy();
-            defaultPalette.forEach(color => {new Swatch(paletteContainer, {bgColor:color});});
-            selectionPalette.forEach(color => {new Swatch(paletteContainer, {bgColor:color});});
-        }, 50)
-    });
-})(myt);
-
-
-((pkg) => {
-    let localeData,
-        dateOnly,
-        timeOnly,
-        firstDayOfWeek,
-        allowedDays,
-        minDate,
-        maxDate,
-        minTime,
-        maxTime,
-        minuteInterval,
-        
-        pickedDate,
-        
-        prevMonthBtn,
-        curMonthTxt,
-        nextMonthBtn,
-        calendarView,
-        timeListView;
-    
-    const JSClass = JS.Class,
-        View = pkg.View,
-        Text = pkg.Text,
-        TextButton = pkg.TextButton,
-        SelectionManager = pkg.SelectionManager,
-        
-        makeTag = pkg.FontAwesome.makeTag,
-        
-        math = Math,
-        mathMin = math.min,
-        mathMax = math.max,
-        
-        clipValue = (value, max) => mathMax(0, mathMin(max, parseInt(value))),
-        
-        parseTime = timeStr => {
-            const parts = timeStr.split(':');
-            return [clipValue(parts[0], 23), clipValue(parts[1], 60)];
-        },
-        
-        resetSelectionManager = view => {
-            view.deselectAll();
-            const subs = view.getSubviews();
-            let i = subs.length;
-            while (i) subs[--i].destroy();
-        },
-        
-        SelectableBtn = new JSClass('SelectableBtn', TextButton, {
-            include:[pkg.Selectable],
-            
-            setSelected: function(v) {
-                this.callSuper(v);
-                this.updateUI();
-            },
-            
-            updateUI: function() {
-                this.callSuper();
-                
-                if (this.isSelected()) {
-                    this.setBgColor('#666');
-                    this.setTextColor('#fff');
-                } else {
-                    this.setTextColor();
-                }
-            }
-        }),
-        
-        TimeBtn = new JSClass('TimeBtn', SelectableBtn, {
-            initNode: function(parent, attrs) {
-                attrs.width = timeOnly ? 175 : 49;
-                this.callSuper(parent, attrs);
-            },
-            
-            doActivated: function() {
-                this.callSuper();
-                const value = this.text,
-                    timeParts = parseTime(value);
-                timeListView.selectById(value);
-                pickedDate.setHours(timeParts[0]);
-                pickedDate.setMinutes(timeParts[1]);
-            }
-        }),
-        
-        DayBtn = new JSClass('DayBtn', SelectableBtn, {
-            initNode: function(parent, attrs) {
-                attrs.width = 23;
-                attrs.border = [1, 'solid', '#fff'];
-                this.callSuper(parent, attrs);
-            },
-            
-            setData: function(v) {this.data = v;},
-            
-            setIsAnotherMonth: function(v) {this.isAnotherMonth = v;},
-            setIsToday: function(v) {this.isToday = v;},
-            setIsSunday: function(v) {this.isSunday = v;},
-            setIsSaturday: function(v) {this.isSaturday = v;},
-            
-            updateUI: function() {
-                if (!this.destroyed) {
-                    this.callSuper();
-                    
-                    if (!this.isSelected()) this.setTextColor(this.isAnotherMonth ? '#ccc' : (this.isSunday ? '#d40' : (this.isSaturday ? '#04a' : null)));
-                    this.setBorderColor(this.isToday ? '#090' : '#fff');
-                }
-            },
-            
-            doActivated: function() {
-                this.callSuper();
-                const targetDate = new Date(this.data);
-                targetDate.setHours(pickedDate.getHours());
-                targetDate.setMinutes(pickedDate.getMinutes());
-                drawForDate(targetDate);
-            }
-        }),
-        
-        drawForDate = date => {
-            date.setSeconds(0);
-            date.setMilliseconds(0);
-            
-            // Prevent selection of disallowed days of the week
-            const hasDisallowedDays = allowedDays.length <= 6;
-            let i;
-            if (hasDisallowedDays) {
-                i = 7;
-                while (i--) {
-                    if (allowedDays.includes(date.getDay())) {
-                        break;
-                    } else {
-                        date.setDate(date.getDate() + 1);
-                    }
-                }
-            }
-            
-            // Save new date to Picker data
-            pickedDate = date;
-            
-            // Calculate dates
-            const timeListScrollTop = timeListView.getOuterDomElement().scrollTop,
-                todayDateObj = new Date(),
-                todayFullYear = todayDateObj.getFullYear(),
-                todayMonth = todayDateObj.getMonth(),
-                todayDate = todayDateObj.getDate(),
-                todayHours = todayDateObj.getHours(),
-                todayMinutes = todayDateObj.getMinutes(),
-                dateFullYear = date.getFullYear(),
-                dateMonth = date.getMonth(),
-                dateDate = date.getDate(),
-                dateTime = date.getTime(),
-                dateHours = date.getHours(),
-                dateMinutes = date.getMinutes(),
-                firstWday = new Date(dateFullYear, dateMonth, 1).getDay() - firstDayOfWeek,
-                lastDay = new Date(dateFullYear, dateMonth + 1, 0).getDate(),
-                beforeMonthLastDay = new Date(dateFullYear, dateMonth, 0).getDate(),
-                dateBeforeMonth = new Date(dateFullYear, dateMonth, 0),
-                dateNextMonth = new Date(dateFullYear, dateMonth + 2, 0),
-                isCurrentYear = todayFullYear == dateFullYear,
-                isCurrentMonth = isCurrentYear && todayMonth == dateMonth,
-                isCurrentDay = isCurrentMonth && todayDate == dateDate,
-                isPastMonth = dateFullYear < todayFullYear || (isCurrentYear && dateMonth < todayMonth);
-            
-            let realDayObj;
-            if (!timeOnly) {
-                resetSelectionManager(calendarView);
-                
-                // Header
-                const cDate = new Date(dateTime),
-                    firstDayDiff = 7 + firstDayOfWeek,
-                    daysOfWeek = localeData['days'];
-                curMonthTxt.setText(dateFullYear + ' ' + localeData['sep'] + ' ' + localeData['months'][dateMonth]);
-                cDate.setMinutes(59);
-                cDate.setHours(23);
-                cDate.setSeconds(59);
-                cDate.setDate(0); // last day of previous month
-                prevMonthBtn.setVisible(minDate == null || minDate < cDate.getTime());
-                cDate.setMinutes(0);
-                cDate.setHours(0);
-                cDate.setSeconds(0);
-                cDate.setDate(1); // First day of next month
-                cDate.setMonth(dateMonth + 1);
-                nextMonthBtn.setVisible(maxDate == null || maxDate > cDate.getTime());
-                
-                // Column Headers
-                for (i = 0; i < 7; i++) {
-                    new Text(calendarView, {
-                        width:23, height:20, textAlign:'center',
-                        text:daysOfWeek[(i + firstDayDiff) % 7],
-                        textColor:'#999'
-                    });
-                }
-                
-                // Days
-                i = 0;
-                let cellNum = 42;
-                if (firstWday < 0) {
-                    i = -7;
-                    cellNum = 35;
-                }
-                
-                realDayObj = new Date(dateTime);
-                realDayObj.setHours(0);
-                realDayObj.setMinutes(0);
-                realDayObj.setSeconds(0);
-                for (; i < cellNum; i++) {
-                    const realDay = i + 1 - firstWday,
-                        wday = (i + firstDayDiff) % 7,
-                        dayCell = new DayBtn(calendarView);
-                    
-                    if (firstWday > i) {
-                        // Prev month days
-                        dayCell.setText(beforeMonthLastDay + realDay);
-                        dayCell.setData(dateBeforeMonth.getFullYear() + '/' + (dateBeforeMonth.getMonth() + 1) + '/' + (beforeMonthLastDay + realDay));
-                        dayCell.setIsAnotherMonth(true);
-                        realDayObj.setDate(beforeMonthLastDay + realDay);
-                        realDayObj.setMonth(dateBeforeMonth.getMonth());
-                        realDayObj.setYear(dateBeforeMonth.getFullYear());
-                    } else if (i < firstWday + lastDay) {
-                        // Current month days
-                        dayCell.setText(realDay);
-                        dayCell.setData((dateFullYear) + '/' + (dateMonth + 1) + '/' + realDay);
-                        realDayObj.setDate(realDay);
-                        realDayObj.setMonth(dateMonth);
-                        realDayObj.setYear(dateFullYear);
-                    } else {
-                        // Next month days
-                        dayCell.setText(realDay - lastDay);
-                        dayCell.setData(dateNextMonth.getFullYear() + '/' + (dateNextMonth.getMonth() + 1) + '/' + (realDay - lastDay));
-                        dayCell.setIsAnotherMonth(true);
-                        realDayObj.setDate(realDay - lastDay);
-                        realDayObj.setMonth(dateNextMonth.getMonth());
-                        realDayObj.setYear(dateNextMonth.getFullYear());
-                    }
-                    
-                    if (hasDisallowedDays && !allowedDays.includes(wday)) {
-                        dayCell.setDisabled(true);
-                    } else {
-                        if (wday === 0) {
-                            dayCell.setIsSunday(true);
-                        } else if (wday === 6) {
-                            dayCell.setIsSaturday(true);
-                        }
-                        
-                        // Set active and today indication
-                        if (realDay === dateDate) {
-                            calendarView.select(dayCell);
-                            dayCell.focus();
-                        }
-                        if (isCurrentMonth && realDay === todayDate) dayCell.setIsToday(true);
-                        
-                        const realDayObjMin =  new Date(realDayObj.getTime());
-                        realDayObjMin.setHours(23);
-                        realDayObjMin.setMinutes(59);
-                        realDayObjMin.setSeconds(59);
-                        if (
-                            (minDate != null && (minDate > realDayObjMin.getTime())) || (maxDate != null && (maxDate < realDayObj.getTime()))
-                        ) {
-                            dayCell.setDisabled(true);
-                        }
-                    }
-                    dayCell.updateUI();
-                }
-            }
-            
-            if (!dateOnly) {
-                const maxTimeInMinutes = maxTime[0] * 60 + maxTime[1];
-                
-                resetSelectionManager(timeListView);
-                
-                let hours = minTime[0],
-                    minutes = minTime[1];
-                realDayObj = new Date(dateTime);
-                while (hours * 60 + minutes < maxTimeInMinutes) {
-                    const is_past_time = hours < todayHours || (hours == todayHours && minutes < todayMinutes),
-                        is_past = isCurrentDay && is_past_time,
-                        timeCell = new TimeBtn(timeListView, {
-                            text:('0' + hours).slice(-2) + ':' + ('0' + minutes).slice(-2)
-                        });
-                    if (hours === dateHours && minutes === dateMinutes) timeListView.select(timeCell);
-                    
-                    realDayObj.setHours(hours);
-                    realDayObj.setMinutes(minutes);
-                    const realDayObjTime = realDayObj.getTime();
-                    if ((minDate != null && (minDate > realDayObjTime)) || (maxDate != null && (maxDate < realDayObjTime))) timeCell.setDisabled(true);
-                    
-                    minutes += minuteInterval;
-                    if (minutes >= 60) {
-                        minutes -= 60;
-                        hours++;
-                    }
-                }
-                
-                // Restore the scroll position
-                timeListView.scrollYTo(timeListScrollTop);
-            }
-        };
-    
-    pkg.DatePicker = new JSClass('DatePicker', View, {
-        // Life Cycle //////////////////////////////////////////////////////////
-        /** @overrides */
-        initNode: function(parent, attrs) {
-            const opt = Object.assign({
-                current:null,
-                dateOnly:false,
-                timeOnly:false,
-                locales:null,
-                locale:'',
-                minuteInterval:30,
-                firstDayOfWeek:0,
-                showTodayButton:true,
-                minDate:null,
-                maxDate:null,
-                minTime:'00:00',
-                maxTime:'23:59',
-                allowedDays:null // An array of day nums: [1,2,3,4,5] for week days only.
-            }, attrs.opt);
-            delete attrs.opt;
-            
-            this.callSuper(parent, attrs);
-            
-            localeData = opt.locales[opt.locale || 'en'];
-            dateOnly = opt.dateOnly;
-            timeOnly = opt.timeOnly;
-            firstDayOfWeek = opt.firstDayOfWeek;
-            minuteInterval = mathMax(5, mathMin(30, opt.minuteInterval));
-            
-            allowedDays = opt.allowedDays;
-            if (!Array.isArray(allowedDays) || allowedDays.length === 0) allowedDays = [0,1,2,3,4,5,6];
-            
-            minDate = Date.parse(opt.minDate);
-            minDate = isNaN(minDate) ? null : minDate;
-            maxDate = Date.parse(opt.maxDate);
-            maxDate = isNaN(maxDate) ? null : maxDate;
-            
-            minTime = parseTime(opt.minTime);
-            maxTime = parseTime(opt.maxTime);
-            
-            // Build UI
-            const headerView = new View(this, {visible:!timeOnly});
-            if (opt.showTodayButton) {
-                new TextButton(headerView, {width:24, text:makeTag(['home']), tooltip:localeData['today']}, [{
-                    doActivated: () => {
-                        drawForDate(new Date());
-                    }
-                }]);
-            }
-            prevMonthBtn = new TextButton(headerView, {width:24, x:28, text:makeTag(['chevron-left']), tooltip:localeData['prevMonth']}, [{
-                doActivated: () => {
-                    const targetMonth_lastDay = new Date(pickedDate.getFullYear(), pickedDate.getMonth(), 0).getDate();
-                    if (targetMonth_lastDay < pickedDate.getDate()) pickedDate.setDate(targetMonth_lastDay);
-                    
-                    pickedDate.setMonth(pickedDate.getMonth() - 1);
-                    drawForDate(pickedDate);
-                    prevMonthBtn.focus();
-                }
-            }]);
-            curMonthTxt = new Text(headerView, {width:100, x:52, textAlign:'center'});
-            nextMonthBtn = new TextButton(headerView, {width:24, x:152, text:makeTag(['chevron-right']), tooltip:localeData['nextMonth']}, [{
-                doActivated: () => {
-                    const targetMonth_lastDay = new Date(pickedDate.getFullYear(), pickedDate.getMonth() + 1, 0).getDate();
-                    if (targetMonth_lastDay < pickedDate.getDate()) pickedDate.setDate(targetMonth_lastDay);
-                    
-                    // Check a last date of a next month
-                    const lastDate = (new Date(pickedDate.getFullYear(), pickedDate.getMonth() + 2, 0)).getDate();
-                    if (lastDate < pickedDate.getDate()) pickedDate.setDate(lastDate);
-                    
-                    pickedDate.setMonth(pickedDate.getMonth() + 1);
-                    drawForDate(pickedDate);
-                    nextMonthBtn.focus();
-                }
-            }]);
-            
-            calendarView = new View(this, {
-                y:25, width:175, height:175,
-                visible:!timeOnly,
-                maxSelected:1,
-                itemSelectionId:'data'
-            }, [SelectionManager]);
-            new pkg.WrappingLayout(calendarView, {spacing:2, lineInset:2, lineSpacing:3});
-            
-            timeListView = new View(this, {
-                x:timeOnly ? 0 : 195,
-                y:timeOnly ? 0 : 25,
-                width:(timeOnly ? 175 : 49) + pkg.DomElementProxy.getScrollbarSize(),
-                height:timeOnly ? 200 : 175,
-                overflow:'autoy',
-                visible:!dateOnly,
-                maxSelected:1,
-                itemSelectionId:'text'
-            }, [SelectionManager]);
-            new pkg.SpacedLayout(timeListView, {axis:'y', inset:1, spacing:3});
-            
-            this.setWidth(timeListView.visible ? timeListView.x + timeListView.width : calendarView.width);
-            
-            drawForDate(opt.current || new Date());
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        getPickedDate: () => pickedDate
-    });
-})(myt);
-
-
-((pkg) => {
     const SizeToParent = pkg.SizeToParent,
         View = pkg.View,
         
@@ -19063,18 +18005,513 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
 
 
 ((pkg) => {
+    const math = Math,
+        mathMax = math.max,
+        mathMin = math.min,
+        
+        cleanChannelValue = value => mathMin(255, mathMax(0, math.round(value))),
+        toHex = value => {
+            value = cleanChannelValue(value).toString(16);
+            return value.length === 1 ? '0' + value : value;
+        },
+        rgbToHex = (red, green, blue, prependHash) => [prependHash ? '#' : '', toHex(red), toHex(green), toHex(blue)].join(''),
+        getRedChannel = value => (0xff0000 & value) >> 16,
+        getGreenChannel = value => (0x00ff00 & value) >> 8,
+        getBlueChannel = value => (0x0000ff & value),
+        makeColorFromNumber = value => new Color(getRedChannel(value), getGreenChannel(value), getBlueChannel(value)),
+        makeColorNumberFromChannels = (red, green, blue) => (cleanChannelValue(red) << 16) + (cleanChannelValue(green) << 8) + cleanChannelValue(blue),
+        toUnitRange = (num, max) => {
+            if (typeof num === 'string') {
+                if (num.endsWith('%')) {
+                    num = parseFloat(num.substring(0, num.length - 1)) * max / 100;
+                } else {
+                    return 0;
+                }
+            }
+            num = mathMin(max, mathMax(0, num)) / max;
+            return math.abs(1 - num) < 0.000001 ? 1 : num;
+        },
+        
+        rgbToHsv = (r, g, b) => {
+            r = toUnitRange(r, 255);
+            g = toUnitRange(g, 255);
+            b = toUnitRange(b, 255);
+            
+            const max = mathMax(r, g, b),
+                diff = max - mathMin(r, g, b);
+            if (diff === 0) {
+                // achromatic
+                return {h:0, s:0, v:max};
+            } else {
+                let h;
+                switch (max) {
+                    case r:
+                        h = (g - b) / diff + (g < b ? 6 : 0);
+                        break;
+                    case g:
+                        h = (b - r) / diff + 2;
+                        break;
+                    case b:
+                        h = (r - g) / diff + 4;
+                        break;
+                }
+                return {h:h * 60, s:max === 0 ? 0 : diff / max, v:max};
+            }
+        },
+        
+        hsvToRgb = (h, s, v) => {
+            h = toUnitRange(h, 360) * 6;
+            s = toUnitRange(s, 100);
+            v = toUnitRange(v, 100);
+            
+            const i = math.floor(h),
+                f = h - i,
+                p = v * (1 - s),
+                q = v * (1 - f * s),
+                t = v * (1 - (1 - f) * s),
+                mod = i % 6,
+                red = [v, q, p, p, t, v][mod],
+                green = [t, v, v, q, p, p][mod],
+                blue = [p, p, t, v, v, q][mod];
+            
+            return {red:red * 255, green:green * 255, blue:blue * 255};
+        },
+        
+        /** Models a color as individual color channels.
+            
+            Attributes:
+                red:int The red channel. Will be an integer between 0 and 255.
+                green:int The green channel. Will be an integer between 0 and 255.
+                blue:int The blue channel. Will be an integer between 0 and 255.
+            
+            @class */
+        Color = pkg.Color = new JS.Class('Color', {
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                toUnitRange:toUnitRange,
+                rgbToHsv:rgbToHsv,
+                hsvToRgb:hsvToRgb,
+                
+                /** Converts a number or string representation of a number to a 
+                    two character hex string.
+                    @param {number|string} value - The number or string to convert.
+                    @returns {string} A two character hex string such as: '0c' or 'c9'. */
+                toHex: toHex,
+                
+                /** Converts red, green, and blue color channel numbers to a six 
+                    character hex string.
+                    @param {number} red - The red color channel.
+                    @param {number} green - The green color channel.
+                    @param {number} blue - The blue color channel.
+                    @param {boolean} [prependHash] - If true a '#' character
+                        will be prepended to the return value.
+                    @returns {string} Something like: '#ff9c02' or 'ff9c02' */
+                rgbToHex: rgbToHex,
+                
+                /** Limits a channel value to integers between 0 and 255.
+                    @param {number} value - The channel value to clean up.
+                    @returns {number} */
+                cleanChannelValue: cleanChannelValue,
+                
+                /** Gets the red channel from a "color" number.
+                    @param {string} value
+                    @returns {number} */
+                getRedChannel: getRedChannel,
+                
+                /** Gets the green channel from a "color" number.
+                    @param {string} value
+                    @returns {number} */
+                getGreenChannel: getGreenChannel,
+                
+                /** Gets the blue channel from a "color" number.
+                    @param {string} value
+                    @returns {number} */
+                getBlueChannel: getBlueChannel,
+                
+                /** Creates an myt.Color from a "color" number.
+                    @param {string} value
+                    @returns {!Object} myt.Color */
+                makeColorFromNumber: makeColorFromNumber,
+                
+                /** Creates an myt.Color from an html color string.
+                    @param {string} value - A hex string representation of a 
+                        color, such as '#ff339b'.
+                    @returns {!Object} a myt.Color or null if no color could 
+                        be parsed. */
+                makeColorFromHexString: value => {
+                    if (value) {
+                        if (!value.startsWith('#')) value = '#' + value;
+                        return makeColorFromNumber(parseInt(value.substring(1), 16));
+                    } else {
+                        return null;
+                    }
+                },
+                
+                /** Creates an myt.Color from hue, saturation and value
+                    parameters.
+                    @param {number} h - The hue. A number from 0 to 360.
+                    @param {number} s - The saturation. A number from 0 to 100.
+                    @param {number} v - The value. A number from 0 to 100.
+                    @returns {!Object} myt.Color */
+                makeColorFromHSV: (h, s, v) => {
+                    const rgb = hsvToRgb(h, s, v);
+                    return makeColorFromNumber(makeColorNumberFromChannels(rgb.red, rgb.green, rgb.blue));
+                },
+                
+                /** Returns the lighter of the two provided colors.
+                    @param {number} a - A color number.
+                    @param {number} b - A color number.
+                    @returns {number} The number that represents the 
+                        lighter color. */
+                getLighterColor: (a, b) => makeColorFromNumber(a).isLighterThan(makeColorFromNumber(b)) ? a : b,
+                
+                /** Creates an RGB "color" number from the provided color channels.
+                    @param {number} red - The red channel
+                    @param {number} green - The green channel
+                    @param {number} blue - The blue channel
+                    @returns {number} */
+                makeColorNumberFromChannels: makeColorNumberFromChannels,
+                
+                /** Creates a new myt.Color object that is a blend of the two 
+                    provided colors.
+                    @param {!Object} fromColor - The first myt.Color to blend.
+                    @param {!Objecdt} toColor - The second myt.Color to blend.
+                    @param {number} percent - The blend percent between the two
+                        colors where 0 is the fromColor and 1.0 is the toColor.
+                    @returns {!Object} myt.Color */
+                makeBlendedColor: (fromColor, toColor, percent) => {
+                    return new Color(
+                        fromColor.red + (percent * (toColor.red - fromColor.red)),
+                        fromColor.green + (percent * (toColor.green - fromColor.green)),
+                        fromColor.blue + (percent * (toColor.blue - fromColor.blue))
+                    );
+                }
+            },
+            
+            
+            // Constructor /////////////////////////////////////////////////////
+            /** Create a new Color.
+                @param {number} red - The red channel
+                @param {number} green - The green channel
+                @param {number} blue - The blue channel
+                @returns {undefined} */
+            initialize: function(red, green, blue) {
+                this.setRed(red);
+                this.setGreen(green);
+                this.setBlue(blue);
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            /** Sets the red channel value.
+                @param {number} red
+                @return {undefined} */
+            setRed: function(red) {
+                this.red = cleanChannelValue(red);
+            },
+            
+            /** Sets the green channel value.
+                @param {number} green
+                @return {undefined} */
+            setGreen: function(green) {
+                this.green = cleanChannelValue(green);
+            },
+            
+            /** Sets the blue channel value.
+                @param {number} blue
+                @return {undefined} */
+            setBlue: function(blue) {
+                this.blue = cleanChannelValue(blue);
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** Gets the numerical representation of this color.
+                @returns {number} The number that represents this color. */
+            getColorNumber: function() {
+                return (this.red << 16) + (this.green << 8) + this.blue;
+            },
+            
+            /** Gets the hex string representation of this color.
+                @returns {string} A hex color such as '#a0bbcc'. */
+            getHtmlHexString: function() {
+                return rgbToHex(this.red, this.green, this.blue, true);
+            },
+            
+            /** Gets an HSV representation of this Color.
+                @returns {!Object} With keys h, s and v. */
+            getHSV: function() {
+                return rgbToHsv(this.red, this.green, this.blue);
+            },
+            
+            /** Tests if this color is lighter than the provided color.
+                @param {!Object} c - The myt.Color to compare to.
+                @returns {boolean} True if this color is lighter, 
+                    false otherwise. */
+            isLighterThan: function(c) {
+                const diff = this.getDiffFrom(c);
+                
+                // Sum channel diffs to determine lightest color. A negative
+                // diff means a lighter color.
+                return 0 > (diff.red + diff.green + diff.blue);
+            },
+            
+            /** Gets an object holding color channel diffs.
+                @param {!Object} c - The myt.Color to diff from.
+                @returns {!Object} containing the diffs for the red, green and 
+                    blue channels. */
+            getDiffFrom: function(c) {
+                return {
+                    red: c.red - this.red,
+                    green: c.green - this.green,
+                    blue: c.blue - this.blue
+                };
+            },
+            
+            /** Applies the provided diff object to this color.
+                @param {!Object} diff - The color diff to apply.
+                @returns {!Object} - This myt.Color for method chaining. */
+            applyDiff: function(diff) {
+                return this.add(diff);
+            },
+            
+            /** Adds the provided color to this color.
+                @param {!Object} c - The myt.Color to add.
+                @returns {!Object} - This myt.Color for method chaining. */
+            add: function(c) {
+                this.setRed(this.red + c.red);
+                this.setGreen(this.green + c.green);
+                this.setBlue(this.blue + c.blue);
+                return this;
+            },
+            
+            /** Subtracts the provided color from this color.
+                @param {!Object} c - The myt.Color to subtract.
+                @returns {!Object} - This myt.Color for method chaining. */
+            subtract: function(c) {
+                this.setRed(this.red - c.red);
+                this.setGreen(this.green - c.green);
+                this.setBlue(this.blue - c.blue);
+                return this;
+            },
+            
+            /** Multiplys this color by the provided scalar.
+                @param {number} s - The scaler to multiply by.
+                @returns {!Object} - This myt.Color for method chaining. */
+            multiply: function(s) {
+                this.setRed(this.red * s);
+                this.setGreen(this.green * s);
+                this.setBlue(this.blue * s);
+                return this;
+            },
+            
+            /** Divides this color by the provided scalar.
+                @param {number} s - The scaler to divide by.
+                @returns {!Object} - This myt.Color for method chaining. */
+            divide: function(s) {
+                this.setRed(this.red / s);
+                this.setGreen(this.green / s);
+                this.setBlue(this.blue / s);
+                return this;
+            },
+            
+            /** Clones this Color.
+                @returns {!Object} - A copy of this myt.Color. */
+            clone: function() {
+                return new Color(this.red, this.green, this.blue);
+            },
+            
+            /** Determine if this color has the same value as another color.
+                @param {?Object} obj - The color object to test against.
+                @returns {boolean} True if this color has the same color values 
+                    as this provided color, false otherwise. */
+            equals: function(obj) {
+                return obj === this || (obj && obj.isA && 
+                    obj.isA(Color) && 
+                    obj.red === this.red && 
+                    obj.green === this.green && 
+                    obj.blue === this.blue);
+            }
+        });
+})(myt);
+
+
+((pkg) => {
+    const sizeClasses = ['','fa-lg','fa-2x','fa-3x','fa-4x','fa-5x'],
+        
+        updateInstance = (instance) => {
+            let props = instance.properties;
+            if (props) {
+                if (typeof props === 'string') {
+                    props = props.split(' ');
+                } else {
+                    props = props.concat();
+                }
+                props.unshift(instance.size);
+                props.unshift(instance.icon);
+            } else {
+                props = [instance.icon, instance.size];
+            }
+            
+            instance.setHtml(FontAwesome.makeTag(props));
+        };
+    
+    pkg.loadCSSFonts(['//use.fontawesome.com/releases/v5.0.8/css/all.css']);
+    
+    /** An adapter for FontAwesome.
+        
+        Attributes:
+            icon:string The name of the FA icon to set.
+            size:number A number from 0 to 5 with 0 being normal size and 5 being
+                the largest size.
+            propeties:string || array A space separated string or list of FA
+                CSS classes to set.
+    */
+    const FontAwesome = pkg.FontAwesome = new JS.Class('FontAwesome', pkg.Markup, {
+        // Class Methods and Attributes ////////////////////////////////////////
+        extend: {
+            makeTag: function(props) {
+                if (Array.isArray(props)) {
+                    let len = props.length,
+                        prop,
+                        i;
+                    if (len > 0) {
+                        props.unshift('fa');
+                        ++len;
+                        
+                        if (props[1].indexOf('fa-') !== 0) props[1] = 'fa-' + props[1];
+                        
+                        if (len >= 3) props[2] = sizeClasses[props[2]] || '';
+                        
+                        if (len > 3) {
+                            i = 3;
+                            for (; len > i; ++i) {
+                                prop = props[i];
+                                if (prop.indexOf('fa-') !== 0) props[i] = 'fa-' + prop;
+                            }
+                        }
+                        
+                        return '<i class="' + props.join(' ') + '"></i>';
+                    }
+                }
+                
+                pkg.dumpStack('Error making tag');
+                console.error(props);
+                return '';
+            },
+            
+            registerForNotification: (instance) => {
+                pkg.registerForFontNotification(instance, 'Font Awesome\ 5 Free 400'); // regular
+                pkg.registerForFontNotification(instance, 'Font Awesome\ 5 Free 900'); // solid
+                pkg.registerForFontNotification(instance, 'Font Awesome\ 5 Brands 400'); // brands
+            },
+        },
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.View */
+        initNode: function(parent, attrs) {
+            this.size = 0;
+            this.icon = '';
+            
+            this.callSuper(parent, attrs);
+            
+            updateInstance(this);
+            
+            FontAwesome.registerForNotification(this);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setIcon: function(v) {
+            const existing = this.icon;
+            this.set('icon', v, true);
+            if (this.inited && existing !== v) updateInstance(this);
+        },
+        
+        setSize: function(v) {
+            const existing = this.size;
+            this.set('size', v, true);
+            if (this.inited && existing !== v) updateInstance(this);
+        },
+        
+        setProperties: function(v) {
+            this.properties = v;
+            this.fireEvent('properties', v);
+            if (this.inited) updateInstance(this);
+        }
+    });
+})(myt);
+
+
+((pkg) => {
+    let // ColorPicker
+        colorPicker,
+        
+        isEmpty,
+        initialColorHex,
+        currentColorHex,
+        
+        currentHue = 0,
+        currentSaturation = 0,
+        currentValue = 0,
+        
+        selectionPalette = [],
+        defaultPalette,
+        
+        paletteContainer,
+        colorView,
+        colorThumb,
+        hueView,
+        hueThumb,
+        inputView,
+        currentColorButton,
+        
+        // DatePicker
+        localeData,
+        dateOnly,
+        timeOnly,
+        firstDayOfWeek,
+        allowedDays,
+        minDate,
+        maxDate,
+        minTime,
+        maxTime,
+        minuteInterval,
+        
+        pickedDate,
+        
+        prevMonthBtn,
+        curMonthTxt,
+        nextMonthBtn,
+        calendarView,
+        timeListView;
+    
     const JSClass = JS.Class,
         View = pkg.View,
         Text = pkg.Text,
         ModalPanel = pkg.ModalPanel,
         SizeToChildren = pkg.SizeToChildren,
+        SpacedLayout = pkg.SpacedLayout,
+        SelectionManager = pkg.SelectionManager,
+        Color = pkg.Color,
+        LocalStorage = pkg.LocalStorage,
+        Button = pkg.Button,
+        TextButton = pkg.TextButton,
+        Draggable = pkg.Draggable,
+        
+        makeTag = pkg.FontAwesome.makeTag,
         
         defAttr = pkg.AccessorSupport.defAttr,
         
         objectAssign = Object.assign,
         
+        math = Math,
+        mathMin = math.min,
+        mathMax = math.max,
+        
         /* Hide spinner related elements. */
-        hideSpinner = (dialog) => {
+        hideSpinner = dialog => {
             if (dialog.spinner) {
                 dialog.spinner.setVisible(false);
                 dialog.spinner = undefined;
@@ -19082,21 +18519,567 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         },
         
         /* The class used as the DEFAULT_BUTTON_CLASS in myt.Dialog. */
-        DialogButton = new JSClass('DialogButton', pkg.SimpleTextButton, {
+        DialogButton = new JSClass('DialogButton', TextButton, {
             /** @overrides */
             initNode: function(parent, attrs) {
-                defAttr(attrs, 'height', 20);
-                defAttr(attrs, 'shrinkToFit', true);
-                defAttr(attrs, 'inset', 10);
-                defAttr(attrs, 'outset', 10);
-                defAttr(attrs, 'textY', 3);
-                defAttr(attrs, 'roundedCorners', 3);
+                defAttr(attrs, 'height', 17);
+                defAttr(attrs, 'paddingTop', 3);
+                defAttr(attrs, 'paddingLeft', 10);
+                defAttr(attrs, 'paddingRight', 10);
                 defAttr(attrs, 'activeColor', '#bbb');
                 defAttr(attrs, 'hoverColor', '#ddd');
                 defAttr(attrs, 'readyColor', '#ccc');
                 
+                attrs.domClass = 'mytButtonText';
+                
                 this.callSuper(parent, attrs);
             }
+        }),
+        
+        // ColorPicker
+        TRANSPARENT = 'transparent',
+        LOCAL_STORAGE_KEY = 'myt.default',
+        DOM_CLASS_CHECKERBOARD = 'mytCheckerboardPattern',
+        CHECKMARK = makeTag(['check']),
+        BORDER_333 = [1, 'solid', '#333'],
+        BORDER_999 = [1, 'solid', '#999'],
+        
+        paletteLookup = {},
+        
+        hsvToHex = (h, s, v) => Color.makeColorFromHSV(h * 360, s * 100, v * 100).getHtmlHexString(),
+        
+        Swatch = new JSClass('Swatch', View, {
+            include:[Button],
+            initNode: function(parent, attrs) {
+                attrs.width = attrs.height = 16;
+                attrs.border = BORDER_999;
+                this.callSuper(parent, attrs);
+                
+                if (this.bgColor === currentColorHex) {
+                    const color = Color.makeColorFromHexString(currentColorHex);
+                    new pkg.Text(this, {
+                        x:2, y:2, text:CHECKMARK, fontSize:'12px', 
+                        textColor:color.red + color.green + color.blue < 3*255/2 ? '#fff' : '#000'
+                    });
+                }
+            },
+            setBgColor: function(v) {
+                this.callSuper(v);
+                this.setTooltip(v);
+            },
+            doActivated: function() {colorPicker.setColor(this.bgColor);},
+            drawHoverState: function() {this.setBorder(BORDER_333);},
+            drawReadyState: function() {this.setBorder(BORDER_999);}
+        }),
+        
+        ColorPicker = pkg.ColorPicker = new JSClass('ColorPicker', View, {
+            // Life Cycle //////////////////////////////////////////////////////
+            initNode: function(parent, attrs) {
+                colorPicker = this;
+                
+                initialColorHex = attrs.color || TRANSPARENT;
+                delete attrs.color;
+                
+                defaultPalette = attrs.palette || [];
+                defaultPalette.forEach(color => {paletteLookup[color] = true;});
+                delete attrs.palette;
+                
+                isEmpty = initialColorHex === TRANSPARENT;
+                
+                colorPicker.callSuper(parent, attrs);
+                
+                // Build UI
+                paletteContainer = new View(colorPicker, {width:160, height:170});
+                new pkg.WrappingLayout(paletteContainer, {spacing:4, lineSpacing:4});
+                
+                colorView = new View(colorPicker, {x:170, width:139, height:139, border:BORDER_333}, [Draggable, {
+                    requestDragPosition: function(x, y) {
+                        colorView.callSuper(colorView.x, colorView.y);
+                        const pos = this.getPagePosition();
+                        currentSaturation = parseFloat(mathMax(0, mathMin(1, (x + this.dragInitX - pos.x) / this.width)));
+                        currentValue = parseFloat(1 - mathMax(0, mathMin(1, (y + this.dragInitY - pos.y) / this.height)));
+                        isEmpty = false;
+                        colorPicker.updateUI();
+                    }
+                }]);
+                const satView = new View(colorView, {width:139, height:139}),
+                    valView = new View(satView, {width:139, height:139});
+                satView.getInnerDomStyle().backgroundImage = 'linear-gradient(to right, #fff, rgba(204, 154, 129, 0))';
+                valView.getInnerDomStyle().backgroundImage = 'linear-gradient(to top, #000, rgba(204, 154, 129, 0))';
+                colorThumb = new View(valView, {width:6, height:6, bgColor:'#000', border:[1, 'solid', '#ffffff'], roundedCorners:4});
+                
+                hueView = new View(colorPicker, {x:315, y:30, width:24, height:109, border:BORDER_333}, [Draggable, {
+                    requestDragPosition: function(x, y) {
+                        this.callSuper(hueView.x, hueView.y);
+                        currentHue = parseFloat(mathMax(0, mathMin(1, (y + this.dragInitY - this.getPagePosition().y) / this.height)));
+                        isEmpty = false;
+                        colorPicker.updateUI();
+                    }
+                }]);
+                hueView.getInnerDomStyle().background = 'linear-gradient(to top, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%)';
+                hueThumb = new View(hueView, {x:-1, width:24, height:2, bgColor:'#fff', border:[1, 'solid', '#000']});
+                
+                new View(colorPicker, {
+                    x:315, width:24, height:24, border:BORDER_333, tooltip:'Set to transparent.', domClass:DOM_CLASS_CHECKERBOARD
+                }, [Button, {doActivated: () => {colorPicker.setColor(TRANSPARENT);}}]);
+                
+                inputView = new pkg.InputText(colorPicker, {x:236, y:146, width:105, height:25, roundedCorners:3, textColor:'#333', border:BORDER_333, maxLength:11});
+                colorPicker.attachToDom(inputView, '_submitInput', 'blur');
+                colorPicker.attachToDom(inputView, '_handleKeyDown', 'keydown');
+                inputView.getInnerDomStyle().paddingLeft = '6px';
+                
+                const initialColorContainer = new View(colorPicker, {x:170, y:146, width:60, height:23, border:BORDER_333});
+                new View(initialColorContainer, {
+                    width:30, height:23, focusEmbellishment:false,
+                    bgColor:initialColorHex, domClass:isEmpty ? DOM_CLASS_CHECKERBOARD : ''
+                }, [Button, {doActivated: () => {colorPicker.setColor(initialColorHex);}}]);
+                currentColorButton = new View(initialColorContainer, {x:30, width:30, height:23}, [{
+                    setBgColor: function(v) {
+                        this.callSuper(v);
+                        this[(v === TRANSPARENT ? 'add' : 'remove') + 'DomClass'](DOM_CLASS_CHECKERBOARD);
+                    }
+                }]);
+                
+                // Load Palette
+                const savedPalette = LocalStorage.getItem(LOCAL_STORAGE_KEY);
+                if (savedPalette) {
+                    selectionPalette = savedPalette.split(';');
+                    selectionPalette.forEach(color => {paletteLookup[color] = true;});
+                }
+                
+                colorPicker.setColor(initialColorHex);
+            },
+            
+            /** @private */
+            _handleKeyDown: event => {
+                if (pkg.KeyObservable.getKeyCodeFromEvent(event) === 13) colorPicker._submitInput();
+            },
+            
+            /** @private */
+            _submitInput: () => {
+                colorPicker.setColor(inputView.value);
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            addToPalette: hexColor => {
+                if (hexColor && hexColor !== TRANSPARENT && !paletteLookup[hexColor]) {
+                    selectionPalette.unshift(hexColor);
+                    selectionPalette.length = mathMin(selectionPalette.length, 56);
+                    LocalStorage.setItem(LOCAL_STORAGE_KEY, selectionPalette.join(';'));
+                }
+            },
+            
+            setColor: color => {
+                if (color && color !== TRANSPARENT) {
+                    const newHsv = (Color.makeColorFromHexString(color)).getHSV();
+                    currentHue = newHsv.h / 360;
+                    currentSaturation = newHsv.s;
+                    currentValue = newHsv.v;
+                    isEmpty = false;
+                } else {
+                    isEmpty = true;
+                }
+                colorPicker.updateUI();
+            },
+            
+            getColor: () => isEmpty ? TRANSPARENT : hsvToHex(currentHue, currentSaturation, currentValue),
+            
+            updateUI: () => {
+                const isNotEmpty = !isEmpty;
+                hueThumb.setVisible(isNotEmpty);
+                colorThumb.setVisible(isNotEmpty);
+                if (isNotEmpty) {
+                    colorThumb.setX(mathMax(0, mathMin(1, currentSaturation) * (colorView.width + 2)) - 5);
+                    colorThumb.setY(mathMax(0, mathMin(1, 1 - currentValue) * (colorView.height + 2)) - 5);
+                    hueThumb.setY((currentHue * (hueView.height - 2)) - 1);
+                }
+                
+                colorView.setBgColor(hsvToHex(currentHue, 1, 1));
+                
+                // Update input
+                currentColorHex = colorPicker.getColor();
+                inputView.setValue(currentColorHex);
+                currentColorButton.setBgColor(currentColorHex);
+                
+                colorPicker.redrawPalette();
+            },
+            
+            redrawPalette: pkg.debounce(() => {
+                const subs = paletteContainer.getSubviews();
+                let i = subs.length;
+                while (i) subs[--i].destroy();
+                defaultPalette.forEach(color => {new Swatch(paletteContainer, {bgColor:color});});
+                selectionPalette.forEach(color => {new Swatch(paletteContainer, {bgColor:color});});
+            }, 50)
+        }),
+        
+        // DatePicker
+        clipValue = (value, max) => mathMax(0, mathMin(max, parseInt(value))),
+        
+        parseTime = timeStr => {
+            const parts = timeStr.split(':');
+            return [clipValue(parts[0], 23), clipValue(parts[1], 60)];
+        },
+        
+        resetSelectionManager = view => {
+            view.deselectAll();
+            const subs = view.getSubviews();
+            let i = subs.length;
+            while (i) subs[--i].destroy();
+        },
+        
+        SelectableBtn = new JSClass('SelectableBtn', TextButton, {
+            include:[pkg.Selectable],
+            
+            setSelected: function(v) {
+                this.callSuper(v);
+                this.updateUI();
+            },
+            
+            updateUI: function() {
+                this.callSuper();
+                
+                if (this.isSelected()) {
+                    this.setBgColor('#666');
+                    this.setTextColor('#fff');
+                } else {
+                    this.setTextColor();
+                }
+            }
+        }),
+        
+        TimeBtn = new JSClass('TimeBtn', SelectableBtn, {
+            initNode: function(parent, attrs) {
+                attrs.width = timeOnly ? 175 : 49;
+                this.callSuper(parent, attrs);
+            },
+            
+            doActivated: function() {
+                this.callSuper();
+                const value = this.text,
+                    timeParts = parseTime(value);
+                timeListView.selectById(value);
+                pickedDate.setHours(timeParts[0]);
+                pickedDate.setMinutes(timeParts[1]);
+            }
+        }),
+        
+        DayBtn = new JSClass('DayBtn', SelectableBtn, {
+            initNode: function(parent, attrs) {
+                attrs.width = 23;
+                attrs.border = [1, 'solid', '#fff'];
+                this.callSuper(parent, attrs);
+            },
+            
+            setData: function(v) {this.data = v;},
+            
+            setIsAnotherMonth: function(v) {this.isAnotherMonth = v;},
+            setIsToday: function(v) {this.isToday = v;},
+            setIsSunday: function(v) {this.isSunday = v;},
+            setIsSaturday: function(v) {this.isSaturday = v;},
+            
+            updateUI: function() {
+                if (!this.destroyed) {
+                    this.callSuper();
+                    
+                    if (!this.isSelected()) this.setTextColor(this.isAnotherMonth ? '#ccc' : (this.isSunday ? '#d40' : (this.isSaturday ? '#04a' : null)));
+                    this.setBorderColor(this.isToday ? '#090' : '#fff');
+                }
+            },
+            
+            doActivated: function() {
+                this.callSuper();
+                const targetDate = new Date(this.data);
+                targetDate.setHours(pickedDate.getHours());
+                targetDate.setMinutes(pickedDate.getMinutes());
+                drawForDate(targetDate);
+            }
+        }),
+        
+        drawForDate = date => {
+            date.setSeconds(0);
+            date.setMilliseconds(0);
+            
+            // Prevent selection of disallowed days of the week
+            const hasDisallowedDays = allowedDays.length <= 6;
+            let i;
+            if (hasDisallowedDays) {
+                i = 7;
+                while (i--) {
+                    if (allowedDays.includes(date.getDay())) {
+                        break;
+                    } else {
+                        date.setDate(date.getDate() + 1);
+                    }
+                }
+            }
+            
+            // Save new date to Picker data
+            pickedDate = date;
+            
+            // Calculate dates
+            const timeListScrollTop = timeListView.getOuterDomElement().scrollTop,
+                todayDateObj = new Date(),
+                todayFullYear = todayDateObj.getFullYear(),
+                todayMonth = todayDateObj.getMonth(),
+                todayDate = todayDateObj.getDate(),
+                todayHours = todayDateObj.getHours(),
+                todayMinutes = todayDateObj.getMinutes(),
+                dateFullYear = date.getFullYear(),
+                dateMonth = date.getMonth(),
+                dateDate = date.getDate(),
+                dateTime = date.getTime(),
+                dateHours = date.getHours(),
+                dateMinutes = date.getMinutes(),
+                firstWday = new Date(dateFullYear, dateMonth, 1).getDay() - firstDayOfWeek,
+                lastDay = new Date(dateFullYear, dateMonth + 1, 0).getDate(),
+                beforeMonthLastDay = new Date(dateFullYear, dateMonth, 0).getDate(),
+                dateBeforeMonth = new Date(dateFullYear, dateMonth, 0),
+                dateNextMonth = new Date(dateFullYear, dateMonth + 2, 0),
+                isCurrentYear = todayFullYear == dateFullYear,
+                isCurrentMonth = isCurrentYear && todayMonth == dateMonth,
+                isCurrentDay = isCurrentMonth && todayDate == dateDate,
+                isPastMonth = dateFullYear < todayFullYear || (isCurrentYear && dateMonth < todayMonth);
+            
+            let realDayObj;
+            if (!timeOnly) {
+                resetSelectionManager(calendarView);
+                
+                // Header
+                const cDate = new Date(dateTime),
+                    firstDayDiff = 7 + firstDayOfWeek,
+                    daysOfWeek = localeData['days'];
+                curMonthTxt.setText(dateFullYear + ' ' + localeData['sep'] + ' ' + localeData['months'][dateMonth]);
+                cDate.setMinutes(59);
+                cDate.setHours(23);
+                cDate.setSeconds(59);
+                cDate.setDate(0); // last day of previous month
+                prevMonthBtn.setVisible(minDate == null || minDate < cDate.getTime());
+                cDate.setMinutes(0);
+                cDate.setHours(0);
+                cDate.setSeconds(0);
+                cDate.setDate(1); // First day of next month
+                cDate.setMonth(dateMonth + 1);
+                nextMonthBtn.setVisible(maxDate == null || maxDate > cDate.getTime());
+                
+                // Column Headers
+                for (i = 0; i < 7; i++) {
+                    new Text(calendarView, {
+                        width:23, height:20, textAlign:'center',
+                        text:daysOfWeek[(i + firstDayDiff) % 7],
+                        textColor:'#999'
+                    });
+                }
+                
+                // Days
+                i = 0;
+                let cellNum = 42;
+                if (firstWday < 0) {
+                    i = -7;
+                    cellNum = 35;
+                }
+                
+                realDayObj = new Date(dateTime);
+                realDayObj.setHours(0);
+                realDayObj.setMinutes(0);
+                realDayObj.setSeconds(0);
+                for (; i < cellNum; i++) {
+                    const realDay = i + 1 - firstWday,
+                        wday = (i + firstDayDiff) % 7,
+                        dayCell = new DayBtn(calendarView);
+                    
+                    if (firstWday > i) {
+                        // Prev month days
+                        dayCell.setText(beforeMonthLastDay + realDay);
+                        dayCell.setData(dateBeforeMonth.getFullYear() + '/' + (dateBeforeMonth.getMonth() + 1) + '/' + (beforeMonthLastDay + realDay));
+                        dayCell.setIsAnotherMonth(true);
+                        realDayObj.setDate(beforeMonthLastDay + realDay);
+                        realDayObj.setMonth(dateBeforeMonth.getMonth());
+                        realDayObj.setYear(dateBeforeMonth.getFullYear());
+                    } else if (i < firstWday + lastDay) {
+                        // Current month days
+                        dayCell.setText(realDay);
+                        dayCell.setData((dateFullYear) + '/' + (dateMonth + 1) + '/' + realDay);
+                        realDayObj.setDate(realDay);
+                        realDayObj.setMonth(dateMonth);
+                        realDayObj.setYear(dateFullYear);
+                    } else {
+                        // Next month days
+                        dayCell.setText(realDay - lastDay);
+                        dayCell.setData(dateNextMonth.getFullYear() + '/' + (dateNextMonth.getMonth() + 1) + '/' + (realDay - lastDay));
+                        dayCell.setIsAnotherMonth(true);
+                        realDayObj.setDate(realDay - lastDay);
+                        realDayObj.setMonth(dateNextMonth.getMonth());
+                        realDayObj.setYear(dateNextMonth.getFullYear());
+                    }
+                    
+                    if (hasDisallowedDays && !allowedDays.includes(wday)) {
+                        dayCell.setDisabled(true);
+                    } else {
+                        if (wday === 0) {
+                            dayCell.setIsSunday(true);
+                        } else if (wday === 6) {
+                            dayCell.setIsSaturday(true);
+                        }
+                        
+                        // Set active and today indication
+                        if (realDay === dateDate) {
+                            calendarView.select(dayCell);
+                            dayCell.focus();
+                        }
+                        if (isCurrentMonth && realDay === todayDate) dayCell.setIsToday(true);
+                        
+                        const realDayObjMin =  new Date(realDayObj.getTime());
+                        realDayObjMin.setHours(23);
+                        realDayObjMin.setMinutes(59);
+                        realDayObjMin.setSeconds(59);
+                        if (
+                            (minDate != null && (minDate > realDayObjMin.getTime())) || (maxDate != null && (maxDate < realDayObj.getTime()))
+                        ) {
+                            dayCell.setDisabled(true);
+                        }
+                    }
+                    dayCell.updateUI();
+                }
+            }
+            
+            if (!dateOnly) {
+                const maxTimeInMinutes = maxTime[0] * 60 + maxTime[1];
+                
+                resetSelectionManager(timeListView);
+                
+                let hours = minTime[0],
+                    minutes = minTime[1];
+                realDayObj = new Date(dateTime);
+                while (hours * 60 + minutes < maxTimeInMinutes) {
+                    const is_past_time = hours < todayHours || (hours == todayHours && minutes < todayMinutes),
+                        is_past = isCurrentDay && is_past_time,
+                        timeCell = new TimeBtn(timeListView, {
+                            text:('0' + hours).slice(-2) + ':' + ('0' + minutes).slice(-2)
+                        });
+                    if (hours === dateHours && minutes === dateMinutes) timeListView.select(timeCell);
+                    
+                    realDayObj.setHours(hours);
+                    realDayObj.setMinutes(minutes);
+                    const realDayObjTime = realDayObj.getTime();
+                    if ((minDate != null && (minDate > realDayObjTime)) || (maxDate != null && (maxDate < realDayObjTime))) timeCell.setDisabled(true);
+                    
+                    minutes += minuteInterval;
+                    if (minutes >= 60) {
+                        minutes -= 60;
+                        hours++;
+                    }
+                }
+                
+                // Restore the scroll position
+                timeListView.scrollYTo(timeListScrollTop);
+            }
+        },
+        
+        DatePicker = pkg.DatePicker = new JSClass('DatePicker', View, {
+            // Life Cycle //////////////////////////////////////////////////////
+            /** @overrides */
+            initNode: function(parent, attrs) {
+                const opt = objectAssign({
+                    current:null,
+                    dateOnly:false,
+                    timeOnly:false,
+                    locales:null,
+                    locale:'',
+                    minuteInterval:30,
+                    firstDayOfWeek:0,
+                    showTodayButton:true,
+                    minDate:null,
+                    maxDate:null,
+                    minTime:'00:00',
+                    maxTime:'23:59',
+                    allowedDays:null // An array of day nums: [1,2,3,4,5] for week days only.
+                }, attrs.opt);
+                delete attrs.opt;
+                
+                this.callSuper(parent, attrs);
+                
+                localeData = opt.locales[opt.locale || 'en'];
+                dateOnly = opt.dateOnly;
+                timeOnly = opt.timeOnly;
+                firstDayOfWeek = opt.firstDayOfWeek;
+                minuteInterval = mathMax(5, mathMin(30, opt.minuteInterval));
+                
+                allowedDays = opt.allowedDays;
+                if (!Array.isArray(allowedDays) || allowedDays.length === 0) allowedDays = [0,1,2,3,4,5,6];
+                
+                minDate = Date.parse(opt.minDate);
+                minDate = isNaN(minDate) ? null : minDate;
+                maxDate = Date.parse(opt.maxDate);
+                maxDate = isNaN(maxDate) ? null : maxDate;
+                
+                minTime = parseTime(opt.minTime);
+                maxTime = parseTime(opt.maxTime);
+                
+                // Build UI
+                const headerView = new View(this, {visible:!timeOnly});
+                if (opt.showTodayButton) {
+                    new TextButton(headerView, {width:24, text:makeTag(['home']), tooltip:localeData['today']}, [{
+                        doActivated: () => {
+                            drawForDate(new Date());
+                        }
+                    }]);
+                }
+                prevMonthBtn = new TextButton(headerView, {width:24, x:28, text:makeTag(['chevron-left']), tooltip:localeData['prevMonth']}, [{
+                    doActivated: () => {
+                        const targetMonth_lastDay = new Date(pickedDate.getFullYear(), pickedDate.getMonth(), 0).getDate();
+                        if (targetMonth_lastDay < pickedDate.getDate()) pickedDate.setDate(targetMonth_lastDay);
+                        
+                        pickedDate.setMonth(pickedDate.getMonth() - 1);
+                        drawForDate(pickedDate);
+                        prevMonthBtn.focus();
+                    }
+                }]);
+                curMonthTxt = new Text(headerView, {width:100, x:52, textAlign:'center'});
+                nextMonthBtn = new TextButton(headerView, {width:24, x:152, text:makeTag(['chevron-right']), tooltip:localeData['nextMonth']}, [{
+                    doActivated: () => {
+                        const targetMonth_lastDay = new Date(pickedDate.getFullYear(), pickedDate.getMonth() + 1, 0).getDate();
+                        if (targetMonth_lastDay < pickedDate.getDate()) pickedDate.setDate(targetMonth_lastDay);
+                        
+                        // Check a last date of a next month
+                        const lastDate = (new Date(pickedDate.getFullYear(), pickedDate.getMonth() + 2, 0)).getDate();
+                        if (lastDate < pickedDate.getDate()) pickedDate.setDate(lastDate);
+                        
+                        pickedDate.setMonth(pickedDate.getMonth() + 1);
+                        drawForDate(pickedDate);
+                        nextMonthBtn.focus();
+                    }
+                }]);
+                
+                calendarView = new View(this, {
+                    y:25, width:175, height:175,
+                    visible:!timeOnly,
+                    maxSelected:1,
+                    itemSelectionId:'data'
+                }, [SelectionManager]);
+                new pkg.WrappingLayout(calendarView, {spacing:2, lineInset:2, lineSpacing:3});
+                
+                timeListView = new View(this, {
+                    x:timeOnly ? 0 : 195,
+                    y:timeOnly ? 0 : 25,
+                    width:(timeOnly ? 175 : 49) + pkg.DomElementProxy.getScrollbarSize(),
+                    height:timeOnly ? 200 : 175,
+                    overflow:'autoy',
+                    visible:!dateOnly,
+                    maxSelected:1,
+                    itemSelectionId:'text'
+                }, [SelectionManager]);
+                new SpacedLayout(timeListView, {axis:'y', inset:1, spacing:3});
+                
+                this.setWidth(timeListView.visible ? timeListView.x + timeListView.width : calendarView.width);
+                
+                drawForDate(opt.current || new Date());
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            getPickedDate: () => pickedDate
         }),
         
         /** A modal panel that contains a Dialog.
@@ -19169,7 +19152,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                             nextMonth: 'Next month',
                             today: 'Today'
                         }
-                    }
+                    },
+                    locale:'en'
                 }
             },
             
@@ -19221,15 +19205,16 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     y:2,
                     align:'right',
                     alignOffset:2,
-                    height:19,
-                    inset:5,
-                    outset:14,
-                    roundedCorners:9,
+                    width:19,
+                    height:16,
+                    paddingLeft:0,
+                    paddingRight:0,
+                    roundedCorners:10,
                     activeColor:'#c00',
                     hoverColor:'#f33',
                     readyColor:'#f00',
                     textColor:'#fff',
-                    text:pkg.FontAwesome.makeTag(['times']),
+                    text:makeTag(['times']),
                     tooltip:'Close Dialog.',
                 });
             },
@@ -19500,7 +19485,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 });
                 
                 // Build Picker
-                const colorPickerView = new pkg.ColorPicker(content, {
+                const colorPickerView = new ColorPicker(content, {
                     x:ModalPanel.DEFAULT_PADDING_X,
                     y:ModalPanel.DEFAULT_PADDING_Y + 24,
                     width:337,
@@ -19522,8 +19507,6 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 opts = objectAssign({}, Dialog.DATE_PICKER_DEFAULTS, opts);
                 self.destroyContent();
                 
-                //content.sizeToChildren.setPaddingX(0);
-                
                 // Set the callback function to one wrapped to handle each button type.
                 self.setCallbackFunction(action => {
                     switch (action) {
@@ -19539,7 +19522,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 });
                 
                 // Build Picker
-                const datePickerView = new pkg.DatePicker(content, {
+                const datePickerView = new DatePicker(content, {
                     x:ModalPanel.DEFAULT_PADDING_X,
                     y:ModalPanel.DEFAULT_PADDING_Y + 24,
                     height:195,
@@ -19548,7 +19531,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                         dateOnly:opts.dateOnly || false,
                         timeOnly:opts.timeOnly || false,
                         locales:opts.locales,
-                        locale:'en'
+                        locale:opts.locale
                     }
                 });
                 self.show();
@@ -19595,7 +19578,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 // Confirm Button
                 attrs = opts.confirmAttrs || {};
                 defAttr(attrs, 'name', 'confirmBtn');
-                defAttr(attrs, 'name', opts.confirmTxt);
+                defAttr(attrs, 'text', opts.confirmTxt);
                 if (opts.activeColorConfirm != null) attrs.activeColor = opts.activeColorConfirm;
                 if (opts.hoverColorConfirm != null) attrs.hoverColor = opts.hoverColorConfirm;
                 if (opts.readyColorConfirm != null) attrs.readyColor = opts.readyColorConfirm;
@@ -19606,11 +19589,11 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 (opts.buttons || []).forEach(buttonAttrs => {self.makeButton(btnContainer, buttonAttrs);});
                 
                 new SizeToChildren(btnContainer, {axis:'y'});
-                new pkg.SpacedLayout(btnContainer, {spacing:4, collapseParent:true});
+                new SpacedLayout(btnContainer, {spacing:4, collapseParent:true});
                 
                 content.sizeToChildren.setPaddingY(HALF_DPY);
                 
-                const r = Dialog.DEFAULT_RADIUS,
+                const R = Dialog.DEFAULT_RADIUS,
                     bgY = btnContainer.y - HALF_DPY;
                 (new View(content, {
                     ignoreLayout:true,
@@ -19618,8 +19601,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     width:content.width,
                     height:content.height - bgY,
                     bgColor:'#eee',
-                    roundedBottomLeftCorner:r,
-                    roundedBottomRightCorner:r
+                    roundedBottomLeftCorner:R,
+                    roundedBottomRightCorner:R
                 })).sendToBack();
                 
                 if (opts.showClose === false) cancelBtn.focus();
@@ -22897,55 +22880,43 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         globalMouse = G.mouse,
         Draggable = pkg.Draggable,
         
-        defAttr = pkg.AccessorSupport.defAttr,
+        ANY_GROUP = '*',
         
         /*  @param {!Object} autoScroller
-            @param {string} dir - The direction to scroll.
-            @param {number} amt - The amount to scroll.
+            @param {!string} lessDir
+            @param {!string} moreDir
             @returns {undefined} */
-        doAutoScrollAdj = (autoScroller, dir, amt) => {
-            if (autoScroller['__isAuto' + dir]) {
-                autoScroller.getInnerDomElement()[dir === 'scrollUp' || dir === 'scrollDown' ? 'scrollTop' : 'scrollLeft'] += amt * autoScroller['__amount' + dir];
-                
-                autoScroller['__timerIdAuto' + dir] = setTimeout(() => {
-                    doAutoScrollAdj(autoScroller, dir, amt);
-                }, autoScroller.scrollFrequency);
-            }
-        },
-        
-        /*  @param {!Object} autoScroller
-            @param {number} percent - The percent of scroll acceleration to use.
-            @returns {number} */
-        calculateAmount = (autoScroller, percent) => Math.round(autoScroller.scrollAmount * (1 + autoScroller.scrollAcceleration * percent)),
-        
-        /*  @param {!Object} autoScroller
-            @returns {undefined} */
-        resetVScroll = autoScroller => {
-            autoScroller.__isAutoscrollUp = autoScroller.__isAutoscrollDown = false;
-            autoScroller.__timerIdAutoscrollUp = autoScroller.__timerIdAutoscrollDown = null;
+        resetScroll = (autoScroller, lessDir, moreDir) => {
+            [lessDir, moreDir].forEach(dir => {
+                autoScroller['__is' + dir] = false;
+                autoScroller['__tmrId' + dir] = null;
+            });
         },
         
         /*  @param {!Object} autoScroller
             @returns {undefined} */
-        resetHScroll = autoScroller => {
-            autoScroller.__isAutoscrollLeft = autoScroller.__isAutoscrollRight = false;
-            autoScroller.__timerIdAutoscrollLeft = autoScroller.__timerIdAutoscrollRight = null;
-        },
+        resetVScroll = autoScroller => {resetScroll(autoScroller, 'Up', 'Down');},
         
-        /* Adds drag group support to drag and drop related classes.
+        /*  @param {!Object} autoScroller
+            @returns {undefined} */
+        resetHScroll = autoScroller => {resetScroll(autoScroller, 'Left', 'Right');},
+        
+        /** Adds drag group support to drag and drop related classes.
             
             Private Attributes:
-                __dragGroups:object The keys are the set of drag groups this view
-                    supports. By default the special drag group of '*' which accepts
-                    all drag groups is defined.
-                __acceptAny:boolean The precalculated return value for the
-                    acceptAnyDragGroup method. */
+                __dgs:object The keys are the set of drag groups this 
+                    view supports. By default the special drag group of '*' 
+                    which accepts all drag groups is defined.
+                __any:boolean The precalculated return value for the
+                    acceptAnyDragGroup method.
+            
+            @class */
         DragGroupSupport = pkg.DragGroupSupport = new JSModule('DragGroupSupport', {
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides */
             initNode: function(parent, attrs) {
-                this.__dragGroups = {'*':true};
-                this.__acceptAny = true;
+                this.__dgs = {'*':true};
+                this.__any = true;
                 
                 this.callSuper(parent, attrs);
             },
@@ -22953,13 +22924,13 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             
             // Accessors ///////////////////////////////////////////////////////
             setDragGroups: function(v) {
-                const newDragGroups = this.__dragGroups = {};
+                const newDragGroups = this.__dgs = {};
                 for (const dragGroup in v) newDragGroups[dragGroup] = true;
-                this.__acceptAny = newDragGroups.hasOwnProperty('*');
+                this.__any = newDragGroups.hasOwnProperty(ANY_GROUP);
             },
             
             getDragGroups: function() {
-                return this.__dragGroups;
+                return this.__dgs;
             },
             
             
@@ -22969,8 +22940,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 @returns {undefined} */
             addDragGroup: function(dragGroup) {
                 if (dragGroup) {
-                    this.__dragGroups[dragGroup] = true;
-                    if (dragGroup === '*') this.__acceptAny = true;
+                    this.__dgs[dragGroup] = true;
+                    if (dragGroup === ANY_GROUP) this.__any = true;
                 }
             },
             
@@ -22979,31 +22950,36 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 @returns {undefined} */
             removeDragGroup: function(dragGroup) {
                 if (dragGroup) {
-                    delete this.__dragGroups[dragGroup];
-                    if (dragGroup === '*') this.__acceptAny = false;
+                    delete this.__dgs[dragGroup];
+                    if (dragGroup === ANY_GROUP) this.__any = false;
                 }
             },
             
-            /** Determines if this drop target will accept drops from any drag group.
-                @returns boolean: True if any drag group will be accepted, false otherwise. */
+            /** Determines if this drop target will accept drops from any 
+                drag group.
+                @returns boolean: True if any drag group will be accepted, 
+                    false otherwise. */
             acceptAnyDragGroup: function() {
-                return this.__acceptAny;
+                return this.__any;
             }
         });
     
-    /** Makes an myt.View support being a source for myt.Dropable instances. Makes
-        use of myt.Draggable for handling drag initiation but this view is not
-        actually draggable.
+    /** Makes an myt.View support being a source for myt.Dropable instances. 
+        Makes use of myt.Draggable for handling drag initiation but this view 
+        is not actually draggable.
         
         Attributes:
             dropParent:myt.View The view to make the myt.Dropable instances in.
                 Defaults to the myt.RootView that contains this drop source.
             dropClass:JS.Class The myt.Dropable class that gets created in the
                 default implementation of makeDropable.
-            dropClassAttrs:object The attrs to use when making the dropClass instance.
+            dropClassAttrs:object The attrs to use when making the dropClass 
+                instance.
             dropable:mytDropable (read only) The dropable that was most 
                 recently created. Once the dropable has been dropped this will
-                be set to null. */
+                be set to null.
+        
+        @class */
     pkg.DropSource = new JSModule('DropSource', {
         include: [Draggable],
         
@@ -23011,8 +22987,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides */
         initNode: function(parent, attrs) {
-            defAttr(attrs, 'distanceBeforeDrag', 2);
-            defAttr(attrs, 'dropParent', parent.getRoot());
+            this.defAttr(attrs, 'distanceBeforeDrag', 2);
+            if (attrs.dropParent == null) attrs.dropParent = parent.getRoot();
             
             this.callSuper(parent, attrs);
         },
@@ -23031,7 +23007,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             
             // Emulate mouse down on the dropable
             if (dropable) {
-                // Remember distance and set to zero so a drag will begin for sure.
+                // Remember distance and set to zero so a drag will begin 
+                // for sure.
                 const origDistance = dropable.distanceBeforeDrag;
                 dropable.distanceBeforeDrag = 0;
                 
@@ -23062,16 +23039,15 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             const dropClass = this.dropClass,
                 dropParent = this.dropParent;
             if (dropClass && dropParent) {
-                const pos = pkg.DomElementProxy.getPagePosition(this.getInnerDomElement(), dropParent.getInnerDomElement()),
-                attrs = Object.assign({}, this.dropClassAttrs);
-                attrs.x = pos.x || 0;
-                attrs.y = pos.y || 0;
-                return new dropClass(dropParent, attrs);
+                const pos = pkg.DomElementProxy.getPagePosition(this.getInnerDomElement(), dropParent.getInnerDomElement());
+                return new dropClass(dropParent, Object.assign({}, this.dropClassAttrs, {x:pos.x || 0, y:pos.y || 0}));
             }
         },
     });
     
-    /** Makes an myt.View support having myt.Dropable views dropped on it. */
+    /** Makes an myt.View support having myt.Dropable views dropped on it.
+        
+        @class */
     pkg.DropTarget = new JSModule('DropTarget', {
         include: [DragGroupSupport],
         
@@ -23098,7 +23074,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             of drag group. The default implementation returns true if the view
             is not disabled.
             @param dropable:myt.Dropable The dropable being dragged.
-            @returns boolean: True if the drop will be allowed, false otherwise. */
+            @returns boolean: True if the drop will be allowed, false 
+                otherwise. */
         willAcceptDrop: function(dropable) {
             // Components must be visible and not disabled to accept a drop.
             return !this.disabled && this.isVisible();
@@ -23118,12 +23095,13 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         /** Called by myt.GlobalDragManager when a dropable is dragged over this
             view and has a matching drag group.
-            @param dropable:myt.Dropable The dropable being dragged over this view.
+            @param dropable:myt.Dropable The dropable being dragged over 
+                this view.
             @returns {undefined} */
         notifyDragEnter: dropable => {},
         
-        /** Called by myt.GlobalDragManager when a dropable is dragged out of this
-            view and has a matching drag group.
+        /** Called by myt.GlobalDragManager when a dropable is dragged out of 
+            this view and has a matching drag group.
             @param dropable:myt.Dropable The dropable being dragged out of 
                 this view.
             @returns {undefined} */
@@ -23159,7 +23137,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             target. Gives this dropable a chance to reject a drop regardless
             of drag group. The default implementation returns true.
             @param dropTarget:myt.DropTarget The drop target dragged over.
-            @returns boolean: True if the drop will be allowed, false otherwise. */
+            @returns boolean: True if the drop will be allowed, false 
+                otherwise. */
         willPermitDrop: dropTarget => true,
         
         /** @overrides myt.Draggable */
@@ -23189,14 +23168,16 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             }
         },
         
-        /** Called by myt.GlobalDragManager when this view is dragged over a drop target.
+        /** Called by myt.GlobalDragManager when this view is dragged over a 
+            drop target.
             @param dropTarget:myt.DropTarget The target that was dragged over.
             @returns {undefined} */
         notifyDragEnter: function(dropTarget) {
             this.setDropTarget(dropTarget);
         },
         
-        /** Called by myt.GlobalDragManager when this view is dragged out of a drop target.
+        /** Called by myt.GlobalDragManager when this view is dragged out of a 
+            drop target.
             @param dropTarget:myt.DropTarget The target that was dragged out of.
             @returns {undefined} */
         notifyDragLeave: function(dropTarget) {
@@ -23204,8 +23185,9 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         },
         
         /** Called by myt.GlobalDragManager when this view is dropped.
-            @param dropTarget:myt.DropTarget The target that was dropped on. Will
-                be undefined if this dropable was dropped on no drop target.
+            @param dropTarget:myt.DropTarget The target that was dropped on. 
+                Will be undefined if this dropable was dropped on no 
+                drop target.
             @param isAbort:boolean Indicates if the drop was the result of an
                 abort or a normal drop.
             @returns {undefined} */
@@ -23229,30 +23211,31 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     /** Makes an myt.View auto scroll during drag and drop.
         
         Attributes:
-            scrollBorder:number The thickness of the auto scroll border. Defaults
-                to 40 pixels.
+            scrollBorder:number The thickness of the auto scroll border. 
+                Defaults to 40 pixels.
             scrollFrequency:number The time between autoscroll adjustments.
                 Defaults to 50 millis.
             scrollAmount:number The number of pixels to adjust by each time.
                 Defaults to 2 pixels.
-            scrollAcceleration:number The amount to increase scrolling by as the
-                mouse gets closer to the edge of the view. Setting this to 0 will
-                result in no acceleration. Defaults to 7.
+            scrollAcceleration:number The amount to increase scrolling by as 
+                the mouse gets closer to the edge of the view. Setting this to 
+                0 will result in no acceleration. Defaults to 7.
         
         Private Attributes:
-            __amountscrollUp:number
-            __amountscrollDown:number
-            __amountscrollLeft:number
-            __amountscrollRight:number
-            __isAutoscrollUp:boolean
-            __timerIdAutoscrollUp:number
-            __isAutoscrollDown:boolean
-            __timerIdAutoscrollDown:number
-            __isAutoscrollLeft:boolean
-            __timerIdAutoscrollLeft:number
-            __isAutoscrollRight:boolean
-            __timerIdAutoscrollRight:number
-    */
+            __amtUp:number
+            __amtDown:number
+            __amtLeft:number
+            __amtRight:number
+            __isUp:boolean
+            __tmrIdUp:number
+            __isDown:boolean
+            __tmrIdDown:number
+            __isLeft:boolean
+            __tmrIdLeft:number
+            __isRight:boolean
+            __tmrIdRight:number
+        
+        @class */
     pkg.AutoScroller = new JSModule('AutoScroller', {
         include: [DragGroupSupport],
         
@@ -23265,7 +23248,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             this.scrollAmount = 2;
             this.scrollAcceleration = 7;
             
-            defAttr(attrs, 'overflow', 'auto');
+            this.defAttr(attrs, 'overflow', 'auto');
             
             this.callSuper(parent, attrs);
             
@@ -23281,7 +23264,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         
         // Accessors ///////////////////////////////////////////////////////////
-        setScrollBorder: function(v) {this.scrollBorder = v;},
+        setScrollBorder: function(v) {this.scrollBorder = Math.max(1, v);},
         setScrollFrequency: function(v) {this.scrollFrequency = v;},
         setScrollAmount: function(v) {this.scrollAmount = v;},
         setScrollAcceleration: function(v) {this.scrollAcceleration = v;},
@@ -23295,7 +23278,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         notifyDragStart: function(dropable) {
             const de = this.getInnerDomElement();
             if (de.scrollHeight > de.clientHeight || de.scrollWidth > de.clientWidth) {
-                this.attachToDom(globalMouse, '__handleMouseMove', 'mousemove', true);
+                this.attachToDom(globalMouse, '__hndlMove', 'mousemove', true);
             }
         },
         
@@ -23304,16 +23287,17 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             @param {!Object} dropable - The myt.Dropable no longer being dragged.
             @returns {undefined} */
         notifyDragStop: function(dropable) {
-            this.detachFromDom(globalMouse, '__handleMouseMove', 'mousemove', true);
+            this.detachFromDom(globalMouse, '__hndlMove', 'mousemove', true);
             
             resetVScroll(this);
             resetHScroll(this);
         },
         
-        /** @private
+        /** Handles global mouse movement.
+            @private
             @param {!Object} event
             @returns {undefined} */
-        __handleMouseMove: function(event) {
+        __hndlMove: function(event) {
             const self = this,
                 mousePos = event.value;
             let mouseX = mousePos.pageX, 
@@ -23321,31 +23305,38 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             
             if (self.containsPoint(mouseX, mouseY)) {
                 const pos = self.getPagePosition(), 
-                    scrollBorder = self.scrollBorder;
+                    scrollBorder = self.scrollBorder,
+                    calculateAmount = percent => Math.round(self.scrollAmount * (1 + self.scrollAcceleration * percent)),
+                    doAutoScrollAdj = (dir, amt) => {
+                        if (self['__is' + dir]) {
+                            self.getInnerDomElement()['scroll' + (dir === 'Up' || dir === 'Down' ? 'Top' : 'Left')] += amt * self['__amt' + dir];
+                            self['__tmrId' + dir] = setTimeout(() => {doAutoScrollAdj(dir, amt);}, self.scrollFrequency);
+                        }
+                    };
                 
                 mouseX -= pos.x;
                 mouseY -= pos.y;
                 
                 if (mouseY < scrollBorder) {
-                    self.__isAutoscrollUp = true;
-                    self.__amountscrollUp = calculateAmount(self, (scrollBorder - mouseY) / scrollBorder);
-                    if (!self.__timerIdAutoscrollUp) doAutoScrollAdj(self, 'scrollUp', -1);
+                    self.__isUp = true;
+                    self.__amtUp = calculateAmount(1 - mouseY / scrollBorder);
+                    if (!self.__tmrIdUp) doAutoScrollAdj('Up', -1);
                 } else if (self.height - mouseY < scrollBorder) {
-                    self.__isAutoscrollDown = true;
-                    self.__amountscrollDown = calculateAmount(self, (scrollBorder - (self.height - mouseY)) / scrollBorder);
-                    if (!self.__timerIdAutoscrollDown) doAutoScrollAdj(self, 'scrollDown', 1);
+                    self.__isDown = true;
+                    self.__amtDown = calculateAmount(1 - (self.height - mouseY) / scrollBorder);
+                    if (!self.__tmrIdDown) doAutoScrollAdj('Down', 1);
                 } else {
                     resetVScroll(self);
                 }
                 
                 if (mouseX < scrollBorder) {
-                    self.__isAutoscrollLeft = true;
-                    self.__amountscrollLeft = calculateAmount(self, (scrollBorder - mouseX) / scrollBorder);
-                    if (!self.__timerIdAutoscrollLeft) doAutoScrollAdj(self, 'scrollLeft', -1);
+                    self.__isLeft = true;
+                    self.__amtLeft = calculateAmount(1 - mouseX / scrollBorder);
+                    if (!self.__tmrIdLeft) doAutoScrollAdj('Left', -1);
                 } else if (self.width - mouseX < scrollBorder) {
-                    self.__isAutoscrollRight = true;
-                    self.__amountscrollRight = calculateAmount(self, (scrollBorder - (self.width - mouseX)) / scrollBorder);
-                    if (!self.__timerIdAutoscrollRight) doAutoScrollAdj(self, 'scrollRight', 1);
+                    self.__isRight = true;
+                    self.__amtRight = calculateAmount(1 - (self.width - mouseX) / scrollBorder);
+                    if (!self.__tmrIdRight) doAutoScrollAdj('Right', 1);
                 } else {
                     resetHScroll(self);
                 }

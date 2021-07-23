@@ -15,12 +15,6 @@
             
             By default myt.Button instances are focusable.
             
-            Events:
-                None
-            
-            Attributes:
-                None
-            
             Private Attributes:
                 __restoreCursor:string The cursor to restore to when the button is
                     no longer disabled.

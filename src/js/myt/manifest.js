@@ -63,7 +63,6 @@ JS.Packages(function() {
     
     // Component
     const MYT_COMPONENT_ROOT = MYT_ROOT + 'component/';
-
     file(MYT_COMPONENT_ROOT + 'Annulus.js'         ).provides('myt.Annulus').requires('myt.View');
     file(MYT_COMPONENT_ROOT + 'BAG.js'             ).provides('myt.BAG','myt.BAGMembership').requires('myt.Node');
     file(MYT_COMPONENT_ROOT + 'BaseViews.js'       ).provides('myt.FlexBox','myt.Frame','myt.Markup','myt.Text','myt.Image')
@@ -77,6 +76,8 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'Canvas.js'          ).provides('myt.Canvas' ).requires('myt.View','myt.Path','myt.Color');
     file(MYT_COMPONENT_ROOT + 'Checkbox.js'        ).provides('myt.Checkbox').requires('myt.SimpleButtonStyle','myt.ValueComponent');
     file(MYT_COMPONENT_ROOT + 'Color.js'           ).provides('myt.Color').requires('myt');
+    file(MYT_COMPONENT_ROOT + 'Dialog.js'          ).provides('myt.Dialog','myt.ColorPicker','myt.DatePicker')
+        .requires('myt.ModalPanel','myt.Spinner','myt.TextButton','myt.Color','myt.Text','myt.FontAwesome', 'myt.Draggable','myt.SelectionManager');
     file(MYT_COMPONENT_ROOT + 'Dimmer.js'          ).provides('myt.Dimmer').requires('myt.View');
     file(MYT_COMPONENT_ROOT + 'Divider.js'         ).provides('myt.HorizontalDivider','myt.VerticalDivider').requires('myt.SimpleButton','myt.BoundedValueComponent','myt.Draggable');
     file(MYT_COMPONENT_ROOT + 'FloatingPanel.js'   ).provides('myt.FloatingPanelAnchor','myt.FloatingPanel').requires('myt.RootView','myt.global.mouse','myt.global.focus');
@@ -130,11 +131,6 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'DragAndDrop.js'     ).provides('myt.DragGroupSupport','myt.Dropable','myt.DropTarget','myt.DropSource','myt.AutoScroller')
         .requires('myt.View','myt.Draggable','myt.global.mouse','myt.global.dragManager');
     
-    // Component : Dialog
-    file(MYT_COMPONENT_ROOT + 'dialog/ColorPicker.js').provides('myt.ColorPicker').requires('myt.Color','myt.Text','myt.FontAwesome', 'myt.Draggable');
-    file(MYT_COMPONENT_ROOT + 'dialog/DatePicker.js').provides('myt.DatePicker').requires('myt.Text','myt.FontAwesome','myt.SelectionManager');
-    file(MYT_COMPONENT_ROOT + 'dialog/Dialog.js').provides('myt.Dialog').requires('myt.ColorPicker','myt.DatePicker','myt.ModalPanel','myt.Spinner','myt.SimpleButton');
-    
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
         'myt.Cookie','myt.LocalStorage',
@@ -149,10 +145,8 @@ JS.Packages(function() {
         'myt.ListViewAnchor',
         'myt.Radio','myt.TextTabSlider','myt.Tab',
         'myt.ImageUploader','myt.Dialog',
-        'myt.global.validators',
-        'myt.global.valueProcessors','myt.UseOtherFieldIfEmptyValueProcessor',
-        'myt.FormElement','myt.FormInputSelect','myt.FormRadioGroup','myt.FormCheckbox',
-        'myt.FormInputText','myt.FormComboBox','myt.FormInputTextArea','myt.FormEditableText',
+        'myt.global.validators','myt.global.valueProcessors','myt.UseOtherFieldIfEmptyValueProcessor',
+        'myt.FormElement','myt.FormInputSelect','myt.FormRadioGroup','myt.FormCheckbox','myt.FormInputText','myt.FormComboBox','myt.FormInputTextArea','myt.FormEditableText',
         'myt.Slider','myt.RangeSlider',
         'myt.HorizontalDivider','myt.VerticalDivider',
         'myt.Grid','myt.SimpleGridColumnHeader',
