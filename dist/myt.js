@@ -2553,7 +2553,7 @@ new JS.Singleton('GlobalError', {
                 descendants.
                 @param {!Object} elem - A domElement
                 @returns {number} - An int */
-            getHighestZIndex: (elem) => {
+            getHighestZIndex: elem => {
                 // See https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Understanding_z_index/The_stacking_context
                 const style = GLOBAL.getComputedStyle(elem);
                 let zIdx = style.zIndex;
@@ -2605,15 +2605,15 @@ new JS.Singleton('GlobalError', {
                 return {x:x, y:y};
             },
             
-            /** Gets the x and y position of the dom element relative to the page
-                with support for transforms.
+            /** Gets the x and y position of the dom element relative to the 
+                page with support for transforms.
                 @param {!Object} elem - The domElement to get the position for.
                 @returns {?Object} - An object with 'x' and 'y' keys or null 
                     if an error has occurred. */
-            getTruePagePosition: (elem) => {
+            getTruePagePosition: elem => {
                 if (!elem) return null;
-                const pos = $(elem).offset();
-                return {x:pos.left, y:pos.top};
+                const pos = elem.getBoundingClientRect();
+                return {x:pos.left + GLOBAL.scrollX, y:pos.top + GLOBAL.scrollY};
             },
             
             /** Generates a dom event on a dom element. Adapted from:
@@ -7882,13 +7882,11 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
         removeTransform = (view, type) => {
             const ods = view.getOuterDomStyle(),
                 value = ods.transform;
-            let parts,
-                i;
             
             if (!value || value.length === 0) return '';
             
-            parts = value.split(' ');
-            i = parts.length;
+            const parts = value.split(' ');
+            let i = parts.length;
             while (i) {
                 if (parts[--i].indexOf(type) === 0) {
                     parts.splice(i, 1);
@@ -7957,12 +7955,10 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
         },
         
         setScale: function(v) {
-            const doUpdateX = this.scaleX !== v;
+            const doUpdateX = this.scaleX !== v,
+                doUpdateY = this.scaleY !== v;
             if (doUpdateX) applyScale(this, 'scaleX', this.scaleX = v);
-            
-            const doUpdateY = this.scaleY !== v;
             if (doUpdateY) applyScale(this, 'scaleY', this.scaleY = v);
-            
             if (this.inited) {
                 if (doUpdateX || doUpdateY) this.__updateBounds(this.width, this.height);
                 if (doUpdateX) this.fireEvent('scaleX', v);
@@ -8019,11 +8015,9 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
         __updateBounds: function(w, h) {
             const r = this.rotation,
                 sx = this.scaleX,
-                sy = this.scaleY;
-            let notScaled = false;
-            if ((sx === undefined || sx === 1) && (sy === undefined || sy === 1)) notScaled = true;
-            
-            if (notScaled && (r === undefined || r === 0 || r === 180)) {
+                sy = this.scaleY,
+                notScaled = (sx == null || sx === 1) && (sy == null || sy === 1);
+            if (notScaled && (r == null || r === 0 || r === 180)) {
                 // Do nothing
             } else if (notScaled && (r === 90 || r === 270)) {
                 w = this.height;
@@ -18143,6 +18137,15 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 makeColorFromHexString: value => {
                     if (value) {
                         if (!value.startsWith('#')) value = '#' + value;
+                        
+                        // Convert #abc colors to #aabbcc
+                        if (value.length === 4) {
+                            const red = value.substring(1,2),
+                                green = value.substring(2,3),
+                                blue = value.substring(3,4);
+                            value = '#' + red + red + green + green + blue + blue;
+                        }
+                        
                         return makeColorFromNumber(parseInt(value.substring(1), 16));
                     } else {
                         return null;
@@ -18358,7 +18361,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             instance.setHtml(FontAwesome.makeTag(props));
         };
     
-    pkg.loadCSSFonts(['//use.fontawesome.com/releases/v5.0.8/css/all.css']);
+    pkg.loadCSSFonts(['https://use.fontawesome.com/releases/v5.0.8/css/all.css']);
     
     /** An adapter for FontAwesome.
         

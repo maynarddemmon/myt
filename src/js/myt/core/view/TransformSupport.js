@@ -31,13 +31,11 @@
         removeTransform = (view, type) => {
             const ods = view.getOuterDomStyle(),
                 value = ods.transform;
-            let parts,
-                i;
             
             if (!value || value.length === 0) return '';
             
-            parts = value.split(' ');
-            i = parts.length;
+            const parts = value.split(' ');
+            let i = parts.length;
             while (i) {
                 if (parts[--i].indexOf(type) === 0) {
                     parts.splice(i, 1);
@@ -106,12 +104,10 @@
         },
         
         setScale: function(v) {
-            const doUpdateX = this.scaleX !== v;
+            const doUpdateX = this.scaleX !== v,
+                doUpdateY = this.scaleY !== v;
             if (doUpdateX) applyScale(this, 'scaleX', this.scaleX = v);
-            
-            const doUpdateY = this.scaleY !== v;
             if (doUpdateY) applyScale(this, 'scaleY', this.scaleY = v);
-            
             if (this.inited) {
                 if (doUpdateX || doUpdateY) this.__updateBounds(this.width, this.height);
                 if (doUpdateX) this.fireEvent('scaleX', v);
@@ -168,11 +164,9 @@
         __updateBounds: function(w, h) {
             const r = this.rotation,
                 sx = this.scaleX,
-                sy = this.scaleY;
-            let notScaled = false;
-            if ((sx === undefined || sx === 1) && (sy === undefined || sy === 1)) notScaled = true;
-            
-            if (notScaled && (r === undefined || r === 0 || r === 180)) {
+                sy = this.scaleY,
+                notScaled = (sx == null || sx === 1) && (sy == null || sy === 1);
+            if (notScaled && (r == null || r === 0 || r === 180)) {
                 // Do nothing
             } else if (notScaled && (r === 90 || r === 270)) {
                 w = this.height;

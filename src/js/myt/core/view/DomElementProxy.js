@@ -91,7 +91,7 @@
                 descendants.
                 @param {!Object} elem - A domElement
                 @returns {number} - An int */
-            getHighestZIndex: (elem) => {
+            getHighestZIndex: elem => {
                 // See https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Understanding_z_index/The_stacking_context
                 const style = GLOBAL.getComputedStyle(elem);
                 let zIdx = style.zIndex;
@@ -143,15 +143,15 @@
                 return {x:x, y:y};
             },
             
-            /** Gets the x and y position of the dom element relative to the page
-                with support for transforms.
+            /** Gets the x and y position of the dom element relative to the 
+                page with support for transforms.
                 @param {!Object} elem - The domElement to get the position for.
                 @returns {?Object} - An object with 'x' and 'y' keys or null 
                     if an error has occurred. */
-            getTruePagePosition: (elem) => {
+            getTruePagePosition: elem => {
                 if (!elem) return null;
-                const pos = $(elem).offset();
-                return {x:pos.left, y:pos.top};
+                const pos = elem.getBoundingClientRect();
+                return {x:pos.left + GLOBAL.scrollX, y:pos.top + GLOBAL.scrollY};
             },
             
             /** Generates a dom event on a dom element. Adapted from:

@@ -18,7 +18,7 @@
             instance.setHtml(FontAwesome.makeTag(props));
         };
     
-    pkg.loadCSSFonts(['//use.fontawesome.com/releases/v5.0.8/css/all.css']);
+    pkg.loadCSSFonts(['https://use.fontawesome.com/releases/v5.0.8/css/all.css']);
     
     /** An adapter for FontAwesome.
         

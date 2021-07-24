@@ -177,3 +177,67 @@ test("getZIndexRelativeToAncestor", function() {
     
     v.destroy();
 });
+
+test("getPagePosition", function() {
+    const View = myt.View,
+        rootView = new View(null, {}, [myt.RootView]);
+        sv1 = new View(rootView, {x:100, y:50, width:100, height:100}),
+        sv2 = new View(rootView, {x:200, y:150, width:100, height:100}),
+        sv2sv1 = new View(sv2, {x:10, y:20, width:100, height:100});
+        sv2sv1sv1 = new View(sv2sv1, {x:5, y:3, width:100, height:100});
+    
+    let pos = rootView.getPagePosition();
+    ok(pos.x === 0, "Root view should have an x of 0.");
+    ok(pos.y === 0, "Root view should have a y of 0.");
+    
+    pos = sv1.getPagePosition();
+    ok(pos.x === 100, "Subview at x=100 should have an x-position of 100.");
+    ok(pos.y === 50, "Subview at y=50 should have a y-position of 50.");
+    
+    pos = sv2.getPagePosition();
+    ok(pos.x === 200, "Subview should have an x-position of 200.");
+    ok(pos.y === 150, "Subview should have a y-position of 150.");
+    
+    pos = sv2sv1.getPagePosition();
+    ok(pos.x === 210, "Subview should have an x-position of 200+10=210.");
+    ok(pos.y === 170, "Subview should have a y-position of 150+20=170.");
+    
+    pos = sv2sv1sv1.getPagePosition();
+    ok(pos.x === 215, "Subview should have an x-position of 200+10+5=215.");
+    ok(pos.y === 173, "Subview should have a y-position of 150+20+3=173.");
+    
+    // Relative
+    pos = myt.DomElementProxy.getPagePosition(sv2sv1sv1.getInnerDomElement(), sv2.getInnerDomElement());
+    ok(pos.x === 15, "Subview should have an x-position of 10+5=15.");
+    ok(pos.y === 23, "Subview should have a y-position of 20+3=23.");
+});
+
+test("getTruePagePosition", function() {
+    const View = myt.View,
+        TransformSupport = myt.TransformSupport,
+        rootView = new View(null, {}, [myt.RootView]);
+        sv1 = new View(rootView, {x:100, y:50, width:100, height:100}),
+        sv2 = new View(rootView, {x:100, y:50, width:100, height:100, transformOrigin:'top left', scale:2}, [TransformSupport]),
+        sv2sv1 = new View(sv2, {x:10, y:20, width:100, height:100, transformOrigin:'top left', scale:3}, [TransformSupport]);
+        sv2sv1sv1 = new View(sv2sv1, {x:5, y:3, width:100, height:100, transformOrigin:'top left'}, [TransformSupport]);
+    
+    let pos = rootView.getTruePagePosition();
+    ok(pos.x === 0, "Root view should have an x of 0.");
+    ok(pos.y === 0, "Root view should have a y of 0.");
+    
+    pos = sv1.getTruePagePosition();
+    ok(pos.x === 100, "Subview at x=100 should have an x-position of 100.");
+    ok(pos.y === 50, "Subview at y=50 should have a y-position of 50.");
+    
+    pos = sv2.getTruePagePosition();
+    ok(pos.x === 100, "Transformable subview at x=100 should have an x-position of 100.");
+    ok(pos.y === 50, "Transformable subview at y=50 should have a y-position of 50.");
+    
+    pos = sv2sv1.getTruePagePosition();
+    ok(pos.x === 100+2*10, "Subview of scaled subview at x=100 should have an x-position of 100+2*10=120.");
+    ok(pos.y === 50+2*20, "Subview of scaled subview at y=50 should have a y-position of 50+2*20=90.");
+    
+    pos = sv2sv1sv1.getTruePagePosition();
+    ok(pos.x === 100+2*10+6*5, "Subview of scaled subview at x=100 should have an x-position of 100+2*10+6*5=150.");
+    ok(pos.y === 50+2*20+6*3, "Subview of scaled subview at y=50 should have a y-position of 50+2*20+6*3=108.");
+});

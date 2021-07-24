@@ -135,6 +135,15 @@
                 makeColorFromHexString: value => {
                     if (value) {
                         if (!value.startsWith('#')) value = '#' + value;
+                        
+                        // Convert #abc colors to #aabbcc
+                        if (value.length === 4) {
+                            const red = value.substring(1,2),
+                                green = value.substring(2,3),
+                                blue = value.substring(3,4);
+                            value = '#' + red + red + green + green + blue + blue;
+                        }
+                        
                         return makeColorFromNumber(parseInt(value.substring(1), 16));
                     } else {
                         return null;
