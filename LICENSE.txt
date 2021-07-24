@@ -1,5 +1,5 @@
 Myt: A simple javascript UI framework
-http://github.com/maynarddemmon/myt
+https://github.com/maynarddemmon/myt
 Copyright (c) 2012-2021 Maynard Demmon and contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -17,16 +17,15 @@ public domain sources and has been noted as such in the source.
 
 Parts of the Software incorporates code from the following open-source projects:
 * MIT License
-*   JS.Class, Copyright (c) 2007-2012 James Coglan and contributors 
-*   parseUri 1.2.2, Copyright (c) Steven Levithan <stevenlevithan.com>
-*   k-d Tree JavaScript - v1.0, Copyright (c) Mircea Pricop <pricop@ubilabs.net>,
-*                                             Martin Kleppe <kleppe@ubilabs.net>,
-*                                             Ubilabs http://ubilabs.net
+*   JS.Class,                    Copyright (c) 2007-2012 James Coglan and contributors 
+*   parseUri 1.2.2,              Copyright (c) Steven Levithan <stevenlevithan.com>
 *   jQuery Cookie Plugin v1.3.1, Copyright (c) 2013 Klaus Hartl (MIT License)
-*   date.format Date:03/10/15, Copyright (c) 2005 Jacob Wright https://github.com/jacwright/date.format
-*
+*   date.format Date:03/10/15,   Copyright (c) 2005 Jacob Wright https://github.com/jacwright/date.format
+*   k-d Tree JavaScript - v1.0,  Copyright (c) Mircea Pricop <pricop@ubilabs.net>,
+*                                              Martin Kleppe <kleppe@ubilabs.net>,
+*                                              Ubilabs http://ubilabs.net
 * BSD-3-Clause
-*   Font Face Observer v2.1.0, Copyright (c) 2014 Bram Stein https://github.com/bramstein/fontfaceobserver
+*   Font Face Observer v2.1.0,   Copyright (c) 2014 Bram Stein https://github.com/bramstein/fontfaceobserver
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
