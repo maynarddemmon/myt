@@ -1,5 +1,7 @@
 ((pkg) => {
     const DomElementProxy = pkg.DomElementProxy,
+    
+        rectContainsPoint = pkg.Geometry.rectContainsPoint,
         
         /*  Preserves focus and scroll position during dom updates. Focus can 
             get lost in webkit when an element is removed from the dom.
@@ -97,14 +99,14 @@
         
         isPointVisible = (view, x, y) => {
             const ode = view.getOuterDomElement();
-            if (pkg.Geometry.rectContainsPoint(x, y, 0, 0, ode.offsetWidth * view.__effectiveScaleX, ode.offsetHeight * view.__effectiveScaleY)) {
+            if (rectContainsPoint(x, y, 0, 0, ode.offsetWidth * view.__effectiveScaleX, ode.offsetHeight * view.__effectiveScaleY)) {
                 let parent;
                 if (parent = view.parent) {
-                    const pOde = parent.getOuterDomElement();
+                    const pIde = parent.getInnerDomElement();
                     return isPointVisible(
                         parent, 
-                        x + (ode.offsetLeft - pOde.scrollLeft) * parent.__effectiveScaleX, 
-                        y + (ode.offsetTop - pOde.scrollTop) * parent.__effectiveScaleY
+                        x + (ode.offsetLeft - pIde.scrollLeft) * parent.__effectiveScaleX, 
+                        y + (ode.offsetTop - pIde.scrollTop) * parent.__effectiveScaleY
                     );
                 }
                 return true;
@@ -1167,7 +1169,7 @@
             if (!outerElem) return false;
             
             const pos = DomElementProxy.getPagePosition(outerElem, referenceFrameDomElem);
-            return pkg.Geometry.rectContainsPoint(locX, locY, pos.x, pos.y, this.width, this.height);
+            return rectContainsPoint(locX, locY, pos.x, pos.y, this.width, this.height);
         },
         
         /** Checks if the provided location is visible on this view and is not

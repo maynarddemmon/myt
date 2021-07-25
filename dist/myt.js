@@ -6437,6 +6437,8 @@ myt.Destructible = new JS.Module('Destructible', {
 
 ((pkg) => {
     const DomElementProxy = pkg.DomElementProxy,
+    
+        rectContainsPoint = pkg.Geometry.rectContainsPoint,
         
         /*  Preserves focus and scroll position during dom updates. Focus can 
             get lost in webkit when an element is removed from the dom.
@@ -6534,14 +6536,14 @@ myt.Destructible = new JS.Module('Destructible', {
         
         isPointVisible = (view, x, y) => {
             const ode = view.getOuterDomElement();
-            if (pkg.Geometry.rectContainsPoint(x, y, 0, 0, ode.offsetWidth * view.__effectiveScaleX, ode.offsetHeight * view.__effectiveScaleY)) {
+            if (rectContainsPoint(x, y, 0, 0, ode.offsetWidth * view.__effectiveScaleX, ode.offsetHeight * view.__effectiveScaleY)) {
                 let parent;
                 if (parent = view.parent) {
-                    const pOde = parent.getOuterDomElement();
+                    const pIde = parent.getInnerDomElement();
                     return isPointVisible(
                         parent, 
-                        x + (ode.offsetLeft - pOde.scrollLeft) * parent.__effectiveScaleX, 
-                        y + (ode.offsetTop - pOde.scrollTop) * parent.__effectiveScaleY
+                        x + (ode.offsetLeft - pIde.scrollLeft) * parent.__effectiveScaleX, 
+                        y + (ode.offsetTop - pIde.scrollTop) * parent.__effectiveScaleY
                     );
                 }
                 return true;
@@ -7604,7 +7606,7 @@ myt.Destructible = new JS.Module('Destructible', {
             if (!outerElem) return false;
             
             const pos = DomElementProxy.getPagePosition(outerElem, referenceFrameDomElem);
-            return pkg.Geometry.rectContainsPoint(locX, locY, pos.x, pos.y, this.width, this.height);
+            return rectContainsPoint(locX, locY, pos.x, pos.y, this.width, this.height);
         },
         
         /** Checks if the provided location is visible on this view and is not
@@ -10302,7 +10304,7 @@ new JS.Singleton('GlobalMouse', {
 
 
 ((pkg) => {
-    let globalDragManager,
+    let fireGlobalDragManagerEvent,
         
         /* The view currently being dragged. */
         dragView,
@@ -10325,7 +10327,7 @@ new JS.Singleton('GlobalMouse', {
                 if (existingOverView) {
                     existingOverView.notifyDragLeave(dragView);
                     if (!dragView.destroyed) dragView.notifyDragLeave(existingOverView);
-                    globalDragManager.fireEvent('dragLeave', existingOverView);
+                    fireGlobalDragManagerEvent('dragLeave', existingOverView);
                 }
                 
                 overView = v;
@@ -10333,21 +10335,20 @@ new JS.Singleton('GlobalMouse', {
                 if (v) {
                     v.notifyDragEnter(dragView);
                     if (!dragView.destroyed) dragView.notifyDragEnter(v);
-                    globalDragManager.fireEvent('dragEnter', existingOverView);
+                    fireGlobalDragManagerEvent('dragEnter', existingOverView);
                 }
             }
         },
         
         setDragView = v => {
-            let existingDragView = dragView,
-                funcName, 
-                eventName,
-                targets,
-                i;
+            let existingDragView = dragView;
             if (existingDragView !== v) {
                 dragView = v;
                 
-                if (!!v) {
+                let funcName, 
+                    eventName,
+                    func = target => {target[funcName](existingDragView);};
+                if (v) {
                     existingDragView = v;
                     funcName = 'notifyDragStart';
                     eventName = 'startDrag';
@@ -10355,16 +10356,9 @@ new JS.Singleton('GlobalMouse', {
                     funcName = 'notifyDragStop';
                     eventName = 'stopDrag';
                 }
-                
-                targets = filterList(existingDragView, dropTargets);
-                i = targets.length;
-                while (i) targets[--i][funcName](existingDragView);
-                
-                targets = filterList(existingDragView, autoScrollers);
-                i = targets.length;
-                while (i) targets[--i][funcName](existingDragView);
-                
-                globalDragManager.fireEvent(eventName, v);
+                filterList(existingDragView, dropTargets).forEach(func);
+                filterList(existingDragView, autoScrollers).forEach(func);
+                fireGlobalDragManagerEvent(eventName, v);
             }
         },
         
@@ -10416,15 +10410,15 @@ new JS.Singleton('GlobalMouse', {
                 an array containing the dropable at index 0 and the drop target
                 at index 1.
         
-        @class
-    */
+        @class */
     new JS.Singleton('GlobalDragManager', {
         include: [pkg.Observable],
         
         
         // Constructor /////////////////////////////////////////////////////////
         initialize: function() {
-            pkg.global.register('dragManager', globalDragManager = this);
+            pkg.global.register('dragManager', this);
+            fireGlobalDragManagerEvent = this.fireEvent.bind(this);
         },
         
         
@@ -10481,8 +10475,10 @@ new JS.Singleton('GlobalMouse', {
         },
         
         /** Called by a myt.Dropable when a drag stops.
-            @param {!Object} event -The mouse event that triggered the stop drag.
-            @param {!Object} dropable - The myt.Dropable that stopped being dragged.
+            @param {!Object} event -The mouse event that triggered the 
+                stop drag.
+            @param {!Object} dropable - The myt.Dropable that stopped 
+                being dragged.
             @param {boolean} isAbort
             @returns {undefined} */
         stopDrag: (event, dropable, isAbort) => {
@@ -10492,7 +10488,7 @@ new JS.Singleton('GlobalMouse', {
             setOverView();
             setDragView();
             
-            if (overView && !isAbort) globalDragManager.fireEvent('drop', [dropable, overView]);
+            if (overView && !isAbort) fireGlobalDragManagerEvent('drop', [dropable, overView]);
         },
         
         /** Called by a myt.Dropable during dragging.

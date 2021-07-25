@@ -1,5 +1,5 @@
 ((pkg) => {
-    let globalDragManager,
+    let fireGlobalDragManagerEvent,
         
         /* The view currently being dragged. */
         dragView,
@@ -22,7 +22,7 @@
                 if (existingOverView) {
                     existingOverView.notifyDragLeave(dragView);
                     if (!dragView.destroyed) dragView.notifyDragLeave(existingOverView);
-                    globalDragManager.fireEvent('dragLeave', existingOverView);
+                    fireGlobalDragManagerEvent('dragLeave', existingOverView);
                 }
                 
                 overView = v;
@@ -30,21 +30,20 @@
                 if (v) {
                     v.notifyDragEnter(dragView);
                     if (!dragView.destroyed) dragView.notifyDragEnter(v);
-                    globalDragManager.fireEvent('dragEnter', existingOverView);
+                    fireGlobalDragManagerEvent('dragEnter', existingOverView);
                 }
             }
         },
         
         setDragView = v => {
-            let existingDragView = dragView,
-                funcName, 
-                eventName,
-                targets,
-                i;
+            let existingDragView = dragView;
             if (existingDragView !== v) {
                 dragView = v;
                 
-                if (!!v) {
+                let funcName, 
+                    eventName,
+                    func = target => {target[funcName](existingDragView);};
+                if (v) {
                     existingDragView = v;
                     funcName = 'notifyDragStart';
                     eventName = 'startDrag';
@@ -52,16 +51,9 @@
                     funcName = 'notifyDragStop';
                     eventName = 'stopDrag';
                 }
-                
-                targets = filterList(existingDragView, dropTargets);
-                i = targets.length;
-                while (i) targets[--i][funcName](existingDragView);
-                
-                targets = filterList(existingDragView, autoScrollers);
-                i = targets.length;
-                while (i) targets[--i][funcName](existingDragView);
-                
-                globalDragManager.fireEvent(eventName, v);
+                filterList(existingDragView, dropTargets).forEach(func);
+                filterList(existingDragView, autoScrollers).forEach(func);
+                fireGlobalDragManagerEvent(eventName, v);
             }
         },
         
@@ -113,15 +105,15 @@
                 an array containing the dropable at index 0 and the drop target
                 at index 1.
         
-        @class
-    */
+        @class */
     new JS.Singleton('GlobalDragManager', {
         include: [pkg.Observable],
         
         
         // Constructor /////////////////////////////////////////////////////////
         initialize: function() {
-            pkg.global.register('dragManager', globalDragManager = this);
+            pkg.global.register('dragManager', this);
+            fireGlobalDragManagerEvent = this.fireEvent.bind(this);
         },
         
         
@@ -178,8 +170,10 @@
         },
         
         /** Called by a myt.Dropable when a drag stops.
-            @param {!Object} event -The mouse event that triggered the stop drag.
-            @param {!Object} dropable - The myt.Dropable that stopped being dragged.
+            @param {!Object} event -The mouse event that triggered the 
+                stop drag.
+            @param {!Object} dropable - The myt.Dropable that stopped 
+                being dragged.
             @param {boolean} isAbort
             @returns {undefined} */
         stopDrag: (event, dropable, isAbort) => {
@@ -189,7 +183,7 @@
             setOverView();
             setDragView();
             
-            if (overView && !isAbort) globalDragManager.fireEvent('drop', [dropable, overView]);
+            if (overView && !isAbort) fireGlobalDragManagerEvent('drop', [dropable, overView]);
         },
         
         /** Called by a myt.Dropable during dragging.
