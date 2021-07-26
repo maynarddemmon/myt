@@ -9,10 +9,12 @@
     JS.require('myt.all', function() {this.init();});
     
     function init() {
+        const TextButton = myt.TextButton;
+        
         myt.Layout.incrementGlobalLock();
         
         var rootView = new myt.View(null, {
-            bgColor:'#eeeeee', id:'rootForm'
+            bgColor:'#cccccc', id:'rootForm'
         }, [myt.SizeToWindowWidth, myt.RootForm, {
             doValidSubmit: function(value) {
                 console.log("valid submit", value);
@@ -23,10 +25,7 @@
             },
         }]);
         
-        new myt.SimpleIconTextButton(rootView, {
-            height:25, width:70, roundedCorners:4, text:'setup',
-            activeColor:'#bbbbbb', hoverColor:'#dddddd', readyColor:'#cccccc'
-        }, [{
+        new TextButton(rootView, {width:70, paddingTop:2, text:'setup'}, [{
             doActivated: function() {
                 var defaultValue = {
                     field0:"and",
@@ -71,10 +70,7 @@
             }
         }]);
         
-        new myt.SimpleIconTextButton(rootView, {
-            height:25, width:70, roundedCorners:4, text:'reset',
-            activeColor:'#bbbbbb', hoverColor:'#dddddd', readyColor:'#cccccc'
-        }, [{
+        new TextButton(rootView, {width:70, paddingTop:2, text:'reset'}, [{
             doActivated: function() {
                 rootView.resetForm();
                 rootView.doValidation();
@@ -166,10 +162,7 @@
         new myt.EditableText(rootView, {name:'editTxt2', value:'foo bar baz', minHeight:17});
         new myt.EditableText(rootView, {name:'editTxt3', whitespace:'nowrap', value:'Here is some text that won\'t wrap.', minHeight:17});
         
-        var rollbackBtn = new myt.SimpleIconTextButton(rootView, {
-            height:25, width:70, roundedCorners:4, text:'rollback',
-            activeColor:'#bbbbbb', hoverColor:'#dddddd', readyColor:'#cccccc'
-        }, [{
+        var rollbackBtn = new TextButton(rootView, {width:70, paddingTop:3, text:'Rollback'}, [{
             doActivated: function() {
                 rootView.invokeAccelerator('cancel');
             },
@@ -181,10 +174,7 @@
         }]);
         rollbackBtn.syncTo(rootView, 'setDisabled', 'isChanged');
         
-        var submitBtn = new myt.SimpleIconTextButton(rootView, {
-            height:25, width:70, roundedCorners:4, text:'submit',
-            activeColor:'#bbbbbb', hoverColor:'#dddddd', readyColor:'#cccccc'
-        }, [{
+        var submitBtn = new TextButton(rootView, {width:70, paddingTop:3, text:'Submit'}, [{
             doActivated: function() {
                 rootView.invokeAccelerator('submit');
             },

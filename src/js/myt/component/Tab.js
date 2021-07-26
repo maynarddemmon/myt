@@ -92,7 +92,7 @@
                     which causes myt.Tab.DEFAULT_RADIUS to be used.
             
             @class */
-        Tab = pkg.Tab = new JS.Class('Tab', pkg.SimpleIconTextButton, {
+        Tab = pkg.Tab = new JS.Class('Tab', pkg.SimpleTextButton, {
             include: [TabMixin],
             
             
@@ -112,7 +112,7 @@
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                // myt.SimpleIconTextButton
+                // myt.SimpleTextButton
                 defAttr(attrs, 'inset', Tab.DEFAULT_INSET);
                 defAttr(attrs, 'outset', Tab.DEFAULT_OUTSET);
                 

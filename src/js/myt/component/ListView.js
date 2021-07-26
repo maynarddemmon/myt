@@ -2,7 +2,11 @@
     const JSClass = JS.Class,
         JSModule = JS.Module,
         
+        GlobalFocus = pkg.global.focus,
+        
         defAttr = pkg.AccessorSupport.defAttr,
+        
+        ACTIVATION_KEYS = [13,27,32,37,38,39,40],
         
         /** Defines the interface list view items must support.
             
@@ -16,14 +20,15 @@
             
             
             // Methods /////////////////////////////////////////////////////////
-            /** Subclasses and/or implementations must implement this method. Should
-                return the minimum width the list item needs to display itself.
+            /** Subclasses and/or implementations must implement this method. 
+                Should return the minimum width the list item needs to 
+                display itself.
                 @returns number */
             getMinimumWidth: () => 0,
             
-            /** Part of a performance optimization. Called from ListView.__updateItems
-                after the items have been inserted into the dom. Now we can actually
-                measure text width. */
+            /** Part of a performance optimization. Called from 
+                ListView.__updateItems after the items have been inserted into 
+                the dom. Now we can actually measure text width. */
             syncToDom: () => {}
         });
     
@@ -34,14 +39,14 @@
         
         Attributes:
             minWidth:number The minimum width for the list. The list will size
-                itself to fit the maximum width of the items in the list or this
-                value whichever is larger. Defaults to 0.
-            maxHeight:number The maximum height of the list view in pixels. If set 
-                to -1 no max height will be used.
-            defaultItemClass:JS.Class The class to use for list items if one is
-                not provided in the config. Defaults to myt.ListViewItem.
-            itemConfig:array An array of configuration information for the items
-                in the list.
+                itself to fit the maximum width of the items in the list or 
+                this value whichever is larger. Defaults to 0.
+            maxHeight:number The maximum height of the list view in pixels. 
+                If set to -1 no max height will be used.
+            defaultItemClass:JS.Class The class to use for list items if one 
+                is not provided in the config. Defaults to myt.ListViewItem.
+            itemConfig:array An array of configuration information for 
+                the items in the list.
             items:array The array of items in the list.
         
         @class */
@@ -104,8 +109,9 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** ListViewItems should call this method when they are activated. The
-            default implementation invokes doItemActivated on the ListViewAnchor.
+        /** ListViewItems should call this method when they are activated. 
+            The default implementation invokes doItemActivated on 
+            the ListViewAnchor.
             @param {!Object} itemView
             @returns {undefined} */
         doItemActivated: function(itemView) {
@@ -184,8 +190,8 @@
                     item.callSetters(cfgAttrs);
                     
                     // Create an item index to sort the layout subviews on. This
-                    // is necessary when the class of list items change so that the
-                    // newly created items don't end up out of order.
+                    // is necessary when the class of list items change so 
+                    // that the newly created items don't end up out of order.
                     item.__LAYOUT_IDX = i;
                 }
             }
@@ -195,11 +201,10 @@
             
             // Measure width. Must be in dom at this point.
             let minWidth = self.minWidth;
-            for (i = 0; cfgLen > i; ++i) {
-                item = items[i];
+            for (i = 0; cfgLen > i;) {
+                item = items[i++];
                 item.syncToDom();
-                const minItemWidth = item.getMinimumWidth();
-                if (minItemWidth > minWidth) minWidth = minItemWidth;
+                minWidth = Math.max(minWidth, item.getMinimumWidth());
             }
             
             // Delete any remaining items
@@ -252,7 +257,7 @@
             
             // Assume this will be mixed onto something that implements 
             // myt.KeyActivation since it probably will.
-            defAttr(attrs, 'activationKeys', [13,27,32,37,38,39,40]);
+            defAttr(attrs, 'activationKeys', ACTIVATION_KEYS);
             
             this.callSuper(parent, attrs);
         },
@@ -348,20 +353,18 @@
     /** An item in an myt.ListView
         
         @class */
-    pkg.ListViewItem = new JSClass('ListViewItem', pkg.SimpleIconTextButton, {
+    pkg.ListViewItem = new JSClass('ListViewItem', pkg.SimpleTextButton, {
         include: [ListViewItemMixin],
         
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            defAttr(attrs, 'height', 24);
             defAttr(attrs, 'activeColor', '#bbb');
             defAttr(attrs, 'hoverColor', '#fff');
             defAttr(attrs, 'readyColor', '#eee');
-            defAttr(attrs, 'contentAlign', 'left');
             defAttr(attrs, 'inset', 8);
             defAttr(attrs, 'outset', 8);
-            defAttr(attrs, 'activationKeys', [13,27,32,37,38,39,40]);
+            defAttr(attrs, 'activationKeys', ACTIVATION_KEYS);
             
             this.callSuper(parent, attrs);
         },
@@ -370,19 +373,13 @@
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides myt.ListViewItemMixin */
         syncToDom: function() {
+            this.textView.getInnerDomStyle().width = 'auto';
             this.textView.sizeViewToDom();
         },
         
         /** @overrides myt.ListViewItemMixin */
         getMinimumWidth: function() {
-            const self = this,
-                iconView = self.iconView,
-                textView = self.textView,
-                textViewVisible = textView.visible && self.text,
-                iconWidth = iconView.visible ? iconView.width : 0,
-                iconExtent = iconWidth + (textViewVisible && iconWidth > 0 ? self.iconSpacing : 0),
-                textWidth = textViewVisible ? Math.ceil(textView.width) : 0;
-            return self.inset + iconExtent + textWidth + self.outset;
+            return this.inset + (this.textView.visible && this.text ? Math.ceil(this.textView.measureNoWrapWidth()) : 0) + this.outset;
         },
         
         /** @overrides myt.Button */
@@ -408,11 +405,11 @@
                     return;
                 case 37: // Left
                 case 38: // Up
-                    pkg.global.focus.prev();
+                    GlobalFocus.prev();
                     break;
                 case 39: // Right
                 case 40: // Down
-                    pkg.global.focus.next();
+                    GlobalFocus.next();
                     break;
             }
             

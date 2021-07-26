@@ -6,16 +6,15 @@
 <script src="../src/js/boilerplate.js"></script>
 <script src="../dist/loader-browser.min.js"></script>
 <script src="../src/js/myt/manifest.js"></script>
-
 </head><body>
 <script>
     // This example works with wsrelay.
     JS.require('myt.all', function() {
         var rootView = new myt.View(null, {bgColor:'#000000', textColor:'#00cc00'}, [myt.SizeToWindow]);
         var btnsView = new myt.View(rootView, {percentOfParentWidth:100, height:28, bgColor:'#333333'}, [myt.SizeToParent]);
-        var connectBtn = new myt.SimpleButton(btnsView, {y:4, height:20, text:'connect', shrinkToFit:true, inset:6, outset:6,
+        var connectBtn = new myt.SimpleTextButton(btnsView, {y:4, height:20, text:'connect', shrinkToFit:true, inset:6, outset:6,
             activeColor:'#222222', hoverColor:'#555555', readyColor:'#444444', roundedCorners:2
-        }, [myt.TextButtonContent, {
+        }, [{
             doActivated:function() {
                 if (ws.status === 'closed') {
                     ws.connect();
@@ -40,9 +39,9 @@
                 if (myt.KeyObservable.getKeyCodeFromEvent(event) === 13) sendBtn.doActivated();
             }
         }]);
-        var sendBtn = new myt.SimpleButton(btnsView, {y:4, height:20, text:'send', shrinkToFit:true, inset:6, outset:6,
+        var sendBtn = new myt.SimpleTextButton(btnsView, {y:4, height:20, text:'send', shrinkToFit:true, inset:6, outset:6,
             activeColor:'#222222', hoverColor:'#555555', readyColor:'#444444', roundedCorners:2
-        }, [myt.TextButtonContent, {
+        }, [{
             doActivated:function() {
                 var msg = msgView.value,
                     name = nameView.value;
@@ -61,9 +60,9 @@
                 }
             }
         }]);
-        var sendActionBtn = new myt.SimpleButton(btnsView, {y:4, height:20, text:'action', shrinkToFit:true, inset:6, outset:6,
+        var sendActionBtn = new myt.SimpleTextButton(btnsView, {y:4, height:20, text:'action', shrinkToFit:true, inset:6, outset:6,
             activeColor:'#222222', hoverColor:'#555555', readyColor:'#444444', roundedCorners:2
-        }, [myt.TextButtonContent, {
+        }, [{
             doActivated:function() {
                 var msg = msgView.value,
                     name = nameView.value;
@@ -82,9 +81,9 @@
                 }
             }
         }]);
-        var clearBtn = new myt.SimpleButton(btnsView, {y:4, height:20, text:'clear text', shrinkToFit:true, inset:6, outset:6,
+        var clearBtn = new myt.SimpleTextButton(btnsView, {y:4, height:20, text:'clear text', shrinkToFit:true, inset:6, outset:6,
             activeColor:'#222222', hoverColor:'#555555', readyColor:'#444444', roundedCorners:2
-        }, [myt.TextButtonContent, {
+        }, [{
             doActivated:function() {
                 logView.setText('');
             }

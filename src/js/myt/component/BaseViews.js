@@ -135,7 +135,7 @@
             const ids = this.getInnerDomStyle(),
                 oldValue = ids.whiteSpace;
             ids.whiteSpace = 'nowrap';
-            const measuredWidth = this.getOuterDomElement().offsetWidth;
+            const measuredWidth = this.getOuterDomElement().getBoundingClientRect().width; // Use getBoundingClientRect to support fractional widths
             ids.whiteSpace = oldValue;
             return measuredWidth;
         }

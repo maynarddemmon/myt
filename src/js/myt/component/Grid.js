@@ -204,22 +204,16 @@
             let glyph = '';
             if (gridHeader.sortable) {
                 switch (gridHeader.sortState) {
-                    case 'ascending':
-                        glyph = 'chevron-up';
-                        break;
-                    case 'descending':
-                        glyph = 'chevron-down';
-                        break;
+                    case 'ascending': glyph = 'chevron-up'; break;
+                    case 'descending': glyph = 'chevron-down'; break;
                 }
             }
             gridHeader.sortIcon.setIcon(glyph);
         },
         
         updateTextWidth = gridHeader => {
-            if (gridHeader.contentAlign === 'left') {
-                const tv = gridHeader.textView;
-                if (tv) tv.setWidth(gridHeader.width - gridHeader.outset - tv.x);
-            }
+            const textView = gridHeader.textView;
+            if (textView) textView.setWidth(gridHeader.width - gridHeader.outset - textView.x);
         },
         
         /** Coordinates the behavior of a grid.
@@ -927,7 +921,7 @@
                 Defaults to '#666666'.
         
         @class */
-    pkg.SimpleGridColumnHeader = new JSClass('SimpleGridColumnHeader', pkg.SimpleIconTextButton, {
+    pkg.SimpleGridColumnHeader = new JSClass('SimpleGridColumnHeader', pkg.SimpleTextButton, {
         include: [GridColumnHeader],
         
         
@@ -941,8 +935,6 @@
             defAttr(attrs, 'readyColor', '#aaa');
             defAttr(attrs, 'inset', 2);
             defAttr(attrs, 'outset', 2);
-            defAttr(attrs, 'height', 18);
-            defAttr(attrs, 'contentAlign', 'left');
             defAttr(attrs, 'sortIconColor', '#666');
             
             self.callSuper(parent, attrs);

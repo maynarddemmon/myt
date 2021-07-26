@@ -92,37 +92,42 @@
   * THE SOFTWARE
   */
 Date.prototype.format = Date.prototype.format || (() => {
-    const shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    const math = Math,
+        mathAbs = math.abs,
+        mathFloor = math.floor,
+        mathCeil = math.ceil,
+        
+        shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
         longMonths = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
         shortDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         longDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
         
         replaceChars = {
             // Day
-            d: (date) => (date.getDate() < 10 ? '0' : '') + date.getDate(),
-            D: (date) => shortDays[date.getDay()],
-            j: (date) => date.getDate(),
-            l: (date) => longDays[date.getDay()],
-            N: (date) => (date.getDay() == 0 ? 7 : date.getDay()),
-            S: (date) => (date.getDate() % 10 == 1 && date.getDate() != 11 ? 'st' : (date.getDate() % 10 == 2 && date.getDate() != 12 ? 'nd' : (date.getDate() % 10 == 3 && date.getDate() != 13 ? 'rd' : 'th'))),
-            w: (date) => date.getDay(),
-            z: (date) => {const d = new Date(date.getFullYear(),0,1); return Math.ceil((date - d) / 86400000);},
+            d: date => (date.getDate() < 10 ? '0' : '') + date.getDate(),
+            D: date => shortDays[date.getDay()],
+            j: date => date.getDate(),
+            l: date => longDays[date.getDay()],
+            N: date => (date.getDay() == 0 ? 7 : date.getDay()),
+            S: date => (date.getDate() % 10 == 1 && date.getDate() != 11 ? 'st' : (date.getDate() % 10 == 2 && date.getDate() != 12 ? 'nd' : (date.getDate() % 10 == 3 && date.getDate() != 13 ? 'rd' : 'th'))),
+            w: date => date.getDay(),
+            z: date => {const d = new Date(date.getFullYear(),0,1); return mathCeil((date - d) / 86400000);},
             // Week
-            W: (date) => {
+            W: date => {
                 const target = new Date(date.valueOf()), dayNr = (date.getDay() + 6) % 7;
                 target.setDate(target.getDate() - dayNr + 3);
                 const firstThursday = target.valueOf();
                 target.setMonth(0, 1);
                 if (target.getDay() !== 4) target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
-                const retVal = 1 + Math.ceil((firstThursday - target) / 604800000);
+                const retVal = 1 + mathCeil((firstThursday - target) / 604800000);
                 return (retVal < 10 ? '0' + retVal : retVal);
             },
             // Month
-            F: (date) => longMonths[date.getMonth()],
-            m: (date) => (date.getMonth() < 9 ? '0' : '') + (date.getMonth() + 1),
-            M: (date) => shortMonths[date.getMonth()],
-            n: (date) => date.getMonth() + 1,
-            t: (date) => {
+            F: date => longMonths[date.getMonth()],
+            m: date => (date.getMonth() < 9 ? '0' : '') + (date.getMonth() + 1),
+            M: date => shortMonths[date.getMonth()],
+            n: date => date.getMonth() + 1,
+            t: date => {
                 let year = date.getFullYear(),
                     nextMonth = date.getMonth() + 1;
                 if (nextMonth === 12) {
@@ -132,28 +137,28 @@ Date.prototype.format = Date.prototype.format || (() => {
                 return new Date(year, nextMonth, 0).getDate();
             },
             // Year
-            L: (date) => {const year = date.getFullYear(); return (year % 400 == 0 || (year % 100 != 0 && year % 4 == 0));},
-            o: (date) => {const d = new Date(date.valueOf()); d.setDate(d.getDate() - ((date.getDay() + 6) % 7) + 3); return d.getFullYear();},
-            Y: (date) => date.getFullYear(),
-            y: (date) => ('' + date.getFullYear()).substr(2),
+            L: date => {const year = date.getFullYear(); return (year % 400 == 0 || (year % 100 != 0 && year % 4 == 0));},
+            o: date => {const d = new Date(date.valueOf()); d.setDate(d.getDate() - ((date.getDay() + 6) % 7) + 3); return d.getFullYear();},
+            Y: date => date.getFullYear(),
+            y: date => ('' + date.getFullYear()).substr(2),
             // Time
-            a: (date) => date.getHours() < 12 ? 'am' : 'pm',
-            A: (date) => date.getHours() < 12 ? 'AM' : 'PM',
-            B: (date) => Math.floor((((date.getUTCHours() + 1) % 24) + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600) * 1000 / 24),
-            g: (date) => date.getHours() % 12 || 12,
-            G: (date) => date.getHours(),
-            h: (date) => ((date.getHours() % 12 || 12) < 10 ? '0' : '') + (date.getHours() % 12 || 12),
-            H: (date) => (date.getHours() < 10 ? '0' : '') + date.getHours(),
-            i: (date) => (date.getMinutes() < 10 ? '0' : '') + date.getMinutes(),
-            s: (date) => (date.getSeconds() < 10 ? '0' : '') + date.getSeconds(),
-            u: (date) => {const m = date.getMilliseconds(); return (m < 10 ? '00' : (m < 100 ? '0' : '')) + m;},
+            a: date => date.getHours() < 12 ? 'am' : 'pm',
+            A: date => date.getHours() < 12 ? 'AM' : 'PM',
+            B: date => mathFloor((((date.getUTCHours() + 1) % 24) + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600) * 1000 / 24),
+            g: date => date.getHours() % 12 || 12,
+            G: date => date.getHours(),
+            h: date => ((date.getHours() % 12 || 12) < 10 ? '0' : '') + (date.getHours() % 12 || 12),
+            H: date => (date.getHours() < 10 ? '0' : '') + date.getHours(),
+            i: date => (date.getMinutes() < 10 ? '0' : '') + date.getMinutes(),
+            s: date => (date.getSeconds() < 10 ? '0' : '') + date.getSeconds(),
+            u: date => {const m = date.getMilliseconds(); return (m < 10 ? '00' : (m < 100 ? '0' : '')) + m;},
             // Timezone
-            e: (date) => /\((.*)\)/.exec(new Date().toString())[1],
-            I: (date) => {
-                let DST = null, i = 0, d, offset;
+            e: date => /\((.*)\)/.exec(new Date().toString())[1],
+            I: date => {
+                let DST = null, i = 0;
                 for (; i < 12;) {
-                    d = new Date(date.getFullYear(), i++, 1);
-                    offset = d.getTimezoneOffset();
+                    const d = new Date(date.getFullYear(), i++, 1),
+                        offset = d.getTimezoneOffset();
                     if (DST === null) {
                         DST = offset;
                     } else if (offset < DST) {
@@ -164,14 +169,14 @@ Date.prototype.format = Date.prototype.format || (() => {
                 }
                 return (date.getTimezoneOffset() == DST) | 0;
             },
-            O: (date) => (-date.getTimezoneOffset() < 0 ? '-' : '+') + (Math.abs(date.getTimezoneOffset() / 60) < 10 ? '0' : '') + Math.floor(Math.abs(date.getTimezoneOffset() / 60)) + (Math.abs(date.getTimezoneOffset() % 60) == 0 ? '00' : ((Math.abs(date.getTimezoneOffset() % 60) < 10 ? '0' : '')) + (Math.abs(date.getTimezoneOffset() % 60))),
-            P: (date) => (-date.getTimezoneOffset() < 0 ? '-' : '+') + (Math.abs(date.getTimezoneOffset() / 60) < 10 ? '0' : '') + Math.floor(Math.abs(date.getTimezoneOffset() / 60)) + ':' + (Math.abs(date.getTimezoneOffset() % 60) == 0 ? '00' : ((Math.abs(date.getTimezoneOffset() % 60) < 10 ? '0' : '')) + (Math.abs(date.getTimezoneOffset() % 60))),
-            T: (date) => Intl.DateTimeFormat().resolvedOptions().timeZone,
-            Z: (date) => -date.getTimezoneOffset() * 60,
+            O: date => (-date.getTimezoneOffset() < 0 ? '-' : '+') + (mathAbs(date.getTimezoneOffset() / 60) < 10 ? '0' : '') + mathFloor(mathAbs(date.getTimezoneOffset() / 60)) + (mathAbs(date.getTimezoneOffset() % 60) == 0 ? '00' : ((mathAbs(date.getTimezoneOffset() % 60) < 10 ? '0' : '')) + (mathAbs(date.getTimezoneOffset() % 60))),
+            P: date => (-date.getTimezoneOffset() < 0 ? '-' : '+') + (mathAbs(date.getTimezoneOffset() / 60) < 10 ? '0' : '') + mathFloor(mathAbs(date.getTimezoneOffset() / 60)) + ':' + (mathAbs(date.getTimezoneOffset() % 60) == 0 ? '00' : ((mathAbs(date.getTimezoneOffset() % 60) < 10 ? '0' : '')) + (mathAbs(date.getTimezoneOffset() % 60))),
+            T: date => Intl.DateTimeFormat().resolvedOptions().timeZone,
+            Z: date => -date.getTimezoneOffset() * 60,
             // Full Date/Time
-            c: (date) => date.format("Y-m-d\\TH:i:sP"),
-            r: (date) => date.toString(),
-            U: (date) => date.getTime() / 1000
+            c: date => date.format("Y-m-d\\TH:i:sP"),
+            r: date => date.toString(),
+            U: date => date.getTime() / 1000
         };
 
     return function(format) {
@@ -1117,25 +1122,15 @@ Date.prototype.format = Date.prototype.format || (() => {
 
 
 ((pkg) => {
-    const pluses = /\+/g,
-        
-        /* Function to return a raw cookie name/value. */
-        raw = s => s,
-        
-        /* Function to return a URI decoded cookie name/value. */
-        decoded = s => decodeURIComponent(s.replace(pluses, ' ')),
+    const objectAssign = Object.assign,
         
         /*  Function to convert a stored cookie value into a value that can
             be returned. */
         converted = (s, useJson) => {
-            if (s.indexOf('"') === 0) {
-                // This is a quoted cookie as according to RFC2068, unescape
-                s = s.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
-            }
+            // This is a quoted cookie as according to RFC2068, unescape
+            if (s.indexOf('"') === 0) s = s.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
             
-            try {
-                return useJson ? JSON.parse(s) : s;
-            } catch(er) {}
+            try {return useJson ? JSON.parse(s) : s;} catch(ex) {}
         },
         
         /** Browser cookie utility functions.
@@ -1159,54 +1154,54 @@ Date.prototype.format = Date.prototype.format || (() => {
             // Methods /////////////////////////////////////////////////////////
             /** Reads a cookie.
                 @param {string} key - The name of the cookie to read.
-                @param {?Object} options - Options that determine how the cookie is read
-                    and/or parsed. Supported options are:
-                        raw:boolean If true the cookie key and value will be used as is.
-                            Otherwise decodeURIComponent will be used.
-                        json:boolean If true JSON.parse will be used to parse the
-                            cookie value before it is returned.
-                @returns {*} - The cookie value string or a parsed cookie value. */
+                @param {?Object} options - Options that determine how the 
+                    cookie is read and/or parsed. Supported options are:
+                        raw:boolean If true the cookie key and value will be 
+                            used as is. Otherwise decodeURIComponent will 
+                            be used.
+                        json:boolean If true JSON.parse will be used to 
+                            parse the cookie value before it is returned.
+                @returns {*} - The cookie value string or a parsed 
+                    cookie value. */
             read: (key, options) => {
-                options = Object.assign({}, Cookie.defaults, options);
+                options = objectAssign({}, Cookie.defaults, options);
                 
-                const decodeFunc = options.raw ? raw : decoded,
+                const decodeFunc = options.raw ? s => s : s => decodeURIComponent(s.replace(/\+/g, ' ')),
                     useJson = options.json,
                     cookies = document.cookie.split('; '),
-                    len = cookies.length;
-                let result = key ? undefined : {},
-                    i = 0;
-                for (; i < len;) {
+                    len = cookies.length,
+                    retval = key ? undefined : {};
+                for (let i = 0; i < len;) {
                     const parts = cookies[i++].split('='),
                         name = decodeFunc(parts.shift()),
                         cookie = decodeFunc(parts.join('='));
-                    
-                    if (key && key === name) {
-                        result = converted(cookie, useJson);
-                        break;
+                    if (key) {
+                        if (key === name) return converted(cookie, useJson);
+                    } else {
+                        retval[name] = converted(cookie, useJson);
                     }
-                    
-                    if (!key) result[name] = converted(cookie, useJson);
                 }
-                
-                return result;
+                return retval;
             },
             
             /** Stores a cookie.
                 @param {string} key - the name of the cookie to store.
                 @param {*} value - The value to store.
-                @param {?Object} options - The options that determine how the cookie is
-                    written and stored. Supported options are:
-                        expires:number the number of days until the cookie expires.
+                @param {?Object} options - The options that determine how the 
+                    cookie is written and stored. Supported options are:
+                        expires:number the number of days until the 
+                            cookie expires.
                         path:string the path scope for the cookie.
                         domain:string the domain scope for the cookie.
                         secure:boolean the cookie must be secure.
-                        raw:boolean If true the cookie key and value will be used as is.
-                            Otherwise encodeURIComponent will be used.
-                        json:boolean If true JSON.stringify will be used to encode
-                            the cookie value.
+                        raw:boolean If true the cookie key and value will be 
+                            used as is. Otherwise encodeURIComponent will 
+                            be used.
+                        json:boolean If true JSON.stringify will be used to 
+                            encode the cookie value.
                 @returns {undefined} */
             write: (key, value, options) => {
-                options = Object.assign({}, Cookie.defaults, options);
+                options = objectAssign({}, Cookie.defaults, options);
                 
                 if (typeof options.expires === 'number') {
                     const days = options.expires,
@@ -1227,14 +1222,17 @@ Date.prototype.format = Date.prototype.format || (() => {
                 ].join(''));
             },
             
-            /** Removes a stored cookie by setting it's expires option to -1 days.
+            /** Removes a stored cookie by setting its expires option 
+                to -1 days.
                 @param {string} key - the name of the cookie to remove.
-                @param {?Object} options - Options used to read/write the cookie.
-                @returns {boolean} - true if a cookie was removed, false otherwise. */
+                @param {?Object} options - Options used to read/write the 
+                    cookie.
+                @returns {boolean} - true if a cookie was removed, 
+                    false otherwise. */
             remove: (key, options) => {
                 if (Cookie.read(key, options) !== undefined) {
                     // Must not alter options, thus extending a fresh object.
-                    Cookie.write(key, '', Object.assign({}, options, {expires: -1}));
+                    Cookie.write(key, '', objectAssign({}, options, {expires: -1}));
                     return true;
                 }
                 return false;
@@ -1608,266 +1606,282 @@ Date.prototype.format = Date.prototype.format || (() => {
 
 ((pkg) => {
     /** Provides common geometry related functions. */
-    const Geometry = pkg.Geometry = {
-        // Methods /////////////////////////////////////////////////////////////
-        /** Get the closest point on a line to a given point.
-            @param {number} Ax - The x-coordinate of the first point that 
-                defines the line.
-            @param {number} Ay - The y-coordinate of the first point that 
-                defines the line.
-            @param {number} Bx - The x-coordinate of the second point that 
-                defines the line.
-            @param {number} By - The y-coordinate of the second point that 
-                defines the line.
-            @param {number} Px - The x-coordinate of the point.
-            @param {number} Py - The y-coordinate of the point.
-            @returns {!Object} - A position object with x and y properties. */
-        getClosestPointOnALineToAPoint: (Ax, Ay, Bx, By, Px, Py) => {
-            const APx = Px - Ax,
-                APy = Py - Ay,
-                ABx = Bx - Ax,
-                ABy = By - Ay,
-                magAB2 = ABx * ABx + ABy * ABy,
-                ABdotAP = ABx * APx + ABy * APy,
-                t = ABdotAP / magAB2;
-            return {x:Ax + ABx * t, y:Ay + ABy * t};
-        },
+    const math = Math,
+        PI = math.PI,
+        mathCos = math.cos,
+        mathSin = math.sin,
+        mathSqrt = math.sqrt,
         
-        /** Get the closest point on a segment to a given point.
-            @param {number} Ax - The x-coordinate of the first endpoint that 
-                defines the segment.
-            @param {number} Ay - The y-coordinate of the first endpoint that 
-                defines  the segment.
-            @param {number} Bx - The x-coordinate of the second endpoint that 
-                defines the segment.
-            @param {number} By - The y-coordinate of the second endpoint that 
-                defines the segment.
-            @param {number} Px - The x-coordinate of the point.
-            @param {number} Py - The y-coordinate of the point.
-            @returns {!Object} - A position object with x and y properties. */
-        getClosestPointOnASegmentToAPoint: (Ax, Ay, Bx, By, Px, Py) => {
-            const APx = Px - Ax,
-                APy = Py - Ay,
-                ABx = Bx - Ax,
-                ABy = By - Ay,
-                magAB2 = ABx * ABx + ABy * ABy,
-                ABdotAP = ABx * APx + ABy * APy,
-                t = ABdotAP / magAB2;
-            if (t < 0) return {x:Ax, y:Ay};
-            if (t > 1) return {x:Bx, y:By};
-            return {x:Ax + ABx * t, y:Ay + ABy * t};
-        },
-        
-        /** Tests if the provided point is inside this path.
-            @param {number|!Object} x - The x coordinate to test or alternately
-                a point object with x and y properties.
-            @param {number} y - The y coordinate to test.
-            @param {!Object} boundingBox - A bounding box object that bounds 
-                the path.
-            @param {!Araay} path - An array of points where the index 0,2,4,... 
-                are the x values and index 1,3,5,... are the y values.
-            @return {boolean} - True if inside, false otherwise. */
-        isPointInPath: (x, y, boundingBox, path) => {
-            if (typeof x === 'object') {
-                path = boundingBox;
-                boundingBox = y;
-                y = x.y;
-                x = x.x;
-            }
+        Geometry = pkg.Geometry = {
+            // Methods /////////////////////////////////////////////////////////////
+            /** Get the closest point on a line to a given point.
+                @param {number} Ax - The x-coordinate of the first point that 
+                    defines the line.
+                @param {number} Ay - The y-coordinate of the first point that 
+                    defines the line.
+                @param {number} Bx - The x-coordinate of the second point that 
+                    defines the line.
+                @param {number} By - The y-coordinate of the second point that 
+                    defines the line.
+                @param {number} Px - The x-coordinate of the point.
+                @param {number} Py - The y-coordinate of the point.
+                @returns {!Object} - A position object with x and y 
+                    properties. */
+            getClosestPointOnALineToAPoint: (Ax, Ay, Bx, By, Px, Py) => {
+                const APx = Px - Ax,
+                    APy = Py - Ay,
+                    ABx = Bx - Ax,
+                    ABy = By - Ay,
+                    magAB2 = ABx * ABx + ABy * ABy,
+                    ABdotAP = ABx * APx + ABy * APy,
+                    t = ABdotAP / magAB2;
+                return {x:Ax + ABx * t, y:Ay + ABy * t};
+            },
             
-            // First test bounding box
-            if (Geometry.rectContainsPoint(x, y, boundingBox)) {
-                // Test using Jordan Curve Theorem
-                let len = path.length;
-                
-                // Must at least be a triangle to have an inside.
-                if (len >= 6) {
-                    let c = false, 
-                        x1 = path[0], 
-                        y1 = path[1], 
-                        x2, 
-                        y2;
-                    while (len) {
-                        y2 = path[--len];
-                        x2 = path[--len];
-                        if (((y2 > y) !== (y1 > y)) && (x < (x1 - x2) * (y - y2) / (y1 - y2) + x2)) c = !c;
-                        x1 = x2;
-                        y1 = y2;
-                    }
-                    return c;
+            /** Get the closest point on a segment to a given point.
+                @param {number} Ax - The x-coordinate of the first endpoint 
+                    that defines the segment.
+                @param {number} Ay - The y-coordinate of the first endpoint 
+                    that defines  the segment.
+                @param {number} Bx - The x-coordinate of the second endpoint 
+                    that defines the segment.
+                @param {number} By - The y-coordinate of the second endpoint 
+                    that defines the segment.
+                @param {number} Px - The x-coordinate of the point.
+                @param {number} Py - The y-coordinate of the point.
+                @returns {!Object} - A position object with x and y 
+                    properties. */
+            getClosestPointOnASegmentToAPoint: (Ax, Ay, Bx, By, Px, Py) => {
+                const APx = Px - Ax,
+                    APy = Py - Ay,
+                    ABx = Bx - Ax,
+                    ABy = By - Ay,
+                    magAB2 = ABx * ABx + ABy * ABy,
+                    ABdotAP = ABx * APx + ABy * APy,
+                    t = ABdotAP / magAB2;
+                if (t < 0) return {x:Ax, y:Ay};
+                if (t > 1) return {x:Bx, y:By};
+                return {x:Ax + ABx * t, y:Ay + ABy * t};
+            },
+            
+            /** Tests if the provided point is inside this path.
+                @param {number|!Object} x - The x coordinate to test or 
+                    alternately a point object with x and y properties.
+                @param {number} y - The y coordinate to test.
+                @param {!Object} boundingBox - A bounding box object that 
+                    bounds the path.
+                @param {!Araay} path - An array of points where the index 
+                    0,2,4,... are the x values and index 1,3,5,... are the 
+                    y values.
+                @return {boolean} - True if inside, false otherwise. */
+            isPointInPath: (x, y, boundingBox, path) => {
+                if (typeof x === 'object') {
+                    path = boundingBox;
+                    boundingBox = y;
+                    y = x.y;
+                    x = x.x;
                 }
+                
+                // First test bounding box
+                if (Geometry.rectContainsPoint(x, y, boundingBox)) {
+                    // Test using Jordan Curve Theorem
+                    let len = path.length;
+                    
+                    // Must at least be a triangle to have an inside.
+                    if (len >= 6) {
+                        let c = false, 
+                            x1 = path[0], 
+                            y1 = path[1], 
+                            x2, 
+                            y2;
+                        while (len) {
+                            y2 = path[--len];
+                            x2 = path[--len];
+                            if (((y2 > y) !== (y1 > y)) && (x < (x1 - x2) * (y - y2) / (y1 - y2) + x2)) c = !c;
+                            x1 = x2;
+                            y1 = y2;
+                        }
+                        return c;
+                    }
+                }
+                return false;
+            },
+            
+            /** Checks if the provided point is inside or on the edge of the 
+                provided rectangle.
+                @param {number|!Object} pX - The x coordinate of the point to 
+                    test or alternately a point object with properties x and y.
+                @param {number} pY - The y coordinate of the point to test.
+                @param {number|!Object} rX - The x coordinate of the rectangle 
+                    or alternately a rect object with properties x, y, width 
+                    and height.
+                @param {number} rY - The y coordinate of the rectangle.
+                @param {number} rW - The width of the rectangle.
+                @param {number} rH - The height of the rectangle.
+                @returns {boolean} - True if the point is inside or on the 
+                    rectangle. */
+            rectContainsPoint: (pX, pY, rX, rY, rW, rH) => {
+                if (typeof pX === 'object') {
+                    rH = rW;
+                    rW = rY;
+                    rY = rX;
+                    rX = pY;
+                    pY = pX.y;
+                    pX = pX.x;
+                }
+                
+                if (typeof rX === 'object') {
+                    rH = rX.height;
+                    rW = rX.width;
+                    rY = rX.y;
+                    rX = rX.x;
+                }
+                
+                return pX >= rX && pY >= rY && pX <= rX + rW && pY <= rY + rH;
+            },
+            
+            /** Checks if the provided point lies inside or on the edge of the
+                provided circle.
+                @param {number} pX - The x coordinate of the point to test.
+                @param {number} pY - The y coordinate of the point to test.
+                @param {number} cX - The x coordinate of the center of 
+                    the circle.
+                @param {number} cY - The y coordinate of the center of 
+                    the circle.
+                @param {number} cR - The radius of the circle.
+                @return {boolean} - True if the point is inside or on the circle. */
+            circleContainsPoint: (pX, pY, cX, cY, cR) => Geometry.measureDistance(pX, pY, cX, cY, true) <= cR * cR,
+            
+            /** Measure the distance between two points.
+                @param {number} x1 - The x position of the first point.
+                @param {number} y1 - The y position of the first point.
+                @param {number} x2 - The x position of the second point.
+                @param {number} y2 - The y position of the second point.
+                @param {boolean} [squared] - If true, the squared distance will
+                    be returned.
+                @returns {number} - The distance between the two points. */
+            measureDistance: (x1, y1, x2, y2, squared) => {
+                const diffX = x2 - x1, 
+                    diffY = y2 - y1, 
+                    diffSquared = diffX * diffX + diffY * diffY;
+                return squared ? diffSquared : mathSqrt(diffSquared);
+            },
+            
+            /** Convert radians to degrees.
+                @param {number} deg - The degrees to convert.
+                @returns {number} - The converted radians. */
+            degreesToRadians: (deg) => deg * PI / 180,
+            
+            /** Convert degrees to radians.
+                @param {number} rad - The radians to convert.
+                @returns {number} The converted degrees. */
+            radiansToDegrees: (rad) => rad * 180 / PI,
+            
+            // Geometry on a sphere
+            /** Checks if the provided lat/lng point lies inside or on the edge 
+                of the provided circle.
+                @param {number} pLat - The latitude of the point to test.
+                @param {number} pLng - The longitude of the point to test.
+                @param {number} cLat - The latitude of the center of 
+                    the circle.
+                @param {number} cLng - The longitude of the center of 
+                    the circle.
+                @param {number} cR - The radius of the circle in kilometers.
+                @param {number} [sphereRadius] - The radius of the sphere the
+                    measurement is being taken on in kilometers. If not 
+                    provided the radius of the earth is used.
+                @return {boolean} - True if the point is inside or on 
+                    the circle. */
+            circleContainsLatLng: (pLat, pLng, cLat, cLng, cR, sphereRadius) => Geometry.measureLatLngDistance(pLat, pLng, cLat, cLng, sphereRadius) <= cR,
+            
+            /** Measures the distance between two points on a sphere using 
+                latitude and longitude.
+                @param {number} lat1 - the latitude of the first point.
+                @param {number} lng1 - the longitude of the first point.
+                @param {number} lat2 - the latitude of the second point.
+                @param {number} lng2 - the longitude of the second point.
+                @param {number} [sphereRadius] - The radius of the sphere the
+                    measurement is being taken on in kilometers. If not provided 
+                    the radius of the earth is used.
+                @returns {number} - The distance between the points 
+                    in kilometers. */
+            measureLatLngDistance: (lat1, lng1, lat2, lng2, sphereRadius) => {
+                // Taken from: http://www.movable-type.co.uk/scripts/latlong.html
+                if (sphereRadius === undefined) sphereRadius = 6371; // kilometers for earth
+                lat1 = Geometry.degreesToRadians(lat1);
+                lng1 = Geometry.degreesToRadians(lng1);
+                lat2 = Geometry.degreesToRadians(lat2);
+                lng2 = Geometry.degreesToRadians(lng2);
+                return sphereRadius * math.acos(
+                    mathSin(lat1) * mathSin(lat2) + 
+                    mathCos(lat1) * mathCos(lat2) * mathCos(lng2 - lng1)
+                );
+            },
+            
+            /** Convert from polar to cartesian coordinates.
+                @param {number} radius - The radius of the point to convert 
+                    relative to the circle.
+                @param {number} degrees - The angle coordinate of the point 
+                    to convert.
+                @param {number} [cx] - The x coordinate of the center of 
+                    the circle.
+                @param {number} [cy] - The y coordinate of the center of 
+                    the circle.
+                @returns {!Array} - Where index 0 is the x coordinate and index 
+                    1 is the y coordinate. */
+            polarToCartesian: (radius, degrees, cx, cy) => {
+                if (cx == null) cx = 0;
+                if (cy == null) cy = 0;
+                degrees = degrees % 360;
+                
+                let x, 
+                    y, 
+                    radians;
+                if (degrees === 0) {
+                    x = radius;
+                    y = 0;
+                } else if (degrees === 90) {
+                    x = 0;
+                    y = radius;
+                } else if (degrees === 180) {
+                    x = -radius;
+                    y = 0;
+                } else if (degrees === 270) {
+                    x = 0;
+                    y = -radius;
+                } else {
+                    radians = Geometry.degreesToRadians(degrees);
+                    x = radius * mathCos(radians);
+                    y = radius * mathSin(radians);
+                }
+                
+                return [cx + x, cy + y];
+            },
+            
+            /** Convert from cartesian to polar coordinates.
+                @param {number} x - The x coordinate to transform.
+                @param {number} y - The y coordinate to transform.
+                @param {number} [cx] - The x coordinate of the center of the
+                    circle.
+                @param {number} [cy] - The y coordinate of the center of the
+                    circle.
+                @param {boolean} [useRadians] - If true the angle returned will
+                    be in radians otherwise it will be degrees.
+                @return {!Array} An array where index 0 is the radius and 
+                    index 1 is angle in degrees (or radians if userRadians 
+                    is true). */
+            cartesianToPolar: (x, y, cx, cy, useRadians) => {
+                if (cx == null) cx = 0;
+                if (cy == null) cy = 0;
+                
+                const diffX = x - cx,
+                    diffY = y - cy,
+                    radius = mathSqrt(diffX*diffX + diffY*diffY);
+                let radians = math.atan2(diffY, diffX);
+                if (radians < 0) radians += 2 * PI;
+                return [radius, useRadians ? radians : Geometry.radiansToDegrees(radians)];
             }
-            return false;
-        },
-        
-        /** Checks if the provided point is inside or on the edge of the provided 
-            rectangle.
-            @param {number|!Object} pX - The x coordinate of the point to test
-                or alternately a point object with properties x and y.
-            @param {number} pY - The y coordinate of the point to test.
-            @param {number|!Object} rX - The x coordinate of the rectangle or
-                alternately a rect object with properties x, y, width and height.
-            @param {number} rY - The y coordinate of the rectangle.
-            @param {number} rW - The width of the rectangle.
-            @param {number} rH - The height of the rectangle.
-            @returns {boolean} - True if the point is inside or on the 
-                rectangle. */
-        rectContainsPoint: (pX, pY, rX, rY, rW, rH) => {
-            if (typeof pX === 'object') {
-                rH = rW;
-                rW = rY;
-                rY = rX;
-                rX = pY;
-                pY = pX.y;
-                pX = pX.x;
-            }
-            
-            if (typeof rX === 'object') {
-                rH = rX.height;
-                rW = rX.width;
-                rY = rX.y;
-                rX = rX.x;
-            }
-            
-            return pX >= rX && pY >= rY && pX <= rX + rW && pY <= rY + rH;
-        },
-        
-        /** Checks if the provided point lies inside or on the edge of the
-            provided circle.
-            @param {number} pX - The x coordinate of the point to test.
-            @param {number} pY - The y coordinate of the point to test.
-            @param {number} cX - The x coordinate of the center of the circle.
-            @param {number} cY - The y coordinate of the center of the circle.
-            @param {number} cR - The radius of the circle.
-            @return {boolean} - True if the point is inside or on the circle. */
-        circleContainsPoint: (pX, pY, cX, cY, cR) => Geometry.measureDistance(pX, pY, cX, cY, true) <= cR * cR,
-        
-        /** Measure the distance between two points.
-            @param {number} x1 - The x position of the first point.
-            @param {number} y1 - The y position of the first point.
-            @param {number} x2 - The x position of the second point.
-            @param {number} y2 - The y position of the second point.
-            @param {boolean} [squared] - If true, the squared distance will
-                be returned.
-            @returns {number} - The distance between the two points. */
-        measureDistance: (x1, y1, x2, y2, squared) => {
-            const diffX = x2 - x1, 
-                diffY = y2 - y1, 
-                diffSquared = diffX * diffX + diffY * diffY;
-            return squared ? diffSquared : Math.sqrt(diffSquared);
-        },
-        
-        /** Convert radians to degrees.
-            @param {number} deg - The degrees to convert.
-            @returns {number} - The converted radians. */
-        degreesToRadians: (deg) => deg * Math.PI / 180,
-        
-        /** Convert degrees to radians.
-            @param {number} rad - The radians to convert.
-            @returns {number} The converted degrees. */
-        radiansToDegrees: (rad) => rad * 180 / Math.PI,
-        
-        // Geometry on a sphere
-        /** Checks if the provided lat/lng point lies inside or on the edge 
-            of the provided circle.
-            @param {number} pLat - The latitude of the point to test.
-            @param {number} pLng - The longitude of the point to test.
-            @param {number} cLat - The latitude of the center of the circle.
-            @param {number} cLng - The longitude of the center of the circle.
-            @param {number} cR - The radius of the circle in kilometers.
-            @param {number} [sphereRadius] - The radius of the sphere the
-                measurement is being taken on in kilometers. If not provided 
-                the radius of the earth is used.
-            @return {boolean} - True if the point is inside or on the circle. */
-        circleContainsLatLng: (pLat, pLng, cLat, cLng, cR, sphereRadius) => Geometry.measureLatLngDistance(pLat, pLng, cLat, cLng, sphereRadius) <= cR,
-        
-        /** Measures the distance between two points on a sphere using latitude
-            and longitude.
-            @param {number} lat1 - the latitude of the first point.
-            @param {number} lng1 - the longitude of the first point.
-            @param {number} lat2 - the latitude of the second point.
-            @param {number} lng2 - the longitude of the second point.
-            @param {number} [sphereRadius] - The radius of the sphere the
-                measurement is being taken on in kilometers. If not provided 
-                the radius of the earth is used.
-            @returns {number} - The distance between the points 
-                in kilometers. */
-        measureLatLngDistance: (lat1, lng1, lat2, lng2, sphereRadius) => {
-            // Taken from: http://www.movable-type.co.uk/scripts/latlong.html
-            if (sphereRadius === undefined) sphereRadius = 6371; // kilometers for earth
-            lat1 = Geometry.degreesToRadians(lat1);
-            lng1 = Geometry.degreesToRadians(lng1);
-            lat2 = Geometry.degreesToRadians(lat2);
-            lng2 = Geometry.degreesToRadians(lng2);
-            return sphereRadius * Math.acos(
-                Math.sin(lat1) * Math.sin(lat2) + 
-                Math.cos(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1)
-            );
-        },
-        
-        /** Convert from polar to cartesian coordinates.
-            @param {number} radius - The radius of the point to convert 
-                relative to the circle.
-            @param {number} degrees - The angle coordinate of the point 
-                to convert.
-            @param {number} [cx] - The x coordinate of the center of 
-                the circle.
-            @param {number} [cy] - The y coordinate of the center of 
-                the circle.
-            @returns {!Array} - Where index 0 is the x coordinate and index 
-                1 is the y coordinate. */
-        polarToCartesian: (radius, degrees, cx, cy) => {
-            if (cx == null) cx = 0;
-            if (cy == null) cy = 0;
-            degrees = degrees % 360;
-            
-            let x, 
-                y, 
-                radians;
-            if (degrees === 0) {
-                x = radius;
-                y = 0;
-            } else if (degrees === 90) {
-                x = 0;
-                y = radius;
-            } else if (degrees === 180) {
-                x = -radius;
-                y = 0;
-            } else if (degrees === 270) {
-                x = 0;
-                y = -radius;
-            } else {
-                radians = Geometry.degreesToRadians(degrees);
-                x = radius * Math.cos(radians);
-                y = radius * Math.sin(radians);
-            }
-            
-            return [cx + x, cy + y];
-        },
-        
-        /** Convert from cartesian to polar coordinates.
-            @param {number} x - The x coordinate to transform.
-            @param {number} y - The y coordinate to transform.
-            @param {number} [cx] - The x coordinate of the center of the
-                circle.
-            @param {number} [cy] - The y coordinate of the center of the
-                circle.
-            @param {boolean} [useRadians] - If true the angle returned will
-                be in radians otherwise it will be degrees.
-            @return {!Array} An array where index 0 is the radius and index 1 
-                is angle in degrees (or radians if userRadians is true). */
-        cartesianToPolar: (x, y, cx, cy, useRadians) => {
-            if (cx == null) cx = 0;
-            if (cy == null) cy = 0;
-            
-            const diffX = x - cx,
-                diffY = y - cy,
-                radius = Math.sqrt(diffX*diffX + diffY*diffY);
-            let radians = Math.atan2(diffY, diffX);
-            if (radians < 0) radians += 2 * Math.PI;
-            return [radius, useRadians ? radians : Geometry.radiansToDegrees(radians)];
-        }
-    };
+        };
 })(myt);
 
 
@@ -8799,7 +8813,7 @@ myt.ImageSupport = new JS.Module('ImageSupport', {
             const ids = this.getInnerDomStyle(),
                 oldValue = ids.whiteSpace;
             ids.whiteSpace = 'nowrap';
-            const measuredWidth = this.getOuterDomElement().offsetWidth;
+            const measuredWidth = this.getOuterDomElement().getBoundingClientRect().width; // Use getBoundingClientRect to support fractional widths
             ids.whiteSpace = oldValue;
             return measuredWidth;
         }
@@ -11267,15 +11281,16 @@ new JS.Singleton('GlobalMouse', {
         defaultDisabledOpacity = 0.5,
         defaultFocusShadowPropertyValue = [0, 0, 7, '#666'],
         
-        /** Provides button functionality to an myt.View. Most of the functionality 
-            comes from the mixins included by this mixin. This mixin resolves issues 
-            that arise when the various mixins are used together.
+        /** Provides button functionality to an myt.View. Most of the 
+            functionality comes from the mixins included by this mixin. 
+            This mixin resolves issues that arise when the various mixins 
+            are used together.
             
             By default myt.Button instances are focusable.
             
             Private Attributes:
-                __restoreCursor:string The cursor to restore to when the button is
-                    no longer disabled.
+                __restoreCursor:string The cursor to restore to when the 
+                    button is no longer disabled.
             
             @class */
         Button = pkg.Button = new JSModule('Button', {
@@ -11318,7 +11333,8 @@ new JS.Singleton('GlobalMouse', {
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.KeyActivation. */
             doActivationKeyDown: function(key, isRepeat) {
-                // Prevent unnecessary UI updates when the activation key is repeating.
+                // Prevent unnecessary UI updates when the activation 
+                // key is repeating.
                 if (!isRepeat) this.updateUI();
             },
             
@@ -11339,8 +11355,8 @@ new JS.Singleton('GlobalMouse', {
                 const self = this;
                 
                 if (self.disabled) {
-                    // Remember the cursor to change back to, but don't re-remember
-                    // if we're already remembering one.
+                    // Remember the cursor to change back to, but don't 
+                    // re-remember if we're already remembering one.
                     if (self.__restoreCursor == null) self.__restoreCursor = self.cursor;
                     self.setCursor('not-allowed');
                     self.drawDisabledState();
@@ -11363,30 +11379,31 @@ new JS.Singleton('GlobalMouse', {
                 }
             },
             
-            /** Draw the UI when the component has focus. The default implementation
-                calls drawHoverState.
+            /** Draw the UI when the component has focus. The default 
+                implementation calls drawHoverState.
                 @returns {undefined} */
             drawFocusedState: function() {
                 this.drawHoverState();
             },
             
-            /** Draw the UI when the component is on the verge of being interacted 
-                with. For mouse interactions this corresponds to the over state.
+            /** Draw the UI when the component is on the verge of being 
+                interacted with. For mouse interactions this corresponds to 
+                the over state.
                 @returns {undefined} */
             drawHoverState: () => {
                 // Subclasses to implement as needed.
             },
             
-            /** Draw the UI when the component has a pending activation. For mouse
-                interactions this corresponds to the down state.
+            /** Draw the UI when the component has a pending activation. For 
+                mouse interactions this corresponds to the down state.
                 @returns {undefined} */
             drawActiveState: () => {
                 // Subclasses to implement as needed.
             },
             
-            /** Draw the UI when the component is ready to be interacted with. For
-                mouse interactions this corresponds to the enabled state when the
-                mouse is not over the component.
+            /** Draw the UI when the component is ready to be interacted with. 
+                For mouse interactions this corresponds to the enabled state 
+                when the mouse is not over the component.
                 @returns {undefined} */
             drawReadyState: () => {
                 // Subclasses to implement as needed.
@@ -11414,16 +11431,14 @@ new JS.Singleton('GlobalMouse', {
         /** A mixin that provides activeColor, hoverColor and readyColor
             attributes to fill the view.
             
-            Events:
-                None
-            
             Attributes:
-                activeColor:string A color string such as '#ff0000' or 'transparent'.
-                    Used when the button is in the active state.
-                hoverColor:string A color string such as '#ff0000' or 'transparent'.
-                    Used when the button is in the hover state.
-                readyColor:string A color string such as '#ff0000' or 'transparent'.
-                    Used when the button is in the ready or disabled state.
+                activeColor:string A color string such as '#ff0000' or 
+                    'transparent'. Used when the button is in the active state.
+                hoverColor:string A color string such as '#ff0000' or 
+                    'transparent'. Used when the button is in the hover state.
+                readyColor:string A color string such as '#ff0000' or 
+                    'transparent'. Used when the button is in the ready or 
+                    disabled state.
             
             @class */
         SimpleButtonStyle = pkg.SimpleButtonStyle = new JSModule('SimpleButtonStyle', {
@@ -11482,8 +11497,8 @@ new JS.Singleton('GlobalMouse', {
             }
         }),
         
-        /** An myt.Button that makes use of activeColor, hoverColor and readyColor
-            attributes to fill the button.
+        /** An myt.Button that makes use of activeColor, hoverColor and 
+            readyColor attributes to fill the button.
             
             @class */
         SimpleButton = pkg.SimpleButton = new JSClass('SimpleButton', View, {
@@ -11497,225 +11512,8 @@ new JS.Singleton('GlobalMouse', {
             }
         });
     
-    /** A mixin that adds an icon and text to the inside of a button.
-        
-        Events:
-            inset:number
-            outset:number
-            text:string
-            shrinkToFit:boolean
-            contentAlign:string
-            iconUrl:string
-            iconY:number|string
-            iconSpacing:number
-            textY:number|string
-        
-        Attributes:
-            text:string The text to display on the button.
-            iconUrl:string The url for an image to display in the button.
-            inset:number The left padding before the icon. Defaults to 0.
-            outset:number The right padding after the text/icon. Defaults to 0.
-            textY:number|string The y offset for the text. If a string it must be
-                a valign value: 'top', 'middle' or 'bottom'.
-            iconY:number|string The y offset for the icon. If a string it must be
-                a valign value: 'top', 'middle' or 'bottom'.
-            iconSpacing:number The spacing between the iconView and the textView. 
-                Defaults to 2.
-            shrinkToFit:boolean When true the button will be as narrow as possible
-                to fit the text, icon, inset and outset. When false the button 
-                will be as wide as the set width. Defaults to false.
-            contentAlign:string Determines how the icon and text will be 
-                positioned when not in shrinkToFit mode. Allowed values are: 
-                'left', 'center' and 'right'. Defaults to 'center'.
-            textView:myt.Text A reference to the child text view.
-            iconView:myt.Image A reference to the child image view.
-            
-        Private Attributes:
-            __updateContentPositionLoopBlock:boolean Used in __updateContentPosition
-                to prevent infinite loops.
-        
-        @class */
-    pkg.IconTextButtonContent = new JSModule('IconTextButtonContent', {
-        // Life Cycle //////////////////////////////////////////////////////////
-        initNode: function(parent, attrs) {
-            const self = this;
-            let iconView,
-                textView;
-            
-            self.textY = self.iconY = 'middle';
-            self.iconSpacing = 2;
-            self.inset = self.outset = 0;
-            
-            defAttr(attrs, 'shrinkToFit', false);
-            defAttr(attrs, 'contentAlign', 'center');
-            
-            self.callSuper(parent, attrs);
-            
-            // Setup the constraint after inited since the textView won't have
-            // been sized to the dom until it's added in.
-            iconView = self.iconView;
-            textView = self.textView;
-            self.constrain('__updateContentPosition', [
-                self, 'inset', self, 'outset',
-                self, 'width', self, 'shrinkToFit', self, 'iconSpacing',
-                self, 'contentAlign',
-                iconView, 'width', iconView, 'visible',
-                textView, 'width', textView, 'visible'
-            ]);
-        },
-        
-        doAfterAdoption: function() {
-            const self = this,
-                iconY = self.iconY,
-                textY = self.textY;
-            let attrs = {
-                    name:'iconView',
-                    imageUrl:self.iconUrl
-                };
-            
-            // Setup iconView
-            if (typeof iconY === 'string') {
-                attrs.valign = iconY;
-            } else {
-                attrs.y = iconY;
-            }
-            new pkg.Image(self, attrs);
-            
-            // Setup textView
-            attrs = {
-                name:'textView',
-                whiteSpace:'nowrap',
-                text:self.text, 
-                domClass:'myt-Text mytButtonText'
-            };
-            if (typeof textY === 'string') {
-                attrs.valign = textY;
-            } else {
-                attrs.y = textY;
-            }
-            new pkg.Text(self, attrs);
-            
-            self.callSuper();
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        setInset: function(v) {
-            // Adapt to event from syncTo
-            if (v != null && typeof v === 'object') v = v.value;
-            this.set('inset', v, true);
-        },
-        
-        setOutset: function(v) {
-            // Adapt to event from syncTo
-            if (v != null && typeof v === 'object') v = v.value;
-            this.set('outset', v, true);
-        },
-        
-        setText: function(v) {
-            if (this.text !== v) {
-                this.text = v;
-                if (this.inited) {
-                    this.textView.setText(v);
-                    this.fireEvent('text', v);
-                }
-            }
-        },
-        
-        setShrinkToFit: function(v) {this.set('shrinkToFit', v, true);},
-        setContentAlign: function(v) {this.set('contentAlign', v, true);},
-        setIconSpacing: function(v) {this.set('iconSpacing', v, true);},
-        
-        setIconUrl: function(v) {
-            if (this.iconUrl !== v) {
-                this.iconUrl = v;
-                if (this.inited) {
-                    this.fireEvent('iconUrl', v);
-                    this.iconView.setImageUrl(v);
-                }
-            }
-        },
-        
-        setIconY: function(v) {
-            const self = this,
-                iconView = self.iconView;
-            if (self.iconY !== v) {
-                self.iconY = v;
-                if (self.inited) {
-                    self.fireEvent('iconY', v);
-                    if (typeof v === 'string') {
-                        iconView.setValign(v);
-                    } else {
-                        iconView.setY(v);
-                    }
-                }
-            }
-        },
-        
-        setTextY: function(v) {
-            const self = this,
-                textView = self.textView;
-            if (self.textY !== v) {
-                self.textY = v;
-                if (self.inited) {
-                    self.fireEvent('textY', v);
-                    if (typeof v === 'string') {
-                        textView.setValign(v);
-                    } else {
-                        textView.setValign('');
-                        textView.setY(v);
-                    }
-                }
-            }
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** @private */
-        __updateContentPosition: function(v) {
-            const self = this;
-            
-            if (self.__updateContentPositionLoopBlock || self.destroyed) return;
-            
-            const inset = self.inset,
-                outset = self.outset,
-                iconView = self.iconView,
-                textView = self.textView,
-                textViewVisible = textView.visible && self.text,
-                iconWidth = iconView.visible ? iconView.width : 0,
-                iconExtent = iconWidth + (textViewVisible && iconWidth > 0 ? self.iconSpacing : 0),
-                textWidth = textViewVisible ? textView.width : 0;
-            let totalWidth,
-                leftPos,
-                extraWidth;
-            
-            if (self.shrinkToFit) {
-                totalWidth = inset;
-                iconView.setX(totalWidth);
-                totalWidth += iconExtent;
-                textView.setX(totalWidth);
-                totalWidth += textWidth + outset;
-                
-                self.__updateContentPositionLoopBlock = true;
-                self.setWidth(totalWidth);
-                self.__updateContentPositionLoopBlock = false;
-            } else {
-                if (self.contentAlign === 'left') {
-                    leftPos = inset;
-                } else if (self.contentAlign === 'center') {
-                    extraWidth = self.width - inset - iconExtent - textWidth - outset;
-                    leftPos = inset + (extraWidth / 2);
-                } else {
-                    leftPos = self.width - iconExtent - textWidth - outset;
-                }
-                
-                iconView.setX(leftPos);
-                textView.setX(leftPos + iconExtent);
-            }
-        }
-    });
-    
-    /** A mixin that adds a text element to the inside of a button.
+    /** A simple button with support for text and a tooltip. Adds a text 
+        element to the inside of the button.
         
         Events:
             inset:number
@@ -11728,22 +11526,19 @@ new JS.Singleton('GlobalMouse', {
             inset:number The left padding before the text. Defaults to 0.
             outset:number The right padding after the text. Defaults to 0.
             text:string The text to display on the button.
-            shrinkToFit:boolean When true the button will be as narrow as possible
-                to fit the text, inset and outset. When false the button 
-                will be as wide as the set width. Defaults to false.
-            textY:number|string The y offset for the text. If a string it must be
-                a valign value: 'top', 'middle' or 'bottom'.
+            shrinkToFit:boolean When true the button will be as narrow as 
+                possible to fit the text, inset and outset. When false the 
+                button will be as wide as the set width. Defaults to false.
+            textY:number|string The y offset for the text. If a string it 
+                must be a valign value: 'top', 'middle' or 'bottom'.
             textView:myt.Text A reference to the child text view.
         
         Private Attributes:
-            __updateContentPositionLoopBlock:boolean Used in __updateContentPosition
+            __updateContentLoopBlock:boolean Used in __updateContent
                 to prevent infinite loops.
-            __origHeight:number The height the button has after adoption. Used to
-                keep a positive height for the button even when the textView is
-                not shown.
         
         @class */
-    pkg.TextButtonContent = new JSModule('TextButtonContent', {
+    pkg.SimpleTextButton = new JSClass('SimpleTextButton', SimpleButton, {
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
             const self = this;
@@ -11751,43 +11546,34 @@ new JS.Singleton('GlobalMouse', {
             self.inset = self.outset = 0;
             
             defAttr(attrs, 'shrinkToFit', false);
-            
-            // Use appropriate default based on mutliline text or not.
-            self.textY = attrs.shrinkToFit ? 'middle' : 0;
+            defAttr(attrs, 'height', 24);
+            defAttr(attrs, 'textY', 'middle');
             
             self.callSuper(parent, attrs);
             
-            // Setup the constraint after adoption since the textView won't have
-            // been sized to the dom until it's added in.
-            let textView = self.textView;
-            self.constrain('__updateContentPosition', [
-                self, 'inset', self, 'outset',
-                self, 'width', self, 'shrinkToFit',
-                textView, 'visible', textView, 'width',
-                textView, 'height', textView, 'y'
-            ]);
-        },
-        
-        doAfterAdoption: function() {
-            const self = this,
-                textY = self.textY, 
-                attrs = {
+            // Build UI
+            const textY = self.textY,
+                textAttrs = {
                     name:'textView', 
                     whiteSpace: self.shrinkToFit ? 'nowrap' : 'normal', 
                     text:self.text,
                     domClass:'myt-Text mytButtonText'
                 };
             if (typeof textY === 'string') {
-                attrs.valign = textY;
+                textAttrs.valign = textY;
             } else {
-                attrs.y = textY;
+                textAttrs.y = textY;
             }
-            new pkg.Text(self, attrs);
+            const textView = new pkg.Text(self, textAttrs);
             
-            // Record original height
-            self.__origHeight = self.height;
-            
-            self.callSuper();
+            // Setup the constraint after adoption since the textView 
+            // won't have been sized to the dom until it's added in.
+            self.constrain('__updateContent', [
+                self, 'inset', self, 'outset',
+                self, 'width', self, 'shrinkToFit',
+                textView, 'visible', textView, 'width',
+                textView, 'height', textView, 'y'
+            ]);
         },
         
         
@@ -11845,43 +11631,23 @@ new JS.Singleton('GlobalMouse', {
         
         
         // Methods /////////////////////////////////////////////////////////////
-        __updateContentPosition: function(v) {
+        __updateContent: function(v) {
             const self = this;
-            
-            if (self.__updateContentPositionLoopBlock || self.destroyed) return;
-            
-            const inset = self.inset, 
-                outset = self.outset, 
-                textView = self.textView,
-                textViewVisible = textView.visible && self.text;
-            
-            self.__updateContentPositionLoopBlock = true;
-            if (self.shrinkToFit) {
+            if (!self.__updateContentLoopBlock && !self.destroyed) {
+                const inset = self.inset, 
+                    outset = self.outset, 
+                    textView = self.textView;
+                
+                self.__updateContentLoopBlock = true;
                 textView.setX(inset);
-                self.setWidth(inset + (textViewVisible ? textView.width : 0) + outset);
-                self.setHeight(self.__origHeight);
-            } else {
-                textView.setHeight('auto');
-                textView.setWidth(self.width - inset - outset);
-                textView.setX(inset);
-                self.setHeight(textViewVisible ? textView.y + textView.height : self.__origHeight);
+                if (self.shrinkToFit) {
+                    self.setWidth(inset + (textView.visible && self.text ? textView.width : 0) + outset);
+                } else {
+                    textView.setWidth(self.width - inset - outset);
+                }
+                self.__updateContentLoopBlock = false;
             }
-            self.__updateContentPositionLoopBlock = false;
         }
-    });
-    
-    /** A simple button with support for an icon, text and a tooltip.
-        
-        @class */
-    pkg.SimpleIconTextButton = new JSClass('SimpleIconTextButton', SimpleButton, {
-        include: [pkg.IconTextButtonContent]
-    });
-    
-    /** A simple button with support for text and a tooltip.
-        
-        @class */
-    pkg.SimpleTextButton = new JSClass('SimpleTextButton', SimpleButton, {
-        include: [pkg.TextButtonContent]
     });
     
     pkg.TextButton = new JSClass('TextButton', View, {
@@ -12338,7 +12104,11 @@ new JS.Singleton('GlobalMouse', {
     const JSClass = JS.Class,
         JSModule = JS.Module,
         
+        GlobalFocus = pkg.global.focus,
+        
         defAttr = pkg.AccessorSupport.defAttr,
+        
+        ACTIVATION_KEYS = [13,27,32,37,38,39,40],
         
         /** Defines the interface list view items must support.
             
@@ -12352,14 +12122,15 @@ new JS.Singleton('GlobalMouse', {
             
             
             // Methods /////////////////////////////////////////////////////////
-            /** Subclasses and/or implementations must implement this method. Should
-                return the minimum width the list item needs to display itself.
+            /** Subclasses and/or implementations must implement this method. 
+                Should return the minimum width the list item needs to 
+                display itself.
                 @returns number */
             getMinimumWidth: () => 0,
             
-            /** Part of a performance optimization. Called from ListView.__updateItems
-                after the items have been inserted into the dom. Now we can actually
-                measure text width. */
+            /** Part of a performance optimization. Called from 
+                ListView.__updateItems after the items have been inserted into 
+                the dom. Now we can actually measure text width. */
             syncToDom: () => {}
         });
     
@@ -12370,14 +12141,14 @@ new JS.Singleton('GlobalMouse', {
         
         Attributes:
             minWidth:number The minimum width for the list. The list will size
-                itself to fit the maximum width of the items in the list or this
-                value whichever is larger. Defaults to 0.
-            maxHeight:number The maximum height of the list view in pixels. If set 
-                to -1 no max height will be used.
-            defaultItemClass:JS.Class The class to use for list items if one is
-                not provided in the config. Defaults to myt.ListViewItem.
-            itemConfig:array An array of configuration information for the items
-                in the list.
+                itself to fit the maximum width of the items in the list or 
+                this value whichever is larger. Defaults to 0.
+            maxHeight:number The maximum height of the list view in pixels. 
+                If set to -1 no max height will be used.
+            defaultItemClass:JS.Class The class to use for list items if one 
+                is not provided in the config. Defaults to myt.ListViewItem.
+            itemConfig:array An array of configuration information for 
+                the items in the list.
             items:array The array of items in the list.
         
         @class */
@@ -12440,8 +12211,9 @@ new JS.Singleton('GlobalMouse', {
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** ListViewItems should call this method when they are activated. The
-            default implementation invokes doItemActivated on the ListViewAnchor.
+        /** ListViewItems should call this method when they are activated. 
+            The default implementation invokes doItemActivated on 
+            the ListViewAnchor.
             @param {!Object} itemView
             @returns {undefined} */
         doItemActivated: function(itemView) {
@@ -12520,8 +12292,8 @@ new JS.Singleton('GlobalMouse', {
                     item.callSetters(cfgAttrs);
                     
                     // Create an item index to sort the layout subviews on. This
-                    // is necessary when the class of list items change so that the
-                    // newly created items don't end up out of order.
+                    // is necessary when the class of list items change so 
+                    // that the newly created items don't end up out of order.
                     item.__LAYOUT_IDX = i;
                 }
             }
@@ -12531,11 +12303,10 @@ new JS.Singleton('GlobalMouse', {
             
             // Measure width. Must be in dom at this point.
             let minWidth = self.minWidth;
-            for (i = 0; cfgLen > i; ++i) {
-                item = items[i];
+            for (i = 0; cfgLen > i;) {
+                item = items[i++];
                 item.syncToDom();
-                const minItemWidth = item.getMinimumWidth();
-                if (minItemWidth > minWidth) minWidth = minItemWidth;
+                minWidth = Math.max(minWidth, item.getMinimumWidth());
             }
             
             // Delete any remaining items
@@ -12588,7 +12359,7 @@ new JS.Singleton('GlobalMouse', {
             
             // Assume this will be mixed onto something that implements 
             // myt.KeyActivation since it probably will.
-            defAttr(attrs, 'activationKeys', [13,27,32,37,38,39,40]);
+            defAttr(attrs, 'activationKeys', ACTIVATION_KEYS);
             
             this.callSuper(parent, attrs);
         },
@@ -12684,20 +12455,18 @@ new JS.Singleton('GlobalMouse', {
     /** An item in an myt.ListView
         
         @class */
-    pkg.ListViewItem = new JSClass('ListViewItem', pkg.SimpleIconTextButton, {
+    pkg.ListViewItem = new JSClass('ListViewItem', pkg.SimpleTextButton, {
         include: [ListViewItemMixin],
         
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            defAttr(attrs, 'height', 24);
             defAttr(attrs, 'activeColor', '#bbb');
             defAttr(attrs, 'hoverColor', '#fff');
             defAttr(attrs, 'readyColor', '#eee');
-            defAttr(attrs, 'contentAlign', 'left');
             defAttr(attrs, 'inset', 8);
             defAttr(attrs, 'outset', 8);
-            defAttr(attrs, 'activationKeys', [13,27,32,37,38,39,40]);
+            defAttr(attrs, 'activationKeys', ACTIVATION_KEYS);
             
             this.callSuper(parent, attrs);
         },
@@ -12706,19 +12475,13 @@ new JS.Singleton('GlobalMouse', {
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides myt.ListViewItemMixin */
         syncToDom: function() {
+            this.textView.getInnerDomStyle().width = 'auto';
             this.textView.sizeViewToDom();
         },
         
         /** @overrides myt.ListViewItemMixin */
         getMinimumWidth: function() {
-            const self = this,
-                iconView = self.iconView,
-                textView = self.textView,
-                textViewVisible = textView.visible && self.text,
-                iconWidth = iconView.visible ? iconView.width : 0,
-                iconExtent = iconWidth + (textViewVisible && iconWidth > 0 ? self.iconSpacing : 0),
-                textWidth = textViewVisible ? Math.ceil(textView.width) : 0;
-            return self.inset + iconExtent + textWidth + self.outset;
+            return this.inset + (this.textView.visible && this.text ? Math.ceil(this.textView.measureNoWrapWidth()) : 0) + this.outset;
         },
         
         /** @overrides myt.Button */
@@ -12744,11 +12507,11 @@ new JS.Singleton('GlobalMouse', {
                     return;
                 case 37: // Left
                 case 38: // Up
-                    pkg.global.focus.prev();
+                    GlobalFocus.prev();
                     break;
                 case 39: // Right
                 case 40: // Down
-                    pkg.global.focus.next();
+                    GlobalFocus.next();
                     break;
             }
             
@@ -14066,7 +13829,7 @@ new JS.Singleton('GlobalMouse', {
                     which causes myt.Tab.DEFAULT_RADIUS to be used.
             
             @class */
-        Tab = pkg.Tab = new JS.Class('Tab', pkg.SimpleIconTextButton, {
+        Tab = pkg.Tab = new JS.Class('Tab', pkg.SimpleTextButton, {
             include: [TabMixin],
             
             
@@ -14086,7 +13849,7 @@ new JS.Singleton('GlobalMouse', {
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                // myt.SimpleIconTextButton
+                // myt.SimpleTextButton
                 defAttr(attrs, 'inset', Tab.DEFAULT_INSET);
                 defAttr(attrs, 'outset', Tab.DEFAULT_OUTSET);
                 
@@ -20939,22 +20702,16 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             let glyph = '';
             if (gridHeader.sortable) {
                 switch (gridHeader.sortState) {
-                    case 'ascending':
-                        glyph = 'chevron-up';
-                        break;
-                    case 'descending':
-                        glyph = 'chevron-down';
-                        break;
+                    case 'ascending': glyph = 'chevron-up'; break;
+                    case 'descending': glyph = 'chevron-down'; break;
                 }
             }
             gridHeader.sortIcon.setIcon(glyph);
         },
         
         updateTextWidth = gridHeader => {
-            if (gridHeader.contentAlign === 'left') {
-                const tv = gridHeader.textView;
-                if (tv) tv.setWidth(gridHeader.width - gridHeader.outset - tv.x);
-            }
+            const textView = gridHeader.textView;
+            if (textView) textView.setWidth(gridHeader.width - gridHeader.outset - textView.x);
         },
         
         /** Coordinates the behavior of a grid.
@@ -21662,7 +21419,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 Defaults to '#666666'.
         
         @class */
-    pkg.SimpleGridColumnHeader = new JSClass('SimpleGridColumnHeader', pkg.SimpleIconTextButton, {
+    pkg.SimpleGridColumnHeader = new JSClass('SimpleGridColumnHeader', pkg.SimpleTextButton, {
         include: [GridColumnHeader],
         
         
@@ -21676,8 +21433,6 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             defAttr(attrs, 'readyColor', '#aaa');
             defAttr(attrs, 'inset', 2);
             defAttr(attrs, 'outset', 2);
-            defAttr(attrs, 'height', 18);
-            defAttr(attrs, 'contentAlign', 'left');
             defAttr(attrs, 'sortIconColor', '#666');
             
             self.callSuper(parent, attrs);

@@ -1,176 +1,180 @@
 <!doctype html><html><head>
 <title>Myt Framework : Floating Panel Example</title>
 <link rel="stylesheet" href="../src/css/myt.css"/>
+<script>var ROOT = '../src/js/';</script>
 <script src="../src/js/boilerplate.js"></script>
-<script src="../dist/myt.min.js"></script>
+<script src="../dist/loader-browser.min.js"></script>
+<script src="../src/js/myt/manifest.js"></script>
 </head><body>
 <script>
-    var BtnClass = new JS.Class('BtnClass2', myt.SimpleIconTextButton, {
-        initNode: function(parent, attrs) {
-            attrs.activeColor = '#666666';
-            attrs.hoverColor = '#cccccc';
-            attrs.readyColor = '#999999';
-            attrs.textColor = '#ffffff';
-            attrs.height = 20;
-            attrs.shrinkToFit = true;
-            attrs.inset = attrs.outset = 10;
-            
-            this.callSuper(parent, attrs);
-        }
-    });
-    
-    var BuildPanelMixin = new JS.Module('BuildPanelMixin', {
-        doActivated: function() {
-            var panelId = 'baz';
-            var fp = this.getFloatingPanel(panelId);
-            if (!fp) {
-                fp = this.createFloatingPanel(panelId, myt.FloatingPanel, {
-                    bgColor:'#0000ff', width:100, height:50
-                });
-                fp.extend({
-                    getFirstFocusableDescendant: function() {
-                        return this.btn1;
-                    }
-                });
-                new BtnClass(fp, {name:'btn1', text:'here'}, [{
-                    doActivated: function() {this.parent.hide();}
-                }]);
-                new BtnClass(fp, {text:'there', y:25}, [{
-                    doActivated: function() {this.parent.hide();}
-                }]);
+    JS.require('myt.all', function() {
+        var BtnClass = new JS.Class('BtnClass2', myt.SimpleTextButton, {
+            initNode: function(parent, attrs) {
+                attrs.activeColor = '#666666';
+                attrs.hoverColor = '#cccccc';
+                attrs.readyColor = '#999999';
+                attrs.textColor = '#ffffff';
+                attrs.height = 20;
+                attrs.shrinkToFit = true;
+                attrs.inset = attrs.outset = 10;
+                
+                this.callSuper(parent, attrs);
             }
-            this.toggleFloatingPanel(panelId);
-        }
-    });
-    
-    var rootView = new myt.View(null, {bgColor:'#eeeeee'}, [myt.SizeToWindow]);
-    
-    global.btn = new BtnClass(rootView, {
-        name:'btn', text:'baz', tooltip:'Example tooltip'
-    }, [myt.FloatingPanelAnchor, {
-        doActivated: function() {
-            var panelId = 'foo';
-            var fp = this.getFloatingPanel(panelId);
-            if (!fp) {
-                fp = this.createFloatingPanel(panelId, myt.FloatingPanel, {bgColor:'#ff0000', width:100, height:25});
+        });
+        
+        var BuildPanelMixin = new JS.Module('BuildPanelMixin', {
+            doActivated: function() {
+                var panelId = 'baz';
+                var fp = this.getFloatingPanel(panelId);
+                if (!fp) {
+                    fp = this.createFloatingPanel(panelId, myt.FloatingPanel, {
+                        bgColor:'#0000ff', width:100, height:50
+                    });
+                    fp.extend({
+                        getFirstFocusableDescendant: function() {
+                            return this.btn1;
+                        }
+                    });
+                    new BtnClass(fp, {name:'btn1', text:'here'}, [{
+                        doActivated: function() {this.parent.hide();}
+                    }]);
+                    new BtnClass(fp, {text:'there', y:25}, [{
+                        doActivated: function() {this.parent.hide();}
+                    }]);
+                }
+                this.toggleFloatingPanel(panelId);
             }
-            this.toggleFloatingPanel(panelId);
-            //fp.setHideOnBlur(!fp.hideOnBlur);
-        },
+        });
         
-        getNextFocusAfterPanel: function() {
-            return this.parent.btn2;
-        }
-    }]);
-    
-    new BtnClass(rootView, {
-        name:'btn2', text:'baz',
-        floatingAlign:'outsideRight', floatingValign:'insideTop', floatingAlignOffset:2
-    }, [myt.FloatingPanelAnchor, {
-        doActivated: function() {
-            var panelId = 'bar';
-            var fp = this.getFloatingPanel(panelId);
-            if (!fp) this.createFloatingPanel(panelId, myt.FloatingPanel, {bgColor:'#00ff00', width:30, height:50});
-            this.toggleFloatingPanel(panelId);
-        },
+        var rootView = new myt.View(null, {bgColor:'#eeeeee'}, [myt.SizeToWindow]);
         
-        getNextFocusAfterPanel: function() {
-            return this.parent.btn3;
-        }
-    }]);
-    
-    new BtnClass(rootView, {
-        name:'btn3', text:'baz'
-    }, [myt.FloatingPanelAnchor, BuildPanelMixin]);
-    
-    new BtnClass(rootView, {
-        name:'btn4', text:'baz'
-    }, [myt.FloatingPanelAnchor, BuildPanelMixin]);
-    
-    new BtnClass(rootView, {
-        name:'btn5', text:'baz',
-        floatingAlign:'outsideRight', floatingValign:'insideTop', floatingAlignOffset:2
-    }, [myt.FloatingPanelAnchor, {
-        doActivated: function() {
-            var panelId = '5';
-            var fp = this.getFloatingPanel(panelId);
-            if (!fp) this.createFloatingPanel(panelId, myt.FloatingPanel, {bgColor:'#00ff99', width:30, height:50, hideOnBlur:false});
-            this.toggleFloatingPanel(panelId);
-        },
-        
-        getNextFocusAfterPanel: function() {
-            return this.parent.btn;
-        }
-    }]);
-    
-    new BtnClass(rootView, {
-        name:'btn6', text:'list view',
-        floatingPanelId:'listviewTest',
-        listViewAttrs:{maxHeight:349}
-    }, [myt.ListViewAnchor, {
-        doItemActivated: function(itemView) {
-            console.log(itemView.text);
-            this.callSuper(itemView);
-        },
-        doActivated: function() {
-            var cfg = [
-                {attrs:{text:'foo'}},
-                {attrs:{text:'bar har har'}},
-                {attrs:{text:'baz'}},
-                {attrs:{text:'a'}},
-                {attrs:{text:'b'}},
-                {attrs:{text:'c', disabled:true}},
-                {attrs:{text:'d', visible:false}},
-                {attrs:{text:'e'}},
-                {attrs:{text:'f'}},
-                {attrs:{text:'g'}},
-                {klass:myt.ListViewSeparator},
-                {attrs:{text:'h'}},
-                {attrs:{text:'i'}},
-                {attrs:{text:'j'}},
-                {attrs:{text:'k'}},
-                {klass:myt.ListViewSeparator},
-                {attrs:{text:'l'}},
-                {attrs:{text:'m'}},
-                {attrs:{text:'n'}},
-                {klass:myt.ListViewSeparator},
-                {attrs:{text:'o'}},
-                {attrs:{text:'p'}},
-                {attrs:{text:'q'}},
-                {attrs:{text:'r'}},
-                {attrs:{text:'s'}},
-                {attrs:{text:'t'}},
-                {attrs:{text:'u'}},
-                {attrs:{text:'v'}},
-                {attrs:{text:'w'}},
-                {attrs:{text:'x'}},
-                {attrs:{text:'y'}},
-                {attrs:{text:'z'}}
-            ];
-            cfg.length = myt.getRandomInt(5, cfg.length);
-            this.setItemConfig(cfg);
+        global.btn = new BtnClass(rootView, {
+            name:'btn', text:'baz', tooltip:'Example tooltip'
+        }, [myt.FloatingPanelAnchor, {
+            doActivated: function() {
+                var panelId = 'foo';
+                var fp = this.getFloatingPanel(panelId);
+                if (!fp) {
+                    fp = this.createFloatingPanel(panelId, myt.FloatingPanel, {bgColor:'#ff0000', width:100, height:25});
+                }
+                this.toggleFloatingPanel(panelId);
+                //fp.setHideOnBlur(!fp.hideOnBlur);
+            },
             
-            this.toggleFloatingPanel();
-        }
-    }]);
-    
-    new BtnClass(rootView, {
-        name:'btn7', text:'baz', 
-        floatingAlign:'outsideRight', floatingValign:'insideTop', floatingAlignOffset:2
-    }, [myt.FloatingPanelAnchor, {
-        doActivated: function() {
-            var panelId = '7';
-            var fp = this.getFloatingPanel(panelId);
-            if (!fp) this.createFloatingPanel(panelId, myt.FloatingPanel, {bgColor:'#00ff99', width:30, height:50, hideOnBlur:false});
-            this.toggleFloatingPanel(panelId);
-        },
+            getNextFocusAfterPanel: function() {
+                return this.parent.btn2;
+            }
+        }]);
         
-        getNextFocusAfterPanel: function() {
-            return this.parent.btn;
-        }
-    }]);
-    
-    new myt.ConstantLayout(rootView, {targetAttrName:'y', targetValue:10});
-    new myt.SpacedLayout(rootView, {axis:'x', spacing:10, inset:10});
+        new BtnClass(rootView, {
+            name:'btn2', text:'baz',
+            floatingAlign:'outsideRight', floatingValign:'insideTop', floatingAlignOffset:2
+        }, [myt.FloatingPanelAnchor, {
+            doActivated: function() {
+                var panelId = 'bar';
+                var fp = this.getFloatingPanel(panelId);
+                if (!fp) this.createFloatingPanel(panelId, myt.FloatingPanel, {bgColor:'#00ff00', width:30, height:50});
+                this.toggleFloatingPanel(panelId);
+            },
+            
+            getNextFocusAfterPanel: function() {
+                return this.parent.btn3;
+            }
+        }]);
+        
+        new BtnClass(rootView, {
+            name:'btn3', text:'baz'
+        }, [myt.FloatingPanelAnchor, BuildPanelMixin]);
+        
+        new BtnClass(rootView, {
+            name:'btn4', text:'baz'
+        }, [myt.FloatingPanelAnchor, BuildPanelMixin]);
+        
+        new BtnClass(rootView, {
+            name:'btn5', text:'baz',
+            floatingAlign:'outsideRight', floatingValign:'insideTop', floatingAlignOffset:2
+        }, [myt.FloatingPanelAnchor, {
+            doActivated: function() {
+                var panelId = '5';
+                var fp = this.getFloatingPanel(panelId);
+                if (!fp) this.createFloatingPanel(panelId, myt.FloatingPanel, {bgColor:'#00ff99', width:30, height:50, hideOnBlur:false});
+                this.toggleFloatingPanel(panelId);
+            },
+            
+            getNextFocusAfterPanel: function() {
+                return this.parent.btn;
+            }
+        }]);
+        
+        new BtnClass(rootView, {
+            name:'btn6', text:'list view',
+            floatingPanelId:'listviewTest',
+            listViewAttrs:{maxHeight:349}
+        }, [myt.ListViewAnchor, {
+            doItemActivated: function(itemView) {
+                console.log(itemView.text);
+                this.callSuper(itemView);
+            },
+            doActivated: function() {
+                var cfg = [
+                    {attrs:{text:'foo'}},
+                    {attrs:{text:'bar har har'}},
+                    {attrs:{text:'baz'}},
+                    {attrs:{text:'a w'}},
+                    {attrs:{text:'b ww'}},
+                    {attrs:{text:'c www', disabled:true}},
+                    {attrs:{text:'d wwww', visible:false}},
+                    {attrs:{text:'e wwwww'}},
+                    {attrs:{text:'f wwwwww'}},
+                    {attrs:{text:'g wwwwwww'}},
+                    {klass:myt.ListViewSeparator},
+                    {attrs:{text:'h wwwwwwww'}},
+                    {attrs:{text:'i wwwwwwwww'}},
+                    {attrs:{text:'j wwwwwwwwww'}},
+                    {attrs:{text:'k wwwwwwwwwww'}},
+                    {klass:myt.ListViewSeparator},
+                    {attrs:{text:'l wwwwwwwwwwww'}},
+                    {attrs:{text:'m wwwwwwwwwwwww'}},
+                    {attrs:{text:'n wwwwwwwwwwwww w'}},
+                    {klass:myt.ListViewSeparator},
+                    {attrs:{text:'o wwwwwwwwwwwww ww'}},
+                    {attrs:{text:'p wwwwwwwwwwwww www'}},
+                    {attrs:{text:'q wwwwwwwwwwwww wwww'}},
+                    {attrs:{text:'r wwwwwwwwwwwww wwwww'}},
+                    {attrs:{text:'s wwwwwwwwwwwww wwwwww'}},
+                    {attrs:{text:'t wwwwwwwwwwwww wwwwwww'}},
+                    {attrs:{text:'u wwwwwwwwwwwww wwwwwwww'}},
+                    {attrs:{text:'v wwwwwwwwwwwww wwwwwwwww'}},
+                    {attrs:{text:'w wwwwwwwwwwwww wwwwwwwwww'}},
+                    {attrs:{text:'x wwwwwwwwwwwww wwwwwwwwwww'}},
+                    {attrs:{text:'y wwwwwwwwwwwww wwwwwwwwwwww'}},
+                    {attrs:{text:'z wwwwwwwwwwwww wwwwwwwwwwww w'}}
+                ];
+                cfg.length = myt.getRandomInt(5, cfg.length);
+                this.setItemConfig(cfg);
+                
+                this.toggleFloatingPanel();
+            }
+        }]);
+        
+        new BtnClass(rootView, {
+            name:'btn7', text:'baz', 
+            floatingAlign:'outsideRight', floatingValign:'insideTop', floatingAlignOffset:2
+        }, [myt.FloatingPanelAnchor, {
+            doActivated: function() {
+                var panelId = '7';
+                var fp = this.getFloatingPanel(panelId);
+                if (!fp) this.createFloatingPanel(panelId, myt.FloatingPanel, {bgColor:'#00ff99', width:30, height:50, hideOnBlur:false});
+                this.toggleFloatingPanel(panelId);
+            },
+            
+            getNextFocusAfterPanel: function() {
+                return this.parent.btn;
+            }
+        }]);
+        
+        new myt.ConstantLayout(rootView, {targetAttrName:'y', targetValue:10});
+        new myt.SpacedLayout(rootView, {axis:'x', spacing:10, inset:10});
+    });
 </script>
 </body></html>
