@@ -93,8 +93,8 @@
                 @param v:* The value to set.
                 @returns {undefined} */
             setDomValue: function(v) {
-                const de = this.getInnerDomElement();
-                if (de.value !== v) de.value = v;
+                const ide = this.getInnerDomElement();
+                if (ide.value !== v) ide.value = v;
             }
         }),
         
@@ -122,8 +122,8 @@
             /** @overrideds myt.Selectable */
             setSelected: function(v) {
                 v = this.valueFromEvent(v);
-                const de = this.getInnerDomElement();
-                if (de.selected !== v) de.selected = v;
+                const ide = this.getInnerDomElement();
+                if (ide.selected !== v) ide.selected = v;
             },
             
             /** @overrides myt.Disableable */
@@ -336,12 +336,12 @@
             },
             
             getSelection: function() {
-                const de = this.getInnerDomElement();
+                const ide = this.getInnerDomElement();
                 return {
-                    start:de.selectionStart,
-                    startElem:de,
-                    end:de.selectionEnd,
-                    endElem:de
+                    start:ide.selectionStart,
+                    startElem:ide,
+                    end:ide.selectionEnd,
+                    endElem:ide
                 };
             },
             
@@ -457,9 +457,9 @@
         
         /** @overrides myt.NativeInputWrapper */
         setDomValue: function(v) {
-            const de = this.getInnerDomElement();
-            if (de.innerHTML !== v) {
-                de.innerHTML = v;
+            const ide = this.getInnerDomElement();
+            if (ide.innerHTML !== v) {
+                ide.innerHTML = v;
                 this.sizeViewToDom();
                 this.restoreSelection();
             }

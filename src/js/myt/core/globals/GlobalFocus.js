@@ -1,10 +1,10 @@
 ((pkg) => {
     let globalFocus;
-        
+    
     const
         /*  Gets the deepest dom element that is a descendant of the provided
             dom element or the element itself. */
-        getDeepestDescendant = (elem) => {
+        getDeepestDescendant = elem => {
             while (elem.lastChild) elem = elem.lastChild;
             return elem;
         },
@@ -34,7 +34,7 @@
                 if (!model) model = globalFocus.findModelForDomElement(startElem);
                 if (model) {
                     const focusTrap = model.getFocusTrap(ignoreFocusTrap);
-                    if (focusTrap) rootElem = focusTrap.domElement;
+                    if (focusTrap) rootElem = focusTrap.getInnerDomElement();
                 }
             }
             
@@ -44,7 +44,7 @@
                     (progModel = elem.model[focusFuncName]())
                 ) {
                     // Programatic traverse
-                    elem = progModel.domElement;
+                    elem = progModel.getInnerDomElement();
                 } else if (isForward) {
                     // Dom traverse forward
                     if (elem.firstChild) {
@@ -113,18 +113,18 @@
             return null;
         };
     
-    /** Tracks focus and provides global focus events. Registered with myt.global 
-        as 'focus'.
+    /** Tracks focus and provides global focus events. Registered with 
+        myt.global  as 'focus'.
         
         Events:
-            focused:View Fired when the focused view changes. The event value is
-                the newly focused view.
+            focused:View Fired when the focused view changes. The event value 
+                is the newly focused view.
         
         Attributes:
-            lastTraversalWasForward:boolean indicates if the last traversal was
-                in the forward direction or not. If false this implies the last
-                traversal was in the backward direction. This value is initalized
-                to true.
+            lastTraversalWasForward:boolean indicates if the last traversal 
+                was in the forward direction or not. If false this implies 
+                the last traversal was in the backward direction. This value 
+                is initalized to true.
             focusedView:View the view that currently has focus.
             prevFocusedView:View the view that previously had focus.
             focusedDom:DomElement holds the dom element that has focus when the
@@ -160,7 +160,7 @@
         /** Sets the currently focused view.
             @param {?Object} v
             @returns {undefined} */
-        setFocusedView: (v) => {
+        setFocusedView: v => {
             if (globalFocus.focusedView !== v) {
                 globalFocus.prevFocusedView = globalFocus.focusedView; // Remember previous focus
                 globalFocus.focusedView = v;
@@ -172,16 +172,17 @@
         
         // Methods /////////////////////////////////////////////////////////////
         /** Called by a FocusObservable when it has received focus.
-            @param {!Object} focusable - The FocusObservable that received focus.
+            @param {!Object} focusable - The FocusObservable that 
+                received focus.
             @returns {undefined}. */
-        notifyFocus: (focusable) => {
+        notifyFocus: focusable => {
             if (globalFocus.focusedView !== focusable) globalFocus.setFocusedView(focusable);
         },
         
         /** Called by a FocusObservable when it has lost focus.
             @param {!Object} focusable - The FocusObservable that lost focus.
             @returns {undefined}. */
-        notifyBlur: (focusable) => {
+        notifyBlur: focusable => {
             if (globalFocus.focusedView === focusable) globalFocus.setFocusedView(null);
         },
         
@@ -198,7 +199,8 @@
         
         // Focus Traversal //
         /** Move focus to the next focusable element.
-            @param {boolean} ignoreFocusTrap - If true focus traps will be skipped over.
+            @param {boolean} ignoreFocusTrap - If true focus traps will be 
+                skipped over.
             @returns {undefined} */
         next: ignoreFocusTrap => {
             const next = traverse(true, ignoreFocusTrap);
@@ -206,7 +208,8 @@
         },
         
         /** Move focus to the previous focusable element.
-            @param {boolean} ignoreFocusTrap - If true focus traps will be skipped over.
+            @param {boolean} ignoreFocusTrap - If true focus traps will be 
+                skipped over.
             @returns {undefined} */
         prev: ignoreFocusTrap => {
             const prev = traverse(false, ignoreFocusTrap);
@@ -214,7 +217,7 @@
         },
         
         /** Finds the closest model for the provided dom element.
-            @param {!Object} elem - The domElement to start looking from.
+            @param {!Object} elem - The dom element to start looking from.
             @returns {?Object} - A myt.View or null if not found. */
         findModelForDomElement: elem => {
             while (elem) {

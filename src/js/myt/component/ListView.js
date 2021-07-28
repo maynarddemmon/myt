@@ -21,10 +21,10 @@
             layouts.forEach(layout => {layout.incrementLockedCounter();});
             
             // Performance: Remove from dom while doing inserts
-            const de = contentView.getOuterDomElement(),
-                nextDe = de.nextSibling,
-                parentElem = de.parentNode;
-            parentElem.removeChild(de);
+            const ode = contentView.getOuterDomElement(),
+                nextDe = ode.nextSibling,
+                parentElem = ode.parentNode;
+            parentElem.removeChild(ode);
             
             // Reconfigure list
             let i = 0;
@@ -55,7 +55,7 @@
             }
             
             // Performance: Put back in dom.
-            parentElem.insertBefore(de, nextDe);
+            parentElem.insertBefore(ode, nextDe);
             
             // Measure width. Must be in dom at this point.
             let minWidth = listView.minWidth;

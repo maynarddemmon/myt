@@ -206,24 +206,25 @@
         Attributes:
             tagName:string Determines the name of the DOM element to create for
                 this instance. This is not a normal attribute. It is only used
-                during initialization and it will be deleted from the attrs object
-                upon use. If no tagName is provided "div" will be used.
-            focusTrap:boolean Determines if focus traversal can move above this view
-                or not. The default is undefined which is equivalent to false. Can 
-                be ignored using a key modifier. The key modifier is 
+                during initialization and it will be deleted from the attrs 
+                object upon use. If no tagName is provided "div" will be used.
+            focusTrap:boolean Determines if focus traversal can move above this 
+                view or not. The default is undefined which is equivalent to 
+                false. Can be ignored using a key modifier. The key modifier is 
                 typically 'option'.
-            focusCage:boolean Determines if focus traversal can move above this view
-                or not. The default is undefined which is equivalent to false. This
-                is the same as focusTrap except it can't be ignored using a 
-                key modifier.
-            maskFocus:boolean Prevents focus from traversing into this view or any
-                of its subviews. The default is undefined which is equivalent 
-                to false.
+            focusCage:boolean Determines if focus traversal can move above this 
+                view or not. The default is undefined which is equivalent to 
+                false. This is the same as focusTrap except it can't be ignored 
+                using a key modifier.
+            maskFocus:boolean Prevents focus from traversing into this view or 
+                any of its subviews. The default is undefined which is 
+                equivalent to false.
             ignoreLayout:boolean Determines if this view should be included in 
-                layouts or not. Default is undefined which is equivalent to false.
-            layoutHint:* A value that indicates this view is treated as "special" 
-                by the layout. The interpretation of this value is up to the 
-                layout managing the view.
+                layouts or not. Default is undefined which is equivalent 
+                to false.
+            layoutHint:* A value that indicates this view is treated as 
+                "special" by the layout. The interpretation of this value is 
+                up to the layout managing the view.
             align:string Aligns the view horizontally within its parent. 
                 Supported values are: 'left', 'center', 'right' and ''. 
                 The default is undefined which is equivalent to ''.
@@ -237,11 +238,11 @@
             width:number The width of this view in pixels. Defaults to 0.
             height:number the height of this view in pixels. Defaults to 0.
             boundsWidth:number (read only) The actual bounds of the view in the
-                x-dimension. This value is in pixels relative to the RootView and
-                thus compensates for rotation and scaling.
-            boundsHeight:number (read only) The actual bounds of the view in the
-                y-dimension. This value is in pixels relative to the RootView and
-                thus compensates for rotation and scaling.
+                x-dimension. This value is in pixels relative to the RootView 
+                and thus compensates for rotation and scaling.
+            boundsHeight:number (read only) The actual bounds of the view in 
+                the y-dimension. This value is in pixels relative to the 
+                RootView and thus compensates for rotation and scaling.
             textColor:string The color used for text. Will be inherited by 
                 descendant views if they don't themselves set textColor or if 
                 they set textColor to 'inherit'. Defaults to undefined which is
@@ -249,12 +250,12 @@
             bgColor:string The background color of this view. Use a value of 
                 'transparent' to make this view transparent. Defaults 
                 to 'transparent'.
-            opacity:number The opacity of this view. The value should be a number 
-                between 0 and 1. Defaults to 1.
-            overflow:string Determines how descendant content overflows the bounds.
-                Allowed values: 'visible', 'hidden', 'scroll', 'auto', 'autoy',
-                'autox' and 'inherit'. Defaults to undefined which is equivalent 
-                to 'visible'.
+            opacity:number The opacity of this view. The value should be a 
+                number between 0 and 1. Defaults to 1.
+            overflow:string Determines how descendant content overflows the 
+                bounds. Allowed values: 'visible', 'hidden', 'scroll', 'auto', 
+                'autoy', 'autox' and 'inherit'. Defaults to undefined which 
+                is equivalent to 'visible'.
             visible:boolean Makes this view visible or not. The default value is 
                 true which means visbility is inherited from the parent view.
             cursor:string Determines what cursor to show when moused over the view.
@@ -283,9 +284,9 @@
                 'outset', 'inherit'.
             borderColor:string Sets the color of the CSS border. If null or 
                 undefined is provided '#000000' will be used.
-            tooltip:string Sets a tooltip for this view. The basic implementation
-                uses domElement.title. For a richer tooltip display use the
-                myt.TooltipMixin.
+            tooltip:string Sets a tooltip for this view. The basic 
+                implementation uses the dom element's title property. For a 
+                richer tooltip display use myt.TooltipMixin.
         
         Private Attributes:
             subviews:array The array of child myt.Views for this view. Should 
@@ -362,7 +363,7 @@
             Subclasses should call super if they don't call __updateBounds. The call
             to super should probably occur at the end of the overridden method. */
         doAfterAdoption: function() {
-            // Must be done after domElement is inserted so that calls to
+            // Must be done after the dom element is inserted so that calls to
             // getBoundingClientRect will work.
             this.__updateBounds(this.width, this.height);
         },

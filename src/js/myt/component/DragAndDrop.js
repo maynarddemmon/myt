@@ -401,8 +401,8 @@
             @param {!Object} dropable - The myt.Dropable being dragged.
             @returns {undefined} */
         notifyDragStart: function(dropable) {
-            const de = this.getInnerDomElement();
-            if (de.scrollHeight > de.clientHeight || de.scrollWidth > de.clientWidth) {
+            const ide = this.getInnerDomElement();
+            if (ide.scrollHeight > ide.clientHeight || ide.scrollWidth > ide.clientWidth) {
                 this.attachToDom(globalMouse, '__hndlMove', 'mousemove', true);
             }
         },

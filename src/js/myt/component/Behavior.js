@@ -595,9 +595,9 @@
         __doMouseDown: function(event) {
             const self = this,
                 pos = getMouseFromEvent(event),
-                de = self.getOuterDomElement();
-            self.dragInitX = pos.x - de.offsetLeft;
-            self.dragInitY = pos.y - de.offsetTop;
+                ode = self.getOuterDomElement();
+            self.dragInitX = pos.x - ode.offsetLeft;
+            self.dragInitY = pos.y - ode.offsetTop;
             
             self.attachToDom(GlobalMouse, '__doMouseUp', 'mouseup', true);
             if (self.distanceBeforeDrag > 0) {

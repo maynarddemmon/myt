@@ -2489,9 +2489,6 @@ new JS.Singleton('GlobalError', {
     /** Provides a dom element for this instance. Also assigns a reference 
         to this DomElementProxy to a property named "model" on the dom element.
         
-        Attributes:
-            domElement:domElement the dom element hidden we are a proxy for.
-        
         @class */
     const DomElementProxy = pkg.DomElementProxy = new JS.Module('DomElementProxy', {
         // Class Methods ///////////////////////////////////////////////////////
@@ -2511,7 +2508,7 @@ new JS.Singleton('GlobalError', {
             },
             
             /** Tests if a dom element is visible or not.
-                @param {!Object} elem - The domElement to check visibility for.
+                @param {!Object} elem - The dom element to check visibility for.
                 @returns {boolean} - True if visible, false otherwise. */
             isDomElementVisible: (elem) => {
                 // Special Case: hidden input elements should be considered not visible.
@@ -2554,8 +2551,8 @@ new JS.Singleton('GlobalError', {
             
             /** Gets an array of ancestor dom elements including the element
                 itself.
-                @param {!Object} elem - The domElement to start from.
-                @param {?Object} ancestor - The domElement to stop
+                @param {!Object} elem - The dom element to start from.
+                @param {?Object} ancestor - The dom element to stop
                     getting ancestors at.
                 @returns {!Array} - An array of ancestor dom elements. */
             getAncestorArray: (elem, ancestor) => {
@@ -2571,7 +2568,7 @@ new JS.Singleton('GlobalError', {
             /** Gets the z-index of the dom element or, if it does not define a 
                 stacking context, the highest z-index of any of the dom 
                 element's descendants.
-                @param {!Object} elem - A domElement
+                @param {!Object} elem - A dom element
                 @returns {number} - An int */
             getHighestZIndex: elem => {
                 // See https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Understanding_z_index/The_stacking_context
@@ -2596,8 +2593,8 @@ new JS.Singleton('GlobalError', {
             /** Gets the x and y position of the dom element relative to the 
                 ancestor dom element or the page. Transforms are not supported.
                 Use getTruePagePosition if you need support for transforms.
-                @param {!Object} elem - The domElement to get the position for.
-                @param {?Object} [ancestorElem] - The ancestor domElement
+                @param {!Object} elem - The dom element to get the position for.
+                @param {?Object} [ancestorElem] - The ancestor dom element
                     that if encountered will halt the page position calculation
                     thus giving the position of elem relative to ancestorElem.
                 @returns {?Object} - An object with 'x' and 'y' keys or null 
@@ -2627,7 +2624,7 @@ new JS.Singleton('GlobalError', {
             
             /** Gets the x and y position of the dom element relative to the 
                 page with support for transforms.
-                @param {!Object} elem - The domElement to get the position for.
+                @param {!Object} elem - The dom element to get the position for.
                 @returns {?Object} - An object with 'x' and 'y' keys or null 
                     if an error has occurred. */
             getTruePagePosition: elem => {
@@ -2638,7 +2635,7 @@ new JS.Singleton('GlobalError', {
             
             /** Generates a dom event on a dom element. Adapted from:
                     http://stackoverflow.com/questions/6157929/how-to-simulate-mouse-click-using-javascript
-                @param {!Object} elem - The domElement to simulate 
+                @param {!Object} elem - The dom element to simulate 
                     the event on.
                 @param {string} eventName - The name of the dom event 
                     to generate.
@@ -2708,7 +2705,7 @@ new JS.Singleton('GlobalError', {
         
         // Accessors ///////////////////////////////////////////////////////////
         getInnerDomElement: function() {
-            return this.domElement;
+            return this.__iE;
         },
         
         getOuterDomElement: function() {
@@ -2747,14 +2744,15 @@ new JS.Singleton('GlobalError', {
                 outerElem = innerElem = v;
             }
             
-            self.domElement = innerElem;
+            self.__iE = innerElem;
             self.__oE = outerElem;
             
-            // Store a reference to domElement.style since it is accessed often.
+            // Store a reference to the dom element style property since it 
+            // is accessed often.
             self.__iS = innerElem.style;
             self.__oS = outerElem.style;
             
-            // Setup a reference from the domElement to this model. This will 
+            // Setup a reference from the dom element to this model. This will 
             // allow access to the model from code that uses JQuery or some 
             // other mechanism to select dom elements.
             innerElem.model = outerElem.model = self;
@@ -2770,9 +2768,9 @@ new JS.Singleton('GlobalError', {
         /** Called when this DomElementProxy is destroyed.
             @returns {undefined} */
         disposeOfDomElement: function() {
-            delete this.domElement.model;
+            delete this.__iE.model;
             delete this.__iS;
-            delete this.domElement;
+            delete this.__iE;
             
             delete this.__oE.model;
             delete this.__oS;
@@ -2783,14 +2781,14 @@ new JS.Singleton('GlobalError', {
             @param {string} v - The dom class name.
             @returns {undefined} */
         setDomClass: function(v) {
-            this.domElement.className = this.domClass = v;
+            this.__iE.className = this.domClass = v;
         },
         
         /** Adds a dom "class" to the existing dom classes on the dom element.
             @param {string} v - The dom class to add.
             @returns {undefined} */
         addDomClass: function(v) {
-            const existing = this.domElement.className;
+            const existing = this.__iE.className;
             this.setDomClass((existing ? existing + ' ' : '') + v);
         },
         
@@ -2798,7 +2796,7 @@ new JS.Singleton('GlobalError', {
             @param {string} v - The dom class to remove.
             @returns {undefined} */
         removeDomClass: function(v) {
-            const existing = this.domElement.className;
+            const existing = this.__iE.className;
             if (existing) {
                 const parts = existing.split(' ');
                 let i = parts.length;
@@ -2819,7 +2817,7 @@ new JS.Singleton('GlobalError', {
             @param {string} v - The dom id name.
             @returns {undefined} */
         setDomId: function(v) {
-            this.domElement.id = this.domId = v;
+            this.__iE.id = this.domId = v;
         },
         
         /** Set the z-index of the outer dom element.
@@ -2844,7 +2842,7 @@ new JS.Singleton('GlobalError', {
             @returns {?Object} - An object with 'x' and 'y' keys or null 
                 if an error has occurred. */
         getPagePosition: function() {
-            return DomElementProxy.getPagePosition(this.domElement);
+            return DomElementProxy.getPagePosition(this.__iE);
         },
         
         /** Gets the x and y position of the underlying dom element relative 
@@ -2852,28 +2850,28 @@ new JS.Singleton('GlobalError', {
             @returns {?Object} - An object with 'x' and 'y' keys or null 
                 if an error has occurred. */
         getTruePagePosition: function() {
-            return DomElementProxy.getTruePagePosition(this.domElement);
+            return DomElementProxy.getTruePagePosition(this.__iE);
         },
         
         /** Generates a dom event "click" on this proxy's dom element.
             @returns {undefined} */
         simulateClick: function() {
-            DomElementProxy.simulateDomEvent(this.domElement, 'click');
+            DomElementProxy.simulateDomEvent(this.__iE, 'click');
         },
         
         /** Gets the highest z-index of the dom element.
             @returns {number} - An int */
         getHighestZIndex: function() {
-            return DomElementProxy.getHighestZIndex(this.domElement);
+            return DomElementProxy.getHighestZIndex(this.__iE);
         },
         
         /** Gets the highest z-index of any of the descendant dom elements 
-            of the domElement of this DomElementProxy.
-            @param {boolean} [skipChild] - A domElement to skip over
+            of the dom element of this DomElementProxy.
+            @param {boolean} [skipChild] - A dom element to skip over
                 when determining the z-index.
             @returns {number} - An int. */
         getHighestChildZIndex: function(skipChild) {
-            const children = this.domElement.childNodes;
+            const children = this.__iE.childNodes;
             let i = children.length, 
                 zIdx = 0;
             while (i) {
@@ -2887,7 +2885,7 @@ new JS.Singleton('GlobalError', {
             relative to its sibling dom elements.
             @returns {undefined} */
         makeHighestZIndex: function() {
-            this.setZIndex(this.parent.getHighestChildZIndex(this.domElement) + 1);
+            this.setZIndex(this.parent.getHighestChildZIndex(this.__iE) + 1);
         },
         
         /** Scrolls the dom element to the provided position or zero if no
@@ -2905,11 +2903,11 @@ new JS.Singleton('GlobalError', {
 
 ((pkg) => {
     let globalFocus;
-        
+    
     const
         /*  Gets the deepest dom element that is a descendant of the provided
             dom element or the element itself. */
-        getDeepestDescendant = (elem) => {
+        getDeepestDescendant = elem => {
             while (elem.lastChild) elem = elem.lastChild;
             return elem;
         },
@@ -2939,7 +2937,7 @@ new JS.Singleton('GlobalError', {
                 if (!model) model = globalFocus.findModelForDomElement(startElem);
                 if (model) {
                     const focusTrap = model.getFocusTrap(ignoreFocusTrap);
-                    if (focusTrap) rootElem = focusTrap.domElement;
+                    if (focusTrap) rootElem = focusTrap.getInnerDomElement();
                 }
             }
             
@@ -2949,7 +2947,7 @@ new JS.Singleton('GlobalError', {
                     (progModel = elem.model[focusFuncName]())
                 ) {
                     // Programatic traverse
-                    elem = progModel.domElement;
+                    elem = progModel.getInnerDomElement();
                 } else if (isForward) {
                     // Dom traverse forward
                     if (elem.firstChild) {
@@ -3018,18 +3016,18 @@ new JS.Singleton('GlobalError', {
             return null;
         };
     
-    /** Tracks focus and provides global focus events. Registered with myt.global 
-        as 'focus'.
+    /** Tracks focus and provides global focus events. Registered with 
+        myt.global  as 'focus'.
         
         Events:
-            focused:View Fired when the focused view changes. The event value is
-                the newly focused view.
+            focused:View Fired when the focused view changes. The event value 
+                is the newly focused view.
         
         Attributes:
-            lastTraversalWasForward:boolean indicates if the last traversal was
-                in the forward direction or not. If false this implies the last
-                traversal was in the backward direction. This value is initalized
-                to true.
+            lastTraversalWasForward:boolean indicates if the last traversal 
+                was in the forward direction or not. If false this implies 
+                the last traversal was in the backward direction. This value 
+                is initalized to true.
             focusedView:View the view that currently has focus.
             prevFocusedView:View the view that previously had focus.
             focusedDom:DomElement holds the dom element that has focus when the
@@ -3065,7 +3063,7 @@ new JS.Singleton('GlobalError', {
         /** Sets the currently focused view.
             @param {?Object} v
             @returns {undefined} */
-        setFocusedView: (v) => {
+        setFocusedView: v => {
             if (globalFocus.focusedView !== v) {
                 globalFocus.prevFocusedView = globalFocus.focusedView; // Remember previous focus
                 globalFocus.focusedView = v;
@@ -3077,16 +3075,17 @@ new JS.Singleton('GlobalError', {
         
         // Methods /////////////////////////////////////////////////////////////
         /** Called by a FocusObservable when it has received focus.
-            @param {!Object} focusable - The FocusObservable that received focus.
+            @param {!Object} focusable - The FocusObservable that 
+                received focus.
             @returns {undefined}. */
-        notifyFocus: (focusable) => {
+        notifyFocus: focusable => {
             if (globalFocus.focusedView !== focusable) globalFocus.setFocusedView(focusable);
         },
         
         /** Called by a FocusObservable when it has lost focus.
             @param {!Object} focusable - The FocusObservable that lost focus.
             @returns {undefined}. */
-        notifyBlur: (focusable) => {
+        notifyBlur: focusable => {
             if (globalFocus.focusedView === focusable) globalFocus.setFocusedView(null);
         },
         
@@ -3103,7 +3102,8 @@ new JS.Singleton('GlobalError', {
         
         // Focus Traversal //
         /** Move focus to the next focusable element.
-            @param {boolean} ignoreFocusTrap - If true focus traps will be skipped over.
+            @param {boolean} ignoreFocusTrap - If true focus traps will be 
+                skipped over.
             @returns {undefined} */
         next: ignoreFocusTrap => {
             const next = traverse(true, ignoreFocusTrap);
@@ -3111,7 +3111,8 @@ new JS.Singleton('GlobalError', {
         },
         
         /** Move focus to the previous focusable element.
-            @param {boolean} ignoreFocusTrap - If true focus traps will be skipped over.
+            @param {boolean} ignoreFocusTrap - If true focus traps will be 
+                skipped over.
             @returns {undefined} */
         prev: ignoreFocusTrap => {
             const prev = traverse(false, ignoreFocusTrap);
@@ -3119,7 +3120,7 @@ new JS.Singleton('GlobalError', {
         },
         
         /** Finds the closest model for the provided dom element.
-            @param {!Object} elem - The domElement to start looking from.
+            @param {!Object} elem - The dom element to start looking from.
             @returns {?Object} - A myt.View or null if not found. */
         findModelForDomElement: elem => {
             while (elem) {
@@ -3257,7 +3258,7 @@ new JS.Singleton('GlobalError', {
                     const domObservers = domObserversByType[type];
                     if (domObservers) {
                         // Remove dom observer
-                        const domElement = this.getInnerDomElement();
+                        const ide = this.getInnerDomElement();
                         let retval = false,  
                             i = domObservers.length;
                         while (i) {
@@ -3266,7 +3267,7 @@ new JS.Singleton('GlobalError', {
                                 methodName === domObservers[i + 1] && 
                                 capture === domObservers[i + 3]
                             ) {
-                                if (domElement) pkg.removeEventListener(domElement, type, domObservers[i + 2], capture);
+                                if (ide) pkg.removeEventListener(ide, type, domObservers[i + 2], capture);
                                 domObservers.splice(i, 4);
                                 retval = true;
                             }
@@ -3281,8 +3282,8 @@ new JS.Singleton('GlobalError', {
         /** Detaches all dom observers from this DomObservable.
             @returns {undefined} */
         detachAllDomObservers: function() {
-            const domElement = this.getInnerDomElement();
-            if (domElement) {
+            const ide = this.getInnerDomElement();
+            if (ide) {
                 const domObserversByType = this.__dobsbt;
                 if (domObserversByType) {
                     for (const type in domObserversByType) {
@@ -3292,7 +3293,7 @@ new JS.Singleton('GlobalError', {
                             const capture = domObservers[--i],
                                 methodRef = domObservers[--i];
                             i -= 2; // methodName and domObserver
-                            pkg.removeEventListener(domElement, type, methodRef, capture);
+                            pkg.removeEventListener(ide, type, methodRef, capture);
                         }
                         domObservers.length = 0;
                     }
@@ -5438,7 +5439,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 if (self.parent) {
                     // Optimization: use the dom element contains function if 
                     // both nodes are DomElementProxy instances.
-                    if (self.domElement && node.domElement) return node.domElement.contains(self.domElement);
+                    if (self.getInnerDomElement && node.getInnerDomElement) return node.getInnerDomElement().contains(self.getInnerDomElement());
                     return self.parent.isDescendantOf(node);
                 }
             }
@@ -6882,24 +6883,25 @@ myt.Destructible = new JS.Module('Destructible', {
         Attributes:
             tagName:string Determines the name of the DOM element to create for
                 this instance. This is not a normal attribute. It is only used
-                during initialization and it will be deleted from the attrs object
-                upon use. If no tagName is provided "div" will be used.
-            focusTrap:boolean Determines if focus traversal can move above this view
-                or not. The default is undefined which is equivalent to false. Can 
-                be ignored using a key modifier. The key modifier is 
+                during initialization and it will be deleted from the attrs 
+                object upon use. If no tagName is provided "div" will be used.
+            focusTrap:boolean Determines if focus traversal can move above this 
+                view or not. The default is undefined which is equivalent to 
+                false. Can be ignored using a key modifier. The key modifier is 
                 typically 'option'.
-            focusCage:boolean Determines if focus traversal can move above this view
-                or not. The default is undefined which is equivalent to false. This
-                is the same as focusTrap except it can't be ignored using a 
-                key modifier.
-            maskFocus:boolean Prevents focus from traversing into this view or any
-                of its subviews. The default is undefined which is equivalent 
-                to false.
+            focusCage:boolean Determines if focus traversal can move above this 
+                view or not. The default is undefined which is equivalent to 
+                false. This is the same as focusTrap except it can't be ignored 
+                using a key modifier.
+            maskFocus:boolean Prevents focus from traversing into this view or 
+                any of its subviews. The default is undefined which is 
+                equivalent to false.
             ignoreLayout:boolean Determines if this view should be included in 
-                layouts or not. Default is undefined which is equivalent to false.
-            layoutHint:* A value that indicates this view is treated as "special" 
-                by the layout. The interpretation of this value is up to the 
-                layout managing the view.
+                layouts or not. Default is undefined which is equivalent 
+                to false.
+            layoutHint:* A value that indicates this view is treated as 
+                "special" by the layout. The interpretation of this value is 
+                up to the layout managing the view.
             align:string Aligns the view horizontally within its parent. 
                 Supported values are: 'left', 'center', 'right' and ''. 
                 The default is undefined which is equivalent to ''.
@@ -6913,11 +6915,11 @@ myt.Destructible = new JS.Module('Destructible', {
             width:number The width of this view in pixels. Defaults to 0.
             height:number the height of this view in pixels. Defaults to 0.
             boundsWidth:number (read only) The actual bounds of the view in the
-                x-dimension. This value is in pixels relative to the RootView and
-                thus compensates for rotation and scaling.
-            boundsHeight:number (read only) The actual bounds of the view in the
-                y-dimension. This value is in pixels relative to the RootView and
-                thus compensates for rotation and scaling.
+                x-dimension. This value is in pixels relative to the RootView 
+                and thus compensates for rotation and scaling.
+            boundsHeight:number (read only) The actual bounds of the view in 
+                the y-dimension. This value is in pixels relative to the 
+                RootView and thus compensates for rotation and scaling.
             textColor:string The color used for text. Will be inherited by 
                 descendant views if they don't themselves set textColor or if 
                 they set textColor to 'inherit'. Defaults to undefined which is
@@ -6925,12 +6927,12 @@ myt.Destructible = new JS.Module('Destructible', {
             bgColor:string The background color of this view. Use a value of 
                 'transparent' to make this view transparent. Defaults 
                 to 'transparent'.
-            opacity:number The opacity of this view. The value should be a number 
-                between 0 and 1. Defaults to 1.
-            overflow:string Determines how descendant content overflows the bounds.
-                Allowed values: 'visible', 'hidden', 'scroll', 'auto', 'autoy',
-                'autox' and 'inherit'. Defaults to undefined which is equivalent 
-                to 'visible'.
+            opacity:number The opacity of this view. The value should be a 
+                number between 0 and 1. Defaults to 1.
+            overflow:string Determines how descendant content overflows the 
+                bounds. Allowed values: 'visible', 'hidden', 'scroll', 'auto', 
+                'autoy', 'autox' and 'inherit'. Defaults to undefined which 
+                is equivalent to 'visible'.
             visible:boolean Makes this view visible or not. The default value is 
                 true which means visbility is inherited from the parent view.
             cursor:string Determines what cursor to show when moused over the view.
@@ -6959,9 +6961,9 @@ myt.Destructible = new JS.Module('Destructible', {
                 'outset', 'inherit'.
             borderColor:string Sets the color of the CSS border. If null or 
                 undefined is provided '#000000' will be used.
-            tooltip:string Sets a tooltip for this view. The basic implementation
-                uses domElement.title. For a richer tooltip display use the
-                myt.TooltipMixin.
+            tooltip:string Sets a tooltip for this view. The basic 
+                implementation uses the dom element's title property. For a 
+                richer tooltip display use myt.TooltipMixin.
         
         Private Attributes:
             subviews:array The array of child myt.Views for this view. Should 
@@ -7038,7 +7040,7 @@ myt.Destructible = new JS.Module('Destructible', {
             Subclasses should call super if they don't call __updateBounds. The call
             to super should probably occur at the end of the overridden method. */
         doAfterAdoption: function() {
-            // Must be done after domElement is inserted so that calls to
+            // Must be done after the dom element is inserted so that calls to
             // getBoundingClientRect will work.
             this.__updateBounds(this.width, this.height);
         },
@@ -9020,137 +9022,142 @@ myt.Destructible = new JS.Module('Destructible', {
 })(myt);
 
 
-/** Allows a view to act as a "root" for a view hierarchy. A "root" view is 
-    backed by a dom element from the page rather than a dom element created 
-    by the view.
-    
-    Events:
-        None
-    
-    Attributes:
-        keepDomElementWhenDestroyed:boolean Indicates the dom element backing 
-            this view must not be destroyed when this view is destroyed. 
-            Defaults to undefined which is equivalent to false.
-*/
-myt.RootView = new JS.Module('RootView', {
-    // Class Methods and Attributes ////////////////////////////////////////////
-    extend: {
-        /** Prevents default drag/drop behavior.
-            @param {!Obect} v - The myt.View the view to supress default 
-                dragover and drop on.
-            @returns {undefined} */
-        setupCaptureDrop: function(v) {
-            const cdf = v.__captureDrop = (event) => {event.preventDefault();},
-                de = v.domElement;
-            myt.addEventListener(de, 'drop', cdf);
-            myt.addEventListener(de, 'dragover', cdf);
-        },
+((pkg) => {
+    const roots = pkg.global.roots,
         
-        /** Cleanup dom listeners for drag/drop.
-            @param {!Obect} v - The myt.View the view that had supressed 
-                default dragover  and drop on.
-            @returns {undefined} */
-        teardownCaptureDrop: function(v) {
-            const de = v.domElement, 
-                cdf = v.__captureDrop;
-            myt.removeEventListener(de, 'drop', cdf);
-            myt.removeEventListener(de, 'dragover', cdf);
-        }
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    initNode: function(parent, attrs) {
-        this.callSuper(parent, attrs);
-        
-        // Establish a stacking context
-        this.setZIndex(0);
-        
-        // Set a css class to allow scoping of CSS rules
-        this.addDomClass('myt');
-        
-        myt.global.roots.addRoot(this);
-        
-        myt.RootView.setupCaptureDrop(this);
-    },
-    
-    /** @overrides myt.View */
-    createOurDomElement: function(parent) {
-        // If no parent is provided create a new dom element
-        if (!parent) {
-            parent = this.callSuper(parent);
-            myt.getElement().appendChild(parent);
-        }
-        
-        // A root view has a dom element provided as the parent. We use
-        // that dom element as our domElement.
-        return parent;
-    },
-    
-    /** @overrides myt.View */
-    destroyAfterOrphaning: function() {
-        myt.RootView.teardownCaptureDrop(this);
-        
-        myt.global.roots.removeRoot(this);
-        if (!this.keepDomElementWhenDestroyed) this.removeDomElement();
-        this.callSuper();
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setKeepDomElementWhenDestroyed: function(keepDomElementWhenDestroyed) {
-        this.keepDomElementWhenDestroyed = keepDomElementWhenDestroyed;
-    },
-    
-    /** @overrides myt.Node */
-    setParent: function(parent) {
-        // A root view doesn't have a parent view.
-        this.callSuper(undefined);
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides myt.View */
-    bringToFront: function() {
-        // Attempt to manipulate dom above root node.
-        const de = this.domElement, parentNode = de.parentNode;
-        if (de !== parentNode.lastChild) {
-            const removedElem = parentNode.removeChild(de);
-            if (removedElem) parentNode.appendChild(removedElem);
-        }
-    },
-    
-    /** @overrides myt.View */
-    sendToBack: function() {
-        // Attempt to manipulate dom above root node.
-        const de = this.domElement, parentNode = de.parentNode;
-        if (de !== parentNode.firstChild) {
-            const removedElem = parentNode.removeChild(de);
-            if (removedElem) parentNode.insertBefore(removedElem, parentNode.firstChild);
-        }
-    },
-    
-    /** @overrides myt.View */
-    sendBehind: function(otherRootView) {
-        // Attempt to manipulate dom above root node.
-        const de = this.domElement,
-            otherDe = otherRootView.domElement,
-            parentNode = de.parentNode;
-        if (otherDe.parentNode === parentNode) {
-            const removedElem = parentNode.removeChild(de);
-            if (removedElem) parentNode.insertBefore(removedElem, otherDe);
-        }
-    },
-    
-    /** @overrides myt.View */
-    sendInFrontOf: function(otherRootView) {
-        // Attempt to manipulate dom above root node.
-        if (otherRootView.domElement.parentNode === this.domElement.parentNode) {
-            this.sendBehind(otherRootView);
-            otherRootView.sendBehind(this);
-        }
-    }
-});
+        /** Allows a view to act as a "root" for a view hierarchy. A "root" 
+            view is backed by a dom element from the page rather than a dom 
+            element created by the view.
+            
+            Attributes:
+                keepDomElementWhenDestroyed:boolean Indicates the dom element 
+                    backing this view must not be destroyed when this view is 
+                    destroyed. Defaults to undefined which is equivalent 
+                    to false.
+            
+            @class */
+        RootView = pkg.RootView = new JS.Module('RootView', {
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                /** Prevents default drag/drop behavior.
+                    @param {!Obect} v - The myt.View the view to supress 
+                        default dragover and drop on.
+                    @returns {undefined} */
+                setupCaptureDrop: function(v) {
+                    const cdf = v.__captureDrop = event => {event.preventDefault();},
+                        ide = v.getInnerDomElement();
+                    pkg.addEventListener(ide, 'drop', cdf);
+                    pkg.addEventListener(ide, 'dragover', cdf);
+                },
+                
+                /** Cleanup dom listeners for drag/drop.
+                    @param {!Obect} v - The myt.View the view that had 
+                        supressed default dragover  and drop on.
+                    @returns {undefined} */
+                teardownCaptureDrop: function(v) {
+                    const ide = v.getInnerDomElement(), 
+                        cdf = v.__captureDrop;
+                    pkg.removeEventListener(ide, 'drop', cdf);
+                    pkg.removeEventListener(ide, 'dragover', cdf);
+                }
+            },
+            
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            initNode: function(parent, attrs) {
+                this.callSuper(parent, attrs);
+                
+                // Establish a stacking context
+                this.setZIndex(0);
+                
+                // Set a css class to allow scoping of CSS rules
+                this.addDomClass('myt');
+                
+                roots.addRoot(this);
+                
+                RootView.setupCaptureDrop(this);
+            },
+            
+            /** @overrides myt.View */
+            createOurDomElement: function(parent) {
+                // If no parent is provided create a new dom element
+                if (!parent) {
+                    parent = this.callSuper(parent);
+                    pkg.getElement().appendChild(parent);
+                }
+                
+                // A root view has a dom element provided as the parent. We use
+                // that as our dom element.
+                return parent;
+            },
+            
+            /** @overrides myt.View */
+            destroyAfterOrphaning: function() {
+                RootView.teardownCaptureDrop(this);
+                
+                roots.removeRoot(this);
+                if (!this.keepDomElementWhenDestroyed) this.removeDomElement();
+                this.callSuper();
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setKeepDomElementWhenDestroyed: function(keepDomElementWhenDestroyed) {
+                this.keepDomElementWhenDestroyed = keepDomElementWhenDestroyed;
+            },
+            
+            /** @overrides myt.Node */
+            setParent: function(parent) {
+                // A root view doesn't have a parent view.
+                this.callSuper(undefined);
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @overrides myt.View */
+            bringToFront: function() {
+                // Attempt to manipulate dom above root node.
+                const ide = this.getInnerDomElement(),
+                    parentNode = ide.parentNode;
+                if (ide !== parentNode.lastChild) {
+                    const removedElem = parentNode.removeChild(ide);
+                    if (removedElem) parentNode.appendChild(removedElem);
+                }
+            },
+            
+            /** @overrides myt.View */
+            sendToBack: function() {
+                // Attempt to manipulate dom above root node.
+                const ide = this.getInnerDomElement(),
+                    parentNode = ide.parentNode;
+                if (ide !== parentNode.firstChild) {
+                    const removedElem = parentNode.removeChild(ide);
+                    if (removedElem) parentNode.insertBefore(removedElem, parentNode.firstChild);
+                }
+            },
+            
+            /** @overrides myt.View */
+            sendBehind: function(otherRootView) {
+                // Attempt to manipulate dom above root node.
+                const ide = this.getInnerDomElement(),
+                    otherIde = otherRootView.getInnerDomElement(),
+                    parentNode = ide.parentNode;
+                if (otherIde.parentNode === parentNode) {
+                    const removedElem = parentNode.removeChild(ide);
+                    if (removedElem) parentNode.insertBefore(removedElem, otherIde);
+                }
+            },
+            
+            /** @overrides myt.View */
+            sendInFrontOf: function(otherRootView) {
+                // Attempt to manipulate dom above root node.
+                if (otherRootView.getInnerDomElement().parentNode === this.getInnerDomElement().parentNode) {
+                    this.sendBehind(otherRootView);
+                    otherRootView.sendBehind(this);
+                }
+            }
+        });
+})(myt);
 
 
 ((pkg) => {
@@ -11131,9 +11138,9 @@ new JS.Singleton('GlobalMouse', {
         __doMouseDown: function(event) {
             const self = this,
                 pos = getMouseFromEvent(event),
-                de = self.getOuterDomElement();
-            self.dragInitX = pos.x - de.offsetLeft;
-            self.dragInitY = pos.y - de.offsetTop;
+                ode = self.getOuterDomElement();
+            self.dragInitX = pos.x - ode.offsetLeft;
+            self.dragInitY = pos.y - ode.offsetTop;
             
             self.attachToDom(GlobalMouse, '__doMouseUp', 'mouseup', true);
             if (self.distanceBeforeDrag > 0) {
@@ -12101,10 +12108,10 @@ new JS.Singleton('GlobalMouse', {
             layouts.forEach(layout => {layout.incrementLockedCounter();});
             
             // Performance: Remove from dom while doing inserts
-            const de = contentView.getOuterDomElement(),
-                nextDe = de.nextSibling,
-                parentElem = de.parentNode;
-            parentElem.removeChild(de);
+            const ode = contentView.getOuterDomElement(),
+                nextDe = ode.nextSibling,
+                parentElem = ode.parentNode;
+            parentElem.removeChild(ode);
             
             // Reconfigure list
             let i = 0;
@@ -12135,7 +12142,7 @@ new JS.Singleton('GlobalMouse', {
             }
             
             // Performance: Put back in dom.
-            parentElem.insertBefore(de, nextDe);
+            parentElem.insertBefore(ode, nextDe);
             
             // Measure width. Must be in dom at this point.
             let minWidth = listView.minWidth;
@@ -14051,8 +14058,8 @@ new JS.Singleton('GlobalMouse', {
                 @param v:* The value to set.
                 @returns {undefined} */
             setDomValue: function(v) {
-                const de = this.getInnerDomElement();
-                if (de.value !== v) de.value = v;
+                const ide = this.getInnerDomElement();
+                if (ide.value !== v) ide.value = v;
             }
         }),
         
@@ -14080,8 +14087,8 @@ new JS.Singleton('GlobalMouse', {
             /** @overrideds myt.Selectable */
             setSelected: function(v) {
                 v = this.valueFromEvent(v);
-                const de = this.getInnerDomElement();
-                if (de.selected !== v) de.selected = v;
+                const ide = this.getInnerDomElement();
+                if (ide.selected !== v) ide.selected = v;
             },
             
             /** @overrides myt.Disableable */
@@ -14294,12 +14301,12 @@ new JS.Singleton('GlobalMouse', {
             },
             
             getSelection: function() {
-                const de = this.getInnerDomElement();
+                const ide = this.getInnerDomElement();
                 return {
-                    start:de.selectionStart,
-                    startElem:de,
-                    end:de.selectionEnd,
-                    endElem:de
+                    start:ide.selectionStart,
+                    startElem:ide,
+                    end:ide.selectionEnd,
+                    endElem:ide
                 };
             },
             
@@ -14415,9 +14422,9 @@ new JS.Singleton('GlobalMouse', {
         
         /** @overrides myt.NativeInputWrapper */
         setDomValue: function(v) {
-            const de = this.getInnerDomElement();
-            if (de.innerHTML !== v) {
-                de.innerHTML = v;
+            const ide = this.getInnerDomElement();
+            if (ide.innerHTML !== v) {
+                ide.innerHTML = v;
                 this.sizeViewToDom();
                 this.restoreSelection();
             }
@@ -16927,11 +16934,11 @@ new JS.Singleton('GlobalMouse', {
                         this.callSuper(parent, attrs);
                         this.attachToDom(this, '_handleInput', 'change');
                         
-                        this.domElement.multiple = self.maxFiles > 1;
+                        this.getInnerDomElement().multiple = self.maxFiles > 1;
                     },
                     
                     _handleInput: function(event) {
-                        self.handleFiles(this.domElement.files, event);
+                        self.handleFiles(this.getInnerDomElement().files, event);
                     }
                 }]);
             },
@@ -16968,7 +16975,7 @@ new JS.Singleton('GlobalMouse', {
                 if (this.maxFiles !== v) {
                     this.maxFiles = v;
                     if (this.inited) this.fireEvent('maxFiles', v);
-                    if (this.fileInput) this.fileInput.domElement.multiple = v > 1;
+                    if (this.fileInput) this.fileInput.getInnerDomElement().multiple = v > 1;
                 }
             },
             
@@ -17081,7 +17088,7 @@ new JS.Singleton('GlobalMouse', {
                 
                 // Reset the form element if empty. Otherwise uploading the 
                 // same file again won't trigger a change event.
-                if (!this.value) this.fileInput.domElement.value = '';
+                if (!this.value) this.fileInput.getInnerDomElement().value = '';
                 
                 this.verifyChangedState(); // FIXME: mimics what happens in myt.FormElement setValue
                 if (this.form) this.form.notifyValueChanged(this); // FIXME: mimics what happens in myt.Form setValue
@@ -22927,8 +22934,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             @param {!Object} dropable - The myt.Dropable being dragged.
             @returns {undefined} */
         notifyDragStart: function(dropable) {
-            const de = this.getInnerDomElement();
-            if (de.scrollHeight > de.clientHeight || de.scrollWidth > de.clientWidth) {
+            const ide = this.getInnerDomElement();
+            if (ide.scrollHeight > ide.clientHeight || ide.scrollWidth > ide.clientWidth) {
                 this.attachToDom(globalMouse, '__hndlMove', 'mousemove', true);
             }
         },
@@ -24183,11 +24190,12 @@ myt.Path = new JS.Class('Path', {
             add child views to a Canvas which is not directly supported in HTML. */
         sendSubviewToBack: function(sv) {
             if (sv.parent === this) {
-                const de = this.domElement,
-                    firstChild = de.childNodes[1];
-                if (sv.domElement !== firstChild) {
-                    const removedElem = de.removeChild(sv.domElement);
-                    if (removedElem) de.insertBefore(removedElem, firstChild);
+                const ide = this.getInnerDomElement(),
+                    firstChild = ide.childNodes[1],
+                    svIde = sv.getInnerDomElement();
+                if (svIde !== firstChild) {
+                    const removedElem = ide.removeChild(svIde);
+                    if (removedElem) ide.insertBefore(removedElem, firstChild);
                 }
             }
         },

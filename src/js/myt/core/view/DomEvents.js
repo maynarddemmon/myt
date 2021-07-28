@@ -122,7 +122,7 @@
                     const domObservers = domObserversByType[type];
                     if (domObservers) {
                         // Remove dom observer
-                        const domElement = this.getInnerDomElement();
+                        const ide = this.getInnerDomElement();
                         let retval = false,  
                             i = domObservers.length;
                         while (i) {
@@ -131,7 +131,7 @@
                                 methodName === domObservers[i + 1] && 
                                 capture === domObservers[i + 3]
                             ) {
-                                if (domElement) pkg.removeEventListener(domElement, type, domObservers[i + 2], capture);
+                                if (ide) pkg.removeEventListener(ide, type, domObservers[i + 2], capture);
                                 domObservers.splice(i, 4);
                                 retval = true;
                             }
@@ -146,8 +146,8 @@
         /** Detaches all dom observers from this DomObservable.
             @returns {undefined} */
         detachAllDomObservers: function() {
-            const domElement = this.getInnerDomElement();
-            if (domElement) {
+            const ide = this.getInnerDomElement();
+            if (ide) {
                 const domObserversByType = this.__dobsbt;
                 if (domObserversByType) {
                     for (const type in domObserversByType) {
@@ -157,7 +157,7 @@
                             const capture = domObservers[--i],
                                 methodRef = domObservers[--i];
                             i -= 2; // methodName and domObserver
-                            pkg.removeEventListener(domElement, type, methodRef, capture);
+                            pkg.removeEventListener(ide, type, methodRef, capture);
                         }
                         domObservers.length = 0;
                     }

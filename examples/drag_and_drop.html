@@ -59,7 +59,7 @@
                     // Prevent dragging from the "dead zone".
                     if (!this.willPermitDrop(this.parent)) return;
                     
-                    var pos = myt.DomElementProxy.getPagePosition(this.domElement, root.domElement);
+                    var pos = myt.DomElementProxy.getPagePosition(this.getInnerDomElement(), root.getInnerDomElement());
                     this.setX(pos.x);
                     this.setY(pos.y);
                     
