@@ -21,7 +21,7 @@
             layouts.forEach(layout => {layout.incrementLockedCounter();});
             
             // Performance: Remove from dom while doing inserts
-            const ode = contentView.getOuterDomElement(),
+            const ode = contentView.getODE(),
                 nextDe = ode.nextSibling,
                 parentElem = ode.parentNode;
             parentElem.removeChild(ode);
@@ -364,7 +364,7 @@
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides myt.ListViewItemMixin */
         syncToDom: function() {
-            this.textView.getInnerDomStyle().width = 'auto';
+            this.textView.getIDS().width = 'auto';
             this.textView.sizeViewToDom();
         },
         

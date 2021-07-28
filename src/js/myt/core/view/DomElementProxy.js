@@ -1,5 +1,6 @@
 ((pkg) => {
     const GLOBAL = global,
+        getComputedStyle = GLOBAL.getComputedStyle,
         DOCUMENT_ELEMENT = document;
     
     /** Provides a dom element for this instance. Also assigns a reference 
@@ -33,7 +34,7 @@
                 while (elem) {
                     if (elem === DOCUMENT_ELEMENT) return true;
                     
-                    const style = GLOBAL.getComputedStyle(elem);
+                    const style = getComputedStyle(elem);
                     if (style.display === 'none' || style.visibility === 'hidden') break;
                     
                     elem = elem.parentNode;
@@ -51,7 +52,7 @@
                     const ancestors = DomElementProxy.getAncestorArray(elem, ancestor);
                     let i = ancestors.length - 1;
                     while (i) {
-                        const style = GLOBAL.getComputedStyle(ancestors[--i]),
+                        const style = getComputedStyle(ancestors[--i]),
                             zIdx = style.zIndex,
                             isAuto = zIdx === 'auto';
                         
@@ -88,7 +89,7 @@
                 @returns {number} - An int */
             getHighestZIndex: elem => {
                 // See https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Understanding_z_index/The_stacking_context
-                const style = GLOBAL.getComputedStyle(elem);
+                const style = getComputedStyle(elem);
                 let zIdx = style.zIndex;
                 const isAuto = zIdx === 'auto';
                 if (isAuto && parseInt(style.opacity, 10) === 1) {
@@ -129,7 +130,7 @@
                     y += elem.offsetTop;
                     elem = elem.offsetParent;
                     if (elem && elem.nodeName !== "BODY") {
-                        const s = GLOBAL.getComputedStyle(elem);
+                        const s = getComputedStyle(elem);
                         x += borderMultiplier * parseInt(s.borderLeftWidth, 10) - elem.scrollLeft;
                         y += borderMultiplier * parseInt(s.borderTopWidth, 10) - elem.scrollTop;
                     }
@@ -220,29 +221,26 @@
         
         
         // Accessors ///////////////////////////////////////////////////////////
-        getInnerDomElement: function() {
-            return this.__iE;
-        },
+        getIDE: function() {return this.__iE;}, // Short alias for getInnerDomElement
+        getODE: function() {return this.__oE;}, // Short alias for getOuterDomElement
+        getIDS: function() {return this.__iS;}, // Short alias for getInnerDomStyle
+        getODS: function() {return this.__oS;}, // Short alias for getOuterDomStyle
         
-        getOuterDomElement: function() {
-            return this.__oE;
-        },
+        getInnerDomElement: function() {return this.__iE;},
+        
+        getOuterDomElement: function() {return this.__oE;},
         
         /** Gets the style attribute of the inner dom element. If only one
             dom element exists then this will be the same as the outer dom
             style.
             @returns {?Object} */
-        getInnerDomStyle: function() {
-            return this.__iS;
-        },
+        getInnerDomStyle: function() {return this.__iS;},
         
         /** Gets the style attribute of the outer dom element. If only one
             dom element exists then this will be the same as the inner dom
             style.
             @returns {?Object} */
-        getOuterDomStyle: function() {
-            return this.__oS;
-        },
+        getOuterDomStyle: function() {return this.__oS;},
         
         /** Sets the dom element(s) to the provided one.
             @param {?Object} v
@@ -277,8 +275,7 @@
         /** Removes this DomElementProxy's dom element from its parent node.
             @returns {undefined} */
         removeDomElement: function() {
-            const ode = this.getOuterDomElement();
-            ode.parentNode.removeChild(ode);
+            this.__oE.parentNode.removeChild(this.__oE);
         },
         
         /** Called when this DomElementProxy is destroyed.
@@ -287,7 +284,6 @@
             delete this.__iE.model;
             delete this.__iS;
             delete this.__iE;
-            
             delete this.__oE.model;
             delete this.__oS;
             delete this.__oE;
@@ -405,7 +401,7 @@
                 should be used instead of the outer dom element.
             @returns {undefined} */
         scrollYTo: function(value, scrollInner) {
-            (scrollInner ? this.getInnerDomElement() : this.getOuterDomElement()).scrollTop = value || 0;
+            (scrollInner ? this.__iE : this.__oE).scrollTop = value || 0;
         }
     });
 })(myt);

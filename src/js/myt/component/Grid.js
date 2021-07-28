@@ -943,7 +943,7 @@
             }, [{
                 initNode: function(parent, attrs) {
                     this.callSuper(parent, attrs);
-                    this.getInnerDomStyle().fontSize = '0.7em'; // Looks better a bit smaller.
+                    this.getIDS().fontSize = '0.7em'; // Looks better a bit smaller.
                 },
                 sizeViewToDom:function() {
                     this.callSuper();

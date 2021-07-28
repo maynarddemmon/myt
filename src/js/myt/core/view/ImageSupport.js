@@ -128,7 +128,7 @@
         setImageUrl: function(v) {
             if (this.imageUrl !== v) {
                 this.imageUrl = v;
-                this.getInnerDomStyle().backgroundImage = v ? 'url("' + v + '")' : 'none';
+                this.getIDS().backgroundImage = v ? 'url("' + v + '")' : 'none';
                 if (this.inited) {
                     this.fireEvent('imageUrl', v);
                     this.setNaturalWidth(undefined);
@@ -149,28 +149,28 @@
         setImageSize: function(v) {
             if (this.imageSize !== v) {
                 this.imageSize = v;
-                this.getInnerDomStyle().backgroundSize = v || 'auto';
+                this.getIDS().backgroundSize = v || 'auto';
                 if (this.inited) this.fireEvent('imageSize', v);
             }
         },
         
         setImageRepeat: function(v) {
             if (this.imageRepeat !== v) {
-                this.getInnerDomStyle().backgroundRepeat = this.imageRepeat = v;
+                this.getIDS().backgroundRepeat = this.imageRepeat = v;
                 if (this.inited) this.fireEvent('imageRepeat', v);
             }
         },
         
         setImagePosition: function(v) {
             if (this.imagePosition !== v) {
-                this.getInnerDomStyle().backgroundPosition = this.imagePosition = v;
+                this.getIDS().backgroundPosition = this.imagePosition = v;
                 if (this.inited) this.fireEvent('imagePosition', v);
             }
         },
         
         setImageAttachment: function(v) {
             if (this.imageAttachment !== v) {
-                this.getInnerDomStyle().backgroundAttachment = this.imageAttachment = v;
+                this.getIDS().backgroundAttachment = this.imageAttachment = v;
                 if (this.inited) this.fireEvent('imageAttachment', v);
             }
         },

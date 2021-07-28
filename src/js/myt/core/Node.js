@@ -349,7 +349,7 @@
                 if (self.parent) {
                     // Optimization: use the dom element contains function if 
                     // both nodes are DomElementProxy instances.
-                    if (self.getInnerDomElement && node.getInnerDomElement) return node.getInnerDomElement().contains(self.getInnerDomElement());
+                    if (self.getInnerDomElement && node.getInnerDomElement) return node.getIDE().contains(self.getIDE());
                     return self.parent.isDescendantOf(node);
                 }
             }

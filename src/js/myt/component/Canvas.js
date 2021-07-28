@@ -96,9 +96,9 @@
             add child views to a Canvas which is not directly supported in HTML. */
         sendSubviewToBack: function(sv) {
             if (sv.parent === this) {
-                const ide = this.getInnerDomElement(),
+                const ide = this.getIDE(),
                     firstChild = ide.childNodes[1],
-                    svIde = sv.getInnerDomElement();
+                    svIde = sv.getIDE();
                 if (svIde !== firstChild) {
                     const removedElem = ide.removeChild(svIde);
                     if (removedElem) ide.insertBefore(removedElem, firstChild);

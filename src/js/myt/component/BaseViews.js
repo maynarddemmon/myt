@@ -54,7 +54,7 @@
         // Accessors ///////////////////////////////////////////////////////////
         setSrc: function(v) {
             if (this.src !== v) {
-                this.src = this.getInnerDomElement().src = v;
+                this.src = this.getIDE().src = v;
                 if (this.inited) this.fireEvent('src', v);
             }
         },
@@ -93,7 +93,7 @@
         setHtml: function(v) {
             const self = this;
             if (self.html !== v) {
-                self.getInnerDomElement().innerHTML = self.html = v;
+                self.getIDE().innerHTML = self.html = v;
                 if (self.inited) {
                     self.fireEvent('html', v);
                     self.sizeViewToDom();
@@ -132,10 +132,10 @@
             
             // Temporarily set wrapping to 'nowrap', take measurement and
             // then restore wrapping.
-            const ids = this.getInnerDomStyle(),
+            const ids = this.getIDS(),
                 oldValue = ids.whiteSpace;
             ids.whiteSpace = 'nowrap';
-            const measuredWidth = this.getOuterDomElement().getBoundingClientRect().width; // Use getBoundingClientRect to support fractional widths
+            const measuredWidth = this.getODE().getBoundingClientRect().width; // Use getBoundingClientRect to support fractional widths
             ids.whiteSpace = oldValue;
             return measuredWidth;
         }

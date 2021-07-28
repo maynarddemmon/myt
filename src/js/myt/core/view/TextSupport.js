@@ -8,7 +8,7 @@
         setAndSizeViewToDom = (textView, v, attrName, defaultValue) => {
             if (textView[attrName] !== v) {
                 textView[attrName] = v;
-                textView.getInnerDomStyle()[attrName] = v || defaultValue || 'inherit';
+                textView.getIDS()[attrName] = v || defaultValue || 'inherit';
                 if (textView.inited) {
                     textView.fireEvent(attrName, v);
                     textView.sizeViewToDom();
@@ -103,7 +103,7 @@
             if (this.text !== v) {
                 // Use innerHTML rather than textContent since this allows us to
                 // embed formatting markup.
-                this.getInnerDomElement().innerHTML = this.text = v;
+                this.getIDE().innerHTML = this.text = v;
                 if (this.inited) {
                     this.fireEvent('text', v);
                     this.sizeViewToDom();
@@ -115,7 +115,7 @@
         setTextOverflow: function(v) {
             if (this.textOverflow !== v) {
                 this.textOverflow = v;
-                this.getInnerDomStyle().textOverflow = v || 'inherit';
+                this.getIDS().textOverflow = v || 'inherit';
                 if (this.inited) this.fireEvent('textOverflow', v);
             }
         },
@@ -123,7 +123,7 @@
         setTextAlign: function(v) {
             if (this.textAlign !== v) {
                 this.textAlign = v;
-                this.getInnerDomStyle().textAlign = v || 'inherit';
+                this.getIDS().textAlign = v || 'inherit';
                 if (this.inited) this.fireEvent('textAlign', v);
             }
         },
@@ -184,7 +184,7 @@
                 to '#000000' if not provided.
             @returns {undefined} */
         showTextShadow: function(x, y, blur, color) {
-            this.getInnerDomStyle().textShadow = 
+            this.getIDS().textShadow = 
                 (x || 0) + 'px ' + 
                 (y || 0) + 'px ' + 
                 (blur != null ? blur : 2) + 'px ' + 
@@ -194,7 +194,7 @@
         /** Turns off a text shadow.
             @returns {undefined} */
         hideTextShadow: function() {
-            this.getInnerDomStyle().textShadow = 'none';
+            this.getIDS().textShadow = 'none';
         }
     });
 })(myt);

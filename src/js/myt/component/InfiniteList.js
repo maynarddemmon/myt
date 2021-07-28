@@ -32,7 +32,7 @@
             infiniteList._rowExtent = infiniteList.rowSpacing + infiniteList.rowHeight;
         },
         
-        getDomScrollTop = infiniteList => infiniteList.getInnerDomElement().scrollTop,
+        getDomScrollTop = infiniteList => infiniteList.getIDE().scrollTop,
         
         setDomScrollTop = (infiniteList, v) => {
             infiniteList.scrollYTo(v, true);
@@ -144,7 +144,7 @@
             // Accessors ///////////////////////////////////////////////////////
             setOverscrollBehavior: function(v) {
                 this.overscrollBehavior = v;
-                this.getInnerDomStyle().overscrollBehavior = v;
+                this.getIDS().overscrollBehavior = v;
             },
             
             setCollectionModel: function(v) {this.collectionModel = v;},

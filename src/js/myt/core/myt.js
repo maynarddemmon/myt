@@ -411,7 +411,7 @@
             
             createInputPlaceholderCSSRule: (view, color, fontFamily) => {
                 // Make sure the view has a dom ID for rule targeting
-                const domId = view.getOuterDomElement().id || (view.getOuterDomElement().id = 'id' + myt.generateGuid());
+                const domId = view.getODE().id || (view.getODE().id = 'id' + myt.generateGuid());
                 let sheet = view.__sheet,
                     rules = [];
                 

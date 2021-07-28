@@ -158,8 +158,8 @@
                 }]);
                 const satView = new View(colorView, {width:139, height:139}),
                     valView = new View(satView, {width:139, height:139});
-                satView.getInnerDomStyle().backgroundImage = 'linear-gradient(to right, #fff, rgba(204, 154, 129, 0))';
-                valView.getInnerDomStyle().backgroundImage = 'linear-gradient(to top, #000, rgba(204, 154, 129, 0))';
+                satView.getIDS().backgroundImage = 'linear-gradient(to right, #fff, rgba(204, 154, 129, 0))';
+                valView.getIDS().backgroundImage = 'linear-gradient(to top, #000, rgba(204, 154, 129, 0))';
                 colorThumb = new View(valView, {width:6, height:6, bgColor:'#000', border:[1, 'solid', '#ffffff'], roundedCorners:4});
                 
                 hueView = new View(colorPicker, {x:315, y:30, width:24, height:109, border:BORDER_333}, [Draggable, {
@@ -170,7 +170,7 @@
                         colorPicker.updateUI();
                     }
                 }]);
-                hueView.getInnerDomStyle().background = 'linear-gradient(to top, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%)';
+                hueView.getIDS().background = 'linear-gradient(to top, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%)';
                 hueThumb = new View(hueView, {x:-1, width:24, height:2, bgColor:'#fff', border:[1, 'solid', '#000']});
                 
                 new View(colorPicker, {
@@ -180,7 +180,7 @@
                 inputView = new pkg.InputText(colorPicker, {x:236, y:146, width:105, height:25, roundedCorners:3, textColor:'#333', border:BORDER_333, maxLength:11});
                 colorPicker.attachToDom(inputView, '_submitInput', 'blur');
                 colorPicker.attachToDom(inputView, '_handleKeyDown', 'keydown');
-                inputView.getInnerDomStyle().paddingLeft = '6px';
+                inputView.getIDS().paddingLeft = '6px';
                 
                 const initialColorContainer = new View(colorPicker, {x:170, y:146, width:60, height:23, border:BORDER_333});
                 new View(initialColorContainer, {
@@ -373,7 +373,7 @@
             pickedDate = date;
             
             // Calculate dates
-            const timeListScrollTop = timeListView.getOuterDomElement().scrollTop,
+            const timeListScrollTop = timeListView.getODE().scrollTop,
                 todayDateObj = new Date(),
                 todayFullYear = todayDateObj.getFullYear(),
                 todayMonth = todayDateObj.getMonth(),

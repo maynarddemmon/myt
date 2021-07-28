@@ -27,7 +27,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         self.callSuper(parent, attrs);
         
-        self.getInnerDomStyle().borderRadius = '50%';
+        self.getIDS().borderRadius = '50%';
         
         self._updateSize();
         self._spin();
@@ -44,7 +44,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     
     setSpinColor: function(v) {
         if (this.spinColor !== v) {
-            this.getInnerDomStyle().borderTopColor = this.spinColor = v;
+            this.getIDS().borderTopColor = this.spinColor = v;
             if (this.inited) this.fireEvent('spinColor', v);
         }
     },
@@ -78,7 +78,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     _updateSize: function() {
         const self = this,
             size = self.size,
-            ids = self.getInnerDomStyle();
+            ids = self.getIDS();
         self.setWidth(size);
         self.setHeight(size);
         ids.width = ids.height = (size - 2*self.borderWidth) + 'px';

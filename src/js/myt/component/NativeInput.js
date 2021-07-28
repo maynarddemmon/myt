@@ -11,7 +11,7 @@
         setEditableTextAttr = (editableText, v, propName) => {
             if (editableText[propName] !== v) {
                 editableText[propName] = v;
-                editableText.getInnerDomStyle()[propName] = v + 'px';
+                editableText.getIDS()[propName] = v + 'px';
                 if (editableText.inited) {
                     editableText.fireEvent(propName, v);
                     editableText.sizeViewToDom();
@@ -21,7 +21,7 @@
         
         setDomAttr = (inputView, attrName, value) => {
             if (inputView[attrName] !== value) {
-                inputView.getInnerDomElement()[attrName] = inputView[attrName] = value;
+                inputView.getIDE()[attrName] = inputView[attrName] = value;
                 if (inputView.inited) inputView.fireEvent(attrName, value);
             }
         },
@@ -68,7 +68,7 @@
             /** @overrides myt.Disableable */
             setDisabled: function(v) {
                 if (this.disabled !== v) {
-                    this.getInnerDomElement().disabled = v;
+                    this.getIDE().disabled = v;
                     this.callSuper(v);
                 }
             },
@@ -86,14 +86,14 @@
             /** Gets the value from the DOM.
                 @returns * The value */
             getDomValue: function() {
-                return this.getInnerDomElement().value;
+                return this.getIDE().value;
             },
             
             /** Sets the value on the DOM.
                 @param v:* The value to set.
                 @returns {undefined} */
             setDomValue: function(v) {
-                const ide = this.getInnerDomElement();
+                const ide = this.getIDE();
                 if (ide.value !== v) ide.value = v;
             }
         }),
@@ -122,14 +122,14 @@
             /** @overrideds myt.Selectable */
             setSelected: function(v) {
                 v = this.valueFromEvent(v);
-                const ide = this.getInnerDomElement();
+                const ide = this.getIDE();
                 if (ide.selected !== v) ide.selected = v;
             },
             
             /** @overrides myt.Disableable */
             setDisabled: function(v) {
                 if (this.disabled !== v) {
-                    this.getInnerDomElement().disabled = v;
+                    this.getIDE().disabled = v;
                     this.callSuper(v);
                 }
             },
@@ -138,7 +138,7 @@
             
             setLabel: function(v) {
                 if (this.label !== v) {
-                    this.getInnerDomElement().textContent = this.label = v;
+                    this.getIDE().textContent = this.label = v;
                     if (this.inited) this.fireEvent('label', v);
                 }
             },
@@ -147,17 +147,17 @@
             // Methods /////////////////////////////////////////////////////////
             /** @overrideds myt.Selectable */
             isSelected: function() {
-                return this.getInnerDomElement().selected;
+                return this.getIDE().selected;
             },
             
             /** @overrideds myt.Selectable */
             canSelect: function(selectionManager) {
-                return !this.disabled && !this.getInnerDomElement().selected && this.parent === selectionManager;
+                return !this.disabled && !this.getIDE().selected && this.parent === selectionManager;
             },
             
             /** @overrideds myt.Selectable */
             canDeselect: function(selectionManager) {
-                return !this.disabled && this.getInnerDomElement().selected && this.parent === selectionManager;
+                return !this.disabled && this.getIDE().selected && this.parent === selectionManager;
             }
         }),
         
@@ -288,7 +288,7 @@
                     return selection.text.length;
                 }
                 
-                return this.getInnerDomElement().selectionStart || 0;
+                return this.getIDE().selectionStart || 0;
             },
             
             /** Sets the caret and selection.
@@ -303,7 +303,7 @@
                     
                     end = start;
                 }
-                const elem = this.getInnerDomElement();
+                const elem = this.getIDE();
                 
                 if (elem.setSelectionRange) {
                     elem.setSelectionRange(start, end);
@@ -332,11 +332,11 @@
             /** Selects all the text in the input element.
                 @returns {undefined} */
             selectAll: function() {
-                this.getInnerDomElement().select();
+                this.getIDE().select();
             },
             
             getSelection: function() {
-                const ide = this.getInnerDomElement();
+                const ide = this.getIDE();
                 return {
                     start:ide.selectionStart,
                     startElem:ide,
@@ -452,12 +452,12 @@
         
         /** @overrides myt.NativeInputWrapper */
         getDomValue: function() {
-            return this.getInnerDomElement().innerHTML;
+            return this.getIDE().innerHTML;
         },
         
         /** @overrides myt.NativeInputWrapper */
         setDomValue: function(v) {
-            const ide = this.getInnerDomElement();
+            const ide = this.getIDE();
             if (ide.innerHTML !== v) {
                 ide.innerHTML = v;
                 this.sizeViewToDom();
@@ -491,7 +491,7 @@
         
         // Caret handling
         getCharacterCount: function() {
-            const elem = this.getInnerDomElement().firstChild;
+            const elem = this.getIDE().firstChild;
             return elem ? elem.length : 0;
         },
         
@@ -515,9 +515,9 @@
             }
             this.saveSelection({
                 start:start,
-                startElem:this.getInnerDomElement().firstChild,
+                startElem:this.getIDE().firstChild,
                 end:end,
-                endElem:this.getInnerDomElement().firstChild
+                endElem:this.getIDE().firstChild
             });
         },
         
@@ -543,7 +543,7 @@
                 const sel = window.getSelection();
                 if (sel.rangeCount > 0) {
                     // Sometimes when deleting we get an unexpected node
-                    if (sel.extentNode === this.getInnerDomElement()) return null;
+                    if (sel.extentNode === this.getIDE()) return null;
                     
                     range = sel.getRangeAt(0);
                 }
@@ -553,9 +553,9 @@
             
             return {
                 start:range ? range.startOffset : 0,
-                startElem:range ? range.startContainer : this.getInnerDomElement().firstChild,
+                startElem:range ? range.startContainer : this.getIDE().firstChild,
                 end:range ? range.endOffset : 0,
-                endElem:range ? range.endContainer : this.getInnerDomElement().firstChild
+                endElem:range ? range.endContainer : this.getIDE().firstChild
             };
         },
         
@@ -610,7 +610,7 @@
         // Accessors ///////////////////////////////////////////////////////////
         setResize: function(v) {
             if (this.resize !== v) {
-                this.resize = this.getInnerDomStyle().resize = v || 'none';
+                this.resize = this.getIDS().resize = v || 'none';
                 if (this.inited) this.fireEvent('resize', v);
             }
         },

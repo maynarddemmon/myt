@@ -47,7 +47,7 @@
                         domObservers.push(domObserver, methodName, methodRef, capture);
                     }
                     
-                    pkg.addEventListener(this.getInnerDomElement(), type, methodRef, capture, passive);
+                    pkg.addEventListener(this.getIDE(), type, methodRef, capture, passive);
                     
                     return true;
                 }
@@ -122,7 +122,7 @@
                     const domObservers = domObserversByType[type];
                     if (domObservers) {
                         // Remove dom observer
-                        const ide = this.getInnerDomElement();
+                        const ide = this.getIDE();
                         let retval = false,  
                             i = domObservers.length;
                         while (i) {
@@ -146,7 +146,7 @@
         /** Detaches all dom observers from this DomObservable.
             @returns {undefined} */
         detachAllDomObservers: function() {
-            const ide = this.getInnerDomElement();
+            const ide = this.getIDE();
             if (ide) {
                 const domObserversByType = this.__dobsbt;
                 if (domObserversByType) {
@@ -485,11 +485,11 @@
                 self.focusable = v;
                 
                 if (v) {
-                    self.getInnerDomElement().tabIndex = 0; // Make focusable. -1 is programmatic only
+                    self.getIDE().tabIndex = 0; // Make focusable. -1 is programmatic only
                     self.attachToDom(self, '__doFocus', 'focus');
                     self.attachToDom(self, '__doBlur', 'blur');
                 } else if (wasFocusable) {
-                    self.getInnerDomElement().removeAttribute('tabIndex'); // Make unfocusable
+                    self.getIDE().removeAttribute('tabIndex'); // Make unfocusable
                     self.detachFromDom(self, '__doFocus', 'focus');
                     self.detachFromDom(self, '__doBlur', 'blur');
                 }
@@ -540,14 +540,14 @@
                 auto-scrolling will occur when focus is set.
             @returns {undefined} */
         focus: function(noScroll) {
-            if (this.isFocusable()) this.getInnerDomElement().focus({preventScroll:noScroll});
+            if (this.isFocusable()) this.getIDE().focus({preventScroll:noScroll});
         },
         
         /** Removes the focus from this view. Do not call this method directly.
             @private
             @returns {undefined} */
         blur: function() {
-            this.getInnerDomElement().blur();
+            this.getIDE().blur();
         },
         
         /** @private
@@ -587,10 +587,10 @@
         /** @returns {undefined} */
         showFocusIndicator: function() {
             // IE
-            this.getInnerDomElement().hideFocus = false;
+            this.getIDE().hideFocus = false;
             
             // Mozilla and Webkit
-            const ids = this.getInnerDomStyle();
+            const ids = this.getIDS();
             ids.outlineWidth = 'thin';
             ids.outlineColor = '#8bf';
             ids.outlineStyle = 'solid';
@@ -606,10 +606,10 @@
             @returns {undefined}*/
         hideDefaultFocusIndicator: function() {
             // IE
-            this.getInnerDomElement().hideFocus = true;
+            this.getIDE().hideFocus = true;
             
             // Mozilla and Webkit
-            this.getInnerDomStyle().outlineStyle = 'none';
+            this.getIDS().outlineStyle = 'none';
         },
         
         /** @overrides myt.DomObservable */

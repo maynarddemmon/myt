@@ -11,7 +11,7 @@
                     followed by an insert. */
         retainFocusDuringDomUpdate = (viewBeingRemoved, wrappedFunc) => {
             const restoreFocus = pkg.global.focus.focusedView, 
-                elem = viewBeingRemoved.getInnerDomElement();
+                elem = viewBeingRemoved.getIDE();
             if (restoreFocus === viewBeingRemoved || (restoreFocus && restoreFocus.isDescendantOf(viewBeingRemoved))) {
                 restoreFocus._ignoreFocus = true;
             }
@@ -48,9 +48,9 @@
                 if (checkZIndex) {
                     const commonAncestor = firstView.getLeastCommonAncestor(secondView);
                     if (commonAncestor) {
-                        const commonAncestorElem = commonAncestor.getInnerDomElement();
-                        let zIdx = DomElementProxy.getZIndexRelativeToAncestor(firstView.getOuterDomElement(), commonAncestorElem),
-                            otherZIdx = DomElementProxy.getZIndexRelativeToAncestor(secondView.getOuterDomElement(), commonAncestorElem);
+                        const commonAncestorElem = commonAncestor.getIDE();
+                        let zIdx = DomElementProxy.getZIndexRelativeToAncestor(firstView.getODE(), commonAncestorElem),
+                            otherZIdx = DomElementProxy.getZIndexRelativeToAncestor(secondView.getODE(), commonAncestorElem);
                         
                         // Reverse comparison order
                         if (front) {
@@ -73,7 +73,7 @@
                 // DOCUMENT_POSITION_CONTAINS 8
                 // DOCUMENT_POSITION_CONTAINED_BY 16
                 // DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC 32
-                const rel = firstView.getOuterDomElement().compareDocumentPosition(secondView.getOuterDomElement());
+                const rel = firstView.getODE().compareDocumentPosition(secondView.getODE());
                 return front ? rel === 2 || rel === 10 : rel === 4 || rel === 20;
             } else {
                 return false;
@@ -98,11 +98,11 @@
         },
         
         isPointVisible = (view, x, y) => {
-            const ode = view.getOuterDomElement();
+            const ode = view.getODE();
             if (rectContainsPoint(x, y, 0, 0, ode.offsetWidth * view.__effectiveScaleX, ode.offsetHeight * view.__effectiveScaleY)) {
                 let parent;
                 if (parent = view.parent) {
-                    const pIde = parent.getInnerDomElement();
+                    const pIde = parent.getIDE();
                     return isPointVisible(
                         parent, 
                         x + (ode.offsetLeft - pIde.scrollLeft) * parent.__effectiveScaleX, 
@@ -173,7 +173,7 @@
             @param {number} radius - The radius of the corner.
             @param {string} corner - One of 'TopLeft', 'TopRight', 'BottomLeft' or 'BottomRight'. */
         setRoundedCorner = (view, radius, corner) => {
-            view.getOuterDomStyle()['border' + corner + 'Radius'] = radius + 'px';
+            view.getODS()['border' + corner + 'Radius'] = radius + 'px';
         };
     
     /** A Node that can be viewed. Instances of view are typically backed by
@@ -330,7 +330,7 @@
             // so this gets things initialized correctly. Without this 
             // RootViews will have an incorrect initial position for x or 
             // y of 0.
-            const ods = self.getOuterDomStyle();
+            const ods = self.getODS();
             ods.left = ods.top = '0px';
             
             self.callSuper(parent, attrs);
@@ -537,7 +537,7 @@
         setX: function(v) {
             if (this.x !== v) {
                 this.x = v;
-                if (this.visible) this.getOuterDomStyle().left = v + 'px';
+                if (this.visible) this.getODS().left = v + 'px';
                 if (this.inited) this.fireEvent('x', v);
             }
         },
@@ -545,7 +545,7 @@
         setY: function(v) {
             if (this.y !== v) {
                 this.y = v;
-                if (this.visible) this.getOuterDomStyle().top = v + 'px';
+                if (this.visible) this.getODS().top = v + 'px';
                 if (this.inited) this.fireEvent('y', v);
             }
         },
@@ -556,7 +556,7 @@
             
             if (this.width !== v) {
                 this.width = v;
-                this.getOuterDomStyle().width = v + 'px';
+                this.getODS().width = v + 'px';
                 if (this.inited) {
                     this.__updateBounds(v, this.height);
                     if (!supressEvent) this.fireEvent('width', v);
@@ -570,7 +570,7 @@
             
             if (this.height !== v) {
                 this.height = v;
-                this.getOuterDomStyle().height = v + 'px';
+                this.getODS().height = v + 'px';
                 if (this.inited) {
                     this.__updateBounds(this.width, v);
                     if (!supressEvent) this.fireEvent('height', v);
@@ -581,14 +581,14 @@
         setTextColor: function(v) {
             if (this.textColor !== v) {
                 this.textColor = v;
-                this.getOuterDomStyle().color = v || 'inherit';
+                this.getODS().color = v || 'inherit';
                 if (this.inited) this.fireEvent('textColor', v);
             }
         },
         
         setBgColor: function(v) {
             if (this.bgColor !== v) {
-                this.getOuterDomStyle().backgroundColor = this.bgColor = v;
+                this.getODS().backgroundColor = this.bgColor = v;
                 if (this.inited) this.fireEvent('bgColor', v);
             }
         },
@@ -601,7 +601,7 @@
         
         setOpacity: function(v) {
             if (this.opacity !== v) {
-                this.getOuterDomStyle().opacity = this.opacity = v;
+                this.getODS().opacity = this.opacity = v;
                 if (this.inited) this.fireEvent('opacity', v);
             }
         },
@@ -611,7 +611,7 @@
             if (existing !== v) {
                 this.overflow = v;
                 
-                const ids = this.getInnerDomStyle();
+                const ids = this.getIDS();
                 if (v === 'autox') {
                     ids.overflowX = 'auto';
                     ids.overflowY = 'hidden';
@@ -632,7 +632,7 @@
             if (self.visible !== v) {
                 self.visible = v;
                 
-                const ods = self.getOuterDomStyle();
+                const ods = self.getODS();
                 ods.visibility = v ? 'inherit' : 'hidden';
                 
                 // Move invisible elements to a very negative location so they won't
@@ -648,7 +648,7 @@
         setPointerEvents: function(v) {
             if (this.pointerEvents !== v) {
                 this.pointerEvents = v;
-                this.getOuterDomStyle().pointerEvents = v || 'auto';
+                this.getODS().pointerEvents = v || 'auto';
                 if (this.inited) this.fireEvent('pointerEvents', v);
             }
         },
@@ -656,7 +656,7 @@
         setCursor: function(v) {
             if (this.cursor !== v) {
                 this.cursor = v;
-                this.getOuterDomStyle().cursor = v || 'auto';
+                this.getODS().cursor = v || 'auto';
                 if (this.inited) this.fireEvent('cursor', v);
             }
         },
@@ -687,15 +687,15 @@
         
         setOutlineWidth: function(v) {
             this.outlineWidth = v || 0;
-            this.getOuterDomStyle().outlineWidth = this.outlineWidth + 'px';
+            this.getODS().outlineWidth = this.outlineWidth + 'px';
         },
         
         setOutlineStyle: function(v) {
-            this.getOuterDomStyle().outlineStyle = this.outlineStyle = v || 'none';
+            this.getODS().outlineStyle = this.outlineStyle = v || 'none';
         },
         
         setOutlineColor: function(v) {
-            this.getOuterDomStyle().outlineColor = this.outlineColor = v || '#000';
+            this.getODS().outlineColor = this.outlineColor = v || '#000';
         },
         
         // Borders
@@ -714,15 +714,15 @@
         
         setBorderWidth: function(v) {
             this.borderWidth = v || 0;
-            this.getOuterDomStyle().borderWidth = this.borderWidth + 'px';
+            this.getODS().borderWidth = this.borderWidth + 'px';
         },
         
         setBorderStyle: function(v) {
-            this.getOuterDomStyle().borderStyle = this.borderStyle = v || 'none';
+            this.getODS().borderStyle = this.borderStyle = v || 'none';
         },
         
         setBorderColor: function(v) {
-            this.getOuterDomStyle().borderColor = this.borderColor = v || '#000';
+            this.getODS().borderColor = this.borderColor = v || '#000';
         },
         
         // Edge treatements
@@ -730,7 +730,7 @@
             @param {number} radius - The radius of the corners.
             @returns {undefined} */
         setRoundedCorners: function(radius) {
-            this.getOuterDomStyle().borderRadius = radius + 'px';
+            this.getODS().borderRadius = radius + 'px';
         },
         
         /** A convienence method to round the top left corner.
@@ -776,7 +776,7 @@
             } else {
                 v = 'none';
             }
-            this.getOuterDomStyle().boxShadow = v;
+            this.getODS().boxShadow = v;
         },
         
         /** Sets the CSS liner-gradient or radial-gradient property. Setting this
@@ -799,7 +799,7 @@
             @returns {undefined} */
         setGradient: function(v) {
             const self = this,
-                ods = self.getOuterDomStyle();
+                ods = self.getODS();
             if (v) {
                 // Determine type
                 let type = v[0];
@@ -877,7 +877,7 @@
             @return {undefined} */
         setTooltip: function(v) {
             if (this.tooltip !== v) {
-                this.tooltip = this.getOuterDomElement().title = v;
+                this.tooltip = this.getODE().title = v;
                 if (this.inited) this.fireEvent('tooltip', v);
             }
         },
@@ -909,7 +909,7 @@
             @fires layoutAdded event with the provided node if it's a Layout. */
         subnodeAdded: function(node) {
             if (node instanceof pkg.View) {
-                this.getInnerDomElement().appendChild(node.getOuterDomElement());
+                this.getIDE().appendChild(node.getODE());
                 this.getSubviews().push(node);
                 this.fireEvent('subviewAdded', node);
                 this.subviewAdded(node);
@@ -980,7 +980,7 @@
             @returns {?Object} - The next sibling myt.View or null if none exists. */
         getNextSibling: function() {
             if (this.parent) {
-                const nextDomElement = this.getOuterDomElement().nextElementSibling;
+                const nextDomElement = this.getODE().nextElementSibling;
                 if (nextDomElement) return nextDomElement.model;
             }
             return null;
@@ -990,7 +990,7 @@
             @returns {?Object} - The previous sibling myt.View or null if none exists. */
         getPrevSibling: function() {
             if (this.parent) {
-                const prevDomElement = this.getOuterDomElement().previousElementSibling;
+                const prevDomElement = this.getODE().previousElementSibling;
                 if (prevDomElement) return prevDomElement.model;
             }
             return null;
@@ -1077,10 +1077,10 @@
             @returns {undefined} */
         bringSubviewToFront: function(sv) {
             if (sv && sv.parent === this) {
-                const innerElem = this.getInnerDomElement();
-                if (sv.getOuterDomElement() !== innerElem.lastChild) {
+                const innerElem = this.getIDE();
+                if (sv.getODE() !== innerElem.lastChild) {
                     retainFocusDuringDomUpdate(sv, () => {
-                        innerElem.appendChild(sv.getOuterDomElement());
+                        innerElem.appendChild(sv.getODE());
                     });
                 }
             }
@@ -1091,10 +1091,10 @@
             @returns {undefined} */
         sendSubviewToBack: function(sv) {
             if (sv && sv.parent === this) {
-                const innerElem = this.getInnerDomElement();
-                if (sv.getOuterDomElement() !== innerElem.firstChild) {
+                const innerElem = this.getIDE();
+                if (sv.getODE() !== innerElem.firstChild) {
                     retainFocusDuringDomUpdate(sv, () => {
-                        innerElem.insertBefore(sv.getOuterDomElement(), innerElem.firstChild);
+                        innerElem.insertBefore(sv.getODE(), innerElem.firstChild);
                     });
                 }
             }
@@ -1106,9 +1106,9 @@
             @returns {undefined} */
         sendSubviewBehind: function(sv, existing) {
             if (sv && existing && sv.parent === this && existing.parent === this) {
-                const innerElem = this.getInnerDomElement();
+                const innerElem = this.getIDE();
                 retainFocusDuringDomUpdate(sv, () => {
-                    innerElem.insertBefore(sv.getOuterDomElement(), existing.getOuterDomElement());
+                    innerElem.insertBefore(sv.getODE(), existing.getODE());
                 });
             }
         },
@@ -1136,7 +1136,7 @@
             
             // Rearrange dom to match new sort order.
             retainFocusDuringDomUpdate(self, () => {
-                const outerElem = self.getOuterDomElement(),
+                const outerElem = self.getODE(),
                     parentElem = outerElem.parentNode;
                 // Remove this dom element from the dom
                 let nextDe;
@@ -1149,8 +1149,8 @@
                 // fragment and then add that fragment back to the dom.
                 const fragment = document.createDocumentFragment(),
                     len = svs.length;
-                for (let i = 0; len > i;) fragment.appendChild(svs[i++].getOuterDomElement());
-                self.getInnerDomElement().appendChild(fragment);
+                for (let i = 0; len > i;) fragment.appendChild(svs[i++].getODE());
+                self.getIDE().appendChild(fragment);
                 
                 // Put this dom element back in the dom
                 if (parentElem) parentElem.insertBefore(outerElem, nextDe);
@@ -1167,7 +1167,7 @@
             @returns {boolean} True if the location is inside this view, false 
                 if not. */
         containsPoint: function(locX, locY, referenceFrameDomElem) {
-            const outerElem = this.getOuterDomElement();
+            const outerElem = this.getODE();
             if (!outerElem) return false;
             
             const pos = DomElementProxy.getRelativePosition(outerElem, referenceFrameDomElem);

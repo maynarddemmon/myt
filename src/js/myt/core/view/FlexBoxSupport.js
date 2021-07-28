@@ -65,7 +65,7 @@
                             domValue = 'column-reverse';
                             break;
                     }
-                    this.getInnerDomStyle().flexDirection = domValue;
+                    this.getIDS().flexDirection = domValue;
                     
                     if (this.inited) {
                         this.fireEvent('flexDirection', v);
@@ -86,7 +86,7 @@
                             domValue = 'wrap-reverse';
                             break;
                     }
-                    this.getInnerDomStyle().flexWrap = domValue;
+                    this.getIDS().flexWrap = domValue;
                     
                     if (this.inited) {
                         this.fireEvent('flexWrap', v);
@@ -121,7 +121,7 @@
                             domValue = 'space-evenly';
                             break;
                     }
-                    this.getInnerDomStyle().justifyContent = domValue;
+                    this.getIDS().justifyContent = domValue;
                     
                     if (this.inited) {
                         this.fireEvent('justifyContent', v);
@@ -144,7 +144,7 @@
                             domValue = 'flex-end';
                             break;
                     }
-                    this.getInnerDomStyle().alignItems = domValue;
+                    this.getIDS().alignItems = domValue;
                     
                     if (this.inited) {
                         this.fireEvent('alignItems', v);
@@ -175,7 +175,7 @@
                             domValue = 'space-around';
                             break;
                     }
-                    this.getInnerDomStyle().alignContent = domValue;
+                    this.getIDS().alignContent = domValue;
                     
                     if (this.inited) {
                         this.fireEvent('alignContent', v);
@@ -197,7 +197,7 @@
                 Allow the child views to be managed by the flex box.*/
             subviewAdded: function(sv) {
                 if (sv && !sv.ignoreFlex) {
-                    sv.getOuterDomStyle().position = '';
+                    sv.getODS().position = '';
                     if (this.inited) syncSubviewsForFlexBox(this);
                 }
             },
@@ -212,7 +212,7 @@
             /** @overrides myt.View
                 Allow the child views to be managed by the flex box. */
             subviewRemoved: sv => {
-                if (sv && !sv.destroyed && !sv.ignoreFlex) sv.getOuterDomStyle().position = 'absolute';
+                if (sv && !sv.destroyed && !sv.ignoreFlex) sv.getODS().position = 'absolute';
             }
         });
     
@@ -244,7 +244,7 @@
             // may need to resync the dom to the model.
             if (self.inited && oldParentIsFlexBox && !self.isChildOfFlexBox()) {
                 // Sync dom to model
-                const ods = self.getOuterDomStyle();
+                const ods = self.getODS();
                 if (ods.width !== AUTO) ods.width = self.width + 'px';
                 if (ods.height !== AUTO) ods.height = self.height + 'px';
                 self.syncInnerToOuter();
@@ -256,7 +256,7 @@
             dom element. */
         setWidth: function(v, supressEvent) {
             if (v == null || v === '') {
-                this.getOuterDomStyle().width = '';
+                this.getODS().width = '';
                 this.syncModelToOuterBounds(false, true);
             } else {
                 this.callSuper(v, supressEvent);
@@ -269,7 +269,7 @@
             dom element. */
         setHeight: function(v, supressEvent) {
             if (v == null || v === '') {
-                this.getOuterDomStyle().height = '';
+                this.getODS().height = '';
                 this.syncModelToOuterBounds(true, false);
             } else {
                 this.callSuper(v, supressEvent);
@@ -280,7 +280,7 @@
         // Flex Box Attrs
         setFlexGrow: function(v) {
             if (this.flexGrow !== v) {
-                this.getOuterDomStyle().flexGrow = this.flexGrow = v;
+                this.getODS().flexGrow = this.flexGrow = v;
                 if (this.inited) {
                     this.fireEvent('flexGrow', v);
                     const parent = this.parent;
@@ -291,7 +291,7 @@
         
         setFlexShrink: function(v) {
             if (this.flexShrink !== v) {
-                this.getOuterDomStyle().flexShrink = this.flexShrink = v;
+                this.getODS().flexShrink = this.flexShrink = v;
                 if (this.inited) {
                     this.fireEvent('flexShrink', v);
                     const parent = this.parent;
@@ -314,7 +314,7 @@
                         domValue = 'flex-end';
                         break;
                 }
-                this.getOuterDomStyle().alignSelf = domValue;
+                this.getODS().alignSelf = domValue;
                 
                 if (this.inited) this.fireEvent('alignSelf', v);
             }
@@ -330,13 +330,13 @@
             @param {boolean} [notHeight] If true height will not be synced.
             @returns {undefined} */
         syncModelToOuterBounds: function(notWidth, notHeight) {
-            const ode = this.getOuterDomElement(),
-                ids = this.getInnerDomStyle();
+            const ode = this.getODE(),
+                ids = this.getIDS();
             if (!notWidth) {
                 if (ids.width === AUTO) {
                     // We're sizing to our contents so first sync the outer 
                     // dom style so we can read the correct client size below.
-                    this.getOuterDomStyle().width = AUTO;
+                    this.getODS().width = AUTO;
                 } else {
                     // We're using a fixed size so first sync the inner dom 
                     // style to the outer dom style.
@@ -348,7 +348,7 @@
                 if (ids.height === AUTO) {
                     // We're sizing to our contents so first sync the outer dom 
                     // style so we can read the correct client size below.
-                    this.getOuterDomStyle().height = AUTO;
+                    this.getODS().height = AUTO;
                 } else {
                     // We're using a fixed size so first sync the inner dom 
                     // style to the outer dom style.
@@ -362,8 +362,8 @@
             @param {boolean} [notHeight] If true height will not be synced.
             @returns {undefined} */
         syncInnerToOuter: function(notWidth, notHeight) {
-            const ids = this.getInnerDomStyle(),
-                ode = this.getOuterDomElement();
+            const ids = this.getIDS(),
+                ode = this.getODE();
             // Don't clobber auto sizing
             if (!notWidth && ids.width !== AUTO) this.setInnerWidth(ode.clientWidth);
             if (!notHeight && ids.height !== AUTO) this.setInnerHeight(ode.clientHeight);
@@ -373,14 +373,14 @@
             @param {number} v
             @returns {undefined} */
         setInnerWidth: function(v) {
-            this.getInnerDomStyle().width = v + 'px';
+            this.getIDS().width = v + 'px';
         },
         
         /** Sets the inner dom element's height.
             @param {number} v
             @returns {undefined} */
         setInnerHeight: function(v) {
-            this.getInnerDomStyle().height = v + 'px';
+            this.getIDS().height = v + 'px';
         },
         
         /** @overrides */

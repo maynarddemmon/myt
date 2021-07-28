@@ -904,7 +904,7 @@ Date.prototype.format = Date.prototype.format || (() => {
             
             createInputPlaceholderCSSRule: (view, color, fontFamily) => {
                 // Make sure the view has a dom ID for rule targeting
-                const domId = view.getOuterDomElement().id || (view.getOuterDomElement().id = 'id' + myt.generateGuid());
+                const domId = view.getODE().id || (view.getODE().id = 'id' + myt.generateGuid());
                 let sheet = view.__sheet,
                     rules = [];
                 
@@ -2484,6 +2484,7 @@ new JS.Singleton('GlobalError', {
 
 ((pkg) => {
     const GLOBAL = global,
+        getComputedStyle = GLOBAL.getComputedStyle,
         DOCUMENT_ELEMENT = document;
     
     /** Provides a dom element for this instance. Also assigns a reference 
@@ -2517,7 +2518,7 @@ new JS.Singleton('GlobalError', {
                 while (elem) {
                     if (elem === DOCUMENT_ELEMENT) return true;
                     
-                    const style = GLOBAL.getComputedStyle(elem);
+                    const style = getComputedStyle(elem);
                     if (style.display === 'none' || style.visibility === 'hidden') break;
                     
                     elem = elem.parentNode;
@@ -2535,7 +2536,7 @@ new JS.Singleton('GlobalError', {
                     const ancestors = DomElementProxy.getAncestorArray(elem, ancestor);
                     let i = ancestors.length - 1;
                     while (i) {
-                        const style = GLOBAL.getComputedStyle(ancestors[--i]),
+                        const style = getComputedStyle(ancestors[--i]),
                             zIdx = style.zIndex,
                             isAuto = zIdx === 'auto';
                         
@@ -2572,7 +2573,7 @@ new JS.Singleton('GlobalError', {
                 @returns {number} - An int */
             getHighestZIndex: elem => {
                 // See https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Understanding_z_index/The_stacking_context
-                const style = GLOBAL.getComputedStyle(elem);
+                const style = getComputedStyle(elem);
                 let zIdx = style.zIndex;
                 const isAuto = zIdx === 'auto';
                 if (isAuto && parseInt(style.opacity, 10) === 1) {
@@ -2613,7 +2614,7 @@ new JS.Singleton('GlobalError', {
                     y += elem.offsetTop;
                     elem = elem.offsetParent;
                     if (elem && elem.nodeName !== "BODY") {
-                        const s = GLOBAL.getComputedStyle(elem);
+                        const s = getComputedStyle(elem);
                         x += borderMultiplier * parseInt(s.borderLeftWidth, 10) - elem.scrollLeft;
                         y += borderMultiplier * parseInt(s.borderTopWidth, 10) - elem.scrollTop;
                     }
@@ -2704,29 +2705,26 @@ new JS.Singleton('GlobalError', {
         
         
         // Accessors ///////////////////////////////////////////////////////////
-        getInnerDomElement: function() {
-            return this.__iE;
-        },
+        getIDE: function() {return this.__iE;}, // Short alias for getInnerDomElement
+        getODE: function() {return this.__oE;}, // Short alias for getOuterDomElement
+        getIDS: function() {return this.__iS;}, // Short alias for getInnerDomStyle
+        getODS: function() {return this.__oS;}, // Short alias for getOuterDomStyle
         
-        getOuterDomElement: function() {
-            return this.__oE;
-        },
+        getInnerDomElement: function() {return this.__iE;},
+        
+        getOuterDomElement: function() {return this.__oE;},
         
         /** Gets the style attribute of the inner dom element. If only one
             dom element exists then this will be the same as the outer dom
             style.
             @returns {?Object} */
-        getInnerDomStyle: function() {
-            return this.__iS;
-        },
+        getInnerDomStyle: function() {return this.__iS;},
         
         /** Gets the style attribute of the outer dom element. If only one
             dom element exists then this will be the same as the inner dom
             style.
             @returns {?Object} */
-        getOuterDomStyle: function() {
-            return this.__oS;
-        },
+        getOuterDomStyle: function() {return this.__oS;},
         
         /** Sets the dom element(s) to the provided one.
             @param {?Object} v
@@ -2761,8 +2759,7 @@ new JS.Singleton('GlobalError', {
         /** Removes this DomElementProxy's dom element from its parent node.
             @returns {undefined} */
         removeDomElement: function() {
-            const ode = this.getOuterDomElement();
-            ode.parentNode.removeChild(ode);
+            this.__oE.parentNode.removeChild(this.__oE);
         },
         
         /** Called when this DomElementProxy is destroyed.
@@ -2771,7 +2768,6 @@ new JS.Singleton('GlobalError', {
             delete this.__iE.model;
             delete this.__iS;
             delete this.__iE;
-            
             delete this.__oE.model;
             delete this.__oS;
             delete this.__oE;
@@ -2889,7 +2885,7 @@ new JS.Singleton('GlobalError', {
                 should be used instead of the outer dom element.
             @returns {undefined} */
         scrollYTo: function(value, scrollInner) {
-            (scrollInner ? this.getInnerDomElement() : this.getOuterDomElement()).scrollTop = value || 0;
+            (scrollInner ? this.__iE : this.__oE).scrollTop = value || 0;
         }
     });
 })(myt);
@@ -2931,7 +2927,7 @@ new JS.Singleton('GlobalError', {
                 if (!model) model = globalFocus.findModelForDomElement(startElem);
                 if (model) {
                     const focusTrap = model.getFocusTrap(ignoreFocusTrap);
-                    if (focusTrap) rootElem = focusTrap.getInnerDomElement();
+                    if (focusTrap) rootElem = focusTrap.getIDE();
                 }
             }
             
@@ -2941,7 +2937,7 @@ new JS.Singleton('GlobalError', {
                     (progModel = elem.model[focusFuncName]())
                 ) {
                     // Programatic traverse
-                    elem = progModel.getInnerDomElement();
+                    elem = progModel.getIDE();
                 } else if (isForward) {
                     // Dom traverse forward
                     if (elem.firstChild) {
@@ -3177,7 +3173,7 @@ new JS.Singleton('GlobalError', {
                         domObservers.push(domObserver, methodName, methodRef, capture);
                     }
                     
-                    pkg.addEventListener(this.getInnerDomElement(), type, methodRef, capture, passive);
+                    pkg.addEventListener(this.getIDE(), type, methodRef, capture, passive);
                     
                     return true;
                 }
@@ -3252,7 +3248,7 @@ new JS.Singleton('GlobalError', {
                     const domObservers = domObserversByType[type];
                     if (domObservers) {
                         // Remove dom observer
-                        const ide = this.getInnerDomElement();
+                        const ide = this.getIDE();
                         let retval = false,  
                             i = domObservers.length;
                         while (i) {
@@ -3276,7 +3272,7 @@ new JS.Singleton('GlobalError', {
         /** Detaches all dom observers from this DomObservable.
             @returns {undefined} */
         detachAllDomObservers: function() {
-            const ide = this.getInnerDomElement();
+            const ide = this.getIDE();
             if (ide) {
                 const domObserversByType = this.__dobsbt;
                 if (domObserversByType) {
@@ -3615,11 +3611,11 @@ new JS.Singleton('GlobalError', {
                 self.focusable = v;
                 
                 if (v) {
-                    self.getInnerDomElement().tabIndex = 0; // Make focusable. -1 is programmatic only
+                    self.getIDE().tabIndex = 0; // Make focusable. -1 is programmatic only
                     self.attachToDom(self, '__doFocus', 'focus');
                     self.attachToDom(self, '__doBlur', 'blur');
                 } else if (wasFocusable) {
-                    self.getInnerDomElement().removeAttribute('tabIndex'); // Make unfocusable
+                    self.getIDE().removeAttribute('tabIndex'); // Make unfocusable
                     self.detachFromDom(self, '__doFocus', 'focus');
                     self.detachFromDom(self, '__doBlur', 'blur');
                 }
@@ -3670,14 +3666,14 @@ new JS.Singleton('GlobalError', {
                 auto-scrolling will occur when focus is set.
             @returns {undefined} */
         focus: function(noScroll) {
-            if (this.isFocusable()) this.getInnerDomElement().focus({preventScroll:noScroll});
+            if (this.isFocusable()) this.getIDE().focus({preventScroll:noScroll});
         },
         
         /** Removes the focus from this view. Do not call this method directly.
             @private
             @returns {undefined} */
         blur: function() {
-            this.getInnerDomElement().blur();
+            this.getIDE().blur();
         },
         
         /** @private
@@ -3717,10 +3713,10 @@ new JS.Singleton('GlobalError', {
         /** @returns {undefined} */
         showFocusIndicator: function() {
             // IE
-            this.getInnerDomElement().hideFocus = false;
+            this.getIDE().hideFocus = false;
             
             // Mozilla and Webkit
-            const ids = this.getInnerDomStyle();
+            const ids = this.getIDS();
             ids.outlineWidth = 'thin';
             ids.outlineColor = '#8bf';
             ids.outlineStyle = 'solid';
@@ -3736,10 +3732,10 @@ new JS.Singleton('GlobalError', {
             @returns {undefined}*/
         hideDefaultFocusIndicator: function() {
             // IE
-            this.getInnerDomElement().hideFocus = true;
+            this.getIDE().hideFocus = true;
             
             // Mozilla and Webkit
-            this.getInnerDomStyle().outlineStyle = 'none';
+            this.getIDS().outlineStyle = 'none';
         },
         
         /** @overrides myt.DomObservable */
@@ -4226,7 +4222,7 @@ new JS.Singleton('GlobalTouch', {
                             domValue = 'column-reverse';
                             break;
                     }
-                    this.getInnerDomStyle().flexDirection = domValue;
+                    this.getIDS().flexDirection = domValue;
                     
                     if (this.inited) {
                         this.fireEvent('flexDirection', v);
@@ -4247,7 +4243,7 @@ new JS.Singleton('GlobalTouch', {
                             domValue = 'wrap-reverse';
                             break;
                     }
-                    this.getInnerDomStyle().flexWrap = domValue;
+                    this.getIDS().flexWrap = domValue;
                     
                     if (this.inited) {
                         this.fireEvent('flexWrap', v);
@@ -4282,7 +4278,7 @@ new JS.Singleton('GlobalTouch', {
                             domValue = 'space-evenly';
                             break;
                     }
-                    this.getInnerDomStyle().justifyContent = domValue;
+                    this.getIDS().justifyContent = domValue;
                     
                     if (this.inited) {
                         this.fireEvent('justifyContent', v);
@@ -4305,7 +4301,7 @@ new JS.Singleton('GlobalTouch', {
                             domValue = 'flex-end';
                             break;
                     }
-                    this.getInnerDomStyle().alignItems = domValue;
+                    this.getIDS().alignItems = domValue;
                     
                     if (this.inited) {
                         this.fireEvent('alignItems', v);
@@ -4336,7 +4332,7 @@ new JS.Singleton('GlobalTouch', {
                             domValue = 'space-around';
                             break;
                     }
-                    this.getInnerDomStyle().alignContent = domValue;
+                    this.getIDS().alignContent = domValue;
                     
                     if (this.inited) {
                         this.fireEvent('alignContent', v);
@@ -4358,7 +4354,7 @@ new JS.Singleton('GlobalTouch', {
                 Allow the child views to be managed by the flex box.*/
             subviewAdded: function(sv) {
                 if (sv && !sv.ignoreFlex) {
-                    sv.getOuterDomStyle().position = '';
+                    sv.getODS().position = '';
                     if (this.inited) syncSubviewsForFlexBox(this);
                 }
             },
@@ -4373,7 +4369,7 @@ new JS.Singleton('GlobalTouch', {
             /** @overrides myt.View
                 Allow the child views to be managed by the flex box. */
             subviewRemoved: sv => {
-                if (sv && !sv.destroyed && !sv.ignoreFlex) sv.getOuterDomStyle().position = 'absolute';
+                if (sv && !sv.destroyed && !sv.ignoreFlex) sv.getODS().position = 'absolute';
             }
         });
     
@@ -4405,7 +4401,7 @@ new JS.Singleton('GlobalTouch', {
             // may need to resync the dom to the model.
             if (self.inited && oldParentIsFlexBox && !self.isChildOfFlexBox()) {
                 // Sync dom to model
-                const ods = self.getOuterDomStyle();
+                const ods = self.getODS();
                 if (ods.width !== AUTO) ods.width = self.width + 'px';
                 if (ods.height !== AUTO) ods.height = self.height + 'px';
                 self.syncInnerToOuter();
@@ -4417,7 +4413,7 @@ new JS.Singleton('GlobalTouch', {
             dom element. */
         setWidth: function(v, supressEvent) {
             if (v == null || v === '') {
-                this.getOuterDomStyle().width = '';
+                this.getODS().width = '';
                 this.syncModelToOuterBounds(false, true);
             } else {
                 this.callSuper(v, supressEvent);
@@ -4430,7 +4426,7 @@ new JS.Singleton('GlobalTouch', {
             dom element. */
         setHeight: function(v, supressEvent) {
             if (v == null || v === '') {
-                this.getOuterDomStyle().height = '';
+                this.getODS().height = '';
                 this.syncModelToOuterBounds(true, false);
             } else {
                 this.callSuper(v, supressEvent);
@@ -4441,7 +4437,7 @@ new JS.Singleton('GlobalTouch', {
         // Flex Box Attrs
         setFlexGrow: function(v) {
             if (this.flexGrow !== v) {
-                this.getOuterDomStyle().flexGrow = this.flexGrow = v;
+                this.getODS().flexGrow = this.flexGrow = v;
                 if (this.inited) {
                     this.fireEvent('flexGrow', v);
                     const parent = this.parent;
@@ -4452,7 +4448,7 @@ new JS.Singleton('GlobalTouch', {
         
         setFlexShrink: function(v) {
             if (this.flexShrink !== v) {
-                this.getOuterDomStyle().flexShrink = this.flexShrink = v;
+                this.getODS().flexShrink = this.flexShrink = v;
                 if (this.inited) {
                     this.fireEvent('flexShrink', v);
                     const parent = this.parent;
@@ -4475,7 +4471,7 @@ new JS.Singleton('GlobalTouch', {
                         domValue = 'flex-end';
                         break;
                 }
-                this.getOuterDomStyle().alignSelf = domValue;
+                this.getODS().alignSelf = domValue;
                 
                 if (this.inited) this.fireEvent('alignSelf', v);
             }
@@ -4491,13 +4487,13 @@ new JS.Singleton('GlobalTouch', {
             @param {boolean} [notHeight] If true height will not be synced.
             @returns {undefined} */
         syncModelToOuterBounds: function(notWidth, notHeight) {
-            const ode = this.getOuterDomElement(),
-                ids = this.getInnerDomStyle();
+            const ode = this.getODE(),
+                ids = this.getIDS();
             if (!notWidth) {
                 if (ids.width === AUTO) {
                     // We're sizing to our contents so first sync the outer 
                     // dom style so we can read the correct client size below.
-                    this.getOuterDomStyle().width = AUTO;
+                    this.getODS().width = AUTO;
                 } else {
                     // We're using a fixed size so first sync the inner dom 
                     // style to the outer dom style.
@@ -4509,7 +4505,7 @@ new JS.Singleton('GlobalTouch', {
                 if (ids.height === AUTO) {
                     // We're sizing to our contents so first sync the outer dom 
                     // style so we can read the correct client size below.
-                    this.getOuterDomStyle().height = AUTO;
+                    this.getODS().height = AUTO;
                 } else {
                     // We're using a fixed size so first sync the inner dom 
                     // style to the outer dom style.
@@ -4523,8 +4519,8 @@ new JS.Singleton('GlobalTouch', {
             @param {boolean} [notHeight] If true height will not be synced.
             @returns {undefined} */
         syncInnerToOuter: function(notWidth, notHeight) {
-            const ids = this.getInnerDomStyle(),
-                ode = this.getOuterDomElement();
+            const ids = this.getIDS(),
+                ode = this.getODE();
             // Don't clobber auto sizing
             if (!notWidth && ids.width !== AUTO) this.setInnerWidth(ode.clientWidth);
             if (!notHeight && ids.height !== AUTO) this.setInnerHeight(ode.clientHeight);
@@ -4534,14 +4530,14 @@ new JS.Singleton('GlobalTouch', {
             @param {number} v
             @returns {undefined} */
         setInnerWidth: function(v) {
-            this.getInnerDomStyle().width = v + 'px';
+            this.getIDS().width = v + 'px';
         },
         
         /** Sets the inner dom element's height.
             @param {number} v
             @returns {undefined} */
         setInnerHeight: function(v) {
-            this.getInnerDomStyle().height = v + 'px';
+            this.getIDS().height = v + 'px';
         },
         
         /** @overrides */
@@ -5438,7 +5434,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 if (self.parent) {
                     // Optimization: use the dom element contains function if 
                     // both nodes are DomElementProxy instances.
-                    if (self.getInnerDomElement && node.getInnerDomElement) return node.getInnerDomElement().contains(self.getInnerDomElement());
+                    if (self.getInnerDomElement && node.getInnerDomElement) return node.getIDE().contains(self.getIDE());
                     return self.parent.isDescendantOf(node);
                 }
             }
@@ -6687,7 +6683,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     followed by an insert. */
         retainFocusDuringDomUpdate = (viewBeingRemoved, wrappedFunc) => {
             const restoreFocus = pkg.global.focus.focusedView, 
-                elem = viewBeingRemoved.getInnerDomElement();
+                elem = viewBeingRemoved.getIDE();
             if (restoreFocus === viewBeingRemoved || (restoreFocus && restoreFocus.isDescendantOf(viewBeingRemoved))) {
                 restoreFocus._ignoreFocus = true;
             }
@@ -6724,9 +6720,9 @@ myt.Destructible = new JS.Module('Destructible', {
                 if (checkZIndex) {
                     const commonAncestor = firstView.getLeastCommonAncestor(secondView);
                     if (commonAncestor) {
-                        const commonAncestorElem = commonAncestor.getInnerDomElement();
-                        let zIdx = DomElementProxy.getZIndexRelativeToAncestor(firstView.getOuterDomElement(), commonAncestorElem),
-                            otherZIdx = DomElementProxy.getZIndexRelativeToAncestor(secondView.getOuterDomElement(), commonAncestorElem);
+                        const commonAncestorElem = commonAncestor.getIDE();
+                        let zIdx = DomElementProxy.getZIndexRelativeToAncestor(firstView.getODE(), commonAncestorElem),
+                            otherZIdx = DomElementProxy.getZIndexRelativeToAncestor(secondView.getODE(), commonAncestorElem);
                         
                         // Reverse comparison order
                         if (front) {
@@ -6749,7 +6745,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 // DOCUMENT_POSITION_CONTAINS 8
                 // DOCUMENT_POSITION_CONTAINED_BY 16
                 // DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC 32
-                const rel = firstView.getOuterDomElement().compareDocumentPosition(secondView.getOuterDomElement());
+                const rel = firstView.getODE().compareDocumentPosition(secondView.getODE());
                 return front ? rel === 2 || rel === 10 : rel === 4 || rel === 20;
             } else {
                 return false;
@@ -6774,11 +6770,11 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         isPointVisible = (view, x, y) => {
-            const ode = view.getOuterDomElement();
+            const ode = view.getODE();
             if (rectContainsPoint(x, y, 0, 0, ode.offsetWidth * view.__effectiveScaleX, ode.offsetHeight * view.__effectiveScaleY)) {
                 let parent;
                 if (parent = view.parent) {
-                    const pIde = parent.getInnerDomElement();
+                    const pIde = parent.getIDE();
                     return isPointVisible(
                         parent, 
                         x + (ode.offsetLeft - pIde.scrollLeft) * parent.__effectiveScaleX, 
@@ -6849,7 +6845,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {number} radius - The radius of the corner.
             @param {string} corner - One of 'TopLeft', 'TopRight', 'BottomLeft' or 'BottomRight'. */
         setRoundedCorner = (view, radius, corner) => {
-            view.getOuterDomStyle()['border' + corner + 'Radius'] = radius + 'px';
+            view.getODS()['border' + corner + 'Radius'] = radius + 'px';
         };
     
     /** A Node that can be viewed. Instances of view are typically backed by
@@ -7006,7 +7002,7 @@ myt.Destructible = new JS.Module('Destructible', {
             // so this gets things initialized correctly. Without this 
             // RootViews will have an incorrect initial position for x or 
             // y of 0.
-            const ods = self.getOuterDomStyle();
+            const ods = self.getODS();
             ods.left = ods.top = '0px';
             
             self.callSuper(parent, attrs);
@@ -7213,7 +7209,7 @@ myt.Destructible = new JS.Module('Destructible', {
         setX: function(v) {
             if (this.x !== v) {
                 this.x = v;
-                if (this.visible) this.getOuterDomStyle().left = v + 'px';
+                if (this.visible) this.getODS().left = v + 'px';
                 if (this.inited) this.fireEvent('x', v);
             }
         },
@@ -7221,7 +7217,7 @@ myt.Destructible = new JS.Module('Destructible', {
         setY: function(v) {
             if (this.y !== v) {
                 this.y = v;
-                if (this.visible) this.getOuterDomStyle().top = v + 'px';
+                if (this.visible) this.getODS().top = v + 'px';
                 if (this.inited) this.fireEvent('y', v);
             }
         },
@@ -7232,7 +7228,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             if (this.width !== v) {
                 this.width = v;
-                this.getOuterDomStyle().width = v + 'px';
+                this.getODS().width = v + 'px';
                 if (this.inited) {
                     this.__updateBounds(v, this.height);
                     if (!supressEvent) this.fireEvent('width', v);
@@ -7246,7 +7242,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             if (this.height !== v) {
                 this.height = v;
-                this.getOuterDomStyle().height = v + 'px';
+                this.getODS().height = v + 'px';
                 if (this.inited) {
                     this.__updateBounds(this.width, v);
                     if (!supressEvent) this.fireEvent('height', v);
@@ -7257,14 +7253,14 @@ myt.Destructible = new JS.Module('Destructible', {
         setTextColor: function(v) {
             if (this.textColor !== v) {
                 this.textColor = v;
-                this.getOuterDomStyle().color = v || 'inherit';
+                this.getODS().color = v || 'inherit';
                 if (this.inited) this.fireEvent('textColor', v);
             }
         },
         
         setBgColor: function(v) {
             if (this.bgColor !== v) {
-                this.getOuterDomStyle().backgroundColor = this.bgColor = v;
+                this.getODS().backgroundColor = this.bgColor = v;
                 if (this.inited) this.fireEvent('bgColor', v);
             }
         },
@@ -7277,7 +7273,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         setOpacity: function(v) {
             if (this.opacity !== v) {
-                this.getOuterDomStyle().opacity = this.opacity = v;
+                this.getODS().opacity = this.opacity = v;
                 if (this.inited) this.fireEvent('opacity', v);
             }
         },
@@ -7287,7 +7283,7 @@ myt.Destructible = new JS.Module('Destructible', {
             if (existing !== v) {
                 this.overflow = v;
                 
-                const ids = this.getInnerDomStyle();
+                const ids = this.getIDS();
                 if (v === 'autox') {
                     ids.overflowX = 'auto';
                     ids.overflowY = 'hidden';
@@ -7308,7 +7304,7 @@ myt.Destructible = new JS.Module('Destructible', {
             if (self.visible !== v) {
                 self.visible = v;
                 
-                const ods = self.getOuterDomStyle();
+                const ods = self.getODS();
                 ods.visibility = v ? 'inherit' : 'hidden';
                 
                 // Move invisible elements to a very negative location so they won't
@@ -7324,7 +7320,7 @@ myt.Destructible = new JS.Module('Destructible', {
         setPointerEvents: function(v) {
             if (this.pointerEvents !== v) {
                 this.pointerEvents = v;
-                this.getOuterDomStyle().pointerEvents = v || 'auto';
+                this.getODS().pointerEvents = v || 'auto';
                 if (this.inited) this.fireEvent('pointerEvents', v);
             }
         },
@@ -7332,7 +7328,7 @@ myt.Destructible = new JS.Module('Destructible', {
         setCursor: function(v) {
             if (this.cursor !== v) {
                 this.cursor = v;
-                this.getOuterDomStyle().cursor = v || 'auto';
+                this.getODS().cursor = v || 'auto';
                 if (this.inited) this.fireEvent('cursor', v);
             }
         },
@@ -7363,15 +7359,15 @@ myt.Destructible = new JS.Module('Destructible', {
         
         setOutlineWidth: function(v) {
             this.outlineWidth = v || 0;
-            this.getOuterDomStyle().outlineWidth = this.outlineWidth + 'px';
+            this.getODS().outlineWidth = this.outlineWidth + 'px';
         },
         
         setOutlineStyle: function(v) {
-            this.getOuterDomStyle().outlineStyle = this.outlineStyle = v || 'none';
+            this.getODS().outlineStyle = this.outlineStyle = v || 'none';
         },
         
         setOutlineColor: function(v) {
-            this.getOuterDomStyle().outlineColor = this.outlineColor = v || '#000';
+            this.getODS().outlineColor = this.outlineColor = v || '#000';
         },
         
         // Borders
@@ -7390,15 +7386,15 @@ myt.Destructible = new JS.Module('Destructible', {
         
         setBorderWidth: function(v) {
             this.borderWidth = v || 0;
-            this.getOuterDomStyle().borderWidth = this.borderWidth + 'px';
+            this.getODS().borderWidth = this.borderWidth + 'px';
         },
         
         setBorderStyle: function(v) {
-            this.getOuterDomStyle().borderStyle = this.borderStyle = v || 'none';
+            this.getODS().borderStyle = this.borderStyle = v || 'none';
         },
         
         setBorderColor: function(v) {
-            this.getOuterDomStyle().borderColor = this.borderColor = v || '#000';
+            this.getODS().borderColor = this.borderColor = v || '#000';
         },
         
         // Edge treatements
@@ -7406,7 +7402,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {number} radius - The radius of the corners.
             @returns {undefined} */
         setRoundedCorners: function(radius) {
-            this.getOuterDomStyle().borderRadius = radius + 'px';
+            this.getODS().borderRadius = radius + 'px';
         },
         
         /** A convienence method to round the top left corner.
@@ -7452,7 +7448,7 @@ myt.Destructible = new JS.Module('Destructible', {
             } else {
                 v = 'none';
             }
-            this.getOuterDomStyle().boxShadow = v;
+            this.getODS().boxShadow = v;
         },
         
         /** Sets the CSS liner-gradient or radial-gradient property. Setting this
@@ -7475,7 +7471,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @returns {undefined} */
         setGradient: function(v) {
             const self = this,
-                ods = self.getOuterDomStyle();
+                ods = self.getODS();
             if (v) {
                 // Determine type
                 let type = v[0];
@@ -7553,7 +7549,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @return {undefined} */
         setTooltip: function(v) {
             if (this.tooltip !== v) {
-                this.tooltip = this.getOuterDomElement().title = v;
+                this.tooltip = this.getODE().title = v;
                 if (this.inited) this.fireEvent('tooltip', v);
             }
         },
@@ -7585,7 +7581,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @fires layoutAdded event with the provided node if it's a Layout. */
         subnodeAdded: function(node) {
             if (node instanceof pkg.View) {
-                this.getInnerDomElement().appendChild(node.getOuterDomElement());
+                this.getIDE().appendChild(node.getODE());
                 this.getSubviews().push(node);
                 this.fireEvent('subviewAdded', node);
                 this.subviewAdded(node);
@@ -7656,7 +7652,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @returns {?Object} - The next sibling myt.View or null if none exists. */
         getNextSibling: function() {
             if (this.parent) {
-                const nextDomElement = this.getOuterDomElement().nextElementSibling;
+                const nextDomElement = this.getODE().nextElementSibling;
                 if (nextDomElement) return nextDomElement.model;
             }
             return null;
@@ -7666,7 +7662,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @returns {?Object} - The previous sibling myt.View or null if none exists. */
         getPrevSibling: function() {
             if (this.parent) {
-                const prevDomElement = this.getOuterDomElement().previousElementSibling;
+                const prevDomElement = this.getODE().previousElementSibling;
                 if (prevDomElement) return prevDomElement.model;
             }
             return null;
@@ -7753,10 +7749,10 @@ myt.Destructible = new JS.Module('Destructible', {
             @returns {undefined} */
         bringSubviewToFront: function(sv) {
             if (sv && sv.parent === this) {
-                const innerElem = this.getInnerDomElement();
-                if (sv.getOuterDomElement() !== innerElem.lastChild) {
+                const innerElem = this.getIDE();
+                if (sv.getODE() !== innerElem.lastChild) {
                     retainFocusDuringDomUpdate(sv, () => {
-                        innerElem.appendChild(sv.getOuterDomElement());
+                        innerElem.appendChild(sv.getODE());
                     });
                 }
             }
@@ -7767,10 +7763,10 @@ myt.Destructible = new JS.Module('Destructible', {
             @returns {undefined} */
         sendSubviewToBack: function(sv) {
             if (sv && sv.parent === this) {
-                const innerElem = this.getInnerDomElement();
-                if (sv.getOuterDomElement() !== innerElem.firstChild) {
+                const innerElem = this.getIDE();
+                if (sv.getODE() !== innerElem.firstChild) {
                     retainFocusDuringDomUpdate(sv, () => {
-                        innerElem.insertBefore(sv.getOuterDomElement(), innerElem.firstChild);
+                        innerElem.insertBefore(sv.getODE(), innerElem.firstChild);
                     });
                 }
             }
@@ -7782,9 +7778,9 @@ myt.Destructible = new JS.Module('Destructible', {
             @returns {undefined} */
         sendSubviewBehind: function(sv, existing) {
             if (sv && existing && sv.parent === this && existing.parent === this) {
-                const innerElem = this.getInnerDomElement();
+                const innerElem = this.getIDE();
                 retainFocusDuringDomUpdate(sv, () => {
-                    innerElem.insertBefore(sv.getOuterDomElement(), existing.getOuterDomElement());
+                    innerElem.insertBefore(sv.getODE(), existing.getODE());
                 });
             }
         },
@@ -7812,7 +7808,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             // Rearrange dom to match new sort order.
             retainFocusDuringDomUpdate(self, () => {
-                const outerElem = self.getOuterDomElement(),
+                const outerElem = self.getODE(),
                     parentElem = outerElem.parentNode;
                 // Remove this dom element from the dom
                 let nextDe;
@@ -7825,8 +7821,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 // fragment and then add that fragment back to the dom.
                 const fragment = document.createDocumentFragment(),
                     len = svs.length;
-                for (let i = 0; len > i;) fragment.appendChild(svs[i++].getOuterDomElement());
-                self.getInnerDomElement().appendChild(fragment);
+                for (let i = 0; len > i;) fragment.appendChild(svs[i++].getODE());
+                self.getIDE().appendChild(fragment);
                 
                 // Put this dom element back in the dom
                 if (parentElem) parentElem.insertBefore(outerElem, nextDe);
@@ -7843,7 +7839,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @returns {boolean} True if the location is inside this view, false 
                 if not. */
         containsPoint: function(locX, locY, referenceFrameDomElem) {
-            const outerElem = this.getOuterDomElement();
+            const outerElem = this.getODE();
             if (!outerElem) return false;
             
             const pos = DomElementProxy.getRelativePosition(outerElem, referenceFrameDomElem);
@@ -7885,7 +7881,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 param view:View the view to modify.
                 param v:string the transformOrigin to set. */
         setTransformOrigin = (view, v) => {
-            view.getOuterDomStyle().transformOrigin = v || '50% 50% 0';
+            view.getODS().transformOrigin = v || '50% 50% 0';
         },
         
         /*  Adds an entry to the 'transform' style property of the provided
@@ -7896,7 +7892,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     param v:string the style value to set. */
         addTransform = (view, type, v) => {
             const cur = removeTransform(view, type);
-            view.getOuterDomStyle().transform = cur + (cur.length === 0 ? '' : ' ') + type + '(' + v + ')';
+            view.getODS().transform = cur + (cur.length === 0 ? '' : ' ') + type + '(' + v + ')';
         },
         
         /*  Removes an entry from the 'transform' style property of the provided
@@ -7906,7 +7902,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 param type:string the type of transform: 'rotate', 'scaleX', 
                     'scaleY', 'skewX', 'skewY'. */
         removeTransform = (view, type) => {
-            const ods = view.getOuterDomStyle(),
+            const ods = view.getODS(),
                 value = ods.transform;
             
             if (!value || value.length === 0) return '';
@@ -8049,7 +8045,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 w = this.height;
                 h = this.width;
             } else {
-                const b = this.getOuterDomElement().getBoundingClientRect();
+                const b = this.getODE().getBoundingClientRect();
                 w = b.width;
                 h = b.height;
             }
@@ -8066,7 +8062,7 @@ myt.Destructible = new JS.Module('Destructible', {
         setWidth = (view, value) => {
             if (value === 'auto') {
                 view.__hasSetWidth = false;
-                view.getOuterDomStyle().width = 'auto';
+                view.getODS().width = 'auto';
                 view.sizeViewToDom();
             } else {
                 view.__hasSetWidth = true;
@@ -8077,7 +8073,7 @@ myt.Destructible = new JS.Module('Destructible', {
         setHeight = (view, value) => {
             if (value === 'auto') {
                 view.__hasSetHeight = false;
-                view.getOuterDomStyle().height = 'auto';
+                view.getODS().height = 'auto';
                 view.sizeViewToDom();
             } else {
                 view.__hasSetHeight = true;
@@ -8089,7 +8085,7 @@ myt.Destructible = new JS.Module('Destructible', {
             if (!view.__hasSetWidth) {
                 // Bounding rect doesn't factor in scaling so we need to 
                 // calculate this ourselves.
-                const w = view.getOuterDomElement().offsetWidth / view.getEffectiveScaleX();
+                const w = view.getODE().offsetWidth / view.getEffectiveScaleX();
                 
                 // Circumvent setter
                 if (view.width !== w) {
@@ -8104,7 +8100,7 @@ myt.Destructible = new JS.Module('Destructible', {
             if (!view.__hasSetHeight) {
                 // Bounding rect doesn't factor in scaling so we need to 
                 // calculate this ourselves.
-                const h = view.getOuterDomElement().offsetHeight / view.getEffectiveScaleY();
+                const h = view.getODE().offsetHeight / view.getEffectiveScaleY();
                 
                 // Circumvent setter
                 if (view.height !== h) {
@@ -8258,7 +8254,7 @@ myt.Destructible = new JS.Module('Destructible', {
         setAndSizeViewToDom = (textView, v, attrName, defaultValue) => {
             if (textView[attrName] !== v) {
                 textView[attrName] = v;
-                textView.getInnerDomStyle()[attrName] = v || defaultValue || 'inherit';
+                textView.getIDS()[attrName] = v || defaultValue || 'inherit';
                 if (textView.inited) {
                     textView.fireEvent(attrName, v);
                     textView.sizeViewToDom();
@@ -8353,7 +8349,7 @@ myt.Destructible = new JS.Module('Destructible', {
             if (this.text !== v) {
                 // Use innerHTML rather than textContent since this allows us to
                 // embed formatting markup.
-                this.getInnerDomElement().innerHTML = this.text = v;
+                this.getIDE().innerHTML = this.text = v;
                 if (this.inited) {
                     this.fireEvent('text', v);
                     this.sizeViewToDom();
@@ -8365,7 +8361,7 @@ myt.Destructible = new JS.Module('Destructible', {
         setTextOverflow: function(v) {
             if (this.textOverflow !== v) {
                 this.textOverflow = v;
-                this.getInnerDomStyle().textOverflow = v || 'inherit';
+                this.getIDS().textOverflow = v || 'inherit';
                 if (this.inited) this.fireEvent('textOverflow', v);
             }
         },
@@ -8373,7 +8369,7 @@ myt.Destructible = new JS.Module('Destructible', {
         setTextAlign: function(v) {
             if (this.textAlign !== v) {
                 this.textAlign = v;
-                this.getInnerDomStyle().textAlign = v || 'inherit';
+                this.getIDS().textAlign = v || 'inherit';
                 if (this.inited) this.fireEvent('textAlign', v);
             }
         },
@@ -8434,7 +8430,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 to '#000000' if not provided.
             @returns {undefined} */
         showTextShadow: function(x, y, blur, color) {
-            this.getInnerDomStyle().textShadow = 
+            this.getIDS().textShadow = 
                 (x || 0) + 'px ' + 
                 (y || 0) + 'px ' + 
                 (blur != null ? blur : 2) + 'px ' + 
@@ -8444,7 +8440,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Turns off a text shadow.
             @returns {undefined} */
         hideTextShadow: function() {
-            this.getInnerDomStyle().textShadow = 'none';
+            this.getIDS().textShadow = 'none';
         }
     });
 })(myt);
@@ -8580,7 +8576,7 @@ myt.Destructible = new JS.Module('Destructible', {
         setImageUrl: function(v) {
             if (this.imageUrl !== v) {
                 this.imageUrl = v;
-                this.getInnerDomStyle().backgroundImage = v ? 'url("' + v + '")' : 'none';
+                this.getIDS().backgroundImage = v ? 'url("' + v + '")' : 'none';
                 if (this.inited) {
                     this.fireEvent('imageUrl', v);
                     this.setNaturalWidth(undefined);
@@ -8601,28 +8597,28 @@ myt.Destructible = new JS.Module('Destructible', {
         setImageSize: function(v) {
             if (this.imageSize !== v) {
                 this.imageSize = v;
-                this.getInnerDomStyle().backgroundSize = v || 'auto';
+                this.getIDS().backgroundSize = v || 'auto';
                 if (this.inited) this.fireEvent('imageSize', v);
             }
         },
         
         setImageRepeat: function(v) {
             if (this.imageRepeat !== v) {
-                this.getInnerDomStyle().backgroundRepeat = this.imageRepeat = v;
+                this.getIDS().backgroundRepeat = this.imageRepeat = v;
                 if (this.inited) this.fireEvent('imageRepeat', v);
             }
         },
         
         setImagePosition: function(v) {
             if (this.imagePosition !== v) {
-                this.getInnerDomStyle().backgroundPosition = this.imagePosition = v;
+                this.getIDS().backgroundPosition = this.imagePosition = v;
                 if (this.inited) this.fireEvent('imagePosition', v);
             }
         },
         
         setImageAttachment: function(v) {
             if (this.imageAttachment !== v) {
-                this.getInnerDomStyle().backgroundAttachment = this.imageAttachment = v;
+                this.getIDS().backgroundAttachment = this.imageAttachment = v;
                 if (this.inited) this.fireEvent('imageAttachment', v);
             }
         },
@@ -8727,7 +8723,7 @@ myt.Destructible = new JS.Module('Destructible', {
         // Accessors ///////////////////////////////////////////////////////////
         setSrc: function(v) {
             if (this.src !== v) {
-                this.src = this.getInnerDomElement().src = v;
+                this.src = this.getIDE().src = v;
                 if (this.inited) this.fireEvent('src', v);
             }
         },
@@ -8766,7 +8762,7 @@ myt.Destructible = new JS.Module('Destructible', {
         setHtml: function(v) {
             const self = this;
             if (self.html !== v) {
-                self.getInnerDomElement().innerHTML = self.html = v;
+                self.getIDE().innerHTML = self.html = v;
                 if (self.inited) {
                     self.fireEvent('html', v);
                     self.sizeViewToDom();
@@ -8805,10 +8801,10 @@ myt.Destructible = new JS.Module('Destructible', {
             
             // Temporarily set wrapping to 'nowrap', take measurement and
             // then restore wrapping.
-            const ids = this.getInnerDomStyle(),
+            const ids = this.getIDS(),
                 oldValue = ids.whiteSpace;
             ids.whiteSpace = 'nowrap';
-            const measuredWidth = this.getOuterDomElement().getBoundingClientRect().width; // Use getBoundingClientRect to support fractional widths
+            const measuredWidth = this.getODE().getBoundingClientRect().width; // Use getBoundingClientRect to support fractional widths
             ids.whiteSpace = oldValue;
             return measuredWidth;
         }
@@ -9044,7 +9040,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     @returns {undefined} */
                 setupCaptureDrop: function(v) {
                     const cdf = v.__captureDrop = event => {event.preventDefault();},
-                        ide = v.getInnerDomElement();
+                        ide = v.getIDE();
                     pkg.addEventListener(ide, 'drop', cdf);
                     pkg.addEventListener(ide, 'dragover', cdf);
                 },
@@ -9054,7 +9050,7 @@ myt.Destructible = new JS.Module('Destructible', {
                         supressed default dragover  and drop on.
                     @returns {undefined} */
                 teardownCaptureDrop: function(v) {
-                    const ide = v.getInnerDomElement(), 
+                    const ide = v.getIDE(), 
                         cdf = v.__captureDrop;
                     pkg.removeEventListener(ide, 'drop', cdf);
                     pkg.removeEventListener(ide, 'dragover', cdf);
@@ -9116,7 +9112,7 @@ myt.Destructible = new JS.Module('Destructible', {
             /** @overrides myt.View */
             bringToFront: function() {
                 // Attempt to manipulate dom above root node.
-                const ide = this.getInnerDomElement(),
+                const ide = this.getIDE(),
                     parentNode = ide.parentNode;
                 if (ide !== parentNode.lastChild) {
                     const removedElem = parentNode.removeChild(ide);
@@ -9127,7 +9123,7 @@ myt.Destructible = new JS.Module('Destructible', {
             /** @overrides myt.View */
             sendToBack: function() {
                 // Attempt to manipulate dom above root node.
-                const ide = this.getInnerDomElement(),
+                const ide = this.getIDE(),
                     parentNode = ide.parentNode;
                 if (ide !== parentNode.firstChild) {
                     const removedElem = parentNode.removeChild(ide);
@@ -9138,8 +9134,8 @@ myt.Destructible = new JS.Module('Destructible', {
             /** @overrides myt.View */
             sendBehind: function(otherRootView) {
                 // Attempt to manipulate dom above root node.
-                const ide = this.getInnerDomElement(),
-                    otherIde = otherRootView.getInnerDomElement(),
+                const ide = this.getIDE(),
+                    otherIde = otherRootView.getIDE(),
                     parentNode = ide.parentNode;
                 if (otherIde.parentNode === parentNode) {
                     const removedElem = parentNode.removeChild(ide);
@@ -9150,7 +9146,7 @@ myt.Destructible = new JS.Module('Destructible', {
             /** @overrides myt.View */
             sendInFrontOf: function(otherRootView) {
                 // Attempt to manipulate dom above root node.
-                if (otherRootView.getInnerDomElement().parentNode === this.getInnerDomElement().parentNode) {
+                if (otherRootView.getIDE().parentNode === this.getIDE().parentNode) {
                     this.sendBehind(otherRootView);
                     otherRootView.sendBehind(this);
                 }
@@ -11137,7 +11133,7 @@ new JS.Singleton('GlobalMouse', {
         __doMouseDown: function(event) {
             const self = this,
                 pos = getMouseFromEvent(event),
-                ode = self.getOuterDomElement();
+                ode = self.getODE();
             self.dragInitX = pos.x - ode.offsetLeft;
             self.dragInitY = pos.y - ode.offsetTop;
             
@@ -11283,7 +11279,7 @@ new JS.Singleton('GlobalMouse', {
         
         setPaddingAttr = (btn, side, value) => {
             const attrName = 'padding' + side;
-            btn.getInnerDomStyle()[attrName] = (btn[attrName] = value) + 'px';
+            btn.getIDS()[attrName] = (btn[attrName] = value) + 'px';
         },
         
         /** Provides button functionality to an myt.View. Most of the 
@@ -12107,7 +12103,7 @@ new JS.Singleton('GlobalMouse', {
             layouts.forEach(layout => {layout.incrementLockedCounter();});
             
             // Performance: Remove from dom while doing inserts
-            const ode = contentView.getOuterDomElement(),
+            const ode = contentView.getODE(),
                 nextDe = ode.nextSibling,
                 parentElem = ode.parentNode;
             parentElem.removeChild(ode);
@@ -12450,7 +12446,7 @@ new JS.Singleton('GlobalMouse', {
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides myt.ListViewItemMixin */
         syncToDom: function() {
-            this.textView.getInnerDomStyle().width = 'auto';
+            this.textView.getIDS().width = 'auto';
             this.textView.sizeViewToDom();
         },
         
@@ -13975,7 +13971,7 @@ new JS.Singleton('GlobalMouse', {
         setEditableTextAttr = (editableText, v, propName) => {
             if (editableText[propName] !== v) {
                 editableText[propName] = v;
-                editableText.getInnerDomStyle()[propName] = v + 'px';
+                editableText.getIDS()[propName] = v + 'px';
                 if (editableText.inited) {
                     editableText.fireEvent(propName, v);
                     editableText.sizeViewToDom();
@@ -13985,7 +13981,7 @@ new JS.Singleton('GlobalMouse', {
         
         setDomAttr = (inputView, attrName, value) => {
             if (inputView[attrName] !== value) {
-                inputView.getInnerDomElement()[attrName] = inputView[attrName] = value;
+                inputView.getIDE()[attrName] = inputView[attrName] = value;
                 if (inputView.inited) inputView.fireEvent(attrName, value);
             }
         },
@@ -14032,7 +14028,7 @@ new JS.Singleton('GlobalMouse', {
             /** @overrides myt.Disableable */
             setDisabled: function(v) {
                 if (this.disabled !== v) {
-                    this.getInnerDomElement().disabled = v;
+                    this.getIDE().disabled = v;
                     this.callSuper(v);
                 }
             },
@@ -14050,14 +14046,14 @@ new JS.Singleton('GlobalMouse', {
             /** Gets the value from the DOM.
                 @returns * The value */
             getDomValue: function() {
-                return this.getInnerDomElement().value;
+                return this.getIDE().value;
             },
             
             /** Sets the value on the DOM.
                 @param v:* The value to set.
                 @returns {undefined} */
             setDomValue: function(v) {
-                const ide = this.getInnerDomElement();
+                const ide = this.getIDE();
                 if (ide.value !== v) ide.value = v;
             }
         }),
@@ -14086,14 +14082,14 @@ new JS.Singleton('GlobalMouse', {
             /** @overrideds myt.Selectable */
             setSelected: function(v) {
                 v = this.valueFromEvent(v);
-                const ide = this.getInnerDomElement();
+                const ide = this.getIDE();
                 if (ide.selected !== v) ide.selected = v;
             },
             
             /** @overrides myt.Disableable */
             setDisabled: function(v) {
                 if (this.disabled !== v) {
-                    this.getInnerDomElement().disabled = v;
+                    this.getIDE().disabled = v;
                     this.callSuper(v);
                 }
             },
@@ -14102,7 +14098,7 @@ new JS.Singleton('GlobalMouse', {
             
             setLabel: function(v) {
                 if (this.label !== v) {
-                    this.getInnerDomElement().textContent = this.label = v;
+                    this.getIDE().textContent = this.label = v;
                     if (this.inited) this.fireEvent('label', v);
                 }
             },
@@ -14111,17 +14107,17 @@ new JS.Singleton('GlobalMouse', {
             // Methods /////////////////////////////////////////////////////////
             /** @overrideds myt.Selectable */
             isSelected: function() {
-                return this.getInnerDomElement().selected;
+                return this.getIDE().selected;
             },
             
             /** @overrideds myt.Selectable */
             canSelect: function(selectionManager) {
-                return !this.disabled && !this.getInnerDomElement().selected && this.parent === selectionManager;
+                return !this.disabled && !this.getIDE().selected && this.parent === selectionManager;
             },
             
             /** @overrideds myt.Selectable */
             canDeselect: function(selectionManager) {
-                return !this.disabled && this.getInnerDomElement().selected && this.parent === selectionManager;
+                return !this.disabled && this.getIDE().selected && this.parent === selectionManager;
             }
         }),
         
@@ -14252,7 +14248,7 @@ new JS.Singleton('GlobalMouse', {
                     return selection.text.length;
                 }
                 
-                return this.getInnerDomElement().selectionStart || 0;
+                return this.getIDE().selectionStart || 0;
             },
             
             /** Sets the caret and selection.
@@ -14267,7 +14263,7 @@ new JS.Singleton('GlobalMouse', {
                     
                     end = start;
                 }
-                const elem = this.getInnerDomElement();
+                const elem = this.getIDE();
                 
                 if (elem.setSelectionRange) {
                     elem.setSelectionRange(start, end);
@@ -14296,11 +14292,11 @@ new JS.Singleton('GlobalMouse', {
             /** Selects all the text in the input element.
                 @returns {undefined} */
             selectAll: function() {
-                this.getInnerDomElement().select();
+                this.getIDE().select();
             },
             
             getSelection: function() {
-                const ide = this.getInnerDomElement();
+                const ide = this.getIDE();
                 return {
                     start:ide.selectionStart,
                     startElem:ide,
@@ -14416,12 +14412,12 @@ new JS.Singleton('GlobalMouse', {
         
         /** @overrides myt.NativeInputWrapper */
         getDomValue: function() {
-            return this.getInnerDomElement().innerHTML;
+            return this.getIDE().innerHTML;
         },
         
         /** @overrides myt.NativeInputWrapper */
         setDomValue: function(v) {
-            const ide = this.getInnerDomElement();
+            const ide = this.getIDE();
             if (ide.innerHTML !== v) {
                 ide.innerHTML = v;
                 this.sizeViewToDom();
@@ -14455,7 +14451,7 @@ new JS.Singleton('GlobalMouse', {
         
         // Caret handling
         getCharacterCount: function() {
-            const elem = this.getInnerDomElement().firstChild;
+            const elem = this.getIDE().firstChild;
             return elem ? elem.length : 0;
         },
         
@@ -14479,9 +14475,9 @@ new JS.Singleton('GlobalMouse', {
             }
             this.saveSelection({
                 start:start,
-                startElem:this.getInnerDomElement().firstChild,
+                startElem:this.getIDE().firstChild,
                 end:end,
-                endElem:this.getInnerDomElement().firstChild
+                endElem:this.getIDE().firstChild
             });
         },
         
@@ -14507,7 +14503,7 @@ new JS.Singleton('GlobalMouse', {
                 const sel = window.getSelection();
                 if (sel.rangeCount > 0) {
                     // Sometimes when deleting we get an unexpected node
-                    if (sel.extentNode === this.getInnerDomElement()) return null;
+                    if (sel.extentNode === this.getIDE()) return null;
                     
                     range = sel.getRangeAt(0);
                 }
@@ -14517,9 +14513,9 @@ new JS.Singleton('GlobalMouse', {
             
             return {
                 start:range ? range.startOffset : 0,
-                startElem:range ? range.startContainer : this.getInnerDomElement().firstChild,
+                startElem:range ? range.startContainer : this.getIDE().firstChild,
                 end:range ? range.endOffset : 0,
-                endElem:range ? range.endContainer : this.getInnerDomElement().firstChild
+                endElem:range ? range.endContainer : this.getIDE().firstChild
             };
         },
         
@@ -14574,7 +14570,7 @@ new JS.Singleton('GlobalMouse', {
         // Accessors ///////////////////////////////////////////////////////////
         setResize: function(v) {
             if (this.resize !== v) {
-                this.resize = this.getInnerDomStyle().resize = v || 'none';
+                this.resize = this.getIDS().resize = v || 'none';
                 if (this.inited) this.fireEvent('resize', v);
             }
         },
@@ -16798,7 +16794,7 @@ new JS.Singleton('GlobalMouse', {
             /** @overrides myt.Disableable */
             setDisabled: function(v) {
                 if (this.disabled !== v) {
-                    this.getInnerDomElement().disabled = v;
+                    this.getIDE().disabled = v;
                     this.callSuper(v);
                     
                     if (this.inited) {
@@ -16933,11 +16929,11 @@ new JS.Singleton('GlobalMouse', {
                         this.callSuper(parent, attrs);
                         this.attachToDom(this, '_handleInput', 'change');
                         
-                        this.getInnerDomElement().multiple = self.maxFiles > 1;
+                        this.getIDE().multiple = self.maxFiles > 1;
                     },
                     
                     _handleInput: function(event) {
-                        self.handleFiles(this.getInnerDomElement().files, event);
+                        self.handleFiles(this.getIDE().files, event);
                     }
                 }]);
             },
@@ -16974,7 +16970,7 @@ new JS.Singleton('GlobalMouse', {
                 if (this.maxFiles !== v) {
                     this.maxFiles = v;
                     if (this.inited) this.fireEvent('maxFiles', v);
-                    if (this.fileInput) this.fileInput.getInnerDomElement().multiple = v > 1;
+                    if (this.fileInput) this.fileInput.getIDE().multiple = v > 1;
                 }
             },
             
@@ -17087,7 +17083,7 @@ new JS.Singleton('GlobalMouse', {
                 
                 // Reset the form element if empty. Otherwise uploading the 
                 // same file again won't trigger a change event.
-                if (!this.value) this.fileInput.getInnerDomElement().value = '';
+                if (!this.value) this.fileInput.getIDE().value = '';
                 
                 this.verifyChangedState(); // FIXME: mimics what happens in myt.FormElement setValue
                 if (this.form) this.form.notifyValueChanged(this); // FIXME: mimics what happens in myt.Form setValue
@@ -17625,7 +17621,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         self.callSuper(parent, attrs);
         
-        self.getInnerDomStyle().borderRadius = '50%';
+        self.getIDS().borderRadius = '50%';
         
         self._updateSize();
         self._spin();
@@ -17642,7 +17638,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     
     setSpinColor: function(v) {
         if (this.spinColor !== v) {
-            this.getInnerDomStyle().borderTopColor = this.spinColor = v;
+            this.getIDS().borderTopColor = this.spinColor = v;
             if (this.inited) this.fireEvent('spinColor', v);
         }
     },
@@ -17676,7 +17672,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     _updateSize: function() {
         const self = this,
             size = self.size,
-            ids = self.getInnerDomStyle();
+            ids = self.getIDS();
         self.setWidth(size);
         self.setHeight(size);
         ids.width = ids.height = (size - 2*self.borderWidth) + 'px';
@@ -18293,8 +18289,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 }]);
                 const satView = new View(colorView, {width:139, height:139}),
                     valView = new View(satView, {width:139, height:139});
-                satView.getInnerDomStyle().backgroundImage = 'linear-gradient(to right, #fff, rgba(204, 154, 129, 0))';
-                valView.getInnerDomStyle().backgroundImage = 'linear-gradient(to top, #000, rgba(204, 154, 129, 0))';
+                satView.getIDS().backgroundImage = 'linear-gradient(to right, #fff, rgba(204, 154, 129, 0))';
+                valView.getIDS().backgroundImage = 'linear-gradient(to top, #000, rgba(204, 154, 129, 0))';
                 colorThumb = new View(valView, {width:6, height:6, bgColor:'#000', border:[1, 'solid', '#ffffff'], roundedCorners:4});
                 
                 hueView = new View(colorPicker, {x:315, y:30, width:24, height:109, border:BORDER_333}, [Draggable, {
@@ -18305,7 +18301,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                         colorPicker.updateUI();
                     }
                 }]);
-                hueView.getInnerDomStyle().background = 'linear-gradient(to top, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%)';
+                hueView.getIDS().background = 'linear-gradient(to top, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%)';
                 hueThumb = new View(hueView, {x:-1, width:24, height:2, bgColor:'#fff', border:[1, 'solid', '#000']});
                 
                 new View(colorPicker, {
@@ -18315,7 +18311,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 inputView = new pkg.InputText(colorPicker, {x:236, y:146, width:105, height:25, roundedCorners:3, textColor:'#333', border:BORDER_333, maxLength:11});
                 colorPicker.attachToDom(inputView, '_submitInput', 'blur');
                 colorPicker.attachToDom(inputView, '_handleKeyDown', 'keydown');
-                inputView.getInnerDomStyle().paddingLeft = '6px';
+                inputView.getIDS().paddingLeft = '6px';
                 
                 const initialColorContainer = new View(colorPicker, {x:170, y:146, width:60, height:23, border:BORDER_333});
                 new View(initialColorContainer, {
@@ -18508,7 +18504,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             pickedDate = date;
             
             // Calculate dates
-            const timeListScrollTop = timeListView.getOuterDomElement().scrollTop,
+            const timeListScrollTop = timeListView.getODE().scrollTop,
                 todayDateObj = new Date(),
                 todayFullYear = todayDateObj.getFullYear(),
                 todayMonth = todayDateObj.getMonth(),
@@ -21347,7 +21343,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             }, [{
                 initNode: function(parent, attrs) {
                     this.callSuper(parent, attrs);
-                    this.getInnerDomStyle().fontSize = '0.7em'; // Looks better a bit smaller.
+                    this.getIDS().fontSize = '0.7em'; // Looks better a bit smaller.
                 },
                 sizeViewToDom:function() {
                     this.callSuper();
@@ -21446,7 +21442,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             infiniteList._rowExtent = infiniteList.rowSpacing + infiniteList.rowHeight;
         },
         
-        getDomScrollTop = infiniteList => infiniteList.getInnerDomElement().scrollTop,
+        getDomScrollTop = infiniteList => infiniteList.getIDE().scrollTop,
         
         setDomScrollTop = (infiniteList, v) => {
             infiniteList.scrollYTo(v, true);
@@ -21558,7 +21554,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             // Accessors ///////////////////////////////////////////////////////
             setOverscrollBehavior: function(v) {
                 this.overscrollBehavior = v;
-                this.getInnerDomStyle().overscrollBehavior = v;
+                this.getIDS().overscrollBehavior = v;
             },
             
             setCollectionModel: function(v) {this.collectionModel = v;},
@@ -22696,7 +22692,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             const dropClass = this.dropClass,
                 dropParent = this.dropParent;
             if (dropClass && dropParent) {
-                const pos = pkg.DomElementProxy.getRelativePosition(this.getInnerDomElement(), dropParent.getInnerDomElement());
+                const pos = pkg.DomElementProxy.getRelativePosition(this.getIDE(), dropParent.getIDE());
                 return new dropClass(dropParent, Object.assign({}, this.dropClassAttrs, {x:pos.x || 0, y:pos.y || 0}));
             }
         },
@@ -22933,7 +22929,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             @param {!Object} dropable - The myt.Dropable being dragged.
             @returns {undefined} */
         notifyDragStart: function(dropable) {
-            const ide = this.getInnerDomElement();
+            const ide = this.getIDE();
             if (ide.scrollHeight > ide.clientHeight || ide.scrollWidth > ide.clientWidth) {
                 this.attachToDom(globalMouse, '__hndlMove', 'mousemove', true);
             }
@@ -22966,7 +22962,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     calculateAmount = percent => Math.round(self.scrollAmount * (1 + self.scrollAcceleration * percent)),
                     doAutoScrollAdj = (dir, amt) => {
                         if (self['__is' + dir]) {
-                            self.getInnerDomElement()['scroll' + (dir === 'Up' || dir === 'Down' ? 'Top' : 'Left')] += amt * self['__amt' + dir];
+                            self.getIDE()['scroll' + (dir === 'Up' || dir === 'Down' ? 'Top' : 'Left')] += amt * self['__amt' + dir];
                             self['__tmrId' + dir] = setTimeout(() => {doAutoScrollAdj(dir, amt);}, self.scrollFrequency);
                         }
                     };
@@ -23064,13 +23060,14 @@ myt.Eventable = new JS.Class('Eventable', {
 
 
 ((pkg) => {
-    const degreesToRadians = pkg.Geometry.degreesToRadians,
+    const math = Math,
+        degreesToRadians = pkg.Geometry.degreesToRadians,
         
         /*  Redraws the annulus
             @param {!Object} annulus - The Annulus to redraw.
             @returns {undefined} */
         redraw = annulus => {
-            pkg.Annulus.draw(
+            Annulus.draw(
                 annulus.__path, 
                 degreesToRadians(annulus.startAngle), 
                 degreesToRadians(annulus.endAngle), 
@@ -23111,154 +23108,155 @@ myt.Eventable = new JS.Class('Eventable', {
         
         setAndUpdateSize = (annulus, attrName, value) => {
             if (annulus[attrName] !== value) {
-                annulus[attrName] = value = Math.max(0, value);
+                annulus[attrName] = value = math.max(0, value);
                 if (annulus.inited) {
                     updateSize(annulus);
                     annulus.fireEvent(attrName, value);
                 }
             }
-        };
-     
-    /** An annulus component.
+        },
         
-        @class */
-    pkg.Annulus = new JS.Class('Annulus', pkg.View, {
-        // Class Methods and Attributes ////////////////////////////////////////
-        extend: {
-            /** Draws an annulus using the provided path.
-                @param path:svg path object
-                @param startAngle:number The start angle in radians.
-                @param endAngle:number The end angle in radians.
-                @param thickness:number The difference between the inner and outer
-                    radius.
-                @param r1:number The inner radius.
-                @param c:number The center of the annulus
-                @param color:hex string The color to fill with.
-                @param startCapRounding:boolean If true the starting cap will
-                    be drawn as a semicircle.
-                @param endCapRounding:boolean If true the ending cap will be
-                    drawn as a semicircle.
-                @returns {undefined} */
-            draw: (path, startAngle, endAngle, thickness, r1, c, color, startCapRounding, endCapRounding) => {
-                // Ensure endAngle is greater than or equal to startAngle
-                if (startAngle > endAngle) {
-                    const tmp = startAngle;
-                    startAngle = endAngle;
-                    endAngle = tmp;
-                }
+        makeSVG = (elementName, parentElem) => {
+            const svgElem = document.createElementNS("http://www.w3.org/2000/svg", elementName);
+            if (parentElem) parentElem.appendChild(svgElem);
+            return svgElem;
+        },
+         
+        /** An annulus component.
+            
+            @class */
+        Annulus = pkg.Annulus = new JS.Class('Annulus', pkg.View, {
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                makeSVG: makeSVG,
                 
-                const r2 = r1 + thickness,
-                    PI = Math.PI,
-                    angleDiff = endAngle - startAngle,
-                    isFull = angleDiff + 0.0001 >= 2 * PI; // 0.0001 is to handle floating point errors
-                
-                // Will use two arcs for a full circle
-                if (isFull) {
-                    startAngle = 0;
-                    endAngle = PI;
-                }
-                
-                const COS = Math.cos,
-                    SIN = Math.sin,
-                    points = [
-                        [c + r2 * COS(startAngle), c + r2 * SIN(startAngle)],
-                        [c + r2 * COS(endAngle),   c + r2 * SIN(endAngle)],
-                        [c + r1 * COS(endAngle),   c + r1 * SIN(endAngle)],
-                        [c + r1 * COS(startAngle), c + r1 * SIN(startAngle)]
-                    ],
-                    commands = [];
-                
-                commands.push("M" + points[0].join());
-                if (isFull) {
-                    commands.push("A" + [r2, r2, 0, 1, 1, points[1]].join());
-                    commands.push("A" + [r2, r2, 0, 1, 1, points[0]].join());
-                    commands.push("L" + points[2].join());
-                    commands.push("A" + [r1, r1, 0, 1, 0, points[3]].join());
-                    commands.push("A" + [r1, r1, 0, 1, 0, points[2]].join());
-                } else {
-                    const largeArc = (angleDiff % (2 * PI)) > PI ? 1 : 0,
-                        halfThickness = thickness / 2;
-                    commands.push("A" + [r2, r2, 0, largeArc, 1, points[1]].join());
-                    if (endCapRounding) {
-                        commands.push("A" + [halfThickness, halfThickness, 0, 0, 1, points[2]].join());
-                    } else {
-                        commands.push("L" + points[2].join());
+                /** Draws an annulus using the provided path.
+                    @param path:svg path object
+                    @param startAngle:number The start angle in radians.
+                    @param endAngle:number The end angle in radians.
+                    @param thickness:number The difference between the inner 
+                        and outer radius.
+                    @param r1:number The inner radius.
+                    @param c:number The center of the annulus
+                    @param color:hex string The color to fill with.
+                    @param startCapRounding:boolean If true the starting cap 
+                        will be drawn as a semicircle.
+                    @param endCapRounding:boolean If true the ending cap will 
+                        be drawn as a semicircle.
+                    @returns {undefined} */
+                draw: (path, startAngle, endAngle, thickness, r1, c, color, startCapRounding, endCapRounding) => {
+                    // Ensure endAngle is greater than or equal to startAngle
+                    if (startAngle > endAngle) {
+                        const tmp = startAngle;
+                        startAngle = endAngle;
+                        endAngle = tmp;
                     }
-                    commands.push("A" + [r1, r1, 0, largeArc, 0, points[3]].join());
-                    if (startCapRounding) commands.push("A" + [halfThickness, halfThickness, 0, 0, 1, points[0]].join());
+                    
+                    const r2 = r1 + thickness,
+                        PI = math.PI,
+                        angleDiff = endAngle - startAngle,
+                        isFull = angleDiff + 0.0001 >= 2 * PI; // 0.0001 is to handle floating point errors
+                    
+                    // Will use two arcs for a full circle
+                    if (isFull) {
+                        startAngle = 0;
+                        endAngle = PI;
+                    }
+                    
+                    const COS = math.cos,
+                        SIN = math.sin,
+                        points = [
+                            [c + r2 * COS(startAngle), c + r2 * SIN(startAngle)],
+                            [c + r2 * COS(endAngle),   c + r2 * SIN(endAngle)],
+                            [c + r1 * COS(endAngle),   c + r1 * SIN(endAngle)],
+                            [c + r1 * COS(startAngle), c + r1 * SIN(startAngle)]
+                        ],
+                        commands = [];
+                    
+                    commands.push('M' + points[0].join());
+                    if (isFull) {
+                        commands.push('A' + [r2, r2, 0, 1, 1, points[1]].join());
+                        commands.push('A' + [r2, r2, 0, 1, 1, points[0]].join());
+                        commands.push('L' + points[2].join());
+                        commands.push('A' + [r1, r1, 0, 1, 0, points[3]].join());
+                        commands.push('A' + [r1, r1, 0, 1, 0, points[2]].join());
+                    } else {
+                        const largeArc = (angleDiff % (2 * PI)) > PI ? 1 : 0,
+                            halfThickness = thickness / 2;
+                        commands.push('A' + [r2, r2, 0, largeArc, 1, points[1]].join());
+                        if (endCapRounding) {
+                            commands.push('A' + [halfThickness, halfThickness, 0, 0, 1, points[2]].join());
+                        } else {
+                            commands.push('L' + points[2].join());
+                        }
+                        commands.push('A' + [r1, r1, 0, largeArc, 0, points[3]].join());
+                        if (startCapRounding) commands.push('A' + [halfThickness, halfThickness, 0, 0, 1, points[0]].join());
+                    }
+                    commands.push('z');
+                    
+                    path.setAttribute('d', commands.join(' '));
+                    path.setAttribute('fill', color);
                 }
-                commands.push("z");
-                
-                path.setAttribute('d', commands.join(' '));
-                path.setAttribute('fill', color);
             },
             
-            makeSVG: (elementName, parentElem) => {
-                const svgElem = document.createElementNS("http://www.w3.org/2000/svg", elementName);
-                if (parentElem) parentElem.appendChild(svgElem);
-                return svgElem;
-            }
-        },
-        
-        
-        // Life Cycle //////////////////////////////////////////////////////////
-        initNode: function(parent, attrs) {
-            const self = this;
             
-            self.radius = self.thickness = self.startAngle = self.endAngle = 0;
-            self.startCapRounding = self.endCapRounding = false;
+            // Life Cycle //////////////////////////////////////////////////////
+            initNode: function(parent, attrs) {
+                const self = this;
+                
+                self.radius = self.thickness = self.startAngle = self.endAngle = 0;
+                self.startCapRounding = self.endCapRounding = false;
+                
+                self.callSuper(parent, attrs);
+                
+                updateSize(self);
+            },
             
-            self.callSuper(parent, attrs);
+            /** @overrides myt.View */
+            createOurDomElement: function(parent) {
+                const elements = this.callSuper(parent),
+                    innerElem = Array.isArray(elements) ? elements[1] : elements,
+                    svg = this.__svg = makeSVG('svg', innerElem);
+                this.__path = makeSVG('path', svg);
+                
+                // Let the view handle mouse events
+                svg.style.pointerEvents = 'none';
+                
+                return elements;
+            },
             
-            updateSize(self);
-        },
-        
-        /** @overrides myt.View */
-        createOurDomElement: function(parent) {
-            const elements = this.callSuper(parent),
-                innerElem = Array.isArray(elements) ? elements[1] : elements,
-                MSVG = pkg.Annulus.makeSVG,
-                svg = this.__svg = MSVG('svg', innerElem);
-            this.__path = MSVG('path', svg);
             
-            // Let the view handle mouse events
-            svg.style.pointerEvents = 'none';
+            // Accessors ///////////////////////////////////////////////////////
+            setRadius: function(v) {setAndUpdateSize(this, 'radius', v);},
+            setThickness: function(v) {setAndUpdateSize(this, 'thickness', v);},
+            setStartAngle: function(v) {setAndRedraw(this, 'startAngle', v);},
+            setEndAngle: function(v) {setAndRedraw(this, 'endAngle', v);},
+            setStartCapRounding: function(v) {setAndRedraw(this, 'startCapRounding', v);},
+            setEndCapRounding: function(v) {setAndRedraw(this, 'endCapRounding', v);},
+            setColor: function(v) {setAndRedraw(this, 'color', v);},
             
-            return elements;
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        setRadius: function(v) {setAndUpdateSize(this, 'radius', v);},
-        setThickness: function(v) {setAndUpdateSize(this, 'thickness', v);},
-        setStartAngle: function(v) {setAndRedraw(this, 'startAngle', v);},
-        setEndAngle: function(v) {setAndRedraw(this, 'endAngle', v);},
-        setStartCapRounding: function(v) {setAndRedraw(this, 'startCapRounding', v);},
-        setEndCapRounding: function(v) {setAndRedraw(this, 'endCapRounding', v);},
-        setColor: function(v) {setAndRedraw(this, 'color', v);},
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** Prevent views from being sent behind the __svg. This allows us 
-            to add child views to an Annulus which is not directly supported 
-            in HTML.
-            @overrides */
-        sendSubviewToBack: function(sv) {
-            if (sv.parent === this) {
-                const ide = this.getInnerDomElement(),
-                    firstChild = ide.childNodes[1];
-                if (sv.getOuterDomElement() !== firstChild) {
-                    const removedElem = ide.removeChild(sv.getOuterDomElement());
-                    if (removedElem) ide.insertBefore(removedElem, firstChild);
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** Prevent views from being sent behind the __svg. This allows us 
+                to add child views to an Annulus which is not directly supported 
+                in HTML.
+                @overrides */
+            sendSubviewToBack: function(sv) {
+                if (sv.parent === this) {
+                    const ide = this.getIDE(),
+                        firstChild = ide.childNodes[1];
+                    if (sv.getODE() !== firstChild) {
+                        const removedElem = ide.removeChild(sv.getODE());
+                        if (removedElem) ide.insertBefore(removedElem, firstChild);
+                    }
                 }
+            },
+            
+            /** @overrides myt.View */
+            isColorAttr: function(attrName) {
+                return attrName === 'color' || this.callSuper(attrName);
             }
-        },
-        
-        /** @overrides myt.View */
-        isColorAttr: function(attrName) {
-            return attrName === 'color' || this.callSuper(attrName);
-        }
-    });
+        });
 })(myt);
 
 
@@ -24189,9 +24187,9 @@ myt.Path = new JS.Class('Path', {
             add child views to a Canvas which is not directly supported in HTML. */
         sendSubviewToBack: function(sv) {
             if (sv.parent === this) {
-                const ide = this.getInnerDomElement(),
+                const ide = this.getIDE(),
                     firstChild = ide.childNodes[1],
-                    svIde = sv.getInnerDomElement();
+                    svIde = sv.getIDE();
                 if (svIde !== firstChild) {
                     const removedElem = ide.removeChild(svIde);
                     if (removedElem) ide.insertBefore(removedElem, firstChild);

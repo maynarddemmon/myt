@@ -4,7 +4,7 @@
         setWidth = (view, value) => {
             if (value === 'auto') {
                 view.__hasSetWidth = false;
-                view.getOuterDomStyle().width = 'auto';
+                view.getODS().width = 'auto';
                 view.sizeViewToDom();
             } else {
                 view.__hasSetWidth = true;
@@ -15,7 +15,7 @@
         setHeight = (view, value) => {
             if (value === 'auto') {
                 view.__hasSetHeight = false;
-                view.getOuterDomStyle().height = 'auto';
+                view.getODS().height = 'auto';
                 view.sizeViewToDom();
             } else {
                 view.__hasSetHeight = true;
@@ -27,7 +27,7 @@
             if (!view.__hasSetWidth) {
                 // Bounding rect doesn't factor in scaling so we need to 
                 // calculate this ourselves.
-                const w = view.getOuterDomElement().offsetWidth / view.getEffectiveScaleX();
+                const w = view.getODE().offsetWidth / view.getEffectiveScaleX();
                 
                 // Circumvent setter
                 if (view.width !== w) {
@@ -42,7 +42,7 @@
             if (!view.__hasSetHeight) {
                 // Bounding rect doesn't factor in scaling so we need to 
                 // calculate this ourselves.
-                const h = view.getOuterDomElement().offsetHeight / view.getEffectiveScaleY();
+                const h = view.getODE().offsetHeight / view.getEffectiveScaleY();
                 
                 // Circumvent setter
                 if (view.height !== h) {

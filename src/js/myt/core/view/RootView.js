@@ -21,7 +21,7 @@
                     @returns {undefined} */
                 setupCaptureDrop: function(v) {
                     const cdf = v.__captureDrop = event => {event.preventDefault();},
-                        ide = v.getInnerDomElement();
+                        ide = v.getIDE();
                     pkg.addEventListener(ide, 'drop', cdf);
                     pkg.addEventListener(ide, 'dragover', cdf);
                 },
@@ -31,7 +31,7 @@
                         supressed default dragover  and drop on.
                     @returns {undefined} */
                 teardownCaptureDrop: function(v) {
-                    const ide = v.getInnerDomElement(), 
+                    const ide = v.getIDE(), 
                         cdf = v.__captureDrop;
                     pkg.removeEventListener(ide, 'drop', cdf);
                     pkg.removeEventListener(ide, 'dragover', cdf);
@@ -93,7 +93,7 @@
             /** @overrides myt.View */
             bringToFront: function() {
                 // Attempt to manipulate dom above root node.
-                const ide = this.getInnerDomElement(),
+                const ide = this.getIDE(),
                     parentNode = ide.parentNode;
                 if (ide !== parentNode.lastChild) {
                     const removedElem = parentNode.removeChild(ide);
@@ -104,7 +104,7 @@
             /** @overrides myt.View */
             sendToBack: function() {
                 // Attempt to manipulate dom above root node.
-                const ide = this.getInnerDomElement(),
+                const ide = this.getIDE(),
                     parentNode = ide.parentNode;
                 if (ide !== parentNode.firstChild) {
                     const removedElem = parentNode.removeChild(ide);
@@ -115,8 +115,8 @@
             /** @overrides myt.View */
             sendBehind: function(otherRootView) {
                 // Attempt to manipulate dom above root node.
-                const ide = this.getInnerDomElement(),
-                    otherIde = otherRootView.getInnerDomElement(),
+                const ide = this.getIDE(),
+                    otherIde = otherRootView.getIDE(),
                     parentNode = ide.parentNode;
                 if (otherIde.parentNode === parentNode) {
                     const removedElem = parentNode.removeChild(ide);
@@ -127,7 +127,7 @@
             /** @overrides myt.View */
             sendInFrontOf: function(otherRootView) {
                 // Attempt to manipulate dom above root node.
-                if (otherRootView.getInnerDomElement().parentNode === this.getInnerDomElement().parentNode) {
+                if (otherRootView.getIDE().parentNode === this.getIDE().parentNode) {
                     this.sendBehind(otherRootView);
                     otherRootView.sendBehind(this);
                 }

@@ -11,7 +11,7 @@
         
         setPaddingAttr = (btn, side, value) => {
             const attrName = 'padding' + side;
-            btn.getInnerDomStyle()[attrName] = (btn[attrName] = value) + 'px';
+            btn.getIDS()[attrName] = (btn[attrName] = value) + 'px';
         },
         
         /** Provides button functionality to an myt.View. Most of the 

@@ -7,7 +7,7 @@
                 param view:View the view to modify.
                 param v:string the transformOrigin to set. */
         setTransformOrigin = (view, v) => {
-            view.getOuterDomStyle().transformOrigin = v || '50% 50% 0';
+            view.getODS().transformOrigin = v || '50% 50% 0';
         },
         
         /*  Adds an entry to the 'transform' style property of the provided
@@ -18,7 +18,7 @@
                     param v:string the style value to set. */
         addTransform = (view, type, v) => {
             const cur = removeTransform(view, type);
-            view.getOuterDomStyle().transform = cur + (cur.length === 0 ? '' : ' ') + type + '(' + v + ')';
+            view.getODS().transform = cur + (cur.length === 0 ? '' : ' ') + type + '(' + v + ')';
         },
         
         /*  Removes an entry from the 'transform' style property of the provided
@@ -28,7 +28,7 @@
                 param type:string the type of transform: 'rotate', 'scaleX', 
                     'scaleY', 'skewX', 'skewY'. */
         removeTransform = (view, type) => {
-            const ods = view.getOuterDomStyle(),
+            const ods = view.getODS(),
                 value = ods.transform;
             
             if (!value || value.length === 0) return '';
@@ -171,7 +171,7 @@
                 w = this.height;
                 h = this.width;
             } else {
-                const b = this.getOuterDomElement().getBoundingClientRect();
+                const b = this.getODE().getBoundingClientRect();
                 w = b.width;
                 h = b.height;
             }

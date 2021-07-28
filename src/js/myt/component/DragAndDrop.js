@@ -164,7 +164,7 @@
             const dropClass = this.dropClass,
                 dropParent = this.dropParent;
             if (dropClass && dropParent) {
-                const pos = pkg.DomElementProxy.getRelativePosition(this.getInnerDomElement(), dropParent.getInnerDomElement());
+                const pos = pkg.DomElementProxy.getRelativePosition(this.getIDE(), dropParent.getIDE());
                 return new dropClass(dropParent, Object.assign({}, this.dropClassAttrs, {x:pos.x || 0, y:pos.y || 0}));
             }
         },
@@ -401,7 +401,7 @@
             @param {!Object} dropable - The myt.Dropable being dragged.
             @returns {undefined} */
         notifyDragStart: function(dropable) {
-            const ide = this.getInnerDomElement();
+            const ide = this.getIDE();
             if (ide.scrollHeight > ide.clientHeight || ide.scrollWidth > ide.clientWidth) {
                 this.attachToDom(globalMouse, '__hndlMove', 'mousemove', true);
             }
@@ -434,7 +434,7 @@
                     calculateAmount = percent => Math.round(self.scrollAmount * (1 + self.scrollAcceleration * percent)),
                     doAutoScrollAdj = (dir, amt) => {
                         if (self['__is' + dir]) {
-                            self.getInnerDomElement()['scroll' + (dir === 'Up' || dir === 'Down' ? 'Top' : 'Left')] += amt * self['__amt' + dir];
+                            self.getIDE()['scroll' + (dir === 'Up' || dir === 'Down' ? 'Top' : 'Left')] += amt * self['__amt' + dir];
                             self['__tmrId' + dir] = setTimeout(() => {doAutoScrollAdj(dir, amt);}, self.scrollFrequency);
                         }
                     };

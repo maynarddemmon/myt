@@ -30,7 +30,7 @@
             /** @overrides myt.Disableable */
             setDisabled: function(v) {
                 if (this.disabled !== v) {
-                    this.getInnerDomElement().disabled = v;
+                    this.getIDE().disabled = v;
                     this.callSuper(v);
                     
                     if (this.inited) {
@@ -165,11 +165,11 @@
                         this.callSuper(parent, attrs);
                         this.attachToDom(this, '_handleInput', 'change');
                         
-                        this.getInnerDomElement().multiple = self.maxFiles > 1;
+                        this.getIDE().multiple = self.maxFiles > 1;
                     },
                     
                     _handleInput: function(event) {
-                        self.handleFiles(this.getInnerDomElement().files, event);
+                        self.handleFiles(this.getIDE().files, event);
                     }
                 }]);
             },
@@ -206,7 +206,7 @@
                 if (this.maxFiles !== v) {
                     this.maxFiles = v;
                     if (this.inited) this.fireEvent('maxFiles', v);
-                    if (this.fileInput) this.fileInput.getInnerDomElement().multiple = v > 1;
+                    if (this.fileInput) this.fileInput.getIDE().multiple = v > 1;
                 }
             },
             
@@ -319,7 +319,7 @@
                 
                 // Reset the form element if empty. Otherwise uploading the 
                 // same file again won't trigger a change event.
-                if (!this.value) this.fileInput.getInnerDomElement().value = '';
+                if (!this.value) this.fileInput.getIDE().value = '';
                 
                 this.verifyChangedState(); // FIXME: mimics what happens in myt.FormElement setValue
                 if (this.form) this.form.notifyValueChanged(this); // FIXME: mimics what happens in myt.Form setValue

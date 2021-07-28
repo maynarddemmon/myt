@@ -34,7 +34,7 @@
                 if (!model) model = globalFocus.findModelForDomElement(startElem);
                 if (model) {
                     const focusTrap = model.getFocusTrap(ignoreFocusTrap);
-                    if (focusTrap) rootElem = focusTrap.getInnerDomElement();
+                    if (focusTrap) rootElem = focusTrap.getIDE();
                 }
             }
             
@@ -44,7 +44,7 @@
                     (progModel = elem.model[focusFuncName]())
                 ) {
                     // Programatic traverse
-                    elem = progModel.getInnerDomElement();
+                    elem = progModel.getIDE();
                 } else if (isForward) {
                     // Dom traverse forward
                     if (elem.firstChild) {
