@@ -2592,14 +2592,14 @@ new JS.Singleton('GlobalError', {
             
             /** Gets the x and y position of the dom element relative to the 
                 ancestor dom element or the page. Transforms are not supported.
-                Use getTruePagePosition if you need support for transforms.
+                Use getTruePosition if you need support for transforms.
                 @param {!Object} elem - The dom element to get the position for.
                 @param {?Object} [ancestorElem] - The ancestor dom element
                     that if encountered will halt the page position calculation
                     thus giving the position of elem relative to ancestorElem.
                 @returns {?Object} - An object with 'x' and 'y' keys or null 
                     if an error has occurred. */
-            getPagePosition: (elem, ancestorElem) => {
+            getRelativePosition: (elem, ancestorElem) => {
                 if (!elem) return null;
                 
                 const borderMultiplier = BrowserDetect.browser === 'Firefox' ? 2 : 1; // I have no idea why firefox needs it twice, but it does.
@@ -2627,7 +2627,7 @@ new JS.Singleton('GlobalError', {
                 @param {!Object} elem - The dom element to get the position for.
                 @returns {?Object} - An object with 'x' and 'y' keys or null 
                     if an error has occurred. */
-            getTruePagePosition: elem => {
+            getTruePosition: elem => {
                 if (!elem) return null;
                 const pos = elem.getBoundingClientRect();
                 return {x:pos.left + GLOBAL.scrollX, y:pos.top + GLOBAL.scrollY};
@@ -2838,19 +2838,13 @@ new JS.Singleton('GlobalError', {
         
         // Methods /////////////////////////////////////////////////////////////
         /** Gets the x and y position of the underlying dom element relative 
-            to the page. Transforms are not supported.
+            to the page. Transforms are not supported by default.
+            @param {boolean} [transformSupport] If true then transforms
+                applied to the dom elements are supported.
             @returns {?Object} - An object with 'x' and 'y' keys or null 
                 if an error has occurred. */
-        getPagePosition: function() {
-            return DomElementProxy.getPagePosition(this.__iE);
-        },
-        
-        /** Gets the x and y position of the underlying dom element relative 
-            to the page with support for transforms.
-            @returns {?Object} - An object with 'x' and 'y' keys or null 
-                if an error has occurred. */
-        getTruePagePosition: function() {
-            return DomElementProxy.getTruePagePosition(this.__iE);
+        getPagePosition: function(transformSupport) {
+            return DomElementProxy['get' + (transformSupport ? 'True' : 'Relative') + 'Position'](this.__iE);
         },
         
         /** Generates a dom event "click" on this proxy's dom element.
@@ -5005,14 +4999,19 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** An myt.SimplePool that tracks which objects are "active".
             
-            Private Attributes:
-                __pbk:object Stores Pools by key.
-            
             @class */
         TrackActivesPool = pkg.TrackActivesPool = new JSClass('TrackActivesPool', SimplePool, {
             include: [TrackActives]
         });
     
+
+    /** A pool that tracks which objects are "active" and stores objects of
+        different classes in different internal TrackActivesPools.
+        
+        Private Attributes:
+            __pbk:object Stores TrackActivesPools by key.
+        
+        @class */
     pkg.TrackActivesMultiPool = new JSClass('TrackActivesMultiPool', AbstractPool, {
         // Constructor /////////////////////////////////////////////////////////
         initialize: function(instanceClassesByKey, instanceParent) {
@@ -7847,7 +7846,7 @@ myt.Destructible = new JS.Module('Destructible', {
             const outerElem = this.getOuterDomElement();
             if (!outerElem) return false;
             
-            const pos = DomElementProxy.getPagePosition(outerElem, referenceFrameDomElem);
+            const pos = DomElementProxy.getRelativePosition(outerElem, referenceFrameDomElem);
             return rectContainsPoint(locX, locY, pos.x, pos.y, this.width, this.height);
         },
         
@@ -7857,7 +7856,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {number} locY
             @returns {boolean} true if visible, false otherwise. */
         isPointVisible: function(locX, locY) {
-            const pos = this.getTruePagePosition();
+            const pos = this.getPagePosition(true);
             calculateEffectiveScale(this);
             return isPointVisible(this, locX - pos.x, locY - pos.y);
         },
@@ -22697,7 +22696,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             const dropClass = this.dropClass,
                 dropParent = this.dropParent;
             if (dropClass && dropParent) {
-                const pos = pkg.DomElementProxy.getPagePosition(this.getInnerDomElement(), dropParent.getInnerDomElement());
+                const pos = pkg.DomElementProxy.getRelativePosition(this.getInnerDomElement(), dropParent.getInnerDomElement());
                 return new dropClass(dropParent, Object.assign({}, this.dropClassAttrs, {x:pos.x || 0, y:pos.y || 0}));
             }
         },

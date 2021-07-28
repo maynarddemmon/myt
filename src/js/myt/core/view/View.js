@@ -1170,7 +1170,7 @@
             const outerElem = this.getOuterDomElement();
             if (!outerElem) return false;
             
-            const pos = DomElementProxy.getPagePosition(outerElem, referenceFrameDomElem);
+            const pos = DomElementProxy.getRelativePosition(outerElem, referenceFrameDomElem);
             return rectContainsPoint(locX, locY, pos.x, pos.y, this.width, this.height);
         },
         
@@ -1180,7 +1180,7 @@
             @param {number} locY
             @returns {boolean} true if visible, false otherwise. */
         isPointVisible: function(locX, locY) {
-            const pos = this.getTruePagePosition();
+            const pos = this.getPagePosition(true);
             calculateEffectiveScale(this);
             return isPointVisible(this, locX - pos.x, locY - pos.y);
         },

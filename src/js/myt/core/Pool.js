@@ -212,14 +212,19 @@
         
         /** An myt.SimplePool that tracks which objects are "active".
             
-            Private Attributes:
-                __pbk:object Stores Pools by key.
-            
             @class */
         TrackActivesPool = pkg.TrackActivesPool = new JSClass('TrackActivesPool', SimplePool, {
             include: [TrackActives]
         });
     
+
+    /** A pool that tracks which objects are "active" and stores objects of
+        different classes in different internal TrackActivesPools.
+        
+        Private Attributes:
+            __pbk:object Stores TrackActivesPools by key.
+        
+        @class */
     pkg.TrackActivesMultiPool = new JSClass('TrackActivesMultiPool', AbstractPool, {
         // Constructor /////////////////////////////////////////////////////////
         initialize: function(instanceClassesByKey, instanceParent) {

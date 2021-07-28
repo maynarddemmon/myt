@@ -108,14 +108,14 @@
             
             /** Gets the x and y position of the dom element relative to the 
                 ancestor dom element or the page. Transforms are not supported.
-                Use getTruePagePosition if you need support for transforms.
+                Use getTruePosition if you need support for transforms.
                 @param {!Object} elem - The dom element to get the position for.
                 @param {?Object} [ancestorElem] - The ancestor dom element
                     that if encountered will halt the page position calculation
                     thus giving the position of elem relative to ancestorElem.
                 @returns {?Object} - An object with 'x' and 'y' keys or null 
                     if an error has occurred. */
-            getPagePosition: (elem, ancestorElem) => {
+            getRelativePosition: (elem, ancestorElem) => {
                 if (!elem) return null;
                 
                 const borderMultiplier = BrowserDetect.browser === 'Firefox' ? 2 : 1; // I have no idea why firefox needs it twice, but it does.
@@ -143,7 +143,7 @@
                 @param {!Object} elem - The dom element to get the position for.
                 @returns {?Object} - An object with 'x' and 'y' keys or null 
                     if an error has occurred. */
-            getTruePagePosition: elem => {
+            getTruePosition: elem => {
                 if (!elem) return null;
                 const pos = elem.getBoundingClientRect();
                 return {x:pos.left + GLOBAL.scrollX, y:pos.top + GLOBAL.scrollY};
@@ -354,19 +354,13 @@
         
         // Methods /////////////////////////////////////////////////////////////
         /** Gets the x and y position of the underlying dom element relative 
-            to the page. Transforms are not supported.
+            to the page. Transforms are not supported by default.
+            @param {boolean} [transformSupport] If true then transforms
+                applied to the dom elements are supported.
             @returns {?Object} - An object with 'x' and 'y' keys or null 
                 if an error has occurred. */
-        getPagePosition: function() {
-            return DomElementProxy.getPagePosition(this.__iE);
-        },
-        
-        /** Gets the x and y position of the underlying dom element relative 
-            to the page with support for transforms.
-            @returns {?Object} - An object with 'x' and 'y' keys or null 
-                if an error has occurred. */
-        getTruePagePosition: function() {
-            return DomElementProxy.getTruePagePosition(this.__iE);
+        getPagePosition: function(transformSupport) {
+            return DomElementProxy['get' + (transformSupport ? 'True' : 'Relative') + 'Position'](this.__iE);
         },
         
         /** Generates a dom event "click" on this proxy's dom element.

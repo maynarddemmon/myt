@@ -164,7 +164,7 @@
             const dropClass = this.dropClass,
                 dropParent = this.dropParent;
             if (dropClass && dropParent) {
-                const pos = pkg.DomElementProxy.getPagePosition(this.getInnerDomElement(), dropParent.getInnerDomElement());
+                const pos = pkg.DomElementProxy.getRelativePosition(this.getInnerDomElement(), dropParent.getInnerDomElement());
                 return new dropClass(dropParent, Object.assign({}, this.dropClassAttrs, {x:pos.x || 0, y:pos.y || 0}));
             }
         },
