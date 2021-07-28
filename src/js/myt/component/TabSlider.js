@@ -80,7 +80,7 @@
                 new self.buttonClass(self, {
                     name:'button', ignorePlacement:true, zIndex:1,
                     height:self.buttonHeight,
-                    focusEmbellishment:true,
+                    focusIndicator:true,
                     groupId:self.parent.parent.groupId,
                     percentOfParentWidth:100,
                     hoverColor:self.fillColorHover,

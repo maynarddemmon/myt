@@ -111,15 +111,16 @@
                     commands.push("A" + [r1, r1, 0, 1, 0, points[3]].join());
                     commands.push("A" + [r1, r1, 0, 1, 0, points[2]].join());
                 } else {
-                    const largeArc = (angleDiff % (2 * PI)) > PI ? 1 : 0;
+                    const largeArc = (angleDiff % (2 * PI)) > PI ? 1 : 0,
+                        halfThickness = thickness / 2;
                     commands.push("A" + [r2, r2, 0, largeArc, 1, points[1]].join());
                     if (endCapRounding) {
-                        commands.push("A" + [thickness / 2, thickness / 2, 0, 0, 1, points[2]].join());
+                        commands.push("A" + [halfThickness, halfThickness, 0, 0, 1, points[2]].join());
                     } else {
                         commands.push("L" + points[2].join());
                     }
                     commands.push("A" + [r1, r1, 0, largeArc, 0, points[3]].join());
-                    if (startCapRounding) commands.push("A" + [thickness / 2, thickness / 2, 0, 0, 1, points[0]].join());
+                    if (startCapRounding) commands.push("A" + [halfThickness, halfThickness, 0, 0, 1, points[0]].join());
                 }
                 commands.push("z");
                 

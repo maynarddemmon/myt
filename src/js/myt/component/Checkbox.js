@@ -31,7 +31,7 @@
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
             defAttr(attrs, 'value', false);
-            defAttr(attrs, 'focusEmbellishment', false);
+            defAttr(attrs, 'focusIndicator', false);
             defAttr(attrs, 'checkboxStyle', DEFAULT_STYLE);
             defAttr(attrs, 'activeColor', 'inherits');
             defAttr(attrs, 'hoverColor', 'inherits');
@@ -81,27 +81,9 @@
         },
         
         /** @overrides myt.SimpleButtonStyle */
-        drawDisabledState: function() {
-            this.setOpacity(pkg.Button.DEFAULT_DISABLED_OPACITY);
-            this.setTextColor(this.readyColor);
-        },
-        
-        /** @overrides myt.SimpleButtonStyle */
-        drawHoverState: function() {
-            this.setOpacity(1);
-            this.setTextColor(this.hoverColor);
-        },
-        
-        /** @overrides myt.SimpleButtonStyle */
-        drawActiveState: function() {
-            this.setOpacity(1);
-            this.setTextColor(this.activeColor);
-        },
-        
-        /** @overrides myt.SimpleButtonStyle */
-        drawReadyState: function() {
-            this.setOpacity(1);
-            this.setTextColor(this.readyColor);
+        draw: function(color, opacity=1) {
+            this.setOpacity(opacity);
+            this.setTextColor(color);
         }
     });
 })(myt);

@@ -2,13 +2,11 @@
     const GLOBAL = global,
         DOCUMENT_ELEMENT = document;
     
-    /** Provides a dom element for this instance. Also assigns a reference to this
-        DomElementProxy to a property named "model" on the dom element.
+    /** Provides a dom element for this instance. Also assigns a reference 
+        to this DomElementProxy to a property named "model" on the dom element.
         
         Attributes:
             domElement:domElement the dom element hidden we are a proxy for.
-            deStyle:object a shortcut reference to the style attribute of 
-                the dom element.
         
         @class */
     const DomElementProxy = pkg.DomElementProxy = new JS.Module('DomElementProxy', {
@@ -87,8 +85,8 @@
             },
             
             /** Gets the z-index of the dom element or, if it does not define a 
-                stacking context, the highest z-index of any of the dom element's 
-                descendants.
+                stacking context, the highest z-index of any of the dom 
+                element's descendants.
                 @param {!Object} elem - A domElement
                 @returns {number} - An int */
             getHighestZIndex: elem => {
@@ -156,8 +154,10 @@
             
             /** Generates a dom event on a dom element. Adapted from:
                     http://stackoverflow.com/questions/6157929/how-to-simulate-mouse-click-using-javascript
-                @param {!Object} elem - The domElement to simulate the event on.
-                @param {string} eventName - The name of the dom event to generate.
+                @param {!Object} elem - The domElement to simulate 
+                    the event on.
+                @param {string} eventName - The name of the dom event 
+                    to generate.
                 @param {?Object} [customOpts] - A map of options that will
                     be added onto the dom event object.
                 @returns {undefined} */
@@ -231,10 +231,18 @@
             return this.__oE;
         },
         
+        /** Gets the style attribute of the inner dom element. If only one
+            dom element exists then this will be the same as the outer dom
+            style.
+            @returns {?Object} */
         getInnerDomStyle: function() {
-            return this.deStyle;
+            return this.__iS;
         },
         
+        /** Gets the style attribute of the outer dom element. If only one
+            dom element exists then this will be the same as the inner dom
+            style.
+            @returns {?Object} */
         getOuterDomStyle: function() {
             return this.__oS;
         },
@@ -243,8 +251,8 @@
             @param {?Object} v
             @returns {undefined} */
         setDomElement: function(v) {
-            // Support an inner and outer dom element if an array of elements is
-            // provided.
+            // Support an inner and outer dom element if an array of elements 
+            // is provided.
             const self = this;
             let outerElem,
                 innerElem;
@@ -259,12 +267,12 @@
             self.__oE = outerElem;
             
             // Store a reference to domElement.style since it is accessed often.
-            self.deStyle = innerElem.style;
+            self.__iS = innerElem.style;
             self.__oS = outerElem.style;
             
-            // Setup a reference from the domElement to this model. This will allow
-            // access to the model from code that uses JQuery or some other
-            // mechanism to select dom elements.
+            // Setup a reference from the domElement to this model. This will 
+            // allow access to the model from code that uses JQuery or some 
+            // other mechanism to select dom elements.
             innerElem.model = outerElem.model = self;
         },
         
@@ -279,7 +287,7 @@
             @returns {undefined} */
         disposeOfDomElement: function() {
             delete this.domElement.model;
-            delete this.deStyle;
+            delete this.__iS;
             delete this.domElement;
             
             delete this.__oE.model;
@@ -330,25 +338,25 @@
             this.domElement.id = this.domId = v;
         },
         
-        /** Set the z-index of the dom element.
+        /** Set the z-index of the outer dom element.
             @param {number} v - The z-index to set.
             @returns {undefined} */
         setZIndex: function(v) {
-            this.deStyle.zIndex = v;
+            this.__oS.zIndex = v;
         },
         
-        /** Set an arbitrary CSS style on the dom element.
+        /** Set an arbitrary CSS style on the inner dom element style.
             @param {string} propertyName - The name of the CSS property to set.
             @param {*} v - The value to set.
             @returns {undefined} */
         setStyleProperty: function(propertyName, v) {
-            this.deStyle[propertyName] = v;
+            this.__iS[propertyName] = v;
         },
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Gets the x and y position of the underlying dom element relative to
-            the page. Transforms are not supported.
+        /** Gets the x and y position of the underlying dom element relative 
+            to the page. Transforms are not supported.
             @returns {?Object} - An object with 'x' and 'y' keys or null 
                 if an error has occurred. */
         getPagePosition: function() {
@@ -375,8 +383,8 @@
             return DomElementProxy.getHighestZIndex(this.domElement);
         },
         
-        /** Gets the highest z-index of any of the descendant dom elements of
-            the domElement of this DomElementProxy.
+        /** Gets the highest z-index of any of the descendant dom elements 
+            of the domElement of this DomElementProxy.
             @param {boolean} [skipChild] - A domElement to skip over
                 when determining the z-index.
             @returns {number} - An int. */

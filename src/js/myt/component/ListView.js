@@ -8,6 +8,79 @@
         
         ACTIVATION_KEYS = [13,27,32,37,38,39,40],
         
+        updateItems = listView => {
+            const cfg = listView.itemConfig || [],
+                cfgLen = cfg.length,
+                items = listView.items, 
+                itemsLen = items.length,
+                defaultItemClass = listView.defaultItemClass,
+                contentView = listView.getContentView(), 
+                layouts = contentView.getLayouts();
+            
+            // Lock layouts during reconfiguration
+            layouts.forEach(layout => {layout.incrementLockedCounter();});
+            
+            // Performance: Remove from dom while doing inserts
+            const de = contentView.getOuterDomElement(),
+                nextDe = de.nextSibling,
+                parentElem = de.parentNode;
+            parentElem.removeChild(de);
+            
+            // Reconfigure list
+            let i = 0;
+            for (; cfgLen > i; ++i) {
+                const cfgItem = cfg[i],
+                    cfgClass = cfgItem.klass || defaultItemClass,
+                    cfgAttrs = cfgItem.attrs || {};
+                let item = items[i];
+                
+                // Destroy existing item if it's the wrong class
+                if (item && !item.isA(cfgClass)) {
+                    item.destroy();
+                    item = null;
+                }
+                
+                // Create a new item if no item exists
+                if (!item) item = items[i] = new cfgClass(contentView, {listView:listView});
+                
+                // Apply config to item
+                if (item) {
+                    item.callSetters(cfgAttrs);
+                    
+                    // Create an item index to sort the layout subviews on. This
+                    // is necessary when the class of list items change so 
+                    // that the newly created items don't end up out of order.
+                    item.__LAYOUT_IDX = i;
+                }
+            }
+            
+            // Performance: Put back in dom.
+            parentElem.insertBefore(de, nextDe);
+            
+            // Measure width. Must be in dom at this point.
+            let minWidth = listView.minWidth;
+            for (i = 0; cfgLen > i;) {
+                const item = items[i++];
+                item.syncToDom();
+                minWidth = Math.max(minWidth, item.getMinimumWidth());
+            }
+            
+            // Delete any remaining items
+            for (; itemsLen > i;) items[i++].destroy();
+            items.length = cfgLen;
+            
+            // Resize items and contentView
+            for (i = 0; cfgLen > i;) listView.updateItemWidth(items[i++], minWidth);
+            listView.updateContentWidth(contentView, minWidth);
+            
+            // Unlock layouts and update
+            layouts.forEach(layout => {
+                layout.sortSubviews((a, b) => a.__LAYOUT_IDX - b.__LAYOUT_IDX);
+                layout.decrementLockedCounter();
+                layout.update();
+            });
+        },
+        
         /** Defines the interface list view items must support.
             
             Attributes:
@@ -27,7 +100,7 @@
             getMinimumWidth: () => 0,
             
             /** Part of a performance optimization. Called from 
-                ListView.__updateItems after the items have been inserted into 
+                updateItems after the items have been inserted into 
                 the dom. Now we can actually measure text width. */
             syncToDom: () => {}
         });
@@ -64,12 +137,14 @@
             
             this.callSuper(parent, attrs);
             
-            this.__updateItems();
-            this.buildLayout();
+            updateItems(this);
+            this.buildLayout(this.getContentView());
         },
         
-        buildLayout: function() {
-            new pkg.SpacedLayout(this.getContentView(), {
+        /** Allows subclasses to specify their own layout. For example a
+            multi-column layout using a WrappingLayout is possible. */
+        buildLayout: contentView => {
+            new pkg.SpacedLayout(contentView, {
                 axis:'y', spacing:1, collapseParent:true
             });
         },
@@ -80,7 +155,7 @@
         setDefaultItemClass: function(v) {this.defaultItemClass = v;},
         setItemConfig: function(v) {
             this.itemConfig = v;
-            if (this.inited) this.__updateItems();
+            if (this.inited) updateItems(this);
         },
         
         /** Get the view that will contain list content.
@@ -102,9 +177,7 @@
         /** @overrides myt.View */
         setHeight: function(v, supressEvent) {
             // Limit height if necessary
-            if (this.maxHeight >= 0) v = Math.min(this.maxHeight, v);
-            
-            this.callSuper(v, supressEvent);
+            this.callSuper(this.maxHeight >= 0 ? Math.min(this.maxHeight, v) : v, supressEvent);
         },
         
         
@@ -115,8 +188,7 @@
             @param {!Object} itemView
             @returns {undefined} */
         doItemActivated: function(itemView) {
-            const owner = this.owner;
-            if (owner) owner.doItemActivated(itemView);
+            if (this.owner) this.owner.doItemActivated(itemView);
         },
         
         /** @overrides myt.FloatingPanel */
@@ -142,87 +214,6 @@
                 if (item.isFocusable()) return item;
             }
             return null;
-        },
-        
-        /** @private
-            @returns {undefined} */
-        __updateItems: function() {
-            const self = this,
-                cfg = self.itemConfig || [],
-                cfgLen = cfg.length,
-                items = self.items, 
-                itemsLen = items.length,
-                defaultItemClass = self.defaultItemClass,
-                contentView = self.getContentView(), 
-                layouts = contentView.getLayouts(),
-                layoutLen = layouts.length;
-            
-            // Lock layouts during reconfiguration
-            let i = layoutLen;
-            while (i) layouts[--i].incrementLockedCounter();
-            
-            // Performance: Remove from dom while doing inserts
-            const de = contentView.getOuterDomElement(),
-                nextDe = de.nextSibling,
-                parentElem = de.parentNode;
-            parentElem.removeChild(de);
-            
-            // Reconfigure list
-            let item;
-            for (i = 0; cfgLen > i; ++i) {
-                const cfgItem = cfg[i],
-                    cfgClass = cfgItem.klass || defaultItemClass,
-                    cfgAttrs = cfgItem.attrs || {};
-                
-                item = items[i];
-                
-                // Destroy existing item if it's the wrong class
-                if (item && !item.isA(cfgClass)) {
-                    item.destroy();
-                    item = null;
-                }
-                
-                // Create a new item if no item exists
-                if (!item) item = items[i] = new cfgClass(contentView, {listView:self});
-                
-                // Apply config to item
-                if (item) {
-                    item.callSetters(cfgAttrs);
-                    
-                    // Create an item index to sort the layout subviews on. This
-                    // is necessary when the class of list items change so 
-                    // that the newly created items don't end up out of order.
-                    item.__LAYOUT_IDX = i;
-                }
-            }
-            
-            // Performance: Put back in dom.
-            parentElem.insertBefore(de, nextDe);
-            
-            // Measure width. Must be in dom at this point.
-            let minWidth = self.minWidth;
-            for (i = 0; cfgLen > i;) {
-                item = items[i++];
-                item.syncToDom();
-                minWidth = Math.max(minWidth, item.getMinimumWidth());
-            }
-            
-            // Delete any remaining items
-            for (; itemsLen > i;) items[i++].destroy();
-            items.length = cfgLen;
-            
-            // Resize items and contentView
-            for (i = 0; cfgLen > i;) self.updateItemWidth(items[i++], minWidth);
-            self.updateContentWidth(contentView, minWidth);
-            
-            // Unlock layouts and update
-            i = layoutLen;
-            while (i) {
-                const layout = layouts[--i];
-                layout.sortSubviews((a, b) => a.__LAYOUT_IDX - b.__LAYOUT_IDX);
-                layout.decrementLockedCounter();
-                layout.update();
-            }
         },
         
         updateItemWidth: (item, width) => {
@@ -385,16 +376,6 @@
         /** @overrides myt.Button */
         doActivated: function() {
             this.listView.doItemActivated(this);
-        },
-        
-        /** @overrides myt.Button */
-        showFocusEmbellishment: function() {
-            this.hideDefaultFocusEmbellishment();
-        },
-        
-        /** @overrides myt.Button */
-        hideFocusEmbellishment: function() {
-            this.hideDefaultFocusEmbellishment();
         },
         
         /** @overrides myt.KeyActivation. */

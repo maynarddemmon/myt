@@ -184,7 +184,7 @@
                 
                 const initialColorContainer = new View(colorPicker, {x:170, y:146, width:60, height:23, border:BORDER_333});
                 new View(initialColorContainer, {
-                    width:30, height:23, focusEmbellishment:false,
+                    width:30, height:23, focusIndicator:false,
                     bgColor:initialColorHex, domClass:isEmpty ? DOM_CLASS_CHECKERBOARD : ''
                 }, [Button, {doActivated: () => {colorPicker.setColor(initialColorHex);}}]);
                 currentColorButton = new View(initialColorContainer, {x:30, width:30, height:23}, [{

@@ -15,7 +15,7 @@ test("Create and destroy a view", function() {
     ok(v != null, "New view exists");
     ok(div.model === v, "Model for div should be the new view.");
     ok(v.domElement === div, "domElement for view should be the div.");
-    ok(v.deStyle === div.style, "deStyle for view should be the style from the div.");
+    ok(v.getInnerDomStyle() === div.style, "inner dom style for view should be the style from the div.");
     
     ok(v.domId === divId, "domId for view should have been set.");
     ok(v.domId === div.id, "domId and div.id should be equal.");
@@ -28,7 +28,7 @@ test("Create and destroy a view", function() {
     
     ok(v.destroyed === true, "The destroyed property of the new view should be true.");
     ok(v.domElement == null, "The domElement reference should not exists anymore.");
-    ok(v.deStyle == null, "The deStyle reference should not exists anymore.");
+    ok(v.getInnerDomStyle() == null, "The inner dom style should not exists anymore.");
     
     var divFromDocAgain = document.getElementById(divId);
     ok(divFromDocAgain == null, "Div obtained from document after destroy should not exist.");
@@ -49,7 +49,7 @@ test("Create and destroy a view with keepDomElementWhenDestroyed set to true.", 
     ok(v != null, "New view exists");
     ok(div.model === v, "Model for div should be the new view.");
     ok(v.domElement === div, "domElement for view should be the div.");
-    ok(v.deStyle === div.style, "deStyle for view should be the style from the div.");
+    ok(v.getInnerDomStyle() === div.style, "inner dom style for view should be the style from the div.");
     
     ok(v.domId === divId, "domId for view should have been set.");
     ok(v.domId === div.id, "domId and div.id should be equal.");
@@ -62,7 +62,7 @@ test("Create and destroy a view with keepDomElementWhenDestroyed set to true.", 
     
     ok(v.destroyed === true, "The destroyed property of the new view should be true.");
     ok(v.domElement == null, "The domElement reference should not exists anymore.");
-    ok(v.deStyle == null, "The deStyle reference should not exists anymore.");
+    ok(v.getInnerDomStyle() == null, "The inner dom style should not exists anymore.");
     
     var divFromDocAgain = document.getElementById(divId);
     ok(div === divFromDoc, "Div obtained from document after destroy should still exist.");
@@ -93,22 +93,22 @@ test("View position and size.", function() {
     
     ok(v.x === 10, "View should have an x of 10.");
     ok(v.get('x') === 10, "View getter for x should return 10");
-    ok(v.deStyle.left === '10px', "domElement.style.left should be 10px.");
+    ok(v.getInnerDomStyle().left === '10px', "domElement.style.left should be 10px.");
     ok(v.domElement.offsetLeft === 10, "Dom element should have an offsetLeft of 10.");
     
     ok(v.y === 20, "View should have an y of 20.");
     ok(v.get('y') === 20, "View getter for y should return 20");
-    ok(v.deStyle.top === '20px', "domElement.style.top should be 20px.");
+    ok(v.getInnerDomStyle().top === '20px', "domElement.style.top should be 20px.");
     ok(v.domElement.offsetTop === 20, "Dom element should have an offsetTop of 20.");
     
     ok(v.width === 30, "View should have a width of 30.");
     ok(v.get('width') === 30, "View getter for width should return 30");
-    ok(v.deStyle.width === '30px', "domElement.style.width should be 30px.");
+    ok(v.getInnerDomStyle().width === '30px', "domElement.style.width should be 30px.");
     ok(v.domElement.offsetWidth === 30, "Dom element should have an offsetWidth of 30.");
     
     ok(v.height === 40, "View should have an height of 40.");
     ok(v.get('height') === 40, "View getter for height should return 40");
-    ok(v.deStyle.height === '40px', "domElement.style.height should be 40px.");
+    ok(v.getInnerDomStyle().height === '40px', "domElement.style.height should be 40px.");
     ok(v.domElement.offsetHeight === 40, "Dom element should have an offsetHeight of 40.");
     
     // Bounding client rect
@@ -359,65 +359,65 @@ test("Outlines", function() {
     var v1 = new myt.View(v, {width:10, height:10});
     
     ok(v1.outlineWidth === undefined, "No outlineWidth defined on view yet.");
-    ok(v1.deStyle.outlineWidth === '', "No outlineWidth defined on dom element yet.");
+    ok(v1.getInnerDomStyle().outlineWidth === '', "No outlineWidth defined on dom element yet.");
     
     ok(v1.outlineStyle === undefined, "No outlineStyle defined on view yet.");
-    ok(v1.deStyle.outlineStyle === '', "No outlineStyle defined on dom element yet.");
+    ok(v1.getInnerDomStyle().outlineStyle === '', "No outlineStyle defined on dom element yet.");
     
     ok(v1.outlineColor === undefined, "No outlineColor defined on view yet.");
-    ok(v1.deStyle.outlineColor === '', "No outlineColor defined on dom element yet.");
+    ok(v1.getInnerDomStyle().outlineColor === '', "No outlineColor defined on dom element yet.");
     
     v1.setOutlineWidth(5);
     
     ok(v1.outlineWidth === 5, "Outline width is now 5.");
-    ok(v1.deStyle.outlineWidth === '5px', "Outline width is 5px.");
+    ok(v1.getInnerDomStyle().outlineWidth === '5px', "Outline width is 5px.");
     
     v1.setOutlineStyle('solid');
     
     ok(v1.outlineStyle === 'solid', "Outline style is now solid.");
-    ok(v1.deStyle.outlineStyle === 'solid', "Outline style is solid.");
+    ok(v1.getInnerDomStyle().outlineStyle === 'solid', "Outline style is solid.");
     
     v1.setOutlineColor('#fff');
     
     ok(v1.outlineColor === '#fff', "Outline color is now #fff.");
-    ok(v1.deStyle.outlineColor === 'rgb(255, 255, 255)', "Outline color is now rgb(255, 255, 255).");
+    ok(v1.getInnerDomStyle().outlineColor === 'rgb(255, 255, 255)', "Outline color is now rgb(255, 255, 255).");
     
     v1.setOutline(null);
     
     ok(v1.outlineWidth === 0, "Outline width is now 0.");
-    ok(v1.deStyle.outlineWidth === '0px', "Outline width is now 0px.");
+    ok(v1.getInnerDomStyle().outlineWidth === '0px', "Outline width is now 0px.");
     
     ok(v1.outlineStyle === 'none', "Outline style is now none.");
-    ok(v1.deStyle.outlineStyle === 'none', "Outline style is now none.");
+    ok(v1.getInnerDomStyle().outlineStyle === 'none', "Outline style is now none.");
     
     ok(v1.outlineColor === '#000', "Outline color is now #000.");
-    ok(v1.deStyle.outlineColor === 'rgb(0, 0, 0)', "Outline color is now rgb(0, 0, 0).");
+    ok(v1.getInnerDomStyle().outlineColor === 'rgb(0, 0, 0)', "Outline color is now rgb(0, 0, 0).");
     
     v1.setOutline([2, 'dotted', '#fff']);
     
     ok(v1.outlineWidth === 2, "Outline width is now 2.");
-    ok(v1.deStyle.outlineWidth === '2px', "Outline width is now 2px.");
+    ok(v1.getInnerDomStyle().outlineWidth === '2px', "Outline width is now 2px.");
     
     ok(v1.outlineStyle === 'dotted', "Outline style is now dotted.");
-    ok(v1.deStyle.outlineStyle === 'dotted', "Outline style is now dotted.");
+    ok(v1.getInnerDomStyle().outlineStyle === 'dotted', "Outline style is now dotted.");
     
     ok(v1.outlineColor === '#fff', "Outline color is now #fff.");
-    ok(v1.deStyle.outlineColor === 'rgb(255, 255, 255)', "Outline color is now rgb(255, 255, 255).");
+    ok(v1.getInnerDomStyle().outlineColor === 'rgb(255, 255, 255)', "Outline color is now rgb(255, 255, 255).");
     
     v1.setOutlineWidth();
     
     ok(v1.outlineWidth === 0, "Outline width is now 0.");
-    ok(v1.deStyle.outlineWidth === '0px', "Outline width is now 0px.");
+    ok(v1.getInnerDomStyle().outlineWidth === '0px', "Outline width is now 0px.");
     
     v1.setOutlineStyle(false);
     
     ok(v1.outlineStyle === 'none', "Outline style is now none.");
-    ok(v1.deStyle.outlineStyle === 'none', "Outline style is now none.");
+    ok(v1.getInnerDomStyle().outlineStyle === 'none', "Outline style is now none.");
     
     v1.setOutlineColor(0);
     
     ok(v1.outlineColor === '#000', "Outline color is now #000.");
-    ok(v1.deStyle.outlineColor === 'rgb(0, 0, 0)', "Outline color is now rgb(0, 0, 0).");
+    ok(v1.getInnerDomStyle().outlineColor === 'rgb(0, 0, 0)', "Outline color is now rgb(0, 0, 0).");
     
     v.destroy();
 });
@@ -428,65 +428,65 @@ test("Borders", function() {
     var v1 = new myt.View(v, {width:10, height:10});
     
     ok(v1.borderWidth === undefined, "No borderWidth defined on view yet.");
-    ok(v1.deStyle.borderWidth === '', "No borderWidth defined on dom element yet.");
+    ok(v1.getInnerDomStyle().borderWidth === '', "No borderWidth defined on dom element yet.");
     
     ok(v1.borderStyle === undefined, "No borderStyle defined on view yet.");
-    ok(v1.deStyle.borderStyle === '', "No borderStyle defined on dom element yet.");
+    ok(v1.getInnerDomStyle().borderStyle === '', "No borderStyle defined on dom element yet.");
     
     ok(v1.borderColor === undefined, "No borderColor defined on view yet.");
-    ok(v1.deStyle.borderColor === '', "No borderColor defined on dom element yet.");
+    ok(v1.getInnerDomStyle().borderColor === '', "No borderColor defined on dom element yet.");
     
     v1.setBorderWidth(5);
     
     ok(v1.borderWidth === 5, "Border width is now 5.");
-    ok(v1.deStyle.borderWidth === '5px', "Border width is 5px.");
+    ok(v1.getInnerDomStyle().borderWidth === '5px', "Border width is 5px.");
     
     v1.setBorderStyle('solid');
     
     ok(v1.borderStyle === 'solid', "Border style is now solid.");
-    ok(v1.deStyle.borderStyle === 'solid', "Border style is solid.");
+    ok(v1.getInnerDomStyle().borderStyle === 'solid', "Border style is solid.");
     
     v1.setBorderColor('#fff');
     
     ok(v1.borderColor === '#fff', "Border color is now #fff.");
-    ok(v1.deStyle.borderColor === 'rgb(255, 255, 255)', "Border color is now rgb(255, 255, 255).");
+    ok(v1.getInnerDomStyle().borderColor === 'rgb(255, 255, 255)', "Border color is now rgb(255, 255, 255).");
     
     v1.setBorder(null);
     
     ok(v1.borderWidth === 0, "Border width is now 0.");
-    ok(v1.deStyle.borderWidth === '0px', "Border width is now 0px.");
+    ok(v1.getInnerDomStyle().borderWidth === '0px', "Border width is now 0px.");
     
     ok(v1.borderStyle === 'none', "Border style is now none.");
-    ok(v1.deStyle.borderStyle === 'none', "Border style is now none.");
+    ok(v1.getInnerDomStyle().borderStyle === 'none', "Border style is now none.");
     
     ok(v1.borderColor === '#000', "Border color is now #000.");
-    ok(v1.deStyle.borderColor === 'rgb(0, 0, 0)', "Border color is now rgb(0, 0, 0).");
+    ok(v1.getInnerDomStyle().borderColor === 'rgb(0, 0, 0)', "Border color is now rgb(0, 0, 0).");
     
     v1.setBorder([2, 'dotted', '#fff']);
     
     ok(v1.borderWidth === 2, "Border width is now 2.");
-    ok(v1.deStyle.borderWidth === '2px', "Border width is now 2px.");
+    ok(v1.getInnerDomStyle().borderWidth === '2px', "Border width is now 2px.");
     
     ok(v1.borderStyle === 'dotted', "Border style is now dotted.");
-    ok(v1.deStyle.borderStyle === 'dotted', "Border style is now dotted.");
+    ok(v1.getInnerDomStyle().borderStyle === 'dotted', "Border style is now dotted.");
     
     ok(v1.borderColor === '#fff', "Border color is now #fff.");
-    ok(v1.deStyle.borderColor === 'rgb(255, 255, 255)', "Border color is now rgb(255, 255, 255).");
+    ok(v1.getInnerDomStyle().borderColor === 'rgb(255, 255, 255)', "Border color is now rgb(255, 255, 255).");
     
     v1.setBorderWidth();
     
     ok(v1.borderWidth === 0, "Border width is now 0.");
-    ok(v1.deStyle.borderWidth === '0px', "Border width is now 0px.");
+    ok(v1.getInnerDomStyle().borderWidth === '0px', "Border width is now 0px.");
     
     v1.setBorderStyle(false);
     
     ok(v1.borderStyle === 'none', "Border style is now none.");
-    ok(v1.deStyle.borderStyle === 'none', "Border style is now none.");
+    ok(v1.getInnerDomStyle().borderStyle === 'none', "Border style is now none.");
     
     v1.setBorderColor(0);
     
     ok(v1.borderColor === '#000', "Border color is now #000.");
-    ok(v1.deStyle.borderColor === 'rgb(0, 0, 0)', "Border color is now rgb(0, 0, 0).");
+    ok(v1.getInnerDomStyle().borderColor === 'rgb(0, 0, 0)', "Border color is now rgb(0, 0, 0).");
     
     v.destroy();
 });

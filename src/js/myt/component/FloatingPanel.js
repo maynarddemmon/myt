@@ -213,7 +213,7 @@
             
             this.ignoreOwnerForHideOnMouseDown = this.ignoreOwnerForHideOnBlur = this.hideOnBlur = this.hideOnMouseDown = true;
             
-            attrs.visible = attrs.focusEmbellishment = false;
+            attrs.visible = attrs.focusIndicator = false;
             
             // Ensure the focus starts and ends with the panel
             attrs.focusable = attrs.focusCage = true;

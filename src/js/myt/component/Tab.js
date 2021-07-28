@@ -125,7 +125,7 @@
                 
                 // Other
                 defAttr(attrs, 'height', Tab.DEFAULT_HEIGHT);
-                defAttr(attrs, 'focusEmbellishment', false);
+                defAttr(attrs, 'focusIndicator', false);
                 
                 this.callSuper(parent, attrs);
                 

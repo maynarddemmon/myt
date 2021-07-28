@@ -51,7 +51,7 @@
                 defAttr(attrs, 'minValue', 0);
                 defAttr(attrs, 'value', attrs.minValue);
                 defAttr(attrs, 'expansionState', 2);
-                defAttr(attrs, 'focusEmbellishment', false);
+                defAttr(attrs, 'focusIndicator', false);
                 defAttr(attrs, 'repeatKeyDown', true);
                 defAttr(attrs, 'activationKeys', [
                     37, // left arrow

@@ -1,10 +1,11 @@
 ((pkg) => {
     const
+        updateBounds = view => {view.__updateBounds(view.width, view.height);},
+        
         /*  Sets the 'transformOrigin' style property of the provided
             style property map.
                 param view:View the view to modify.
-                param v:string the transformOrigin to set.
-        */
+                param v:string the transformOrigin to set. */
         setTransformOrigin = (view, v) => {
             view.getOuterDomStyle().transformOrigin = v || '50% 50% 0';
         },
@@ -14,8 +15,7 @@
                 param view:View the view to add the transform to.
                 param type:string the type of transform: 'rotate', 'scaleX', 
                     'scaleY', 'skewX', 'skewY'.
-                    param v:string the style value to set.
-        */
+                    param v:string the style value to set. */
         addTransform = (view, type, v) => {
             const cur = removeTransform(view, type);
             view.getOuterDomStyle().transform = cur + (cur.length === 0 ? '' : ' ') + type + '(' + v + ')';
@@ -26,8 +26,7 @@
             removal has been applied.
                 param view:View the view ro remove the transform from.
                 param type:string the type of transform: 'rotate', 'scaleX', 
-                    'scaleY', 'skewX', 'skewY'.
-        */
+                    'scaleY', 'skewX', 'skewY'. */
         removeTransform = (view, type) => {
             const ods = view.getOuterDomStyle(),
                 value = ods.transform;
@@ -86,7 +85,7 @@
                 this.transformOrigin = v;
                 setTransformOrigin(this, v);
                 if (this.inited) {
-                    this.__updateBounds(this.width, this.height);
+                    updateBounds(this);
                     this.fireEvent('transformOrigin', v);
                 }
             }
@@ -97,7 +96,7 @@
                 this.rotation = v;
                 addTransform(this, 'rotate', (v || 0) + 'deg');
                 if (this.inited) {
-                    this.__updateBounds(this.width, this.height);
+                    updateBounds(this);
                     this.fireEvent('rotation', v);
                 }
             }
@@ -109,7 +108,7 @@
             if (doUpdateX) applyScale(this, 'scaleX', this.scaleX = v);
             if (doUpdateY) applyScale(this, 'scaleY', this.scaleY = v);
             if (this.inited) {
-                if (doUpdateX || doUpdateY) this.__updateBounds(this.width, this.height);
+                if (doUpdateX || doUpdateY) updateBounds(this);
                 if (doUpdateX) this.fireEvent('scaleX', v);
                 if (doUpdateY) this.fireEvent('scaleY', v);
             }
@@ -119,7 +118,7 @@
             if (this.scaleX !== v) {
                 applyScale(this, 'scaleX', this.scaleX = v);
                 if (this.inited) {
-                    this.__updateBounds(this.width, this.height);
+                    updateBounds(this);
                     this.fireEvent('scaleX', v);
                 }
             }
@@ -129,7 +128,7 @@
             if (this.scaleY !== v) {
                 applyScale(this, 'scaleY', this.scaleY = v);
                 if (this.inited) {
-                    this.__updateBounds(this.width, this.height);
+                    updateBounds(this);
                     this.fireEvent('scaleY', v);
                 }
             }
@@ -140,7 +139,7 @@
                 this.skewX = v;
                 addTransform(this, 'skewX', v || 0);
                 if (this.inited) {
-                    this.__updateBounds(this.width, this.height);
+                    updateBounds(this);
                     this.fireEvent('skewX', v);
                 }
             }
@@ -151,7 +150,7 @@
                 this.skewY = v;
                 addTransform(this, 'skewY', v || 0);
                 if (this.inited) {
-                    this.__updateBounds(this.width, this.height);
+                    updateBounds(this);
                     this.fireEvent('skewY', v);
                 }
             }

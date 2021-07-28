@@ -1,6 +1,6 @@
 ((pkg) => {
     const JSModule = JS.Module,
-        globalKeys = pkg.global.keys,
+        GlobalKeys = pkg.global.keys,
     
         /** Makes an object selectable.
             
@@ -14,9 +14,7 @@
         Selectable = pkg.Selectable = new JSModule('Selectable', {
             // Accessors ///////////////////////////////////////////////////////
             setSelected: function(v) {
-                // Adapt to event from syncTo
-                if (v !== null && typeof v === 'object') v = v.value;
-                
+                v = this.valueFromEvent(v);
                 if (this.selected !== v) {
                     this.selected = v;
                     if (this.inited && this.fireEvent) this.fireEvent('selected', v);
@@ -35,13 +33,13 @@
                 Returns true by default.
                 @param {!Object} selectionManager
                 @returns {boolean} */
-            canSelect: (selectionManager) => true,
+            canSelect: selectionManager => true,
             
             /** Checks if the provided myt.SelectionManager can deselect this object.
                 Returns true by default.
                 @param {!Object} selectionManager
                 @returns {boolean} */
-            canDeselect: (selectionManager) => true
+            canDeselect: selectionManager => true
         }),
         
         /** Manages the selection of one or more items.
@@ -77,13 +75,13 @@
                     selections will only be increased not reduced. Typically this
                     means the shift key is down.
                     @returns {boolean} true if in add mode, false otherwise. */
-                isAddMode: () => globalKeys.isShiftKeyDown(),
+                isAddMode: () => GlobalKeys.isShiftKeyDown(),
                 
                 /** Determines if we are in "toggle" mode for selection such that
                     selections can be added to or removed from incrementally. Typically 
                     this means the control or command key is down.
                     @returns {boolean} true if in add mode, false otherwise. */
-                isToggleMode: () => globalKeys.isAcceleratorKeyDown()
+                isToggleMode: () => GlobalKeys.isAcceleratorKeyDown()
             },
             
             

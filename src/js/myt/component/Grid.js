@@ -314,8 +314,7 @@
             },
             
             setGridWidth: function(v) {
-                if (v !== null && typeof v === 'object') v = v.value;
-                
+                v = this.valueFromEvent(v);
                 if (this.gridWidth !== v) {
                     this.gridWidth = v;
                     if (this.inited) this.fitHeadersToWidth();
@@ -992,6 +991,7 @@
         
         // Methods /////////////////////////////////////////////////////////////
         doActivated: function() {
+            console.log('here');
             if (!this.disabled) {
                 switch (this.sortState) {
                     case 'ascending': this.setSortState('descending'); break;
@@ -1003,12 +1003,6 @@
         },
         
         /** @overrides myt.SimpleButton */
-        drawDisabledState: function() {this.setBgColor(this.readyColor);},
-        
-        /** @overrides myt.Button */
-        showFocusEmbellishment: function() {this.hideDefaultFocusEmbellishment();},
-        
-        /** @overrides myt.Button */
-        hideFocusEmbellishment: function() {this.hideDefaultFocusEmbellishment();}
+        drawDisabledState: function() {this.draw(this.readyColor, 1);}
     });
 })(myt);

@@ -420,7 +420,7 @@
                 defAttr(attrs, 'activeColor', DEFAULT_ACTIVE_COLOR);
                 defAttr(attrs, 'hoverColor', DEFAULT_HOVER_COLOR);
                 defAttr(attrs, 'readyColor', DEFAULT_READY_COLOR);
-                defAttr(attrs, 'focusEmbellishment', false);
+                defAttr(attrs, 'focusIndicator', false);
                 defAttr(attrs, 'activationKeys', [13,27,32,37,38,39,40]);
                 
                 this.callSuper(parent, attrs);

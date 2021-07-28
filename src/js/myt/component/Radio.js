@@ -49,7 +49,7 @@
         initNode: function(parent, attrs) {
             defAttr(attrs, 'selected', false);
             if (attrs.groupId == null) attrs.groupId = pkg.generateGuid();
-            defAttr(attrs, 'focusEmbellishment', false);
+            defAttr(attrs, 'focusIndicator', false);
             defAttr(attrs, 'activeColor', 'inherits');
             defAttr(attrs, 'hoverColor', 'inherits');
             defAttr(attrs, 'readyColor', 'inherits');
@@ -129,27 +129,9 @@
         },
         
         /** @overrides myt.SimpleButtonStyle */
-        drawDisabledState: function() {
-            this.setOpacity(pkg.Button.DEFAULT_DISABLED_OPACITY);
-            this.setTextColor(this.readyColor);
-        },
-        
-        /** @overrides myt.SimpleButtonStyle */
-        drawHoverState: function() {
-            this.setOpacity(1);
-            this.setTextColor(this.hoverColor);
-        },
-        
-        /** @overrides myt.SimpleButtonStyle */
-        drawActiveState: function() {
-            this.setOpacity(1);
-            this.setTextColor(this.activeColor);
-        },
-        
-        /** @overrides myt.SimpleButtonStyle */
-        drawReadyState: function() {
-            this.setOpacity(1);
-            this.setTextColor(this.readyColor);
+        draw: function(color, opacity=1) {
+            this.setOpacity(opacity);
+            this.setTextColor(color);
         }
     });
 })(myt);

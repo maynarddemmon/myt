@@ -43,10 +43,7 @@
             // Accessors ///////////////////////////////////////////////////////
             /** @overrides myt.Disableable */
             setDisabled: function(v) {
-                // Adapt to event from syncTo
-                if (v != null && typeof v === 'object') v = v.value;
-                
-                this.callSuper(v);
+                this.callSuper(this.valueFromEvent(v));
             },
             
             /** @overrides myt.FocusObservable */
@@ -141,20 +138,6 @@
                 this.callSuper(parent, attrs);
                 
                 if (attrs.roundedCorners == null) this.setRoundedCorners(Math.min(this.height, this.width) / 2);
-            },
-            
-            
-            // Methods /////////////////////////////////////////////////////////
-            /** @overrides myt.FocusObservable */
-            showFocusEmbellishment: function() {
-                this.hideDefaultFocusEmbellishment();
-                this.setBoxShadow([0, 0, 9, '#666']);
-            },
-            
-            /** @overrides myt.FocusObservable */
-            hideFocusEmbellishment: function() {
-                this.hideDefaultFocusEmbellishment();
-                this.setBoxShadow([0, 0, 4, '#666']);
             }
         }),
         
@@ -249,9 +232,7 @@
                 this._nudge(thumb, true);
             },
             
-            _nudge: (thumb, up) => {
-                // Subclasses to implement
-            },
+            _nudge: (thumb, up) => {/* Subclasses to implement */},
             
             _syncThumbToValue: function(thumb, value) {
                 value = this.convertValueToPixels(value);

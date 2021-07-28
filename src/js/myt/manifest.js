@@ -45,8 +45,7 @@ JS.Packages(function() {
     file(MYT_VIEW_ROOT + 'SizeToDom.js'          )
         .provides('myt.SizeToDom','myt.SizeWidthToDom','myt.SizeHeightToDom').requires('myt.TransformSupport');
     file(MYT_VIEW_ROOT + 'TextSupport.js'        ).provides('myt.TextSupport'        ).requires('myt.SizeToDom');
-    file(MYT_VIEW_ROOT + 'FlexBoxSupport.js'     ).provides('myt.FlexBoxSupport'     ).requires('myt');
-    file(MYT_VIEW_ROOT + 'FlexBoxChildSupport.js').provides('myt.FlexBoxChildSupport').requires('myt');
+    file(MYT_VIEW_ROOT + 'FlexBoxSupport.js'     ).provides('myt.FlexBoxSupport','myt.FlexBoxChildSupport').requires('myt');
     
     // Core : Globals
     const MYT_GLOBALS_ROOT = MYT_CORE_ROOT + 'globals/';

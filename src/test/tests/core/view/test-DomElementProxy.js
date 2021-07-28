@@ -8,12 +8,12 @@ test("Create a DomElementProxy and dispose of the dom element", function() {
     var proxy = new myt.Node(null, {}, [myt.DomElementProxy]);
     
     ok(proxy.domElement === undefined, "No dom element reference should exist yet.");
-    ok(proxy.deStyle === undefined, "No dom element style reference should exist yet.");
+    ok(proxy.getInnerDomStyle() === undefined, "No dom element style reference should exist yet.");
     ok(div.model === undefined, "No model reference should exist yet on the dom element.");
     
     proxy.setDomElement(div);
     ok(proxy.domElement === div, "Dom element reference should now exist.");
-    ok(proxy.deStyle === div.style, "Style reference should now exist.");
+    ok(proxy.getInnerDomStyle() === div.style, "Inner dom style reference should now exist.");
     ok(div.model === proxy, "Model reference should now exist.");
     
     // Destroy
@@ -23,7 +23,7 @@ test("Create a DomElementProxy and dispose of the dom element", function() {
     
     proxy.disposeOfDomElement();
     ok(proxy.domElement === undefined, "After dispose, no dom element reference should exist yet.");
-    ok(proxy.deStyle === undefined, "After dispose, no dom element style reference should exist yet.");
+    ok(proxy.getInnerDomStyle() === undefined, "After dispose, no inner dom style reference should exist.");
     ok(div.model === undefined, "After dispose, no model reference should exist yet on the dom element.");
     
     proxy.destroy();

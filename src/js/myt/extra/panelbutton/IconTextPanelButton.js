@@ -105,15 +105,11 @@
         
         // Accessors ///////////////////////////////////////////////////////////
         setInset: function(v) {
-            // Adapt to event from syncTo
-            if (v != null && typeof v === 'object') v = v.value;
-            this.set('inset', v, true);
+            this.set('inset', this.valueFromEvent(v), true);
         },
         
         setOutset: function(v) {
-            // Adapt to event from syncTo
-            if (v != null && typeof v === 'object') v = v.value;
-            this.set('outset', v, true);
+            this.set('outset', this.valueFromEvent(v), true);
         },
         
         setText: function(v) {

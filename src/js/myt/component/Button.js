@@ -9,6 +9,11 @@
         defaultDisabledOpacity = 0.5,
         defaultFocusShadowPropertyValue = [0, 0, 7, '#666'],
         
+        setPaddingAttr = (btn, side, value) => {
+            const attrName = 'padding' + side;
+            btn.getInnerDomStyle()[attrName] = (btn[attrName] = value) + 'px';
+        },
+        
         /** Provides button functionality to an myt.View. Most of the 
             functionality comes from the mixins included by this mixin. 
             This mixin resolves issues that arise when the various mixins 
@@ -118,41 +123,31 @@
                 interacted with. For mouse interactions this corresponds to 
                 the over state.
                 @returns {undefined} */
-            drawHoverState: () => {
-                // Subclasses to implement as needed.
-            },
+            drawHoverState: () => {/* Subclasses to implement as needed. */},
             
             /** Draw the UI when the component has a pending activation. For 
                 mouse interactions this corresponds to the down state.
                 @returns {undefined} */
-            drawActiveState: () => {
-                // Subclasses to implement as needed.
-            },
+            drawActiveState: () => {/* Subclasses to implement as needed. */},
             
             /** Draw the UI when the component is ready to be interacted with. 
                 For mouse interactions this corresponds to the enabled state 
                 when the mouse is not over the component.
                 @returns {undefined} */
-            drawReadyState: () => {
-                // Subclasses to implement as needed.
-            },
+            drawReadyState: () => {/* Subclasses to implement as needed. */},
             
             /** Draw the UI when the component is in the disabled state.
                 @returns {undefined} */
-            drawDisabledState: () => {
-                // Subclasses to implement as needed.
+            drawDisabledState: () => {/* Subclasses to implement as needed. */},
+            
+            /** @overrides myt.FocusObservable */
+            showFocusIndicator: function() {
+                this.hideDefaultFocusIndicator();
             },
             
             /** @overrides myt.FocusObservable */
-            showFocusEmbellishment: function() {
-                this.hideDefaultFocusEmbellishment();
-                this.setBoxShadow(defaultFocusShadowPropertyValue);
-            },
-            
-            /** @overrides myt.FocusObservable */
-            hideFocusEmbellishment: function() {
-                this.hideDefaultFocusEmbellishment();
-                this.setBoxShadow();
+            hideFocusIndicator: function() {
+                this.hideDefaultFocusIndicator();
             }
         }),
         
@@ -202,26 +197,27 @@
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.Button */
             drawDisabledState: function() {
-                this.setOpacity(defaultDisabledOpacity);
-                this.setBgColor(this.readyColor);
+                this.draw(this.readyColor, defaultDisabledOpacity);
             },
             
             /** @overrides myt.Button */
             drawHoverState: function() {
-                this.setOpacity(1);
-                this.setBgColor(this.hoverColor);
+                this.draw(this.hoverColor);
             },
             
             /** @overrides myt.Button */
             drawActiveState: function() {
-                this.setOpacity(1);
-                this.setBgColor(this.activeColor);
+                this.draw(this.activeColor);
             },
             
             /** @overrides myt.Button */
             drawReadyState: function() {
-                this.setOpacity(1);
-                this.setBgColor(this.readyColor);
+                this.draw(this.readyColor);
+            },
+            
+            draw: function(color, opacity=1) {
+                this.setOpacity(opacity);
+                this.setBgColor(color);
             }
         }),
         
@@ -307,15 +303,11 @@
         
         // Accessors ///////////////////////////////////////////////////////////
         setInset: function(v) {
-            // Adapt to event from syncTo
-            if (v != null && typeof v === 'object') v = v.value;
-            this.set('inset', v, true);
+            this.set('inset', this.valueFromEvent(v), true);
         },
         
         setOutset: function(v) {
-            // Adapt to event from syncTo
-            if (v != null && typeof v === 'object') v = v.value;
-            this.set('outset', v, true);
+            this.set('outset', this.valueFromEvent(v), true);
         },
         
         setText: function(v) {
@@ -378,6 +370,9 @@
         }
     });
     
+    /** A minimalist button that uses a single View with TextSupport.
+        
+        @class */
     pkg.TextButton = new JSClass('TextButton', View, {
         include: [
             SimpleButtonStyle,
@@ -387,7 +382,7 @@
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            defAttr(attrs, 'focusEmbellishment', false);
+            defAttr(attrs, 'focusIndicator', false);
             defAttr(attrs, 'roundedCorners', 3);
             defAttr(attrs, 'textAlign', 'center');
             defAttr(attrs, 'paddingTop', 1);
@@ -401,20 +396,9 @@
         
         
         // Accessors ///////////////////////////////////////////////////////////
-        setPaddingLeft: function(v) {
-            this.getInnerDomStyle().paddingLeft = (this.paddingLeft = v) + 'px';
-        },
-        
-        setPaddingRight: function(v) {
-            this.getInnerDomStyle().paddingRight = (this.paddingRight = v) + 'px';
-        },
-        
-        setPaddingTop: function(v) {
-            this.getInnerDomStyle().paddingTop = (this.paddingTop = v) + 'px';
-        },
-        
-        setPaddingBottom: function(v) {
-            this.getInnerDomStyle().paddingBottom = (this.paddingBottom = v) + 'px';
-        }
+        setPaddingLeft: function(v) {setPaddingAttr(this, 'Left', v);},
+        setPaddingRight: function(v) {setPaddingAttr(this, 'Right', v);},
+        setPaddingTop: function(v) {setPaddingAttr(this, 'Top', v);},
+        setPaddingBottom: function(v) {setPaddingAttr(this, 'Bottom', v);}
     });
 })(myt);

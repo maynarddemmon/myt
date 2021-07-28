@@ -2093,6 +2093,14 @@ Date.prototype.format = Date.prototype.format || (() => {
         @class */
     pkg.Observer = new JSModule('Observer', {
         // Methods /////////////////////////////////////////////////////////////
+        /** Extracts the value from an "event like" object if encountered.
+            Otherwise it returns the provided eventOrValue.
+            @param {*} v The candidate event or value to get the 
+                value from. An event like value is a non-null Object with a
+                truthy "type" property.
+            @returns {*} the provided event or the event's value if found. */
+        valueFromEvent: v => v && typeof v === 'object' && v.type ? v.value : v,
+        
         /** Does the same thing as this.attachTo and also immediately calls the
             method with an event containing the attributes value. If 'once' is
             true no attachment will occur which means this probably isn't the
@@ -2478,13 +2486,11 @@ new JS.Singleton('GlobalError', {
     const GLOBAL = global,
         DOCUMENT_ELEMENT = document;
     
-    /** Provides a dom element for this instance. Also assigns a reference to this
-        DomElementProxy to a property named "model" on the dom element.
+    /** Provides a dom element for this instance. Also assigns a reference 
+        to this DomElementProxy to a property named "model" on the dom element.
         
         Attributes:
             domElement:domElement the dom element hidden we are a proxy for.
-            deStyle:object a shortcut reference to the style attribute of 
-                the dom element.
         
         @class */
     const DomElementProxy = pkg.DomElementProxy = new JS.Module('DomElementProxy', {
@@ -2563,8 +2569,8 @@ new JS.Singleton('GlobalError', {
             },
             
             /** Gets the z-index of the dom element or, if it does not define a 
-                stacking context, the highest z-index of any of the dom element's 
-                descendants.
+                stacking context, the highest z-index of any of the dom 
+                element's descendants.
                 @param {!Object} elem - A domElement
                 @returns {number} - An int */
             getHighestZIndex: elem => {
@@ -2632,8 +2638,10 @@ new JS.Singleton('GlobalError', {
             
             /** Generates a dom event on a dom element. Adapted from:
                     http://stackoverflow.com/questions/6157929/how-to-simulate-mouse-click-using-javascript
-                @param {!Object} elem - The domElement to simulate the event on.
-                @param {string} eventName - The name of the dom event to generate.
+                @param {!Object} elem - The domElement to simulate 
+                    the event on.
+                @param {string} eventName - The name of the dom event 
+                    to generate.
                 @param {?Object} [customOpts] - A map of options that will
                     be added onto the dom event object.
                 @returns {undefined} */
@@ -2707,10 +2715,18 @@ new JS.Singleton('GlobalError', {
             return this.__oE;
         },
         
+        /** Gets the style attribute of the inner dom element. If only one
+            dom element exists then this will be the same as the outer dom
+            style.
+            @returns {?Object} */
         getInnerDomStyle: function() {
-            return this.deStyle;
+            return this.__iS;
         },
         
+        /** Gets the style attribute of the outer dom element. If only one
+            dom element exists then this will be the same as the inner dom
+            style.
+            @returns {?Object} */
         getOuterDomStyle: function() {
             return this.__oS;
         },
@@ -2719,8 +2735,8 @@ new JS.Singleton('GlobalError', {
             @param {?Object} v
             @returns {undefined} */
         setDomElement: function(v) {
-            // Support an inner and outer dom element if an array of elements is
-            // provided.
+            // Support an inner and outer dom element if an array of elements 
+            // is provided.
             const self = this;
             let outerElem,
                 innerElem;
@@ -2735,12 +2751,12 @@ new JS.Singleton('GlobalError', {
             self.__oE = outerElem;
             
             // Store a reference to domElement.style since it is accessed often.
-            self.deStyle = innerElem.style;
+            self.__iS = innerElem.style;
             self.__oS = outerElem.style;
             
-            // Setup a reference from the domElement to this model. This will allow
-            // access to the model from code that uses JQuery or some other
-            // mechanism to select dom elements.
+            // Setup a reference from the domElement to this model. This will 
+            // allow access to the model from code that uses JQuery or some 
+            // other mechanism to select dom elements.
             innerElem.model = outerElem.model = self;
         },
         
@@ -2755,7 +2771,7 @@ new JS.Singleton('GlobalError', {
             @returns {undefined} */
         disposeOfDomElement: function() {
             delete this.domElement.model;
-            delete this.deStyle;
+            delete this.__iS;
             delete this.domElement;
             
             delete this.__oE.model;
@@ -2806,25 +2822,25 @@ new JS.Singleton('GlobalError', {
             this.domElement.id = this.domId = v;
         },
         
-        /** Set the z-index of the dom element.
+        /** Set the z-index of the outer dom element.
             @param {number} v - The z-index to set.
             @returns {undefined} */
         setZIndex: function(v) {
-            this.deStyle.zIndex = v;
+            this.__oS.zIndex = v;
         },
         
-        /** Set an arbitrary CSS style on the dom element.
+        /** Set an arbitrary CSS style on the inner dom element style.
             @param {string} propertyName - The name of the CSS property to set.
             @param {*} v - The value to set.
             @returns {undefined} */
         setStyleProperty: function(propertyName, v) {
-            this.deStyle[propertyName] = v;
+            this.__iS[propertyName] = v;
         },
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Gets the x and y position of the underlying dom element relative to
-            the page. Transforms are not supported.
+        /** Gets the x and y position of the underlying dom element relative 
+            to the page. Transforms are not supported.
             @returns {?Object} - An object with 'x' and 'y' keys or null 
                 if an error has occurred. */
         getPagePosition: function() {
@@ -2851,8 +2867,8 @@ new JS.Singleton('GlobalError', {
             return DomElementProxy.getHighestZIndex(this.domElement);
         },
         
-        /** Gets the highest z-index of any of the descendant dom elements of
-            the domElement of this DomElementProxy.
+        /** Gets the highest z-index of any of the descendant dom elements 
+            of the domElement of this DomElementProxy.
             @param {boolean} [skipChild] - A domElement to skip over
                 when determining the z-index.
             @returns {number} - An int. */
@@ -3136,10 +3152,12 @@ new JS.Singleton('GlobalError', {
         @class */
     pkg.DomObservable = new JSModule('DomObservable', {
         // Methods /////////////////////////////////////////////////////////////
-        /** Adds the observer to the list of event recipients for the event type.
+        /** Adds the observer to the list of event recipients for the 
+            event type.
             @param {!Object} domObserver - The myt.DomObserver that will be 
                 notified when a dom event occurs.
-            @param {string} methodName - The method name to call on the dom observer.
+            @param {string} methodName - The method name to call on the 
+                dom observer.
             @param {string} type - The type of dom event to register for.
             @param {boolean} [capture] - Indicates if the event registration is 
                 during capture or bubble phase. Defaults to false, bubble phase.
@@ -3150,7 +3168,7 @@ new JS.Singleton('GlobalError', {
             if (domObserver && methodName && type) {
                 capture = !!capture;
                 
-                const methodRef = this.createDomMethodRef(domObserver, methodName, type);
+                const methodRef = this.createDomHandler(domObserver, methodName, type);
                 if (methodRef) {
                     const domObserversByType = this.__dobsbt || (this.__dobsbt = {});
                     
@@ -3175,26 +3193,29 @@ new JS.Singleton('GlobalError', {
         /** Creates a function that will handle the dom event when it is fired
             by the browser. Must be implemented by the object this mixin is 
             applied to.
-            @param {!Object} domObserver - The myt.DomObserver that must be notified
-                when the dom event fires.
-            @param {string} methodName - the name of the function to pass the event to.
+            @param {!Object} domObserver - The myt.DomObserver that must be 
+                notified when the dom event fires.
+            @param {string} methodName - the name of the function to pass the 
+                event to.
             @param {string} type - the type of the event to fire.
-            @returns {?Function} - A function to handle the dom event or null if 
-                the event is not supported. */
-        createDomMethodRef: (domObserver, methodName, type) => null,
+            @returns {?Function} - A function to handle the dom event or null 
+                if the event is not supported. */
+        createDomHandler: (domObserver, methodName, type) => null,
         
-        /** Used by the createDomMethodRef implementations of submixins of 
+        /** Used by the createDomHandler implementations of submixins of 
             myt.DomObservable to implement the standard methodRef.
-            @param {!Object} domObserver - The myt.DomObserver that must be notified
-                when the dom event fires.
-            @param {string} methodName - The name of the function to pass the event to.
+            @param {!Object} domObserver - The myt.DomObserver that must be 
+                notified when the dom event fires.
+            @param {string} methodName - The name of the function to pass the 
+                event to.
             @param {string} type - The type of the event to fire.
-            @param {!Function} observableClass - The JS.Class that has the common event.
+            @param {!Function} observableClass - The JS.Class that has the 
+                common event.
             @param {boolean} [preventDefault] - If true the default behavior
                 of the domEvent will be prevented.
-            @returns {?Function} - A function to handle the dom event or undefined 
-                if the event will not be handled. */
-        createStandardDomMethodRef: function(domObserver, methodName, type, observableClass, preventDefault) {
+            @returns {?Function} - A function to handle the dom event or 
+                undefined if the event will not be handled. */
+        createStandardDomHandler: function(domObserver, methodName, type, observableClass, preventDefault) {
             if (observableClass.EVENT_TYPES[type]) {
                 const self = this, 
                     event = observableClass.EVENT;
@@ -3218,14 +3239,15 @@ new JS.Singleton('GlobalError', {
             }
         },
         
-        /** Removes the observer from the list of dom observers for the event type.
+        /** Removes the observer from the list of dom observers for the 
+            event type.
             @param {!Object} domObserver - The myt.DomObserver to unregister.
             @param {string} methodName - The method name to unregister for.
             @param {string} type - The dom event type to unregister for.
             @param {boolean} [capture] - The event phase to unregister for.
                 Defaults to false if not provided.
-            @returns {boolean} - True if the observer was successfully unregistered, 
-                false otherwise.*/
+            @returns {boolean} - True if the observer was successfully 
+                unregistered, false otherwise.*/
         detachDomObserver: function(domObserver, methodName, type, capture) {
             if (domObserver && methodName && type) {
                 capture = !!capture;
@@ -3279,14 +3301,15 @@ new JS.Singleton('GlobalError', {
         }
     });
     
-    /** Provides a mechanism to remember which DomObservables this DomObserver has 
-        attached itself to. This is useful when the instance is being destroyed
-        to automatically cleanup the observer/observable relationships.
+    /** Provides a mechanism to remember which DomObservables this 
+        DomObserver has attached itself to. This is useful when the 
+        instance is being destroyed to automatically cleanup the 
+        observer/observable relationships.
         
         When this mixin is used attachment and detachment should be done 
-        using the 'attachToDom' and 'detachFromDom' methods of this mixin. If this 
-        is not done, it is possible for the relationship between observer and 
-        observable to become broken.
+        using the 'attachToDom' and 'detachFromDom' methods of this mixin. 
+        If this is not done, it is possible for the relationship between 
+        observer and observable to become broken.
         
         Private Attributes:
             __dobt: (Object) Holds arrays of DomObservables by event type.
@@ -3317,12 +3340,14 @@ new JS.Singleton('GlobalError', {
             }
         },
         
-        /** Detaches this DomObserver from the DomObservable for the event type.
+        /** Detaches this DomObserver from the DomObservable for the 
+            event type.
             @param {!Object} observable
             @param {string} methodName
             @param {string} type
             @param {boolean} [capture]
-            @returns {boolean} - True if detachment succeeded, false otherwise. */
+            @returns {boolean} - True if detachment succeeded, 
+                false otherwise. */
         detachFromDom: function(observable, methodName, type, capture) {
             if (observable && methodName && type) {
                 capture = !!capture;
@@ -3396,15 +3421,15 @@ new JS.Singleton('GlobalError', {
         
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides myt.DomObservable */
-        createDomMethodRef: function(domObserver, methodName, type) {
-            return this.createStandardDomMethodRef(domObserver, methodName, type, pkg.KeyObservable) || 
+        createDomHandler: function(domObserver, methodName, type) {
+            return this.createStandardDomHandler(domObserver, methodName, type, pkg.KeyObservable) || 
                 this.callSuper(domObserver, methodName, type);
         }
     });
     
-    /** Generates Mouse Events and passes them on to one or more event observers.
-        Also provides the capability to capture contextmenu events and mouse
-        wheel events.
+    /** Generates Mouse Events and passes them on to one or more event 
+        observers. Also provides the capability to capture contextmenu events 
+        and mouse wheel events.
         
         Requires: myt.DomObservable super mixin. */
     pkg.MouseObservable = new JSModule('MouseObservable', {
@@ -3428,8 +3453,8 @@ new JS.Singleton('GlobalError', {
             
             /** Gets the mouse coordinates from the provided event.
                 @param {!Object} event Event value is a dom event.
-                @returns {!Object} An object with 'x' and 'y' keys containing the
-                    x and y mouse position. */
+                @returns {!Object} An object with 'x' and 'y' keys containing 
+                    the x and y mouse position. */
             getMouseFromEvent: event => {
                 return {x:event.value.pageX, y:event.value.pageY};
             },
@@ -3446,13 +3471,15 @@ new JS.Singleton('GlobalError', {
         
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides myt.DomObservable */
-        createDomMethodRef: function(domObserver, methodName, type) {
-            return this.createStandardDomMethodRef(domObserver, methodName, type, pkg.MouseObservable, true) || 
+        createDomHandler: function(domObserver, methodName, type) {
+            return this.createStandardDomHandler(domObserver, methodName, type, pkg.MouseObservable, true) || 
                 this.callSuper(domObserver, methodName, type);
         }
     });
     
-    /** Generates Scroll Events and passes them on to one or more event observers.
+    /** Generates Scroll Events and passes them on to one or more event 
+        observers.
+        
         Requires myt.DomObservable as a super mixin. */
     pkg.ScrollObservable = new JSModule('ScrollObservable', {
         // Class Methods and Attributes ////////////////////////////////////////
@@ -3477,13 +3504,14 @@ new JS.Singleton('GlobalError', {
         
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides myt.DomObservable */
-        createDomMethodRef: function(domObserver, methodName, type) {
-            return this.createStandardDomMethodRef(domObserver, methodName, type, pkg.ScrollObservable) || 
+        createDomHandler: function(domObserver, methodName, type) {
+            return this.createStandardDomHandler(domObserver, methodName, type, pkg.ScrollObservable) || 
                 this.callSuper(domObserver, methodName, type);
         }
     });
     
-    /** Generates Touch Events and passes them on to one or more event observers.
+    /** Generates Touch Events and passes them on to one or more event 
+        observers.
         
         Requires: myt.DomObservable super mixin. */
     pkg.TouchObservable = new JSModule('TouchObservable', {
@@ -3504,21 +3532,22 @@ new JS.Singleton('GlobalError', {
         
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides myt.DomObservable */
-        createDomMethodRef: function(domObserver, methodName, type) {
-            return this.createStandardDomMethodRef(domObserver, methodName, type, pkg.TouchObservable, false) || 
+        createDomHandler: function(domObserver, methodName, type) {
+            return this.createStandardDomHandler(domObserver, methodName, type, pkg.TouchObservable, false) || 
                 this.callSuper(domObserver, methodName, type);
         }
     });
     
     /** Generates focus and blur events and passes them on to one or more 
-        event observers. Also provides focus related events to a view. When a view
-        is focused or blurred, myt.global.focus will be notified via the
+        event observers. Also provides focus related events to a view. When 
+        a view is focused or blurred, myt.global.focus will be notified via the
         'notifyFocus' and 'notifyBlur' methods.
         
         Requires myt.DomObservable as a super mixin.
         
         Events:
-            focused:object Fired when this view gets focus. The value is this view.
+            focused:object Fired when this view gets focus. The value is 
+                this view.
             focus:object Fired when this view gets focus. The value is a dom
                 focus event.
             blur:object Fired when this view loses focus. The value is a dom
@@ -3527,7 +3556,7 @@ new JS.Singleton('GlobalError', {
         Attributes:
             focused:boolean Indicates if this view has focus or not.
             focusable:boolean Indicates if this view can have focus or not.
-            focusEmbellishment:boolean Indicates if the focus embellishment should
+            focusIndicator:boolean Indicates if the focus indicator should
                 be shown for this view or not when it has focus.
         
         Virtual Methods:
@@ -3557,7 +3586,7 @@ new JS.Singleton('GlobalError', {
         /** @overrides myt.Node */
         initNode: function(parent, attrs) {
             this.focusable = false;
-            this.focusEmbellishment = true;
+            this.focusIndicator = true;
             
             this.callSuper(parent, attrs);
         },
@@ -3604,14 +3633,14 @@ new JS.Singleton('GlobalError', {
             }
         },
         
-        setFocusEmbellishment: function(v) {
-            if (this.focusEmbellishment !== v) {
-                this.focusEmbellishment = v;
+        setFocusIndicator: function(v) {
+            if (this.focusIndicator !== v) {
+                this.focusIndicator = v;
                 if (this.focused) {
                     if (v) {
-                        this.showFocusEmbellishment();
+                        this.showFocusIndicator();
                     } else {
-                        this.hideFocusEmbellishment();
+                        this.hideFocusIndicator();
                     }
                 }
             }
@@ -3633,16 +3662,17 @@ new JS.Singleton('GlobalError', {
         },
         
         /** Tests if this view is in a state where it can receive focus.
-            @returns boolean True if this view is visible, enabled, focusable and
-                not focus masked, false otherwise. */
+            @returns boolean True if this view is visible, enabled, focusable 
+                and not focus masked, false otherwise. */
         isFocusable: function() {
             return this.focusable && !this.disabled && this.isVisible() && 
                 this.searchAncestorsOrSelf(node => node.maskFocus === true) === null;
         },
         
-        /** Calling this method will set focus onto this view if it is focusable.
-            @param noScroll:boolean (optional) if true is provided no auto-scrolling
-                will occur when focus is set.
+        /** Calling this method will set focus onto this view if it 
+            is focusable.
+            @param noScroll:boolean (optional) if true is provided no 
+                auto-scrolling will occur when focus is set.
             @returns {undefined} */
         focus: function(noScroll) {
             if (this.isFocusable()) this.getInnerDomElement().focus({preventScroll:noScroll});
@@ -3677,39 +3707,39 @@ new JS.Singleton('GlobalError', {
         
         /** @returns {undefined} */
         doFocus: function() {
-            if (this.focusEmbellishment) {
-                this.showFocusEmbellishment();
+            if (this.focusIndicator) {
+                this.showFocusIndicator();
             } else {
-                this.hideFocusEmbellishment();
+                this.hideFocusIndicator();
             }
         },
         
         /** @returns {undefined} */
         doBlur: function() {
-            if (this.focusEmbellishment) this.hideFocusEmbellishment();
+            if (this.focusIndicator) this.hideFocusIndicator();
         },
         
         /** @returns {undefined} */
-        showFocusEmbellishment: function() {
+        showFocusIndicator: function() {
             // IE
             this.getInnerDomElement().hideFocus = false;
             
             // Mozilla and Webkit
-            const s = this.getInnerDomStyle();
-            s.outlineWidth = 'thin';
-            s.outlineColor = '#8bf';
-            s.outlineStyle = 'solid';
-            s.outlineOffset = '0px';
+            const ids = this.getInnerDomStyle();
+            ids.outlineWidth = 'thin';
+            ids.outlineColor = '#8bf';
+            ids.outlineStyle = 'solid';
+            ids.outlineOffset = '0px';
         },
         
         /** @returns {undefined} */
-        hideFocusEmbellishment: function() {
-            this.hideDefaultFocusEmbellishment();
+        hideFocusIndicator: function() {
+            this.hideDefaultFocusIndicator();
         },
         
-        /** Hides the browser's default focus embellishment.
+        /** Hides the browser's default focus indicator.
             @returns {undefined}*/
-        hideDefaultFocusEmbellishment: function() {
+        hideDefaultFocusIndicator: function() {
             // IE
             this.getInnerDomElement().hideFocus = true;
             
@@ -3718,7 +3748,7 @@ new JS.Singleton('GlobalError', {
         },
         
         /** @overrides myt.DomObservable */
-        createDomMethodRef: function(domObserver, methodName, type) {
+        createDomHandler: function(domObserver, methodName, type) {
             if (pkg.FocusObservable.EVENT_TYPES[type]) {
                 const self = this;
                 return domEvent => {
@@ -3753,7 +3783,9 @@ new JS.Singleton('GlobalError', {
         }
     });
     
-    /** Generates input events and passes them on to one or more event observers.
+    /** Generates input events and passes them on to one or more event 
+        observers.
+        
         Requires myt.DomObservable as a super mixin. */
     pkg.InputObservable = new JSModule('InputObservable', {
         // Class Methods and Attributes ////////////////////////////////////////
@@ -3772,14 +3804,15 @@ new JS.Singleton('GlobalError', {
         
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides myt.DomObservable */
-        createDomMethodRef: function(domObserver, methodName, type) {
-            return this.createStandardDomMethodRef(domObserver, methodName, type, pkg.InputObservable) || 
+        createDomHandler: function(domObserver, methodName, type) {
+            return this.createStandardDomHandler(domObserver, methodName, type, pkg.InputObservable) || 
                 this.callSuper(domObserver, methodName, type);
         }
     });
     
     /** Generates drag and drop events and passes them on to one or more event 
         observers.
+        
         Requires myt.DomObservable as a super mixin. */
     pkg.DragDropObservable = new JSModule('DragDropObservable', {
         // Class Methods and Attributes ////////////////////////////////////////
@@ -3799,8 +3832,8 @@ new JS.Singleton('GlobalError', {
         
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides myt.DomObservable */
-        createDomMethodRef: function(domObserver, methodName, type) {
-            return this.createStandardDomMethodRef(domObserver, methodName, type, pkg.DragDropObservable, true) || 
+        createDomHandler: function(domObserver, methodName, type) {
+            return this.createStandardDomHandler(domObserver, methodName, type, pkg.DragDropObservable, true) || 
                 this.callSuper(domObserver, methodName, type);
         }
     });
@@ -4131,213 +4164,405 @@ new JS.Singleton('GlobalTouch', {
 });
 
 
-/** Adds support for flex box child behavior to a myt.View.
-    
-    Events:
-        flexGrow
-        flexShrink
-        alignSelf
-    
-    Attributes:
-        flexGrow
-        flexShrink
-        alignSelf
-    
-    @class */
-myt.FlexBoxChildSupport = new JS.Module('FlexBoxChildSupport', {
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrides */
-    setParent: function(v) {
-        const self = this,
-            oldParentIsFlexBox = self.isChildOfFlexBox();
+((pkg) => {
+    const JSModule = JS.Module,
         
-        self.callSuper(v);
+        AUTO = 'auto',
         
-        self._isChildOfFlexBox = self.parent && self.parent.isA(myt.FlexBoxSupport);
+        syncSubviewsForFlexBox = flexBox => {
+            flexBox.getSubviews().forEach(sv => {
+                if (sv && sv.syncInnerToOuter && !sv.ignoreFlex) {
+                    sv.syncInnerToOuter();
+                    sv.syncModelToOuterBounds();
+                }
+            });
+        },
         
-        // When reparenting from a flexbox parent to a non-flexbox parent we
-        // may need to resync the dom to the model.
-        if (self.inited && oldParentIsFlexBox && !self.isChildOfFlexBox()) self._syncDomToModel();
-    },
+        /** Adds support for flex box to a myt.View.
+            
+            Events:
+                flexDirection
+                flexWrap
+                justifyContent
+                alignItems
+                alignContent
+            
+            Attributes:
+                flexDirection
+                flexWrap
+                justifyContent
+                alignItems
+                alignContent
+            
+            @class */
+        FlexBoxSupport = pkg.FlexBoxSupport = new JSModule('FlexBoxSupport', {
+            // Life Cycle //////////////////////////////////////////////////////
+            /** @overrides */
+            initNode: function(parent, attrs) {
+                this.callSuper(parent, attrs);
+                syncSubviewsForFlexBox(this);
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            /** @overrides */
+            setWidth: function(v, supressEvent) {
+                this.callSuper(v, supressEvent);
+                if (this.inited) syncSubviewsForFlexBox(this);
+            },
+            
+            /** @overrides */
+            setHeight: function(v, supressEvent) {
+                this.callSuper(v, supressEvent);
+                if (this.inited) syncSubviewsForFlexBox(this);
+            },
+            
+            setFlexDirection: function(v) {
+                if (this.flexDirection !== v) {
+                    this.flexDirection = v;
+                    
+                    // Alias common unexpected values when assigning to the dom
+                    let domValue = v;
+                    switch (domValue) {
+                        case 'rowReverse':
+                            domValue = 'row-reverse';
+                            break;
+                        case 'columnReverse':
+                            domValue = 'column-reverse';
+                            break;
+                    }
+                    this.getInnerDomStyle().flexDirection = domValue;
+                    
+                    if (this.inited) {
+                        this.fireEvent('flexDirection', v);
+                        syncSubviewsForFlexBox(this);
+                    }
+                }
+            },
+            
+            setFlexWrap: function(v) {
+                if (this.flexWrap !== v) {
+                    this.flexWrap = v;
+                    
+                    // Alias common unexpected values when assigning to the dom
+                    let domValue = v;
+                    switch (domValue) {
+                        case 'wrapReverse':
+                        case 'reverse':
+                            domValue = 'wrap-reverse';
+                            break;
+                    }
+                    this.getInnerDomStyle().flexWrap = domValue;
+                    
+                    if (this.inited) {
+                        this.fireEvent('flexWrap', v);
+                        syncSubviewsForFlexBox(this);
+                    }
+                }
+            },
+            
+            setJustifyContent: function(v) {
+                if (this.justifyContent !== v) {
+                    this.justifyContent = v;
+                    
+                    // Alias common unexpected values when assigning to the dom
+                    let domValue = v;
+                    switch (domValue) {
+                        case 'start':
+                            domValue = 'flex-start';
+                            break;
+                        case 'end':
+                            domValue = 'flex-end';
+                            break;
+                        case 'spaceBetween':
+                        case 'between':
+                            domValue = 'space-between';
+                            break;
+                        case 'spaceAround':
+                        case 'around':
+                            domValue = 'space-around';
+                            break;
+                        case 'spaceEvenly':
+                        case 'evenly':
+                            domValue = 'space-evenly';
+                            break;
+                    }
+                    this.getInnerDomStyle().justifyContent = domValue;
+                    
+                    if (this.inited) {
+                        this.fireEvent('justifyContent', v);
+                        syncSubviewsForFlexBox(this);
+                    }
+                }
+            },
+            
+            setAlignItems: function(v) {
+                if (this.alignItems !== v) {
+                    this.alignItems = v;
+                    
+                    // Alias common unexpected values when assigning to the dom
+                    let domValue = v;
+                    switch (domValue) {
+                        case 'start':
+                            domValue = 'flex-start';
+                            break;
+                        case 'end':
+                            domValue = 'flex-end';
+                            break;
+                    }
+                    this.getInnerDomStyle().alignItems = domValue;
+                    
+                    if (this.inited) {
+                        this.fireEvent('alignItems', v);
+                        syncSubviewsForFlexBox(this);
+                    }
+                }
+            },
+            
+            setAlignContent: function(v) {
+                if (this.alignContent !== v) {
+                    this.alignContent = v;
+                    
+                    // Alias common unexpected values when assigning to the dom
+                    let domValue = v;
+                    switch (domValue) {
+                        case 'start':
+                            domValue = 'flex-start';
+                            break;
+                        case 'end':
+                            domValue = 'flex-end';
+                            break;
+                        case 'spaceBetween':
+                        case 'between':
+                            domValue = 'space-between';
+                            break;
+                        case 'spaceAround':
+                        case 'around':
+                            domValue = 'space-around';
+                            break;
+                    }
+                    this.getInnerDomStyle().alignContent = domValue;
+                    
+                    if (this.inited) {
+                        this.fireEvent('alignContent', v);
+                        syncSubviewsForFlexBox(this);
+                    }
+                }
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @overrides */
+            createOurDomElement: function(parent) {
+                const elements = this.callSuper(parent);
+                (Array.isArray(elements) ? elements[1] : elements).style.display = 'flex';
+                return elements;
+            },
+            
+            /** @overrides myt.View
+                Allow the child views to be managed by the flex box.*/
+            subviewAdded: function(sv) {
+                if (sv && !sv.ignoreFlex) {
+                    sv.getOuterDomStyle().position = '';
+                    if (this.inited) syncSubviewsForFlexBox(this);
+                }
+            },
+            
+            /** Syncs all the subviews inner dom elements to outer dom elements
+                and models to outer bounds.
+                @returns {undefined} */
+            syncSubviews: function() {
+                syncSubviewsForFlexBox(this);
+            },
+            
+            /** @overrides myt.View
+                Allow the child views to be managed by the flex box. */
+            subviewRemoved: sv => {
+                if (sv && !sv.destroyed && !sv.ignoreFlex) sv.getOuterDomStyle().position = 'absolute';
+            }
+        });
     
-    /** @private
-        @returns {undefined} */
-    _syncDomToModel: function() {
-        const self = this,
-            s = self.getOuterDomStyle();
-        if (s.width !== 'auto') s.width = self.width + 'px';
-        if (s.height !== 'auto') s.height = self.height + 'px';
-        self.syncInnerToOuter();
-    },
-    
-    /** @overrides
-        Keep outer dom element's width in sync with the inner dom element. */
-    setWidth: function(v, supressEvent) {
-        if (v == null || v === '') {
-            this.getOuterDomStyle().width = '';
-            this.__syncModelToOuterBoundsWidth();
-        } else {
-            this.callSuper(v, supressEvent);
-        }
-        this.__syncInnerWidthToOuterWidth();
-    },
-    
-    /** @overrides
-        Keep outer dom element's height in sync with the inner dom element. */
-    setHeight: function(v, supressEvent) {
-        if (v == null || v === '') {
-            this.getOuterDomStyle().height = '';
-            this.__syncModelToOuterBoundsHeight();
-        } else {
-            this.callSuper(v, supressEvent);
-        }
-        this.__syncInnerHeightToOuterHeight();
-    },
-    
-    // Flex Box Attrs
-    setFlexGrow: function(v) {
-        if (this.flexGrow !== v) {
-            this.getOuterDomStyle().flexGrow = this.flexGrow = v;
-            if (this.inited) {
-                this.fireEvent('flexGrow', v);
-                if (this.parent && this.parent.__syncSubviews) {
-                    this.parent.__syncSubviews();
+    /** Adds support for flex box child behavior to a myt.View.
+        
+        Events:
+            flexGrow
+            flexShrink
+            alignSelf
+        
+        Attributes:
+            flexGrow
+            flexShrink
+            alignSelf
+        
+        @class */
+    pkg.FlexBoxChildSupport = new JSModule('FlexBoxChildSupport', {
+        // Accessors ///////////////////////////////////////////////////////////
+        /** @overrides */
+        setParent: function(v) {
+            const self = this,
+                oldParentIsFlexBox = self.isChildOfFlexBox();
+            
+            self.callSuper(v);
+            
+            self.__parentIsFlexBox = self.parent && self.parent.isA(FlexBoxSupport);
+            
+            // When reparenting from a flexbox parent to a non-flexbox parent we
+            // may need to resync the dom to the model.
+            if (self.inited && oldParentIsFlexBox && !self.isChildOfFlexBox()) {
+                // Sync dom to model
+                const ods = self.getOuterDomStyle();
+                if (ods.width !== AUTO) ods.width = self.width + 'px';
+                if (ods.height !== AUTO) ods.height = self.height + 'px';
+                self.syncInnerToOuter();
+            }
+        },
+        
+        /** @overrides
+            Keep outer dom element's width in sync with the inner 
+            dom element. */
+        setWidth: function(v, supressEvent) {
+            if (v == null || v === '') {
+                this.getOuterDomStyle().width = '';
+                this.syncModelToOuterBounds(false, true);
+            } else {
+                this.callSuper(v, supressEvent);
+            }
+            this.syncInnerToOuter(false, true);
+        },
+        
+        /** @overrides
+            Keep outer dom element's height in sync with the inner 
+            dom element. */
+        setHeight: function(v, supressEvent) {
+            if (v == null || v === '') {
+                this.getOuterDomStyle().height = '';
+                this.syncModelToOuterBounds(true, false);
+            } else {
+                this.callSuper(v, supressEvent);
+            }
+            this.syncInnerToOuter(true, false);
+        },
+        
+        // Flex Box Attrs
+        setFlexGrow: function(v) {
+            if (this.flexGrow !== v) {
+                this.getOuterDomStyle().flexGrow = this.flexGrow = v;
+                if (this.inited) {
+                    this.fireEvent('flexGrow', v);
+                    const parent = this.parent;
+                    if (parent && parent.syncSubviews) parent.syncSubviews();
                 }
             }
-        }
-    },
-    
-    setFlexShrink: function(v) {
-        if (this.flexShrink !== v) {
-            this.getOuterDomStyle().flexShrink = this.flexShrink = v;
-            if (this.inited) {
-                this.fireEvent('flexShrink', v);
-                if (this.parent && this.parent.__syncSubviews) {
-                    this.parent.__syncSubviews();
+        },
+        
+        setFlexShrink: function(v) {
+            if (this.flexShrink !== v) {
+                this.getOuterDomStyle().flexShrink = this.flexShrink = v;
+                if (this.inited) {
+                    this.fireEvent('flexShrink', v);
+                    const parent = this.parent;
+                    if (parent && parent.syncSubviews) parent.syncSubviews();
                 }
             }
-        }
-    },
-    
-    setAlignSelf: function(v) {
-        if (this.alignSelf !== v) {
-            this.alignSelf = v;
-            
-            // Alias common unexpected values when assigning to the dom
-            let domValue = v;
-            switch (domValue) {
-                case 'start':
-                    domValue = 'flex-start';
-                    break;
-                case 'end':
-                    domValue = 'flex-end';
-                    break;
+        },
+        
+        setAlignSelf: function(v) {
+            if (this.alignSelf !== v) {
+                this.alignSelf = v;
+                
+                // Alias common unexpected values when assigning to the dom
+                let domValue = v;
+                switch (domValue) {
+                    case 'start':
+                        domValue = 'flex-start';
+                        break;
+                    case 'end':
+                        domValue = 'flex-end';
+                        break;
+                }
+                this.getOuterDomStyle().alignSelf = domValue;
+                
+                if (this.inited) this.fireEvent('alignSelf', v);
             }
-            this.getOuterDomStyle().alignSelf = domValue;
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        isChildOfFlexBox: function() {
+            return this.__parentIsFlexBox;
+        },
+        
+        /** @param {boolean} [notWidth] If true width will not be synced.
+            @param {boolean} [notHeight] If true height will not be synced.
+            @returns {undefined} */
+        syncModelToOuterBounds: function(notWidth, notHeight) {
+            const ode = this.getOuterDomElement(),
+                ids = this.getInnerDomStyle();
+            if (!notWidth) {
+                if (ids.width === AUTO) {
+                    // We're sizing to our contents so first sync the outer 
+                    // dom style so we can read the correct client size below.
+                    this.getOuterDomStyle().width = AUTO;
+                } else {
+                    // We're using a fixed size so first sync the inner dom 
+                    // style to the outer dom style.
+                    this.setInnerWidth(ode.clientWidth);
+                }
+                this.fireEvent('width', this.width = ode.clientWidth);
+            }
+            if (!notHeight) {
+                if (ids.height === AUTO) {
+                    // We're sizing to our contents so first sync the outer dom 
+                    // style so we can read the correct client size below.
+                    this.getOuterDomStyle().height = AUTO;
+                } else {
+                    // We're using a fixed size so first sync the inner dom 
+                    // style to the outer dom style.
+                    this.setInnerHeight(ode.clientHeight);
+                }
+                this.fireEvent('height', this.height = ode.clientHeight);
+            }
+        },
+        
+        /** @param {boolean} [notWidth] If true width will not be synced.
+            @param {boolean} [notHeight] If true height will not be synced.
+            @returns {undefined} */
+        syncInnerToOuter: function(notWidth, notHeight) {
+            const ids = this.getInnerDomStyle(),
+                ode = this.getOuterDomElement();
+            // Don't clobber auto sizing
+            if (!notWidth && ids.width !== AUTO) this.setInnerWidth(ode.clientWidth);
+            if (!notHeight && ids.height !== AUTO) this.setInnerHeight(ode.clientHeight);
+        },
+        
+        /** Sets the inner dom element's width.
+            @param {number} v
+            @returns {undefined} */
+        setInnerWidth: function(v) {
+            this.getInnerDomStyle().width = v + 'px';
+        },
+        
+        /** Sets the inner dom element's height.
+            @param {number} v
+            @returns {undefined} */
+        setInnerHeight: function(v) {
+            this.getInnerDomStyle().height = v + 'px';
+        },
+        
+        /** @overrides */
+        createOurDomElement: function(parent) {
+            const outerElem = this.callSuper(parent);
             
-            if (this.inited) this.fireEvent('alignSelf', v);
+            // We need an inner dom element that is position relative to mask 
+            // the flex box behavior for descendants of this flex box child.
+            const innerElem = document.createElement('div');
+            innerElem.style.position = 'relative';
+            outerElem.appendChild(innerElem);
+            
+            return [outerElem, innerElem];
         }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    isChildOfFlexBox: function() {
-        return this._isChildOfFlexBox;
-    },
-    
-    syncModelToOuterBounds: function() {
-        const de = this.getOuterDomElement();
-        this.__syncModelToOuterBoundsWidth(de);
-        this.__syncModelToOuterBoundsHeight(de);
-    },
-    
-    /** @private
-        @param {!Object} de - A dom element.
-        @returns {undefined} */
-    __syncModelToOuterBoundsWidth: function(de) {
-        const ids = this.getInnerDomStyle();
-        if (!de) de = this.getOuterDomElement();
-        if (ids.width === 'auto') {
-            // We're sizing to our contents so first sync the outer dom style 
-            // so we can read the correct client size below.
-            this.getOuterDomStyle().width = 'auto';
-        } else {
-            // We're using a fixed size so first sync the inner dom style
-            // to the outer dom style.
-            this.__setInnerWidth(de.clientWidth);
-        }
-        this.fireEvent('width', this.width = de.clientWidth);
-    },
-    
-    /** @private
-        @param {!Object} de - A dom element.
-        @returns {undefined} */
-    __syncModelToOuterBoundsHeight: function(de) {
-        const ids = this.getInnerDomStyle();
-        if (!de) de = this.getOuterDomElement();
-        if (ids.height === 'auto') {
-            // We're sizing to our contents so first sync the outer dom style 
-            // so we can read the correct client size below.
-            this.getOuterDomStyle().height = 'auto';
-        } else {
-            // We're using a fixed size so first sync the inner dom style
-            // to the outer dom style.
-            this.__setInnerHeight(de.clientHeight);
-        }
-        this.fireEvent('height', this.height = de.clientHeight);
-    },
-    
-    /** @returns {undefined} */
-    syncInnerToOuter: function() {
-        this.__syncInnerWidthToOuterWidth();
-        this.__syncInnerHeightToOuterHeight();
-    },
-    
-    /** @private
-        @returns {undefined} */
-    __syncInnerWidthToOuterWidth: function() {
-        // Don't clobber auto sizing
-        if (this.getInnerDomStyle().width !== 'auto') {
-            this.__setInnerWidth(this.getOuterDomElement().clientWidth);
-        }
-    },
-    
-    /** @private
-        @returns {undefined} */
-    __syncInnerHeightToOuterHeight: function() {
-        // Don't clobber auto sizing
-        if (this.getInnerDomStyle().height !== 'auto') {
-            this.__setInnerHeight(this.getOuterDomElement().clientHeight);
-        }
-    },
-    
-    /** @private
-        @param {number} v
-        @returns {undefined} */
-    __setInnerWidth: function(v) {
-        this.getInnerDomStyle().width = v + 'px';
-    },
-    
-    /** @private
-        @param {number} v
-        @returns {undefined} */
-    __setInnerHeight: function(v) {
-        this.getInnerDomStyle().height = v + 'px';
-    },
-    
-    /** @overrides */
-    createOurDomElement: function(parent) {
-        const outerElem = this.callSuper(parent);
-        
-        // We need an inner dom element that is position relative to mask the
-        // flex box behavior for descendants of this flex box child.
-        const innerElem = document.createElement('div');
-        innerElem.style.position = 'relative';
-        outerElem.appendChild(innerElem);
-        
-        return [outerElem, innerElem];
-    }
-});
+    });
+})(myt);
 
 
 ((pkg) => {
@@ -6776,9 +7001,10 @@ myt.Destructible = new JS.Module('Destructible', {
             delete attrs.tagName;
             self.setDomElement(self.createOurDomElement(parent));
             
-            // Necessary since x and y of 0 won't update deStyle so this gets
-            // things initialized correctly. Without this RootViews will have
-            // an incorrect initial position for x or y of 0.
+            // Necessary since x and y of 0 won't update the dom element style
+            // so this gets things initialized correctly. Without this 
+            // RootViews will have an incorrect initial position for x or 
+            // y of 0.
             const ods = self.getOuterDomStyle();
             ods.left = ods.top = '0px';
             
@@ -7649,229 +7875,14 @@ myt.Destructible = new JS.Module('Destructible', {
 })(myt);
 
 
-/** Adds support for flex box to a myt.View.
-    
-    Events:
-        flexDirection
-        flexWrap
-        justifyContent
-        alignItems
-        alignContent
-    
-    Attributes:
-        flexDirection
-        flexWrap
-        justifyContent
-        alignItems
-        alignContent
-*/
-myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides */
-    initNode: function(parent, attrs) {
-        this.callSuper(parent, attrs);
-        this.__syncSubviews();
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrides */
-    setWidth: function(v, supressEvent) {
-        this.callSuper(v, supressEvent);
-        if (this.inited) this.__syncSubviews();
-    },
-    
-    /** @overrides */
-    setHeight: function(v, supressEvent) {
-        this.callSuper(v, supressEvent);
-        if (this.inited) this.__syncSubviews();
-    },
-    
-    setFlexDirection: function(v) {
-        if (this.flexDirection !== v) {
-            this.flexDirection = v;
-            
-            // Alias common unexpected values when assigning to the dom
-            let domValue = v;
-            switch (domValue) {
-                case 'rowReverse':
-                    domValue = 'row-reverse';
-                    break;
-                case 'columnReverse':
-                    domValue = 'column-reverse';
-                    break;
-            }
-            this.getInnerDomStyle().flexDirection = domValue;
-            
-            if (this.inited) {
-                this.fireEvent('flexDirection', v);
-                this.__syncSubviews();
-            }
-        }
-    },
-    
-    setFlexWrap: function(v) {
-        if (this.flexWrap !== v) {
-            this.flexWrap = v;
-            
-            // Alias common unexpected values when assigning to the dom
-            let domValue = v;
-            switch (domValue) {
-                case 'wrapReverse':
-                case 'reverse':
-                    domValue = 'wrap-reverse';
-                    break;
-            }
-            this.getInnerDomStyle().flexWrap = domValue;
-            
-            
-            if (this.inited) {
-                this.fireEvent('flexWrap', v);
-                this.__syncSubviews();
-            }
-        }
-    },
-    
-    setJustifyContent: function(v) {
-        if (this.justifyContent !== v) {
-            this.justifyContent = v;
-            
-            // Alias common unexpected values when assigning to the dom
-            let domValue = v;
-            switch (domValue) {
-                case 'start':
-                    domValue = 'flex-start';
-                    break;
-                case 'end':
-                    domValue = 'flex-end';
-                    break;
-                case 'spaceBetween':
-                case 'between':
-                    domValue = 'space-between';
-                    break;
-                case 'spaceAround':
-                case 'around':
-                    domValue = 'space-around';
-                    break;
-                case 'spaceEvenly':
-                case 'evenly':
-                    domValue = 'space-evenly';
-                    break;
-            }
-            this.getInnerDomStyle().justifyContent = domValue;
-            
-            if (this.inited) {
-                this.fireEvent('justifyContent', v);
-                this.__syncSubviews();
-            }
-        }
-    },
-    
-    setAlignItems: function(v) {
-        if (this.alignItems !== v) {
-            this.alignItems = v;
-            
-            // Alias common unexpected values when assigning to the dom
-            let domValue = v;
-            switch (domValue) {
-                case 'start':
-                    domValue = 'flex-start';
-                    break;
-                case 'end':
-                    domValue = 'flex-end';
-                    break;
-            }
-            this.getInnerDomStyle().alignItems = domValue;
-            
-            if (this.inited) {
-                this.fireEvent('alignItems', v);
-                this.__syncSubviews();
-            }
-        }
-    },
-    
-    setAlignContent: function(v) {
-        if (this.alignContent !== v) {
-            this.alignContent = v;
-            
-            // Alias common unexpected values when assigning to the dom
-            let domValue = v;
-            switch (domValue) {
-                case 'start':
-                    domValue = 'flex-start';
-                    break;
-                case 'end':
-                    domValue = 'flex-end';
-                    break;
-                case 'spaceBetween':
-                case 'between':
-                    domValue = 'space-between';
-                    break;
-                case 'spaceAround':
-                case 'around':
-                    domValue = 'space-around';
-                    break;
-            }
-            this.getInnerDomStyle().alignContent = domValue;
-            
-            if (this.inited) {
-                this.fireEvent('alignContent', v);
-                this.__syncSubviews();
-            }
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @overrides */
-    createOurDomElement: function(parent) {
-        const elements = this.callSuper(parent),
-            innerElem = Array.isArray(elements) ? elements[1] : elements;
-        innerElem.style.display = 'flex';
-        return elements;
-    },
-    
-    /** @overrides myt.View
-        Allow the child views to be managed by the flex box.*/
-    subviewAdded: function(sv) {
-        if (sv && !sv.ignoreFlex) {
-            sv.getOuterDomStyle().position = '';
-            if (this.inited) this.__syncSubviews();
-        }
-    },
-    
-    /** @private
-        @returns {undefined} */
-    __syncSubviews: function() {
-        const svs = this.getSubviews();
-        svs.forEach(sv => this.__syncSubview(sv));
-    },
-    
-    /** @private
-        @param {!Object} sv
-        @returns {undefined} */
-    __syncSubview: function(sv) {
-        if (sv && sv.syncInnerToOuter && !sv.ignoreFlex) {
-            sv.syncInnerToOuter();
-            sv.syncModelToOuterBounds();
-        }
-    },
-    
-    /** @overrides myt.View
-        Allow the child views to be managed by the flex box. */
-    subviewRemoved: function(sv) {
-        if (sv && !sv.destroyed && !sv.ignoreFlex) sv.getOuterDomStyle().position = 'absolute';
-    }
-});
-
-
 ((pkg) => {
     const
+        updateBounds = view => {view.__updateBounds(view.width, view.height);},
+        
         /*  Sets the 'transformOrigin' style property of the provided
             style property map.
                 param view:View the view to modify.
-                param v:string the transformOrigin to set.
-        */
+                param v:string the transformOrigin to set. */
         setTransformOrigin = (view, v) => {
             view.getOuterDomStyle().transformOrigin = v || '50% 50% 0';
         },
@@ -7881,8 +7892,7 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
                 param view:View the view to add the transform to.
                 param type:string the type of transform: 'rotate', 'scaleX', 
                     'scaleY', 'skewX', 'skewY'.
-                    param v:string the style value to set.
-        */
+                    param v:string the style value to set. */
         addTransform = (view, type, v) => {
             const cur = removeTransform(view, type);
             view.getOuterDomStyle().transform = cur + (cur.length === 0 ? '' : ' ') + type + '(' + v + ')';
@@ -7893,8 +7903,7 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
             removal has been applied.
                 param view:View the view ro remove the transform from.
                 param type:string the type of transform: 'rotate', 'scaleX', 
-                    'scaleY', 'skewX', 'skewY'.
-        */
+                    'scaleY', 'skewX', 'skewY'. */
         removeTransform = (view, type) => {
             const ods = view.getOuterDomStyle(),
                 value = ods.transform;
@@ -7953,7 +7962,7 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
                 this.transformOrigin = v;
                 setTransformOrigin(this, v);
                 if (this.inited) {
-                    this.__updateBounds(this.width, this.height);
+                    updateBounds(this);
                     this.fireEvent('transformOrigin', v);
                 }
             }
@@ -7964,7 +7973,7 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
                 this.rotation = v;
                 addTransform(this, 'rotate', (v || 0) + 'deg');
                 if (this.inited) {
-                    this.__updateBounds(this.width, this.height);
+                    updateBounds(this);
                     this.fireEvent('rotation', v);
                 }
             }
@@ -7976,7 +7985,7 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
             if (doUpdateX) applyScale(this, 'scaleX', this.scaleX = v);
             if (doUpdateY) applyScale(this, 'scaleY', this.scaleY = v);
             if (this.inited) {
-                if (doUpdateX || doUpdateY) this.__updateBounds(this.width, this.height);
+                if (doUpdateX || doUpdateY) updateBounds(this);
                 if (doUpdateX) this.fireEvent('scaleX', v);
                 if (doUpdateY) this.fireEvent('scaleY', v);
             }
@@ -7986,7 +7995,7 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
             if (this.scaleX !== v) {
                 applyScale(this, 'scaleX', this.scaleX = v);
                 if (this.inited) {
-                    this.__updateBounds(this.width, this.height);
+                    updateBounds(this);
                     this.fireEvent('scaleX', v);
                 }
             }
@@ -7996,7 +8005,7 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
             if (this.scaleY !== v) {
                 applyScale(this, 'scaleY', this.scaleY = v);
                 if (this.inited) {
-                    this.__updateBounds(this.width, this.height);
+                    updateBounds(this);
                     this.fireEvent('scaleY', v);
                 }
             }
@@ -8007,7 +8016,7 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
                 this.skewX = v;
                 addTransform(this, 'skewX', v || 0);
                 if (this.inited) {
-                    this.__updateBounds(this.width, this.height);
+                    updateBounds(this);
                     this.fireEvent('skewX', v);
                 }
             }
@@ -8018,7 +8027,7 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
                 this.skewY = v;
                 addTransform(this, 'skewY', v || 0);
                 if (this.inited) {
-                    this.__updateBounds(this.width, this.height);
+                    updateBounds(this);
                     this.fireEvent('skewY', v);
                 }
             }
@@ -8238,442 +8247,427 @@ myt.FlexBoxSupport = new JS.Module('FlexBoxSupport', {
 })(myt);
 
 
-/** Adds support for text display to a View.
-    
-    Requires:
-        myt.SizeToDom super mixin.
-    
-    Events:
-        text:string
-        textOverflow:string
-        textAlign:string
-        whiteSpace:string
-        wordWrap:string
-        textIndent:string
-        textTransform:string
-        textDecoration:string
-        lineHeight:string
-        letterSpacing:string
-        wordSpacing:string
-        fontFamily:string
-        fontStyle:string
-        fontVariant:string
-        fontWeight:string
-        fontSize:string
-    
-    Attributes:
-        text:string|event(string) The text to be displayed. The value will 
-            be assigned to the inner html of the div.
-        textOverflow:string How text will be treated when it overflows the
-            bounds. Supported values: 'ellipsis', 'clip', 'inherit'.
-        textAlign:string How text will be aligned within the bounds. Supported 
-            values: 'left', 'right', 'center', 'justify', 'inherit'.
-        whiteSpace:string How white space is handled. Supported values: 
-            'normal', 'nowrap', 'pre', 'pre-line', 'pre-wrap', 'inherit'.
-        wordWrap:string How line wrapping is done. Supported 
-            values: 'break-word', 'normal'.
-        textIndent:string How text gets indented. Supported values: '20px', 
-            '10%', 'inherit'.
-        textTransform:string Transformation performed on the text during
-            display. Supported values: 'none', 'capitalize', 'uppercase', 
-            'lowercase', 'inherit'.
-        textDecoration:string Visual decoration to the text. Supported 
-            values: 'none', 'underline', 'overline', 'line-through', 
-            'blink', 'inherit'.
-        lineHeight:string The height of individual lines of text. Supported 
-            values: 'normal', '1.5', '22px', '150%', 'inherit'.
-        letterSpacing:string Spacing between letters. Supported values: 
-            'normal', '3px', 'inherit'.
-        wordSpacing:string Spacing between words. Supported values: 
-            'normal', '3px', 'inherit'.
-        fontFamily:string The name of a font to use. The value will be 
-            assigned to the font family CSS parameter.
-        fontStyle:string Styling applied to the text. Supported values: 
-            'normal', 'italic', 'oblique', 'inherit'.
-        fontVariant:string The font variant. Supported values: 'normal', 
-            'small-caps', 'inherit'.
-        fontWeight:string The font weight. Supported values: 'normal', 'bold', 
-            'bolder', 'lighter', '100-900', 'inherit'.
-        fontSize:string The size of the font. Supported values: 'normal, 
-            '14px', '14pt', 'xx-small', 'x-small', 'small', 'medium', 'large', 
-            'x-large', 'xx-large', 'smaller', 'larger', '75%', 'inherit'.
-        userUnselectable:boolean If set to true the CSS property user-select 
-            will be set to 'none' thus making text selection not work.
-            Furthermore, the cursor will be set to the default so it no longer
-            appears as an i-beam.
-    
-    @class */
-myt.TextSupport = new JS.Module('TextSupport', {
-    // Accessors ///////////////////////////////////////////////////////////////
-    /** @overrides myt.View */
-    setWidth: function(v, supressEvent) {
-        this.callSuper(v, supressEvent);
-        
-        // Height can change with width change when wrapping occurs.
-        if (v !== 'auto') {
-            const ws = this.whiteSpace;
-            if (ws === 'normal' || ws === 'pre-line' || ws === 'pre-wrap') {
-                this.sizeViewToDom();
-            }
-        }
-    },
-    
-    setText: function(v) {
-        if (!v) v = '';
-        if (typeof v === 'object') v = v.value;
-        
-        if (this.text !== v) {
-            // Use innerHTML rather than textContent since this allows us to
-            // embed formatting markup.
-            this.getInnerDomElement().innerHTML = this.text = v;
-            if (this.inited) {
-                this.fireEvent('text', v);
-                this.sizeViewToDom();
-            }
-        }
-    },
-    
-    // Text Attributes
-    setTextOverflow: function(v) {
-        if (this.textOverflow !== v) {
-            this.textOverflow = v;
-            this.getInnerDomStyle().textOverflow = v || 'inherit';
-            if (this.inited) this.fireEvent('textOverflow', v);
-        }
-    },
-    
-    setTextAlign: function(v) {
-        if (this.textAlign !== v) {
-            this.textAlign = v;
-            this.getInnerDomStyle().textAlign = v || 'inherit';
-            if (this.inited) this.fireEvent('textAlign', v);
-        }
-    },
-    
-    setWhiteSpace: function(v) {this.__s(v, 'whiteSpace');},
-    setWordWrap: function(v) {this.__s(v, 'wordWrap', 'normal');},
-    setTextIndent: function(v) {this.__s(v, 'textIndent');},
-    setTextTransform: function(v) {this.__s(v, 'textTransform');},
-    setTextDecoration: function(v) {this.__s(v, 'textDecoration');},
-    setLineHeight: function(v) {this.__s(v, 'lineHeight');},
-    setLetterSpacing: function(v) {this.__s(v, 'letterSpacing');},
-    setWordSpacing: function(v) {this.__s(v, 'wordSpacing');},
-    
-    // Font Attributes
-    setFontFamily: function(v) {this.__s(v, 'fontFamily');},
-    setFontStyle: function(v) {this.__s(v, 'fontStyle');},
-    setFontVariant: function(v) {this.__s(v, 'fontVariant');},
-    setFontWeight: function(v) {this.__s(v, 'fontWeight');},
-    setFontSize: function(v) {this.__s(v, 'fontSize');},
-    
-    /** A private setter function that provides a common implementation for
-        most of this setters in this mixin.
-        @private
-        @param {string|number} v
-        @param {string} attrName
-        @param {string|number} defaultValue
-        @returns {undefined} */
-    __s: function(v, attrName, defaultValue) {
-        if (this[attrName] !== v) {
-            this[attrName] = v;
-            this.getInnerDomStyle()[attrName] = v || defaultValue || 'inherit';
-            if (this.inited) {
-                this.fireEvent(attrName, v);
-                this.sizeViewToDom();
-            }
-        }
-    },
-    
-    setUserUnselectable: function(v) {
-        if (this.userUnselectable !== v) {
-            this.userUnselectable = v;
-            this[v ? 'addDomClass' : 'removeDomClass']('mytUnselectable');
-            this.setCursor(v ? 'default' : 'text');
-            if (this.inited) this.fireEvent('userUnselectable', v);
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Configures the attributes for this Text so that an ellipsis will be
-        displayed. To actually see an ellipsis, an explicit width should be
-        set on the Text so that overflow will occur.
-        @returns {undefined} */
-    enableEllipsis: function() {
-        this.setWhiteSpace('nowrap');
-        this.setOverflow('hidden');
-        this.setTextOverflow('ellipsis');
-    },
-    
-    /** Turns ellipsis off by setting overflow to 'visible'. Other CSS
-        related changes for ellipsis are not undone such as whiteSpace and
-        textOverflow.
-        @returns {undefined} */
-    disableEllipsis: function() {
-        this.setOverflow('visible');
-    },
-    
-    /** Turns on a text shadow.
-        @param {number} [x] - The x offset in pixels of the shadow.
-            Defaults to 0 if not provided.
-        @param {number} [y] - The y offset in pixels of the shadow.
-            Defaults to 0 if not provided.
-        @param {number} [blur] - The bluriness in pixels of the shadow.
-            Defaults to 2 if not provided.
-        @param {string} [color] - The color of the shadow. Defaults
-            to '#000000' if not provided.
-        @param {number} [extraStrength] - The number of times to render 
-            the shadow to give the shadow extra opacity.
-        @returns {undefined} */
-    showTextShadow: function(x, y, blur, color, extraStrength) {
-        let shadow = (x || 0) + 'px ' + 
-            (y || 0) + 'px ' + 
-            (blur != null ? blur : 2) + 'px ' + 
-            (color || '#000');
-            
-        if (extraStrength > 0) {
-            const value = [shadow];
-            while (extraStrength--) value.push(shadow);
-            shadow = value.join(',');
-        }
-        
-        this.getInnerDomStyle().textShadow = shadow;
-    },
-    
-    /** Turns off a text shadow.
-        @returns {undefined} */
-    hideTextShadow: function() {
-        this.getInnerDomStyle().textShadow = 'none';
-    }
-});
-
-
-/** Adds support for image display to a View.
-    
-    Events:
-        imageUrl:string
-        imageSize:string
-        imageRepeat:string
-        imagePosition:string
-        imageAttachment:string
-        calculateNaturalSize:boolean
-        naturalWidth:number
-        naturalHeight:number
-        useNaturalSize:boolean
-        imageLoadingError:boolean
-    
-    Attributes:
-        imageUrl:string The URL to load the image data from.
-        imageSize:string Determines the size of the image. Allowed values
-            are: 'auto', 'cover', 'contain', absolute ('20px 10px') and 
-            percentage ('100% 50%').
-        imageRepeat:string Determines if an image is repeated or not.
-            Allowed values: 'repeat', 'repeat-x', 'repeat-y', 'no-repeat', 
-            'inherit'. Defaults to 'no-repeat'.
-        imagePosition:string Determines where an image is positioned.
-        imageAttachment:string Determines how an image is attached to the view.
-            Allowed values are: 'scroll', 'fixed', 'inherit'. The default
-            value is 'scroll'.
-        calculateNaturalSize:boolean Determines if the natural size should be 
-            automatically calculated or not. Defaults to undefined which is
-            equivalent to false.
-        naturalWidth:number The natural width of the image. Only set if
-            calculateNaturalWidth is true.
-        naturalHeight:number The natural height of the image. Only set if
-            calculateNaturalWidth is true.
-        useNaturalSize:boolean If true this image view will be sized to the
-            naturalWidth and naturalHeight and calculateNaturalSize will be
-            set to true.
-        imageLoadingError:boolean Gets set to true when an error occurs
-            loading the image. The image will be loaded whenever the
-            calculateNaturalSize attribute is set to true.
-*/
-myt.ImageSupport = new JS.Module('ImageSupport', {
-    // Class Methods ///////////////////////////////////////////////////////////
-    extend: {
-        /** Stores widths and heights of images by URL so we don't have to
-            reload them to get sizes. */
-        SIZE_CACHE:{},
-        
-        /** Tracks requests to get the width and height of an image. Used to
-            prevent multiple requests being made for the same image URL. */
-        OPEN_SIZE_QUERIES:{}
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.Node */
-    initNode: function(parent, attrs) {
-        if (attrs.imageRepeat == null) attrs.imageRepeat = 'no-repeat';
-        if (attrs.imageAttachment == null) attrs.imageAttachment = 'scroll';
-        
-        this.callSuper(parent, attrs);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setImageUrl: function(v) {
-        if (this.imageUrl !== v) {
-            this.imageUrl = v;
-            this.deStyle.backgroundImage = v ? 'url("' + v + '")' : 'none';
-            if (this.inited) {
-                this.fireEvent('imageUrl', v);
-                this.setNaturalWidth(undefined);
-                this.setNaturalHeight(undefined);
-                
-                // Collapse size if no url and we are using natural size
-                if (!v && this.useNaturalSize) {
-                    this.setWidth(0);
-                    this.setHeight(0);
+((pkg) => {
+    const /* A private setter function that provides a common implementation for
+            most of this setters in the TextSupport mixin.
+            @param {string|number} v
+            @param {string} attrName
+            @param {string|number} defaultValue
+            @returns {undefined} */
+        setAndSizeViewToDom = (textView, v, attrName, defaultValue) => {
+            if (textView[attrName] !== v) {
+                textView[attrName] = v;
+                textView.getInnerDomStyle()[attrName] = v || defaultValue || 'inherit';
+                if (textView.inited) {
+                    textView.fireEvent(attrName, v);
+                    textView.sizeViewToDom();
                 }
             }
-            this.__calculateNaturalSize();
-        }
-    },
+        };
     
-    setImageLoadingError: function(v) {this.set('imageLoadingError', v, true);},
-    
-    setImageSize: function(v) {
-        if (this.imageSize !== v) {
-            this.imageSize = v;
-            this.deStyle.backgroundSize = v || 'auto';
-            if (this.inited) this.fireEvent('imageSize', v);
-        }
-    },
-    
-    setImageRepeat: function(v) {
-        if (this.imageRepeat !== v) {
-            this.deStyle.backgroundRepeat = this.imageRepeat = v;
-            if (this.inited) this.fireEvent('imageRepeat', v);
-        }
-    },
-    
-    setImagePosition: function(v) {
-        if (this.imagePosition !== v) {
-            this.deStyle.backgroundPosition = this.imagePosition = v;
-            if (this.inited) this.fireEvent('imagePosition', v);
-        }
-    },
-    
-    setImageAttachment: function(v) {
-        if (this.imageAttachment !== v) {
-            this.deStyle.backgroundAttachment = this.imageAttachment = v;
-            if (this.inited) this.fireEvent('imageAttachment', v);
-        }
-    },
-    
-    setCalculateNaturalSize: function(v) {
-        if (this.calculateNaturalSize !== v) {
-            this.calculateNaturalSize = v;
-            if (this.inited) this.fireEvent('calculateNaturalSize', v);
-            this.__calculateNaturalSize();
-        }
-    },
-    
-    setNaturalWidth: function(v) {
-        if (this.naturalWidth !== v) {
-            this.naturalWidth = v;
-            if (this.inited) this.fireEvent('naturalWidth', v);
-            if (this.useNaturalSize && v) this.setWidth(v);
-        }
-    },
-    
-    setNaturalHeight: function(v) {
-        if (this.naturalHeight !== v) {
-            this.naturalHeight = v;
-            if (this.inited) this.fireEvent('naturalHeight', v);
-            if (this.useNaturalSize && v) this.setHeight(v);
-        }
-    },
-    
-    setUseNaturalSize: function(v) {
-        if (this.useNaturalSize !== v) {
-            this.useNaturalSize = v;
-            if (this.inited) this.fireEvent('useNaturalSize', v);
+    /** Adds support for text display to a View.
+        
+        Requires:
+            myt.SizeToDom super mixin.
+        
+        Events:
+            text:string
+            textOverflow:string
+            textAlign:string
+            whiteSpace:string
+            wordWrap:string
+            textIndent:string
+            textTransform:string
+            textDecoration:string
+            lineHeight:string
+            letterSpacing:string
+            wordSpacing:string
+            fontFamily:string
+            fontStyle:string
+            fontVariant:string
+            fontWeight:string
+            fontSize:string
+        
+        Attributes:
+            text:string|event(string) The text to be displayed. The value will 
+                be assigned to the inner html of the div.
+            textOverflow:string How text will be treated when it overflows the
+                bounds. Supported values: 'ellipsis', 'clip', 'inherit'.
+            textAlign:string How text will be aligned within the bounds. Supported 
+                values: 'left', 'right', 'center', 'justify', 'inherit'.
+            whiteSpace:string How white space is handled. Supported values: 
+                'normal', 'nowrap', 'pre', 'pre-line', 'pre-wrap', 'inherit'.
+            wordWrap:string How line wrapping is done. Supported 
+                values: 'break-word', 'normal'.
+            textIndent:string How text gets indented. Supported values: '20px', 
+                '10%', 'inherit'.
+            textTransform:string Transformation performed on the text during
+                display. Supported values: 'none', 'capitalize', 'uppercase', 
+                'lowercase', 'inherit'.
+            textDecoration:string Visual decoration to the text. Supported 
+                values: 'none', 'underline', 'overline', 'line-through', 
+                'blink', 'inherit'.
+            lineHeight:string The height of individual lines of text. Supported 
+                values: 'normal', '1.5', '22px', '150%', 'inherit'.
+            letterSpacing:string Spacing between letters. Supported values: 
+                'normal', '3px', 'inherit'.
+            wordSpacing:string Spacing between words. Supported values: 
+                'normal', '3px', 'inherit'.
+            fontFamily:string The name of a font to use. The value will be 
+                assigned to the font family CSS parameter.
+            fontStyle:string Styling applied to the text. Supported values: 
+                'normal', 'italic', 'oblique', 'inherit'.
+            fontVariant:string The font variant. Supported values: 'normal', 
+                'small-caps', 'inherit'.
+            fontWeight:string The font weight. Supported values: 'normal', 'bold', 
+                'bolder', 'lighter', '100-900', 'inherit'.
+            fontSize:string The size of the font. Supported values: 'normal, 
+                '14px', '14pt', 'xx-small', 'x-small', 'small', 'medium', 'large', 
+                'x-large', 'xx-large', 'smaller', 'larger', '75%', 'inherit'.
+            userUnselectable:boolean If set to true the CSS property user-select 
+                will be set to 'none' thus making text selection not work.
+                Furthermore, the cursor will be set to the default so it no longer
+                appears as an i-beam.
+        
+        @class */
+    pkg.TextSupport = new JS.Module('TextSupport', {
+        // Accessors ///////////////////////////////////////////////////////////////
+        /** @overrides myt.View */
+        setWidth: function(v, supressEvent) {
+            this.callSuper(v, supressEvent);
             
-            // Sync width and height
-            if (v) {
-                if (this.naturalWidth) this.setWidth(this.naturalWidth);
-                if (this.naturalHeight) this.setHeight(this.naturalHeight);
+            // Height can change with width change when wrapping occurs.
+            if (v !== 'auto') {
+                const ws = this.whiteSpace;
+                if (ws === 'normal' || ws === 'pre-line' || ws === 'pre-wrap') {
+                    this.sizeViewToDom();
+                }
             }
+        },
+        
+        setText: function(v) {
+            if (!v) v = '';
+            v = this.valueFromEvent(v);
             
-            // Turn on calculation of natural size if we're going to use
-            // natural size.
-            if (v && !this.calculateNaturalSize) this.setCalculateNaturalSize(true);
+            if (this.text !== v) {
+                // Use innerHTML rather than textContent since this allows us to
+                // embed formatting markup.
+                this.getInnerDomElement().innerHTML = this.text = v;
+                if (this.inited) {
+                    this.fireEvent('text', v);
+                    this.sizeViewToDom();
+                }
+            }
+        },
+        
+        // Text Attributes
+        setTextOverflow: function(v) {
+            if (this.textOverflow !== v) {
+                this.textOverflow = v;
+                this.getInnerDomStyle().textOverflow = v || 'inherit';
+                if (this.inited) this.fireEvent('textOverflow', v);
+            }
+        },
+        
+        setTextAlign: function(v) {
+            if (this.textAlign !== v) {
+                this.textAlign = v;
+                this.getInnerDomStyle().textAlign = v || 'inherit';
+                if (this.inited) this.fireEvent('textAlign', v);
+            }
+        },
+        
+        setWhiteSpace: function(v) {setAndSizeViewToDom(this, v, 'whiteSpace');},
+        setWordWrap: function(v) {setAndSizeViewToDom(this, v, 'wordWrap', 'normal');},
+        setTextIndent: function(v) {setAndSizeViewToDom(this, v, 'textIndent');},
+        setTextTransform: function(v) {setAndSizeViewToDom(this, v, 'textTransform');},
+        setTextDecoration: function(v) {setAndSizeViewToDom(this, v, 'textDecoration');},
+        setLineHeight: function(v) {setAndSizeViewToDom(this, v, 'lineHeight');},
+        setLetterSpacing: function(v) {setAndSizeViewToDom(this, v, 'letterSpacing');},
+        setWordSpacing: function(v) {setAndSizeViewToDom(this, v, 'wordSpacing');},
+        
+        // Font Attributes
+        setFontFamily: function(v) {setAndSizeViewToDom(this, v, 'fontFamily');},
+        setFontStyle: function(v) {setAndSizeViewToDom(this, v, 'fontStyle');},
+        setFontVariant: function(v) {setAndSizeViewToDom(this, v, 'fontVariant');},
+        setFontWeight: function(v) {setAndSizeViewToDom(this, v, 'fontWeight');},
+        setFontSize: function(v) {setAndSizeViewToDom(this, v, 'fontSize');},
+        
+        setUserUnselectable: function(v) {
+            if (this.userUnselectable !== v) {
+                this.userUnselectable = v;
+                this[v ? 'addDomClass' : 'removeDomClass']('mytUnselectable');
+                this.setCursor(v ? 'default' : 'text');
+                if (this.inited) this.fireEvent('userUnselectable', v);
+            }
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////////
+        /** Configures the attributes for this Text so that an ellipsis will be
+            displayed. To actually see an ellipsis, an explicit width should be
+            set on the Text so that overflow will occur.
+            @returns {undefined} */
+        enableEllipsis: function() {
+            this.setWhiteSpace('nowrap');
+            this.setOverflow('hidden');
+            this.setTextOverflow('ellipsis');
+        },
+        
+        /** Turns ellipsis off by setting overflow to 'visible'. Other CSS
+            related changes for ellipsis are not undone such as whiteSpace and
+            textOverflow.
+            @returns {undefined} */
+        disableEllipsis: function() {
+            this.setOverflow('visible');
+        },
+        
+        /** Turns on a text shadow.
+            @param {number} [x] - The x offset in pixels of the shadow.
+                Defaults to 0 if not provided.
+            @param {number} [y] - The y offset in pixels of the shadow.
+                Defaults to 0 if not provided.
+            @param {number} [blur] - The bluriness in pixels of the shadow.
+                Defaults to 2 if not provided.
+            @param {string} [color] - The color of the shadow. Defaults
+                to '#000000' if not provided.
+            @returns {undefined} */
+        showTextShadow: function(x, y, blur, color) {
+            this.getInnerDomStyle().textShadow = 
+                (x || 0) + 'px ' + 
+                (y || 0) + 'px ' + 
+                (blur != null ? blur : 2) + 'px ' + 
+                (color || '#000');
+        },
+        
+        /** Turns off a text shadow.
+            @returns {undefined} */
+        hideTextShadow: function() {
+            this.getInnerDomStyle().textShadow = 'none';
         }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Loads an image to measure its size.
-        @private
-        @returns {undefined} */
-    __calculateNaturalSize: function() {
-        const imgUrl = this.imageUrl;
-        if (this.calculateNaturalSize && imgUrl) {
-            const sizeCache = myt.ImageSupport.SIZE_CACHE,
-                cachedSize = sizeCache[imgUrl];
-            if (cachedSize) {
-                // Cache hit
-                this.setNaturalWidth(cachedSize.width);
-                this.setNaturalHeight(cachedSize.height);
-            } else {
-                // Cache miss
-                const openQueryCache = myt.ImageSupport.OPEN_SIZE_QUERIES;
-                let openQuery = openQueryCache[imgUrl];
-                if (!openQuery) {
-                    // Lazy instantiate the open query array.
-                    openQueryCache[imgUrl] = openQuery = [];
-                    
-                    // Start a size query
-                    const img = new Image();
-                    img.onerror = function(err) {
-                        // Notify all ImageSupport instances that are waiting
-                        // for a natural size that an error has occurred.
-                        const openQueries = openQueryCache[imgUrl];
-                        if (openQueries) {
-                            let i = openQueries.length;
-                            while (i) openQueries[--i].setImageLoadingError(true);
-                            
-                            // Cleanup
-                            openQueries.length = 0;
-                            delete openQueryCache[imgUrl];
-                        }
-                    };
-                    img.onload = function() {
-                        const w = this.width,
-                            h = this.height;
+    });
+})(myt);
+
+
+((pkg) => {
+    const 
+        /*  Stores widths and heights of images by URL so we don't have to
+            reload them to get sizes. */
+        sizeCache = {},
+        
+        /*  Tracks requests to get the width and height of an image. Used to 
+            prevent multiple requests being made for the same image URL. */
+        openQueryCache = {},
+        
+        /*  Loads an image to measure its size. */
+        loadImageAndMeasureIt = imageView => {
+            const imgUrl = imageView.imageUrl;
+            if (imageView.calculateNaturalSize && imgUrl) {
+                const cachedSize = sizeCache[imgUrl];
+                if (cachedSize) {
+                    // Cache hit
+                    imageView.setNaturalWidth(cachedSize.width);
+                    imageView.setNaturalHeight(cachedSize.height);
+                } else {
+                    // Cache miss
+                    let openQuery = openQueryCache[imgUrl];
+                    if (!openQuery) {
+                        // Lazy instantiate the open query array.
+                        openQueryCache[imgUrl] = openQuery = [];
                         
-                        // Notify all ImageSupport instances that are waiting
-                        // for a natural size.
-                        const openQueries = openQueryCache[imgUrl];
-                        if (openQueries) {
-                            let i = openQueries.length,
-                                imageSupportInstance;
-                            while (i) {
-                                imageSupportInstance = openQueries[--i];
-                                if (imageSupportInstance.imageUrl === imgUrl) {
-                                    imageSupportInstance.setNaturalWidth(w);
-                                    imageSupportInstance.setNaturalHeight(h);
+                        // Start a size query
+                        const img = new Image();
+                        img.onerror = err => {
+                            // Notify all ImageSupport instances that are 
+                            // waiting for a natural size that an error 
+                            // has occurred.
+                            const openQueries = openQueryCache[imgUrl];
+                            if (openQueries) {
+                                let i = openQueries.length;
+                                while (i) openQueries[--i].setImageLoadingError(true);
+                                
+                                // Cleanup
+                                openQueries.length = 0;
+                                delete openQueryCache[imgUrl];
+                            }
+                        };
+                        img.onload = () => {
+                            // Notify all ImageSupport instances that are 
+                            // waiting for a natural size.
+                            const w = img.width,
+                                h = img.height,
+                                openQueries = openQueryCache[imgUrl];
+                            if (openQueries) {
+                                let i = openQueries.length;
+                                while (i) {
+                                    const imageSupportInstance = openQueries[--i];
+                                    if (imageSupportInstance.imageUrl === imgUrl) {
+                                        imageSupportInstance.setNaturalWidth(w);
+                                        imageSupportInstance.setNaturalHeight(h);
+                                    }
                                 }
+                                
+                                // Cleanup
+                                openQueries.length = 0;
+                                delete openQueryCache[imgUrl];
                             }
                             
-                            // Cleanup
-                            openQueries.length = 0;
-                            delete openQueryCache[imgUrl];
-                        }
-                        
-                        // Store size in cache.
-                        sizeCache[imgUrl] = {width:w, height:h};
-                    };
-                    img.src = imgUrl;
+                            // Store size in cache.
+                            sizeCache[imgUrl] = {width:w, height:h};
+                        };
+                        img.src = imgUrl;
+                    }
+                    
+                    openQuery.push(imageView);
+                }
+            }
+        };
+    
+    /** Adds support for image display to a View.
+        
+        Events:
+            imageUrl:string
+            imageSize:string
+            imageRepeat:string
+            imagePosition:string
+            imageAttachment:string
+            calculateNaturalSize:boolean
+            naturalWidth:number
+            naturalHeight:number
+            useNaturalSize:boolean
+            imageLoadingError:boolean
+        
+        Attributes:
+            imageUrl:string The URL to load the image data from.
+            imageSize:string Determines the size of the image. Allowed values
+                are: 'auto', 'cover', 'contain', absolute ('20px 10px') and 
+                percentage ('100% 50%').
+            imageRepeat:string Determines if an image is repeated or not.
+                Allowed values: 'repeat', 'repeat-x', 'repeat-y', 'no-repeat', 
+                'inherit'. Defaults to 'no-repeat'.
+            imagePosition:string Determines where an image is positioned.
+            imageAttachment:string Determines how an image is attached to the 
+                view. Allowed values are: 'scroll', 'fixed', 'inherit'. 
+                The default value is 'scroll'.
+            calculateNaturalSize:boolean Determines if the natural size should 
+                be automatically calculated or not. Defaults to undefined which 
+                is equivalent to false.
+            naturalWidth:number The natural width of the image. Only set if
+                calculateNaturalWidth is true.
+            naturalHeight:number The natural height of the image. Only set if
+                calculateNaturalWidth is true.
+            useNaturalSize:boolean If true this image view will be sized to the
+                naturalWidth and naturalHeight and calculateNaturalSize will be
+                set to true.
+            imageLoadingError:boolean Gets set to true when an error occurs
+                loading the image. The image will be loaded whenever the
+                calculateNaturalSize attribute is set to true.
+        
+        @class */
+    pkg.ImageSupport = new JS.Module('ImageSupport', {
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.Node */
+        initNode: function(parent, attrs) {
+            this.defAttr(attrs, 'imageRepeat', 'no-repeat');
+            this.defAttr(attrs, 'imageAttachment', 'scroll');
+            
+            this.callSuper(parent, attrs);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setImageUrl: function(v) {
+            if (this.imageUrl !== v) {
+                this.imageUrl = v;
+                this.getInnerDomStyle().backgroundImage = v ? 'url("' + v + '")' : 'none';
+                if (this.inited) {
+                    this.fireEvent('imageUrl', v);
+                    this.setNaturalWidth(undefined);
+                    this.setNaturalHeight(undefined);
+                    
+                    // Collapse size if no url and we are using natural size
+                    if (!v && this.useNaturalSize) {
+                        this.setWidth(0);
+                        this.setHeight(0);
+                    }
+                }
+                loadImageAndMeasureIt(this);
+            }
+        },
+        
+        setImageLoadingError: function(v) {this.set('imageLoadingError', v, true);},
+        
+        setImageSize: function(v) {
+            if (this.imageSize !== v) {
+                this.imageSize = v;
+                this.getInnerDomStyle().backgroundSize = v || 'auto';
+                if (this.inited) this.fireEvent('imageSize', v);
+            }
+        },
+        
+        setImageRepeat: function(v) {
+            if (this.imageRepeat !== v) {
+                this.getInnerDomStyle().backgroundRepeat = this.imageRepeat = v;
+                if (this.inited) this.fireEvent('imageRepeat', v);
+            }
+        },
+        
+        setImagePosition: function(v) {
+            if (this.imagePosition !== v) {
+                this.getInnerDomStyle().backgroundPosition = this.imagePosition = v;
+                if (this.inited) this.fireEvent('imagePosition', v);
+            }
+        },
+        
+        setImageAttachment: function(v) {
+            if (this.imageAttachment !== v) {
+                this.getInnerDomStyle().backgroundAttachment = this.imageAttachment = v;
+                if (this.inited) this.fireEvent('imageAttachment', v);
+            }
+        },
+        
+        setCalculateNaturalSize: function(v) {
+            if (this.calculateNaturalSize !== v) {
+                this.calculateNaturalSize = v;
+                if (this.inited) this.fireEvent('calculateNaturalSize', v);
+                loadImageAndMeasureIt(this);
+            }
+        },
+        
+        setNaturalWidth: function(v) {
+            if (this.naturalWidth !== v) {
+                this.naturalWidth = v;
+                if (this.inited) this.fireEvent('naturalWidth', v);
+                if (this.useNaturalSize && v) this.setWidth(v);
+            }
+        },
+        
+        setNaturalHeight: function(v) {
+            if (this.naturalHeight !== v) {
+                this.naturalHeight = v;
+                if (this.inited) this.fireEvent('naturalHeight', v);
+                if (this.useNaturalSize && v) this.setHeight(v);
+            }
+        },
+        
+        setUseNaturalSize: function(v) {
+            if (this.useNaturalSize !== v) {
+                this.useNaturalSize = v;
+                if (this.inited) this.fireEvent('useNaturalSize', v);
+                
+                // Sync width and height
+                if (v) {
+                    if (this.naturalWidth) this.setWidth(this.naturalWidth);
+                    if (this.naturalHeight) this.setHeight(this.naturalHeight);
                 }
                 
-                openQuery.push(this);
+                // Turn on calculation of natural size if we're going to use
+                // natural size.
+                if (v && !this.calculateNaturalSize) this.setCalculateNaturalSize(true);
             }
         }
-    }
-});
+    });
+})(myt);
 
 
 ((pkg) => {
@@ -11281,6 +11275,11 @@ new JS.Singleton('GlobalMouse', {
         defaultDisabledOpacity = 0.5,
         defaultFocusShadowPropertyValue = [0, 0, 7, '#666'],
         
+        setPaddingAttr = (btn, side, value) => {
+            const attrName = 'padding' + side;
+            btn.getInnerDomStyle()[attrName] = (btn[attrName] = value) + 'px';
+        },
+        
         /** Provides button functionality to an myt.View. Most of the 
             functionality comes from the mixins included by this mixin. 
             This mixin resolves issues that arise when the various mixins 
@@ -11390,41 +11389,31 @@ new JS.Singleton('GlobalMouse', {
                 interacted with. For mouse interactions this corresponds to 
                 the over state.
                 @returns {undefined} */
-            drawHoverState: () => {
-                // Subclasses to implement as needed.
-            },
+            drawHoverState: () => {/* Subclasses to implement as needed. */},
             
             /** Draw the UI when the component has a pending activation. For 
                 mouse interactions this corresponds to the down state.
                 @returns {undefined} */
-            drawActiveState: () => {
-                // Subclasses to implement as needed.
-            },
+            drawActiveState: () => {/* Subclasses to implement as needed. */},
             
             /** Draw the UI when the component is ready to be interacted with. 
                 For mouse interactions this corresponds to the enabled state 
                 when the mouse is not over the component.
                 @returns {undefined} */
-            drawReadyState: () => {
-                // Subclasses to implement as needed.
-            },
+            drawReadyState: () => {/* Subclasses to implement as needed. */},
             
             /** Draw the UI when the component is in the disabled state.
                 @returns {undefined} */
-            drawDisabledState: () => {
-                // Subclasses to implement as needed.
+            drawDisabledState: () => {/* Subclasses to implement as needed. */},
+            
+            /** @overrides myt.FocusObservable */
+            showFocusIndicator: function() {
+                this.hideDefaultFocusIndicator();
             },
             
             /** @overrides myt.FocusObservable */
-            showFocusEmbellishment: function() {
-                this.hideDefaultFocusEmbellishment();
-                this.setBoxShadow(defaultFocusShadowPropertyValue);
-            },
-            
-            /** @overrides myt.FocusObservable */
-            hideFocusEmbellishment: function() {
-                this.hideDefaultFocusEmbellishment();
-                this.setBoxShadow();
+            hideFocusIndicator: function() {
+                this.hideDefaultFocusIndicator();
             }
         }),
         
@@ -11474,26 +11463,27 @@ new JS.Singleton('GlobalMouse', {
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.Button */
             drawDisabledState: function() {
-                this.setOpacity(defaultDisabledOpacity);
-                this.setBgColor(this.readyColor);
+                this.draw(this.readyColor, defaultDisabledOpacity);
             },
             
             /** @overrides myt.Button */
             drawHoverState: function() {
-                this.setOpacity(1);
-                this.setBgColor(this.hoverColor);
+                this.draw(this.hoverColor);
             },
             
             /** @overrides myt.Button */
             drawActiveState: function() {
-                this.setOpacity(1);
-                this.setBgColor(this.activeColor);
+                this.draw(this.activeColor);
             },
             
             /** @overrides myt.Button */
             drawReadyState: function() {
-                this.setOpacity(1);
-                this.setBgColor(this.readyColor);
+                this.draw(this.readyColor);
+            },
+            
+            draw: function(color, opacity=1) {
+                this.setOpacity(opacity);
+                this.setBgColor(color);
             }
         }),
         
@@ -11579,15 +11569,11 @@ new JS.Singleton('GlobalMouse', {
         
         // Accessors ///////////////////////////////////////////////////////////
         setInset: function(v) {
-            // Adapt to event from syncTo
-            if (v != null && typeof v === 'object') v = v.value;
-            this.set('inset', v, true);
+            this.set('inset', this.valueFromEvent(v), true);
         },
         
         setOutset: function(v) {
-            // Adapt to event from syncTo
-            if (v != null && typeof v === 'object') v = v.value;
-            this.set('outset', v, true);
+            this.set('outset', this.valueFromEvent(v), true);
         },
         
         setText: function(v) {
@@ -11650,6 +11636,9 @@ new JS.Singleton('GlobalMouse', {
         }
     });
     
+    /** A minimalist button that uses a single View with TextSupport.
+        
+        @class */
     pkg.TextButton = new JSClass('TextButton', View, {
         include: [
             SimpleButtonStyle,
@@ -11659,7 +11648,7 @@ new JS.Singleton('GlobalMouse', {
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            defAttr(attrs, 'focusEmbellishment', false);
+            defAttr(attrs, 'focusIndicator', false);
             defAttr(attrs, 'roundedCorners', 3);
             defAttr(attrs, 'textAlign', 'center');
             defAttr(attrs, 'paddingTop', 1);
@@ -11673,21 +11662,10 @@ new JS.Singleton('GlobalMouse', {
         
         
         // Accessors ///////////////////////////////////////////////////////////
-        setPaddingLeft: function(v) {
-            this.getInnerDomStyle().paddingLeft = (this.paddingLeft = v) + 'px';
-        },
-        
-        setPaddingRight: function(v) {
-            this.getInnerDomStyle().paddingRight = (this.paddingRight = v) + 'px';
-        },
-        
-        setPaddingTop: function(v) {
-            this.getInnerDomStyle().paddingTop = (this.paddingTop = v) + 'px';
-        },
-        
-        setPaddingBottom: function(v) {
-            this.getInnerDomStyle().paddingBottom = (this.paddingBottom = v) + 'px';
-        }
+        setPaddingLeft: function(v) {setPaddingAttr(this, 'Left', v);},
+        setPaddingRight: function(v) {setPaddingAttr(this, 'Right', v);},
+        setPaddingTop: function(v) {setPaddingAttr(this, 'Top', v);},
+        setPaddingBottom: function(v) {setPaddingAttr(this, 'Bottom', v);}
     });
 })(myt);
 
@@ -11907,7 +11885,7 @@ new JS.Singleton('GlobalMouse', {
             
             this.ignoreOwnerForHideOnMouseDown = this.ignoreOwnerForHideOnBlur = this.hideOnBlur = this.hideOnMouseDown = true;
             
-            attrs.visible = attrs.focusEmbellishment = false;
+            attrs.visible = attrs.focusIndicator = false;
             
             // Ensure the focus starts and ends with the panel
             attrs.focusable = attrs.focusCage = true;
@@ -12110,6 +12088,79 @@ new JS.Singleton('GlobalMouse', {
         
         ACTIVATION_KEYS = [13,27,32,37,38,39,40],
         
+        updateItems = listView => {
+            const cfg = listView.itemConfig || [],
+                cfgLen = cfg.length,
+                items = listView.items, 
+                itemsLen = items.length,
+                defaultItemClass = listView.defaultItemClass,
+                contentView = listView.getContentView(), 
+                layouts = contentView.getLayouts();
+            
+            // Lock layouts during reconfiguration
+            layouts.forEach(layout => {layout.incrementLockedCounter();});
+            
+            // Performance: Remove from dom while doing inserts
+            const de = contentView.getOuterDomElement(),
+                nextDe = de.nextSibling,
+                parentElem = de.parentNode;
+            parentElem.removeChild(de);
+            
+            // Reconfigure list
+            let i = 0;
+            for (; cfgLen > i; ++i) {
+                const cfgItem = cfg[i],
+                    cfgClass = cfgItem.klass || defaultItemClass,
+                    cfgAttrs = cfgItem.attrs || {};
+                let item = items[i];
+                
+                // Destroy existing item if it's the wrong class
+                if (item && !item.isA(cfgClass)) {
+                    item.destroy();
+                    item = null;
+                }
+                
+                // Create a new item if no item exists
+                if (!item) item = items[i] = new cfgClass(contentView, {listView:listView});
+                
+                // Apply config to item
+                if (item) {
+                    item.callSetters(cfgAttrs);
+                    
+                    // Create an item index to sort the layout subviews on. This
+                    // is necessary when the class of list items change so 
+                    // that the newly created items don't end up out of order.
+                    item.__LAYOUT_IDX = i;
+                }
+            }
+            
+            // Performance: Put back in dom.
+            parentElem.insertBefore(de, nextDe);
+            
+            // Measure width. Must be in dom at this point.
+            let minWidth = listView.minWidth;
+            for (i = 0; cfgLen > i;) {
+                const item = items[i++];
+                item.syncToDom();
+                minWidth = Math.max(minWidth, item.getMinimumWidth());
+            }
+            
+            // Delete any remaining items
+            for (; itemsLen > i;) items[i++].destroy();
+            items.length = cfgLen;
+            
+            // Resize items and contentView
+            for (i = 0; cfgLen > i;) listView.updateItemWidth(items[i++], minWidth);
+            listView.updateContentWidth(contentView, minWidth);
+            
+            // Unlock layouts and update
+            layouts.forEach(layout => {
+                layout.sortSubviews((a, b) => a.__LAYOUT_IDX - b.__LAYOUT_IDX);
+                layout.decrementLockedCounter();
+                layout.update();
+            });
+        },
+        
         /** Defines the interface list view items must support.
             
             Attributes:
@@ -12129,7 +12180,7 @@ new JS.Singleton('GlobalMouse', {
             getMinimumWidth: () => 0,
             
             /** Part of a performance optimization. Called from 
-                ListView.__updateItems after the items have been inserted into 
+                updateItems after the items have been inserted into 
                 the dom. Now we can actually measure text width. */
             syncToDom: () => {}
         });
@@ -12166,12 +12217,14 @@ new JS.Singleton('GlobalMouse', {
             
             this.callSuper(parent, attrs);
             
-            this.__updateItems();
-            this.buildLayout();
+            updateItems(this);
+            this.buildLayout(this.getContentView());
         },
         
-        buildLayout: function() {
-            new pkg.SpacedLayout(this.getContentView(), {
+        /** Allows subclasses to specify their own layout. For example a
+            multi-column layout using a WrappingLayout is possible. */
+        buildLayout: contentView => {
+            new pkg.SpacedLayout(contentView, {
                 axis:'y', spacing:1, collapseParent:true
             });
         },
@@ -12182,7 +12235,7 @@ new JS.Singleton('GlobalMouse', {
         setDefaultItemClass: function(v) {this.defaultItemClass = v;},
         setItemConfig: function(v) {
             this.itemConfig = v;
-            if (this.inited) this.__updateItems();
+            if (this.inited) updateItems(this);
         },
         
         /** Get the view that will contain list content.
@@ -12204,9 +12257,7 @@ new JS.Singleton('GlobalMouse', {
         /** @overrides myt.View */
         setHeight: function(v, supressEvent) {
             // Limit height if necessary
-            if (this.maxHeight >= 0) v = Math.min(this.maxHeight, v);
-            
-            this.callSuper(v, supressEvent);
+            this.callSuper(this.maxHeight >= 0 ? Math.min(this.maxHeight, v) : v, supressEvent);
         },
         
         
@@ -12217,8 +12268,7 @@ new JS.Singleton('GlobalMouse', {
             @param {!Object} itemView
             @returns {undefined} */
         doItemActivated: function(itemView) {
-            const owner = this.owner;
-            if (owner) owner.doItemActivated(itemView);
+            if (this.owner) this.owner.doItemActivated(itemView);
         },
         
         /** @overrides myt.FloatingPanel */
@@ -12244,87 +12294,6 @@ new JS.Singleton('GlobalMouse', {
                 if (item.isFocusable()) return item;
             }
             return null;
-        },
-        
-        /** @private
-            @returns {undefined} */
-        __updateItems: function() {
-            const self = this,
-                cfg = self.itemConfig || [],
-                cfgLen = cfg.length,
-                items = self.items, 
-                itemsLen = items.length,
-                defaultItemClass = self.defaultItemClass,
-                contentView = self.getContentView(), 
-                layouts = contentView.getLayouts(),
-                layoutLen = layouts.length;
-            
-            // Lock layouts during reconfiguration
-            let i = layoutLen;
-            while (i) layouts[--i].incrementLockedCounter();
-            
-            // Performance: Remove from dom while doing inserts
-            const de = contentView.getOuterDomElement(),
-                nextDe = de.nextSibling,
-                parentElem = de.parentNode;
-            parentElem.removeChild(de);
-            
-            // Reconfigure list
-            let item;
-            for (i = 0; cfgLen > i; ++i) {
-                const cfgItem = cfg[i],
-                    cfgClass = cfgItem.klass || defaultItemClass,
-                    cfgAttrs = cfgItem.attrs || {};
-                
-                item = items[i];
-                
-                // Destroy existing item if it's the wrong class
-                if (item && !item.isA(cfgClass)) {
-                    item.destroy();
-                    item = null;
-                }
-                
-                // Create a new item if no item exists
-                if (!item) item = items[i] = new cfgClass(contentView, {listView:self});
-                
-                // Apply config to item
-                if (item) {
-                    item.callSetters(cfgAttrs);
-                    
-                    // Create an item index to sort the layout subviews on. This
-                    // is necessary when the class of list items change so 
-                    // that the newly created items don't end up out of order.
-                    item.__LAYOUT_IDX = i;
-                }
-            }
-            
-            // Performance: Put back in dom.
-            parentElem.insertBefore(de, nextDe);
-            
-            // Measure width. Must be in dom at this point.
-            let minWidth = self.minWidth;
-            for (i = 0; cfgLen > i;) {
-                item = items[i++];
-                item.syncToDom();
-                minWidth = Math.max(minWidth, item.getMinimumWidth());
-            }
-            
-            // Delete any remaining items
-            for (; itemsLen > i;) items[i++].destroy();
-            items.length = cfgLen;
-            
-            // Resize items and contentView
-            for (i = 0; cfgLen > i;) self.updateItemWidth(items[i++], minWidth);
-            self.updateContentWidth(contentView, minWidth);
-            
-            // Unlock layouts and update
-            i = layoutLen;
-            while (i) {
-                const layout = layouts[--i];
-                layout.sortSubviews((a, b) => a.__LAYOUT_IDX - b.__LAYOUT_IDX);
-                layout.decrementLockedCounter();
-                layout.update();
-            }
         },
         
         updateItemWidth: (item, width) => {
@@ -12487,16 +12456,6 @@ new JS.Singleton('GlobalMouse', {
         /** @overrides myt.Button */
         doActivated: function() {
             this.listView.doItemActivated(this);
-        },
-        
-        /** @overrides myt.Button */
-        showFocusEmbellishment: function() {
-            this.hideDefaultFocusEmbellishment();
-        },
-        
-        /** @overrides myt.Button */
-        hideFocusEmbellishment: function() {
-            this.hideDefaultFocusEmbellishment();
         },
         
         /** @overrides myt.KeyActivation. */
@@ -12871,7 +12830,7 @@ new JS.Singleton('GlobalMouse', {
         initNode: function(parent, attrs) {
             defAttr(attrs, 'selected', false);
             if (attrs.groupId == null) attrs.groupId = pkg.generateGuid();
-            defAttr(attrs, 'focusEmbellishment', false);
+            defAttr(attrs, 'focusIndicator', false);
             defAttr(attrs, 'activeColor', 'inherits');
             defAttr(attrs, 'hoverColor', 'inherits');
             defAttr(attrs, 'readyColor', 'inherits');
@@ -12951,27 +12910,9 @@ new JS.Singleton('GlobalMouse', {
         },
         
         /** @overrides myt.SimpleButtonStyle */
-        drawDisabledState: function() {
-            this.setOpacity(pkg.Button.DEFAULT_DISABLED_OPACITY);
-            this.setTextColor(this.readyColor);
-        },
-        
-        /** @overrides myt.SimpleButtonStyle */
-        drawHoverState: function() {
-            this.setOpacity(1);
-            this.setTextColor(this.hoverColor);
-        },
-        
-        /** @overrides myt.SimpleButtonStyle */
-        drawActiveState: function() {
-            this.setOpacity(1);
-            this.setTextColor(this.activeColor);
-        },
-        
-        /** @overrides myt.SimpleButtonStyle */
-        drawReadyState: function() {
-            this.setOpacity(1);
-            this.setTextColor(this.readyColor);
+        draw: function(color, opacity=1) {
+            this.setOpacity(opacity);
+            this.setTextColor(color);
         }
     });
 })(myt);
@@ -12979,7 +12920,7 @@ new JS.Singleton('GlobalMouse', {
 
 ((pkg) => {
     const JSModule = JS.Module,
-        globalKeys = pkg.global.keys,
+        GlobalKeys = pkg.global.keys,
     
         /** Makes an object selectable.
             
@@ -12993,9 +12934,7 @@ new JS.Singleton('GlobalMouse', {
         Selectable = pkg.Selectable = new JSModule('Selectable', {
             // Accessors ///////////////////////////////////////////////////////
             setSelected: function(v) {
-                // Adapt to event from syncTo
-                if (v !== null && typeof v === 'object') v = v.value;
-                
+                v = this.valueFromEvent(v);
                 if (this.selected !== v) {
                     this.selected = v;
                     if (this.inited && this.fireEvent) this.fireEvent('selected', v);
@@ -13014,13 +12953,13 @@ new JS.Singleton('GlobalMouse', {
                 Returns true by default.
                 @param {!Object} selectionManager
                 @returns {boolean} */
-            canSelect: (selectionManager) => true,
+            canSelect: selectionManager => true,
             
             /** Checks if the provided myt.SelectionManager can deselect this object.
                 Returns true by default.
                 @param {!Object} selectionManager
                 @returns {boolean} */
-            canDeselect: (selectionManager) => true
+            canDeselect: selectionManager => true
         }),
         
         /** Manages the selection of one or more items.
@@ -13056,13 +12995,13 @@ new JS.Singleton('GlobalMouse', {
                     selections will only be increased not reduced. Typically this
                     means the shift key is down.
                     @returns {boolean} true if in add mode, false otherwise. */
-                isAddMode: () => globalKeys.isShiftKeyDown(),
+                isAddMode: () => GlobalKeys.isShiftKeyDown(),
                 
                 /** Determines if we are in "toggle" mode for selection such that
                     selections can be added to or removed from incrementally. Typically 
                     this means the control or command key is down.
                     @returns {boolean} true if in add mode, false otherwise. */
-                isToggleMode: () => globalKeys.isAcceleratorKeyDown()
+                isToggleMode: () => GlobalKeys.isAcceleratorKeyDown()
             },
             
             
@@ -13346,7 +13285,7 @@ new JS.Singleton('GlobalMouse', {
                 new self.buttonClass(self, {
                     name:'button', ignorePlacement:true, zIndex:1,
                     height:self.buttonHeight,
-                    focusEmbellishment:true,
+                    focusIndicator:true,
                     groupId:self.parent.parent.groupId,
                     percentOfParentWidth:100,
                     hoverColor:self.fillColorHover,
@@ -13862,7 +13801,7 @@ new JS.Singleton('GlobalMouse', {
                 
                 // Other
                 defAttr(attrs, 'height', Tab.DEFAULT_HEIGHT);
-                defAttr(attrs, 'focusEmbellishment', false);
+                defAttr(attrs, 'focusIndicator', false);
                 
                 this.callSuper(parent, attrs);
                 
@@ -14030,7 +13969,7 @@ new JS.Singleton('GlobalMouse', {
         setEditableTextAttr = (editableText, v, propName) => {
             if (editableText[propName] !== v) {
                 editableText[propName] = v;
-                editableText.deStyle[propName] = v + 'px';
+                editableText.getInnerDomStyle()[propName] = v + 'px';
                 if (editableText.inited) {
                     editableText.fireEvent(propName, v);
                     editableText.sizeViewToDom();
@@ -14140,9 +14079,7 @@ new JS.Singleton('GlobalMouse', {
             // Accessors ///////////////////////////////////////////////////////
             /** @overrideds myt.Selectable */
             setSelected: function(v) {
-                // Adapt to event from syncTo
-                if (v !== null && typeof v === 'object') v = v.value;
-                
+                v = this.valueFromEvent(v);
                 const de = this.getInnerDomElement();
                 if (de.selected !== v) de.selected = v;
             },
@@ -14240,14 +14177,14 @@ new JS.Singleton('GlobalMouse', {
             
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.FocusObservable */
-            showFocusEmbellishment: function() {
-                this.hideDefaultFocusEmbellishment();
+            showFocusIndicator: function() {
+                this.hideDefaultFocusIndicator();
                 this.setBoxShadow(DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
             },
             
             /** @overrides myt.FocusObservable */
-            hideFocusEmbellishment: function() {
-                this.hideDefaultFocusEmbellishment();
+            hideFocusIndicator: function() {
+                this.hideDefaultFocusIndicator();
                 this.setBoxShadow();
             },
             
@@ -14816,14 +14753,14 @@ new JS.Singleton('GlobalMouse', {
         },
         
         /** @overrides myt.FocusObservable */
-        showFocusEmbellishment: function() {
-            this.hideDefaultFocusEmbellishment();
+        showFocusIndicator: function() {
+            this.hideDefaultFocusIndicator();
             this.setBoxShadow(DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
         },
         
         /** @overrides myt.FocusObservable */
-        hideFocusEmbellishment: function() {
-            this.hideDefaultFocusEmbellishment();
+        hideFocusIndicator: function() {
+            this.hideDefaultFocusIndicator();
             this.setBoxShadow();
         },
         
@@ -15266,7 +15203,7 @@ new JS.Singleton('GlobalMouse', {
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
             defAttr(attrs, 'value', false);
-            defAttr(attrs, 'focusEmbellishment', false);
+            defAttr(attrs, 'focusIndicator', false);
             defAttr(attrs, 'checkboxStyle', DEFAULT_STYLE);
             defAttr(attrs, 'activeColor', 'inherits');
             defAttr(attrs, 'hoverColor', 'inherits');
@@ -15316,27 +15253,9 @@ new JS.Singleton('GlobalMouse', {
         },
         
         /** @overrides myt.SimpleButtonStyle */
-        drawDisabledState: function() {
-            this.setOpacity(pkg.Button.DEFAULT_DISABLED_OPACITY);
-            this.setTextColor(this.readyColor);
-        },
-        
-        /** @overrides myt.SimpleButtonStyle */
-        drawHoverState: function() {
-            this.setOpacity(1);
-            this.setTextColor(this.hoverColor);
-        },
-        
-        /** @overrides myt.SimpleButtonStyle */
-        drawActiveState: function() {
-            this.setOpacity(1);
-            this.setTextColor(this.activeColor);
-        },
-        
-        /** @overrides myt.SimpleButtonStyle */
-        drawReadyState: function() {
-            this.setOpacity(1);
-            this.setTextColor(this.readyColor);
+        draw: function(color, opacity=1) {
+            this.setOpacity(opacity);
+            this.setTextColor(color);
         }
     });
 })(myt);
@@ -17700,7 +17619,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         self.callSuper(parent, attrs);
         
-        self.deStyle.borderRadius = '50%';
+        self.getInnerDomStyle().borderRadius = '50%';
         
         self._updateSize();
         self._spin();
@@ -17717,7 +17636,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     
     setSpinColor: function(v) {
         if (this.spinColor !== v) {
-            this.deStyle.borderTopColor = this.spinColor = v;
+            this.getInnerDomStyle().borderTopColor = this.spinColor = v;
             if (this.inited) this.fireEvent('spinColor', v);
         }
     },
@@ -17751,10 +17670,10 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     _updateSize: function() {
         const self = this,
             size = self.size,
-            deStyle = self.deStyle;
+            ids = self.getInnerDomStyle();
         self.setWidth(size);
         self.setHeight(size);
-        deStyle.width = deStyle.height = (size - 2*self.borderWidth) + 'px';
+        ids.width = ids.height = (size - 2*self.borderWidth) + 'px';
     }
 });
 
@@ -18394,7 +18313,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 
                 const initialColorContainer = new View(colorPicker, {x:170, y:146, width:60, height:23, border:BORDER_333});
                 new View(initialColorContainer, {
-                    width:30, height:23, focusEmbellishment:false,
+                    width:30, height:23, focusIndicator:false,
                     bgColor:initialColorHex, domClass:isEmpty ? DOM_CLASS_CHECKERBOARD : ''
                 }, [Button, {doActivated: () => {colorPicker.setColor(initialColorHex);}}]);
                 currentColorButton = new View(initialColorContainer, {x:30, width:30, height:23}, [{
@@ -19750,10 +19669,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             // Accessors ///////////////////////////////////////////////////////
             /** @overrides myt.Disableable */
             setDisabled: function(v) {
-                // Adapt to event from syncTo
-                if (v != null && typeof v === 'object') v = v.value;
-                
-                this.callSuper(v);
+                this.callSuper(this.valueFromEvent(v));
             },
             
             /** @overrides myt.FocusObservable */
@@ -19848,20 +19764,6 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 this.callSuper(parent, attrs);
                 
                 if (attrs.roundedCorners == null) this.setRoundedCorners(Math.min(this.height, this.width) / 2);
-            },
-            
-            
-            // Methods /////////////////////////////////////////////////////////
-            /** @overrides myt.FocusObservable */
-            showFocusEmbellishment: function() {
-                this.hideDefaultFocusEmbellishment();
-                this.setBoxShadow([0, 0, 9, '#666']);
-            },
-            
-            /** @overrides myt.FocusObservable */
-            hideFocusEmbellishment: function() {
-                this.hideDefaultFocusEmbellishment();
-                this.setBoxShadow([0, 0, 4, '#666']);
             }
         }),
         
@@ -19956,9 +19858,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 this._nudge(thumb, true);
             },
             
-            _nudge: (thumb, up) => {
-                // Subclasses to implement
-            },
+            _nudge: (thumb, up) => {/* Subclasses to implement */},
             
             _syncThumbToValue: function(thumb, value) {
                 value = this.convertValueToPixels(value);
@@ -20292,7 +20192,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 defAttr(attrs, 'minValue', 0);
                 defAttr(attrs, 'value', attrs.minValue);
                 defAttr(attrs, 'expansionState', 2);
-                defAttr(attrs, 'focusEmbellishment', false);
+                defAttr(attrs, 'focusIndicator', false);
                 defAttr(attrs, 'repeatKeyDown', true);
                 defAttr(attrs, 'activationKeys', [
                     37, // left arrow
@@ -20812,8 +20712,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             },
             
             setGridWidth: function(v) {
-                if (v !== null && typeof v === 'object') v = v.value;
-                
+                v = this.valueFromEvent(v);
                 if (this.gridWidth !== v) {
                     this.gridWidth = v;
                     if (this.inited) this.fitHeadersToWidth();
@@ -21490,6 +21389,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         // Methods /////////////////////////////////////////////////////////////
         doActivated: function() {
+            console.log('here');
             if (!this.disabled) {
                 switch (this.sortState) {
                     case 'ascending': this.setSortState('descending'); break;
@@ -21501,13 +21401,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         },
         
         /** @overrides myt.SimpleButton */
-        drawDisabledState: function() {this.setBgColor(this.readyColor);},
-        
-        /** @overrides myt.Button */
-        showFocusEmbellishment: function() {this.hideDefaultFocusEmbellishment();},
-        
-        /** @overrides myt.Button */
-        hideFocusEmbellishment: function() {this.hideDefaultFocusEmbellishment();}
+        drawDisabledState: function() {this.draw(this.readyColor, 1);}
     });
 })(myt);
 
@@ -21934,7 +21828,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 defAttr(attrs, 'activeColor', DEFAULT_ACTIVE_COLOR);
                 defAttr(attrs, 'hoverColor', DEFAULT_HOVER_COLOR);
                 defAttr(attrs, 'readyColor', DEFAULT_READY_COLOR);
-                defAttr(attrs, 'focusEmbellishment', false);
+                defAttr(attrs, 'focusIndicator', false);
                 defAttr(attrs, 'activationKeys', [13,27,32,37,38,39,40]);
                 
                 this.callSuper(parent, attrs);
@@ -23276,15 +23170,16 @@ myt.Eventable = new JS.Class('Eventable', {
                     commands.push("A" + [r1, r1, 0, 1, 0, points[3]].join());
                     commands.push("A" + [r1, r1, 0, 1, 0, points[2]].join());
                 } else {
-                    const largeArc = (angleDiff % (2 * PI)) > PI ? 1 : 0;
+                    const largeArc = (angleDiff % (2 * PI)) > PI ? 1 : 0,
+                        halfThickness = thickness / 2;
                     commands.push("A" + [r2, r2, 0, largeArc, 1, points[1]].join());
                     if (endCapRounding) {
-                        commands.push("A" + [thickness / 2, thickness / 2, 0, 0, 1, points[2]].join());
+                        commands.push("A" + [halfThickness, halfThickness, 0, 0, 1, points[2]].join());
                     } else {
                         commands.push("L" + points[2].join());
                     }
                     commands.push("A" + [r1, r1, 0, largeArc, 0, points[3]].join());
-                    if (startCapRounding) commands.push("A" + [thickness / 2, thickness / 2, 0, 0, 1, points[0]].join());
+                    if (startCapRounding) commands.push("A" + [halfThickness, halfThickness, 0, 0, 1, points[0]].join());
                 }
                 commands.push("z");
                 

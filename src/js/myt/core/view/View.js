@@ -325,9 +325,10 @@
             delete attrs.tagName;
             self.setDomElement(self.createOurDomElement(parent));
             
-            // Necessary since x and y of 0 won't update deStyle so this gets
-            // things initialized correctly. Without this RootViews will have
-            // an incorrect initial position for x or y of 0.
+            // Necessary since x and y of 0 won't update the dom element style
+            // so this gets things initialized correctly. Without this 
+            // RootViews will have an incorrect initial position for x or 
+            // y of 0.
             const ods = self.getOuterDomStyle();
             ods.left = ods.top = '0px';
             

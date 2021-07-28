@@ -11,7 +11,7 @@
         setEditableTextAttr = (editableText, v, propName) => {
             if (editableText[propName] !== v) {
                 editableText[propName] = v;
-                editableText.deStyle[propName] = v + 'px';
+                editableText.getInnerDomStyle()[propName] = v + 'px';
                 if (editableText.inited) {
                     editableText.fireEvent(propName, v);
                     editableText.sizeViewToDom();
@@ -121,9 +121,7 @@
             // Accessors ///////////////////////////////////////////////////////
             /** @overrideds myt.Selectable */
             setSelected: function(v) {
-                // Adapt to event from syncTo
-                if (v !== null && typeof v === 'object') v = v.value;
-                
+                v = this.valueFromEvent(v);
                 const de = this.getInnerDomElement();
                 if (de.selected !== v) de.selected = v;
             },
@@ -221,14 +219,14 @@
             
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.FocusObservable */
-            showFocusEmbellishment: function() {
-                this.hideDefaultFocusEmbellishment();
+            showFocusIndicator: function() {
+                this.hideDefaultFocusIndicator();
                 this.setBoxShadow(DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
             },
             
             /** @overrides myt.FocusObservable */
-            hideFocusEmbellishment: function() {
-                this.hideDefaultFocusEmbellishment();
+            hideFocusIndicator: function() {
+                this.hideDefaultFocusIndicator();
                 this.setBoxShadow();
             },
             
@@ -797,14 +795,14 @@
         },
         
         /** @overrides myt.FocusObservable */
-        showFocusEmbellishment: function() {
-            this.hideDefaultFocusEmbellishment();
+        showFocusIndicator: function() {
+            this.hideDefaultFocusIndicator();
             this.setBoxShadow(DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
         },
         
         /** @overrides myt.FocusObservable */
-        hideFocusEmbellishment: function() {
-            this.hideDefaultFocusEmbellishment();
+        hideFocusIndicator: function() {
+            this.hideDefaultFocusIndicator();
             this.setBoxShadow();
         },
         
