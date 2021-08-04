@@ -1,5 +1,5 @@
 html,body{height:100%;margin:0px;padding:0px;border:0px none;}
-input,textarea,select{box-sizing:border-box;-moz-box-sizing:border-box;}
+input,textarea,select{box-sizing:border-box;}
 input.mytNativeInput:not([type=button]), textarea.mytNativeInput{margin:0px;padding:1px;border:0px none;}
 select.mytNativeInput{margin:0px;}
 .mytTextTabSliderLabel{font-size:16px;font-weight:bold;}
@@ -7,12 +7,12 @@ select.mytNativeInput{margin:0px;}
 .mytUnselectable{user-select:none;}
 
 /* For some reason placeholder text is selectable if you click and drag just right. These rules prevent that. */
-::-webkit-input-placeholder{-webkit-user-select:none;}
-:-moz-placeholder{-moz-user-select:none;}
-::-moz-placeholder{-moz-user-select:none;}
-:-ms-input-placeholder{-ms-user-select:none;}
+::-webkit-input-placeholder{user-select:none;}
+:-moz-placeholder{user-select:none;}
+::-moz-placeholder{user-select:none;}
+:-ms-input-placeholder{user-select:none;}
 
-.mytCheckerboardPattern{background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAMAAACeL25MAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2hpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYxIDY0LjE0MDk0OSwgMjAxMC8xMi8wNy0xMDo1NzowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDowMzgwMTE3NDA3MjA2ODExQUVBQUZDQkJGQ0VBMDdBQyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo1RjYxNUI2NjYyQjcxMUUzQjhEMUFERTdEQjMzNkEwMCIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo1RjYxNUI2NTYyQjcxMUUzQjhEMUFERTdEQjMzNkEwMCIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1LjEgTWFjaW50b3NoIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6MDM4MDExNzQwNzIwNjgxMUFFQUFGQ0JCRkNFQTA3QUMiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6MDM4MDExNzQwNzIwNjgxMUFFQUFGQ0JCRkNFQTA3QUMiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz41jZEgAAAABlBMVEUAAAD///+l2Z/dAAAAFUlEQVR42mJgZGRgYAATUIqRESDAAABkAAl9xqwbAAAAAElFTkSuQmCC);}
+.mytCheckerboardPattern{background:repeating-conic-gradient(#808080 0% 25%, transparent 0% 50%) 50% / 4px 4px;}
 .myt-DatePicker {font:13px/22.5px Arial, Helvetica, sans-serif;user-select:none;}
 
 /* Spinner */
