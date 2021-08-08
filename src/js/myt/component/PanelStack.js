@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const JSClass = JS.Class,
         
         defAttr = pkg.AccessorSupport.defAttr,
@@ -91,17 +91,17 @@
             item.setHeight(this.height);
         },
         
-        /** Called by a panel when it transitions between selected states. Should
-            not be called directly. Instead change the panel selection.
+        /** Called by a panel when it transitions between selected states. 
+            Should not be called directly. Instead change the panel selection.
             @param panel:myt.StackablePanel The panel that is transitioning.
             @returns {undefined} */
         doStackTransition: function(panel) {
             this['doStackTransition' + (panel.selected ? 'To' : 'From')](panel);
         },
         
-        /** Called by PanelStack.doStackTransition when the provided panel will be 
-            the newly selected panel in the stack. Should not be called directly. 
-            Instead change the panel selection.
+        /** Called by PanelStack.doStackTransition when the provided panel 
+            will be the newly selected panel in the stack. Should not be 
+            called directly. Instead change the panel selection.
             @param panel:myt.StackablePanel The panel that is transitioning.
             @returns {undefined} */
         doStackTransitionTo: function(panel) {
@@ -123,9 +123,9 @@
         doBeforeTransitionTo: panel => {},
         doAfterTransitionTo: panel => {},
         
-        /** Called by PanelStack.doStackTransition when the provided panel will be 
-            the newly deselected panel in the stack. Should not be called directly. 
-            Instead change the panel selection.
+        /** Called by PanelStack.doStackTransition when the provided panel 
+            will be the newly deselected panel in the stack. Should not be 
+            called directly. Instead change the panel selection.
             @param panel:myt.StackablePanel The panel that is transitioning.
             @returns {undefined} */
         doStackTransitionFrom: function(panel) {
@@ -289,7 +289,7 @@
             panel.setVisible(true);
             
             return new Promise((resolve, reject) => {
-                const nextFunc = (success) => {
+                const nextFunc = success => {
                     panel.makeHighestZIndex();
                     resolve(panel);
                 };
@@ -329,7 +329,7 @@
             panel.stopActiveAnimators(axis);
             
             return new Promise((resolve, reject) => {
-                const nextFunc = (success) => {
+                const nextFunc = success => {
                     panel.setVisible(false);
                     resolve(panel);
                 };

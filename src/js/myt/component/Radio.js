@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const BAGAttrName = 'selected',
         
         defAttr = pkg.AccessorSupport.defAttr,

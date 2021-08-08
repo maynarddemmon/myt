@@ -1,7 +1,7 @@
-((pkg) => {
+(pkg => {
     const sizeClasses = ['','fa-lg','fa-2x','fa-3x','fa-4x','fa-5x'],
         
-        updateInstance = (instance) => {
+        updateInstance = instance => {
             let props = instance.properties;
             if (props) {
                 if (typeof props === 'string') {
@@ -24,11 +24,12 @@
         
         Attributes:
             icon:string The name of the FA icon to set.
-            size:number A number from 0 to 5 with 0 being normal size and 5 being
-                the largest size.
+            size:number A number from 0 to 5 with 0 being normal size and 5 
+                being the largest size.
             propeties:string || array A space separated string or list of FA
                 CSS classes to set.
-    */
+        
+        @class */
     const FontAwesome = pkg.FontAwesome = new JS.Class('FontAwesome', pkg.Markup, {
         // Class Methods and Attributes ////////////////////////////////////////
         extend: {
@@ -62,7 +63,7 @@
                 return '';
             },
             
-            registerForNotification: (instance) => {
+            registerForNotification: instance => {
                 pkg.registerForFontNotification(instance, 'Font Awesome\ 5 Free 400'); // regular
                 pkg.registerForFontNotification(instance, 'Font Awesome\ 5 Free 900'); // solid
                 pkg.registerForFontNotification(instance, 'Font Awesome\ 5 Brands 400'); // brands

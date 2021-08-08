@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const JSClass = JS.Class,
         JSModule = JS.Module,
         
@@ -82,7 +82,7 @@
                 object if it is a function. Otherwise it does nothing.
                 @param {!Object} obj - The object to be cleaned.
                 @returns {!Object} - The cleaned object. */
-            cleanInstance: (obj) => {
+            cleanInstance: obj => {
                 if (typeof obj.clean === 'function') obj.clean();
                 return obj;
             },
@@ -180,7 +180,8 @@
             },
             
             /** Gets an array of the active instances.
-                @param {?Function} [filterFunc] - If provided filters the results.
+                @param {?Function} [filterFunc] - If provided filters the 
+                    results.
                 @returns {!Array} */
             getActives: function(filterFunc) {
                 const actives = getActiveObjArray(this);

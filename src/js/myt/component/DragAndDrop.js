@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const JSModule = JS.Module,
         G = pkg.global,
         dragManager = G.dragManager,
@@ -206,8 +206,8 @@
             return !this.disabled && this.isVisible();
         },
         
-        /** Called by myt.GlobalDragManager when a dropable starts being dragged
-            that has a matching drag group.
+        /** Called by myt.GlobalDragManager when a dropable starts being 
+            dragged that has a matching drag group.
             @param dropable:myt.Dropable The dropable being dragged.
             @returns {undefined} */
         notifyDragStart: dropable => {},
@@ -218,8 +218,8 @@
             @returns {undefined} */
         notifyDragStop: dropable => {},
         
-        /** Called by myt.GlobalDragManager when a dropable is dragged over this
-            view and has a matching drag group.
+        /** Called by myt.GlobalDragManager when a dropable is dragged over 
+            this view and has a matching drag group.
             @param dropable:myt.Dropable The dropable being dragged over 
                 this view.
             @returns {undefined} */
@@ -232,9 +232,10 @@
             @returns {undefined} */
         notifyDragLeave: dropable => {},
         
-        /** Called by myt.GlobalDragManager when a dropable is dropped onto this
-            view and has a matching drag group.
-            @param dropable:myt.Dropable The dropable being dropped onto this view.
+        /** Called by myt.GlobalDragManager when a dropable is dropped 
+            onto this view and has a matching drag group.
+            @param dropable:myt.Dropable The dropable being dropped onto 
+                this view.
             @returns {undefined} */
         notifyDrop: dropable => {}
     });
@@ -243,8 +244,8 @@
         
         Attributes:
             dropped:boolean Indicates this dropable was just dropped.
-            dropFailed:boolean Indicates this dropable was just dropped outside
-                of a drop target.
+            dropFailed:boolean Indicates this dropable was just dropped 
+                outside of a drop target.
             dropTarget:myt.DropTarget The drop target this dropable is 
                 currently over. */
     pkg.Dropable = new JSModule('Dropable', {
@@ -396,8 +397,8 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Called by myt.GlobalDragManager when a dropable starts being dragged
-            that has a matching drag group.
+        /** Called by myt.GlobalDragManager when a dropable starts 
+            being dragged that has a matching drag group.
             @param {!Object} dropable - The myt.Dropable being dragged.
             @returns {undefined} */
         notifyDragStart: function(dropable) {
@@ -409,7 +410,8 @@
         
         /** Called by myt.GlobalDragManager when a dropable stops being dragged
             that has a matching drag group.
-            @param {!Object} dropable - The myt.Dropable no longer being dragged.
+            @param {!Object} dropable - The myt.Dropable no longer 
+                being dragged.
             @returns {undefined} */
         notifyDragStop: function(dropable) {
             this.detachFromDom(globalMouse, '__hndlMove', 'mousemove', true);

@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     /* Based on browser detection from: http://www.quirksmode.org/js/detect.html
         
         Events:
@@ -12,7 +12,7 @@
     let versionSearchString,
         dom,
         pre;
-    const searchString = (data) => {
+    const searchString = data => {
             let dataItem, 
                 i = data.length;
             while (i) {
@@ -22,7 +22,7 @@
             }
         },
         
-        searchVersion = (dataString) => {
+        searchVersion = dataString => {
             const index = dataString.indexOf(versionSearchString);
             if (index >= 0) return parseFloat(dataString.substring(index + versionSearchString.length + 1));
         },

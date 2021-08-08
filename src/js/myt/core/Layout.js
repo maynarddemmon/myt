@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     let 
         /*  The global lock counter. Any value greater than zero sets the 
             global lock. */
@@ -83,8 +83,9 @@
             
             Private Attributes:
                 subviews:array An array of Views managed by this layout.
-                __deferredLayout:boolean Marks a layout as deferred if the global
-                    layout lock is true during a call to 'canUpdate' on the layout.
+                __deferredLayout:boolean Marks a layout as deferred if the 
+                    global layout lock is true during a call to 'canUpdate' 
+                    on the layout.
             
             @class */
         Layout = pkg.Layout = new JSClass('Layout', pkg.Node, {
@@ -139,8 +140,8 @@
             setParent: function(parent) {
                 const curParent = this.parent;
                 if (curParent !== parent) {
-                    // Lock during parent change so that old parent is not updated by
-                    // the calls to removeSubview and addSubview.
+                    // Lock during parent change so that old parent is not 
+                    // updated by the calls to removeSubview and addSubview.
                     const wasNotLocked = !this.locked;
                     if (wasNotLocked) this.locked = true;
                     
@@ -169,7 +170,8 @@
                         this.attachTo(parent, '__hndlPSRV', 'subviewRemoved');
                     }
                     
-                    // Clear temporary lock and update if this happened after initialization.
+                    // Clear temporary lock and update if this happened 
+                    // after initialization.
                     if (wasNotLocked) {
                         this.locked = false;
                         if (this.inited && parent) this.update();
@@ -180,10 +182,11 @@
             
             // Methods /////////////////////////////////////////////////////////
             /** Checks if the layout is locked or not. Should be called by the
-                "update" method of each layout to check if it is OK to do the update.
-                If myt.Layout.locked is true (the global layout lock) then a deferred
-                layout update will be setup for this Layout. Once the global lock is
-                unlocked this Layout's 'update' method will be invoked.
+                "update" method of each layout to check if it is OK to do the 
+                update. If myt.Layout.locked is true (the global layout lock) 
+                then a deferred layout update will be setup for this Layout. 
+                Once the global lock is unlocked this Layout's 'update' method 
+                will be invoked.
                 @returns {boolean} true if not locked, false otherwise. */
             canUpdate: function() {
                 if (globalLock) {
@@ -193,13 +196,14 @@
                 return !this.locked;
             },
             
-            /** Updates the layout. Subclasses should call canUpdate to check lock 
-                state before trying to do anything.
+            /** Updates the layout. Subclasses should call canUpdate to check 
+                lock state before trying to do anything.
                 @returns {undefined} */
             update: () => {},
             
             // Subview Methods //
-            /** Checks if this Layout has the provided View in the subviews array.
+            /** Checks if this Layout has the provided View in the subviews 
+                array.
                 @param {?Object} sv - The myt.View to check for.
                 @returns true if the subview is found, false otherwise. */
             hasSubview: function(sv) {
@@ -208,7 +212,8 @@
             
             /** Gets the index of the provided View in the subviews array.
                 @param {?Object} sv - The myt.View to check for.
-                @returns {number} - The index of the subview or -1 if not found. */
+                @returns {number} - The index of the subview or -1 if not 
+                    found. */
             getSubviewIndex: function(sv) {
                 return this.subviews.indexOf(sv);
             },
@@ -226,13 +231,14 @@
             
             /** Subclasses should implement this method to start listening to
                 events from the subview that should trigger the update method.
-                @param {?Object} sv - The myt.View to start monitoring for changes.
+                @param {?Object} sv - The myt.View to start monitoring for 
+                    changes.
                 @returns {undefined} */
             startMonitoringSubview: sv => {},
             
             /** Calls startMonitoringSubview for all views. Used by Layout 
-                implementations when a change occurs to the layout that requires
-                refreshing all the subview monitoring.
+                implementations when a change occurs to the layout that 
+                requires refreshing all the subview monitoring.
                 @returns {undefined} */
             startMonitoringAllSubviews: function() {
                 const svs = this.subviews;
@@ -240,9 +246,11 @@
                 while (i) this.startMonitoringSubview(svs[--i]);
             },
             
-            /** Removes the provided View from the subviews array of this Layout.
+            /** Removes the provided View from the subviews array of this 
+                Layout.
                 @param {?Object} sv - The myt.View to remove from this layout.
-                @returns the index of the removed subview or -1 if not removed. */
+                @returns the index of the removed subview or -1 if 
+                    not removed. */
             removeSubview: function(sv) {
                 if (this.ignore(sv)) return -1;
                 
@@ -256,15 +264,17 @@
             },
             
             /** Subclasses should implement this method to stop listening to
-                events from the subview that would trigger the update method. This
-                should remove all listeners that were setup in startMonitoringSubview.
-                @param {?Object} sv - The myt.View to stop monitoring for changes.
+                events from the subview that would trigger the update method. 
+                This should remove all listeners that were setup in 
+                startMonitoringSubview.
+                @param {?Object} sv - The myt.View to stop monitoring for 
+                    changes.
                 @returns {undefined} */
             stopMonitoringSubview: sv => {},
             
             /** Calls stopMonitoringSubview for all views. Used by Layout 
-                implementations when a change occurs to the layout that requires
-                refreshing all the subview monitoring.
+                implementations when a change occurs to the layout that 
+                requires refreshing all the subview monitoring.
                 @returns {undefined} */
             stopMonitoringAllSubviews: function() {
                 const svs = this.subviews;
@@ -272,11 +282,12 @@
                 while (i) this.stopMonitoringSubview(svs[--i]);
             },
             
-            /** Checks if a subview can be added to this Layout or not. The default 
-                implementation returns the 'ignoreLayout' attributes of the subview.
+            /** Checks if a subview can be added to this Layout or not. The 
+                default implementation returns the 'ignoreLayout' attributes 
+                of the subview.
                 @param {?Object} sv - The myt.View to check.
-                @returns {boolean} true means the subview will be skipped, false
-                    otherwise. */
+                @returns {boolean} true means the subview will be skipped, 
+                    false otherwise. */
             ignore: sv => sv.ignoreLayout,
             
             /** If our parent adds a new subview we should add it.
@@ -296,16 +307,19 @@
             },
             
             // Subview ordering //
-            /** Sorts the subviews array according to the provided sort function.
-                @param {?Function} sortFunc - The sort function to sort the subviews with.
+            /** Sorts the subviews array according to the provided sort 
+                function.
+                @param {?Function} sortFunc - The sort function to sort the 
+                    subviews with.
                 @returns {undefined} */
             sortSubviews: function(sortFunc) {
                 this.subviews.sort(sortFunc);
             },
             
-            /** Moves the subview before the target subview in the order the subviews
-                are layed out. If no target subview is provided, or it isn't in the
-                layout the subview will be moved to the front of the list.
+            /** Moves the subview before the target subview in the order the s
+                ubviews are layed out. If no target subview is provided, or 
+                it isn't in the layout the subview will be moved to the front 
+                of the list.
                 @param {?Object} sv
                 @param {?Object} target
                 @returns {undefined} */
@@ -313,9 +327,10 @@
                 moveSubview(this, sv, target, false);
             },
             
-            /** Moves the subview after the target subview in the order the subviews
-                are layed out. If no target subview is provided, or it isn't in the
-                layout the subview will be moved to the back of the list.
+            /** Moves the subview after the target subview in the order the 
+                subviews are layed out. If no target subview is provided, or 
+                it isn't in the layout the subview will be moved to the back 
+                of the list.
                 @param {?Object} sv
                 @param {?Object} target
                 @returns {undefined} */
@@ -438,8 +453,8 @@
                 }
             },
             
-            /** Called by update before any processing is done. Gives subviews a
-                chance to do any special setup before update is processed.
+            /** Called by update before any processing is done. Gives subviews 
+                a chance to do any special setup before update is processed.
                 @returns {undefined} */
             doBeforeUpdate: () => {
                 // Subclasses to implement as needed.
@@ -476,7 +491,8 @@
                     layed out including the current one. i.e. count will be 1 
                     for the first subview layed out.
                 @param {!Object} sv - The sub myt.View being layed out.
-                @param {string} setterName - The name of the setter method to call.
+                @param {string} setterName - The name of the setter method 
+                    to call.
                 @param {*} value - The layout value.
                 @returns {*} - The value to use for the next subview. */
             updateSubview: (count, sv, setterName, value) => {

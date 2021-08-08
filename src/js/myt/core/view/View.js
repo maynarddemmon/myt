@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const DomElementProxy = pkg.DomElementProxy,
     
         rectContainsPoint = pkg.Geometry.rectContainsPoint,
@@ -63,7 +63,8 @@
                         } else if (otherZIdx < zIdx) {
                             return false;
                         }
-                        // Fall through to dom comparison since z-indices are equal.
+                        // Fall through to dom comparison since z-indices 
+                        // are equal.
                     }
                 }
                 
@@ -171,7 +172,8 @@
         /*  A convienence method to set a single rounded corner on an element.
             @param {!Object} view
             @param {number} radius - The radius of the corner.
-            @param {string} corner - One of 'TopLeft', 'TopRight', 'BottomLeft' or 'BottomRight'. */
+            @param {string} corner - One of 'TopLeft', 'TopRight', 
+                'BottomLeft' or 'BottomRight'. */
         setRoundedCorner = (view, radius, corner) => {
             view.getODS()['border' + corner + 'Radius'] = radius + 'px';
         };
@@ -191,7 +193,8 @@
             width:number (supressable)
             height:number (supressable)
             boundsWidth:number Fired when the bounds width of the view changes.
-            boundsHeight:number Fired when the bounds height of the view changes.
+            boundsHeight:number Fired when the bounds height of the 
+                view changes.
             textColor:string
             bgColor:string
             opacity:number
@@ -199,9 +202,11 @@
             visible:boolean
             cursor:string
             subviewAdded:myt.View Fired when a subview is added to this view.
-            subviewRemoved:myt.View Fired when a subview is removed from this view.
+            subviewRemoved:myt.View Fired when a subview is removed from 
+                this view.
             layoutAdded:myt.Layout Fired when a layout is added to this view.
-            layoutRemoved:myt.Layout Fired when a layout is removed from this view.
+            layoutRemoved:myt.Layout Fired when a layout is removed from 
+                this view.
         
         Attributes:
             tagName:string Determines the name of the DOM element to create for
@@ -256,32 +261,34 @@
                 bounds. Allowed values: 'visible', 'hidden', 'scroll', 'auto', 
                 'autoy', 'autox' and 'inherit'. Defaults to undefined which 
                 is equivalent to 'visible'.
-            visible:boolean Makes this view visible or not. The default value is 
-                true which means visbility is inherited from the parent view.
-            cursor:string Determines what cursor to show when moused over the view.
-                Allowed values: 'auto', 'move', 'no-drop', 'col-resize', 
-                'all-scroll', 'pointer', 'not-allowed', 'row-resize', 'crosshair', 
-                'progress', 'e-resize', 'ne-resize', 'default', 'text', 'n-resize', 
-                'nw-resize', 'help', 'vertical-text', 's-resize', 'se-resize', 
-                'inherit', 'wait', 'w-resize', 'sw-resize'. Defaults to undefined 
-                which is equivalent to 'auto'.
-            pointerEvents:string Determines if this view responds to pointer events
-                or not. Supported values: 'none', 'auto' and 'inherit'. Defaults 
-                to undefined which is equivalent to 'auto'.
-            outlineWidth:number The width of the CSS outline. If a value equivalent
-                to false is provided 0 will be used.
+            visible:boolean Makes this view visible or not. The default 
+                value is true which means visbility is inherited from the 
+                parent view.
+            cursor:string Determines what cursor to show when moused over the 
+                view. Allowed values: 'auto', 'move', 'no-drop', 'col-resize', 
+                'all-scroll', 'pointer', 'not-allowed', 'row-resize', 
+                'crosshair', 'progress', 'e-resize', 'ne-resize', 'default', 
+                'text', 'n-resize', 'nw-resize', 'help', 'vertical-text', 
+                's-resize', 'se-resize', 'inherit', 'wait', 'w-resize', 
+                'sw-resize'. Defaults to undefined which is equivalent 
+                to 'auto'.
+            pointerEvents:string Determines if this view responds to pointer 
+                events or not. Supported values: 'none', 'auto' and 'inherit'. 
+                Defaults to undefined which is equivalent to 'auto'.
+            outlineWidth:number The width of the CSS outline. If a value 
+                equivalent to false is provided 0 will be used.
             outlineStyle:string The CSS outline style. If null or undefined is 
-                provided 'none' will be used. Supported values: 'none', 'dotted', 
-                'dashed', 'solid', 'double', 'groove', 'ridge', 'inset', 
-                'outset', 'inherit'.
+                provided 'none' will be used. Supported values: 'none', 
+                'dotted', 'dashed', 'solid', 'double', 'groove', 'ridge', 
+                'inset', 'outset', 'inherit'.
             outlineColor:string Sets the color of the CSS outline. If null or 
                 undefined is provided '#000000' will be used.
-            borderWidth:number The width of the CSS border. If a value equivalent 
-                to false is provided 0 will be used.
+            borderWidth:number The width of the CSS border. If a value 
+                equivalent to false is provided 0 will be used.
             borderStyle:string The CSS border style. If null or undefined is 
-                provided 'none' will be used. Supported values: 'none', 'dotted', 
-                'dashed', 'solid', 'double', 'groove', 'ridge', 'inset', 
-                'outset', 'inherit'.
+                provided 'none' will be used. Supported values: 'none', 
+                'dotted', 'dashed', 'solid', 'double', 'groove', 'ridge', 
+                'inset', 'outset', 'inherit'.
             borderColor:string Sets the color of the CSS border. If null or 
                 undefined is provided '#000000' will be used.
             tooltip:string Sets a tooltip for this view. The basic 
@@ -360,8 +367,9 @@
         },
         
         /** @overrides myt.Node 
-            Subclasses should call super if they don't call __updateBounds. The call
-            to super should probably occur at the end of the overridden method. */
+            Subclasses should call super if they don't call __updateBounds. 
+            The call to super should probably occur at the end of the 
+            overridden method. */
         doAfterAdoption: function() {
             // Must be done after the dom element is inserted so that calls to
             // getBoundingClientRect will work.
@@ -400,12 +408,14 @@
         },
         
         /** Gets the views that are our siblings.
-            @returns {!Array} of myt.View or undefined if this view is orphaned. */
+            @returns {!Array} of myt.View or undefined if this view 
+                is orphaned. */
         getSiblingViews: function() {
             if (this.parent) {
                 // Using filter ensures we have a copy of the subviews since we 
                 // will modify it and do not want to modify the original array.
-                // Remove ourselves from the subviews since we only want siblings.
+                // Remove ourselves from the subviews since we only want 
+                // siblings.
                 return this.parent.getSubviews().filter(sv => sv !== this);
             }
         },
@@ -635,9 +645,10 @@
                 const ods = self.getODS();
                 ods.visibility = v ? 'inherit' : 'hidden';
                 
-                // Move invisible elements to a very negative location so they won't
-                // effect scrollable area. Ideally we could use display:none but we
-                // can't because that makes measuring bounds not work.
+                // Move invisible elements to a very negative location so they 
+                // won't effect scrollable area. Ideally we could use 
+                // display:none but we can't because that makes measuring 
+                // bounds not work.
                 ods.left = v ? self.x + 'px' : '-100000px';
                 ods.top = v ? self.y + 'px' : '-100000px';
                 
@@ -675,8 +686,8 @@
         /** Sets outlineWidth, outlineStyle and outlineColor via a single 
             array. If a value equivalent to false is provided the outline 
             will be supressed.
-            @param {?Array} v - An array where index 0 is outlineWidth, index 1 is outline 
-                style and index 2 is outlineColor.
+            @param {?Array} v - An array where index 0 is outlineWidth, index 
+                1 is outline style and index 2 is outlineColor.
             @returns {undefined} */
         setOutline: function(v) {
             v = v || [];
@@ -702,8 +713,8 @@
         /** Sets borderWidth, borderStyle and borderColor via a single 
             array. If a value equivalent to false is provided the border 
             will be supressed.
-            @param {?Array} v - An array where index 0 is borderWidth, index 1 is border 
-                style and index 2 is borderColor.
+            @param {?Array} v - An array where index 0 is borderWidth, index 
+                1 is border style and index 2 is borderColor.
             @returns {undefined} */
         setBorder: function(v) {
             v = v || [];
@@ -762,9 +773,9 @@
         },
         
         /** Sets the CSS boxShadow property.
-            @param {?Array} v - An array where index 0 is the horizontal shadow offset,
-                index 1 is the vertical shadow offset, index 2 is the blur amount,
-                and index 3 is the color.
+            @param {?Array} v - An array where index 0 is the horizontal 
+                shadow offset, index 1 is the vertical shadow offset, index 
+                2 is the blur amount, and index 3 is the color.
             @returns {undefined} */
         setBoxShadow: function(v) {
             if (v) {
@@ -779,23 +790,23 @@
             this.getODS().boxShadow = v;
         },
         
-        /** Sets the CSS liner-gradient or radial-gradient property. Setting this
-            property will take the place of any bgColor used in the view.
+        /** Sets the CSS liner-gradient or radial-gradient property. Setting 
+            this property will take the place of any bgColor used in the view.
             @param {?Array} v - An array where:
                 index 0: is the gradient type: linear or radial
                 index 1: is the geometry of the gradient.
                     radial: The value "cover" / "farthest-corner" or 
                         "contain" / "closest-side"
                     linear: A number will be interpreted as the degrees or a
-                        string must be one of: top, top right, right, bottom right,
-                            bottom, bottom left, left, top left
-                index 3+: Are the color stops which must be a valid CSS color. If
-                    the first and second color stops will default to the textColor
-                    and bgColor properties of this view if not provided. Use of the
-                    rgba(0-255,0-255,0-255,0-1) syntax is a good way to designate 
-                    colors since it will let you use an opacity. For a more 
-                    comprehensive description of how to specify color stops see: 
-                    https://developer.mozilla.org/en-US/docs/Web/CSS/linear-gradient
+                        string must be one of: top, top right, right, bottom 
+                        right, bottom, bottom left, left, top left
+                index 3+: Are the color stops which must be a valid CSS color. 
+                    If the first and second color stops will default to the 
+                    textColor and bgColor properties of this view if not 
+                    provided. Use of the rgba(0-255,0-255,0-255,0-1) syntax is 
+                    a good way to designate colors since it will let you use 
+                    an opacity. For a more comprehensive description of how to 
+                    specify color stops see: https://developer.mozilla.org/en-US/docs/Web/CSS/linear-gradient
             @returns {undefined} */
         setGradient: function(v) {
             const self = this,
@@ -867,8 +878,8 @@
                 ods.background = 'none';
             }
             
-            // Wipe the bgColor property since setting style.background replaces 
-            // the bgColor.
+            // Wipe the bgColor property since setting style.background 
+            // replaces the bgColor.
             self.bgColor = undefined;
         },
         
@@ -892,10 +903,12 @@
             return this.searchAncestorsOrSelf(v => !v.visible) === null;
         },
         
-        /** Finds the youngest ancestor (or self) that is a focusTrap or focusCage.
+        /** Finds the youngest ancestor (or self) that is a focusTrap or 
+            focusCage.
             @param {boolean} ignoreFocusTrap - indicates focusTraps should be
                 ignored.
-            @returns {?Object} a View with focusTrap set to true or null if not found. */
+            @returns {?Object} a View with focusTrap set to true or null if 
+                not found. */
         getFocusTrap: function(ignoreFocusTrap) {
             return this.searchAncestorsOrSelf(v => v.focusCage || (v.focusTrap && !ignoreFocusTrap));
         },
@@ -964,20 +977,21 @@
             return this.getSubviews().indexOf(sv);
         },
         
-        /** Called when a View is added to this View. Do not call this method to 
-            add a View. Instead call addSubnode or setParent.
+        /** Called when a View is added to this View. Do not call this method 
+            to add a View. Instead call addSubnode or setParent.
             @param {!Object} sv - The myt.View that was added.
             @returns {undefined} */
         subviewAdded: sv => {},
         
-        /** Called when a View is removed from this View. Do not call this method 
-            to remove a View. Instead call removeSubnode or setParent.
+        /** Called when a View is removed from this View. Do not call this 
+            method to remove a View. Instead call removeSubnode or setParent.
             @param {!Object} sv - The myt.View that was removed.
             @returns {undefined} */
         subviewRemoved: sv => {},
         
         /** Gets the next sibling view based on lexical ordering of dom elements.
-            @returns {?Object} - The next sibling myt.View or null if none exists. */
+            @returns {?Object} - The next sibling myt.View or null if 
+                none exists. */
         getNextSibling: function() {
             if (this.parent) {
                 const nextDomElement = this.getODE().nextElementSibling;
@@ -987,7 +1001,8 @@
         },
         
         /** Gets the previous sibling view.
-            @returns {?Object} - The previous sibling myt.View or null if none exists. */
+            @returns {?Object} - The previous sibling myt.View or null if 
+                none exists. */
         getPrevSibling: function() {
             if (this.parent) {
                 const prevDomElement = this.getODE().previousElementSibling;
@@ -1011,8 +1026,8 @@
             return this.getLayouts().indexOf(layout);
         },
         
-        /** Called when a Layout is added to this View. Do not call this method to 
-            add a Layout. Instead call addSubnode or setParent.
+        /** Called when a Layout is added to this View. Do not call this 
+            method to add a Layout. Instead call addSubnode or setParent.
             @param {!Object} layout - The myt.Layout that was added.
             @returns {undefined} */
         layoutAdded: layout => {},
@@ -1035,8 +1050,8 @@
             return comparePosition(this, view, false, checkZIndex);
         },
         
-        /** Test if the provided view is front of this view. The view to test can
-            be anywhere in the document.
+        /** Test if the provided view is front of this view. The view to test 
+            can be anywhere in the document.
             @param {!Object} view - The myt.View to check.
             @param {boolean} [checkZIndex] - If true z-index will first be
                 used to check if the view is in front or not.
@@ -1087,7 +1102,8 @@
         },
         
         /** Sends the provided subview to the back.
-            @param {?Object} sv - The sub myt.View of this myt.View to send to back.
+            @param {?Object} sv - The sub myt.View of this myt.View to send 
+                to back.
             @returns {undefined} */
         sendSubviewToBack: function(sv) {
             if (sv && sv.parent === this) {
@@ -1101,8 +1117,10 @@
         },
         
         /** Sends the subview behind the existing subview.
-            @param {!Object} sv - The sub myt.View to send behind the existing myt.View.
-            @param {?Object} existing - The sub myt.View to send the other sub myt.View behind.
+            @param {!Object} sv - The sub myt.View to send behind the 
+                existing myt.View.
+            @param {?Object} existing - The sub myt.View to send the other 
+                sub myt.View behind.
             @returns {undefined} */
         sendSubviewBehind: function(sv, existing) {
             if (sv && existing && sv.parent === this && existing.parent === this) {
@@ -1114,8 +1132,10 @@
         },
         
         /** Sends the subview in front of the existing subview.
-            @param {!Object} sv - the subview to send in front of the existing view.
-            @param {!Object} existing - the subview to send the other subview in front of.
+            @param {!Object} sv - the subview to send in front of the 
+                existing view.
+            @param {!Object} existing - the subview to send the other subview 
+                in front of.
             @returns {undefined} */
         sendSubviewInFrontOf: function(sv, existing) {
             if (sv && existing && sv.parent === this && existing.parent === this) {
@@ -1127,7 +1147,8 @@
         /** Sorts the subviews array according to the provided sort function.
             Also rearranges the dom elements so that focus navigation and z
             ordering get updated.
-            @param {!Function} sortFunc - The sort function to sort the subviews with.
+            @param {!Function} sortFunc - The sort function to sort the 
+                subviews with.
             @returns {undefined} */
         sortSubviews: function(sortFunc) {
             // Sort subviews

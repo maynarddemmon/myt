@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const JSClass = JS.Class,
         SizeToDom = pkg.SizeToDom,
         View = pkg.View,
@@ -244,8 +244,8 @@
                 const domEvent = event.value,
                     charCode = domEvent.which;
                 
-                // Firefox fires events for arrow keys and backspace which should be
-                // ignored completely.
+                // Firefox fires events for arrow keys and backspace which 
+                // should be ignored completely.
                 switch (charCode) {
                     case 8: // backspace key
                     case 0: // arrow keys have a "charCode" of 0 in firefox.
@@ -259,14 +259,14 @@
                 this.filterInputPress(domEvent);
             },
             
-            /** A hook for subclasses/instances to do input filtering. The default
-                implementation returns the value unchanged.
+            /** A hook for subclasses/instances to do input filtering. The 
+                default implementation returns the value unchanged.
                 @param {string} v - the current value of the form element.
                 @returns {string} The new value of the form element. */
             filterInput: v => v,
             
-            /** A hook for subclasses/instances to do input filtering during key press.
-                The default implementation does nothing.
+            /** A hook for subclasses/instances to do input filtering during 
+                key press. The default implementation does nothing.
                 @param {!Object} domEvent - The dom key press event.
                 @returns {undefined} */
             filterInputPress: domEvent => {},
@@ -292,8 +292,8 @@
             },
             
             /** Sets the caret and selection.
-                @param start:int the start of the selection or location of the caret
-                    if no end is provided.
+                @param start:int the start of the selection or location of 
+                    the caret if no end is provided.
                 @param end:int (optional) the end of the selection.
                 @returns {undefined} */
             setCaretPosition: function(start, end) {
@@ -588,8 +588,9 @@
             wrap:string
         
         Attributes:
-            resize:string Sets how the textarea can be resized. Defaults to 'none'.
-                Allowed values: 'none', 'both', 'horizontal', 'vertical'.
+            resize:string Sets how the textarea can be resized. Defaults to 
+                'none'. Allowed values: 'none', 'both', 'horizontal', 
+                'vertical'.
             wrap:string Sets how text will wrap. Defaults to 'soft'.
                 Allowed values: 'off', 'hard', 'soft'.
         
@@ -725,15 +726,15 @@
             value:string
         
         Attributes:
-            multiple:boolean Indicates if multiple options can be selected or not.
-                Defaults to false.
+            multiple:boolean Indicates if multiple options can be selected 
+                or not. Defaults to false.
             size:int The number of options to show. The default value is 4 for
                 multiple == true and 1 for multiple == false. It is recommended
                 that a size of at least 4 be used when multiple is 2.
-            options:array (write only) Adds a list of options to this select list.
-                The value should be an array of myt.InputSelectOptions attrs that 
-                will be used to instantiate new myt.InputSelectOption instances on
-                this select list.
+            options:array (write only) Adds a list of options to this select 
+                list. The value should be an array of myt.InputSelectOptions 
+                attrs that will be used to instantiate new myt.InputSelectOption
+                instances on this select list.
         
         @class */
     pkg.InputSelect = new JSClass('InputSelect', NativeInputWrapper, {
@@ -840,7 +841,8 @@
         
         /** Destroys an option that has the provided value.
             @param value:* The value of the option to remove.
-            @returns boolean: true if the option is destroyed, false otherwise. */
+            @returns boolean: true if the option is destroyed, 
+                false otherwise. */
         destroyOptionWithValue: function(value) {
             const option = this.getOptionForValue(value);
             if (option) {

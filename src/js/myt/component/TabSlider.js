@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const JSClass = JS.Class,
         View = pkg.View,
         SizeToParent = pkg.SizeToParent,
@@ -6,27 +6,30 @@
         /** A tab slider component.
             
             Events:
-                expansionState:string Fired when the tab slider changes expansion state.
+                expansionState:string Fired when the tab slider changes 
+                    expansion state.
             
             Attributes:
                 tabId:string The unique ID for this tab slider relative to the
                     tab slider container that manages this tab slider.
-                tabContainer:myt.TabSliderContainer The tab slider container that 
-                    manages this tab.
-                buttonClass:JS.Class The class to use for the button portion of the
-                    tab slider. Defaults to myt.SimpleButton.
+                tabContainer:myt.TabSliderContainer The tab slider container 
+                    that manages this tab.
+                buttonClass:JS.Class The class to use for the button portion 
+                    of the tab slider. Defaults to myt.SimpleButton.
                 fillColorSelected:color The color of the button when selected.
                 fillColorHover:color The color of the button when moused over.
                 fillColorActive:color The color of the button while active.
-                fillColorReady:color The color of the button when ready for interaction.
-                buttonHeight:number The height of the button portion of the tab slider.
-                    Defaults to myt.TabSlider.DEFAULT_BUTTON_HEIGHT which is 30.
-                minContainerHeight:number The minimum height of the content container
-                    inside this tab slider. Defaults to 
+                fillColorReady:color The color of the button when ready for 
+                    interaction.
+                buttonHeight:number The height of the button portion of the 
+                    tab slider. Defaults to myt.TabSlider.DEFAULT_BUTTON_HEIGHT 
+                    which is 30.
+                minContainerHeight:number The minimum height of the content 
+                    container inside this tab slider. Defaults to 
                     myt.TabSlider.DEFAULT_MINIMUM_CONTAINER_HEIGHT which is 100.
-                expansionState:string Indicates the expansion state of the tab slider.
-                    Supported values are: 'expanded', 'expanding', 'collapsed' and
-                    'collapsing'. Defaults to 'collapsed'.
+                expansionState:string Indicates the expansion state of the tab 
+                    slider. Supported values are: 'expanded', 'expanding', 
+                    'collapsed' and 'collapsing'. Defaults to 'collapsed'.
             
             @class */
         TabSlider = pkg.TabSlider = new JSClass('TabSlider', View, {
@@ -69,7 +72,8 @@
                 if (attrs.fillColorReady == null) attrs.fillColorReady = TabSlider.DEFAULT_FILL_COLOR_READY;
                 if (attrs.minContainerHeight == null) attrs.minContainerHeight = TabSlider.DEFAULT_MINIMUM_CONTAINER_HEIGHT;
                 
-                // Selection must be done via the select method on the tabContainer
+                // Selection must be done via the select method on 
+                // the tabContainer
                 if (attrs.selected) {
                     initiallySelected = true;
                     delete attrs.selected;
@@ -189,8 +193,9 @@
                 if (btn) btn.setDisabled(this.disabled);
             },
             
-            /** Called whenever the button is redrawn. Gives subclasses/instances
-                a chance to do additional things when the button is redrawn.
+            /** Called whenever the button is redrawn. Gives 
+                subclasses/instances a chance to do additional things when 
+                the button is redrawn.
                 @returns {undefined} */
             notifyButtonRedraw: () => {},
             
@@ -242,23 +247,24 @@
                 }
             },
             
-            /** Gets the height of the tab slider when it is collapsed. Will be the
-                height of the button portion of the tab slider.
+            /** Gets the height of the tab slider when it is collapsed. Will 
+                be the height of the button portion of the tab slider.
                 @returns number */
             getCollapsedHeight: function() {
                 return this.buttonHeight;
             },
             
-            /** Gets the minimum height. Will be the smaller of the preferred height
-                or the buttonHeight + minContainerHeight. Thus, if the content is
-                smaller than the minContainerHeight extra space will not be shown.
+            /** Gets the minimum height. Will be the smaller of the preferred 
+                height or the buttonHeight + minContainerHeight. Thus, if the 
+                content is smaller than the minContainerHeight extra space 
+                will not be shown.
                 @returns number */
             getMinimumExpandedHeight: function() {
                 return Math.min(this.getPreferredExpandedHeight(), this.buttonHeight + this.minContainerHeight);
             },
             
-            /** Gets the preferred height that would allow the container to be shown
-                without vertical scrollbars.
+            /** Gets the preferred height that would allow the container to 
+                be shown without vertical scrollbars.
                 @returns number */
             getPreferredExpandedHeight: function() {
                 return this.buttonHeight + this.wrapper.container.height;
@@ -296,7 +302,7 @@
             },
             
             
-            // Accessors ///////////////////////////////////////////////////////////////
+            // Accessors ///////////////////////////////////////////////////////
             setLabelTextColorChecked: function(v) {this.labelTextColorChecked = v;},
             setLabelTextColor: function(v) {this.labelTextColor = v;},
             
@@ -309,7 +315,7 @@
             },
             
             
-            // Methods /////////////////////////////////////////////////////////////////
+            // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.TabSlider */
             notifyButtonRedraw: function() {
                 const label = this.button.label;

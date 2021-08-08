@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const SizeToParent = pkg.SizeToParent,
         View = pkg.View,
         
@@ -76,7 +76,8 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** A handler for mouse events that does nothing and prevents propogation.
+        /** A handler for mouse events that does nothing and prevents 
+            propogation.
             @param {!Object} event
             @return boolean True so that the dom event gets eaten. */
         eatMouseEvent: event => true,
@@ -97,7 +98,8 @@
         },
         
         /** Hides the dimmer and restores focus if necessary.
-            @param {boolean} [ignoreRestoreFocus] - When true focus will not be restored.
+            @param {boolean} [ignoreRestoreFocus] - When true focus will not 
+                be restored.
             @returns {undefined} */
         hide: function(ignoreRestoreFocus) {
             const self = this;

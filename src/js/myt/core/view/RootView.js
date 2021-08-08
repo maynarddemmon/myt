@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const roots = pkg.global.roots,
         
         /** Allows a view to act as a "root" for a view hierarchy. A "root" 

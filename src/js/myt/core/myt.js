@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     /*
      * http://github.com/maynarddemmon/myt
      * Maynard Demmon <maynarddemmon@gmail.com>
@@ -134,8 +134,8 @@
                 non-string value is provided it is verified to be a JS.Class 
                 object.
                 @param {*} value - The value to resolve and/or verify.
-                @returns {?Function} - A JS.Class or null if the string could not 
-                    be resolved or the value was not a JS.Class object. */
+                @returns {?Function} - A JS.Class or null if the string could 
+                    not be resolved or the value was not a JS.Class object. */
             resolveClassname: value => {
                 if (typeof value === 'string') value = myt.resolveName(value);
                 
@@ -179,8 +179,8 @@
                                 // Prevent refiring callback
                                 r = true;
                                 
-                                // Prevent later events from this script for example
-                                // if the src is changed.
+                                // Prevent later events from this script for
+                                // example if the src is changed.
                                 s.onload = s.onreadystatechange = null;
                                 
                                 callback();
@@ -188,8 +188,8 @@
                         };
                     }
                     
-                    // Must set src AFTER adding onreadystatechange listener otherwise
-                    // we’ll miss the loaded event for cached scripts
+                    // Must set src AFTER adding onreadystatechange listener 
+                    // otherwise we’ll miss the loaded event for cached scripts
                     s.src = src + (noCacheBust ? '' : (src.indexOf('?') !== -1 ? '&' : '?') + 'cacheBust=' + Date.now());
                     
                     this.getElement('head').appendChild(s);
@@ -215,7 +215,8 @@
             },
             
             // Random numbers
-            /** Generates a random number between 0 (inclusive) and 1 (exclusive)
+            /** Generates a random number between 0 (inclusive) and 
+                1 (exclusive)
                 @param {?Function} [func] - A distribution function for the
                     random numbers. The function should map a number between 0 
                     and 1 to another number between 0 (inclusive) and 1 
@@ -345,7 +346,7 @@
             
             loadFontFace: (fontName, fontUrl, fontOptions={}, callback) => {
                 const fontFace = new FontFace(fontName, 'url(' + fontUrl + ')', fontOptions);
-                fontFace.loaded.then((loadedFontFace) => {
+                fontFace.loaded.then(loadedFontFace => {
                     docFonts.add(loadedFontFace);
                     notifyFontLoaded(loadedFontFace);
                     if (callback) callback(loadedFontFace);
@@ -591,7 +592,8 @@
                             if (raw) {
                                 successFunc(response);
                             } else {
-                                // Throw application errors to the catch clause below
+                                // Throw application errors to the catch 
+                                // clause below
                                 if (response.success === false) throw new FetchError(200, url, response.message);
                                 successFunc(response.data);
                             }

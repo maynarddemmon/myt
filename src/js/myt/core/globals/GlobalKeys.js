@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     let globalKeys,
         
         /* A map of keycodes of the keys currently pressed down. */
@@ -16,12 +16,12 @@
         KEYCODE_COMMAND = isFirefox ? 224 : 91,
         KEYCODE_RIGHT_COMMAND = isFirefox ? 224 : 93,
         
-        getKeyCodeFromEvent = (event) => pkg.KeyObservable.getKeyCodeFromEvent(event),
+        getKeyCodeFromEvent = event => pkg.KeyObservable.getKeyCodeFromEvent(event),
         
         /*  Tests if a key is currently pressed down or not. Returns true if 
             the key is down, false otherwise.
                 param keyCode:number the key to test. */
-        isKeyDown = (keyCode) => !!keysDown[keyCode],
+        isKeyDown = keyCode => !!keysDown[keyCode],
         
         /* Tests if the 'shift' key is down. */
         isShiftKeyDown = () => isKeyDown(KEYCODE_SHIFT),
@@ -43,8 +43,8 @@
         shouldPreventDefault = (keyCode, targetElem) => {
             switch (keyCode) {
                 case 8: // Backspace
-                    // Catch backspace since it navigates the history. Allow it to
-                    // go through for text input elements though.
+                    // Catch backspace since it navigates the history. Allow 
+                    // it to go through for text input elements though.
                     const nodeName = targetElem.nodeName;
                     if (nodeName === 'TEXTAREA' || 
                         (nodeName === 'INPUT' && (targetElem.type === 'text' || targetElem.type === 'password')) ||
@@ -186,7 +186,7 @@
         ],
         
         
-        // Constructor /////////////////////////////////////////////////////////////
+        // Constructor /////////////////////////////////////////////////////////
         initialize: function() {
             G.register('keys', globalKeys = this);
             
@@ -203,15 +203,15 @@
             globalKeys.attachTo(globalFocus, '__handleFocused', 'focused');
             globalKeys.__listenToDocument();
             
-            // Clear keys down when the window loses focus. This is necessary when
-            // using keyboard shortcusts to switch apps since that will leave
-            // a key in the down state even though it may no longer be when the
-            // focus is returned to the page.
+            // Clear keys down when the window loses focus. This is necessary 
+            // when using keyboard shortcusts to switch apps since that will 
+            // leave a key in the down state even though it may no longer be 
+            // when the focus is returned to the page.
             global.onblur = () => {keysDown = {};};
         },
         
         
-        // Methods /////////////////////////////////////////////////////////////////
+        // Methods /////////////////////////////////////////////////////////////
         isKeyDown: isKeyDown,
         isShiftKeyDown: isShiftKeyDown,
         isControlKeyDown: isControlKeyDown,
@@ -224,7 +224,7 @@
         /** @private
             @param {!Object} event
             @returns {undefined} */
-        __handleFocused: (event) => {
+        __handleFocused: event => {
             const focused = event.value;
             if (focused) {
                 // unlisten to document
@@ -258,7 +258,7 @@
         /** @private
             @param {!Object} event
             @returns {undefined} */
-        __handleKeyDown: (event) => {
+        __handleKeyDown: event => {
             const keyCode = getKeyCodeFromEvent(event),
                 domEvent = event.value;
             if (shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
@@ -289,14 +289,14 @@
         /** @private
             @param {!Object} event
             @returns {undefined} */
-        __handleKeyPress: (event) => {
+        __handleKeyPress: event => {
             globalKeys.fireEvent('keypress', getKeyCodeFromEvent(event));
         },
         
         /** @private
             @param {!Object} event
             @returns {undefined} */
-        __handleKeyUp: (event) => {
+        __handleKeyUp: event => {
             const keyCode = getKeyCodeFromEvent(event),
                 domEvent = event.value;
             if (shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();

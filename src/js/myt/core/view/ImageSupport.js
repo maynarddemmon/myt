@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const 
         /*  Stores widths and heights of images by URL so we don't have to
             reload them to get sizes. */

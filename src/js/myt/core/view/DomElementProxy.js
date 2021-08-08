@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const GLOBAL = global,
         getComputedStyle = GLOBAL.getComputedStyle,
         DOCUMENT_ELEMENT = document;
@@ -27,8 +27,9 @@
             /** Tests if a dom element is visible or not.
                 @param {!Object} elem - The dom element to check visibility for.
                 @returns {boolean} - True if visible, false otherwise. */
-            isDomElementVisible: (elem) => {
-                // Special Case: hidden input elements should be considered not visible.
+            isDomElementVisible: elem => {
+                // Special Case: hidden input elements should be considered 
+                // not visible.
                 if (elem.nodeName === 'INPUT' && elem.type === 'hidden') return false;
                 
                 while (elem) {
@@ -124,7 +125,8 @@
                     y = 0;
                 
                 // elem.nodeName !== "BODY" test prevents looking at the body
-                // which causes problems when the document is scrolled on webkit.
+                // which causes problems when the document is scrolled 
+                // on webkit.
                 while (elem && elem.nodeName !== "BODY" && elem !== ancestorElem) {
                     x += elem.offsetLeft;
                     y += elem.offsetTop;

@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const win = window;
         
         /* The inner width of the browser window. */
@@ -16,9 +16,7 @@
                     w:number the new window width.
                     h:number the new window height.
         
-        Attributes:
-            None
-    */
+        @class */
     new JS.Singleton('GlobalWindowResize', {
         include: [pkg.Observable],
         

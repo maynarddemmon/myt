@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const AccessorSupport = pkg.AccessorSupport,
     
         /*  A data structure of groups stored as a map of maps. First 
@@ -248,7 +248,8 @@
                         groups.splice(i, 1);
                         group.unregister(this);
                     } else if (g.attrName === attrName) {
-                        // Don't detach if another group is listening to the same attr.
+                        // Don't detach if another group is listening to 
+                        // the same attr.
                         detach = false;
                     }
                 }

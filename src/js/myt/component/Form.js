@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     let undefToEmptyValueProcessor;
     
     const JSClass = JS.Class,
@@ -128,7 +128,8 @@
         ValueProcessor = pkg.ValueProcessor = new JSClass('ValueProcessor', {
             // Constructor /////////////////////////////////////////////////////
             /** Creates a new ValueProcessor
-                @param {string} id - The ideally unique ID for a processor instance.
+                @param {string} id - The ideally unique ID for a processor 
+                    instance.
                 @param {boolean} [runForDefault]
                 @param {boolean} [runForRollback]
                 @param {boolean} [runForCurrent]
@@ -158,9 +159,9 @@
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.ValueProcessor */
             process: value => {
-                // Don't convert "empty" values to a number since they'll become zero
-                // which is probably incorrect. Also catch undefined/null values since
-                // they will become NaN.
+                // Don't convert "empty" values to a number since they'll 
+                // become zero which is probably incorrect. Also catch 
+                // undefined/null values since they will become NaN.
                 if (value == null || value === "" || value === "-") return value;
                 
                 const numericValue = Number(value);
@@ -179,7 +180,8 @@
         TrimValueProcessor = pkg.TrimValueProcessor = new JSClass('TrimValueProcessor', ValueProcessor, {
             // Constructor /////////////////////////////////////////////////////
             /** @overrides myt.ValueProcessor
-                @param {string} id - The ideally unique ID for a processor instance.
+                @param {string} id - The ideally unique ID for a processor 
+                    instance.
                 @param {boolean} [runForDefault]
                 @param {boolean} [runForRollback]
                 @param {boolean} [runForCurrent]
@@ -221,11 +223,13 @@
         UndefinedValueProcessor = pkg.UndefinedValueProcessor = new JSClass('UndefinedValueProcessor', ValueProcessor, {
             // Constructor /////////////////////////////////////////////////////
             /** @overrides myt.ValueProcessor
-                @param {string} id - The ideally unique ID for a processor instance.
+                @param {string} id - The ideally unique ID for a processor 
+                    instance.
                 @param {boolean} [runForDefault]
                 @param {boolean} [runForRollback]
                 @param {boolean} [runForCurrent]
-                @param {*} [defaultValue] - The default value to convert undefined to.
+                @param {*} [defaultValue] - The default value to convert 
+                    undefined to.
                 @returns {undefined} */
             initialize: function(id, runForDefault, runForRollback, runForCurrent, defaultValue) {
                 this.callSuper(id, runForDefault, runForRollback, runForCurrent);
@@ -383,8 +387,8 @@
             },
             
             /** Gets the value of this form. For a form this will be a map of
-                all the subform values by ID. Form elements should override this
-                to return an element specific value.
+                all the subform values by ID. Form elements should override 
+                this to return an element specific value.
                 @returns object */
             getValue: function() {
                 // Allow for superclass to have custom getValue behavior.
@@ -399,9 +403,9 @@
                 return retval;
             },
             
-            /** Sets the value of this form. For a form the value should be a map
-                containing values for each of the subform elements. The entries in
-                the map will be applied to each of the subforms.
+            /** Sets the value of this form. For a form the value should be a 
+                map containing values for each of the subform elements. The 
+                entries in the map will be applied to each of the subforms.
                 @param value:object the value to set.
                 @returns the value that was actually set. */
             setValue: function(value) {
@@ -426,9 +430,10 @@
                 return value;
             },
             
-            /** Gets the default value of this form. For a form this will be a 
-                map of all the subform default values by ID. Form elements 
-                should override this to return an element specific default value.
+            /** Gets the default value of this form. For a form this will be 
+                a map of all the subform default values by ID. Form elements 
+                should override this to return an element specific default 
+                value.
                 @returns object */
             getDefaultValue: function() {
                 const retval = {};
@@ -457,9 +462,10 @@
                 return value;
             },
             
-            /** Gets the rollback value of this form. For a form this will be a 
-                map of all the subform rollback values by ID. Form elements 
-                should override this to return an element specific rollback value.
+            /** Gets the rollback value of this form. For a form this will 
+                be a map of all the subform rollback values by ID. Form 
+                elements should override this to return an element specific 
+                rollback value.
                 @returns object */
             getRollbackValue: function() {
                 const retval = {}, 
@@ -623,7 +629,8 @@
                 @param subformToIgnore:myt.Form (optional) A subform that will 
                     not be checked for validity. This is typically the subform 
                     that is invoking this method.
-                @returns boolean true if this form is valid, false otherwise. */
+                @returns boolean true if this form is valid, 
+                    false otherwise. */
             verifyValidState: function(subformToIgnore) {
                 const subForms = this.__sf;
                 let isValid = true;
@@ -638,7 +645,8 @@
                 validation check across the entire form tree. Does not allow 
                 upwards cascade of validity check since this is intended to be 
                 a top down check.
-                @returns boolean true if this form is valid, false otherwise. */
+                @returns boolean true if this form is valid, 
+                    false otherwise. */
             doValidation: function() {
                 const subForms = this.__sf;
                 let isValid = true;
@@ -670,7 +678,8 @@
                 @param subformToIgnore:myt.Form (optional) A subform that will 
                     not be checked for changed state. This is typically the 
                     subform that is invoking this method.
-                @returns boolean true if this form is changed, false otherwise. */
+                @returns boolean true if this form is changed, 
+                    false otherwise. */
             verifyChangedState: function(subformToIgnore) {
                 const subForms = this.__sf;
                 let isChanged = false;
@@ -946,8 +955,8 @@
             },
             
             /** @overrides myt.Form
-                @returns The current value if this form is in the changed state,
-                    otherwise undefined. */
+                @returns The current value if this form is in the changed 
+                    state, otherwise undefined. */
             getChangedValue: function() {
                 return this.isChanged ? this.getValue() : undefined;
             }
@@ -973,8 +982,8 @@
                     Supported values are:
                         key: Validate as the user types.
                         blur: Validate when blurring out of the UI control
-                        blurWithKeyFix: The same as blur except we also validate 
-                            as the user types if currently invalid.
+                        blurWithKeyFix: The same as blur except we also 
+                            validate as the user types if currently invalid.
                         none: Don't do any validation when interacting with 
                             the field.
                     The default value is 'key'.
@@ -1488,7 +1497,7 @@
             @param identifiable:myt.ValueProcessor the ValueProcessor to remove.
             @returns {undefined} */
         unregister: identifiable => {
-            doFuncOnIdentifiable(identifiable, (id) => {
+            doFuncOnIdentifiable(identifiable, id => {
                 // Make sure the processor is in the repository then delete.
                 if (getValueProcessor(id)) delete processorsById[id];
             });

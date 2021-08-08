@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const queryParser = /(?:^|&)([^&=]*)=?([^&]*)/g,
         strictParser = /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/,
         looseParser = /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/;
@@ -41,9 +41,9 @@
         
         // Methods /////////////////////////////////////////////////////////////
         parse: function(str, loose) {
-            // match order: "source", "protocol", "authority", "userInfo", "user",
-            //              "password", "host", "port", "relative", "path", 
-            //              "directory", "file", "query", "anchor".
+            // match order: "source", "protocol", "authority", "userInfo", 
+            //              "user", "password", "host", "port", "relative", 
+            //              "path", "directory", "file", "query", "anchor".
             const self = this,
                 m = (loose ? looseParser : strictParser).exec(str);
             

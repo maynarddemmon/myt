@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     let globalFocus;
     
     const
@@ -95,9 +95,10 @@
                             if (!elem.disabled && !isNaN(elem.tabIndex) && 
                                 pkg.DomElementProxy.isDomElementVisible(elem)
                             ) {
-                                // Make sure the dom element isn't inside a maskFocus
+                                // Make sure the dom element isn't inside 
+                                // a maskFocus
                                 model = globalFocus.findModelForDomElement(elem);
-                                if (model && model.searchAncestorsOrSelf((n) => n.maskFocus === true)) {
+                                if (model && model.searchAncestorsOrSelf(n => n.maskFocus === true)) {
                                     // Is a masked dom element so ignore.
                                 } else {
                                     elem.focus();

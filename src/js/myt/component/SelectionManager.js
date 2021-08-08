@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const JSModule = JS.Module,
         GlobalKeys = pkg.global.keys,
     
@@ -29,14 +29,14 @@
                 return this.selected ? true : false;
             },
             
-            /** Checks if the provided myt.SelectionManager can select this object.
-                Returns true by default.
+            /** Checks if the provided myt.SelectionManager can select this 
+                object. Returns true by default.
                 @param {!Object} selectionManager
                 @returns {boolean} */
             canSelect: selectionManager => true,
             
-            /** Checks if the provided myt.SelectionManager can deselect this object.
-                Returns true by default.
+            /** Checks if the provided myt.SelectionManager can deselect this 
+                object. Returns true by default.
                 @param {!Object} selectionManager
                 @returns {boolean} */
             canDeselect: selectionManager => true
@@ -45,41 +45,44 @@
         /** Manages the selection of one or more items.
             
             Events:
-                itemSelected:object Fired when an item is selected. The event value is 
-                    the selected item.
-                itemDeselected:object Fired when an item is deselected. The event 
-                    value is the deselected item.
-                selectedCount:number Fired when the number of selected items changes.
+                itemSelected:object Fired when an item is selected. The event 
+                    value is the selected item.
+                itemDeselected:object Fired when an item is deselected. The 
+                    event value is the deselected item.
+                selectedCount:number Fired when the number of selected 
+                    items changes.
             
             Attributes:
-                itemSelectionId:string The name of the property on items that is used
-                    to differentiate them from each other for selection. The default
-                    value is 'id'.
-                maxSelected:number The maximum number of items that can be selected.
-                    If -1 is provided the count is unlimited. If 1 is provided attempts
-                    to select when an item is already selected will result in the
-                    existing selection being cleared and the the new item being
-                    selected. Defaults to -1.
+                itemSelectionId:string The name of the property on items that 
+                    is used to differentiate them from each other for 
+                    selection. The default value is 'id'.
+                maxSelected:number The maximum number of items that can be 
+                    selected. If -1 is provided the count is unlimited. If 1 
+                    is provided attempts to select when an item is already 
+                    selected will result in the existing selection being 
+                    cleared and the the new item being selected. Defaults to -1.
                 selectedCount:number The number of selected items.
             
             Private Attributes:
                 __selected:object A map of selected items by itemSelectionId.
                 __lastSelectedItem:object A reference to the last item that was
-                    selected. If this item is deselected this will get set to null.
+                    selected. If this item is deselected this will get set 
+                    to null.
             
             @class */
         SelectionManager = pkg.SelectionManager = new JSModule('SelectionManager', {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
                 /** Determines if we are in "add" mode for selection such that
-                    selections will only be increased not reduced. Typically this
-                    means the shift key is down.
+                    selections will only be increased not reduced. Typically 
+                    this means the shift key is down.
                     @returns {boolean} true if in add mode, false otherwise. */
                 isAddMode: () => GlobalKeys.isShiftKeyDown(),
                 
-                /** Determines if we are in "toggle" mode for selection such that
-                    selections can be added to or removed from incrementally. Typically 
-                    this means the control or command key is down.
+                /** Determines if we are in "toggle" mode for selection such 
+                    that selections can be added to or removed from 
+                    incrementally. Typically this means the control or command 
+                    key is down.
                     @returns {boolean} true if in add mode, false otherwise. */
                 isToggleMode: () => GlobalKeys.isAcceleratorKeyDown()
             },
@@ -159,7 +162,8 @@
             
             /** Checks if the item can be selected.
                 @param {!Object} item - The item to test.
-                @returns {boolean} True if selection is allowed, false otherwise. */
+                @returns {boolean} True if selection is allowed, false 
+                    otherwise. */
             canSelectItem: function(item) {
                 const ms = this.maxSelected, 
                     sc = this.selectedCount;
@@ -206,7 +210,7 @@
             /** Called when an item is deselected.
                 @param {!Object} item - The newly deselected myt.Selectable.
                 @returns {undefined} */
-            doDeselected: (item) => {},
+            doDeselected: item => {},
             
             /** Deselects the item with the provided item selection ID.
                 @param {string} itemSelectionId
@@ -217,7 +221,8 @@
             
             /** Checks if the item can be deselected.
                 @param {!Object} item
-                @returns {boolean}true if deselection is allowed, false otherwise. */
+                @returns {boolean}true if deselection is allowed, false 
+                    otherwise. */
             canDeselectItem: function(item) {
                 return item.canDeselect(this);
             },
@@ -240,8 +245,8 @@
                 return this.selectedCount === this.getSelectableItems().length;
             },
             
-            /** Gets a list of items that are potentially selectable by this manager.
-                By default assumes this is an myt.View and returns all 
+            /** Gets a list of items that are potentially selectable by this 
+                manager. By default assumes this is an myt.View and returns all 
                 myt.Selectable subviews.
                 @returns {!Array} */
             getManagedItems: function() {
@@ -255,7 +260,8 @@
                 return retval;
             },
             
-            /** Gets a list of items that can currently be selected by this manager.
+            /** Gets a list of items that can currently be selected by 
+                this manager.
                 @returns {!Array} */
             getSelectableItems: function() {
                 const items = this.getManagedItems();

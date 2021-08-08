@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const
         setupPercentOfParentWidthConstraint = stp => {
             const p = stp.parent;
@@ -31,20 +31,20 @@
             percentOfParentHeight:number
             
         Attributes:
-            percentOfParentWidthOffset:number An additional offset used to adjust
-                the width of the parent. Defaults to undefined which is
+            percentOfParentWidthOffset:number An additional offset used to 
+                adjust the width of the parent. Defaults to undefined which is
                 equivalent to 0.
-            percentOfParentHeightOffset:number An additional offset used to adjust
-                the height of the parent. Defaults to undefined which is
+            percentOfParentHeightOffset:number An additional offset used to 
+                adjust the height of the parent. Defaults to undefined which is
                 equivalent to 0.
             percentOfParentWidth:number The percent of the parent views width
-                to size this views width to. Should be a number between 0 and 100 
-                or a negative value which means don't do resizing. Defaults to 
-                undefined which is equivalent to a negative value.
+                to size this views width to. Should be a number between 0 and 
+                100 or a negative value which means don't do resizing. Defaults 
+                to undefined which is equivalent to a negative value.
             percentOfParentHeight:number The percent of the parent views height
-                to size this views height to. Should be a number between 0 and 100 
-                or a negative value which means don't do resizing. Defaults to 
-                undefined which is equivalent to a negative value.
+                to size this views height to. Should be a number between 0 and 
+                100 or a negative value which means don't do resizing. Defaults 
+                to undefined which is equivalent to a negative value.
         
         @class */
     pkg.SizeToParent = new JS.Module('SizeToParent', {

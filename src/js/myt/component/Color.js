@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const math = Math,
         mathMax = math.max,
         mathMin = math.min,
@@ -74,9 +74,12 @@
         /** Models a color as individual color channels.
             
             Attributes:
-                red:int The red channel. Will be an integer between 0 and 255.
-                green:int The green channel. Will be an integer between 0 and 255.
-                blue:int The blue channel. Will be an integer between 0 and 255.
+                red:int The red channel. Will be an integer between 0 
+                    and 255.
+                green:int The green channel. Will be an integer between 0 
+                    and 255.
+                blue:int The blue channel. Will be an integer between 0 
+                    and 255.
             
             @class */
         Color = pkg.Color = new JS.Class('Color', {
@@ -88,8 +91,10 @@
                 
                 /** Converts a number or string representation of a number to a 
                     two character hex string.
-                    @param {number|string} value - The number or string to convert.
-                    @returns {string} A two character hex string such as: '0c' or 'c9'. */
+                    @param {number|string} value - The number or string 
+                        to convert.
+                    @returns {string} A two character hex string 
+                        such as: '0c' or 'c9'. */
                 toHex: toHex,
                 
                 /** Converts red, green, and blue color channel numbers to a six 
@@ -168,7 +173,8 @@
                         lighter color. */
                 getLighterColor: (a, b) => makeColorFromNumber(a).isLighterThan(makeColorFromNumber(b)) ? a : b,
                 
-                /** Creates an RGB "color" number from the provided color channels.
+                /** Creates an RGB "color" number from the provided 
+                    color channels.
                     @param {number} red - The red channel
                     @param {number} green - The green channel
                     @param {number} blue - The blue channel

@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const JSClass = JS.Class,
         
         MIME_TYPES_BY_EXTENSION = {
@@ -94,11 +94,12 @@
                 }
             },
             
-            /** Provides an opportunity to prevent a file from being handled. The
-                default implementation returns the provided file argument.
+            /** Provides an opportunity to prevent a file from being handled. 
+                The default implementation returns the provided file argument.
                 @param file:File the file to be checked for handleability.
-                @returns file:File the file to be handled (possibly modified by this
-                    function) or something falsy if the file should not be handled. */
+                @returns file:File the file to be handled (possibly modified 
+                    by this function) or something falsy if the file should 
+                    not be handled. */
             filterFiles: file => file,
             
             /** @param {!Object} file
@@ -116,8 +117,8 @@
             
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                /** The attribute key used in a file to store the path for the file
-                    on the server. */
+                /** The attribute key used in a file to store the path for 
+                    the file on the server. */
                 FILE_ATTR_SERVER_PATH: 'serverPath',
                 
                 readFile: (file, handlerFunc) => {

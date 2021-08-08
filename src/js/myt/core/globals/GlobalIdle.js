@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const win = window,
         
         /* The idle event object that gets reused. */

@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const updateMonitoringSubview = (stc, sv, func) => {
             const axis = stc.axis;
             func = func.bind(stc);
@@ -13,8 +13,8 @@
             func(sv, 'update', 'visible');
         };
     
-    /** A special "layout" that resizes the parent to fit the children rather than
-        laying out the children.
+    /** A special "layout" that resizes the parent to fit the children rather 
+        than laying out the children.
         
         Events:
             axis:string
@@ -23,11 +23,12 @@
         
         Attributes:
             axis:string The axis along which to resize this view to fit its
-                children. Supported values are 'x', 'y' and 'both'. Defaults to 'x'.
-            paddingX:number Additional space added on the child extent along the
-                x-axis. Defaults to 0.
-            paddingY:number Additional space added on the child extent along the
-                y-axis. Defaults to 0.
+                children. Supported values are 'x', 'y' and 'both'. Defaults 
+                to 'x'.
+            paddingX:number Additional space added on the child extent along 
+                the x-axis. Defaults to 0.
+            paddingY:number Additional space added on the child extent along 
+                the y-axis. Defaults to 0.
         
         @class */
     pkg.SizeToChildren = new JS.Class('SizeToChildren', pkg.Layout, {

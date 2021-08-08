@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const objectAssign = Object.assign,
         
         /*  Function to convert a stored cookie value into a value that can

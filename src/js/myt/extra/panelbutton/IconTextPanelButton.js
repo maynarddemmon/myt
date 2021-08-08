@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const defAttr = pkg.AccessorSupport.defAttr;
     
     /** A mixin that adds an icon and text to the inside of a button.
@@ -19,15 +19,15 @@
             iconUrl:string The url for an image to display in the button.
             inset:number The left padding before the icon. Defaults to 0.
             outset:number The right padding after the text/icon. Defaults to 0.
-            textY:number|string The y offset for the text. If a string it must be
-                a valign value: 'top', 'middle' or 'bottom'.
-            iconY:number|string The y offset for the icon. If a string it must be
-                a valign value: 'top', 'middle' or 'bottom'.
-            iconSpacing:number The spacing between the iconView and the textView. 
-                Defaults to 2.
-            shrinkToFit:boolean When true the button will be as narrow as possible
-                to fit the text, icon, inset and outset. When false the button 
-                will be as wide as the set width. Defaults to false.
+            textY:number|string The y offset for the text. If a string it must 
+                be a valign value: 'top', 'middle' or 'bottom'.
+            iconY:number|string The y offset for the icon. If a string it must 
+                be a valign value: 'top', 'middle' or 'bottom'.
+            iconSpacing:number The spacing between the iconView and the 
+                textView. Defaults to 2.
+            shrinkToFit:boolean When true the button will be as narrow as 
+                possible to fit the text, icon, inset and outset. When false 
+                the button will be as wide as the set width. Defaults to false.
             contentAlign:string Determines how the icon and text will be 
                 positioned when not in shrinkToFit mode. Allowed values are: 
                 'left', 'center' and 'right'. Defaults to 'center'.

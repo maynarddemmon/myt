@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     let fireGlobalDragManagerEvent,
         
         /* The view currently being dragged. */
@@ -16,7 +16,7 @@
             when drag and drop events occur. */
         dropTargets = [],
         
-        setOverView = (v) => {
+        setOverView = v => {
             const existingOverView = overView;
             if (existingOverView !== v) {
                 if (existingOverView) {

@@ -1,31 +1,40 @@
-((pkg) => {
+(pkg => {
     const defAttr = pkg.AccessorSupport.defAttr,
         
         /** An myt.Dimmer that also provides a content panel.
             
             Attributes:
                 content:myt.View The content view placed inside the dimmer.
-                sizingStrategy:string Determines how the content view is positioned
-                    relative to the bounds of the dimmer. Supported values are:
-                        children: The content will be sized to fit the children it
-                            contains. The content will be positioned in the center and
-                            middle of the dimmer. This is the default sizingStrategy
-                        parent: The content will be sized to the bounds of the dimmer.
-                        basic: The content will not be sized in any way. It will be
-                            positioned in the center and middle of the dimmer.
-                        none: The content will not be sized or positioned in any way.
-                marginTop:number The margin above the content when the sizingStrategy
-                    is "parent". Defaults to 40 if not provided.
-                marginLeft:number The margin on the left side of the content when 
-                    the sizingStrategy is "parent". Defaults to 40 if not provided.
+                sizingStrategy:string Determines how the content view is 
+                    positioned relative to the bounds of the dimmer. Supported 
+                    values are:
+                        children: The content will be sized to fit the children 
+                            it contains. The content will be positioned in the 
+                            center and middle of the dimmer. This is the 
+                            default sizingStrategy
+                        parent: The content will be sized to the bounds of 
+                            the dimmer.
+                        basic: The content will not be sized in any way. It 
+                            will be positioned in the center and middle of 
+                            the dimmer.
+                        none: The content will not be sized or positioned in 
+                            any way.
+                marginTop:number The margin above the content when the 
+                    sizingStrategy is "parent". Defaults to 40 if not provided.
+                marginLeft:number The margin on the left side of the content 
+                    when the sizingStrategy is "parent". Defaults to 40 if 
+                    not provided.
                 marginBottom:number The margin below the content when the 
                     sizingStrategy is "parent". Defaults to 40 if not provided.
-                marginRight:number The margin on the right side of the content when 
-                    the sizingStrategy is "parent". Defaults to 40 if not provided.
-                paddingX:number The internal horizontal padding when the sizingStrategy
-                    is "children". Defaults to 20 if not provided.
-                paddingY:number The internal vertical padding when the sizingStrategy
-                    is "children". Defaults to 15 if not provided.
+                marginRight:number The margin on the right side of the content 
+                    when the sizingStrategy is "parent". Defaults to 40 if 
+                    not provided.
+                paddingX:number The internal horizontal padding when the 
+                    sizingStrategy is "children". Defaults to 20 if 
+                    not provided.
+                paddingY:number The internal vertical padding when the 
+                    sizingStrategy is "children". Defaults to 15 if 
+                    not provided.
                 
             @class */
         ModalPanel = pkg.ModalPanel = new JS.Class('ModalPanel', pkg.Dimmer, {

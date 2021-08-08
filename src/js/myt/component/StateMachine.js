@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const 
         /* Indicates a synchronous transition. */
         SYNC = 'sync',
@@ -9,7 +9,7 @@
         /* Special state name that holds transitions for all states. */
         WILDCARD = '*',
         
-        resetTransitionProgress = (stateMachine) => {
+        resetTransitionProgress = stateMachine => {
             stateMachine.__additionalArgs = [];
             stateMachine.__pendingTransition = '';
             stateMachine.__transDestinationState = '';
@@ -52,7 +52,7 @@
             }
         },
         
-        doDeferredTransitions = (stateMachine) => {
+        doDeferredTransitions = stateMachine => {
             stateMachine.__transInProgress = false;
             
             const deferredTransitions = stateMachine.__deferredTransitions;
@@ -85,8 +85,8 @@
         Private Attributes:
             __transInProgress:boolean Indicates that a transition is 
                 currently under way.
-            __pendingTransition:string The name of the transition that is currently
-                under way.
+            __pendingTransition:string The name of the transition that is 
+                currently under way.
             __additionalArgs:array An array of additional args passed into the
                 doTransition or doAsyncTransition methods.
             __transDestinationState: The state the currently running 
@@ -102,7 +102,8 @@
         extend: {
             /** The transition was successfull. */
             SUCCEEDED:1,
-            /** The transition was cancelled before the state change occurred. */
+            /** The transition was cancelled before the state change 
+                occurred. */
             CANCELLED:2,
             /** An asynchronous transition is in progress. */
             PENDING:3,

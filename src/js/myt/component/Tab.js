@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const JSModule = JS.Module,
     
         defAttr = pkg.AccessorSupport.defAttr,
@@ -35,8 +35,10 @@
                 myt.Activateable
             
             Attributes:
-                tabId:string The unique ID of this tab relative to its tab container.
-                tabContainer:myt.TabContainer The tab container that manages this tab.
+                tabId:string The unique ID of this tab relative to its tab 
+                    container.
+                tabContainer:myt.TabContainer The tab container that manages 
+                    this tab.
             
             @class */
         TabMixin = pkg.TabMixin = new JSModule('TabMixin', {
@@ -49,7 +51,8 @@
                 if (attrs.tabId == null) attrs.tabId = pkg.generateGuid();
                 if (attrs.tabContainer == null) attrs.tabContainer = parent;
                 
-                // Selection must be done via the select method on the tabContainer
+                // Selection must be done via the select method on 
+                // the tabContainer
                 let initiallySelected;
                 if (attrs.selected) {
                     initiallySelected = true;
@@ -170,9 +173,9 @@
             
             Attributes:
                 layout:myt.SpacedLayout The layout for the tabs.
-                location:string The location of the tabs relative to the container.
-                    Supported values are: 'top', 'bottom', 'left' and 'right'. Defaults
-                    to 'top'.
+                location:string The location of the tabs relative to the 
+                    container. Supported values are: 'top', 'bottom', 'left' 
+                    and 'right'. Defaults to 'top'.
                 spacing:number The spacing between tabs. Defaults to 1.
                 inset:number The inset for the layout. Defaults to 0.
             

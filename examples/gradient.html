@@ -2,30 +2,56 @@
 <title>Myt Framework : Gradient Example</title>
 <link rel="stylesheet" href="../src/css/myt.css"/>
 <script src="../src/js/boilerplate.js"></script>
-<script src="../dist/myt.min.js"></script>
+<script src="../dist/loader-browser.min.js"></script>
+<script src="../src/js/myt/manifest.js"></script>
 </head><body>
 <script>
-    var rootView = new myt.View(null, {
-        imageUrl:'./img/transparent_pattern.png',
-        imageRepeat:'both'
-    }, [myt.SizeToWindow, myt.ImageSupport]);
-    
-    new myt.View(rootView, {
-        width:100, height:100,
-        gradient:[0, 'rgba(255,0,0,0.25)','rgba(0,255,0,1)']
+    JS.require('myt.all', () => {
+        const M = myt,
+            View = M.View,
+            Color = M.Color,
+            rootView = new View(null, {
+                domClass:'mytCheckerboardPattern'
+            }, [M.SizeToWindow]);
+        
+        // CSS Gradients
+        new View(rootView, {
+            width:100, height:100,
+            gradient:[0, 'rgba(255,0,0,0.25)','rgba(0,255,0,1)']
+        });
+        
+        new View(rootView, {
+            width:100, height:100,
+            bgColor:'#ffffff',
+            gradient:[0, 'rgba(255,0,0,0.5)','rgba(0,255,0,0.5)']
+        });
+        
+        new View(rootView, {
+            width:100, height:100,
+            gradient:['radial', 'farthest-corner', 'circle', 'center', 'rgba(255,0,0,0.5) 25%', 'rgba(0,255,0,1) 50%', '#0000ff 75%']
+        });
+        
+        // Canvas Gradients
+        const canvasView = new M.Canvas(rootView, {
+            width:100, height:100
+        });
+        canvasView.drawAnnulus(
+            50, 50, 35, 25, Math.PI, Math.PI*2,
+            [
+                {
+                    angle:Math.PI,
+                    color:Color.makeColorFromHexString('#f00')
+                },{
+                    angle:Math.PI*3/2,
+                    color:'#0f0'
+                },{
+                    angle:Math.PI*2,
+                    color:Color.makeColorFromHexString('#00f')
+                }
+            ]
+        );
+        
+        new M.SpacedLayout(rootView, {axis:'y', spacing:1});
     });
-    
-    new myt.View(rootView, {
-        width:100, height:100,
-        bgColor:'#ffffff',
-        gradient:[0, 'rgba(255,0,0,0.5)','rgba(0,255,0,0.5)']
-    });
-    
-    new myt.View(rootView, {
-        width:100, height:100,
-        gradient:['radial', 0, 'rgba(255,0,0,0.5) 25%','rgba(0,255,0,1) 75%']
-    });
-    
-    new myt.SpacedLayout(rootView, {axis:'y', spacing:1});
 </script>
 </body></html>

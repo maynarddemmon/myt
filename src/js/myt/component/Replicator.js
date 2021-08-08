@@ -1,9 +1,9 @@
-((pkg) => {
+(pkg => {
     const sortFunction = (a, b) => a.replicationIndex - b.replicationIndex,
         
         /*  @param {!Array} layouts
             @returns {undefined} */
-        lockLayouts = (layouts) => {
+        lockLayouts = layouts => {
             let i = layouts.length;
             while (i) layouts[--i].incrementLockedCounter();
         },
@@ -23,7 +23,7 @@
         
         /*  @param {!Object} replicator
             @returns {undefined} */
-        setupPool = (replicator) => {
+        setupPool = replicator => {
             destroyOldPool(replicator);
             
             // Create new pool
@@ -33,7 +33,7 @@
         
         /*  @param {!Object} replicator
             @returns {undefined} */
-        destroyOldPool = (replicator) => {
+        destroyOldPool = replicator => {
             // Destroy old pool and instances.
             const pool = replicator.__pool;
             if (pool) {
@@ -52,11 +52,8 @@
     
     /** Objects that can be replicated should include this mixin and implemment
         the replicate method. The myt.Reusable mixin is also included and the
-        clean method should also be implemented. The methods replicate and clean
-        should perform setup and teardown of the object respectively.
-        
-        Events:
-            None
+        clean method should also be implemented. The methods replicate and 
+        clean should perform setup and teardown of the object respectively.
         
         Attributes:
             replicationData:* The data provided during replication.
@@ -69,8 +66,8 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Called to configure the replicable object with data. Subclasses should
-            call super.
+        /** Called to configure the replicable object with data. Subclasses 
+            should call super.
             @param {?Object} data - The data being replicated for this instance.
             @param {number} idx - The index of the data in the replicated list.
             @returns {undefined} */
@@ -97,8 +94,8 @@
             updated or not.
             @param {!Object} data - The data being replicated for this instance.
             @param {number} idx - The index of the data in the replicated list.
-            @returns {boolean} - True if the provided data is already set on this
-                replicable, false otherwise. */
+            @returns {boolean} - True if the provided data is already set on 
+                this replicable, false otherwise. */
         alreadyHasReplicationData: function(data, idx) {
             // FIXME: Use deepEquals on replicationData?
             return idx === this.replicationIndex && data === this.replicationData;
@@ -106,9 +103,6 @@
     });
 
     /** Creates instances using a template class and an array of data items.
-        
-        Events:
-            None
         
         Attributes:
             template:JS.Class The template to replicate for each entry in the

@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const
         /*  Get the closest ancestor of the provided Node or the Node itself for 
             which the matcher function returns true. Returns a Node or null if 
@@ -39,7 +39,8 @@
         
         /*  Removes a named reference to a subnode.
                 param node:Node the node to remove the name reference from.
-                param nodeToRemove:Node the node to remove the name reference for. */
+                param nodeToRemove:Node the node to remove the name reference 
+                    for. */
         removeNameRef = (node, nodeToRemove) => {
             const name = nodeToRemove.name;
             if (node[name] === nodeToRemove) {
@@ -53,40 +54,44 @@
             if necessary. Returns a myt.TrackActivesPool */
         getAnimPool = node => node.__animPool || (node.__animPool = new pkg.TrackActivesPool(pkg.Animator, node));
         
-    /** A single node within a tree data structure. A node has zero or one parent 
-        node and zero or more child nodes. If a node has no parent it is a 'root' 
-        node. If a node has no child nodes it is a 'leaf' node. Parent nodes and 
-        parent of parents, etc. are referred to as ancestors. Child nodes and 
-        children of children, etc. are referred to as descendants.
+    /** A single node within a tree data structure. A node has zero or one 
+        parent node and zero or more child nodes. If a node has no parent it 
+        is a 'root' node. If a node has no child nodes it is a 'leaf' node. 
+        Parent nodes and parent of parents, etc. are referred to as ancestors. 
+        Child nodes and children of children, etc. are referred to 
+        as descendants.
         
-        Lifecycle management is also provided via the 'initNode', 'doBeforeAdoption',
-        'doAfterAdoption', 'destroy', 'destroyBeforeOrphaning' and
-        'destroyAfterOrphaning' methods.
+        Lifecycle management is also provided via the 'initNode', 
+        'doBeforeAdoption', 'doAfterAdoption', 'destroy', 
+        'destroyBeforeOrphaning' and 'destroyAfterOrphaning' methods.
         
         Events:
             parent:myt.Node Fired when the parent is set.
         
         Attributes:
-            inited:boolean Set to true after this Node has completed initializing.
+            inited:boolean Set to true after this Node has completed 
+                initializing.
             parent:myt.Node The parent of this Node.
             name:string The name of this node. Used to reference this Node from
                 its parent Node.
             isBeingDestroyed:boolean Indicates that this node is in the process
                 of being destroyed. Set to true at the beginning of the destroy
                 lifecycle phase. Undefined before that.
-            placement:string The name of the subnode of this Node to add nodes to 
-                when setParent is called on the subnode. Placement can be nested 
-                using '.' For example 'foo.bar'. The special value of '*' means 
-                use the default placement. For example 'foo.*' means place in the 
-                foo subnode and then in the default placement for foo.
+            placement:string The name of the subnode of this Node to add nodes 
+                to when setParent is called on the subnode. Placement can be 
+                nested using '.' For example 'foo.bar'. The special value of 
+                '*' means use the default placement. For example 'foo.*' means 
+                place in the foo subnode and then in the default placement 
+                for foo.
             defaultPlacement:string The name of the subnode to add nodes to when 
                 no placement is specified. Defaults to undefined which means add
                 subnodes directly to this node.
-            ignorePlacement:boolean If set to true placement will not be processed 
-                for this Node when it is added to a parent Node.
+            ignorePlacement:boolean If set to true placement will not be 
+                processed for this Node when it is added to a parent Node.
         
         Private Attributes:
-            __animPool:array An myt.TrackActivesPool used by the 'animate' method.
+            __animPool:array An myt.TrackActivesPool used by the 'animate' 
+                method.
             subnodes:array The array of child nodes for this node. Should be
                 accessed through the getSubnodes method.
         
@@ -135,9 +140,9 @@
         
         
         // Life Cycle //////////////////////////////////////////////////////////
-        /** Called during initialization. Sets initial state for life cycle attrs,
-            calls setter methods, sets parent and lastly, sets inited to true.
-            Subclasses must callSuper.
+        /** Called during initialization. Sets initial state for life 
+            cycle attrs, calls setter methods, sets parent and lastly, sets 
+            inited to true. Subclasses must callSuper.
             @param {?Object} parent - The myt.Node (or dom element for 
                 RootViews) the parent of this Node.
             @param {?Object} attrs - A map of attribute names and values.
@@ -216,8 +221,8 @@
         setIgnorePlacement: function(v) {this.ignorePlacement = v;},
         
         /** Sets the provided Node as the new parent of this Node. This is the
-            most direct method to do reparenting. You can also use the addSubnode
-            method but it's just a wrapper around this setter.
+            most direct method to do reparenting. You can also use the 
+            addSubnode method but it's just a wrapper around this setter.
             @param {?Object} newParent
             @returns {undefined} */
         setParent: function(newParent) {
@@ -286,9 +291,9 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Called from setParent to determine where to insert a subnode in the node
-            hierarchy. Subclasses will not typically override this method, but if
-            they do, they probably won't need to call super.
+        /** Called from setParent to determine where to insert a subnode in 
+            the node hierarchy. Subclasses will not typically override this 
+            method, but if they do, they probably won't need to call super.
             @param {string} placement - The placement path to use.
             @param {!Object} subnode - The sub myt.Node being placed.
             @returns {!Object} - The Node to place a subnode into. */
@@ -364,9 +369,12 @@
             return node ? node.isDescendantOf(this) : false;
         },
         
-        /** Gets the youngest common ancestor of this node and the provided node.
-            @param {!Object} node - The myt.Node to look for a common ancestor with.
-            @returns {?Object} The youngest common Node or null if none exists. */
+        /** Gets the youngest common ancestor of this node and the 
+            provided node.
+            @param {!Object} node - The myt.Node to look for a common 
+                ancestor with.
+            @returns {?Object} The youngest common Node or null if 
+                none exists. */
         getLeastCommonAncestor: function(node) {
             while (node) {
                 if (this.isDescendantOf(node)) return node;
@@ -383,8 +391,8 @@
             return klass ? this.searchAncestors(node => node instanceof klass) : null;
         },
         
-        /** Get the youngest ancestor of this Node for which the matcher function 
-            returns true. This is a simple wrapper around 
+        /** Get the youngest ancestor of this Node for which the matcher 
+            function returns true. This is a simple wrapper around 
             myt.Node.getMatchingAncestor(this, matcherFunc).
             @param {!Function} matcherFunc - The function to test for matching 
                 Nodes with.
@@ -441,11 +449,12 @@
             node.setParent(this);
         },
         
-        /** A convienence method to make a Node no longer a child of this Node. The
-            standard way to do this is to call the setParent method with a value
-            of null on the child Node.
+        /** A convienence method to make a Node no longer a child of this Node. 
+            The standard way to do this is to call the setParent method with 
+            a value of null on the child Node.
             @param {!Object} node - The sub myt.Node to remove.
-            @returns {?Object} - The removed myt.Node or null if removal failed. */
+            @returns {?Object} - The removed myt.Node or null if 
+                removal failed. */
         removeSubnode: function(node) {
             if (node.parent !== this) return null;
             node.setParent(null);
@@ -518,7 +527,7 @@
             }
             
             // Release the animation when it completes.
-            anim.next((success) => {animPool.putInstance(anim);});
+            anim.next(success => {animPool.putInstance(anim);});
             if (callback) anim.next(callback);
             
             anim.setRunning(true);
@@ -529,8 +538,8 @@
             by calls to the animate method.
             @param {?Function|string} [filterFunc] - The function that filters
                 which animations get stopped. The filter should return true for 
-                functions to be included. If the provided values is a string it will
-                be used as a matching attribute name.
+                functions to be included. If the provided values is a string it 
+                will be used as a matching attribute name.
             @returns {!Array} - An array of active animators. */
         getActiveAnimators: function(filterFunc) {
             if (typeof filterFunc === 'string') {

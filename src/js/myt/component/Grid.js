@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const JSClass = JS.Class,
         JSModule = JS.Module,
         
@@ -136,7 +136,8 @@
         
         /*  Steals width from previous column headers.
             @param {!Object} gridHeader
-            @param {number} diff - The amount to steal. Will be a negative number.
+            @param {number} diff - The amount to steal. Will be a 
+                negative number.
             @returns {number} - The amount of width actually stolen. */
         stealPrevWidth = (gridHeader, diff) => {
             const hdr = getPrevColumnHeader(gridHeader);
@@ -153,7 +154,8 @@
         
         /*  Gives width to previous column headers.
             @param {!Object} gridHeader
-            @param {number} diff - The amount to give. Will be a positive number.
+            @param {number} diff - The amount to give. Will be a 
+                positive number.
             @returns {number} - The amount of width actually given. */
         givePrevWidth = (gridHeader, diff) => {
             const hdr = getPrevColumnHeader(gridHeader);
@@ -170,7 +172,8 @@
         
         /*  Steals width from next column headers.
             @param {!Object} gridHeader
-            @param {number} diff - The amount to steal. Will be a negative number.
+            @param {number} diff - The amount to steal. Will be a 
+                negative number.
             @returns {number} - The amount of width actually stolen. */
         stealNextWidth = (gridHeader, diff) => {
             const hdr = getNextColumnHeader(gridHeader);
@@ -184,7 +187,8 @@
         
         /*  Gives width to next column headers.
             @param {!Object} gridHeader
-            @param {number} diff - The amount to give. Will be a positive number.
+            @param {number} diff - The amount to give. Will be a 
+                positive number.
             @returns {number} - The amount of width actually given. */
         giveNextWidth = (gridHeader, diff) => {
             const hdr = getNextColumnHeader(gridHeader);
@@ -486,7 +490,8 @@
                     let maxExtent = 0;
                     hdrs.forEach(hdr => {maxExtent = Math.max(maxExtent, hdr.x + hdr.width);});
                     
-                    // Distribute extra width to resizable flex columns and then to non-flex columns.
+                    // Distribute extra width to resizable flex columns and 
+                    // then to non-flex columns.
                     calculateAndDistribute(hdrs, this.gridWidth - maxExtent, true, extra => {
                         calculateAndDistribute(hdrs, extra, false, null);
                     });
@@ -520,8 +525,8 @@
                         'none': Not currently an active sort column.
                 cellXAdj:number The amount to shift the x values of cells 
                     updated by this column. Defaults to 0.
-                cellWidthAdj:number The amount to grow/shrink the width of cells 
-                    updated by this column. Defaults to 0.
+                cellWidthAdj:number The amount to grow/shrink the width of 
+                    cells updated by this column. Defaults to 0.
             
             @class */
         GridColumnHeader = pkg.GridColumnHeader = new JSModule('GridColumnHeader', {
@@ -889,14 +894,15 @@
             }
         },
         
-        /** Gets the sort function used to sort the rows. Subclasses and instances
-            should implement this as needed.
+        /** Gets the sort function used to sort the rows. Subclasses and 
+            instances should implement this as needed.
             @param {string} sortColumnId,
             @param {string} sortOrder
             @returns {!Function}  a comparator function used for sorting. */
         getSortFunction: (sortColumnId, sortOrder) => {
             if (sortColumnId) {
-                // Default sort function uses the 'text' attribute of the subview.
+                // Default sort function uses the 'text' attribute of 
+                // the subview.
                 const sortNum = sortOrder === 'ascending' ? 1 : -1,
                     columnName = sortColumnId + 'View';
                 return (a, b) => {

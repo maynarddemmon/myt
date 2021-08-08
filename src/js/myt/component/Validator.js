@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const JSClass = JS.Class,
         
         // Safe as a closure variable because the registry is a singleton.,
@@ -29,13 +29,15 @@
                 None
             
             Attributes:
-                id:string the ideally unique ID for this Validator so it can be
-                    stored and retreived from the myt.global.validators registry.
+                id:string the ideally unique ID for this Validator so it can 
+                    be stored and retreived from the myt.global.validators 
+                    registry.
             
             @class */
         Validator = pkg.Validator = new JSClass('Validator', {
             /** Creates a new Validator
-                @param {string} id - The ideally unique ID for a validator instance. */
+                @param {string} id - The ideally unique ID for a validator 
+                    instance. */
             initialize: function(id) {
                 this.id = id;
             },
@@ -43,21 +45,27 @@
             /** Tests if the value is valid or not.
                 @param {*} value - The value to test validity for.
                 @param {?Object} [config] - A map of configuration values that
-                    can be used to augment the validation function as needed. The
-                    nature of this config will be specific to each Validator class.
-                @param {?Array} [errorMessages] - Any error messages arising during
-                    validation will be pushed onto thiis array if it is provided.
-                @returns {boolean} true if the value is valid, false otherwise. */
+                    can be used to augment the validation function as needed. 
+                    The nature of this config will be specific to each 
+                    Validator class.
+                @param {?Array} [errorMessages] - Any error messages arising 
+                    during validation will be pushed onto thiis array if it 
+                    is provided.
+                @returns {boolean} true if the value is valid, false 
+                    otherwise. */
             isValid: (value, config, errorMessages) => true,
             
             /** Tests if the form is valid or not.
                 @param {!Object} form - The myt.Form to test validity for.
                 @param {?Object} [config] - A map of configuration values that
-                    can be used to augment the validation function as needed. The
-                    nature of this config will be specific to each Validator class.
-                @param {?Array} [errorMessages] - Any error messages arising during
-                    validation will be pushed onto thiis array if it is provided.
-                @returns {boolean} true if the form is valid, false otherwise. */
+                    can be used to augment the validation function as needed. 
+                    The nature of this config will be specific to each 
+                    Validator class.
+                @param {?Array} [errorMessages] - Any error messages arising 
+                    during validation will be pushed onto thiis array if it 
+                    is provided.
+                @returns {boolean} true if the form is valid, false 
+                    otherwise. */
             isFormValid: function(form, config, errorMessages) {
                 if (!config) config = {};
                 config.form = form;
@@ -79,8 +87,8 @@
             }
         }),
         
-        /** Tests that the value differs from the form rollback value by more than
-            just case.
+        /** Tests that the value differs from the form rollback value by more 
+            than just case.
             @class */
         EqualsIgnoreCaseValidator = pkg.EqualsIgnoreCaseValidator = new JSClass('EqualsIgnoreCaseValidator', Validator, {
             /** @overrides myt.Validator */
@@ -100,8 +108,8 @@
         URLValidator = pkg.URLValidator = new JSClass('URLValidator', Validator, {
             /** @overrides myt.Validator
                 @param {string id
-                @param originalRawQuery:boolean if true this prevents the query from
-                    being normalized. */
+                @param originalRawQuery:boolean if true this prevents the 
+                    query from being normalized. */
             initialize: function(id, originalRawQuery) {
                 this.callSuper(id);
                 this.originalRawQuery = originalRawQuery;
@@ -155,7 +163,8 @@
         }
     });
     
-    /** Tests that the value has a length between min and max. */
+    /** Tests that the value has a length between min and max
+        @class */
     pkg.LengthValidator = new JSClass('LengthValidator', Validator, {
         /** @overrides myt.Validator
             @param {string} id
@@ -190,7 +199,8 @@
         }
     });
     
-    /** Tests that adBinary value is between min and max. */
+    /** Tests that adBinary value is between min and max.
+        @class */
     pkg.NumericRangeValidator = new JSClass('NumericRangeValidator', Validator, {
         /** @overrides myt.Validator
             @param {string} id

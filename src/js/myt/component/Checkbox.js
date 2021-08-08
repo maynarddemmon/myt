@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const STYLE_SOLID = 'solid',
         STYLE_OUTLINE = 'outline',
         DEFAULT_STYLE = STYLE_OUTLINE,

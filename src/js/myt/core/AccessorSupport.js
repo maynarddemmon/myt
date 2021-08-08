@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const
         /* Caches getter names. */
         GETTER_NAMES = {},
@@ -7,8 +7,8 @@
         SETTER_NAMES = {},
         
         generateName = (attrName, prefix) => prefix + attrName.substring(0,1).toUpperCase() + attrName.substring(1),
-        generateSetterName = (attrName) => SETTER_NAMES[attrName] || (SETTER_NAMES[attrName] = generateName(attrName, 'set')),
-        generateGetterName = (attrName) => GETTER_NAMES[attrName] || (GETTER_NAMES[attrName] = generateName(attrName, 'get')),
+        generateSetterName = attrName => SETTER_NAMES[attrName] || (SETTER_NAMES[attrName] = generateName(attrName, 'set')),
+        generateGetterName = attrName => GETTER_NAMES[attrName] || (GETTER_NAMES[attrName] = generateName(attrName, 'get')),
         
         defAttr = (attrs, attrName, defaultValue) => {if (attrs[attrName] == null) attrs[attrName] = defaultValue;};
     
@@ -43,7 +43,7 @@
             createSetterFunction: (target, attrName) => {
                 const setterName = generateSetterName(attrName);
                 if (target[setterName]) console.log("Overwriting setter", setterName);
-                target[setterName] = (v) => {
+                target[setterName] = v => {
                     if (target[attrName] !== v) {
                         target[attrName] = v;
                         if (target.inited) target.fireEvent(attrName, v);

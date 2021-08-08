@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const JSModule = JS.Module,
         GlobalWindowResize = pkg.global.windowResize,
         

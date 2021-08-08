@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const math = Math,
         degreesToRadians = pkg.Geometry.degreesToRadians,
         

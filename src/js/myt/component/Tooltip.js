@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     let tooltipView;
     
     const JSClass = JS.Class,
@@ -31,9 +31,11 @@
         /*  A base class for tooltip classes.
             
             Attributes:
-                tooltip:object The tooltip configuration assigned to this tooltip
-                    when the mouse has moved over a view with TooltipMixin.
-                tipDelay:number The time in millis to wait before showing the tooltip.
+                tooltip:object The tooltip configuration assigned to this 
+                    tooltip when the mouse has moved over a view with 
+                    TooltipMixin.
+                tipDelay:number The time in millis to wait before showing 
+                    the tooltip.
                 tipHideDelay:number The time in millis to wait before hiding 
                     the tooltip.
             
@@ -98,7 +100,8 @@
                         () => {
                             delete self.__checkTipTimerId;
                             
-                            // If the mouse rests in the tip's parent, show the tip.
+                            // If the mouse rests in the tip's parent, 
+                            // show the tip.
                             if (checkInTooltip(self)) self.showTip();
                         },
                         self.nextTipDelay
@@ -121,9 +124,9 @@
                 this.setVisible(false);
                 
                 // Don't consume mouse event since we just want to close the tip
-                // as a side effect of the user action. The typical case for this is
-                // the user clicking on a button while the tooltip for that button
-                // is shown.
+                // as a side effect of the user action. The typical case for 
+                // this is the user clicking on a button while the tooltip for 
+                // that button is shown.
                 return true;
             },
             
@@ -143,7 +146,8 @@
         /*  An implementation of a tooltip.
             
             Attributes:
-                edgeSize:number the thickness of the "edge" of the tip background.
+                edgeSize:number the thickness of the "edge" of the tip 
+                    background.
                 edgeColor:string The color used for the edge.
                 shadowSize:number The thickness of the shadow.
                 shadowColor:string The color of the shadow.
@@ -209,7 +213,8 @@
                     edgeSize = self.edgeSize,
                     shadowSize = self.shadowSize;
                 
-                // Size tip text and size it to fit within the maximum text width.
+                // Size tip text and size it to fit within the maximum 
+                // text width.
                 if (tipText.text !== txt) tipText.setText(txt);
                 tipText.setWidth('auto');
                 const tipTextWidth = Math.min(tipText.measureNoWrapWidth(), tt.maxTextWidth),
@@ -263,12 +268,13 @@
             
             Attributes:
                 tooltip:string The tip text to display.
-                tipAlign:string The horizontal alignment of the tooltip relative to
-                    the view the tip is being shown for. Supported values are 'left'
-                    'farleft', 'right' and 'farright'. Defaults to 'left'.
-                tipValign:string The vertical alignment of the tooltip relative to
-                    the view the tip is being shown for. Supported values are 'above'
-                    and 'below'. Defaults to 'above'.
+                tipAlign:string The horizontal alignment of the tooltip 
+                    relative to the view the tip is being shown for. Supported 
+                    values are 'left', 'farleft', 'right' and 'farright'. 
+                    Defaults to 'left'.
+                tipValign:string The vertical alignment of the tooltip 
+                    relative to the view the tip is being shown for. Supported 
+                    values are 'above' and 'below'. Defaults to 'above'.
                 maxTextWidth:number The maximum width of the tooltip text.
                 tipClass:JS.Class The class to use to instantiate the tooltip.
             
@@ -276,8 +282,9 @@
         TooltipMixin = pkg.TooltipMixin = new JS.Module('TooltipMixin', {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                /** The default class to use for tooltip views. If a project wants to use
-                    a special tip class everywhere it should override this. */
+                /** The default class to use for tooltip views. If a project 
+                    wants to use a special tip class everywhere it should 
+                    override this. */
                 DEFAULT_TIP_CLASS:Tooltip,
                 DEFAULT_MAX_TEXT_WIDTH:280
             },
@@ -321,8 +328,9 @@
                         if (!elem) {
                             elem = pkg.DomElementProxy.createDomElement('div', {position:'absolute'});
                             
-                            // Make the div a child of the body element so it can be
-                            // in front of pretty much anything in the document.
+                            // Make the div a child of the body element so it 
+                            // can be in front of pretty much anything in the 
+                            // document.
                             pkg.getElement().appendChild(elem);
                         }
                         tooltipView = new tipClass(elem, {domId:tooltipDomId});

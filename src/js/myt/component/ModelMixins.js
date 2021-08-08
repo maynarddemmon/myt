@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const JSModule = JS.Module,
         
         /** Provides a setValue and getValue method.
@@ -194,7 +194,8 @@
                     if (this.inited) {
                         this.fireEvent('snapToInt', v);
                         
-                        // Update min, max and value since snap has been turned on
+                        // Update min, max and value since snap has been 
+                        // turned on
                         if (v) {
                             this.setMinValue(this.minValue);
                             this.setMaxValue(this.maxValue);

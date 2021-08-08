@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const getTarget = animator => animator.target || animator.parent,
         
         isColorAttr = animator => {
@@ -113,61 +113,66 @@
                 easingFunction:function
                 from:number
                 to:number
-                repeat:Fired when the animation repeats. The value is the current
-                    loop count.
+                repeat:Fired when the animation repeats. The value is the 
+                    current loop count.
                 
             Attributes:
                 attribute:string The attribute to animate.
-                target:object The object to animate the attribute on. The default is 
-                    the parent of this node.
-                from:number The starting value of the attribute. If not specified the 
-                    current value on the target will be used.
+                target:object The object to animate the attribute on. The 
+                    default is the parent of this node.
+                from:number The starting value of the attribute. If not 
+                    specified the current value on the target will be used.
                 to:number The ending value of the attribute.
-                duration:number The length of time the animation will run in millis.
-                    The default value is 1000.
+                duration:number The length of time the animation will run 
+                    in millis. The default value is 1000.
                 easingFunction:string/function Controls the rate of animation.
-                    string: See http://easings.net/ for more info. One of the following:
-                        linear, 
-                        easeInQuad, easeOutQuad, easeInOutQuad(default), 
-                        easeInCubic, easeOutCubic, easeInOutCubic, 
-                        easeInQuart, easeOutQuart, easeInOutQuart, 
-                        easeInQuint, easeOutQuint, easeInOutQuint, 
-                        easeInSine, easeOutSine, easeInOutSine,
-                        easeInExpo ,easeOutExpo, easeInOutExpo, 
-                        easeInCirc, easeOutCirc, easeInOutCirc,
-                        easeInElastic ,easeOutElastic, easeInOutElastic, 
-                        easeInBack, easeOutBack, easeInOutBack, 
-                        easeInBounce, easeOutBounce, easeInOutBounce
+                    string: See http://easings.net/ for more info. One of the 
+                        following:
+                            linear, 
+                            easeInQuad, easeOutQuad, easeInOutQuad(default), 
+                            easeInCubic, easeOutCubic, easeInOutCubic, 
+                            easeInQuart, easeOutQuart, easeInOutQuart, 
+                            easeInQuint, easeOutQuint, easeInOutQuint, 
+                            easeInSine, easeOutSine, easeInOutSine,
+                            easeInExpo ,easeOutExpo, easeInOutExpo, 
+                            easeInCirc, easeOutCirc, easeInOutCirc,
+                            easeInElastic ,easeOutElastic, easeInOutElastic, 
+                            easeInBack, easeOutBack, easeInOutBack, 
+                            easeInBounce, easeOutBounce, easeInOutBounce
                     
-                    function: A function that determines the rate of change of the 
-                        attribute. The arguments to the easing function are:
-                        t: Animation progress in millis
-                        c: Value change (to - from)
-                        d: Animation duration in millis
-                relative:boolean Determines if the animated value is set on the target 
-                    (false), or added to the exiting value on the target (true). Note
-                    that this means the difference between the from and to values
-                    will be "added" to the existing value on the target. The default 
-                    value is false.
-                repeat:number The number of times to repeat the animation. If negative 
-                    the animation will repeat forever. The default value is 1.
+                    function: A function that determines the rate of change of 
+                        the attribute. The arguments to the easing 
+                        function are:
+                            t: Animation progress in millis
+                            c: Value change (to - from)
+                            d: Animation duration in millis
+                relative:boolean Determines if the animated value is set on the 
+                    target (false), or added to the exiting value on the 
+                    target (true). Note that this means the difference between 
+                    the from and to values will be "added" to the existing 
+                    value on the target. The default value is false.
+                repeat:number The number of times to repeat the animation. If 
+                    negative the animation will repeat forever. The default 
+                    value is 1.
                 reverse:boolean If true, the animation is run in reverse.
-                running:boolean Indicates if the animation is currently running. The 
-                    default value is false.
-                paused:boolean Indicates if the animation is temporarily paused. The 
-                    default value is false.
+                running:boolean Indicates if the animation is currently running.
+                    The default value is false.
+                paused:boolean Indicates if the animation is temporarily paused.
+                    The default value is false.
                 callback:function A function that gets called when the animation
-                    completes. A boolean value is passed into the function and will be
-                    true if the animation completed successfully or false if not.
+                    completes. A boolean value is passed into the function and 
+                    will be true if the animation completed successfully or 
+                    false if not.
             
             Private Attributes:
                 __loopCount:number the loop currently being run.
                 __progress:number the number of millis currently used during the
                     current animation loop.
-                __temporaryFrom:boolean Indicates no "from" was set on the animator so 
-                    we will have to generate one when needed. We want to reset back to 
-                    undefined after the animation completes so that subsequent calls 
-                    to start the animation will behave the same.
+                __temporaryFrom:boolean Indicates no "from" was set on the 
+                    animator so we will have to generate one when needed. We 
+                    want to reset back to undefined after the animation 
+                    completes so that subsequent calls to start the animation
+                    will behave the same.
                 __isColorAnim:boolean Indicates this animator is animating a
                     color attribute.
             
@@ -341,9 +346,9 @@
             
             
             // Methods /////////////////////////////////////////////////////////
-            /** A convienence method to set the callback to run when the animator
-                stops running. If a callback already exists the provided callback
-                will be executed after the existing one.
+            /** A convienence method to set the callback to run when the 
+                animator stops running. If a callback already exists the 
+                provided callback will be executed after the existing one.
                 @param {!Function} callback - The function to run.
                 @param {boolean} [replace] - If true the existing callback will 
                     be replaced with the new callback.

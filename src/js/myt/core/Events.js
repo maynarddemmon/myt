@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const JSModule = JS.Module;
     
     /** Apply this mixin to any Object that needs to fire events.
@@ -6,21 +6,24 @@
         Private Attributes:
             __obsbt:object Stores arrays of myt.Observers and method names 
                 by event type
-            __aet:object Stores active event type strings. An event type is active
-                if it has been fired from this Observable as part of the current 
-                call stack. If an event type is "active" it will not be fired 
-                again. This provides protection against infinite event loops.
+            __aet:object Stores active event type strings. An event type is 
+                active if it has been fired from this Observable as part of 
+                the current call stack. If an event type is "active" it will 
+                not be fired again. This provides protection against infinite 
+                event loops.
         
         @class */
     pkg.Observable = new JSModule('Observable', {
         // Methods /////////////////////////////////////////////////////////////
-        /** Adds the observer to the list of event recipients for the event type.
+        /** Adds the observer to the list of event recipients for the 
+            event type.
             @param observer:myt.Observer The observer that will observe this
                 observable. If methodName is a function this object will be the
                 context for the function when it is called.
-            @param methodName:string|function The name of the method to call, or
-                a function, on the observer when the event fires.
-            @param type:string The name of the event the observer will listen to.
+            @param methodName:string|function The name of the method to call, 
+                or a function, on the observer when the event fires.
+            @param type:string The name of the event the observer will 
+                listen to.
             @returns boolean true if the observer was successfully attached, 
                 false otherwise. */
         attachObserver: function(observer, methodName, type) {
@@ -36,8 +39,8 @@
                 observing this observable.
             @param methodName:string|function The name of the method that was
                 to be called or the function to be called.
-            @param type:string The name of the event the observer will no longer
-                be listening to.
+            @param type:string The name of the event the observer will no 
+                longer be listening to.
             @returns boolean true if the observer was successfully detached, 
                 false otherwise. */
         detachObserver: function(observer, methodName, type) {
@@ -52,7 +55,8 @@
                             i = observers.length;
                         while (i) {
                             // Ensures we decrement twice. First with --i, then 
-                            // with i-- since the part after && may not be executed.
+                            // with i-- since the part after && may not be 
+                            // executed.
                             --i;
                             if (observer === observers[i--] && methodName === observers[i]) {
                                 observers.splice(i, 2); // <- Detach Activity that detachAllObservers cares about.
@@ -78,17 +82,18 @@
                         const observer = observers[--i],
                             methodName = observers[--i];
                         
-                        // If an observer is registered more than once the list may 
-                        // get shortened by observer.detachFrom. If so, just 
+                        // If an observer is registered more than once the list 
+                        // may get shortened by observer.detachFrom. If so, just 
                         // continue decrementing downwards.
                         if (observer && methodName) {
                             if (typeof observer.detachFrom !== 'function' || 
                                 !observer.detachFrom(this, methodName, type)
                             ) {
-                                // Observer may not have a detachFrom function or 
-                                // observer may not have attached via 
-                                // Observer.attachTo so do default detach activity 
-                                // as implemented in Observable.detachObserver
+                                // Observer may not have a detachFrom function 
+                                // or observer may not have attached via 
+                                // Observer.attachTo so do default detach 
+                                // activity as implemented 
+                                // in Observable.detachObserver
                                 observers.splice(i, 2);
                             }
                         }
@@ -153,17 +158,19 @@
                     // Mark event type as "active"
                     activeEventTypes[type] = true;
                     
-                    // Walk through observers backwards so that if the observer is
-                    // detached by the event handler the index won't get messed up.
-                    // FIXME: If necessary we could queue up detachObserver calls that 
-                    // come in during iteration or make some sort of adjustment to 'i'.
+                    // Walk through observers backwards so that if the observer 
+                    // is detached by the event handler the index won't get 
+                    // messed up.
+                    // FIXME: If necessary we could queue up detachObserver 
+                    // calls that come in during iteration or make some sort 
+                    // of adjustment to 'i'.
                     let i = observers.length;
                     while (i) {
                         const observer = observers[--i],
                             methodName = observers[--i];
                         
-                        // Sometimes the list gets shortened by the method we called so
-                        // just continue decrementing downwards.
+                        // Sometimes the list gets shortened by the method we 
+                        // called so just continue decrementing downwards.
                         if (observer && methodName) {
                             // Stop firing the event if it was "consumed".
                             try {
@@ -219,7 +226,8 @@
             true no attachment will occur which means this probably isn't the
             correct method to use in that situation.
             @param observable:myt.Observable the Observable to attach to.
-            @param methodName:string the method name on this instance to execute.
+            @param methodName:string the method name on this instance to 
+                execute.
             @param eventType:string the event type to attach for.
             @param attrName:string (optional: the eventType will be used if not
                 provided) the name of the attribute on the Observable
@@ -235,7 +243,8 @@
                 pkg.dumpStack(err);
             }
             
-            // Providing a true value for once means we'll never actually attach.
+            // Providing a true value for once means we'll never 
+            // actually attach.
             if (once) return;
             
             this.attachTo(observable, methodName, eventType, once);
@@ -244,7 +253,8 @@
         /** Checks if this Observer is attached to the provided observable for
             the methodName and eventType.
             @param observable:myt.Observable the Observable to check with.
-            @param methodName:string the method name on this instance to execute.
+            @param methodName:string the method name on this instance to 
+                execute.
             @param eventType:string the event type to check for.
             @returns true if attached, false otherwise. */
         isAttachedTo: function(observable, methodName, eventType) {
@@ -256,7 +266,8 @@
                         let i = observables.length;
                         while (i) {
                             // Ensures we decrement twice. First with --i, then 
-                            // with i-- since the part after && may not be executed.
+                            // with i-- since the part after && may not be 
+                            // executed.
                             --i;
                             if (observable === observables[i--] && methodName === observables[i]) return true;
                         }
@@ -289,7 +300,8 @@
         /** Registers this Observer with the provided Observable
             for the provided eventType.
             @param observable:myt.Observable the Observable to attach to.
-            @param methodName:string the method name on this instance to execute.
+            @param methodName:string the method name on this instance to 
+                execute.
             @param eventType:string the event type to attach for.
             @param once:boolean (optional) if true  this Observer will detach
                 from the Observable after the event is handled once.
@@ -328,7 +340,8 @@
         /** Unregisters this Observer from the provided Observable
             for the provided eventType.
             @param observable:myt.Observable the Observable to attach to.
-            @param methodName:string the method name on this instance to execute.
+            @param methodName:string the method name on this instance to 
+                execute.
             @param eventType:string the event type to attach for.
             @returns boolean true if one or more detachments occurred, false 
                 otherwise. */
@@ -378,10 +391,12 @@
         
         // Constraints
         /** Creates a constraint. The method will be executed on this object
-            whenever any of the provided observables fire the indicated event type.
-            @param {string} methodName - The name of the method to call on this object.
-            @param {?Array} observables - An array of observable/type pairs. An observer
-                will attach to each observable for the event type.
+            whenever any of the provided observables fire the indicated event 
+            type.
+            @param {string} methodName - The name of the method to call on 
+                this object.
+            @param {?Array} observables - An array of observable/type pairs. 
+                An observer will attach to each observable for the event type.
             @returns {undefined} */
         constrain: function(methodName, observables) {
             if (methodName && observables) {
@@ -407,7 +422,8 @@
                             }
                         }
                         
-                        // Call constraint method once so it can "sync" the constraint
+                        // Call constraint method once so it can "sync" 
+                        // the constraint
                         try {
                             this[methodName]();
                         } catch (err) {

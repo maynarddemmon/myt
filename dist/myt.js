@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     /* Based on browser detection from: http://www.quirksmode.org/js/detect.html
         
         Events:
@@ -12,7 +12,7 @@
     let versionSearchString,
         dom,
         pre;
-    const searchString = (data) => {
+    const searchString = data => {
             let dataItem, 
                 i = data.length;
             while (i) {
@@ -22,7 +22,7 @@
             }
         },
         
-        searchVersion = (dataString) => {
+        searchVersion = dataString => {
             const index = dataString.indexOf(versionSearchString);
             if (index >= 0) return parseFloat(dataString.substring(index + versionSearchString.length + 1));
         },
@@ -491,7 +491,7 @@ Date.prototype.format = Date.prototype.format || (() => {
     });
 })(global.JS || (global.JS = {}));
 
-((pkg) => {
+(pkg => {
     /*
      * http://github.com/maynarddemmon/myt
      * Maynard Demmon <maynarddemmon@gmail.com>
@@ -627,8 +627,8 @@ Date.prototype.format = Date.prototype.format || (() => {
                 non-string value is provided it is verified to be a JS.Class 
                 object.
                 @param {*} value - The value to resolve and/or verify.
-                @returns {?Function} - A JS.Class or null if the string could not 
-                    be resolved or the value was not a JS.Class object. */
+                @returns {?Function} - A JS.Class or null if the string could 
+                    not be resolved or the value was not a JS.Class object. */
             resolveClassname: value => {
                 if (typeof value === 'string') value = myt.resolveName(value);
                 
@@ -672,8 +672,8 @@ Date.prototype.format = Date.prototype.format || (() => {
                                 // Prevent refiring callback
                                 r = true;
                                 
-                                // Prevent later events from this script for example
-                                // if the src is changed.
+                                // Prevent later events from this script for
+                                // example if the src is changed.
                                 s.onload = s.onreadystatechange = null;
                                 
                                 callback();
@@ -681,8 +681,8 @@ Date.prototype.format = Date.prototype.format || (() => {
                         };
                     }
                     
-                    // Must set src AFTER adding onreadystatechange listener otherwise
-                    // we’ll miss the loaded event for cached scripts
+                    // Must set src AFTER adding onreadystatechange listener 
+                    // otherwise we’ll miss the loaded event for cached scripts
                     s.src = src + (noCacheBust ? '' : (src.indexOf('?') !== -1 ? '&' : '?') + 'cacheBust=' + Date.now());
                     
                     this.getElement('head').appendChild(s);
@@ -708,7 +708,8 @@ Date.prototype.format = Date.prototype.format || (() => {
             },
             
             // Random numbers
-            /** Generates a random number between 0 (inclusive) and 1 (exclusive)
+            /** Generates a random number between 0 (inclusive) and 
+                1 (exclusive)
                 @param {?Function} [func] - A distribution function for the
                     random numbers. The function should map a number between 0 
                     and 1 to another number between 0 (inclusive) and 1 
@@ -838,7 +839,7 @@ Date.prototype.format = Date.prototype.format || (() => {
             
             loadFontFace: (fontName, fontUrl, fontOptions={}, callback) => {
                 const fontFace = new FontFace(fontName, 'url(' + fontUrl + ')', fontOptions);
-                fontFace.loaded.then((loadedFontFace) => {
+                fontFace.loaded.then(loadedFontFace => {
                     docFonts.add(loadedFontFace);
                     notifyFontLoaded(loadedFontFace);
                     if (callback) callback(loadedFontFace);
@@ -1084,7 +1085,8 @@ Date.prototype.format = Date.prototype.format || (() => {
                             if (raw) {
                                 successFunc(response);
                             } else {
-                                // Throw application errors to the catch clause below
+                                // Throw application errors to the catch 
+                                // clause below
                                 if (response.success === false) throw new FetchError(200, url, response.message);
                                 successFunc(response.data);
                             }
@@ -1121,7 +1123,7 @@ Date.prototype.format = Date.prototype.format || (() => {
 })(global);
 
 
-((pkg) => {
+(pkg => {
     const objectAssign = Object.assign,
         
         /*  Function to convert a stored cookie value into a value that can
@@ -1241,7 +1243,7 @@ Date.prototype.format = Date.prototype.format || (() => {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const localStorage = global.localStorage,
         
         getStoreId = storeId => storeId = storeId || 'myt',
@@ -1263,17 +1265,17 @@ Date.prototype.format = Date.prototype.format || (() => {
         
         /** Browser local storage utility functions.
             
-            The Data methods utilize a single JSON object to store multiple values
-            under a single local storage item.
+            The Data methods utilize a single JSON object to store multiple 
+            values under a single local storage item.
             
             @class */
         LocalStorage = pkg.LocalStorage = {
             /** Check if data has been stored under the key and storage id.
                 @param {string} key - The key to look for.
-                @param {string} [storeId] - The id of the data store to look in. If
-                    not provided the default "myt" storeId will be used.
-                @returns {boolean} - false if an undefined or null value is found,
-                    otherwise true. */
+                @param {string} [storeId] - The id of the data store to look 
+                    in. If not provided the default "myt" storeId will be used.
+                @returns {boolean} - false if an undefined or null value is 
+                    found, otherwise true. */
             hasDatum: (key, storeId) => {
                 if (key) {
                     const data = LocalStorage.getItem(getStoreId(storeId));
@@ -1291,8 +1293,9 @@ Date.prototype.format = Date.prototype.format || (() => {
             
             /** Get the data stored under the key and storage id.
                 @param {string} key - The key to get data for.
-                @param {string} [storeId] - The id of the data store to get data for.
-                    If not provided the default "myt" storeId will be used.
+                @param {string} [storeId] - The id of the data store to get 
+                    data for. If not provided the default "myt" storeId will 
+                    be used.
                 @returns {*} the value of the data or undefined if not found. */
             getDatum: (key, storeId) => {
                 if (key) {
@@ -1311,14 +1314,15 @@ Date.prototype.format = Date.prototype.format || (() => {
             /** Sets a single entry in a data store.
                 @param {string} key - The key to store the value under.
                 @param {*} value - The value to store.
-                @param {string} [storeId] - The id of the data store to put data in.
-                    If not provided the default "myt" storeId will be used.
+                @param {string} [storeId] - The id of the data store to put 
+                    data in. If not provided the default "myt" storeId will 
+                    be used.
                 @param {number} [delay] - A number of millis to wait before
-                    actually storing the data. This can be useful to prevent excessive
-                    numbers of writes when a value will be set a large number of times
-                    over a short time interval. For example, when saving the position
-                    of a UI control as it is being repositioned or a value the user
-                    is typing.
+                    actually storing the data. This can be useful to prevent 
+                    excessive numbers of writes when a value will be set a 
+                    large number of times over a short time interval. For 
+                    example, when saving the position of a UI control as it 
+                    is being repositioned or a value the user is typing.
                 @returns {undefined} */
             setDatum: (key, value, storeId, delay) => {
                 storeId = getStoreId(storeId);
@@ -1331,8 +1335,9 @@ Date.prototype.format = Date.prototype.format || (() => {
             
             /** Removes a single entry in a data store.
                 @param {string} key - The key to remove the entry for.
-                @param {string} [storeId] - The id of the data store to remove data 
-                    from. If not provided the default "myt" storeId will be used.
+                @param {string} [storeId] - The id of the data store to remove 
+                    data from. If not provided the default "myt" storeId will 
+                    be used.
                 @param {number} [delay] - A number of millis to wait before
                     actually removing the data.
                 @returns {undefined} */
@@ -1346,15 +1351,16 @@ Date.prototype.format = Date.prototype.format || (() => {
             },
             
             /** Check if data has been stored under the storage id.
-                @param {string} [storeId] - THe id of the data store to look in. If
-                    not provided the default "myt" storeId will be used.
-                @returns {boolean} - false if an undefined or null value is found,
-                    otherwise true. */
+                @param {string} [storeId] - THe id of the data store to look 
+                    in. If not provided the default "myt" storeId will be used.
+                @returns {boolean} - false if an undefined or null value is 
+                    found, otherwise true. */
             hasData: storeId => LocalStorage.getItem(getStoreId(storeId)) != null,
             
             /** Get the data store stored under storage id.
-                @param {string} [storeId] - The id of the data store to get data for.
-                    If not provided the default "myt" storeId will be used.
+                @param {string} [storeId] - The id of the data store to get 
+                    data for. If not provided the default "myt" storeId will 
+                    be used.
                 @returns {!Object} - The store object. */
             getData: storeId => {
                 const data = LocalStorage.getItem(getStoreId(storeId));
@@ -1368,19 +1374,21 @@ Date.prototype.format = Date.prototype.format || (() => {
                 return {};
             },
             
-            /** Store data under the storage id. This replaces an entire data store
-                with the new data object.
+            /** Store data under the storage id. This replaces an entire data 
+                store with the new data object.
                 @param {?Object} [data] - The data object to store under the 
                     storage id.
-                @param {string} [storeId] - The id of the data store to put data in.
-                    If not provided the default "myt" storeId will be used.
+                @param {string} [storeId] - The id of the data store to put 
+                    data in. If not provided the default "myt" storeId will 
+                    be used.
                 @param {number} [delay] - A number of millis to wait before
-                    actually storing the data. This can be useful to prevent excessive
-                    numbers of writes when a value will be set a large number of times
-                    over a short time interval. For example, when saving the position
-                    of a UI control as it is being repositioned or a value the user
-                    is typing.
-                @returns {boolean} - true if the data is of type object false otherwise. */
+                    actually storing the data. This can be useful to prevent 
+                    excessive numbers of writes when a value will be set a 
+                    large number of times over a short time interval. For 
+                    example, when saving the position of a UI control as it 
+                    is being repositioned or a value the user is typing.
+                @returns {boolean} - true if the data is of type object 
+                    false otherwise. */
             setData: (data, storeId, delay) => {
                 storeId = getStoreId(storeId);
                 
@@ -1395,8 +1403,9 @@ Date.prototype.format = Date.prototype.format || (() => {
             },
             
             /** Removes a data store.
-                @param {string} [storeId] - The id of the data store to remove. If 
-                    not provided the default "myt" storeId will be used.
+                @param {string} [storeId] - The id of the data store to 
+                    remove. If not provided the default "myt" storeId will 
+                    be used.
                 @param {number} [delay] - A number of millis to wait before
                     actually removing the data.
                 @returns {undefined} */
@@ -1406,7 +1415,8 @@ Date.prototype.format = Date.prototype.format || (() => {
             },
             
             // wrapper functions on localStorage
-            /** @returns {number} - The number of data items stored in the Storage object. */
+            /** @returns {number} - The number of data items stored in the 
+                    Storage object. */
             getLength: () => localStorage.length,
             
             /** @param {number} n - The index of the key name to retrieve.
@@ -1414,7 +1424,8 @@ Date.prototype.format = Date.prototype.format || (() => {
             getKey: n => localStorage.key(n),
             
             /** @param {string} key - The name of the storage entry to return.
-                @returns {*} - The value of the storage entry or null if not found. */
+                @returns {*} - The value of the storage entry or null if 
+                    not found. */
             getItem: key => localStorage.getItem(key),
             
             /** Stores the value under the key. If a value already exists for
@@ -1442,7 +1453,8 @@ Date.prototype.format = Date.prototype.format || (() => {
             // Aliases for better API compatibility with some libraries.
             /** An alias for getItem.
                 @param {string} key - The name of the storage entry to return.
-                @returns {*} - The value of the storage entry or null if not found. */
+                @returns {*} - The value of the storage entry or null if 
+                    not found. */
             get: key => LocalStorage.getItem(key),
             
             /** An alias for setItem.
@@ -1469,7 +1481,7 @@ Date.prototype.format = Date.prototype.format || (() => {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const queryParser = /(?:^|&)([^&=]*)=?([^&]*)/g,
         strictParser = /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/,
         looseParser = /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/;
@@ -1512,9 +1524,9 @@ Date.prototype.format = Date.prototype.format || (() => {
         
         // Methods /////////////////////////////////////////////////////////////
         parse: function(str, loose) {
-            // match order: "source", "protocol", "authority", "userInfo", "user",
-            //              "password", "host", "port", "relative", "path", 
-            //              "directory", "file", "query", "anchor".
+            // match order: "source", "protocol", "authority", "userInfo", 
+            //              "user", "password", "host", "port", "relative", 
+            //              "path", "directory", "file", "query", "anchor".
             const self = this,
                 m = (loose ? looseParser : strictParser).exec(str);
             
@@ -1604,7 +1616,7 @@ Date.prototype.format = Date.prototype.format || (() => {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     /** Provides common geometry related functions. */
     const math = Math,
         PI = math.PI,
@@ -1613,7 +1625,7 @@ Date.prototype.format = Date.prototype.format || (() => {
         mathSqrt = math.sqrt,
         
         Geometry = pkg.Geometry = {
-            // Methods /////////////////////////////////////////////////////////////
+            // Methods /////////////////////////////////////////////////////////
             /** Get the closest point on a line to a given point.
                 @param {number} Ax - The x-coordinate of the first point that 
                     defines the line.
@@ -1749,7 +1761,8 @@ Date.prototype.format = Date.prototype.format || (() => {
                 @param {number} cY - The y coordinate of the center of 
                     the circle.
                 @param {number} cR - The radius of the circle.
-                @return {boolean} - True if the point is inside or on the circle. */
+                @return {boolean} - True if the point is inside or on 
+                    the circle. */
             circleContainsPoint: (pX, pY, cX, cY, cR) => Geometry.measureDistance(pX, pY, cX, cY, true) <= cR * cR,
             
             /** Measure the distance between two points.
@@ -1770,12 +1783,12 @@ Date.prototype.format = Date.prototype.format || (() => {
             /** Convert radians to degrees.
                 @param {number} deg - The degrees to convert.
                 @returns {number} - The converted radians. */
-            degreesToRadians: (deg) => deg * PI / 180,
+            degreesToRadians: deg => deg * PI / 180,
             
             /** Convert degrees to radians.
                 @param {number} rad - The radians to convert.
                 @returns {number} The converted degrees. */
-            radiansToDegrees: (rad) => rad * 180 / PI,
+            radiansToDegrees: rad => rad * 180 / PI,
             
             // Geometry on a sphere
             /** Checks if the provided lat/lng point lies inside or on the edge 
@@ -1885,7 +1898,7 @@ Date.prototype.format = Date.prototype.format || (() => {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const JSModule = JS.Module;
     
     /** Apply this mixin to any Object that needs to fire events.
@@ -1893,21 +1906,24 @@ Date.prototype.format = Date.prototype.format || (() => {
         Private Attributes:
             __obsbt:object Stores arrays of myt.Observers and method names 
                 by event type
-            __aet:object Stores active event type strings. An event type is active
-                if it has been fired from this Observable as part of the current 
-                call stack. If an event type is "active" it will not be fired 
-                again. This provides protection against infinite event loops.
+            __aet:object Stores active event type strings. An event type is 
+                active if it has been fired from this Observable as part of 
+                the current call stack. If an event type is "active" it will 
+                not be fired again. This provides protection against infinite 
+                event loops.
         
         @class */
     pkg.Observable = new JSModule('Observable', {
         // Methods /////////////////////////////////////////////////////////////
-        /** Adds the observer to the list of event recipients for the event type.
+        /** Adds the observer to the list of event recipients for the 
+            event type.
             @param observer:myt.Observer The observer that will observe this
                 observable. If methodName is a function this object will be the
                 context for the function when it is called.
-            @param methodName:string|function The name of the method to call, or
-                a function, on the observer when the event fires.
-            @param type:string The name of the event the observer will listen to.
+            @param methodName:string|function The name of the method to call, 
+                or a function, on the observer when the event fires.
+            @param type:string The name of the event the observer will 
+                listen to.
             @returns boolean true if the observer was successfully attached, 
                 false otherwise. */
         attachObserver: function(observer, methodName, type) {
@@ -1923,8 +1939,8 @@ Date.prototype.format = Date.prototype.format || (() => {
                 observing this observable.
             @param methodName:string|function The name of the method that was
                 to be called or the function to be called.
-            @param type:string The name of the event the observer will no longer
-                be listening to.
+            @param type:string The name of the event the observer will no 
+                longer be listening to.
             @returns boolean true if the observer was successfully detached, 
                 false otherwise. */
         detachObserver: function(observer, methodName, type) {
@@ -1939,7 +1955,8 @@ Date.prototype.format = Date.prototype.format || (() => {
                             i = observers.length;
                         while (i) {
                             // Ensures we decrement twice. First with --i, then 
-                            // with i-- since the part after && may not be executed.
+                            // with i-- since the part after && may not be 
+                            // executed.
                             --i;
                             if (observer === observers[i--] && methodName === observers[i]) {
                                 observers.splice(i, 2); // <- Detach Activity that detachAllObservers cares about.
@@ -1965,17 +1982,18 @@ Date.prototype.format = Date.prototype.format || (() => {
                         const observer = observers[--i],
                             methodName = observers[--i];
                         
-                        // If an observer is registered more than once the list may 
-                        // get shortened by observer.detachFrom. If so, just 
+                        // If an observer is registered more than once the list 
+                        // may get shortened by observer.detachFrom. If so, just 
                         // continue decrementing downwards.
                         if (observer && methodName) {
                             if (typeof observer.detachFrom !== 'function' || 
                                 !observer.detachFrom(this, methodName, type)
                             ) {
-                                // Observer may not have a detachFrom function or 
-                                // observer may not have attached via 
-                                // Observer.attachTo so do default detach activity 
-                                // as implemented in Observable.detachObserver
+                                // Observer may not have a detachFrom function 
+                                // or observer may not have attached via 
+                                // Observer.attachTo so do default detach 
+                                // activity as implemented 
+                                // in Observable.detachObserver
                                 observers.splice(i, 2);
                             }
                         }
@@ -2040,17 +2058,19 @@ Date.prototype.format = Date.prototype.format || (() => {
                     // Mark event type as "active"
                     activeEventTypes[type] = true;
                     
-                    // Walk through observers backwards so that if the observer is
-                    // detached by the event handler the index won't get messed up.
-                    // FIXME: If necessary we could queue up detachObserver calls that 
-                    // come in during iteration or make some sort of adjustment to 'i'.
+                    // Walk through observers backwards so that if the observer 
+                    // is detached by the event handler the index won't get 
+                    // messed up.
+                    // FIXME: If necessary we could queue up detachObserver 
+                    // calls that come in during iteration or make some sort 
+                    // of adjustment to 'i'.
                     let i = observers.length;
                     while (i) {
                         const observer = observers[--i],
                             methodName = observers[--i];
                         
-                        // Sometimes the list gets shortened by the method we called so
-                        // just continue decrementing downwards.
+                        // Sometimes the list gets shortened by the method we 
+                        // called so just continue decrementing downwards.
                         if (observer && methodName) {
                             // Stop firing the event if it was "consumed".
                             try {
@@ -2106,7 +2126,8 @@ Date.prototype.format = Date.prototype.format || (() => {
             true no attachment will occur which means this probably isn't the
             correct method to use in that situation.
             @param observable:myt.Observable the Observable to attach to.
-            @param methodName:string the method name on this instance to execute.
+            @param methodName:string the method name on this instance to 
+                execute.
             @param eventType:string the event type to attach for.
             @param attrName:string (optional: the eventType will be used if not
                 provided) the name of the attribute on the Observable
@@ -2122,7 +2143,8 @@ Date.prototype.format = Date.prototype.format || (() => {
                 pkg.dumpStack(err);
             }
             
-            // Providing a true value for once means we'll never actually attach.
+            // Providing a true value for once means we'll never 
+            // actually attach.
             if (once) return;
             
             this.attachTo(observable, methodName, eventType, once);
@@ -2131,7 +2153,8 @@ Date.prototype.format = Date.prototype.format || (() => {
         /** Checks if this Observer is attached to the provided observable for
             the methodName and eventType.
             @param observable:myt.Observable the Observable to check with.
-            @param methodName:string the method name on this instance to execute.
+            @param methodName:string the method name on this instance to 
+                execute.
             @param eventType:string the event type to check for.
             @returns true if attached, false otherwise. */
         isAttachedTo: function(observable, methodName, eventType) {
@@ -2143,7 +2166,8 @@ Date.prototype.format = Date.prototype.format || (() => {
                         let i = observables.length;
                         while (i) {
                             // Ensures we decrement twice. First with --i, then 
-                            // with i-- since the part after && may not be executed.
+                            // with i-- since the part after && may not be 
+                            // executed.
                             --i;
                             if (observable === observables[i--] && methodName === observables[i]) return true;
                         }
@@ -2176,7 +2200,8 @@ Date.prototype.format = Date.prototype.format || (() => {
         /** Registers this Observer with the provided Observable
             for the provided eventType.
             @param observable:myt.Observable the Observable to attach to.
-            @param methodName:string the method name on this instance to execute.
+            @param methodName:string the method name on this instance to 
+                execute.
             @param eventType:string the event type to attach for.
             @param once:boolean (optional) if true  this Observer will detach
                 from the Observable after the event is handled once.
@@ -2215,7 +2240,8 @@ Date.prototype.format = Date.prototype.format || (() => {
         /** Unregisters this Observer from the provided Observable
             for the provided eventType.
             @param observable:myt.Observable the Observable to attach to.
-            @param methodName:string the method name on this instance to execute.
+            @param methodName:string the method name on this instance to 
+                execute.
             @param eventType:string the event type to attach for.
             @returns boolean true if one or more detachments occurred, false 
                 otherwise. */
@@ -2265,10 +2291,12 @@ Date.prototype.format = Date.prototype.format || (() => {
         
         // Constraints
         /** Creates a constraint. The method will be executed on this object
-            whenever any of the provided observables fire the indicated event type.
-            @param {string} methodName - The name of the method to call on this object.
-            @param {?Array} observables - An array of observable/type pairs. An observer
-                will attach to each observable for the event type.
+            whenever any of the provided observables fire the indicated event 
+            type.
+            @param {string} methodName - The name of the method to call on 
+                this object.
+            @param {?Array} observables - An array of observable/type pairs. 
+                An observer will attach to each observable for the event type.
             @returns {undefined} */
         constrain: function(methodName, observables) {
             if (methodName && observables) {
@@ -2294,7 +2322,8 @@ Date.prototype.format = Date.prototype.format || (() => {
                             }
                         }
                         
-                        // Call constraint method once so it can "sync" the constraint
+                        // Call constraint method once so it can "sync" 
+                        // the constraint
                         try {
                             this[methodName]();
                         } catch (err) {
@@ -2482,7 +2511,7 @@ new JS.Singleton('GlobalError', {
 });
 
 
-((pkg) => {
+(pkg => {
     const GLOBAL = global,
         getComputedStyle = GLOBAL.getComputedStyle,
         DOCUMENT_ELEMENT = document;
@@ -2511,8 +2540,9 @@ new JS.Singleton('GlobalError', {
             /** Tests if a dom element is visible or not.
                 @param {!Object} elem - The dom element to check visibility for.
                 @returns {boolean} - True if visible, false otherwise. */
-            isDomElementVisible: (elem) => {
-                // Special Case: hidden input elements should be considered not visible.
+            isDomElementVisible: elem => {
+                // Special Case: hidden input elements should be considered 
+                // not visible.
                 if (elem.nodeName === 'INPUT' && elem.type === 'hidden') return false;
                 
                 while (elem) {
@@ -2608,7 +2638,8 @@ new JS.Singleton('GlobalError', {
                     y = 0;
                 
                 // elem.nodeName !== "BODY" test prevents looking at the body
-                // which causes problems when the document is scrolled on webkit.
+                // which causes problems when the document is scrolled 
+                // on webkit.
                 while (elem && elem.nodeName !== "BODY" && elem !== ancestorElem) {
                     x += elem.offsetLeft;
                     y += elem.offsetTop;
@@ -2891,7 +2922,7 @@ new JS.Singleton('GlobalError', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     let globalFocus;
     
     const
@@ -2988,9 +3019,10 @@ new JS.Singleton('GlobalError', {
                             if (!elem.disabled && !isNaN(elem.tabIndex) && 
                                 pkg.DomElementProxy.isDomElementVisible(elem)
                             ) {
-                                // Make sure the dom element isn't inside a maskFocus
+                                // Make sure the dom element isn't inside 
+                                // a maskFocus
                                 model = globalFocus.findModelForDomElement(elem);
-                                if (model && model.searchAncestorsOrSelf((n) => n.maskFocus === true)) {
+                                if (model && model.searchAncestorsOrSelf(n => n.maskFocus === true)) {
                                     // Is a masked dom element so ignore.
                                 } else {
                                     elem.focus();
@@ -3124,7 +3156,7 @@ new JS.Singleton('GlobalError', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const JSModule = JS.Module,
         
         GlobalFocus = pkg.global.focus,
@@ -3831,7 +3863,7 @@ new JS.Singleton('GlobalError', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     let globalKeys,
         
         /* A map of keycodes of the keys currently pressed down. */
@@ -3849,12 +3881,12 @@ new JS.Singleton('GlobalError', {
         KEYCODE_COMMAND = isFirefox ? 224 : 91,
         KEYCODE_RIGHT_COMMAND = isFirefox ? 224 : 93,
         
-        getKeyCodeFromEvent = (event) => pkg.KeyObservable.getKeyCodeFromEvent(event),
+        getKeyCodeFromEvent = event => pkg.KeyObservable.getKeyCodeFromEvent(event),
         
         /*  Tests if a key is currently pressed down or not. Returns true if 
             the key is down, false otherwise.
                 param keyCode:number the key to test. */
-        isKeyDown = (keyCode) => !!keysDown[keyCode],
+        isKeyDown = keyCode => !!keysDown[keyCode],
         
         /* Tests if the 'shift' key is down. */
         isShiftKeyDown = () => isKeyDown(KEYCODE_SHIFT),
@@ -3876,8 +3908,8 @@ new JS.Singleton('GlobalError', {
         shouldPreventDefault = (keyCode, targetElem) => {
             switch (keyCode) {
                 case 8: // Backspace
-                    // Catch backspace since it navigates the history. Allow it to
-                    // go through for text input elements though.
+                    // Catch backspace since it navigates the history. Allow 
+                    // it to go through for text input elements though.
                     const nodeName = targetElem.nodeName;
                     if (nodeName === 'TEXTAREA' || 
                         (nodeName === 'INPUT' && (targetElem.type === 'text' || targetElem.type === 'password')) ||
@@ -4019,7 +4051,7 @@ new JS.Singleton('GlobalError', {
         ],
         
         
-        // Constructor /////////////////////////////////////////////////////////////
+        // Constructor /////////////////////////////////////////////////////////
         initialize: function() {
             G.register('keys', globalKeys = this);
             
@@ -4036,15 +4068,15 @@ new JS.Singleton('GlobalError', {
             globalKeys.attachTo(globalFocus, '__handleFocused', 'focused');
             globalKeys.__listenToDocument();
             
-            // Clear keys down when the window loses focus. This is necessary when
-            // using keyboard shortcusts to switch apps since that will leave
-            // a key in the down state even though it may no longer be when the
-            // focus is returned to the page.
+            // Clear keys down when the window loses focus. This is necessary 
+            // when using keyboard shortcusts to switch apps since that will 
+            // leave a key in the down state even though it may no longer be 
+            // when the focus is returned to the page.
             global.onblur = () => {keysDown = {};};
         },
         
         
-        // Methods /////////////////////////////////////////////////////////////////
+        // Methods /////////////////////////////////////////////////////////////
         isKeyDown: isKeyDown,
         isShiftKeyDown: isShiftKeyDown,
         isControlKeyDown: isControlKeyDown,
@@ -4057,7 +4089,7 @@ new JS.Singleton('GlobalError', {
         /** @private
             @param {!Object} event
             @returns {undefined} */
-        __handleFocused: (event) => {
+        __handleFocused: event => {
             const focused = event.value;
             if (focused) {
                 // unlisten to document
@@ -4091,7 +4123,7 @@ new JS.Singleton('GlobalError', {
         /** @private
             @param {!Object} event
             @returns {undefined} */
-        __handleKeyDown: (event) => {
+        __handleKeyDown: event => {
             const keyCode = getKeyCodeFromEvent(event),
                 domEvent = event.value;
             if (shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
@@ -4122,14 +4154,14 @@ new JS.Singleton('GlobalError', {
         /** @private
             @param {!Object} event
             @returns {undefined} */
-        __handleKeyPress: (event) => {
+        __handleKeyPress: event => {
             globalKeys.fireEvent('keypress', getKeyCodeFromEvent(event));
         },
         
         /** @private
             @param {!Object} event
             @returns {undefined} */
-        __handleKeyUp: (event) => {
+        __handleKeyUp: event => {
             const keyCode = getKeyCodeFromEvent(event),
                 domEvent = event.value;
             if (shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
@@ -4155,7 +4187,7 @@ new JS.Singleton('GlobalTouch', {
 });
 
 
-((pkg) => {
+(pkg => {
     const JSModule = JS.Module,
         
         AUTO = 'auto',
@@ -4556,7 +4588,7 @@ new JS.Singleton('GlobalTouch', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const
         /* Caches getter names. */
         GETTER_NAMES = {},
@@ -4565,8 +4597,8 @@ new JS.Singleton('GlobalTouch', {
         SETTER_NAMES = {},
         
         generateName = (attrName, prefix) => prefix + attrName.substring(0,1).toUpperCase() + attrName.substring(1),
-        generateSetterName = (attrName) => SETTER_NAMES[attrName] || (SETTER_NAMES[attrName] = generateName(attrName, 'set')),
-        generateGetterName = (attrName) => GETTER_NAMES[attrName] || (GETTER_NAMES[attrName] = generateName(attrName, 'get')),
+        generateSetterName = attrName => SETTER_NAMES[attrName] || (SETTER_NAMES[attrName] = generateName(attrName, 'set')),
+        generateGetterName = attrName => GETTER_NAMES[attrName] || (GETTER_NAMES[attrName] = generateName(attrName, 'get')),
         
         defAttr = (attrs, attrName, defaultValue) => {if (attrs[attrName] == null) attrs[attrName] = defaultValue;};
     
@@ -4601,7 +4633,7 @@ new JS.Singleton('GlobalTouch', {
             createSetterFunction: (target, attrName) => {
                 const setterName = generateSetterName(attrName);
                 if (target[setterName]) console.log("Overwriting setter", setterName);
-                target[setterName] = (v) => {
+                target[setterName] = v => {
                     if (target[attrName] !== v) {
                         target[attrName] = v;
                         if (target.inited) target.fireEvent(attrName, v);
@@ -4781,7 +4813,7 @@ myt.Destructible = new JS.Module('Destructible', {
 });
 
 
-((pkg) => {
+(pkg => {
     const JSClass = JS.Class,
         JSModule = JS.Module,
         
@@ -4865,7 +4897,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 object if it is a function. Otherwise it does nothing.
                 @param {!Object} obj - The object to be cleaned.
                 @returns {!Object} - The cleaned object. */
-            cleanInstance: (obj) => {
+            cleanInstance: obj => {
                 if (typeof obj.clean === 'function') obj.clean();
                 return obj;
             },
@@ -4963,7 +4995,8 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** Gets an array of the active instances.
-                @param {?Function} [filterFunc] - If provided filters the results.
+                @param {?Function} [filterFunc] - If provided filters the 
+                    results.
                 @returns {!Array} */
             getActives: function(filterFunc) {
                 const actives = getActiveObjArray(this);
@@ -5083,7 +5116,7 @@ myt.Destructible = new JS.Module('Destructible', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const
         /*  Get the closest ancestor of the provided Node or the Node itself for 
             which the matcher function returns true. Returns a Node or null if 
@@ -5124,7 +5157,8 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /*  Removes a named reference to a subnode.
                 param node:Node the node to remove the name reference from.
-                param nodeToRemove:Node the node to remove the name reference for. */
+                param nodeToRemove:Node the node to remove the name reference 
+                    for. */
         removeNameRef = (node, nodeToRemove) => {
             const name = nodeToRemove.name;
             if (node[name] === nodeToRemove) {
@@ -5138,40 +5172,44 @@ myt.Destructible = new JS.Module('Destructible', {
             if necessary. Returns a myt.TrackActivesPool */
         getAnimPool = node => node.__animPool || (node.__animPool = new pkg.TrackActivesPool(pkg.Animator, node));
         
-    /** A single node within a tree data structure. A node has zero or one parent 
-        node and zero or more child nodes. If a node has no parent it is a 'root' 
-        node. If a node has no child nodes it is a 'leaf' node. Parent nodes and 
-        parent of parents, etc. are referred to as ancestors. Child nodes and 
-        children of children, etc. are referred to as descendants.
+    /** A single node within a tree data structure. A node has zero or one 
+        parent node and zero or more child nodes. If a node has no parent it 
+        is a 'root' node. If a node has no child nodes it is a 'leaf' node. 
+        Parent nodes and parent of parents, etc. are referred to as ancestors. 
+        Child nodes and children of children, etc. are referred to 
+        as descendants.
         
-        Lifecycle management is also provided via the 'initNode', 'doBeforeAdoption',
-        'doAfterAdoption', 'destroy', 'destroyBeforeOrphaning' and
-        'destroyAfterOrphaning' methods.
+        Lifecycle management is also provided via the 'initNode', 
+        'doBeforeAdoption', 'doAfterAdoption', 'destroy', 
+        'destroyBeforeOrphaning' and 'destroyAfterOrphaning' methods.
         
         Events:
             parent:myt.Node Fired when the parent is set.
         
         Attributes:
-            inited:boolean Set to true after this Node has completed initializing.
+            inited:boolean Set to true after this Node has completed 
+                initializing.
             parent:myt.Node The parent of this Node.
             name:string The name of this node. Used to reference this Node from
                 its parent Node.
             isBeingDestroyed:boolean Indicates that this node is in the process
                 of being destroyed. Set to true at the beginning of the destroy
                 lifecycle phase. Undefined before that.
-            placement:string The name of the subnode of this Node to add nodes to 
-                when setParent is called on the subnode. Placement can be nested 
-                using '.' For example 'foo.bar'. The special value of '*' means 
-                use the default placement. For example 'foo.*' means place in the 
-                foo subnode and then in the default placement for foo.
+            placement:string The name of the subnode of this Node to add nodes 
+                to when setParent is called on the subnode. Placement can be 
+                nested using '.' For example 'foo.bar'. The special value of 
+                '*' means use the default placement. For example 'foo.*' means 
+                place in the foo subnode and then in the default placement 
+                for foo.
             defaultPlacement:string The name of the subnode to add nodes to when 
                 no placement is specified. Defaults to undefined which means add
                 subnodes directly to this node.
-            ignorePlacement:boolean If set to true placement will not be processed 
-                for this Node when it is added to a parent Node.
+            ignorePlacement:boolean If set to true placement will not be 
+                processed for this Node when it is added to a parent Node.
         
         Private Attributes:
-            __animPool:array An myt.TrackActivesPool used by the 'animate' method.
+            __animPool:array An myt.TrackActivesPool used by the 'animate' 
+                method.
             subnodes:array The array of child nodes for this node. Should be
                 accessed through the getSubnodes method.
         
@@ -5220,9 +5258,9 @@ myt.Destructible = new JS.Module('Destructible', {
         
         
         // Life Cycle //////////////////////////////////////////////////////////
-        /** Called during initialization. Sets initial state for life cycle attrs,
-            calls setter methods, sets parent and lastly, sets inited to true.
-            Subclasses must callSuper.
+        /** Called during initialization. Sets initial state for life 
+            cycle attrs, calls setter methods, sets parent and lastly, sets 
+            inited to true. Subclasses must callSuper.
             @param {?Object} parent - The myt.Node (or dom element for 
                 RootViews) the parent of this Node.
             @param {?Object} attrs - A map of attribute names and values.
@@ -5301,8 +5339,8 @@ myt.Destructible = new JS.Module('Destructible', {
         setIgnorePlacement: function(v) {this.ignorePlacement = v;},
         
         /** Sets the provided Node as the new parent of this Node. This is the
-            most direct method to do reparenting. You can also use the addSubnode
-            method but it's just a wrapper around this setter.
+            most direct method to do reparenting. You can also use the 
+            addSubnode method but it's just a wrapper around this setter.
             @param {?Object} newParent
             @returns {undefined} */
         setParent: function(newParent) {
@@ -5371,9 +5409,9 @@ myt.Destructible = new JS.Module('Destructible', {
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Called from setParent to determine where to insert a subnode in the node
-            hierarchy. Subclasses will not typically override this method, but if
-            they do, they probably won't need to call super.
+        /** Called from setParent to determine where to insert a subnode in 
+            the node hierarchy. Subclasses will not typically override this 
+            method, but if they do, they probably won't need to call super.
             @param {string} placement - The placement path to use.
             @param {!Object} subnode - The sub myt.Node being placed.
             @returns {!Object} - The Node to place a subnode into. */
@@ -5449,9 +5487,12 @@ myt.Destructible = new JS.Module('Destructible', {
             return node ? node.isDescendantOf(this) : false;
         },
         
-        /** Gets the youngest common ancestor of this node and the provided node.
-            @param {!Object} node - The myt.Node to look for a common ancestor with.
-            @returns {?Object} The youngest common Node or null if none exists. */
+        /** Gets the youngest common ancestor of this node and the 
+            provided node.
+            @param {!Object} node - The myt.Node to look for a common 
+                ancestor with.
+            @returns {?Object} The youngest common Node or null if 
+                none exists. */
         getLeastCommonAncestor: function(node) {
             while (node) {
                 if (this.isDescendantOf(node)) return node;
@@ -5468,8 +5509,8 @@ myt.Destructible = new JS.Module('Destructible', {
             return klass ? this.searchAncestors(node => node instanceof klass) : null;
         },
         
-        /** Get the youngest ancestor of this Node for which the matcher function 
-            returns true. This is a simple wrapper around 
+        /** Get the youngest ancestor of this Node for which the matcher 
+            function returns true. This is a simple wrapper around 
             myt.Node.getMatchingAncestor(this, matcherFunc).
             @param {!Function} matcherFunc - The function to test for matching 
                 Nodes with.
@@ -5526,11 +5567,12 @@ myt.Destructible = new JS.Module('Destructible', {
             node.setParent(this);
         },
         
-        /** A convienence method to make a Node no longer a child of this Node. The
-            standard way to do this is to call the setParent method with a value
-            of null on the child Node.
+        /** A convienence method to make a Node no longer a child of this Node. 
+            The standard way to do this is to call the setParent method with 
+            a value of null on the child Node.
             @param {!Object} node - The sub myt.Node to remove.
-            @returns {?Object} - The removed myt.Node or null if removal failed. */
+            @returns {?Object} - The removed myt.Node or null if 
+                removal failed. */
         removeSubnode: function(node) {
             if (node.parent !== this) return null;
             node.setParent(null);
@@ -5603,7 +5645,7 @@ myt.Destructible = new JS.Module('Destructible', {
             }
             
             // Release the animation when it completes.
-            anim.next((success) => {animPool.putInstance(anim);});
+            anim.next(success => {animPool.putInstance(anim);});
             if (callback) anim.next(callback);
             
             anim.setRunning(true);
@@ -5614,8 +5656,8 @@ myt.Destructible = new JS.Module('Destructible', {
             by calls to the animate method.
             @param {?Function|string} [filterFunc] - The function that filters
                 which animations get stopped. The filter should return true for 
-                functions to be included. If the provided values is a string it will
-                be used as a matching attribute name.
+                functions to be included. If the provided values is a string it 
+                will be used as a matching attribute name.
             @returns {!Array} - An array of active animators. */
         getActiveAnimators: function(filterFunc) {
             if (typeof filterFunc === 'string') {
@@ -5658,7 +5700,7 @@ myt.Destructible = new JS.Module('Destructible', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     let 
         /*  The global lock counter. Any value greater than zero sets the 
             global lock. */
@@ -5743,8 +5785,9 @@ myt.Destructible = new JS.Module('Destructible', {
             
             Private Attributes:
                 subviews:array An array of Views managed by this layout.
-                __deferredLayout:boolean Marks a layout as deferred if the global
-                    layout lock is true during a call to 'canUpdate' on the layout.
+                __deferredLayout:boolean Marks a layout as deferred if the 
+                    global layout lock is true during a call to 'canUpdate' 
+                    on the layout.
             
             @class */
         Layout = pkg.Layout = new JSClass('Layout', pkg.Node, {
@@ -5799,8 +5842,8 @@ myt.Destructible = new JS.Module('Destructible', {
             setParent: function(parent) {
                 const curParent = this.parent;
                 if (curParent !== parent) {
-                    // Lock during parent change so that old parent is not updated by
-                    // the calls to removeSubview and addSubview.
+                    // Lock during parent change so that old parent is not 
+                    // updated by the calls to removeSubview and addSubview.
                     const wasNotLocked = !this.locked;
                     if (wasNotLocked) this.locked = true;
                     
@@ -5829,7 +5872,8 @@ myt.Destructible = new JS.Module('Destructible', {
                         this.attachTo(parent, '__hndlPSRV', 'subviewRemoved');
                     }
                     
-                    // Clear temporary lock and update if this happened after initialization.
+                    // Clear temporary lock and update if this happened 
+                    // after initialization.
                     if (wasNotLocked) {
                         this.locked = false;
                         if (this.inited && parent) this.update();
@@ -5840,10 +5884,11 @@ myt.Destructible = new JS.Module('Destructible', {
             
             // Methods /////////////////////////////////////////////////////////
             /** Checks if the layout is locked or not. Should be called by the
-                "update" method of each layout to check if it is OK to do the update.
-                If myt.Layout.locked is true (the global layout lock) then a deferred
-                layout update will be setup for this Layout. Once the global lock is
-                unlocked this Layout's 'update' method will be invoked.
+                "update" method of each layout to check if it is OK to do the 
+                update. If myt.Layout.locked is true (the global layout lock) 
+                then a deferred layout update will be setup for this Layout. 
+                Once the global lock is unlocked this Layout's 'update' method 
+                will be invoked.
                 @returns {boolean} true if not locked, false otherwise. */
             canUpdate: function() {
                 if (globalLock) {
@@ -5853,13 +5898,14 @@ myt.Destructible = new JS.Module('Destructible', {
                 return !this.locked;
             },
             
-            /** Updates the layout. Subclasses should call canUpdate to check lock 
-                state before trying to do anything.
+            /** Updates the layout. Subclasses should call canUpdate to check 
+                lock state before trying to do anything.
                 @returns {undefined} */
             update: () => {},
             
             // Subview Methods //
-            /** Checks if this Layout has the provided View in the subviews array.
+            /** Checks if this Layout has the provided View in the subviews 
+                array.
                 @param {?Object} sv - The myt.View to check for.
                 @returns true if the subview is found, false otherwise. */
             hasSubview: function(sv) {
@@ -5868,7 +5914,8 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Gets the index of the provided View in the subviews array.
                 @param {?Object} sv - The myt.View to check for.
-                @returns {number} - The index of the subview or -1 if not found. */
+                @returns {number} - The index of the subview or -1 if not 
+                    found. */
             getSubviewIndex: function(sv) {
                 return this.subviews.indexOf(sv);
             },
@@ -5886,13 +5933,14 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Subclasses should implement this method to start listening to
                 events from the subview that should trigger the update method.
-                @param {?Object} sv - The myt.View to start monitoring for changes.
+                @param {?Object} sv - The myt.View to start monitoring for 
+                    changes.
                 @returns {undefined} */
             startMonitoringSubview: sv => {},
             
             /** Calls startMonitoringSubview for all views. Used by Layout 
-                implementations when a change occurs to the layout that requires
-                refreshing all the subview monitoring.
+                implementations when a change occurs to the layout that 
+                requires refreshing all the subview monitoring.
                 @returns {undefined} */
             startMonitoringAllSubviews: function() {
                 const svs = this.subviews;
@@ -5900,9 +5948,11 @@ myt.Destructible = new JS.Module('Destructible', {
                 while (i) this.startMonitoringSubview(svs[--i]);
             },
             
-            /** Removes the provided View from the subviews array of this Layout.
+            /** Removes the provided View from the subviews array of this 
+                Layout.
                 @param {?Object} sv - The myt.View to remove from this layout.
-                @returns the index of the removed subview or -1 if not removed. */
+                @returns the index of the removed subview or -1 if 
+                    not removed. */
             removeSubview: function(sv) {
                 if (this.ignore(sv)) return -1;
                 
@@ -5916,15 +5966,17 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** Subclasses should implement this method to stop listening to
-                events from the subview that would trigger the update method. This
-                should remove all listeners that were setup in startMonitoringSubview.
-                @param {?Object} sv - The myt.View to stop monitoring for changes.
+                events from the subview that would trigger the update method. 
+                This should remove all listeners that were setup in 
+                startMonitoringSubview.
+                @param {?Object} sv - The myt.View to stop monitoring for 
+                    changes.
                 @returns {undefined} */
             stopMonitoringSubview: sv => {},
             
             /** Calls stopMonitoringSubview for all views. Used by Layout 
-                implementations when a change occurs to the layout that requires
-                refreshing all the subview monitoring.
+                implementations when a change occurs to the layout that 
+                requires refreshing all the subview monitoring.
                 @returns {undefined} */
             stopMonitoringAllSubviews: function() {
                 const svs = this.subviews;
@@ -5932,11 +5984,12 @@ myt.Destructible = new JS.Module('Destructible', {
                 while (i) this.stopMonitoringSubview(svs[--i]);
             },
             
-            /** Checks if a subview can be added to this Layout or not. The default 
-                implementation returns the 'ignoreLayout' attributes of the subview.
+            /** Checks if a subview can be added to this Layout or not. The 
+                default implementation returns the 'ignoreLayout' attributes 
+                of the subview.
                 @param {?Object} sv - The myt.View to check.
-                @returns {boolean} true means the subview will be skipped, false
-                    otherwise. */
+                @returns {boolean} true means the subview will be skipped, 
+                    false otherwise. */
             ignore: sv => sv.ignoreLayout,
             
             /** If our parent adds a new subview we should add it.
@@ -5956,16 +6009,19 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             // Subview ordering //
-            /** Sorts the subviews array according to the provided sort function.
-                @param {?Function} sortFunc - The sort function to sort the subviews with.
+            /** Sorts the subviews array according to the provided sort 
+                function.
+                @param {?Function} sortFunc - The sort function to sort the 
+                    subviews with.
                 @returns {undefined} */
             sortSubviews: function(sortFunc) {
                 this.subviews.sort(sortFunc);
             },
             
-            /** Moves the subview before the target subview in the order the subviews
-                are layed out. If no target subview is provided, or it isn't in the
-                layout the subview will be moved to the front of the list.
+            /** Moves the subview before the target subview in the order the s
+                ubviews are layed out. If no target subview is provided, or 
+                it isn't in the layout the subview will be moved to the front 
+                of the list.
                 @param {?Object} sv
                 @param {?Object} target
                 @returns {undefined} */
@@ -5973,9 +6029,10 @@ myt.Destructible = new JS.Module('Destructible', {
                 moveSubview(this, sv, target, false);
             },
             
-            /** Moves the subview after the target subview in the order the subviews
-                are layed out. If no target subview is provided, or it isn't in the
-                layout the subview will be moved to the back of the list.
+            /** Moves the subview after the target subview in the order the 
+                subviews are layed out. If no target subview is provided, or 
+                it isn't in the layout the subview will be moved to the back 
+                of the list.
                 @param {?Object} sv
                 @param {?Object} target
                 @returns {undefined} */
@@ -6098,8 +6155,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 }
             },
             
-            /** Called by update before any processing is done. Gives subviews a
-                chance to do any special setup before update is processed.
+            /** Called by update before any processing is done. Gives subviews 
+                a chance to do any special setup before update is processed.
                 @returns {undefined} */
             doBeforeUpdate: () => {
                 // Subclasses to implement as needed.
@@ -6136,7 +6193,8 @@ myt.Destructible = new JS.Module('Destructible', {
                     layed out including the current one. i.e. count will be 1 
                     for the first subview layed out.
                 @param {!Object} sv - The sub myt.View being layed out.
-                @param {string} setterName - The name of the setter method to call.
+                @param {string} setterName - The name of the setter method 
+                    to call.
                 @param {*} value - The layout value.
                 @returns {*} - The value to use for the next subview. */
             updateSubview: (count, sv, setterName, value) => {
@@ -6670,7 +6728,7 @@ myt.Destructible = new JS.Module('Destructible', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const DomElementProxy = pkg.DomElementProxy,
     
         rectContainsPoint = pkg.Geometry.rectContainsPoint,
@@ -6735,7 +6793,8 @@ myt.Destructible = new JS.Module('Destructible', {
                         } else if (otherZIdx < zIdx) {
                             return false;
                         }
-                        // Fall through to dom comparison since z-indices are equal.
+                        // Fall through to dom comparison since z-indices 
+                        // are equal.
                     }
                 }
                 
@@ -6843,7 +6902,8 @@ myt.Destructible = new JS.Module('Destructible', {
         /*  A convienence method to set a single rounded corner on an element.
             @param {!Object} view
             @param {number} radius - The radius of the corner.
-            @param {string} corner - One of 'TopLeft', 'TopRight', 'BottomLeft' or 'BottomRight'. */
+            @param {string} corner - One of 'TopLeft', 'TopRight', 
+                'BottomLeft' or 'BottomRight'. */
         setRoundedCorner = (view, radius, corner) => {
             view.getODS()['border' + corner + 'Radius'] = radius + 'px';
         };
@@ -6863,7 +6923,8 @@ myt.Destructible = new JS.Module('Destructible', {
             width:number (supressable)
             height:number (supressable)
             boundsWidth:number Fired when the bounds width of the view changes.
-            boundsHeight:number Fired when the bounds height of the view changes.
+            boundsHeight:number Fired when the bounds height of the 
+                view changes.
             textColor:string
             bgColor:string
             opacity:number
@@ -6871,9 +6932,11 @@ myt.Destructible = new JS.Module('Destructible', {
             visible:boolean
             cursor:string
             subviewAdded:myt.View Fired when a subview is added to this view.
-            subviewRemoved:myt.View Fired when a subview is removed from this view.
+            subviewRemoved:myt.View Fired when a subview is removed from 
+                this view.
             layoutAdded:myt.Layout Fired when a layout is added to this view.
-            layoutRemoved:myt.Layout Fired when a layout is removed from this view.
+            layoutRemoved:myt.Layout Fired when a layout is removed from 
+                this view.
         
         Attributes:
             tagName:string Determines the name of the DOM element to create for
@@ -6928,32 +6991,34 @@ myt.Destructible = new JS.Module('Destructible', {
                 bounds. Allowed values: 'visible', 'hidden', 'scroll', 'auto', 
                 'autoy', 'autox' and 'inherit'. Defaults to undefined which 
                 is equivalent to 'visible'.
-            visible:boolean Makes this view visible or not. The default value is 
-                true which means visbility is inherited from the parent view.
-            cursor:string Determines what cursor to show when moused over the view.
-                Allowed values: 'auto', 'move', 'no-drop', 'col-resize', 
-                'all-scroll', 'pointer', 'not-allowed', 'row-resize', 'crosshair', 
-                'progress', 'e-resize', 'ne-resize', 'default', 'text', 'n-resize', 
-                'nw-resize', 'help', 'vertical-text', 's-resize', 'se-resize', 
-                'inherit', 'wait', 'w-resize', 'sw-resize'. Defaults to undefined 
-                which is equivalent to 'auto'.
-            pointerEvents:string Determines if this view responds to pointer events
-                or not. Supported values: 'none', 'auto' and 'inherit'. Defaults 
-                to undefined which is equivalent to 'auto'.
-            outlineWidth:number The width of the CSS outline. If a value equivalent
-                to false is provided 0 will be used.
+            visible:boolean Makes this view visible or not. The default 
+                value is true which means visbility is inherited from the 
+                parent view.
+            cursor:string Determines what cursor to show when moused over the 
+                view. Allowed values: 'auto', 'move', 'no-drop', 'col-resize', 
+                'all-scroll', 'pointer', 'not-allowed', 'row-resize', 
+                'crosshair', 'progress', 'e-resize', 'ne-resize', 'default', 
+                'text', 'n-resize', 'nw-resize', 'help', 'vertical-text', 
+                's-resize', 'se-resize', 'inherit', 'wait', 'w-resize', 
+                'sw-resize'. Defaults to undefined which is equivalent 
+                to 'auto'.
+            pointerEvents:string Determines if this view responds to pointer 
+                events or not. Supported values: 'none', 'auto' and 'inherit'. 
+                Defaults to undefined which is equivalent to 'auto'.
+            outlineWidth:number The width of the CSS outline. If a value 
+                equivalent to false is provided 0 will be used.
             outlineStyle:string The CSS outline style. If null or undefined is 
-                provided 'none' will be used. Supported values: 'none', 'dotted', 
-                'dashed', 'solid', 'double', 'groove', 'ridge', 'inset', 
-                'outset', 'inherit'.
+                provided 'none' will be used. Supported values: 'none', 
+                'dotted', 'dashed', 'solid', 'double', 'groove', 'ridge', 
+                'inset', 'outset', 'inherit'.
             outlineColor:string Sets the color of the CSS outline. If null or 
                 undefined is provided '#000000' will be used.
-            borderWidth:number The width of the CSS border. If a value equivalent 
-                to false is provided 0 will be used.
+            borderWidth:number The width of the CSS border. If a value 
+                equivalent to false is provided 0 will be used.
             borderStyle:string The CSS border style. If null or undefined is 
-                provided 'none' will be used. Supported values: 'none', 'dotted', 
-                'dashed', 'solid', 'double', 'groove', 'ridge', 'inset', 
-                'outset', 'inherit'.
+                provided 'none' will be used. Supported values: 'none', 
+                'dotted', 'dashed', 'solid', 'double', 'groove', 'ridge', 
+                'inset', 'outset', 'inherit'.
             borderColor:string Sets the color of the CSS border. If null or 
                 undefined is provided '#000000' will be used.
             tooltip:string Sets a tooltip for this view. The basic 
@@ -7032,8 +7097,9 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** @overrides myt.Node 
-            Subclasses should call super if they don't call __updateBounds. The call
-            to super should probably occur at the end of the overridden method. */
+            Subclasses should call super if they don't call __updateBounds. 
+            The call to super should probably occur at the end of the 
+            overridden method. */
         doAfterAdoption: function() {
             // Must be done after the dom element is inserted so that calls to
             // getBoundingClientRect will work.
@@ -7072,12 +7138,14 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** Gets the views that are our siblings.
-            @returns {!Array} of myt.View or undefined if this view is orphaned. */
+            @returns {!Array} of myt.View or undefined if this view 
+                is orphaned. */
         getSiblingViews: function() {
             if (this.parent) {
                 // Using filter ensures we have a copy of the subviews since we 
                 // will modify it and do not want to modify the original array.
-                // Remove ourselves from the subviews since we only want siblings.
+                // Remove ourselves from the subviews since we only want 
+                // siblings.
                 return this.parent.getSubviews().filter(sv => sv !== this);
             }
         },
@@ -7307,9 +7375,10 @@ myt.Destructible = new JS.Module('Destructible', {
                 const ods = self.getODS();
                 ods.visibility = v ? 'inherit' : 'hidden';
                 
-                // Move invisible elements to a very negative location so they won't
-                // effect scrollable area. Ideally we could use display:none but we
-                // can't because that makes measuring bounds not work.
+                // Move invisible elements to a very negative location so they 
+                // won't effect scrollable area. Ideally we could use 
+                // display:none but we can't because that makes measuring 
+                // bounds not work.
                 ods.left = v ? self.x + 'px' : '-100000px';
                 ods.top = v ? self.y + 'px' : '-100000px';
                 
@@ -7347,8 +7416,8 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Sets outlineWidth, outlineStyle and outlineColor via a single 
             array. If a value equivalent to false is provided the outline 
             will be supressed.
-            @param {?Array} v - An array where index 0 is outlineWidth, index 1 is outline 
-                style and index 2 is outlineColor.
+            @param {?Array} v - An array where index 0 is outlineWidth, index 
+                1 is outline style and index 2 is outlineColor.
             @returns {undefined} */
         setOutline: function(v) {
             v = v || [];
@@ -7374,8 +7443,8 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Sets borderWidth, borderStyle and borderColor via a single 
             array. If a value equivalent to false is provided the border 
             will be supressed.
-            @param {?Array} v - An array where index 0 is borderWidth, index 1 is border 
-                style and index 2 is borderColor.
+            @param {?Array} v - An array where index 0 is borderWidth, index 
+                1 is border style and index 2 is borderColor.
             @returns {undefined} */
         setBorder: function(v) {
             v = v || [];
@@ -7434,9 +7503,9 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** Sets the CSS boxShadow property.
-            @param {?Array} v - An array where index 0 is the horizontal shadow offset,
-                index 1 is the vertical shadow offset, index 2 is the blur amount,
-                and index 3 is the color.
+            @param {?Array} v - An array where index 0 is the horizontal 
+                shadow offset, index 1 is the vertical shadow offset, index 
+                2 is the blur amount, and index 3 is the color.
             @returns {undefined} */
         setBoxShadow: function(v) {
             if (v) {
@@ -7451,23 +7520,23 @@ myt.Destructible = new JS.Module('Destructible', {
             this.getODS().boxShadow = v;
         },
         
-        /** Sets the CSS liner-gradient or radial-gradient property. Setting this
-            property will take the place of any bgColor used in the view.
+        /** Sets the CSS liner-gradient or radial-gradient property. Setting 
+            this property will take the place of any bgColor used in the view.
             @param {?Array} v - An array where:
                 index 0: is the gradient type: linear or radial
                 index 1: is the geometry of the gradient.
                     radial: The value "cover" / "farthest-corner" or 
                         "contain" / "closest-side"
                     linear: A number will be interpreted as the degrees or a
-                        string must be one of: top, top right, right, bottom right,
-                            bottom, bottom left, left, top left
-                index 3+: Are the color stops which must be a valid CSS color. If
-                    the first and second color stops will default to the textColor
-                    and bgColor properties of this view if not provided. Use of the
-                    rgba(0-255,0-255,0-255,0-1) syntax is a good way to designate 
-                    colors since it will let you use an opacity. For a more 
-                    comprehensive description of how to specify color stops see: 
-                    https://developer.mozilla.org/en-US/docs/Web/CSS/linear-gradient
+                        string must be one of: top, top right, right, bottom 
+                        right, bottom, bottom left, left, top left
+                index 3+: Are the color stops which must be a valid CSS color. 
+                    If the first and second color stops will default to the 
+                    textColor and bgColor properties of this view if not 
+                    provided. Use of the rgba(0-255,0-255,0-255,0-1) syntax is 
+                    a good way to designate colors since it will let you use 
+                    an opacity. For a more comprehensive description of how to 
+                    specify color stops see: https://developer.mozilla.org/en-US/docs/Web/CSS/linear-gradient
             @returns {undefined} */
         setGradient: function(v) {
             const self = this,
@@ -7539,8 +7608,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 ods.background = 'none';
             }
             
-            // Wipe the bgColor property since setting style.background replaces 
-            // the bgColor.
+            // Wipe the bgColor property since setting style.background 
+            // replaces the bgColor.
             self.bgColor = undefined;
         },
         
@@ -7564,10 +7633,12 @@ myt.Destructible = new JS.Module('Destructible', {
             return this.searchAncestorsOrSelf(v => !v.visible) === null;
         },
         
-        /** Finds the youngest ancestor (or self) that is a focusTrap or focusCage.
+        /** Finds the youngest ancestor (or self) that is a focusTrap or 
+            focusCage.
             @param {boolean} ignoreFocusTrap - indicates focusTraps should be
                 ignored.
-            @returns {?Object} a View with focusTrap set to true or null if not found. */
+            @returns {?Object} a View with focusTrap set to true or null if 
+                not found. */
         getFocusTrap: function(ignoreFocusTrap) {
             return this.searchAncestorsOrSelf(v => v.focusCage || (v.focusTrap && !ignoreFocusTrap));
         },
@@ -7636,20 +7707,21 @@ myt.Destructible = new JS.Module('Destructible', {
             return this.getSubviews().indexOf(sv);
         },
         
-        /** Called when a View is added to this View. Do not call this method to 
-            add a View. Instead call addSubnode or setParent.
+        /** Called when a View is added to this View. Do not call this method 
+            to add a View. Instead call addSubnode or setParent.
             @param {!Object} sv - The myt.View that was added.
             @returns {undefined} */
         subviewAdded: sv => {},
         
-        /** Called when a View is removed from this View. Do not call this method 
-            to remove a View. Instead call removeSubnode or setParent.
+        /** Called when a View is removed from this View. Do not call this 
+            method to remove a View. Instead call removeSubnode or setParent.
             @param {!Object} sv - The myt.View that was removed.
             @returns {undefined} */
         subviewRemoved: sv => {},
         
         /** Gets the next sibling view based on lexical ordering of dom elements.
-            @returns {?Object} - The next sibling myt.View or null if none exists. */
+            @returns {?Object} - The next sibling myt.View or null if 
+                none exists. */
         getNextSibling: function() {
             if (this.parent) {
                 const nextDomElement = this.getODE().nextElementSibling;
@@ -7659,7 +7731,8 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** Gets the previous sibling view.
-            @returns {?Object} - The previous sibling myt.View or null if none exists. */
+            @returns {?Object} - The previous sibling myt.View or null if 
+                none exists. */
         getPrevSibling: function() {
             if (this.parent) {
                 const prevDomElement = this.getODE().previousElementSibling;
@@ -7683,8 +7756,8 @@ myt.Destructible = new JS.Module('Destructible', {
             return this.getLayouts().indexOf(layout);
         },
         
-        /** Called when a Layout is added to this View. Do not call this method to 
-            add a Layout. Instead call addSubnode or setParent.
+        /** Called when a Layout is added to this View. Do not call this 
+            method to add a Layout. Instead call addSubnode or setParent.
             @param {!Object} layout - The myt.Layout that was added.
             @returns {undefined} */
         layoutAdded: layout => {},
@@ -7707,8 +7780,8 @@ myt.Destructible = new JS.Module('Destructible', {
             return comparePosition(this, view, false, checkZIndex);
         },
         
-        /** Test if the provided view is front of this view. The view to test can
-            be anywhere in the document.
+        /** Test if the provided view is front of this view. The view to test 
+            can be anywhere in the document.
             @param {!Object} view - The myt.View to check.
             @param {boolean} [checkZIndex] - If true z-index will first be
                 used to check if the view is in front or not.
@@ -7759,7 +7832,8 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** Sends the provided subview to the back.
-            @param {?Object} sv - The sub myt.View of this myt.View to send to back.
+            @param {?Object} sv - The sub myt.View of this myt.View to send 
+                to back.
             @returns {undefined} */
         sendSubviewToBack: function(sv) {
             if (sv && sv.parent === this) {
@@ -7773,8 +7847,10 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** Sends the subview behind the existing subview.
-            @param {!Object} sv - The sub myt.View to send behind the existing myt.View.
-            @param {?Object} existing - The sub myt.View to send the other sub myt.View behind.
+            @param {!Object} sv - The sub myt.View to send behind the 
+                existing myt.View.
+            @param {?Object} existing - The sub myt.View to send the other 
+                sub myt.View behind.
             @returns {undefined} */
         sendSubviewBehind: function(sv, existing) {
             if (sv && existing && sv.parent === this && existing.parent === this) {
@@ -7786,8 +7862,10 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** Sends the subview in front of the existing subview.
-            @param {!Object} sv - the subview to send in front of the existing view.
-            @param {!Object} existing - the subview to send the other subview in front of.
+            @param {!Object} sv - the subview to send in front of the 
+                existing view.
+            @param {!Object} existing - the subview to send the other subview 
+                in front of.
             @returns {undefined} */
         sendSubviewInFrontOf: function(sv, existing) {
             if (sv && existing && sv.parent === this && existing.parent === this) {
@@ -7799,7 +7877,8 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Sorts the subviews array according to the provided sort function.
             Also rearranges the dom elements so that focus navigation and z
             ordering get updated.
-            @param {!Function} sortFunc - The sort function to sort the subviews with.
+            @param {!Function} sortFunc - The sort function to sort the 
+                subviews with.
             @returns {undefined} */
         sortSubviews: function(sortFunc) {
             // Sort subviews
@@ -7872,7 +7951,7 @@ myt.Destructible = new JS.Module('Destructible', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const
         updateBounds = view => {view.__updateBounds(view.width, view.height);},
         
@@ -7944,10 +8023,10 @@ myt.Destructible = new JS.Module('Destructible', {
                 and y dimension to the same value. A value of 1 is no scaling, 
                 0.5 is 50%, 2 is 200%, etc. Note: The setters for scaleX and 
                 scaleY are not called.
-            scaleX:number The scale for the view in the x-dimension. A value of 1 
-                is no scaling, 0.5 is 50%, 2 is 200%, etc.
-            scaleY:number The scale for the view in the y-dimension. A value of 1 
-                is no scaling, 0.5 is 50%, 2 is 200%, etc.
+            scaleX:number The scale for the view in the x-dimension. A value 
+                of 1 is no scaling, 0.5 is 50%, 2 is 200%, etc.
+            scaleY:number The scale for the view in the y-dimension. A value 
+                of 1 is no scaling, 0.5 is 50%, 2 is 200%, etc.
             skewX:number Sets the horizontal skew in degrees.
             skewY:number Sets the vertical skew in degrees.
         
@@ -8056,7 +8135,7 @@ myt.Destructible = new JS.Module('Destructible', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const JSModule = JS.Module,
         
         setWidth = (view, value) => {
@@ -8244,7 +8323,7 @@ myt.Destructible = new JS.Module('Destructible', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const /* A private setter function that provides a common implementation for
             most of this setters in the TextSupport mixin.
             @param {string|number} v
@@ -8290,8 +8369,9 @@ myt.Destructible = new JS.Module('Destructible', {
                 be assigned to the inner html of the div.
             textOverflow:string How text will be treated when it overflows the
                 bounds. Supported values: 'ellipsis', 'clip', 'inherit'.
-            textAlign:string How text will be aligned within the bounds. Supported 
-                values: 'left', 'right', 'center', 'justify', 'inherit'.
+            textAlign:string How text will be aligned within the bounds. 
+                Supported values: 'left', 'right', 'center', 'justify', 
+                'inherit'.
             whiteSpace:string How white space is handled. Supported values: 
                 'normal', 'nowrap', 'pre', 'pre-line', 'pre-wrap', 'inherit'.
             wordWrap:string How line wrapping is done. Supported 
@@ -8316,19 +8396,20 @@ myt.Destructible = new JS.Module('Destructible', {
                 'normal', 'italic', 'oblique', 'inherit'.
             fontVariant:string The font variant. Supported values: 'normal', 
                 'small-caps', 'inherit'.
-            fontWeight:string The font weight. Supported values: 'normal', 'bold', 
-                'bolder', 'lighter', '100-900', 'inherit'.
+            fontWeight:string The font weight. Supported values: 'normal', 
+                'bold', 'bolder', 'lighter', '100-900', 'inherit'.
             fontSize:string The size of the font. Supported values: 'normal, 
-                '14px', '14pt', 'xx-small', 'x-small', 'small', 'medium', 'large', 
-                'x-large', 'xx-large', 'smaller', 'larger', '75%', 'inherit'.
+                '14px', '14pt', 'xx-small', 'x-small', 'small', 'medium', 
+                'large', 'x-large', 'xx-large', 'smaller', 'larger', '75%', 
+                'inherit'.
             userUnselectable:boolean If set to true the CSS property user-select 
                 will be set to 'none' thus making text selection not work.
-                Furthermore, the cursor will be set to the default so it no longer
-                appears as an i-beam.
+                Furthermore, the cursor will be set to the default so it no 
+                longer appears as an i-beam.
         
         @class */
     pkg.TextSupport = new JS.Module('TextSupport', {
-        // Accessors ///////////////////////////////////////////////////////////////
+        // Accessors ///////////////////////////////////////////////////////////
         /** @overrides myt.View */
         setWidth: function(v, supressEvent) {
             this.callSuper(v, supressEvent);
@@ -8400,7 +8481,7 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         
-        // Methods /////////////////////////////////////////////////////////////////
+        // Methods /////////////////////////////////////////////////////////////
         /** Configures the attributes for this Text so that an ellipsis will be
             displayed. To actually see an ellipsis, an explicit width should be
             set on the Text so that overflow will occur.
@@ -8446,7 +8527,7 @@ myt.Destructible = new JS.Module('Destructible', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const 
         /*  Stores widths and heights of images by URL so we don't have to
             reload them to get sizes. */
@@ -8667,7 +8748,7 @@ myt.Destructible = new JS.Module('Destructible', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const JSClass = JS.Class,
         View = pkg.View,
         SizeToDom = pkg.SizeToDom,
@@ -8829,7 +8910,7 @@ myt.Destructible = new JS.Module('Destructible', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const
         setupPercentOfParentWidthConstraint = stp => {
             const p = stp.parent;
@@ -8862,20 +8943,20 @@ myt.Destructible = new JS.Module('Destructible', {
             percentOfParentHeight:number
             
         Attributes:
-            percentOfParentWidthOffset:number An additional offset used to adjust
-                the width of the parent. Defaults to undefined which is
+            percentOfParentWidthOffset:number An additional offset used to 
+                adjust the width of the parent. Defaults to undefined which is
                 equivalent to 0.
-            percentOfParentHeightOffset:number An additional offset used to adjust
-                the height of the parent. Defaults to undefined which is
+            percentOfParentHeightOffset:number An additional offset used to 
+                adjust the height of the parent. Defaults to undefined which is
                 equivalent to 0.
             percentOfParentWidth:number The percent of the parent views width
-                to size this views width to. Should be a number between 0 and 100 
-                or a negative value which means don't do resizing. Defaults to 
-                undefined which is equivalent to a negative value.
+                to size this views width to. Should be a number between 0 and 
+                100 or a negative value which means don't do resizing. Defaults 
+                to undefined which is equivalent to a negative value.
             percentOfParentHeight:number The percent of the parent views height
-                to size this views height to. Should be a number between 0 and 100 
-                or a negative value which means don't do resizing. Defaults to 
-                undefined which is equivalent to a negative value.
+                to size this views height to. Should be a number between 0 and 
+                100 or a negative value which means don't do resizing. Defaults 
+                to undefined which is equivalent to a negative value.
         
         @class */
     pkg.SizeToParent = new JS.Module('SizeToParent', {
@@ -8956,7 +9037,7 @@ myt.Destructible = new JS.Module('Destructible', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     let globalRootViewRegistry;
         
     /* Holds an array of RootViews. */
@@ -8968,12 +9049,10 @@ myt.Destructible = new JS.Module('Destructible', {
         Events:
             rootAdded:RootView Fired when a RootView is added. The value is the 
                 RootView added.
-            rootRemoved:RootView Fired when a RootView is removed. The value is the 
-                RootView removed.
+            rootRemoved:RootView Fired when a RootView is removed. The value 
+                is the RootView removed.
         
-        Attributes:
-            None
-    */
+        @class */
     new JS.Singleton('GlobalRootViewRegistry', {
         include: [pkg.Observable],
         
@@ -8994,7 +9073,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Add a rootable to the global list of root views.
             @param {!Object} r - The RootView to add.
             @returns {undefined} */
-        addRoot: (r) => {
+        addRoot: r => {
             roots.push(r);
             globalRootViewRegistry.fireEvent('rootAdded', r);
         },
@@ -9017,7 +9096,7 @@ myt.Destructible = new JS.Module('Destructible', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const roots = pkg.global.roots,
         
         /** Allows a view to act as a "root" for a view hierarchy. A "root" 
@@ -9155,7 +9234,7 @@ myt.Destructible = new JS.Module('Destructible', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const win = window;
         
         /* The inner width of the browser window. */
@@ -9173,9 +9252,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     w:number the new window width.
                     h:number the new window height.
         
-        Attributes:
-            None
-    */
+        @class */
     new JS.Singleton('GlobalWindowResize', {
         include: [pkg.Observable],
         
@@ -9205,7 +9282,7 @@ myt.Destructible = new JS.Module('Destructible', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const JSModule = JS.Module,
         GlobalWindowResize = pkg.global.windowResize,
         
@@ -9305,7 +9382,7 @@ myt.Destructible = new JS.Module('Destructible', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const win = window,
         
         /* The idle event object that gets reused. */
@@ -9393,7 +9470,7 @@ myt.Destructible = new JS.Module('Destructible', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const getTarget = animator => animator.target || animator.parent,
         
         isColorAttr = animator => {
@@ -9508,61 +9585,66 @@ myt.Destructible = new JS.Module('Destructible', {
                 easingFunction:function
                 from:number
                 to:number
-                repeat:Fired when the animation repeats. The value is the current
-                    loop count.
+                repeat:Fired when the animation repeats. The value is the 
+                    current loop count.
                 
             Attributes:
                 attribute:string The attribute to animate.
-                target:object The object to animate the attribute on. The default is 
-                    the parent of this node.
-                from:number The starting value of the attribute. If not specified the 
-                    current value on the target will be used.
+                target:object The object to animate the attribute on. The 
+                    default is the parent of this node.
+                from:number The starting value of the attribute. If not 
+                    specified the current value on the target will be used.
                 to:number The ending value of the attribute.
-                duration:number The length of time the animation will run in millis.
-                    The default value is 1000.
+                duration:number The length of time the animation will run 
+                    in millis. The default value is 1000.
                 easingFunction:string/function Controls the rate of animation.
-                    string: See http://easings.net/ for more info. One of the following:
-                        linear, 
-                        easeInQuad, easeOutQuad, easeInOutQuad(default), 
-                        easeInCubic, easeOutCubic, easeInOutCubic, 
-                        easeInQuart, easeOutQuart, easeInOutQuart, 
-                        easeInQuint, easeOutQuint, easeInOutQuint, 
-                        easeInSine, easeOutSine, easeInOutSine,
-                        easeInExpo ,easeOutExpo, easeInOutExpo, 
-                        easeInCirc, easeOutCirc, easeInOutCirc,
-                        easeInElastic ,easeOutElastic, easeInOutElastic, 
-                        easeInBack, easeOutBack, easeInOutBack, 
-                        easeInBounce, easeOutBounce, easeInOutBounce
+                    string: See http://easings.net/ for more info. One of the 
+                        following:
+                            linear, 
+                            easeInQuad, easeOutQuad, easeInOutQuad(default), 
+                            easeInCubic, easeOutCubic, easeInOutCubic, 
+                            easeInQuart, easeOutQuart, easeInOutQuart, 
+                            easeInQuint, easeOutQuint, easeInOutQuint, 
+                            easeInSine, easeOutSine, easeInOutSine,
+                            easeInExpo ,easeOutExpo, easeInOutExpo, 
+                            easeInCirc, easeOutCirc, easeInOutCirc,
+                            easeInElastic ,easeOutElastic, easeInOutElastic, 
+                            easeInBack, easeOutBack, easeInOutBack, 
+                            easeInBounce, easeOutBounce, easeInOutBounce
                     
-                    function: A function that determines the rate of change of the 
-                        attribute. The arguments to the easing function are:
-                        t: Animation progress in millis
-                        c: Value change (to - from)
-                        d: Animation duration in millis
-                relative:boolean Determines if the animated value is set on the target 
-                    (false), or added to the exiting value on the target (true). Note
-                    that this means the difference between the from and to values
-                    will be "added" to the existing value on the target. The default 
-                    value is false.
-                repeat:number The number of times to repeat the animation. If negative 
-                    the animation will repeat forever. The default value is 1.
+                    function: A function that determines the rate of change of 
+                        the attribute. The arguments to the easing 
+                        function are:
+                            t: Animation progress in millis
+                            c: Value change (to - from)
+                            d: Animation duration in millis
+                relative:boolean Determines if the animated value is set on the 
+                    target (false), or added to the exiting value on the 
+                    target (true). Note that this means the difference between 
+                    the from and to values will be "added" to the existing 
+                    value on the target. The default value is false.
+                repeat:number The number of times to repeat the animation. If 
+                    negative the animation will repeat forever. The default 
+                    value is 1.
                 reverse:boolean If true, the animation is run in reverse.
-                running:boolean Indicates if the animation is currently running. The 
-                    default value is false.
-                paused:boolean Indicates if the animation is temporarily paused. The 
-                    default value is false.
+                running:boolean Indicates if the animation is currently running.
+                    The default value is false.
+                paused:boolean Indicates if the animation is temporarily paused.
+                    The default value is false.
                 callback:function A function that gets called when the animation
-                    completes. A boolean value is passed into the function and will be
-                    true if the animation completed successfully or false if not.
+                    completes. A boolean value is passed into the function and 
+                    will be true if the animation completed successfully or 
+                    false if not.
             
             Private Attributes:
                 __loopCount:number the loop currently being run.
                 __progress:number the number of millis currently used during the
                     current animation loop.
-                __temporaryFrom:boolean Indicates no "from" was set on the animator so 
-                    we will have to generate one when needed. We want to reset back to 
-                    undefined after the animation completes so that subsequent calls 
-                    to start the animation will behave the same.
+                __temporaryFrom:boolean Indicates no "from" was set on the 
+                    animator so we will have to generate one when needed. We 
+                    want to reset back to undefined after the animation 
+                    completes so that subsequent calls to start the animation
+                    will behave the same.
                 __isColorAnim:boolean Indicates this animator is animating a
                     color attribute.
             
@@ -9736,9 +9818,9 @@ myt.Destructible = new JS.Module('Destructible', {
             
             
             // Methods /////////////////////////////////////////////////////////
-            /** A convienence method to set the callback to run when the animator
-                stops running. If a callback already exists the provided callback
-                will be executed after the existing one.
+            /** A convienence method to set the callback to run when the 
+                animator stops running. If a callback already exists the 
+                provided callback will be executed after the existing one.
                 @param {!Function} callback - The function to run.
                 @param {boolean} [replace] - If true the existing callback will 
                     be replaced with the new callback.
@@ -9797,7 +9879,7 @@ myt.Destructible = new JS.Module('Destructible', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const 
         /* Indicates a synchronous transition. */
         SYNC = 'sync',
@@ -9808,7 +9890,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /* Special state name that holds transitions for all states. */
         WILDCARD = '*',
         
-        resetTransitionProgress = (stateMachine) => {
+        resetTransitionProgress = stateMachine => {
             stateMachine.__additionalArgs = [];
             stateMachine.__pendingTransition = '';
             stateMachine.__transDestinationState = '';
@@ -9851,7 +9933,7 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         },
         
-        doDeferredTransitions = (stateMachine) => {
+        doDeferredTransitions = stateMachine => {
             stateMachine.__transInProgress = false;
             
             const deferredTransitions = stateMachine.__deferredTransitions;
@@ -9884,8 +9966,8 @@ myt.Destructible = new JS.Module('Destructible', {
         Private Attributes:
             __transInProgress:boolean Indicates that a transition is 
                 currently under way.
-            __pendingTransition:string The name of the transition that is currently
-                under way.
+            __pendingTransition:string The name of the transition that is 
+                currently under way.
             __additionalArgs:array An array of additional args passed into the
                 doTransition or doAsyncTransition methods.
             __transDestinationState: The state the currently running 
@@ -9901,7 +9983,8 @@ myt.Destructible = new JS.Module('Destructible', {
         extend: {
             /** The transition was successfull. */
             SUCCEEDED:1,
-            /** The transition was cancelled before the state change occurred. */
+            /** The transition was cancelled before the state change 
+                occurred. */
             CANCELLED:2,
             /** An asynchronous transition is in progress. */
             PENDING:3,
@@ -10066,12 +10149,12 @@ myt.Destructible = new JS.Module('Destructible', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const sortFunction = (a, b) => a.replicationIndex - b.replicationIndex,
         
         /*  @param {!Array} layouts
             @returns {undefined} */
-        lockLayouts = (layouts) => {
+        lockLayouts = layouts => {
             let i = layouts.length;
             while (i) layouts[--i].incrementLockedCounter();
         },
@@ -10091,7 +10174,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /*  @param {!Object} replicator
             @returns {undefined} */
-        setupPool = (replicator) => {
+        setupPool = replicator => {
             destroyOldPool(replicator);
             
             // Create new pool
@@ -10101,7 +10184,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /*  @param {!Object} replicator
             @returns {undefined} */
-        destroyOldPool = (replicator) => {
+        destroyOldPool = replicator => {
             // Destroy old pool and instances.
             const pool = replicator.__pool;
             if (pool) {
@@ -10120,11 +10203,8 @@ myt.Destructible = new JS.Module('Destructible', {
     
     /** Objects that can be replicated should include this mixin and implemment
         the replicate method. The myt.Reusable mixin is also included and the
-        clean method should also be implemented. The methods replicate and clean
-        should perform setup and teardown of the object respectively.
-        
-        Events:
-            None
+        clean method should also be implemented. The methods replicate and 
+        clean should perform setup and teardown of the object respectively.
         
         Attributes:
             replicationData:* The data provided during replication.
@@ -10137,8 +10217,8 @@ myt.Destructible = new JS.Module('Destructible', {
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Called to configure the replicable object with data. Subclasses should
-            call super.
+        /** Called to configure the replicable object with data. Subclasses 
+            should call super.
             @param {?Object} data - The data being replicated for this instance.
             @param {number} idx - The index of the data in the replicated list.
             @returns {undefined} */
@@ -10165,8 +10245,8 @@ myt.Destructible = new JS.Module('Destructible', {
             updated or not.
             @param {!Object} data - The data being replicated for this instance.
             @param {number} idx - The index of the data in the replicated list.
-            @returns {boolean} - True if the provided data is already set on this
-                replicable, false otherwise. */
+            @returns {boolean} - True if the provided data is already set on 
+                this replicable, false otherwise. */
         alreadyHasReplicationData: function(data, idx) {
             // FIXME: Use deepEquals on replicationData?
             return idx === this.replicationIndex && data === this.replicationData;
@@ -10174,9 +10254,6 @@ myt.Destructible = new JS.Module('Destructible', {
     });
 
     /** Creates instances using a template class and an array of data items.
-        
-        Events:
-            None
         
         Attributes:
             template:JS.Class The template to replicate for each entry in the
@@ -10313,7 +10390,7 @@ new JS.Singleton('GlobalMouse', {
 });
 
 
-((pkg) => {
+(pkg => {
     let fireGlobalDragManagerEvent,
         
         /* The view currently being dragged. */
@@ -10331,7 +10408,7 @@ new JS.Singleton('GlobalMouse', {
             when drag and drop events occur. */
         dropTargets = [],
         
-        setOverView = (v) => {
+        setOverView = v => {
             const existingOverView = overView;
             if (existingOverView !== v) {
                 if (existingOverView) {
@@ -10536,7 +10613,7 @@ new JS.Singleton('GlobalMouse', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const JSModule = JS.Module,
         G = pkg.global,
         GlobalMouse = G.mouse,
@@ -11266,7 +11343,7 @@ new JS.Singleton('GlobalMouse', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const JSClass = JS.Class,
         JSModule = JS.Module,
         
@@ -11672,7 +11749,7 @@ new JS.Singleton('GlobalMouse', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const G = pkg.global,
         GlobalFocus = G.focus,
         GlobalMouse = G.mouse,
@@ -11690,24 +11767,27 @@ new JS.Singleton('GlobalMouse', {
                 floatingValignOffset:number
             
             Attributes:
-                floatingPanelId:string If defined this is the panel ID that will be
-                    used by default in the various methods that require a panel ID.
-                floatingAlign:string:number The horizontal alignment for panels shown 
-                    by this anchor. If the value is a string it is an alignment 
-                    identifier relative to this anchor. If the value is a number it is 
-                    an absolute position in pixels. Allowed values: 'outsideLeft', 
-                    'insideLeft', 'insideRight', 'outsideRight' or a number.
-                floatingValign:string:number The vertical alignment for panels shown 
-                    by this anchor. If the value is a string it is an alignment 
-                    identifier relative to this anchor. If the value is a number it is 
-                    an absolute position in pixels. Allowed values: 'outsideTop', 
-                    'insideTop', 'insideBottom', 'outsideBottom' or a number.
-                floatingAlignOffset:number The number of pixels to offset the panel
-                    position by horizontally.
-                floatingValignOffset:number The number of pixels to offset the panel
-                    position by vertically.
-                lastFloatingPanelShown:myt.FloatingPanel A reference to the last
-                    floating panel shown by this anchor.
+                floatingPanelId:string If defined this is the panel ID that 
+                    will be used by default in the various methods that 
+                    require a panel ID.
+                floatingAlign:string:number The horizontal alignment for panels 
+                    shown by this anchor. If the value is a string it is an 
+                    alignment identifier relative to this anchor. If the value 
+                    is a number it is an absolute position in pixels. Allowed 
+                    values: 'outsideLeft', 'insideLeft', 'insideRight', 
+                    'outsideRight' or a number.
+                floatingValign:string:number The vertical alignment for panels 
+                    shown by this anchor. If the value is a string it is an 
+                    alignment identifier relative to this anchor. If the value 
+                    is a number it is an absolute position in pixels. Allowed 
+                    values: 'outsideTop', 'insideTop', 'insideBottom', 
+                    'outsideBottom' or a number.
+                floatingAlignOffset:number The number of pixels to offset 
+                    the panel position by horizontally.
+                floatingValignOffset:number The number of pixels to offset 
+                    the panel position by vertically.
+                lastFloatingPanelShown:myt.FloatingPanel A reference to the 
+                    last floating panel shown by this anchor.
             
             @class */
         FloatingPanelAnchor = pkg.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
@@ -11775,7 +11855,8 @@ new JS.Singleton('GlobalMouse', {
             },
             
             /** Called when a floating panel has been shown for this anchor.
-                @param {!Object} panel - The myt.FloatingPanel that is now shown.
+                @param {!Object} panel - The myt.FloatingPanel that is 
+                    now shown.
                 @returns {undefined} */
             notifyPanelShown: function(panel) {
                 // Subclasses to implement as needed.
@@ -11783,47 +11864,50 @@ new JS.Singleton('GlobalMouse', {
             },
             
             /** Called when a floating panel has been hidden for this anchor.
-                @param {!Object} panel - The myt.FloatingPanel that is now hidden.
+                @param {!Object} panel - The myt.FloatingPanel that is 
+                    now hidden.
                 @returns {undefined} */
             notifyPanelHidden: function(panel) {
                 // Subclasses to implement as needed.
                 if (this.callSuper) this.callSuper();
             },
             
-            /** Called by the FloatingPanel to determine where to position itself
-                horizontally. By default this returns the floatingAlign attribute. 
-                Subclasses and instances should override this if panel specific 
-                behavior is needed.
+            /** Called by the FloatingPanel to determine where to position 
+                itself horizontally. By default this returns the floatingAlign 
+                attribute. Subclasses and instances should override this if 
+                panel specific behavior is needed.
                 @param {string} panelId - The ID of the panel being positioned.
-                @returns {string|number} - An alignment identifer or absolute position. */
+                @returns {string|number} - An alignment identifer or 
+                    absolute position. */
             getFloatingAlignForPanelId: function(panelId) {
                 return this.floatingAlign;
             },
             
-            /** Called by the FloatingPanel to determine where to position itself
-                vertically. By default this returns the floatingAlign attribute. 
-                Subclasses and instances should override this if panel specific 
-                behavior is needed.
+            /** Called by the FloatingPanel to determine where to position 
+                itself vertically. By default this returns the floatingAlign 
+                attribute. Subclasses and instances should override this if 
+                panel specific behavior is needed.
                 @param {string} panelId - The ID of the panel being positioned.
-                @returns {string|number} - An alignment identifer or absolute position. */
+                @returns {string|number} - An alignment identifer or absolute 
+                    position. */
             getFloatingValignForPanelId: function(panelId) {
                 return this.floatingValign;
             },
             
-            /** Called by the FloatingPanel to determine where to position itself
-                horizontally. By default this returns the floatingAlignOffset attribute. 
-                Subclasses and instances should override this if panel specific 
-                behavior is needed.
+            /** Called by the FloatingPanel to determine where to position 
+                itself horizontally. By default this returns the 
+                floatingAlignOffset attribute. Subclasses and instances should 
+                override this if panel specific behavior is needed.
                 @param {string} panelId - The ID of the panel being positioned.
                 @returns {number} the offset to use. */
             getFloatingAlignOffsetForPanelId: function(panelId) {
                 return this.floatingAlignOffset;
             },
             
-            /** Called by the FloatingPanel to determine where to position itself
-                vertically. By default this returns the floatingValignOffset attribute. 
-                Subclasses and instances should override this if panel specific 
-                behavior is needed.
+            /** Called by the FloatingPanel to determine where to position 
+                itself vertically. By default this returns the 
+                floatingValignOffset attribute. Subclasses and instances should 
+                override this if panel specific behavior is needed.
                 @param {string} panelId - The ID of the panel being positioned.
                 @returns {number} the offset to use. */
             getFloatingValignOffsetForPanelId: function(panelId) {
@@ -11831,24 +11915,26 @@ new JS.Singleton('GlobalMouse', {
             },
             
             /** @overrides myt.FocusObservable
-                @returns {!Object} The last floating panel shown if it exists and 
-                    can be shown. Otherwise it returns the default. */
+                @returns {!Object} The last floating panel shown if it exists 
+                    and can be shown. Otherwise it returns the default. */
             getNextFocus: function() {
                 const last = this.lastFloatingPanelShown;
                 if (last && last.isShown()) return last;
                 return this.callSuper ? this.callSuper() : null;
             },
             
-            /** Called by the floating panel owned by this anchor to determine where
-                to go to next after leaving the panel in the forward direction.
+            /** Called by the floating panel owned by this anchor to determine 
+                where to go to next after leaving the panel in the forward 
+                direction.
                 @param {string} panelId
                 @returns {!Object} */
             getNextFocusAfterPanel: function(panelId) {
                 return this;
             },
             
-            /** Called by the floating panel owned by this anchor to determine where
-                to go to next after leaving the panel in the backward direction.
+            /** Called by the floating panel owned by this anchor to determine 
+                where to go to next after leaving the panel in the backward 
+                direction.
                 @param {string} panelId
                 @returns {!Object} */
             getPrevFocusAfterPanel: function(panelId) {
@@ -11858,17 +11944,15 @@ new JS.Singleton('GlobalMouse', {
     
     /** A panel that floats above everything else.
         
-        Events:
-            None
-        
         Attributes:
             owner:myt.FloatingPanelAnchor The anchor that currently "owns" 
                 this panel.
             panelId:string The unique ID for this panel instance.
             hideOnMouseDown:boolean If true this panel will be hidden when a
                 mousedown occurs outside the panel. True by default.
-            ignoreOwnerForHideOnMouseDown:boolean If true the owner view for this
-                panel will also be ignored for mousedown events. True by default.
+            ignoreOwnerForHideOnMouseDown:boolean If true the owner view for 
+                this panel will also be ignored for mousedown events. True by 
+                default.
             ignoreOwnerForHideOnBlur:boolean If true the owner view for this
                 panel will also be ignored for blur events. True by default.
             hideOnBlur:boolean If true this panel will be hidden when a
@@ -11920,9 +12004,9 @@ new JS.Singleton('GlobalMouse', {
             return true;
         },
         
-        /** Called when a mousedown occurs outside the floating panel. The default
-            behavior is to hide the panel. This gives subclasses a chance to 
-            provide different behavior.
+        /** Called when a mousedown occurs outside the floating panel. The 
+            default behavior is to hide the panel. This gives subclasses a 
+            chance to provide different behavior.
             @returns {undefined} */
         doMouseDownOutside: function() {
             if (this.hideOnMouseDown) this.hide();
@@ -11948,9 +12032,9 @@ new JS.Singleton('GlobalMouse', {
             }
         },
         
-        /** Gets the view to give focus to when this panel gets focus. Should be
-            a descendant of the floating panel or the panel itself. Returns this 
-            floating panel by default.
+        /** Gets the view to give focus to when this panel gets focus. Should 
+            be a descendant of the floating panel or the panel itself. Returns 
+            this floating panel by default.
             @returns myt.View: The view to give focus to. */
         getFirstFocusableDescendant: function() {
             return this;
@@ -11983,8 +12067,8 @@ new JS.Singleton('GlobalMouse', {
         },
         
         /** Shows the floating panel for the provided myt.FloatingPanelAnchor.
-            @param panelAnchor:myt.FloatingPanelAnchor The floating panel anchor 
-                to show the panel for.
+            @param panelAnchor:myt.FloatingPanelAnchor The floating panel 
+                anchor to show the panel for.
             @returns {undefined} */
         show: function(panelAnchor) {
             if (!this.isShown()) {
@@ -12000,9 +12084,9 @@ new JS.Singleton('GlobalMouse', {
         },
         
         /** Hides the floating panel for the provided myt.FloatingPanelAnchor.
-            @param ignoreRestoreFocus:boolean (Optional) If true the restoreFocus
-                method will not be called. Defaults to undefined which is
-                equivalent to false.
+            @param ignoreRestoreFocus:boolean (Optional) If true the 
+                restoreFocus method will not be called. Defaults to undefined 
+                which is equivalent to false.
             @returns {undefined} */
         hide: function(ignoreRestoreFocus) {
             if (this.isShown()) {
@@ -12025,8 +12109,8 @@ new JS.Singleton('GlobalMouse', {
         
         /** Updates the x and y position of the floating panel for the provided 
             floating panel anchor.
-            @param panelAnchor:myt.FloatingPanelAnchor The anchor to update the
-                location for.
+            @param panelAnchor:myt.FloatingPanelAnchor The anchor to update 
+                the location for.
             @returns {undefined} */
         updateLocation: function(panelAnchor) {
             this.setOwner(panelAnchor);
@@ -12080,7 +12164,7 @@ new JS.Singleton('GlobalMouse', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const JSClass = JS.Class,
         JSModule = JS.Module,
         
@@ -12498,7 +12582,7 @@ new JS.Singleton('GlobalMouse', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const AccessorSupport = pkg.AccessorSupport,
     
         /*  A data structure of groups stored as a map of maps. First 
@@ -12748,7 +12832,8 @@ new JS.Singleton('GlobalMouse', {
                         groups.splice(i, 1);
                         group.unregister(this);
                     } else if (g.attrName === attrName) {
-                        // Don't detach if another group is listening to the same attr.
+                        // Don't detach if another group is listening to 
+                        // the same attr.
                         detach = false;
                     }
                 }
@@ -12781,7 +12866,7 @@ new JS.Singleton('GlobalMouse', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const BAGAttrName = 'selected',
         
         defAttr = pkg.AccessorSupport.defAttr,
@@ -12920,7 +13005,7 @@ new JS.Singleton('GlobalMouse', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const JSModule = JS.Module,
         GlobalKeys = pkg.global.keys,
     
@@ -12951,14 +13036,14 @@ new JS.Singleton('GlobalMouse', {
                 return this.selected ? true : false;
             },
             
-            /** Checks if the provided myt.SelectionManager can select this object.
-                Returns true by default.
+            /** Checks if the provided myt.SelectionManager can select this 
+                object. Returns true by default.
                 @param {!Object} selectionManager
                 @returns {boolean} */
             canSelect: selectionManager => true,
             
-            /** Checks if the provided myt.SelectionManager can deselect this object.
-                Returns true by default.
+            /** Checks if the provided myt.SelectionManager can deselect this 
+                object. Returns true by default.
                 @param {!Object} selectionManager
                 @returns {boolean} */
             canDeselect: selectionManager => true
@@ -12967,41 +13052,44 @@ new JS.Singleton('GlobalMouse', {
         /** Manages the selection of one or more items.
             
             Events:
-                itemSelected:object Fired when an item is selected. The event value is 
-                    the selected item.
-                itemDeselected:object Fired when an item is deselected. The event 
-                    value is the deselected item.
-                selectedCount:number Fired when the number of selected items changes.
+                itemSelected:object Fired when an item is selected. The event 
+                    value is the selected item.
+                itemDeselected:object Fired when an item is deselected. The 
+                    event value is the deselected item.
+                selectedCount:number Fired when the number of selected 
+                    items changes.
             
             Attributes:
-                itemSelectionId:string The name of the property on items that is used
-                    to differentiate them from each other for selection. The default
-                    value is 'id'.
-                maxSelected:number The maximum number of items that can be selected.
-                    If -1 is provided the count is unlimited. If 1 is provided attempts
-                    to select when an item is already selected will result in the
-                    existing selection being cleared and the the new item being
-                    selected. Defaults to -1.
+                itemSelectionId:string The name of the property on items that 
+                    is used to differentiate them from each other for 
+                    selection. The default value is 'id'.
+                maxSelected:number The maximum number of items that can be 
+                    selected. If -1 is provided the count is unlimited. If 1 
+                    is provided attempts to select when an item is already 
+                    selected will result in the existing selection being 
+                    cleared and the the new item being selected. Defaults to -1.
                 selectedCount:number The number of selected items.
             
             Private Attributes:
                 __selected:object A map of selected items by itemSelectionId.
                 __lastSelectedItem:object A reference to the last item that was
-                    selected. If this item is deselected this will get set to null.
+                    selected. If this item is deselected this will get set 
+                    to null.
             
             @class */
         SelectionManager = pkg.SelectionManager = new JSModule('SelectionManager', {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
                 /** Determines if we are in "add" mode for selection such that
-                    selections will only be increased not reduced. Typically this
-                    means the shift key is down.
+                    selections will only be increased not reduced. Typically 
+                    this means the shift key is down.
                     @returns {boolean} true if in add mode, false otherwise. */
                 isAddMode: () => GlobalKeys.isShiftKeyDown(),
                 
-                /** Determines if we are in "toggle" mode for selection such that
-                    selections can be added to or removed from incrementally. Typically 
-                    this means the control or command key is down.
+                /** Determines if we are in "toggle" mode for selection such 
+                    that selections can be added to or removed from 
+                    incrementally. Typically this means the control or command 
+                    key is down.
                     @returns {boolean} true if in add mode, false otherwise. */
                 isToggleMode: () => GlobalKeys.isAcceleratorKeyDown()
             },
@@ -13081,7 +13169,8 @@ new JS.Singleton('GlobalMouse', {
             
             /** Checks if the item can be selected.
                 @param {!Object} item - The item to test.
-                @returns {boolean} True if selection is allowed, false otherwise. */
+                @returns {boolean} True if selection is allowed, false 
+                    otherwise. */
             canSelectItem: function(item) {
                 const ms = this.maxSelected, 
                     sc = this.selectedCount;
@@ -13128,7 +13217,7 @@ new JS.Singleton('GlobalMouse', {
             /** Called when an item is deselected.
                 @param {!Object} item - The newly deselected myt.Selectable.
                 @returns {undefined} */
-            doDeselected: (item) => {},
+            doDeselected: item => {},
             
             /** Deselects the item with the provided item selection ID.
                 @param {string} itemSelectionId
@@ -13139,7 +13228,8 @@ new JS.Singleton('GlobalMouse', {
             
             /** Checks if the item can be deselected.
                 @param {!Object} item
-                @returns {boolean}true if deselection is allowed, false otherwise. */
+                @returns {boolean}true if deselection is allowed, false 
+                    otherwise. */
             canDeselectItem: function(item) {
                 return item.canDeselect(this);
             },
@@ -13162,8 +13252,8 @@ new JS.Singleton('GlobalMouse', {
                 return this.selectedCount === this.getSelectableItems().length;
             },
             
-            /** Gets a list of items that are potentially selectable by this manager.
-                By default assumes this is an myt.View and returns all 
+            /** Gets a list of items that are potentially selectable by this 
+                manager. By default assumes this is an myt.View and returns all 
                 myt.Selectable subviews.
                 @returns {!Array} */
             getManagedItems: function() {
@@ -13177,7 +13267,8 @@ new JS.Singleton('GlobalMouse', {
                 return retval;
             },
             
-            /** Gets a list of items that can currently be selected by this manager.
+            /** Gets a list of items that can currently be selected by 
+                this manager.
                 @returns {!Array} */
             getSelectableItems: function() {
                 const items = this.getManagedItems();
@@ -13205,7 +13296,7 @@ new JS.Singleton('GlobalMouse', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const JSClass = JS.Class,
         View = pkg.View,
         SizeToParent = pkg.SizeToParent,
@@ -13213,27 +13304,30 @@ new JS.Singleton('GlobalMouse', {
         /** A tab slider component.
             
             Events:
-                expansionState:string Fired when the tab slider changes expansion state.
+                expansionState:string Fired when the tab slider changes 
+                    expansion state.
             
             Attributes:
                 tabId:string The unique ID for this tab slider relative to the
                     tab slider container that manages this tab slider.
-                tabContainer:myt.TabSliderContainer The tab slider container that 
-                    manages this tab.
-                buttonClass:JS.Class The class to use for the button portion of the
-                    tab slider. Defaults to myt.SimpleButton.
+                tabContainer:myt.TabSliderContainer The tab slider container 
+                    that manages this tab.
+                buttonClass:JS.Class The class to use for the button portion 
+                    of the tab slider. Defaults to myt.SimpleButton.
                 fillColorSelected:color The color of the button when selected.
                 fillColorHover:color The color of the button when moused over.
                 fillColorActive:color The color of the button while active.
-                fillColorReady:color The color of the button when ready for interaction.
-                buttonHeight:number The height of the button portion of the tab slider.
-                    Defaults to myt.TabSlider.DEFAULT_BUTTON_HEIGHT which is 30.
-                minContainerHeight:number The minimum height of the content container
-                    inside this tab slider. Defaults to 
+                fillColorReady:color The color of the button when ready for 
+                    interaction.
+                buttonHeight:number The height of the button portion of the 
+                    tab slider. Defaults to myt.TabSlider.DEFAULT_BUTTON_HEIGHT 
+                    which is 30.
+                minContainerHeight:number The minimum height of the content 
+                    container inside this tab slider. Defaults to 
                     myt.TabSlider.DEFAULT_MINIMUM_CONTAINER_HEIGHT which is 100.
-                expansionState:string Indicates the expansion state of the tab slider.
-                    Supported values are: 'expanded', 'expanding', 'collapsed' and
-                    'collapsing'. Defaults to 'collapsed'.
+                expansionState:string Indicates the expansion state of the tab 
+                    slider. Supported values are: 'expanded', 'expanding', 
+                    'collapsed' and 'collapsing'. Defaults to 'collapsed'.
             
             @class */
         TabSlider = pkg.TabSlider = new JSClass('TabSlider', View, {
@@ -13276,7 +13370,8 @@ new JS.Singleton('GlobalMouse', {
                 if (attrs.fillColorReady == null) attrs.fillColorReady = TabSlider.DEFAULT_FILL_COLOR_READY;
                 if (attrs.minContainerHeight == null) attrs.minContainerHeight = TabSlider.DEFAULT_MINIMUM_CONTAINER_HEIGHT;
                 
-                // Selection must be done via the select method on the tabContainer
+                // Selection must be done via the select method on 
+                // the tabContainer
                 if (attrs.selected) {
                     initiallySelected = true;
                     delete attrs.selected;
@@ -13396,8 +13491,9 @@ new JS.Singleton('GlobalMouse', {
                 if (btn) btn.setDisabled(this.disabled);
             },
             
-            /** Called whenever the button is redrawn. Gives subclasses/instances
-                a chance to do additional things when the button is redrawn.
+            /** Called whenever the button is redrawn. Gives 
+                subclasses/instances a chance to do additional things when 
+                the button is redrawn.
                 @returns {undefined} */
             notifyButtonRedraw: () => {},
             
@@ -13449,23 +13545,24 @@ new JS.Singleton('GlobalMouse', {
                 }
             },
             
-            /** Gets the height of the tab slider when it is collapsed. Will be the
-                height of the button portion of the tab slider.
+            /** Gets the height of the tab slider when it is collapsed. Will 
+                be the height of the button portion of the tab slider.
                 @returns number */
             getCollapsedHeight: function() {
                 return this.buttonHeight;
             },
             
-            /** Gets the minimum height. Will be the smaller of the preferred height
-                or the buttonHeight + minContainerHeight. Thus, if the content is
-                smaller than the minContainerHeight extra space will not be shown.
+            /** Gets the minimum height. Will be the smaller of the preferred 
+                height or the buttonHeight + minContainerHeight. Thus, if the 
+                content is smaller than the minContainerHeight extra space 
+                will not be shown.
                 @returns number */
             getMinimumExpandedHeight: function() {
                 return Math.min(this.getPreferredExpandedHeight(), this.buttonHeight + this.minContainerHeight);
             },
             
-            /** Gets the preferred height that would allow the container to be shown
-                without vertical scrollbars.
+            /** Gets the preferred height that would allow the container to 
+                be shown without vertical scrollbars.
                 @returns number */
             getPreferredExpandedHeight: function() {
                 return this.buttonHeight + this.wrapper.container.height;
@@ -13503,7 +13600,7 @@ new JS.Singleton('GlobalMouse', {
             },
             
             
-            // Accessors ///////////////////////////////////////////////////////////////
+            // Accessors ///////////////////////////////////////////////////////
             setLabelTextColorChecked: function(v) {this.labelTextColorChecked = v;},
             setLabelTextColor: function(v) {this.labelTextColor = v;},
             
@@ -13516,7 +13613,7 @@ new JS.Singleton('GlobalMouse', {
             },
             
             
-            // Methods /////////////////////////////////////////////////////////////////
+            // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.TabSlider */
             notifyButtonRedraw: function() {
                 const label = this.button.label;
@@ -13676,7 +13773,7 @@ new JS.Singleton('GlobalMouse', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const JSModule = JS.Module,
     
         defAttr = pkg.AccessorSupport.defAttr,
@@ -13713,8 +13810,10 @@ new JS.Singleton('GlobalMouse', {
                 myt.Activateable
             
             Attributes:
-                tabId:string The unique ID of this tab relative to its tab container.
-                tabContainer:myt.TabContainer The tab container that manages this tab.
+                tabId:string The unique ID of this tab relative to its tab 
+                    container.
+                tabContainer:myt.TabContainer The tab container that manages 
+                    this tab.
             
             @class */
         TabMixin = pkg.TabMixin = new JSModule('TabMixin', {
@@ -13727,7 +13826,8 @@ new JS.Singleton('GlobalMouse', {
                 if (attrs.tabId == null) attrs.tabId = pkg.generateGuid();
                 if (attrs.tabContainer == null) attrs.tabContainer = parent;
                 
-                // Selection must be done via the select method on the tabContainer
+                // Selection must be done via the select method on 
+                // the tabContainer
                 let initiallySelected;
                 if (attrs.selected) {
                     initiallySelected = true;
@@ -13848,9 +13948,9 @@ new JS.Singleton('GlobalMouse', {
             
             Attributes:
                 layout:myt.SpacedLayout The layout for the tabs.
-                location:string The location of the tabs relative to the container.
-                    Supported values are: 'top', 'bottom', 'left' and 'right'. Defaults
-                    to 'top'.
+                location:string The location of the tabs relative to the 
+                    container. Supported values are: 'top', 'bottom', 'left' 
+                    and 'right'. Defaults to 'top'.
                 spacing:number The spacing between tabs. Defaults to 1.
                 inset:number The inset for the layout. Defaults to 0.
             
@@ -13958,7 +14058,7 @@ new JS.Singleton('GlobalMouse', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const JSClass = JS.Class,
         SizeToDom = pkg.SizeToDom,
         View = pkg.View,
@@ -14204,8 +14304,8 @@ new JS.Singleton('GlobalMouse', {
                 const domEvent = event.value,
                     charCode = domEvent.which;
                 
-                // Firefox fires events for arrow keys and backspace which should be
-                // ignored completely.
+                // Firefox fires events for arrow keys and backspace which 
+                // should be ignored completely.
                 switch (charCode) {
                     case 8: // backspace key
                     case 0: // arrow keys have a "charCode" of 0 in firefox.
@@ -14219,14 +14319,14 @@ new JS.Singleton('GlobalMouse', {
                 this.filterInputPress(domEvent);
             },
             
-            /** A hook for subclasses/instances to do input filtering. The default
-                implementation returns the value unchanged.
+            /** A hook for subclasses/instances to do input filtering. The 
+                default implementation returns the value unchanged.
                 @param {string} v - the current value of the form element.
                 @returns {string} The new value of the form element. */
             filterInput: v => v,
             
-            /** A hook for subclasses/instances to do input filtering during key press.
-                The default implementation does nothing.
+            /** A hook for subclasses/instances to do input filtering during 
+                key press. The default implementation does nothing.
                 @param {!Object} domEvent - The dom key press event.
                 @returns {undefined} */
             filterInputPress: domEvent => {},
@@ -14252,8 +14352,8 @@ new JS.Singleton('GlobalMouse', {
             },
             
             /** Sets the caret and selection.
-                @param start:int the start of the selection or location of the caret
-                    if no end is provided.
+                @param start:int the start of the selection or location of 
+                    the caret if no end is provided.
                 @param end:int (optional) the end of the selection.
                 @returns {undefined} */
             setCaretPosition: function(start, end) {
@@ -14548,8 +14648,9 @@ new JS.Singleton('GlobalMouse', {
             wrap:string
         
         Attributes:
-            resize:string Sets how the textarea can be resized. Defaults to 'none'.
-                Allowed values: 'none', 'both', 'horizontal', 'vertical'.
+            resize:string Sets how the textarea can be resized. Defaults to 
+                'none'. Allowed values: 'none', 'both', 'horizontal', 
+                'vertical'.
             wrap:string Sets how text will wrap. Defaults to 'soft'.
                 Allowed values: 'off', 'hard', 'soft'.
         
@@ -14685,15 +14786,15 @@ new JS.Singleton('GlobalMouse', {
             value:string
         
         Attributes:
-            multiple:boolean Indicates if multiple options can be selected or not.
-                Defaults to false.
+            multiple:boolean Indicates if multiple options can be selected 
+                or not. Defaults to false.
             size:int The number of options to show. The default value is 4 for
                 multiple == true and 1 for multiple == false. It is recommended
                 that a size of at least 4 be used when multiple is 2.
-            options:array (write only) Adds a list of options to this select list.
-                The value should be an array of myt.InputSelectOptions attrs that 
-                will be used to instantiate new myt.InputSelectOption instances on
-                this select list.
+            options:array (write only) Adds a list of options to this select 
+                list. The value should be an array of myt.InputSelectOptions 
+                attrs that will be used to instantiate new myt.InputSelectOption
+                instances on this select list.
         
         @class */
     pkg.InputSelect = new JSClass('InputSelect', NativeInputWrapper, {
@@ -14800,7 +14901,8 @@ new JS.Singleton('GlobalMouse', {
         
         /** Destroys an option that has the provided value.
             @param value:* The value of the option to remove.
-            @returns boolean: true if the option is destroyed, false otherwise. */
+            @returns boolean: true if the option is destroyed, 
+                false otherwise. */
         destroyOptionWithValue: function(value) {
             const option = this.getOptionForValue(value);
             if (option) {
@@ -14883,7 +14985,7 @@ new JS.Singleton('GlobalMouse', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const JSModule = JS.Module,
         
         /** Provides a setValue and getValue method.
@@ -15079,7 +15181,8 @@ new JS.Singleton('GlobalMouse', {
                     if (this.inited) {
                         this.fireEvent('snapToInt', v);
                         
-                        // Update min, max and value since snap has been turned on
+                        // Update min, max and value since snap has been 
+                        // turned on
                         if (v) {
                             this.setMinValue(this.minValue);
                             this.setMaxValue(this.maxValue);
@@ -15172,7 +15275,7 @@ new JS.Singleton('GlobalMouse', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const STYLE_SOLID = 'solid',
         STYLE_OUTLINE = 'outline',
         DEFAULT_STYLE = STYLE_OUTLINE,
@@ -15263,7 +15366,7 @@ new JS.Singleton('GlobalMouse', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     let undefToEmptyValueProcessor;
     
     const JSClass = JS.Class,
@@ -15393,7 +15496,8 @@ new JS.Singleton('GlobalMouse', {
         ValueProcessor = pkg.ValueProcessor = new JSClass('ValueProcessor', {
             // Constructor /////////////////////////////////////////////////////
             /** Creates a new ValueProcessor
-                @param {string} id - The ideally unique ID for a processor instance.
+                @param {string} id - The ideally unique ID for a processor 
+                    instance.
                 @param {boolean} [runForDefault]
                 @param {boolean} [runForRollback]
                 @param {boolean} [runForCurrent]
@@ -15423,9 +15527,9 @@ new JS.Singleton('GlobalMouse', {
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.ValueProcessor */
             process: value => {
-                // Don't convert "empty" values to a number since they'll become zero
-                // which is probably incorrect. Also catch undefined/null values since
-                // they will become NaN.
+                // Don't convert "empty" values to a number since they'll 
+                // become zero which is probably incorrect. Also catch 
+                // undefined/null values since they will become NaN.
                 if (value == null || value === "" || value === "-") return value;
                 
                 const numericValue = Number(value);
@@ -15444,7 +15548,8 @@ new JS.Singleton('GlobalMouse', {
         TrimValueProcessor = pkg.TrimValueProcessor = new JSClass('TrimValueProcessor', ValueProcessor, {
             // Constructor /////////////////////////////////////////////////////
             /** @overrides myt.ValueProcessor
-                @param {string} id - The ideally unique ID for a processor instance.
+                @param {string} id - The ideally unique ID for a processor 
+                    instance.
                 @param {boolean} [runForDefault]
                 @param {boolean} [runForRollback]
                 @param {boolean} [runForCurrent]
@@ -15486,11 +15591,13 @@ new JS.Singleton('GlobalMouse', {
         UndefinedValueProcessor = pkg.UndefinedValueProcessor = new JSClass('UndefinedValueProcessor', ValueProcessor, {
             // Constructor /////////////////////////////////////////////////////
             /** @overrides myt.ValueProcessor
-                @param {string} id - The ideally unique ID for a processor instance.
+                @param {string} id - The ideally unique ID for a processor 
+                    instance.
                 @param {boolean} [runForDefault]
                 @param {boolean} [runForRollback]
                 @param {boolean} [runForCurrent]
-                @param {*} [defaultValue] - The default value to convert undefined to.
+                @param {*} [defaultValue] - The default value to convert 
+                    undefined to.
                 @returns {undefined} */
             initialize: function(id, runForDefault, runForRollback, runForCurrent, defaultValue) {
                 this.callSuper(id, runForDefault, runForRollback, runForCurrent);
@@ -15648,8 +15755,8 @@ new JS.Singleton('GlobalMouse', {
             },
             
             /** Gets the value of this form. For a form this will be a map of
-                all the subform values by ID. Form elements should override this
-                to return an element specific value.
+                all the subform values by ID. Form elements should override 
+                this to return an element specific value.
                 @returns object */
             getValue: function() {
                 // Allow for superclass to have custom getValue behavior.
@@ -15664,9 +15771,9 @@ new JS.Singleton('GlobalMouse', {
                 return retval;
             },
             
-            /** Sets the value of this form. For a form the value should be a map
-                containing values for each of the subform elements. The entries in
-                the map will be applied to each of the subforms.
+            /** Sets the value of this form. For a form the value should be a 
+                map containing values for each of the subform elements. The 
+                entries in the map will be applied to each of the subforms.
                 @param value:object the value to set.
                 @returns the value that was actually set. */
             setValue: function(value) {
@@ -15691,9 +15798,10 @@ new JS.Singleton('GlobalMouse', {
                 return value;
             },
             
-            /** Gets the default value of this form. For a form this will be a 
-                map of all the subform default values by ID. Form elements 
-                should override this to return an element specific default value.
+            /** Gets the default value of this form. For a form this will be 
+                a map of all the subform default values by ID. Form elements 
+                should override this to return an element specific default 
+                value.
                 @returns object */
             getDefaultValue: function() {
                 const retval = {};
@@ -15722,9 +15830,10 @@ new JS.Singleton('GlobalMouse', {
                 return value;
             },
             
-            /** Gets the rollback value of this form. For a form this will be a 
-                map of all the subform rollback values by ID. Form elements 
-                should override this to return an element specific rollback value.
+            /** Gets the rollback value of this form. For a form this will 
+                be a map of all the subform rollback values by ID. Form 
+                elements should override this to return an element specific 
+                rollback value.
                 @returns object */
             getRollbackValue: function() {
                 const retval = {}, 
@@ -15888,7 +15997,8 @@ new JS.Singleton('GlobalMouse', {
                 @param subformToIgnore:myt.Form (optional) A subform that will 
                     not be checked for validity. This is typically the subform 
                     that is invoking this method.
-                @returns boolean true if this form is valid, false otherwise. */
+                @returns boolean true if this form is valid, 
+                    false otherwise. */
             verifyValidState: function(subformToIgnore) {
                 const subForms = this.__sf;
                 let isValid = true;
@@ -15903,7 +16013,8 @@ new JS.Singleton('GlobalMouse', {
                 validation check across the entire form tree. Does not allow 
                 upwards cascade of validity check since this is intended to be 
                 a top down check.
-                @returns boolean true if this form is valid, false otherwise. */
+                @returns boolean true if this form is valid, 
+                    false otherwise. */
             doValidation: function() {
                 const subForms = this.__sf;
                 let isValid = true;
@@ -15935,7 +16046,8 @@ new JS.Singleton('GlobalMouse', {
                 @param subformToIgnore:myt.Form (optional) A subform that will 
                     not be checked for changed state. This is typically the 
                     subform that is invoking this method.
-                @returns boolean true if this form is changed, false otherwise. */
+                @returns boolean true if this form is changed, 
+                    false otherwise. */
             verifyChangedState: function(subformToIgnore) {
                 const subForms = this.__sf;
                 let isChanged = false;
@@ -16211,8 +16323,8 @@ new JS.Singleton('GlobalMouse', {
             },
             
             /** @overrides myt.Form
-                @returns The current value if this form is in the changed state,
-                    otherwise undefined. */
+                @returns The current value if this form is in the changed 
+                    state, otherwise undefined. */
             getChangedValue: function() {
                 return this.isChanged ? this.getValue() : undefined;
             }
@@ -16238,8 +16350,8 @@ new JS.Singleton('GlobalMouse', {
                     Supported values are:
                         key: Validate as the user types.
                         blur: Validate when blurring out of the UI control
-                        blurWithKeyFix: The same as blur except we also validate 
-                            as the user types if currently invalid.
+                        blurWithKeyFix: The same as blur except we also 
+                            validate as the user types if currently invalid.
                         none: Don't do any validation when interacting with 
                             the field.
                     The default value is 'key'.
@@ -16753,7 +16865,7 @@ new JS.Singleton('GlobalMouse', {
             @param identifiable:myt.ValueProcessor the ValueProcessor to remove.
             @returns {undefined} */
         unregister: identifiable => {
-            doFuncOnIdentifiable(identifiable, (id) => {
+            doFuncOnIdentifiable(identifiable, id => {
                 // Make sure the processor is in the repository then delete.
                 if (getValueProcessor(id)) delete processorsById[id];
             });
@@ -16762,7 +16874,7 @@ new JS.Singleton('GlobalMouse', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const JSClass = JS.Class,
         
         MIME_TYPES_BY_EXTENSION = {
@@ -16858,11 +16970,12 @@ new JS.Singleton('GlobalMouse', {
                 }
             },
             
-            /** Provides an opportunity to prevent a file from being handled. The
-                default implementation returns the provided file argument.
+            /** Provides an opportunity to prevent a file from being handled. 
+                The default implementation returns the provided file argument.
                 @param file:File the file to be checked for handleability.
-                @returns file:File the file to be handled (possibly modified by this
-                    function) or something falsy if the file should not be handled. */
+                @returns file:File the file to be handled (possibly modified 
+                    by this function) or something falsy if the file should 
+                    not be handled. */
             filterFiles: file => file,
             
             /** @param {!Object} file
@@ -16880,8 +16993,8 @@ new JS.Singleton('GlobalMouse', {
             
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                /** The attribute key used in a file to store the path for the file
-                    on the server. */
+                /** The attribute key used in a file to store the path for 
+                    the file on the server. */
                 FILE_ATTR_SERVER_PATH: 'serverPath',
                 
                 readFile: (file, handlerFunc) => {
@@ -17233,7 +17346,7 @@ new JS.Singleton('GlobalMouse', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const SizeToParent = pkg.SizeToParent,
         View = pkg.View,
         
@@ -17311,7 +17424,8 @@ new JS.Singleton('GlobalMouse', {
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** A handler for mouse events that does nothing and prevents propogation.
+        /** A handler for mouse events that does nothing and prevents 
+            propogation.
             @param {!Object} event
             @return boolean True so that the dom event gets eaten. */
         eatMouseEvent: event => true,
@@ -17332,7 +17446,8 @@ new JS.Singleton('GlobalMouse', {
         },
         
         /** Hides the dimmer and restores focus if necessary.
-            @param {boolean} [ignoreRestoreFocus] - When true focus will not be restored.
+            @param {boolean} [ignoreRestoreFocus] - When true focus will not 
+                be restored.
             @returns {undefined} */
         hide: function(ignoreRestoreFocus) {
             const self = this;
@@ -17346,7 +17461,7 @@ new JS.Singleton('GlobalMouse', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const updateMonitoringSubview = (stc, sv, func) => {
             const axis = stc.axis;
             func = func.bind(stc);
@@ -17361,8 +17476,8 @@ new JS.Singleton('GlobalMouse', {
             func(sv, 'update', 'visible');
         };
     
-    /** A special "layout" that resizes the parent to fit the children rather than
-        laying out the children.
+    /** A special "layout" that resizes the parent to fit the children rather 
+        than laying out the children.
         
         Events:
             axis:string
@@ -17371,11 +17486,12 @@ new JS.Singleton('GlobalMouse', {
         
         Attributes:
             axis:string The axis along which to resize this view to fit its
-                children. Supported values are 'x', 'y' and 'both'. Defaults to 'x'.
-            paddingX:number Additional space added on the child extent along the
-                x-axis. Defaults to 0.
-            paddingY:number Additional space added on the child extent along the
-                y-axis. Defaults to 0.
+                children. Supported values are 'x', 'y' and 'both'. Defaults 
+                to 'x'.
+            paddingX:number Additional space added on the child extent along 
+                the x-axis. Defaults to 0.
+            paddingY:number Additional space added on the child extent along 
+                the y-axis. Defaults to 0.
         
         @class */
     pkg.SizeToChildren = new JS.Class('SizeToChildren', pkg.Layout, {
@@ -17480,34 +17596,43 @@ new JS.Singleton('GlobalMouse', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const defAttr = pkg.AccessorSupport.defAttr,
         
         /** An myt.Dimmer that also provides a content panel.
             
             Attributes:
                 content:myt.View The content view placed inside the dimmer.
-                sizingStrategy:string Determines how the content view is positioned
-                    relative to the bounds of the dimmer. Supported values are:
-                        children: The content will be sized to fit the children it
-                            contains. The content will be positioned in the center and
-                            middle of the dimmer. This is the default sizingStrategy
-                        parent: The content will be sized to the bounds of the dimmer.
-                        basic: The content will not be sized in any way. It will be
-                            positioned in the center and middle of the dimmer.
-                        none: The content will not be sized or positioned in any way.
-                marginTop:number The margin above the content when the sizingStrategy
-                    is "parent". Defaults to 40 if not provided.
-                marginLeft:number The margin on the left side of the content when 
-                    the sizingStrategy is "parent". Defaults to 40 if not provided.
+                sizingStrategy:string Determines how the content view is 
+                    positioned relative to the bounds of the dimmer. Supported 
+                    values are:
+                        children: The content will be sized to fit the children 
+                            it contains. The content will be positioned in the 
+                            center and middle of the dimmer. This is the 
+                            default sizingStrategy
+                        parent: The content will be sized to the bounds of 
+                            the dimmer.
+                        basic: The content will not be sized in any way. It 
+                            will be positioned in the center and middle of 
+                            the dimmer.
+                        none: The content will not be sized or positioned in 
+                            any way.
+                marginTop:number The margin above the content when the 
+                    sizingStrategy is "parent". Defaults to 40 if not provided.
+                marginLeft:number The margin on the left side of the content 
+                    when the sizingStrategy is "parent". Defaults to 40 if 
+                    not provided.
                 marginBottom:number The margin below the content when the 
                     sizingStrategy is "parent". Defaults to 40 if not provided.
-                marginRight:number The margin on the right side of the content when 
-                    the sizingStrategy is "parent". Defaults to 40 if not provided.
-                paddingX:number The internal horizontal padding when the sizingStrategy
-                    is "children". Defaults to 20 if not provided.
-                paddingY:number The internal vertical padding when the sizingStrategy
-                    is "children". Defaults to 15 if not provided.
+                marginRight:number The margin on the right side of the content 
+                    when the sizingStrategy is "parent". Defaults to 40 if 
+                    not provided.
+                paddingX:number The internal horizontal padding when the 
+                    sizingStrategy is "children". Defaults to 20 if 
+                    not provided.
+                paddingY:number The internal vertical padding when the 
+                    sizingStrategy is "children". Defaults to 15 if 
+                    not provided.
                 
             @class */
         ModalPanel = pkg.ModalPanel = new JS.Class('ModalPanel', pkg.Dimmer, {
@@ -17680,7 +17805,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
 });
 
 
-((pkg) => {
+(pkg => {
     const math = Math,
         mathMax = math.max,
         mathMin = math.min,
@@ -17756,9 +17881,12 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         /** Models a color as individual color channels.
             
             Attributes:
-                red:int The red channel. Will be an integer between 0 and 255.
-                green:int The green channel. Will be an integer between 0 and 255.
-                blue:int The blue channel. Will be an integer between 0 and 255.
+                red:int The red channel. Will be an integer between 0 
+                    and 255.
+                green:int The green channel. Will be an integer between 0 
+                    and 255.
+                blue:int The blue channel. Will be an integer between 0 
+                    and 255.
             
             @class */
         Color = pkg.Color = new JS.Class('Color', {
@@ -17770,8 +17898,10 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 
                 /** Converts a number or string representation of a number to a 
                     two character hex string.
-                    @param {number|string} value - The number or string to convert.
-                    @returns {string} A two character hex string such as: '0c' or 'c9'. */
+                    @param {number|string} value - The number or string 
+                        to convert.
+                    @returns {string} A two character hex string 
+                        such as: '0c' or 'c9'. */
                 toHex: toHex,
                 
                 /** Converts red, green, and blue color channel numbers to a six 
@@ -17850,7 +17980,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                         lighter color. */
                 getLighterColor: (a, b) => makeColorFromNumber(a).isLighterThan(makeColorFromNumber(b)) ? a : b,
                 
-                /** Creates an RGB "color" number from the provided color channels.
+                /** Creates an RGB "color" number from the provided 
+                    color channels.
                     @param {number} red - The red channel
                     @param {number} green - The green channel
                     @param {number} blue - The blue channel
@@ -18021,10 +18152,10 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const sizeClasses = ['','fa-lg','fa-2x','fa-3x','fa-4x','fa-5x'],
         
-        updateInstance = (instance) => {
+        updateInstance = instance => {
             let props = instance.properties;
             if (props) {
                 if (typeof props === 'string') {
@@ -18047,11 +18178,12 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         Attributes:
             icon:string The name of the FA icon to set.
-            size:number A number from 0 to 5 with 0 being normal size and 5 being
-                the largest size.
+            size:number A number from 0 to 5 with 0 being normal size and 5 
+                being the largest size.
             propeties:string || array A space separated string or list of FA
                 CSS classes to set.
-    */
+        
+        @class */
     const FontAwesome = pkg.FontAwesome = new JS.Class('FontAwesome', pkg.Markup, {
         // Class Methods and Attributes ////////////////////////////////////////
         extend: {
@@ -18085,7 +18217,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 return '';
             },
             
-            registerForNotification: (instance) => {
+            registerForNotification: instance => {
                 pkg.registerForFontNotification(instance, 'Font Awesome\ 5 Free 400'); // regular
                 pkg.registerForFontNotification(instance, 'Font Awesome\ 5 Free 900'); // solid
                 pkg.registerForFontNotification(instance, 'Font Awesome\ 5 Brands 400'); // brands
@@ -18129,7 +18261,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     let // ColorPicker
         colorPicker,
         
@@ -18233,6 +18365,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         hsvToHex = (h, s, v) => Color.makeColorFromHSV(h * 360, s * 100, v * 100).getHtmlHexString(),
         
+        /** @class */
         Swatch = new JSClass('Swatch', View, {
             include:[Button],
             initNode: function(parent, attrs) {
@@ -18257,6 +18390,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             drawReadyState: function() {this.setBorder(BORDER_999);}
         }),
         
+        /** @class */
         ColorPicker = pkg.ColorPicker = new JSClass('ColorPicker', View, {
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
@@ -18434,6 +18568,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             }
         }),
         
+        /** @class */
         TimeBtn = new JSClass('TimeBtn', SelectableBtn, {
             initNode: function(parent, attrs) {
                 attrs.width = timeOnly ? 175 : 49;
@@ -18450,6 +18585,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             }
         }),
         
+        /** @class */
         DayBtn = new JSClass('DayBtn', SelectableBtn, {
             initNode: function(parent, attrs) {
                 attrs.width = 23;
@@ -18662,6 +18798,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             }
         },
         
+        /** @class */
         DatePicker = pkg.DatePicker = new JSClass('DatePicker', View, {
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides */
@@ -18770,12 +18907,12 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         /** A modal panel that contains a Dialog.
             
             Attributes:
-                callbackFunction:function (read only) A function that gets called when 
-                    the dialog is about to be closed. A single argument is passed in 
-                    that indicates the UI element interacted with that should close the 
-                    dialog. Supported values are: 'closeBtn', 'cancelBtn' and 
-                    'confirmBtn'. The function should return true if the close should 
-                    be aborted.
+                callbackFunction:function (read only) A function that gets 
+                    called when the dialog is about to be closed. A single 
+                    argument is passed in that indicates the UI element 
+                    interacted with that should close the dialog. Supported 
+                    values are: 'closeBtn', 'cancelBtn' and 'confirmBtn'. The 
+                    function should return true if the close should be aborted.
             
             @class */
         Dialog = pkg.Dialog = new JSClass('Dialog', ModalPanel, {
@@ -18921,7 +19058,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     stc = content.sizeToChildren,
                     svs = content.getSubviews();
                 
-                // Destroy all children except the close button since that gets reused.
+                // Destroy all children except the close button since 
+                // that gets reused.
                 let i = svs.length;
                 while (i) {
                     const sv = svs[--i];
@@ -19153,7 +19291,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 opts = objectAssign({}, Dialog.COLOR_PICKER_DEFAULTS, opts);
                 self.destroyContent();
                 
-                // Set the callback function to one wrapped to handle each button type.
+                // Set the callback function to one wrapped to handle each 
+                // button type.
                 self.setCallbackFunction(action => {
                     switch (action) {
                         case 'closeBtn':
@@ -19192,7 +19331,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 opts = objectAssign({}, Dialog.DATE_PICKER_DEFAULTS, opts);
                 self.destroyContent();
                 
-                // Set the callback function to one wrapped to handle each button type.
+                // Set the callback function to one wrapped to handle each 
+                // button type.
                 self.setCallbackFunction(action => {
                     switch (action) {
                         case 'closeBtn':
@@ -19296,7 +19436,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const JSClass = JS.Class,
         
         // Safe as a closure variable because the registry is a singleton.,
@@ -19327,13 +19467,15 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 None
             
             Attributes:
-                id:string the ideally unique ID for this Validator so it can be
-                    stored and retreived from the myt.global.validators registry.
+                id:string the ideally unique ID for this Validator so it can 
+                    be stored and retreived from the myt.global.validators 
+                    registry.
             
             @class */
         Validator = pkg.Validator = new JSClass('Validator', {
             /** Creates a new Validator
-                @param {string} id - The ideally unique ID for a validator instance. */
+                @param {string} id - The ideally unique ID for a validator 
+                    instance. */
             initialize: function(id) {
                 this.id = id;
             },
@@ -19341,21 +19483,27 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             /** Tests if the value is valid or not.
                 @param {*} value - The value to test validity for.
                 @param {?Object} [config] - A map of configuration values that
-                    can be used to augment the validation function as needed. The
-                    nature of this config will be specific to each Validator class.
-                @param {?Array} [errorMessages] - Any error messages arising during
-                    validation will be pushed onto thiis array if it is provided.
-                @returns {boolean} true if the value is valid, false otherwise. */
+                    can be used to augment the validation function as needed. 
+                    The nature of this config will be specific to each 
+                    Validator class.
+                @param {?Array} [errorMessages] - Any error messages arising 
+                    during validation will be pushed onto thiis array if it 
+                    is provided.
+                @returns {boolean} true if the value is valid, false 
+                    otherwise. */
             isValid: (value, config, errorMessages) => true,
             
             /** Tests if the form is valid or not.
                 @param {!Object} form - The myt.Form to test validity for.
                 @param {?Object} [config] - A map of configuration values that
-                    can be used to augment the validation function as needed. The
-                    nature of this config will be specific to each Validator class.
-                @param {?Array} [errorMessages] - Any error messages arising during
-                    validation will be pushed onto thiis array if it is provided.
-                @returns {boolean} true if the form is valid, false otherwise. */
+                    can be used to augment the validation function as needed. 
+                    The nature of this config will be specific to each 
+                    Validator class.
+                @param {?Array} [errorMessages] - Any error messages arising 
+                    during validation will be pushed onto thiis array if it 
+                    is provided.
+                @returns {boolean} true if the form is valid, false 
+                    otherwise. */
             isFormValid: function(form, config, errorMessages) {
                 if (!config) config = {};
                 config.form = form;
@@ -19377,8 +19525,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             }
         }),
         
-        /** Tests that the value differs from the form rollback value by more than
-            just case.
+        /** Tests that the value differs from the form rollback value by more 
+            than just case.
             @class */
         EqualsIgnoreCaseValidator = pkg.EqualsIgnoreCaseValidator = new JSClass('EqualsIgnoreCaseValidator', Validator, {
             /** @overrides myt.Validator */
@@ -19398,8 +19546,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         URLValidator = pkg.URLValidator = new JSClass('URLValidator', Validator, {
             /** @overrides myt.Validator
                 @param {string id
-                @param originalRawQuery:boolean if true this prevents the query from
-                    being normalized. */
+                @param originalRawQuery:boolean if true this prevents the 
+                    query from being normalized. */
             initialize: function(id, originalRawQuery) {
                 this.callSuper(id);
                 this.originalRawQuery = originalRawQuery;
@@ -19453,7 +19601,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         }
     });
     
-    /** Tests that the value has a length between min and max. */
+    /** Tests that the value has a length between min and max
+        @class */
     pkg.LengthValidator = new JSClass('LengthValidator', Validator, {
         /** @overrides myt.Validator
             @param {string} id
@@ -19488,7 +19637,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         }
     });
     
-    /** Tests that adBinary value is between min and max. */
+    /** Tests that adBinary value is between min and max.
+        @class */
     pkg.NumericRangeValidator = new JSClass('NumericRangeValidator', Validator, {
         /** @overrides myt.Validator
             @param {string} id
@@ -19626,7 +19776,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const JSClass = JS.Class,
         View = pkg.View,
         
@@ -19701,7 +19851,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             },
             
             
-            // Methods /////////////////////////////////////////////////////////////////
+            // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.Draggable */
             requestDragPosition: function(x, y) {
                 if (!this.disabled) {
@@ -19772,26 +19922,28 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         /** A base class for slider components.
             
             Attributes:
-                axis:string Indicates the direction the slider moves in. Allowed 
-                    values are 'x' and 'y'. Defaults to 'x'.
-                trackInset:number the number of pixels to inset the start of the 
-                    track from the top/left edge of the component. Defaults to 0.
-                trackOutset:number the number of pixels to inset the end of the track
-                    from the bottom/right edge of the component. Default to 0.
+                axis:string Indicates the direction the slider moves in. 
+                    Allowed values are 'x' and 'y'. Defaults to 'x'.
+                trackInset:number the number of pixels to inset the start of 
+                    the track from the top/left edge of the component. 
+                    Defaults to 0.
+                trackOutset:number the number of pixels to inset the end of 
+                    the track from the bottom/right edge of the component. 
+                    Default to 0.
                 thumbWidth:number The width of the thumb.
                 thumbHeight:number The height of the thumb.
                 thumbOffset:number The x/y offset of the thumb. Will applied to 
                     the opposite dimension to the axis.
                 thumbClass:JS.Class the class to use to create the thumb.
-                nudgeAmount:number the amount to nudge the value when the arrows 
-                    keys are invoked. Defaults to 1.
+                nudgeAmount:number the amount to nudge the value when the 
+                    arrows keys are invoked. Defaults to 1.
             
             @class */
         BaseSlider = pkg.BaseSlider = new JSClass('BaseSlider', View, {
             include: [pkg.Disableable],
             
             
-            // Life Cycle //////////////////////////////////////////////////////////
+            // Life Cycle //////////////////////////////////////////////////////
             /** @overrides myt.View */
             initNode: function(parent, attrs) {
                 defAttr(attrs, 'axis', 'x');
@@ -19876,7 +20028,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             
             @class */
         SimpleSliderRangeFill = pkg.SimpleSliderRangeFill = new JSClass('SimpleSliderRangeFill', View, {
-            // Life Cycle //////////////////////////////////////////////////////////
+            // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
                 defAttr(attrs, 'bgColor', '#666');
                 
@@ -20141,7 +20293,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const JSClass = JS.Class,
         
         defAttr = pkg.AccessorSupport.defAttr,
@@ -20149,7 +20301,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         /*  Setup the limitToParent constraint.
             @param {!BaseDivider} divider
             @returns {undefined} */
-        updateLimitToParentConstraint = (divider) => {
+        updateLimitToParentConstraint = divider => {
             const dim = divider.axis === 'y' ? 'height' : 'width';
             divider.constrain('__limitToParent', [divider, 'limitToParent', divider, dim, divider.parent, dim]);
         },
@@ -20161,19 +20313,20 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 limitToParent:number
             
             Attributes:
-                @property {string} axis - Indicates if the divider should be constrained horizontally
-                    or vertically. Allowed values: 'x' or 'y'. This value can only
-                    be set during instantiation.
-                @property {number} limitToParent - If set, this will constrain the maxValue to the
-                    appropriate parent view dimension less the limitToParent amount.
-                @property {number} expansionState - Used by the "primary" action to update the 
-                    divider position. Allowed values are:
+                @property {string} axis - Indicates if the divider should be 
+                    constrained horizontally or vertically. Allowed values: 'x' 
+                    or 'y'. This value can only be set during instantiation.
+                @property {number} limitToParent - If set, this will constrain 
+                    the maxValue to the appropriate parent view dimension less 
+                    the limitToParent amount.
+                @property {number} expansionState - Used by the "primary" 
+                    action to update the divider position. Allowed values are:
                         collapsed:0
                         restored just collapsed:1
                         restored just expanded:2
                         expanded:3
-                @property {number} restoreValue - The value used to restore the position in the
-                    "primary" action.
+                @property {number} restoreValue - The value used to restore 
+                    the position in the "primary" action.
             
             Private Attributes:
                 __nudgeAcc:number The multiplier in px per nudge.
@@ -20257,7 +20410,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 }
             },
             
-            /** Update the x or y position of the component as the value changes.
+            /** Update the x or y position of the component as the value 
+                changes.
                 @overrides myt.ValueComponent
                 @param {number} v - The x or y position to set.
                 @param {boolean} [restoreValueAlso] - If true, the restoreValue
@@ -20288,8 +20442,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 self.setMaxValue(self.parent[dim] - self.limitToParent - self[dim]);
             },
             
-            /** Nudge the divider when the arrow keys are used. Nudging accelerates
-                up to a limit if the key is held down.
+            /** Nudge the divider when the arrow keys are used. Nudging 
+                accelerates up to a limit if the key is held down.
                 @overrides myt.Button. */
             doActivationKeyDown: function(key, isRepeat) {
                 const self = this;
@@ -20324,7 +20478,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                         if (rv != null) {
                             self.setExpansionState(1);
                             if (rv === minV) {
-                                // Prevent infinite loop if there's nowhere to animate to.
+                                // Prevent infinite loop if there's nowhere 
+                                // to animate to.
                                 if (rv !== maxV) self.doPrimaryAction();
                             } else {
                                 toValue = rv;
@@ -20398,7 +20553,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const JSClass = JS.Class,
         JSModule = JS.Module,
         
@@ -20536,7 +20691,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         /*  Steals width from previous column headers.
             @param {!Object} gridHeader
-            @param {number} diff - The amount to steal. Will be a negative number.
+            @param {number} diff - The amount to steal. Will be a 
+                negative number.
             @returns {number} - The amount of width actually stolen. */
         stealPrevWidth = (gridHeader, diff) => {
             const hdr = getPrevColumnHeader(gridHeader);
@@ -20553,7 +20709,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         /*  Gives width to previous column headers.
             @param {!Object} gridHeader
-            @param {number} diff - The amount to give. Will be a positive number.
+            @param {number} diff - The amount to give. Will be a 
+                positive number.
             @returns {number} - The amount of width actually given. */
         givePrevWidth = (gridHeader, diff) => {
             const hdr = getPrevColumnHeader(gridHeader);
@@ -20570,7 +20727,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         /*  Steals width from next column headers.
             @param {!Object} gridHeader
-            @param {number} diff - The amount to steal. Will be a negative number.
+            @param {number} diff - The amount to steal. Will be a 
+                negative number.
             @returns {number} - The amount of width actually stolen. */
         stealNextWidth = (gridHeader, diff) => {
             const hdr = getNextColumnHeader(gridHeader);
@@ -20584,7 +20742,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         /*  Gives width to next column headers.
             @param {!Object} gridHeader
-            @param {number} diff - The amount to give. Will be a positive number.
+            @param {number} diff - The amount to give. Will be a 
+                positive number.
             @returns {number} - The amount of width actually given. */
         giveNextWidth = (gridHeader, diff) => {
             const hdr = getNextColumnHeader(gridHeader);
@@ -20886,7 +21045,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     let maxExtent = 0;
                     hdrs.forEach(hdr => {maxExtent = Math.max(maxExtent, hdr.x + hdr.width);});
                     
-                    // Distribute extra width to resizable flex columns and then to non-flex columns.
+                    // Distribute extra width to resizable flex columns and 
+                    // then to non-flex columns.
                     calculateAndDistribute(hdrs, this.gridWidth - maxExtent, true, extra => {
                         calculateAndDistribute(hdrs, extra, false, null);
                     });
@@ -20920,8 +21080,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                         'none': Not currently an active sort column.
                 cellXAdj:number The amount to shift the x values of cells 
                     updated by this column. Defaults to 0.
-                cellWidthAdj:number The amount to grow/shrink the width of cells 
-                    updated by this column. Defaults to 0.
+                cellWidthAdj:number The amount to grow/shrink the width of 
+                    cells updated by this column. Defaults to 0.
             
             @class */
         GridColumnHeader = pkg.GridColumnHeader = new JSModule('GridColumnHeader', {
@@ -21289,14 +21449,15 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             }
         },
         
-        /** Gets the sort function used to sort the rows. Subclasses and instances
-            should implement this as needed.
+        /** Gets the sort function used to sort the rows. Subclasses and 
+            instances should implement this as needed.
             @param {string} sortColumnId,
             @param {string} sortOrder
             @returns {!Function}  a comparator function used for sorting. */
         getSortFunction: (sortColumnId, sortOrder) => {
             if (sortColumnId) {
-                // Default sort function uses the 'text' attribute of the subview.
+                // Default sort function uses the 'text' attribute of 
+                // the subview.
                 const sortNum = sortOrder === 'ascending' ? 1 : -1,
                     columnName = sortColumnId + 'View';
                 return (a, b) => {
@@ -21408,7 +21569,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const JSClass = JS.Class,
         JSModule = JS.Module,
         View = pkg.View,
@@ -22179,7 +22340,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const JSClass = JS.Class,
         
         defAttr = pkg.AccessorSupport.defAttr,
@@ -22272,17 +22433,17 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             item.setHeight(this.height);
         },
         
-        /** Called by a panel when it transitions between selected states. Should
-            not be called directly. Instead change the panel selection.
+        /** Called by a panel when it transitions between selected states. 
+            Should not be called directly. Instead change the panel selection.
             @param panel:myt.StackablePanel The panel that is transitioning.
             @returns {undefined} */
         doStackTransition: function(panel) {
             this['doStackTransition' + (panel.selected ? 'To' : 'From')](panel);
         },
         
-        /** Called by PanelStack.doStackTransition when the provided panel will be 
-            the newly selected panel in the stack. Should not be called directly. 
-            Instead change the panel selection.
+        /** Called by PanelStack.doStackTransition when the provided panel 
+            will be the newly selected panel in the stack. Should not be 
+            called directly. Instead change the panel selection.
             @param panel:myt.StackablePanel The panel that is transitioning.
             @returns {undefined} */
         doStackTransitionTo: function(panel) {
@@ -22304,9 +22465,9 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         doBeforeTransitionTo: panel => {},
         doAfterTransitionTo: panel => {},
         
-        /** Called by PanelStack.doStackTransition when the provided panel will be 
-            the newly deselected panel in the stack. Should not be called directly. 
-            Instead change the panel selection.
+        /** Called by PanelStack.doStackTransition when the provided panel 
+            will be the newly deselected panel in the stack. Should not be 
+            called directly. Instead change the panel selection.
             @param panel:myt.StackablePanel The panel that is transitioning.
             @returns {undefined} */
         doStackTransitionFrom: function(panel) {
@@ -22470,7 +22631,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             panel.setVisible(true);
             
             return new Promise((resolve, reject) => {
-                const nextFunc = (success) => {
+                const nextFunc = success => {
                     panel.makeHighestZIndex();
                     resolve(panel);
                 };
@@ -22510,7 +22671,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             panel.stopActiveAnimators(axis);
             
             return new Promise((resolve, reject) => {
-                const nextFunc = (success) => {
+                const nextFunc = success => {
                     panel.setVisible(false);
                     resolve(panel);
                 };
@@ -22526,7 +22687,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const JSModule = JS.Module,
         G = pkg.global,
         dragManager = G.dragManager,
@@ -22734,8 +22895,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             return !this.disabled && this.isVisible();
         },
         
-        /** Called by myt.GlobalDragManager when a dropable starts being dragged
-            that has a matching drag group.
+        /** Called by myt.GlobalDragManager when a dropable starts being 
+            dragged that has a matching drag group.
             @param dropable:myt.Dropable The dropable being dragged.
             @returns {undefined} */
         notifyDragStart: dropable => {},
@@ -22746,8 +22907,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             @returns {undefined} */
         notifyDragStop: dropable => {},
         
-        /** Called by myt.GlobalDragManager when a dropable is dragged over this
-            view and has a matching drag group.
+        /** Called by myt.GlobalDragManager when a dropable is dragged over 
+            this view and has a matching drag group.
             @param dropable:myt.Dropable The dropable being dragged over 
                 this view.
             @returns {undefined} */
@@ -22760,9 +22921,10 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             @returns {undefined} */
         notifyDragLeave: dropable => {},
         
-        /** Called by myt.GlobalDragManager when a dropable is dropped onto this
-            view and has a matching drag group.
-            @param dropable:myt.Dropable The dropable being dropped onto this view.
+        /** Called by myt.GlobalDragManager when a dropable is dropped 
+            onto this view and has a matching drag group.
+            @param dropable:myt.Dropable The dropable being dropped onto 
+                this view.
             @returns {undefined} */
         notifyDrop: dropable => {}
     });
@@ -22771,8 +22933,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         Attributes:
             dropped:boolean Indicates this dropable was just dropped.
-            dropFailed:boolean Indicates this dropable was just dropped outside
-                of a drop target.
+            dropFailed:boolean Indicates this dropable was just dropped 
+                outside of a drop target.
             dropTarget:myt.DropTarget The drop target this dropable is 
                 currently over. */
     pkg.Dropable = new JSModule('Dropable', {
@@ -22924,8 +23086,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Called by myt.GlobalDragManager when a dropable starts being dragged
-            that has a matching drag group.
+        /** Called by myt.GlobalDragManager when a dropable starts 
+            being dragged that has a matching drag group.
             @param {!Object} dropable - The myt.Dropable being dragged.
             @returns {undefined} */
         notifyDragStart: function(dropable) {
@@ -22937,7 +23099,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         /** Called by myt.GlobalDragManager when a dropable stops being dragged
             that has a matching drag group.
-            @param {!Object} dropable - The myt.Dropable no longer being dragged.
+            @param {!Object} dropable - The myt.Dropable no longer 
+                being dragged.
             @returns {undefined} */
         notifyDragStop: function(dropable) {
             this.detachFromDom(globalMouse, '__hndlMove', 'mousemove', true);
@@ -23059,7 +23222,7 @@ myt.Eventable = new JS.Class('Eventable', {
 });
 
 
-((pkg) => {
+(pkg => {
     const math = Math,
         degreesToRadians = pkg.Geometry.degreesToRadians,
         
@@ -23260,7 +23423,7 @@ myt.Eventable = new JS.Class('Eventable', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     const JSClass = JS.Class,
         CLOSE_NORMAL = 1000,
         
@@ -23311,8 +23474,8 @@ myt.Eventable = new JS.Class('Eventable', {
             // Methods /////////////////////////////////////////////////////////
             /** Connects the WebSocket to the currently configured URL.
                 @param {?Function} [afterOpenCallback] - This callback will be
-                    executed once after the connection is established and the onOpen
-                    method has been called.
+                    executed once after the connection is established and the 
+                    onOpen method has been called.
                 @returns {undefined} */
             connect: function(afterOpenCallback) {
                 if (!this._ws && this.url) {
@@ -23322,7 +23485,7 @@ myt.Eventable = new JS.Class('Eventable', {
                         const openFunc = this.onOpen.bind(this);
                         if (afterOpenCallback) {
                             // Execute an afterOpenCallback one time
-                            ws.onopen = (event) => {
+                            ws.onopen = event => {
                                 openFunc(event);
                                 afterOpenCallback(event);
                                 
@@ -23345,11 +23508,11 @@ myt.Eventable = new JS.Class('Eventable', {
             /** Sends a message over the WebSocket.
                 @param {*} msg - The message to send.
                 @param {boolean} [doNotTryToConnect] - If falsy an attempt will
-                    be made to connect if the WebSocket is not currently connected
-                    before sending the message.
+                    be made to connect if the WebSocket is not currently 
+                    connected before sending the message.
                 @returns {boolean|undefined} Indicating if the message was sent
-                    or not. Undefined is returned when the connection has to be opened
-                    before sending. */
+                    or not. Undefined is returned when the connection has to 
+                    be opened before sending. */
             send: function(msg, doNotTryToConnect) {
                 const self = this,
                     ws = self._ws;
@@ -23365,17 +23528,17 @@ myt.Eventable = new JS.Class('Eventable', {
                     return true;
                 } else if (!doNotTryToConnect) {
                     // Try to connect first and then send
-                    self.connect((event) => {self.send(msg, true);});
+                    self.connect(event => {self.send(msg, true);});
                 } else {
                     return false;
                 }
             },
             
             /** Attempts to close the connection.
-                @param code:number (optional) Should be a WebSocket CloseEvent.code 
-                    value. Defaults to 1000 CLOSE_NORMAL.
-                @param reason:string (optional) An explanation of why the close is
-                    occurring. Defaults to "close".
+                @param code:number (optional) Should be a WebSocket 
+                    CloseEvent.code value. Defaults to 1000 CLOSE_NORMAL.
+                @param reason:string (optional) An explanation of why the 
+                    close is occurring. Defaults to "close".
                 @returns {undefined} */
             close: function(code, reason) {
                 if (this._ws) this._ws.close(code || CLOSE_NORMAL, reason || 'close');
@@ -23389,7 +23552,8 @@ myt.Eventable = new JS.Class('Eventable', {
             },
             
             /** Invoked when an error occurs in the WebSocket.
-                @param {!Object} event -  The error event fired by the WebSocket.
+                @param {!Object} event -  The error event fired by the 
+                    WebSocket.
                 @returns {undefined} */
             onError: function(event) {
                 console.error(event);
@@ -23398,7 +23562,8 @@ myt.Eventable = new JS.Class('Eventable', {
             },
             
             /** Invoked when a message is received over the WebSocket.
-                @param {!Object} event -  The message event fired by the WebSocket.
+                @param {!Object} event -  The message event fired by the 
+                    WebSocket.
                 @returns msg:* The message received. */
             onMessage: function(event) {
                 let msg = event.data;
@@ -23439,7 +23604,7 @@ myt.Eventable = new JS.Class('Eventable', {
                 matcherFunc = matcher;
             } else if (matcher == null) {
                 // Use a unique match anything function
-                matcherFunc = (type) => true;
+                matcherFunc = type => true;
             } else {
                 // Invalid matcherFunc
             }
@@ -23470,14 +23635,14 @@ myt.Eventable = new JS.Class('Eventable', {
         // Methods /////////////////////////////////////////////////////////////
         /** Registers a listener function that will get called for messages with
             a type that is matched by the provided matcher.
-            @param {?Function} listenerFunc The function that will get invoked. The
-                message is provided as the sole argument to the function.
-            @param {string|?Function} matcher (optional) A matcher function that takes
-                the type as the sole argument and must return true or false
-                indicating if the type is matched or not. If a string is provided
-                it will be converted into an exact match function. If not provided
-                (or something falsy) is provided a promiscuous matcher function
-                will be used.
+            @param {?Function} listenerFunc The function that will get invoked. 
+                The message is provided as the sole argument to the function.
+            @param {string|?Function} matcher (optional) A matcher function 
+                that takes the type as the sole argument and must return true 
+                or false indicating if the type is matched or not. If a string 
+                is provided it will be converted into an exact match function. 
+                If not provided (or something falsy) is provided a promiscuous 
+                matcher function will be used.
             @returns {undefined} */
         registerListener: function(listenerFunc, matcher) {
             if (listenerFunc) {
@@ -23492,13 +23657,14 @@ myt.Eventable = new JS.Class('Eventable', {
                             const patternMatchers = listenerInfo.patternMatchers; 
                             let j = patternMatchers.length;
                             while (j) {
-                                // Abort since patternMatcher is already registered
+                                // Abort since the patternMatcher is 
+                                // already registered
                                 if (patternMatchers[--j] === matcherFunc) return;
                             }
                             patternMatchers.push(matcherFunc);
                             
-                            // Prevent fall through to "add" below since we found
-                            // a listener.
+                            // Prevent fall through to "add" below since we 
+                            // found a listener.
                             return;
                         }
                     }
@@ -23590,8 +23756,8 @@ myt.Eventable = new JS.Class('Eventable', {
             
             // Notify Listeners
             const type = msg.type;
-            this._listeners.forEach((listenerInfo) => {
-                listenerInfo.patternMatchers.every((patternMatcher) => {
+            this._listeners.forEach(listenerInfo => {
+                listenerInfo.patternMatchers.every(patternMatcher => {
                     if (patternMatcher(type)) {
                         listenerInfo.func(msg);
                         return false;
@@ -23606,7 +23772,7 @@ myt.Eventable = new JS.Class('Eventable', {
 })(myt);
 
 
-((pkg) => {
+(pkg => {
     let tooltipView;
     
     const JSClass = JS.Class,
@@ -23639,9 +23805,11 @@ myt.Eventable = new JS.Class('Eventable', {
         /*  A base class for tooltip classes.
             
             Attributes:
-                tooltip:object The tooltip configuration assigned to this tooltip
-                    when the mouse has moved over a view with TooltipMixin.
-                tipDelay:number The time in millis to wait before showing the tooltip.
+                tooltip:object The tooltip configuration assigned to this 
+                    tooltip when the mouse has moved over a view with 
+                    TooltipMixin.
+                tipDelay:number The time in millis to wait before showing 
+                    the tooltip.
                 tipHideDelay:number The time in millis to wait before hiding 
                     the tooltip.
             
@@ -23706,7 +23874,8 @@ myt.Eventable = new JS.Class('Eventable', {
                         () => {
                             delete self.__checkTipTimerId;
                             
-                            // If the mouse rests in the tip's parent, show the tip.
+                            // If the mouse rests in the tip's parent, 
+                            // show the tip.
                             if (checkInTooltip(self)) self.showTip();
                         },
                         self.nextTipDelay
@@ -23729,9 +23898,9 @@ myt.Eventable = new JS.Class('Eventable', {
                 this.setVisible(false);
                 
                 // Don't consume mouse event since we just want to close the tip
-                // as a side effect of the user action. The typical case for this is
-                // the user clicking on a button while the tooltip for that button
-                // is shown.
+                // as a side effect of the user action. The typical case for 
+                // this is the user clicking on a button while the tooltip for 
+                // that button is shown.
                 return true;
             },
             
@@ -23751,7 +23920,8 @@ myt.Eventable = new JS.Class('Eventable', {
         /*  An implementation of a tooltip.
             
             Attributes:
-                edgeSize:number the thickness of the "edge" of the tip background.
+                edgeSize:number the thickness of the "edge" of the tip 
+                    background.
                 edgeColor:string The color used for the edge.
                 shadowSize:number The thickness of the shadow.
                 shadowColor:string The color of the shadow.
@@ -23817,7 +23987,8 @@ myt.Eventable = new JS.Class('Eventable', {
                     edgeSize = self.edgeSize,
                     shadowSize = self.shadowSize;
                 
-                // Size tip text and size it to fit within the maximum text width.
+                // Size tip text and size it to fit within the maximum 
+                // text width.
                 if (tipText.text !== txt) tipText.setText(txt);
                 tipText.setWidth('auto');
                 const tipTextWidth = Math.min(tipText.measureNoWrapWidth(), tt.maxTextWidth),
@@ -23871,12 +24042,13 @@ myt.Eventable = new JS.Class('Eventable', {
             
             Attributes:
                 tooltip:string The tip text to display.
-                tipAlign:string The horizontal alignment of the tooltip relative to
-                    the view the tip is being shown for. Supported values are 'left'
-                    'farleft', 'right' and 'farright'. Defaults to 'left'.
-                tipValign:string The vertical alignment of the tooltip relative to
-                    the view the tip is being shown for. Supported values are 'above'
-                    and 'below'. Defaults to 'above'.
+                tipAlign:string The horizontal alignment of the tooltip 
+                    relative to the view the tip is being shown for. Supported 
+                    values are 'left', 'farleft', 'right' and 'farright'. 
+                    Defaults to 'left'.
+                tipValign:string The vertical alignment of the tooltip 
+                    relative to the view the tip is being shown for. Supported 
+                    values are 'above' and 'below'. Defaults to 'above'.
                 maxTextWidth:number The maximum width of the tooltip text.
                 tipClass:JS.Class The class to use to instantiate the tooltip.
             
@@ -23884,8 +24056,9 @@ myt.Eventable = new JS.Class('Eventable', {
         TooltipMixin = pkg.TooltipMixin = new JS.Module('TooltipMixin', {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                /** The default class to use for tooltip views. If a project wants to use
-                    a special tip class everywhere it should override this. */
+                /** The default class to use for tooltip views. If a project 
+                    wants to use a special tip class everywhere it should 
+                    override this. */
                 DEFAULT_TIP_CLASS:Tooltip,
                 DEFAULT_MAX_TEXT_WIDTH:280
             },
@@ -23929,8 +24102,9 @@ myt.Eventable = new JS.Class('Eventable', {
                         if (!elem) {
                             elem = pkg.DomElementProxy.createDomElement('div', {position:'absolute'});
                             
-                            // Make the div a child of the body element so it can be
-                            // in front of pretty much anything in the document.
+                            // Make the div a child of the body element so it 
+                            // can be in front of pretty much anything in the 
+                            // document.
                             pkg.getElement().appendChild(elem);
                         }
                         tooltipView = new tipClass(elem, {domId:tooltipDomId});
@@ -24089,7 +24263,7 @@ myt.Path = new JS.Class('Path', {
 });
 
 
-((pkg) => {
+(pkg => {
     const PI = Math.PI,
         HALF_PI = PI / 2,
         ONE_AND_A_HALF_PI = PI * 3 / 2,
@@ -24183,8 +24357,9 @@ myt.Path = new JS.Class('Path', {
         
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides
-            Prevent views from being sent behind the __canvas. This allows us to
-            add child views to a Canvas which is not directly supported in HTML. */
+            Prevent views from being sent behind the __canvas. This allows us 
+            to add child views to a Canvas which is not directly supported 
+            in HTML. */
         sendSubviewToBack: function(sv) {
             if (sv.parent === this) {
                 const ide = this.getIDE(),
@@ -24197,10 +24372,11 @@ myt.Path = new JS.Class('Path', {
             }
         },
         
-        /** Clears the drawing context. Anything currently drawn will be erased. */
+        /** Clears the drawing context. Anything currently drawn will 
+            be erased. */
         clear: function() {
-            // Store the current transform matrix, then apply the identity matrix
-            // to make clearing simpler then restore the transform.
+            // Store the current transform matrix, then apply the identity 
+            // matrix to make clearing simpler then restore the transform.
             const ctx = this.__ctx;
             ctx.save();
             ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -24228,7 +24404,8 @@ myt.Path = new JS.Class('Path', {
                     break;
                 case 'jpg': case 'JPG': case 'jpeg': case 'JPEG':
                     extension = 'jpeg';
-                    // opt should be a quality number between 0.0 (worst) and 1.0 (best)
+                    // opt should be a quality number between 0.0 (worst) 
+                    // and 1.0 (best)
                     if (opt == null) opt = 0.5;
                     break;
                 default:
@@ -24252,36 +24429,39 @@ myt.Path = new JS.Class('Path', {
         
         /** Draws a rounded rect into the provided drawview.
             @param {number} r - The radius of the corners.
-            @param {number} thickness - The thickness of the line. If thickness is
-                zero or less a fill will be done rather than an outline.
+            @param {number} thickness - The thickness of the line. If thickness 
+                is zero or less a fill will be done rather than an outline.
             @param {number} left
             @param {number} top
             @param {number} w
             @param {number} h
-            @returns {undefined} */
+            @returns {!Object} The canvas for function chaining. */
         drawRoundedRect: function(r, thickness, left, top, w, h) {
-            const self = this;
+            const self = this,
+                lineTo = self.lineTo.bind(self),
+                arc = self.arc.bind(self);
             
             let bottom = top + h,
                 right = left + w;
             
-            // We create a single path for both an outer and inner rounded rect.
-            // The reason for this is that filling looks much better than stroking.
+            // We create a single path for both an outer and inner rounded 
+            // rect. The reason for this is that filling looks much better 
+            // than stroking.
             self.beginPath();
             
             self.moveTo(left, top + r);
             
-            self.lineTo(left, bottom - r);
-            self.arc(left + r, bottom - r, r, PI, HALF_PI, true);
+            lineTo(left, bottom - r);
+            arc(left + r, bottom - r, r, PI, HALF_PI, true);
             
-            self.lineTo(right - r, bottom);
-            self.arc(right - r, bottom - r, r, HALF_PI, 0, true);
+            lineTo(right - r, bottom);
+            arc(right - r, bottom - r, r, HALF_PI, 0, true);
             
-            self.lineTo(right, top + r);
-            self.arc(right - r, top + r, r, 0, ONE_AND_A_HALF_PI, true);
+            lineTo(right, top + r);
+            arc(right - r, top + r, r, 0, ONE_AND_A_HALF_PI, true);
             
-            self.lineTo(left + r, top);
-            self.arc(left + r, top + r, r, ONE_AND_A_HALF_PI, PI, true);
+            lineTo(left + r, top);
+            arc(left + r, top + r, r, ONE_AND_A_HALF_PI, PI, true);
             
             self.closePath();
             
@@ -24294,19 +24474,20 @@ myt.Path = new JS.Class('Path', {
                 
                 self.moveTo(left, top + r);
                 
-                self.arc(left + r, top + r, r, PI, ONE_AND_A_HALF_PI);
+                arc(left + r, top + r, r, PI, ONE_AND_A_HALF_PI);
                 
-                self.lineTo(right - r, top);
-                self.arc(right - r, top + r, r, ONE_AND_A_HALF_PI, 0);
+                lineTo(right - r, top);
+                arc(right - r, top + r, r, ONE_AND_A_HALF_PI, 0);
                 
-                self.lineTo(right, bottom - r);
-                self.arc(right - r, bottom - r, r, 0, HALF_PI);
+                lineTo(right, bottom - r);
+                arc(right - r, bottom - r, r, 0, HALF_PI);
                 
-                self.lineTo(left + r, bottom);
-                self.arc(left + r, bottom - r, r, HALF_PI, PI);
+                lineTo(left + r, bottom);
+                arc(left + r, bottom - r, r, HALF_PI, PI);
                 
                 self.closePath();
             }
+            return self;
         },
         
         /** Draws a rect outline into the provided drawview.
@@ -24315,7 +24496,7 @@ myt.Path = new JS.Class('Path', {
             @param {number} top
             @param {number} w
             @param {number} h
-            @returns {undefined} */
+            @returns {!Object} The canvas for function chaining. */
         drawRectOutline: function(thickness, left, top, w, h) {
             const self = this,
                 bottom = top + h, 
@@ -24323,23 +24504,26 @@ myt.Path = new JS.Class('Path', {
                 ileft = left + thickness,
                 iright = right - thickness,
                 itop = top + thickness,
-                ibottom = bottom - thickness;
+                ibottom = bottom - thickness,
+                lineTo = self.lineTo.bind(self);
             
             self.beginPath();
             
             self.moveTo(left, top);
-            self.lineTo(left, bottom);
-            self.lineTo(right, bottom);
-            self.lineTo(right, top);
-            self.lineTo(left, top);
+            lineTo(left, bottom);
+            lineTo(right, bottom);
+            lineTo(right, top);
+            lineTo(left, top);
             
-            self.lineTo(ileft, itop);
-            self.lineTo(iright, itop);
-            self.lineTo(iright, ibottom);
-            self.lineTo(ileft, ibottom);
-            self.lineTo(ileft, itop);
+            lineTo(ileft, itop);
+            lineTo(iright, itop);
+            lineTo(iright, ibottom);
+            lineTo(ileft, ibottom);
+            lineTo(ileft, itop);
             
             self.closePath();
+            
+            return self;
         },
         
         /** Draws a rounded rect with one or more flat corners.
@@ -24351,64 +24535,89 @@ myt.Path = new JS.Class('Path', {
             @param {number} top
             @param {number} w
             @param {number} h
-            @returns {undefined} */
+            @returns {!Object} The canvas for function chaining. */
         drawPartiallyRoundedRect: function(rTL, rTR, rBL, rBR, left, top, w, h) {
             const self = this,
                 bottom = top + h, 
-                right = left + w;
+                right = left + w,
+                lineTo = self.lineTo.bind(self),
+                quadraticCurveTo = self.quadraticCurveTo.bind(self);
             
             self.beginPath();
             
             self.moveTo(left, top + rTL);
             
-            self.lineTo(left, bottom - rBL);
-            if (rBL > 0) self.quadraticCurveTo(left, bottom, left + rBL, bottom);
+            lineTo(left, bottom - rBL);
+            if (rBL > 0) quadraticCurveTo(left, bottom, left + rBL, bottom);
             
-            self.lineTo(right - rBR, bottom);
-            if (rBR > 0) self.quadraticCurveTo(right, bottom, right, bottom - rBR);
+            lineTo(right - rBR, bottom);
+            if (rBR > 0) quadraticCurveTo(right, bottom, right, bottom - rBR);
             
-            self.lineTo(right, top + rTR);
-            if (rTR > 0) self.quadraticCurveTo(right, top, right - rTR, top);
+            lineTo(right, top + rTR);
+            if (rTR > 0) quadraticCurveTo(right, top, right - rTR, top);
             
-            self.lineTo(left + rTL, top);
-            if (rTL > 0) self.quadraticCurveTo(left, top, left, top + rTL);
+            lineTo(left + rTL, top);
+            if (rTL > 0) quadraticCurveTo(left, top, left, top + rTL);
             
             self.closePath();
+            return self;
         },
         
-        drawGradientArc: function(centerX, centerY, r, ir, startAngle, endAngle, colors, segments) {
-            const self = this;
+        /** Draws an annulus filled with a gradient.
+            @param {number} centerX - The x location of the origin of 
+                the annulus.
+            @param {number} centerY - The y location of the origin of 
+                the annulus.
+            @param {number} r - The outer radius of the annulus in pixels.
+            @param {number} ir - The inner radius of the annulus in pixels.
+            @param {number} startAngle - The start of the annulus in radians.
+            @param {number} endAngle - The end of the annulus in radians.
+            @param {!Array} colors - An array of objects that contains the
+                colors to blend between and the angle they occur at. The object
+                has two properties, "angle" (in radians) and "color". The
+                "color" may be either a hex color string or a myt.Color object.
+            @param {number} [segments] - The number of segments to draw for
+                half a circle. Defaults to 60.
+            @returns {!Object} The canvas for function chaining. */
+        drawAnnulus: function(centerX, centerY, r, ir, startAngle, endAngle, colors, segments=60) {
+            const self = this,
+                Color = pkg.Color;
             
-            if (segments == null) segments = 60;
-            
-            let angleDelta = PI / segments,
-            
-            // Antialiasing issues means we need to draw each polygon with a small 
-            // overlap to fill the gap.
-                angleOverlap =  PI / 360,
+            // Convert string based hex colors to myt.Color objects.
+            colors.forEach(config => {
+                if (typeof config.color === 'string') config.color = Color.makeColorFromHexString(config.color);
+            });
             
             // Calculate Colors
-                len = colors.length,
-                i = 0, 
-                angleDiff, 
-                slices, 
-                diff;
-            for (; len > i + 1; i++) {
-                angleDiff = colors[i + 1].angle - colors[i].angle;
-                slices = Math.round(angleDiff / angleDelta);
-                diff = colors[i].color.getDiffFrom(colors[i + 1].color);
-                colors[i].colorDelta = {red:diff.red / slices, green:diff.green / slices, blue:diff.blue / slices};
+            let angleDelta = PI / segments,
+                i = 0;
+            
+            for (; colors.length - 1 > i;) {
+                const config = colors[i++],
+                    nextConfig = colors[i],
+                    angleDiff = nextConfig.angle - config.angle,
+                    slices = Math.round(angleDiff / angleDelta),
+                    diff = config.color.getDiffFrom(nextConfig.color);
+                config.colorDelta = {red:diff.red / slices, green:diff.green / slices, blue:diff.blue / slices};
             }
             
             const path = new pkg.Path([centerX + r, centerY, centerX + ir, centerY]);
-            let prevAngle, ix1, iy1, x1, y1,
-                angle = startAngle;
-            
-            path.rotateAroundOrigin(angle, centerX, centerY);
+            path.rotateAroundOrigin(startAngle, centerX, centerY);
             const vectors = path.vectors;
-            let x2 = vectors[0], y2 = vectors[1],
-                ix2 = vectors[2], iy2 = vectors[3],
-                diffCount = 0;
+            let angle = startAngle,
+                ix1,
+                iy1,
+                x1,
+                y1,
+                x2 = vectors[0],
+                y2 = vectors[1],
+                ix2 = vectors[2],
+                iy2 = vectors[3],
+                diffCount = 0,
+                
+                // Antialiasing issues means we need to draw each polygon with 
+                // a small overlap to fill the gap.
+                angleOverlap =  PI / 360;
             
             i = 0;
             
@@ -24418,7 +24627,6 @@ myt.Path = new JS.Class('Path', {
                 y1 = y2;
                 ix1 = ix2;
                 iy1 = iy2;
-                prevAngle = angle;
                 
                 // Calculate new angle and points
                 angle += angleDelta;
@@ -24443,11 +24651,12 @@ myt.Path = new JS.Class('Path', {
                 
                 const c = colors[i].color,
                     colorDelta = colors[i].colorDelta;
-                self.fillStyle = pkg.Color.makeColorNumberFromChannels(
+                self.setFillStyle(Color.rgbToHex(
                     c.red + (diffCount * colorDelta.red),
                     c.green + (diffCount * colorDelta.green),
-                    c.blue + (diffCount * colorDelta.blue)
-                );
+                    c.blue + (diffCount * colorDelta.blue),
+                    true
+                ));
                 self.fill();
                 
                 if (angleOverlap > 0) {
@@ -24465,6 +24674,7 @@ myt.Path = new JS.Class('Path', {
                     i++;
                 }
             }
+            return self;
         }
     });
 })(myt);

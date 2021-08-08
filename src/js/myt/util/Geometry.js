@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     /** Provides common geometry related functions. */
     const math = Math,
         PI = math.PI,
@@ -7,7 +7,7 @@
         mathSqrt = math.sqrt,
         
         Geometry = pkg.Geometry = {
-            // Methods /////////////////////////////////////////////////////////////
+            // Methods /////////////////////////////////////////////////////////
             /** Get the closest point on a line to a given point.
                 @param {number} Ax - The x-coordinate of the first point that 
                     defines the line.
@@ -143,7 +143,8 @@
                 @param {number} cY - The y coordinate of the center of 
                     the circle.
                 @param {number} cR - The radius of the circle.
-                @return {boolean} - True if the point is inside or on the circle. */
+                @return {boolean} - True if the point is inside or on 
+                    the circle. */
             circleContainsPoint: (pX, pY, cX, cY, cR) => Geometry.measureDistance(pX, pY, cX, cY, true) <= cR * cR,
             
             /** Measure the distance between two points.
@@ -164,12 +165,12 @@
             /** Convert radians to degrees.
                 @param {number} deg - The degrees to convert.
                 @returns {number} - The converted radians. */
-            degreesToRadians: (deg) => deg * PI / 180,
+            degreesToRadians: deg => deg * PI / 180,
             
             /** Convert degrees to radians.
                 @param {number} rad - The radians to convert.
                 @returns {number} The converted degrees. */
-            radiansToDegrees: (rad) => rad * 180 / PI,
+            radiansToDegrees: rad => rad * 180 / PI,
             
             // Geometry on a sphere
             /** Checks if the provided lat/lng point lies inside or on the edge 

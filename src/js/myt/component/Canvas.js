@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const PI = Math.PI,
         HALF_PI = PI / 2,
         ONE_AND_A_HALF_PI = PI * 3 / 2,
@@ -92,8 +92,9 @@
         
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides
-            Prevent views from being sent behind the __canvas. This allows us to
-            add child views to a Canvas which is not directly supported in HTML. */
+            Prevent views from being sent behind the __canvas. This allows us 
+            to add child views to a Canvas which is not directly supported 
+            in HTML. */
         sendSubviewToBack: function(sv) {
             if (sv.parent === this) {
                 const ide = this.getIDE(),
@@ -106,10 +107,11 @@
             }
         },
         
-        /** Clears the drawing context. Anything currently drawn will be erased. */
+        /** Clears the drawing context. Anything currently drawn will 
+            be erased. */
         clear: function() {
-            // Store the current transform matrix, then apply the identity matrix
-            // to make clearing simpler then restore the transform.
+            // Store the current transform matrix, then apply the identity 
+            // matrix to make clearing simpler then restore the transform.
             const ctx = this.__ctx;
             ctx.save();
             ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -137,7 +139,8 @@
                     break;
                 case 'jpg': case 'JPG': case 'jpeg': case 'JPEG':
                     extension = 'jpeg';
-                    // opt should be a quality number between 0.0 (worst) and 1.0 (best)
+                    // opt should be a quality number between 0.0 (worst) 
+                    // and 1.0 (best)
                     if (opt == null) opt = 0.5;
                     break;
                 default:
@@ -161,36 +164,39 @@
         
         /** Draws a rounded rect into the provided drawview.
             @param {number} r - The radius of the corners.
-            @param {number} thickness - The thickness of the line. If thickness is
-                zero or less a fill will be done rather than an outline.
+            @param {number} thickness - The thickness of the line. If thickness 
+                is zero or less a fill will be done rather than an outline.
             @param {number} left
             @param {number} top
             @param {number} w
             @param {number} h
-            @returns {undefined} */
+            @returns {!Object} The canvas for function chaining. */
         drawRoundedRect: function(r, thickness, left, top, w, h) {
-            const self = this;
+            const self = this,
+                lineTo = self.lineTo.bind(self),
+                arc = self.arc.bind(self);
             
             let bottom = top + h,
                 right = left + w;
             
-            // We create a single path for both an outer and inner rounded rect.
-            // The reason for this is that filling looks much better than stroking.
+            // We create a single path for both an outer and inner rounded 
+            // rect. The reason for this is that filling looks much better 
+            // than stroking.
             self.beginPath();
             
             self.moveTo(left, top + r);
             
-            self.lineTo(left, bottom - r);
-            self.arc(left + r, bottom - r, r, PI, HALF_PI, true);
+            lineTo(left, bottom - r);
+            arc(left + r, bottom - r, r, PI, HALF_PI, true);
             
-            self.lineTo(right - r, bottom);
-            self.arc(right - r, bottom - r, r, HALF_PI, 0, true);
+            lineTo(right - r, bottom);
+            arc(right - r, bottom - r, r, HALF_PI, 0, true);
             
-            self.lineTo(right, top + r);
-            self.arc(right - r, top + r, r, 0, ONE_AND_A_HALF_PI, true);
+            lineTo(right, top + r);
+            arc(right - r, top + r, r, 0, ONE_AND_A_HALF_PI, true);
             
-            self.lineTo(left + r, top);
-            self.arc(left + r, top + r, r, ONE_AND_A_HALF_PI, PI, true);
+            lineTo(left + r, top);
+            arc(left + r, top + r, r, ONE_AND_A_HALF_PI, PI, true);
             
             self.closePath();
             
@@ -203,19 +209,20 @@
                 
                 self.moveTo(left, top + r);
                 
-                self.arc(left + r, top + r, r, PI, ONE_AND_A_HALF_PI);
+                arc(left + r, top + r, r, PI, ONE_AND_A_HALF_PI);
                 
-                self.lineTo(right - r, top);
-                self.arc(right - r, top + r, r, ONE_AND_A_HALF_PI, 0);
+                lineTo(right - r, top);
+                arc(right - r, top + r, r, ONE_AND_A_HALF_PI, 0);
                 
-                self.lineTo(right, bottom - r);
-                self.arc(right - r, bottom - r, r, 0, HALF_PI);
+                lineTo(right, bottom - r);
+                arc(right - r, bottom - r, r, 0, HALF_PI);
                 
-                self.lineTo(left + r, bottom);
-                self.arc(left + r, bottom - r, r, HALF_PI, PI);
+                lineTo(left + r, bottom);
+                arc(left + r, bottom - r, r, HALF_PI, PI);
                 
                 self.closePath();
             }
+            return self;
         },
         
         /** Draws a rect outline into the provided drawview.
@@ -224,7 +231,7 @@
             @param {number} top
             @param {number} w
             @param {number} h
-            @returns {undefined} */
+            @returns {!Object} The canvas for function chaining. */
         drawRectOutline: function(thickness, left, top, w, h) {
             const self = this,
                 bottom = top + h, 
@@ -232,23 +239,26 @@
                 ileft = left + thickness,
                 iright = right - thickness,
                 itop = top + thickness,
-                ibottom = bottom - thickness;
+                ibottom = bottom - thickness,
+                lineTo = self.lineTo.bind(self);
             
             self.beginPath();
             
             self.moveTo(left, top);
-            self.lineTo(left, bottom);
-            self.lineTo(right, bottom);
-            self.lineTo(right, top);
-            self.lineTo(left, top);
+            lineTo(left, bottom);
+            lineTo(right, bottom);
+            lineTo(right, top);
+            lineTo(left, top);
             
-            self.lineTo(ileft, itop);
-            self.lineTo(iright, itop);
-            self.lineTo(iright, ibottom);
-            self.lineTo(ileft, ibottom);
-            self.lineTo(ileft, itop);
+            lineTo(ileft, itop);
+            lineTo(iright, itop);
+            lineTo(iright, ibottom);
+            lineTo(ileft, ibottom);
+            lineTo(ileft, itop);
             
             self.closePath();
+            
+            return self;
         },
         
         /** Draws a rounded rect with one or more flat corners.
@@ -260,64 +270,89 @@
             @param {number} top
             @param {number} w
             @param {number} h
-            @returns {undefined} */
+            @returns {!Object} The canvas for function chaining. */
         drawPartiallyRoundedRect: function(rTL, rTR, rBL, rBR, left, top, w, h) {
             const self = this,
                 bottom = top + h, 
-                right = left + w;
+                right = left + w,
+                lineTo = self.lineTo.bind(self),
+                quadraticCurveTo = self.quadraticCurveTo.bind(self);
             
             self.beginPath();
             
             self.moveTo(left, top + rTL);
             
-            self.lineTo(left, bottom - rBL);
-            if (rBL > 0) self.quadraticCurveTo(left, bottom, left + rBL, bottom);
+            lineTo(left, bottom - rBL);
+            if (rBL > 0) quadraticCurveTo(left, bottom, left + rBL, bottom);
             
-            self.lineTo(right - rBR, bottom);
-            if (rBR > 0) self.quadraticCurveTo(right, bottom, right, bottom - rBR);
+            lineTo(right - rBR, bottom);
+            if (rBR > 0) quadraticCurveTo(right, bottom, right, bottom - rBR);
             
-            self.lineTo(right, top + rTR);
-            if (rTR > 0) self.quadraticCurveTo(right, top, right - rTR, top);
+            lineTo(right, top + rTR);
+            if (rTR > 0) quadraticCurveTo(right, top, right - rTR, top);
             
-            self.lineTo(left + rTL, top);
-            if (rTL > 0) self.quadraticCurveTo(left, top, left, top + rTL);
+            lineTo(left + rTL, top);
+            if (rTL > 0) quadraticCurveTo(left, top, left, top + rTL);
             
             self.closePath();
+            return self;
         },
         
-        drawGradientArc: function(centerX, centerY, r, ir, startAngle, endAngle, colors, segments) {
-            const self = this;
+        /** Draws an annulus filled with a gradient.
+            @param {number} centerX - The x location of the origin of 
+                the annulus.
+            @param {number} centerY - The y location of the origin of 
+                the annulus.
+            @param {number} r - The outer radius of the annulus in pixels.
+            @param {number} ir - The inner radius of the annulus in pixels.
+            @param {number} startAngle - The start of the annulus in radians.
+            @param {number} endAngle - The end of the annulus in radians.
+            @param {!Array} colors - An array of objects that contains the
+                colors to blend between and the angle they occur at. The object
+                has two properties, "angle" (in radians) and "color". The
+                "color" may be either a hex color string or a myt.Color object.
+            @param {number} [segments] - The number of segments to draw for
+                half a circle. Defaults to 60.
+            @returns {!Object} The canvas for function chaining. */
+        drawAnnulus: function(centerX, centerY, r, ir, startAngle, endAngle, colors, segments=60) {
+            const self = this,
+                Color = pkg.Color;
             
-            if (segments == null) segments = 60;
-            
-            let angleDelta = PI / segments,
-            
-            // Antialiasing issues means we need to draw each polygon with a small 
-            // overlap to fill the gap.
-                angleOverlap =  PI / 360,
+            // Convert string based hex colors to myt.Color objects.
+            colors.forEach(config => {
+                if (typeof config.color === 'string') config.color = Color.makeColorFromHexString(config.color);
+            });
             
             // Calculate Colors
-                len = colors.length,
-                i = 0, 
-                angleDiff, 
-                slices, 
-                diff;
-            for (; len > i + 1; i++) {
-                angleDiff = colors[i + 1].angle - colors[i].angle;
-                slices = Math.round(angleDiff / angleDelta);
-                diff = colors[i].color.getDiffFrom(colors[i + 1].color);
-                colors[i].colorDelta = {red:diff.red / slices, green:diff.green / slices, blue:diff.blue / slices};
+            let angleDelta = PI / segments,
+                i = 0;
+            
+            for (; colors.length - 1 > i;) {
+                const config = colors[i++],
+                    nextConfig = colors[i],
+                    angleDiff = nextConfig.angle - config.angle,
+                    slices = Math.round(angleDiff / angleDelta),
+                    diff = config.color.getDiffFrom(nextConfig.color);
+                config.colorDelta = {red:diff.red / slices, green:diff.green / slices, blue:diff.blue / slices};
             }
             
             const path = new pkg.Path([centerX + r, centerY, centerX + ir, centerY]);
-            let prevAngle, ix1, iy1, x1, y1,
-                angle = startAngle;
-            
-            path.rotateAroundOrigin(angle, centerX, centerY);
+            path.rotateAroundOrigin(startAngle, centerX, centerY);
             const vectors = path.vectors;
-            let x2 = vectors[0], y2 = vectors[1],
-                ix2 = vectors[2], iy2 = vectors[3],
-                diffCount = 0;
+            let angle = startAngle,
+                ix1,
+                iy1,
+                x1,
+                y1,
+                x2 = vectors[0],
+                y2 = vectors[1],
+                ix2 = vectors[2],
+                iy2 = vectors[3],
+                diffCount = 0,
+                
+                // Antialiasing issues means we need to draw each polygon with 
+                // a small overlap to fill the gap.
+                angleOverlap =  PI / 360;
             
             i = 0;
             
@@ -327,7 +362,6 @@
                 y1 = y2;
                 ix1 = ix2;
                 iy1 = iy2;
-                prevAngle = angle;
                 
                 // Calculate new angle and points
                 angle += angleDelta;
@@ -352,11 +386,12 @@
                 
                 const c = colors[i].color,
                     colorDelta = colors[i].colorDelta;
-                self.fillStyle = pkg.Color.makeColorNumberFromChannels(
+                self.setFillStyle(Color.rgbToHex(
                     c.red + (diffCount * colorDelta.red),
                     c.green + (diffCount * colorDelta.green),
-                    c.blue + (diffCount * colorDelta.blue)
-                );
+                    c.blue + (diffCount * colorDelta.blue),
+                    true
+                ));
                 self.fill();
                 
                 if (angleOverlap > 0) {
@@ -374,6 +409,7 @@
                     i++;
                 }
             }
+            return self;
         }
     });
 })(myt);

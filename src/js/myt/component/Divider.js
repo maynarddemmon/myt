@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const JSClass = JS.Class,
         
         defAttr = pkg.AccessorSupport.defAttr,
@@ -6,7 +6,7 @@
         /*  Setup the limitToParent constraint.
             @param {!BaseDivider} divider
             @returns {undefined} */
-        updateLimitToParentConstraint = (divider) => {
+        updateLimitToParentConstraint = divider => {
             const dim = divider.axis === 'y' ? 'height' : 'width';
             divider.constrain('__limitToParent', [divider, 'limitToParent', divider, dim, divider.parent, dim]);
         },
@@ -18,19 +18,20 @@
                 limitToParent:number
             
             Attributes:
-                @property {string} axis - Indicates if the divider should be constrained horizontally
-                    or vertically. Allowed values: 'x' or 'y'. This value can only
-                    be set during instantiation.
-                @property {number} limitToParent - If set, this will constrain the maxValue to the
-                    appropriate parent view dimension less the limitToParent amount.
-                @property {number} expansionState - Used by the "primary" action to update the 
-                    divider position. Allowed values are:
+                @property {string} axis - Indicates if the divider should be 
+                    constrained horizontally or vertically. Allowed values: 'x' 
+                    or 'y'. This value can only be set during instantiation.
+                @property {number} limitToParent - If set, this will constrain 
+                    the maxValue to the appropriate parent view dimension less 
+                    the limitToParent amount.
+                @property {number} expansionState - Used by the "primary" 
+                    action to update the divider position. Allowed values are:
                         collapsed:0
                         restored just collapsed:1
                         restored just expanded:2
                         expanded:3
-                @property {number} restoreValue - The value used to restore the position in the
-                    "primary" action.
+                @property {number} restoreValue - The value used to restore 
+                    the position in the "primary" action.
             
             Private Attributes:
                 __nudgeAcc:number The multiplier in px per nudge.
@@ -114,7 +115,8 @@
                 }
             },
             
-            /** Update the x or y position of the component as the value changes.
+            /** Update the x or y position of the component as the value 
+                changes.
                 @overrides myt.ValueComponent
                 @param {number} v - The x or y position to set.
                 @param {boolean} [restoreValueAlso] - If true, the restoreValue
@@ -145,8 +147,8 @@
                 self.setMaxValue(self.parent[dim] - self.limitToParent - self[dim]);
             },
             
-            /** Nudge the divider when the arrow keys are used. Nudging accelerates
-                up to a limit if the key is held down.
+            /** Nudge the divider when the arrow keys are used. Nudging 
+                accelerates up to a limit if the key is held down.
                 @overrides myt.Button. */
             doActivationKeyDown: function(key, isRepeat) {
                 const self = this;
@@ -181,7 +183,8 @@
                         if (rv != null) {
                             self.setExpansionState(1);
                             if (rv === minV) {
-                                // Prevent infinite loop if there's nowhere to animate to.
+                                // Prevent infinite loop if there's nowhere 
+                                // to animate to.
                                 if (rv !== maxV) self.doPrimaryAction();
                             } else {
                                 toValue = rv;

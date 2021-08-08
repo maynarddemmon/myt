@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const JSClass = JS.Class,
         CLOSE_NORMAL = 1000,
         
@@ -49,8 +49,8 @@
             // Methods /////////////////////////////////////////////////////////
             /** Connects the WebSocket to the currently configured URL.
                 @param {?Function} [afterOpenCallback] - This callback will be
-                    executed once after the connection is established and the onOpen
-                    method has been called.
+                    executed once after the connection is established and the 
+                    onOpen method has been called.
                 @returns {undefined} */
             connect: function(afterOpenCallback) {
                 if (!this._ws && this.url) {
@@ -60,7 +60,7 @@
                         const openFunc = this.onOpen.bind(this);
                         if (afterOpenCallback) {
                             // Execute an afterOpenCallback one time
-                            ws.onopen = (event) => {
+                            ws.onopen = event => {
                                 openFunc(event);
                                 afterOpenCallback(event);
                                 
@@ -83,11 +83,11 @@
             /** Sends a message over the WebSocket.
                 @param {*} msg - The message to send.
                 @param {boolean} [doNotTryToConnect] - If falsy an attempt will
-                    be made to connect if the WebSocket is not currently connected
-                    before sending the message.
+                    be made to connect if the WebSocket is not currently 
+                    connected before sending the message.
                 @returns {boolean|undefined} Indicating if the message was sent
-                    or not. Undefined is returned when the connection has to be opened
-                    before sending. */
+                    or not. Undefined is returned when the connection has to 
+                    be opened before sending. */
             send: function(msg, doNotTryToConnect) {
                 const self = this,
                     ws = self._ws;
@@ -103,17 +103,17 @@
                     return true;
                 } else if (!doNotTryToConnect) {
                     // Try to connect first and then send
-                    self.connect((event) => {self.send(msg, true);});
+                    self.connect(event => {self.send(msg, true);});
                 } else {
                     return false;
                 }
             },
             
             /** Attempts to close the connection.
-                @param code:number (optional) Should be a WebSocket CloseEvent.code 
-                    value. Defaults to 1000 CLOSE_NORMAL.
-                @param reason:string (optional) An explanation of why the close is
-                    occurring. Defaults to "close".
+                @param code:number (optional) Should be a WebSocket 
+                    CloseEvent.code value. Defaults to 1000 CLOSE_NORMAL.
+                @param reason:string (optional) An explanation of why the 
+                    close is occurring. Defaults to "close".
                 @returns {undefined} */
             close: function(code, reason) {
                 if (this._ws) this._ws.close(code || CLOSE_NORMAL, reason || 'close');
@@ -127,7 +127,8 @@
             },
             
             /** Invoked when an error occurs in the WebSocket.
-                @param {!Object} event -  The error event fired by the WebSocket.
+                @param {!Object} event -  The error event fired by the 
+                    WebSocket.
                 @returns {undefined} */
             onError: function(event) {
                 console.error(event);
@@ -136,7 +137,8 @@
             },
             
             /** Invoked when a message is received over the WebSocket.
-                @param {!Object} event -  The message event fired by the WebSocket.
+                @param {!Object} event -  The message event fired by the 
+                    WebSocket.
                 @returns msg:* The message received. */
             onMessage: function(event) {
                 let msg = event.data;
@@ -177,7 +179,7 @@
                 matcherFunc = matcher;
             } else if (matcher == null) {
                 // Use a unique match anything function
-                matcherFunc = (type) => true;
+                matcherFunc = type => true;
             } else {
                 // Invalid matcherFunc
             }
@@ -208,14 +210,14 @@
         // Methods /////////////////////////////////////////////////////////////
         /** Registers a listener function that will get called for messages with
             a type that is matched by the provided matcher.
-            @param {?Function} listenerFunc The function that will get invoked. The
-                message is provided as the sole argument to the function.
-            @param {string|?Function} matcher (optional) A matcher function that takes
-                the type as the sole argument and must return true or false
-                indicating if the type is matched or not. If a string is provided
-                it will be converted into an exact match function. If not provided
-                (or something falsy) is provided a promiscuous matcher function
-                will be used.
+            @param {?Function} listenerFunc The function that will get invoked. 
+                The message is provided as the sole argument to the function.
+            @param {string|?Function} matcher (optional) A matcher function 
+                that takes the type as the sole argument and must return true 
+                or false indicating if the type is matched or not. If a string 
+                is provided it will be converted into an exact match function. 
+                If not provided (or something falsy) is provided a promiscuous 
+                matcher function will be used.
             @returns {undefined} */
         registerListener: function(listenerFunc, matcher) {
             if (listenerFunc) {
@@ -230,13 +232,14 @@
                             const patternMatchers = listenerInfo.patternMatchers; 
                             let j = patternMatchers.length;
                             while (j) {
-                                // Abort since patternMatcher is already registered
+                                // Abort since the patternMatcher is 
+                                // already registered
                                 if (patternMatchers[--j] === matcherFunc) return;
                             }
                             patternMatchers.push(matcherFunc);
                             
-                            // Prevent fall through to "add" below since we found
-                            // a listener.
+                            // Prevent fall through to "add" below since we 
+                            // found a listener.
                             return;
                         }
                     }
@@ -328,8 +331,8 @@
             
             // Notify Listeners
             const type = msg.type;
-            this._listeners.forEach((listenerInfo) => {
-                listenerInfo.patternMatchers.every((patternMatcher) => {
+            this._listeners.forEach(listenerInfo => {
+                listenerInfo.patternMatchers.every(patternMatcher => {
                     if (patternMatcher(type)) {
                         listenerInfo.func(msg);
                         return false;

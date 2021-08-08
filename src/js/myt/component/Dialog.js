@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     let // ColorPicker
         colorPicker,
         
@@ -102,6 +102,7 @@
         
         hsvToHex = (h, s, v) => Color.makeColorFromHSV(h * 360, s * 100, v * 100).getHtmlHexString(),
         
+        /** @class */
         Swatch = new JSClass('Swatch', View, {
             include:[Button],
             initNode: function(parent, attrs) {
@@ -126,6 +127,7 @@
             drawReadyState: function() {this.setBorder(BORDER_999);}
         }),
         
+        /** @class */
         ColorPicker = pkg.ColorPicker = new JSClass('ColorPicker', View, {
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
@@ -303,6 +305,7 @@
             }
         }),
         
+        /** @class */
         TimeBtn = new JSClass('TimeBtn', SelectableBtn, {
             initNode: function(parent, attrs) {
                 attrs.width = timeOnly ? 175 : 49;
@@ -319,6 +322,7 @@
             }
         }),
         
+        /** @class */
         DayBtn = new JSClass('DayBtn', SelectableBtn, {
             initNode: function(parent, attrs) {
                 attrs.width = 23;
@@ -531,6 +535,7 @@
             }
         },
         
+        /** @class */
         DatePicker = pkg.DatePicker = new JSClass('DatePicker', View, {
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides */
@@ -639,12 +644,12 @@
         /** A modal panel that contains a Dialog.
             
             Attributes:
-                callbackFunction:function (read only) A function that gets called when 
-                    the dialog is about to be closed. A single argument is passed in 
-                    that indicates the UI element interacted with that should close the 
-                    dialog. Supported values are: 'closeBtn', 'cancelBtn' and 
-                    'confirmBtn'. The function should return true if the close should 
-                    be aborted.
+                callbackFunction:function (read only) A function that gets 
+                    called when the dialog is about to be closed. A single 
+                    argument is passed in that indicates the UI element 
+                    interacted with that should close the dialog. Supported 
+                    values are: 'closeBtn', 'cancelBtn' and 'confirmBtn'. The 
+                    function should return true if the close should be aborted.
             
             @class */
         Dialog = pkg.Dialog = new JSClass('Dialog', ModalPanel, {
@@ -790,7 +795,8 @@
                     stc = content.sizeToChildren,
                     svs = content.getSubviews();
                 
-                // Destroy all children except the close button since that gets reused.
+                // Destroy all children except the close button since 
+                // that gets reused.
                 let i = svs.length;
                 while (i) {
                     const sv = svs[--i];
@@ -1022,7 +1028,8 @@
                 opts = objectAssign({}, Dialog.COLOR_PICKER_DEFAULTS, opts);
                 self.destroyContent();
                 
-                // Set the callback function to one wrapped to handle each button type.
+                // Set the callback function to one wrapped to handle each 
+                // button type.
                 self.setCallbackFunction(action => {
                     switch (action) {
                         case 'closeBtn':
@@ -1061,7 +1068,8 @@
                 opts = objectAssign({}, Dialog.DATE_PICKER_DEFAULTS, opts);
                 self.destroyContent();
                 
-                // Set the callback function to one wrapped to handle each button type.
+                // Set the callback function to one wrapped to handle each 
+                // button type.
                 self.setCallbackFunction(action => {
                     switch (action) {
                         case 'closeBtn':

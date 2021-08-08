@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const /* A private setter function that provides a common implementation for
             most of this setters in the TextSupport mixin.
             @param {string|number} v
@@ -44,8 +44,9 @@
                 be assigned to the inner html of the div.
             textOverflow:string How text will be treated when it overflows the
                 bounds. Supported values: 'ellipsis', 'clip', 'inherit'.
-            textAlign:string How text will be aligned within the bounds. Supported 
-                values: 'left', 'right', 'center', 'justify', 'inherit'.
+            textAlign:string How text will be aligned within the bounds. 
+                Supported values: 'left', 'right', 'center', 'justify', 
+                'inherit'.
             whiteSpace:string How white space is handled. Supported values: 
                 'normal', 'nowrap', 'pre', 'pre-line', 'pre-wrap', 'inherit'.
             wordWrap:string How line wrapping is done. Supported 
@@ -70,19 +71,20 @@
                 'normal', 'italic', 'oblique', 'inherit'.
             fontVariant:string The font variant. Supported values: 'normal', 
                 'small-caps', 'inherit'.
-            fontWeight:string The font weight. Supported values: 'normal', 'bold', 
-                'bolder', 'lighter', '100-900', 'inherit'.
+            fontWeight:string The font weight. Supported values: 'normal', 
+                'bold', 'bolder', 'lighter', '100-900', 'inherit'.
             fontSize:string The size of the font. Supported values: 'normal, 
-                '14px', '14pt', 'xx-small', 'x-small', 'small', 'medium', 'large', 
-                'x-large', 'xx-large', 'smaller', 'larger', '75%', 'inherit'.
+                '14px', '14pt', 'xx-small', 'x-small', 'small', 'medium', 
+                'large', 'x-large', 'xx-large', 'smaller', 'larger', '75%', 
+                'inherit'.
             userUnselectable:boolean If set to true the CSS property user-select 
                 will be set to 'none' thus making text selection not work.
-                Furthermore, the cursor will be set to the default so it no longer
-                appears as an i-beam.
+                Furthermore, the cursor will be set to the default so it no 
+                longer appears as an i-beam.
         
         @class */
     pkg.TextSupport = new JS.Module('TextSupport', {
-        // Accessors ///////////////////////////////////////////////////////////////
+        // Accessors ///////////////////////////////////////////////////////////
         /** @overrides myt.View */
         setWidth: function(v, supressEvent) {
             this.callSuper(v, supressEvent);
@@ -154,7 +156,7 @@
         },
         
         
-        // Methods /////////////////////////////////////////////////////////////////
+        // Methods /////////////////////////////////////////////////////////////
         /** Configures the attributes for this Text so that an ellipsis will be
             displayed. To actually see an ellipsis, an explicit width should be
             set on the Text so that overflow will occur.

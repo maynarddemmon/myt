@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const JSClass = JS.Class,
         View = pkg.View,
         
@@ -73,7 +73,7 @@
             },
             
             
-            // Methods /////////////////////////////////////////////////////////////////
+            // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.Draggable */
             requestDragPosition: function(x, y) {
                 if (!this.disabled) {
@@ -144,26 +144,28 @@
         /** A base class for slider components.
             
             Attributes:
-                axis:string Indicates the direction the slider moves in. Allowed 
-                    values are 'x' and 'y'. Defaults to 'x'.
-                trackInset:number the number of pixels to inset the start of the 
-                    track from the top/left edge of the component. Defaults to 0.
-                trackOutset:number the number of pixels to inset the end of the track
-                    from the bottom/right edge of the component. Default to 0.
+                axis:string Indicates the direction the slider moves in. 
+                    Allowed values are 'x' and 'y'. Defaults to 'x'.
+                trackInset:number the number of pixels to inset the start of 
+                    the track from the top/left edge of the component. 
+                    Defaults to 0.
+                trackOutset:number the number of pixels to inset the end of 
+                    the track from the bottom/right edge of the component. 
+                    Default to 0.
                 thumbWidth:number The width of the thumb.
                 thumbHeight:number The height of the thumb.
                 thumbOffset:number The x/y offset of the thumb. Will applied to 
                     the opposite dimension to the axis.
                 thumbClass:JS.Class the class to use to create the thumb.
-                nudgeAmount:number the amount to nudge the value when the arrows 
-                    keys are invoked. Defaults to 1.
+                nudgeAmount:number the amount to nudge the value when the 
+                    arrows keys are invoked. Defaults to 1.
             
             @class */
         BaseSlider = pkg.BaseSlider = new JSClass('BaseSlider', View, {
             include: [pkg.Disableable],
             
             
-            // Life Cycle //////////////////////////////////////////////////////////
+            // Life Cycle //////////////////////////////////////////////////////
             /** @overrides myt.View */
             initNode: function(parent, attrs) {
                 defAttr(attrs, 'axis', 'x');
@@ -248,7 +250,7 @@
             
             @class */
         SimpleSliderRangeFill = pkg.SimpleSliderRangeFill = new JSClass('SimpleSliderRangeFill', View, {
-            // Life Cycle //////////////////////////////////////////////////////////
+            // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
                 defAttr(attrs, 'bgColor', '#666');
                 

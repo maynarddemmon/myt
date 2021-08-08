@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const
         updateBounds = view => {view.__updateBounds(view.width, view.height);},
         
@@ -70,10 +70,10 @@
                 and y dimension to the same value. A value of 1 is no scaling, 
                 0.5 is 50%, 2 is 200%, etc. Note: The setters for scaleX and 
                 scaleY are not called.
-            scaleX:number The scale for the view in the x-dimension. A value of 1 
-                is no scaling, 0.5 is 50%, 2 is 200%, etc.
-            scaleY:number The scale for the view in the y-dimension. A value of 1 
-                is no scaling, 0.5 is 50%, 2 is 200%, etc.
+            scaleX:number The scale for the view in the x-dimension. A value 
+                of 1 is no scaling, 0.5 is 50%, 2 is 200%, etc.
+            scaleY:number The scale for the view in the y-dimension. A value 
+                of 1 is no scaling, 0.5 is 50%, 2 is 200%, etc.
             skewX:number Sets the horizontal skew in degrees.
             skewY:number Sets the vertical skew in degrees.
         

@@ -1,4 +1,4 @@
-((pkg) => {
+(pkg => {
     const JSClass = JS.Class,
         View = pkg.View,
         SizeToDom = pkg.SizeToDom,
