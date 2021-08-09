@@ -32,6 +32,16 @@
     let GUID_COUNTER = 0;
     
     const 
+        math = Math,
+        mathAbs = math.abs,
+        mathMin = math.min,
+        mathMax = math.max,
+        mathPow = math.pow,
+        
+        documentElem = document,
+        headElem = documentElem.head,
+        createElement = documentElem.createElement.bind(documentElem),
+        
         /* Font functionality */
         fontTargets = {},
         fontLoaded = {
@@ -41,7 +51,7 @@
             // font will be used.
             '':true
         },
-        docFonts = document.fonts,
+        docFonts = documentElem.fonts,
         
         notifyFontLoaded = fontFace => {
             let fontName = fontFace.family + ' ' + fontFace.weight,
@@ -65,12 +75,7 @@
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was
                 created. */
-            version:20210723.1606,
-            
-            /** The root path to image assets for the myt package. 
-                MYT_IMAGE_ROOT should be set by the page that includes 
-                this script. */
-            IMAGE_ROOT: global.MYT_IMAGE_ROOT || '',
+            version:20210808.1459,
             
             /** Generates a globally unique id, (GUID).
                 @returns {number} */
@@ -146,8 +151,8 @@
             /** Gets the file extension from a file name.
                 @param {string} fileName - The filename to extract the 
                     extension from.
-                @returns {string) The file extension or null if a falsy fileName
-                    argument was provided. */
+                @returns {string) The file extension or null if a falsy 
+                    fileName argument was provided. */
             getExtension: fileName => fileName ? fileName.split('.')[1] : null,
             
             /** Dynamically load a script into the dom.
@@ -168,20 +173,20 @@
                 } else {
                     loadedScripts[src] = true;
                     
-                    const s = document.createElement('script');
-                    s.type = 'text/javascript';
-                    s.async = false;
+                    const scriptElem = createElement('script');
+                    scriptElem.type = 'text/javascript';
+                    scriptElem.async = false;
                     
                     if (callback) {
-                        let r = false;
-                        s.onload = s.onreadystatechange = function() {
-                            if (!r && (!this.readyState || this.readyState === 'complete')) {
+                        let fired = false;
+                        scriptElem.onload = scriptElem.onreadystatechange = () => {
+                            if (!fired && (!scriptElem.readyState || scriptElem.readyState === 'complete')) {
                                 // Prevent refiring callback
-                                r = true;
+                                fired = true;
                                 
                                 // Prevent later events from this script for
                                 // example if the src is changed.
-                                s.onload = s.onreadystatechange = null;
+                                scriptElem.onload = scriptElem.onreadystatechange = null;
                                 
                                 callback();
                             }
@@ -190,11 +195,11 @@
                     
                     // Must set src AFTER adding onreadystatechange listener 
                     // otherwise we’ll miss the loaded event for cached scripts
-                    s.src = src + (noCacheBust ? '' : (src.indexOf('?') !== -1 ? '&' : '?') + 'cacheBust=' + Date.now());
+                    scriptElem.src = src + (noCacheBust ? '' : (src.indexOf('?') !== -1 ? '&' : '?') + 'cacheBust=' + Date.now());
                     
-                    this.getElement('head').appendChild(s);
+                    headElem.appendChild(scriptElem);
                     
-                    return s;
+                    return scriptElem;
                 }
             },
             
@@ -228,18 +233,9 @@
                           the value towards a value very close to 1.
                 @returns {number} a random number between 0 and almost 1. */
             getRandom: func => {
-                let v = Math.random();
-                if (func) {
-                    v = func(v);
-                    
-                    // Correct for badly behaved skew functions.
-                    if (v >= 1) {
-                        v = 0.9999999999;
-                    } else if (v < 0) {
-                        v = 0;
-                    }
-                }
-                return v;
+                const v = math.random();
+                // Min and max is to correct for badly behaved skew functions.
+                return func ? mathMax(0, mathMin(func(v), 0.9999999999)) : v;
             },
             
             /** @returns a random number between min (inclusive) and 
@@ -250,41 +246,34 @@
                     See myt.getRandom for more info.
                 @returns {number} a number between min and max. */
             getRandomArbitrary: (min, max, func) => {
-                if (min > max) {
-                    const tmp = min;
-                    min = max;
-                    max = tmp;
-                }
-                return myt.getRandom(func) * (max - min) + min;
+                const actualMin = mathMin(min, max);
+                return myt.getRandom(func) * (mathMax(min, max) - actualMin) + actualMin;
             },
             
             /** Generates a random integer between min (inclusive) and 
-                max (inclusive)
+                max (inclusive).
                 @param {number} min - the minimum value returned.
                 @param {number} max - the maximum value returned.
                 @param {?Function} [func] - A distribution function. 
                     See myt.getRandom for more info.
                 @returns {number} a number between min and max. */
             getRandomInt: (min, max, func) => {
-                if (min > max) {
-                    const tmp = min;
-                    min = max;
-                    max = tmp;
-                }
-                return Math.floor(myt.getRandom(func) * (max - min + 1) + min);
+                const actualMin = mathMin(min, max);
+                return math.floor(myt.getRandom(func) * (mathMax(min, max) - actualMin + 1) + actualMin);
             },
             
             // Equality
             /** Tests if two floats are essentially equal to each other.
                 @param {number} a - A float
                 @param {number} b - A float
-                @param {number} [epsilon] - The percent of difference allowed
-                    between a and b. Defaults to 0.000001 if not provided.
+                @param {number} [epsilon] - The percent of difference of the
+                    smaller magnitude number allowed between a and b. 
+                    Defaults to 0.000001 if not provided.
                 @returns {boolean} true if equal, false otherwise. */
             areFloatsEqual: (a, b, epsilon) => {
-                const A = Math.abs(a), B = Math.abs(b);
-                epsilon = epsilon ? Math.abs(epsilon) : 0.000001;
-                return Math.abs(a - b) <= (A > B ? B : A) * epsilon;
+                const absA = mathAbs(a),
+                    absB = mathAbs(b);
+                return mathAbs(a - b) <= (absA > absB ? absB : absA) * (epsilon == null ? 0.000001 : mathAbs(epsilon));
             },
             
             /** Tests if two array are equal. For a more complete deep equal
@@ -325,7 +314,7 @@
                 @param {number} [index] - The index of the tag to get. 
                     Defaults to 0 if not provided.
                 @returns {?Object} a dom element or undefined if none exist. */
-            getElement: (tagname, index) => document.getElementsByTagName(tagname || 'body')[index > 0 ? index : 0],
+            getElement: (tagname, index) => documentElem.getElementsByTagName(tagname || 'body')[index > 0 ? index : 0],
             
             // Fonts
             loadFontFaces: (fontList, callback) => {
@@ -362,8 +351,7 @@
                 }
             },
             
-            /** Create a CSS rule that defines the base font for 
-                the document.
+            /** Create a CSS rule that defines the base font for the document.
                 @param {string} fontFamily
                 @returns {undefined} */
             createBaseFontCSSRule: fontFamily => {
@@ -374,10 +362,10 @@
                 @returns {undefined} */
             loadCSSFonts: fontUrls => {
                 (fontUrls || []).forEach(fontUrl => {
-                    const link = document.createElement('link');
+                    const link = createElement('link');
                     link.rel = 'stylesheet';
                     link.href = fontUrl;
-                    document.head.appendChild(link);
+                    headElem.appendChild(link);
                 });
             },
             
@@ -385,8 +373,8 @@
             /** Creates a "style" dom element.
                 @returns {!Object} */
             createStylesheet: () => {
-                const style = document.createElement('style');
-                document.head.appendChild(style);
+                const style = createElement('style');
+                headElem.appendChild(style);
                 return style.sheet;
             },
             
@@ -453,8 +441,8 @@
                 @returns (string) */
             formatAsPercentage: (num, fixed=2) => {
                 if (typeof num === 'number') {
-                    fixed = Math.max(16, Math.min(0, fixed));
-                    const percent = Math.round(Math.max(0, Math.min(1, num)) * Math.pow(10, 2+fixed)) / Math.pow(10, fixed);
+                    fixed = mathMax(16, mathMin(0, fixed));
+                    const percent = math.round(mathMax(0, mathMin(1, num)) * mathPow(10, 2+fixed)) / mathPow(10, fixed);
                     return (percent % 1 === 0 ? percent : percent.toFixed(fixed)) + '%';
                 } else if (typeof num === 'string') {
                     return num;
@@ -526,16 +514,16 @@
                     mod = {};
                 counterAttrName = counterAttrName || genNameFunc('counter', exceededAttrName);
                 
-                let incrName = genNameFunc(counterAttrName, 'increment'),
+                const incrName = genNameFunc(counterAttrName, 'increment'),
                     decrName = genNameFunc(counterAttrName, 'decrement');
                 
                 // Prevent clobbering
                 if ((isModuleOrClass ? scope.instanceMethod(incrName) : scope[incrName]) !== undefined) {
-                    console.warn("Can't clobber existing property during setup of increment function.", incrName, scope);
+                    console.warn("Can't clobber property with increment function.", incrName, scope);
                     return false;
                 }
                 if ((isModuleOrClass ? scope.instanceMethod(decrName) : scope[decrName]) !== undefined) {
-                    console.warn("Can't clobber existing property during setup of decrement function.", decrName, scope);
+                    console.warn("Can't clobber property with decrement function.", decrName, scope);
                     return false;
                 }
                 
