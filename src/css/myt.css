@@ -6,10 +6,9 @@ select.mytNativeInput{margin:0px;}
 .mytButtonText{font-size:12px;font-weight:bold;}
 .mytUnselectable{user-select:none;}
 
-/* For some reason placeholder text is selectable if you click and drag just right. These rules prevent that. */
-::-webkit-input-placeholder{user-select:none;}
-:-moz-placeholder{user-select:none;}
-::-moz-placeholder{user-select:none;}
+/* For some reason placeholder text is selectable if you click and 
+   drag just right. These rules prevent that. */
+::placeholder{user-select:none;}
 :-ms-input-placeholder{user-select:none;}
 
 .mytCheckerboardPattern{background:repeating-conic-gradient(#808080 0% 25%, transparent 0% 50%) 50% / 4px 4px;}

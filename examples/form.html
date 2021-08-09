@@ -97,10 +97,11 @@
                 {attrs:{text:'zip'}}
             ]
         });
-        new myt.FormInputText(rootView, {
+        const fieldAView = new myt.FormInputText(rootView, {
             width:100, id:'fieldA', form:rootView, validators:[lenValidator, 'required'],
             allowedChars:'0123456789', placeholder:'Numbers Only'
         });
+        myt.createInputPlaceholderCSSRule(fieldAView, '#f00', 'courier', 0.5);
         new myt.FormInputText(rootView, {
             width:100, id:'fieldB', form:rootView, validators:['equalsIgnoreCase', lenValidator], 
             validateWhen:'blurWithKeyFix', placeholder:'Ignore Case'

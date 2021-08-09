@@ -891,13 +891,13 @@ Date.prototype.format = Date.prototype.format || (() => {
                 }
             },
             
-            createInputPlaceholderCSSRule: (view, color, fontFamily) => {
+            createInputPlaceholderCSSRule: (view, color, fontFamily, opacity=1) => {
                 // Make sure the view has a dom ID for rule targeting
-                const domId = view.getODE().id || (view.getODE().id = 'id' + myt.generateGuid());
-                let sheet = view.__sheet,
-                    rules = [];
+                const ode = view.getODE(),
+                    domId = ode.id || (ode.id = 'id' + myt.generateGuid());
                 
                 // Clear existing sheet if it exists or create a new sheet
+                let sheet = view.__sheet;
                 if (sheet) {
                     myt.removeCSSRules(sheet);
                 } else {
@@ -905,23 +905,11 @@ Date.prototype.format = Date.prototype.format || (() => {
                 }
                 
                 // Write rules
+                const rules = [];
                 if (color) rules.push('color:' + color);
                 if (fontFamily) rules.push('font-family:' + fontFamily);
-                rules = rules.join('; ');
-                
-                switch (BrowserDetect.browser) {
-                    case 'Chrome':
-                    case 'Safari':
-                        myt.addCSSRule(sheet, '#' + domId + '::-webkit-input-placeholder', rules, 0);
-                        break;
-                    case 'Firefox':
-                        myt.addCSSRule(sheet, '#' + domId + ':-moz-placeholder', 'opacity:1; ' + rules, 0);
-                        myt.addCSSRule(sheet, '#' + domId + '::-moz-placeholder', 'opacity:1; ' + rules, 0);
-                        break;
-                    case 'Explorer':
-                        myt.addCSSRule(sheet, '#' + domId + ':-ms-input-placeholder', rules, 0);
-                        break;
-                }
+                if (opacity) rules.push('opacity:' + opacity);
+                myt.addCSSRule(sheet, '#' + domId + '::placeholder', rules.join('; '), 0);
             },
             
             // Misc
@@ -931,13 +919,15 @@ Date.prototype.format = Date.prototype.format || (() => {
                     during formatting. If the percentage is a whole number 
                     no decimal places will be used. 
                     For example 0.55781 -> 55.78% and 0.55 -> 55%
-                @returns (string) */
+                @returns {string} */
             formatAsPercentage: (num, fixed=2) => {
                 if (typeof num === 'number') {
                     fixed = mathMax(16, mathMin(0, fixed));
                     const percent = math.round(mathMax(0, mathMin(1, num)) * mathPow(10, 2+fixed)) / mathPow(10, fixed);
                     return (percent % 1 === 0 ? percent : percent.toFixed(fixed)) + '%';
                 } else if (typeof num === 'string') {
+                    // Assume a string passed to this function is already
+                    // correctly formatted so pass it through unchanged.
                     return num;
                 } else {
                     console.warn('formatAsPercentage: expects a number');
