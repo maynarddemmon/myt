@@ -1,8 +1,8 @@
 (pkg => {
     const
-        /*  Get the closest ancestor of the provided Node or the Node itself for 
-            which the matcher function returns true. Returns a Node or null if 
-            no match is found.
+        /*  Get the closest ancestor of the provided Node or the Node itself 
+            for which the matcher function returns true. Returns a Node or 
+            null if no match is found.
                 param node:myt.Node the Node to start searching from.
                 param matcher:function the function to test for matching 
                     Nodes with. */
@@ -19,15 +19,16 @@
         /*  Get the youngest ancestor of the provided Node for which the 
             matcher function returns true. Returns a Node or null if no 
             match is found.
-                param node:myt.Node the Node to start searching from. This Node 
-                    is not tested, but its parent is.
+                param node:myt.Node the Node to start searching from. This 
+                    Node  is not tested, but its parent is.
                 param matcher:function the function to test for matching 
                     Nodes with. */
         getMatchingAncestor = (node, matcherFunc) => getMatchingAncestorOrSelf(node ? node.parent : null, matcherFunc),
         
         /*  Adds a named reference to a subnode.
                 param node:Node the node to add the name reference to.
-                param nodeToAdd:Node the node to add the name reference for. */
+                param nodeToAdd:Node the node to add the name 
+                    reference for. */
         addNameRef = (node, nodeToAdd) => {
             const name = nodeToAdd.name;
             if (node[name] === undefined) {
@@ -39,8 +40,8 @@
         
         /*  Removes a named reference to a subnode.
                 param node:Node the node to remove the name reference from.
-                param nodeToRemove:Node the node to remove the name reference 
-                    for. */
+                param nodeToRemove:Node the node to remove the name 
+                    reference for. */
         removeNameRef = (node, nodeToRemove) => {
             const name = nodeToRemove.name;
             if (node[name] === nodeToRemove) {
@@ -50,8 +51,8 @@
             }
         },
         
-        /*  Gets the animation pool if it exists, or lazy instantiates it first
-            if necessary. Returns a myt.TrackActivesPool */
+        /*  Gets the animation pool if it exists, or lazy instantiates it 
+            first if necessary. Returns a myt.TrackActivesPool */
         getAnimPool = node => node.__animPool || (node.__animPool = new pkg.TrackActivesPool(pkg.Animator, node));
         
     /** A single node within a tree data structure. A node has zero or one 
@@ -83,9 +84,9 @@
                 '*' means use the default placement. For example 'foo.*' means 
                 place in the foo subnode and then in the default placement 
                 for foo.
-            defaultPlacement:string The name of the subnode to add nodes to when 
-                no placement is specified. Defaults to undefined which means add
-                subnodes directly to this node.
+            defaultPlacement:string The name of the subnode to add nodes to 
+                when no placement is specified. Defaults to undefined which 
+                means add subnodes directly to this node.
             ignorePlacement:boolean If set to true placement will not be 
                 processed for this Node when it is added to a parent Node.
         
@@ -129,7 +130,7 @@
                     if (mixin = mixins[i++]) {
                         self.extend(mixin);
                     } else {
-                        console.warn("Missing mixin in:" + self.klass.__displayName);
+                        console.warn('Missing mixin in:' + self.klass.__displayName);
                     }
                 }
             }
@@ -143,7 +144,7 @@
         /** Called during initialization. Sets initial state for life 
             cycle attrs, calls setter methods, sets parent and lastly, sets 
             inited to true. Subclasses must callSuper.
-            @param {?Object} parent - The myt.Node (or dom element for 
+            @param {?Object} [parent] - The myt.Node (or dom element for 
                 RootViews) the parent of this Node.
             @param {?Object} attrs - A map of attribute names and values.
             @returns {undefined} */
@@ -157,17 +158,17 @@
             this.inited = true;
         },
         
-        /** Provides a hook for subclasses to do things before this Node has its
-            parent assigned. This would be the ideal place to create subviews
-            so as to avoid unnecessary dom reflows. However, text size can't
-            be measured until insertion into the DOM so you may want to use
-            doAfterAdoption for creating subviews since it will give you less
-            trouble though it will be slower.
+        /** Provides a hook for subclasses to do things before this Node has 
+            its parent assigned. This would be the ideal place to create 
+            subviews so as to avoid unnecessary dom reflows. However, text 
+            size can't be measured until insertion into the DOM so you may 
+            want to use doAfterAdoption for creating subviews since it will 
+            give you less trouble though it will be slower.
             @returns {undefined} */
         doBeforeAdoption: () => {},
         
-        /** Provides a hook for subclasses to do things after this Node has its
-            parent assigned.
+        /** Provides a hook for subclasses to do things after this Node has 
+            its parent assigned.
             @returns {undefined} */
         doAfterAdoption: () => {},
         
@@ -220,8 +221,8 @@
         setDefaultPlacement: function(v) {this.defaultPlacement = v;},
         setIgnorePlacement: function(v) {this.ignorePlacement = v;},
         
-        /** Sets the provided Node as the new parent of this Node. This is the
-            most direct method to do reparenting. You can also use the 
+        /** Sets the provided Node as the new parent of this Node. This is 
+            the most direct method to do reparenting. You can also use the 
             addSubnode method but it's just a wrapper around this setter.
             @param {?Object} newParent
             @returns {undefined} */
@@ -282,8 +283,8 @@
             }
         },
         
-        /** Gets the subnodes for this Node and does lazy instantiation of the 
-            subnodes array if no child Nodes exist.
+        /** Gets the subnodes for this Node and does lazy instantiation of 
+            the subnodes array if no child Nodes exist.
             @returns {!Array} - An array of subnodes. */
         getSubnodes: function() {
             return this.subnodes || (this.subnodes = []);
@@ -354,7 +355,7 @@
                 if (self.parent) {
                     // Optimization: use the dom element contains function if 
                     // both nodes are DomElementProxy instances.
-                    if (self.getInnerDomElement && node.getInnerDomElement) return node.getIDE().contains(self.getIDE());
+                    if (self.getIDE && node.getIDE) return node.getIDE().contains(self.getIDE());
                     return self.parent.isDescendantOf(node);
                 }
             }
@@ -468,9 +469,10 @@
             @returns {undefined} */
         subnodeAdded: node => {},
         
-        /** Called when a subnode is removed from this node. Provides a hook for
-            subclasses. No need for subclasses to call super. Do not call this
-            method to remove a subnode. Instead call removeSubnode or setParent.
+        /** Called when a subnode is removed from this node. Provides a hook 
+            for subclasses. No need for subclasses to call super. Do not call 
+            this method to remove a subnode. Instead call removeSubnode 
+            or setParent.
             @param {!Object} node - The sub myt.Node that was removed.
             @returns {undefined} */
         subnodeRemoved: node => {},
@@ -479,9 +481,10 @@
         /** A wrapper on Node.animate that will only animate one time and that 
             provides a streamlined list of the most commonly used arguments.
             @param {!Object|string} attribute - The name of the attribute to 
-                animate. If an object is provided it should be the only argument 
-                and its keys should be the params of this method. This provides 
-                a more concise way of passing in sparse optional parameters.
+                animate. If an object is provided it should be the only 
+                argument and its keys should be the params of this method. 
+                This provides a more concise way of passing in sparse 
+                optional parameters.
             @param {number} to - The target value to animate to.
             @param {number} [from] - The target value to animate from.
             @param {number} [duration]
@@ -493,9 +496,10 @@
         
         /** Animates an attribute using the provided parameters.
             @param {!Object|string} attribute - The name of the attribute to 
-                animate. If an object is provided it should be the only argument 
-                and its keys should be the params of this method. This provides 
-                a more concise way of passing in sparse optional parameters.
+                animate. If an object is provided it should be the only 
+                argument and its keys should be the params of this method. 
+                This provides a more concise way of passing in sparse 
+                optional parameters.
             @param {number} to - The target value to animate to.
             @param {number} [from] - The target value to animate from.
             @param {boolean} [relative]

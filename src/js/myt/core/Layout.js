@@ -4,12 +4,13 @@
             global lock. */
         globalLockCount = 0,
         
-        /* The global layout locked status. */
+        /*  The global layout locked status. */
         globalLock = false;
     
     const JSClass = JS.Class,
         
-        /* A list of layouts to be updated once the global lock is released. */
+        /*  A list of layouts to be updated once the global lock 
+            is released. */
         deferredLayouts = [],
         
         /*  Called to set/unset the global lock. Updates all the currently 
@@ -30,8 +31,8 @@
             }
         },
         
-        /*  Adds a Layout to the list of layouts that will get updated when the
-            global lock is released.
+        /*  Adds a Layout to the list of layouts that will get updated when 
+            the global lock is released.
                 param layout:myt.Layout the layout to defer an update for. */
         deferLayoutUpdate = layout => {
             // Don't add a layout that is already deferred.
@@ -316,8 +317,8 @@
                 this.subviews.sort(sortFunc);
             },
             
-            /** Moves the subview before the target subview in the order the s
-                ubviews are layed out. If no target subview is provided, or 
+            /** Moves the subview before the target subview in the order the 
+                subviews are layed out. If no target subview is provided, or 
                 it isn't in the layout the subview will be moved to the front 
                 of the list.
                 @param {?Object} sv
@@ -339,8 +340,8 @@
             }
         }),
         
-        /** A layout that sets the target attribute name to the target value for 
-            each subview.
+        /** A layout that sets the target attribute name to the target value 
+            for each subview.
             
             Events:
                 targetAttrName:string
@@ -379,8 +380,8 @@
         }),
         
         /** An extension of ConstantLayout that allows for variation based on 
-            the index and subview. An updateSubview method is provided that can 
-            be overriden to provide variable behavior.
+            the index and subview. An updateSubview method is provided that 
+            can be overriden to provide variable behavior.
             
             Events:
                 collapseParent:boolean
@@ -456,17 +457,13 @@
             /** Called by update before any processing is done. Gives subviews 
                 a chance to do any special setup before update is processed.
                 @returns {undefined} */
-            doBeforeUpdate: () => {
-                // Subclasses to implement as needed.
-            },
+            doBeforeUpdate: () => {/* Subclasses to implement as needed. */},
             
             /** Called by update after any processing is done but before the 
                 optional collapsing of parent is done. Gives subviews a chance 
                 to do any special teardown after update is processed.
                 @returns {undefined} */
-            doAfterUpdate: () => {
-                // Subclasses to implement as needed.
-            },
+            doAfterUpdate: () => {/* Subclasses to implement as needed. */},
             
             /** Provides a default implementation that calls update when the
                 visibility of a subview changes.
@@ -514,9 +511,7 @@
                     call on the parent.
                 @param {*} value - The value to set on the parent.
                 @returns {undefined} */
-            updateParent: (setterName, value) => {
-                // Subclasses to implement as needed.
-            }
+            updateParent: (setterName, value) => {/* Subclasses to implement as needed. */}
         }),
         
         /** An extension of VariableLayout that positions views along an axis 
@@ -532,8 +527,8 @@
                 inset:number Padding before the first subview that gets 
                     positioned. An alias for setTargetValue.
                 spacing:number Spacing between each subview.
-                outset:number Padding at the end of the layout. Only gets used
-                    if collapseParent is true.
+                outset:number Padding at the end of the layout. Only gets 
+                    used if collapseParent is true.
                 noAddSubviewOptimization:boolean Turns the optimization to 
                     suppress layout updates when a subview is added off/on. 
                     Defaults to undefined which is equivalent to false and 
@@ -618,18 +613,16 @@
             }
         });
     
-    /** An extension of SpacedLayout that resizes one or more views to fill in
-        any remaining space. The resizable subviews should not have a transform
-        applied to it. The non-resized views may have transforms applied 
-        to them.
+    /** An extension of SpacedLayout that resizes one or more views to fill 
+        in any remaining space. The resizable subviews should not have a 
+        transform applied to it. The non-resized views may have transforms 
+        applied to them.
         
         @class */
     pkg.ResizeLayout = new JSClass('ResizeLayout', SpacedLayout, {
         // Accessors ///////////////////////////////////////////////////////////
         /** @overrides myt.VariableLayout */
-        setCollapseParent: function(v) {
-            // collapseParent attribute is unused in ResizeLayout.
-        },
+        setCollapseParent: v => {/* collapseParent attribute is unused in ResizeLayout. */},
         
         /** @overrides myt.SpacedLayout */
         setTargetAttrName: function(v) {
@@ -742,9 +735,7 @@
         },
         
         /** @overrides myt.SpacedLayout */
-        updateParent: function(setterName, value) {
-            // No resizing of parent since this view expands to fill the parent.
-        }
+        updateParent: (setterName, value) => {/* No resizing of parent since this view expands to fill the parent. */}
     });
 
     /** An extension of VariableLayout that also aligns each view vertically

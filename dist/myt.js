@@ -3844,7 +3844,7 @@ new JS.Singleton('GlobalError', {
 (pkg => {
     let globalKeys,
         
-        /* A map of keycodes of the keys currently pressed down. */
+        /*  A map of keycodes of the keys currently pressed down. */
         keysDown = {};
     
     const G = pkg.global,
@@ -3866,20 +3866,17 @@ new JS.Singleton('GlobalError', {
                 param keyCode:number the key to test. */
         isKeyDown = keyCode => !!keysDown[keyCode],
         
-        /* Tests if the 'shift' key is down. */
+        /*  Tests if the 'shift' key is down. */
         isShiftKeyDown = () => isKeyDown(KEYCODE_SHIFT),
         
-        /* Tests if the 'control' key is down. */
+        /*  Tests if the 'control' key is down. */
         isControlKeyDown = () => isKeyDown(KEYCODE_CONTROL),
         
-        /* Tests if the 'alt' key is down. */
+        /*  Tests if the 'alt' key is down. */
         isAltKeyDown = () => isKeyDown(KEYCODE_ALT),
         
-        /* Tests if the 'command' key is down. */
+        /*  Tests if the 'command' key is down. */
         isCommandKeyDown = () => isKeyDown(KEYCODE_COMMAND) || isKeyDown(KEYCODE_RIGHT_COMMAND),
-        
-        /* Tests if the platform specific "accelerator" key is down. */
-        isAcceleratorKeyDown = () => BrowserDetect.os === 'Mac' ? isCommandKeyDown() : isControlKeyDown(),
         
         ignoreFocusTrap = () => isAltKeyDown(),
         
@@ -3889,19 +3886,25 @@ new JS.Singleton('GlobalError', {
                     // Catch backspace since it navigates the history. Allow 
                     // it to go through for text input elements though.
                     const nodeName = targetElem.nodeName;
-                    if (nodeName === 'TEXTAREA' || 
+                    return !(
+                        nodeName === 'TEXTAREA' || 
                         (nodeName === 'INPUT' && (targetElem.type === 'text' || targetElem.type === 'password')) ||
                         (nodeName === 'DIV' && targetElem.contentEditable === 'true' && targetElem.firstChild)
-                    ) return false;
-                    
-                    return true;
-                    
+                    );
                 case 9: // Tab
                     // Tab navigation is handled by the framework.
                     return true;
             }
             return false;
-        };
+        },
+        
+        registerEventHandler = (target, action) => {
+            ['keydown','keypress','keyup'].forEach(eventName => {
+                globalKeys[action](target, '__handle_' + eventName, eventName);
+            });
+        },
+        attach = target => {registerEventHandler(target, 'attachToDom');},
+        detach = target => {registerEventHandler(target, 'detachFromDom');};
     
     /** Provides global keyboard events. Registered with myt.global as 'keys'.
         
@@ -4043,8 +4046,8 @@ new JS.Singleton('GlobalError', {
             globalKeys.KEYCODE_RIGHT_COMMAND = KEYCODE_RIGHT_COMMAND;
             
             globalKeys.setDomElement(document);
-            globalKeys.attachTo(globalFocus, '__handleFocused', 'focused');
-            globalKeys.__listenToDocument();
+            globalKeys.attachTo(globalFocus, '__handle_focused', 'focused');
+            attach(globalKeys);
             
             // Clear keys down when the window loses focus. This is necessary 
             // when using keyboard shortcusts to switch apps since that will 
@@ -4060,55 +4063,40 @@ new JS.Singleton('GlobalError', {
         isControlKeyDown: isControlKeyDown,
         isAltKeyDown: isAltKeyDown,
         isCommandKeyDown: isCommandKeyDown,
-        isAcceleratorKeyDown: isAcceleratorKeyDown,
+        
+        /** Tests if the platform specific "accelerator" key is down. */
+        isAcceleratorKeyDown: () => BrowserDetect.os === 'Mac' ? isCommandKeyDown() : isControlKeyDown(),
         
         ignoreFocusTrap: ignoreFocusTrap,
         
-        /** @private
+        /** Switch what is being listened to as focus changes. By default the
+            document is listened to for key events.
+            @private
             @param {!Object} event
             @returns {undefined} */
-        __handleFocused: event => {
+        __handle_focused: event => {
             const focused = event.value;
             if (focused) {
-                // unlisten to document
-                globalKeys.detachFromDom(globalKeys, '__handleKeyDown', 'keydown');
-                globalKeys.detachFromDom(globalKeys, '__handleKeyPress', 'keypress');
-                globalKeys.detachFromDom(globalKeys, '__handleKeyUp', 'keyup');
-                
-                globalKeys.attachToDom(focused, '__handleKeyDown', 'keydown');
-                globalKeys.attachToDom(focused, '__handleKeyPress', 'keypress');
-                globalKeys.attachToDom(focused, '__handleKeyUp', 'keyup');
+                detach(globalKeys);
+                attach(focused);
             } else {
                 const prevFocused = globalFocus.prevFocusedView;
-                if (prevFocused) {
-                    globalKeys.detachFromDom(prevFocused, '__handleKeyDown', 'keydown');
-                    globalKeys.detachFromDom(prevFocused, '__handleKeyPress', 'keypress');
-                    globalKeys.detachFromDom(prevFocused, '__handleKeyUp', 'keyup');
-                }
-                
-                globalKeys.__listenToDocument();
+                if (prevFocused) detach(prevFocused);
+                attach(globalKeys);
             }
         },
         
         /** @private
-            @returns {undefined} */
-        __listenToDocument: () => {
-            globalKeys.attachToDom(globalKeys, '__handleKeyDown', 'keydown');
-            globalKeys.attachToDom(globalKeys, '__handleKeyPress', 'keypress');
-            globalKeys.attachToDom(globalKeys, '__handleKeyUp', 'keyup');
-        },
-        
-        /** @private
             @param {!Object} event
             @returns {undefined} */
-        __handleKeyDown: event => {
+        __handle_keydown: event => {
             const keyCode = getKeyCodeFromEvent(event),
                 domEvent = event.value;
             if (shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
             
-            // Keyup events do not fire when command key is down so fire a keyup
-            // event immediately. Not an issue for other meta keys: shift, ctrl 
-            // and option.
+            // Keyup events do not fire when command key is down so 
+            // fire a keyup event immediately. Not an issue for other 
+            // meta keys: shift, ctrl and option.
             if (isCommandKeyDown() && keyCode !== KEYCODE_SHIFT && keyCode !== KEYCODE_CONTROL && keyCode !== KEYCODE_ALT) {
                 globalKeys.fireEvent('keydown', keyCode);
                 globalKeys.fireEvent('keyup', keyCode);
@@ -4132,14 +4120,14 @@ new JS.Singleton('GlobalError', {
         /** @private
             @param {!Object} event
             @returns {undefined} */
-        __handleKeyPress: event => {
+        __handle_keypress: event => {
             globalKeys.fireEvent('keypress', getKeyCodeFromEvent(event));
         },
         
         /** @private
             @param {!Object} event
             @returns {undefined} */
-        __handleKeyUp: event => {
+        __handle_keyup: event => {
             const keyCode = getKeyCodeFromEvent(event),
                 domEvent = event.value;
             if (shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
@@ -5096,9 +5084,9 @@ myt.Destructible = new JS.Module('Destructible', {
 
 (pkg => {
     const
-        /*  Get the closest ancestor of the provided Node or the Node itself for 
-            which the matcher function returns true. Returns a Node or null if 
-            no match is found.
+        /*  Get the closest ancestor of the provided Node or the Node itself 
+            for which the matcher function returns true. Returns a Node or 
+            null if no match is found.
                 param node:myt.Node the Node to start searching from.
                 param matcher:function the function to test for matching 
                     Nodes with. */
@@ -5115,15 +5103,16 @@ myt.Destructible = new JS.Module('Destructible', {
         /*  Get the youngest ancestor of the provided Node for which the 
             matcher function returns true. Returns a Node or null if no 
             match is found.
-                param node:myt.Node the Node to start searching from. This Node 
-                    is not tested, but its parent is.
+                param node:myt.Node the Node to start searching from. This 
+                    Node  is not tested, but its parent is.
                 param matcher:function the function to test for matching 
                     Nodes with. */
         getMatchingAncestor = (node, matcherFunc) => getMatchingAncestorOrSelf(node ? node.parent : null, matcherFunc),
         
         /*  Adds a named reference to a subnode.
                 param node:Node the node to add the name reference to.
-                param nodeToAdd:Node the node to add the name reference for. */
+                param nodeToAdd:Node the node to add the name 
+                    reference for. */
         addNameRef = (node, nodeToAdd) => {
             const name = nodeToAdd.name;
             if (node[name] === undefined) {
@@ -5135,8 +5124,8 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /*  Removes a named reference to a subnode.
                 param node:Node the node to remove the name reference from.
-                param nodeToRemove:Node the node to remove the name reference 
-                    for. */
+                param nodeToRemove:Node the node to remove the name 
+                    reference for. */
         removeNameRef = (node, nodeToRemove) => {
             const name = nodeToRemove.name;
             if (node[name] === nodeToRemove) {
@@ -5146,8 +5135,8 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         },
         
-        /*  Gets the animation pool if it exists, or lazy instantiates it first
-            if necessary. Returns a myt.TrackActivesPool */
+        /*  Gets the animation pool if it exists, or lazy instantiates it 
+            first if necessary. Returns a myt.TrackActivesPool */
         getAnimPool = node => node.__animPool || (node.__animPool = new pkg.TrackActivesPool(pkg.Animator, node));
         
     /** A single node within a tree data structure. A node has zero or one 
@@ -5179,9 +5168,9 @@ myt.Destructible = new JS.Module('Destructible', {
                 '*' means use the default placement. For example 'foo.*' means 
                 place in the foo subnode and then in the default placement 
                 for foo.
-            defaultPlacement:string The name of the subnode to add nodes to when 
-                no placement is specified. Defaults to undefined which means add
-                subnodes directly to this node.
+            defaultPlacement:string The name of the subnode to add nodes to 
+                when no placement is specified. Defaults to undefined which 
+                means add subnodes directly to this node.
             ignorePlacement:boolean If set to true placement will not be 
                 processed for this Node when it is added to a parent Node.
         
@@ -5225,7 +5214,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     if (mixin = mixins[i++]) {
                         self.extend(mixin);
                     } else {
-                        console.warn("Missing mixin in:" + self.klass.__displayName);
+                        console.warn('Missing mixin in:' + self.klass.__displayName);
                     }
                 }
             }
@@ -5239,7 +5228,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Called during initialization. Sets initial state for life 
             cycle attrs, calls setter methods, sets parent and lastly, sets 
             inited to true. Subclasses must callSuper.
-            @param {?Object} parent - The myt.Node (or dom element for 
+            @param {?Object} [parent] - The myt.Node (or dom element for 
                 RootViews) the parent of this Node.
             @param {?Object} attrs - A map of attribute names and values.
             @returns {undefined} */
@@ -5253,17 +5242,17 @@ myt.Destructible = new JS.Module('Destructible', {
             this.inited = true;
         },
         
-        /** Provides a hook for subclasses to do things before this Node has its
-            parent assigned. This would be the ideal place to create subviews
-            so as to avoid unnecessary dom reflows. However, text size can't
-            be measured until insertion into the DOM so you may want to use
-            doAfterAdoption for creating subviews since it will give you less
-            trouble though it will be slower.
+        /** Provides a hook for subclasses to do things before this Node has 
+            its parent assigned. This would be the ideal place to create 
+            subviews so as to avoid unnecessary dom reflows. However, text 
+            size can't be measured until insertion into the DOM so you may 
+            want to use doAfterAdoption for creating subviews since it will 
+            give you less trouble though it will be slower.
             @returns {undefined} */
         doBeforeAdoption: () => {},
         
-        /** Provides a hook for subclasses to do things after this Node has its
-            parent assigned.
+        /** Provides a hook for subclasses to do things after this Node has 
+            its parent assigned.
             @returns {undefined} */
         doAfterAdoption: () => {},
         
@@ -5316,8 +5305,8 @@ myt.Destructible = new JS.Module('Destructible', {
         setDefaultPlacement: function(v) {this.defaultPlacement = v;},
         setIgnorePlacement: function(v) {this.ignorePlacement = v;},
         
-        /** Sets the provided Node as the new parent of this Node. This is the
-            most direct method to do reparenting. You can also use the 
+        /** Sets the provided Node as the new parent of this Node. This is 
+            the most direct method to do reparenting. You can also use the 
             addSubnode method but it's just a wrapper around this setter.
             @param {?Object} newParent
             @returns {undefined} */
@@ -5378,8 +5367,8 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         },
         
-        /** Gets the subnodes for this Node and does lazy instantiation of the 
-            subnodes array if no child Nodes exist.
+        /** Gets the subnodes for this Node and does lazy instantiation of 
+            the subnodes array if no child Nodes exist.
             @returns {!Array} - An array of subnodes. */
         getSubnodes: function() {
             return this.subnodes || (this.subnodes = []);
@@ -5450,7 +5439,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 if (self.parent) {
                     // Optimization: use the dom element contains function if 
                     // both nodes are DomElementProxy instances.
-                    if (self.getInnerDomElement && node.getInnerDomElement) return node.getIDE().contains(self.getIDE());
+                    if (self.getIDE && node.getIDE) return node.getIDE().contains(self.getIDE());
                     return self.parent.isDescendantOf(node);
                 }
             }
@@ -5564,9 +5553,10 @@ myt.Destructible = new JS.Module('Destructible', {
             @returns {undefined} */
         subnodeAdded: node => {},
         
-        /** Called when a subnode is removed from this node. Provides a hook for
-            subclasses. No need for subclasses to call super. Do not call this
-            method to remove a subnode. Instead call removeSubnode or setParent.
+        /** Called when a subnode is removed from this node. Provides a hook 
+            for subclasses. No need for subclasses to call super. Do not call 
+            this method to remove a subnode. Instead call removeSubnode 
+            or setParent.
             @param {!Object} node - The sub myt.Node that was removed.
             @returns {undefined} */
         subnodeRemoved: node => {},
@@ -5575,9 +5565,10 @@ myt.Destructible = new JS.Module('Destructible', {
         /** A wrapper on Node.animate that will only animate one time and that 
             provides a streamlined list of the most commonly used arguments.
             @param {!Object|string} attribute - The name of the attribute to 
-                animate. If an object is provided it should be the only argument 
-                and its keys should be the params of this method. This provides 
-                a more concise way of passing in sparse optional parameters.
+                animate. If an object is provided it should be the only 
+                argument and its keys should be the params of this method. 
+                This provides a more concise way of passing in sparse 
+                optional parameters.
             @param {number} to - The target value to animate to.
             @param {number} [from] - The target value to animate from.
             @param {number} [duration]
@@ -5589,9 +5580,10 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Animates an attribute using the provided parameters.
             @param {!Object|string} attribute - The name of the attribute to 
-                animate. If an object is provided it should be the only argument 
-                and its keys should be the params of this method. This provides 
-                a more concise way of passing in sparse optional parameters.
+                animate. If an object is provided it should be the only 
+                argument and its keys should be the params of this method. 
+                This provides a more concise way of passing in sparse 
+                optional parameters.
             @param {number} to - The target value to animate to.
             @param {number} [from] - The target value to animate from.
             @param {boolean} [relative]
@@ -5684,12 +5676,13 @@ myt.Destructible = new JS.Module('Destructible', {
             global lock. */
         globalLockCount = 0,
         
-        /* The global layout locked status. */
+        /*  The global layout locked status. */
         globalLock = false;
     
     const JSClass = JS.Class,
         
-        /* A list of layouts to be updated once the global lock is released. */
+        /*  A list of layouts to be updated once the global lock 
+            is released. */
         deferredLayouts = [],
         
         /*  Called to set/unset the global lock. Updates all the currently 
@@ -5710,8 +5703,8 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         },
         
-        /*  Adds a Layout to the list of layouts that will get updated when the
-            global lock is released.
+        /*  Adds a Layout to the list of layouts that will get updated when 
+            the global lock is released.
                 param layout:myt.Layout the layout to defer an update for. */
         deferLayoutUpdate = layout => {
             // Don't add a layout that is already deferred.
@@ -5996,8 +5989,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 this.subviews.sort(sortFunc);
             },
             
-            /** Moves the subview before the target subview in the order the s
-                ubviews are layed out. If no target subview is provided, or 
+            /** Moves the subview before the target subview in the order the 
+                subviews are layed out. If no target subview is provided, or 
                 it isn't in the layout the subview will be moved to the front 
                 of the list.
                 @param {?Object} sv
@@ -6019,8 +6012,8 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         }),
         
-        /** A layout that sets the target attribute name to the target value for 
-            each subview.
+        /** A layout that sets the target attribute name to the target value 
+            for each subview.
             
             Events:
                 targetAttrName:string
@@ -6059,8 +6052,8 @@ myt.Destructible = new JS.Module('Destructible', {
         }),
         
         /** An extension of ConstantLayout that allows for variation based on 
-            the index and subview. An updateSubview method is provided that can 
-            be overriden to provide variable behavior.
+            the index and subview. An updateSubview method is provided that 
+            can be overriden to provide variable behavior.
             
             Events:
                 collapseParent:boolean
@@ -6136,17 +6129,13 @@ myt.Destructible = new JS.Module('Destructible', {
             /** Called by update before any processing is done. Gives subviews 
                 a chance to do any special setup before update is processed.
                 @returns {undefined} */
-            doBeforeUpdate: () => {
-                // Subclasses to implement as needed.
-            },
+            doBeforeUpdate: () => {/* Subclasses to implement as needed. */},
             
             /** Called by update after any processing is done but before the 
                 optional collapsing of parent is done. Gives subviews a chance 
                 to do any special teardown after update is processed.
                 @returns {undefined} */
-            doAfterUpdate: () => {
-                // Subclasses to implement as needed.
-            },
+            doAfterUpdate: () => {/* Subclasses to implement as needed. */},
             
             /** Provides a default implementation that calls update when the
                 visibility of a subview changes.
@@ -6194,9 +6183,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     call on the parent.
                 @param {*} value - The value to set on the parent.
                 @returns {undefined} */
-            updateParent: (setterName, value) => {
-                // Subclasses to implement as needed.
-            }
+            updateParent: (setterName, value) => {/* Subclasses to implement as needed. */}
         }),
         
         /** An extension of VariableLayout that positions views along an axis 
@@ -6212,8 +6199,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 inset:number Padding before the first subview that gets 
                     positioned. An alias for setTargetValue.
                 spacing:number Spacing between each subview.
-                outset:number Padding at the end of the layout. Only gets used
-                    if collapseParent is true.
+                outset:number Padding at the end of the layout. Only gets 
+                    used if collapseParent is true.
                 noAddSubviewOptimization:boolean Turns the optimization to 
                     suppress layout updates when a subview is added off/on. 
                     Defaults to undefined which is equivalent to false and 
@@ -6298,18 +6285,16 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         });
     
-    /** An extension of SpacedLayout that resizes one or more views to fill in
-        any remaining space. The resizable subviews should not have a transform
-        applied to it. The non-resized views may have transforms applied 
-        to them.
+    /** An extension of SpacedLayout that resizes one or more views to fill 
+        in any remaining space. The resizable subviews should not have a 
+        transform applied to it. The non-resized views may have transforms 
+        applied to them.
         
         @class */
     pkg.ResizeLayout = new JSClass('ResizeLayout', SpacedLayout, {
         // Accessors ///////////////////////////////////////////////////////////
         /** @overrides myt.VariableLayout */
-        setCollapseParent: function(v) {
-            // collapseParent attribute is unused in ResizeLayout.
-        },
+        setCollapseParent: v => {/* collapseParent attribute is unused in ResizeLayout. */},
         
         /** @overrides myt.SpacedLayout */
         setTargetAttrName: function(v) {
@@ -6422,9 +6407,7 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** @overrides myt.SpacedLayout */
-        updateParent: function(setterName, value) {
-            // No resizing of parent since this view expands to fill the parent.
-        }
+        updateParent: (setterName, value) => {/* No resizing of parent since this view expands to fill the parent. */}
     });
 
     /** An extension of VariableLayout that also aligns each view vertically
@@ -9092,23 +9075,23 @@ myt.Destructible = new JS.Module('Destructible', {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
                 /** Prevents default drag/drop behavior.
-                    @param {!Obect} v - The myt.View the view to supress 
+                    @param {!Obect} view - The myt.View the view to supress 
                         default dragover and drop on.
                     @returns {undefined} */
-                setupCaptureDrop: function(v) {
-                    const cdf = v.__captureDrop = event => {event.preventDefault();},
-                        ide = v.getIDE();
+                setupCaptureDrop: view => {
+                    const cdf = view.__captureDrop = event => {event.preventDefault();},
+                        ide = view.getIDE();
                     pkg.addEventListener(ide, 'drop', cdf);
                     pkg.addEventListener(ide, 'dragover', cdf);
                 },
                 
                 /** Cleanup dom listeners for drag/drop.
-                    @param {!Obect} v - The myt.View the view that had 
+                    @param {!Obect} view - The myt.View the view that had 
                         supressed default dragover  and drop on.
                     @returns {undefined} */
-                teardownCaptureDrop: function(v) {
-                    const ide = v.getIDE(), 
-                        cdf = v.__captureDrop;
+                teardownCaptureDrop: view => {
+                    const ide = view.getIDE(), 
+                        cdf = view.__captureDrop;
                     pkg.removeEventListener(ide, 'drop', cdf);
                     pkg.removeEventListener(ide, 'dragover', cdf);
                 }
@@ -9138,8 +9121,8 @@ myt.Destructible = new JS.Module('Destructible', {
                     pkg.getElement().appendChild(parent);
                 }
                 
-                // A root view has a dom element provided as the parent. We use
-                // that as our dom element.
+                // A root view has a dom element provided as the parent. 
+                // We use that as our dom element.
                 return parent;
             },
             
@@ -9449,7 +9432,90 @@ myt.Destructible = new JS.Module('Destructible', {
 
 
 (pkg => {
-    const getTarget = animator => animator.target || animator.parent,
+    const math = Math,
+        mathMax = math.max,
+        mathSin = math.sin,
+        mathCos = math.cos,
+        mathPow = math.pow,
+        mathSqrt = math.sqrt,
+        
+        PI = math.PI,
+        TWO_PI = 2 * PI,
+        HALF_PI = PI / 2,
+        
+        easingFunctions = {
+            linear:t => t,
+            
+            easeInQuad:t => t*t,
+            easeOutQuad:t => -t*(t-2),
+            easeInOutQuad:t => (t*=2) < 1 ? t*t/2 : -((--t)*(t-2) - 1)/2,
+            
+            easeInCubic:t => t*t*t,
+            easeOutCubic:t => (t=t-1)*t*t + 1,
+            easeInOutCubic:t => (t*=2) < 1 ? t*t*t/2 : ((t-=2)*t*t + 2)/2,
+            
+            easeInQuart:t => t*t*t*t,
+            easeOutQuart:t => -((t=t-1)*t*t*t - 1),
+            easeInOutQuart:t => (t*=2) < 1 ? t*t*t*t/2 : -((t-=2)*t*t*t - 2)/2,
+            
+            easeInQuint:t => t*t*t*t*t,
+            easeOutQuint:t => (t=t-1)*t*t*t*t + 1,
+            easeInOutQuint:t => (t*=2) < 1 ? t*t*t*t*t/2 : ((t-=2)*t*t*t*t + 2)/2,
+            
+            easeInSine:t => -mathCos(t * HALF_PI) + 1,
+            easeOutSine:t => mathSin(t * HALF_PI),
+            easeInOutSine:t => -(mathCos(t * PI) - 1)/2,
+            
+            easeInCirc:t => -(mathSqrt(1 - t*t) - 1),
+            easeOutCirc:t => mathSqrt(1 - (t=t-1)*t),
+            easeInOutCirc:t => (t*=2) < 1 ? -(mathSqrt(1 - t*t) - 1)/2: (mathSqrt(1 - (t-=2)*t) + 1)/2,
+            
+            easeInExpo:t => t === 0 ? 0 : mathPow(2, 10 * (t - 1)),
+            easeOutExpo:t => t === 1 ? 1 : (-mathPow(2, -10 * t) + 1),
+            easeInOutExpo:t => {
+                if (t === 0 || t === 1) return t;
+                if ((t*=2) < 1) return mathPow(2, 10 * (t - 1))/2;
+                return (-mathPow(2, -10 * --t) + 2)/2;
+            },
+            
+            easeInElastic:t => {
+                if (t === 0 || t === 1) return t;
+                const p = 0.3;
+                return -(mathPow(2, 10 * (t -= 1)) * mathSin((t * 1 - p/4) * TWO_PI / p));
+            },
+            easeOutElastic:t => {
+                if (t === 0 || t === 1) return t;
+                const p = 0.3;
+                return mathPow(2,-10 * t) * mathSin((t * 1 - p/4) * TWO_PI / p) + 1;
+            },
+            easeInOutElastic:t => {
+                if (t === 0 || t === 1) return t;
+                const p = 0.45;
+                if ((t*=2) < 1) return -(mathPow(2, 10 * (t-=1)) * mathSin((t * 1 - p/4) * TWO_PI / p))/2;
+                return mathPow(2, -10 * (t-=1)) * mathSin((t * 1 - p/4) * TWO_PI/p)/2 + 1;
+            },
+            
+            easeInBack:(t, s=1.70158) => (t/=1) * t * ((s+1)*t - s),
+            easeOutBack:(t, s=1.70158) => (t=t/1-1) * t * ((s+1)*t + s) + 1,
+            easeInOutBack:(t, s=1.70158) => (t*=2) < 1 ? (t*t*(((s*=(1.525))+1)*t - s))/2 : ((t-=2)*t*(((s*=(1.525))+1)*t + s) + 2)/2,
+            
+            easeInBounce:t => 1 - easingFunctions.easeOutBounce(1-t),
+            easeOutBounce:t => {
+                if (t < (1/2.75)) {
+                    return 7.5625*t*t;
+                } else if (t < (2/2.75)) {
+                    return 7.5625*(t-=(1.5/2.75))*t + 0.75;
+                } else if (t < (2.5/2.75)) {
+                    return 7.5625*(t-=(2.25/2.75))*t + 0.9375;
+                }
+                return 7.5625*(t-=(2.625/2.75))*t + 0.984375;
+            },
+            easeInOutBounce:t => (t*=2) < 1 ? easingFunctions.easeInBounce(t)/2 : (easingFunctions.easeOutBounce(t-1) + 1)/2
+        },
+        
+        globalIdle = pkg.global.idle,
+        
+        getTarget = animator => animator.target || animator.parent,
         
         isColorAttr = animator => {
             const target = getTarget(animator);
@@ -9471,8 +9537,8 @@ myt.Destructible = new JS.Module('Destructible', {
             const relative = animator.relative,
                 duration = animator.duration,
                 attr = animator.attribute,
-                progressPercent = Math.max(0, progress / duration), 
-                oldProgressPercent = Math.max(0, oldProgress / duration);
+                progressPercent = mathMax(0, progress / duration), 
+                oldProgressPercent = mathMax(0, oldProgress / duration);
             
             // Determine what "from" to use if none was provided.
             if (animator.from == null) {
@@ -9500,7 +9566,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     repeat = animator.repeat;
                 
                 // An animation in reverse is like time going backward.
-                if (reverse) timeDiff = timeDiff * -1;
+                if (reverse) timeDiff *= -1;
                 
                 // Determine how much time to move forward by.
                 const oldProgress = animator.__progress;
@@ -9549,10 +9615,6 @@ myt.Destructible = new JS.Module('Destructible', {
                 }
             }
         },
-        
-        PI = Math.PI,
-        TWO_PI = 2*PI,
-        HALF_PI = PI/2,
         
         /** Changes the value of an attribute on a target over time.
             
@@ -9616,8 +9678,8 @@ myt.Destructible = new JS.Module('Destructible', {
             
             Private Attributes:
                 __loopCount:number the loop currently being run.
-                __progress:number the number of millis currently used during the
-                    current animation loop.
+                __progress:number the number of millis currently used during 
+                    the current animation loop.
                 __temporaryFrom:boolean Indicates no "from" was set on the 
                     animator so we will have to generate one when needed. We 
                     want to reset back to undefined after the animation 
@@ -9633,90 +9695,10 @@ myt.Destructible = new JS.Module('Destructible', {
             
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                easingFunctions: {
-                    linear:t => t,
-                    
-                    easeInQuad:t => t*t,
-                    easeOutQuad:t => -t*(t-2),
-                    easeInOutQuad:t => (t/=0.5) < 1 ? 0.5*t*t : -0.5 * ((--t)*(t-2) - 1),
-                    
-                    easeInCubic:t => t*t*t,
-                    easeOutCubic:t => ((t=t-1)*t*t + 1),
-                    easeInOutCubic:t => (t/=0.5) < 1 ? 0.5*t*t*t : 1 /2*((t-=2)*t*t + 2),
-                    
-                    easeInQuart:t => t*t*t*t,
-                    easeOutQuart:t => -((t=t-1)*t*t*t - 1),
-                    easeInOutQuart:t => (t/=0.5) < 1 ? 0.5*t*t*t*t : -0.5 * ((t-=2)*t*t*t - 2),
-                    
-                    easeInQuint:t => t*t*t*t*t,
-                    easeOutQuint:t => ((t=t-1)*t*t*t*t + 1),
-                    easeInOutQuint:t => (t/=0.5) < 1 ? 0.5*t*t*t*t*t : 0.5*((t-=2)*t*t*t*t + 2),
-                    
-                    easeInSine:t => -Math.cos(t * HALF_PI) + 1,
-                    easeOutSine:t => Math.sin(t * HALF_PI),
-                    easeInOutSine:t => -0.5 * (Math.cos(PI*t) - 1),
-                    
-                    easeInCirc:t => -(Math.sqrt(1 - t*t) - 1),
-                    easeOutCirc:t => Math.sqrt(1 - (t=t-1)*t),
-                    easeInOutCirc:t => (t/=0.5) < 1? -0.5 * (Math.sqrt(1 - t*t) - 1): 0.5 * (Math.sqrt(1 - (t-=2)*t) + 1),
-                    
-                    easeInExpo:t => (t==0) ? 0 : Math.pow(2, 10 * (t - 1)),
-                    easeOutExpo:t => (t==1) ? 1 : (-Math.pow(2, -10 * t) + 1),
-                    easeInOutExpo:t => {
-                        if (t==0) return 0;
-                        if (t==1) return 1;
-                        if ((t/=0.5) < 1) return 0.5 * Math.pow(2, 10 * (t - 1));
-                        return 0.5 * (-Math.pow(2, -10 * --t) + 2);
-                    },
-                    
-                    easeInElastic:t => {
-                        if (t==0) return 0;
-                        if (t==1) return 1;
-                        let p = 0.3,
-                            s = p/4;
-                        return -(Math.pow(2,10*(t-=1)) * Math.sin((t*1-s)*TWO_PI/p));
-                    },
-                    easeOutElastic:t => {
-                        if (t==0) return 0;
-                        if (t==1) return 1;
-                        let p = 0.3,
-                            s = p/4;
-                        return Math.pow(2,-10*t) * Math.sin((t*1-s)*TWO_PI/p) + 1;
-                    },
-                    easeInOutElastic:t => {
-                        if (t==0) return 0;
-                        if ((t/=0.5)==2) return 1;
-                        let p = 0.45,
-                            s = p/4;
-                        if (t < 1) return -.5*(Math.pow(2,10*(t-=1)) * Math.sin((t*1-s)*TWO_PI/p));
-                        return Math.pow(2,-10*(t-=1)) * Math.sin((t*1-s)*TWO_PI/p)*0.5 + 1;
-                    },
-                    
-                    easeInBack:(t, s=1.70158) => (t/=1)*t*((s+1)*t - s),
-                    easeOutBack:(t, s=1.70158) => ((t=t/1-1)*t*((s+1)*t + s) + 1),
-                    easeInOutBack:(t, s=1.70158) => {
-                        if ((t/=0.5) < 1) return 0.5*(t*t*(((s*=(1.525))+1)*t - s));
-                        return 0.5*((t-=2)*t*(((s*=(1.525))+1)*t + s) + 2);
-                    },
-                    
-                    easeInBounce:t => 1 - Animator.easingFunctions.easeOutBounce(1-t),
-                    easeOutBounce:t => {
-                        if (t < (1/2.75)) {
-                            return (7.5625*t*t);
-                        } else if (t < (2/2.75)) {
-                            return (7.5625*(t-=(1.5/2.75))*t + 0.75);
-                        } else if (t < (2.5/2.75)) {
-                            return (7.5625*(t-=(2.25/2.75))*t + 0.9375);
-                        }
-                        return (7.5625*(t-=(2.625/2.75))*t + .984375);
-                    },
-                    easeInOutBounce:t => {
-                        if (t < 0.5) return Animator.easingFunctions.easeInBounce(t*2) * 0.5;
-                        return Animator.easingFunctions.easeOutBounce(t*2-1) * 0.5 + 0.5;
-                    }
-                }
+                easingFunctions: easingFunctions,
+                
+                DEFAULT_EASING_FUNCTION: easingFunctions.easeInOutQuad
             },
-            
             
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides myt.Node */
@@ -9737,7 +9719,6 @@ myt.Destructible = new JS.Module('Destructible', {
             // Accessors ///////////////////////////////////////////////////////
             setRunning: function(v) {
                 const self = this;
-                
                 if (self.running !== v) {
                     self.running = v;
                     if (self.inited) self.fireEvent('running', v);
@@ -9749,24 +9730,22 @@ myt.Destructible = new JS.Module('Destructible', {
                             if (self.__temporaryFrom) self.from = undefined;
                             reset(self);
                         }
-                        self[v ? 'attachTo' : 'detachFrom'](pkg.global.idle, '__updateAnim', 'idle');
+                        self[v ? 'attachTo' : 'detachFrom'](globalIdle, '__updateAnim', 'idle');
                     }
                 }
             },
             
             setPaused: function(v) {
                 const self = this;
-                
                 if (self.paused !== v) {
                     self.paused = v;
                     if (self.inited) self.fireEvent('paused', v);
-                    if (self.running) self[v ? 'detachFrom' : 'attachTo'](pkg.global.idle, '__updateAnim', 'idle');
+                    if (self.running) self[v ? 'detachFrom' : 'attachTo'](globalIdle, '__updateAnim', 'idle');
                 }
             },
             
             setReverse: function(v) {
                 const self = this;
-                
                 if (self.reverse !== v) {
                     self.reverse = v;
                     if (self.inited) self.fireEvent('reverse', v);
@@ -9776,7 +9755,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             setEasingFunction: function(v) {
                 // Lookup easing function if a string is provided.
-                if (typeof v === 'string') v = Animator.easingFunctions[v];
+                if (typeof v === 'string') v = easingFunctions[v];
                 
                 // Use default if invalid
                 if (!v) v = Animator.DEFAULT_EASING_FUNCTION;
@@ -9784,14 +9763,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 this.set('easingFunction', v, true);
             },
             
-            setFrom: function(v) {
-                this.set('from', v, true);
-            },
-            
-            setTo: function(v) {
-                this.set('to', v, true);
-            },
-            
+            setFrom: function(v) {this.set('from', v, true);},
+            setTo: function(v) {this.set('to', v, true);},
             setCallback: function(v) {this.callback = v;},
             
             
@@ -9851,9 +9824,6 @@ myt.Destructible = new JS.Module('Destructible', {
                 advance(this, idleEvent.value.delta);
             }
         });
-    
-    /* Setup the default easing function. */
-    Animator.DEFAULT_EASING_FUNCTION = Animator.easingFunctions.easeInOutQuad;
 })(myt);
 
 
@@ -23148,17 +23118,23 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     relationships are not needed.
     
     Attributes:
-        inited:boolean Set to true after this Eventable has completed initializing.
+        inited:boolean Set to true after this Eventable has completed 
+            initializing.
     
     @class */
 myt.Eventable = new JS.Class('Eventable', {
-    include: [myt.AccessorSupport, myt.Destructible, myt.Observable, myt.Observer],
+    include: [
+        myt.AccessorSupport, 
+        myt.Destructible, 
+        myt.Observable, 
+        myt.Observer
+    ],
     
     
     // Constructor /////////////////////////////////////////////////////////////
     /** The standard JSClass initializer function.
-        @param attrs:object (Optional) A map of attribute names and values.
-        @param mixins:array (Optional) a list of mixins to be added onto
+        @param {?Object} [attrs] - A map of attribute names and values.
+        @param {?Array} [mixins] - A list of mixins to be added onto
             the new instance.
         @returns {undefined} */
     initialize: function(attrs, mixins) {
@@ -23169,7 +23145,7 @@ myt.Eventable = new JS.Class('Eventable', {
                 if (mixin = mixins[i++]) {
                     self.extend(mixin);
                 } else {
-                    console.warn("Missing mixin in:" + self.klass.__displayName);
+                    console.warn('Missing mixin in:' + self.klass.__displayName);
                 }
             }
         }
@@ -23182,7 +23158,7 @@ myt.Eventable = new JS.Class('Eventable', {
     // Life Cycle //////////////////////////////////////////////////////////////
     /** Called during initialization. Calls setter methods and lastly, sets 
         inited to true. Subclasses must callSuper.
-        @param attrs:object A map of attribute names and values.
+        @param {?Object} attrs - A map of attribute names and values.
         @returns {undefined} */
     init: function(attrs) {
         this.callSetters(attrs);

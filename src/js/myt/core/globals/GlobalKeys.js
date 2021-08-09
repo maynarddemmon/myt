@@ -1,7 +1,7 @@
 (pkg => {
     let globalKeys,
         
-        /* A map of keycodes of the keys currently pressed down. */
+        /*  A map of keycodes of the keys currently pressed down. */
         keysDown = {};
     
     const G = pkg.global,
@@ -23,20 +23,17 @@
                 param keyCode:number the key to test. */
         isKeyDown = keyCode => !!keysDown[keyCode],
         
-        /* Tests if the 'shift' key is down. */
+        /*  Tests if the 'shift' key is down. */
         isShiftKeyDown = () => isKeyDown(KEYCODE_SHIFT),
         
-        /* Tests if the 'control' key is down. */
+        /*  Tests if the 'control' key is down. */
         isControlKeyDown = () => isKeyDown(KEYCODE_CONTROL),
         
-        /* Tests if the 'alt' key is down. */
+        /*  Tests if the 'alt' key is down. */
         isAltKeyDown = () => isKeyDown(KEYCODE_ALT),
         
-        /* Tests if the 'command' key is down. */
+        /*  Tests if the 'command' key is down. */
         isCommandKeyDown = () => isKeyDown(KEYCODE_COMMAND) || isKeyDown(KEYCODE_RIGHT_COMMAND),
-        
-        /* Tests if the platform specific "accelerator" key is down. */
-        isAcceleratorKeyDown = () => BrowserDetect.os === 'Mac' ? isCommandKeyDown() : isControlKeyDown(),
         
         ignoreFocusTrap = () => isAltKeyDown(),
         
@@ -46,19 +43,25 @@
                     // Catch backspace since it navigates the history. Allow 
                     // it to go through for text input elements though.
                     const nodeName = targetElem.nodeName;
-                    if (nodeName === 'TEXTAREA' || 
+                    return !(
+                        nodeName === 'TEXTAREA' || 
                         (nodeName === 'INPUT' && (targetElem.type === 'text' || targetElem.type === 'password')) ||
                         (nodeName === 'DIV' && targetElem.contentEditable === 'true' && targetElem.firstChild)
-                    ) return false;
-                    
-                    return true;
-                    
+                    );
                 case 9: // Tab
                     // Tab navigation is handled by the framework.
                     return true;
             }
             return false;
-        };
+        },
+        
+        registerEventHandler = (target, action) => {
+            ['keydown','keypress','keyup'].forEach(eventName => {
+                globalKeys[action](target, '__handle_' + eventName, eventName);
+            });
+        },
+        attach = target => {registerEventHandler(target, 'attachToDom');},
+        detach = target => {registerEventHandler(target, 'detachFromDom');};
     
     /** Provides global keyboard events. Registered with myt.global as 'keys'.
         
@@ -200,8 +203,8 @@
             globalKeys.KEYCODE_RIGHT_COMMAND = KEYCODE_RIGHT_COMMAND;
             
             globalKeys.setDomElement(document);
-            globalKeys.attachTo(globalFocus, '__handleFocused', 'focused');
-            globalKeys.__listenToDocument();
+            globalKeys.attachTo(globalFocus, '__handle_focused', 'focused');
+            attach(globalKeys);
             
             // Clear keys down when the window loses focus. This is necessary 
             // when using keyboard shortcusts to switch apps since that will 
@@ -217,55 +220,40 @@
         isControlKeyDown: isControlKeyDown,
         isAltKeyDown: isAltKeyDown,
         isCommandKeyDown: isCommandKeyDown,
-        isAcceleratorKeyDown: isAcceleratorKeyDown,
+        
+        /** Tests if the platform specific "accelerator" key is down. */
+        isAcceleratorKeyDown: () => BrowserDetect.os === 'Mac' ? isCommandKeyDown() : isControlKeyDown(),
         
         ignoreFocusTrap: ignoreFocusTrap,
         
-        /** @private
+        /** Switch what is being listened to as focus changes. By default the
+            document is listened to for key events.
+            @private
             @param {!Object} event
             @returns {undefined} */
-        __handleFocused: event => {
+        __handle_focused: event => {
             const focused = event.value;
             if (focused) {
-                // unlisten to document
-                globalKeys.detachFromDom(globalKeys, '__handleKeyDown', 'keydown');
-                globalKeys.detachFromDom(globalKeys, '__handleKeyPress', 'keypress');
-                globalKeys.detachFromDom(globalKeys, '__handleKeyUp', 'keyup');
-                
-                globalKeys.attachToDom(focused, '__handleKeyDown', 'keydown');
-                globalKeys.attachToDom(focused, '__handleKeyPress', 'keypress');
-                globalKeys.attachToDom(focused, '__handleKeyUp', 'keyup');
+                detach(globalKeys);
+                attach(focused);
             } else {
                 const prevFocused = globalFocus.prevFocusedView;
-                if (prevFocused) {
-                    globalKeys.detachFromDom(prevFocused, '__handleKeyDown', 'keydown');
-                    globalKeys.detachFromDom(prevFocused, '__handleKeyPress', 'keypress');
-                    globalKeys.detachFromDom(prevFocused, '__handleKeyUp', 'keyup');
-                }
-                
-                globalKeys.__listenToDocument();
+                if (prevFocused) detach(prevFocused);
+                attach(globalKeys);
             }
         },
         
         /** @private
-            @returns {undefined} */
-        __listenToDocument: () => {
-            globalKeys.attachToDom(globalKeys, '__handleKeyDown', 'keydown');
-            globalKeys.attachToDom(globalKeys, '__handleKeyPress', 'keypress');
-            globalKeys.attachToDom(globalKeys, '__handleKeyUp', 'keyup');
-        },
-        
-        /** @private
             @param {!Object} event
             @returns {undefined} */
-        __handleKeyDown: event => {
+        __handle_keydown: event => {
             const keyCode = getKeyCodeFromEvent(event),
                 domEvent = event.value;
             if (shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
             
-            // Keyup events do not fire when command key is down so fire a keyup
-            // event immediately. Not an issue for other meta keys: shift, ctrl 
-            // and option.
+            // Keyup events do not fire when command key is down so 
+            // fire a keyup event immediately. Not an issue for other 
+            // meta keys: shift, ctrl and option.
             if (isCommandKeyDown() && keyCode !== KEYCODE_SHIFT && keyCode !== KEYCODE_CONTROL && keyCode !== KEYCODE_ALT) {
                 globalKeys.fireEvent('keydown', keyCode);
                 globalKeys.fireEvent('keyup', keyCode);
@@ -289,14 +277,14 @@
         /** @private
             @param {!Object} event
             @returns {undefined} */
-        __handleKeyPress: event => {
+        __handle_keypress: event => {
             globalKeys.fireEvent('keypress', getKeyCodeFromEvent(event));
         },
         
         /** @private
             @param {!Object} event
             @returns {undefined} */
-        __handleKeyUp: event => {
+        __handle_keyup: event => {
             const keyCode = getKeyCodeFromEvent(event),
                 domEvent = event.value;
             if (shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();

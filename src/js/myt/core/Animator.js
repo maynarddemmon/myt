@@ -1,5 +1,88 @@
 (pkg => {
-    const getTarget = animator => animator.target || animator.parent,
+    const math = Math,
+        mathMax = math.max,
+        mathSin = math.sin,
+        mathCos = math.cos,
+        mathPow = math.pow,
+        mathSqrt = math.sqrt,
+        
+        PI = math.PI,
+        TWO_PI = 2 * PI,
+        HALF_PI = PI / 2,
+        
+        easingFunctions = {
+            linear:t => t,
+            
+            easeInQuad:t => t*t,
+            easeOutQuad:t => -t*(t-2),
+            easeInOutQuad:t => (t*=2) < 1 ? t*t/2 : -((--t)*(t-2) - 1)/2,
+            
+            easeInCubic:t => t*t*t,
+            easeOutCubic:t => (t=t-1)*t*t + 1,
+            easeInOutCubic:t => (t*=2) < 1 ? t*t*t/2 : ((t-=2)*t*t + 2)/2,
+            
+            easeInQuart:t => t*t*t*t,
+            easeOutQuart:t => -((t=t-1)*t*t*t - 1),
+            easeInOutQuart:t => (t*=2) < 1 ? t*t*t*t/2 : -((t-=2)*t*t*t - 2)/2,
+            
+            easeInQuint:t => t*t*t*t*t,
+            easeOutQuint:t => (t=t-1)*t*t*t*t + 1,
+            easeInOutQuint:t => (t*=2) < 1 ? t*t*t*t*t/2 : ((t-=2)*t*t*t*t + 2)/2,
+            
+            easeInSine:t => -mathCos(t * HALF_PI) + 1,
+            easeOutSine:t => mathSin(t * HALF_PI),
+            easeInOutSine:t => -(mathCos(t * PI) - 1)/2,
+            
+            easeInCirc:t => -(mathSqrt(1 - t*t) - 1),
+            easeOutCirc:t => mathSqrt(1 - (t=t-1)*t),
+            easeInOutCirc:t => (t*=2) < 1 ? -(mathSqrt(1 - t*t) - 1)/2: (mathSqrt(1 - (t-=2)*t) + 1)/2,
+            
+            easeInExpo:t => t === 0 ? 0 : mathPow(2, 10 * (t - 1)),
+            easeOutExpo:t => t === 1 ? 1 : (-mathPow(2, -10 * t) + 1),
+            easeInOutExpo:t => {
+                if (t === 0 || t === 1) return t;
+                if ((t*=2) < 1) return mathPow(2, 10 * (t - 1))/2;
+                return (-mathPow(2, -10 * --t) + 2)/2;
+            },
+            
+            easeInElastic:t => {
+                if (t === 0 || t === 1) return t;
+                const p = 0.3;
+                return -(mathPow(2, 10 * (t -= 1)) * mathSin((t * 1 - p/4) * TWO_PI / p));
+            },
+            easeOutElastic:t => {
+                if (t === 0 || t === 1) return t;
+                const p = 0.3;
+                return mathPow(2,-10 * t) * mathSin((t * 1 - p/4) * TWO_PI / p) + 1;
+            },
+            easeInOutElastic:t => {
+                if (t === 0 || t === 1) return t;
+                const p = 0.45;
+                if ((t*=2) < 1) return -(mathPow(2, 10 * (t-=1)) * mathSin((t * 1 - p/4) * TWO_PI / p))/2;
+                return mathPow(2, -10 * (t-=1)) * mathSin((t * 1 - p/4) * TWO_PI/p)/2 + 1;
+            },
+            
+            easeInBack:(t, s=1.70158) => (t/=1) * t * ((s+1)*t - s),
+            easeOutBack:(t, s=1.70158) => (t=t/1-1) * t * ((s+1)*t + s) + 1,
+            easeInOutBack:(t, s=1.70158) => (t*=2) < 1 ? (t*t*(((s*=(1.525))+1)*t - s))/2 : ((t-=2)*t*(((s*=(1.525))+1)*t + s) + 2)/2,
+            
+            easeInBounce:t => 1 - easingFunctions.easeOutBounce(1-t),
+            easeOutBounce:t => {
+                if (t < (1/2.75)) {
+                    return 7.5625*t*t;
+                } else if (t < (2/2.75)) {
+                    return 7.5625*(t-=(1.5/2.75))*t + 0.75;
+                } else if (t < (2.5/2.75)) {
+                    return 7.5625*(t-=(2.25/2.75))*t + 0.9375;
+                }
+                return 7.5625*(t-=(2.625/2.75))*t + 0.984375;
+            },
+            easeInOutBounce:t => (t*=2) < 1 ? easingFunctions.easeInBounce(t)/2 : (easingFunctions.easeOutBounce(t-1) + 1)/2
+        },
+        
+        globalIdle = pkg.global.idle,
+        
+        getTarget = animator => animator.target || animator.parent,
         
         isColorAttr = animator => {
             const target = getTarget(animator);
@@ -21,8 +104,8 @@
             const relative = animator.relative,
                 duration = animator.duration,
                 attr = animator.attribute,
-                progressPercent = Math.max(0, progress / duration), 
-                oldProgressPercent = Math.max(0, oldProgress / duration);
+                progressPercent = mathMax(0, progress / duration), 
+                oldProgressPercent = mathMax(0, oldProgress / duration);
             
             // Determine what "from" to use if none was provided.
             if (animator.from == null) {
@@ -50,7 +133,7 @@
                     repeat = animator.repeat;
                 
                 // An animation in reverse is like time going backward.
-                if (reverse) timeDiff = timeDiff * -1;
+                if (reverse) timeDiff *= -1;
                 
                 // Determine how much time to move forward by.
                 const oldProgress = animator.__progress;
@@ -99,10 +182,6 @@
                 }
             }
         },
-        
-        PI = Math.PI,
-        TWO_PI = 2*PI,
-        HALF_PI = PI/2,
         
         /** Changes the value of an attribute on a target over time.
             
@@ -166,8 +245,8 @@
             
             Private Attributes:
                 __loopCount:number the loop currently being run.
-                __progress:number the number of millis currently used during the
-                    current animation loop.
+                __progress:number the number of millis currently used during 
+                    the current animation loop.
                 __temporaryFrom:boolean Indicates no "from" was set on the 
                     animator so we will have to generate one when needed. We 
                     want to reset back to undefined after the animation 
@@ -183,90 +262,10 @@
             
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                easingFunctions: {
-                    linear:t => t,
-                    
-                    easeInQuad:t => t*t,
-                    easeOutQuad:t => -t*(t-2),
-                    easeInOutQuad:t => (t/=0.5) < 1 ? 0.5*t*t : -0.5 * ((--t)*(t-2) - 1),
-                    
-                    easeInCubic:t => t*t*t,
-                    easeOutCubic:t => ((t=t-1)*t*t + 1),
-                    easeInOutCubic:t => (t/=0.5) < 1 ? 0.5*t*t*t : 1 /2*((t-=2)*t*t + 2),
-                    
-                    easeInQuart:t => t*t*t*t,
-                    easeOutQuart:t => -((t=t-1)*t*t*t - 1),
-                    easeInOutQuart:t => (t/=0.5) < 1 ? 0.5*t*t*t*t : -0.5 * ((t-=2)*t*t*t - 2),
-                    
-                    easeInQuint:t => t*t*t*t*t,
-                    easeOutQuint:t => ((t=t-1)*t*t*t*t + 1),
-                    easeInOutQuint:t => (t/=0.5) < 1 ? 0.5*t*t*t*t*t : 0.5*((t-=2)*t*t*t*t + 2),
-                    
-                    easeInSine:t => -Math.cos(t * HALF_PI) + 1,
-                    easeOutSine:t => Math.sin(t * HALF_PI),
-                    easeInOutSine:t => -0.5 * (Math.cos(PI*t) - 1),
-                    
-                    easeInCirc:t => -(Math.sqrt(1 - t*t) - 1),
-                    easeOutCirc:t => Math.sqrt(1 - (t=t-1)*t),
-                    easeInOutCirc:t => (t/=0.5) < 1? -0.5 * (Math.sqrt(1 - t*t) - 1): 0.5 * (Math.sqrt(1 - (t-=2)*t) + 1),
-                    
-                    easeInExpo:t => (t==0) ? 0 : Math.pow(2, 10 * (t - 1)),
-                    easeOutExpo:t => (t==1) ? 1 : (-Math.pow(2, -10 * t) + 1),
-                    easeInOutExpo:t => {
-                        if (t==0) return 0;
-                        if (t==1) return 1;
-                        if ((t/=0.5) < 1) return 0.5 * Math.pow(2, 10 * (t - 1));
-                        return 0.5 * (-Math.pow(2, -10 * --t) + 2);
-                    },
-                    
-                    easeInElastic:t => {
-                        if (t==0) return 0;
-                        if (t==1) return 1;
-                        let p = 0.3,
-                            s = p/4;
-                        return -(Math.pow(2,10*(t-=1)) * Math.sin((t*1-s)*TWO_PI/p));
-                    },
-                    easeOutElastic:t => {
-                        if (t==0) return 0;
-                        if (t==1) return 1;
-                        let p = 0.3,
-                            s = p/4;
-                        return Math.pow(2,-10*t) * Math.sin((t*1-s)*TWO_PI/p) + 1;
-                    },
-                    easeInOutElastic:t => {
-                        if (t==0) return 0;
-                        if ((t/=0.5)==2) return 1;
-                        let p = 0.45,
-                            s = p/4;
-                        if (t < 1) return -.5*(Math.pow(2,10*(t-=1)) * Math.sin((t*1-s)*TWO_PI/p));
-                        return Math.pow(2,-10*(t-=1)) * Math.sin((t*1-s)*TWO_PI/p)*0.5 + 1;
-                    },
-                    
-                    easeInBack:(t, s=1.70158) => (t/=1)*t*((s+1)*t - s),
-                    easeOutBack:(t, s=1.70158) => ((t=t/1-1)*t*((s+1)*t + s) + 1),
-                    easeInOutBack:(t, s=1.70158) => {
-                        if ((t/=0.5) < 1) return 0.5*(t*t*(((s*=(1.525))+1)*t - s));
-                        return 0.5*((t-=2)*t*(((s*=(1.525))+1)*t + s) + 2);
-                    },
-                    
-                    easeInBounce:t => 1 - Animator.easingFunctions.easeOutBounce(1-t),
-                    easeOutBounce:t => {
-                        if (t < (1/2.75)) {
-                            return (7.5625*t*t);
-                        } else if (t < (2/2.75)) {
-                            return (7.5625*(t-=(1.5/2.75))*t + 0.75);
-                        } else if (t < (2.5/2.75)) {
-                            return (7.5625*(t-=(2.25/2.75))*t + 0.9375);
-                        }
-                        return (7.5625*(t-=(2.625/2.75))*t + .984375);
-                    },
-                    easeInOutBounce:t => {
-                        if (t < 0.5) return Animator.easingFunctions.easeInBounce(t*2) * 0.5;
-                        return Animator.easingFunctions.easeOutBounce(t*2-1) * 0.5 + 0.5;
-                    }
-                }
+                easingFunctions: easingFunctions,
+                
+                DEFAULT_EASING_FUNCTION: easingFunctions.easeInOutQuad
             },
-            
             
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides myt.Node */
@@ -287,7 +286,6 @@
             // Accessors ///////////////////////////////////////////////////////
             setRunning: function(v) {
                 const self = this;
-                
                 if (self.running !== v) {
                     self.running = v;
                     if (self.inited) self.fireEvent('running', v);
@@ -299,24 +297,22 @@
                             if (self.__temporaryFrom) self.from = undefined;
                             reset(self);
                         }
-                        self[v ? 'attachTo' : 'detachFrom'](pkg.global.idle, '__updateAnim', 'idle');
+                        self[v ? 'attachTo' : 'detachFrom'](globalIdle, '__updateAnim', 'idle');
                     }
                 }
             },
             
             setPaused: function(v) {
                 const self = this;
-                
                 if (self.paused !== v) {
                     self.paused = v;
                     if (self.inited) self.fireEvent('paused', v);
-                    if (self.running) self[v ? 'detachFrom' : 'attachTo'](pkg.global.idle, '__updateAnim', 'idle');
+                    if (self.running) self[v ? 'detachFrom' : 'attachTo'](globalIdle, '__updateAnim', 'idle');
                 }
             },
             
             setReverse: function(v) {
                 const self = this;
-                
                 if (self.reverse !== v) {
                     self.reverse = v;
                     if (self.inited) self.fireEvent('reverse', v);
@@ -326,7 +322,7 @@
             
             setEasingFunction: function(v) {
                 // Lookup easing function if a string is provided.
-                if (typeof v === 'string') v = Animator.easingFunctions[v];
+                if (typeof v === 'string') v = easingFunctions[v];
                 
                 // Use default if invalid
                 if (!v) v = Animator.DEFAULT_EASING_FUNCTION;
@@ -334,14 +330,8 @@
                 this.set('easingFunction', v, true);
             },
             
-            setFrom: function(v) {
-                this.set('from', v, true);
-            },
-            
-            setTo: function(v) {
-                this.set('to', v, true);
-            },
-            
+            setFrom: function(v) {this.set('from', v, true);},
+            setTo: function(v) {this.set('to', v, true);},
             setCallback: function(v) {this.callback = v;},
             
             
@@ -401,7 +391,4 @@
                 advance(this, idleEvent.value.delta);
             }
         });
-    
-    /* Setup the default easing function. */
-    Animator.DEFAULT_EASING_FUNCTION = Animator.easingFunctions.easeInOutQuad;
 })(myt);

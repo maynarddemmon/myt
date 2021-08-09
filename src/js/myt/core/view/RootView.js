@@ -16,23 +16,23 @@
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
                 /** Prevents default drag/drop behavior.
-                    @param {!Obect} v - The myt.View the view to supress 
+                    @param {!Obect} view - The myt.View the view to supress 
                         default dragover and drop on.
                     @returns {undefined} */
-                setupCaptureDrop: function(v) {
-                    const cdf = v.__captureDrop = event => {event.preventDefault();},
-                        ide = v.getIDE();
+                setupCaptureDrop: view => {
+                    const cdf = view.__captureDrop = event => {event.preventDefault();},
+                        ide = view.getIDE();
                     pkg.addEventListener(ide, 'drop', cdf);
                     pkg.addEventListener(ide, 'dragover', cdf);
                 },
                 
                 /** Cleanup dom listeners for drag/drop.
-                    @param {!Obect} v - The myt.View the view that had 
+                    @param {!Obect} view - The myt.View the view that had 
                         supressed default dragover  and drop on.
                     @returns {undefined} */
-                teardownCaptureDrop: function(v) {
-                    const ide = v.getIDE(), 
-                        cdf = v.__captureDrop;
+                teardownCaptureDrop: view => {
+                    const ide = view.getIDE(), 
+                        cdf = view.__captureDrop;
                     pkg.removeEventListener(ide, 'drop', cdf);
                     pkg.removeEventListener(ide, 'dragover', cdf);
                 }
@@ -62,8 +62,8 @@
                     pkg.getElement().appendChild(parent);
                 }
                 
-                // A root view has a dom element provided as the parent. We use
-                // that as our dom element.
+                // A root view has a dom element provided as the parent. 
+                // We use that as our dom element.
                 return parent;
             },
             
