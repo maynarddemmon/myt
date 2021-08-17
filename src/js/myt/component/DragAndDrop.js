@@ -167,7 +167,7 @@
                 const pos = pkg.DomElementProxy.getRelativePosition(this.getIDE(), dropParent.getIDE());
                 return new dropClass(dropParent, Object.assign({}, this.dropClassAttrs, {x:pos.x || 0, y:pos.y || 0}));
             }
-        },
+        }
     });
     
     /** Makes an myt.View support having myt.Dropable views dropped on it.
@@ -194,10 +194,10 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Called by myt.GlobalDragManager when a dropable is dragged over this
-            target. Gives this drop target a chance to reject a drop regardless
-            of drag group. The default implementation returns true if the view
-            is not disabled.
+        /** Called by myt.GlobalDragManager when a dropable is dragged over 
+            this target. Gives this drop target a chance to reject a drop 
+            regardless of drag group. The default implementation returns true 
+            if the view is not disabled.
             @param dropable:myt.Dropable The dropable being dragged.
             @returns boolean: True if the drop will be allowed, false 
                 otherwise. */
@@ -212,8 +212,8 @@
             @returns {undefined} */
         notifyDragStart: dropable => {},
         
-        /** Called by myt.GlobalDragManager when a dropable stops being dragged
-            that has a matching drag group.
+        /** Called by myt.GlobalDragManager when a dropable stops being 
+            dragged that has a matching drag group.
             @param dropable:myt.Dropable The dropable no longer being dragged.
             @returns {undefined} */
         notifyDragStop: dropable => {},
@@ -247,7 +247,9 @@
             dropFailed:boolean Indicates this dropable was just dropped 
                 outside of a drop target.
             dropTarget:myt.DropTarget The drop target this dropable is 
-                currently over. */
+                currently over.
+        
+        @class */
     pkg.Dropable = new JSModule('Dropable', {
         include: [Draggable, DragGroupSupport],
         
@@ -294,16 +296,16 @@
             }
         },
         
-        /** Called by myt.GlobalDragManager when this view is dragged over a 
-            drop target.
+        /** Called by myt.GlobalDragManager when this view is dragged over 
+            a drop target.
             @param dropTarget:myt.DropTarget The target that was dragged over.
             @returns {undefined} */
         notifyDragEnter: function(dropTarget) {
             this.setDropTarget(dropTarget);
         },
         
-        /** Called by myt.GlobalDragManager when this view is dragged out of a 
-            drop target.
+        /** Called by myt.GlobalDragManager when this view is dragged out of 
+            a drop target.
             @param dropTarget:myt.DropTarget The target that was dragged out of.
             @returns {undefined} */
         notifyDragLeave: function(dropTarget) {
@@ -314,8 +316,8 @@
             @param dropTarget:myt.DropTarget The target that was dropped on. 
                 Will be undefined if this dropable was dropped on no 
                 drop target.
-            @param isAbort:boolean Indicates if the drop was the result of an
-                abort or a normal drop.
+            @param isAbort:boolean Indicates if the drop was the result of 
+                an abort or a normal drop.
             @returns {undefined} */
         notifyDropped: function(dropTarget, isAbort) {
             this.setDropped(true);
@@ -344,8 +346,8 @@
             scrollAmount:number The number of pixels to adjust by each time.
                 Defaults to 2 pixels.
             scrollAcceleration:number The amount to increase scrolling by as 
-                the mouse gets closer to the edge of the view. Setting this to 
-                0 will result in no acceleration. Defaults to 7.
+                the mouse gets closer to the edge of the view. Setting this 
+                to 0 will result in no acceleration. Defaults to 7.
         
         Private Attributes:
             __amtUp:number
@@ -408,8 +410,8 @@
             }
         },
         
-        /** Called by myt.GlobalDragManager when a dropable stops being dragged
-            that has a matching drag group.
+        /** Called by myt.GlobalDragManager when a dropable stops being 
+            dragged that has a matching drag group.
             @param {!Object} dropable - The myt.Dropable no longer 
                 being dragged.
             @returns {undefined} */

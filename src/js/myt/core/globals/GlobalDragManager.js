@@ -1,18 +1,18 @@
 (pkg => {
     let fireGlobalDragManagerEvent,
         
-        /* The view currently being dragged. */
+        /*  The view currently being dragged. */
         dragView,
         
-        /* The view currently being dragged over. */
+        /*  The view currently being dragged over. */
         overView;
         
     const
-        /* The list of myt.AutoScrollers currently registered for notification
+        /*  The list of myt.AutoScrollers currently registered for notification
             when drags start and stop. */
         autoScrollers = [],
         
-        /* The list of myt.DropTargets currently registered for notification 
+        /*  The list of myt.DropTargets currently registered for notification 
             when drag and drop events occur. */
         dropTargets = [],
         
@@ -57,9 +57,9 @@
             }
         },
         
-        /*  Filters the provided array of myt.DragGroupSupport items for the
-            provided myt.Dropable. Returns an array of the matching list
-            items.
+        /*  Filters the provided array of myt.DragGroupSupport items for 
+            the provided myt.Dropable. Returns an array of the matching 
+            list items.
             @param {!Object} dropable
             @param {!Array} list
             @returns {!Array} */
@@ -93,17 +93,17 @@
     /** Provides global drag and drop functionality.
         
         Events:
-            dragLeave:myt.DropTarget Fired when a myt.Dropable is dragged out of
-                the drop target.
+            dragLeave:myt.DropTarget Fired when a myt.Dropable is dragged out 
+                of the drop target.
             dragEnter:myt.DropTarget Fired when a myt.Dropable is dragged over
                 the drop target.
             startDrag:object Fired when a drag starts. Value is the object
                 being dragged.
             stopDrag:object Fired when a drag ends. Value is the object 
                 that is no longer being dragged.
-            drop:object Fired when a drag ends over a drop target. The value is
-                an array containing the dropable at index 0 and the drop target
-                at index 1.
+            drop:object Fired when a drag ends over a drop target. The value 
+                is an array containing the dropable at index 0 and the drop 
+                target at index 1.
         
         @class */
     new JS.Singleton('GlobalDragManager', {

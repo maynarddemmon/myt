@@ -7,113 +7,122 @@
 <script src="../src/js/myt/manifest.js"></script>
 </head><body>
 <script>
-    JS.require('myt.all', function() {
-        var rootView = new myt.View(null, {bgColor:'#eeeeee'}, [myt.SizeToWindow]);
-        
-        var AnimClass = new JS.Class('AnimClass', myt.View, {
-            initNode: function(parent, attrs) {
-                attrs.x = 8;
-                attrs.width = parent.width - 2 * attrs.x;
-                attrs.height = 12;
+    JS.require('myt.all', () => {
+        const JSClass = JS.Class,
+            M = myt,
+            View = M.View,
+            rootView = new View(null, {bgColor:'#eee'}, [M.SizeToWindow]),
+            
+            AnimClass = new JSClass('AnimClass', View, {
+                initNode: function(parent, attrs) {
+                    attrs.x = 8;
+                    attrs.width = parent.width - 2 * attrs.x;
+                    attrs.height = 12;
+                    
+                    this.callSuper(parent, attrs);
+                    
+                    var self = this,
+                        labelWidth = 85,
+                        trackX = labelWidth + 4;
+                    
+                    new M.Text(this, {text:attrs.easing, textAlign:'right', fontSize:'10px', width:labelWidth});
+                    var trackView = new View(this, {
+                        x:trackX, width:this.width - trackX, height:attrs.height, 
+                        bgColor:'#f8f8f8', roundedCorners:2
+                    });
+                    
+                    this.targetView = new M.SimpleButton(trackView, {
+                        width:attrs.height, height:attrs.height, 
+                        activeColor:'#555', hoverColor:'#777', readyColor:'#666', 
+                        roundedCorners:attrs.roundedCorners
+                    }, [{
+                        doActivated: function() {
+                            self.doAnimation();
+                        }
+                    }]);
+                },
                 
-                this.callSuper(parent, attrs);
+                setEasing: function(v) {this.easing = v;},
                 
-                var self = this,
-                    labelWidth = 85,
-                    trackX = labelWidth + 4;
-                
-                new myt.Text(this, {text:attrs.easing, textAlign:'right', fontSize:'10px', width:labelWidth});
-                var trackView = new myt.View(this, {
-                    x:trackX, width:this.width - trackX, height:attrs.height, 
-                    bgColor:'#f8f8f8', roundedCorners:2
-                });
-                
-                this.targetView = new myt.SimpleButton(trackView, {
-                    width:attrs.height, height:attrs.height, 
-                    activeColor:'#555555', hoverColor:'#777777', readyColor:'#666666', 
-                    roundedCorners:attrs.roundedCorners
-                }, [{
-                    doActivated: function() {
-                        self.doAnimation();
+                doAnimation: function() {
+                    let targetView = this.targetView,
+                        parentView = targetView.parent,
+                        repeat = Number(repeatTxt.value) || 1,
+                        duration = Number(durationTxt.value) || 2000,
+                        from = lowerLine.x === 12 ? null : lowerLine.x - 97,
+                        to = upperLine.x - 97 - targetView.width + 1,
+                        isRelative = false,
+                        relativeTo = relativeToTxt.value;
+                    if (relativeTo) {
+                        isRelative = true;
+                        from = 0;
+                        to = Number(relativeTo);
                     }
-                }]);
-            },
-            
-            setEasing: function(v) {this.easing = v;},
-            
-            doAnimation: function() {
-                var targetView = this.targetView,
-                    parentView = targetView.parent,
-                    repeat = Number(repeatTxt.value) || 1,
-                    duration = Number(durationTxt.value) || 2000,
-                    from = lowerLine.x === 12 ? null : lowerLine.x - 97,
-                    to = upperLine.x - 97 - targetView.width + 1,
-                    reversed = contentView.reversed,
-                    easing = this.easing;
+                    targetView.stopActiveAnimators('x');
+                    targetView.animate({
+                        attribute:'x', 
+                        from:from, 
+                        to:to, 
+                        relative:isRelative, 
+                        duration:duration, 
+                        reverse:contentView.reversed, 
+                        repeat:repeat, 
+                        easingFunction:this.easing
+                    });
+                },
                 
-                var isRelative = false,
-                    relativeTo = relativeToTxt.value;
-                if (relativeTo) {
-                    isRelative = true;
-                    from = 0;
-                    to = Number(relativeTo);
+                stopAnimation: function() {
+                    this.targetView.stopActiveAnimators('x');
+                },
+                
+                resetAnimation: function() {
+                    this.stopAnimation();
+                    this.targetView.setX(lowerLine.x === 12 ? 0 : lowerLine.x - 97);
+                },
+                
+                pauseAnimation: function(pause) {
+                    var anims = this.targetView.getActiveAnimators('x'), i = anims.length;
+                    while (i) anims[--i].setPaused(pause);
+                },
+                
+                reverseAnimation: function(reverse) {
+                    var anims = this.targetView.getActiveAnimators('x'), i = anims.length;
+                    while (i) anims[--i].setReverse(reverse);
                 }
-                targetView.stopActiveAnimators('x');
-                targetView.animate('x', to, from, isRelative, null, duration, reversed, repeat, easing);
-            },
+            }),
             
-            stopAnimation: function() {
-                this.targetView.stopActiveAnimators('x');
-            },
+            BtnClass = new JSClass('BtnClass', M.SimpleTextButton, {
+                initNode: function(parent, attrs) {
+                    attrs.height = 22;
+                    if (attrs.width === undefined) attrs.shrinkToFit = true;
+                    attrs.inset = attrs.outset = 8;
+                    attrs.activeColor = '#888';
+                    attrs.hoverColor = '#aaa';
+                    attrs.readyColor = '#999';
+                    attrs.textColor = '#fff';
+                    attrs.roundedCorners = 1;
+                    
+                    this.callSuper(parent, attrs);
+                }
+            }),
             
-            resetAnimation: function() {
-                this.stopAnimation();
-                this.targetView.setX(lowerLine.x === 12 ? 0 : lowerLine.x - 97);
-            },
-            
-            pauseAnimation: function(pause) {
-                var anims = this.targetView.getActiveAnimators('x'), i = anims.length;
-                while (i) anims[--i].setPaused(pause);
-            },
-            
-            reverseAnimation: function(reverse) {
-                var anims = this.targetView.getActiveAnimators('x'), i = anims.length;
-                while (i) anims[--i].setReverse(reverse);
-            }
-        });
-        
-        var BtnClass = new JS.Class('BtnClass', myt.SimpleTextButton, {
-            initNode: function(parent, attrs) {
-                attrs.height = 22;
-                if (attrs.width === undefined) attrs.shrinkToFit = true;
-                attrs.inset = attrs.outset = 8;
-                attrs.activeColor = '#888888';
-                attrs.hoverColor = '#aaaaaa';
-                attrs.readyColor = '#999999';
-                attrs.textColor = '#ffffff';
-                attrs.roundedCorners = 1;
+            InputClass = new JSClass('InputClass', M.InputText, {
+                include: [M.MouseOver, M.TooltipMixin],
                 
-                this.callSuper(parent, attrs);
-            }
-        });
+                initNode: function(parent, attrs) {
+                    attrs.height = 22;
+                    attrs.roundedCorners = 2;
+                    attrs.border = [1,'solid','#999'];
+                    
+                    this.callSuper(parent, attrs);
+                    
+                    this.setStyleProperty('paddingLeft', '4px');
+                    this.setStyleProperty('paddingBottom', '2px');
+                }
+            });
         
-        var InputClass = new JS.Class('InputClass', myt.InputText, {
-            include: [myt.MouseOver, myt.TooltipMixin],
-            
-            initNode: function(parent, attrs) {
-                attrs.height = 22;
-                attrs.roundedCorners = 2;
-                attrs.border = [1,'solid','#999999'];
-                
-                this.callSuper(parent, attrs);
-                
-                this.setStyleProperty('paddingLeft', '4px');
-                this.setStyleProperty('paddingBottom', '2px');
-            }
-        });
-        
-        var contentView = new myt.View(rootView, {
-            x:10, y:10, width:600, bgColor:'#cccccc', roundedCorners:10
+        var contentView = new View(rootView, {
+            x:10, y:10, width:600, bgColor:'#ccc', roundedCorners:10
         }, [{
             notify: function(methodName) {
                 var args = Array.prototype.slice.call(arguments, 1);
@@ -152,7 +161,7 @@
         }]);
         
         // Control View //
-        var controlView = new myt.View(contentView, {
+        var controlView = new View(contentView, {
             ignoreLayout:true,
             x:8, y:8, width:contentView.width - 16, height:24, 
             bgColor:'#ffffff', roundedCorners:2
@@ -174,45 +183,45 @@
             width:65, placeholder:'relative to', allowedChars:'-0123456789', maxLength:4, text:'',
             tooltip:'If not empty a relative animation will be performed using this as the to value.'
         });
-        new myt.SpacedLayout(controlView, {spacing:1, inset:1});
-        new myt.ConstantLayout(controlView, {targetAttrName:'y', targetValue:1});
+        new M.SpacedLayout(controlView, {spacing:1, inset:1});
+        new M.ConstantLayout(controlView, {targetAttrName:'y', targetValue:1});
         
         // Easing Views //
         var easings = [
             'linear',
             
-            'easeInQuad',
-            'easeInCubic',
-            'easeInQuart',
-            'easeInQuint',
-            'easeInSine',
-            'easeInExpo',
-            'easeInCirc',
-            'easeInElastic',
-            'easeInBack',
-            'easeInBounce',
+            'inQuad',
+            'inCubic',
+            'inQuart',
+            'inQuint',
+            'inSine',
+            'inExpo',
+            'inCirc',
+            'inElastic',
+            'inBack',
+            'inBounce',
             
-            'easeOutQuad',
-            'easeOutCubic',
-            'easeOutQuart',
-            'easeOutQuint',
-            'easeOutSine',
-            'easeOutExpo',
-            'easeOutCirc',
-            'easeOutElastic',
-            'easeOutBack',
-            'easeOutBounce',
+            'outQuad',
+            'outCubic',
+            'outQuart',
+            'outQuint',
+            'outSine',
+            'outExpo',
+            'outCirc',
+            'outElastic',
+            'outBack',
+            'outBounce',
             
-            'easeInOutQuad',
-            'easeInOutCubic',
-            'easeInOutQuart',
-            'easeInOutQuint',
-            'easeInOutSine',
-            'easeInOutExpo',
-            'easeInOutCirc',
-            'easeInOutElastic',
-            'easeInOutBack',
-            'easeInOutBounce'
+            'inOutQuad',
+            'inOutCubic',
+            'inOutQuart',
+            'inOutQuint',
+            'inOutSine',
+            'inOutExpo',
+            'inOutCirc',
+            'inOutElastic',
+            'inOutBack',
+            'inOutBounce'
         ], len = easings.length, i = 0;
         for (;len > i;) new AnimClass(contentView, {easing:easings[i++]});
         
@@ -220,13 +229,13 @@
         // Markers //
         var w = contentView.width,
             upperLimit = w - 13;
-        var lowerView = new myt.SimpleButton(contentView, {
+        var lowerView = new M.SimpleButton(contentView, {
             ignoreLayout:true, y:34, x:93, width:7, height:10,
-            activeColor:'#999999', hoverColor:'#bbbbbb', readyColor:'#aaaaaa',
-            border:[1,'solid','#666666'],
+            activeColor:'#999', hoverColor:'#bbb', readyColor:'#aaa',
+            border:[1,'solid','#666'],
             roundedCorners:2,
             tooltip:'The from value of the animation. If you slide this away to the left the current location of the animation target will be used.'
-        }, [myt.Draggable, myt.TooltipMixin, {
+        }, [M.Draggable, M.TooltipMixin, {
             requestDragPosition: function(x, y) {
                 y = 34;
                 if (x <= 70) {
@@ -237,7 +246,7 @@
                 this.callSuper(x, y);
             }
         }]);
-        var lowerLine = new myt.View(contentView, {
+        var lowerLine = new View(contentView, {
             ignoreLayout:true, y:46, x:96, width:1, height:0,
             bgColor:'#00ff00', opacity:0.5
         }, [{
@@ -245,37 +254,37 @@
         }]);
         lowerLine.syncTo(lowerView, 'updateX', 'x');
         
-        var upperView = new myt.SimpleButton(contentView, {
+        var upperView = new M.SimpleButton(contentView, {
             ignoreLayout:true, y:34, x:upperLimit, width:7, height:10,
-            activeColor:'#999999', hoverColor:'#bbbbbb', readyColor:'#aaaaaa',
-            border:[1,'solid','#666666'],
+            activeColor:'#999', hoverColor:'#bbb', readyColor:'#aaa',
+            border:[1,'solid','#666'],
             roundedCorners:2,
             tooltip:'The to value for the animation.'
-        }, [myt.Draggable, myt.TooltipMixin, {
+        }, [M.Draggable, M.TooltipMixin, {
             requestDragPosition: function(x, y) {
                 y = 34;
                 x = Math.min(Math.max(x, 93), upperLimit);
                 this.callSuper(x, y);
             }
         }]);
-        var upperLine = new myt.View(contentView, {
+        var upperLine = new View(contentView, {
             ignoreLayout:true, y:46, x:w - 10, width:1, height:0,
-            bgColor:'#ff0000', opacity:0.5
+            bgColor:'#f00', opacity:0.5
         }, [{
             updateX: function(event) {this.setX(event.value + 4);}
         }]);
         upperLine.syncTo(upperView, 'updateX', 'x');
         
-        new myt.SpacedLayout(contentView, {axis:'y', spacing:1, inset:48, outset:8, collapseParent:true});
+        new M.SpacedLayout(contentView, {axis:'y', spacing:1, inset:48, outset:8, collapseParent:true});
         
         var h = contentView.height - lowerLine.y - 8;
         lowerLine.setHeight(h);
         upperLine.setHeight(h);
         
         // Race around the edge to test next chaining
-        new myt.SimpleButton(rootView, {
+        new M.SimpleButton(rootView, {
             x:contentView.x, y:contentView.y, width:8, height:8,
-            activeColor:'#cc0000', hoverColor:'#ff3333', readyColor:'#ff0000',
+            activeColor:'#c00', hoverColor:'#f33', readyColor:'#f00',
             roundedCorners:2
         }, [{
             doActivated: function() {
@@ -283,26 +292,26 @@
                 this.setY(contentView.y);
                 this.stopActiveAnimators();
                 
-                var self = this, 
-                    xAmount = contentView.width - this.width, 
-                    yAmount = contentView.height - this.height;
-                this.animate('x', xAmount, null, true).next(
-                    function(success) {
+                const self = this, 
+                    xAmount = contentView.width - self.width, 
+                    yAmount = contentView.height - self.height;
+                self.animate({attribute:'x', to:xAmount, relative:true}).next(
+                    success => {
                         // Demonstrate relative adding
-                        self.animate('x', 100, null, true, null, 1000, false, 1, 'easeInQuad');
-                        self.animate('x', -100, null, true, null, 1000, false, 1, 'easeOutQuad');
+                        self.animate({attribute:'x', to:100, relative:true, easingFunction:'inQuad'});
+                        self.animate({attribute:'x', to:-100, relative:true, easingFunction:'outQuad'});
                         
-                        self.animate('y', yAmount, null, true).next(
-                            function(success) {
+                        self.animate({attribute:'y', to:yAmount, relative:true}).next(
+                            success => {
                                 // Demonstrate relative adding
-                                self.animate('y', 100, null, true, null, 1000, false, 1, 'easeInQuad');
-                                self.animate('y', -100, null, true, null, 1000, false, 1, 'easeOutQuad');
+                                self.animate({attribute:'y', to:100, relative:true, easingFunction:'inQuad'});
+                                self.animate({attribute:'y', to:-100, relative:true, easingFunction:'outQuad'});
                                 
-                                self.animate('x', -xAmount, null, true).next(
-                                    function(success) {
+                                self.animate({attribute:'x', to:-xAmount, relative:true}).next(
+                                    success => {
                                         // Demonstrate relative adding and object param
-                                        self.animate({attribute:'x', to:-100, relative:true, easingFunction:'easeInQuad'});
-                                        self.animate({attribute:'x', to:100, relative:true, easingFunction:'easeOutQuad'});
+                                        self.animate({attribute:'x', to:-100, relative:true, easingFunction:'inQuad'});
+                                        self.animate({attribute:'x', to:100, relative:true, easingFunction:'outQuad'});
                                         
                                         self.animate({attribute:'y', to:-yAmount, relative:true});
                                     }
@@ -313,8 +322,8 @@
                 );
                 
                 // Demonstrate relative adding
-                self.animate('y', -100, null, true, null, 1000, false, 1, 'easeInQuad');
-                self.animate('y', 100, null, true, null, 1000, false, 1, 'easeOutQuad');
+                self.animate({attribute:'y', to:-100, relative:true, easingFunction:'inQuad'});
+                self.animate({attribute:'y', to:100, relative:true, easingFunction:'outQuad'});
             }
         }]);
     });

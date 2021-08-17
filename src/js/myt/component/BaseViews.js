@@ -12,9 +12,9 @@
         include: [pkg.FlexBoxSupport]
     });
     
-    /** A view for an iframe. This component also listens to global mousedown/up
-        events and turns off point-events so that the iframe will interfere
-        less with mouse behavior in the parent document.
+    /** A view for an iframe. This component also listens to global mousedown
+        and mouseup events and turns off point-events so that the iframe will 
+        interfere less with mouse behavior in the parent document.
         
         Events:
             src:string
@@ -141,8 +141,8 @@
         }
     });
     
-    /** A view that displays an image. By default useNaturalSize is set to true
-        so the Image will take on the size of the image data.
+    /** A view that displays an image. By default useNaturalSize is set to 
+        true so the Image will take on the size of the image data.
         
         @class */
     pkg.Image = new JSClass('Image', View, {

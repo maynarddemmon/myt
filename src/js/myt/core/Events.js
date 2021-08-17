@@ -18,8 +18,8 @@
         /** Adds the observer to the list of event recipients for the 
             event type.
             @param observer:myt.Observer The observer that will observe this
-                observable. If methodName is a function this object will be the
-                context for the function when it is called.
+                observable. If methodName is a function this object will be 
+                the context for the function when it is called.
             @param methodName:string|function The name of the method to call, 
                 or a function, on the observer when the event fires.
             @param type:string The name of the event the observer will 
@@ -82,18 +82,18 @@
                         const observer = observers[--i],
                             methodName = observers[--i];
                         
-                        // If an observer is registered more than once the list 
-                        // may get shortened by observer.detachFrom. If so, just 
-                        // continue decrementing downwards.
+                        // If an observer is registered more than once the 
+                        // list may get shortened by observer.detachFrom. 
+                        // If so, just continue decrementing downwards.
                         if (observer && methodName) {
                             if (typeof observer.detachFrom !== 'function' || 
                                 !observer.detachFrom(this, methodName, type)
                             ) {
-                                // Observer may not have a detachFrom function 
-                                // or observer may not have attached via 
-                                // Observer.attachTo so do default detach 
-                                // activity as implemented 
-                                // in Observable.detachObserver
+                                // Observer may not have a detachFrom 
+                                // function or the observer may not have 
+                                // attached via Observer.attachTo so 
+                                // do the default detach activity as 
+                                // implemented in Observable.detachObserver
                                 observers.splice(i, 2);
                             }
                         }
@@ -135,8 +135,8 @@
             return (this.__aet || (this.__aet = {}))[type];
         },
         
-        /** Generates a new event from the provided type and value and fires it
-            to the provided observers or the registered observers.
+        /** Generates a new event from the provided type and value and fires 
+            it to the provided observers or the registered observers.
             @param type:string The event type to fire.
             @param value:* The value to set on the event.
             @param observers:array (Optional) If provided the event will
@@ -153,7 +153,7 @@
                 const event = {source:self, type:type, value:value}, // Inlined from this.createEvent
                     activeEventTypes = self.__aet || (self.__aet = {});
                 if (activeEventTypes[type] === true) {
-                    pkg.global.error.notifyWarn('eventLoop', "Attempt to refire active event: " + type);
+                    pkg.global.error.notifyWarn('eventLoop', 'Abort refiring event:' + type);
                 } else {
                     // Mark event type as "active"
                     activeEventTypes[type] = true;
@@ -243,11 +243,9 @@
                 pkg.dumpStack(err);
             }
             
-            // Providing a true value for once means we'll never 
+            // Providing a true value for once means we will never 
             // actually attach.
-            if (once) return;
-            
-            this.attachTo(observable, methodName, eventType, once);
+            if (!once) this.attachTo(observable, methodName, eventType, once);
         },
         
         /** Checks if this Observer is attached to the provided observable for
@@ -265,9 +263,9 @@
                     if (observables) {
                         let i = observables.length;
                         while (i) {
-                            // Ensures we decrement twice. First with --i, then 
-                            // with i-- since the part after && may not be 
-                            // executed.
+                            // Ensures we decrement twice. First with --i, 
+                            // then with i-- since the part after && may 
+                            // not be executed.
                             --i;
                             if (observable === observables[i--] && methodName === observables[i]) return true;
                         }
@@ -305,8 +303,8 @@
             @param eventType:string the event type to attach for.
             @param once:boolean (optional) if true  this Observer will detach
                 from the Observable after the event is handled once.
-            @returns boolean true if the observable was successfully registered, 
-                false otherwise. */
+            @returns boolean true if the observable was successfully 
+                registered, false otherwise. */
         attachTo: function(observable, methodName, eventType, once) {
             if (observable && methodName && eventType) {
                 const observables = this.getObservables(eventType);
@@ -343,8 +341,8 @@
             @param methodName:string the method name on this instance to 
                 execute.
             @param eventType:string the event type to attach for.
-            @returns boolean true if one or more detachments occurred, false 
-                otherwise. */
+            @returns boolean true if one or more detachments occurred, 
+                false otherwise. */
         detachFrom: function(observable, methodName, eventType) {
             if (observable && methodName && eventType) {
                 // No need to unregister if observable array doesn't exist.
@@ -403,7 +401,7 @@
                 // Make sure an even number of observable/type was provided
                 const len = observables.length;
                 if (len % 2 !== 0) {
-                    console.log("Observables not even.", this);
+                    console.log('Observables uneven', this);
                 } else {
                     // Lazy instantiate constraints array.
                     const constraints = this.__cbmn || (this.__cbmn = {}),
@@ -411,7 +409,7 @@
                     
                     // Don't allow a constraint to be clobbered.
                     if (constraint.length > 0) {
-                        console.log("Constraint already exists for " + methodName + " on " + this);
+                        console.log('Constraint exists for ' + methodName + ' on ' + this);
                     } else {
                         for (let i = 0; len !== i;) {
                             const observable = observables[i++],

@@ -5,7 +5,6 @@
         mathCos = math.cos,
         mathPow = math.pow,
         mathSqrt = math.sqrt,
-        
         PI = math.PI,
         TWO_PI = 2 * PI,
         HALF_PI = PI / 2,
@@ -13,61 +12,61 @@
         easingFunctions = {
             linear:t => t,
             
-            easeInQuad:t => t*t,
-            easeOutQuad:t => -t*(t-2),
-            easeInOutQuad:t => (t*=2) < 1 ? t*t/2 : -((--t)*(t-2) - 1)/2,
+            inQuad:t => t*t,
+            outQuad:t => -t*(t-2),
+            inOutQuad:t => (t*=2) < 1 ? t*t/2 : -((--t)*(t-2) - 1)/2,
             
-            easeInCubic:t => t*t*t,
-            easeOutCubic:t => (t=t-1)*t*t + 1,
-            easeInOutCubic:t => (t*=2) < 1 ? t*t*t/2 : ((t-=2)*t*t + 2)/2,
+            inCubic:t => t*t*t,
+            outCubic:t => (t=t-1)*t*t + 1,
+            inOutCubic:t => (t*=2) < 1 ? t*t*t/2 : ((t-=2)*t*t + 2)/2,
             
-            easeInQuart:t => t*t*t*t,
-            easeOutQuart:t => -((t=t-1)*t*t*t - 1),
-            easeInOutQuart:t => (t*=2) < 1 ? t*t*t*t/2 : -((t-=2)*t*t*t - 2)/2,
+            inQuart:t => t*t*t*t,
+            outQuart:t => -((t=t-1)*t*t*t - 1),
+            inOutQuart:t => (t*=2) < 1 ? t*t*t*t/2 : -((t-=2)*t*t*t - 2)/2,
             
-            easeInQuint:t => t*t*t*t*t,
-            easeOutQuint:t => (t=t-1)*t*t*t*t + 1,
-            easeInOutQuint:t => (t*=2) < 1 ? t*t*t*t*t/2 : ((t-=2)*t*t*t*t + 2)/2,
+            inQuint:t => t*t*t*t*t,
+            outQuint:t => (t=t-1)*t*t*t*t + 1,
+            inOutQuint:t => (t*=2) < 1 ? t*t*t*t*t/2 : ((t-=2)*t*t*t*t + 2)/2,
             
-            easeInSine:t => -mathCos(t * HALF_PI) + 1,
-            easeOutSine:t => mathSin(t * HALF_PI),
-            easeInOutSine:t => -(mathCos(t * PI) - 1)/2,
+            inSine:t => -mathCos(t * HALF_PI) + 1,
+            outSine:t => mathSin(t * HALF_PI),
+            inOutSine:t => -(mathCos(t * PI) - 1)/2,
             
-            easeInCirc:t => -(mathSqrt(1 - t*t) - 1),
-            easeOutCirc:t => mathSqrt(1 - (t=t-1)*t),
-            easeInOutCirc:t => (t*=2) < 1 ? -(mathSqrt(1 - t*t) - 1)/2: (mathSqrt(1 - (t-=2)*t) + 1)/2,
+            inCirc:t => -(mathSqrt(1 - t*t) - 1),
+            outCirc:t => mathSqrt(1 - (t=t-1)*t),
+            inOutCirc:t => (t*=2) < 1 ? -(mathSqrt(1 - t*t) - 1)/2: (mathSqrt(1 - (t-=2)*t) + 1)/2,
             
-            easeInExpo:t => t === 0 ? 0 : mathPow(2, 10 * (t - 1)),
-            easeOutExpo:t => t === 1 ? 1 : (-mathPow(2, -10 * t) + 1),
-            easeInOutExpo:t => {
+            inExpo:t => t === 0 ? 0 : mathPow(2, 10 * (t - 1)),
+            outExpo:t => t === 1 ? 1 : (-mathPow(2, -10 * t) + 1),
+            inOutExpo:t => {
                 if (t === 0 || t === 1) return t;
                 if ((t*=2) < 1) return mathPow(2, 10 * (t - 1))/2;
                 return (-mathPow(2, -10 * --t) + 2)/2;
             },
             
-            easeInElastic:t => {
+            inElastic:t => {
                 if (t === 0 || t === 1) return t;
                 const p = 0.3;
                 return -(mathPow(2, 10 * (t -= 1)) * mathSin((t * 1 - p/4) * TWO_PI / p));
             },
-            easeOutElastic:t => {
+            outElastic:t => {
                 if (t === 0 || t === 1) return t;
                 const p = 0.3;
                 return mathPow(2,-10 * t) * mathSin((t * 1 - p/4) * TWO_PI / p) + 1;
             },
-            easeInOutElastic:t => {
+            inOutElastic:t => {
                 if (t === 0 || t === 1) return t;
                 const p = 0.45;
                 if ((t*=2) < 1) return -(mathPow(2, 10 * (t-=1)) * mathSin((t * 1 - p/4) * TWO_PI / p))/2;
                 return mathPow(2, -10 * (t-=1)) * mathSin((t * 1 - p/4) * TWO_PI/p)/2 + 1;
             },
             
-            easeInBack:(t, s=1.70158) => (t/=1) * t * ((s+1)*t - s),
-            easeOutBack:(t, s=1.70158) => (t=t/1-1) * t * ((s+1)*t + s) + 1,
-            easeInOutBack:(t, s=1.70158) => (t*=2) < 1 ? (t*t*(((s*=(1.525))+1)*t - s))/2 : ((t-=2)*t*(((s*=(1.525))+1)*t + s) + 2)/2,
+            inBack:(t, s=1.70158) => (t/=1) * t * ((s+1)*t - s),
+            outBack:(t, s=1.70158) => (t=t/1-1) * t * ((s+1)*t + s) + 1,
+            inOutBack:(t, s=1.70158) => (t*=2) < 1 ? (t*t*(((s*=(1.525))+1)*t - s))/2 : ((t-=2)*t*(((s*=(1.525))+1)*t + s) + 2)/2,
             
-            easeInBounce:t => 1 - easingFunctions.easeOutBounce(1-t),
-            easeOutBounce:t => {
+            inBounce:t => 1 - easingFunctions.outBounce(1-t),
+            outBounce:t => {
                 if (t < (1/2.75)) {
                     return 7.5625*t*t;
                 } else if (t < (2/2.75)) {
@@ -77,7 +76,7 @@
                 }
                 return 7.5625*(t-=(2.625/2.75))*t + 0.984375;
             },
-            easeInOutBounce:t => (t*=2) < 1 ? easingFunctions.easeInBounce(t)/2 : (easingFunctions.easeOutBounce(t-1) + 1)/2
+            inOutBounce:t => (t*=2) < 1 ? easingFunctions.inBounce(t)/2 : (easingFunctions.outBounce(t-1) + 1)/2
         },
         
         globalIdle = pkg.global.idle,
@@ -89,11 +88,11 @@
             animator.__isColorAnim = (target && typeof target.isColorAttr === 'function') ? target.isColorAttr(animator.attribute) : undefined;
         },
         
+        makeColorFromHexString = pkg.Color.makeColorFromHexString,
         getColorValue = (from, to, motionValue, relative, value) => {
-            const Color = pkg.Color,
-                fromColor = Color.makeColorFromHexString(from),
-                toColor = Color.makeColorFromHexString(to),
-                colorObj = relative ? Color.makeColorFromHexString(value) : fromColor;
+            const fromColor = makeColorFromHexString(from),
+                toColor = makeColorFromHexString(to),
+                colorObj = relative ? makeColorFromHexString(value) : fromColor;
             colorObj.setRed(colorObj.red + ((toColor.red - fromColor.red) * motionValue));
             colorObj.setGreen(colorObj.green + ((toColor.green - fromColor.green) * motionValue));
             colorObj.setBlue(colorObj.blue + ((toColor.blue - fromColor.blue) * motionValue));
@@ -109,7 +108,7 @@
             
             // Determine what "from" to use if none was provided.
             if (animator.from == null) {
-                animator.__temporaryFrom = true;
+                animator.__tmpFrom = true;
                 animator.from = relative ? (animator.__isColorAnim ? '#000' : 0) : target.get(attr);
             }
             
@@ -121,9 +120,9 @@
         },
         
         reset = animator => {
-            animator.__temporaryFrom = false;
-            animator.__loopCount = animator.reverse ? animator.repeat - 1 : 0;
-            animator.__progress = animator.reverse ? animator.duration : 0;
+            animator.__tmpFrom = false;
+            animator.__loopCnt = animator.reverse ? animator.repeat - 1 : 0;
+            animator.__prog = animator.reverse ? animator.duration : 0;
         },
         
         advance = (animator, timeDiff) => {
@@ -136,33 +135,33 @@
                 if (reverse) timeDiff *= -1;
                 
                 // Determine how much time to move forward by.
-                const oldProgress = animator.__progress;
-                animator.__progress += timeDiff;
+                const oldProgress = animator.__prog;
+                animator.__prog += timeDiff;
                 
                 // Check for overage
                 let remainderTime = 0;
-                if (animator.__progress > duration) {
-                    remainderTime = animator.__progress - duration;
-                    animator.__progress = duration;
+                if (animator.__prog > duration) {
+                    remainderTime = animator.__prog - duration;
+                    animator.__prog = duration;
                     
                     // Increment loop count and halt looping if necessary
-                    if (++animator.__loopCount === repeat) remainderTime = 0;
-                } else if (0 > animator.__progress) {
+                    if (++animator.__loopCnt === repeat) remainderTime = 0;
+                } else if (0 > animator.__prog) {
                     // Reverse case
-                    remainderTime = -animator.__progress; // Flip reverse time back to forward time
-                    animator.__progress = 0;
+                    remainderTime = -animator.__prog; // Flip reverse time back to forward time
+                    animator.__prog = 0;
                     
                     // Decrement loop count and halt looping if necessary
-                    if (0 > --animator.__loopCount && repeat > 0) remainderTime = 0;
+                    if (0 > --animator.__loopCnt && repeat > 0) remainderTime = 0;
                 }
                 
                 const target = getTarget(animator);
                 if (target) {
-                    updateTarget(animator, target, animator.__progress, oldProgress);
+                    updateTarget(animator, target, animator.__prog, oldProgress);
                     
                     if (
-                        (!reverse && animator.__loopCount === repeat) || // Forward check
-                        (reverse && 0 > animator.__loopCount && repeat > 0) // Reverse check
+                        (!reverse && animator.__loopCnt === repeat) || // Forward check
+                        (reverse && 0 > animator.__loopCnt && repeat > 0) // Reverse check
                     ) {
                         // Stop animation since loop count exceeded repeat count.
                         animator.setRunning(false);
@@ -171,12 +170,12 @@
                         // Advance again if time is remaining. This occurs when
                         // the timeDiff provided was greater than the animation
                         // duration and the animation loops.
-                        animator.fireEvent('repeat', animator.__loopCount);
-                        animator.__progress = reverse ? duration : 0;
+                        animator.fireEvent('repeat', animator.__loopCnt);
+                        animator.__prog = reverse ? duration : 0;
                         advance(animator, remainderTime);
                     }
                 } else {
-                    console.log("No target found for animator.", animator);
+                    console.log('No target for animator', animator);
                     animator.setRunning(false);
                     if (animator.callback) animator.callback.call(animator, false);
                 }
@@ -208,48 +207,48 @@
                     string: See http://easings.net/ for more info. One of the 
                         following:
                             linear, 
-                            easeInQuad, easeOutQuad, easeInOutQuad(default), 
-                            easeInCubic, easeOutCubic, easeInOutCubic, 
-                            easeInQuart, easeOutQuart, easeInOutQuart, 
-                            easeInQuint, easeOutQuint, easeInOutQuint, 
-                            easeInSine, easeOutSine, easeInOutSine,
-                            easeInExpo ,easeOutExpo, easeInOutExpo, 
-                            easeInCirc, easeOutCirc, easeInOutCirc,
-                            easeInElastic ,easeOutElastic, easeInOutElastic, 
-                            easeInBack, easeOutBack, easeInOutBack, 
-                            easeInBounce, easeOutBounce, easeInOutBounce
+                            inQuad, outQuad, inOutQuad(default), 
+                            inCubic, outCubic, inOutCubic, 
+                            inQuart, outQuart, inOutQuart, 
+                            inQuint, outQuint, inOutQuint, 
+                            inSine, outSine, inOutSine,
+                            inExpo ,outExpo, inOutExpo, 
+                            inCirc, outCirc, inOutCirc,
+                            inElastic ,outElastic, inOutElastic, 
+                            inBack, outBack, inOutBack, 
+                            inBounce, outBounce, inOutBounce
                     
-                    function: A function that determines the rate of change of 
-                        the attribute. The arguments to the easing 
+                    function: A function that determines the rate of change 
+                        of the attribute. The arguments to the easing 
                         function are:
                             t: Animation progress in millis
                             c: Value change (to - from)
                             d: Animation duration in millis
-                relative:boolean Determines if the animated value is set on the 
-                    target (false), or added to the exiting value on the 
+                relative:boolean Determines if the animated value is set on 
+                    the target (false), or added to the exiting value on the 
                     target (true). Note that this means the difference between 
                     the from and to values will be "added" to the existing 
                     value on the target. The default value is false.
-                repeat:number The number of times to repeat the animation. If 
-                    negative the animation will repeat forever. The default 
+                repeat:number The number of times to repeat the animation. 
+                    If negative the animation will repeat forever. The default 
                     value is 1.
                 reverse:boolean If true, the animation is run in reverse.
-                running:boolean Indicates if the animation is currently running.
-                    The default value is false.
-                paused:boolean Indicates if the animation is temporarily paused.
-                    The default value is false.
-                callback:function A function that gets called when the animation
-                    completes. A boolean value is passed into the function and 
-                    will be true if the animation completed successfully or 
-                    false if not.
+                running:boolean Indicates if the animation is currently 
+                    running. The default value is false.
+                paused:boolean Indicates if the animation is temporarily 
+                    paused. The default value is false.
+                callback:function A function that gets called when the 
+                    animation completes. A boolean value is passed into the 
+                    function and will be true if the animation completed 
+                    successfully or false if not.
             
             Private Attributes:
-                __loopCount:number the loop currently being run.
-                __progress:number the number of millis currently used during 
+                __loopCnt:number the loop currently being run.
+                __prog:number the number of millis currently used during 
                     the current animation loop.
-                __temporaryFrom:boolean Indicates no "from" was set on the 
-                    animator so we will have to generate one when needed. We 
-                    want to reset back to undefined after the animation 
+                __tmpFrom:boolean Indicates no "from" was set on the 
+                    animator so we will have to generate one when needed. 
+                    We want to reset back to undefined after the animation 
                     completes so that subsequent calls to start the animation
                     will behave the same.
                 __isColorAnim:boolean Indicates this animator is animating a
@@ -262,9 +261,11 @@
             
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                easingFunctions: easingFunctions,
+                /** An object containing easign functions. */
+                easings: easingFunctions,
                 
-                DEFAULT_EASING_FUNCTION: easingFunctions.easeInOutQuad
+                /** The default easing function. */
+                EASING: easingFunctions.inOutQuad
             },
             
             // Life Cycle //////////////////////////////////////////////////////
@@ -275,7 +276,7 @@
                 self.duration = 1000;
                 self.relative = self.reverse = self.running = self.paused = false;
                 self.repeat = 1;
-                self.easingFunction = Animator.DEFAULT_EASING_FUNCTION;
+                self.easingFunction = Animator.EASING;
                 
                 self.callSuper(parent, attrs);
                 
@@ -294,7 +295,7 @@
                         if (v) {
                             isColorAttr(self);
                         } else {
-                            if (self.__temporaryFrom) self.from = undefined;
+                            if (self.__tmpFrom) self.from = undefined;
                             reset(self);
                         }
                         self[v ? 'attachTo' : 'detachFrom'](globalIdle, '__updateAnim', 'idle');
@@ -325,7 +326,7 @@
                 if (typeof v === 'string') v = easingFunctions[v];
                 
                 // Use default if invalid
-                if (!v) v = Animator.DEFAULT_EASING_FUNCTION;
+                if (!v) v = Animator.EASING;
                 
                 this.set('easingFunction', v, true);
             },
@@ -338,10 +339,11 @@
             // Methods /////////////////////////////////////////////////////////
             /** A convienence method to set the callback to run when the 
                 animator stops running. If a callback already exists the 
-                provided callback will be executed after the existing one.
+                provided callback will be executed after (but not after the
+                existing animator completes) the existing one.
                 @param {!Function} callback - The function to run.
-                @param {boolean} [replace] - If true the existing callback will 
-                    be replaced with the new callback.
+                @param {boolean} [replace] - If true the existing callback 
+                    will be replaced with the new callback.
                 @returns {undefined} */
             next: function(callback, replace) {
                 const self = this,
@@ -357,8 +359,8 @@
             },
             
             /** Puts the animator back to an initial configured state.
-                @param {boolean} [executeCallback] - If true the callback, if
-                    it exists, will be executed.
+                @param {boolean} [executeCallback] - If true and the callback
+                    exists, the callback will be executed.
                 @returns {undefined} */
             reset: function(executeCallback) {
                 const self = this;
@@ -379,7 +381,7 @@
                 self.duration = 1000;
                 self.relative = self.reverse = false;
                 self.repeat = 1;
-                self.easingFunction = Animator.DEFAULT_EASING_FUNCTION;
+                self.easingFunction = Animator.EASING;
                 
                 self.reset(false);
             },

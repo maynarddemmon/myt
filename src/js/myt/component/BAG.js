@@ -1,14 +1,13 @@
 (pkg => {
     const AccessorSupport = pkg.AccessorSupport,
-    
+        
         /*  A data structure of groups stored as a map of maps. First 
-            level is attribute name second level is group ID.
-            @private */
+            level is attribute name second level is group ID. */
         BAGsByAttrName = {},
         
-        /** Manages a boolean attribute on a collection of Nodes. Ensures that 
-            no more than one of the Nodes has the attribute set to true at 
-            one time.
+        /** Manages a boolean attribute on a collection of Nodes. Ensures 
+            that no more than one of the Nodes has the attribute set to 
+            true at one time.
             
             Events:
                 attrName:string
@@ -16,11 +15,11 @@
                 trueNode:myt.Node
             
             Attributes:
-                attrName:string The name of the boolean attribute to monitor 
-                    and update.
+                attrName:string The name of the boolean attribute to 
+                    monitor and update.
                 groupId:string The unqiue ID of the group.
-                trueNode:myt.Node The node that is currently true. Will be null 
-                    if no node is true.
+                trueNode:myt.Node The node that is currently true. Will 
+                    be null if no node is true.
             
             Private Attributes:
                 __nodes:array A list of the currently registered nodes.
@@ -125,8 +124,8 @@
                 }
             },
             
-            /** Sets the attribute to true on the provided registered node and 
-                sets it to false on all other registered nodes.
+            /** Sets the attribute to true on the provided registered node 
+                and sets it to false on all other registered nodes.
                 @param node:myt.Node the node to set the attribute to true on.
                 @returns {undefined} */
             setTrue: function(node) {
@@ -263,20 +262,9 @@
             @param {!Object} event
             @returns {undefined} */
         __updateForBAG: function(event) {
-            const type = event.type,
-                value = event.value,
-                groups = this.__bags;
-            let i = groups.length;
-            while (i) {
-                const group = groups[--i];
-                if (group.attrName === type) {
-                    if (value) {
-                        group.setTrue(this);
-                    } else {
-                        group.setFalse(this);
-                    }
-                }
-            }
+            this.__bags.forEach(bag => {
+                if (bag.attrName === event.type) bag[event.value ? 'setTrue' : 'setFalse'](this);
+            });
         }
     });
 })(myt);

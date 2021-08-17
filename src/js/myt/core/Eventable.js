@@ -4,7 +4,7 @@
     
     Attributes:
         inited:boolean Set to true after this Eventable has completed 
-            initializing.
+            initialization.
     
     @class */
 myt.Eventable = new JS.Class('Eventable', {
@@ -30,7 +30,7 @@ myt.Eventable = new JS.Class('Eventable', {
                 if (mixin = mixins[i++]) {
                     self.extend(mixin);
                 } else {
-                    console.warn('Missing mixin in:' + self.klass.__displayName);
+                    console.warn('Missing mixin in', self.klass.__displayName);
                 }
             }
         }

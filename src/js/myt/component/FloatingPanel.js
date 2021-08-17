@@ -205,7 +205,9 @@
             ignoreOwnerForHideOnBlur:boolean If true the owner view for this
                 panel will also be ignored for blur events. True by default.
             hideOnBlur:boolean If true this panel will be hidden when a
-                focus traverses outside the panel. True by default. */
+                focus traverses outside the panel. True by default.
+        
+        @class */
     pkg.FloatingPanel = new JS.Class('FloatingPanel', pkg.View, {
         include: [pkg.RootView],
         
@@ -268,7 +270,7 @@
             where to give focus. */
         focus: function(noScroll) {
             if (this.owner && this.isAncestorOf(GlobalFocus.focusedView)) {
-                this.owner[GlobalFocus.lastTraversalWasForward ? 'getNextFocusAfterPanel' : 'getPrevFocusAfterPanel'](this.panelId).focus(noScroll);
+                this.owner[(GlobalFocus.lastTraversalWasForward ? 'getNext' : 'getPrev') + 'FocusAfterPanel'](this.panelId).focus(noScroll);
             } else {
                 const ffv = this.getFirstFocusableDescendant();
                 if (ffv === this) {
@@ -379,13 +381,13 @@
                     case 'insideRight': x += panelAnchor.width - this.width; break;
                     case 'outsideLeft': x -= this.width; break;
                     case 'insideLeft': break;
-                    default: console.warn("Unexpected align value", type, align);
+                    default: console.warn('Invalid align value', type, align);
                 }
             } else if (type === 'number') {
                 // Absolute position
                 x = align;
             } else {
-                console.warn("Unexpected align type", type, align);
+                console.warn('Invalid align type', type, align);
             }
             this.setX(x);
             
@@ -399,13 +401,13 @@
                     case 'insideBottom': y += panelAnchor.height - this.height; break;
                     case 'outsideTop': y -= this.height; break;
                     case 'insideTop': break;
-                    default: console.warn("Unexpected valign value", type, valign);
+                    default: console.warn('Invalid valign value', type, valign);
                 }
             } else if (type === 'number') {
                 // Absolute position
                 y = valign;
             } else {
-                console.warn("Unexpected valign type", type, valign);
+                console.warn('Invalid valign type', type, valign);
             }
             this.setY(y);
         }

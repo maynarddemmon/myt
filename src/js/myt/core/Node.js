@@ -20,7 +20,7 @@
             matcher function returns true. Returns a Node or null if no 
             match is found.
                 param node:myt.Node the Node to start searching from. This 
-                    Node  is not tested, but its parent is.
+                    Node is not tested, but its parent is.
                 param matcher:function the function to test for matching 
                     Nodes with. */
         getMatchingAncestor = (node, matcherFunc) => getMatchingAncestorOrSelf(node ? node.parent : null, matcherFunc),
@@ -34,7 +34,7 @@
             if (node[name] === undefined) {
                 node[name] = nodeToAdd;
             } else {
-                console.log("Name in use:" + name);
+                console.warn('Name in use', name);
             }
         },
         
@@ -47,7 +47,7 @@
             if (node[name] === nodeToRemove) {
                 delete node[name];
             } else {
-                console.log("Name not in use:" + name);
+                console.warn('Name not in use', name);
             }
         },
         
@@ -55,12 +55,12 @@
             first if necessary. Returns a myt.TrackActivesPool */
         getAnimPool = node => node.__animPool || (node.__animPool = new pkg.TrackActivesPool(pkg.Animator, node));
         
-    /** A single node within a tree data structure. A node has zero or one 
-        parent node and zero or more child nodes. If a node has no parent it 
-        is a 'root' node. If a node has no child nodes it is a 'leaf' node. 
-        Parent nodes and parent of parents, etc. are referred to as ancestors. 
-        Child nodes and children of children, etc. are referred to 
-        as descendants.
+    /** A single node within a tree data structure. A node has zero or 
+        one parent node and zero or more child nodes. If a node has no 
+        parent it is a 'root' node. If a node has no child nodes it is a 
+        'leaf' node. Parent nodes and parent of parents, etc. are referred 
+        to as ancestors. Child nodes and children of children, etc. are 
+        referred to as descendants.
         
         Lifecycle management is also provided via the 'initNode', 
         'doBeforeAdoption', 'doAfterAdoption', 'destroy', 
@@ -73,8 +73,8 @@
             inited:boolean Set to true after this Node has completed 
                 initializing.
             parent:myt.Node The parent of this Node.
-            name:string The name of this node. Used to reference this Node from
-                its parent Node.
+            name:string The name of this node. Used to reference this Node 
+                from its parent Node.
             isBeingDestroyed:boolean Indicates that this node is in the process
                 of being destroyed. Set to true at the beginning of the destroy
                 lifecycle phase. Undefined before that.
@@ -130,7 +130,7 @@
                     if (mixin = mixins[i++]) {
                         self.extend(mixin);
                     } else {
-                        console.warn('Missing mixin in:' + self.klass.__displayName);
+                        console.warn('Missing mixin in', self.klass.__displayName);
                     }
                 }
             }
@@ -198,16 +198,16 @@
             self.callSuper();
         },
         
-        /** Provides a hook for subclasses to do destruction of their internals.
-            This method is called after subnodes have been destroyed but before
-            the parent has been unset.
-            Subclasses should call super.
+        /** Provides a hook for subclasses to do destruction of their 
+            internals. This method is called after subnodes have been 
+            destroyed but before the parent has been unset. Subclasses 
+            should call super.
             @returns {undefined} */
         destroyBeforeOrphaning: () => {},
         
-        /** Provides a hook for subclasses to do destruction of their internals.
-            This method is called after the parent has been unset.
-            Subclasses must call super.
+        /** Provides a hook for subclasses to do destruction of their 
+            internals. This method is called after the parent has been 
+            unset. Subclasses must call super.
             @returns {undefined} */
         destroyAfterOrphaning: function() {
             this.releaseAllConstraints();
@@ -344,8 +344,8 @@
             return this.parent == null;
         },
         
-        /** Tests if this Node is a descendant of the provided Node or is the
-            node itself.
+        /** Tests if this Node is a descendant of the provided Node or is 
+            the node itself.
             @param {!Object} node - The myt.Node to check for descent from.
             @returns {boolean} */
         isDescendantOf: function(node) {
@@ -362,8 +362,8 @@
             return false;
         },
         
-        /** Tests if this Node is an ancestor of the provided Node or is the
-            node itself.
+        /** Tests if this Node is an ancestor of the provided Node or is 
+            the node itself.
             @param {!Object} node - The myt.Node to check for.
             @returns {boolean} */
         isAncestorOf: function(node) {
@@ -495,47 +495,27 @@
         },
         
         /** Animates an attribute using the provided parameters.
-            @param {!Object|string} attribute - The name of the attribute to 
-                animate. If an object is provided it should be the only 
-                argument and its keys should be the params of this method. 
-                This provides a more concise way of passing in sparse 
-                optional parameters.
-            @param {number} to - The target value to animate to.
-            @param {number} [from] - The target value to animate from.
-            @param {boolean} [relative]
-            @param {?Function} [callback]
-            @param {number} [duration]
-            @param {boolean} [reverse]
-            @param {boolean} [repeat]
-            @param {?Function} [easingFunction]
-            @returns {!Object} - The Animator being run. */
-        animate: function(attribute, to, from, relative, callback, duration, reverse, repeat, easingFunction) {
-            const animPool = getAnimPool(this),
-                anim = animPool.getInstance({ignorePlacement:true}); // ignorePlacement ensures the animator is directly attached to this node
-            
-            if (typeof attribute === 'object') {
-                // Handle a single map argument if provided
-                callback = attribute.callback;
-                delete attribute.callback;
-                anim.callSetters(attribute);
-            } else {
-                // Handle individual arguments
-                anim.attribute = attribute;
-                anim.setTo(to);
-                anim.setFrom(from);
-                if (duration != null) anim.duration = duration;
-                if (relative != null) anim.relative = relative;
-                if (repeat != null) anim.repeat = repeat;
-                if (reverse != null) anim.setReverse(reverse);
-                if (easingFunction != null) anim.setEasingFunction(easingFunction);
+            @param {!Object} attrs - Attributes that will be passed to
+                the myt.Animator that will be run.
+            @returns {?Object} - The Animator being run or undefined if for
+                some reason an animator could not be run. */
+        animate: function(attrs) {
+            if (attrs) {
+                const animPool = getAnimPool(this),
+                    // Get an animator from the pool. Use of ignorePlacement 
+                    // ensures the animator is directly attached to this node
+                    anim = animPool.getInstance({ignorePlacement:true}),
+                    callback = attrs.callback;
+                delete attrs.callback;
+                anim.callSetters(attrs);
+                
+                // Release the animation when it completes.
+                anim.next(success => {animPool.putInstance(anim);});
+                if (callback) anim.next(callback);
+                
+                anim.setRunning(true);
+                return anim;
             }
-            
-            // Release the animation when it completes.
-            anim.next(success => {animPool.putInstance(anim);});
-            if (callback) anim.next(callback);
-            
-            anim.setRunning(true);
-            return anim;
         },
         
         /** Gets an array of the currently running animators that were created
@@ -576,8 +556,8 @@
         
         // Timing and Delay
         /** A convienence method to execute a method once on idle.
-            @param {string} methodName - The name of the method to execute on
-                this object.
+            @param {string} methodName - The name of the method to execute 
+                on this object.
             @returns {undefined} */
         doOnceOnIdle: function(methodName) {
             this.attachTo(pkg.global.idle, methodName, 'idle', true);

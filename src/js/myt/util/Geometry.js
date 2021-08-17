@@ -8,31 +8,7 @@
         
         Geometry = pkg.Geometry = {
             // Methods /////////////////////////////////////////////////////////
-            /** Get the closest point on a line to a given point.
-                @param {number} Ax - The x-coordinate of the first point that 
-                    defines the line.
-                @param {number} Ay - The y-coordinate of the first point that 
-                    defines the line.
-                @param {number} Bx - The x-coordinate of the second point that 
-                    defines the line.
-                @param {number} By - The y-coordinate of the second point that 
-                    defines the line.
-                @param {number} Px - The x-coordinate of the point.
-                @param {number} Py - The y-coordinate of the point.
-                @returns {!Object} - A position object with x and y 
-                    properties. */
-            getClosestPointOnALineToAPoint: (Ax, Ay, Bx, By, Px, Py) => {
-                const APx = Px - Ax,
-                    APy = Py - Ay,
-                    ABx = Bx - Ax,
-                    ABy = By - Ay,
-                    magAB2 = ABx * ABx + ABy * ABy,
-                    ABdotAP = ABx * APx + ABy * APy,
-                    t = ABdotAP / magAB2;
-                return {x:Ax + ABx * t, y:Ay + ABy * t};
-            },
-            
-            /** Get the closest point on a segment to a given point.
+            /** Get the closest point on a line, or segment, to a given point.
                 @param {number} Ax - The x-coordinate of the first endpoint 
                     that defines the segment.
                 @param {number} Ay - The y-coordinate of the first endpoint 
@@ -43,18 +19,19 @@
                     that defines the segment.
                 @param {number} Px - The x-coordinate of the point.
                 @param {number} Py - The y-coordinate of the point.
+                @param {boolean} [isSegment] - If true the endpoints will be
+                    treated as a segment rather than an infinitely long line.
                 @returns {!Object} - A position object with x and y 
                     properties. */
-            getClosestPointOnASegmentToAPoint: (Ax, Ay, Bx, By, Px, Py) => {
+            getClosestPointOnALineToAPoint: (Ax, Ay, Bx, By, Px, Py, isSegment) => {
                 const APx = Px - Ax,
                     APy = Py - Ay,
                     ABx = Bx - Ax,
                     ABy = By - Ay,
                     magAB2 = ABx * ABx + ABy * ABy,
-                    ABdotAP = ABx * APx + ABy * APy,
-                    t = ABdotAP / magAB2;
-                if (t < 0) return {x:Ax, y:Ay};
-                if (t > 1) return {x:Bx, y:By};
+                    ABdotAP = ABx * APx + ABy * APy;
+                let t = ABdotAP / magAB2;
+                if (isSegment) t = math.min(1, math.max(0, t));
                 return {x:Ax + ABx * t, y:Ay + ABy * t};
             },
             
@@ -230,8 +207,7 @@
                 degrees = degrees % 360;
                 
                 let x, 
-                    y, 
-                    radians;
+                    y;
                 if (degrees === 0) {
                     x = radius;
                     y = 0;
@@ -245,7 +221,7 @@
                     x = 0;
                     y = -radius;
                 } else {
-                    radians = Geometry.degreesToRadians(degrees);
+                    const radians = Geometry.degreesToRadians(degrees);
                     x = radius * mathCos(radians);
                     y = radius * mathSin(radians);
                 }

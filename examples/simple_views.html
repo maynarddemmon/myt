@@ -25,7 +25,7 @@
         
         v.attachToDom(v, 'redoAnim', 'click');
         
-        const anim = new M.Animator(v, {attribute:'x', from:10, to:500, duration:2000, relative:false, easingFunction:'easeInOutElastic'}),
+        const anim = new M.Animator(v, {attribute:'x', from:10, to:500, duration:2000, relative:false, easingFunction:'inOutElastic'}),
             anim3 = new M.Animator(v, {attribute:'y', from:0, to:100, duration:1000, relative:true, running:true, repeat:3});
         anim.setRunning(true);
         

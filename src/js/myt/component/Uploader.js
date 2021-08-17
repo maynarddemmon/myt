@@ -90,7 +90,7 @@
                         if (file) this.handleDroppedFile(file, event);
                     }
                 } else {
-                    pkg.dumpStack('File API not supported.');
+                    pkg.dumpStack('File API unsupported');
                 }
             },
             
@@ -151,8 +151,8 @@
                 self.files = [];
                 
                 // Modify attrs so setter gets called.
-                if (attrs.requestFileParam == null) attrs.requestFileParam = 'file';
-                if (attrs.maxFiles == null) attrs.maxFiles = -1;
+                self.defAttr(attrs, 'requestFileParam', 'file');
+                self.defAttr(attrs, 'maxFiles', -1);
                 
                 self.callSuper(parent, attrs);
                 
@@ -164,12 +164,12 @@
                     initNode: function(parent, attrs) {
                         this.inputType = 'file';
                         this.callSuper(parent, attrs);
-                        this.attachToDom(this, '_handleInput', 'change');
+                        this.attachToDom(this, '_hndlInput', 'change');
                         
                         this.getIDE().multiple = self.maxFiles > 1;
                     },
                     
-                    _handleInput: function(event) {
+                    _hndlInput: function(event) {
                         self.handleFiles(this.getIDE().files, event);
                     }
                 }]);

@@ -38,8 +38,11 @@
             
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE: defaultFocusShadowPropertyValue,
-                DEFAULT_DISABLED_OPACITY: defaultDisabledOpacity
+                /** The default focus shadow. */
+                FOCUS_SHADOW: defaultFocusShadowPropertyValue,
+                
+                /** The default disabled state opacity. */
+                DISABLED_OPACITY: defaultDisabledOpacity
             },
             
             

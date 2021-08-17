@@ -31,8 +31,7 @@
     /* Used to generate globally unique IDs. */
     let GUID_COUNTER = 0;
     
-    const 
-        math = Math,
+    const math = Math,
         mathAbs = math.abs,
         mathMin = math.min,
         mathMax = math.max,
@@ -54,16 +53,15 @@
         docFonts = documentElem.fonts,
         
         notifyFontLoaded = fontFace => {
-            let fontName = fontFace.family + ' ' + fontFace.weight,
-                targets;
-            
-            // Fix for Firefox and FontAwesome because of garbage returned in
-            // the font family name.
-            if (fontName.indexOf('\\35 ') >= 0) fontName = fontName.replace(/\\35 /g, '5');
+            // Fix for Firefox and FontAwesome because of double quotes 
+            // returned in the font family name. Seems OK to just do it for
+            // all fonts since double quotes in a font name is most likely
+            // going to be confusing anyhow.
+            const fontName = fontFace.family.replace(/\"/g, '') + ' ' + fontFace.weight;
             
             if (!fontLoaded[fontName]) {
                 fontLoaded[fontName] = true;
-                targets = fontTargets[fontName] || [];
+                const targets = fontTargets[fontName] || [];
                 while (targets.length) notifyInstanceThatFontLoaded(targets.pop());
             }
         },
@@ -73,8 +71,8 @@
         },
         
         myt = pkg.myt = {
-            /** A version number based on the time this distribution of myt was
-                created. */
+            /** A version number based on the time this distribution of 
+                myt was created. */
             version:20210808.1459,
             
             /** Generates a globally unique id, (GUID).
@@ -123,12 +121,12 @@
                 
                 scope = scope || global;
                 
-                const parts = Array.isArray(objName) ? objName : objName.split("."), 
+                const parts = Array.isArray(objName) ? objName : objName.split('.'), 
                     len = parts.length;
                 for (let i = 0; i < len; i++) {
                     scope = scope[parts[i]];
                     if (scope === undefined) {
-                        console.warn("resolveName failed for:", objName, "at part:", i, parts[i]);
+                        console.warn('resolveName failed for', objName, 'at part', i, parts[i]);
                         return undefined;
                     }
                 }
@@ -168,7 +166,7 @@
                 // Prevent reloading the same script
                 const loadedScripts = this._loadedScripts || (this._loadedScripts = {});
                 if (loadedScripts[src]) {
-                    console.warn("script already loaded for src", src);
+                    console.warn('script already loaded for src', src);
                     return null;
                 } else {
                     loadedScripts[src] = true;
@@ -379,9 +377,9 @@
             },
             
             addCSSRule: (sheet, selector, rules, index) => {
-                if ("insertRule" in sheet) {
-                    sheet.insertRule(selector + "{" + rules + "}", index);
-                } else if("addRule" in sheet) {
+                if ('insertRule' in sheet) {
+                    sheet.insertRule(selector + '{' + rules + '}', index);
+                } else if('addRule' in sheet) {
                     sheet.addRule(selector, rules, index);
                 }
             },
@@ -390,9 +388,9 @@
                 let i = sheet.cssRules.length;
                 while (i) {
                     i--;
-                    if ("deleteRule" in sheet) {
+                    if ('deleteRule' in sheet) {
                         sheet.deleteRule(i);
-                    } else if ("removeRule" in sheet) {
+                    } else if ('removeRule' in sheet) {
                         sheet.removeRule(i);
                     }
                 }
@@ -509,11 +507,11 @@
                 
                 // Prevent clobbering
                 if ((isModuleOrClass ? scope.instanceMethod(incrName) : scope[incrName]) !== undefined) {
-                    console.warn("Can't clobber property with increment function.", incrName, scope);
+                    console.warn('Increment: Abort clobber', incrName, scope);
                     return false;
                 }
                 if ((isModuleOrClass ? scope.instanceMethod(decrName) : scope[decrName]) !== undefined) {
-                    console.warn("Can't clobber property with decrement function.", decrName, scope);
+                    console.warn('Decrement: Abort clobber', decrName, scope);
                     return false;
                 }
                 

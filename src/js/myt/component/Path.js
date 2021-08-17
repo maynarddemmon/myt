@@ -1,9 +1,10 @@
 /** An ordered collection of points that can be applied to a canvas.
     
     Attributes:
-        vectors:array The data is stored in a single array with the x coordinate
-            first and the y coordinate second.
-        _boundingBox:object the cached bounding box if it has been calculated.
+        vectors:array The data is stored in a single array with the 
+            x coordinate first and the y coordinate second.
+        _boundingBox:object the cached bounding box if it has 
+            been calculated.
     
     @class */
 myt.Path = new JS.Class('Path', {
@@ -63,7 +64,8 @@ myt.Path = new JS.Class('Path', {
         @param {number} a
         @returns {undefined} */
     rotate: function(a) {
-        const cosA = Math.cos(a), sinA = Math.sin(a),
+        const cosA = Math.cos(a),
+            sinA = Math.sin(a),
             vecs = this.vectors,
             len = vecs.length;
         for (let i = 0; len > i;) {

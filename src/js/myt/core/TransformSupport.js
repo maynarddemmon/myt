@@ -21,9 +21,9 @@
             view.getODS().transform = cur + (cur.length === 0 ? '' : ' ') + type + '(' + v + ')';
         },
         
-        /*  Removes an entry from the 'transform' style property of the provided
-            style property map. Returns the new transform value after the 
-            removal has been applied.
+        /*  Removes an entry from the 'transform' style property of the 
+            provided style property map. Returns the new transform value 
+            after the removal has been applied.
                 param view:View the view ro remove the transform from.
                 param type:string the type of transform: 'rotate', 'scaleX', 
                     'scaleY', 'skewX', 'skewY'. */

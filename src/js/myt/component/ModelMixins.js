@@ -1,6 +1,8 @@
 (pkg => {
     const JSModule = JS.Module,
         
+        mathRound = Math.round,
+        
         /** Provides a setValue and getValue method.
             
             Events:
@@ -206,7 +208,7 @@
             },
             
             setMinValue: function(v) {
-                if (this.snapToInt && v != null) v = Math.round(v);
+                if (this.snapToInt && v != null) v = mathRound(v);
                 
                 if (this.minValue !== v) {
                     const max = this.maxValue;
@@ -225,7 +227,7 @@
             },
             
             setMaxValue: function(v) {
-                if (this.snapToInt && v != null) v = Math.round(v);
+                if (this.snapToInt && v != null) v = mathRound(v);
                 
                 if (this.maxValue !== v) {
                     const min = this.minValue;
@@ -245,7 +247,7 @@
             
             /** @overrides myt.ValueComponent */
             setValue: function(v) {
-                this.callSuper(this.snapToInt && v != null && !isNaN(v) ? Math.round(v) : v);
+                this.callSuper(this.snapToInt && v != null && !isNaN(v) ? mathRound(v) : v);
             }
         });
     
@@ -279,8 +281,8 @@
         /** @overrides myt.ValueComponent */
         setValue: function(v) {
             if (this.snapToInt && v != null) {
-                if (v.lower != null && !isNaN(v.lower)) v.lower = Math.round(v.lower);
-                if (v.upper != null && !isNaN(v.upper)) v.upper = Math.round(v.upper);
+                if (v.lower != null && !isNaN(v.lower)) v.lower = mathRound(v.lower);
+                if (v.upper != null && !isNaN(v.upper)) v.upper = mathRound(v.upper);
             }
             this.callSuper(v);
         }

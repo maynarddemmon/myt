@@ -51,7 +51,8 @@
                 @param {string} [storeId] - The id of the data store to get 
                     data for. If not provided the default "myt" storeId will 
                     be used.
-                @returns {*} the value of the data or undefined if not found. */
+                @returns {*} the value of the data or undefined if the
+                    datum was not found. */
             getDatum: (key, storeId) => {
                 if (key) {
                     const data = LocalStorage.getItem(getStoreId(storeId));

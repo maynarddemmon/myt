@@ -1,26 +1,27 @@
 (pkg => {
-    const win = window,
+    let 
+        /*  The ID of the last idle event in the browser. */
+        timerId,
         
-        /* The idle event object that gets reused. */
-        EVENT = {};
-        
-        /* The ID of the last idle event in the browser. */
-    let timerId,
-        
-        /* The function that gets executed on idle. */
+        /*  The function that gets executed on idle. */
         idleFunc,
         
-        /* The millis of the last idle event fired. */
+        /*  The millis of the last idle event fired. */
         lastTime,
         
-        /* Indicates if idle events are currently being fired or not. */
+        /*  Indicates if idle events are currently being fired or not. */
         running = false;
+    
+    const win = window,
+        
+        /*  The idle event object that gets reused. */
+        EVENT = {};
     
     /** Provides idle events. Registered with myt.global as 'idle'.
         
         Events:
-            idle:object Fired when a browser idle event occurs. The event value 
-                is an object containing:
+            idle:object Fired when a browser idle event occurs. The event 
+                value is an object containing:
                     delta: The time in millis since the last idle evnet.
                     time: The time in millis of this idle event.
         

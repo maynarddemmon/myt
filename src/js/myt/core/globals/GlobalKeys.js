@@ -57,7 +57,7 @@
         
         registerEventHandler = (target, action) => {
             ['keydown','keypress','keyup'].forEach(eventName => {
-                globalKeys[action](target, '__handle_' + eventName, eventName);
+                globalKeys[action](target, '__hndl_' + eventName, eventName);
             });
         },
         attach = target => {registerEventHandler(target, 'attachToDom');},
@@ -203,7 +203,7 @@
             globalKeys.KEYCODE_RIGHT_COMMAND = KEYCODE_RIGHT_COMMAND;
             
             globalKeys.setDomElement(document);
-            globalKeys.attachTo(globalFocus, '__handle_focused', 'focused');
+            globalKeys.attachTo(globalFocus, '__hndl_focused', 'focused');
             attach(globalKeys);
             
             // Clear keys down when the window loses focus. This is necessary 
@@ -231,7 +231,7 @@
             @private
             @param {!Object} event
             @returns {undefined} */
-        __handle_focused: event => {
+        __hndl_focused: event => {
             const focused = event.value;
             if (focused) {
                 detach(globalKeys);
@@ -246,7 +246,7 @@
         /** @private
             @param {!Object} event
             @returns {undefined} */
-        __handle_keydown: event => {
+        __hndl_keydown: event => {
             const keyCode = getKeyCodeFromEvent(event),
                 domEvent = event.value;
             if (shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
@@ -277,14 +277,14 @@
         /** @private
             @param {!Object} event
             @returns {undefined} */
-        __handle_keypress: event => {
+        __hndl_keypress: event => {
             globalKeys.fireEvent('keypress', getKeyCodeFromEvent(event));
         },
         
         /** @private
             @param {!Object} event
             @returns {undefined} */
-        __handle_keyup: event => {
+        __hndl_keyup: event => {
             const keyCode = getKeyCodeFromEvent(event),
                 domEvent = event.value;
             if (shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();

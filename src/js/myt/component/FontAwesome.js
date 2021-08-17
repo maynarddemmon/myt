@@ -1,6 +1,32 @@
 (pkg => {
     const sizeClasses = ['','fa-lg','fa-2x','fa-3x','fa-4x','fa-5x'],
         
+        makeTag = props => {
+            if (Array.isArray(props)) {
+                let len = props.length;
+                if (len > 0) {
+                    props.unshift('fa');
+                    len++;
+                    
+                    if (!props[1].startsWith('fa-')) props[1] = 'fa-' + props[1];
+                    
+                    if (len >= 3) props[2] = sizeClasses[props[2]] || '';
+                    
+                    if (len > 3) {
+                        for (let i = 3; len > i; i++) {
+                            if (!props[i].startsWith('fa-')) props[i] = 'fa-' + props[i];
+                        }
+                    }
+                    
+                    return '<i class="' + props.join(' ') + '"></i>';
+                }
+            }
+            
+            pkg.dumpStack('Error making tag');
+            console.error(props);
+            return '';
+        },
+        
         updateInstance = instance => {
             let props = instance.properties;
             if (props) {
@@ -9,65 +35,35 @@
                 } else {
                     props = props.concat();
                 }
-                props.unshift(instance.size);
-                props.unshift(instance.icon);
             } else {
-                props = [instance.icon, instance.size];
+                props = [];
             }
+            props.unshift(instance.icon, instance.size);
             
-            instance.setHtml(FontAwesome.makeTag(props));
+            instance.setHtml(makeTag(props));
+        },
+        
+        registerForNotification = instance => {
+            ['Free 400', 'Free 900', 'Brands 400'].forEach(fontName => {
+                pkg.registerForFontNotification(instance, 'Font Awesome\ 5 ' + fontName);
+            });
         };
-    
-    pkg.loadCSSFonts(['https://use.fontawesome.com/releases/v5.0.8/css/all.css']);
     
     /** An adapter for FontAwesome.
         
         Attributes:
             icon:string The name of the FA icon to set.
-            size:number A number from 0 to 5 with 0 being normal size and 5 
-                being the largest size.
-            propeties:string || array A space separated string or list of FA
-                CSS classes to set.
+            size:number A number from 0 to 5 with 0 being normal size 
+                and 5 being the largest size.
+            propeties:string || array A space separated string or list 
+                of FA CSS classes to set.
         
         @class */
-    const FontAwesome = pkg.FontAwesome = new JS.Class('FontAwesome', pkg.Markup, {
+    pkg.FontAwesome = new JS.Class('FontAwesome', pkg.Markup, {
         // Class Methods and Attributes ////////////////////////////////////////
         extend: {
-            makeTag: function(props) {
-                if (Array.isArray(props)) {
-                    let len = props.length,
-                        prop,
-                        i;
-                    if (len > 0) {
-                        props.unshift('fa');
-                        ++len;
-                        
-                        if (props[1].indexOf('fa-') !== 0) props[1] = 'fa-' + props[1];
-                        
-                        if (len >= 3) props[2] = sizeClasses[props[2]] || '';
-                        
-                        if (len > 3) {
-                            i = 3;
-                            for (; len > i; ++i) {
-                                prop = props[i];
-                                if (prop.indexOf('fa-') !== 0) props[i] = 'fa-' + prop;
-                            }
-                        }
-                        
-                        return '<i class="' + props.join(' ') + '"></i>';
-                    }
-                }
-                
-                pkg.dumpStack('Error making tag');
-                console.error(props);
-                return '';
-            },
-            
-            registerForNotification: instance => {
-                pkg.registerForFontNotification(instance, 'Font Awesome\ 5 Free 400'); // regular
-                pkg.registerForFontNotification(instance, 'Font Awesome\ 5 Free 900'); // solid
-                pkg.registerForFontNotification(instance, 'Font Awesome\ 5 Brands 400'); // brands
-            },
+            makeTag: makeTag,
+            registerForNotification: registerForNotification
         },
         
         
@@ -80,8 +76,7 @@
             this.callSuper(parent, attrs);
             
             updateInstance(this);
-            
-            FontAwesome.registerForNotification(this);
+            registerForNotification(this);
         },
         
         
@@ -104,4 +99,6 @@
             if (this.inited) updateInstance(this);
         }
     });
+    
+    pkg.loadCSSFonts(['https://use.fontawesome.com/releases/v5.0.8/css/all.css']);
 })(myt);

@@ -43,8 +43,8 @@
                 return false;
             },
             
-            /** Gets the z-index of a dom element relative to an ancestor dom
-                element.
+            /** Gets the z-index of a dom element relative to an ancestor 
+                dom element.
                 @param {?Object} elem
                 @param {?Object} ancestor
                 @returns {number} */
@@ -83,8 +83,8 @@
                 return ancestors;
             },
             
-            /** Gets the z-index of the dom element or, if it does not define a 
-                stacking context, the highest z-index of any of the dom 
+            /** Gets the z-index of the dom element or, if it does not define 
+                a stacking context, the highest z-index of any of the dom 
                 element's descendants.
                 @param {!Object} elem - A dom element
                 @returns {number} - An int */
@@ -120,24 +120,21 @@
             getRelativePosition: (elem, ancestorElem) => {
                 if (!elem) return null;
                 
-                const borderMultiplier = BrowserDetect.browser === 'Firefox' ? 2 : 1; // I have no idea why firefox needs it twice, but it does.
-                let x = 0, 
-                    y = 0;
-                
-                // elem.nodeName !== "BODY" test prevents looking at the body
+                // elem.nodeName !== 'BODY' test prevents looking at the body
                 // which causes problems when the document is scrolled 
                 // on webkit.
-                while (elem && elem.nodeName !== "BODY" && elem !== ancestorElem) {
+                let x = 0, 
+                    y = 0;
+                while (elem && elem.nodeName !== 'BODY' && elem !== ancestorElem) {
                     x += elem.offsetLeft;
                     y += elem.offsetTop;
                     elem = elem.offsetParent;
-                    if (elem && elem.nodeName !== "BODY") {
+                    if (elem && elem.nodeName !== 'BODY') {
                         const s = getComputedStyle(elem);
-                        x += borderMultiplier * parseInt(s.borderLeftWidth, 10) - elem.scrollLeft;
-                        y += borderMultiplier * parseInt(s.borderTopWidth, 10) - elem.scrollTop;
+                        x += parseInt(s.borderLeftWidth, 10) - elem.scrollLeft;
+                        y += parseInt(s.borderTopWidth, 10) - elem.scrollTop;
                     }
                 }
-                
                 return {x:x, y:y};
             },
             

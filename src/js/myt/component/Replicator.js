@@ -81,7 +81,7 @@
             @param {string} key - The name of the message
             @param {*} value - The value of the message.
             @returns {undefined} */
-        notify: function(key, value) {},
+        notify: (key, value) => {},
         
         /** @overrides myt.Reusable
             Subclasses should call super. */
@@ -105,13 +105,13 @@
     /** Creates instances using a template class and an array of data items.
         
         Attributes:
-            template:JS.Class The template to replicate for each entry in the
-                data set.
+            template:JS.Class The template to replicate for each entry 
+                in the data set.
             data:array The data to replicate the template for.
         
         Private Attributes:
-            __pool:myt.TrackActivesPool The pool that holds the myt.Replicable
-                instances.
+            __pool:myt.TrackActivesPool The pool that holds the 
+                myt.Replicable instances.
         
         @class */
     pkg.Replicator = new JS.Class('Replicator', pkg.Node, {
@@ -135,7 +135,7 @@
         setTemplate: function(v) {
             // Make sure template class is an myt.Replicable
             this.template = v.includes(pkg.Replicable) ? v : null;
-            if (!this.template) pkg.dumpStack("Template not an myt.Replicable");
+            if (!this.template) pkg.dumpStack('Template not a myt.Replicable');
             
             if (this.inited) {
                 setupPool(this);

@@ -9,7 +9,8 @@
     Attributes:
         stackTraceLimit:int Sets the size for stack traces.
         consoleLogging:boolean Turns logging to the console on and off.
-*/
+    
+    @class */
 new JS.Singleton('GlobalError', {
     include: [myt.Observable],
     

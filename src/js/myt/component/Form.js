@@ -8,6 +8,8 @@
         
         defAttr = pkg.AccessorSupport.defAttr,
         
+        getKeyCodeFromEvent = pkg.KeyObservable.getKeyCodeFromEvent,
+        
         DEFAULT_ATTR = 'runForDefault',
         ROLLBACK_ATTR = 'runForRollback',
         CURRENT_ATTR = 'runForCurrent',
@@ -35,10 +37,10 @@
                 if (identifiable.id) {
                     func(id);
                 } else {
-                    pkg.dumpStack("No ID");
+                    pkg.dumpStack('No ID');
                 }
             } else {
-                pkg.dumpStack("No processor");
+                pkg.dumpStack('No processor');
             }
         },
         
@@ -86,14 +88,12 @@
             @param isValid:boolean The currently determined validity.
             @returns boolean true if this form is valid, false otherwise. */
         applyValidation = (form, isValid) => {
-            const validators = form.__v,
-                len = validators.length, 
-                errorMessages = [];
-            for (let i = 0; len > i;) isValid = validators[i++].isFormValid(form, null, errorMessages) && isValid;
-            
+            const errorMessages = [];
+            form.__v.forEach(validator => {
+                isValid = validator.isFormValid(form, null, errorMessages) && isValid;
+            });
             form.setErrorMessages(errorMessages);
             form.setIsValid(isValid);
-            
             return isValid;
         },
         
@@ -103,17 +103,14 @@
                 that is checked to see if that processor should be run or not.
             @returns * The processed value. */
         processValue = (formElement, value, checkAttr) => {
-            const processors = formElement.__vp, 
-                len = processors.length;
-            for (let i = 0; len > i;) {
-                const processor = processors[i++];
+            formElement.__vp.forEach(processor => {
                 if (processor[checkAttr]) value = processor.process(value);
-            }
+            });
             return value;
         },
         
-        /** Modifies a value. Typically used to convert a form element value to 
-            its canonical form.
+        /** Modifies a value. Typically used to convert a form element value 
+            to its canonical form.
             
             Attributes:
                 id:string The ideally unique ID for this value processor.
@@ -137,9 +134,9 @@
             initialize: function(id, runForDefault, runForRollback, runForCurrent) {
                 this.id = id;
                 
-                this[DEFAULT_ATTR] = runForDefault ? true : false;
-                this[ROLLBACK_ATTR] = runForRollback ? true : false;
-                this[CURRENT_ATTR] = runForCurrent ? true : false;
+                this[DEFAULT_ATTR] = !!runForDefault;
+                this[ROLLBACK_ATTR] = !!runForRollback;
+                this[CURRENT_ATTR] = !!runForCurrent;
             },
             
             
@@ -162,7 +159,7 @@
                 // Don't convert "empty" values to a number since they'll 
                 // become zero which is probably incorrect. Also catch 
                 // undefined/null values since they will become NaN.
-                if (value == null || value === "" || value === "-") return value;
+                if (value == null || value === '' || value === '-') return value;
                 
                 const numericValue = Number(value);
                 return isNaN(numericValue) ? value : numericValue;
@@ -419,7 +416,7 @@
                         if (subform) {
                             value[id] = subform.setValue(value[id]);
                         } else {
-                            console.warn("ID in setValue for non-existant subform", id);
+                            console.warn('ID in setValue for missing subform', id);
                         }
                     }
                 }
@@ -442,10 +439,10 @@
                 return retval;
             },
             
-            /** Sets the default value of this form. For a form the value should
-                be a map containing default values for each of the subform 
-                elements. The entries in the map will be applied to each of 
-                the subforms.
+            /** Sets the default value of this form. For a form the value 
+                should be a map containing default values for each of the 
+                subform elements. The entries in the map will be applied to 
+                each of the subforms.
                 @param value:object the value to set.
                 @returns the value that was actually set. */
             setDefaultValue: function(value) {
@@ -455,7 +452,7 @@
                         if (subform) {
                             value[id] = subform.setDefaultValue(value[id]);
                         } else {
-                            console.warn("ID in setDefaultValue for non-existant subform", id);
+                            console.warn('ID in setDefaultValue for missing subform', id);
                         }
                     }
                 }
@@ -487,7 +484,7 @@
                         if (subform) {
                             value[id] = subform.setRollbackValue(value[id]);
                         } else {
-                            console.warn("ID in setRollbackValue for non-existant subform", id);
+                            console.warn('ID in setRollbackValue for missing subform', id);
                         }
                     }
                 }
@@ -558,7 +555,7 @@
             addSubForm: function(subform) {
                 const id = subform.id;
                 if (this.getSubForm(id) != null) {
-                    console.warn("ID in use for subform, add aborted.", id, subform);
+                    console.warn('ID in use for subform, add aborted', id, subform);
                 } else {
                     subform.setForm(this);
                     this.__sf[id] = subform;
@@ -881,18 +878,18 @@
             
             /** @overrides myt.Form */
             addSubForm: subform => {
-                pkg.dumpStack("addSubForm not supported on FormElement.");
+                pkg.dumpStack('addSubForm unsupported on FormElement');
             },
             
             /** @overrides myt.Form */
             getSubForm: id => {
-                pkg.dumpStack("getSubForm not supported on FormElement.");
+                pkg.dumpStack('getSubForm unsupported on FormElement');
                 return null;
             },
             
             /** @overrides myt.Form */
             removeSubForm: id => {
-                pkg.dumpStack("removeSubForm not supported on FormElement.");
+                pkg.dumpStack('removeSubForm unsupported on FormElement');
                 return null;
             },
             
@@ -972,12 +969,12 @@
             
             Attributes:
                 errorColor:color_string The color to use when a validation 
-                    error exists. Defaults to '#ff9999'.
+                    error exists. Defaults to '#f99'.
                 actionRequiredColor:color_string The color to use when a 
                     validation error exists but the user has not modified the 
-                    value. Defaults to '#996666'.
+                    value. Defaults to '#966'.
                 normalColor:color_string The color to use when no validation 
-                    error exists. Defaults to '#999999'.
+                    error exists. Defaults to '#999'.
                 validateWhen:string Indicates when to run validation.
                     Supported values are:
                         key: Validate as the user types.
@@ -1020,8 +1017,8 @@
                 
                 self.addValueProcessor(undefToEmptyValueProcessor);
                 
-                self.attachToDom(self, '__handleKeyDown', 'keydown');
-                self.attachToDom(self, '__handleKeyUp', 'keyup');
+                self.attachToDom(self, '__hndlKeyDown', 'keydown');
+                self.attachToDom(self, '__hndlKeyUp', 'keyup');
                 
                 self.addAccelerator(ACCELERATOR_ACCEPT, self.doAccept);
                 self.addAccelerator(ACCELERATOR_REJECT, self.doReject);
@@ -1094,15 +1091,15 @@
             /** @private
                 @param {!Object} event
                 @returns {undefined} */
-            __handleKeyDown: function(event) {
-                if (pkg.KeyObservable.getKeyCodeFromEvent(event) === 13) this.invokeAccelerator(ACCELERATOR_ACCEPT);
+            __hndlKeyDown: function(event) {
+                if (getKeyCodeFromEvent(event) === 13) this.invokeAccelerator(ACCELERATOR_ACCEPT);
             },
             
             /** @private
                 @param {!Object} event
                 @returns {undefined} */
-            __handleKeyUp: function(event) {
-                if (pkg.KeyObservable.getKeyCodeFromEvent(event) === 27) this.invokeAccelerator(ACCELERATOR_REJECT);
+            __hndlKeyUp: function(event) {
+                if (getKeyCodeFromEvent(event) === 27) this.invokeAccelerator(ACCELERATOR_REJECT);
             },
             
             /** @overrides myt.FocusObservable */
@@ -1326,10 +1323,10 @@
         
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides myt.FormInputTextMixin */
-        __handleKeyDown: function(event) {
+        __hndlKeyDown: function(event) {
             // Only allow enter key as accelerator if no wrapping is occurring
             if (this.whitespace === 'nowrap') this.callSuper(event);
-        },
+        }
     });
     
     /** An myt.InputText that is also a FormElement.
@@ -1351,9 +1348,7 @@
         
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides myt.FormInputTextMixin */
-        __handleKeyDown: function(event) {
-            // Do nothing so the "accept" accelerator is not invoked.
-        },
+        __hndlKeyDown: event => {/* Do nothing so the "accept" accelerator is not invoked. */}
     });
     
     /** An myt.InputSelect that is also a FormElement.
@@ -1460,7 +1455,7 @@
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides */
         process: function(value) {
-            return (value == null || value === "") ? this.otherField.getValue() : value;
+            return (value == null || value === '') ? this.otherField.getValue() : value;
         }
     });
     

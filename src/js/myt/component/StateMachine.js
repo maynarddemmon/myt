@@ -1,12 +1,29 @@
 (pkg => {
-    const 
-        /* Indicates a synchronous transition. */
+    const isArray = Array.isArray,
+        
+        /*  Indicates a synchronous transition. */
         SYNC = 'sync',
         
-        /* Indicates an asynchronous transition. */
+        /*  Indicates an asynchronous transition. */
         ASYNC = 'async',
         
-        /* Special state name that holds transitions for all states. */
+        /*  Indicates the transition was successfull. */
+        SUCCEEDED = 1,
+        
+        /*  Indicates the transition was cancelled before the state 
+            change occurred. */
+        CANCELLED = 2,
+        
+        /*  Indicates an asynchronous transition is in progress. */
+        PENDING = 3,
+        
+        /*  Indicates the transition was invalid in some way. */
+        INVALID = 4,
+        
+        /* Indicates no transition exists for the current state. */
+        NO_TRANSITION = 5,
+        
+        /*  Special state name that holds transitions for all states. */
         WILDCARD = '*',
         
         resetTransitionProgress = stateMachine => {
@@ -17,8 +34,9 @@
         },
         
         doTheTransition = (stateMachine, args) => {
-            // Don't allow another transition if one is already in progress.
-            // Instead, defer them until after the current transition completes.
+            // Don't allow another transition if one is already in 
+            // progress. Instead, defer them until after the current 
+            // transition completes.
             if (stateMachine.__transInProgress) {
                 let deferredTransitions = stateMachine.__deferredTransitions;
                 if (!deferredTransitions) deferredTransitions = stateMachine.__deferredTransitions = [];
@@ -30,12 +48,12 @@
                     transitionName = args.shift();
                 
                 // Invalid to start a transition if one is still pending.
-                if (stateMachine.__pendingTransition) return StateMachine.PENDING;
+                if (stateMachine.__pendingTransition) return PENDING;
                 
                 // Do not allow transition from the terminal states
                 if (stateMachine.isFinished()) {
                     stateMachine.__transInProgress = false;
-                    return StateMachine.NO_TRANSITION;
+                    return NO_TRANSITION;
                 }
                 
                 let to = stateMachine.map[stateMachine.current][transitionName];
@@ -47,7 +65,7 @@
                     return stateMachine.resumeTransition(async);
                 } else {
                     stateMachine.__transInProgress = false;
-                    return StateMachine.NO_TRANSITION;
+                    return NO_TRANSITION;
                 }
             }
         },
@@ -97,20 +115,20 @@
                 performed after the current one completes.
         
         @class */
-    const StateMachine = pkg.StateMachine = new JS.Class('StateMachine', pkg.Node, {
+    pkg.StateMachine = new JS.Class('StateMachine', pkg.Node, {
         // Class Methods and Attributes ////////////////////////////////////////
         extend: {
             /** The transition was successfull. */
-            SUCCEEDED:1,
+            SUCCEEDED:SUCCEEDED,
             /** The transition was cancelled before the state change 
                 occurred. */
-            CANCELLED:2,
+            CANCELLED:CANCELLED,
             /** An asynchronous transition is in progress. */
-            PENDING:3,
+            PENDING:PENDING,
             /** The transition was invalid in some way. */
-            INVALID:4,
+            INVALID:INVALID,
             /** No transition exists for the current state. */
-            NO_TRANSITION:5
+            NO_TRANSITION:NO_TRANSITION
         },
         
         
@@ -131,7 +149,7 @@
             if (this.current === '') {
                 // Get optional args if v is an array
                 let args;
-                if (Array.isArray(v)) {
+                if (isArray(v)) {
                     args = v;
                     v = args.shift();
                 } else {
@@ -158,19 +176,16 @@
         },
         
         addTransition: function(transitionName, from, to) {
-            const map = this.map;
-            
             if (from) {
-                from = Array.isArray(from) ? from : [from];
+                from = isArray(from) ? from : [from];
             } else {
                 from = [WILDCARD];
             }
             
-            let i = from.length, 
-                mapEntry;
+            const map = this.map;
+            let i = from.length;
             while (i) {
-                mapEntry = map[from[--i]];
-                if (!mapEntry) mapEntry = map[from[i]] = {};
+                const mapEntry = map[from[--i]] || (map[from[i]] = {});
                 mapEntry[transitionName] = to;
             }
         },
@@ -189,12 +204,13 @@
             const transitionName = this.__pendingTransition;
             
             // Invalid to resume a transition if none is pending.
-            if (!transitionName) return StateMachine.INVALID;
+            if (!transitionName) return INVALID;
             
             const current = this.current,
                 to = this.__transDestinationState,
                 args = this.__additionalArgs,
-                eventValue = {name:transitionName, from:current, to:to, args:args};
+                eventValue = {name:transitionName, from:current, to:to, args:args},
+                fireEvent = this.fireEvent.bind(this);
             
             switch (this.__transStage) {
                 case 'leaveState':
@@ -202,44 +218,40 @@
                     if (result === false) {
                         resetTransitionProgress(this);
                         doDeferredTransitions(this);
-                        return StateMachine.CANCELLED;
+                        return CANCELLED;
                     } else if (result === ASYNC || async === ASYNC) {
                         this.__transStage = 'enterState';
-                        this.fireEvent('start' + transitionName, eventValue);
-                        this.fireEvent('start', eventValue);
-                        this.fireEvent('leave' + current, eventValue);
-                        this.fireEvent('leave', eventValue);
+                        fireEvent('start' + transitionName, eventValue);
+                        fireEvent('start', eventValue);
+                        fireEvent('leave' + current, eventValue);
+                        fireEvent('leave', eventValue);
                         doDeferredTransitions(this); // FIXME: Is there a bug here if a transition starts in the middle of an async transition?
-                        return StateMachine.PENDING;
+                        return PENDING;
                     } else {
-                        this.fireEvent('start' + transitionName, eventValue);
-                        this.fireEvent('start', eventValue);
-                        this.fireEvent('leave' + current, eventValue);
-                        this.fireEvent('leave', eventValue);
+                        fireEvent('start' + transitionName, eventValue);
+                        fireEvent('start', eventValue);
+                        fireEvent('leave' + current, eventValue);
+                        fireEvent('leave', eventValue);
                         // Synchronous so fall through to 'enterState' case.
                     }
                 case 'enterState':
                     this.current = to;
                     resetTransitionProgress(this);
                     this.doEnterState(transitionName, current, to, args);
-                    this.fireEvent('enter' + to, eventValue);
-                    this.fireEvent('enter', eventValue);
-                    this.fireEvent('end' + transitionName, eventValue);
-                    this.fireEvent('end', eventValue);
-                    if (this.isFinished()) this.fireEvent('finished', eventValue);
+                    fireEvent('enter' + to, eventValue);
+                    fireEvent('enter', eventValue);
+                    fireEvent('end' + transitionName, eventValue);
+                    fireEvent('end', eventValue);
+                    if (this.isFinished()) fireEvent('finished', eventValue);
             }
             
             doDeferredTransitions(this);
-            return StateMachine.SUCCEEDED;
+            return SUCCEEDED;
         },
         
-        doLeaveState: (transitionName, from, to, args) => {
-            // Subclasses to implement as needed.
-        },
+        doLeaveState: (transitionName, from, to, args) => {/* Subclasses to implement as needed. */},
         
-        doEnterState: (transitionName, from, to, args) => {
-            // Subclasses to implement as needed.
-        },
+        doEnterState: (transitionName, from, to, args) => {/* Subclasses to implement as needed. */},
         
         isFinished: function() {
             return this.is(this.terminal);
@@ -250,7 +262,7 @@
         },
         
         is: function(stateName) {
-            if (Array.isArray(stateName)) {
+            if (isArray(stateName)) {
                 return stateName.indexOf(this.current) >= 0;
             } else {
                 return this.current === stateName;

@@ -1,6 +1,11 @@
 (pkg => {
     const JSClass = JS.Class,
         
+        STATE_COLLAPSED = 0,
+        STATE_RESTORED_JUST_COLLAPSED = 1,
+        STATE_RESTORED_JUST_EXPANDED = 2,
+        STATE_EXPANDED = 3,
+        
         defAttr = pkg.AccessorSupport.defAttr,
         
         /*  Setup the limitToParent constraint.
@@ -11,8 +16,8 @@
             divider.constrain('__limitToParent', [divider, 'limitToParent', divider, dim, divider.parent, dim]);
         },
         
-        /** A divider is a UI control that allows the user to resize two area by
-            dragging the divider left/right or up/down.
+        /** A divider is a UI control that allows the user to resize two area 
+            by dragging the divider left/right or up/down.
             
             Events:
                 limitToParent:number
@@ -51,7 +56,7 @@
                 defAttr(attrs, 'axis', 'x');
                 defAttr(attrs, 'minValue', 0);
                 defAttr(attrs, 'value', attrs.minValue);
-                defAttr(attrs, 'expansionState', 2);
+                defAttr(attrs, 'expansionState', STATE_RESTORED_JUST_EXPANDED);
                 defAttr(attrs, 'focusIndicator', false);
                 defAttr(attrs, 'repeatKeyDown', true);
                 defAttr(attrs, 'activationKeys', [
@@ -109,14 +114,13 @@
             
             setAxis: function(v) {
                 if (this.inited) {
-                    console.warn("Axis may not be updated after instantiation.");
+                    console.warn('Axis not updatable after instantiation');
                 } else {
                     this.axis = v;
                 }
             },
             
-            /** Update the x or y position of the component as the value 
-                changes.
+            /** Update the x or y position of the divider as the value changes.
                 @overrides myt.ValueComponent
                 @param {number} v - The x or y position to set.
                 @param {boolean} [restoreValueAlso] - If true, the restoreValue
@@ -152,11 +156,11 @@
                 @overrides myt.Button. */
             doActivationKeyDown: function(key, isRepeat) {
                 const self = this;
-                let dir = 0;
                 
                 self.callSuper(key, isRepeat);
                 
                 // Determine nudge direction
+                let dir = 0;
                 switch (key) {
                     case 37: case 38: dir = -1; break;
                     case 39: case 40: dir = 1; break;
@@ -169,7 +173,7 @@
                 self.__nudgeAcc = isRepeat ? Math.min(self.__nudgeAcc + 1, 64) : 1;
                 
                 self.setValue(self.value + dir * self.__nudgeAcc, true);
-                self.setExpansionState(2);
+                self.setExpansionState(STATE_RESTORED_JUST_EXPANDED);
             },
             
             doPrimaryAction: function() {
@@ -179,9 +183,9 @@
                     minV = self.minValue;
                 let toValue;
                 switch (self.expansionState) {
-                    case 0:
+                    case STATE_COLLAPSED:
                         if (rv != null) {
-                            self.setExpansionState(1);
+                            self.setExpansionState(STATE_RESTORED_JUST_COLLAPSED);
                             if (rv === minV) {
                                 // Prevent infinite loop if there's nowhere 
                                 // to animate to.
@@ -191,9 +195,9 @@
                             }
                         }
                         break;
-                    case 1:
+                    case STATE_RESTORED_JUST_COLLAPSED:
                         if (maxV != null) {
-                            self.setExpansionState(3);
+                            self.setExpansionState(STATE_EXPANDED);
                             if (self.value === maxV) {
                                 self.doPrimaryAction();
                             } else {
@@ -201,9 +205,9 @@
                             }
                         }
                         break;
-                    case 2:
+                    case STATE_RESTORED_JUST_EXPANDED:
                         if (minV != null) {
-                            self.setExpansionState(0);
+                            self.setExpansionState(STATE_COLLAPSED);
                             if (self.value === minV) {
                                 self.doPrimaryAction();
                             } else {
@@ -211,9 +215,9 @@
                             }
                         }
                         break;
-                    case 3:
+                    case STATE_EXPANDED:
                         if (rv != null) {
-                            self.setExpansionState(2);
+                            self.setExpansionState(STATE_RESTORED_JUST_EXPANDED);
                             if (rv === maxV) {
                                 self.doPrimaryAction();
                             } else {
@@ -233,12 +237,13 @@
             requestDragPosition: function(x, y) {
                 if (!this.disabled) {
                     this.setValue(this.axis === 'y' ? y : x, true);
-                    this.setExpansionState(2);
+                    this.setExpansionState(STATE_RESTORED_JUST_EXPANDED);
                 }
             }
         });
     
     /** A divider that moves left/right.
+        
         @class */
     pkg.HorizontalDivider = new JSClass('HorizontalDivider', BaseDivider, {
         initNode: function(parent, attrs) {
@@ -248,6 +253,7 @@
     });
     
     /** A divider that moves left/right.
+        
         @class */
     pkg.VerticalDivider = new JSClass('VerticalDivider', BaseDivider, {
         initNode: function(parent, attrs) {

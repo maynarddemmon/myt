@@ -202,8 +202,8 @@
                 }
             },
             
-            /** Syncs all the subviews inner dom elements to outer dom elements
-                and models to outer bounds.
+            /** Syncs all the subviews inner dom elements to outer dom 
+                elements and models to outer bounds.
                 @returns {undefined} */
             syncSubviews: function() {
                 syncSubviewsForFlexBox(this);
@@ -240,8 +240,8 @@
             
             self.__parentIsFlexBox = self.parent && self.parent.isA(FlexBoxSupport);
             
-            // When reparenting from a flexbox parent to a non-flexbox parent we
-            // may need to resync the dom to the model.
+            // When reparenting from a flexbox parent to a non-flexbox parent 
+            // we may need to resync the dom to the model.
             if (self.inited && oldParentIsFlexBox && !self.isChildOfFlexBox()) {
                 // Sync dom to model
                 const ods = self.getODS();

@@ -89,16 +89,16 @@
                 rgbToHsv:rgbToHsv,
                 hsvToRgb:hsvToRgb,
                 
-                /** Converts a number or string representation of a number to a 
-                    two character hex string.
+                /** Converts a number or string representation of a number to 
+                    a two character hex string.
                     @param {number|string} value - The number or string 
                         to convert.
                     @returns {string} A two character hex string 
                         such as: '0c' or 'c9'. */
                 toHex: toHex,
                 
-                /** Converts red, green, and blue color channel numbers to a six 
-                    character hex string.
+                /** Converts red, green, and blue color channel numbers to 
+                    a six character hex string.
                     @param {number} red - The red color channel.
                     @param {number} green - The green color channel.
                     @param {number} blue - The blue color channel.
@@ -267,8 +267,8 @@
             
             /** Gets an object holding color channel diffs.
                 @param {!Object} c - The myt.Color to diff from.
-                @returns {!Object} containing the diffs for the red, green and 
-                    blue channels. */
+                @returns {!Object} containing the diffs for the red, green 
+                    and blue channels. */
             getDiffFrom: function(c) {
                 return {
                     red: c.red - this.red,
@@ -332,8 +332,8 @@
             
             /** Determine if this color has the same value as another color.
                 @param {?Object} obj - The color object to test against.
-                @returns {boolean} True if this color has the same color values 
-                    as this provided color, false otherwise. */
+                @returns {boolean} True if this color has the same color 
+                    values as this provided color, false otherwise. */
             equals: function(obj) {
                 return obj === this || (obj && obj.isA && 
                     obj.isA(Color) && 

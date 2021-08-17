@@ -6,55 +6,57 @@
 <script src="../src/js/myt/manifest.js"></script>
 </head><body>
 <script>
-    JS.require('myt.all', function() {
-        var rootView = new myt.View(null, {bgColor:'#eeeeee'}, [myt.SizeToWindow]);
+    JS.require('myt.all', () => {
+        const M = myt,
+            rootView = new M.View(null, {bgColor:'#eee'}, [M.SizeToWindow]),
+            
+            ActivatedMixin = new JS.Module('ActivatedMixin', {
+                doActivated: function() {
+                    console.log("activated", this.name);
+                }
+            }),
+            
+            BtnClass = new JS.Class('BtnClass', M.View, {
+                include: [M.Button, ActivatedMixin],
+                drawDisabledState: function() {
+                    this.setBgColor('#999');
+                },
+                drawHoverState: function() {
+                    this.setBgColor('#f00');
+                },
+                drawActiveState: function() {
+                    this.setBgColor('#900');
+                },
+                drawReadyState: function() {
+                    this.setBgColor('#c00');
+                }
+            });
         
-        var ActivatedMixin = new JS.Module('ActivatedMixin', {
-            doActivated: function() {
-                console.log("activated", this.name);
-            }
-        });
-        var BtnClass = new JS.Class('BtnClass', myt.View, {
-            include: [myt.Button, ActivatedMixin],
-            drawDisabledState: function() {
-                this.setBgColor('#999999');
-            },
-            drawHoverState: function() {
-                this.setBgColor('#ff0000');
-            },
-            drawActiveState: function() {
-                this.setBgColor('#990000');
-            },
-            drawReadyState: function() {
-                this.setBgColor('#cc0000');
-            }
-        });
+        new M.Dialog(rootView, {name:'dialog'});
         
-        new myt.Dialog(rootView, {name:'dialog'});
+        new M.ConstantLayout(rootView, {targetAttrName:'y', targetValue:5});
+        const layout = new M.SpacedLayout(rootView, {axis:'x', spacing:2, inset:5});
         
-        new myt.ConstantLayout(rootView, {targetAttrName:'y', targetValue:5});
-        var layout = new myt.SpacedLayout(rootView, {axis:'x', spacing:2, inset:5});
-        
-        var btn1 = new BtnClass(rootView, {name:'one', width:50, height:20}, [ActivatedMixin, {
+        const btn1 = new BtnClass(rootView, {name:'one', width:50, height:20}, [ActivatedMixin, {
             doActivated: function() {
                 this.parent.dialog.showSimple(
                     function(container) {
-                        new myt.SimpleButton(container, {
-                            name:'btn1', x:25,  width:50, height:50, roundedCorners:4, readyColor:'#999999'
+                        new M.SimpleButton(container, {
+                            name:'btn1', x:25,  width:50, height:50, roundedCorners:4, readyColor:'#999'
                         }, [{
                             doActivated: function() {container.parent.parent.doCallback(this);}
                         }]);
-                        new myt.SimpleButton(container, {
-                            name:'btn2', x:100, width:50, height:50, roundedCorners:4, readyColor:'#999999'
+                        new M.SimpleButton(container, {
+                            name:'btn2', x:100, width:50, height:50, roundedCorners:4, readyColor:'#999'
                         }, [{
                             doActivated: function() {container.parent.parent.doCallback(this);}
                         }]);
-                        new myt.SimpleButton(container, {
-                            name:'btn3', x:175, width:50, height:50, roundedCorners:4, readyColor:'#999999'
+                        new M.SimpleButton(container, {
+                            name:'btn3', x:175, width:50, height:50, roundedCorners:4, readyColor:'#999'
                         }, [{
                             doActivated: function() {container.parent.parent.doCallback(this);}
                         }]);
-                        new myt.View(container, {width:250, height:8, y:50});
+                        new M.View(container, {width:250, height:8, y:50});
                     },
                     function(action) {
                         switch(action) {
@@ -79,10 +81,10 @@
         }]);
         btn1.setRoundedCorners(5);
         
-        var btn2 = new BtnClass(rootView, {name:'two', width:50, height:20, y:100});
+        const btn2 = new BtnClass(rootView, {name:'two', width:50, height:20, y:100});
         btn2.setRoundedCorners(8);
-        var btn3 = new BtnClass(rootView, {name:'three', width:50, height:20, disabled:true, y:25});
-        var btn4 = new BtnClass(rootView, {name:'four', width:50, height:20}, [{
+        const btn3 = new BtnClass(rootView, {name:'three', width:50, height:20, disabled:true, y:25});
+        const btn4 = new BtnClass(rootView, {name:'four', width:50, height:20}, [{
             doMouseDown: function(event) {
                 this.callSuper(event);
                 this.setDisabled(true);
@@ -93,15 +95,15 @@
                 this.setDisabled(true);
             }
         }]);
-        var btn5 = new BtnClass(rootView, {name:'five', width:50, height:20}, [ActivatedMixin,  {
+        const btn5 = new BtnClass(rootView, {name:'five', width:50, height:20}, [ActivatedMixin,  {
             doActivated: function() {
                 this.parent.dialog.showContentConfirm(
                     function(container) {
-                        new myt.View(container, {width:300, height:100, bgColor:'#999999'});
-                        new myt.View(container, {width:300, height:100, bgColor:'#999999'});
-                        new myt.View(container, {width:300, height:100, bgColor:'#999999'});
-                        new myt.View(container, {width:300, height:100, bgColor:'#999999'});
-                        new myt.SpacedLayout(container, {axis:'y', spacing:1});
+                        new M.View(container, {width:300, height:100, bgColor:'#999'});
+                        new M.View(container, {width:300, height:100, bgColor:'#999'});
+                        new M.View(container, {width:300, height:100, bgColor:'#999'});
+                        new M.View(container, {width:300, height:100, bgColor:'#999'});
+                        new M.SpacedLayout(container, {axis:'y', spacing:1});
                     },
                     function(action) {
                         switch(action) {
@@ -121,8 +123,8 @@
             }
         }]);
         
-        var btn6 = new myt.SimpleButton(rootView, {
-            name:'six', width:50, height:20, activeColor:'#990000', hoverColor:'#ff0000', readyColor:'#cc0000'
+        const btn6 = new M.SimpleButton(rootView, {
+            name:'six', width:50, height:20, activeColor:'#900', hoverColor:'#f00', readyColor:'#c00'
         }, [ActivatedMixin,  {
             doActivated: function() {
                 this.parent.dialog.showConfirm(
@@ -145,14 +147,14 @@
             }
         }]);
         
-        var BtnClass2 = new JS.Class('BtnClass2', myt.SimpleTextButton, {
+        const BtnClass2 = new JS.Class('BtnClass2', M.SimpleTextButton, {
             include: [ActivatedMixin],
             
             initNode: function(parent, attrs) {
-                attrs.activeColor = '#666666';
-                attrs.hoverColor = '#cccccc';
-                attrs.readyColor = '#999999';
-                attrs.textColor = '#ffffff';
+                attrs.activeColor = '#666';
+                attrs.hoverColor = '#ccc';
+                attrs.readyColor = '#999';
+                attrs.textColor = '#fff';
                 attrs.height = 20;
                 attrs.shrinkToFit = true;
                 attrs.inset = attrs.outset = 10;
@@ -161,7 +163,7 @@
             }
         });
         
-        var btn7 = new BtnClass2(rootView, {name:'seven', text:'foo', tooltip:'here is a tip'}, [{
+        const btn7 = new BtnClass2(rootView, {name:'seven', text:'foo', tooltip:'here is a tip'}, [{
             doActivated: function() {
                 var dialog = this.parent.dialog;
                 dialog.showSpinner("Here is a message with a spinner.");
@@ -169,8 +171,8 @@
                 setTimeout(() => {dialog.hide();}, 1000);
             }
         }]);
-        var btn8 = new BtnClass2(rootView, {name:'eight', text:'bar', disabled:true});
-        var btn9 = new BtnClass2(rootView, {name:'nine', text:'baz'}, [{
+        const btn8 = new BtnClass2(rootView, {name:'eight', text:'bar', disabled:true});
+        const btn9 = new BtnClass2(rootView, {name:'nine', text:'baz'}, [{
             doActivated: function() {
                 this.parent.dialog.showMessage("This is just a simple message.");
                 this.callSuper();
@@ -178,22 +180,26 @@
         }]);
         
         // Do some simple animation
-        btn3.animate('y', 100, undefined, false, function(success) {btn3.animate({attribute:'x', to:52, relative:true});});
+        btn3.animate({
+            attribute:'y',
+            to:100,
+            callback:success => {
+                btn3.animate({attribute:'x', to:52, relative:true});
+            }
+        });
         
-        layout.animate({
-            attribute:'spacing', to:25, duration:250
-        }).next(
-            function(success) {layout.animate({attribute:'spacing', to:2, duration:250});}
+        layout.animate({attribute:'spacing', to:25, duration:250}).next(
+            success => {layout.animate({attribute:'spacing', to:2, duration:250});}
         );
         
-        var txt1 = new myt.Text(rootView, {text:'foo'});
+        const txt1 = new M.Text(rootView, {text:'foo'});
         txt1.showTextShadow(0, 0, 0);
-        var txt2 = new myt.Text(rootView, {text:'bar'});
+        const txt2 = new M.Text(rootView, {text:'bar'});
         txt2.showTextShadow(0, 0, 1);
-        var txt3 = new myt.Text(rootView, {text:'baz'});
+        const txt3 = new M.Text(rootView, {text:'baz'});
         txt3.showTextShadow();
-        var txt4 = new myt.Text(rootView, {text:'Hey there'});
-        txt4.showTextShadow(5, 5, 3, '#ffffff');
+        const txt4 = new M.Text(rootView, {text:'Hey there'});
+        txt4.showTextShadow(5, 5, 3, '#fff');
         txt4.enableEllipsis();
         txt4.setWidth(50);
         txt4.disableEllipsis();

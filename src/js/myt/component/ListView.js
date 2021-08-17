@@ -133,7 +133,7 @@
             defAttr(attrs, 'defaultItemClass', pkg.ListViewItem);
             defAttr(attrs, 'overflow', 'autoy');
             defAttr(attrs, 'bgColor', '#ccc');
-            defAttr(attrs, 'boxShadow', pkg.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
+            defAttr(attrs, 'boxShadow', pkg.Button.FOCUS_SHADOW);
             
             this.callSuper(parent, attrs);
             

@@ -66,10 +66,12 @@
                 behavior to be restored after an explicit height has been set.
         
         Private Attributes:
-            __hasSetWidth:boolean Indicates the an explicit width has been set
-                so that should be used rather than sizing to the dom element.
-            __hasSetHeight:boolean Indicates the an explicit height has been set
-                so that should be used rather than sizing to the dom element.
+            __hasSetWidth:boolean Indicates the an explicit width has been 
+                set so that width should be used rather than sizing to the 
+                dom element.
+            __hasSetHeight:boolean Indicates the an explicit height has been 
+                set so that height should be used rather than sizing to the 
+                dom element.
         
         @class */
     pkg.SizeToDom = new JSModule('SizeToDom', {
@@ -114,8 +116,9 @@
                 behavior to be restored after an explicit width has been set.
         
         Private Attributes:
-            __hasSetWidth:boolean Indicates the an explicit width has been set
-                so that should be used rather than sizing to the dom element.
+            __hasSetWidth:boolean Indicates the an explicit width has been 
+                set so that width should be used rather than sizing to the 
+                dom element.
         
         @class */
     pkg.SizeWidthToDom = new JSModule('SizeWidthToDom', {
@@ -154,8 +157,9 @@
                 behavior to be restored after an explicit height has been set.
         
         Private Attributes:
-            __hasSetHeight:boolean Indicates the an explicit height has been set
-                so that should be used rather than sizing to the dom element.
+            __hasSetHeight:boolean Indicates the an explicit height has been 
+                set so that height should be used rather than sizing to the 
+                dom element.
         
         @class */
     pkg.SizeHeightToDom = new JSModule('SizeHeightToDom', {

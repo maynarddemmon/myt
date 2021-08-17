@@ -155,8 +155,8 @@
                         i = svs.length;
                         while (i) this.removeSubview(svs[--i]);
                         
-                        this.detachFrom(curParent, '__hndlPSAV', 'subviewAdded');
-                        this.detachFrom(curParent, '__hndlPSRV', 'subviewRemoved');
+                        this.detachFrom(curParent, '__hndlPSA', 'subviewAdded');
+                        this.detachFrom(curParent, '__hndlPSR', 'subviewRemoved');
                     }
                     
                     this.callSuper(parent);
@@ -167,8 +167,8 @@
                         svs = parent.getSubviews();
                         for (i = 0, len = svs.length; len > i;) this.addSubview(svs[i++]);
                         
-                        this.attachTo(parent, '__hndlPSAV', 'subviewAdded');
-                        this.attachTo(parent, '__hndlPSRV', 'subviewRemoved');
+                        this.attachTo(parent, '__hndlPSA', 'subviewAdded');
+                        this.attachTo(parent, '__hndlPSR', 'subviewRemoved');
                     }
                     
                     // Clear temporary lock and update if this happened 
@@ -213,8 +213,8 @@
             
             /** Gets the index of the provided View in the subviews array.
                 @param {?Object} sv - The myt.View to check for.
-                @returns {number} - The index of the subview or -1 if not 
-                    found. */
+                @returns {number} - The index of the subview or -1 
+                    if not found. */
             getSubviewIndex: function(sv) {
                 return this.subviews.indexOf(sv);
             },
@@ -268,8 +268,8 @@
                 events from the subview that would trigger the update method. 
                 This should remove all listeners that were setup in 
                 startMonitoringSubview.
-                @param {?Object} sv - The myt.View to stop monitoring for 
-                    changes.
+                @param {?Object} sv - The myt.View to stop monitoring 
+                    for changes.
                 @returns {undefined} */
             stopMonitoringSubview: sv => {},
             
@@ -295,7 +295,7 @@
                 @private
                 @param {!Object} event
                 @returns {undefined} */
-            __hndlPSAV: function(event) {
+            __hndlPSA: function(event) {
                 if (event.value.parent === this.parent) this.addSubview(event.value);
             },
             
@@ -303,15 +303,15 @@
                 @private
                 @param {!Object} event
                 @returns {undefined} */
-            __hndlPSRV: function(event) {
+            __hndlPSR: function(event) {
                 if (event.value.parent === this.parent) this.removeSubview(event.value);
             },
             
             // Subview ordering //
-            /** Sorts the subviews array according to the provided sort 
-                function.
-                @param {?Function} sortFunc - The sort function to sort the 
-                    subviews with.
+            /** Sorts the subviews array according to the provided 
+                sort function.
+                @param {?Function} sortFunc - The sort function to sort 
+                    the subviews with.
                 @returns {undefined} */
             sortSubviews: function(sortFunc) {
                 this.subviews.sort(sortFunc);
@@ -348,8 +348,8 @@
                 targetValue:*
             
             Attributes:
-                targetAttrName:string the name of the attribute to set on each 
-                    subview.
+                targetAttrName:string the name of the attribute to set on 
+                    each subview.
                 targetValue:* the value to set the attribute to.
                 setterName:string the name of the setter method to call on 
                     the subview for the targetAttrName. This value is updated 
@@ -853,9 +853,9 @@
         }
     });
     
-    /** An extension of VariableLayout that positions views along an axis using
-        an inset, outset and spacing value. Views will be wrapped when they
-        overflow the available space.
+    /** An extension of VariableLayout that positions views along an axis 
+        using an inset, outset and spacing value. Views will be wrapped 
+        when they overflow the available space.
         
         Supported Layout Hints:
             break:string Will force the subview to start a new line/column.
@@ -1012,6 +1012,6 @@
         }
     });
     
-    /* Create locked counter functions for the myt.Layout class. */
+    /*  Create locked counter functions for the myt.Layout class. */
     pkg.createFixedThresholdCounter(Layout, 1, 'locked');
 })(myt);

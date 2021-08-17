@@ -1,25 +1,18 @@
 (pkg => {
     const JSClass = JS.Class,
         JSModule = JS.Module,
+        
+        math = Math,
+        mathMax = math.max,
+        
         View = pkg.View,
         GlobalFocus = pkg.global.focus,
         
         defAttr = pkg.AccessorSupport.defAttr,
         
-        DEFAULT_ROW_SPACING = 1,
-        DEFAULT_ROW_HEIGHT = 30,
-        DEFAULT_ROW_INSET = 0,
-        DEFAULT_ROW_OUTSET = 0,
-        DEFAULT_BG_COLOR = '#ccc',
-        
         DEFAULT_CLASS_KEY = 'default',
         
-        DEFAULT_SELECTED_COLOR = '#ccf',
-        DEFAULT_ACTIVE_COLOR = '#f8f8f8',
-        DEFAULT_HOVER_COLOR = '#eee',
-        DEFAULT_READY_COLOR = '#fff',
-        
-        /* Clears the selectedRow while leaving the selectedRowModel. */
+        /*  Clears the selectedRow while leaving the selectedRowModel. */
         clearSelectedRow = selectableInfiniteList => {
             const existing = selectableInfiniteList.selectedRow;
             if (existing) {
@@ -65,7 +58,9 @@
                 this.classKey = classKey;
             },
             
-            notifyRefreshed: () => {}
+            
+            // Methods /////////////////////////////////////////////////////////
+            notifyRefreshed: () => {/* Subclasses to implement as needed. */}
         }),
         
         /** A mixin for rows in infinite scrolling lists
@@ -116,11 +111,11 @@
                 defAttr(attrs, 'numericSort', true);
                 defAttr(attrs, 'ascendingSort', true);
                 defAttr(attrs, 'overflow', 'autoy');
-                defAttr(attrs, 'bgColor', DEFAULT_BG_COLOR);
-                defAttr(attrs, 'rowSpacing', DEFAULT_ROW_SPACING);
-                defAttr(attrs, 'rowInset', DEFAULT_ROW_INSET);
-                defAttr(attrs, 'rowOutset', DEFAULT_ROW_OUTSET);
-                defAttr(attrs, 'rowHeight', DEFAULT_ROW_HEIGHT);
+                defAttr(attrs, 'bgColor', '#ccc');
+                defAttr(attrs, 'rowSpacing', 1);
+                defAttr(attrs, 'rowInset', 0);
+                defAttr(attrs, 'rowOutset', 0);
+                defAttr(attrs, 'rowHeight', 30);
                 defAttr(attrs, 'overscrollBehavior', 'auto contain');
                 
                 self._rowExtent = self.rowSpacing = self.rowHeight = 0;
@@ -198,9 +193,7 @@
                 }
             },
             
-            getFilterFunction: () => {
-                // Unimplemented which means don't filter anything out.
-            },
+            getFilterFunction: () => {/* Unimplemented which means don't filter anything out. */},
             
             scrollModelIntoView: function(model) {
                 const self = this,
@@ -322,8 +315,8 @@
             },
             
             putRowBackInPool: function(row) {
-                // Clear or reassign focus since the row will get reused and the 
-                // reused row will likely not be the appropriate focus.
+                // Clear or reassign focus since the row will get reused and 
+                // the reused row will likely not be the appropriate focus.
                 const currentFocus = GlobalFocus.focusedView;
                 if (currentFocus && currentFocus.isDescendantOf(row)) {
                     const focusTrap = this.getFocusTrap();
@@ -345,8 +338,8 @@
                     forceFullReset = self.forceFullResetOnNextRefresh,
                     scrollY = getDomScrollTop(self),
                     data = self.getListData() || [],
-                    startIdx = Math.max(0, Math.floor((scrollY - rowInset) / rowExtent)),
-                    endIdx = Math.min(data.length, Math.ceil((scrollY - rowInset + self.height) / rowExtent));
+                    startIdx = mathMax(0, math.floor((scrollY - rowInset) / rowExtent)),
+                    endIdx = math.min(data.length, math.ceil((scrollY - rowInset + self.height) / rowExtent));
                 
                 if (self.forceFullResetOnNextRefresh) self.forceFullResetOnNextRefresh = false;
                 
@@ -416,10 +409,10 @@
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                defAttr(attrs, 'selectedColor', DEFAULT_SELECTED_COLOR);
-                defAttr(attrs, 'activeColor', DEFAULT_ACTIVE_COLOR);
-                defAttr(attrs, 'hoverColor', DEFAULT_HOVER_COLOR);
-                defAttr(attrs, 'readyColor', DEFAULT_READY_COLOR);
+                defAttr(attrs, 'selectedColor', '#ccf');
+                defAttr(attrs, 'activeColor', '#f8f8f8');
+                defAttr(attrs, 'hoverColor', '#eee');
+                defAttr(attrs, 'readyColor', '#fff');
                 defAttr(attrs, 'focusIndicator', false);
                 defAttr(attrs, 'activationKeys', [13,27,32,37,38,39,40]);
                 
@@ -546,8 +539,8 @@
             /** @overrides */
             resetListUI: function(preserveScroll, forceFullReset) {
                 if (this.isModelInData(this.selectedRowModel)) {
-                    // Only clear the selected row since it's still in the data 
-                    // and thus may be shown again.
+                    // Only clear the selected row since it's still in the 
+                    // data and thus may be shown again.
                     clearSelectedRow(this);
                 } else {
                     // Clear the row and model since the model can no longer 
@@ -711,7 +704,7 @@
         setColumnSpacing: function(v) {this.columnSpacing = v;},
         
         getColumnSpacingInUse: function() {
-            return this.columnSpacing === 0 ? 0 : Math.max(0, this.getVisibleColumnHeaders().length - 1) * this.columnSpacing;
+            return this.columnSpacing === 0 ? 0 : mathMax(0, this.getVisibleColumnHeaders().length - 1) * this.columnSpacing;
         },
         
         /** @overrides myt.View */
@@ -726,7 +719,7 @@
         /** @overrides myt.View */
         setWidth: function(v, supressEvent) {
             const self = this;
-            self.callSuper(Math.max(self.minWidth, v), supressEvent);
+            self.callSuper(mathMax(self.minWidth, v), supressEvent);
             if (self.inited) {
                 const width = self.width;
                 self.setGridWidth(width);

@@ -6,86 +6,63 @@
 <script src="../src/js/myt/manifest.js"></script>
 </head><body>
 <script>
-    JS.require('myt.all', function() {
-        var rootView = new myt.View(null, {}, [myt.SizeToWindow]);
+    JS.require('myt.all', () => {
+        const M = myt,
+            View = M.View,
+            Annulus = M.Annulus,
+            rootView = new View(null, {}, [M.SizeToWindow]);
+            innerView = new View(rootView, {x:50, y:50, width:400, height:400, bgColor:'#999'});
         
-        var innerView = new myt.View(rootView, {
-            x:50, y:50, width:400, height:400, bgColor:'#999999'
-        });
+        new View(innerView, {x:10, y:10, width:120, height:120, bgColor:'#ccc', roundedCorners:60});
         
-        var a = new myt.Annulus(innerView, {
-            x:10, y:10,
-            bgColor:'#cccccc',
-            
-            radius:50,
-            thickness:10,
-            startAngle:0,
-            endAngle:90,
-            color:'#000000'
-        });
+        const a = new Annulus(innerView, {
+                x:10, y:10,
+                radius:50, thickness:10,
+                startAngle:0, endAngle:90,
+                color:'#000'
+            });
+            b = new Annulus(innerView, {
+                x:15, y:15, opacity:0.5,
+                radius:42, thickness:13,
+                startAngle:270, endAngle:450,
+                color:'#999'
+            });
         
-        var b = new myt.Annulus(innerView, {
-            x:15, y:15,
-            opacity:0.5,
-            
-            radius:40,
-            thickness:15,
-            startAngle:270,
-            endAngle:450,
-            color:'#999999'
-        });
-        
-        new myt.Annulus(innerView, {
+        new Annulus(innerView, {
             x:30, y:30,
-            
-            radius:30,
-            thickness:10,
-            startAngle:0,
-            endAngle:360,
-            color:'#ffffff'
+            radius:30, thickness:10,
+            startAngle:0, endAngle:360,
+            color:'#fff'
         });
         
-        a.animate('startAngle', 360, 0, true, null, 3000, false, 10, 'linear');
-        a.animate('endAngle', 360, 0, true, null, 3000, false, 10, 'linear');
-        
-        b.animate('startAngle', 270, 360 + 270, false, null, 3000, false, 10, 'linear');
-        
-        new myt.Annulus(innerView, {
+        new Annulus(innerView, {
             x:140, y:10,
-            
-            radius:96,
-            thickness:6,
-            startAngle:0,
-            endAngle:270,
-            endCapRounding:true,
-            startCapRounding:true,
-            color:'#ffffff'
+            radius:96, thickness:6,
+            startAngle:0, endAngle:270,
+            endCapRounding:true, startCapRounding:true,
+            color:'#fff'
         });
         
-        var c = new myt.Annulus(innerView, {
+        const c = new Annulus(innerView, {
             x:141, y:11,
-            
-            radius:97,
-            thickness:4,
-            startAngle:0,
-            endAngle:0,
-            endCapRounding:true,
-            startCapRounding:true,
-            color:'#009900'
+            radius:97, thickness:4,
+            startAngle:0, endAngle:0,
+            endCapRounding:true, startCapRounding:true,
+            color:'#090'
         });
         
-        new myt.Annulus(innerView, {
+        new Annulus(innerView, {
             x:191, y:61,
-            
-            radius:0,
-            thickness:50,
-            startAngle:90,
-            endAngle:300,
-            color:'#666666'
+            radius:0, thickness:50,
+            startAngle:90, endAngle:300,
+            color:'#666'
         });
         
-        c.animate('endAngle', 270, 0, false, null, 3000, false, 10, 'easeInBounce');
-        c.animate('color', '#990000', '#009900', false, null, 3000, false, 10, 'easeInBounce');
+        a.animate({attribute:'startAngle', to:360, from:0, relative:true, duration:3000, repeat:10, easingFunction:'linear'});
+        a.animate({attribute:'endAngle', to:360, from:0, relative:true, duration:3000, repeat:10, easingFunction:'linear'});
+        b.animate({attribute:'startAngle', to:270, from:360 + 270, duration:3000, repeat:10, easingFunction:'linear'});
+        c.animate({attribute:'endAngle', to:270, from:0, duration:3000, repeat:10, easingFunction:'inBounce'});
+        c.animate({attribute:'color', to:'#900', from:'#090', duration:3000, repeat:10, easingFunction:'inBounce'});
     });
 </script>
 </body></html>

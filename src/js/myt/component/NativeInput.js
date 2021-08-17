@@ -1,12 +1,15 @@
 (pkg => {
     const JSClass = JS.Class,
+        mathMin = Math.min,
+        isArray = Array.isArray,
+        
         SizeToDom = pkg.SizeToDom,
         View = pkg.View,
         Disableable = pkg.Disableable,
         
         defAttr = pkg.AccessorSupport.defAttr,
         
-        DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE = pkg.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE,
+        FOCUS_SHADOW = pkg.Button.FOCUS_SHADOW,
         
         setEditableTextAttr = (editableText, v, propName) => {
             if (editableText[propName] !== v) {
@@ -59,7 +62,7 @@
             /** @overrides myt.View */
             createOurDomElement: function(parent) {
                 const elements = this.callSuper(parent);
-                if (this.inputType) (Array.isArray(elements) ? elements[1] : elements).type = this.inputType;
+                if (this.inputType) (isArray(elements) ? elements[1] : elements).type = this.inputType;
                 return elements;
             },
             
@@ -180,6 +183,9 @@
                 placeholder:string Text that will be shown if the value 
                     is empty.
             
+            Private Attributes:
+                _selRange:object Stores the start and end of the selection.
+            
             @class */
         BaseInputText = pkg.BaseInputText = new JSClass('BaseInputText', NativeInputWrapper, {
             include: [pkg.TextSupport],
@@ -221,7 +227,7 @@
             /** @overrides myt.FocusObservable */
             showFocusIndicator: function() {
                 this.hideDefaultFocusIndicator();
-                this.setBoxShadow(DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
+                this.setBoxShadow(FOCUS_SHADOW);
             },
             
             /** @overrides myt.FocusObservable */
@@ -241,20 +247,10 @@
                 @param {!Object} event
                 @returns {undefined} */
             __filterInputPress: function(event) {
-                const domEvent = event.value,
-                    charCode = domEvent.which;
-                
-                // Firefox fires events for arrow keys and backspace which 
-                // should be ignored completely.
-                switch (charCode) {
-                    case 8: // backspace key
-                    case 0: // arrow keys have a "charCode" of 0 in firefox.
-                        return;
-                }
-                
                 // Filter for allowed characters
-                const allowedChars = this.allowedChars;
-                if (allowedChars && allowedChars.indexOf(String.fromCharCode(charCode)) === -1) domEvent.preventDefault();
+                const domEvent = event.value,
+                    allowedChars = this.allowedChars;
+                if (allowedChars && allowedChars.indexOf(String.fromCharCode(domEvent.which)) === -1) domEvent.preventDefault();
                 
                 this.filterInputPress(domEvent);
             },
@@ -269,7 +265,7 @@
                 key press. The default implementation does nothing.
                 @param {!Object} domEvent - The dom key press event.
                 @returns {undefined} */
-            filterInputPress: domEvent => {},
+            filterInputPress: domEvent => {/* Subclasses to implement as needed. */},
             
             /** @private
                 @param {!Object} event
@@ -392,9 +388,6 @@
             minHeight:number The minimum height for the component. Defaults to 
                 undefined which is effectively 0.
         
-        Private Attributes:
-            _selRange:object Stores the start and end of the selection.
-        
         @class */
     pkg.EditableText = new JSClass('EditableText', BaseInputText, {
         include: [SizeToDom],
@@ -423,10 +416,7 @@
         
         // Attributes //////////////////////////////////////////////////////////
         setMinWidth: function(v) {setEditableTextAttr(this, v, 'minWidth');},
-        setMinHeight: function(v) {
-            if (BrowserDetect.browser === 'Firefox') v += 2;
-            setEditableTextAttr(this, v, 'minHeight');
-        },
+        setMinHeight: function(v) {setEditableTextAttr(this, v, 'minHeight');},
         setPadding: function(v) {
             this.setPaddingTop(v);
             this.setPaddingRight(v);
@@ -566,8 +556,8 @@
                     endElem = selection.endElem;
                 if (startElem && startElem.parentNode && endElem && endElem.parentNode) {
                     const range = document.createRange();
-                    range.setStart(startElem, Math.min(selection.start, startElem.length));
-                    range.setEnd(endElem, Math.min(selection.end, endElem.length));
+                    range.setStart(startElem, mathMin(selection.start, startElem.length));
+                    range.setEnd(endElem, mathMin(selection.end, endElem.length));
                     
                     if (window.getSelection) {
                         const sel = window.getSelection();
@@ -763,7 +753,7 @@
         
         setOptions: function(v) {
             this.destroyAllOptions();
-            if (Array.isArray(v)) v.forEach(option => {this.addOption(option);});
+            if (isArray(v)) v.forEach(option => {this.addOption(option);});
         },
         
         /** The options are just the subviews.
@@ -776,7 +766,7 @@
             Does not update the dom since the dom element's 'value' attribute
             doesn't support lists. */
         setValue: function(v) {
-            if (Array.isArray(v) && pkg.areArraysEqual(v, this.value)) return;
+            if (isArray(v) && pkg.areArraysEqual(v, this.value)) return;
             
             if (this.value !== v) {
                 this.value = v;
@@ -790,7 +780,7 @@
         subviewAdded: function(sv) {
             // Destroy subview if it's not supported.
             if (!(sv instanceof InputSelectOption)) {
-                pkg.dumpStack("Subview not supported. Destroying it.");
+                pkg.dumpStack('Subview unsupported. Destroying it');
                 sv.destroy();
             }
         },
@@ -798,7 +788,7 @@
         /** @overrides myt.FocusObservable */
         showFocusIndicator: function() {
             this.hideDefaultFocusIndicator();
-            this.setBoxShadow(DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
+            this.setBoxShadow(FOCUS_SHADOW);
         },
         
         /** @overrides myt.FocusObservable */
@@ -867,7 +857,7 @@
         },
         
         selectValues: function(values) {
-            (Array.isArray(values) ? values : [values]).forEach(value => {this.selectValue(value);});
+            (isArray(values) ? values : [values]).forEach(value => {this.selectValue(value);});
         },
         
         /** Selects the option that has the provided value.

@@ -4,7 +4,8 @@
     Events:
         register<key>:object Fired when an object is stored under the key.
         unregister<key>:object Fired when an object is removed from the key.
-*/
+    
+    @class */
 myt.global = new JS.Singleton('Global', {
     include: [myt.Observable],
     
@@ -18,7 +19,7 @@ myt.global = new JS.Singleton('Global', {
         @returns {undefined} */
     register: function(key, v) {
         if (this.hasOwnProperty(key)) {
-            console.log("Warning: myt.global key in use: ", key);
+            console.warn('Global key in use', key);
             this.unregister(key);
         }
         this[key] = v;
@@ -35,7 +36,7 @@ myt.global = new JS.Singleton('Global', {
             delete this[key];
             this.fireEvent('unregister' + key, v);
         } else {
-            console.log("Warning: myt.global key not in use: ", key);
+            console.warn('Global key not in use', key);
         }
     }
 });

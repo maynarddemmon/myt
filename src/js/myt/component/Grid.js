@@ -2,6 +2,9 @@
     const JSClass = JS.Class,
         JSModule = JS.Module,
         
+        mathMin = Math.min,
+        mathMax = Math.max,
+        
         View = pkg.View,
         
         defAttr = pkg.AccessorSupport.defAttr,
@@ -34,7 +37,7 @@
             if (!controller.locked) controller.doSort();
         },
         
-        /* Calculate resize amounts and distribute it to the headers */
+        /*  Calculate resize amounts and distribute it to the headers */
         calculateAndDistribute = (hdrs, extra, isFlex, nextFunc) => {
             if (extra !== 0) {
                 const isGrow = extra > 0;
@@ -68,13 +71,13 @@
                         } else {
                             let incr;
                             if (isGrow) {
-                                incr = Math.min(isFlex ? hdr.flex : 1, extra);
+                                incr = mathMin(isFlex ? hdr.flex : 1, extra);
                                 if (info.amt + incr > info.limit) {
                                     incr = info.limit - info.amt;
                                     info.full = true;
                                 }
                             } else {
-                                incr = Math.max(isFlex ? -hdr.flex : -1, extra);
+                                incr = mathMax(isFlex ? -hdr.flex : -1, extra);
                                 if (info.amt + incr < info.limit) {
                                     incr = info.limit - info.amt;
                                     info.full = true;
@@ -335,8 +338,8 @@
             // Column Headers
             /** Gets the column header before the provided one.
                 @param {!Object} columnHeader
-                @returns {?Object} The myt.GridColumnHeader or null if none 
-                    exists. */
+                @returns {?Object} The myt.GridColumnHeader or null if 
+                    none exists. */
             getPrevColumnHeader: function(columnHeader) {
                 const hdrs = this.columnHeaders;
                 let idx = this.getColumnHeaderIndex(columnHeader);
@@ -488,7 +491,7 @@
                     // Determine extra width to distribute/consume
                     const hdrs = this.getVisibleColumnHeaders();
                     let maxExtent = 0;
-                    hdrs.forEach(hdr => {maxExtent = Math.max(maxExtent, hdr.x + hdr.width);});
+                    hdrs.forEach(hdr => {maxExtent = mathMax(maxExtent, hdr.x + hdr.width);});
                     
                     // Distribute extra width to resizable flex columns and 
                     // then to non-flex columns.
@@ -507,17 +510,18 @@
                 resizable:boolean
             
             Attributes:
-                columnId:string The unique ID for this column relative to the 
-                    grid it is part of.
-                gridController:myt.GridController the controller for the grid 
-                    this component is part of.
-                flex:number If 1 or more the column will get extra space if 
-                    any exists.
-                resizable:boolean Indicates if this column can be resized or 
-                    not. Defaults to true.
-                last:boolean Indicates if this is the last column header or not.
-                sortable:boolean Indicates if this column can be sorted or not.
-                    Defaults to true.
+                columnId:string The unique ID for this column relative 
+                    to the grid it is part of.
+                gridController:myt.GridController the controller for the 
+                    grid this component is part of.
+                flex:number If 1 or more the column will get extra space 
+                    if any exists.
+                resizable:boolean Indicates if this column can be resized 
+                    or not. Defaults to true.
+                last:boolean Indicates if this is the last column header 
+                    or not.
+                sortable:boolean Indicates if this column can be sorted 
+                    or not. Defaults to true.
                 sortState:string The sort state of this column. Allowed 
                     values are:
                         'ascending': Sorted in ascending order.
@@ -525,8 +529,8 @@
                         'none': Not currently an active sort column.
                 cellXAdj:number The amount to shift the x values of cells 
                     updated by this column. Defaults to 0.
-                cellWidthAdj:number The amount to grow/shrink the width of 
-                    cells updated by this column. Defaults to 0.
+                cellWidthAdj:number The amount to grow/shrink the width 
+                    of cells updated by this column. Defaults to 0.
             
             @class */
         GridColumnHeader = pkg.GridColumnHeader = new JSModule('GridColumnHeader', {
@@ -568,11 +572,11 @@
                             if (diff > 0) {
                                 // Get amount that this header can grow
                                 growAmt = self.maxValue - self.value;
-                                diff = Math.min(diff, Math.min(-getTakeRight(self), growAmt + getGiveLeft(self)));
+                                diff = mathMin(diff, mathMin(-getTakeRight(self), growAmt + getGiveLeft(self)));
                             } else if (diff < 0) {
                                 // Get amount that this header can shrink
                                 shrinkAmt = self.minValue - self.value;
-                                diff = Math.max(diff, Math.max(-getGiveRight(self), shrinkAmt + getTakeLeft(self)));
+                                diff = mathMax(diff, mathMax(-getGiveRight(self), shrinkAmt + getTakeLeft(self)));
                             }
                             
                             if (diff === 0) return;
@@ -657,7 +661,7 @@
                     oldMinValue = self.minValue || 0, 
                     gc = self.gridController;
                 self.callSuper(v);
-                if (self.inited && gc && oldMinValue !== self.minValue) gc.setMinWidth(gc.minWidth + self.minValue - oldMinValue);
+                if (gc && self.inited && oldMinValue !== self.minValue) gc.setMinWidth(gc.minWidth + self.minValue - oldMinValue);
             },
             
             /** @overrides myt.BoundedValueComponent */
@@ -667,31 +671,34 @@
                     gc = self.gridController;
                 if (v == null) v = defaultMaxValue;
                 self.callSuper(v);
-                if (self.inited && gc && oldMaxValue !== self.maxValue) gc.setMaxWidth(gc.maxWidth + self.maxValue - oldMaxValue);
+                if (gc && self.inited && oldMaxValue !== self.maxValue) gc.setMaxWidth(gc.maxWidth + self.maxValue - oldMaxValue);
             },
             
             /** @overrides myt.View */
             setWidth: function(v, supressEvent) {
                 const self = this,
-                    cur = self.width;
+                    cur = self.width,
+                    gc = self.gridController;
                 self.callSuper(v, supressEvent);
-                if (self.inited && self.gridController && cur !== self.width) self.gridController.notifyColumnHeaderWidthChange(self);
+                if (gc && self.inited && cur !== self.width) gc.notifyColumnHeaderWidthChange(self);
             },
             
             /** @overrides myt.View */
             setX: function(v) {
                 const self = this,
-                    cur = self.x;
+                    cur = self.x,
+                    gc = self.gridController;
                 self.callSuper(v);
-                if (self.inited && self.gridController && cur !== self.x) self.gridController.notifyColumnHeaderXChange(self);
+                if (gc && self.inited && cur !== self.x) gc.notifyColumnHeaderXChange(self);
             },
             
             /** @overrides myt.View */
             setVisible: function(v) {
                 const self = this,
-                    cur = self.visible;
+                    cur = self.visible,
+                    gc = self.gridController;
                 self.callSuper(v);
-                if (self.inited && self.gridController && cur !== self.visible) self.gridController.notifyColumnHeaderVisibilityChange(self);
+                if (self.inited && gc && cur !== self.visible) gc.notifyColumnHeaderVisibilityChange(self);
             }
         }),
         
@@ -923,7 +930,7 @@
         
         Attributes:
             sortIconColor:color the color to fill the sort icon with if shown.
-                Defaults to '#666666'.
+                Defaults to '#666'.
         
         @class */
     pkg.SimpleGridColumnHeader = new JSClass('SimpleGridColumnHeader', pkg.SimpleTextButton, {
@@ -997,7 +1004,6 @@
         
         // Methods /////////////////////////////////////////////////////////////
         doActivated: function() {
-            console.log('here');
             if (!this.disabled) {
                 switch (this.sortState) {
                     case 'ascending': this.setSortState('descending'); break;

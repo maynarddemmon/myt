@@ -1,11 +1,12 @@
 (pkg => {
-    const win = window;
+    let 
+        /*  The inner width of the browser window. */
+        innerWidth,
         
-        /* The inner width of the browser window. */
-    let innerWidth,
-        
-        /* The inner height of the browser window. */
+        /*  The inner height of the browser window. */
         innerHeight;
+    
+    const win = window;
     
     /** Provides events when the window is resized. Registered with myt.global
         as 'windowResize'.

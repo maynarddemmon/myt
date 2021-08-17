@@ -73,7 +73,8 @@
             }
         }),
         
-        /** Tests that a value is not null, undefined or empty. 
+        /** Tests that a value is not null, undefined or empty.
+            
             @class */
         RequiredFieldValidator = pkg.RequiredFieldValidator = new JSClass('RequiredFieldValidator', Validator, {
             /** @overrides myt.Validator */
@@ -89,6 +90,7 @@
         
         /** Tests that the value differs from the form rollback value by more 
             than just case.
+            
             @class */
         EqualsIgnoreCaseValidator = pkg.EqualsIgnoreCaseValidator = new JSClass('EqualsIgnoreCaseValidator', Validator, {
             /** @overrides myt.Validator */
@@ -104,6 +106,7 @@
         }),
         
         /** Verifies that a value is in the form of a URL.
+        
             @class */
         URLValidator = pkg.URLValidator = new JSClass('URLValidator', Validator, {
             /** @overrides myt.Validator
@@ -127,6 +130,7 @@
         }),
         
         /** Verifies that a value is JSON.
+        
             @class */
         JSONValidator = pkg.JSONValidator = new JSClass('JSONValidator', Validator, {
             /** @overrides myt.Validator */
@@ -141,7 +145,9 @@
             }
         });
     
-    /** Tests that the value from two fields are equal. */
+    /** Tests that the value from two fields are equal.
+        
+        @class */
     pkg.EqualFieldsValidator = new JSClass('EqualFieldsValidator', Validator, {
         /** @overrides myt.Validator
             @param {string} id
@@ -163,7 +169,8 @@
         }
     });
     
-    /** Tests that the value has a length between min and max
+    /** Tests that the value has a length between a min and max value.
+        
         @class */
     pkg.LengthValidator = new JSClass('LengthValidator', Validator, {
         /** @overrides myt.Validator
@@ -199,7 +206,8 @@
         }
     });
     
-    /** Tests that adBinary value is between min and max.
+    /** Tests that a value is between a min and max value.
+        
         @class */
     pkg.NumericRangeValidator = new JSClass('NumericRangeValidator', Validator, {
         /** @overrides myt.Validator
@@ -215,8 +223,8 @@
         
         /** @overrides myt.Validator */
         isValid: function(value, config, errorMessages) {
-            // Treat empty values as valid.
-            if (value === "") return true;
+            // Treat empty values as valid
+            if (value === '') return true;
             
             // Must be a number
             const numericValue = Number(value),
@@ -255,9 +263,9 @@
         /** Creates a new CompoundValidator for the ID and 0 or more Validators
             provided.
             @param {string} id
-            @param arguments:args ever argument after the first must be a
-                Validator or a Validator ID from the myt.global.validators
-                registry.*/
+            @param arguments:args - Every argument after the first argument 
+                must be a myt.Validator or a myt.Validator ID from the 
+                myt.global.validators registry.*/
         initialize: function(id, ...args) {
             this.callSuper(id);
             
@@ -277,9 +285,9 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Add a Validator to this CompoundValidator.
+        /** Add a myt.Validator to this myt.CompoundValidator.
             @param {!Object|string} v - The myt.Validator to add or a string
-                used to lookup a validator in the validator repository.
+                used to lookup a Validator in the Validator repository.
             @returns {undefined} */
         addValidator: function(v) {
             if (typeof v === 'string') v = getValidator(v);
@@ -298,7 +306,9 @@
     });
     
     /** Stores myt.Validators by ID so they can be used in multiple
-        places easily. */
+        places easily.
+        
+        @class */
     new JS.Singleton('GlobalValidatorRegistry', {
         // Life Cycle //////////////////////////////////////////////////////////
         initialize: function() {
@@ -328,8 +338,8 @@
         /** Removes a Validator from this registery.
             @param {!Object} identifiable - The myt.Validator to remove.
             @returns {undefined} */
-        unregister: (identifiable) => {
-            doFuncOnIdentifiable(identifiable, (id) => {
+        unregister: identifiable => {
+            doFuncOnIdentifiable(identifiable, id => {
                 // Make sure the validator is in the repository then delete.
                 if (getValidator(id)) delete validators[id];
             });

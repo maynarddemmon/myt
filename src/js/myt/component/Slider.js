@@ -1,38 +1,36 @@
 (pkg => {
     const JSClass = JS.Class,
+        mathMin = Math.min,
+        mathMax = Math.max,
+        
         View = pkg.View,
         
         defAttr = pkg.AccessorSupport.defAttr,
         
-        /** Provides Slider thumb functionality.
-            
-            Requires:
-                myt.Button
-            
-            @class */
-        SliderThumbMixin = pkg.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
+        SliderThumb = new JSClass('SliderThumb', pkg.SimpleButton, {
             include: [pkg.Draggable],
             
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                defAttr(attrs, 'width', parent.thumbWidth);
-                defAttr(attrs, 'height', parent.thumbHeight);
-                defAttr(attrs, 'repeatKeyDown', true);
-                defAttr(attrs, 'activationKeys', [
+                const width = attrs.width = parent.thumbWidth,
+                    height = attrs.height = parent.thumbHeight;
+                attrs.roundedCorners = mathMin(height, width) / 2;
+                attrs.repeatKeyDown = true;
+                attrs.activationKeys = [
                     37, // left arrow
                     38, // up arrow
                     39, // right arrow
                     40 // down arrow
-                ]);
+                ];
+                attrs.activeColor = '#bbb';
+                attrs.readyColor = '#ccc';
+                attrs.hoverColor = '#ddd';
+                attrs.boxShadow = [0, 0, 4, '#666'];
                 
                 this.callSuper(parent, attrs);
                 
-                if (parent.axis === 'x') {
-                    this.setY(parent.thumbOffset);
-                } else {
-                    this.setX(parent.thumbOffset);
-                }
+                this[parent.axis === 'x' ? 'setY' : 'setX'](parent.thumbOffset);
                 
                 this.syncTo(parent, 'setDisabled', 'disabled');
                 
@@ -58,7 +56,7 @@
                     this.callSuper(v);
                     
                     const p = this.parent;
-                    if (p.axis === 'x') p._syncValueToThumb(this);
+                    if (p.axis === 'x') p.syncValueToThumb(this);
                 }
             },
             
@@ -68,7 +66,7 @@
                     this.callSuper(v);
                     
                     const p = this.parent;
-                    if (p.axis === 'y') p._syncValueToThumb(this);
+                    if (p.axis === 'y') p.syncValueToThumb(this);
                 }
             },
             
@@ -82,19 +80,17 @@
                         maxPx = parent.getMaxPixelValueForThumb(this);
                     let halfSize,
                         pos,
-                        func;
-                    
+                        funcName;
                     if (parent.axis === 'x') {
                         halfSize = this.width / 2;
                         pos = x;
-                        func = this.setX;
+                        funcName = 'setX';
                     } else {
                         halfSize = this.height / 2;
                         pos = y;
-                        func = this.setY;
+                        funcName = 'setY';
                     }
-                    
-                    func.call(this, Math.min(Math.max(pos, minPx - halfSize), maxPx - halfSize));
+                    this[funcName](mathMin(mathMax(pos, minPx - halfSize), maxPx - halfSize));
                 }
             },
             
@@ -115,29 +111,7 @@
                         parent.nudgeValueDown(this);
                         break;
                 }
-                
                 this.callSuper(key, isRepeat);
-            }
-        }),
-        
-        /** A simple implementation of a slider thumb.
-            
-            @class */
-        SimpleSliderThumb = pkg.SimpleSliderThumb = new JSClass('SimpleSliderThumb', pkg.SimpleButton, {
-            include: [SliderThumbMixin],
-            
-            
-            // Life Cycle //////////////////////////////////////////////////////
-            /** @overrides myt.SimpleButton */
-            initNode: function(parent, attrs) {
-                defAttr(attrs, 'activeColor', '#bbb');
-                defAttr(attrs, 'readyColor', '#ccc');
-                defAttr(attrs, 'hoverColor', '#ddd');
-                defAttr(attrs, 'boxShadow', [0, 0, 4, '#666']);
-                
-                this.callSuper(parent, attrs);
-                
-                if (attrs.roundedCorners == null) this.setRoundedCorners(Math.min(this.height, this.width) / 2);
             }
         }),
         
@@ -156,9 +130,11 @@
                 thumbHeight:number The height of the thumb.
                 thumbOffset:number The x/y offset of the thumb. Will applied to 
                     the opposite dimension to the axis.
-                thumbClass:JS.Class the class to use to create the thumb.
                 nudgeAmount:number the amount to nudge the value when the 
                     arrows keys are invoked. Defaults to 1.
+            
+            Private Attributes:
+                __lockSync:boolean Used internally to prevent infinite loops.
             
             @class */
         BaseSlider = pkg.BaseSlider = new JSClass('BaseSlider', View, {
@@ -184,7 +160,6 @@
                 defAttr(attrs, 'thumbHeight', 16);
                 defAttr(attrs, 'thumbOffset', 1);
                 defAttr(attrs, 'nudgeAmount', 1);
-                defAttr(attrs, 'thumbClass', SimpleSliderThumb);
                 
                 this.callSuper(parent, attrs);
             },
@@ -197,25 +172,26 @@
             setThumbWidth: function(v) {this.thumbWidth = v;},
             setThumbHeight: function(v) {this.thumbHeight = v;},
             setThumbOffset: function(v) {this.thumbOffset = v;},
-            setThumbClass: function(v) {this.thumbClass = v;},
             setNudgeAmount: function(v) {this.nudgeAmount = v;},
             
             
             // Methods /////////////////////////////////////////////////////////
             convertValueToPixels: function(v) {
                 const self = this,
-                    minV = self.minValue, ti = self.trackInset,
-                    pxRange = (self.axis === 'x' ? self.width : self.height) - ti - self.trackOutset,
+                    minV = self.minValue,
+                    trackInset = self.trackInset,
+                    pxRange = (self.axis === 'x' ? self.width : self.height) - trackInset - self.trackOutset,
                     valueRange = self.maxValue - minV;
-                return ti + ((v - minV) * (pxRange / valueRange));
+                return trackInset + ((v - minV) * (pxRange / valueRange));
             },
             
             convertPixelsToValue: function(px) {
                 const self = this,
-                    minV = self.minValue, ti = self.trackInset,
-                    pxRange = (self.axis === 'x' ? self.width : self.height) - ti - self.trackOutset,
+                    minV = self.minValue,
+                    trackInset = self.trackInset,
+                    pxRange = (self.axis === 'x' ? self.width : self.height) - trackInset - self.trackOutset,
                     valueRange = self.maxValue - minV;
-                return ((px - ti) * (valueRange / pxRange)) + minV;
+                return ((px - trackInset) * (valueRange / pxRange)) + minV;
             },
             
             nudgeValueLeft: function(thumb) {
@@ -243,39 +219,43 @@
                 } else {
                     thumb.setY(value - thumb.height / 2);
                 }
-            }
-        }),
-        
-        /** A simple implementation of the range fill for a RangeSlider.
+            },
             
-            @class */
-        SimpleSliderRangeFill = pkg.SimpleSliderRangeFill = new JSClass('SimpleSliderRangeFill', View, {
-            // Life Cycle //////////////////////////////////////////////////////
-            initNode: function(parent, attrs) {
-                defAttr(attrs, 'bgColor', '#666');
-                
-                this.callSuper(parent, attrs);
-                
-                if (parent.axis === 'x') {
-                    this.setY(parent.thumbOffset);
-                    this.setHeight(parent.thumbHeight);
-                    this.setRoundedCorners(parent.thumbHeight / 2);
-                } else {
-                    this.setX(parent.thumbOffset);
-                    this.setWidth(parent.thumbWidth);
-                    this.setRoundedCorners(parent.thumbWidth / 2);
+            /** Should only be called by SliderThumb.
+                @private
+                @param {!Object} thumb
+                @returns {undefined} */
+            syncValueToThumb: function(thumb) {
+                if (this.inited && !this.__lockSync) {
+                    this.__lockSync = true;
+                    this._syncValueToThumb(thumb, this.convertPixelsToValue(
+                        this.axis === 'x' ? thumb.x + thumb.width / 2 : thumb.y + thumb.height / 2
+                    ));
+                    this.__lockSync = false;
                 }
-                parent._syncRangeFillToValue();
+            },
+            
+            _syncValueToThumb: (thumb, converted) => {/* Subclasses to implement */},
+            
+            /** Should only be called by SliderThumb.
+                @private
+                @param {!Object} thumb
+                @returns {number} */
+            getMinPixelValueForThumb: function(thumb) {
+                return this.convertValueToPixels(this.minValue);
+            },
+            
+            /** Should only be called by SliderThumb.
+                @private
+                @param {!Object} thumb
+                @returns {number} */
+            getMaxPixelValueForThumb: function(thumb) {
+                return this.convertValueToPixels(this.maxValue);
             }
         });
     
-    /** A slider component that support two thumbs.
-        
-        Attributes:
-            rangeFillClass:JS.Class The class used to instantiate the rangeFill
-        
-        Private Attributes:
-            __lockSync:boolean Used internally to prevent infinite loops.
+    /** A slider component that supports two thumbs, a lower one and an
+        upper one.
         
         @class */
     pkg.RangeSlider = new JSClass('RangeSlider', BaseSlider, {
@@ -285,19 +265,27 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.BaseSlider */
         initNode: function(parent, attrs) {
-            defAttr(attrs, 'rangeFillClass', SimpleSliderRangeFill);
-            
             this.callSuper(parent, attrs);
             
-            new this.rangeFillClass(this, {name:'rangeFill'});
-            new this.thumbClass(this, {name:'thumbLower'});
-            new this.thumbClass(this, {name:'thumbUpper'});
+            const rangeFillView = new View(this, {name:'rangeFill', bgColor:'#666'});
+            if (this.axis === 'x') {
+                rangeFillView.setY(this.thumbOffset);
+                rangeFillView.setHeight(this.thumbHeight);
+                rangeFillView.setRoundedCorners(this.thumbHeight / 2);
+            } else {
+                rangeFillView.setX(this.thumbOffset);
+                rangeFillView.setWidth(this.thumbWidth);
+                rangeFillView.setRoundedCorners(this.thumbWidth / 2);
+            }
+            
+            new SliderThumb(this, {name:'thumbLower'});
+            new SliderThumb(this, {name:'thumbUpper'});
+            
+            this._syncRangeFillToValue();
         },
         
         
         // Accessors ///////////////////////////////////////////////////////////
-        setRangeFillClass: function(v) {this.rangeFillClass = v;},
-        
         /** @overrides */
         setValue: function(v) {
             this.callSuper(v);
@@ -309,7 +297,6 @@
                     this._syncThumbToValue(this.thumbLower, v);
                     this._syncThumbToValue(this.thumbUpper, v);
                 }
-                
                 this._syncRangeFillToValue();
             }
         },
@@ -340,7 +327,7 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Should only be called by myt.SimpleSliderRangeFill.
+        /** Should only be called by this and the rangeFill View.
             @private
             @returns {undefined} */
         _syncRangeFillToValue: function() {
@@ -362,33 +349,17 @@
             this.callSuper(thumb, thumb.name === 'thumbLower' ? value.lower : value.upper);
         },
         
-        /** Should only be called by myt.SliderThumbMixin.
-            @private
-            @param {!Object} thumb
-            @returns {undefined} */
-        _syncValueToThumb: function(thumb) {
-            if (this.inited && !this.__lockSync) {
-                this.__lockSync = true;
-                
-                const converted = this.convertPixelsToValue(
-                    this.axis === 'x' ? thumb.x + thumb.width / 2 : thumb.y + thumb.height / 2
-                );
-                
-                let value = this.getValueCopy();
-                if (thumb.name === 'thumbLower') {
-                    value.lower = converted;
-                } else {
-                    value.upper = converted;
-                }
-                this.setValue(value);
-                
-                // Update thumb position since value may have been adjusted
-                value = this.getValue();
-                if (this.thumbLower) this._syncThumbToValue(this.thumbLower, value);
-                if (this.thumbUpper) this._syncThumbToValue(this.thumbUpper, value);
-                
-                this.__lockSync = false;
-            }
+        /** @overrides myt.BaseSlider */
+        _syncValueToThumb: function(thumb, converted) {
+            let value = this.getValueCopy();
+            value[thumb.name === 'thumbLower' ? 'lower' : 'upper'] = converted;
+            
+            this.setValue(value);
+            
+            // Update thumb position since value may have been adjusted
+            value = this.getValue();
+            if (this.thumbLower) this._syncThumbToValue(this.thumbLower, value);
+            if (this.thumbUpper) this._syncThumbToValue(this.thumbUpper, value);
         },
         
         /** @overrides myt.BaseSlider */
@@ -396,29 +367,21 @@
             const value = this.getValueCopy(),
                 adj = this.nudgeAmount * (up ? 1 : -1);
             if (thumb.name === 'thumbLower') {
-                value.lower += adj;
-                if (value.lower > value.upper) value.lower = value.upper;
+                value.lower = mathMin(value.lower + adj, value.upper);
             } else {
-                value.upper += adj;
-                if (value.lower > value.upper) value.upper = value.lower;
+                value.upper = mathMax(value.upper + adj, value.lower);
             }
             this.setValue(value);
         },
         
-        /** Should only be called by myt.SliderThumbMixin.
-            @private
-            @param {!Object} thumb
-            @returns {number} */
+        /** @overrides */
         getMinPixelValueForThumb: function(thumb) {
             return this.convertValueToPixels(
                 thumb.name === 'thumbLower' ? this.minValue : this.getValue().lower
             );
         },
         
-        /** Should only be called by myt.SliderThumbMixin.
-            @private
-            @param {!Object} thumb
-            @returns {number} */
+        /** @overrides */
         getMaxPixelValueForThumb: function(thumb) {
             return this.convertValueToPixels(
                 thumb.name === 'thumbLower' ? this.getValue().upper : this.maxValue
@@ -427,9 +390,6 @@
     });
     
     /** A slider component.
-        
-        Private Attributes:
-            __lockSync:boolean Used internally to prevent infinite loops.
         
         @class */
     pkg.Slider = new JSClass('Slider', BaseSlider, {
@@ -441,7 +401,7 @@
         initNode: function(parent, attrs) {
             this.callSuper(parent, attrs);
             
-            new this.thumbClass(this, {name:'thumb'});
+            new SliderThumb(this, {name:'thumb'});
         },
         
         
@@ -472,44 +432,17 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Should only be called by myt.SliderThumbMixin.
-            @private
-            @param {!Object} thumb
-            @returns {undefined} */
-        _syncValueToThumb: function(thumb) {
-            if (this.inited && !this.__lockSync) {
-                this.__lockSync = true;
-                
-                this.setValue(this.convertPixelsToValue(
-                    this.axis === 'x' ? thumb.x + thumb.width / 2 : thumb.y + thumb.height / 2
-                ));
-                
-                // Update thumb position since value may have been adjusted
-                this._syncThumbToValue(thumb, this.getValue());
-                
-                this.__lockSync = false;
-            }
+        /** @overrides myt.BaseSlider */
+        _syncValueToThumb: function(thumb, converted) {
+            this.setValue(converted);
+            
+            // Update thumb position since value may have been adjusted
+            this._syncThumbToValue(thumb, this.getValue());
         },
         
         /** @overrides myt.BaseSlider */
         _nudge: function(thumb, up) {
             this.setValue(this.getValue() + this.nudgeAmount * (up ? 1 : -1));
-        },
-        
-        /** Should only be called by myt.SliderThumbMixin.
-            @private
-            @param {!Object} thumb
-            @returns {number} */
-        getMinPixelValueForThumb: function(thumb) {
-            return this.convertValueToPixels(this.minValue);
-        },
-        
-        /** Should only be called by myt.SliderThumbMixin.
-            @private
-            @param {!Object} thumb
-            @returns {number} */
-        getMaxPixelValueForThumb: function(thumb) {
-            return this.convertValueToPixels(this.maxValue);
         }
     });
 })(myt);

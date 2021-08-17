@@ -1,5 +1,6 @@
 (pkg => {
-    const /* A private setter function that provides a common implementation for
+    const
+        /*  A private setter function that provides a common implementation for
             most of this setters in the TextSupport mixin.
             @param {string|number} v
             @param {string} attrName
@@ -103,8 +104,8 @@
             v = this.valueFromEvent(v);
             
             if (this.text !== v) {
-                // Use innerHTML rather than textContent since this allows us to
-                // embed formatting markup.
+                // Use innerHTML rather than textContent since this allows 
+                // us to embed formatting markup.
                 this.getIDE().innerHTML = this.text = v;
                 if (this.inited) {
                     this.fireEvent('text', v);
@@ -183,7 +184,7 @@
             @param {number} [blur] - The bluriness in pixels of the shadow.
                 Defaults to 2 if not provided.
             @param {string} [color] - The color of the shadow. Defaults
-                to '#000000' if not provided.
+                to '#000' if not provided.
             @returns {undefined} */
         showTextShadow: function(x, y, blur, color) {
             this.getIDS().textShadow = 

@@ -250,8 +250,8 @@
                 RootView and thus compensates for rotation and scaling.
             textColor:string The color used for text. Will be inherited by 
                 descendant views if they don't themselves set textColor or if 
-                they set textColor to 'inherit'. Defaults to undefined which is
-                equivalent to 'inherit'.
+                they set textColor to 'inherit'. Defaults to undefined which 
+                is equivalent to 'inherit'.
             bgColor:string The background color of this view. Use a value of 
                 'transparent' to make this view transparent. Defaults 
                 to 'transparent'.
@@ -282,7 +282,7 @@
                 'dotted', 'dashed', 'solid', 'double', 'groove', 'ridge', 
                 'inset', 'outset', 'inherit'.
             outlineColor:string Sets the color of the CSS outline. If null or 
-                undefined is provided '#000000' will be used.
+                undefined is provided '#000' will be used.
             borderWidth:number The width of the CSS border. If a value 
                 equivalent to false is provided 0 will be used.
             borderStyle:string The CSS border style. If null or undefined is 
@@ -290,7 +290,7 @@
                 'dotted', 'dashed', 'solid', 'double', 'groove', 'ridge', 
                 'inset', 'outset', 'inherit'.
             borderColor:string Sets the color of the CSS border. If null or 
-                undefined is provided '#000000' will be used.
+                undefined is provided '#000' will be used.
             tooltip:string Sets a tooltip for this view. The basic 
                 implementation uses the dom element's title property. For a 
                 richer tooltip display use myt.TooltipMixin.
@@ -412,10 +412,10 @@
                 is orphaned. */
         getSiblingViews: function() {
             if (this.parent) {
-                // Using filter ensures we have a copy of the subviews since we 
-                // will modify it and do not want to modify the original array.
-                // Remove ourselves from the subviews since we only want 
-                // siblings.
+                // Using filter ensures we have a copy of the subviews since 
+                // we will modify it and do not want to modify the original 
+                // array. Remove ourselves from the subviews since we only 
+                // want siblings.
                 return this.parent.getSubviews().filter(sv => sv !== this);
             }
         },
@@ -645,8 +645,8 @@
                 const ods = self.getODS();
                 ods.visibility = v ? 'inherit' : 'hidden';
                 
-                // Move invisible elements to a very negative location so they 
-                // won't effect scrollable area. Ideally we could use 
+                // Move invisible elements to a very negative location so 
+                // they won't effect scrollable area. Ideally we could use 
                 // display:none but we can't because that makes measuring 
                 // bounds not work.
                 ods.left = v ? self.x + 'px' : '-100000px';
@@ -778,16 +778,7 @@
                 2 is the blur amount, and index 3 is the color.
             @returns {undefined} */
         setBoxShadow: function(v) {
-            if (v) {
-                const hShadow = v[0] || 0,
-                    vShadow = v[1] || 0,
-                    blur = v[2] || 7,
-                    color = v[3] || '#000000';
-                v = hShadow + 'px ' + vShadow + 'px ' + blur + 'px ' + color;
-            } else {
-                v = 'none';
-            }
-            this.getODS().boxShadow = v;
+            this.getODS().boxShadow = v ? (v[0] || 0) + 'px ' + (v[1] || 0) + 'px ' + (v[2] || 7) + 'px ' + (v[3] || '#000') : 'none';
         },
         
         /** Sets the CSS liner-gradient or radial-gradient property. Setting 
@@ -838,7 +829,7 @@
                             case 'ellipse':
                                 break;
                             default:
-                                console.warn('Unexpected radial gradient shape: ' + shape);
+                                console.warn('Unexpected radial gradient shape', shape);
                                 shape = 'circle';
                         }
                         v.shift();
@@ -903,12 +894,12 @@
             return this.searchAncestorsOrSelf(v => !v.visible) === null;
         },
         
-        /** Finds the youngest ancestor (or self) that is a focusTrap or 
-            focusCage.
-            @param {boolean} ignoreFocusTrap - indicates focusTraps should be
-                ignored.
-            @returns {?Object} a View with focusTrap set to true or null if 
-                not found. */
+        /** Finds the youngest ancestor (or self) that is a focusTrap 
+            or focusCage.
+            @param {boolean} ignoreFocusTrap - Indicates focusTraps should 
+                be ignored.
+            @returns {?Object} a View with focusTrap set to true or null 
+                if not found. */
         getFocusTrap: function(ignoreFocusTrap) {
             return this.searchAncestorsOrSelf(v => v.focusCage || (v.focusTrap && !ignoreFocusTrap));
         },
@@ -1183,8 +1174,8 @@
             @param {number} locX - the x position to test.
             @param {number} locY - the y position to test.
             @param {?Object} [referenceFrameDomElem] - The dom element
-                the locX and locY are relative to. If not provided the page is
-                assumed.
+                the locX and locY are relative to. If not provided the page 
+                is assumed.
             @returns {boolean} True if the location is inside this view, false 
                 if not. */
         containsPoint: function(locX, locY, referenceFrameDomElem) {

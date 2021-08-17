@@ -64,8 +64,8 @@
                 return objPool.length ? objPool.pop() : this.createInstance.apply(this, arguments);
             },
             
-            /** Creates a new object that can be stored in the pool. The default
-                implementation does nothing.
+            /** Creates a new object that can be stored in the pool. 
+                The default implementation does nothing.
                 @returns {?Object} */
             createInstance: () => null,
             
@@ -78,8 +78,8 @@
             },
             
             /** Cleans the object in preparation for putting it back in the 
-                pool. The default implementation calls the clean method on the 
-                object if it is a function. Otherwise it does nothing.
+                pool. The default implementation calls the clean method on 
+                the object if it is a function. Otherwise it does nothing.
                 @param {!Object} obj - The object to be cleaned.
                 @returns {!Object} - The cleaned object. */
             cleanInstance: obj => {
@@ -98,8 +98,8 @@
         /** An implementation of an myt.AbstractPool.
             
             Attributes:
-                instanceClass:JS.Class (initializer only) the class to use for 
-                    new instances. Defaults to Object.
+                instanceClass:JS.Class (initializer only) the class to use 
+                    for new instances. Defaults to Object.
                 instanceParent:myt.Node (initializer only) The node to create 
                     new instances on.
             
@@ -110,8 +110,8 @@
                 @param {!Function} instanceClass - The JS.Class to create 
                     instances from.
                 @param {?Object} [instanceParent] - The place to create 
-                    instances on. When instanceClass is an myt.Node this will 
-                    be the node parent.
+                    instances on. When instanceClass is an myt.Node this 
+                    will be the node parent.
                 @returns {undefined} */
             initialize: function(instanceClass, instanceParent) {
                 this.callSuper();
@@ -172,11 +172,11 @@
                             return;
                         }
                     }
-                    warningType = "non-active";
+                    warningType = 'inactive';
                 } else {
-                    warningType = "non-existant";
+                    warningType = 'missing';
                 }
-                console.warn("Tried to put a " + warningType + " instance.", obj, this);
+                console.warn('Tried to put a ' + warningType + ' instance', obj, this);
             },
             
             /** Gets an array of the active instances.
@@ -258,7 +258,7 @@
             if (pool) {
                 return pool.getInstance(arguments);
             } else {
-                console.warn('No pool for key:', key);
+                console.warn('No pool for key', key);
             }
         },
         
@@ -267,7 +267,7 @@
             if (pool) {
                 pool.putInstance(obj);
             } else {
-                console.warn('No pool for obj:', obj);
+                console.warn('No pool for obj', obj);
             }
         },
         
@@ -290,7 +290,9 @@
     });
     
     /** Objects that can be used in an myt.AbstractPool should use this mixin 
-        and implement the "clean" method. */
+        and implement the "clean" method.
+        
+        @class */
     pkg.Reusable = new JSModule('Reusable', {
         // Methods /////////////////////////////////////////////////////////////
         /** Puts this object back into a default state suitable for storage in

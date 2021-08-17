@@ -1,6 +1,6 @@
 (pkg => {
     const JSModule = JS.Module,
-    
+        
         defAttr = pkg.AccessorSupport.defAttr,
         
         updateTextColor = tab => {
@@ -8,28 +8,28 @@
         },
         
         updateCornerRadius = tab => {
-            const r = tab.cornerRadius != null ? tab.cornerRadius : Tab.DEFAULT_RADIUS;
+            const radius = tab.cornerRadius != null ? tab.cornerRadius : Tab.RADIUS;
             switch (tab.tabContainer.location) {
                 case 'top':
-                    tab.setRoundedTopLeftCorner(r);
-                    tab.setRoundedTopRightCorner(r);
+                    tab.setRoundedTopLeftCorner(radius);
+                    tab.setRoundedTopRightCorner(radius);
                     break;
                 case 'bottom':
-                    tab.setRoundedBottomLeftCorner(r);
-                    tab.setRoundedBottomRightCorner(r);
+                    tab.setRoundedBottomLeftCorner(radius);
+                    tab.setRoundedBottomRightCorner(radius);
                     break;
                 case 'left':
-                    tab.setRoundedTopLeftCorner(r);
-                    tab.setRoundedBottomLeftCorner(r);
+                    tab.setRoundedTopLeftCorner(radius);
+                    tab.setRoundedBottomLeftCorner(radius);
                     break;
                 case 'right':
-                    tab.setRoundedTopRightCorner(r);
-                    tab.setRoundedBottomRightCorner(r);
+                    tab.setRoundedTopRightCorner(radius);
+                    tab.setRoundedBottomRightCorner(radius);
                     break;
             }
         },
         
-        /** A tab component.
+        /** A simple tab component.
             
             Requires:
                 myt.Activateable
@@ -37,51 +37,6 @@
             Attributes:
                 tabId:string The unique ID of this tab relative to its tab 
                     container.
-                tabContainer:myt.TabContainer The tab container that manages 
-                    this tab.
-            
-            @class */
-        TabMixin = pkg.TabMixin = new JSModule('TabMixin', {
-            include: [pkg.Selectable],
-            
-            
-            // Life Cycle //////////////////////////////////////////////////////
-            /** @overrides */
-            initNode: function(parent, attrs) {
-                if (attrs.tabId == null) attrs.tabId = pkg.generateGuid();
-                if (attrs.tabContainer == null) attrs.tabContainer = parent;
-                
-                // Selection must be done via the select method on 
-                // the tabContainer
-                let initiallySelected;
-                if (attrs.selected) {
-                    initiallySelected = true;
-                    delete attrs.selected;
-                }
-                
-                this.callSuper(parent, attrs);
-                
-                if (initiallySelected) this.tabContainer.select(this);
-            },
-            
-            
-            // Accessors ///////////////////////////////////////////////////////
-            setTabId: function(v) {this.tabId = v;},
-            setTabContainer: function(v) {this.tabContainer = v;},
-            
-            
-            // Methods /////////////////////////////////////////////////////////
-            /** @overrides myt.Activateable */
-            doActivated: function() {
-                if (!this.selected) this.tabContainer.select(this);
-            }
-        }),
-        
-        /** A simple tab component.
-            
-            Attributes:
-                tabId:string The unique ID of this tab relative to its 
-                    tab container.
                 tabContainer:myt.TabContainer The tab container that manages 
                     this tab.
                 edgeColor:color
@@ -92,45 +47,58 @@
                     text when this tab is selected.
                 cornerRadius:number Passed into the drawing config to determine
                     if a rounded corner is drawn or not. Defaults to undefined 
-                    which causes myt.Tab.DEFAULT_RADIUS to be used.
+                    which causes myt.Tab.RADIUS to be used.
             
             @class */
         Tab = pkg.Tab = new JS.Class('Tab', pkg.SimpleTextButton, {
-            include: [TabMixin],
+            include: [pkg.Selectable],
             
             
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                DEFAULT_HEIGHT: 24,
-                DEFAULT_INSET: 8,
-                DEFAULT_OUTSET: 8,
-                DEFAULT_FILL_COLOR_SELECTED: '#fff',
-                DEFAULT_FILL_COLOR_HOVER: '#eee',
-                DEFAULT_FILL_COLOR_ACTIVE: '#aaa',
-                DEFAULT_FILL_COLOR_READY: '#ccc',
-                DEFAULT_LABEL_TEXT_COLOR_SELECTED:'#333',
-                DEFAULT_RADIUS:6
+                HEIGHT: 24,
+                INSET: 8,
+                OUTSET: 8,
+                FILL_COLOR_SELECTED: '#fff',
+                FILL_COLOR_HOVER: '#eee',
+                FILL_COLOR_ACTIVE: '#aaa',
+                FILL_COLOR_READY: '#ccc',
+                LABEL_TEXT_COLOR_SELECTED:'#333',
+                RADIUS:6
             },
             
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
+                if (attrs.tabId == null) attrs.tabId = pkg.generateGuid();
+                defAttr(attrs, 'tabContainer', parent);
+                
+                // Selection must be done via the select method on 
+                // the tabContainer
+                let initiallySelected;
+                if (attrs.selected) {
+                    initiallySelected = true;
+                    delete attrs.selected;
+                }
+                
                 // myt.SimpleTextButton
-                defAttr(attrs, 'inset', Tab.DEFAULT_INSET);
-                defAttr(attrs, 'outset', Tab.DEFAULT_OUTSET);
+                defAttr(attrs, 'inset', Tab.INSET);
+                defAttr(attrs, 'outset', Tab.OUTSET);
                 
                 // myt.Tab
-                defAttr(attrs, 'selectedColor', Tab.DEFAULT_FILL_COLOR_SELECTED);
-                defAttr(attrs, 'hoverColor', Tab.DEFAULT_FILL_COLOR_HOVER);
-                defAttr(attrs, 'activeColor', Tab.DEFAULT_FILL_COLOR_ACTIVE);
-                defAttr(attrs, 'readyColor', Tab.DEFAULT_FILL_COLOR_READY);
-                defAttr(attrs, 'labelTextSelectedColor', Tab.DEFAULT_LABEL_TEXT_COLOR_SELECTED);
+                defAttr(attrs, 'selectedColor', Tab.FILL_COLOR_SELECTED);
+                defAttr(attrs, 'hoverColor', Tab.FILL_COLOR_HOVER);
+                defAttr(attrs, 'activeColor', Tab.FILL_COLOR_ACTIVE);
+                defAttr(attrs, 'readyColor', Tab.FILL_COLOR_READY);
+                defAttr(attrs, 'labelTextSelectedColor', Tab.LABEL_TEXT_COLOR_SELECTED);
                 
                 // Other
-                defAttr(attrs, 'height', Tab.DEFAULT_HEIGHT);
+                defAttr(attrs, 'height', Tab.HEIGHT);
                 defAttr(attrs, 'focusIndicator', false);
                 
                 this.callSuper(parent, attrs);
+                
+                if (initiallySelected) this.tabContainer.select(this);
                 
                 updateCornerRadius(this);
                 updateTextColor(this);
@@ -138,14 +106,15 @@
             
             
             // Accessors ///////////////////////////////////////////////////////
+            setTabId: function(v) {this.tabId = v;},
+            setTabContainer: function(v) {this.tabContainer = v;},
             setSelectedColor: function(v) {this.selectedColor = v;},
+            setLabelTextColor: function(v) {this.labelTextColor = v;},
             
             setCornerRadius: function(v) {
                 this.cornerRadius = v;
                 if (this.inited) updateCornerRadius(this);
             },
-            
-            setLabelTextColor: function(v) {this.labelTextColor = v;},
             
             setLabelTextSelectedColor: function(v) {
                 this.labelTextSelectedColor = v;
@@ -166,6 +135,11 @@
             updateUI: function() {
                 this.callSuper();
                 if (this.selected) this.setBgColor(this.selectedColor);
+            },
+            
+            /** @overrides myt.Activateable */
+            doActivated: function() {
+                if (!this.selected) this.tabContainer.select(this);
             }
         }),
         
@@ -186,8 +160,8 @@
             
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                DEFAULT_SPACING:1,
-                DEFAULT_INSET:0
+                SPACING:1,
+                INSET:0
             },
             
             
@@ -195,8 +169,8 @@
             initNode: function(parent, attrs) {
                 this.__tabs = [];
                 
-                defAttr(attrs, 'spacing', TabContainer.DEFAULT_SPACING);
-                defAttr(attrs, 'inset', TabContainer.DEFAULT_INSET);
+                defAttr(attrs, 'spacing', TabContainer.SPACING);
+                defAttr(attrs, 'inset', TabContainer.INSET);
                 defAttr(attrs, 'location', 'top');
                 defAttr(attrs, 'itemSelectionId', 'tabId');
                 defAttr(attrs, 'maxSelected', 1);
@@ -245,7 +219,7 @@
             /** @overrides myt.View */
             subnodeAdded: function(node) {
                 this.callSuper(node);
-                if (node.isA(TabMixin)) {
+                if (node.isA(Tab)) {
                     this.__tabs.push(node);
                     
                     switch (this.location) {
@@ -267,7 +241,7 @@
             
             /** @overrides myt.View */
             subnodeRemoved: function(node) {
-                if (node.isA(TabMixin)) {
+                if (node.isA(Tab)) {
                     const tabs = this.__tabs;
                     let i = tabs.length;
                     while (i) {

@@ -1,9 +1,10 @@
 (pkg => {
-    const
-        /* Caches getter names. */
+    const arrayPrototype = Array.prototype,
+        
+        /*  Caches getter names. */
         GETTER_NAMES = {},
     
-        /* Caches setter names. */
+        /*  Caches setter names. */
         SETTER_NAMES = {},
         
         generateName = (attrName, prefix) => prefix + attrName.substring(0,1).toUpperCase() + attrName.substring(1),
@@ -42,7 +43,7 @@
                 @returns {undefined} */
             createSetterFunction: (target, attrName) => {
                 const setterName = generateSetterName(attrName);
-                if (target[setterName]) console.log("Overwriting setter", setterName);
+                if (target[setterName]) console.log('Overwriting setter', setterName);
                 target[setterName] = v => {
                     if (target[attrName] !== v) {
                         target[attrName] = v;
@@ -58,7 +59,7 @@
                 @returns {undefined} */
             createGetterFunction: (target, attrName) => {
                 const getterName = generateGetterName(attrName);
-                if (target[getterName]) console.log("Overwriting getter", getterName);
+                if (target[getterName]) console.log('Overwriting getter', getterName);
                 target[getterName] = () => target[attrName];
             },
             
@@ -67,10 +68,10 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        appendToEarlyAttrs: function() {Array.prototype.push.apply(this.earlyAttrs || (this.earlyAttrs = []), arguments);},
-        prependToEarlyAttrs: function() {Array.prototype.unshift.apply(this.earlyAttrs || (this.earlyAttrs = []), arguments);},
-        appendToLateAttrs: function() {Array.prototype.push.apply(this.lateAttrs || (this.lateAttrs = []), arguments);},
-        prependToLateAttrs: function() {Array.prototype.unshift.apply(this.lateAttrs || (this.lateAttrs = []), arguments);},
+        appendToEarlyAttrs: function() {arrayPrototype.push.apply(this.earlyAttrs || (this.earlyAttrs = []), arguments);},
+        prependToEarlyAttrs: function() {arrayPrototype.unshift.apply(this.earlyAttrs || (this.earlyAttrs = []), arguments);},
+        appendToLateAttrs: function() {arrayPrototype.push.apply(this.lateAttrs || (this.lateAttrs = []), arguments);},
+        prependToLateAttrs: function() {arrayPrototype.unshift.apply(this.lateAttrs || (this.lateAttrs = []), arguments);},
         
         defAttr: defAttr,
         
@@ -157,8 +158,8 @@
             have a 'fireEvent' method.
             @param {string} attrName - The name of the attribute to set.
             @param {*} v -The value to set.
-            @param {boolean} [skipSetter] - If true no attempt will be made to
-                invoke a setter function. Useful when you want to invoke 
+            @param {boolean} [skipSetter] - If true no attempt will be made 
+                to invoke a setter function. Useful when you want to invoke 
                 standard setter behavior. Defaults to undefined which is 
                 equivalent to false.
             @returns {undefined} */

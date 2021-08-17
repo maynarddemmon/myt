@@ -12,6 +12,7 @@
     let versionSearchString,
         dom,
         pre;
+    
     const searchString = data => {
             let dataItem, 
                 i = data.length;
@@ -33,20 +34,20 @@
         
         BrowserDetect = pkg.BrowserDetect = {
             browser:searchString([
-                {prop:window.opera,                   id:"Opera",    ver:"Version"},
-                {str:navigator.vendor, sub:"Apple",   id:"Safari",   ver:"Version"},
-                {str:userAgent,        sub:"Firefox", id:"Firefox"},
-                {str:userAgent,        sub:"Chrome",  id:"Chrome"},
-                {str:userAgent,        sub:"MSIE",    id:"Explorer", ver:"MSIE"}
+                {prop:window.opera,                   id:'Opera',    ver:'Version'},
+                {str:navigator.vendor, sub:'Apple',   id:'Safari',   ver:'Version'},
+                {str:userAgent,        sub:'Firefox', id:'Firefox'},
+                {str:userAgent,        sub:'Chrome',  id:'Chrome'},
+                {str:userAgent,        sub:'MSIE',    id:'Explorer', ver:'MSIE'}
             ]) || unknown,
             
             version:searchVersion(userAgent) || searchVersion(navigator.appVersion) || unknown,
             
             os:searchString([
-                {str:userAgent, sub:"iPhone", id:"iPhone/iPod"},
-                {str:platform,  sub:"Linux",  id:"Linux"},
-                {str:platform,  sub:"Mac",    id:"Mac"},
-                {str:platform,  sub:"Win",    id:"Windows"}
+                {str:userAgent, sub:'iPhone', id:'iPhone/iPod'},
+                {str:platform,  sub:'Linux',  id:'Linux'},
+                {str:platform,  sub:'Mac',    id:'Mac'},
+                {str:platform,  sub:'Win',    id:'Windows'}
             ]) || unknown
         };
     
@@ -102,16 +103,28 @@ Date.prototype.format = Date.prototype.format || (() => {
         shortDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         longDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
         
+        zeroPad = value => (value < 10 ? '0' : '') + value,
+        timezoneOffsetFunc = (date, useColon) => {
+            const offset = date.getTimezoneOffset();
+            return (offset > 0 ? '-' : '+') + zeroPad(mathFloor(mathAbs(offset / 60))) + (useColon ? ':' : '') + (mathAbs(offset % 60) == 0 ? '00' : zeroPad(mathAbs(offset % 60)));
+        },
+        
         replaceChars = {
             // Day
-            d: date => (date.getDate() < 10 ? '0' : '') + date.getDate(),
+            d: date => zeroPad(date.getDate()),
             D: date => shortDays[date.getDay()],
             j: date => date.getDate(),
             l: date => longDays[date.getDay()],
             N: date => (date.getDay() == 0 ? 7 : date.getDay()),
-            S: date => (date.getDate() % 10 == 1 && date.getDate() != 11 ? 'st' : (date.getDate() % 10 == 2 && date.getDate() != 12 ? 'nd' : (date.getDate() % 10 == 3 && date.getDate() != 13 ? 'rd' : 'th'))),
+            S: date => {
+                const dayOfMonth = date.getDate();
+                return (dayOfMonth % 10 == 1 && dayOfMonth != 11 ? 'st' : (dayOfMonth % 10 == 2 && dayOfMonth != 12 ? 'nd' : (dayOfMonth % 10 == 3 && dayOfMonth != 13 ? 'rd' : 'th')));
+            },
             w: date => date.getDay(),
-            z: date => {const d = new Date(date.getFullYear(),0,1); return mathCeil((date - d) / 86400000);},
+            z: date => {
+                const d = new Date(date.getFullYear(), 0, 1);
+                return mathCeil((date - d) / 86400000);
+            },
             // Week
             W: date => {
                 const target = new Date(date.valueOf()), dayNr = (date.getDay() + 6) % 7;
@@ -119,12 +132,11 @@ Date.prototype.format = Date.prototype.format || (() => {
                 const firstThursday = target.valueOf();
                 target.setMonth(0, 1);
                 if (target.getDay() !== 4) target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
-                const retVal = 1 + mathCeil((firstThursday - target) / 604800000);
-                return (retVal < 10 ? '0' + retVal : retVal);
+                return zeroPad(1 + mathCeil((firstThursday - target) / 604800000));
             },
             // Month
             F: date => longMonths[date.getMonth()],
-            m: date => (date.getMonth() < 9 ? '0' : '') + (date.getMonth() + 1),
+            m: date => zeroPad(date.getMonth() + 1),
             M: date => shortMonths[date.getMonth()],
             n: date => date.getMonth() + 1,
             t: date => {
@@ -137,8 +149,15 @@ Date.prototype.format = Date.prototype.format || (() => {
                 return new Date(year, nextMonth, 0).getDate();
             },
             // Year
-            L: date => {const year = date.getFullYear(); return (year % 400 == 0 || (year % 100 != 0 && year % 4 == 0));},
-            o: date => {const d = new Date(date.valueOf()); d.setDate(d.getDate() - ((date.getDay() + 6) % 7) + 3); return d.getFullYear();},
+            L: date => {
+                const year = date.getFullYear();
+                return (year % 400 == 0 || (year % 100 != 0 && year % 4 == 0));
+            },
+            o: date => {
+                const d = new Date(date.valueOf());
+                d.setDate(d.getDate() - ((date.getDay() + 6) % 7) + 3);
+                return d.getFullYear();
+            },
             Y: date => date.getFullYear(),
             y: date => ('' + date.getFullYear()).substr(2),
             // Time
@@ -147,11 +166,10 @@ Date.prototype.format = Date.prototype.format || (() => {
             B: date => mathFloor((((date.getUTCHours() + 1) % 24) + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600) * 1000 / 24),
             g: date => date.getHours() % 12 || 12,
             G: date => date.getHours(),
-            h: date => ((date.getHours() % 12 || 12) < 10 ? '0' : '') + (date.getHours() % 12 || 12),
-            H: date => (date.getHours() < 10 ? '0' : '') + date.getHours(),
-            i: date => (date.getMinutes() < 10 ? '0' : '') + date.getMinutes(),
-            s: date => (date.getSeconds() < 10 ? '0' : '') + date.getSeconds(),
-            u: date => {const m = date.getMilliseconds(); return (m < 10 ? '00' : (m < 100 ? '0' : '')) + m;},
+            h: date => zeroPad(date.getHours() % 12 || 12),
+            H: date => zeroPad(date.getHours()),
+            i: date => zeroPad(date.getMinutes()),
+            s: date => zeroPad(date.getSeconds()),
             // Timezone
             e: date => /\((.*)\)/.exec(new Date().toString())[1],
             I: date => {
@@ -169,19 +187,18 @@ Date.prototype.format = Date.prototype.format || (() => {
                 }
                 return (date.getTimezoneOffset() == DST) | 0;
             },
-            O: date => (-date.getTimezoneOffset() < 0 ? '-' : '+') + (mathAbs(date.getTimezoneOffset() / 60) < 10 ? '0' : '') + mathFloor(mathAbs(date.getTimezoneOffset() / 60)) + (mathAbs(date.getTimezoneOffset() % 60) == 0 ? '00' : ((mathAbs(date.getTimezoneOffset() % 60) < 10 ? '0' : '')) + (mathAbs(date.getTimezoneOffset() % 60))),
-            P: date => (-date.getTimezoneOffset() < 0 ? '-' : '+') + (mathAbs(date.getTimezoneOffset() / 60) < 10 ? '0' : '') + mathFloor(mathAbs(date.getTimezoneOffset() / 60)) + ':' + (mathAbs(date.getTimezoneOffset() % 60) == 0 ? '00' : ((mathAbs(date.getTimezoneOffset() % 60) < 10 ? '0' : '')) + (mathAbs(date.getTimezoneOffset() % 60))),
+            O: date => timezoneOffsetFunc(date, false),
+            P: date => timezoneOffsetFunc(date, true),
             T: date => Intl.DateTimeFormat().resolvedOptions().timeZone,
             Z: date => -date.getTimezoneOffset() * 60,
             // Full Date/Time
-            c: date => date.format("Y-m-d\\TH:i:sP"),
+            c: date => date.format('Y-m-d\\TH:i:sP'),
             r: date => date.toString(),
             U: date => date.getTime() / 1000
         };
-
+    
     return function(format) {
-        const date = this;
-        return format.replace(/(\\?)(.)/g, (_, esc, chr) => (esc === '' && replaceChars[chr]) ? replaceChars[chr](date) : chr);
+        return format.replace(/(\\?)(.)/g, (_, esc, chr) => (esc === '' && replaceChars[chr]) ? replaceChars[chr](this) : chr);
     };
 })();
 
@@ -524,8 +541,7 @@ Date.prototype.format = Date.prototype.format || (() => {
     /* Used to generate globally unique IDs. */
     let GUID_COUNTER = 0;
     
-    const 
-        math = Math,
+    const math = Math,
         mathAbs = math.abs,
         mathMin = math.min,
         mathMax = math.max,
@@ -547,16 +563,15 @@ Date.prototype.format = Date.prototype.format || (() => {
         docFonts = documentElem.fonts,
         
         notifyFontLoaded = fontFace => {
-            let fontName = fontFace.family + ' ' + fontFace.weight,
-                targets;
-            
-            // Fix for Firefox and FontAwesome because of garbage returned in
-            // the font family name.
-            if (fontName.indexOf('\\35 ') >= 0) fontName = fontName.replace(/\\35 /g, '5');
+            // Fix for Firefox and FontAwesome because of double quotes 
+            // returned in the font family name. Seems OK to just do it for
+            // all fonts since double quotes in a font name is most likely
+            // going to be confusing anyhow.
+            const fontName = fontFace.family.replace(/\"/g, '') + ' ' + fontFace.weight;
             
             if (!fontLoaded[fontName]) {
                 fontLoaded[fontName] = true;
-                targets = fontTargets[fontName] || [];
+                const targets = fontTargets[fontName] || [];
                 while (targets.length) notifyInstanceThatFontLoaded(targets.pop());
             }
         },
@@ -566,8 +581,8 @@ Date.prototype.format = Date.prototype.format || (() => {
         },
         
         myt = pkg.myt = {
-            /** A version number based on the time this distribution of myt was
-                created. */
+            /** A version number based on the time this distribution of 
+                myt was created. */
             version:20210808.1459,
             
             /** Generates a globally unique id, (GUID).
@@ -616,12 +631,12 @@ Date.prototype.format = Date.prototype.format || (() => {
                 
                 scope = scope || global;
                 
-                const parts = Array.isArray(objName) ? objName : objName.split("."), 
+                const parts = Array.isArray(objName) ? objName : objName.split('.'), 
                     len = parts.length;
                 for (let i = 0; i < len; i++) {
                     scope = scope[parts[i]];
                     if (scope === undefined) {
-                        console.warn("resolveName failed for:", objName, "at part:", i, parts[i]);
+                        console.warn('resolveName failed for', objName, 'at part', i, parts[i]);
                         return undefined;
                     }
                 }
@@ -661,7 +676,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                 // Prevent reloading the same script
                 const loadedScripts = this._loadedScripts || (this._loadedScripts = {});
                 if (loadedScripts[src]) {
-                    console.warn("script already loaded for src", src);
+                    console.warn('script already loaded for src', src);
                     return null;
                 } else {
                     loadedScripts[src] = true;
@@ -872,9 +887,9 @@ Date.prototype.format = Date.prototype.format || (() => {
             },
             
             addCSSRule: (sheet, selector, rules, index) => {
-                if ("insertRule" in sheet) {
-                    sheet.insertRule(selector + "{" + rules + "}", index);
-                } else if("addRule" in sheet) {
+                if ('insertRule' in sheet) {
+                    sheet.insertRule(selector + '{' + rules + '}', index);
+                } else if('addRule' in sheet) {
                     sheet.addRule(selector, rules, index);
                 }
             },
@@ -883,9 +898,9 @@ Date.prototype.format = Date.prototype.format || (() => {
                 let i = sheet.cssRules.length;
                 while (i) {
                     i--;
-                    if ("deleteRule" in sheet) {
+                    if ('deleteRule' in sheet) {
                         sheet.deleteRule(i);
-                    } else if ("removeRule" in sheet) {
+                    } else if ('removeRule' in sheet) {
                         sheet.removeRule(i);
                     }
                 }
@@ -1002,11 +1017,11 @@ Date.prototype.format = Date.prototype.format || (() => {
                 
                 // Prevent clobbering
                 if ((isModuleOrClass ? scope.instanceMethod(incrName) : scope[incrName]) !== undefined) {
-                    console.warn("Can't clobber property with increment function.", incrName, scope);
+                    console.warn('Increment: Abort clobber', incrName, scope);
                     return false;
                 }
                 if ((isModuleOrClass ? scope.instanceMethod(decrName) : scope[decrName]) !== undefined) {
-                    console.warn("Can't clobber property with decrement function.", decrName, scope);
+                    console.warn('Decrement: Abort clobber', decrName, scope);
                     return false;
                 }
                 
@@ -1274,7 +1289,8 @@ Date.prototype.format = Date.prototype.format || (() => {
                 @param {string} [storeId] - The id of the data store to get 
                     data for. If not provided the default "myt" storeId will 
                     be used.
-                @returns {*} the value of the data or undefined if not found. */
+                @returns {*} the value of the data or undefined if the
+                    datum was not found. */
             getDatum: (key, storeId) => {
                 if (key) {
                     const data = LocalStorage.getItem(getStoreId(storeId));
@@ -1604,31 +1620,7 @@ Date.prototype.format = Date.prototype.format || (() => {
         
         Geometry = pkg.Geometry = {
             // Methods /////////////////////////////////////////////////////////
-            /** Get the closest point on a line to a given point.
-                @param {number} Ax - The x-coordinate of the first point that 
-                    defines the line.
-                @param {number} Ay - The y-coordinate of the first point that 
-                    defines the line.
-                @param {number} Bx - The x-coordinate of the second point that 
-                    defines the line.
-                @param {number} By - The y-coordinate of the second point that 
-                    defines the line.
-                @param {number} Px - The x-coordinate of the point.
-                @param {number} Py - The y-coordinate of the point.
-                @returns {!Object} - A position object with x and y 
-                    properties. */
-            getClosestPointOnALineToAPoint: (Ax, Ay, Bx, By, Px, Py) => {
-                const APx = Px - Ax,
-                    APy = Py - Ay,
-                    ABx = Bx - Ax,
-                    ABy = By - Ay,
-                    magAB2 = ABx * ABx + ABy * ABy,
-                    ABdotAP = ABx * APx + ABy * APy,
-                    t = ABdotAP / magAB2;
-                return {x:Ax + ABx * t, y:Ay + ABy * t};
-            },
-            
-            /** Get the closest point on a segment to a given point.
+            /** Get the closest point on a line, or segment, to a given point.
                 @param {number} Ax - The x-coordinate of the first endpoint 
                     that defines the segment.
                 @param {number} Ay - The y-coordinate of the first endpoint 
@@ -1639,18 +1631,19 @@ Date.prototype.format = Date.prototype.format || (() => {
                     that defines the segment.
                 @param {number} Px - The x-coordinate of the point.
                 @param {number} Py - The y-coordinate of the point.
+                @param {boolean} [isSegment] - If true the endpoints will be
+                    treated as a segment rather than an infinitely long line.
                 @returns {!Object} - A position object with x and y 
                     properties. */
-            getClosestPointOnASegmentToAPoint: (Ax, Ay, Bx, By, Px, Py) => {
+            getClosestPointOnALineToAPoint: (Ax, Ay, Bx, By, Px, Py, isSegment) => {
                 const APx = Px - Ax,
                     APy = Py - Ay,
                     ABx = Bx - Ax,
                     ABy = By - Ay,
                     magAB2 = ABx * ABx + ABy * ABy,
-                    ABdotAP = ABx * APx + ABy * APy,
-                    t = ABdotAP / magAB2;
-                if (t < 0) return {x:Ax, y:Ay};
-                if (t > 1) return {x:Bx, y:By};
+                    ABdotAP = ABx * APx + ABy * APy;
+                let t = ABdotAP / magAB2;
+                if (isSegment) t = math.min(1, math.max(0, t));
                 return {x:Ax + ABx * t, y:Ay + ABy * t};
             },
             
@@ -1826,8 +1819,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                 degrees = degrees % 360;
                 
                 let x, 
-                    y, 
-                    radians;
+                    y;
                 if (degrees === 0) {
                     x = radius;
                     y = 0;
@@ -1841,7 +1833,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                     x = 0;
                     y = -radius;
                 } else {
-                    radians = Geometry.degreesToRadians(degrees);
+                    const radians = Geometry.degreesToRadians(degrees);
                     x = radius * mathCos(radians);
                     y = radius * mathSin(radians);
                 }
@@ -1896,8 +1888,8 @@ Date.prototype.format = Date.prototype.format || (() => {
         /** Adds the observer to the list of event recipients for the 
             event type.
             @param observer:myt.Observer The observer that will observe this
-                observable. If methodName is a function this object will be the
-                context for the function when it is called.
+                observable. If methodName is a function this object will be 
+                the context for the function when it is called.
             @param methodName:string|function The name of the method to call, 
                 or a function, on the observer when the event fires.
             @param type:string The name of the event the observer will 
@@ -1960,18 +1952,18 @@ Date.prototype.format = Date.prototype.format || (() => {
                         const observer = observers[--i],
                             methodName = observers[--i];
                         
-                        // If an observer is registered more than once the list 
-                        // may get shortened by observer.detachFrom. If so, just 
-                        // continue decrementing downwards.
+                        // If an observer is registered more than once the 
+                        // list may get shortened by observer.detachFrom. 
+                        // If so, just continue decrementing downwards.
                         if (observer && methodName) {
                             if (typeof observer.detachFrom !== 'function' || 
                                 !observer.detachFrom(this, methodName, type)
                             ) {
-                                // Observer may not have a detachFrom function 
-                                // or observer may not have attached via 
-                                // Observer.attachTo so do default detach 
-                                // activity as implemented 
-                                // in Observable.detachObserver
+                                // Observer may not have a detachFrom 
+                                // function or the observer may not have 
+                                // attached via Observer.attachTo so 
+                                // do the default detach activity as 
+                                // implemented in Observable.detachObserver
                                 observers.splice(i, 2);
                             }
                         }
@@ -2013,8 +2005,8 @@ Date.prototype.format = Date.prototype.format || (() => {
             return (this.__aet || (this.__aet = {}))[type];
         },
         
-        /** Generates a new event from the provided type and value and fires it
-            to the provided observers or the registered observers.
+        /** Generates a new event from the provided type and value and fires 
+            it to the provided observers or the registered observers.
             @param type:string The event type to fire.
             @param value:* The value to set on the event.
             @param observers:array (Optional) If provided the event will
@@ -2031,7 +2023,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                 const event = {source:self, type:type, value:value}, // Inlined from this.createEvent
                     activeEventTypes = self.__aet || (self.__aet = {});
                 if (activeEventTypes[type] === true) {
-                    pkg.global.error.notifyWarn('eventLoop', "Attempt to refire active event: " + type);
+                    pkg.global.error.notifyWarn('eventLoop', 'Abort refiring event:' + type);
                 } else {
                     // Mark event type as "active"
                     activeEventTypes[type] = true;
@@ -2121,11 +2113,9 @@ Date.prototype.format = Date.prototype.format || (() => {
                 pkg.dumpStack(err);
             }
             
-            // Providing a true value for once means we'll never 
+            // Providing a true value for once means we will never 
             // actually attach.
-            if (once) return;
-            
-            this.attachTo(observable, methodName, eventType, once);
+            if (!once) this.attachTo(observable, methodName, eventType, once);
         },
         
         /** Checks if this Observer is attached to the provided observable for
@@ -2143,9 +2133,9 @@ Date.prototype.format = Date.prototype.format || (() => {
                     if (observables) {
                         let i = observables.length;
                         while (i) {
-                            // Ensures we decrement twice. First with --i, then 
-                            // with i-- since the part after && may not be 
-                            // executed.
+                            // Ensures we decrement twice. First with --i, 
+                            // then with i-- since the part after && may 
+                            // not be executed.
                             --i;
                             if (observable === observables[i--] && methodName === observables[i]) return true;
                         }
@@ -2183,8 +2173,8 @@ Date.prototype.format = Date.prototype.format || (() => {
             @param eventType:string the event type to attach for.
             @param once:boolean (optional) if true  this Observer will detach
                 from the Observable after the event is handled once.
-            @returns boolean true if the observable was successfully registered, 
-                false otherwise. */
+            @returns boolean true if the observable was successfully 
+                registered, false otherwise. */
         attachTo: function(observable, methodName, eventType, once) {
             if (observable && methodName && eventType) {
                 const observables = this.getObservables(eventType);
@@ -2221,8 +2211,8 @@ Date.prototype.format = Date.prototype.format || (() => {
             @param methodName:string the method name on this instance to 
                 execute.
             @param eventType:string the event type to attach for.
-            @returns boolean true if one or more detachments occurred, false 
-                otherwise. */
+            @returns boolean true if one or more detachments occurred, 
+                false otherwise. */
         detachFrom: function(observable, methodName, eventType) {
             if (observable && methodName && eventType) {
                 // No need to unregister if observable array doesn't exist.
@@ -2281,7 +2271,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                 // Make sure an even number of observable/type was provided
                 const len = observables.length;
                 if (len % 2 !== 0) {
-                    console.log("Observables not even.", this);
+                    console.log('Observables uneven', this);
                 } else {
                     // Lazy instantiate constraints array.
                     const constraints = this.__cbmn || (this.__cbmn = {}),
@@ -2289,7 +2279,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                     
                     // Don't allow a constraint to be clobbered.
                     if (constraint.length > 0) {
-                        console.log("Constraint already exists for " + methodName + " on " + this);
+                        console.log('Constraint exists for ' + methodName + ' on ' + this);
                     } else {
                         for (let i = 0; len !== i;) {
                             const observable = observables[i++],
@@ -2352,7 +2342,8 @@ Date.prototype.format = Date.prototype.format || (() => {
     Events:
         register<key>:object Fired when an object is stored under the key.
         unregister<key>:object Fired when an object is removed from the key.
-*/
+    
+    @class */
 myt.global = new JS.Singleton('Global', {
     include: [myt.Observable],
     
@@ -2366,7 +2357,7 @@ myt.global = new JS.Singleton('Global', {
         @returns {undefined} */
     register: function(key, v) {
         if (this.hasOwnProperty(key)) {
-            console.log("Warning: myt.global key in use: ", key);
+            console.warn('Global key in use', key);
             this.unregister(key);
         }
         this[key] = v;
@@ -2383,7 +2374,7 @@ myt.global = new JS.Singleton('Global', {
             delete this[key];
             this.fireEvent('unregister' + key, v);
         } else {
-            console.log("Warning: myt.global key not in use: ", key);
+            console.warn('Global key not in use', key);
         }
     }
 });
@@ -2400,7 +2391,8 @@ myt.global = new JS.Singleton('Global', {
     Attributes:
         stackTraceLimit:int Sets the size for stack traces.
         consoleLogging:boolean Turns logging to the console on and off.
-*/
+    
+    @class */
 new JS.Singleton('GlobalError', {
     include: [myt.Observable],
     
@@ -2534,8 +2526,8 @@ new JS.Singleton('GlobalError', {
                 return false;
             },
             
-            /** Gets the z-index of a dom element relative to an ancestor dom
-                element.
+            /** Gets the z-index of a dom element relative to an ancestor 
+                dom element.
                 @param {?Object} elem
                 @param {?Object} ancestor
                 @returns {number} */
@@ -2574,8 +2566,8 @@ new JS.Singleton('GlobalError', {
                 return ancestors;
             },
             
-            /** Gets the z-index of the dom element or, if it does not define a 
-                stacking context, the highest z-index of any of the dom 
+            /** Gets the z-index of the dom element or, if it does not define 
+                a stacking context, the highest z-index of any of the dom 
                 element's descendants.
                 @param {!Object} elem - A dom element
                 @returns {number} - An int */
@@ -2611,24 +2603,21 @@ new JS.Singleton('GlobalError', {
             getRelativePosition: (elem, ancestorElem) => {
                 if (!elem) return null;
                 
-                const borderMultiplier = BrowserDetect.browser === 'Firefox' ? 2 : 1; // I have no idea why firefox needs it twice, but it does.
-                let x = 0, 
-                    y = 0;
-                
-                // elem.nodeName !== "BODY" test prevents looking at the body
+                // elem.nodeName !== 'BODY' test prevents looking at the body
                 // which causes problems when the document is scrolled 
                 // on webkit.
-                while (elem && elem.nodeName !== "BODY" && elem !== ancestorElem) {
+                let x = 0, 
+                    y = 0;
+                while (elem && elem.nodeName !== 'BODY' && elem !== ancestorElem) {
                     x += elem.offsetLeft;
                     y += elem.offsetTop;
                     elem = elem.offsetParent;
-                    if (elem && elem.nodeName !== "BODY") {
+                    if (elem && elem.nodeName !== 'BODY') {
                         const s = getComputedStyle(elem);
-                        x += borderMultiplier * parseInt(s.borderLeftWidth, 10) - elem.scrollLeft;
-                        y += borderMultiplier * parseInt(s.borderTopWidth, 10) - elem.scrollTop;
+                        x += parseInt(s.borderLeftWidth, 10) - elem.scrollLeft;
+                        y += parseInt(s.borderTopWidth, 10) - elem.scrollTop;
                     }
                 }
-                
                 return {x:x, y:y};
             },
             
@@ -3141,14 +3130,473 @@ new JS.Singleton('GlobalError', {
         
         makeEmptyEvent = () => {
             return {source:null, type:null, value:null};
-        };
+        },
+        
+        /** Generates Key Events and passes them on to one or more event 
+            observers. Requires myt.DomObservable as a super mixin.
+            
+            @class */
+        KeyObservable = pkg.KeyObservable = new JSModule('KeyObservable', {
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                /** A map of supported key event types. */
+                EVENT_TYPES: {
+                    keypress:true,
+                    keydown:true,
+                    keyup:true
+                },
+                
+                /** The common key event that gets reused. */
+                EVENT: makeEmptyEvent(),
+                
+                /** Gets the key code from the provided key event.
+                    @param {!Object} event Event value is a dom event.
+                    @returns {number} The keycode from the event. */
+                getKeyCodeFromEvent: event => event.value.keyCode || event.value.charCode
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @overrides myt.DomObservable */
+            createDomHandler: function(domObserver, methodName, type) {
+                return this.createStandardDomHandler(domObserver, methodName, type, KeyObservable) || 
+                    this.callSuper(domObserver, methodName, type);
+            }
+        }),
+        
+        /** Generates Mouse Events and passes them on to one or more event 
+            observers. Also provides the capability to capture contextmenu 
+            events and mouse wheel events.
+            
+            Requires: myt.DomObservable super mixin.
+            
+            @class */
+        MouseObservable = pkg.MouseObservable = new JSModule('MouseObservable', {
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                /** A map of supported mouse event types. */
+                EVENT_TYPES: {
+                    mouseover:true,
+                    mouseout:true,
+                    mousedown:true,
+                    mouseup:true,
+                    click:true,
+                    dblclick:true,
+                    mousemove:true,
+                    contextmenu:true,
+                    wheel:true
+                },
+                
+                /** The common mouse event that gets reused. */
+                EVENT: makeEmptyEvent(),
+                
+                /** Gets the mouse coordinates from the provided event.
+                    @param {!Object} event Event value is a dom event.
+                    @returns {!Object} An object with 'x' and 'y' keys 
+                        containing the x and y mouse position. */
+                getMouseFromEvent: event => {
+                    return {x:event.value.pageX, y:event.value.pageY};
+                },
+                
+                getMouseFromEventRelativeToView: (event, view) => {
+                    const viewPos = view.getPagePosition(),
+                        pos = MouseObservable.getMouseFromEvent(event);
+                    pos.x -= viewPos.x;
+                    pos.y -= viewPos.y;
+                    return pos;
+                }
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @overrides myt.DomObservable */
+            createDomHandler: function(domObserver, methodName, type) {
+                return this.createStandardDomHandler(domObserver, methodName, type, MouseObservable, true) || 
+                    this.callSuper(domObserver, methodName, type);
+            }
+        }),
+        
+        /** Generates Scroll Events and passes them on to one or more 
+            event observers.
+            
+            Requires myt.DomObservable as a super mixin.
+            
+            @class */
+        ScrollObservable = pkg.ScrollObservable = new JSModule('ScrollObservable', {
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                /** A map of supported scroll event types. */
+                EVENT_TYPES: {
+                    scroll:true
+                },
+                
+                /** The common scroll event that gets reused. */
+                EVENT: makeEmptyEvent(),
+                
+                /** Gets the scrollLeft and scrollTop from the event.
+                    @param {!Object} event Event value is a dom event.
+                    @returns object with an x and y key each containing 
+                        a number. */
+                getScrollFromEvent: event => {
+                    const target = event.value.target || event.value.srcElement;
+                    return {x:target.scrollLeft, y:target.scrollTop};
+                }
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @overrides myt.DomObservable */
+            createDomHandler: function(domObserver, methodName, type) {
+                return this.createStandardDomHandler(domObserver, methodName, type, ScrollObservable) || 
+                    this.callSuper(domObserver, methodName, type);
+            }
+        }),
+        
+        /** Generates Touch Events and passes them on to one or more 
+            event observers.
+            
+            Requires: myt.DomObservable super mixin.
+            
+            @class */
+        TouchObservable = pkg.TouchObservable = new JSModule('TouchObservable', {
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                /** A map of supported touch event types. */
+                EVENT_TYPES: {
+                    touchstart:true,
+                    touchend:true,
+                    touchmove:true,
+                    touchcancel:true
+                },
+                
+                /** The common touch event that gets reused. */
+                EVENT: makeEmptyEvent()
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @overrides myt.DomObservable */
+            createDomHandler: function(domObserver, methodName, type) {
+                return this.createStandardDomHandler(domObserver, methodName, type, TouchObservable, false) || 
+                    this.callSuper(domObserver, methodName, type);
+            }
+        }),
+        
+        /** Generates focus and blur events and passes them on to one or more 
+            event observers. Also provides focus related events to a view. 
+            When a view is focused or blurred, myt.global.focus will be 
+            notified via the 'notifyFocus' and 'notifyBlur' methods.
+            
+            Requires myt.DomObservable as a super mixin.
+            
+            Events:
+                focused:object Fired when this view gets focus. The value is 
+                    this view.
+                focus:object Fired when this view gets focus. The value is 
+                    a dom focus event.
+                blur:object Fired when this view loses focus. The value is 
+                    a dom focus event.
+            
+            Attributes:
+                focused:boolean Indicates if this view has focus or not.
+                focusable:boolean Indicates if this view can have focus or not.
+                focusIndicator:boolean Indicates if the focus indicator should
+                    be shown for this view or not when it has focus.
+            
+            Virtual Methods:
+                getNextFocus() Implement this method to return the next view 
+                    that should have focus. If null is returned or the method 
+                    is not implemented, normal dom traversal will occur.
+                getPrevFocus() Implement this method to return the prev view 
+                    that should have focus. If null is returned or the method 
+                    is not implemented, normal dom traversal will occur.
+            
+            @class */
+        // TODO: fire focus and blur events rather than a focused event?
+        // FIXME: should we give away focus when we become not visible?
+        FocusObservable = pkg.FocusObservable = new JSModule('FocusObservable', {
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                /** A map of supported focus event types. */
+                EVENT_TYPES: {
+                    focus:true,
+                    blur:true
+                },
+                
+                /** The common focus/blur event that gets reused. */
+                EVENT: makeEmptyEvent()
+            },
+            
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            /** @overrides myt.Node */
+            initNode: function(parent, attrs) {
+                this.focusable = false;
+                this.focusIndicator = true;
+                
+                this.callSuper(parent, attrs);
+            },
+            
+            /** @overrides myt.View */
+            destroyBeforeOrphaning: function() {
+                this.giveAwayFocus();
+                this.callSuper();
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setFocused: function(v) {
+                if (this.focused !== v) {
+                    this.focused = v;
+                    if (this.inited) {
+                        this.fireEvent('focused', v);
+                        if (v) {
+                            GlobalFocus.notifyFocus(this);
+                        } else {
+                            GlobalFocus.notifyBlur(this);
+                        }
+                    }
+                }
+            },
+            
+            setFocusable: function(v) {
+                const self = this;
+                if (self.focusable !== v) {
+                    const wasFocusable = self.focusable;
+                    self.focusable = v;
+                    
+                    if (v) {
+                        self.getIDE().tabIndex = 0; // Make focusable. -1 is programmatic only
+                        self.attachToDom(self, '__doFocus', 'focus');
+                        self.attachToDom(self, '__doBlur', 'blur');
+                    } else if (wasFocusable) {
+                        self.getIDE().removeAttribute('tabIndex'); // Make unfocusable
+                        self.detachFromDom(self, '__doFocus', 'focus');
+                        self.detachFromDom(self, '__doBlur', 'blur');
+                    }
+                    
+                    if (self.inited) self.fireEvent('focusable', v);
+                }
+            },
+            
+            setFocusIndicator: function(v) {
+                if (this.focusIndicator !== v) {
+                    this.focusIndicator = v;
+                    if (this.focused) {
+                        if (v) {
+                            this.showFocusIndicator();
+                        } else {
+                            this.hideFocusIndicator();
+                        }
+                    }
+                }
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** Gives the focus to the next focusable element or, if nothing 
+                else is focusable, blurs away from this element.
+                @returns {undefined} */
+            giveAwayFocus: function() {
+                if (this.focused) {
+                    // Try to go to next focusable element.
+                    GlobalFocus.next();
+                    
+                    // If focus loops around to ourself make sure we 
+                    // do not keep it.
+                    if (this.focused) this.blur();
+                }
+            },
+            
+            /** Tests if this view is in a state where it can receive focus.
+                @returns boolean True if this view is visible, enabled, 
+                    focusable and not focus masked, false otherwise. */
+            isFocusable: function() {
+                return this.focusable && !this.disabled && this.isVisible() && 
+                    this.searchAncestorsOrSelf(node => node.maskFocus === true) === null;
+            },
+            
+            /** Calling this method will set focus onto this view if it 
+                is focusable.
+                @param noScroll:boolean (optional) if true is provided no 
+                    auto-scrolling will occur when focus is set.
+                @returns {undefined} */
+            focus: function(noScroll) {
+                if (this.isFocusable()) this.getIDE().focus({preventScroll:noScroll});
+            },
+            
+            /** Removes the focus from this view. Do not call this 
+                method directly.
+                @private
+                @returns {undefined} */
+            blur: function() {
+                this.getIDE().blur();
+            },
+            
+            /** @private
+                @param {!Object} event
+                @returns {undefined} */
+            __doFocus: function(event) {
+                if (!this.focused) {
+                    this.setFocused(true);
+                    this.doFocus();
+                }
+            },
+            
+            /** @private
+                @param {!Object} event
+                @returns {undefined} */
+            __doBlur: function(event) {
+                if (this.focused) {
+                    this.doBlur();
+                    this.setFocused(false);
+                }
+            },
+            
+            /** @returns {undefined} */
+            doFocus: function() {
+                if (this.focusIndicator) {
+                    this.showFocusIndicator();
+                } else {
+                    this.hideFocusIndicator();
+                }
+            },
+            
+            /** @returns {undefined} */
+            doBlur: function() {
+                if (this.focusIndicator) this.hideFocusIndicator();
+            },
+            
+            /** @returns {undefined} */
+            showFocusIndicator: function() {
+                // IE
+                this.getIDE().hideFocus = false;
+                
+                // Mozilla and Webkit
+                const ids = this.getIDS();
+                ids.outlineWidth = 'thin';
+                ids.outlineColor = '#8bf';
+                ids.outlineStyle = 'solid';
+                ids.outlineOffset = '0px';
+            },
+            
+            /** @returns {undefined} */
+            hideFocusIndicator: function() {
+                this.hideDefaultFocusIndicator();
+            },
+            
+            /** Hides the browser's default focus indicator.
+                @returns {undefined}*/
+            hideDefaultFocusIndicator: function() {
+                // IE
+                this.getIDE().hideFocus = true;
+                
+                // Mozilla and Webkit
+                this.getIDS().outlineStyle = 'none';
+            },
+            
+            /** @overrides myt.DomObservable */
+            createDomHandler: function(domObserver, methodName, type) {
+                if (FocusObservable.EVENT_TYPES[type]) {
+                    const self = this;
+                    return domEvent => {
+                        if (!domEvent) domEvent = window.event;
+                        
+                        // OPTIMIZATION: prevent extra focus events under 
+                        // special circumstances. See myt.VariableLayout 
+                        // for more detail.
+                        if (self._ignoreFocus) {
+                            domEvent.cancelBubble = true;
+                            if (domEvent.stopPropagation) domEvent.stopPropagation();
+                            domEvent.preventDefault();
+                            return;
+                        }
+                        
+                        // Configure common focus event.
+                        const event = FocusObservable.EVENT;
+                        event.source = self;
+                        event.type = domEvent.type;
+                        event.value = domEvent;
+                        
+                        const allowBubble = domObserver[methodName](event);
+                        if (!allowBubble) {
+                            domEvent.cancelBubble = true;
+                            if (domEvent.stopPropagation) domEvent.stopPropagation();
+                        }
+                        
+                        event.source = undefined;
+                    };
+                }
+                
+                return this.callSuper(domObserver, methodName, type);
+            }
+        }),
+        
+        /** Generates input events and passes them on to one or more 
+            event observers.
+            
+            Requires myt.DomObservable as a super mixin.
+            
+            @class */
+        InputObservable = pkg.InputObservable = new JSModule('InputObservable', {
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                /** A map of supported input event types. */
+                EVENT_TYPES: {
+                    input:true,
+                    select:true,
+                    change:true
+                },
+                
+                /** The common change/select event that gets reused. */
+                EVENT: makeEmptyEvent()
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @overrides myt.DomObservable */
+            createDomHandler: function(domObserver, methodName, type) {
+                return this.createStandardDomHandler(domObserver, methodName, type, InputObservable) || 
+                    this.callSuper(domObserver, methodName, type);
+            }
+        }),
+        
+        /** Generates drag and drop events and passes them on to one or more 
+            event observers.
+            
+            Requires myt.DomObservable as a super mixin.
+            
+            @class */
+        DragDropObservable = pkg.DragDropObservable = new JSModule('DragDropObservable', {
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                /** A map of supported drag and drop event types. */
+                EVENT_TYPES: {
+                    dragleave:true,
+                    dragenter:true,
+                    dragover:true,
+                    drop:true
+                },
+                
+                /** The common drag and drop event that gets reused. */
+                EVENT: makeEmptyEvent()
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @overrides myt.DomObservable */
+            createDomHandler: function(domObserver, methodName, type) {
+                return this.createStandardDomHandler(domObserver, methodName, type, DragDropObservable, true) || 
+                    this.callSuper(domObserver, methodName, type);
+            }
+        });
     
     /** Generates Dom Events and passes them on to one or more event observers.
         Requires myt.DomElementProxy be included when this mixin is included.
         
         Private Attributes:
-            __dobsbt:object Stores arrays of myt.DomObservers and method names 
-                by event type.
+            __dobsbt:object Stores arrays of myt.DomObservers and method 
+                names by event type.
         
         @class */
     pkg.DomObservable = new JSModule('DomObservable', {
@@ -3160,8 +3608,9 @@ new JS.Singleton('GlobalError', {
             @param {string} methodName - The method name to call on the 
                 dom observer.
             @param {string} type - The type of dom event to register for.
-            @param {boolean} [capture] - Indicates if the event registration is 
-                during capture or bubble phase. Defaults to false, bubble phase.
+            @param {boolean} [capture] - Indicates if the event registration 
+                is during capture or bubble phase. Defaults to false, 
+                bubble phase.
             @param {boolean} [passive]
             @returns {boolean} - True if the observer was successfully 
                 registered, false otherwise. */
@@ -3173,7 +3622,8 @@ new JS.Singleton('GlobalError', {
                 if (methodRef) {
                     const domObserversByType = this.__dobsbt || (this.__dobsbt = {});
                     
-                    // Lazy instantiate dom observers array for type and insert observer.
+                    // Lazy instantiate dom observers array for type and 
+                    // insert observer.
                     const domObservers = domObserversByType[type];
                     if (!domObservers) {
                         // Create list with observer
@@ -3375,7 +3825,7 @@ new JS.Singleton('GlobalError', {
                             }
                         }
                         
-                        // Observable wasn't found
+                        // Observable was not found
                         return retval;
                     }
                 }
@@ -3395,447 +3845,6 @@ new JS.Singleton('GlobalError', {
                     observables.length = 0;
                 }
             }
-        }
-    });
-    
-    /** Generates Key Events and passes them on to one or more event observers.
-        Requires myt.DomObservable as a super mixin. */
-    pkg.KeyObservable = new JSModule('KeyObservable', {
-        // Class Methods and Attributes ////////////////////////////////////////
-        extend: {
-            /** A map of supported key event types. */
-            EVENT_TYPES:{
-                keypress:true,
-                keydown:true,
-                keyup:true
-            },
-            
-            /** The common key event that gets reused. */
-            EVENT:makeEmptyEvent(),
-            
-            /** Gets the key code from the provided key event.
-                @param {!Object} event Event value is a dom event.
-                @returns {number} The keycode from the event. */
-            getKeyCodeFromEvent: event => event.value.keyCode || event.value.charCode
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** @overrides myt.DomObservable */
-        createDomHandler: function(domObserver, methodName, type) {
-            return this.createStandardDomHandler(domObserver, methodName, type, pkg.KeyObservable) || 
-                this.callSuper(domObserver, methodName, type);
-        }
-    });
-    
-    /** Generates Mouse Events and passes them on to one or more event 
-        observers. Also provides the capability to capture contextmenu events 
-        and mouse wheel events.
-        
-        Requires: myt.DomObservable super mixin. */
-    pkg.MouseObservable = new JSModule('MouseObservable', {
-        // Class Methods and Attributes ////////////////////////////////////////
-        extend: {
-            /** A map of supported mouse event types. */
-            EVENT_TYPES:{
-                mouseover:true,
-                mouseout:true,
-                mousedown:true,
-                mouseup:true,
-                click:true,
-                dblclick:true,
-                mousemove:true,
-                contextmenu:true,
-                wheel:true
-            },
-            
-            /** The common mouse event that gets reused. */
-            EVENT:makeEmptyEvent(),
-            
-            /** Gets the mouse coordinates from the provided event.
-                @param {!Object} event Event value is a dom event.
-                @returns {!Object} An object with 'x' and 'y' keys containing 
-                    the x and y mouse position. */
-            getMouseFromEvent: event => {
-                return {x:event.value.pageX, y:event.value.pageY};
-            },
-            
-            getMouseFromEventRelativeToView: function(event, view) {
-                const viewPos = view.getPagePosition(),
-                    pos = this.getMouseFromEvent(event);
-                pos.x -= viewPos.x;
-                pos.y -= viewPos.y;
-                return pos;
-            }
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** @overrides myt.DomObservable */
-        createDomHandler: function(domObserver, methodName, type) {
-            return this.createStandardDomHandler(domObserver, methodName, type, pkg.MouseObservable, true) || 
-                this.callSuper(domObserver, methodName, type);
-        }
-    });
-    
-    /** Generates Scroll Events and passes them on to one or more event 
-        observers.
-        
-        Requires myt.DomObservable as a super mixin. */
-    pkg.ScrollObservable = new JSModule('ScrollObservable', {
-        // Class Methods and Attributes ////////////////////////////////////////
-        extend: {
-            /** A map of supported scroll event types. */
-            EVENT_TYPES:{
-                scroll:true
-            },
-            
-            /** The common scroll event that gets reused. */
-            EVENT:makeEmptyEvent(),
-            
-            /** Gets the scrollLeft and scrollTop from the event.
-                @param {!Object} event Event value is a dom event.
-                @returns object with an x and y key each containing a number. */
-            getScrollFromEvent: event => {
-                const target = event.value.target || event.value.srcElement;
-                return {x:target.scrollLeft, y:target.scrollTop};
-            }
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** @overrides myt.DomObservable */
-        createDomHandler: function(domObserver, methodName, type) {
-            return this.createStandardDomHandler(domObserver, methodName, type, pkg.ScrollObservable) || 
-                this.callSuper(domObserver, methodName, type);
-        }
-    });
-    
-    /** Generates Touch Events and passes them on to one or more event 
-        observers.
-        
-        Requires: myt.DomObservable super mixin. */
-    pkg.TouchObservable = new JSModule('TouchObservable', {
-        // Class Methods and Attributes ////////////////////////////////////////
-        extend: {
-            /** A map of supported touch event types. */
-            EVENT_TYPES:{
-                touchstart:true,
-                touchend:true,
-                touchmove:true,
-                touchcancel:true
-            },
-            
-            /** The common touch event that gets reused. */
-            EVENT:makeEmptyEvent()
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** @overrides myt.DomObservable */
-        createDomHandler: function(domObserver, methodName, type) {
-            return this.createStandardDomHandler(domObserver, methodName, type, pkg.TouchObservable, false) || 
-                this.callSuper(domObserver, methodName, type);
-        }
-    });
-    
-    /** Generates focus and blur events and passes them on to one or more 
-        event observers. Also provides focus related events to a view. When 
-        a view is focused or blurred, myt.global.focus will be notified via the
-        'notifyFocus' and 'notifyBlur' methods.
-        
-        Requires myt.DomObservable as a super mixin.
-        
-        Events:
-            focused:object Fired when this view gets focus. The value is 
-                this view.
-            focus:object Fired when this view gets focus. The value is a dom
-                focus event.
-            blur:object Fired when this view loses focus. The value is a dom
-                focus event.
-        
-        Attributes:
-            focused:boolean Indicates if this view has focus or not.
-            focusable:boolean Indicates if this view can have focus or not.
-            focusIndicator:boolean Indicates if the focus indicator should
-                be shown for this view or not when it has focus.
-        
-        Virtual Methods:
-            getNextFocus() Implement this method to return the next view that 
-                should have focus. If null is returned or the method is not 
-                implemented, normal dom traversal will occur.
-            getPrevFocus() Implement this method to return the prev view that 
-                should have focus. If null is returned or the method is not 
-                implemented, normal dom traversal will occur. */
-    // TODO: fire focus and blur events rather than a focused event?
-    // FIXME: should we give away focus when we become not visible?
-    pkg.FocusObservable = new JSModule('FocusObservable', {
-        // Class Methods and Attributes ////////////////////////////////////////
-        extend: {
-            /** A map of supported focus event types. */
-            EVENT_TYPES:{
-                focus:true,
-                blur:true
-            },
-            
-            /** The common focus/blur event that gets reused. */
-            EVENT:makeEmptyEvent()
-        },
-        
-        
-        // Life Cycle //////////////////////////////////////////////////////////
-        /** @overrides myt.Node */
-        initNode: function(parent, attrs) {
-            this.focusable = false;
-            this.focusIndicator = true;
-            
-            this.callSuper(parent, attrs);
-        },
-        
-        /** @overrides myt.View */
-        destroyBeforeOrphaning: function() {
-            this.giveAwayFocus();
-            this.callSuper();
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        setFocused: function(v) {
-            if (this.focused !== v) {
-                this.focused = v;
-                if (this.inited) {
-                    this.fireEvent('focused', v);
-                    if (v) {
-                        GlobalFocus.notifyFocus(this);
-                    } else {
-                        GlobalFocus.notifyBlur(this);
-                    }
-                }
-            }
-        },
-        
-        setFocusable: function(v) {
-            const self = this;
-            if (self.focusable !== v) {
-                const wasFocusable = self.focusable;
-                self.focusable = v;
-                
-                if (v) {
-                    self.getIDE().tabIndex = 0; // Make focusable. -1 is programmatic only
-                    self.attachToDom(self, '__doFocus', 'focus');
-                    self.attachToDom(self, '__doBlur', 'blur');
-                } else if (wasFocusable) {
-                    self.getIDE().removeAttribute('tabIndex'); // Make unfocusable
-                    self.detachFromDom(self, '__doFocus', 'focus');
-                    self.detachFromDom(self, '__doBlur', 'blur');
-                }
-                
-                if (self.inited) self.fireEvent('focusable', v);
-            }
-        },
-        
-        setFocusIndicator: function(v) {
-            if (this.focusIndicator !== v) {
-                this.focusIndicator = v;
-                if (this.focused) {
-                    if (v) {
-                        this.showFocusIndicator();
-                    } else {
-                        this.hideFocusIndicator();
-                    }
-                }
-            }
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** Gives the focus to the next focusable element or, if nothing else
-            is focusable, blurs away from this element.
-            @returns {undefined} */
-        giveAwayFocus: function() {
-            if (this.focused) {
-                // Try to go to next focusable element.
-                GlobalFocus.next();
-                
-                // If focus loops around to ourself make sure we don't keep it.
-                if (this.focused) this.blur();
-            }
-        },
-        
-        /** Tests if this view is in a state where it can receive focus.
-            @returns boolean True if this view is visible, enabled, focusable 
-                and not focus masked, false otherwise. */
-        isFocusable: function() {
-            return this.focusable && !this.disabled && this.isVisible() && 
-                this.searchAncestorsOrSelf(node => node.maskFocus === true) === null;
-        },
-        
-        /** Calling this method will set focus onto this view if it 
-            is focusable.
-            @param noScroll:boolean (optional) if true is provided no 
-                auto-scrolling will occur when focus is set.
-            @returns {undefined} */
-        focus: function(noScroll) {
-            if (this.isFocusable()) this.getIDE().focus({preventScroll:noScroll});
-        },
-        
-        /** Removes the focus from this view. Do not call this method directly.
-            @private
-            @returns {undefined} */
-        blur: function() {
-            this.getIDE().blur();
-        },
-        
-        /** @private
-            @param {!Object} event
-            @returns {undefined} */
-        __doFocus: function(event) {
-            if (!this.focused) {
-                this.setFocused(true);
-                this.doFocus();
-            }
-        },
-        
-        /** @private
-            @param {!Object} event
-            @returns {undefined} */
-        __doBlur: function(event) {
-            if (this.focused) {
-                this.doBlur();
-                this.setFocused(false);
-            }
-        },
-        
-        /** @returns {undefined} */
-        doFocus: function() {
-            if (this.focusIndicator) {
-                this.showFocusIndicator();
-            } else {
-                this.hideFocusIndicator();
-            }
-        },
-        
-        /** @returns {undefined} */
-        doBlur: function() {
-            if (this.focusIndicator) this.hideFocusIndicator();
-        },
-        
-        /** @returns {undefined} */
-        showFocusIndicator: function() {
-            // IE
-            this.getIDE().hideFocus = false;
-            
-            // Mozilla and Webkit
-            const ids = this.getIDS();
-            ids.outlineWidth = 'thin';
-            ids.outlineColor = '#8bf';
-            ids.outlineStyle = 'solid';
-            ids.outlineOffset = '0px';
-        },
-        
-        /** @returns {undefined} */
-        hideFocusIndicator: function() {
-            this.hideDefaultFocusIndicator();
-        },
-        
-        /** Hides the browser's default focus indicator.
-            @returns {undefined}*/
-        hideDefaultFocusIndicator: function() {
-            // IE
-            this.getIDE().hideFocus = true;
-            
-            // Mozilla and Webkit
-            this.getIDS().outlineStyle = 'none';
-        },
-        
-        /** @overrides myt.DomObservable */
-        createDomHandler: function(domObserver, methodName, type) {
-            if (pkg.FocusObservable.EVENT_TYPES[type]) {
-                const self = this;
-                return domEvent => {
-                    if (!domEvent) domEvent = window.event;
-                    
-                    // OPTIMIZATION: prevent extra focus events under special 
-                    // circumstances. See myt.VariableLayout for more detail.
-                    if (self._ignoreFocus) {
-                        domEvent.cancelBubble = true;
-                        if (domEvent.stopPropagation) domEvent.stopPropagation();
-                        domEvent.preventDefault();
-                        return;
-                    }
-                    
-                    // Configure common focus event.
-                    const event = pkg.FocusObservable.EVENT;
-                    event.source = self;
-                    event.type = domEvent.type;
-                    event.value = domEvent;
-                    
-                    const allowBubble = domObserver[methodName](event);
-                    if (!allowBubble) {
-                        domEvent.cancelBubble = true;
-                        if (domEvent.stopPropagation) domEvent.stopPropagation();
-                    }
-                    
-                    event.source = undefined;
-                };
-            }
-            
-            return this.callSuper(domObserver, methodName, type);
-        }
-    });
-    
-    /** Generates input events and passes them on to one or more event 
-        observers.
-        
-        Requires myt.DomObservable as a super mixin. */
-    pkg.InputObservable = new JSModule('InputObservable', {
-        // Class Methods and Attributes ////////////////////////////////////////
-        extend: {
-            /** A map of supported input event types. */
-            EVENT_TYPES:{
-                input:true,
-                select:true,
-                change:true
-            },
-            
-            /** The common change/select event that gets reused. */
-            EVENT:makeEmptyEvent()
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** @overrides myt.DomObservable */
-        createDomHandler: function(domObserver, methodName, type) {
-            return this.createStandardDomHandler(domObserver, methodName, type, pkg.InputObservable) || 
-                this.callSuper(domObserver, methodName, type);
-        }
-    });
-    
-    /** Generates drag and drop events and passes them on to one or more event 
-        observers.
-        
-        Requires myt.DomObservable as a super mixin. */
-    pkg.DragDropObservable = new JSModule('DragDropObservable', {
-        // Class Methods and Attributes ////////////////////////////////////////
-        extend: {
-            /** A map of supported drag and drop event types. */
-            EVENT_TYPES:{
-                dragleave:true,
-                dragenter:true,
-                dragover:true,
-                drop:true
-            },
-            
-            /** The common drag and drop event that gets reused. */
-            EVENT:makeEmptyEvent()
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** @overrides myt.DomObservable */
-        createDomHandler: function(domObserver, methodName, type) {
-            return this.createStandardDomHandler(domObserver, methodName, type, pkg.DragDropObservable, true) || 
-                this.callSuper(domObserver, methodName, type);
         }
     });
 })(myt);
@@ -3900,7 +3909,7 @@ new JS.Singleton('GlobalError', {
         
         registerEventHandler = (target, action) => {
             ['keydown','keypress','keyup'].forEach(eventName => {
-                globalKeys[action](target, '__handle_' + eventName, eventName);
+                globalKeys[action](target, '__hndl_' + eventName, eventName);
             });
         },
         attach = target => {registerEventHandler(target, 'attachToDom');},
@@ -4046,7 +4055,7 @@ new JS.Singleton('GlobalError', {
             globalKeys.KEYCODE_RIGHT_COMMAND = KEYCODE_RIGHT_COMMAND;
             
             globalKeys.setDomElement(document);
-            globalKeys.attachTo(globalFocus, '__handle_focused', 'focused');
+            globalKeys.attachTo(globalFocus, '__hndl_focused', 'focused');
             attach(globalKeys);
             
             // Clear keys down when the window loses focus. This is necessary 
@@ -4074,7 +4083,7 @@ new JS.Singleton('GlobalError', {
             @private
             @param {!Object} event
             @returns {undefined} */
-        __handle_focused: event => {
+        __hndl_focused: event => {
             const focused = event.value;
             if (focused) {
                 detach(globalKeys);
@@ -4089,7 +4098,7 @@ new JS.Singleton('GlobalError', {
         /** @private
             @param {!Object} event
             @returns {undefined} */
-        __handle_keydown: event => {
+        __hndl_keydown: event => {
             const keyCode = getKeyCodeFromEvent(event),
                 domEvent = event.value;
             if (shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
@@ -4120,14 +4129,14 @@ new JS.Singleton('GlobalError', {
         /** @private
             @param {!Object} event
             @returns {undefined} */
-        __handle_keypress: event => {
+        __hndl_keypress: event => {
             globalKeys.fireEvent('keypress', getKeyCodeFromEvent(event));
         },
         
         /** @private
             @param {!Object} event
             @returns {undefined} */
-        __handle_keyup: event => {
+        __hndl_keyup: event => {
             const keyCode = getKeyCodeFromEvent(event),
                 domEvent = event.value;
             if (shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
@@ -4139,7 +4148,9 @@ new JS.Singleton('GlobalError', {
 
 
 /** Provides global touch events by listening to touch events on the the
-    document. Registered with myt.global as 'touch'. */
+    document. Registered with myt.global as 'touch'.
+    
+    @class */
 new JS.Singleton('GlobalTouch', {
     include: [myt.DomElementProxy, myt.DomObservable, myt.TouchObservable],
     
@@ -4357,8 +4368,8 @@ new JS.Singleton('GlobalTouch', {
                 }
             },
             
-            /** Syncs all the subviews inner dom elements to outer dom elements
-                and models to outer bounds.
+            /** Syncs all the subviews inner dom elements to outer dom 
+                elements and models to outer bounds.
                 @returns {undefined} */
             syncSubviews: function() {
                 syncSubviewsForFlexBox(this);
@@ -4395,8 +4406,8 @@ new JS.Singleton('GlobalTouch', {
             
             self.__parentIsFlexBox = self.parent && self.parent.isA(FlexBoxSupport);
             
-            // When reparenting from a flexbox parent to a non-flexbox parent we
-            // may need to resync the dom to the model.
+            // When reparenting from a flexbox parent to a non-flexbox parent 
+            // we may need to resync the dom to the model.
             if (self.inited && oldParentIsFlexBox && !self.isChildOfFlexBox()) {
                 // Sync dom to model
                 const ods = self.getODS();
@@ -4555,11 +4566,12 @@ new JS.Singleton('GlobalTouch', {
 
 
 (pkg => {
-    const
-        /* Caches getter names. */
+    const arrayPrototype = Array.prototype,
+        
+        /*  Caches getter names. */
         GETTER_NAMES = {},
     
-        /* Caches setter names. */
+        /*  Caches setter names. */
         SETTER_NAMES = {},
         
         generateName = (attrName, prefix) => prefix + attrName.substring(0,1).toUpperCase() + attrName.substring(1),
@@ -4598,7 +4610,7 @@ new JS.Singleton('GlobalTouch', {
                 @returns {undefined} */
             createSetterFunction: (target, attrName) => {
                 const setterName = generateSetterName(attrName);
-                if (target[setterName]) console.log("Overwriting setter", setterName);
+                if (target[setterName]) console.log('Overwriting setter', setterName);
                 target[setterName] = v => {
                     if (target[attrName] !== v) {
                         target[attrName] = v;
@@ -4614,7 +4626,7 @@ new JS.Singleton('GlobalTouch', {
                 @returns {undefined} */
             createGetterFunction: (target, attrName) => {
                 const getterName = generateGetterName(attrName);
-                if (target[getterName]) console.log("Overwriting getter", getterName);
+                if (target[getterName]) console.log('Overwriting getter', getterName);
                 target[getterName] = () => target[attrName];
             },
             
@@ -4623,10 +4635,10 @@ new JS.Singleton('GlobalTouch', {
         
         
         // Methods /////////////////////////////////////////////////////////////
-        appendToEarlyAttrs: function() {Array.prototype.push.apply(this.earlyAttrs || (this.earlyAttrs = []), arguments);},
-        prependToEarlyAttrs: function() {Array.prototype.unshift.apply(this.earlyAttrs || (this.earlyAttrs = []), arguments);},
-        appendToLateAttrs: function() {Array.prototype.push.apply(this.lateAttrs || (this.lateAttrs = []), arguments);},
-        prependToLateAttrs: function() {Array.prototype.unshift.apply(this.lateAttrs || (this.lateAttrs = []), arguments);},
+        appendToEarlyAttrs: function() {arrayPrototype.push.apply(this.earlyAttrs || (this.earlyAttrs = []), arguments);},
+        prependToEarlyAttrs: function() {arrayPrototype.unshift.apply(this.earlyAttrs || (this.earlyAttrs = []), arguments);},
+        appendToLateAttrs: function() {arrayPrototype.push.apply(this.lateAttrs || (this.lateAttrs = []), arguments);},
+        prependToLateAttrs: function() {arrayPrototype.unshift.apply(this.lateAttrs || (this.lateAttrs = []), arguments);},
         
         defAttr: defAttr,
         
@@ -4713,8 +4725,8 @@ new JS.Singleton('GlobalTouch', {
             have a 'fireEvent' method.
             @param {string} attrName - The name of the attribute to set.
             @param {*} v -The value to set.
-            @param {boolean} [skipSetter] - If true no attempt will be made to
-                invoke a setter function. Useful when you want to invoke 
+            @param {boolean} [skipSetter] - If true no attempt will be made 
+                to invoke a setter function. Useful when you want to invoke 
                 standard setter behavior. Defaults to undefined which is 
                 equivalent to false.
             @returns {undefined} */
@@ -4735,25 +4747,24 @@ new JS.Singleton('GlobalTouch', {
 })(myt);
 
 
-/** Provides a destroy method that can be used as part of an Object creation
-    and destruction lifecycle. When an object is "destroyed" it will have
-    a 'destroyed' attribute with a value of true.
-    
-    Events:
-        None
+/** Provides a destroy method that can be used as part of an Object 
+    creation and destruction lifecycle. When an object is "destroyed" 
+    it will have a 'destroyed' attribute with a value of true.
     
     Attributes:
-        destroyed:boolean Set to true when the object is in the "destroyed"
-            state, undefinded otherwise.
-*/
+        destroyed:boolean Set to true when the object is in the 
+            "destroyed" state, undefinded otherwise.
+    
+    @class */
 myt.Destructible = new JS.Module('Destructible', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Destroys this Object. Subclasses must call super.
         @returns {undefined} */
     destroy: function() {
-        // See http://perfectionkills.com/understanding-delete/ for details
-        // on how delete works. This is why we use Object.keys below since it
-        // avoids iterating over many of the properties that are not deletable.
+        // See http://perfectionkills.com/understanding-delete/ for 
+        // details on how delete works. This is why we use Object.keys 
+        // below since it avoids iterating over many of the properties 
+        // that are not deletable.
         const self = this;
         if (self.destroyed) {
             console.warn('Already destroyed');
@@ -4845,8 +4856,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 return objPool.length ? objPool.pop() : this.createInstance.apply(this, arguments);
             },
             
-            /** Creates a new object that can be stored in the pool. The default
-                implementation does nothing.
+            /** Creates a new object that can be stored in the pool. 
+                The default implementation does nothing.
                 @returns {?Object} */
             createInstance: () => null,
             
@@ -4859,8 +4870,8 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** Cleans the object in preparation for putting it back in the 
-                pool. The default implementation calls the clean method on the 
-                object if it is a function. Otherwise it does nothing.
+                pool. The default implementation calls the clean method on 
+                the object if it is a function. Otherwise it does nothing.
                 @param {!Object} obj - The object to be cleaned.
                 @returns {!Object} - The cleaned object. */
             cleanInstance: obj => {
@@ -4879,8 +4890,8 @@ myt.Destructible = new JS.Module('Destructible', {
         /** An implementation of an myt.AbstractPool.
             
             Attributes:
-                instanceClass:JS.Class (initializer only) the class to use for 
-                    new instances. Defaults to Object.
+                instanceClass:JS.Class (initializer only) the class to use 
+                    for new instances. Defaults to Object.
                 instanceParent:myt.Node (initializer only) The node to create 
                     new instances on.
             
@@ -4891,8 +4902,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 @param {!Function} instanceClass - The JS.Class to create 
                     instances from.
                 @param {?Object} [instanceParent] - The place to create 
-                    instances on. When instanceClass is an myt.Node this will 
-                    be the node parent.
+                    instances on. When instanceClass is an myt.Node this 
+                    will be the node parent.
                 @returns {undefined} */
             initialize: function(instanceClass, instanceParent) {
                 this.callSuper();
@@ -4953,11 +4964,11 @@ myt.Destructible = new JS.Module('Destructible', {
                             return;
                         }
                     }
-                    warningType = "non-active";
+                    warningType = 'inactive';
                 } else {
-                    warningType = "non-existant";
+                    warningType = 'missing';
                 }
-                console.warn("Tried to put a " + warningType + " instance.", obj, this);
+                console.warn('Tried to put a ' + warningType + ' instance', obj, this);
             },
             
             /** Gets an array of the active instances.
@@ -5039,7 +5050,7 @@ myt.Destructible = new JS.Module('Destructible', {
             if (pool) {
                 return pool.getInstance(arguments);
             } else {
-                console.warn('No pool for key:', key);
+                console.warn('No pool for key', key);
             }
         },
         
@@ -5048,7 +5059,7 @@ myt.Destructible = new JS.Module('Destructible', {
             if (pool) {
                 pool.putInstance(obj);
             } else {
-                console.warn('No pool for obj:', obj);
+                console.warn('No pool for obj', obj);
             }
         },
         
@@ -5071,7 +5082,9 @@ myt.Destructible = new JS.Module('Destructible', {
     });
     
     /** Objects that can be used in an myt.AbstractPool should use this mixin 
-        and implement the "clean" method. */
+        and implement the "clean" method.
+        
+        @class */
     pkg.Reusable = new JSModule('Reusable', {
         // Methods /////////////////////////////////////////////////////////////
         /** Puts this object back into a default state suitable for storage in
@@ -5104,7 +5117,7 @@ myt.Destructible = new JS.Module('Destructible', {
             matcher function returns true. Returns a Node or null if no 
             match is found.
                 param node:myt.Node the Node to start searching from. This 
-                    Node  is not tested, but its parent is.
+                    Node is not tested, but its parent is.
                 param matcher:function the function to test for matching 
                     Nodes with. */
         getMatchingAncestor = (node, matcherFunc) => getMatchingAncestorOrSelf(node ? node.parent : null, matcherFunc),
@@ -5118,7 +5131,7 @@ myt.Destructible = new JS.Module('Destructible', {
             if (node[name] === undefined) {
                 node[name] = nodeToAdd;
             } else {
-                console.log("Name in use:" + name);
+                console.warn('Name in use', name);
             }
         },
         
@@ -5131,7 +5144,7 @@ myt.Destructible = new JS.Module('Destructible', {
             if (node[name] === nodeToRemove) {
                 delete node[name];
             } else {
-                console.log("Name not in use:" + name);
+                console.warn('Name not in use', name);
             }
         },
         
@@ -5139,12 +5152,12 @@ myt.Destructible = new JS.Module('Destructible', {
             first if necessary. Returns a myt.TrackActivesPool */
         getAnimPool = node => node.__animPool || (node.__animPool = new pkg.TrackActivesPool(pkg.Animator, node));
         
-    /** A single node within a tree data structure. A node has zero or one 
-        parent node and zero or more child nodes. If a node has no parent it 
-        is a 'root' node. If a node has no child nodes it is a 'leaf' node. 
-        Parent nodes and parent of parents, etc. are referred to as ancestors. 
-        Child nodes and children of children, etc. are referred to 
-        as descendants.
+    /** A single node within a tree data structure. A node has zero or 
+        one parent node and zero or more child nodes. If a node has no 
+        parent it is a 'root' node. If a node has no child nodes it is a 
+        'leaf' node. Parent nodes and parent of parents, etc. are referred 
+        to as ancestors. Child nodes and children of children, etc. are 
+        referred to as descendants.
         
         Lifecycle management is also provided via the 'initNode', 
         'doBeforeAdoption', 'doAfterAdoption', 'destroy', 
@@ -5157,8 +5170,8 @@ myt.Destructible = new JS.Module('Destructible', {
             inited:boolean Set to true after this Node has completed 
                 initializing.
             parent:myt.Node The parent of this Node.
-            name:string The name of this node. Used to reference this Node from
-                its parent Node.
+            name:string The name of this node. Used to reference this Node 
+                from its parent Node.
             isBeingDestroyed:boolean Indicates that this node is in the process
                 of being destroyed. Set to true at the beginning of the destroy
                 lifecycle phase. Undefined before that.
@@ -5214,7 +5227,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     if (mixin = mixins[i++]) {
                         self.extend(mixin);
                     } else {
-                        console.warn('Missing mixin in:' + self.klass.__displayName);
+                        console.warn('Missing mixin in', self.klass.__displayName);
                     }
                 }
             }
@@ -5282,16 +5295,16 @@ myt.Destructible = new JS.Module('Destructible', {
             self.callSuper();
         },
         
-        /** Provides a hook for subclasses to do destruction of their internals.
-            This method is called after subnodes have been destroyed but before
-            the parent has been unset.
-            Subclasses should call super.
+        /** Provides a hook for subclasses to do destruction of their 
+            internals. This method is called after subnodes have been 
+            destroyed but before the parent has been unset. Subclasses 
+            should call super.
             @returns {undefined} */
         destroyBeforeOrphaning: () => {},
         
-        /** Provides a hook for subclasses to do destruction of their internals.
-            This method is called after the parent has been unset.
-            Subclasses must call super.
+        /** Provides a hook for subclasses to do destruction of their 
+            internals. This method is called after the parent has been 
+            unset. Subclasses must call super.
             @returns {undefined} */
         destroyAfterOrphaning: function() {
             this.releaseAllConstraints();
@@ -5428,8 +5441,8 @@ myt.Destructible = new JS.Module('Destructible', {
             return this.parent == null;
         },
         
-        /** Tests if this Node is a descendant of the provided Node or is the
-            node itself.
+        /** Tests if this Node is a descendant of the provided Node or is 
+            the node itself.
             @param {!Object} node - The myt.Node to check for descent from.
             @returns {boolean} */
         isDescendantOf: function(node) {
@@ -5446,8 +5459,8 @@ myt.Destructible = new JS.Module('Destructible', {
             return false;
         },
         
-        /** Tests if this Node is an ancestor of the provided Node or is the
-            node itself.
+        /** Tests if this Node is an ancestor of the provided Node or is 
+            the node itself.
             @param {!Object} node - The myt.Node to check for.
             @returns {boolean} */
         isAncestorOf: function(node) {
@@ -5579,47 +5592,27 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** Animates an attribute using the provided parameters.
-            @param {!Object|string} attribute - The name of the attribute to 
-                animate. If an object is provided it should be the only 
-                argument and its keys should be the params of this method. 
-                This provides a more concise way of passing in sparse 
-                optional parameters.
-            @param {number} to - The target value to animate to.
-            @param {number} [from] - The target value to animate from.
-            @param {boolean} [relative]
-            @param {?Function} [callback]
-            @param {number} [duration]
-            @param {boolean} [reverse]
-            @param {boolean} [repeat]
-            @param {?Function} [easingFunction]
-            @returns {!Object} - The Animator being run. */
-        animate: function(attribute, to, from, relative, callback, duration, reverse, repeat, easingFunction) {
-            const animPool = getAnimPool(this),
-                anim = animPool.getInstance({ignorePlacement:true}); // ignorePlacement ensures the animator is directly attached to this node
-            
-            if (typeof attribute === 'object') {
-                // Handle a single map argument if provided
-                callback = attribute.callback;
-                delete attribute.callback;
-                anim.callSetters(attribute);
-            } else {
-                // Handle individual arguments
-                anim.attribute = attribute;
-                anim.setTo(to);
-                anim.setFrom(from);
-                if (duration != null) anim.duration = duration;
-                if (relative != null) anim.relative = relative;
-                if (repeat != null) anim.repeat = repeat;
-                if (reverse != null) anim.setReverse(reverse);
-                if (easingFunction != null) anim.setEasingFunction(easingFunction);
+            @param {!Object} attrs - Attributes that will be passed to
+                the myt.Animator that will be run.
+            @returns {?Object} - The Animator being run or undefined if for
+                some reason an animator could not be run. */
+        animate: function(attrs) {
+            if (attrs) {
+                const animPool = getAnimPool(this),
+                    // Get an animator from the pool. Use of ignorePlacement 
+                    // ensures the animator is directly attached to this node
+                    anim = animPool.getInstance({ignorePlacement:true}),
+                    callback = attrs.callback;
+                delete attrs.callback;
+                anim.callSetters(attrs);
+                
+                // Release the animation when it completes.
+                anim.next(success => {animPool.putInstance(anim);});
+                if (callback) anim.next(callback);
+                
+                anim.setRunning(true);
+                return anim;
             }
-            
-            // Release the animation when it completes.
-            anim.next(success => {animPool.putInstance(anim);});
-            if (callback) anim.next(callback);
-            
-            anim.setRunning(true);
-            return anim;
         },
         
         /** Gets an array of the currently running animators that were created
@@ -5660,8 +5653,8 @@ myt.Destructible = new JS.Module('Destructible', {
         
         // Timing and Delay
         /** A convienence method to execute a method once on idle.
-            @param {string} methodName - The name of the method to execute on
-                this object.
+            @param {string} methodName - The name of the method to execute 
+                on this object.
             @returns {undefined} */
         doOnceOnIdle: function(methodName) {
             this.attachTo(pkg.global.idle, methodName, 'idle', true);
@@ -5827,8 +5820,8 @@ myt.Destructible = new JS.Module('Destructible', {
                         i = svs.length;
                         while (i) this.removeSubview(svs[--i]);
                         
-                        this.detachFrom(curParent, '__hndlPSAV', 'subviewAdded');
-                        this.detachFrom(curParent, '__hndlPSRV', 'subviewRemoved');
+                        this.detachFrom(curParent, '__hndlPSA', 'subviewAdded');
+                        this.detachFrom(curParent, '__hndlPSR', 'subviewRemoved');
                     }
                     
                     this.callSuper(parent);
@@ -5839,8 +5832,8 @@ myt.Destructible = new JS.Module('Destructible', {
                         svs = parent.getSubviews();
                         for (i = 0, len = svs.length; len > i;) this.addSubview(svs[i++]);
                         
-                        this.attachTo(parent, '__hndlPSAV', 'subviewAdded');
-                        this.attachTo(parent, '__hndlPSRV', 'subviewRemoved');
+                        this.attachTo(parent, '__hndlPSA', 'subviewAdded');
+                        this.attachTo(parent, '__hndlPSR', 'subviewRemoved');
                     }
                     
                     // Clear temporary lock and update if this happened 
@@ -5885,8 +5878,8 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Gets the index of the provided View in the subviews array.
                 @param {?Object} sv - The myt.View to check for.
-                @returns {number} - The index of the subview or -1 if not 
-                    found. */
+                @returns {number} - The index of the subview or -1 
+                    if not found. */
             getSubviewIndex: function(sv) {
                 return this.subviews.indexOf(sv);
             },
@@ -5940,8 +5933,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 events from the subview that would trigger the update method. 
                 This should remove all listeners that were setup in 
                 startMonitoringSubview.
-                @param {?Object} sv - The myt.View to stop monitoring for 
-                    changes.
+                @param {?Object} sv - The myt.View to stop monitoring 
+                    for changes.
                 @returns {undefined} */
             stopMonitoringSubview: sv => {},
             
@@ -5967,7 +5960,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 @private
                 @param {!Object} event
                 @returns {undefined} */
-            __hndlPSAV: function(event) {
+            __hndlPSA: function(event) {
                 if (event.value.parent === this.parent) this.addSubview(event.value);
             },
             
@@ -5975,15 +5968,15 @@ myt.Destructible = new JS.Module('Destructible', {
                 @private
                 @param {!Object} event
                 @returns {undefined} */
-            __hndlPSRV: function(event) {
+            __hndlPSR: function(event) {
                 if (event.value.parent === this.parent) this.removeSubview(event.value);
             },
             
             // Subview ordering //
-            /** Sorts the subviews array according to the provided sort 
-                function.
-                @param {?Function} sortFunc - The sort function to sort the 
-                    subviews with.
+            /** Sorts the subviews array according to the provided 
+                sort function.
+                @param {?Function} sortFunc - The sort function to sort 
+                    the subviews with.
                 @returns {undefined} */
             sortSubviews: function(sortFunc) {
                 this.subviews.sort(sortFunc);
@@ -6020,8 +6013,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 targetValue:*
             
             Attributes:
-                targetAttrName:string the name of the attribute to set on each 
-                    subview.
+                targetAttrName:string the name of the attribute to set on 
+                    each subview.
                 targetValue:* the value to set the attribute to.
                 setterName:string the name of the setter method to call on 
                     the subview for the targetAttrName. This value is updated 
@@ -6525,9 +6518,9 @@ myt.Destructible = new JS.Module('Destructible', {
         }
     });
     
-    /** An extension of VariableLayout that positions views along an axis using
-        an inset, outset and spacing value. Views will be wrapped when they
-        overflow the available space.
+    /** An extension of VariableLayout that positions views along an axis 
+        using an inset, outset and spacing value. Views will be wrapped 
+        when they overflow the available space.
         
         Supported Layout Hints:
             break:string Will force the subview to start a new line/column.
@@ -6684,7 +6677,7 @@ myt.Destructible = new JS.Module('Destructible', {
         }
     });
     
-    /* Create locked counter functions for the myt.Layout class. */
+    /*  Create locked counter functions for the myt.Layout class. */
     pkg.createFixedThresholdCounter(Layout, 1, 'locked');
 })(myt);
 
@@ -6941,8 +6934,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 RootView and thus compensates for rotation and scaling.
             textColor:string The color used for text. Will be inherited by 
                 descendant views if they don't themselves set textColor or if 
-                they set textColor to 'inherit'. Defaults to undefined which is
-                equivalent to 'inherit'.
+                they set textColor to 'inherit'. Defaults to undefined which 
+                is equivalent to 'inherit'.
             bgColor:string The background color of this view. Use a value of 
                 'transparent' to make this view transparent. Defaults 
                 to 'transparent'.
@@ -6973,7 +6966,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 'dotted', 'dashed', 'solid', 'double', 'groove', 'ridge', 
                 'inset', 'outset', 'inherit'.
             outlineColor:string Sets the color of the CSS outline. If null or 
-                undefined is provided '#000000' will be used.
+                undefined is provided '#000' will be used.
             borderWidth:number The width of the CSS border. If a value 
                 equivalent to false is provided 0 will be used.
             borderStyle:string The CSS border style. If null or undefined is 
@@ -6981,7 +6974,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 'dotted', 'dashed', 'solid', 'double', 'groove', 'ridge', 
                 'inset', 'outset', 'inherit'.
             borderColor:string Sets the color of the CSS border. If null or 
-                undefined is provided '#000000' will be used.
+                undefined is provided '#000' will be used.
             tooltip:string Sets a tooltip for this view. The basic 
                 implementation uses the dom element's title property. For a 
                 richer tooltip display use myt.TooltipMixin.
@@ -7103,10 +7096,10 @@ myt.Destructible = new JS.Module('Destructible', {
                 is orphaned. */
         getSiblingViews: function() {
             if (this.parent) {
-                // Using filter ensures we have a copy of the subviews since we 
-                // will modify it and do not want to modify the original array.
-                // Remove ourselves from the subviews since we only want 
-                // siblings.
+                // Using filter ensures we have a copy of the subviews since 
+                // we will modify it and do not want to modify the original 
+                // array. Remove ourselves from the subviews since we only 
+                // want siblings.
                 return this.parent.getSubviews().filter(sv => sv !== this);
             }
         },
@@ -7336,8 +7329,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 const ods = self.getODS();
                 ods.visibility = v ? 'inherit' : 'hidden';
                 
-                // Move invisible elements to a very negative location so they 
-                // won't effect scrollable area. Ideally we could use 
+                // Move invisible elements to a very negative location so 
+                // they won't effect scrollable area. Ideally we could use 
                 // display:none but we can't because that makes measuring 
                 // bounds not work.
                 ods.left = v ? self.x + 'px' : '-100000px';
@@ -7469,16 +7462,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 2 is the blur amount, and index 3 is the color.
             @returns {undefined} */
         setBoxShadow: function(v) {
-            if (v) {
-                const hShadow = v[0] || 0,
-                    vShadow = v[1] || 0,
-                    blur = v[2] || 7,
-                    color = v[3] || '#000000';
-                v = hShadow + 'px ' + vShadow + 'px ' + blur + 'px ' + color;
-            } else {
-                v = 'none';
-            }
-            this.getODS().boxShadow = v;
+            this.getODS().boxShadow = v ? (v[0] || 0) + 'px ' + (v[1] || 0) + 'px ' + (v[2] || 7) + 'px ' + (v[3] || '#000') : 'none';
         },
         
         /** Sets the CSS liner-gradient or radial-gradient property. Setting 
@@ -7529,7 +7513,7 @@ myt.Destructible = new JS.Module('Destructible', {
                             case 'ellipse':
                                 break;
                             default:
-                                console.warn('Unexpected radial gradient shape: ' + shape);
+                                console.warn('Unexpected radial gradient shape', shape);
                                 shape = 'circle';
                         }
                         v.shift();
@@ -7594,12 +7578,12 @@ myt.Destructible = new JS.Module('Destructible', {
             return this.searchAncestorsOrSelf(v => !v.visible) === null;
         },
         
-        /** Finds the youngest ancestor (or self) that is a focusTrap or 
-            focusCage.
-            @param {boolean} ignoreFocusTrap - indicates focusTraps should be
-                ignored.
-            @returns {?Object} a View with focusTrap set to true or null if 
-                not found. */
+        /** Finds the youngest ancestor (or self) that is a focusTrap 
+            or focusCage.
+            @param {boolean} ignoreFocusTrap - Indicates focusTraps should 
+                be ignored.
+            @returns {?Object} a View with focusTrap set to true or null 
+                if not found. */
         getFocusTrap: function(ignoreFocusTrap) {
             return this.searchAncestorsOrSelf(v => v.focusCage || (v.focusTrap && !ignoreFocusTrap));
         },
@@ -7874,8 +7858,8 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {number} locX - the x position to test.
             @param {number} locY - the y position to test.
             @param {?Object} [referenceFrameDomElem] - The dom element
-                the locX and locY are relative to. If not provided the page is
-                assumed.
+                the locX and locY are relative to. If not provided the page 
+                is assumed.
             @returns {boolean} True if the location is inside this view, false 
                 if not. */
         containsPoint: function(locX, locY, referenceFrameDomElem) {
@@ -7935,9 +7919,9 @@ myt.Destructible = new JS.Module('Destructible', {
             view.getODS().transform = cur + (cur.length === 0 ? '' : ' ') + type + '(' + v + ')';
         },
         
-        /*  Removes an entry from the 'transform' style property of the provided
-            style property map. Returns the new transform value after the 
-            removal has been applied.
+        /*  Removes an entry from the 'transform' style property of the 
+            provided style property map. Returns the new transform value 
+            after the removal has been applied.
                 param view:View the view ro remove the transform from.
                 param type:string the type of transform: 'rotate', 'scaleX', 
                     'scaleY', 'skewX', 'skewY'. */
@@ -8164,10 +8148,12 @@ myt.Destructible = new JS.Module('Destructible', {
                 behavior to be restored after an explicit height has been set.
         
         Private Attributes:
-            __hasSetWidth:boolean Indicates the an explicit width has been set
-                so that should be used rather than sizing to the dom element.
-            __hasSetHeight:boolean Indicates the an explicit height has been set
-                so that should be used rather than sizing to the dom element.
+            __hasSetWidth:boolean Indicates the an explicit width has been 
+                set so that width should be used rather than sizing to the 
+                dom element.
+            __hasSetHeight:boolean Indicates the an explicit height has been 
+                set so that height should be used rather than sizing to the 
+                dom element.
         
         @class */
     pkg.SizeToDom = new JSModule('SizeToDom', {
@@ -8212,8 +8198,9 @@ myt.Destructible = new JS.Module('Destructible', {
                 behavior to be restored after an explicit width has been set.
         
         Private Attributes:
-            __hasSetWidth:boolean Indicates the an explicit width has been set
-                so that should be used rather than sizing to the dom element.
+            __hasSetWidth:boolean Indicates the an explicit width has been 
+                set so that width should be used rather than sizing to the 
+                dom element.
         
         @class */
     pkg.SizeWidthToDom = new JSModule('SizeWidthToDom', {
@@ -8252,8 +8239,9 @@ myt.Destructible = new JS.Module('Destructible', {
                 behavior to be restored after an explicit height has been set.
         
         Private Attributes:
-            __hasSetHeight:boolean Indicates the an explicit height has been set
-                so that should be used rather than sizing to the dom element.
+            __hasSetHeight:boolean Indicates the an explicit height has been 
+                set so that height should be used rather than sizing to the 
+                dom element.
         
         @class */
     pkg.SizeHeightToDom = new JSModule('SizeHeightToDom', {
@@ -8285,7 +8273,8 @@ myt.Destructible = new JS.Module('Destructible', {
 
 
 (pkg => {
-    const /* A private setter function that provides a common implementation for
+    const
+        /*  A private setter function that provides a common implementation for
             most of this setters in the TextSupport mixin.
             @param {string|number} v
             @param {string} attrName
@@ -8389,8 +8378,8 @@ myt.Destructible = new JS.Module('Destructible', {
             v = this.valueFromEvent(v);
             
             if (this.text !== v) {
-                // Use innerHTML rather than textContent since this allows us to
-                // embed formatting markup.
+                // Use innerHTML rather than textContent since this allows 
+                // us to embed formatting markup.
                 this.getIDE().innerHTML = this.text = v;
                 if (this.inited) {
                     this.fireEvent('text', v);
@@ -8469,7 +8458,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {number} [blur] - The bluriness in pixels of the shadow.
                 Defaults to 2 if not provided.
             @param {string} [color] - The color of the shadow. Defaults
-                to '#000000' if not provided.
+                to '#000' if not provided.
             @returns {undefined} */
         showTextShadow: function(x, y, blur, color) {
             this.getIDS().textShadow = 
@@ -8723,9 +8712,9 @@ myt.Destructible = new JS.Module('Destructible', {
         include: [pkg.FlexBoxSupport]
     });
     
-    /** A view for an iframe. This component also listens to global mousedown/up
-        events and turns off point-events so that the iframe will interfere
-        less with mouse behavior in the parent document.
+    /** A view for an iframe. This component also listens to global mousedown
+        and mouseup events and turns off point-events so that the iframe will 
+        interfere less with mouse behavior in the parent document.
         
         Events:
             src:string
@@ -8852,8 +8841,8 @@ myt.Destructible = new JS.Module('Destructible', {
         }
     });
     
-    /** A view that displays an image. By default useNaturalSize is set to true
-        so the Image will take on the size of the image data.
+    /** A view that displays an image. By default useNaturalSize is set to 
+        true so the Image will take on the size of the image data.
         
         @class */
     pkg.Image = new JSClass('Image', View, {
@@ -8893,9 +8882,9 @@ myt.Destructible = new JS.Module('Destructible', {
     
     /** A mixin that sizes a view to a percentage of its parent view.
         
-        This is the inverse of a layout since the child is responsible for sizing
-        itself to the parent rather than in a layout where the layout positions
-        and sizes the children.
+        This is the inverse of a layout since the child is responsible for 
+        sizing itself to the parent rather than in a layout where the layout 
+        positions and sizes the children.
         
         Events:
             percentOfParentWidthOffset:number
@@ -9196,13 +9185,14 @@ myt.Destructible = new JS.Module('Destructible', {
 
 
 (pkg => {
-    const win = window;
+    let 
+        /*  The inner width of the browser window. */
+        innerWidth,
         
-        /* The inner width of the browser window. */
-    let innerWidth,
-        
-        /* The inner height of the browser window. */
+        /*  The inner height of the browser window. */
         innerHeight;
+    
+    const win = window;
     
     /** Provides events when the window is resized. Registered with myt.global
         as 'windowResize'.
@@ -9247,21 +9237,24 @@ myt.Destructible = new JS.Module('Destructible', {
     const JSModule = JS.Module,
         GlobalWindowResize = pkg.global.windowResize,
         
-        handleResize = stw => {
-            const dim = stw.resizeDimension;
-            if (dim === 'width' || dim === 'both') stw.setWidth(Math.max(stw.minWidth, GlobalWindowResize.getWidth()));
-            if (dim === 'height' || dim === 'both') stw.setHeight(Math.max(stw.minHeight, GlobalWindowResize.getHeight()));
+        defAttr = pkg.AccessorSupport.defAttr,
+        
+        handleResize = sizeToWindow => {
+            const dim = sizeToWindow.resizeDimension;
+            if (dim === 'both' || dim === 'width') sizeToWindow.setWidth(Math.max(sizeToWindow.minWidth, GlobalWindowResize.getWidth()));
+            if (dim === 'both' || dim === 'height') sizeToWindow.setHeight(Math.max(sizeToWindow.minHeight, GlobalWindowResize.getHeight()));
         },
         
         /** A mixin that sizes a RootView to the window width, height or both.
             
             Attributes:
-                resizeDimension:string The dimension to resize in. Supported
-                    values are 'width', 'height' and 'both'. Defaults to 'both'.
-                minWidth:number the minimum width below which this view will
-                    not resize its width. Defaults to 0.
-                minWidth:number the minimum height below which this view will
-                    not resize its height. Defaults to 0.
+                resizeDimension:string The dimension to resize in. 
+                    Supported values are 'width', 'height' and 'both'. 
+                    Defaults to 'both'.
+                minWidth:number the minimum width below which this view 
+                    will not resize its width. Defaults to 0.
+                minWidth:number the minimum height below which this view 
+                    will not resize its height. Defaults to 0.
             
             @class */
         SizeToWindow = pkg.SizeToWindow = new JSModule('SizeToWindow', {
@@ -9272,9 +9265,9 @@ myt.Destructible = new JS.Module('Destructible', {
             /** @overrides */
             initNode: function(parent, attrs) {
                 this.minWidth = this.minHeight = 0;
-                if (attrs.resizeDimension == null) attrs.resizeDimension = 'both';
+                defAttr(attrs, 'resizeDimension', 'both');
                 
-                this.attachTo(GlobalWindowResize, '__handleResize', 'resize');
+                this.attachTo(GlobalWindowResize, '__hndlResize', 'resize');
                 this.callSuper(parent, attrs);
             },
             
@@ -9306,7 +9299,7 @@ myt.Destructible = new JS.Module('Destructible', {
             /** @private
                 @param {!Object} ignoredEvent
                 @returns {undefined} */
-            __handleResize: function(ignoredEvent) {
+            __hndlResize: function(ignoredEvent) {
                 handleResize(this);
             }
         });
@@ -9321,7 +9314,7 @@ myt.Destructible = new JS.Module('Destructible', {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.SizeToWindow */
         initNode: function(parent, attrs) {
-            if (attrs.resizeDimension == null) attrs.resizeDimension = 'width';
+            defAttr(attrs, 'resizeDimension', 'width');
             this.callSuper(parent, attrs);
         }
     });
@@ -9336,7 +9329,7 @@ myt.Destructible = new JS.Module('Destructible', {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.SizeToWindow */
         initNode: function(parent, attrs) {
-            if (attrs.resizeDimension == null) attrs.resizeDimension = 'height';
+            defAttr(attrs, 'resizeDimension', 'height');
             this.callSuper(parent, attrs);
         }
     });
@@ -9344,28 +9337,29 @@ myt.Destructible = new JS.Module('Destructible', {
 
 
 (pkg => {
-    const win = window,
+    let 
+        /*  The ID of the last idle event in the browser. */
+        timerId,
         
-        /* The idle event object that gets reused. */
-        EVENT = {};
-        
-        /* The ID of the last idle event in the browser. */
-    let timerId,
-        
-        /* The function that gets executed on idle. */
+        /*  The function that gets executed on idle. */
         idleFunc,
         
-        /* The millis of the last idle event fired. */
+        /*  The millis of the last idle event fired. */
         lastTime,
         
-        /* Indicates if idle events are currently being fired or not. */
+        /*  Indicates if idle events are currently being fired or not. */
         running = false;
+    
+    const win = window,
+        
+        /*  The idle event object that gets reused. */
+        EVENT = {};
     
     /** Provides idle events. Registered with myt.global as 'idle'.
         
         Events:
-            idle:object Fired when a browser idle event occurs. The event value 
-                is an object containing:
+            idle:object Fired when a browser idle event occurs. The event 
+                value is an object containing:
                     delta: The time in millis since the last idle evnet.
                     time: The time in millis of this idle event.
         
@@ -9434,11 +9428,357 @@ myt.Destructible = new JS.Module('Destructible', {
 (pkg => {
     const math = Math,
         mathMax = math.max,
+        mathMin = math.min,
+        
+        cleanChannelValue = value => mathMin(255, mathMax(0, math.round(value))),
+        toHex = value => {
+            value = cleanChannelValue(value).toString(16);
+            return value.length === 1 ? '0' + value : value;
+        },
+        rgbToHex = (red, green, blue, prependHash) => [prependHash ? '#' : '', toHex(red), toHex(green), toHex(blue)].join(''),
+        getRedChannel = value => (0xff0000 & value) >> 16,
+        getGreenChannel = value => (0x00ff00 & value) >> 8,
+        getBlueChannel = value => (0x0000ff & value),
+        makeColorFromNumber = value => new Color(getRedChannel(value), getGreenChannel(value), getBlueChannel(value)),
+        makeColorNumberFromChannels = (red, green, blue) => (cleanChannelValue(red) << 16) + (cleanChannelValue(green) << 8) + cleanChannelValue(blue),
+        toUnitRange = (num, max) => {
+            if (typeof num === 'string') {
+                if (num.endsWith('%')) {
+                    num = parseFloat(num.substring(0, num.length - 1)) * max / 100;
+                } else {
+                    return 0;
+                }
+            }
+            num = mathMin(max, mathMax(0, num)) / max;
+            return math.abs(1 - num) < 0.000001 ? 1 : num;
+        },
+        
+        rgbToHsv = (r, g, b) => {
+            r = toUnitRange(r, 255);
+            g = toUnitRange(g, 255);
+            b = toUnitRange(b, 255);
+            
+            const max = mathMax(r, g, b),
+                diff = max - mathMin(r, g, b);
+            if (diff === 0) {
+                // achromatic
+                return {h:0, s:0, v:max};
+            } else {
+                let h;
+                switch (max) {
+                    case r:
+                        h = (g - b) / diff + (g < b ? 6 : 0);
+                        break;
+                    case g:
+                        h = (b - r) / diff + 2;
+                        break;
+                    case b:
+                        h = (r - g) / diff + 4;
+                        break;
+                }
+                return {h:h * 60, s:max === 0 ? 0 : diff / max, v:max};
+            }
+        },
+        
+        hsvToRgb = (h, s, v) => {
+            h = toUnitRange(h, 360) * 6;
+            s = toUnitRange(s, 100);
+            v = toUnitRange(v, 100);
+            
+            const i = math.floor(h),
+                f = h - i,
+                p = v * (1 - s),
+                q = v * (1 - f * s),
+                t = v * (1 - (1 - f) * s),
+                mod = i % 6,
+                red = [v, q, p, p, t, v][mod],
+                green = [t, v, v, q, p, p][mod],
+                blue = [p, p, t, v, v, q][mod];
+            
+            return {red:red * 255, green:green * 255, blue:blue * 255};
+        },
+        
+        /** Models a color as individual color channels.
+            
+            Attributes:
+                red:int The red channel. Will be an integer between 0 
+                    and 255.
+                green:int The green channel. Will be an integer between 0 
+                    and 255.
+                blue:int The blue channel. Will be an integer between 0 
+                    and 255.
+            
+            @class */
+        Color = pkg.Color = new JS.Class('Color', {
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                toUnitRange:toUnitRange,
+                rgbToHsv:rgbToHsv,
+                hsvToRgb:hsvToRgb,
+                
+                /** Converts a number or string representation of a number to 
+                    a two character hex string.
+                    @param {number|string} value - The number or string 
+                        to convert.
+                    @returns {string} A two character hex string 
+                        such as: '0c' or 'c9'. */
+                toHex: toHex,
+                
+                /** Converts red, green, and blue color channel numbers to 
+                    a six character hex string.
+                    @param {number} red - The red color channel.
+                    @param {number} green - The green color channel.
+                    @param {number} blue - The blue color channel.
+                    @param {boolean} [prependHash] - If true a '#' character
+                        will be prepended to the return value.
+                    @returns {string} Something like: '#ff9c02' or 'ff9c02' */
+                rgbToHex: rgbToHex,
+                
+                /** Limits a channel value to integers between 0 and 255.
+                    @param {number} value - The channel value to clean up.
+                    @returns {number} */
+                cleanChannelValue: cleanChannelValue,
+                
+                /** Gets the red channel from a "color" number.
+                    @param {string} value
+                    @returns {number} */
+                getRedChannel: getRedChannel,
+                
+                /** Gets the green channel from a "color" number.
+                    @param {string} value
+                    @returns {number} */
+                getGreenChannel: getGreenChannel,
+                
+                /** Gets the blue channel from a "color" number.
+                    @param {string} value
+                    @returns {number} */
+                getBlueChannel: getBlueChannel,
+                
+                /** Creates an myt.Color from a "color" number.
+                    @param {string} value
+                    @returns {!Object} myt.Color */
+                makeColorFromNumber: makeColorFromNumber,
+                
+                /** Creates an myt.Color from an html color string.
+                    @param {string} value - A hex string representation of a 
+                        color, such as '#ff339b'.
+                    @returns {!Object} a myt.Color or null if no color could 
+                        be parsed. */
+                makeColorFromHexString: value => {
+                    if (value) {
+                        if (!value.startsWith('#')) value = '#' + value;
+                        
+                        // Convert #abc colors to #aabbcc
+                        if (value.length === 4) {
+                            const red = value.substring(1,2),
+                                green = value.substring(2,3),
+                                blue = value.substring(3,4);
+                            value = '#' + red + red + green + green + blue + blue;
+                        }
+                        
+                        return makeColorFromNumber(parseInt(value.substring(1), 16));
+                    } else {
+                        return null;
+                    }
+                },
+                
+                /** Creates an myt.Color from hue, saturation and value
+                    parameters.
+                    @param {number} h - The hue. A number from 0 to 360.
+                    @param {number} s - The saturation. A number from 0 to 100.
+                    @param {number} v - The value. A number from 0 to 100.
+                    @returns {!Object} myt.Color */
+                makeColorFromHSV: (h, s, v) => {
+                    const rgb = hsvToRgb(h, s, v);
+                    return makeColorFromNumber(makeColorNumberFromChannels(rgb.red, rgb.green, rgb.blue));
+                },
+                
+                /** Returns the lighter of the two provided colors.
+                    @param {number} a - A color number.
+                    @param {number} b - A color number.
+                    @returns {number} The number that represents the 
+                        lighter color. */
+                getLighterColor: (a, b) => makeColorFromNumber(a).isLighterThan(makeColorFromNumber(b)) ? a : b,
+                
+                /** Creates an RGB "color" number from the provided 
+                    color channels.
+                    @param {number} red - The red channel
+                    @param {number} green - The green channel
+                    @param {number} blue - The blue channel
+                    @returns {number} */
+                makeColorNumberFromChannels: makeColorNumberFromChannels,
+                
+                /** Creates a new myt.Color object that is a blend of the two 
+                    provided colors.
+                    @param {!Object} fromColor - The first myt.Color to blend.
+                    @param {!Objecdt} toColor - The second myt.Color to blend.
+                    @param {number} percent - The blend percent between the two
+                        colors where 0 is the fromColor and 1.0 is the toColor.
+                    @returns {!Object} myt.Color */
+                makeBlendedColor: (fromColor, toColor, percent) => {
+                    return new Color(
+                        fromColor.red + (percent * (toColor.red - fromColor.red)),
+                        fromColor.green + (percent * (toColor.green - fromColor.green)),
+                        fromColor.blue + (percent * (toColor.blue - fromColor.blue))
+                    );
+                }
+            },
+            
+            
+            // Constructor /////////////////////////////////////////////////////
+            /** Create a new Color.
+                @param {number} red - The red channel
+                @param {number} green - The green channel
+                @param {number} blue - The blue channel
+                @returns {undefined} */
+            initialize: function(red, green, blue) {
+                this.setRed(red);
+                this.setGreen(green);
+                this.setBlue(blue);
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            /** Sets the red channel value.
+                @param {number} red
+                @return {undefined} */
+            setRed: function(red) {
+                this.red = cleanChannelValue(red);
+            },
+            
+            /** Sets the green channel value.
+                @param {number} green
+                @return {undefined} */
+            setGreen: function(green) {
+                this.green = cleanChannelValue(green);
+            },
+            
+            /** Sets the blue channel value.
+                @param {number} blue
+                @return {undefined} */
+            setBlue: function(blue) {
+                this.blue = cleanChannelValue(blue);
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** Gets the numerical representation of this color.
+                @returns {number} The number that represents this color. */
+            getColorNumber: function() {
+                return (this.red << 16) + (this.green << 8) + this.blue;
+            },
+            
+            /** Gets the hex string representation of this color.
+                @returns {string} A hex color such as '#a0bbcc'. */
+            getHtmlHexString: function() {
+                return rgbToHex(this.red, this.green, this.blue, true);
+            },
+            
+            /** Gets an HSV representation of this Color.
+                @returns {!Object} With keys h, s and v. */
+            getHSV: function() {
+                return rgbToHsv(this.red, this.green, this.blue);
+            },
+            
+            /** Tests if this color is lighter than the provided color.
+                @param {!Object} c - The myt.Color to compare to.
+                @returns {boolean} True if this color is lighter, 
+                    false otherwise. */
+            isLighterThan: function(c) {
+                const diff = this.getDiffFrom(c);
+                
+                // Sum channel diffs to determine lightest color. A negative
+                // diff means a lighter color.
+                return 0 > (diff.red + diff.green + diff.blue);
+            },
+            
+            /** Gets an object holding color channel diffs.
+                @param {!Object} c - The myt.Color to diff from.
+                @returns {!Object} containing the diffs for the red, green 
+                    and blue channels. */
+            getDiffFrom: function(c) {
+                return {
+                    red: c.red - this.red,
+                    green: c.green - this.green,
+                    blue: c.blue - this.blue
+                };
+            },
+            
+            /** Applies the provided diff object to this color.
+                @param {!Object} diff - The color diff to apply.
+                @returns {!Object} - This myt.Color for method chaining. */
+            applyDiff: function(diff) {
+                return this.add(diff);
+            },
+            
+            /** Adds the provided color to this color.
+                @param {!Object} c - The myt.Color to add.
+                @returns {!Object} - This myt.Color for method chaining. */
+            add: function(c) {
+                this.setRed(this.red + c.red);
+                this.setGreen(this.green + c.green);
+                this.setBlue(this.blue + c.blue);
+                return this;
+            },
+            
+            /** Subtracts the provided color from this color.
+                @param {!Object} c - The myt.Color to subtract.
+                @returns {!Object} - This myt.Color for method chaining. */
+            subtract: function(c) {
+                this.setRed(this.red - c.red);
+                this.setGreen(this.green - c.green);
+                this.setBlue(this.blue - c.blue);
+                return this;
+            },
+            
+            /** Multiplys this color by the provided scalar.
+                @param {number} s - The scaler to multiply by.
+                @returns {!Object} - This myt.Color for method chaining. */
+            multiply: function(s) {
+                this.setRed(this.red * s);
+                this.setGreen(this.green * s);
+                this.setBlue(this.blue * s);
+                return this;
+            },
+            
+            /** Divides this color by the provided scalar.
+                @param {number} s - The scaler to divide by.
+                @returns {!Object} - This myt.Color for method chaining. */
+            divide: function(s) {
+                this.setRed(this.red / s);
+                this.setGreen(this.green / s);
+                this.setBlue(this.blue / s);
+                return this;
+            },
+            
+            /** Clones this Color.
+                @returns {!Object} - A copy of this myt.Color. */
+            clone: function() {
+                return new Color(this.red, this.green, this.blue);
+            },
+            
+            /** Determine if this color has the same value as another color.
+                @param {?Object} obj - The color object to test against.
+                @returns {boolean} True if this color has the same color 
+                    values as this provided color, false otherwise. */
+            equals: function(obj) {
+                return obj === this || (obj && obj.isA && 
+                    obj.isA(Color) && 
+                    obj.red === this.red && 
+                    obj.green === this.green && 
+                    obj.blue === this.blue);
+            }
+        });
+})(myt);
+
+
+(pkg => {
+    const math = Math,
+        mathMax = math.max,
         mathSin = math.sin,
         mathCos = math.cos,
         mathPow = math.pow,
         mathSqrt = math.sqrt,
-        
         PI = math.PI,
         TWO_PI = 2 * PI,
         HALF_PI = PI / 2,
@@ -9446,61 +9786,61 @@ myt.Destructible = new JS.Module('Destructible', {
         easingFunctions = {
             linear:t => t,
             
-            easeInQuad:t => t*t,
-            easeOutQuad:t => -t*(t-2),
-            easeInOutQuad:t => (t*=2) < 1 ? t*t/2 : -((--t)*(t-2) - 1)/2,
+            inQuad:t => t*t,
+            outQuad:t => -t*(t-2),
+            inOutQuad:t => (t*=2) < 1 ? t*t/2 : -((--t)*(t-2) - 1)/2,
             
-            easeInCubic:t => t*t*t,
-            easeOutCubic:t => (t=t-1)*t*t + 1,
-            easeInOutCubic:t => (t*=2) < 1 ? t*t*t/2 : ((t-=2)*t*t + 2)/2,
+            inCubic:t => t*t*t,
+            outCubic:t => (t=t-1)*t*t + 1,
+            inOutCubic:t => (t*=2) < 1 ? t*t*t/2 : ((t-=2)*t*t + 2)/2,
             
-            easeInQuart:t => t*t*t*t,
-            easeOutQuart:t => -((t=t-1)*t*t*t - 1),
-            easeInOutQuart:t => (t*=2) < 1 ? t*t*t*t/2 : -((t-=2)*t*t*t - 2)/2,
+            inQuart:t => t*t*t*t,
+            outQuart:t => -((t=t-1)*t*t*t - 1),
+            inOutQuart:t => (t*=2) < 1 ? t*t*t*t/2 : -((t-=2)*t*t*t - 2)/2,
             
-            easeInQuint:t => t*t*t*t*t,
-            easeOutQuint:t => (t=t-1)*t*t*t*t + 1,
-            easeInOutQuint:t => (t*=2) < 1 ? t*t*t*t*t/2 : ((t-=2)*t*t*t*t + 2)/2,
+            inQuint:t => t*t*t*t*t,
+            outQuint:t => (t=t-1)*t*t*t*t + 1,
+            inOutQuint:t => (t*=2) < 1 ? t*t*t*t*t/2 : ((t-=2)*t*t*t*t + 2)/2,
             
-            easeInSine:t => -mathCos(t * HALF_PI) + 1,
-            easeOutSine:t => mathSin(t * HALF_PI),
-            easeInOutSine:t => -(mathCos(t * PI) - 1)/2,
+            inSine:t => -mathCos(t * HALF_PI) + 1,
+            outSine:t => mathSin(t * HALF_PI),
+            inOutSine:t => -(mathCos(t * PI) - 1)/2,
             
-            easeInCirc:t => -(mathSqrt(1 - t*t) - 1),
-            easeOutCirc:t => mathSqrt(1 - (t=t-1)*t),
-            easeInOutCirc:t => (t*=2) < 1 ? -(mathSqrt(1 - t*t) - 1)/2: (mathSqrt(1 - (t-=2)*t) + 1)/2,
+            inCirc:t => -(mathSqrt(1 - t*t) - 1),
+            outCirc:t => mathSqrt(1 - (t=t-1)*t),
+            inOutCirc:t => (t*=2) < 1 ? -(mathSqrt(1 - t*t) - 1)/2: (mathSqrt(1 - (t-=2)*t) + 1)/2,
             
-            easeInExpo:t => t === 0 ? 0 : mathPow(2, 10 * (t - 1)),
-            easeOutExpo:t => t === 1 ? 1 : (-mathPow(2, -10 * t) + 1),
-            easeInOutExpo:t => {
+            inExpo:t => t === 0 ? 0 : mathPow(2, 10 * (t - 1)),
+            outExpo:t => t === 1 ? 1 : (-mathPow(2, -10 * t) + 1),
+            inOutExpo:t => {
                 if (t === 0 || t === 1) return t;
                 if ((t*=2) < 1) return mathPow(2, 10 * (t - 1))/2;
                 return (-mathPow(2, -10 * --t) + 2)/2;
             },
             
-            easeInElastic:t => {
+            inElastic:t => {
                 if (t === 0 || t === 1) return t;
                 const p = 0.3;
                 return -(mathPow(2, 10 * (t -= 1)) * mathSin((t * 1 - p/4) * TWO_PI / p));
             },
-            easeOutElastic:t => {
+            outElastic:t => {
                 if (t === 0 || t === 1) return t;
                 const p = 0.3;
                 return mathPow(2,-10 * t) * mathSin((t * 1 - p/4) * TWO_PI / p) + 1;
             },
-            easeInOutElastic:t => {
+            inOutElastic:t => {
                 if (t === 0 || t === 1) return t;
                 const p = 0.45;
                 if ((t*=2) < 1) return -(mathPow(2, 10 * (t-=1)) * mathSin((t * 1 - p/4) * TWO_PI / p))/2;
                 return mathPow(2, -10 * (t-=1)) * mathSin((t * 1 - p/4) * TWO_PI/p)/2 + 1;
             },
             
-            easeInBack:(t, s=1.70158) => (t/=1) * t * ((s+1)*t - s),
-            easeOutBack:(t, s=1.70158) => (t=t/1-1) * t * ((s+1)*t + s) + 1,
-            easeInOutBack:(t, s=1.70158) => (t*=2) < 1 ? (t*t*(((s*=(1.525))+1)*t - s))/2 : ((t-=2)*t*(((s*=(1.525))+1)*t + s) + 2)/2,
+            inBack:(t, s=1.70158) => (t/=1) * t * ((s+1)*t - s),
+            outBack:(t, s=1.70158) => (t=t/1-1) * t * ((s+1)*t + s) + 1,
+            inOutBack:(t, s=1.70158) => (t*=2) < 1 ? (t*t*(((s*=(1.525))+1)*t - s))/2 : ((t-=2)*t*(((s*=(1.525))+1)*t + s) + 2)/2,
             
-            easeInBounce:t => 1 - easingFunctions.easeOutBounce(1-t),
-            easeOutBounce:t => {
+            inBounce:t => 1 - easingFunctions.outBounce(1-t),
+            outBounce:t => {
                 if (t < (1/2.75)) {
                     return 7.5625*t*t;
                 } else if (t < (2/2.75)) {
@@ -9510,7 +9850,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 }
                 return 7.5625*(t-=(2.625/2.75))*t + 0.984375;
             },
-            easeInOutBounce:t => (t*=2) < 1 ? easingFunctions.easeInBounce(t)/2 : (easingFunctions.easeOutBounce(t-1) + 1)/2
+            inOutBounce:t => (t*=2) < 1 ? easingFunctions.inBounce(t)/2 : (easingFunctions.outBounce(t-1) + 1)/2
         },
         
         globalIdle = pkg.global.idle,
@@ -9522,11 +9862,11 @@ myt.Destructible = new JS.Module('Destructible', {
             animator.__isColorAnim = (target && typeof target.isColorAttr === 'function') ? target.isColorAttr(animator.attribute) : undefined;
         },
         
+        makeColorFromHexString = pkg.Color.makeColorFromHexString,
         getColorValue = (from, to, motionValue, relative, value) => {
-            const Color = pkg.Color,
-                fromColor = Color.makeColorFromHexString(from),
-                toColor = Color.makeColorFromHexString(to),
-                colorObj = relative ? Color.makeColorFromHexString(value) : fromColor;
+            const fromColor = makeColorFromHexString(from),
+                toColor = makeColorFromHexString(to),
+                colorObj = relative ? makeColorFromHexString(value) : fromColor;
             colorObj.setRed(colorObj.red + ((toColor.red - fromColor.red) * motionValue));
             colorObj.setGreen(colorObj.green + ((toColor.green - fromColor.green) * motionValue));
             colorObj.setBlue(colorObj.blue + ((toColor.blue - fromColor.blue) * motionValue));
@@ -9542,7 +9882,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             // Determine what "from" to use if none was provided.
             if (animator.from == null) {
-                animator.__temporaryFrom = true;
+                animator.__tmpFrom = true;
                 animator.from = relative ? (animator.__isColorAnim ? '#000' : 0) : target.get(attr);
             }
             
@@ -9554,9 +9894,9 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         reset = animator => {
-            animator.__temporaryFrom = false;
-            animator.__loopCount = animator.reverse ? animator.repeat - 1 : 0;
-            animator.__progress = animator.reverse ? animator.duration : 0;
+            animator.__tmpFrom = false;
+            animator.__loopCnt = animator.reverse ? animator.repeat - 1 : 0;
+            animator.__prog = animator.reverse ? animator.duration : 0;
         },
         
         advance = (animator, timeDiff) => {
@@ -9569,33 +9909,33 @@ myt.Destructible = new JS.Module('Destructible', {
                 if (reverse) timeDiff *= -1;
                 
                 // Determine how much time to move forward by.
-                const oldProgress = animator.__progress;
-                animator.__progress += timeDiff;
+                const oldProgress = animator.__prog;
+                animator.__prog += timeDiff;
                 
                 // Check for overage
                 let remainderTime = 0;
-                if (animator.__progress > duration) {
-                    remainderTime = animator.__progress - duration;
-                    animator.__progress = duration;
+                if (animator.__prog > duration) {
+                    remainderTime = animator.__prog - duration;
+                    animator.__prog = duration;
                     
                     // Increment loop count and halt looping if necessary
-                    if (++animator.__loopCount === repeat) remainderTime = 0;
-                } else if (0 > animator.__progress) {
+                    if (++animator.__loopCnt === repeat) remainderTime = 0;
+                } else if (0 > animator.__prog) {
                     // Reverse case
-                    remainderTime = -animator.__progress; // Flip reverse time back to forward time
-                    animator.__progress = 0;
+                    remainderTime = -animator.__prog; // Flip reverse time back to forward time
+                    animator.__prog = 0;
                     
                     // Decrement loop count and halt looping if necessary
-                    if (0 > --animator.__loopCount && repeat > 0) remainderTime = 0;
+                    if (0 > --animator.__loopCnt && repeat > 0) remainderTime = 0;
                 }
                 
                 const target = getTarget(animator);
                 if (target) {
-                    updateTarget(animator, target, animator.__progress, oldProgress);
+                    updateTarget(animator, target, animator.__prog, oldProgress);
                     
                     if (
-                        (!reverse && animator.__loopCount === repeat) || // Forward check
-                        (reverse && 0 > animator.__loopCount && repeat > 0) // Reverse check
+                        (!reverse && animator.__loopCnt === repeat) || // Forward check
+                        (reverse && 0 > animator.__loopCnt && repeat > 0) // Reverse check
                     ) {
                         // Stop animation since loop count exceeded repeat count.
                         animator.setRunning(false);
@@ -9604,12 +9944,12 @@ myt.Destructible = new JS.Module('Destructible', {
                         // Advance again if time is remaining. This occurs when
                         // the timeDiff provided was greater than the animation
                         // duration and the animation loops.
-                        animator.fireEvent('repeat', animator.__loopCount);
-                        animator.__progress = reverse ? duration : 0;
+                        animator.fireEvent('repeat', animator.__loopCnt);
+                        animator.__prog = reverse ? duration : 0;
                         advance(animator, remainderTime);
                     }
                 } else {
-                    console.log("No target found for animator.", animator);
+                    console.log('No target for animator', animator);
                     animator.setRunning(false);
                     if (animator.callback) animator.callback.call(animator, false);
                 }
@@ -9641,48 +9981,48 @@ myt.Destructible = new JS.Module('Destructible', {
                     string: See http://easings.net/ for more info. One of the 
                         following:
                             linear, 
-                            easeInQuad, easeOutQuad, easeInOutQuad(default), 
-                            easeInCubic, easeOutCubic, easeInOutCubic, 
-                            easeInQuart, easeOutQuart, easeInOutQuart, 
-                            easeInQuint, easeOutQuint, easeInOutQuint, 
-                            easeInSine, easeOutSine, easeInOutSine,
-                            easeInExpo ,easeOutExpo, easeInOutExpo, 
-                            easeInCirc, easeOutCirc, easeInOutCirc,
-                            easeInElastic ,easeOutElastic, easeInOutElastic, 
-                            easeInBack, easeOutBack, easeInOutBack, 
-                            easeInBounce, easeOutBounce, easeInOutBounce
+                            inQuad, outQuad, inOutQuad(default), 
+                            inCubic, outCubic, inOutCubic, 
+                            inQuart, outQuart, inOutQuart, 
+                            inQuint, outQuint, inOutQuint, 
+                            inSine, outSine, inOutSine,
+                            inExpo ,outExpo, inOutExpo, 
+                            inCirc, outCirc, inOutCirc,
+                            inElastic ,outElastic, inOutElastic, 
+                            inBack, outBack, inOutBack, 
+                            inBounce, outBounce, inOutBounce
                     
-                    function: A function that determines the rate of change of 
-                        the attribute. The arguments to the easing 
+                    function: A function that determines the rate of change 
+                        of the attribute. The arguments to the easing 
                         function are:
                             t: Animation progress in millis
                             c: Value change (to - from)
                             d: Animation duration in millis
-                relative:boolean Determines if the animated value is set on the 
-                    target (false), or added to the exiting value on the 
+                relative:boolean Determines if the animated value is set on 
+                    the target (false), or added to the exiting value on the 
                     target (true). Note that this means the difference between 
                     the from and to values will be "added" to the existing 
                     value on the target. The default value is false.
-                repeat:number The number of times to repeat the animation. If 
-                    negative the animation will repeat forever. The default 
+                repeat:number The number of times to repeat the animation. 
+                    If negative the animation will repeat forever. The default 
                     value is 1.
                 reverse:boolean If true, the animation is run in reverse.
-                running:boolean Indicates if the animation is currently running.
-                    The default value is false.
-                paused:boolean Indicates if the animation is temporarily paused.
-                    The default value is false.
-                callback:function A function that gets called when the animation
-                    completes. A boolean value is passed into the function and 
-                    will be true if the animation completed successfully or 
-                    false if not.
+                running:boolean Indicates if the animation is currently 
+                    running. The default value is false.
+                paused:boolean Indicates if the animation is temporarily 
+                    paused. The default value is false.
+                callback:function A function that gets called when the 
+                    animation completes. A boolean value is passed into the 
+                    function and will be true if the animation completed 
+                    successfully or false if not.
             
             Private Attributes:
-                __loopCount:number the loop currently being run.
-                __progress:number the number of millis currently used during 
+                __loopCnt:number the loop currently being run.
+                __prog:number the number of millis currently used during 
                     the current animation loop.
-                __temporaryFrom:boolean Indicates no "from" was set on the 
-                    animator so we will have to generate one when needed. We 
-                    want to reset back to undefined after the animation 
+                __tmpFrom:boolean Indicates no "from" was set on the 
+                    animator so we will have to generate one when needed. 
+                    We want to reset back to undefined after the animation 
                     completes so that subsequent calls to start the animation
                     will behave the same.
                 __isColorAnim:boolean Indicates this animator is animating a
@@ -9695,9 +10035,11 @@ myt.Destructible = new JS.Module('Destructible', {
             
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                easingFunctions: easingFunctions,
+                /** An object containing easign functions. */
+                easings: easingFunctions,
                 
-                DEFAULT_EASING_FUNCTION: easingFunctions.easeInOutQuad
+                /** The default easing function. */
+                EASING: easingFunctions.inOutQuad
             },
             
             // Life Cycle //////////////////////////////////////////////////////
@@ -9708,7 +10050,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 self.duration = 1000;
                 self.relative = self.reverse = self.running = self.paused = false;
                 self.repeat = 1;
-                self.easingFunction = Animator.DEFAULT_EASING_FUNCTION;
+                self.easingFunction = Animator.EASING;
                 
                 self.callSuper(parent, attrs);
                 
@@ -9727,7 +10069,7 @@ myt.Destructible = new JS.Module('Destructible', {
                         if (v) {
                             isColorAttr(self);
                         } else {
-                            if (self.__temporaryFrom) self.from = undefined;
+                            if (self.__tmpFrom) self.from = undefined;
                             reset(self);
                         }
                         self[v ? 'attachTo' : 'detachFrom'](globalIdle, '__updateAnim', 'idle');
@@ -9758,7 +10100,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 if (typeof v === 'string') v = easingFunctions[v];
                 
                 // Use default if invalid
-                if (!v) v = Animator.DEFAULT_EASING_FUNCTION;
+                if (!v) v = Animator.EASING;
                 
                 this.set('easingFunction', v, true);
             },
@@ -9771,10 +10113,11 @@ myt.Destructible = new JS.Module('Destructible', {
             // Methods /////////////////////////////////////////////////////////
             /** A convienence method to set the callback to run when the 
                 animator stops running. If a callback already exists the 
-                provided callback will be executed after the existing one.
+                provided callback will be executed after (but not after the
+                existing animator completes) the existing one.
                 @param {!Function} callback - The function to run.
-                @param {boolean} [replace] - If true the existing callback will 
-                    be replaced with the new callback.
+                @param {boolean} [replace] - If true the existing callback 
+                    will be replaced with the new callback.
                 @returns {undefined} */
             next: function(callback, replace) {
                 const self = this,
@@ -9790,8 +10133,8 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** Puts the animator back to an initial configured state.
-                @param {boolean} [executeCallback] - If true the callback, if
-                    it exists, will be executed.
+                @param {boolean} [executeCallback] - If true and the callback
+                    exists, the callback will be executed.
                 @returns {undefined} */
             reset: function(executeCallback) {
                 const self = this;
@@ -9812,7 +10155,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 self.duration = 1000;
                 self.relative = self.reverse = false;
                 self.repeat = 1;
-                self.easingFunction = Animator.DEFAULT_EASING_FUNCTION;
+                self.easingFunction = Animator.EASING;
                 
                 self.reset(false);
             },
@@ -9828,14 +10171,31 @@ myt.Destructible = new JS.Module('Destructible', {
 
 
 (pkg => {
-    const 
-        /* Indicates a synchronous transition. */
+    const isArray = Array.isArray,
+        
+        /*  Indicates a synchronous transition. */
         SYNC = 'sync',
         
-        /* Indicates an asynchronous transition. */
+        /*  Indicates an asynchronous transition. */
         ASYNC = 'async',
         
-        /* Special state name that holds transitions for all states. */
+        /*  Indicates the transition was successfull. */
+        SUCCEEDED = 1,
+        
+        /*  Indicates the transition was cancelled before the state 
+            change occurred. */
+        CANCELLED = 2,
+        
+        /*  Indicates an asynchronous transition is in progress. */
+        PENDING = 3,
+        
+        /*  Indicates the transition was invalid in some way. */
+        INVALID = 4,
+        
+        /* Indicates no transition exists for the current state. */
+        NO_TRANSITION = 5,
+        
+        /*  Special state name that holds transitions for all states. */
         WILDCARD = '*',
         
         resetTransitionProgress = stateMachine => {
@@ -9846,8 +10206,9 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         doTheTransition = (stateMachine, args) => {
-            // Don't allow another transition if one is already in progress.
-            // Instead, defer them until after the current transition completes.
+            // Don't allow another transition if one is already in 
+            // progress. Instead, defer them until after the current 
+            // transition completes.
             if (stateMachine.__transInProgress) {
                 let deferredTransitions = stateMachine.__deferredTransitions;
                 if (!deferredTransitions) deferredTransitions = stateMachine.__deferredTransitions = [];
@@ -9859,12 +10220,12 @@ myt.Destructible = new JS.Module('Destructible', {
                     transitionName = args.shift();
                 
                 // Invalid to start a transition if one is still pending.
-                if (stateMachine.__pendingTransition) return StateMachine.PENDING;
+                if (stateMachine.__pendingTransition) return PENDING;
                 
                 // Do not allow transition from the terminal states
                 if (stateMachine.isFinished()) {
                     stateMachine.__transInProgress = false;
-                    return StateMachine.NO_TRANSITION;
+                    return NO_TRANSITION;
                 }
                 
                 let to = stateMachine.map[stateMachine.current][transitionName];
@@ -9876,7 +10237,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     return stateMachine.resumeTransition(async);
                 } else {
                     stateMachine.__transInProgress = false;
-                    return StateMachine.NO_TRANSITION;
+                    return NO_TRANSITION;
                 }
             }
         },
@@ -9926,20 +10287,20 @@ myt.Destructible = new JS.Module('Destructible', {
                 performed after the current one completes.
         
         @class */
-    const StateMachine = pkg.StateMachine = new JS.Class('StateMachine', pkg.Node, {
+    pkg.StateMachine = new JS.Class('StateMachine', pkg.Node, {
         // Class Methods and Attributes ////////////////////////////////////////
         extend: {
             /** The transition was successfull. */
-            SUCCEEDED:1,
+            SUCCEEDED:SUCCEEDED,
             /** The transition was cancelled before the state change 
                 occurred. */
-            CANCELLED:2,
+            CANCELLED:CANCELLED,
             /** An asynchronous transition is in progress. */
-            PENDING:3,
+            PENDING:PENDING,
             /** The transition was invalid in some way. */
-            INVALID:4,
+            INVALID:INVALID,
             /** No transition exists for the current state. */
-            NO_TRANSITION:5
+            NO_TRANSITION:NO_TRANSITION
         },
         
         
@@ -9960,7 +10321,7 @@ myt.Destructible = new JS.Module('Destructible', {
             if (this.current === '') {
                 // Get optional args if v is an array
                 let args;
-                if (Array.isArray(v)) {
+                if (isArray(v)) {
                     args = v;
                     v = args.shift();
                 } else {
@@ -9987,19 +10348,16 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         addTransition: function(transitionName, from, to) {
-            const map = this.map;
-            
             if (from) {
-                from = Array.isArray(from) ? from : [from];
+                from = isArray(from) ? from : [from];
             } else {
                 from = [WILDCARD];
             }
             
-            let i = from.length, 
-                mapEntry;
+            const map = this.map;
+            let i = from.length;
             while (i) {
-                mapEntry = map[from[--i]];
-                if (!mapEntry) mapEntry = map[from[i]] = {};
+                const mapEntry = map[from[--i]] || (map[from[i]] = {});
                 mapEntry[transitionName] = to;
             }
         },
@@ -10018,12 +10376,13 @@ myt.Destructible = new JS.Module('Destructible', {
             const transitionName = this.__pendingTransition;
             
             // Invalid to resume a transition if none is pending.
-            if (!transitionName) return StateMachine.INVALID;
+            if (!transitionName) return INVALID;
             
             const current = this.current,
                 to = this.__transDestinationState,
                 args = this.__additionalArgs,
-                eventValue = {name:transitionName, from:current, to:to, args:args};
+                eventValue = {name:transitionName, from:current, to:to, args:args},
+                fireEvent = this.fireEvent.bind(this);
             
             switch (this.__transStage) {
                 case 'leaveState':
@@ -10031,44 +10390,40 @@ myt.Destructible = new JS.Module('Destructible', {
                     if (result === false) {
                         resetTransitionProgress(this);
                         doDeferredTransitions(this);
-                        return StateMachine.CANCELLED;
+                        return CANCELLED;
                     } else if (result === ASYNC || async === ASYNC) {
                         this.__transStage = 'enterState';
-                        this.fireEvent('start' + transitionName, eventValue);
-                        this.fireEvent('start', eventValue);
-                        this.fireEvent('leave' + current, eventValue);
-                        this.fireEvent('leave', eventValue);
+                        fireEvent('start' + transitionName, eventValue);
+                        fireEvent('start', eventValue);
+                        fireEvent('leave' + current, eventValue);
+                        fireEvent('leave', eventValue);
                         doDeferredTransitions(this); // FIXME: Is there a bug here if a transition starts in the middle of an async transition?
-                        return StateMachine.PENDING;
+                        return PENDING;
                     } else {
-                        this.fireEvent('start' + transitionName, eventValue);
-                        this.fireEvent('start', eventValue);
-                        this.fireEvent('leave' + current, eventValue);
-                        this.fireEvent('leave', eventValue);
+                        fireEvent('start' + transitionName, eventValue);
+                        fireEvent('start', eventValue);
+                        fireEvent('leave' + current, eventValue);
+                        fireEvent('leave', eventValue);
                         // Synchronous so fall through to 'enterState' case.
                     }
                 case 'enterState':
                     this.current = to;
                     resetTransitionProgress(this);
                     this.doEnterState(transitionName, current, to, args);
-                    this.fireEvent('enter' + to, eventValue);
-                    this.fireEvent('enter', eventValue);
-                    this.fireEvent('end' + transitionName, eventValue);
-                    this.fireEvent('end', eventValue);
-                    if (this.isFinished()) this.fireEvent('finished', eventValue);
+                    fireEvent('enter' + to, eventValue);
+                    fireEvent('enter', eventValue);
+                    fireEvent('end' + transitionName, eventValue);
+                    fireEvent('end', eventValue);
+                    if (this.isFinished()) fireEvent('finished', eventValue);
             }
             
             doDeferredTransitions(this);
-            return StateMachine.SUCCEEDED;
+            return SUCCEEDED;
         },
         
-        doLeaveState: (transitionName, from, to, args) => {
-            // Subclasses to implement as needed.
-        },
+        doLeaveState: (transitionName, from, to, args) => {/* Subclasses to implement as needed. */},
         
-        doEnterState: (transitionName, from, to, args) => {
-            // Subclasses to implement as needed.
-        },
+        doEnterState: (transitionName, from, to, args) => {/* Subclasses to implement as needed. */},
         
         isFinished: function() {
             return this.is(this.terminal);
@@ -10079,7 +10434,7 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         is: function(stateName) {
-            if (Array.isArray(stateName)) {
+            if (isArray(stateName)) {
                 return stateName.indexOf(this.current) >= 0;
             } else {
                 return this.current === stateName;
@@ -10180,7 +10535,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {string} key - The name of the message
             @param {*} value - The value of the message.
             @returns {undefined} */
-        notify: function(key, value) {},
+        notify: (key, value) => {},
         
         /** @overrides myt.Reusable
             Subclasses should call super. */
@@ -10204,13 +10559,13 @@ myt.Destructible = new JS.Module('Destructible', {
     /** Creates instances using a template class and an array of data items.
         
         Attributes:
-            template:JS.Class The template to replicate for each entry in the
-                data set.
+            template:JS.Class The template to replicate for each entry 
+                in the data set.
             data:array The data to replicate the template for.
         
         Private Attributes:
-            __pool:myt.TrackActivesPool The pool that holds the myt.Replicable
-                instances.
+            __pool:myt.TrackActivesPool The pool that holds the 
+                myt.Replicable instances.
         
         @class */
     pkg.Replicator = new JS.Class('Replicator', pkg.Node, {
@@ -10234,7 +10589,7 @@ myt.Destructible = new JS.Module('Destructible', {
         setTemplate: function(v) {
             // Make sure template class is an myt.Replicable
             this.template = v.includes(pkg.Replicable) ? v : null;
-            if (!this.template) pkg.dumpStack("Template not an myt.Replicable");
+            if (!this.template) pkg.dumpStack('Template not a myt.Replicable');
             
             if (this.inited) {
                 setupPool(this);
@@ -10324,7 +10679,9 @@ myt.Destructible = new JS.Module('Destructible', {
 
 
 /** Provides global mouse events by listening to mouse events on the 
-    document. Registered with myt.global as 'mouse'. */
+    document. Registered with myt.global as 'mouse'.
+    
+    @class */
 new JS.Singleton('GlobalMouse', {
     include: [myt.DomElementProxy, myt.DomObservable, myt.MouseObservable],
     
@@ -10341,18 +10698,18 @@ new JS.Singleton('GlobalMouse', {
 (pkg => {
     let fireGlobalDragManagerEvent,
         
-        /* The view currently being dragged. */
+        /*  The view currently being dragged. */
         dragView,
         
-        /* The view currently being dragged over. */
+        /*  The view currently being dragged over. */
         overView;
         
     const
-        /* The list of myt.AutoScrollers currently registered for notification
+        /*  The list of myt.AutoScrollers currently registered for notification
             when drags start and stop. */
         autoScrollers = [],
         
-        /* The list of myt.DropTargets currently registered for notification 
+        /*  The list of myt.DropTargets currently registered for notification 
             when drag and drop events occur. */
         dropTargets = [],
         
@@ -10397,9 +10754,9 @@ new JS.Singleton('GlobalMouse', {
             }
         },
         
-        /*  Filters the provided array of myt.DragGroupSupport items for the
-            provided myt.Dropable. Returns an array of the matching list
-            items.
+        /*  Filters the provided array of myt.DragGroupSupport items for 
+            the provided myt.Dropable. Returns an array of the matching 
+            list items.
             @param {!Object} dropable
             @param {!Array} list
             @returns {!Array} */
@@ -10433,17 +10790,17 @@ new JS.Singleton('GlobalMouse', {
     /** Provides global drag and drop functionality.
         
         Events:
-            dragLeave:myt.DropTarget Fired when a myt.Dropable is dragged out of
-                the drop target.
+            dragLeave:myt.DropTarget Fired when a myt.Dropable is dragged out 
+                of the drop target.
             dragEnter:myt.DropTarget Fired when a myt.Dropable is dragged over
                 the drop target.
             startDrag:object Fired when a drag starts. Value is the object
                 being dragged.
             stopDrag:object Fired when a drag ends. Value is the object 
                 that is no longer being dragged.
-            drop:object Fired when a drag ends over a drop target. The value is
-                an array containing the dropable at index 0 and the drop target
-                at index 1.
+            drop:object Fired when a drag ends over a drop target. The value 
+                is an array containing the dropable at index 0 and the drop 
+                target at index 1.
         
         @class */
     new JS.Singleton('GlobalDragManager', {
@@ -10584,8 +10941,9 @@ new JS.Singleton('GlobalMouse', {
         doActivated: () => {/* Subclasses to implement as needed. */}
     });
     
-    /** Adds an udpateUI method that should be called to update the UI. Various
-        mixins will rely on the updateUI method to trigger visual updates.
+    /** Adds an udpateUI method that should be called to update the UI. 
+        Various mixins will rely on the updateUI method to trigger 
+        visual updates.
         
         @class */
     pkg.UpdateableUI = new JSModule('UpdateableUI', {
@@ -10607,8 +10965,8 @@ new JS.Singleton('GlobalMouse', {
         updateUI: () => {/* Subclasses to implement as needed. */}
     });
     
-    /** Adds the capability to be "disabled" to an myt.Node. When an myt.Node is 
-        disabled the user should typically not be able to interact with it.
+    /** Adds the capability to be "disabled" to an myt.Node. When an myt.Node 
+        is disabled the user should typically not be able to interact with it.
         
         When disabled becomes true an attempt will be made to give away the 
         focus using myt.FocusObservable's giveAwayFocus method.
@@ -10649,18 +11007,18 @@ new JS.Singleton('GlobalMouse', {
             @returns {undefined} */
         doDisabled: function() {
             if (this.inited) {
-                // Give away focus if we become disabled and this instance is
-                // a FocusObservable
+                // Give away focus if we become disabled and this instance 
+                // is a FocusObservable
                 if (this.disabled && this.giveAwayFocus) this.giveAwayFocus();
                 if (this.updateUI) this.updateUI();
             }
         }
     });
     
-    /** Provides keyboard handling to "activate" the component when a key is 
-        pressed down or released up. By default, when a keyup event occurs for
-        an activation key and this view is not disabled, the 'doActivated' 
-        method will get called.
+    /** Provides keyboard handling to "activate" the component when a key 
+        is pressed down or released up. By default, when a keyup event 
+        occurs for an activation key and this view is not disabled, the 
+        'doActivated' method will get called.
         
         Requires: myt.Activateable, myt.Disableable, myt.KeyObservable and 
             myt.FocusObservable super mixins.
@@ -10668,10 +11026,10 @@ new JS.Singleton('GlobalMouse', {
         Attributes:
             activationKeys:array of chars The keys that when keyed down will
                 activate this component. Note: The value is not copied so
-                modification of the array outside the scope of this object will
-                effect behavior.
-            activateKeyDown:number the keycode of the activation key that is
-                currently down. This will be -1 when no key is down.
+                modification of the array outside the scope of this object 
+                will effect behavior.
+            activateKeyDown:number the keycode of the activation key that 
+                is currently down. This will be -1 when no key is down.
             repeatKeyDown:boolean Indicates if doActivationKeyDown will be 
                 called for repeated keydown events or not. Defaults to false.
         
@@ -10679,8 +11037,9 @@ new JS.Singleton('GlobalMouse', {
     pkg.KeyActivation = new JSModule('KeyActivation', {
         // Class Methods and Attributes ////////////////////////////////////////
         extend: {
-            /** The default activation keys are enter (13) and spacebar (32). */
-            DEFAULT_ACTIVATION_KEYS: [13,32]
+            /** The default activation keys are enter (13) and 
+                spacebar (32). */
+            ACTIVATION_KEYS: [13,32]
         },
         
         
@@ -10691,13 +11050,13 @@ new JS.Singleton('GlobalMouse', {
             
             self.activateKeyDown = -1;
             
-            defAttr(attrs, 'activationKeys', pkg.KeyActivation.DEFAULT_ACTIVATION_KEYS);
+            defAttr(attrs, 'activationKeys', pkg.KeyActivation.ACTIVATION_KEYS);
             
             self.callSuper(parent, attrs);
             
-            self.attachToDom(self, '__handleKeyDown', 'keydown');
-            self.attachToDom(self, '__handleKeyPress', 'keypress');
-            self.attachToDom(self, '__handleKeyUp', 'keyup');
+            self.attachToDom(self, '__hndlKeyDown', 'keydown');
+            self.attachToDom(self, '__hndlKeyPress', 'keypress');
+            self.attachToDom(self, '__hndlKeyUp', 'keyup');
             self.attachToDom(self, '__doDomBlur', 'blur');
         },
         
@@ -10711,7 +11070,7 @@ new JS.Singleton('GlobalMouse', {
         /** @private
             @param {!Object} event
             @returns {undefined} */
-        __handleKeyDown: function(event) {
+        __hndlKeyDown: function(event) {
             if (!this.disabled) {
                 if (this.activateKeyDown === -1 || this.repeatKeyDown) {
                     const keyCode = getKeyCodeFromEvent(event),
@@ -10736,7 +11095,7 @@ new JS.Singleton('GlobalMouse', {
         /** @private
             @param {!Object} event
             @returns {undefined} */
-        __handleKeyPress: function(event) {
+        __hndlKeyPress: function(event) {
             if (!this.disabled) {
                 const keyCode = getKeyCodeFromEvent(event);
                 if (this.activateKeyDown === keyCode) {
@@ -10755,7 +11114,7 @@ new JS.Singleton('GlobalMouse', {
         /** @private
             @param {!Object} event
             @returns {undefined} */
-        __handleKeyUp: function(event) {
+        __hndlKeyUp: function(event) {
             if (!this.disabled) {
                 const keyCode = getKeyCodeFromEvent(event);
                 if (this.activateKeyDown === keyCode) {
@@ -10809,9 +11168,9 @@ new JS.Singleton('GlobalMouse', {
         doActivationKeyAborted: key => {/* Subclasses to implement as needed. */}
     });
     
-    /** Provides a 'mouseOver' attribute that tracks mouse over/out state. Also
-        provides a mechanism to smoothe over/out events so only one call to
-        'doSmoothMouseOver' occurs per idle event.
+    /** Provides a 'mouseOver' attribute that tracks mouse over/out state. 
+        Also provides a mechanism to smoothe over/out events so only one 
+        call to 'doSmoothMouseOver' occurs per idle event.
         
         Requires myt.Disableable and myt.MouseObservable super mixins.
         
@@ -10824,9 +11183,10 @@ new JS.Singleton('GlobalMouse', {
                 idle event.
             __lastOverIdleValue:boolean Used by the code that smoothes out
                 mouseover events. Stores the last mouseOver value.
-            __disabledOver:boolean Tracks mouse over/out state while a view is
-                disabled. This allows correct restoration of mouseOver state if
-                a view becomes enabled while the mouse is already over it.
+            __disabledOver:boolean Tracks mouse over/out state while a view 
+                is disabled. This allows correct restoration of mouseOver 
+                state if a view becomes enabled while the mouse is already 
+                over it.
         
         @class */
     pkg.MouseOver = new JSModule('MouseOver', {
@@ -10984,27 +11344,30 @@ new JS.Singleton('GlobalMouse', {
             if (!this.disabled && this.mouseDown) this.attachToDom(GlobalMouse, 'doMouseUp', 'mouseup', true);
         },
         
-        /** Called when the mouse is down on this view. Subclasses must call super.
+        /** Called when the mouse is down on this view.
+            Subclasses must call super.
             @param {!Object} event
             @returns {undefined} */
         doMouseDown: function(event) {
             if (!this.disabled) this.setMouseDown(true);
         },
         
-        /** Called when the mouse is up on this view. Subclasses must call super.
+        /** Called when the mouse is up on this view.
+            Subclasses must call super.
             @param {!Object} event
             @returns {undefined} */
         doMouseUp: function(event) {
-            // Cleanup global mouse listener since the mouseUp occurred outside
-            // the view.
+            // Cleanup global mouse listener since the mouseUp occurred 
+            // outside the view.
             if (!this.mouseOver) this.detachFromDom(GlobalMouse, 'doMouseUp', 'mouseup', true);
             
             if (!this.disabled && this.mouseDown) {
                 this.setMouseDown(false);
                 
-                // Only do mouseUpInside if the mouse is actually over the view.
-                // This means the user can mouse down on a view, move the mouse
-                // out and then mouse up and not "activate" the view.
+                // Only do mouseUpInside if the mouse is actually over 
+                // the view. This means the user can mouse down on a view, 
+                // move the mouse out and then mouse up and not "activate" 
+                // the view.
                 if (this.mouseOver) this.doMouseUpInside(event);
             }
         },
@@ -11027,19 +11390,19 @@ new JS.Singleton('GlobalMouse', {
     
     /** Makes an myt.View draggable via the mouse.
         
-        Also supresses context menus since the mouse down to open it causes bad
-        behavior since a mouseup event is not always fired.
+        Also supresses context menus since the mouse down to open it causes 
+        bad behavior since a mouseup event is not always fired.
         
         Events:
-            isDragging:boolean Fired when the isDragging attribute is modified
-                via setIsDragging.
+            isDragging:boolean Fired when the isDragging attribute is 
+                modified via setIsDragging.
         
         Attributes:
             allowAbort:boolean Allows a drag to be aborted by the user by
                 pressing the 'esc' key. Defaults to undefined which is 
                 equivalent to false.
-            isDraggable:boolean Configures the view to be draggable or not. The 
-                default value is true.
+            isDraggable:boolean Configures the view to be draggable or not. 
+                The default value is true.
             distanceBeforeDrag:number The distance, in pixels, before a mouse 
                 down and drag is considered a drag action. Defaults to 0.
             isDragging:boolean Indicates that this view is currently 
@@ -11054,12 +11417,12 @@ new JS.Singleton('GlobalMouse', {
             dragInitX:number Stores initial mouse x position during dragging.
             dragInitY:number Stores initial mouse y position during dragging.
             centerOnMouse:boolean If true this draggable will update the 
-                dragInitX and dragInitY to keep the view centered on the mouse. 
-                Defaults to undefined which is equivalent to false.
+                dragInitX and dragInitY to keep the view centered on the 
+                mouse. Defaults to undefined which is equivalent to false.
         
         Private Attributes:
-            __lastMousePosition:object The last position of the mouse during
-                dragging.
+            __lastMousePosition:object The last position of the mouse 
+                during dragging.
         
         @class */
     pkg.Draggable = new JSModule('Draggable', {
@@ -11137,8 +11500,8 @@ new JS.Singleton('GlobalMouse', {
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** @returns {!Array} - An array of views that can be moused down on to 
-            start the drag. Subclasses should override this to return an 
+        /** @returns {!Array} - An array of views that can be moused down on 
+            to start the drag. Subclasses should override this to return an 
             appropriate list of views. By default this view is returned thus 
             making the entire view capable of starting a drag. */
         getDragViews: function() {
@@ -11148,9 +11511,7 @@ new JS.Singleton('GlobalMouse', {
         /** @private
             @param {!Object} event
             @returns {undefined} */
-        __doContextMenu: event => {
-            // Do nothing so the context menu event is supressed.
-        },
+        __doContextMenu: event => {/* Do nothing so the context menu event is supressed. */},
         
         /** @private
             @param {!Object} event
@@ -11331,8 +11692,11 @@ new JS.Singleton('GlobalMouse', {
             
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE: defaultFocusShadowPropertyValue,
-                DEFAULT_DISABLED_OPACITY: defaultDisabledOpacity
+                /** The default focus shadow. */
+                FOCUS_SHADOW: defaultFocusShadowPropertyValue,
+                
+                /** The default disabled state opacity. */
+                DISABLED_OPACITY: defaultDisabledOpacity
             },
             
             
@@ -11904,7 +12268,9 @@ new JS.Singleton('GlobalMouse', {
             ignoreOwnerForHideOnBlur:boolean If true the owner view for this
                 panel will also be ignored for blur events. True by default.
             hideOnBlur:boolean If true this panel will be hidden when a
-                focus traverses outside the panel. True by default. */
+                focus traverses outside the panel. True by default.
+        
+        @class */
     pkg.FloatingPanel = new JS.Class('FloatingPanel', pkg.View, {
         include: [pkg.RootView],
         
@@ -11967,7 +12333,7 @@ new JS.Singleton('GlobalMouse', {
             where to give focus. */
         focus: function(noScroll) {
             if (this.owner && this.isAncestorOf(GlobalFocus.focusedView)) {
-                this.owner[GlobalFocus.lastTraversalWasForward ? 'getNextFocusAfterPanel' : 'getPrevFocusAfterPanel'](this.panelId).focus(noScroll);
+                this.owner[(GlobalFocus.lastTraversalWasForward ? 'getNext' : 'getPrev') + 'FocusAfterPanel'](this.panelId).focus(noScroll);
             } else {
                 const ffv = this.getFirstFocusableDescendant();
                 if (ffv === this) {
@@ -12078,13 +12444,13 @@ new JS.Singleton('GlobalMouse', {
                     case 'insideRight': x += panelAnchor.width - this.width; break;
                     case 'outsideLeft': x -= this.width; break;
                     case 'insideLeft': break;
-                    default: console.warn("Unexpected align value", type, align);
+                    default: console.warn('Invalid align value', type, align);
                 }
             } else if (type === 'number') {
                 // Absolute position
                 x = align;
             } else {
-                console.warn("Unexpected align type", type, align);
+                console.warn('Invalid align type', type, align);
             }
             this.setX(x);
             
@@ -12098,13 +12464,13 @@ new JS.Singleton('GlobalMouse', {
                     case 'insideBottom': y += panelAnchor.height - this.height; break;
                     case 'outsideTop': y -= this.height; break;
                     case 'insideTop': break;
-                    default: console.warn("Unexpected valign value", type, valign);
+                    default: console.warn('Invalid valign value', type, valign);
                 }
             } else if (type === 'number') {
                 // Absolute position
                 y = valign;
             } else {
-                console.warn("Unexpected valign type", type, valign);
+                console.warn('Invalid valign type', type, valign);
             }
             this.setY(y);
         }
@@ -12247,7 +12613,7 @@ new JS.Singleton('GlobalMouse', {
             defAttr(attrs, 'defaultItemClass', pkg.ListViewItem);
             defAttr(attrs, 'overflow', 'autoy');
             defAttr(attrs, 'bgColor', '#ccc');
-            defAttr(attrs, 'boxShadow', pkg.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
+            defAttr(attrs, 'boxShadow', pkg.Button.FOCUS_SHADOW);
             
             this.callSuper(parent, attrs);
             
@@ -12532,15 +12898,14 @@ new JS.Singleton('GlobalMouse', {
 
 (pkg => {
     const AccessorSupport = pkg.AccessorSupport,
-    
+        
         /*  A data structure of groups stored as a map of maps. First 
-            level is attribute name second level is group ID.
-            @private */
+            level is attribute name second level is group ID. */
         BAGsByAttrName = {},
         
-        /** Manages a boolean attribute on a collection of Nodes. Ensures that 
-            no more than one of the Nodes has the attribute set to true at 
-            one time.
+        /** Manages a boolean attribute on a collection of Nodes. Ensures 
+            that no more than one of the Nodes has the attribute set to 
+            true at one time.
             
             Events:
                 attrName:string
@@ -12548,11 +12913,11 @@ new JS.Singleton('GlobalMouse', {
                 trueNode:myt.Node
             
             Attributes:
-                attrName:string The name of the boolean attribute to monitor 
-                    and update.
+                attrName:string The name of the boolean attribute to 
+                    monitor and update.
                 groupId:string The unqiue ID of the group.
-                trueNode:myt.Node The node that is currently true. Will be null 
-                    if no node is true.
+                trueNode:myt.Node The node that is currently true. Will 
+                    be null if no node is true.
             
             Private Attributes:
                 __nodes:array A list of the currently registered nodes.
@@ -12657,8 +13022,8 @@ new JS.Singleton('GlobalMouse', {
                 }
             },
             
-            /** Sets the attribute to true on the provided registered node and 
-                sets it to false on all other registered nodes.
+            /** Sets the attribute to true on the provided registered node 
+                and sets it to false on all other registered nodes.
                 @param node:myt.Node the node to set the attribute to true on.
                 @returns {undefined} */
             setTrue: function(node) {
@@ -12795,20 +13160,9 @@ new JS.Singleton('GlobalMouse', {
             @param {!Object} event
             @returns {undefined} */
         __updateForBAG: function(event) {
-            const type = event.type,
-                value = event.value,
-                groups = this.__bags;
-            let i = groups.length;
-            while (i) {
-                const group = groups[--i];
-                if (group.attrName === type) {
-                    if (value) {
-                        group.setTrue(this);
-                    } else {
-                        group.setFalse(this);
-                    }
-                }
-            }
+            this.__bags.forEach(bag => {
+                if (bag.attrName === event.type) bag[event.value ? 'setTrue' : 'setFalse'](this);
+            });
         }
     });
 })(myt);
@@ -12981,7 +13335,7 @@ new JS.Singleton('GlobalMouse', {
             /** Checks if this object is selected.
                 @returns {boolean} */
             isSelected: function() {
-                return this.selected ? true : false;
+                return !!this.selected;
             },
             
             /** Checks if the provided myt.SelectionManager can select this 
@@ -13000,29 +13354,30 @@ new JS.Singleton('GlobalMouse', {
         /** Manages the selection of one or more items.
             
             Events:
-                itemSelected:object Fired when an item is selected. The event 
-                    value is the selected item.
-                itemDeselected:object Fired when an item is deselected. The 
-                    event value is the deselected item.
+                itemSelected:object Fired when an item is selected. 
+                    The event value is the selected item.
+                itemDeselected:object Fired when an item is deselected. 
+                    The event value is the deselected item.
                 selectedCount:number Fired when the number of selected 
                     items changes.
             
             Attributes:
-                itemSelectionId:string The name of the property on items that 
-                    is used to differentiate them from each other for 
+                itemSelectionId:string The name of the property on items 
+                    that is used to differentiate them from each other for 
                     selection. The default value is 'id'.
                 maxSelected:number The maximum number of items that can be 
-                    selected. If -1 is provided the count is unlimited. If 1 
-                    is provided attempts to select when an item is already 
-                    selected will result in the existing selection being 
-                    cleared and the the new item being selected. Defaults to -1.
+                    selected. If -1 is provided the count is unlimited. 
+                    If 1 is provided attempts to select when an item is 
+                    already selected will result in the existing selection 
+                    being cleared and the the new item being selected. 
+                    Defaults to -1.
                 selectedCount:number The number of selected items.
             
             Private Attributes:
                 __selected:object A map of selected items by itemSelectionId.
-                __lastSelectedItem:object A reference to the last item that was
-                    selected. If this item is deselected this will get set 
-                    to null.
+                __lastSelectedItem:object A reference to the last item that 
+                    was selected. If this item is deselected this will get 
+                    set to null.
             
             @class */
         SelectionManager = pkg.SelectionManager = new JSModule('SelectionManager', {
@@ -13050,8 +13405,8 @@ new JS.Singleton('GlobalMouse', {
                 
                 attrs.selectedCount = 0;
                 
-                if (attrs.itemSelectionId == null) attrs.itemSelectionId = 'id';
-                if (attrs.maxSelected == null) attrs.maxSelected = -1;
+                this.defAttr(attrs, 'itemSelectionId', 'id');
+                this.defAttr(attrs, 'maxSelected', -1);
                 
                 this.callSuper(parent, attrs);
             },
@@ -13248,6 +13603,8 @@ new JS.Singleton('GlobalMouse', {
     const JSClass = JS.Class,
         View = pkg.View,
         SizeToParent = pkg.SizeToParent,
+        
+        defAttr = pkg.AccessorSupport.defAttr,
     
         /** A tab slider component.
             
@@ -13268,11 +13625,11 @@ new JS.Singleton('GlobalMouse', {
                 fillColorReady:color The color of the button when ready for 
                     interaction.
                 buttonHeight:number The height of the button portion of the 
-                    tab slider. Defaults to myt.TabSlider.DEFAULT_BUTTON_HEIGHT 
+                    tab slider. Defaults to myt.TabSlider.BUTTON_HEIGHT 
                     which is 30.
                 minContainerHeight:number The minimum height of the content 
                     container inside this tab slider. Defaults to 
-                    myt.TabSlider.DEFAULT_MINIMUM_CONTAINER_HEIGHT which is 100.
+                    myt.TabSlider.MINIMUM_CONTAINER_HEIGHT which is 100.
                 expansionState:string Indicates the expansion state of the tab 
                     slider. Supported values are: 'expanded', 'expanding', 
                     'collapsed' and 'collapsing'. Defaults to 'collapsed'.
@@ -13284,14 +13641,15 @@ new JS.Singleton('GlobalMouse', {
             
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                DEFAULT_BUTTON_HEIGHT:30,
-                /** The minimum height of the container when expanded. */
-                DEFAULT_MINIMUM_CONTAINER_HEIGHT:100,
-                DEFAULT_FILL_COLOR_SELECTED:'#666',
-                DEFAULT_FILL_COLOR_HOVER:'#eee',
-                DEFAULT_FILL_COLOR_ACTIVE:'#ccc',
-                DEFAULT_FILL_COLOR_READY:'#fff',
-                DEFAULT_ANIMATION_MILLIS:500
+                BUTTON_HEIGHT:30,
+                /** The default minimum height of the container 
+                    when expanded. */
+                MINIMUM_CONTAINER_HEIGHT:100,
+                FILL_COLOR_SELECTED:'#666',
+                FILL_COLOR_HOVER:'#eee',
+                FILL_COLOR_ACTIVE:'#ccc',
+                FILL_COLOR_READY:'#fff',
+                ANIMATION_MILLIS:500
             },
             
             
@@ -13305,18 +13663,17 @@ new JS.Singleton('GlobalMouse', {
                 attrs.expansionState = 'collapsed';
                 
                 if (attrs.tabId == null) attrs.tabId = pkg.generateGuid();
-                if (attrs.tabContainer == null) attrs.tabContainer = parent;
                 
-                if (attrs.selected == null) attrs.selected = false;
-                if (attrs.buttonClass == null) attrs.buttonClass = pkg.SimpleButton;
-                if (attrs.zIndex == null) attrs.zIndex = 0;
-                
-                if (attrs.buttonHeight == null) attrs.buttonHeight = TabSlider.DEFAULT_BUTTON_HEIGHT;
-                if (attrs.fillColorSelected == null) attrs.fillColorSelected = TabSlider.DEFAULT_FILL_COLOR_SELECTED;
-                if (attrs.fillColorHover == null) attrs.fillColorHover = TabSlider.DEFAULT_FILL_COLOR_HOVER;
-                if (attrs.fillColorActive == null) attrs.fillColorActive = TabSlider.DEFAULT_FILL_COLOR_ACTIVE;
-                if (attrs.fillColorReady == null) attrs.fillColorReady = TabSlider.DEFAULT_FILL_COLOR_READY;
-                if (attrs.minContainerHeight == null) attrs.minContainerHeight = TabSlider.DEFAULT_MINIMUM_CONTAINER_HEIGHT;
+                defAttr(attrs, 'tabContainer', parent);
+                defAttr(attrs, 'selected', false);
+                defAttr(attrs, 'buttonClass', pkg.SimpleButton);
+                defAttr(attrs, 'zIndex', 0);
+                defAttr(attrs, 'buttonHeight', TabSlider.BUTTON_HEIGHT);
+                defAttr(attrs, 'fillColorSelected', TabSlider.FILL_COLOR_SELECTED);
+                defAttr(attrs, 'fillColorHover', TabSlider.FILL_COLOR_HOVER);
+                defAttr(attrs, 'fillColorActive', TabSlider.FILL_COLOR_ACTIVE);
+                defAttr(attrs, 'fillColorReady', TabSlider.FILL_COLOR_READY);
+                defAttr(attrs, 'minContainerHeight', TabSlider.MINIMUM_CONTAINER_HEIGHT);
                 
                 // Selection must be done via the select method on 
                 // the tabContainer
@@ -13466,7 +13823,7 @@ new JS.Singleton('GlobalMouse', {
                 if (wrapper.height !== to) {
                     wrapper.animate({
                         attribute:'height', to:to, 
-                        duration:TabSlider.DEFAULT_ANIMATION_MILLIS
+                        duration:TabSlider.ANIMATION_MILLIS
                     }).next((success) => {self.setExpansionState('expanded');});
                 } else {
                     self.setExpansionState('expanded');
@@ -13486,7 +13843,7 @@ new JS.Singleton('GlobalMouse', {
                 if (wrapper.height !== 0) {
                     wrapper.animate({
                         attribute:'height', to:0, 
-                        duration:TabSlider.DEFAULT_ANIMATION_MILLIS
+                        duration:TabSlider.ANIMATION_MILLIS
                     }).next((success) => {self.setExpansionState('collapsed');});
                 } else {
                     self.setExpansionState('collapsed');
@@ -13528,15 +13885,15 @@ new JS.Singleton('GlobalMouse', {
         TextTabSlider = pkg.TextTabSlider = new JSClass('TextTabSlider', TabSlider, {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                DEFAULT_LABEL_TEXT_COLOR_CHECKED: '#fff',
-                DEFAULT_LABEL_TEXT_COLOR: '#333'
+                LABEL_TEXT_COLOR_CHECKED: '#fff',
+                LABEL_TEXT_COLOR: '#333'
             },
             
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                if (attrs.labelTextColorChecked == null) attrs.labelTextColorChecked = TextTabSlider.DEFAULT_LABEL_TEXT_COLOR_CHECKED;
-                if (attrs.labelTextColor == null) attrs.labelTextColor = TextTabSlider.DEFAULT_LABEL_TEXT_COLOR;
+                defAttr(attrs, 'labelTextColorChecked', TextTabSlider.LABEL_TEXT_COLOR_CHECKED);
+                defAttr(attrs, 'labelTextColor', TextTabSlider.LABEL_TEXT_COLOR);
                 
                 this.callSuper(parent, attrs);
                 
@@ -13579,7 +13936,7 @@ new JS.Singleton('GlobalMouse', {
             
             Attributes:
                 spacing:number The spacing between tab sliders. Defaults to
-                    myt.TabSliderContainer.DEFAULT_SPACING which is 1.
+                    myt.TabSliderContainer.SPACING which is 1.
             
             @class */
         TabSliderContainer = pkg.TabSliderContainer = new JS.Module('TabSliderContainer', {
@@ -13588,7 +13945,7 @@ new JS.Singleton('GlobalMouse', {
             
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                DEFAULT_SPACING:1
+                SPACING:1
             },
             
             
@@ -13600,10 +13957,10 @@ new JS.Singleton('GlobalMouse', {
                 
                 attrs.defaultPlacement = 'container';
                 
-                if (attrs.spacing == null) attrs.spacing = TabSliderContainer.DEFAULT_SPACING;
-                if (attrs.overflow == null) attrs.overflow = 'autoy';
-                if (attrs.itemSelectionId == null) attrs.itemSelectionId = 'tabId';
-                if (attrs.maxSelected == null) attrs.maxSelected = 1;
+                defAttr(attrs, 'spacing', TabSliderContainer.SPACING);
+                defAttr(attrs, 'overflow', 'autoy');
+                defAttr(attrs, 'itemSelectionId', 'tabId');
+                defAttr(attrs, 'maxSelected', 1);
                 
                 self.updateLayout = pkg.debounce(self.updateLayout);
                 
@@ -13723,7 +14080,7 @@ new JS.Singleton('GlobalMouse', {
 
 (pkg => {
     const JSModule = JS.Module,
-    
+        
         defAttr = pkg.AccessorSupport.defAttr,
         
         updateTextColor = tab => {
@@ -13731,28 +14088,28 @@ new JS.Singleton('GlobalMouse', {
         },
         
         updateCornerRadius = tab => {
-            const r = tab.cornerRadius != null ? tab.cornerRadius : Tab.DEFAULT_RADIUS;
+            const radius = tab.cornerRadius != null ? tab.cornerRadius : Tab.RADIUS;
             switch (tab.tabContainer.location) {
                 case 'top':
-                    tab.setRoundedTopLeftCorner(r);
-                    tab.setRoundedTopRightCorner(r);
+                    tab.setRoundedTopLeftCorner(radius);
+                    tab.setRoundedTopRightCorner(radius);
                     break;
                 case 'bottom':
-                    tab.setRoundedBottomLeftCorner(r);
-                    tab.setRoundedBottomRightCorner(r);
+                    tab.setRoundedBottomLeftCorner(radius);
+                    tab.setRoundedBottomRightCorner(radius);
                     break;
                 case 'left':
-                    tab.setRoundedTopLeftCorner(r);
-                    tab.setRoundedBottomLeftCorner(r);
+                    tab.setRoundedTopLeftCorner(radius);
+                    tab.setRoundedBottomLeftCorner(radius);
                     break;
                 case 'right':
-                    tab.setRoundedTopRightCorner(r);
-                    tab.setRoundedBottomRightCorner(r);
+                    tab.setRoundedTopRightCorner(radius);
+                    tab.setRoundedBottomRightCorner(radius);
                     break;
             }
         },
         
-        /** A tab component.
+        /** A simple tab component.
             
             Requires:
                 myt.Activateable
@@ -13760,51 +14117,6 @@ new JS.Singleton('GlobalMouse', {
             Attributes:
                 tabId:string The unique ID of this tab relative to its tab 
                     container.
-                tabContainer:myt.TabContainer The tab container that manages 
-                    this tab.
-            
-            @class */
-        TabMixin = pkg.TabMixin = new JSModule('TabMixin', {
-            include: [pkg.Selectable],
-            
-            
-            // Life Cycle //////////////////////////////////////////////////////
-            /** @overrides */
-            initNode: function(parent, attrs) {
-                if (attrs.tabId == null) attrs.tabId = pkg.generateGuid();
-                if (attrs.tabContainer == null) attrs.tabContainer = parent;
-                
-                // Selection must be done via the select method on 
-                // the tabContainer
-                let initiallySelected;
-                if (attrs.selected) {
-                    initiallySelected = true;
-                    delete attrs.selected;
-                }
-                
-                this.callSuper(parent, attrs);
-                
-                if (initiallySelected) this.tabContainer.select(this);
-            },
-            
-            
-            // Accessors ///////////////////////////////////////////////////////
-            setTabId: function(v) {this.tabId = v;},
-            setTabContainer: function(v) {this.tabContainer = v;},
-            
-            
-            // Methods /////////////////////////////////////////////////////////
-            /** @overrides myt.Activateable */
-            doActivated: function() {
-                if (!this.selected) this.tabContainer.select(this);
-            }
-        }),
-        
-        /** A simple tab component.
-            
-            Attributes:
-                tabId:string The unique ID of this tab relative to its 
-                    tab container.
                 tabContainer:myt.TabContainer The tab container that manages 
                     this tab.
                 edgeColor:color
@@ -13815,45 +14127,58 @@ new JS.Singleton('GlobalMouse', {
                     text when this tab is selected.
                 cornerRadius:number Passed into the drawing config to determine
                     if a rounded corner is drawn or not. Defaults to undefined 
-                    which causes myt.Tab.DEFAULT_RADIUS to be used.
+                    which causes myt.Tab.RADIUS to be used.
             
             @class */
         Tab = pkg.Tab = new JS.Class('Tab', pkg.SimpleTextButton, {
-            include: [TabMixin],
+            include: [pkg.Selectable],
             
             
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                DEFAULT_HEIGHT: 24,
-                DEFAULT_INSET: 8,
-                DEFAULT_OUTSET: 8,
-                DEFAULT_FILL_COLOR_SELECTED: '#fff',
-                DEFAULT_FILL_COLOR_HOVER: '#eee',
-                DEFAULT_FILL_COLOR_ACTIVE: '#aaa',
-                DEFAULT_FILL_COLOR_READY: '#ccc',
-                DEFAULT_LABEL_TEXT_COLOR_SELECTED:'#333',
-                DEFAULT_RADIUS:6
+                HEIGHT: 24,
+                INSET: 8,
+                OUTSET: 8,
+                FILL_COLOR_SELECTED: '#fff',
+                FILL_COLOR_HOVER: '#eee',
+                FILL_COLOR_ACTIVE: '#aaa',
+                FILL_COLOR_READY: '#ccc',
+                LABEL_TEXT_COLOR_SELECTED:'#333',
+                RADIUS:6
             },
             
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
+                if (attrs.tabId == null) attrs.tabId = pkg.generateGuid();
+                defAttr(attrs, 'tabContainer', parent);
+                
+                // Selection must be done via the select method on 
+                // the tabContainer
+                let initiallySelected;
+                if (attrs.selected) {
+                    initiallySelected = true;
+                    delete attrs.selected;
+                }
+                
                 // myt.SimpleTextButton
-                defAttr(attrs, 'inset', Tab.DEFAULT_INSET);
-                defAttr(attrs, 'outset', Tab.DEFAULT_OUTSET);
+                defAttr(attrs, 'inset', Tab.INSET);
+                defAttr(attrs, 'outset', Tab.OUTSET);
                 
                 // myt.Tab
-                defAttr(attrs, 'selectedColor', Tab.DEFAULT_FILL_COLOR_SELECTED);
-                defAttr(attrs, 'hoverColor', Tab.DEFAULT_FILL_COLOR_HOVER);
-                defAttr(attrs, 'activeColor', Tab.DEFAULT_FILL_COLOR_ACTIVE);
-                defAttr(attrs, 'readyColor', Tab.DEFAULT_FILL_COLOR_READY);
-                defAttr(attrs, 'labelTextSelectedColor', Tab.DEFAULT_LABEL_TEXT_COLOR_SELECTED);
+                defAttr(attrs, 'selectedColor', Tab.FILL_COLOR_SELECTED);
+                defAttr(attrs, 'hoverColor', Tab.FILL_COLOR_HOVER);
+                defAttr(attrs, 'activeColor', Tab.FILL_COLOR_ACTIVE);
+                defAttr(attrs, 'readyColor', Tab.FILL_COLOR_READY);
+                defAttr(attrs, 'labelTextSelectedColor', Tab.LABEL_TEXT_COLOR_SELECTED);
                 
                 // Other
-                defAttr(attrs, 'height', Tab.DEFAULT_HEIGHT);
+                defAttr(attrs, 'height', Tab.HEIGHT);
                 defAttr(attrs, 'focusIndicator', false);
                 
                 this.callSuper(parent, attrs);
+                
+                if (initiallySelected) this.tabContainer.select(this);
                 
                 updateCornerRadius(this);
                 updateTextColor(this);
@@ -13861,14 +14186,15 @@ new JS.Singleton('GlobalMouse', {
             
             
             // Accessors ///////////////////////////////////////////////////////
+            setTabId: function(v) {this.tabId = v;},
+            setTabContainer: function(v) {this.tabContainer = v;},
             setSelectedColor: function(v) {this.selectedColor = v;},
+            setLabelTextColor: function(v) {this.labelTextColor = v;},
             
             setCornerRadius: function(v) {
                 this.cornerRadius = v;
                 if (this.inited) updateCornerRadius(this);
             },
-            
-            setLabelTextColor: function(v) {this.labelTextColor = v;},
             
             setLabelTextSelectedColor: function(v) {
                 this.labelTextSelectedColor = v;
@@ -13889,6 +14215,11 @@ new JS.Singleton('GlobalMouse', {
             updateUI: function() {
                 this.callSuper();
                 if (this.selected) this.setBgColor(this.selectedColor);
+            },
+            
+            /** @overrides myt.Activateable */
+            doActivated: function() {
+                if (!this.selected) this.tabContainer.select(this);
             }
         }),
         
@@ -13909,8 +14240,8 @@ new JS.Singleton('GlobalMouse', {
             
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                DEFAULT_SPACING:1,
-                DEFAULT_INSET:0
+                SPACING:1,
+                INSET:0
             },
             
             
@@ -13918,8 +14249,8 @@ new JS.Singleton('GlobalMouse', {
             initNode: function(parent, attrs) {
                 this.__tabs = [];
                 
-                defAttr(attrs, 'spacing', TabContainer.DEFAULT_SPACING);
-                defAttr(attrs, 'inset', TabContainer.DEFAULT_INSET);
+                defAttr(attrs, 'spacing', TabContainer.SPACING);
+                defAttr(attrs, 'inset', TabContainer.INSET);
                 defAttr(attrs, 'location', 'top');
                 defAttr(attrs, 'itemSelectionId', 'tabId');
                 defAttr(attrs, 'maxSelected', 1);
@@ -13968,7 +14299,7 @@ new JS.Singleton('GlobalMouse', {
             /** @overrides myt.View */
             subnodeAdded: function(node) {
                 this.callSuper(node);
-                if (node.isA(TabMixin)) {
+                if (node.isA(Tab)) {
                     this.__tabs.push(node);
                     
                     switch (this.location) {
@@ -13990,7 +14321,7 @@ new JS.Singleton('GlobalMouse', {
             
             /** @overrides myt.View */
             subnodeRemoved: function(node) {
-                if (node.isA(TabMixin)) {
+                if (node.isA(Tab)) {
                     const tabs = this.__tabs;
                     let i = tabs.length;
                     while (i) {
@@ -14008,13 +14339,16 @@ new JS.Singleton('GlobalMouse', {
 
 (pkg => {
     const JSClass = JS.Class,
+        mathMin = Math.min,
+        isArray = Array.isArray,
+        
         SizeToDom = pkg.SizeToDom,
         View = pkg.View,
         Disableable = pkg.Disableable,
         
         defAttr = pkg.AccessorSupport.defAttr,
         
-        DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE = pkg.Button.DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE,
+        FOCUS_SHADOW = pkg.Button.FOCUS_SHADOW,
         
         setEditableTextAttr = (editableText, v, propName) => {
             if (editableText[propName] !== v) {
@@ -14067,7 +14401,7 @@ new JS.Singleton('GlobalMouse', {
             /** @overrides myt.View */
             createOurDomElement: function(parent) {
                 const elements = this.callSuper(parent);
-                if (this.inputType) (Array.isArray(elements) ? elements[1] : elements).type = this.inputType;
+                if (this.inputType) (isArray(elements) ? elements[1] : elements).type = this.inputType;
                 return elements;
             },
             
@@ -14188,6 +14522,9 @@ new JS.Singleton('GlobalMouse', {
                 placeholder:string Text that will be shown if the value 
                     is empty.
             
+            Private Attributes:
+                _selRange:object Stores the start and end of the selection.
+            
             @class */
         BaseInputText = pkg.BaseInputText = new JSClass('BaseInputText', NativeInputWrapper, {
             include: [pkg.TextSupport],
@@ -14229,7 +14566,7 @@ new JS.Singleton('GlobalMouse', {
             /** @overrides myt.FocusObservable */
             showFocusIndicator: function() {
                 this.hideDefaultFocusIndicator();
-                this.setBoxShadow(DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
+                this.setBoxShadow(FOCUS_SHADOW);
             },
             
             /** @overrides myt.FocusObservable */
@@ -14249,20 +14586,10 @@ new JS.Singleton('GlobalMouse', {
                 @param {!Object} event
                 @returns {undefined} */
             __filterInputPress: function(event) {
-                const domEvent = event.value,
-                    charCode = domEvent.which;
-                
-                // Firefox fires events for arrow keys and backspace which 
-                // should be ignored completely.
-                switch (charCode) {
-                    case 8: // backspace key
-                    case 0: // arrow keys have a "charCode" of 0 in firefox.
-                        return;
-                }
-                
                 // Filter for allowed characters
-                const allowedChars = this.allowedChars;
-                if (allowedChars && allowedChars.indexOf(String.fromCharCode(charCode)) === -1) domEvent.preventDefault();
+                const domEvent = event.value,
+                    allowedChars = this.allowedChars;
+                if (allowedChars && allowedChars.indexOf(String.fromCharCode(domEvent.which)) === -1) domEvent.preventDefault();
                 
                 this.filterInputPress(domEvent);
             },
@@ -14277,7 +14604,7 @@ new JS.Singleton('GlobalMouse', {
                 key press. The default implementation does nothing.
                 @param {!Object} domEvent - The dom key press event.
                 @returns {undefined} */
-            filterInputPress: domEvent => {},
+            filterInputPress: domEvent => {/* Subclasses to implement as needed. */},
             
             /** @private
                 @param {!Object} event
@@ -14400,9 +14727,6 @@ new JS.Singleton('GlobalMouse', {
             minHeight:number The minimum height for the component. Defaults to 
                 undefined which is effectively 0.
         
-        Private Attributes:
-            _selRange:object Stores the start and end of the selection.
-        
         @class */
     pkg.EditableText = new JSClass('EditableText', BaseInputText, {
         include: [SizeToDom],
@@ -14431,10 +14755,7 @@ new JS.Singleton('GlobalMouse', {
         
         // Attributes //////////////////////////////////////////////////////////
         setMinWidth: function(v) {setEditableTextAttr(this, v, 'minWidth');},
-        setMinHeight: function(v) {
-            if (BrowserDetect.browser === 'Firefox') v += 2;
-            setEditableTextAttr(this, v, 'minHeight');
-        },
+        setMinHeight: function(v) {setEditableTextAttr(this, v, 'minHeight');},
         setPadding: function(v) {
             this.setPaddingTop(v);
             this.setPaddingRight(v);
@@ -14574,8 +14895,8 @@ new JS.Singleton('GlobalMouse', {
                     endElem = selection.endElem;
                 if (startElem && startElem.parentNode && endElem && endElem.parentNode) {
                     const range = document.createRange();
-                    range.setStart(startElem, Math.min(selection.start, startElem.length));
-                    range.setEnd(endElem, Math.min(selection.end, endElem.length));
+                    range.setStart(startElem, mathMin(selection.start, startElem.length));
+                    range.setEnd(endElem, mathMin(selection.end, endElem.length));
                     
                     if (window.getSelection) {
                         const sel = window.getSelection();
@@ -14771,7 +15092,7 @@ new JS.Singleton('GlobalMouse', {
         
         setOptions: function(v) {
             this.destroyAllOptions();
-            if (Array.isArray(v)) v.forEach(option => {this.addOption(option);});
+            if (isArray(v)) v.forEach(option => {this.addOption(option);});
         },
         
         /** The options are just the subviews.
@@ -14784,7 +15105,7 @@ new JS.Singleton('GlobalMouse', {
             Does not update the dom since the dom element's 'value' attribute
             doesn't support lists. */
         setValue: function(v) {
-            if (Array.isArray(v) && pkg.areArraysEqual(v, this.value)) return;
+            if (isArray(v) && pkg.areArraysEqual(v, this.value)) return;
             
             if (this.value !== v) {
                 this.value = v;
@@ -14798,7 +15119,7 @@ new JS.Singleton('GlobalMouse', {
         subviewAdded: function(sv) {
             // Destroy subview if it's not supported.
             if (!(sv instanceof InputSelectOption)) {
-                pkg.dumpStack("Subview not supported. Destroying it.");
+                pkg.dumpStack('Subview unsupported. Destroying it');
                 sv.destroy();
             }
         },
@@ -14806,7 +15127,7 @@ new JS.Singleton('GlobalMouse', {
         /** @overrides myt.FocusObservable */
         showFocusIndicator: function() {
             this.hideDefaultFocusIndicator();
-            this.setBoxShadow(DEFAULT_FOCUS_SHADOW_PROPERTY_VALUE);
+            this.setBoxShadow(FOCUS_SHADOW);
         },
         
         /** @overrides myt.FocusObservable */
@@ -14875,7 +15196,7 @@ new JS.Singleton('GlobalMouse', {
         },
         
         selectValues: function(values) {
-            (Array.isArray(values) ? values : [values]).forEach(value => {this.selectValue(value);});
+            (isArray(values) ? values : [values]).forEach(value => {this.selectValue(value);});
         },
         
         /** Selects the option that has the provided value.
@@ -14935,6 +15256,8 @@ new JS.Singleton('GlobalMouse', {
 
 (pkg => {
     const JSModule = JS.Module,
+        
+        mathRound = Math.round,
         
         /** Provides a setValue and getValue method.
             
@@ -15141,7 +15464,7 @@ new JS.Singleton('GlobalMouse', {
             },
             
             setMinValue: function(v) {
-                if (this.snapToInt && v != null) v = Math.round(v);
+                if (this.snapToInt && v != null) v = mathRound(v);
                 
                 if (this.minValue !== v) {
                     const max = this.maxValue;
@@ -15160,7 +15483,7 @@ new JS.Singleton('GlobalMouse', {
             },
             
             setMaxValue: function(v) {
-                if (this.snapToInt && v != null) v = Math.round(v);
+                if (this.snapToInt && v != null) v = mathRound(v);
                 
                 if (this.maxValue !== v) {
                     const min = this.minValue;
@@ -15180,7 +15503,7 @@ new JS.Singleton('GlobalMouse', {
             
             /** @overrides myt.ValueComponent */
             setValue: function(v) {
-                this.callSuper(this.snapToInt && v != null && !isNaN(v) ? Math.round(v) : v);
+                this.callSuper(this.snapToInt && v != null && !isNaN(v) ? mathRound(v) : v);
             }
         });
     
@@ -15214,8 +15537,8 @@ new JS.Singleton('GlobalMouse', {
         /** @overrides myt.ValueComponent */
         setValue: function(v) {
             if (this.snapToInt && v != null) {
-                if (v.lower != null && !isNaN(v.lower)) v.lower = Math.round(v.lower);
-                if (v.upper != null && !isNaN(v.upper)) v.upper = Math.round(v.upper);
+                if (v.lower != null && !isNaN(v.lower)) v.lower = mathRound(v.lower);
+                if (v.upper != null && !isNaN(v.upper)) v.upper = mathRound(v.upper);
             }
             this.callSuper(v);
         }
@@ -15324,6 +15647,8 @@ new JS.Singleton('GlobalMouse', {
         
         defAttr = pkg.AccessorSupport.defAttr,
         
+        getKeyCodeFromEvent = pkg.KeyObservable.getKeyCodeFromEvent,
+        
         DEFAULT_ATTR = 'runForDefault',
         ROLLBACK_ATTR = 'runForRollback',
         CURRENT_ATTR = 'runForCurrent',
@@ -15351,10 +15676,10 @@ new JS.Singleton('GlobalMouse', {
                 if (identifiable.id) {
                     func(id);
                 } else {
-                    pkg.dumpStack("No ID");
+                    pkg.dumpStack('No ID');
                 }
             } else {
-                pkg.dumpStack("No processor");
+                pkg.dumpStack('No processor');
             }
         },
         
@@ -15402,14 +15727,12 @@ new JS.Singleton('GlobalMouse', {
             @param isValid:boolean The currently determined validity.
             @returns boolean true if this form is valid, false otherwise. */
         applyValidation = (form, isValid) => {
-            const validators = form.__v,
-                len = validators.length, 
-                errorMessages = [];
-            for (let i = 0; len > i;) isValid = validators[i++].isFormValid(form, null, errorMessages) && isValid;
-            
+            const errorMessages = [];
+            form.__v.forEach(validator => {
+                isValid = validator.isFormValid(form, null, errorMessages) && isValid;
+            });
             form.setErrorMessages(errorMessages);
             form.setIsValid(isValid);
-            
             return isValid;
         },
         
@@ -15419,17 +15742,14 @@ new JS.Singleton('GlobalMouse', {
                 that is checked to see if that processor should be run or not.
             @returns * The processed value. */
         processValue = (formElement, value, checkAttr) => {
-            const processors = formElement.__vp, 
-                len = processors.length;
-            for (let i = 0; len > i;) {
-                const processor = processors[i++];
+            formElement.__vp.forEach(processor => {
                 if (processor[checkAttr]) value = processor.process(value);
-            }
+            });
             return value;
         },
         
-        /** Modifies a value. Typically used to convert a form element value to 
-            its canonical form.
+        /** Modifies a value. Typically used to convert a form element value 
+            to its canonical form.
             
             Attributes:
                 id:string The ideally unique ID for this value processor.
@@ -15453,9 +15773,9 @@ new JS.Singleton('GlobalMouse', {
             initialize: function(id, runForDefault, runForRollback, runForCurrent) {
                 this.id = id;
                 
-                this[DEFAULT_ATTR] = runForDefault ? true : false;
-                this[ROLLBACK_ATTR] = runForRollback ? true : false;
-                this[CURRENT_ATTR] = runForCurrent ? true : false;
+                this[DEFAULT_ATTR] = !!runForDefault;
+                this[ROLLBACK_ATTR] = !!runForRollback;
+                this[CURRENT_ATTR] = !!runForCurrent;
             },
             
             
@@ -15478,7 +15798,7 @@ new JS.Singleton('GlobalMouse', {
                 // Don't convert "empty" values to a number since they'll 
                 // become zero which is probably incorrect. Also catch 
                 // undefined/null values since they will become NaN.
-                if (value == null || value === "" || value === "-") return value;
+                if (value == null || value === '' || value === '-') return value;
                 
                 const numericValue = Number(value);
                 return isNaN(numericValue) ? value : numericValue;
@@ -15735,7 +16055,7 @@ new JS.Singleton('GlobalMouse', {
                         if (subform) {
                             value[id] = subform.setValue(value[id]);
                         } else {
-                            console.warn("ID in setValue for non-existant subform", id);
+                            console.warn('ID in setValue for missing subform', id);
                         }
                     }
                 }
@@ -15758,10 +16078,10 @@ new JS.Singleton('GlobalMouse', {
                 return retval;
             },
             
-            /** Sets the default value of this form. For a form the value should
-                be a map containing default values for each of the subform 
-                elements. The entries in the map will be applied to each of 
-                the subforms.
+            /** Sets the default value of this form. For a form the value 
+                should be a map containing default values for each of the 
+                subform elements. The entries in the map will be applied to 
+                each of the subforms.
                 @param value:object the value to set.
                 @returns the value that was actually set. */
             setDefaultValue: function(value) {
@@ -15771,7 +16091,7 @@ new JS.Singleton('GlobalMouse', {
                         if (subform) {
                             value[id] = subform.setDefaultValue(value[id]);
                         } else {
-                            console.warn("ID in setDefaultValue for non-existant subform", id);
+                            console.warn('ID in setDefaultValue for missing subform', id);
                         }
                     }
                 }
@@ -15803,7 +16123,7 @@ new JS.Singleton('GlobalMouse', {
                         if (subform) {
                             value[id] = subform.setRollbackValue(value[id]);
                         } else {
-                            console.warn("ID in setRollbackValue for non-existant subform", id);
+                            console.warn('ID in setRollbackValue for missing subform', id);
                         }
                     }
                 }
@@ -15874,7 +16194,7 @@ new JS.Singleton('GlobalMouse', {
             addSubForm: function(subform) {
                 const id = subform.id;
                 if (this.getSubForm(id) != null) {
-                    console.warn("ID in use for subform, add aborted.", id, subform);
+                    console.warn('ID in use for subform, add aborted', id, subform);
                 } else {
                     subform.setForm(this);
                     this.__sf[id] = subform;
@@ -16197,18 +16517,18 @@ new JS.Singleton('GlobalMouse', {
             
             /** @overrides myt.Form */
             addSubForm: subform => {
-                pkg.dumpStack("addSubForm not supported on FormElement.");
+                pkg.dumpStack('addSubForm unsupported on FormElement');
             },
             
             /** @overrides myt.Form */
             getSubForm: id => {
-                pkg.dumpStack("getSubForm not supported on FormElement.");
+                pkg.dumpStack('getSubForm unsupported on FormElement');
                 return null;
             },
             
             /** @overrides myt.Form */
             removeSubForm: id => {
-                pkg.dumpStack("removeSubForm not supported on FormElement.");
+                pkg.dumpStack('removeSubForm unsupported on FormElement');
                 return null;
             },
             
@@ -16288,12 +16608,12 @@ new JS.Singleton('GlobalMouse', {
             
             Attributes:
                 errorColor:color_string The color to use when a validation 
-                    error exists. Defaults to '#ff9999'.
+                    error exists. Defaults to '#f99'.
                 actionRequiredColor:color_string The color to use when a 
                     validation error exists but the user has not modified the 
-                    value. Defaults to '#996666'.
+                    value. Defaults to '#966'.
                 normalColor:color_string The color to use when no validation 
-                    error exists. Defaults to '#999999'.
+                    error exists. Defaults to '#999'.
                 validateWhen:string Indicates when to run validation.
                     Supported values are:
                         key: Validate as the user types.
@@ -16336,8 +16656,8 @@ new JS.Singleton('GlobalMouse', {
                 
                 self.addValueProcessor(undefToEmptyValueProcessor);
                 
-                self.attachToDom(self, '__handleKeyDown', 'keydown');
-                self.attachToDom(self, '__handleKeyUp', 'keyup');
+                self.attachToDom(self, '__hndlKeyDown', 'keydown');
+                self.attachToDom(self, '__hndlKeyUp', 'keyup');
                 
                 self.addAccelerator(ACCELERATOR_ACCEPT, self.doAccept);
                 self.addAccelerator(ACCELERATOR_REJECT, self.doReject);
@@ -16410,15 +16730,15 @@ new JS.Singleton('GlobalMouse', {
             /** @private
                 @param {!Object} event
                 @returns {undefined} */
-            __handleKeyDown: function(event) {
-                if (pkg.KeyObservable.getKeyCodeFromEvent(event) === 13) this.invokeAccelerator(ACCELERATOR_ACCEPT);
+            __hndlKeyDown: function(event) {
+                if (getKeyCodeFromEvent(event) === 13) this.invokeAccelerator(ACCELERATOR_ACCEPT);
             },
             
             /** @private
                 @param {!Object} event
                 @returns {undefined} */
-            __handleKeyUp: function(event) {
-                if (pkg.KeyObservable.getKeyCodeFromEvent(event) === 27) this.invokeAccelerator(ACCELERATOR_REJECT);
+            __hndlKeyUp: function(event) {
+                if (getKeyCodeFromEvent(event) === 27) this.invokeAccelerator(ACCELERATOR_REJECT);
             },
             
             /** @overrides myt.FocusObservable */
@@ -16642,10 +16962,10 @@ new JS.Singleton('GlobalMouse', {
         
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides myt.FormInputTextMixin */
-        __handleKeyDown: function(event) {
+        __hndlKeyDown: function(event) {
             // Only allow enter key as accelerator if no wrapping is occurring
             if (this.whitespace === 'nowrap') this.callSuper(event);
-        },
+        }
     });
     
     /** An myt.InputText that is also a FormElement.
@@ -16667,9 +16987,7 @@ new JS.Singleton('GlobalMouse', {
         
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides myt.FormInputTextMixin */
-        __handleKeyDown: function(event) {
-            // Do nothing so the "accept" accelerator is not invoked.
-        },
+        __hndlKeyDown: event => {/* Do nothing so the "accept" accelerator is not invoked. */}
     });
     
     /** An myt.InputSelect that is also a FormElement.
@@ -16776,7 +17094,7 @@ new JS.Singleton('GlobalMouse', {
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides */
         process: function(value) {
-            return (value == null || value === "") ? this.otherField.getValue() : value;
+            return (value == null || value === '') ? this.otherField.getValue() : value;
         }
     });
     
@@ -16914,7 +17232,7 @@ new JS.Singleton('GlobalMouse', {
                         if (file) this.handleDroppedFile(file, event);
                     }
                 } else {
-                    pkg.dumpStack('File API not supported.');
+                    pkg.dumpStack('File API unsupported');
                 }
             },
             
@@ -16975,8 +17293,8 @@ new JS.Singleton('GlobalMouse', {
                 self.files = [];
                 
                 // Modify attrs so setter gets called.
-                if (attrs.requestFileParam == null) attrs.requestFileParam = 'file';
-                if (attrs.maxFiles == null) attrs.maxFiles = -1;
+                self.defAttr(attrs, 'requestFileParam', 'file');
+                self.defAttr(attrs, 'maxFiles', -1);
                 
                 self.callSuper(parent, attrs);
                 
@@ -16988,12 +17306,12 @@ new JS.Singleton('GlobalMouse', {
                     initNode: function(parent, attrs) {
                         this.inputType = 'file';
                         this.callSuper(parent, attrs);
-                        this.attachToDom(this, '_handleInput', 'change');
+                        this.attachToDom(this, '_hndlInput', 'change');
                         
                         this.getIDE().multiple = self.maxFiles > 1;
                     },
                     
-                    _handleInput: function(event) {
+                    _hndlInput: function(event) {
                         self.handleFiles(this.getIDE().files, event);
                     }
                 }]);
@@ -17295,121 +17613,6 @@ new JS.Singleton('GlobalMouse', {
 
 
 (pkg => {
-    const SizeToParent = pkg.SizeToParent,
-        View = pkg.View,
-        
-        defAttr = pkg.AccessorSupport.defAttr;
-    
-    /** A dimmer that can be placed on another myt.View to obscure the subviews
-        of that view.
-        
-        Attributes:
-            restoreFocus:boolean when true focus will be sent back to the view
-                that had focus before the dimmer was shown when the dimmer is
-                hidden. Defaults to true.
-            prevFocus:myt.View or dom element. The thing to set focus on when
-                the dimmer is hidden if restoreFocus is true.
-        
-        @class */
-    pkg.Dimmer = new JS.Class('Dimmer', View, {
-        include: [SizeToParent],
-        
-        
-        // Class Methods and Attributes ////////////////////////////////////////
-        extend: {
-            DEFAULT_OPACITY: 0.35,
-            DEFAULT_COLOR: '#000'
-        },
-        
-        
-        // Life Cycle //////////////////////////////////////////////////////////
-        /** @overrides myt.View */
-        initNode: function(parent, attrs) {
-            const self = this;
-            
-            self.restoreFocus = true;
-            
-            attrs.focusable = attrs.focusCage = true;
-            
-            defAttr(attrs, 'percentOfParentWidth', 100);
-            defAttr(attrs, 'percentOfParentHeight', 100);
-            defAttr(attrs, 'visible', false);
-            defAttr(attrs, 'ignoreLayout', true);
-            
-            self.callSuper(parent, attrs);
-            
-            // Eat mouse events
-            ['mouseover','mouseout','mousedown','mouseup','click','dblclick','mousemove'].forEach(eventName => {self.attachDomObserver(self, 'eatMouseEvent', eventName);});
-            
-            pkg.RootView.setupCaptureDrop(self);
-        },
-        
-        /** @overrides myt.View */
-        doBeforeAdoption: function() {
-            this.callSuper();
-            
-            const Dimmer = pkg.Dimmer;
-            new View(this, {
-                name:'overlay',
-                ignorePlacement:true, 
-                opacity:Dimmer.DEFAULT_OPACITY,
-                bgColor:Dimmer.DEFAULT_COLOR,
-                percentOfParentWidth:100,
-                percentOfParentHeight:100
-            }, [SizeToParent]);
-        },
-        
-        /** @overrides myt.View */
-        destroyAfterOrphaning: function() {
-            pkg.RootView.teardownCaptureDrop(this);
-            
-            this.callSuper();
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        setRestoreFocus: function(v) {this.restoreFocus = v;},
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** A handler for mouse events that does nothing and prevents 
-            propogation.
-            @param {!Object} event
-            @return boolean True so that the dom event gets eaten. */
-        eatMouseEvent: event => true,
-        
-        /** Shows the dimmer and remembers the focus location.
-            @returns {undefined} */
-        show: function() {
-            const self = this,
-                gf = pkg.global.focus;
-            self.prevFocus = gf.focusedView || gf.focusedDom;
-            
-            self.makeHighestZIndex();
-            
-            // Prevent focus traversing
-            if (self.focusable) self.focus();
-            
-            self.setVisible(true);
-        },
-        
-        /** Hides the dimmer and restores focus if necessary.
-            @param {boolean} [ignoreRestoreFocus] - When true focus will not 
-                be restored.
-            @returns {undefined} */
-        hide: function(ignoreRestoreFocus) {
-            const self = this;
-            if (self.visible) {
-                self.setVisible(false);
-                
-                if (!ignoreRestoreFocus && self.restoreFocus && self.prevFocus) self.prevFocus.focus();
-            }
-        }
-    });
-})(myt);
-
-
-(pkg => {
     const updateMonitoringSubview = (stc, sv, func) => {
             const axis = stc.axis;
             func = func.bind(stc);
@@ -17545,7 +17748,120 @@ new JS.Singleton('GlobalMouse', {
 
 
 (pkg => {
-    const defAttr = pkg.AccessorSupport.defAttr,
+    const JSClass = JS.Class,
+        SizeToParent = pkg.SizeToParent,
+        View = pkg.View,
+        RootView = pkg.RootView,
+        
+        defAttr = pkg.AccessorSupport.defAttr,
+    
+        /** A dimmer that can be placed on another myt.View to obscure the 
+            subviews of that view.
+            
+            Attributes:
+                restoreFocus:boolean when true focus will be sent back to the 
+                    view that had focus before the dimmer was shown when the 
+                    dimmer is hidden. Defaults to true.
+                prevFocus:myt.View or dom element. The thing to set focus on 
+                    when the dimmer is hidden if restoreFocus is true.
+            
+            @class */
+        Dimmer = pkg.Dimmer = new JSClass('Dimmer', View, {
+            include: [SizeToParent],
+            
+            
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                OPACITY: 0.35,
+                COLOR: '#000'
+            },
+            
+            
+            // Life Cycle //////////////////////////////////////////////////////
+            /** @overrides myt.View */
+            initNode: function(parent, attrs) {
+                const self = this;
+                
+                self.restoreFocus = true;
+                
+                attrs.focusable = attrs.focusCage = true;
+                
+                defAttr(attrs, 'percentOfParentWidth', 100);
+                defAttr(attrs, 'percentOfParentHeight', 100);
+                defAttr(attrs, 'visible', false);
+                defAttr(attrs, 'ignoreLayout', true);
+                
+                self.callSuper(parent, attrs);
+                
+                // Eat mouse events
+                ['mouseover','mouseout','mousedown','mouseup','click','dblclick','mousemove'].forEach(eventName => {
+                    self.attachDomObserver(self, 'eatMouseEvent', eventName);
+                });
+                
+                RootView.setupCaptureDrop(self);
+            },
+            
+            /** @overrides myt.View */
+            doBeforeAdoption: function() {
+                this.callSuper();
+                
+                new View(this, {
+                    name:'overlay',
+                    ignorePlacement:true, 
+                    opacity:Dimmer.OPACITY,
+                    bgColor:Dimmer.COLOR,
+                    percentOfParentWidth:100,
+                    percentOfParentHeight:100
+                }, [SizeToParent]);
+            },
+            
+            /** @overrides myt.View */
+            destroyAfterOrphaning: function() {
+                RootView.teardownCaptureDrop(this);
+                
+                this.callSuper();
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setRestoreFocus: function(v) {this.restoreFocus = v;},
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** A handler for mouse events that does nothing and prevents 
+                propogation.
+                @param {!Object} event
+                @return boolean True so that the dom event gets eaten. */
+            eatMouseEvent: event => true,
+            
+            /** Shows the dimmer and remembers the focus location.
+                @returns {undefined} */
+            show: function() {
+                const self = this,
+                    globalFocus = pkg.global.focus;
+                self.prevFocus = globalFocus.focusedView || globalFocus.focusedDom;
+                
+                self.makeHighestZIndex();
+                
+                // Prevent focus traversing
+                if (self.focusable) self.focus();
+                
+                self.setVisible(true);
+            },
+            
+            /** Hides the dimmer and restores focus if necessary.
+                @param {boolean} [ignoreRestoreFocus] - When true focus will not 
+                    be restored.
+                @returns {undefined} */
+            hide: function(ignoreRestoreFocus) {
+                const self = this;
+                if (self.visible) {
+                    self.setVisible(false);
+                    
+                    if (!ignoreRestoreFocus && self.restoreFocus && self.prevFocus) self.prevFocus.focus();
+                }
+            }
+        }),
         
         /** An myt.Dimmer that also provides a content panel.
             
@@ -17583,16 +17899,26 @@ new JS.Singleton('GlobalMouse', {
                     not provided.
                 
             @class */
-        ModalPanel = pkg.ModalPanel = new JS.Class('ModalPanel', pkg.Dimmer, {
+        ModalPanel = pkg.ModalPanel = new JSClass('ModalPanel', Dimmer, {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                DEFAULT_PADDING_X:20,
-                DEFAULT_PADDING_Y:15,
+                /** The default horizontal padding. */
+                PADDING_X:20,
                 
-                DEFAULT_MARGIN_TOP:40,
-                DEFAULT_MARGIN_LEFT:40,
-                DEFAULT_MARGIN_BOTTOM:40,
-                DEFAULT_MARGIN_RIGHT:40
+                /** The default vertical padding. */
+                PADDING_Y:15,
+                
+                /** The default margin top. */
+                MARGIN_TOP:40,
+                
+                /** The default margin left. */
+                MARGIN_LEFT:40,
+                
+                /** The default margin bottom. */
+                MARGIN_BOTTOM:40,
+                
+                /** The default margin right. */
+                MARGIN_RIGHT:40
             },
             
             
@@ -17603,21 +17929,20 @@ new JS.Singleton('GlobalMouse', {
                 defAttr(attrs, 'sizingStrategy', 'children');
                 
                 // Used for parent sizing strategy
-                defAttr(attrs, 'marginTop', ModalPanel.DEFAULT_MARGIN_TOP);
-                defAttr(attrs, 'marginLeft', ModalPanel.DEFAULT_MARGIN_LEFT);
-                defAttr(attrs, 'marginBottom', ModalPanel.DEFAULT_MARGIN_BOTTOM);
-                defAttr(attrs, 'marginRight', ModalPanel.DEFAULT_MARGIN_RIGHT);
+                defAttr(attrs, 'marginTop', ModalPanel.MARGIN_TOP);
+                defAttr(attrs, 'marginLeft', ModalPanel.MARGIN_LEFT);
+                defAttr(attrs, 'marginBottom', ModalPanel.MARGIN_BOTTOM);
+                defAttr(attrs, 'marginRight', ModalPanel.MARGIN_RIGHT);
                 
                 // Used for "children" sizing strategy
-                defAttr(attrs, 'paddingX', ModalPanel.DEFAULT_PADDING_X);
-                defAttr(attrs, 'paddingY', ModalPanel.DEFAULT_PADDING_Y);
+                defAttr(attrs, 'paddingX', ModalPanel.PADDING_X);
+                defAttr(attrs, 'paddingY', ModalPanel.PADDING_Y);
                 
                 this.callSuper(parent, attrs);
             },
             
             doBeforeAdoption: function() {
                 const self = this,
-                    View = pkg.View,
                     viewAttrs = {name:'content', ignorePlacement:true},
                     centeredViewAttrs = Object.assign({}, viewAttrs, {align:'center', valign:'middle'});
                 
@@ -17639,7 +17964,7 @@ new JS.Singleton('GlobalMouse', {
                             percentOfParentHeightOffset:-self.marginTop - self.marginBottom,
                             percentOfParentWidth:100,
                             percentOfParentHeight:100,
-                        }), [pkg.SizeToParent]);
+                        }), [SizeToParent]);
                         break;
                     case 'basic':
                         new View(self, centeredViewAttrs);
@@ -17665,443 +17990,119 @@ new JS.Singleton('GlobalMouse', {
 })(myt);
 
 
-/** A spinner that uses the CSS border property and a CSS rotation animation
-        to create the appearance of a spinner.
-    
-    Events:
-        spinColor
-    
-    Attributes:
-        size:number The width and height of the spinner.
-        spinColor:color_string The color spinning quarter of the border.
-    
-    Private Attributes:
-        None
-*/
-myt.Spinner = new JS.Class('Spinner', myt.View, {
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** @overrides myt.View */
-    initNode: function(parent, attrs) {
-        const self = this;
-        
-        self.lateAttrs = ['spinColor'];
-        
-        if (attrs.visible == null) attrs.visible = false;
-        if (attrs.borderWidth == null) attrs.borderWidth = 5;
-        if (attrs.borderColor == null) attrs.borderColor = '#fff';
-        if (attrs.borderStyle == null) attrs.borderStyle = 'solid';
-        if (attrs.spinColor == null) attrs.spinColor = '#000';
-        
-        self.callSuper(parent, attrs);
-        
-        self.getIDS().borderRadius = '50%';
-        
-        self._updateSize();
-        self._spin();
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setSize: function(v) {
-        if (this.size !== v) {
-            this.size = v;
-            if (this.inited) this._updateSize();
-        }
-    },
-    
-    setSpinColor: function(v) {
-        if (this.spinColor !== v) {
-            this.getIDS().borderTopColor = this.spinColor = v;
-            if (this.inited) this.fireEvent('spinColor', v);
-        }
-    },
-    
-    /** @overrides myt.View */
-    setBorderWidth: function(v) {
-        if (this.borderWidth !== v) {
-            this.callSuper(v);
-            if (this.inited) this._updateSize();
-        }
-    },
-    
-    /** @overrides myt.View */
-    setVisible: function(v) {
-        if (this.visible !== v) {
-            this.callSuper(v);
-            if (this.inited) this._spin();
-        }
-    },
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** @private */
-    _spin: function() {
-        this[this.visible ? 'addDomClass' : 'removeDomClass']('mytCenterSpin');
-    },
-    
-    /** Remove the border from the dom element width and height so that the
-        spinner doesn't take up more space that the size.
-        @private */
-    _updateSize: function() {
-        const self = this,
-            size = self.size,
-            ids = self.getIDS();
-        self.setWidth(size);
-        self.setHeight(size);
-        ids.width = ids.height = (size - 2*self.borderWidth) + 'px';
-    }
-});
-
-
 (pkg => {
-    const math = Math,
-        mathMax = math.max,
-        mathMin = math.min,
-        
-        cleanChannelValue = value => mathMin(255, mathMax(0, math.round(value))),
-        toHex = value => {
-            value = cleanChannelValue(value).toString(16);
-            return value.length === 1 ? '0' + value : value;
+    const
+        spin = spinner => {
+            spinner[spinner.visible ? 'addDomClass' : 'removeDomClass']('mytCenterSpin');
         },
-        rgbToHex = (red, green, blue, prependHash) => [prependHash ? '#' : '', toHex(red), toHex(green), toHex(blue)].join(''),
-        getRedChannel = value => (0xff0000 & value) >> 16,
-        getGreenChannel = value => (0x00ff00 & value) >> 8,
-        getBlueChannel = value => (0x0000ff & value),
-        makeColorFromNumber = value => new Color(getRedChannel(value), getGreenChannel(value), getBlueChannel(value)),
-        makeColorNumberFromChannels = (red, green, blue) => (cleanChannelValue(red) << 16) + (cleanChannelValue(green) << 8) + cleanChannelValue(blue),
-        toUnitRange = (num, max) => {
-            if (typeof num === 'string') {
-                if (num.endsWith('%')) {
-                    num = parseFloat(num.substring(0, num.length - 1)) * max / 100;
-                } else {
-                    return 0;
-                }
+        
+        /*  Remove the border from the dom element width and height so that 
+            the spinner doesn't take up more space that the size. */
+        updateSize = spinner => {
+            const size = spinner.size,
+                ids = spinner.getIDS();
+            spinner.setWidth(size);
+            spinner.setHeight(size);
+            ids.width = ids.height = (size - 2*spinner.borderWidth) + 'px';
+        };
+    
+    /** A spinner that uses the CSS border property and a CSS rotation 
+        animation to create the appearance of a spinner.
+        
+        Events:
+            spinColor
+        
+        Attributes:
+            size:number The width and height of the spinner.
+            spinColor:color_string The color spinning quarter of the border.
+        
+        @class */
+    pkg.Spinner = new JS.Class('Spinner', pkg.View, {
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.View */
+        initNode: function(parent, attrs) {
+            const self = this;
+            
+            self.lateAttrs = ['spinColor'];
+            
+            const defAttr = self.defAttr;
+            defAttr(attrs, 'visible', false);
+            defAttr(attrs, 'borderWidth', 5);
+            defAttr(attrs, 'borderColor', '#fff');
+            defAttr(attrs, 'borderStyle', 'solid');
+            defAttr(attrs, 'spinColor', '#000');
+            
+            self.callSuper(parent, attrs);
+            
+            self.getIDS().borderRadius = '50%';
+            
+            updateSize(self);
+            spin(self);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setSize: function(v) {
+            if (this.size !== v) {
+                this.size = v;
+                if (this.inited) updateSize(this);
             }
-            num = mathMin(max, mathMax(0, num)) / max;
-            return math.abs(1 - num) < 0.000001 ? 1 : num;
         },
         
-        rgbToHsv = (r, g, b) => {
-            r = toUnitRange(r, 255);
-            g = toUnitRange(g, 255);
-            b = toUnitRange(b, 255);
-            
-            const max = mathMax(r, g, b),
-                diff = max - mathMin(r, g, b);
-            if (diff === 0) {
-                // achromatic
-                return {h:0, s:0, v:max};
-            } else {
-                let h;
-                switch (max) {
-                    case r:
-                        h = (g - b) / diff + (g < b ? 6 : 0);
-                        break;
-                    case g:
-                        h = (b - r) / diff + 2;
-                        break;
-                    case b:
-                        h = (r - g) / diff + 4;
-                        break;
-                }
-                return {h:h * 60, s:max === 0 ? 0 : diff / max, v:max};
+        setSpinColor: function(v) {
+            if (this.spinColor !== v) {
+                this.getIDS().borderTopColor = this.spinColor = v;
+                if (this.inited) this.fireEvent('spinColor', v);
             }
         },
         
-        hsvToRgb = (h, s, v) => {
-            h = toUnitRange(h, 360) * 6;
-            s = toUnitRange(s, 100);
-            v = toUnitRange(v, 100);
-            
-            const i = math.floor(h),
-                f = h - i,
-                p = v * (1 - s),
-                q = v * (1 - f * s),
-                t = v * (1 - (1 - f) * s),
-                mod = i % 6,
-                red = [v, q, p, p, t, v][mod],
-                green = [t, v, v, q, p, p][mod],
-                blue = [p, p, t, v, v, q][mod];
-            
-            return {red:red * 255, green:green * 255, blue:blue * 255};
+        /** @overrides myt.View */
+        setBorderWidth: function(v) {
+            if (this.borderWidth !== v) {
+                this.callSuper(v);
+                if (this.inited) updateSize(this);
+            }
         },
         
-        /** Models a color as individual color channels.
-            
-            Attributes:
-                red:int The red channel. Will be an integer between 0 
-                    and 255.
-                green:int The green channel. Will be an integer between 0 
-                    and 255.
-                blue:int The blue channel. Will be an integer between 0 
-                    and 255.
-            
-            @class */
-        Color = pkg.Color = new JS.Class('Color', {
-            // Class Methods and Attributes ////////////////////////////////////
-            extend: {
-                toUnitRange:toUnitRange,
-                rgbToHsv:rgbToHsv,
-                hsvToRgb:hsvToRgb,
-                
-                /** Converts a number or string representation of a number to a 
-                    two character hex string.
-                    @param {number|string} value - The number or string 
-                        to convert.
-                    @returns {string} A two character hex string 
-                        such as: '0c' or 'c9'. */
-                toHex: toHex,
-                
-                /** Converts red, green, and blue color channel numbers to a six 
-                    character hex string.
-                    @param {number} red - The red color channel.
-                    @param {number} green - The green color channel.
-                    @param {number} blue - The blue color channel.
-                    @param {boolean} [prependHash] - If true a '#' character
-                        will be prepended to the return value.
-                    @returns {string} Something like: '#ff9c02' or 'ff9c02' */
-                rgbToHex: rgbToHex,
-                
-                /** Limits a channel value to integers between 0 and 255.
-                    @param {number} value - The channel value to clean up.
-                    @returns {number} */
-                cleanChannelValue: cleanChannelValue,
-                
-                /** Gets the red channel from a "color" number.
-                    @param {string} value
-                    @returns {number} */
-                getRedChannel: getRedChannel,
-                
-                /** Gets the green channel from a "color" number.
-                    @param {string} value
-                    @returns {number} */
-                getGreenChannel: getGreenChannel,
-                
-                /** Gets the blue channel from a "color" number.
-                    @param {string} value
-                    @returns {number} */
-                getBlueChannel: getBlueChannel,
-                
-                /** Creates an myt.Color from a "color" number.
-                    @param {string} value
-                    @returns {!Object} myt.Color */
-                makeColorFromNumber: makeColorFromNumber,
-                
-                /** Creates an myt.Color from an html color string.
-                    @param {string} value - A hex string representation of a 
-                        color, such as '#ff339b'.
-                    @returns {!Object} a myt.Color or null if no color could 
-                        be parsed. */
-                makeColorFromHexString: value => {
-                    if (value) {
-                        if (!value.startsWith('#')) value = '#' + value;
-                        
-                        // Convert #abc colors to #aabbcc
-                        if (value.length === 4) {
-                            const red = value.substring(1,2),
-                                green = value.substring(2,3),
-                                blue = value.substring(3,4);
-                            value = '#' + red + red + green + green + blue + blue;
-                        }
-                        
-                        return makeColorFromNumber(parseInt(value.substring(1), 16));
-                    } else {
-                        return null;
-                    }
-                },
-                
-                /** Creates an myt.Color from hue, saturation and value
-                    parameters.
-                    @param {number} h - The hue. A number from 0 to 360.
-                    @param {number} s - The saturation. A number from 0 to 100.
-                    @param {number} v - The value. A number from 0 to 100.
-                    @returns {!Object} myt.Color */
-                makeColorFromHSV: (h, s, v) => {
-                    const rgb = hsvToRgb(h, s, v);
-                    return makeColorFromNumber(makeColorNumberFromChannels(rgb.red, rgb.green, rgb.blue));
-                },
-                
-                /** Returns the lighter of the two provided colors.
-                    @param {number} a - A color number.
-                    @param {number} b - A color number.
-                    @returns {number} The number that represents the 
-                        lighter color. */
-                getLighterColor: (a, b) => makeColorFromNumber(a).isLighterThan(makeColorFromNumber(b)) ? a : b,
-                
-                /** Creates an RGB "color" number from the provided 
-                    color channels.
-                    @param {number} red - The red channel
-                    @param {number} green - The green channel
-                    @param {number} blue - The blue channel
-                    @returns {number} */
-                makeColorNumberFromChannels: makeColorNumberFromChannels,
-                
-                /** Creates a new myt.Color object that is a blend of the two 
-                    provided colors.
-                    @param {!Object} fromColor - The first myt.Color to blend.
-                    @param {!Objecdt} toColor - The second myt.Color to blend.
-                    @param {number} percent - The blend percent between the two
-                        colors where 0 is the fromColor and 1.0 is the toColor.
-                    @returns {!Object} myt.Color */
-                makeBlendedColor: (fromColor, toColor, percent) => {
-                    return new Color(
-                        fromColor.red + (percent * (toColor.red - fromColor.red)),
-                        fromColor.green + (percent * (toColor.green - fromColor.green)),
-                        fromColor.blue + (percent * (toColor.blue - fromColor.blue))
-                    );
-                }
-            },
-            
-            
-            // Constructor /////////////////////////////////////////////////////
-            /** Create a new Color.
-                @param {number} red - The red channel
-                @param {number} green - The green channel
-                @param {number} blue - The blue channel
-                @returns {undefined} */
-            initialize: function(red, green, blue) {
-                this.setRed(red);
-                this.setGreen(green);
-                this.setBlue(blue);
-            },
-            
-            
-            // Accessors ///////////////////////////////////////////////////////
-            /** Sets the red channel value.
-                @param {number} red
-                @return {undefined} */
-            setRed: function(red) {
-                this.red = cleanChannelValue(red);
-            },
-            
-            /** Sets the green channel value.
-                @param {number} green
-                @return {undefined} */
-            setGreen: function(green) {
-                this.green = cleanChannelValue(green);
-            },
-            
-            /** Sets the blue channel value.
-                @param {number} blue
-                @return {undefined} */
-            setBlue: function(blue) {
-                this.blue = cleanChannelValue(blue);
-            },
-            
-            
-            // Methods /////////////////////////////////////////////////////////
-            /** Gets the numerical representation of this color.
-                @returns {number} The number that represents this color. */
-            getColorNumber: function() {
-                return (this.red << 16) + (this.green << 8) + this.blue;
-            },
-            
-            /** Gets the hex string representation of this color.
-                @returns {string} A hex color such as '#a0bbcc'. */
-            getHtmlHexString: function() {
-                return rgbToHex(this.red, this.green, this.blue, true);
-            },
-            
-            /** Gets an HSV representation of this Color.
-                @returns {!Object} With keys h, s and v. */
-            getHSV: function() {
-                return rgbToHsv(this.red, this.green, this.blue);
-            },
-            
-            /** Tests if this color is lighter than the provided color.
-                @param {!Object} c - The myt.Color to compare to.
-                @returns {boolean} True if this color is lighter, 
-                    false otherwise. */
-            isLighterThan: function(c) {
-                const diff = this.getDiffFrom(c);
-                
-                // Sum channel diffs to determine lightest color. A negative
-                // diff means a lighter color.
-                return 0 > (diff.red + diff.green + diff.blue);
-            },
-            
-            /** Gets an object holding color channel diffs.
-                @param {!Object} c - The myt.Color to diff from.
-                @returns {!Object} containing the diffs for the red, green and 
-                    blue channels. */
-            getDiffFrom: function(c) {
-                return {
-                    red: c.red - this.red,
-                    green: c.green - this.green,
-                    blue: c.blue - this.blue
-                };
-            },
-            
-            /** Applies the provided diff object to this color.
-                @param {!Object} diff - The color diff to apply.
-                @returns {!Object} - This myt.Color for method chaining. */
-            applyDiff: function(diff) {
-                return this.add(diff);
-            },
-            
-            /** Adds the provided color to this color.
-                @param {!Object} c - The myt.Color to add.
-                @returns {!Object} - This myt.Color for method chaining. */
-            add: function(c) {
-                this.setRed(this.red + c.red);
-                this.setGreen(this.green + c.green);
-                this.setBlue(this.blue + c.blue);
-                return this;
-            },
-            
-            /** Subtracts the provided color from this color.
-                @param {!Object} c - The myt.Color to subtract.
-                @returns {!Object} - This myt.Color for method chaining. */
-            subtract: function(c) {
-                this.setRed(this.red - c.red);
-                this.setGreen(this.green - c.green);
-                this.setBlue(this.blue - c.blue);
-                return this;
-            },
-            
-            /** Multiplys this color by the provided scalar.
-                @param {number} s - The scaler to multiply by.
-                @returns {!Object} - This myt.Color for method chaining. */
-            multiply: function(s) {
-                this.setRed(this.red * s);
-                this.setGreen(this.green * s);
-                this.setBlue(this.blue * s);
-                return this;
-            },
-            
-            /** Divides this color by the provided scalar.
-                @param {number} s - The scaler to divide by.
-                @returns {!Object} - This myt.Color for method chaining. */
-            divide: function(s) {
-                this.setRed(this.red / s);
-                this.setGreen(this.green / s);
-                this.setBlue(this.blue / s);
-                return this;
-            },
-            
-            /** Clones this Color.
-                @returns {!Object} - A copy of this myt.Color. */
-            clone: function() {
-                return new Color(this.red, this.green, this.blue);
-            },
-            
-            /** Determine if this color has the same value as another color.
-                @param {?Object} obj - The color object to test against.
-                @returns {boolean} True if this color has the same color values 
-                    as this provided color, false otherwise. */
-            equals: function(obj) {
-                return obj === this || (obj && obj.isA && 
-                    obj.isA(Color) && 
-                    obj.red === this.red && 
-                    obj.green === this.green && 
-                    obj.blue === this.blue);
+        /** @overrides myt.View */
+        setVisible: function(v) {
+            if (this.visible !== v) {
+                this.callSuper(v);
+                if (this.inited) spin(this);
             }
-        });
+        }
+    });
 })(myt);
 
 
 (pkg => {
     const sizeClasses = ['','fa-lg','fa-2x','fa-3x','fa-4x','fa-5x'],
+        
+        makeTag = props => {
+            if (Array.isArray(props)) {
+                let len = props.length;
+                if (len > 0) {
+                    props.unshift('fa');
+                    len++;
+                    
+                    if (!props[1].startsWith('fa-')) props[1] = 'fa-' + props[1];
+                    
+                    if (len >= 3) props[2] = sizeClasses[props[2]] || '';
+                    
+                    if (len > 3) {
+                        for (let i = 3; len > i; i++) {
+                            if (!props[i].startsWith('fa-')) props[i] = 'fa-' + props[i];
+                        }
+                    }
+                    
+                    return '<i class="' + props.join(' ') + '"></i>';
+                }
+            }
+            
+            pkg.dumpStack('Error making tag');
+            console.error(props);
+            return '';
+        },
         
         updateInstance = instance => {
             let props = instance.properties;
@@ -18111,65 +18112,35 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 } else {
                     props = props.concat();
                 }
-                props.unshift(instance.size);
-                props.unshift(instance.icon);
             } else {
-                props = [instance.icon, instance.size];
+                props = [];
             }
+            props.unshift(instance.icon, instance.size);
             
-            instance.setHtml(FontAwesome.makeTag(props));
+            instance.setHtml(makeTag(props));
+        },
+        
+        registerForNotification = instance => {
+            ['Free 400', 'Free 900', 'Brands 400'].forEach(fontName => {
+                pkg.registerForFontNotification(instance, 'Font Awesome\ 5 ' + fontName);
+            });
         };
-    
-    pkg.loadCSSFonts(['https://use.fontawesome.com/releases/v5.0.8/css/all.css']);
     
     /** An adapter for FontAwesome.
         
         Attributes:
             icon:string The name of the FA icon to set.
-            size:number A number from 0 to 5 with 0 being normal size and 5 
-                being the largest size.
-            propeties:string || array A space separated string or list of FA
-                CSS classes to set.
+            size:number A number from 0 to 5 with 0 being normal size 
+                and 5 being the largest size.
+            propeties:string || array A space separated string or list 
+                of FA CSS classes to set.
         
         @class */
-    const FontAwesome = pkg.FontAwesome = new JS.Class('FontAwesome', pkg.Markup, {
+    pkg.FontAwesome = new JS.Class('FontAwesome', pkg.Markup, {
         // Class Methods and Attributes ////////////////////////////////////////
         extend: {
-            makeTag: function(props) {
-                if (Array.isArray(props)) {
-                    let len = props.length,
-                        prop,
-                        i;
-                    if (len > 0) {
-                        props.unshift('fa');
-                        ++len;
-                        
-                        if (props[1].indexOf('fa-') !== 0) props[1] = 'fa-' + props[1];
-                        
-                        if (len >= 3) props[2] = sizeClasses[props[2]] || '';
-                        
-                        if (len > 3) {
-                            i = 3;
-                            for (; len > i; ++i) {
-                                prop = props[i];
-                                if (prop.indexOf('fa-') !== 0) props[i] = 'fa-' + prop;
-                            }
-                        }
-                        
-                        return '<i class="' + props.join(' ') + '"></i>';
-                    }
-                }
-                
-                pkg.dumpStack('Error making tag');
-                console.error(props);
-                return '';
-            },
-            
-            registerForNotification: instance => {
-                pkg.registerForFontNotification(instance, 'Font Awesome\ 5 Free 400'); // regular
-                pkg.registerForFontNotification(instance, 'Font Awesome\ 5 Free 900'); // solid
-                pkg.registerForFontNotification(instance, 'Font Awesome\ 5 Brands 400'); // brands
-            },
+            makeTag: makeTag,
+            registerForNotification: registerForNotification
         },
         
         
@@ -18182,8 +18153,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             this.callSuper(parent, attrs);
             
             updateInstance(this);
-            
-            FontAwesome.registerForNotification(this);
+            registerForNotification(this);
         },
         
         
@@ -18206,6 +18176,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             if (this.inited) updateInstance(this);
         }
     });
+    
+    pkg.loadCSSFonts(['https://use.fontawesome.com/releases/v5.0.8/css/all.css']);
 })(myt);
 
 
@@ -18271,11 +18243,14 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         objectAssign = Object.assign,
         
-        math = Math,
-        mathMin = math.min,
-        mathMax = math.max,
+        mathMin = Math.min,
+        mathMax = Math.max,
         
-        /* Hide spinner related elements. */
+        BORDER_333 = [1, 'solid', '#333'],
+        BORDER_999 = [1, 'solid', '#999'],
+        BORDER_FFF = [1, 'solid', '#fff'],
+        
+        /*  Hide spinner related elements. */
         hideSpinner = dialog => {
             if (dialog.spinner) {
                 dialog.spinner.setVisible(false);
@@ -18283,7 +18258,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             }
         },
         
-        /* The class used as the DEFAULT_BUTTON_CLASS in myt.Dialog. */
+        /*  The class used as the default BUTTON_CLASS in myt.Dialog. */
         DialogButton = new JSClass('DialogButton', TextButton, {
             /** @overrides */
             initNode: function(parent, attrs) {
@@ -18306,8 +18281,6 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         LOCAL_STORAGE_KEY = 'myt.default',
         DOM_CLASS_CHECKERBOARD = 'mytCheckerboardPattern',
         CHECKMARK = makeTag(['check']),
-        BORDER_333 = [1, 'solid', '#333'],
-        BORDER_999 = [1, 'solid', '#999'],
         
         paletteLookup = {},
         
@@ -18373,7 +18346,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     valView = new View(satView, {width:139, height:139});
                 satView.getIDS().backgroundImage = 'linear-gradient(to right, #fff, rgba(204, 154, 129, 0))';
                 valView.getIDS().backgroundImage = 'linear-gradient(to top, #000, rgba(204, 154, 129, 0))';
-                colorThumb = new View(valView, {width:6, height:6, bgColor:'#000', border:[1, 'solid', '#ffffff'], roundedCorners:4});
+                colorThumb = new View(valView, {width:6, height:6, bgColor:'#000', border:BORDER_FFF, roundedCorners:4});
                 
                 hueView = new View(colorPicker, {x:315, y:30, width:24, height:109, border:BORDER_333}, [Draggable, {
                     requestDragPosition: function(x, y) {
@@ -18537,7 +18510,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         DayBtn = new JSClass('DayBtn', SelectableBtn, {
             initNode: function(parent, attrs) {
                 attrs.width = 23;
-                attrs.border = [1, 'solid', '#fff'];
+                attrs.border = BORDER_FFF;
                 this.callSuper(parent, attrs);
             },
             
@@ -18866,11 +18839,20 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         Dialog = pkg.Dialog = new JSClass('Dialog', ModalPanel, {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                DEFAULT_RADIUS: 12,
-                DEFAULT_SHADOW: [0, 4, 20, '#666'],
-                DEFAULT_BORDER: [1, 'solid', '#fff'],
-                DEFAULT_BGCOLOR: '#fff',
-                DEFAULT_BUTTON_CLASS: DialogButton,
+                /** The default corner radius. */
+                RADIUS: 12,
+                
+                /** The default button class. */
+                BUTTON_CLASS: DialogButton,
+                
+                /** The default box shadow. */
+                SHADOW: [0, 4, 20, '#666'],
+                
+                /** The default border */
+                BORDER: BORDER_FFF,
+                
+                /** The default background color. */
+                BGCOLOR: '#fff',
                 
                 /** Makes the text wrap at 200px and the dialog will be at
                     least 200px wide. */
@@ -18916,7 +18898,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     locales:{
                         en: {
                             days: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
-                            months: [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ],
+                            months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                             sep: '-',
                             prevMonth: 'Previous month',
                             nextMonth: 'Next month',
@@ -18931,15 +18913,15 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides */
             initNode: function(parent, attrs) {
-                defAttr(attrs, 'buttonClass', Dialog.DEFAULT_BUTTON_CLASS);
+                defAttr(attrs, 'buttonClass', Dialog.BUTTON_CLASS);
                 
                 this.callSuper(parent, attrs);
                 
                 const content = this.content;
-                content.setRoundedCorners(Dialog.DEFAULT_RADIUS);
-                content.setBgColor(Dialog.DEFAULT_BGCOLOR);
-                content.setBoxShadow(Dialog.DEFAULT_SHADOW);
-                content.setBorder(Dialog.DEFAULT_BORDER);
+                content.setRoundedCorners(Dialog.RADIUS);
+                content.setBgColor(Dialog.BGCOLOR);
+                content.setBoxShadow(Dialog.SHADOW);
+                content.setBorder(Dialog.BORDER);
                 content.setFocusCage(true);
                 
                 this.makeCloseButton(content);
@@ -19016,22 +18998,22 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 
                 // The blank dialog sets this.
                 content.setVisible(true);
-                this.overlay.setBgColor(pkg.Dimmer.DEFAULT_COLOR);
+                this.overlay.setBgColor(pkg.Dimmer.COLOR);
                 
                 // Message and Confirm dialogs set this.
                 this.setCallbackFunction();
                 
                 // The confirm dialog modifies this.
-                stc.setPaddingY(ModalPanel.DEFAULT_PADDING_Y);
+                stc.setPaddingY(ModalPanel.PADDING_Y);
                 
                 // The confirm content dialog modifies this.
-                stc.setPaddingX(ModalPanel.DEFAULT_PADDING_X);
+                stc.setPaddingX(ModalPanel.PADDING_X);
                 
                 // Any opts could modify this
-                content.setRoundedCorners(Dialog.DEFAULT_RADIUS);
-                content.setBgColor(Dialog.DEFAULT_BGCOLOR);
-                content.setBoxShadow(Dialog.DEFAULT_SHADOW);
-                content.setBorder(Dialog.DEFAULT_BORDER);
+                content.setRoundedCorners(Dialog.RADIUS);
+                content.setBgColor(Dialog.BGCOLOR);
+                content.setBoxShadow(Dialog.SHADOW);
+                content.setBorder(Dialog.BORDER);
             },
             
             /** Called by each of the buttons that can trigger the dialog to 
@@ -19086,8 +19068,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     whiteSpace:opts.whiteSpace,
                     wordWrap:opts.wordWrap,
                     fontWeight:opts.fontWeight,
-                    x:opts.msgX == null ? ModalPanel.DEFAULT_PADDING_X : opts.msgX,
-                    y:opts.msgY == null ? ModalPanel.DEFAULT_PADDING_Y : opts.msgY,
+                    x:opts.msgX == null ? ModalPanel.PADDING_X : opts.msgX,
+                    y:opts.msgY == null ? ModalPanel.PADDING_Y : opts.msgY,
                     width:opts.width
                 });
                 
@@ -19212,7 +19194,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 const spinner = self.spinner = new pkg.Spinner(content, {
                     align:'center', visible:true,
                     borderColor:'#ccc',
-                    size:50, y:opts.msgY == null ? ModalPanel.DEFAULT_PADDING_Y : opts.msgY,
+                    size:50, y:opts.msgY == null ? ModalPanel.PADDING_Y : opts.msgY,
                 });
                 if (msg) {
                     new Text(content, {
@@ -19220,8 +19202,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                         whiteSpace:opts.whiteSpace,
                         wordWrap:opts.wordWrap,
                         fontWeight:opts.fontWeight,
-                        x:opts.msgX == null ? ModalPanel.DEFAULT_PADDING_X : opts.msgX,
-                        y:spinner.y + spinner.size + ModalPanel.DEFAULT_PADDING_Y,
+                        x:opts.msgX == null ? ModalPanel.PADDING_X : opts.msgX,
+                        y:spinner.y + spinner.size + ModalPanel.PADDING_Y,
                         width:opts.width
                     });
                 }
@@ -19229,7 +19211,9 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 self.show();
                 
                 content.closeBtn.setVisible(false);
-                self.focus(); // Focus on the dimmer itself to prevent user interaction.
+                
+                // Focus on the dimmer itself to prevent user interaction.
+                self.focus();
             },
             
             showColorPicker: function(callbackFunction, opts) {
@@ -19258,8 +19242,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 
                 // Build Picker
                 const colorPickerView = new ColorPicker(content, {
-                    x:ModalPanel.DEFAULT_PADDING_X,
-                    y:ModalPanel.DEFAULT_PADDING_Y + 24,
+                    x:ModalPanel.PADDING_X,
+                    y:ModalPanel.PADDING_Y + 24,
                     width:337,
                     height:177,
                     color:opts.color,
@@ -19296,8 +19280,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 
                 // Build Picker
                 const datePickerView = new DatePicker(content, {
-                    x:ModalPanel.DEFAULT_PADDING_X,
-                    y:ModalPanel.DEFAULT_PADDING_Y + 24,
+                    x:ModalPanel.PADDING_X,
+                    y:ModalPanel.PADDING_Y + 24,
                     height:195,
                     opt: {
                         current:new Date(opts.initialDate || Date.now()),
@@ -19315,16 +19299,16 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             },
             
             setupTitle: function(content, titleTxt) {
-                const R = Dialog.DEFAULT_RADIUS;
+                const radius = Dialog.RADIUS;
                 (this.header = new View(content, {
                     ignoreLayout:true,
                     width:content.width,
                     height:24,
                     bgColor:'#eee',
-                    roundedTopLeftCorner:R,
-                    roundedTopRightCorner:R
+                    roundedTopLeftCorner:radius,
+                    roundedTopRightCorner:radius
                 })).sendToBack();
-                new Text(content, {name:'title', x:R, y:4, text:titleTxt, fontWeight:'bold'});
+                new Text(content, {name:'title', x:radius, y:4, text:titleTxt, fontWeight:'bold'});
             },
             
             /** @private 
@@ -19334,7 +19318,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             setupFooterButtons: function(mainView, opts) {
                 const self = this,
                     content = self.content, 
-                    DPY = ModalPanel.DEFAULT_PADDING_Y,
+                    DPY = ModalPanel.PADDING_Y,
                     HALF_DPY = DPY / 2,
                     btnContainer = new View(content, {y:mainView.y + mainView.height + DPY, align:'center'});
                 
@@ -19366,7 +19350,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 
                 content.sizeToChildren.setPaddingY(HALF_DPY);
                 
-                const R = Dialog.DEFAULT_RADIUS,
+                const radius = Dialog.RADIUS,
                     bgY = btnContainer.y - HALF_DPY;
                 (new View(content, {
                     ignoreLayout:true,
@@ -19374,8 +19358,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     width:content.width,
                     height:content.height - bgY,
                     bgColor:'#eee',
-                    roundedBottomLeftCorner:R,
-                    roundedBottomRightCorner:R
+                    roundedBottomLeftCorner:radius,
+                    roundedBottomRightCorner:radius
                 })).sendToBack();
                 
                 if (opts.showClose === false) cancelBtn.focus();
@@ -19459,7 +19443,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             }
         }),
         
-        /** Tests that a value is not null, undefined or empty. 
+        /** Tests that a value is not null, undefined or empty.
+            
             @class */
         RequiredFieldValidator = pkg.RequiredFieldValidator = new JSClass('RequiredFieldValidator', Validator, {
             /** @overrides myt.Validator */
@@ -19475,6 +19460,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         /** Tests that the value differs from the form rollback value by more 
             than just case.
+            
             @class */
         EqualsIgnoreCaseValidator = pkg.EqualsIgnoreCaseValidator = new JSClass('EqualsIgnoreCaseValidator', Validator, {
             /** @overrides myt.Validator */
@@ -19490,6 +19476,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         }),
         
         /** Verifies that a value is in the form of a URL.
+        
             @class */
         URLValidator = pkg.URLValidator = new JSClass('URLValidator', Validator, {
             /** @overrides myt.Validator
@@ -19513,6 +19500,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         }),
         
         /** Verifies that a value is JSON.
+        
             @class */
         JSONValidator = pkg.JSONValidator = new JSClass('JSONValidator', Validator, {
             /** @overrides myt.Validator */
@@ -19527,7 +19515,9 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             }
         });
     
-    /** Tests that the value from two fields are equal. */
+    /** Tests that the value from two fields are equal.
+        
+        @class */
     pkg.EqualFieldsValidator = new JSClass('EqualFieldsValidator', Validator, {
         /** @overrides myt.Validator
             @param {string} id
@@ -19549,7 +19539,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         }
     });
     
-    /** Tests that the value has a length between min and max
+    /** Tests that the value has a length between a min and max value.
+        
         @class */
     pkg.LengthValidator = new JSClass('LengthValidator', Validator, {
         /** @overrides myt.Validator
@@ -19585,7 +19576,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         }
     });
     
-    /** Tests that adBinary value is between min and max.
+    /** Tests that a value is between a min and max value.
+        
         @class */
     pkg.NumericRangeValidator = new JSClass('NumericRangeValidator', Validator, {
         /** @overrides myt.Validator
@@ -19601,8 +19593,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         /** @overrides myt.Validator */
         isValid: function(value, config, errorMessages) {
-            // Treat empty values as valid.
-            if (value === "") return true;
+            // Treat empty values as valid
+            if (value === '') return true;
             
             // Must be a number
             const numericValue = Number(value),
@@ -19641,9 +19633,9 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         /** Creates a new CompoundValidator for the ID and 0 or more Validators
             provided.
             @param {string} id
-            @param arguments:args ever argument after the first must be a
-                Validator or a Validator ID from the myt.global.validators
-                registry.*/
+            @param arguments:args - Every argument after the first argument 
+                must be a myt.Validator or a myt.Validator ID from the 
+                myt.global.validators registry.*/
         initialize: function(id, ...args) {
             this.callSuper(id);
             
@@ -19663,9 +19655,9 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Add a Validator to this CompoundValidator.
+        /** Add a myt.Validator to this myt.CompoundValidator.
             @param {!Object|string} v - The myt.Validator to add or a string
-                used to lookup a validator in the validator repository.
+                used to lookup a Validator in the Validator repository.
             @returns {undefined} */
         addValidator: function(v) {
             if (typeof v === 'string') v = getValidator(v);
@@ -19684,7 +19676,9 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     });
     
     /** Stores myt.Validators by ID so they can be used in multiple
-        places easily. */
+        places easily.
+        
+        @class */
     new JS.Singleton('GlobalValidatorRegistry', {
         // Life Cycle //////////////////////////////////////////////////////////
         initialize: function() {
@@ -19714,8 +19708,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         /** Removes a Validator from this registery.
             @param {!Object} identifiable - The myt.Validator to remove.
             @returns {undefined} */
-        unregister: (identifiable) => {
-            doFuncOnIdentifiable(identifiable, (id) => {
+        unregister: identifiable => {
+            doFuncOnIdentifiable(identifiable, id => {
                 // Make sure the validator is in the repository then delete.
                 if (getValidator(id)) delete validators[id];
             });
@@ -19726,39 +19720,37 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
 
 (pkg => {
     const JSClass = JS.Class,
+        mathMin = Math.min,
+        mathMax = Math.max,
+        
         View = pkg.View,
         
         defAttr = pkg.AccessorSupport.defAttr,
         
-        /** Provides Slider thumb functionality.
-            
-            Requires:
-                myt.Button
-            
-            @class */
-        SliderThumbMixin = pkg.SliderThumbMixin = new JS.Module('SliderThumbMixin', {
+        SliderThumb = new JSClass('SliderThumb', pkg.SimpleButton, {
             include: [pkg.Draggable],
             
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                defAttr(attrs, 'width', parent.thumbWidth);
-                defAttr(attrs, 'height', parent.thumbHeight);
-                defAttr(attrs, 'repeatKeyDown', true);
-                defAttr(attrs, 'activationKeys', [
+                const width = attrs.width = parent.thumbWidth,
+                    height = attrs.height = parent.thumbHeight;
+                attrs.roundedCorners = mathMin(height, width) / 2;
+                attrs.repeatKeyDown = true;
+                attrs.activationKeys = [
                     37, // left arrow
                     38, // up arrow
                     39, // right arrow
                     40 // down arrow
-                ]);
+                ];
+                attrs.activeColor = '#bbb';
+                attrs.readyColor = '#ccc';
+                attrs.hoverColor = '#ddd';
+                attrs.boxShadow = [0, 0, 4, '#666'];
                 
                 this.callSuper(parent, attrs);
                 
-                if (parent.axis === 'x') {
-                    this.setY(parent.thumbOffset);
-                } else {
-                    this.setX(parent.thumbOffset);
-                }
+                this[parent.axis === 'x' ? 'setY' : 'setX'](parent.thumbOffset);
                 
                 this.syncTo(parent, 'setDisabled', 'disabled');
                 
@@ -19784,7 +19776,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     this.callSuper(v);
                     
                     const p = this.parent;
-                    if (p.axis === 'x') p._syncValueToThumb(this);
+                    if (p.axis === 'x') p.syncValueToThumb(this);
                 }
             },
             
@@ -19794,7 +19786,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     this.callSuper(v);
                     
                     const p = this.parent;
-                    if (p.axis === 'y') p._syncValueToThumb(this);
+                    if (p.axis === 'y') p.syncValueToThumb(this);
                 }
             },
             
@@ -19808,19 +19800,17 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                         maxPx = parent.getMaxPixelValueForThumb(this);
                     let halfSize,
                         pos,
-                        func;
-                    
+                        funcName;
                     if (parent.axis === 'x') {
                         halfSize = this.width / 2;
                         pos = x;
-                        func = this.setX;
+                        funcName = 'setX';
                     } else {
                         halfSize = this.height / 2;
                         pos = y;
-                        func = this.setY;
+                        funcName = 'setY';
                     }
-                    
-                    func.call(this, Math.min(Math.max(pos, minPx - halfSize), maxPx - halfSize));
+                    this[funcName](mathMin(mathMax(pos, minPx - halfSize), maxPx - halfSize));
                 }
             },
             
@@ -19841,29 +19831,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                         parent.nudgeValueDown(this);
                         break;
                 }
-                
                 this.callSuper(key, isRepeat);
-            }
-        }),
-        
-        /** A simple implementation of a slider thumb.
-            
-            @class */
-        SimpleSliderThumb = pkg.SimpleSliderThumb = new JSClass('SimpleSliderThumb', pkg.SimpleButton, {
-            include: [SliderThumbMixin],
-            
-            
-            // Life Cycle //////////////////////////////////////////////////////
-            /** @overrides myt.SimpleButton */
-            initNode: function(parent, attrs) {
-                defAttr(attrs, 'activeColor', '#bbb');
-                defAttr(attrs, 'readyColor', '#ccc');
-                defAttr(attrs, 'hoverColor', '#ddd');
-                defAttr(attrs, 'boxShadow', [0, 0, 4, '#666']);
-                
-                this.callSuper(parent, attrs);
-                
-                if (attrs.roundedCorners == null) this.setRoundedCorners(Math.min(this.height, this.width) / 2);
             }
         }),
         
@@ -19882,9 +19850,11 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 thumbHeight:number The height of the thumb.
                 thumbOffset:number The x/y offset of the thumb. Will applied to 
                     the opposite dimension to the axis.
-                thumbClass:JS.Class the class to use to create the thumb.
                 nudgeAmount:number the amount to nudge the value when the 
                     arrows keys are invoked. Defaults to 1.
+            
+            Private Attributes:
+                __lockSync:boolean Used internally to prevent infinite loops.
             
             @class */
         BaseSlider = pkg.BaseSlider = new JSClass('BaseSlider', View, {
@@ -19910,7 +19880,6 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 defAttr(attrs, 'thumbHeight', 16);
                 defAttr(attrs, 'thumbOffset', 1);
                 defAttr(attrs, 'nudgeAmount', 1);
-                defAttr(attrs, 'thumbClass', SimpleSliderThumb);
                 
                 this.callSuper(parent, attrs);
             },
@@ -19923,25 +19892,26 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             setThumbWidth: function(v) {this.thumbWidth = v;},
             setThumbHeight: function(v) {this.thumbHeight = v;},
             setThumbOffset: function(v) {this.thumbOffset = v;},
-            setThumbClass: function(v) {this.thumbClass = v;},
             setNudgeAmount: function(v) {this.nudgeAmount = v;},
             
             
             // Methods /////////////////////////////////////////////////////////
             convertValueToPixels: function(v) {
                 const self = this,
-                    minV = self.minValue, ti = self.trackInset,
-                    pxRange = (self.axis === 'x' ? self.width : self.height) - ti - self.trackOutset,
+                    minV = self.minValue,
+                    trackInset = self.trackInset,
+                    pxRange = (self.axis === 'x' ? self.width : self.height) - trackInset - self.trackOutset,
                     valueRange = self.maxValue - minV;
-                return ti + ((v - minV) * (pxRange / valueRange));
+                return trackInset + ((v - minV) * (pxRange / valueRange));
             },
             
             convertPixelsToValue: function(px) {
                 const self = this,
-                    minV = self.minValue, ti = self.trackInset,
-                    pxRange = (self.axis === 'x' ? self.width : self.height) - ti - self.trackOutset,
+                    minV = self.minValue,
+                    trackInset = self.trackInset,
+                    pxRange = (self.axis === 'x' ? self.width : self.height) - trackInset - self.trackOutset,
                     valueRange = self.maxValue - minV;
-                return ((px - ti) * (valueRange / pxRange)) + minV;
+                return ((px - trackInset) * (valueRange / pxRange)) + minV;
             },
             
             nudgeValueLeft: function(thumb) {
@@ -19969,39 +19939,43 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 } else {
                     thumb.setY(value - thumb.height / 2);
                 }
-            }
-        }),
-        
-        /** A simple implementation of the range fill for a RangeSlider.
+            },
             
-            @class */
-        SimpleSliderRangeFill = pkg.SimpleSliderRangeFill = new JSClass('SimpleSliderRangeFill', View, {
-            // Life Cycle //////////////////////////////////////////////////////
-            initNode: function(parent, attrs) {
-                defAttr(attrs, 'bgColor', '#666');
-                
-                this.callSuper(parent, attrs);
-                
-                if (parent.axis === 'x') {
-                    this.setY(parent.thumbOffset);
-                    this.setHeight(parent.thumbHeight);
-                    this.setRoundedCorners(parent.thumbHeight / 2);
-                } else {
-                    this.setX(parent.thumbOffset);
-                    this.setWidth(parent.thumbWidth);
-                    this.setRoundedCorners(parent.thumbWidth / 2);
+            /** Should only be called by SliderThumb.
+                @private
+                @param {!Object} thumb
+                @returns {undefined} */
+            syncValueToThumb: function(thumb) {
+                if (this.inited && !this.__lockSync) {
+                    this.__lockSync = true;
+                    this._syncValueToThumb(thumb, this.convertPixelsToValue(
+                        this.axis === 'x' ? thumb.x + thumb.width / 2 : thumb.y + thumb.height / 2
+                    ));
+                    this.__lockSync = false;
                 }
-                parent._syncRangeFillToValue();
+            },
+            
+            _syncValueToThumb: (thumb, converted) => {/* Subclasses to implement */},
+            
+            /** Should only be called by SliderThumb.
+                @private
+                @param {!Object} thumb
+                @returns {number} */
+            getMinPixelValueForThumb: function(thumb) {
+                return this.convertValueToPixels(this.minValue);
+            },
+            
+            /** Should only be called by SliderThumb.
+                @private
+                @param {!Object} thumb
+                @returns {number} */
+            getMaxPixelValueForThumb: function(thumb) {
+                return this.convertValueToPixels(this.maxValue);
             }
         });
     
-    /** A slider component that support two thumbs.
-        
-        Attributes:
-            rangeFillClass:JS.Class The class used to instantiate the rangeFill
-        
-        Private Attributes:
-            __lockSync:boolean Used internally to prevent infinite loops.
+    /** A slider component that supports two thumbs, a lower one and an
+        upper one.
         
         @class */
     pkg.RangeSlider = new JSClass('RangeSlider', BaseSlider, {
@@ -20011,19 +19985,27 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.BaseSlider */
         initNode: function(parent, attrs) {
-            defAttr(attrs, 'rangeFillClass', SimpleSliderRangeFill);
-            
             this.callSuper(parent, attrs);
             
-            new this.rangeFillClass(this, {name:'rangeFill'});
-            new this.thumbClass(this, {name:'thumbLower'});
-            new this.thumbClass(this, {name:'thumbUpper'});
+            const rangeFillView = new View(this, {name:'rangeFill', bgColor:'#666'});
+            if (this.axis === 'x') {
+                rangeFillView.setY(this.thumbOffset);
+                rangeFillView.setHeight(this.thumbHeight);
+                rangeFillView.setRoundedCorners(this.thumbHeight / 2);
+            } else {
+                rangeFillView.setX(this.thumbOffset);
+                rangeFillView.setWidth(this.thumbWidth);
+                rangeFillView.setRoundedCorners(this.thumbWidth / 2);
+            }
+            
+            new SliderThumb(this, {name:'thumbLower'});
+            new SliderThumb(this, {name:'thumbUpper'});
+            
+            this._syncRangeFillToValue();
         },
         
         
         // Accessors ///////////////////////////////////////////////////////////
-        setRangeFillClass: function(v) {this.rangeFillClass = v;},
-        
         /** @overrides */
         setValue: function(v) {
             this.callSuper(v);
@@ -20035,7 +20017,6 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     this._syncThumbToValue(this.thumbLower, v);
                     this._syncThumbToValue(this.thumbUpper, v);
                 }
-                
                 this._syncRangeFillToValue();
             }
         },
@@ -20066,7 +20047,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Should only be called by myt.SimpleSliderRangeFill.
+        /** Should only be called by this and the rangeFill View.
             @private
             @returns {undefined} */
         _syncRangeFillToValue: function() {
@@ -20088,33 +20069,17 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             this.callSuper(thumb, thumb.name === 'thumbLower' ? value.lower : value.upper);
         },
         
-        /** Should only be called by myt.SliderThumbMixin.
-            @private
-            @param {!Object} thumb
-            @returns {undefined} */
-        _syncValueToThumb: function(thumb) {
-            if (this.inited && !this.__lockSync) {
-                this.__lockSync = true;
-                
-                const converted = this.convertPixelsToValue(
-                    this.axis === 'x' ? thumb.x + thumb.width / 2 : thumb.y + thumb.height / 2
-                );
-                
-                let value = this.getValueCopy();
-                if (thumb.name === 'thumbLower') {
-                    value.lower = converted;
-                } else {
-                    value.upper = converted;
-                }
-                this.setValue(value);
-                
-                // Update thumb position since value may have been adjusted
-                value = this.getValue();
-                if (this.thumbLower) this._syncThumbToValue(this.thumbLower, value);
-                if (this.thumbUpper) this._syncThumbToValue(this.thumbUpper, value);
-                
-                this.__lockSync = false;
-            }
+        /** @overrides myt.BaseSlider */
+        _syncValueToThumb: function(thumb, converted) {
+            let value = this.getValueCopy();
+            value[thumb.name === 'thumbLower' ? 'lower' : 'upper'] = converted;
+            
+            this.setValue(value);
+            
+            // Update thumb position since value may have been adjusted
+            value = this.getValue();
+            if (this.thumbLower) this._syncThumbToValue(this.thumbLower, value);
+            if (this.thumbUpper) this._syncThumbToValue(this.thumbUpper, value);
         },
         
         /** @overrides myt.BaseSlider */
@@ -20122,29 +20087,21 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             const value = this.getValueCopy(),
                 adj = this.nudgeAmount * (up ? 1 : -1);
             if (thumb.name === 'thumbLower') {
-                value.lower += adj;
-                if (value.lower > value.upper) value.lower = value.upper;
+                value.lower = mathMin(value.lower + adj, value.upper);
             } else {
-                value.upper += adj;
-                if (value.lower > value.upper) value.upper = value.lower;
+                value.upper = mathMax(value.upper + adj, value.lower);
             }
             this.setValue(value);
         },
         
-        /** Should only be called by myt.SliderThumbMixin.
-            @private
-            @param {!Object} thumb
-            @returns {number} */
+        /** @overrides */
         getMinPixelValueForThumb: function(thumb) {
             return this.convertValueToPixels(
                 thumb.name === 'thumbLower' ? this.minValue : this.getValue().lower
             );
         },
         
-        /** Should only be called by myt.SliderThumbMixin.
-            @private
-            @param {!Object} thumb
-            @returns {number} */
+        /** @overrides */
         getMaxPixelValueForThumb: function(thumb) {
             return this.convertValueToPixels(
                 thumb.name === 'thumbLower' ? this.getValue().upper : this.maxValue
@@ -20153,9 +20110,6 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     });
     
     /** A slider component.
-        
-        Private Attributes:
-            __lockSync:boolean Used internally to prevent infinite loops.
         
         @class */
     pkg.Slider = new JSClass('Slider', BaseSlider, {
@@ -20167,7 +20121,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         initNode: function(parent, attrs) {
             this.callSuper(parent, attrs);
             
-            new this.thumbClass(this, {name:'thumb'});
+            new SliderThumb(this, {name:'thumb'});
         },
         
         
@@ -20198,44 +20152,17 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Should only be called by myt.SliderThumbMixin.
-            @private
-            @param {!Object} thumb
-            @returns {undefined} */
-        _syncValueToThumb: function(thumb) {
-            if (this.inited && !this.__lockSync) {
-                this.__lockSync = true;
-                
-                this.setValue(this.convertPixelsToValue(
-                    this.axis === 'x' ? thumb.x + thumb.width / 2 : thumb.y + thumb.height / 2
-                ));
-                
-                // Update thumb position since value may have been adjusted
-                this._syncThumbToValue(thumb, this.getValue());
-                
-                this.__lockSync = false;
-            }
+        /** @overrides myt.BaseSlider */
+        _syncValueToThumb: function(thumb, converted) {
+            this.setValue(converted);
+            
+            // Update thumb position since value may have been adjusted
+            this._syncThumbToValue(thumb, this.getValue());
         },
         
         /** @overrides myt.BaseSlider */
         _nudge: function(thumb, up) {
             this.setValue(this.getValue() + this.nudgeAmount * (up ? 1 : -1));
-        },
-        
-        /** Should only be called by myt.SliderThumbMixin.
-            @private
-            @param {!Object} thumb
-            @returns {number} */
-        getMinPixelValueForThumb: function(thumb) {
-            return this.convertValueToPixels(this.minValue);
-        },
-        
-        /** Should only be called by myt.SliderThumbMixin.
-            @private
-            @param {!Object} thumb
-            @returns {number} */
-        getMaxPixelValueForThumb: function(thumb) {
-            return this.convertValueToPixels(this.maxValue);
         }
     });
 })(myt);
@@ -20243,6 +20170,11 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
 
 (pkg => {
     const JSClass = JS.Class,
+        
+        STATE_COLLAPSED = 0,
+        STATE_RESTORED_JUST_COLLAPSED = 1,
+        STATE_RESTORED_JUST_EXPANDED = 2,
+        STATE_EXPANDED = 3,
         
         defAttr = pkg.AccessorSupport.defAttr,
         
@@ -20254,8 +20186,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             divider.constrain('__limitToParent', [divider, 'limitToParent', divider, dim, divider.parent, dim]);
         },
         
-        /** A divider is a UI control that allows the user to resize two area by
-            dragging the divider left/right or up/down.
+        /** A divider is a UI control that allows the user to resize two area 
+            by dragging the divider left/right or up/down.
             
             Events:
                 limitToParent:number
@@ -20294,7 +20226,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 defAttr(attrs, 'axis', 'x');
                 defAttr(attrs, 'minValue', 0);
                 defAttr(attrs, 'value', attrs.minValue);
-                defAttr(attrs, 'expansionState', 2);
+                defAttr(attrs, 'expansionState', STATE_RESTORED_JUST_EXPANDED);
                 defAttr(attrs, 'focusIndicator', false);
                 defAttr(attrs, 'repeatKeyDown', true);
                 defAttr(attrs, 'activationKeys', [
@@ -20352,14 +20284,13 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             
             setAxis: function(v) {
                 if (this.inited) {
-                    console.warn("Axis may not be updated after instantiation.");
+                    console.warn('Axis not updatable after instantiation');
                 } else {
                     this.axis = v;
                 }
             },
             
-            /** Update the x or y position of the component as the value 
-                changes.
+            /** Update the x or y position of the divider as the value changes.
                 @overrides myt.ValueComponent
                 @param {number} v - The x or y position to set.
                 @param {boolean} [restoreValueAlso] - If true, the restoreValue
@@ -20395,11 +20326,11 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 @overrides myt.Button. */
             doActivationKeyDown: function(key, isRepeat) {
                 const self = this;
-                let dir = 0;
                 
                 self.callSuper(key, isRepeat);
                 
                 // Determine nudge direction
+                let dir = 0;
                 switch (key) {
                     case 37: case 38: dir = -1; break;
                     case 39: case 40: dir = 1; break;
@@ -20412,7 +20343,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 self.__nudgeAcc = isRepeat ? Math.min(self.__nudgeAcc + 1, 64) : 1;
                 
                 self.setValue(self.value + dir * self.__nudgeAcc, true);
-                self.setExpansionState(2);
+                self.setExpansionState(STATE_RESTORED_JUST_EXPANDED);
             },
             
             doPrimaryAction: function() {
@@ -20422,9 +20353,9 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     minV = self.minValue;
                 let toValue;
                 switch (self.expansionState) {
-                    case 0:
+                    case STATE_COLLAPSED:
                         if (rv != null) {
-                            self.setExpansionState(1);
+                            self.setExpansionState(STATE_RESTORED_JUST_COLLAPSED);
                             if (rv === minV) {
                                 // Prevent infinite loop if there's nowhere 
                                 // to animate to.
@@ -20434,9 +20365,9 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                             }
                         }
                         break;
-                    case 1:
+                    case STATE_RESTORED_JUST_COLLAPSED:
                         if (maxV != null) {
-                            self.setExpansionState(3);
+                            self.setExpansionState(STATE_EXPANDED);
                             if (self.value === maxV) {
                                 self.doPrimaryAction();
                             } else {
@@ -20444,9 +20375,9 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                             }
                         }
                         break;
-                    case 2:
+                    case STATE_RESTORED_JUST_EXPANDED:
                         if (minV != null) {
-                            self.setExpansionState(0);
+                            self.setExpansionState(STATE_COLLAPSED);
                             if (self.value === minV) {
                                 self.doPrimaryAction();
                             } else {
@@ -20454,9 +20385,9 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                             }
                         }
                         break;
-                    case 3:
+                    case STATE_EXPANDED:
                         if (rv != null) {
-                            self.setExpansionState(2);
+                            self.setExpansionState(STATE_RESTORED_JUST_EXPANDED);
                             if (rv === maxV) {
                                 self.doPrimaryAction();
                             } else {
@@ -20476,12 +20407,13 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             requestDragPosition: function(x, y) {
                 if (!this.disabled) {
                     this.setValue(this.axis === 'y' ? y : x, true);
-                    this.setExpansionState(2);
+                    this.setExpansionState(STATE_RESTORED_JUST_EXPANDED);
                 }
             }
         });
     
     /** A divider that moves left/right.
+        
         @class */
     pkg.HorizontalDivider = new JSClass('HorizontalDivider', BaseDivider, {
         initNode: function(parent, attrs) {
@@ -20491,6 +20423,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     });
     
     /** A divider that moves left/right.
+        
         @class */
     pkg.VerticalDivider = new JSClass('VerticalDivider', BaseDivider, {
         initNode: function(parent, attrs) {
@@ -20504,6 +20437,9 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
 (pkg => {
     const JSClass = JS.Class,
         JSModule = JS.Module,
+        
+        mathMin = Math.min,
+        mathMax = Math.max,
         
         View = pkg.View,
         
@@ -20537,7 +20473,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             if (!controller.locked) controller.doSort();
         },
         
-        /* Calculate resize amounts and distribute it to the headers */
+        /*  Calculate resize amounts and distribute it to the headers */
         calculateAndDistribute = (hdrs, extra, isFlex, nextFunc) => {
             if (extra !== 0) {
                 const isGrow = extra > 0;
@@ -20571,13 +20507,13 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                         } else {
                             let incr;
                             if (isGrow) {
-                                incr = Math.min(isFlex ? hdr.flex : 1, extra);
+                                incr = mathMin(isFlex ? hdr.flex : 1, extra);
                                 if (info.amt + incr > info.limit) {
                                     incr = info.limit - info.amt;
                                     info.full = true;
                                 }
                             } else {
-                                incr = Math.max(isFlex ? -hdr.flex : -1, extra);
+                                incr = mathMax(isFlex ? -hdr.flex : -1, extra);
                                 if (info.amt + incr < info.limit) {
                                     incr = info.limit - info.amt;
                                     info.full = true;
@@ -20838,8 +20774,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             // Column Headers
             /** Gets the column header before the provided one.
                 @param {!Object} columnHeader
-                @returns {?Object} The myt.GridColumnHeader or null if none 
-                    exists. */
+                @returns {?Object} The myt.GridColumnHeader or null if 
+                    none exists. */
             getPrevColumnHeader: function(columnHeader) {
                 const hdrs = this.columnHeaders;
                 let idx = this.getColumnHeaderIndex(columnHeader);
@@ -20991,7 +20927,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     // Determine extra width to distribute/consume
                     const hdrs = this.getVisibleColumnHeaders();
                     let maxExtent = 0;
-                    hdrs.forEach(hdr => {maxExtent = Math.max(maxExtent, hdr.x + hdr.width);});
+                    hdrs.forEach(hdr => {maxExtent = mathMax(maxExtent, hdr.x + hdr.width);});
                     
                     // Distribute extra width to resizable flex columns and 
                     // then to non-flex columns.
@@ -21010,17 +20946,18 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 resizable:boolean
             
             Attributes:
-                columnId:string The unique ID for this column relative to the 
-                    grid it is part of.
-                gridController:myt.GridController the controller for the grid 
-                    this component is part of.
-                flex:number If 1 or more the column will get extra space if 
-                    any exists.
-                resizable:boolean Indicates if this column can be resized or 
-                    not. Defaults to true.
-                last:boolean Indicates if this is the last column header or not.
-                sortable:boolean Indicates if this column can be sorted or not.
-                    Defaults to true.
+                columnId:string The unique ID for this column relative 
+                    to the grid it is part of.
+                gridController:myt.GridController the controller for the 
+                    grid this component is part of.
+                flex:number If 1 or more the column will get extra space 
+                    if any exists.
+                resizable:boolean Indicates if this column can be resized 
+                    or not. Defaults to true.
+                last:boolean Indicates if this is the last column header 
+                    or not.
+                sortable:boolean Indicates if this column can be sorted 
+                    or not. Defaults to true.
                 sortState:string The sort state of this column. Allowed 
                     values are:
                         'ascending': Sorted in ascending order.
@@ -21028,8 +20965,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                         'none': Not currently an active sort column.
                 cellXAdj:number The amount to shift the x values of cells 
                     updated by this column. Defaults to 0.
-                cellWidthAdj:number The amount to grow/shrink the width of 
-                    cells updated by this column. Defaults to 0.
+                cellWidthAdj:number The amount to grow/shrink the width 
+                    of cells updated by this column. Defaults to 0.
             
             @class */
         GridColumnHeader = pkg.GridColumnHeader = new JSModule('GridColumnHeader', {
@@ -21071,11 +21008,11 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                             if (diff > 0) {
                                 // Get amount that this header can grow
                                 growAmt = self.maxValue - self.value;
-                                diff = Math.min(diff, Math.min(-getTakeRight(self), growAmt + getGiveLeft(self)));
+                                diff = mathMin(diff, mathMin(-getTakeRight(self), growAmt + getGiveLeft(self)));
                             } else if (diff < 0) {
                                 // Get amount that this header can shrink
                                 shrinkAmt = self.minValue - self.value;
-                                diff = Math.max(diff, Math.max(-getGiveRight(self), shrinkAmt + getTakeLeft(self)));
+                                diff = mathMax(diff, mathMax(-getGiveRight(self), shrinkAmt + getTakeLeft(self)));
                             }
                             
                             if (diff === 0) return;
@@ -21160,7 +21097,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     oldMinValue = self.minValue || 0, 
                     gc = self.gridController;
                 self.callSuper(v);
-                if (self.inited && gc && oldMinValue !== self.minValue) gc.setMinWidth(gc.minWidth + self.minValue - oldMinValue);
+                if (gc && self.inited && oldMinValue !== self.minValue) gc.setMinWidth(gc.minWidth + self.minValue - oldMinValue);
             },
             
             /** @overrides myt.BoundedValueComponent */
@@ -21170,31 +21107,34 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     gc = self.gridController;
                 if (v == null) v = defaultMaxValue;
                 self.callSuper(v);
-                if (self.inited && gc && oldMaxValue !== self.maxValue) gc.setMaxWidth(gc.maxWidth + self.maxValue - oldMaxValue);
+                if (gc && self.inited && oldMaxValue !== self.maxValue) gc.setMaxWidth(gc.maxWidth + self.maxValue - oldMaxValue);
             },
             
             /** @overrides myt.View */
             setWidth: function(v, supressEvent) {
                 const self = this,
-                    cur = self.width;
+                    cur = self.width,
+                    gc = self.gridController;
                 self.callSuper(v, supressEvent);
-                if (self.inited && self.gridController && cur !== self.width) self.gridController.notifyColumnHeaderWidthChange(self);
+                if (gc && self.inited && cur !== self.width) gc.notifyColumnHeaderWidthChange(self);
             },
             
             /** @overrides myt.View */
             setX: function(v) {
                 const self = this,
-                    cur = self.x;
+                    cur = self.x,
+                    gc = self.gridController;
                 self.callSuper(v);
-                if (self.inited && self.gridController && cur !== self.x) self.gridController.notifyColumnHeaderXChange(self);
+                if (gc && self.inited && cur !== self.x) gc.notifyColumnHeaderXChange(self);
             },
             
             /** @overrides myt.View */
             setVisible: function(v) {
                 const self = this,
-                    cur = self.visible;
+                    cur = self.visible,
+                    gc = self.gridController;
                 self.callSuper(v);
-                if (self.inited && self.gridController && cur !== self.visible) self.gridController.notifyColumnHeaderVisibilityChange(self);
+                if (self.inited && gc && cur !== self.visible) gc.notifyColumnHeaderVisibilityChange(self);
             }
         }),
         
@@ -21426,7 +21366,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         Attributes:
             sortIconColor:color the color to fill the sort icon with if shown.
-                Defaults to '#666666'.
+                Defaults to '#666'.
         
         @class */
     pkg.SimpleGridColumnHeader = new JSClass('SimpleGridColumnHeader', pkg.SimpleTextButton, {
@@ -21500,7 +21440,6 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         // Methods /////////////////////////////////////////////////////////////
         doActivated: function() {
-            console.log('here');
             if (!this.disabled) {
                 switch (this.sortState) {
                     case 'ascending': this.setSortState('descending'); break;
@@ -21520,25 +21459,18 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
 (pkg => {
     const JSClass = JS.Class,
         JSModule = JS.Module,
+        
+        math = Math,
+        mathMax = math.max,
+        
         View = pkg.View,
         GlobalFocus = pkg.global.focus,
         
         defAttr = pkg.AccessorSupport.defAttr,
         
-        DEFAULT_ROW_SPACING = 1,
-        DEFAULT_ROW_HEIGHT = 30,
-        DEFAULT_ROW_INSET = 0,
-        DEFAULT_ROW_OUTSET = 0,
-        DEFAULT_BG_COLOR = '#ccc',
-        
         DEFAULT_CLASS_KEY = 'default',
         
-        DEFAULT_SELECTED_COLOR = '#ccf',
-        DEFAULT_ACTIVE_COLOR = '#f8f8f8',
-        DEFAULT_HOVER_COLOR = '#eee',
-        DEFAULT_READY_COLOR = '#fff',
-        
-        /* Clears the selectedRow while leaving the selectedRowModel. */
+        /*  Clears the selectedRow while leaving the selectedRowModel. */
         clearSelectedRow = selectableInfiniteList => {
             const existing = selectableInfiniteList.selectedRow;
             if (existing) {
@@ -21584,7 +21516,9 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 this.classKey = classKey;
             },
             
-            notifyRefreshed: () => {}
+            
+            // Methods /////////////////////////////////////////////////////////
+            notifyRefreshed: () => {/* Subclasses to implement as needed. */}
         }),
         
         /** A mixin for rows in infinite scrolling lists
@@ -21635,11 +21569,11 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 defAttr(attrs, 'numericSort', true);
                 defAttr(attrs, 'ascendingSort', true);
                 defAttr(attrs, 'overflow', 'autoy');
-                defAttr(attrs, 'bgColor', DEFAULT_BG_COLOR);
-                defAttr(attrs, 'rowSpacing', DEFAULT_ROW_SPACING);
-                defAttr(attrs, 'rowInset', DEFAULT_ROW_INSET);
-                defAttr(attrs, 'rowOutset', DEFAULT_ROW_OUTSET);
-                defAttr(attrs, 'rowHeight', DEFAULT_ROW_HEIGHT);
+                defAttr(attrs, 'bgColor', '#ccc');
+                defAttr(attrs, 'rowSpacing', 1);
+                defAttr(attrs, 'rowInset', 0);
+                defAttr(attrs, 'rowOutset', 0);
+                defAttr(attrs, 'rowHeight', 30);
                 defAttr(attrs, 'overscrollBehavior', 'auto contain');
                 
                 self._rowExtent = self.rowSpacing = self.rowHeight = 0;
@@ -21717,9 +21651,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 }
             },
             
-            getFilterFunction: () => {
-                // Unimplemented which means don't filter anything out.
-            },
+            getFilterFunction: () => {/* Unimplemented which means don't filter anything out. */},
             
             scrollModelIntoView: function(model) {
                 const self = this,
@@ -21841,8 +21773,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             },
             
             putRowBackInPool: function(row) {
-                // Clear or reassign focus since the row will get reused and the 
-                // reused row will likely not be the appropriate focus.
+                // Clear or reassign focus since the row will get reused and 
+                // the reused row will likely not be the appropriate focus.
                 const currentFocus = GlobalFocus.focusedView;
                 if (currentFocus && currentFocus.isDescendantOf(row)) {
                     const focusTrap = this.getFocusTrap();
@@ -21864,8 +21796,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                     forceFullReset = self.forceFullResetOnNextRefresh,
                     scrollY = getDomScrollTop(self),
                     data = self.getListData() || [],
-                    startIdx = Math.max(0, Math.floor((scrollY - rowInset) / rowExtent)),
-                    endIdx = Math.min(data.length, Math.ceil((scrollY - rowInset + self.height) / rowExtent));
+                    startIdx = mathMax(0, math.floor((scrollY - rowInset) / rowExtent)),
+                    endIdx = math.min(data.length, math.ceil((scrollY - rowInset + self.height) / rowExtent));
                 
                 if (self.forceFullResetOnNextRefresh) self.forceFullResetOnNextRefresh = false;
                 
@@ -21935,10 +21867,10 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                defAttr(attrs, 'selectedColor', DEFAULT_SELECTED_COLOR);
-                defAttr(attrs, 'activeColor', DEFAULT_ACTIVE_COLOR);
-                defAttr(attrs, 'hoverColor', DEFAULT_HOVER_COLOR);
-                defAttr(attrs, 'readyColor', DEFAULT_READY_COLOR);
+                defAttr(attrs, 'selectedColor', '#ccf');
+                defAttr(attrs, 'activeColor', '#f8f8f8');
+                defAttr(attrs, 'hoverColor', '#eee');
+                defAttr(attrs, 'readyColor', '#fff');
                 defAttr(attrs, 'focusIndicator', false);
                 defAttr(attrs, 'activationKeys', [13,27,32,37,38,39,40]);
                 
@@ -22065,8 +21997,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             /** @overrides */
             resetListUI: function(preserveScroll, forceFullReset) {
                 if (this.isModelInData(this.selectedRowModel)) {
-                    // Only clear the selected row since it's still in the data 
-                    // and thus may be shown again.
+                    // Only clear the selected row since it's still in the 
+                    // data and thus may be shown again.
                     clearSelectedRow(this);
                 } else {
                     // Clear the row and model since the model can no longer 
@@ -22230,7 +22162,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         setColumnSpacing: function(v) {this.columnSpacing = v;},
         
         getColumnSpacingInUse: function() {
-            return this.columnSpacing === 0 ? 0 : Math.max(0, this.getVisibleColumnHeaders().length - 1) * this.columnSpacing;
+            return this.columnSpacing === 0 ? 0 : mathMax(0, this.getVisibleColumnHeaders().length - 1) * this.columnSpacing;
         },
         
         /** @overrides myt.View */
@@ -22245,7 +22177,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         /** @overrides myt.View */
         setWidth: function(v, supressEvent) {
             const self = this;
-            self.callSuper(Math.max(self.minWidth, v), supressEvent);
+            self.callSuper(mathMax(self.minWidth, v), supressEvent);
             if (self.inited) {
                 const width = self.width;
                 self.setGridWidth(width);
@@ -22804,7 +22736,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
                 const pos = pkg.DomElementProxy.getRelativePosition(this.getIDE(), dropParent.getIDE());
                 return new dropClass(dropParent, Object.assign({}, this.dropClassAttrs, {x:pos.x || 0, y:pos.y || 0}));
             }
-        },
+        }
     });
     
     /** Makes an myt.View support having myt.Dropable views dropped on it.
@@ -22831,10 +22763,10 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Called by myt.GlobalDragManager when a dropable is dragged over this
-            target. Gives this drop target a chance to reject a drop regardless
-            of drag group. The default implementation returns true if the view
-            is not disabled.
+        /** Called by myt.GlobalDragManager when a dropable is dragged over 
+            this target. Gives this drop target a chance to reject a drop 
+            regardless of drag group. The default implementation returns true 
+            if the view is not disabled.
             @param dropable:myt.Dropable The dropable being dragged.
             @returns boolean: True if the drop will be allowed, false 
                 otherwise. */
@@ -22849,8 +22781,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             @returns {undefined} */
         notifyDragStart: dropable => {},
         
-        /** Called by myt.GlobalDragManager when a dropable stops being dragged
-            that has a matching drag group.
+        /** Called by myt.GlobalDragManager when a dropable stops being 
+            dragged that has a matching drag group.
             @param dropable:myt.Dropable The dropable no longer being dragged.
             @returns {undefined} */
         notifyDragStop: dropable => {},
@@ -22884,7 +22816,9 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             dropFailed:boolean Indicates this dropable was just dropped 
                 outside of a drop target.
             dropTarget:myt.DropTarget The drop target this dropable is 
-                currently over. */
+                currently over.
+        
+        @class */
     pkg.Dropable = new JSModule('Dropable', {
         include: [Draggable, DragGroupSupport],
         
@@ -22931,16 +22865,16 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             }
         },
         
-        /** Called by myt.GlobalDragManager when this view is dragged over a 
-            drop target.
+        /** Called by myt.GlobalDragManager when this view is dragged over 
+            a drop target.
             @param dropTarget:myt.DropTarget The target that was dragged over.
             @returns {undefined} */
         notifyDragEnter: function(dropTarget) {
             this.setDropTarget(dropTarget);
         },
         
-        /** Called by myt.GlobalDragManager when this view is dragged out of a 
-            drop target.
+        /** Called by myt.GlobalDragManager when this view is dragged out of 
+            a drop target.
             @param dropTarget:myt.DropTarget The target that was dragged out of.
             @returns {undefined} */
         notifyDragLeave: function(dropTarget) {
@@ -22951,8 +22885,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             @param dropTarget:myt.DropTarget The target that was dropped on. 
                 Will be undefined if this dropable was dropped on no 
                 drop target.
-            @param isAbort:boolean Indicates if the drop was the result of an
-                abort or a normal drop.
+            @param isAbort:boolean Indicates if the drop was the result of 
+                an abort or a normal drop.
             @returns {undefined} */
         notifyDropped: function(dropTarget, isAbort) {
             this.setDropped(true);
@@ -22981,8 +22915,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             scrollAmount:number The number of pixels to adjust by each time.
                 Defaults to 2 pixels.
             scrollAcceleration:number The amount to increase scrolling by as 
-                the mouse gets closer to the edge of the view. Setting this to 
-                0 will result in no acceleration. Defaults to 7.
+                the mouse gets closer to the edge of the view. Setting this 
+                to 0 will result in no acceleration. Defaults to 7.
         
         Private Attributes:
             __amtUp:number
@@ -23045,8 +22979,8 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
             }
         },
         
-        /** Called by myt.GlobalDragManager when a dropable stops being dragged
-            that has a matching drag group.
+        /** Called by myt.GlobalDragManager when a dropable stops being 
+            dragged that has a matching drag group.
             @param {!Object} dropable - The myt.Dropable no longer 
                 being dragged.
             @returns {undefined} */
@@ -23119,7 +23053,7 @@ myt.Spinner = new JS.Class('Spinner', myt.View, {
     
     Attributes:
         inited:boolean Set to true after this Eventable has completed 
-            initializing.
+            initialization.
     
     @class */
 myt.Eventable = new JS.Class('Eventable', {
@@ -23145,7 +23079,7 @@ myt.Eventable = new JS.Class('Eventable', {
                 if (mixin = mixins[i++]) {
                     self.extend(mixin);
                 } else {
-                    console.warn('Missing mixin in:' + self.klass.__displayName);
+                    console.warn('Missing mixin in', self.klass.__displayName);
                 }
             }
         }
@@ -23184,17 +23118,61 @@ myt.Eventable = new JS.Class('Eventable', {
             @param {!Object} annulus - The Annulus to redraw.
             @returns {undefined} */
         redraw = annulus => {
-            Annulus.draw(
-                annulus.__path, 
-                degreesToRadians(annulus.startAngle), 
-                degreesToRadians(annulus.endAngle), 
-                annulus.thickness, 
-                annulus.radius, 
-                annulus.width / 2, 
-                annulus.color, 
-                annulus.startCapRounding, 
-                annulus.endCapRounding
-            );
+            // Ensure endAngle is greater than or equal to startAngle
+            let startAngle = degreesToRadians(annulus.startAngle), 
+                endAngle = degreesToRadians(annulus.endAngle);
+            if (startAngle > endAngle) {
+                const tmp = startAngle;
+                startAngle = endAngle;
+                endAngle = tmp;
+            }
+            
+            const path = annulus.__path,
+                center = annulus.width / 2,
+                thickness = annulus.thickness,
+                innerRadius = annulus.radius,
+                outerRadius = innerRadius + thickness,
+                PI = math.PI,
+                angleDiff = endAngle - startAngle,
+                isFull = angleDiff + 0.0001 >= 2 * PI; // 0.0001 is to handle floating point errors
+            
+            // Will use two arcs for a full circle
+            if (isFull) {
+                startAngle = 0;
+                endAngle = PI;
+            }
+            
+            const mathCos = math.cos,
+                mathSin = math.sin,
+                points = [
+                    [center + outerRadius * mathCos(startAngle), center + outerRadius * mathSin(startAngle)],
+                    [center + outerRadius * mathCos(endAngle),   center + outerRadius * mathSin(endAngle)],
+                    [center + innerRadius * mathCos(endAngle),   center + innerRadius * mathSin(endAngle)],
+                    [center + innerRadius * mathCos(startAngle), center + innerRadius * mathSin(startAngle)]
+                ],
+                commands = ['M' + points[0].join()];
+            if (isFull) {
+                commands.push(
+                    'A' + [outerRadius, outerRadius, 0, 1, 1, points[1]].join(),
+                    'A' + [outerRadius, outerRadius, 0, 1, 1, points[0]].join(),
+                    'L' + points[2].join(),
+                    'A' + [innerRadius, innerRadius, 0, 1, 0, points[3]].join(),
+                    'A' + [innerRadius, innerRadius, 0, 1, 0, points[2]].join()
+                );
+            } else {
+                const largeArc = (angleDiff % (2 * PI)) > PI ? 1 : 0,
+                    halfThickness = thickness / 2;
+                commands.push(
+                    'A' + [outerRadius, outerRadius, 0, largeArc, 1, points[1]].join(),
+                    annulus.endCapRounding ? 'A' + [halfThickness, halfThickness, 0, 0, 1, points[2]].join() : 'L' + points[2].join(),
+                    'A' + [innerRadius, innerRadius, 0, largeArc, 0, points[3]].join(),
+                    annulus.startCapRounding ? 'A' + [halfThickness, halfThickness, 0, 0, 1, points[0]].join() : ''
+                );
+            }
+            commands.push('z');
+            
+            path.setAttribute('d', commands.join(' '));
+            path.setAttribute('fill', annulus.color);
         },
         
         /*  Ensures the size of the view exactly fits the annulus.
@@ -23234,7 +23212,7 @@ myt.Eventable = new JS.Class('Eventable', {
         },
         
         makeSVG = (elementName, parentElem) => {
-            const svgElem = document.createElementNS("http://www.w3.org/2000/svg", elementName);
+            const svgElem = document.createElementNS('http://www.w3.org/2000/svg', elementName);
             if (parentElem) parentElem.appendChild(svgElem);
             return svgElem;
         },
@@ -23243,80 +23221,6 @@ myt.Eventable = new JS.Class('Eventable', {
             
             @class */
         Annulus = pkg.Annulus = new JS.Class('Annulus', pkg.View, {
-            // Class Methods and Attributes ////////////////////////////////////
-            extend: {
-                makeSVG: makeSVG,
-                
-                /** Draws an annulus using the provided path.
-                    @param path:svg path object
-                    @param startAngle:number The start angle in radians.
-                    @param endAngle:number The end angle in radians.
-                    @param thickness:number The difference between the inner 
-                        and outer radius.
-                    @param r1:number The inner radius.
-                    @param c:number The center of the annulus
-                    @param color:hex string The color to fill with.
-                    @param startCapRounding:boolean If true the starting cap 
-                        will be drawn as a semicircle.
-                    @param endCapRounding:boolean If true the ending cap will 
-                        be drawn as a semicircle.
-                    @returns {undefined} */
-                draw: (path, startAngle, endAngle, thickness, r1, c, color, startCapRounding, endCapRounding) => {
-                    // Ensure endAngle is greater than or equal to startAngle
-                    if (startAngle > endAngle) {
-                        const tmp = startAngle;
-                        startAngle = endAngle;
-                        endAngle = tmp;
-                    }
-                    
-                    const r2 = r1 + thickness,
-                        PI = math.PI,
-                        angleDiff = endAngle - startAngle,
-                        isFull = angleDiff + 0.0001 >= 2 * PI; // 0.0001 is to handle floating point errors
-                    
-                    // Will use two arcs for a full circle
-                    if (isFull) {
-                        startAngle = 0;
-                        endAngle = PI;
-                    }
-                    
-                    const COS = math.cos,
-                        SIN = math.sin,
-                        points = [
-                            [c + r2 * COS(startAngle), c + r2 * SIN(startAngle)],
-                            [c + r2 * COS(endAngle),   c + r2 * SIN(endAngle)],
-                            [c + r1 * COS(endAngle),   c + r1 * SIN(endAngle)],
-                            [c + r1 * COS(startAngle), c + r1 * SIN(startAngle)]
-                        ],
-                        commands = [];
-                    
-                    commands.push('M' + points[0].join());
-                    if (isFull) {
-                        commands.push('A' + [r2, r2, 0, 1, 1, points[1]].join());
-                        commands.push('A' + [r2, r2, 0, 1, 1, points[0]].join());
-                        commands.push('L' + points[2].join());
-                        commands.push('A' + [r1, r1, 0, 1, 0, points[3]].join());
-                        commands.push('A' + [r1, r1, 0, 1, 0, points[2]].join());
-                    } else {
-                        const largeArc = (angleDiff % (2 * PI)) > PI ? 1 : 0,
-                            halfThickness = thickness / 2;
-                        commands.push('A' + [r2, r2, 0, largeArc, 1, points[1]].join());
-                        if (endCapRounding) {
-                            commands.push('A' + [halfThickness, halfThickness, 0, 0, 1, points[2]].join());
-                        } else {
-                            commands.push('L' + points[2].join());
-                        }
-                        commands.push('A' + [r1, r1, 0, largeArc, 0, points[3]].join());
-                        if (startCapRounding) commands.push('A' + [halfThickness, halfThickness, 0, 0, 1, points[0]].join());
-                    }
-                    commands.push('z');
-                    
-                    path.setAttribute('d', commands.join(' '));
-                    path.setAttribute('fill', color);
-                }
-            },
-            
-            
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
                 const self = this;
@@ -23344,26 +23248,40 @@ myt.Eventable = new JS.Class('Eventable', {
             
             
             // Accessors ///////////////////////////////////////////////////////
+            /** The outer radius of the Annulus. */
             setRadius: function(v) {setAndUpdateSize(this, 'radius', v);},
+            
+            /** The difference between the inner and outer radius. */
             setThickness: function(v) {setAndUpdateSize(this, 'thickness', v);},
+            
+            /** The start angle in radians. */
             setStartAngle: function(v) {setAndRedraw(this, 'startAngle', v);},
+            
+            /** The end angle in radians. */
             setEndAngle: function(v) {setAndRedraw(this, 'endAngle', v);},
+            
+            /** If true the starting cap will be drawn as a semicircle. */
             setStartCapRounding: function(v) {setAndRedraw(this, 'startCapRounding', v);},
+            
+            /** If true the ending cap will be drawn as a semicircle. */
             setEndCapRounding: function(v) {setAndRedraw(this, 'endCapRounding', v);},
+            
+            /** The hex color string to fill the Annulus with. */
             setColor: function(v) {setAndRedraw(this, 'color', v);},
             
             
             // Methods /////////////////////////////////////////////////////////
-            /** Prevent views from being sent behind the __svg. This allows us 
-                to add child views to an Annulus which is not directly supported 
-                in HTML.
+            /** Prevent views from being sent behind the __svg. This allows 
+                child views to be added to an Annulus which is not directly 
+                supported in HTML.
                 @overrides */
             sendSubviewToBack: function(sv) {
                 if (sv.parent === this) {
                     const ide = this.getIDE(),
-                        firstChild = ide.childNodes[1];
-                    if (sv.getODE() !== firstChild) {
-                        const removedElem = ide.removeChild(sv.getODE());
+                        firstChild = ide.childNodes[1],
+                        svOde = sv.getODE();
+                    if (svOde !== firstChild) {
+                        const removedElem = ide.removeChild(svOde);
                         if (removedElem) ide.insertBefore(removedElem, firstChild);
                     }
                 }
@@ -23378,355 +23296,6 @@ myt.Eventable = new JS.Class('Eventable', {
 
 
 (pkg => {
-    const JSClass = JS.Class,
-        CLOSE_NORMAL = 1000,
-        
-        /** Provides WebSocket functionality.
-            
-            @class */
-        WebSocketClass = pkg.WebSocket = new JSClass('WebSocket', pkg.Node, {
-            // Life Cycle //////////////////////////////////////////////////////
-            initNode: function(parent, attrs) {
-                this.status = 'closed';
-                this.useJSON = true;
-                this.callSuper();
-            },
-            
-            destroy: function() {
-                this.close(CLOSE_NORMAL, 'destroyed');
-                this.callSuper();
-            },
-            
-            
-            // Accessors ///////////////////////////////////////////////////////
-            setUseJSON: function(v) {
-                if (this.useJSON !== v) {
-                    this.useJSON = v;
-                    if (this.inited) this.fireEvent('useJSON', v);
-                }
-            },
-            
-            setStatus: function(v) {
-                if (this.status !== v) {
-                    this.status = v;
-                    if (this.inited) this.fireEvent('status', v);
-                }
-            },
-            
-            setUrl: function(v) {
-                // Support myt.URI for the url param.
-                if (typeof v === 'object' && typeof v.isA === 'function' && v.isA(pkg.URI)) v = v.toString();
-                
-                this.url = v;
-            },
-            
-            setProtocols: function(v) {
-                this.protocols = v;
-            },
-            
-            
-            // Methods /////////////////////////////////////////////////////////
-            /** Connects the WebSocket to the currently configured URL.
-                @param {?Function} [afterOpenCallback] - This callback will be
-                    executed once after the connection is established and the 
-                    onOpen method has been called.
-                @returns {undefined} */
-            connect: function(afterOpenCallback) {
-                if (!this._ws && this.url) {
-                    try {
-                        const ws = this._ws = new WebSocket(this.url, this.protocols);
-                        
-                        const openFunc = this.onOpen.bind(this);
-                        if (afterOpenCallback) {
-                            // Execute an afterOpenCallback one time
-                            ws.onopen = event => {
-                                openFunc(event);
-                                afterOpenCallback(event);
-                                
-                                // Reassign handler
-                                ws.onopen = openFunc;
-                            };
-                        } else {
-                            ws.onopen = openFunc;
-                        }
-                        
-                        ws.onerror = this.onError.bind(this);
-                        ws.onmessage = this.onMessage.bind(this);
-                        ws.onclose = this.onClose.bind(this);
-                    } catch (ex) {
-                        this.onError(ex);
-                    }
-                }
-            },
-            
-            /** Sends a message over the WebSocket.
-                @param {*} msg - The message to send.
-                @param {boolean} [doNotTryToConnect] - If falsy an attempt will
-                    be made to connect if the WebSocket is not currently 
-                    connected before sending the message.
-                @returns {boolean|undefined} Indicating if the message was sent
-                    or not. Undefined is returned when the connection has to 
-                    be opened before sending. */
-            send: function(msg, doNotTryToConnect) {
-                const self = this,
-                    ws = self._ws;
-                if (ws && self.status === 'open') {
-                    if (self.useJSON) {
-                        try {
-                            msg = JSON.stringify(msg);
-                        } catch (ex) {
-                            self.onError(ex);
-                        }
-                    }
-                    ws.send(msg);
-                    return true;
-                } else if (!doNotTryToConnect) {
-                    // Try to connect first and then send
-                    self.connect(event => {self.send(msg, true);});
-                } else {
-                    return false;
-                }
-            },
-            
-            /** Attempts to close the connection.
-                @param code:number (optional) Should be a WebSocket 
-                    CloseEvent.code value. Defaults to 1000 CLOSE_NORMAL.
-                @param reason:string (optional) An explanation of why the 
-                    close is occurring. Defaults to "close".
-                @returns {undefined} */
-            close: function(code, reason) {
-                if (this._ws) this._ws.close(code || CLOSE_NORMAL, reason || 'close');
-            },
-            
-            /** Invoked when after the WebSocket is opened.
-                @param {!Object} event -  The open event fired by the WebSocket.
-                @returns {undefined} */
-            onOpen: function(event) {
-                this.setStatus('open');
-            },
-            
-            /** Invoked when an error occurs in the WebSocket.
-                @param {!Object} event -  The error event fired by the 
-                    WebSocket.
-                @returns {undefined} */
-            onError: function(event) {
-                console.error(event);
-                
-                if (this._ws && this._ws.readyState !== WebSocket.OPEN) this.close();
-            },
-            
-            /** Invoked when a message is received over the WebSocket.
-                @param {!Object} event -  The message event fired by the 
-                    WebSocket.
-                @returns msg:* The message received. */
-            onMessage: function(event) {
-                let msg = event.data;
-                
-                if (this.useJSON) {
-                    try {
-                        msg = JSON.parse(msg);
-                    } catch (ex) {
-                        this.onError(ex);
-                    }
-                }
-                
-                return msg; // Useful for subclassing
-            },
-            
-            /** Invoked when the WebSocket is closed.
-                @param {!Object} event - The close event fired by the WebSocket.
-                @returns {undefined} */
-            onClose: function(event) {
-                if (this._ws) delete this._ws;
-                this.setStatus('closed');
-            }
-        }),
-        
-        matcherFunctionsByKey = {},
-        
-        /*  @param {string|?Function} matcher
-            @return {?Function} */
-        makeMatcherFunction = matcher => {
-            let matcherFunc;
-            if (typeof matcher === 'string') {
-                // Use the provided string as an exact match function. We must
-                // generate a unique function for each string key (and reuse it)
-                // so that the === tests will work in the registerListener and
-                // unregisterListener functions.
-                matcherFunc = matcherFunctionsByKey[matcher] || (matcherFunctionsByKey[matcher] = type => type === matcher);
-            } else if (typeof matcher === 'function') {
-                matcherFunc = matcher;
-            } else if (matcher == null) {
-                // Use a unique match anything function
-                matcherFunc = type => true;
-            } else {
-                // Invalid matcherFunc
-            }
-            return matcherFunc;
-        };
-    
-    /** A WebSocket where messages are JSON objects with the following
-        structure:
-            type:string The type of the message. This will allow registered 
-                listeners to be notified when a message they are interested 
-                in arrives.
-            msg:json The message payload.
-            date:number The time in milliseconds when the message was sent.
-        
-        @class */
-    pkg.MessageTypeWebSocket = new JSClass('MessageTypeWebSocket', WebSocketClass, {
-        // Life Cycle //////////////////////////////////////////////////////////
-        /** @overrides */
-        initNode: function(parent, attrs) {
-            this._listeners = [];
-            
-            if (attrs.protocols == null) attrs.protocols = 'typedMessage';
-            
-            this.callSuper();
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** Registers a listener function that will get called for messages with
-            a type that is matched by the provided matcher.
-            @param {?Function} listenerFunc The function that will get invoked. 
-                The message is provided as the sole argument to the function.
-            @param {string|?Function} matcher (optional) A matcher function 
-                that takes the type as the sole argument and must return true 
-                or false indicating if the type is matched or not. If a string 
-                is provided it will be converted into an exact match function. 
-                If not provided (or something falsy) is provided a promiscuous 
-                matcher function will be used.
-            @returns {undefined} */
-        registerListener: function(listenerFunc, matcher) {
-            if (listenerFunc) {
-                const matcherFunc = makeMatcherFunction(matcher);
-                if (matcherFunc) {
-                    // Register for existing listenr
-                    const listeners = this._listeners;
-                    let i = listeners.length;
-                    while (i) {
-                        const listenerInfo = listeners[--i];
-                        if (listenerInfo.func === listenerFunc) {
-                            const patternMatchers = listenerInfo.patternMatchers; 
-                            let j = patternMatchers.length;
-                            while (j) {
-                                // Abort since the patternMatcher is 
-                                // already registered
-                                if (patternMatchers[--j] === matcherFunc) return;
-                            }
-                            patternMatchers.push(matcherFunc);
-                            
-                            // Prevent fall through to "add" below since we 
-                            // found a listener.
-                            return;
-                        }
-                    }
-                    
-                    // Add a new listenerFunc
-                    listeners.push({
-                        func:listenerFunc,
-                        patternMatchers:[matcherFunc]
-                    });
-                }
-            }
-        },
-        
-        /** Removed the provided listener function and matcher.
-            @param {!Function} listenerFunc
-            @param {string|?Function} matcher
-            @returns {undefined} */
-        unregisterListener: function(listenerFunc, matcher) {
-            if (listenerFunc) {
-                const matcherFunc = makeMatcherFunction(matcher);
-                if (matcherFunc) {
-                    const listeners = this._listeners;
-                    let i = listeners.length;
-                    while (i) {
-                        const listenerInfo = listeners[--i];
-                        if (listenerInfo.func === listenerFunc) {
-                            // Try to remove the matcherFunc
-                            const patternMatchers = listenerInfo.patternMatchers;
-                            let j = patternMatchers.length;
-                            while (j) {
-                                if (patternMatchers[--j] === matcherFunc) {
-                                    patternMatchers.splice(j, 1);
-                                    break;
-                                }
-                            }
-                            
-                            // Remove entire entry if there are no more matchers
-                            if (patternMatchers.length === 0) listeners.splice(i, 1);
-                            break;
-                        }
-                    }
-                }
-            }
-        },
-        
-        /** Sends a message with a type. Use this method instead of send.
-            @param {string} type The type of the message to send.
-            @param {*} msg The message value. Must be convertible to JSON.
-            @param {boolean} doNotTryToConnect
-            @returns {undefined} The sent message. */
-        sendTypedMessage: function(type, msg, doNotTryToConnect) {
-            msg = this.createMessage(type, msg);
-            if (msg) return this.send(msg, doNotTryToConnect);
-        },
-        
-        /** Creates a new message to be sent. May be overridden by subclasses, 
-            but should not be used externally.
-            @param type:string The type of the message to send.
-            @param msg:* The message value. Must be convertible to JSON.
-            @returns string The message to be sent or undefined if an
-                exception occurs during JSON.stringify. */
-        createMessage: (type, msg) => {
-            let jsonMsg;
-            try {
-                jsonMsg = JSON.stringify(msg);
-            } catch (ex) {
-                console.error(ex);
-                return;
-            }
-            
-            return {
-                type:type || '',
-                msg:jsonMsg,
-                date:Date.now()
-            };
-        },
-        
-        /** @overrides */
-        onMessage: function(event) {
-            const msg = this.callSuper(event);
-            
-            // Parse msg.msg JSON
-            try {
-                msg.msg = JSON.parse(msg.msg);
-            } catch (ex) {
-                this.onError(msg);
-                return;
-            }
-            
-            // Notify Listeners
-            const type = msg.type;
-            this._listeners.forEach(listenerInfo => {
-                listenerInfo.patternMatchers.every(patternMatcher => {
-                    if (patternMatcher(type)) {
-                        listenerInfo.func(msg);
-                        return false;
-                    }
-                    return true;
-                });
-            });
-            
-            return msg;
-        }
-    });
-})(myt);
-
-
-(pkg => {
     let tooltipView;
     
     const JSClass = JS.Class,
@@ -23734,13 +23303,20 @@ myt.Eventable = new JS.Class('Eventable', {
         GlobalMouse = G.mouse,
         GlobalWindowResize = G.windowResize,
         
+        math = Math,
+        mathMin = math.min,
+        mathMax = math.max,
+        mathRound = math.round,
+        
+        defAttr = pkg.AccessorSupport.defAttr,
+        
         tooltipDomId = 'tooltipDiv',
         
-        /* Clears the tooltip timer. */
+        /*  Clears the tooltip timer. */
         clearCheckTipTimer = ttView => {
-            if (ttView.__checkTipTimerId) {
-                clearTimeout(ttView.__checkTipTimerId);
-                delete ttView.__checkTipTimerId;
+            if (ttView.__checkTID) {
+                clearTimeout(ttView.__checkTID);
+                delete ttView.__checkTID;
             }
         },
         
@@ -23756,7 +23332,7 @@ myt.Eventable = new JS.Class('Eventable', {
             return false;
         },
         
-        /*  A base class for tooltip classes.
+        /** A base class for tooltip classes.
             
             Attributes:
                 tooltip:object The tooltip configuration assigned to this 
@@ -23768,28 +23344,32 @@ myt.Eventable = new JS.Class('Eventable', {
                     the tooltip.
             
             Private Attributes:
-                __checkTipTimerId:number The timer ID used internally for 
-                    delaying when the tip gets shown. */
+                __checkTID:number The timer ID used internally for 
+                    delaying when the tip gets shown.
+            
+            @class */
         BaseTooltip = pkg.BaseTooltip = new JSClass('BaseTooltip', pkg.View, {
             include: [pkg.RootView],
             
             
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                /** The length of time in millis before the tip is shown. */
-                DEFAULT_TIP_DELAY:500,
+                /** The default length of time in millis before the tip 
+                    is shown. */
+                TIP_DELAY: 500,
                 
-                /** The length of time in millis before the tip is hidden. */
-                DEFAULT_TIP_HIDE_DELAY:100
+                /** The default length of time in millis before the tip 
+                    is hidden. */
+                TIP_HIDE_DELAY: 100
             },
             
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                this.tipDelay = this.nextTipDelay = BaseTooltip.DEFAULT_TIP_DELAY;
-                this.tipHideDelay = BaseTooltip.DEFAULT_TIP_HIDE_DELAY;
+                this.tipDelay = this.nextTipDelay = BaseTooltip.TIP_DELAY;
+                this.tipHideDelay = BaseTooltip.TIP_HIDE_DELAY;
                 
-                if (attrs.visible == null) attrs.visible = false;
+                defAttr(attrs, 'visible', false);
                 
                 this.callSuper(parent, attrs);
             },
@@ -23807,7 +23387,7 @@ myt.Eventable = new JS.Class('Eventable', {
                 if (this.inited) {
                     this.tooltip = v;
                     if (v) {
-                        this.attachToDom(GlobalMouse, '__checkMouseMovement', 'mousemove', true);
+                        this.attachToDom(GlobalMouse, '__hndl_mousemove', 'mousemove', true);
                         this.attachToDom(v.parent, 'hideTip', 'mousedown', true);
                         this.attachToDom(v.parent, 'hideTip', 'mouseup', true);
                     }
@@ -23819,17 +23399,17 @@ myt.Eventable = new JS.Class('Eventable', {
             /** @private
                 @param {!Object} event The event object.
                 @returns {undefined} */
-            __checkMouseMovement: function(event) {
+            __hndl_mousemove: function(event) {
                 const self = this;
                 self._lastPos = pkg.MouseObservable.getMouseFromEvent(event);
                 if (checkInTooltip(self)) {
                     clearCheckTipTimer(self);
-                    self.__checkTipTimerId = setTimeout(
+                    self.__checkTID = setTimeout(
                         () => {
-                            delete self.__checkTipTimerId;
+                            delete self.__checkTID;
                             
-                            // If the mouse rests in the tip's parent, 
-                            // show the tip.
+                            // If the mouse rests in the tooltip's parent, 
+                            // show the tooltip.
                             if (checkInTooltip(self)) self.showTip();
                         },
                         self.nextTipDelay
@@ -23846,23 +23426,23 @@ myt.Eventable = new JS.Class('Eventable', {
                 const ttp = this.tooltip.parent;
                 this.detachFromDom(ttp, 'hideTip', 'mousedown', true);
                 this.detachFromDom(ttp, 'hideTip', 'mouseup', true);
-                this.detachFromDom(GlobalMouse, '__checkMouseMovement', 'mousemove', true);
+                this.detachFromDom(GlobalMouse, '__hndl_mousemove', 'mousemove', true);
                 
                 this.nextTipDelay = this.tipDelay;
                 this.setVisible(false);
                 
-                // Don't consume mouse event since we just want to close the tip
-                // as a side effect of the user action. The typical case for 
-                // this is the user clicking on a button while the tooltip for 
-                // that button is shown.
+                // Don't consume mouse event since we just want to close the 
+                // tip as a side effect of the user action. The typical case 
+                // for this is the user clicking on a button while the tooltip 
+                // for that button is shown.
                 return true;
             },
             
             /** Called when the tip will be shown.
                 @returns {undefined} */
             showTip: function() {
-                // Don't show tooltips while doing drag and drop since they're
-                // distracting while this is going on.
+                // Don't show tooltips while doing drag and drop since 
+                // tooltips are distracting while this is going on.
                 if (!G.dragManager.getDragView()) {
                     this.nextTipDelay = this.tipHideDelay;
                     this.bringToFront();
@@ -23871,7 +23451,7 @@ myt.Eventable = new JS.Class('Eventable', {
             }
         }),
         
-        /*  An implementation of a tooltip.
+        /** An implementation of a tooltip.
             
             Attributes:
                 edgeSize:number the thickness of the "edge" of the tip 
@@ -23882,31 +23462,33 @@ myt.Eventable = new JS.Class('Eventable', {
                 insetH:number The horizontal inset of the text from the edge.
                 insetV:number The vertical inset of the text from the edge.
                 tipBgColor:string The color to use for the tip background.
-                tipTextColor:string The color to use for the tip text. */
+                tipTextColor:string The color to use for the tip text.
+            
+            @class */
         Tooltip = pkg.Tooltip = new JSClass('Tooltip', BaseTooltip, {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                DEFAULT_EDGE_SIZE:0,
-                DEFAULT_EDGE_COLOR:'#444',
-                DEFAULT_SHADOW_SIZE:2,
-                DEFAULT_SHADOW_COLOR:'#00000033', // Extra nums are opacity
-                DEFAULT_HORIZONTAL_INSET:6,
-                DEFAULT_VERTICAL_INSET:3,
-                DEFAULT_TIP_BG_COLOR:'#444',
-                DEFAULT_TIP_TEXT_COLOR:'#eee'
+                EDGE_SIZE: 0,
+                EDGE_COLOR: '#444',
+                SHADOW_SIZE: 2,
+                SHADOW_COLOR: '#00000033', // Extra nums are opacity
+                HORIZONTAL_INSET: 6,
+                VERTICAL_INSET: 3,
+                TIP_BG_COLOR: '#444',
+                TIP_TEXT_COLOR: '#eee'
             },
             
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                if (attrs.edgeSize == null) attrs.edgeSize = Tooltip.DEFAULT_EDGE_SIZE;
-                if (attrs.edgeColor == null) attrs.edgeColor = Tooltip.DEFAULT_EDGE_COLOR;
-                if (attrs.shadowSize == null) attrs.shadowSize = Tooltip.DEFAULT_SHADOW_SIZE;
-                if (attrs.shadowColor == null) attrs.shadowColor = Tooltip.DEFAULT_SHADOW_COLOR;
-                if (attrs.insetH == null) attrs.insetH = Tooltip.DEFAULT_HORIZONTAL_INSET;
-                if (attrs.insetV == null) attrs.insetV = Tooltip.DEFAULT_VERTICAL_INSET;
-                if (attrs.tipBgColor == null) attrs.tipBgColor = Tooltip.DEFAULT_TIP_BG_COLOR;
-                if (attrs.tipTextColor == null) attrs.tipTextColor = Tooltip.DEFAULT_TIP_TEXT_COLOR;
+                defAttr(attrs, 'edgeSize', Tooltip.EDGE_SIZE);
+                defAttr(attrs, 'edgeColor', Tooltip.EDGE_COLOR);
+                defAttr(attrs, 'shadowSize', Tooltip.SHADOW_SIZE);
+                defAttr(attrs, 'shadowColor', Tooltip.SHADOW_COLOR);
+                defAttr(attrs, 'insetH', Tooltip.HORIZONTAL_INSET);
+                defAttr(attrs, 'insetV', Tooltip.VERTICAL_INSET);
+                defAttr(attrs, 'tipBgColor', Tooltip.TIP_BG_COLOR);
+                defAttr(attrs, 'tipTextColor', Tooltip.TIP_TEXT_COLOR);
                 
                 this.callSuper(parent, attrs);
                 
@@ -23945,7 +23527,7 @@ myt.Eventable = new JS.Class('Eventable', {
                 // text width.
                 if (tipText.text !== txt) tipText.setText(txt);
                 tipText.setWidth('auto');
-                const tipTextWidth = Math.min(tipText.measureNoWrapWidth(), tt.maxTextWidth),
+                const tipTextWidth = mathMin(tipText.measureNoWrapWidth(), tt.maxTextWidth),
                     tipWidth = tipTextWidth + 2*tipText.x,
                     tipExtentX = tipWidth + 2*edgeSize;
                 tipText.setWidth(tipTextWidth);
@@ -23971,8 +23553,8 @@ myt.Eventable = new JS.Class('Eventable', {
                 }
                 
                 // Apply values and prevent out-of-bounds
-                self.setX(Math.round(Math.min(Math.max(tipX, 0), GlobalWindowResize.getWidth() - tipExtentX)));
-                self.setY(Math.round(Math.min(Math.max(tipY, 0), GlobalWindowResize.getHeight() - tipExtentY)));
+                self.setX(mathRound(mathMin(mathMax(tipX, 0), GlobalWindowResize.getWidth() - tipExtentX)));
+                self.setY(mathRound(mathMin(mathMax(tipY, 0), GlobalWindowResize.getHeight() - tipExtentY)));
                 self.setWidth(tipWidth);
                 self.setHeight(tipHeight);
                 self.setBgColor(self.tipBgColor);
@@ -24013,8 +23595,8 @@ myt.Eventable = new JS.Class('Eventable', {
                 /** The default class to use for tooltip views. If a project 
                     wants to use a special tip class everywhere it should 
                     override this. */
-                DEFAULT_TIP_CLASS:Tooltip,
-                DEFAULT_MAX_TEXT_WIDTH:280
+                TIP_CLASS: Tooltip,
+                MAX_TEXT_WIDTH: 280
             },
             
             
@@ -24041,7 +23623,7 @@ myt.Eventable = new JS.Class('Eventable', {
                 
                 if (isOver && tooltip) {
                     // Use configured class or default if none defined.
-                    const tipClass = self.tipClass || TooltipMixin.DEFAULT_TIP_CLASS;
+                    const tipClass = self.tipClass || TooltipMixin.TIP_CLASS;
                     
                     // Destroy tip if it's not the correct class.
                     if (tooltipView && !(tooltipView instanceof tipClass)) {
@@ -24069,7 +23651,7 @@ myt.Eventable = new JS.Class('Eventable', {
                         text:tooltip, 
                         tipalign:self.tipAlign, 
                         tipvalign:self.tipValign,
-                        maxTextWidth:self.maxTextWidth || TooltipMixin.DEFAULT_MAX_TEXT_WIDTH
+                        maxTextWidth:self.maxTextWidth || TooltipMixin.MAX_TEXT_WIDTH
                     });
                 }
             }
@@ -24080,9 +23662,10 @@ myt.Eventable = new JS.Class('Eventable', {
 /** An ordered collection of points that can be applied to a canvas.
     
     Attributes:
-        vectors:array The data is stored in a single array with the x coordinate
-            first and the y coordinate second.
-        _boundingBox:object the cached bounding box if it has been calculated.
+        vectors:array The data is stored in a single array with the 
+            x coordinate first and the y coordinate second.
+        _boundingBox:object the cached bounding box if it has 
+            been calculated.
     
     @class */
 myt.Path = new JS.Class('Path', {
@@ -24142,7 +23725,8 @@ myt.Path = new JS.Class('Path', {
         @param {number} a
         @returns {undefined} */
     rotate: function(a) {
-        const cosA = Math.cos(a), sinA = Math.sin(a),
+        const cosA = Math.cos(a),
+            sinA = Math.sin(a),
             vecs = this.vectors,
             len = vecs.length;
         for (let i = 0; len > i;) {
@@ -24318,9 +23902,9 @@ myt.Path = new JS.Class('Path', {
             if (sv.parent === this) {
                 const ide = this.getIDE(),
                     firstChild = ide.childNodes[1],
-                    svIde = sv.getIDE();
-                if (svIde !== firstChild) {
-                    const removedElem = ide.removeChild(svIde);
+                    svOde = sv.getODE();
+                if (svOde !== firstChild) {
+                    const removedElem = ide.removeChild(svOde);
                     if (removedElem) ide.insertBefore(removedElem, firstChild);
                 }
             }
@@ -24363,7 +23947,7 @@ myt.Path = new JS.Class('Path', {
                     if (opt == null) opt = 0.5;
                     break;
                 default:
-                    console.warn('Unexpected image type: ', imageType);
+                    console.warn('Unexpected image type', imageType);
                     extension = imageType.toLowerCase();
             }
             const mimeType = 'image/' + extension,

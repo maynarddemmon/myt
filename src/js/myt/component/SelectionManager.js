@@ -26,7 +26,7 @@
             /** Checks if this object is selected.
                 @returns {boolean} */
             isSelected: function() {
-                return this.selected ? true : false;
+                return !!this.selected;
             },
             
             /** Checks if the provided myt.SelectionManager can select this 
@@ -45,29 +45,30 @@
         /** Manages the selection of one or more items.
             
             Events:
-                itemSelected:object Fired when an item is selected. The event 
-                    value is the selected item.
-                itemDeselected:object Fired when an item is deselected. The 
-                    event value is the deselected item.
+                itemSelected:object Fired when an item is selected. 
+                    The event value is the selected item.
+                itemDeselected:object Fired when an item is deselected. 
+                    The event value is the deselected item.
                 selectedCount:number Fired when the number of selected 
                     items changes.
             
             Attributes:
-                itemSelectionId:string The name of the property on items that 
-                    is used to differentiate them from each other for 
+                itemSelectionId:string The name of the property on items 
+                    that is used to differentiate them from each other for 
                     selection. The default value is 'id'.
                 maxSelected:number The maximum number of items that can be 
-                    selected. If -1 is provided the count is unlimited. If 1 
-                    is provided attempts to select when an item is already 
-                    selected will result in the existing selection being 
-                    cleared and the the new item being selected. Defaults to -1.
+                    selected. If -1 is provided the count is unlimited. 
+                    If 1 is provided attempts to select when an item is 
+                    already selected will result in the existing selection 
+                    being cleared and the the new item being selected. 
+                    Defaults to -1.
                 selectedCount:number The number of selected items.
             
             Private Attributes:
                 __selected:object A map of selected items by itemSelectionId.
-                __lastSelectedItem:object A reference to the last item that was
-                    selected. If this item is deselected this will get set 
-                    to null.
+                __lastSelectedItem:object A reference to the last item that 
+                    was selected. If this item is deselected this will get 
+                    set to null.
             
             @class */
         SelectionManager = pkg.SelectionManager = new JSModule('SelectionManager', {
@@ -95,8 +96,8 @@
                 
                 attrs.selectedCount = 0;
                 
-                if (attrs.itemSelectionId == null) attrs.itemSelectionId = 'id';
-                if (attrs.maxSelected == null) attrs.maxSelected = -1;
+                this.defAttr(attrs, 'itemSelectionId', 'id');
+                this.defAttr(attrs, 'maxSelected', -1);
                 
                 this.callSuper(parent, attrs);
             },

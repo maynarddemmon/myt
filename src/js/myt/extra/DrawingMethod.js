@@ -35,7 +35,7 @@ myt.DrawingMethod = new JS.Class('DrawingMethod', {
             if (drawingMethod) {
                 drawingMethod.draw(canvas, config);
             } else {
-                console.log("Unknown DrawingMethod", classname);
+                console.warn('Unknown DrawingMethod', classname);
             }
         }
     },

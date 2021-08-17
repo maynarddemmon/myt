@@ -2,6 +2,8 @@
     const JSClass = JS.Class,
         View = pkg.View,
         SizeToParent = pkg.SizeToParent,
+        
+        defAttr = pkg.AccessorSupport.defAttr,
     
         /** A tab slider component.
             
@@ -22,11 +24,11 @@
                 fillColorReady:color The color of the button when ready for 
                     interaction.
                 buttonHeight:number The height of the button portion of the 
-                    tab slider. Defaults to myt.TabSlider.DEFAULT_BUTTON_HEIGHT 
+                    tab slider. Defaults to myt.TabSlider.BUTTON_HEIGHT 
                     which is 30.
                 minContainerHeight:number The minimum height of the content 
                     container inside this tab slider. Defaults to 
-                    myt.TabSlider.DEFAULT_MINIMUM_CONTAINER_HEIGHT which is 100.
+                    myt.TabSlider.MINIMUM_CONTAINER_HEIGHT which is 100.
                 expansionState:string Indicates the expansion state of the tab 
                     slider. Supported values are: 'expanded', 'expanding', 
                     'collapsed' and 'collapsing'. Defaults to 'collapsed'.
@@ -38,14 +40,15 @@
             
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                DEFAULT_BUTTON_HEIGHT:30,
-                /** The minimum height of the container when expanded. */
-                DEFAULT_MINIMUM_CONTAINER_HEIGHT:100,
-                DEFAULT_FILL_COLOR_SELECTED:'#666',
-                DEFAULT_FILL_COLOR_HOVER:'#eee',
-                DEFAULT_FILL_COLOR_ACTIVE:'#ccc',
-                DEFAULT_FILL_COLOR_READY:'#fff',
-                DEFAULT_ANIMATION_MILLIS:500
+                BUTTON_HEIGHT:30,
+                /** The default minimum height of the container 
+                    when expanded. */
+                MINIMUM_CONTAINER_HEIGHT:100,
+                FILL_COLOR_SELECTED:'#666',
+                FILL_COLOR_HOVER:'#eee',
+                FILL_COLOR_ACTIVE:'#ccc',
+                FILL_COLOR_READY:'#fff',
+                ANIMATION_MILLIS:500
             },
             
             
@@ -59,18 +62,17 @@
                 attrs.expansionState = 'collapsed';
                 
                 if (attrs.tabId == null) attrs.tabId = pkg.generateGuid();
-                if (attrs.tabContainer == null) attrs.tabContainer = parent;
                 
-                if (attrs.selected == null) attrs.selected = false;
-                if (attrs.buttonClass == null) attrs.buttonClass = pkg.SimpleButton;
-                if (attrs.zIndex == null) attrs.zIndex = 0;
-                
-                if (attrs.buttonHeight == null) attrs.buttonHeight = TabSlider.DEFAULT_BUTTON_HEIGHT;
-                if (attrs.fillColorSelected == null) attrs.fillColorSelected = TabSlider.DEFAULT_FILL_COLOR_SELECTED;
-                if (attrs.fillColorHover == null) attrs.fillColorHover = TabSlider.DEFAULT_FILL_COLOR_HOVER;
-                if (attrs.fillColorActive == null) attrs.fillColorActive = TabSlider.DEFAULT_FILL_COLOR_ACTIVE;
-                if (attrs.fillColorReady == null) attrs.fillColorReady = TabSlider.DEFAULT_FILL_COLOR_READY;
-                if (attrs.minContainerHeight == null) attrs.minContainerHeight = TabSlider.DEFAULT_MINIMUM_CONTAINER_HEIGHT;
+                defAttr(attrs, 'tabContainer', parent);
+                defAttr(attrs, 'selected', false);
+                defAttr(attrs, 'buttonClass', pkg.SimpleButton);
+                defAttr(attrs, 'zIndex', 0);
+                defAttr(attrs, 'buttonHeight', TabSlider.BUTTON_HEIGHT);
+                defAttr(attrs, 'fillColorSelected', TabSlider.FILL_COLOR_SELECTED);
+                defAttr(attrs, 'fillColorHover', TabSlider.FILL_COLOR_HOVER);
+                defAttr(attrs, 'fillColorActive', TabSlider.FILL_COLOR_ACTIVE);
+                defAttr(attrs, 'fillColorReady', TabSlider.FILL_COLOR_READY);
+                defAttr(attrs, 'minContainerHeight', TabSlider.MINIMUM_CONTAINER_HEIGHT);
                 
                 // Selection must be done via the select method on 
                 // the tabContainer
@@ -220,7 +222,7 @@
                 if (wrapper.height !== to) {
                     wrapper.animate({
                         attribute:'height', to:to, 
-                        duration:TabSlider.DEFAULT_ANIMATION_MILLIS
+                        duration:TabSlider.ANIMATION_MILLIS
                     }).next((success) => {self.setExpansionState('expanded');});
                 } else {
                     self.setExpansionState('expanded');
@@ -240,7 +242,7 @@
                 if (wrapper.height !== 0) {
                     wrapper.animate({
                         attribute:'height', to:0, 
-                        duration:TabSlider.DEFAULT_ANIMATION_MILLIS
+                        duration:TabSlider.ANIMATION_MILLIS
                     }).next((success) => {self.setExpansionState('collapsed');});
                 } else {
                     self.setExpansionState('collapsed');
@@ -282,15 +284,15 @@
         TextTabSlider = pkg.TextTabSlider = new JSClass('TextTabSlider', TabSlider, {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                DEFAULT_LABEL_TEXT_COLOR_CHECKED: '#fff',
-                DEFAULT_LABEL_TEXT_COLOR: '#333'
+                LABEL_TEXT_COLOR_CHECKED: '#fff',
+                LABEL_TEXT_COLOR: '#333'
             },
             
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                if (attrs.labelTextColorChecked == null) attrs.labelTextColorChecked = TextTabSlider.DEFAULT_LABEL_TEXT_COLOR_CHECKED;
-                if (attrs.labelTextColor == null) attrs.labelTextColor = TextTabSlider.DEFAULT_LABEL_TEXT_COLOR;
+                defAttr(attrs, 'labelTextColorChecked', TextTabSlider.LABEL_TEXT_COLOR_CHECKED);
+                defAttr(attrs, 'labelTextColor', TextTabSlider.LABEL_TEXT_COLOR);
                 
                 this.callSuper(parent, attrs);
                 
@@ -333,7 +335,7 @@
             
             Attributes:
                 spacing:number The spacing between tab sliders. Defaults to
-                    myt.TabSliderContainer.DEFAULT_SPACING which is 1.
+                    myt.TabSliderContainer.SPACING which is 1.
             
             @class */
         TabSliderContainer = pkg.TabSliderContainer = new JS.Module('TabSliderContainer', {
@@ -342,7 +344,7 @@
             
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                DEFAULT_SPACING:1
+                SPACING:1
             },
             
             
@@ -354,10 +356,10 @@
                 
                 attrs.defaultPlacement = 'container';
                 
-                if (attrs.spacing == null) attrs.spacing = TabSliderContainer.DEFAULT_SPACING;
-                if (attrs.overflow == null) attrs.overflow = 'autoy';
-                if (attrs.itemSelectionId == null) attrs.itemSelectionId = 'tabId';
-                if (attrs.maxSelected == null) attrs.maxSelected = 1;
+                defAttr(attrs, 'spacing', TabSliderContainer.SPACING);
+                defAttr(attrs, 'overflow', 'autoy');
+                defAttr(attrs, 'itemSelectionId', 'tabId');
+                defAttr(attrs, 'maxSelected', 1);
                 
                 self.updateLayout = pkg.debounce(self.updateLayout);
                 

@@ -12,6 +12,7 @@
     let versionSearchString,
         dom,
         pre;
+    
     const searchString = data => {
             let dataItem, 
                 i = data.length;
@@ -33,20 +34,20 @@
         
         BrowserDetect = pkg.BrowserDetect = {
             browser:searchString([
-                {prop:window.opera,                   id:"Opera",    ver:"Version"},
-                {str:navigator.vendor, sub:"Apple",   id:"Safari",   ver:"Version"},
-                {str:userAgent,        sub:"Firefox", id:"Firefox"},
-                {str:userAgent,        sub:"Chrome",  id:"Chrome"},
-                {str:userAgent,        sub:"MSIE",    id:"Explorer", ver:"MSIE"}
+                {prop:window.opera,                   id:'Opera',    ver:'Version'},
+                {str:navigator.vendor, sub:'Apple',   id:'Safari',   ver:'Version'},
+                {str:userAgent,        sub:'Firefox', id:'Firefox'},
+                {str:userAgent,        sub:'Chrome',  id:'Chrome'},
+                {str:userAgent,        sub:'MSIE',    id:'Explorer', ver:'MSIE'}
             ]) || unknown,
             
             version:searchVersion(userAgent) || searchVersion(navigator.appVersion) || unknown,
             
             os:searchString([
-                {str:userAgent, sub:"iPhone", id:"iPhone/iPod"},
-                {str:platform,  sub:"Linux",  id:"Linux"},
-                {str:platform,  sub:"Mac",    id:"Mac"},
-                {str:platform,  sub:"Win",    id:"Windows"}
+                {str:userAgent, sub:'iPhone', id:'iPhone/iPod'},
+                {str:platform,  sub:'Linux',  id:'Linux'},
+                {str:platform,  sub:'Mac',    id:'Mac'},
+                {str:platform,  sub:'Win',    id:'Windows'}
             ]) || unknown
         };
     

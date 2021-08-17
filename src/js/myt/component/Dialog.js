@@ -60,11 +60,14 @@
         
         objectAssign = Object.assign,
         
-        math = Math,
-        mathMin = math.min,
-        mathMax = math.max,
+        mathMin = Math.min,
+        mathMax = Math.max,
         
-        /* Hide spinner related elements. */
+        BORDER_333 = [1, 'solid', '#333'],
+        BORDER_999 = [1, 'solid', '#999'],
+        BORDER_FFF = [1, 'solid', '#fff'],
+        
+        /*  Hide spinner related elements. */
         hideSpinner = dialog => {
             if (dialog.spinner) {
                 dialog.spinner.setVisible(false);
@@ -72,7 +75,7 @@
             }
         },
         
-        /* The class used as the DEFAULT_BUTTON_CLASS in myt.Dialog. */
+        /*  The class used as the default BUTTON_CLASS in myt.Dialog. */
         DialogButton = new JSClass('DialogButton', TextButton, {
             /** @overrides */
             initNode: function(parent, attrs) {
@@ -95,8 +98,6 @@
         LOCAL_STORAGE_KEY = 'myt.default',
         DOM_CLASS_CHECKERBOARD = 'mytCheckerboardPattern',
         CHECKMARK = makeTag(['check']),
-        BORDER_333 = [1, 'solid', '#333'],
-        BORDER_999 = [1, 'solid', '#999'],
         
         paletteLookup = {},
         
@@ -162,7 +163,7 @@
                     valView = new View(satView, {width:139, height:139});
                 satView.getIDS().backgroundImage = 'linear-gradient(to right, #fff, rgba(204, 154, 129, 0))';
                 valView.getIDS().backgroundImage = 'linear-gradient(to top, #000, rgba(204, 154, 129, 0))';
-                colorThumb = new View(valView, {width:6, height:6, bgColor:'#000', border:[1, 'solid', '#ffffff'], roundedCorners:4});
+                colorThumb = new View(valView, {width:6, height:6, bgColor:'#000', border:BORDER_FFF, roundedCorners:4});
                 
                 hueView = new View(colorPicker, {x:315, y:30, width:24, height:109, border:BORDER_333}, [Draggable, {
                     requestDragPosition: function(x, y) {
@@ -326,7 +327,7 @@
         DayBtn = new JSClass('DayBtn', SelectableBtn, {
             initNode: function(parent, attrs) {
                 attrs.width = 23;
-                attrs.border = [1, 'solid', '#fff'];
+                attrs.border = BORDER_FFF;
                 this.callSuper(parent, attrs);
             },
             
@@ -655,11 +656,20 @@
         Dialog = pkg.Dialog = new JSClass('Dialog', ModalPanel, {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                DEFAULT_RADIUS: 12,
-                DEFAULT_SHADOW: [0, 4, 20, '#666'],
-                DEFAULT_BORDER: [1, 'solid', '#fff'],
-                DEFAULT_BGCOLOR: '#fff',
-                DEFAULT_BUTTON_CLASS: DialogButton,
+                /** The default corner radius. */
+                RADIUS: 12,
+                
+                /** The default button class. */
+                BUTTON_CLASS: DialogButton,
+                
+                /** The default box shadow. */
+                SHADOW: [0, 4, 20, '#666'],
+                
+                /** The default border */
+                BORDER: BORDER_FFF,
+                
+                /** The default background color. */
+                BGCOLOR: '#fff',
                 
                 /** Makes the text wrap at 200px and the dialog will be at
                     least 200px wide. */
@@ -705,7 +715,7 @@
                     locales:{
                         en: {
                             days: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
-                            months: [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ],
+                            months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                             sep: '-',
                             prevMonth: 'Previous month',
                             nextMonth: 'Next month',
@@ -720,15 +730,15 @@
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides */
             initNode: function(parent, attrs) {
-                defAttr(attrs, 'buttonClass', Dialog.DEFAULT_BUTTON_CLASS);
+                defAttr(attrs, 'buttonClass', Dialog.BUTTON_CLASS);
                 
                 this.callSuper(parent, attrs);
                 
                 const content = this.content;
-                content.setRoundedCorners(Dialog.DEFAULT_RADIUS);
-                content.setBgColor(Dialog.DEFAULT_BGCOLOR);
-                content.setBoxShadow(Dialog.DEFAULT_SHADOW);
-                content.setBorder(Dialog.DEFAULT_BORDER);
+                content.setRoundedCorners(Dialog.RADIUS);
+                content.setBgColor(Dialog.BGCOLOR);
+                content.setBoxShadow(Dialog.SHADOW);
+                content.setBorder(Dialog.BORDER);
                 content.setFocusCage(true);
                 
                 this.makeCloseButton(content);
@@ -805,22 +815,22 @@
                 
                 // The blank dialog sets this.
                 content.setVisible(true);
-                this.overlay.setBgColor(pkg.Dimmer.DEFAULT_COLOR);
+                this.overlay.setBgColor(pkg.Dimmer.COLOR);
                 
                 // Message and Confirm dialogs set this.
                 this.setCallbackFunction();
                 
                 // The confirm dialog modifies this.
-                stc.setPaddingY(ModalPanel.DEFAULT_PADDING_Y);
+                stc.setPaddingY(ModalPanel.PADDING_Y);
                 
                 // The confirm content dialog modifies this.
-                stc.setPaddingX(ModalPanel.DEFAULT_PADDING_X);
+                stc.setPaddingX(ModalPanel.PADDING_X);
                 
                 // Any opts could modify this
-                content.setRoundedCorners(Dialog.DEFAULT_RADIUS);
-                content.setBgColor(Dialog.DEFAULT_BGCOLOR);
-                content.setBoxShadow(Dialog.DEFAULT_SHADOW);
-                content.setBorder(Dialog.DEFAULT_BORDER);
+                content.setRoundedCorners(Dialog.RADIUS);
+                content.setBgColor(Dialog.BGCOLOR);
+                content.setBoxShadow(Dialog.SHADOW);
+                content.setBorder(Dialog.BORDER);
             },
             
             /** Called by each of the buttons that can trigger the dialog to 
@@ -875,8 +885,8 @@
                     whiteSpace:opts.whiteSpace,
                     wordWrap:opts.wordWrap,
                     fontWeight:opts.fontWeight,
-                    x:opts.msgX == null ? ModalPanel.DEFAULT_PADDING_X : opts.msgX,
-                    y:opts.msgY == null ? ModalPanel.DEFAULT_PADDING_Y : opts.msgY,
+                    x:opts.msgX == null ? ModalPanel.PADDING_X : opts.msgX,
+                    y:opts.msgY == null ? ModalPanel.PADDING_Y : opts.msgY,
                     width:opts.width
                 });
                 
@@ -1001,7 +1011,7 @@
                 const spinner = self.spinner = new pkg.Spinner(content, {
                     align:'center', visible:true,
                     borderColor:'#ccc',
-                    size:50, y:opts.msgY == null ? ModalPanel.DEFAULT_PADDING_Y : opts.msgY,
+                    size:50, y:opts.msgY == null ? ModalPanel.PADDING_Y : opts.msgY,
                 });
                 if (msg) {
                     new Text(content, {
@@ -1009,8 +1019,8 @@
                         whiteSpace:opts.whiteSpace,
                         wordWrap:opts.wordWrap,
                         fontWeight:opts.fontWeight,
-                        x:opts.msgX == null ? ModalPanel.DEFAULT_PADDING_X : opts.msgX,
-                        y:spinner.y + spinner.size + ModalPanel.DEFAULT_PADDING_Y,
+                        x:opts.msgX == null ? ModalPanel.PADDING_X : opts.msgX,
+                        y:spinner.y + spinner.size + ModalPanel.PADDING_Y,
                         width:opts.width
                     });
                 }
@@ -1018,7 +1028,9 @@
                 self.show();
                 
                 content.closeBtn.setVisible(false);
-                self.focus(); // Focus on the dimmer itself to prevent user interaction.
+                
+                // Focus on the dimmer itself to prevent user interaction.
+                self.focus();
             },
             
             showColorPicker: function(callbackFunction, opts) {
@@ -1047,8 +1059,8 @@
                 
                 // Build Picker
                 const colorPickerView = new ColorPicker(content, {
-                    x:ModalPanel.DEFAULT_PADDING_X,
-                    y:ModalPanel.DEFAULT_PADDING_Y + 24,
+                    x:ModalPanel.PADDING_X,
+                    y:ModalPanel.PADDING_Y + 24,
                     width:337,
                     height:177,
                     color:opts.color,
@@ -1085,8 +1097,8 @@
                 
                 // Build Picker
                 const datePickerView = new DatePicker(content, {
-                    x:ModalPanel.DEFAULT_PADDING_X,
-                    y:ModalPanel.DEFAULT_PADDING_Y + 24,
+                    x:ModalPanel.PADDING_X,
+                    y:ModalPanel.PADDING_Y + 24,
                     height:195,
                     opt: {
                         current:new Date(opts.initialDate || Date.now()),
@@ -1104,16 +1116,16 @@
             },
             
             setupTitle: function(content, titleTxt) {
-                const R = Dialog.DEFAULT_RADIUS;
+                const radius = Dialog.RADIUS;
                 (this.header = new View(content, {
                     ignoreLayout:true,
                     width:content.width,
                     height:24,
                     bgColor:'#eee',
-                    roundedTopLeftCorner:R,
-                    roundedTopRightCorner:R
+                    roundedTopLeftCorner:radius,
+                    roundedTopRightCorner:radius
                 })).sendToBack();
-                new Text(content, {name:'title', x:R, y:4, text:titleTxt, fontWeight:'bold'});
+                new Text(content, {name:'title', x:radius, y:4, text:titleTxt, fontWeight:'bold'});
             },
             
             /** @private 
@@ -1123,7 +1135,7 @@
             setupFooterButtons: function(mainView, opts) {
                 const self = this,
                     content = self.content, 
-                    DPY = ModalPanel.DEFAULT_PADDING_Y,
+                    DPY = ModalPanel.PADDING_Y,
                     HALF_DPY = DPY / 2,
                     btnContainer = new View(content, {y:mainView.y + mainView.height + DPY, align:'center'});
                 
@@ -1155,7 +1167,7 @@
                 
                 content.sizeToChildren.setPaddingY(HALF_DPY);
                 
-                const R = Dialog.DEFAULT_RADIUS,
+                const radius = Dialog.RADIUS,
                     bgY = btnContainer.y - HALF_DPY;
                 (new View(content, {
                     ignoreLayout:true,
@@ -1163,8 +1175,8 @@
                     width:content.width,
                     height:content.height - bgY,
                     bgColor:'#eee',
-                    roundedBottomLeftCorner:R,
-                    roundedBottomRightCorner:R
+                    roundedBottomLeftCorner:radius,
+                    roundedBottomRightCorner:radius
                 })).sendToBack();
                 
                 if (opts.showClose === false) cancelBtn.focus();

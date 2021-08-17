@@ -200,16 +200,14 @@
         /** @overrides */
         initNode: function(parent, attrs) {
             this._listeners = [];
-            
-            if (attrs.protocols == null) attrs.protocols = 'typedMessage';
-            
+            this.defAttr(attrs, 'protocols', 'typedMessage');
             this.callSuper();
         },
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Registers a listener function that will get called for messages with
-            a type that is matched by the provided matcher.
+        /** Registers a listener function that will get called for messages 
+            with a type that is matched by the provided matcher.
             @param {?Function} listenerFunc The function that will get invoked. 
                 The message is provided as the sole argument to the function.
             @param {string|?Function} matcher (optional) A matcher function 

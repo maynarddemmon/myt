@@ -6,16 +6,15 @@
 <script src="../src/js/myt/manifest.js"></script>
 </head><body>
 <script>
-    JS.require('myt.all', function() {this.init();});
-    
-    function init() {
-        const TextButton = myt.TextButton;
+    JS.require('myt.all', () => {
+        const M = myt,
+            TextButton = M.TextButton;
         
-        myt.Layout.incrementGlobalLock();
+        M.Layout.incrementGlobalLock();
         
-        var rootView = new myt.View(null, {
+        const rootView = new M.View(null, {
             bgColor:'#cccccc', id:'rootForm'
-        }, [myt.SizeToWindowWidth, myt.RootForm, {
+        }, [M.SizeToWindowWidth, M.RootForm, {
             doValidSubmit: function(value) {
                 console.log("valid submit", value);
             },
@@ -27,7 +26,7 @@
         
         new TextButton(rootView, {width:70, paddingTop:2, text:'setup'}, [{
             doActivated: function() {
-                var defaultValue = {
+                const defaultValue = {
                     field0:"and",
                     fieldA:"foo",
                     fieldB:"bar",
@@ -43,7 +42,7 @@
                     fieldH:['two','four'],
                     fieldI:"bar"
                 };
-                var rollbackValue = {
+                const rollbackValue = {
                     field0:"any",
                     fieldA:"FOO",
                     fieldB:"",
@@ -58,7 +57,7 @@
                     fieldH:['four','five','six'],
                     fieldI:""
                 };
-                var value = {
+                const value = {
                     field0:"big",
                     fieldC:"blah",
                     subForm:{
@@ -78,9 +77,9 @@
         }]);
         
         // Define a few validators
-        var lenValidator = new myt.LengthValidator('len', 3, 10);
+        const lenValidator = new M.LengthValidator('len', 3, 10);
         
-        new myt.FormComboBox(rootView, {
+        new M.FormComboBox(rootView, {
             width:100, id:'field0', form:rootView,
             validators:[lenValidator],
             fullItemConfig:[
@@ -97,35 +96,35 @@
                 {attrs:{text:'zip'}}
             ]
         });
-        const fieldAView = new myt.FormInputText(rootView, {
+        const fieldAView = new M.FormInputText(rootView, {
             width:100, id:'fieldA', form:rootView, validators:[lenValidator, 'required'],
             allowedChars:'0123456789', placeholder:'Numbers Only'
         });
-        myt.createInputPlaceholderCSSRule(fieldAView, '#f00', 'courier', 0.5);
-        new myt.FormInputText(rootView, {
+        M.createInputPlaceholderCSSRule(fieldAView, '#f00', 'courier', 0.5);
+        new M.FormInputText(rootView, {
             width:100, id:'fieldB', form:rootView, validators:['equalsIgnoreCase', lenValidator], 
             validateWhen:'blurWithKeyFix', placeholder:'Ignore Case'
         });
-        new myt.FormInputText(rootView, {
+        new M.FormInputText(rootView, {
             width:100, id:'fieldC', form:rootView, validators:[lenValidator]
         });
-        new myt.FormInputTextArea(rootView, {
+        new M.FormInputTextArea(rootView, {
             width:100, height:43, id:'fieldCAlt', form:rootView, validators:[lenValidator],
             placeholder:'Length must be 3 to 10.'
         });
-        new myt.FormCheckbox(rootView, {
+        new M.FormCheckbox(rootView, {
             id:'fieldD', form:rootView, label:'It all makes sense'
         });
-        new myt.FormCheckbox(rootView, {
+        new M.FormCheckbox(rootView, {
             id:'fieldE', form:rootView
         });
         
-        new myt.Radio(rootView, {groupId:'foo', optionValue:'a', label:'A'});
-        new myt.Radio(rootView, {groupId:'foo', optionValue:'b', label:'B'});
-        new myt.Radio(rootView, {groupId:'foo', optionValue:'c', label:'C'});
-        new myt.FormRadioGroup(rootView, {id:'fieldF', form:rootView, groupId:'foo'});
+        new M.Radio(rootView, {groupId:'foo', optionValue:'a', label:'A'});
+        new M.Radio(rootView, {groupId:'foo', optionValue:'b', label:'B'});
+        new M.Radio(rootView, {groupId:'foo', optionValue:'c', label:'C'});
+        new M.FormRadioGroup(rootView, {id:'fieldF', form:rootView, groupId:'foo'});
         
-        var options = [
+        const options = [
             {value:'one', label:'Label One'},
             {value:'two', label:'Label Two'},
             {value:'three', label:'Label Three'},
@@ -135,23 +134,23 @@
             {value:'seven', label:'Label Seven'},
             {value:'eight', label:'Label Eight'}
         ];
-        new myt.FormInputSelect(rootView, {id:'fieldG', form:rootView, options:options});
-        new myt.FormInputSelect(rootView, {id:'fieldH', form:rootView, options:options, multiple:true});
+        new M.FormInputSelect(rootView, {id:'fieldG', form:rootView, options:options});
+        new M.FormInputSelect(rootView, {id:'fieldH', form:rootView, options:options, multiple:true});
         
         // Subform: start
-        var subform = new myt.View(rootView, {
+        const subform = new M.View(rootView, {
             width:250, bgColor:'#cccccc', id:'subForm', form:rootView
-        }, [myt.Form]);
-        new myt.FormInputText(subform, {width:100, id:'fieldA', form:subform});
-        new myt.FormInputText(subform, {width:100, id:'fieldB', form:subform});
-        new myt.SpacedLayout(subform, {
+        }, [M.Form]);
+        new M.FormInputText(subform, {width:100, id:'fieldA', form:subform});
+        new M.FormInputText(subform, {width:100, id:'fieldB', form:subform});
+        new M.SpacedLayout(subform, {
             name:'layout', axis:'x', inset:5, spacing:5, outset:5, collapseParent:true
         });
-        new myt.ConstantLayout(subform, {targetAttrName:'y', targetValue:5});
-        new myt.SizeToChildren(subform, {axis:'y', paddingY:5});
+        new M.ConstantLayout(subform, {targetAttrName:'y', targetValue:5});
+        new M.SizeToChildren(subform, {axis:'y', paddingY:5});
         // Subform: end
         
-        var fieldI = new myt.FormEditableText(rootView, {
+        const fieldI = new M.FormEditableText(rootView, {
             id:'fieldI', form:rootView, validators:['equalsIgnoreCase', lenValidator],
             allowedChars:'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
             maxLength:32,
@@ -159,11 +158,11 @@
             paddingTop:2, paddingBottom:2, paddingRight:6, paddingLeft:6
         });
         
-        new myt.EditableText(rootView, {name:'editTxt1', value:'foo bar baz', minHeight:17});
-        new myt.EditableText(rootView, {name:'editTxt2', value:'foo bar baz', minHeight:17});
-        new myt.EditableText(rootView, {name:'editTxt3', whitespace:'nowrap', value:'Here is some text that won\'t wrap.', minHeight:17});
+        new M.EditableText(rootView, {name:'editTxt1', value:'foo bar baz', minHeight:17});
+        new M.EditableText(rootView, {name:'editTxt2', value:'foo bar baz', minHeight:17});
+        new M.EditableText(rootView, {name:'editTxt3', whitespace:'nowrap', value:'Here is some text that won\'t wrap.', minHeight:17});
         
-        var rollbackBtn = new TextButton(rootView, {width:70, paddingTop:3, text:'Rollback'}, [{
+        const rollbackBtn = new TextButton(rootView, {width:70, paddingTop:3, text:'Rollback'}, [{
             doActivated: function() {
                 rootView.invokeAccelerator('cancel');
             },
@@ -175,7 +174,7 @@
         }]);
         rollbackBtn.syncTo(rootView, 'setDisabled', 'isChanged');
         
-        var submitBtn = new TextButton(rootView, {width:70, paddingTop:3, text:'Submit'}, [{
+        const submitBtn = new TextButton(rootView, {width:70, paddingTop:3, text:'Submit'}, [{
             doActivated: function() {
                 rootView.invokeAccelerator('submit');
             },
@@ -190,13 +189,13 @@
         submitBtn.syncTo(rootView, 'setDisabled', 'isChanged');
         submitBtn.syncTo(rootView, 'setDisabled', 'isValid');
         
-        new myt.SpacedLayout(rootView, {
+        new M.SpacedLayout(rootView, {
             name:'layout', axis:'y',
             inset:25, spacing:5, outset:25, collapseParent:true
         });
-        new myt.ConstantLayout(rootView, {targetAttrName:'x', targetValue:10});
+        new M.ConstantLayout(rootView, {targetAttrName:'x', targetValue:10});
         
-        myt.Layout.decrementGlobalLock();
-    };
+        M.Layout.decrementGlobalLock();
+    });
 </script>
 </body></html>

@@ -99,9 +99,9 @@
             if (sv.parent === this) {
                 const ide = this.getIDE(),
                     firstChild = ide.childNodes[1],
-                    svIde = sv.getIDE();
-                if (svIde !== firstChild) {
-                    const removedElem = ide.removeChild(svIde);
+                    svOde = sv.getODE();
+                if (svOde !== firstChild) {
+                    const removedElem = ide.removeChild(svOde);
                     if (removedElem) ide.insertBefore(removedElem, firstChild);
                 }
             }
@@ -144,7 +144,7 @@
                     if (opt == null) opt = 0.5;
                     break;
                 default:
-                    console.warn('Unexpected image type: ', imageType);
+                    console.warn('Unexpected image type', imageType);
                     extension = imageType.toLowerCase();
             }
             const mimeType = 'image/' + extension,

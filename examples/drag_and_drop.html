@@ -6,217 +6,217 @@
 <script src="../src/js/myt/manifest.js"></script>
 </head><body>
 <script>
-    JS.require('myt.all', function() {
-        var DragSource = new JS.Class('DragSource', myt.SimpleButton, {
-            include: [myt.DropSource],
-            
-            initNode: function(parent, attrs) {
-                if (attrs.activeColor === undefined) attrs.activeColor = '#bbbbbb';
-                if (attrs.readyColor === undefined) attrs.readyColor = '#cccccc';
-                if (attrs.hoverColor === undefined) attrs.hoverColor = '#dddddd';
+    JS.require('myt.all', () => {
+        const DragSource = new JS.Class('DragSource', myt.SimpleButton, {
+                include: [myt.DropSource],
                 
-                attrs.width = attrs.height = 30;
-                attrs.roundedCorners = 8;
-                
-                this.callSuper(parent, attrs);
-            }
-        });
-        
-        var DragBox = new JS.Class('DragBox', myt.SimpleButton, {
-            include: [myt.Dropable],
-            
-            initNode: function(parent, attrs) {
-                if (attrs.activeColor === undefined) attrs.activeColor = '#aa0000';
-                if (attrs.readyColor === undefined) attrs.readyColor = '#cc0000';
-                if (attrs.hoverColor === undefined) attrs.hoverColor = '#ff0000';
-                
-                attrs.ignoreLayout = true;
-                attrs.width = attrs.height = 30;
-                attrs.roundedCorners = 8;
-                
-                attrs.centerOnMouse = true;
-                attrs.distanceBeforeDrag = 2;
-                attrs.allowAbort = true;
-                
-                this.callSuper(parent, attrs);
-                
-                this._origW = this.width;
-                this._origH = this.height;
-                this.animDuration = 100;
-            },
-            
-            willPermitDrop: function(dropTarget) {
-                // Create a "dead zone".
-                if (dropTarget.x > 500 && dropTarget.y < 300) return false;
-                
-                return this.callSuper(dropTarget);
-            },
-            
-            startDrag: function() {
-                var root = this.getRoot();
-                if (this.parent !== root) {
-                    // Prevent dragging from the "dead zone".
-                    if (!this.willPermitDrop(this.parent)) return;
+                initNode: function(parent, attrs) {
+                    if (attrs.activeColor === undefined) attrs.activeColor = '#bbbbbb';
+                    if (attrs.readyColor === undefined) attrs.readyColor = '#cccccc';
+                    if (attrs.hoverColor === undefined) attrs.hoverColor = '#dddddd';
                     
-                    var pos = myt.DomElementProxy.getRelativePosition(this.getInnerDomElement(), root.getInnerDomElement());
-                    this.setX(pos.x);
-                    this.setY(pos.y);
+                    attrs.width = attrs.height = 30;
+                    attrs.roundedCorners = 8;
                     
-                    var self = this;
-                    myt.View.retainFocusDuringDomUpdate(this, function() {
-                        self.setParent(root);
-                    });
+                    this.callSuper(parent, attrs);
                 }
-                this.bringToFront();
+            }),
+            
+            DragBox = new JS.Class('DragBox', myt.SimpleButton, {
+                include: [myt.Dropable],
                 
-                this.callSuper();
-            },
-            
-            notifyDropped: function(dropTarget, isAbort) {
-                console.log('dropped: ' + isAbort);
-                this.callSuper(dropTarget, isAbort);
-            },
-            
-            notifyDropAborted: function() {
-                console.log('aborted: behave as a drop fail.');
-                this.notifyDropFailed();
-            },
-            
-            notifyDropFailed: function() {
-                var self = this;
-                this.setDisabled(true);
-                this.animate('opacity', 0, 1, null, null, 500, null, null, 'easeInOutQuad').next(
-                    function(success) {self.destroy();}
-                );
-            },
-            
-            requestDragPosition: function(x, y) {
-                if (!this.disabled && this.dropTarget) {
-                    // Do nothing since animators handle positioning
-                } else {
-                    if (this._doCatchup) {
-                        this._doCatchup = false;
+                initNode: function(parent, attrs) {
+                    if (attrs.activeColor === undefined) attrs.activeColor = '#aa0000';
+                    if (attrs.readyColor === undefined) attrs.readyColor = '#cc0000';
+                    if (attrs.hoverColor === undefined) attrs.hoverColor = '#ff0000';
+                    
+                    attrs.ignoreLayout = true;
+                    attrs.width = attrs.height = 30;
+                    attrs.roundedCorners = 8;
+                    
+                    attrs.centerOnMouse = true;
+                    attrs.distanceBeforeDrag = 2;
+                    attrs.allowAbort = true;
+                    
+                    this.callSuper(parent, attrs);
+                    
+                    this._origW = this.width;
+                    this._origH = this.height;
+                    this.animDuration = 100;
+                },
+                
+                willPermitDrop: function(dropTarget) {
+                    // Create a "dead zone".
+                    if (dropTarget.x > 500 && dropTarget.y < 300) return false;
+                    
+                    return this.callSuper(dropTarget);
+                },
+                
+                startDrag: function() {
+                    var root = this.getRoot();
+                    if (this.parent !== root) {
+                        // Prevent dragging from the "dead zone".
+                        if (!this.willPermitDrop(this.parent)) return;
                         
-                        var dur = this.animDuration,
-                            startX = this.x - x, 
-                            startY = this.y - y;
-                        this.setDragOffsetX(startX, true);
-                        this.setDragOffsetY(startY, true);
-                        this.animate('dragOffsetX', 0, startX, null, null, dur, null, null, 'easeInOutQuad');
-                        this.animate('dragOffsetY', 0, startY, null, null, dur, null, null, 'easeInOutQuad');
+                        var pos = myt.DomElementProxy.getRelativePosition(this.getInnerDomElement(), root.getInnerDomElement());
+                        this.setX(pos.x);
+                        this.setY(pos.y);
+                        
+                        var self = this;
+                        myt.View.retainFocusDuringDomUpdate(this, function() {
+                            self.setParent(root);
+                        });
+                    }
+                    this.bringToFront();
+                    
+                    this.callSuper();
+                },
+                
+                notifyDropped: function(dropTarget, isAbort) {
+                    console.log('dropped: ' + isAbort);
+                    this.callSuper(dropTarget, isAbort);
+                },
+                
+                notifyDropAborted: function() {
+                    console.log('aborted: behave as a drop fail.');
+                    this.notifyDropFailed();
+                },
+                
+                notifyDropFailed: function() {
+                    var self = this;
+                    this.setDisabled(true);
+                    this.animate({attribute:'opacity', to:0, from:1, duration:500}).next(
+                        success => {self.destroy();}
+                    );
+                },
+                
+                requestDragPosition: function(x, y) {
+                    if (!this.disabled && this.dropTarget) {
+                        // Do nothing since animators handle positioning
                     } else {
-                        this.callSuper(x, y);
+                        if (this._doCatchup) {
+                            this._doCatchup = false;
+                            
+                            var dur = this.animDuration,
+                                startX = this.x - x, 
+                                startY = this.y - y;
+                            this.setDragOffsetX(startX, true);
+                            this.setDragOffsetY(startY, true);
+                            this.animate({attribute:'dragOffsetX', to:0, from:startX, duration:dur});
+                            this.animate({attribute:'dragOffsetY', to:0, from:startY, duration:dur});
+                        } else {
+                            this.callSuper(x, y);
+                        }
                     }
                 }
-            }
-        });
-        
-        var DragTarget = new JS.Class('DragBox', myt.View, {
-            include: [myt.DropTarget, myt.Disableable],
+            }),
             
-            initNode: function(parent, attrs) {
-                if (attrs.width === undefined) attrs.width = 60;
-                if (attrs.height === undefined) attrs.height = 60;
-                attrs.bgColor = '#999999';
-                attrs.roundedCorners = 10;
+            DragTarget = new JS.Class('DragBox', myt.View, {
+                include: [myt.DropTarget, myt.Disableable],
                 
-                this.callSuper(parent, attrs);
-            },
-            
-            doDisabled: function() {
-                this.setOpacity(this.disabled ? 0.5 : 1);
-                this.callSuper();
-            },
-            
-            notifyDragStart: function(dropable) {
-                if (this.willAcceptDrop(dropable) && dropable.willPermitDrop(this)) this.setBgColor('#666666');
-            },
-            
-            notifyDragStop: function(dropable) {
-                this.setBgColor('#999999');
-            },
-            
-            notifyDragEnter: function(dropable) {
-                this.setBoxShadow([0, 0, 9, '#666666']);
+                initNode: function(parent, attrs) {
+                    if (attrs.width === undefined) attrs.width = 60;
+                    if (attrs.height === undefined) attrs.height = 60;
+                    attrs.bgColor = '#999';
+                    attrs.roundedCorners = 10;
+                    
+                    this.callSuper(parent, attrs);
+                },
                 
-                dropable.stopActiveAnimators('width');
-                dropable.stopActiveAnimators('height');
+                doDisabled: function() {
+                    this.setOpacity(this.disabled ? 0.5 : 1);
+                    this.callSuper();
+                },
                 
-                dropable.stopActiveAnimators('dragOffsetX');
-                dropable.stopActiveAnimators('dragOffsetY');
-                dropable.setDragOffsetX(0, true);
-                dropable.setDragOffsetY(0, true);
+                notifyDragStart: function(dropable) {
+                    if (this.willAcceptDrop(dropable) && dropable.willPermitDrop(this)) this.setBgColor('#666666');
+                },
                 
-                var pos = myt.DomElementProxy.getRelativePosition(this.getOuterDomElement(), dropable.parent.getOuterDomElement()),
-                    dur = dropable.animDuration;
-                dropable.animate('x', (pos.x + 5), null, null, null, dur, null, null, 'easeInOutQuad');
-                dropable.animate('y', (pos.y + 5), null, null, null, dur, null, null, 'easeInOutQuad');
-                dropable.animate('width', this.width - 10, null, null, null, dur, null, null, 'easeInOutQuad');
-                dropable.animate('height', this.height - 10, null, null, null, dur, null, null, 'easeInOutQuad');
-            },
-            
-            notifyDragLeave: function(dropable) {
-                this.setBoxShadow();
+                notifyDragStop: function(dropable) {
+                    this.setBgColor('#999999');
+                },
                 
-                dropable.stopActiveAnimators('width');
-                dropable.stopActiveAnimators('height');
-                dropable.stopActiveAnimators('x');
-                dropable.stopActiveAnimators('y');
+                notifyDragEnter: function(dropable) {
+                    this.setBoxShadow([0, 0, 9, '#666666']);
+                    
+                    dropable.stopActiveAnimators('width');
+                    dropable.stopActiveAnimators('height');
+                    
+                    dropable.stopActiveAnimators('dragOffsetX');
+                    dropable.stopActiveAnimators('dragOffsetY');
+                    dropable.setDragOffsetX(0, true);
+                    dropable.setDragOffsetY(0, true);
+                    
+                    var pos = myt.DomElementProxy.getRelativePosition(this.getOuterDomElement(), dropable.parent.getOuterDomElement()),
+                        dur = dropable.animDuration;
+                    dropable.animate({attribute:'x', to:(pos.x + 5), duration:dur});
+                    dropable.animate({attribute:'y', to:(pos.y + 5), duration:dur});
+                    dropable.animate({attribute:'width', to:this.width - 10, duration:dur});
+                    dropable.animate({attribute:'height', to:this.height - 10, duration:dur});
+                },
                 
-                if (!dropable.dropped) {
-                    var dur = dropable.animDuration;
-                    dropable.animate('width', dropable._origW, null, null, null, dur, null, null, 'easeInOutQuad');
-                    dropable.animate('height', dropable._origH, null, null, null, dur, null, null, 'easeInOutQuad');
-                    dropable._doCatchup = true;
+                notifyDragLeave: function(dropable) {
+                    this.setBoxShadow();
+                    
+                    dropable.stopActiveAnimators('width');
+                    dropable.stopActiveAnimators('height');
+                    dropable.stopActiveAnimators('x');
+                    dropable.stopActiveAnimators('y');
+                    
+                    if (!dropable.dropped) {
+                        var dur = dropable.animDuration;
+                        dropable.animate({attribute:'width', to:dropable._origW, duration:dur});
+                        dropable.animate({attribute:'height', to:dropable._origH, duration:dur});
+                        dropable._doCatchup = true;
+                    }
+                },
+                
+                notifyDrop: function(dropable) {
+                    // Reparent if necessary.
+                    if (dropable.parent !== this) {
+                        var self = this;
+                        myt.View.retainFocusDuringDomUpdate(dropable, function() {
+                            dropable.setParent(self);
+                        });
+                    }
+                    
+                    dropable.setX((this.width - dropable.width) / 2);
+                    dropable.setY((this.height - dropable.height) / 2);
+                },
+                
+                willAcceptDrop: function(dropable) {
+                    if (this.hasContent()) {
+                        return false;
+                    } else {
+                        return this.callSuper();
+                    }
+                },
+                
+                hasContent: function() {
+                    return this.getSubviews().length > 0;
                 }
-            },
-            
-            notifyDrop: function(dropable) {
-                // Reparent if necessary.
-                if (dropable.parent !== this) {
-                    var self = this;
-                    myt.View.retainFocusDuringDomUpdate(dropable, function() {
-                        dropable.setParent(self);
-                    });
-                }
-                
-                dropable.setX((this.width - dropable.width) / 2);
-                dropable.setY((this.height - dropable.height) / 2);
-            },
-            
-            willAcceptDrop: function(dropable) {
-                if (this.hasContent()) {
-                    return false;
-                } else {
-                    return this.callSuper();
-                }
-            },
-            
-            hasContent: function() {
-                return this.getSubviews().length > 0;
-            }
-        });
+            });
         
         
         // Create Views ////////////////////////////////////////////////////////
-        var rootView = new myt.View(null, {}, [myt.SizeToWindow]);
+        const rootView = new myt.View(null, {}, [myt.SizeToWindow]);
         
-        var leftView = new myt.View(rootView, {bgColor:'#eeeeee', percentOfParentHeight:100}, [myt.SizeToParent, myt.AutoScroller, {
+        const leftView = new myt.View(rootView, {bgColor:'#eee', percentOfParentHeight:100}, [myt.SizeToParent, myt.AutoScroller, {
             updateWidth: function(event) {
                 this.setWidth(divider.value - this.x);
             }
         }]);
-        var leftViewContent = new myt.View(leftView, {percentOfParentWidth:100}, [myt.SizeToParent]);
+        const leftViewContent = new myt.View(leftView, {percentOfParentWidth:100}, [myt.SizeToParent]);
         
-        var rightView = new myt.View(rootView, {bgColor:'#ffffff', percentOfParentHeight:100}, [myt.SizeToParent, myt.AutoScroller, {
+        const rightView = new myt.View(rootView, {bgColor:'#fff', percentOfParentHeight:100}, [myt.SizeToParent, myt.AutoScroller, {
             updateWidth: function(event) {
                 this.setX(divider.value + divider.width);
                 this.setWidth(this.parent.width - this.x);
             }
         }]);
-        var rightViewContent = new myt.View(rightView, {percentOfParentWidth:100}, [myt.SizeToParent]);
+        const rightViewContent = new myt.View(rightView, {percentOfParentWidth:100}, [myt.SizeToParent]);
         
-        var divider = new myt.HorizontalDivider(rootView, {
+        const divider = new myt.HorizontalDivider(rootView, {
             percentOfParentHeight:100, minValue:110, value:110, limitToParent:110
         }, [myt.SizeToParent]);
         leftView.syncTo(divider, 'updateWidth', 'value');

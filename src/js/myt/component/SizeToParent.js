@@ -20,9 +20,9 @@
     
     /** A mixin that sizes a view to a percentage of its parent view.
         
-        This is the inverse of a layout since the child is responsible for sizing
-        itself to the parent rather than in a layout where the layout positions
-        and sizes the children.
+        This is the inverse of a layout since the child is responsible for 
+        sizing itself to the parent rather than in a layout where the layout 
+        positions and sizes the children.
         
         Events:
             percentOfParentWidthOffset:number
