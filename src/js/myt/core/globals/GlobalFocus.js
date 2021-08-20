@@ -10,8 +10,8 @@
         },
         
         /*  Traverse forward or backward from the currently focused view. 
-            Returns the new view to give focus to, or null if there is no view
-            to focus on or an unmanaged dom element will receive focus.
+            Returns the new view to give focus to, or undefined if there is 
+            no view to focus on or an unmanaged dom element will receive focus.
                 param: isForward:boolean indicates forward or backward dom 
                     traversal.
                 param: ignoreFocusTrap:boolean indicates if focus traps should 
@@ -103,15 +103,13 @@
                                 } else {
                                     elem.focus();
                                     globalFocus.focusedDom = elem;
-                                    return null;
+                                    return;
                                 }
                             }
                         }
                     }
                 }
             }
-            
-            return null;
         };
     
     /** Tracks focus and provides global focus events. Registered with 
@@ -219,14 +217,13 @@
         
         /** Finds the closest model for the provided dom element.
             @param {!Object} elem - The dom element to start looking from.
-            @returns {?Object} - A myt.View or null if not found. */
+            @returns {?Object} - A myt.View or undefined if not found. */
         findModelForDomElement: elem => {
             while (elem) {
                 let model = elem.model;
                 if (model && model instanceof pkg.View) return model;
                 elem = elem.parentNode;
             }
-            return null;
         }
     });
 })(myt);

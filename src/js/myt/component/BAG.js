@@ -32,21 +32,23 @@
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
                 /** Gets a BAG for the attribute name and group ID.
-                    @param attrName:string the name of the attribute to monitor.
+                    @param attrName:string the name of the attribute 
+                        to monitor.
                     @param groupId:string the unique ID of the group.
-                    @returns the BAG */
+                    @returns the BAG or undefined if not found */
                 getGroup: (attrName, groupId) => {
                     if (attrName && groupId) {
                         const groupIdMap = BAGsByAttrName[attrName] || (BAGsByAttrName[attrName] = {});
                         return groupIdMap[groupId] || (groupIdMap[groupId] = new BAG(attrName, groupId));
                     }
-                    return null;
                 },
                 
                 /** Removes a BAG for the attribute name and group id.
-                    @param attrName:string the name of the attribute to monitor.
+                    @param attrName:string the name of the attribute 
+                        to monitor.
                     @param groupId:string the unique ID of the group.
-                    @returns the removed BAG */
+                    @returns the removed BAG or undefined if no
+                        BAG was removed. */
                 removeGroup: (attrName, groupId) => {
                     if (attrName && groupId) {
                         const groupIdMap = BAGsByAttrName[attrName];
@@ -56,7 +58,6 @@
                             return group;
                         }
                     }
-                    return null;
                 }
             },
             
@@ -188,15 +189,15 @@
         },
         
         /** @overrides myt.Node */
-        destroyAfterOrphaning: function() {
-            this.callSuper();
-            
+        destroy: function() {
             const groups = this.__bags;
             let i = groups.length;
             while (i) {
                 const group = groups[--i];
                 this.removeFromBAG(group.attrName, group.groupId);
             }
+            
+            this.callSuper();
         },
         
         

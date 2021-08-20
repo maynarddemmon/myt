@@ -169,7 +169,7 @@
             getNextFocus: function() {
                 const last = this.lastFloatingPanelShown;
                 if (last && last.isShown()) return last;
-                return this.callSuper ? this.callSuper() : null;
+                if (this.callSuper) return this.callSuper();
             },
             
             /** Called by the floating panel owned by this anchor to determine 

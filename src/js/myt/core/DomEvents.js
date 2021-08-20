@@ -213,7 +213,7 @@
             },
             
             /** @overrides myt.View */
-            destroyBeforeOrphaning: function() {
+            destroy: function() {
                 this.giveAwayFocus();
                 this.callSuper();
             },
@@ -288,7 +288,7 @@
                     focusable and not focus masked, false otherwise. */
             isFocusable: function() {
                 return this.focusable && !this.disabled && this.isVisible() && 
-                    this.searchAncestorsOrSelf(node => node.maskFocus === true) === null;
+                    this.searchAncestorsOrSelf(node => node.maskFocus === true) == null;
             },
             
             /** Calling this method will set focus onto this view if it 

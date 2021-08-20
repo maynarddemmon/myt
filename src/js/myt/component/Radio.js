@@ -86,7 +86,8 @@
         },
         
         /** Gets the value of the 'selected' radio button in the group.
-            @returns {*} The value of the selected radio button. */
+            @returns {*} The value of the selected radio button or null
+                if no selected radio could be found. */
         getValue: function() {
             // Get selected radio
             const bag = getBooleanAttributeGroup(this),

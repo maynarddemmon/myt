@@ -50,10 +50,11 @@
             }
         };
     
-    /** Objects that can be replicated should include this mixin and implemment
-        the replicate method. The myt.Reusable mixin is also included and the
-        clean method should also be implemented. The methods replicate and 
-        clean should perform setup and teardown of the object respectively.
+    /** Objects that can be replicated should include this mixin and 
+        implemment the replicate method. The myt.Reusable mixin is 
+        also included and the clean method should also be implemented. 
+        The methods replicate and clean should perform setup and teardown 
+        of the object respectively.
         
         Attributes:
             replicationData:* The data provided during replication.
@@ -66,10 +67,12 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Called to configure the replicable object with data. Subclasses 
-            should call super.
-            @param {?Object} data - The data being replicated for this instance.
-            @param {number} idx - The index of the data in the replicated list.
+        /** Called to configure the replicable object with data. 
+            Subclasses should call super.
+            @param {?Object} data - The data being replicated for 
+                this instance.
+            @param {number} idx - The index of the data in the 
+                replicated list.
             @returns {undefined} */
         replicate: function(data, idx) {
             this.replicationData = data;
@@ -90,12 +93,14 @@
             this.replicationIndex = -1;
         },
         
-        /** Called by an myt.Replicator to check if this replicable needs to be
-            updated or not.
-            @param {!Object} data - The data being replicated for this instance.
-            @param {number} idx - The index of the data in the replicated list.
-            @returns {boolean} - True if the provided data is already set on 
-                this replicable, false otherwise. */
+        /** Called by an myt.Replicator to check if this replicable 
+            needs to be updated or not.
+            @param {!Object} data - The data being replicated for 
+                this instance.
+            @param {number} idx - The index of the data in the 
+                replicated list.
+            @returns {boolean} - True if the provided data is already 
+                set on this replicable, false otherwise. */
         alreadyHasReplicationData: function(data, idx) {
             // FIXME: Use deepEquals on replicationData?
             return idx === this.replicationIndex && data === this.replicationData;
@@ -125,7 +130,7 @@
         },
         
         /** @overrides */
-        destroyAfterOrphaning: function() {
+        destroy: function() {
             destroyOldPool(this);
             this.callSuper();
         },
@@ -135,7 +140,7 @@
         setTemplate: function(v) {
             // Make sure template class is an myt.Replicable
             this.template = v.includes(pkg.Replicable) ? v : null;
-            if (!this.template) pkg.dumpStack('Template not a myt.Replicable');
+            if (!this.template) pkg.dumpStack('Template not replicable');
             
             if (this.inited) {
                 setupPool(this);
@@ -199,7 +204,8 @@
                     if (i >= activesLen || unused[i] != null) pool.getInstance().replicate(data[i], i);
                 }
                 
-                // Sort layout subviews so the layout reflects the data list order.
+                // Sort layout subviews so the layout reflects the 
+                // data list order.
                 i = layouts.length;
                 while (i) layouts[--i].sortSubviews(sortFunction);
                 

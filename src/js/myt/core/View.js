@@ -1,5 +1,6 @@
 (pkg => {
-    const DomElementProxy = pkg.DomElementProxy,
+    const mathRound = Math.round,
+        DomElementProxy = pkg.DomElementProxy,
     
         rectContainsPoint = pkg.Geometry.rectContainsPoint,
         
@@ -215,21 +216,21 @@
                 object upon use. If no tagName is provided "div" will be used.
             focusTrap:boolean Determines if focus traversal can move above this 
                 view or not. The default is undefined which is equivalent to 
-                false. Can be ignored using a key modifier. The key modifier is 
-                typically 'option'.
+                false. Can be ignored using a key modifier. The key modifier 
+                is typically 'option'.
             focusCage:boolean Determines if focus traversal can move above this 
                 view or not. The default is undefined which is equivalent to 
                 false. This is the same as focusTrap except it can't be ignored 
                 using a key modifier.
-            maskFocus:boolean Prevents focus from traversing into this view or 
-                any of its subviews. The default is undefined which is 
+            maskFocus:boolean Prevents focus from traversing into this view 
+                or any of its subviews. The default is undefined which is 
                 equivalent to false.
-            ignoreLayout:boolean Determines if this view should be included in 
-                layouts or not. Default is undefined which is equivalent 
+            ignoreLayout:boolean Determines if this view should be included 
+                in layouts or not. Default is undefined which is equivalent 
                 to false.
             layoutHint:* A value that indicates this view is treated as 
-                "special" by the layout. The interpretation of this value is 
-                up to the layout managing the view.
+                "special" by the layout. The interpretation of this value 
+                is up to the layout managing the view.
             align:string Aligns the view horizontally within its parent. 
                 Supported values are: 'left', 'center', 'right' and ''. 
                 The default is undefined which is equivalent to ''.
@@ -242,9 +243,9 @@
             y:number The y-position of this view in pixels. Defaults to 0.
             width:number The width of this view in pixels. Defaults to 0.
             height:number the height of this view in pixels. Defaults to 0.
-            boundsWidth:number (read only) The actual bounds of the view in the
-                x-dimension. This value is in pixels relative to the RootView 
-                and thus compensates for rotation and scaling.
+            boundsWidth:number (read only) The actual bounds of the view in 
+                the x-dimension. This value is in pixels relative to the 
+                RootView and thus compensates for rotation and scaling.
             boundsHeight:number (read only) The actual bounds of the view in 
                 the y-dimension. This value is in pixels relative to the 
                 RootView and thus compensates for rotation and scaling.
@@ -333,14 +334,18 @@
             delete attrs.tagName;
             self.setDomElement(self.createOurDomElement(parent));
             
-            // Necessary since x and y of 0 won't update the dom element style
-            // so this gets things initialized correctly. Without this 
-            // RootViews will have an incorrect initial position for x or 
-            // y of 0.
+            // Necessary since x and y of 0 won't update the dom element 
+            // style so this gets things initialized correctly. Without 
+            // this RootViews will have an incorrect initial position 
+            // for x or y of 0.
             const ods = self.getODS();
             ods.left = ods.top = '0px';
             
             self.callSuper(parent, attrs);
+            
+            // Must be done after the dom element is inserted so that calls 
+            // to getBoundingClientRect will work.
+            self.__updateBounds(self.width, self.height);
             
             // Set default bgcolor afterwards if still undefined. This allows 
             // BaseInputText to override the default for input:text via attrs.
@@ -364,16 +369,6 @@
             elem.className = klass.__cssClassName || (klass.__cssClassName = 'myt-' + klass.__displayName.split('.').join('-'));
             
             return elem;
-        },
-        
-        /** @overrides myt.Node 
-            Subclasses should call super if they don't call __updateBounds. 
-            The call to super should probably occur at the end of the 
-            overridden method. */
-        doAfterAdoption: function() {
-            // Must be done after the dom element is inserted so that calls to
-            // getBoundingClientRect will work.
-            this.__updateBounds(this.width, this.height);
         },
         
         /** @overrides myt.Node */
@@ -500,7 +495,7 @@
             @param {!Object} event
             @returns {undefined} */
         __doAlignCenter: function(event) {
-            this.setX(Math.round((this.parent.width - this.width) / 2) + (this.alignOffset || 0));
+            this.setX(mathRound((this.parent.width - this.width) / 2) + (this.alignOffset || 0));
         },
         
         /** @private
@@ -533,7 +528,7 @@
             @param {!Object} event
             @returns {undefined} */
         __doValignMiddle: function(event) {
-            this.setY(Math.round((this.parent.height - this.height) / 2) + (this.valignOffset || 0));
+            this.setY(mathRound((this.parent.height - this.height) / 2) + (this.valignOffset || 0));
         },
         
         /** @private
@@ -886,19 +881,20 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Checks if this view is visible and each view in the parent chain to
-            the RootView is also visible. Dom elements are not explicitly
-            checked. If you need to check that use myt.DomElementProxy.isDomElementVisible.
+        /** Checks that this view is visible and each view in the parent 
+            chain up to the RootView is also visible. Dom elements are not 
+            explicitly checked. If you need to check dom elements as well,
+            use myt.DomElementProxy.isDomElementVisible.
             @returns {boolean} true if this view is visible, false otherwise. */
         isVisible: function() {
-            return this.searchAncestorsOrSelf(v => !v.visible) === null;
+            return this.searchAncestorsOrSelf(v => !v.visible) == null;
         },
         
         /** Finds the youngest ancestor (or self) that is a focusTrap 
             or focusCage.
             @param {boolean} ignoreFocusTrap - Indicates focusTraps should 
                 be ignored.
-            @returns {?Object} a View with focusTrap set to true or null 
+            @returns {?Object} a View with focusTrap set to true or undefined 
                 if not found. */
         getFocusTrap: function(ignoreFocusTrap) {
             return this.searchAncestorsOrSelf(v => v.focusCage || (v.focusTrap && !ignoreFocusTrap));
@@ -937,7 +933,7 @@
             let idx;
             if (node instanceof pkg.View) {
                 idx = this.getSubviewIndex(node);
-                if (idx !== -1) {
+                if (idx >= 0) {
                     this.fireEvent('subviewRemoved', node);
                     node.removeDomElement();
                     this.subviews.splice(idx, 1);
@@ -945,7 +941,7 @@
                 }
             } else if (node instanceof pkg.Layout) {
                 idx = this.getLayoutIndex(node);
-                if (idx !== -1) {
+                if (idx >= 0) {
                     this.fireEvent('layoutRemoved', node);
                     this.layouts.splice(idx, 1);
                     this.layoutRemoved(node);
@@ -981,25 +977,23 @@
         subviewRemoved: sv => {},
         
         /** Gets the next sibling view based on lexical ordering of dom elements.
-            @returns {?Object} - The next sibling myt.View or null if 
+            @returns {?Object} - The next sibling myt.View or undefined if 
                 none exists. */
         getNextSibling: function() {
             if (this.parent) {
                 const nextDomElement = this.getODE().nextElementSibling;
                 if (nextDomElement) return nextDomElement.model;
             }
-            return null;
         },
         
         /** Gets the previous sibling view.
-            @returns {?Object} - The previous sibling myt.View or null if 
+            @returns {?Object} - The previous sibling myt.View or undefined if 
                 none exists. */
         getPrevSibling: function() {
             if (this.parent) {
                 const prevDomElement = this.getODE().previousElementSibling;
                 if (prevDomElement) return prevDomElement.model;
             }
-            return null;
         },
         
         // Layouts //

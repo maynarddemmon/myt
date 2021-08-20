@@ -57,7 +57,7 @@
             // returned in the font family name. Seems OK to just do it for
             // all fonts since double quotes in a font name is most likely
             // going to be confusing anyhow.
-            const fontName = fontFace.family.replace(/\"/g, '') + ' ' + fontFace.weight;
+            const fontName = fontFace.family.split('"').join('') + ' ' + fontFace.weight;
             
             if (!fontLoaded[fontName]) {
                 fontLoaded[fontName] = true;

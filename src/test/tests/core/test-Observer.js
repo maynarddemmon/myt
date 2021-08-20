@@ -153,9 +153,11 @@ test("Fire an event after observer has attached.", function() {
     var observable = new myt.Node();
     
     var observer = new myt.Node(null, null, [{
-        doBeforeAdoption: function() {
+        initNode: function(parent, attrs) {
             this.fooEventCount = 0;
             this.lastFooEvent = null;
+            
+            this.callSuper(parent, attrs);
         },
         
         handleFooEvent: function(e) {
@@ -188,9 +190,11 @@ test("Attach once.", function() {
     var observable = new myt.Node();
     
     var observer = new myt.Node(null, null, [{
-        doBeforeAdoption: function() {
+        initNode: function(parent, attrs) {
             this.fooEventCount = 0;
             this.lastFooEvent = null;
+            
+            this.callSuper(parent, attrs);
         },
         
         handleFooEvent: function(e) {

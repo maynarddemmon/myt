@@ -2,7 +2,7 @@
     const
         /*  Get the closest ancestor of the provided Node or the Node itself 
             for which the matcher function returns true. Returns a Node or 
-            null if no match is found.
+            undefined if no match is found.
                 param node:myt.Node the Node to start searching from.
                 param matcher:function the function to test for matching 
                     Nodes with. */
@@ -13,11 +13,10 @@
                     node = node.parent;
                 }
             }
-            return null;
         },
         
         /*  Get the youngest ancestor of the provided Node for which the 
-            matcher function returns true. Returns a Node or null if no 
+            matcher function returns true. Returns a Node or undefined if no 
             match is found.
                 param node:myt.Node the Node to start searching from. This 
                     Node is not tested, but its parent is.
@@ -62,9 +61,8 @@
         to as ancestors. Child nodes and children of children, etc. are 
         referred to as descendants.
         
-        Lifecycle management is also provided via the 'initNode', 
-        'doBeforeAdoption', 'doAfterAdoption', 'destroy', 
-        'destroyBeforeOrphaning' and 'destroyAfterOrphaning' methods.
+        Lifecycle management is also provided via the 'initNode', 'destroy'
+        and 'destroyAfterOrphaning' methods.
         
         Events:
             parent:myt.Node Fired when the parent is set.
@@ -150,27 +148,9 @@
             @returns {undefined} */
         initNode: function(parent, attrs) {
             this.callSetters(attrs);
-            
-            this.doBeforeAdoption();
             this.setParent(parent);
-            this.doAfterAdoption();
-            
             this.inited = true;
         },
-        
-        /** Provides a hook for subclasses to do things before this Node has 
-            its parent assigned. This would be the ideal place to create 
-            subviews so as to avoid unnecessary dom reflows. However, text 
-            size can't be measured until insertion into the DOM so you may 
-            want to use doAfterAdoption for creating subviews since it will 
-            give you less trouble though it will be slower.
-            @returns {undefined} */
-        doBeforeAdoption: () => {},
-        
-        /** Provides a hook for subclasses to do things after this Node has 
-            its parent assigned.
-            @returns {undefined} */
-        doAfterAdoption: () => {},
         
         /** @overrides myt.Destructible. */
         destroy: function() {
@@ -191,29 +171,22 @@
                 self.__animPool.destroy();
             }
             
-            self.destroyBeforeOrphaning();
-            if (self.parent) self.setParent(null);
+            if (self.parent) self.setParent();
+            
+            self.releaseAllConstraints();
+            self.detachFromAllObservables();
+            self.detachAllObservers();
+            
             self.destroyAfterOrphaning();
             
             self.callSuper();
         },
         
         /** Provides a hook for subclasses to do destruction of their 
-            internals. This method is called after subnodes have been 
-            destroyed but before the parent has been unset. Subclasses 
-            should call super.
-            @returns {undefined} */
-        destroyBeforeOrphaning: () => {},
-        
-        /** Provides a hook for subclasses to do destruction of their 
             internals. This method is called after the parent has been 
             unset. Subclasses must call super.
             @returns {undefined} */
-        destroyAfterOrphaning: function() {
-            this.releaseAllConstraints();
-            this.detachFromAllObservables();
-            this.detachAllObservers();
-        },
+        destroyAfterOrphaning: () => {/* Subclasses to implement as needed. */},
         
         
         // Structural Accessors ////////////////////////////////////////////////
@@ -374,22 +347,21 @@
             provided node.
             @param {!Object} node - The myt.Node to look for a common 
                 ancestor with.
-            @returns {?Object} The youngest common Node or null if 
+            @returns {?Object} The youngest common Node or undefined if 
                 none exists. */
         getLeastCommonAncestor: function(node) {
             while (node) {
                 if (this.isDescendantOf(node)) return node;
                 node = node.parent;
             }
-            return null;
         },
         
         /** Find the youngest ancestor Node that is an instance of the class.
             @param {?Function} klass - The Class to search for.
-            @returns {?Object} - The myt.Node or null if no klass is provided 
-                or match found. */
+            @returns {?Object} - The myt.Node or undefined if no klass is 
+                provided or match found. */
         searchAncestorsForClass: function(klass) {
-            return klass ? this.searchAncestors(node => node instanceof klass) : null;
+            if (klass) return this.searchAncestors(node => node instanceof klass);
         },
         
         /** Get the youngest ancestor of this Node for which the matcher 
@@ -397,7 +369,8 @@
             myt.Node.getMatchingAncestor(this, matcherFunc).
             @param {!Function} matcherFunc - The function to test for matching 
                 Nodes with.
-            @returns {?Object} - The myt.Node or null if no match is found. */
+            @returns {?Object} - The myt.Node or undefined if no match 
+                is found. */
         searchAncestors: function(matcherFunc) {
             return getMatchingAncestor(this, matcherFunc);
         },
@@ -407,7 +380,8 @@
             myt.Node.getMatchingAncestorOrSelf(this, matcherFunc).
             @param {!Function} matcherFunc - The function to test for matching 
                 Nodes with.
-            @returns {?Object} - The myt.Node or null if no match is found. */
+            @returns {?Object} - The myt.Node or undefined if no match 
+                is found. */
         searchAncestorsOrSelf: function(matcherFunc) {
             return getMatchingAncestorOrSelf(this, matcherFunc);
         },
@@ -431,7 +405,7 @@
             @param {!Object} node - The sub myt.Node to check for.
             @returns {boolean} true if the subnode is found, false otherwise. */
         hasSubnode: function(node) {
-            return this.getSubnodeIndex(node) !== -1;
+            return this.getSubnodeIndex(node) >= 0;
         },
         
         /** Gets the index of the provided Node in the subnodes array.
@@ -454,12 +428,13 @@
             The standard way to do this is to call the setParent method with 
             a value of null on the child Node.
             @param {!Object} node - The sub myt.Node to remove.
-            @returns {?Object} - The removed myt.Node or null if 
+            @returns {?Object} - The removed myt.Node or undefined if 
                 removal failed. */
         removeSubnode: function(node) {
-            if (node.parent !== this) return null;
-            node.setParent(null);
-            return node;
+            if (node.parent === this) {
+                node.setParent();
+                return node;
+            }
         },
         
         /** Called when a subnode is added to this node. Provides a hook for

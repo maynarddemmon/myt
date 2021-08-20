@@ -17,7 +17,6 @@
                 const hdr = hdrs[--i];
                 if (hdr.visible) return hdr;
             }
-            return null;
         },
         
         notifyHeadersOfSortState = controller => {
@@ -338,7 +337,7 @@
             // Column Headers
             /** Gets the column header before the provided one.
                 @param {!Object} columnHeader
-                @returns {?Object} The myt.GridColumnHeader or null if 
+                @returns {?Object} The myt.GridColumnHeader or undefined if 
                     none exists. */
             getPrevColumnHeader: function(columnHeader) {
                 const hdrs = this.columnHeaders;
@@ -349,12 +348,11 @@
                         if (hdr.visible) return hdr;
                     }
                 }
-                return null;
             },
             
             /** Gets the column header after the provided one.
                 @param {!Object} columnHeader
-                @returns {?Object} The myt.GridColumnHeader or null if 
+                @returns {?Object} The myt.GridColumnHeader or undefined if 
                     none exists. */
             getNextColumnHeader: function(columnHeader) {
                 const hdrs = this.columnHeaders,
@@ -366,7 +364,6 @@
                         if (hdr.visible) return hdr;
                     }
                 }
-                return null;
             },
             
             hasColumnHeader: function(columnHeader) {
@@ -384,7 +381,6 @@
                     const hdr = hdrs[--i];
                     if (hdr.columnId === columnId) return hdr;
                 }
-                return null;
             },
             
             getVisibleColumnHeaders: function() {

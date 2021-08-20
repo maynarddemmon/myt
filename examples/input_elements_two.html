@@ -92,9 +92,9 @@
                     new myt.Text(this, {text:lorem.substr(0, size), bgColor:'#eeeeee', whiteSpace:'nowrap'});
                     
                     new myt.Radio(this, {optionValue:'foo ' + i, groupId:groupId}, [{
-                        doBeforeAdoption: function() {
+                        initNode: function(parent, attrs) {
                             this.attachObserver(this, 'doValueChange', 'value');
-                            this.callSuper();
+                            this.callSuper(parent, attrs);
                         },
                         doValueChange: function(e) {
                             if (e.value) {
@@ -109,9 +109,9 @@
                         width:100, bgColor:'#ffeeee', text:'foo bar baz', 
                         textColor:'#990000', spellcheck:true, maxLength:25
                     }, [{
-                        doBeforeAdoption: function() {
+                        initNode: function(parent, attrs) {
                             this.attachObserver(this, 'doValueChange', 'value');
-                            this.callSuper();
+                            this.callSuper(parent, attrs);
                         },
                         doValueChange: function(e) {
                             console.log("Value: ", e.value);
@@ -124,9 +124,9 @@
                         width:100, height:80, text:'Hey there! This is long enough.', 
                         bgColor:'#ffffff', spellcheck:true
                     }, [{
-                        doBeforeAdoption: function() {
+                        initNode: function(parent, attrs) {
                             this.attachObserver(this, 'doValueChange', 'value');
-                            this.callSuper();
+                            this.callSuper(parent, attrs);
                         },
                         doValueChange: function(e) {
                             console.log("Value:", e.value);
@@ -134,9 +134,9 @@
                     }]);
                     
                     new myt.Checkbox(this, {value:i%2===0}, [{
-                        doBeforeAdoption: function() {
+                        initNode: function(parent, attrs) {
                             this.attachObserver(this, 'doValueChange', 'value');
-                            this.callSuper();
+                            this.callSuper(parent, attrs);
                         },
                         doValueChange: function(e) {
                             console.log("Checkbox Value:", e.value);
@@ -146,9 +146,9 @@
                     new LocalFlowBtn(this, {width:size, height:size, focusable:i%2===0, disabled:i%4===0});
                     
                     var selectView = new myt.InputSelect(this, {width:100, size:i%6, multiple:i===5, options:selectOptions}, [{
-                        doBeforeAdoption: function() {
+                        initNode: function(parent, attrs) {
                             this.attachObserver(this, 'doValueChange', 'value');
-                            this.callSuper();
+                            this.callSuper(parent, attrs);
                         },
                         doValueChange: function(e) {
                             console.log("Select Value:", e.value);

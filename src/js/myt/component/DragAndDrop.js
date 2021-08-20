@@ -186,7 +186,7 @@
         },
         
         /** @overrides */
-        destroyAfterOrphaning: function() {
+        destroy: function() {
             dragManager.unregisterDropTarget(this);
             
             this.callSuper();
@@ -384,7 +384,7 @@
         },
         
         /** @overrides */
-        destroyAfterOrphaning: function() {
+        destroy: function() {
             dragManager.unregisterAutoScroller(this);
             
             this.callSuper();

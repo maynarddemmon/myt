@@ -515,7 +515,7 @@
                 @returns {undefined} */
             invokeAccelerator: function(id, value) {
                 const accelerator = this.__acc[id];
-                if (accelerator) accelerator.call(this, value === undefined ? null : value);
+                if (accelerator) accelerator.call(this, value == null ? null : value);
             },
             
             /** Adds a validator to this form.
@@ -527,7 +527,8 @@
             
             /** Removes a validator from this form.
                 @param id:string The ID of the validator to remove.
-                @returns the removed myt.Validator or null if not found. */
+                @returns the removed myt.Validator or undefined 
+                    if not found. */
             removeValidator: function(id) {
                 if (id) {
                     const validators = this.__v;
@@ -540,7 +541,6 @@
                         }
                     }
                 }
-                return null;
             },
             
             /** Gets the oldest ancestor form of this form or the form itself.
@@ -860,7 +860,8 @@
             
             /** Removes a ValueProcessor from this form element.
                 @param id:string the ID of the processor to remove.
-                @returns the removed myt.ValueProcessor or null if not found. */
+                @returns the removed myt.ValueProcessor or undefined 
+                    if not found. */
             removeValueProcessor: function(id) {
                 if (id) {
                     const processors = this.__vp;
@@ -873,7 +874,6 @@
                         }
                     }
                 }
-                return null;
             },
             
             /** @overrides myt.Form */
@@ -884,13 +884,11 @@
             /** @overrides myt.Form */
             getSubForm: id => {
                 pkg.dumpStack('getSubForm unsupported on FormElement');
-                return null;
             },
             
             /** @overrides myt.Form */
             removeSubForm: id => {
                 pkg.dumpStack('removeSubForm unsupported on FormElement');
-                return null;
             },
             
             /** @overrides myt.Form */

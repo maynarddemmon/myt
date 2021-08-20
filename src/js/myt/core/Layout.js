@@ -130,9 +130,9 @@
             },
             
             /** @overrides */
-            destroyAfterOrphaning: function() {
-                this.callSuper();
+            destroy: function() {
                 this.subviews.length = 0;
+                this.callSuper();
             },
             
             

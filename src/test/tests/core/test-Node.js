@@ -82,7 +82,7 @@ test("Add and remove child nodes on a root node", function() {
     ok(rootNode.getSubnodeIndex(orphanNode2) === 2, "Formerly orphaned node 2 should have an index of 1.");
     
     // Remove the node using removeSubnode
-    ok(rootNode.removeSubnode(rootNode) === null, "Passing a node that is not a child should return null.");
+    ok(rootNode.removeSubnode(rootNode) === undefined, "Passing a node that is not a child should return undefined.");
     var removedNode = rootNode.removeSubnode(orphanNode2);
     ok(removedNode === orphanNode2, "Removed node should be the node returned from removeSubnode.");
     ok(orphanNode2.isRoot() === true, "Orphan node 2 should be a root now.");
@@ -230,16 +230,16 @@ test("Ancestor matching", function() {
     ok(found6 === instC, "Should find the first ancestor of ClassC.");
     
     var found7 = instC.bar.baz.searchAncestorsForClass(ClassA);
-    ok(found7 === null, "Should find the no ancestor of ClassA.");
+    ok(found7 === undefined, "Should find the no ancestor of ClassA.");
     
     var failToFind = instC.bar.baz.searchAncestorsForClass(null);
-    ok(failToFind === null, "Should not find the ancestor since no class was provided.");
+    ok(failToFind === undefined, "Should not find the ancestor since no class was provided.");
     
     // getMatchingAncestorOrSelf and searchAncestorsOrSelf
     var func = function(n) {return n.name === 'foo';};
     
-    ok(myt.Node.getMatchingAncestorOrSelf(instA.foo, null) === null, "Bad args should return null.");
-    ok(myt.Node.getMatchingAncestorOrSelf(null, func) === null, "Bad args should return null.");
+    ok(myt.Node.getMatchingAncestorOrSelf(instA.foo, null) === undefined, "Bad args should return undefined.");
+    ok(myt.Node.getMatchingAncestorOrSelf(null, func) === undefined, "Bad args should return undefined.");
     
     var match = myt.Node.getMatchingAncestorOrSelf(instA.foo, func);
     ok(match === instA.foo, "Name should match foo");
@@ -249,13 +249,13 @@ test("Ancestor matching", function() {
     var failMatch = myt.Node.getMatchingAncestorOrSelf(instA.foo, function(n) {
         return n.name === 'bar';
     });
-    ok(failMatch === null, "No match should be found since no ancestor is named 'bar'");
+    ok(failMatch === undefined, "No match should be found since no ancestor is named 'bar'");
     
     // getMatchingAncestor and searchAncestors
     var func2 = function(n) {return n.isRoot();};
     
-    ok(myt.Node.getMatchingAncestor(instC.bar.baz, null) === null, "Bad args should return null.");
-    ok(myt.Node.getMatchingAncestor(null, func2) === null, "Bad args should return null.");
+    ok(myt.Node.getMatchingAncestor(instC.bar.baz, null) === undefined, "Bad args should return undefined.");
+    ok(myt.Node.getMatchingAncestor(null, func2) === undefined, "Bad args should return undefined.");
     
     var match2 = myt.Node.getMatchingAncestor(instC.bar.baz, func2);
     ok(match2 === instC, "Root should be root");
@@ -265,7 +265,7 @@ test("Ancestor matching", function() {
     var failMatch2 = myt.Node.getMatchingAncestor(instC.bar.baz, function(n) {
         return n.getSubnodes().length === 99;
     });
-    ok(failMatch2 === null, "No match should be found since no subnodes count is 99");
+    ok(failMatch2 === undefined, "No match should be found since no subnodes count is 99");
     
     instA.destroy();
     instB.destroy();
@@ -287,9 +287,9 @@ test("Node: getLeastCommonAncestor", function() {
     var n32 = new myt.Node(n3);
     var n33 = new myt.Node(n3);
     
-    ok(root.getLeastCommonAncestor() === null, "Common ancestor of undefined is null.");
-    ok(root.getLeastCommonAncestor(null) === null, "Common ancestor of null is null.");
-    ok(root.getLeastCommonAncestor(true) === null, "Common ancestor of true is null.");
+    ok(root.getLeastCommonAncestor() === undefined, "Common ancestor of undefined is undefined.");
+    ok(root.getLeastCommonAncestor(null) === undefined, "Common ancestor of null is undefined.");
+    ok(root.getLeastCommonAncestor(true) === undefined, "Common ancestor of true is undefined.");
     
     ok(root.getLeastCommonAncestor(root) === root, "Common ancestor of node and itself is the node itself.");
     ok(n1.getLeastCommonAncestor(root) === root, "Common ancestor of ancestor and the node is the ancestor.");

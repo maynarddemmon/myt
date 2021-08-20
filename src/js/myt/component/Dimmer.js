@@ -44,6 +44,15 @@
                 
                 self.callSuper(parent, attrs);
                 
+                new View(self, {
+                    name:'overlay',
+                    ignorePlacement:true, 
+                    opacity:Dimmer.OPACITY,
+                    bgColor:Dimmer.COLOR,
+                    percentOfParentWidth:100,
+                    percentOfParentHeight:100
+                }, [SizeToParent]);
+                
                 // Eat mouse events
                 ['mouseover','mouseout','mousedown','mouseup','click','dblclick','mousemove'].forEach(eventName => {
                     self.attachDomObserver(self, 'eatMouseEvent', eventName);
@@ -53,23 +62,8 @@
             },
             
             /** @overrides myt.View */
-            doBeforeAdoption: function() {
-                this.callSuper();
-                
-                new View(this, {
-                    name:'overlay',
-                    ignorePlacement:true, 
-                    opacity:Dimmer.OPACITY,
-                    bgColor:Dimmer.COLOR,
-                    percentOfParentWidth:100,
-                    percentOfParentHeight:100
-                }, [SizeToParent]);
-            },
-            
-            /** @overrides myt.View */
-            destroyAfterOrphaning: function() {
+            destroy: function() {
                 RootView.teardownCaptureDrop(this);
-                
                 this.callSuper();
             },
             
@@ -175,7 +169,11 @@
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                this.defaultPlacement = 'content';
+                const self = this,
+                    viewAttrs = {name:'content', ignorePlacement:true},
+                    centeredViewAttrs = Object.assign({}, viewAttrs, {align:'center', valign:'middle'});
+                
+                self.defaultPlacement = 'content';
                 
                 defAttr(attrs, 'sizingStrategy', 'children');
                 
@@ -189,15 +187,7 @@
                 defAttr(attrs, 'paddingX', ModalPanel.PADDING_X);
                 defAttr(attrs, 'paddingY', ModalPanel.PADDING_Y);
                 
-                this.callSuper(parent, attrs);
-            },
-            
-            doBeforeAdoption: function() {
-                const self = this,
-                    viewAttrs = {name:'content', ignorePlacement:true},
-                    centeredViewAttrs = Object.assign({}, viewAttrs, {align:'center', valign:'middle'});
-                
-                self.callSuper();
+                self.callSuper(parent, attrs);
                 
                 switch (self.sizingStrategy) {
                     case 'children':

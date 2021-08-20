@@ -339,7 +339,7 @@
                         // Create tooltip div if necessary
                         let elem = document.getElementById(tooltipDomId);
                         if (!elem) {
-                            elem = pkg.DomElementProxy.createDomElement('div', {position:'absolute'});
+                            elem = pkg.DomElementProxy.createElement('div', {position:'absolute'});
                             
                             // Make the div a child of the body element so it 
                             // can be in front of pretty much anything in the 

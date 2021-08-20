@@ -68,7 +68,7 @@
             },
             
             /** @overrides myt.View */
-            destroyAfterOrphaning: function() {
+            destroy: function() {
                 RootView.teardownCaptureDrop(this);
                 
                 roots.removeRoot(this);

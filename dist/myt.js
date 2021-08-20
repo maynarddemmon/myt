@@ -567,7 +567,7 @@ Date.prototype.format = Date.prototype.format || (() => {
             // returned in the font family name. Seems OK to just do it for
             // all fonts since double quotes in a font name is most likely
             // going to be confusing anyhow.
-            const fontName = fontFace.family.replace(/\"/g, '') + ' ' + fontFace.weight;
+            const fontName = fontFace.family.split('"').join('') + ' ' + fontFace.weight;
             
             if (!fontLoaded[fontName]) {
                 fontLoaded[fontName] = true;
@@ -1161,7 +1161,7 @@ Date.prototype.format = Date.prototype.format || (() => {
             read: (key, options) => {
                 options = objectAssign({}, Cookie.defaults, options);
                 
-                const decodeFunc = options.raw ? s => s : s => decodeURIComponent(s.replace(/\+/g, ' ')),
+                const decodeFunc = options.raw ? str => str : str => decodeURIComponent(str.split('+').join(' ')),
                     useJson = options.json,
                     cookies = document.cookie.split('; '),
                     len = cookies.length,
@@ -1550,7 +1550,7 @@ Date.prototype.format = Date.prototype.format || (() => {
         /** Unescape a query param value.
             @param {string} paramValue
             @returns {string} */
-        decodeQueryParam: paramValue => decodeURIComponent(paramValue).replace('+', ' '),
+        decodeQueryParam: paramValue => decodeURIComponent(paramValue).split('+').join(' '),
         
         getQuery: function() {
             const pairs = this.queryPairs,
@@ -2484,7 +2484,9 @@ new JS.Singleton('GlobalError', {
 (pkg => {
     const GLOBAL = global,
         getComputedStyle = GLOBAL.getComputedStyle,
-        DOCUMENT_ELEMENT = document;
+        DOCUMENT_ELEMENT = document,
+        
+        mathMax = Math.max;
     
     /** Provides a dom element for this instance. Also assigns a reference 
         to this DomElementProxy to a property named "model" on the dom element.
@@ -2500,11 +2502,11 @@ new JS.Singleton('GlobalError', {
                 @param {?Object} [props] - A map of keys and values to add to 
                     the new element.
                 @returns {!Object} the created element. */
-            createDomElement: (tagname, styles, props) => {
-                const de = DOCUMENT_ELEMENT.createElement(tagname);
-                if (props) for (const key in props) de[key] = props[key];
-                if (styles) for (const key in styles) de.style[key] = styles[key];
-                return de;
+            createElement: (tagname, styles, props) => {
+                const elem = DOCUMENT_ELEMENT.createElement(tagname);
+                if (props) for (const key in props) elem[key] = props[key];
+                if (styles) for (const key in styles) elem.style[key] = styles[key];
+                return elem;
             },
             
             /** Tests if a dom element is visible or not.
@@ -2539,7 +2541,6 @@ new JS.Singleton('GlobalError', {
                         const style = getComputedStyle(ancestors[--i]),
                             zIdx = style.zIndex,
                             isAuto = zIdx === 'auto';
-                        
                         if (i !== 0 && isAuto && parseInt(style.opacity, 10) === 1) {
                             continue;
                         } else {
@@ -2583,7 +2584,7 @@ new JS.Singleton('GlobalError', {
                     let i = children.length;
                     while (i) {
                         const child = children[--i];
-                        if (child.nodeType === 1) zIdx = Math.max(zIdx, DomElementProxy.getHighestZIndex(child));
+                        if (child.nodeType === 1) zIdx = mathMax(zIdx, DomElementProxy.getHighestZIndex(child));
                     }
                 } else {
                     zIdx = isAuto ? 0 : parseInt(zIdx, 10);
@@ -2598,38 +2599,39 @@ new JS.Singleton('GlobalError', {
                 @param {?Object} [ancestorElem] - The ancestor dom element
                     that if encountered will halt the page position calculation
                     thus giving the position of elem relative to ancestorElem.
-                @returns {?Object} - An object with 'x' and 'y' keys or null 
-                    if an error has occurred. */
+                @returns {?Object} - An object with 'x' and 'y' keys or 
+                    undefined if an error has occurred. */
             getRelativePosition: (elem, ancestorElem) => {
-                if (!elem) return null;
-                
-                // elem.nodeName !== 'BODY' test prevents looking at the body
-                // which causes problems when the document is scrolled 
-                // on webkit.
-                let x = 0, 
-                    y = 0;
-                while (elem && elem.nodeName !== 'BODY' && elem !== ancestorElem) {
-                    x += elem.offsetLeft;
-                    y += elem.offsetTop;
-                    elem = elem.offsetParent;
-                    if (elem && elem.nodeName !== 'BODY') {
-                        const s = getComputedStyle(elem);
-                        x += parseInt(s.borderLeftWidth, 10) - elem.scrollLeft;
-                        y += parseInt(s.borderTopWidth, 10) - elem.scrollTop;
+                if (elem) {
+                    // elem.nodeName !== 'BODY' test prevents looking at the 
+                    // body which causes problems when the document is scrolled 
+                    // on webkit.
+                    let x = 0, 
+                        y = 0;
+                    while (elem && elem.nodeName !== 'BODY' && elem !== ancestorElem) {
+                        x += elem.offsetLeft;
+                        y += elem.offsetTop;
+                        elem = elem.offsetParent;
+                        if (elem && elem.nodeName !== 'BODY') {
+                            const s = getComputedStyle(elem);
+                            x += parseInt(s.borderLeftWidth, 10) - elem.scrollLeft;
+                            y += parseInt(s.borderTopWidth, 10) - elem.scrollTop;
+                        }
                     }
+                    return {x:x, y:y};
                 }
-                return {x:x, y:y};
             },
             
             /** Gets the x and y position of the dom element relative to the 
                 page with support for transforms.
                 @param {!Object} elem - The dom element to get the position for.
-                @returns {?Object} - An object with 'x' and 'y' keys or null 
-                    if an error has occurred. */
+                @returns {?Object} - An object with 'x' and 'y' keys or 
+                    undefined if an error has occurred. */
             getTruePosition: elem => {
-                if (!elem) return null;
-                const pos = elem.getBoundingClientRect();
-                return {x:pos.left + GLOBAL.scrollX, y:pos.top + GLOBAL.scrollY};
+                if (elem) {
+                    const pos = elem.getBoundingClientRect();
+                    return {x:pos.left + GLOBAL.scrollX, y:pos.top + GLOBAL.scrollY};
+                }
             },
             
             /** Generates a dom event on a dom element. Adapted from:
@@ -2693,7 +2695,7 @@ new JS.Singleton('GlobalError', {
             getScrollbarSize: pkg.memoize(() => {
                 // Detect if scrollbars take up space or not
                 const body = DOCUMENT_ELEMENT.body,
-                    elem = DomElementProxy.createDomElement('div', {width:'100px', height:'100px', overflow:'scroll'});
+                    elem = DomElementProxy.createElement('div', {width:'100px', height:'100px', overflow:'scroll'});
                 body.appendChild(elem);
                 const scrollbarSize = elem.offsetWidth - elem.clientWidth;
                 body.removeChild(elem);
@@ -2835,7 +2837,7 @@ new JS.Singleton('GlobalError', {
             to the page. Transforms are not supported by default.
             @param {boolean} [transformSupport] If true then transforms
                 applied to the dom elements are supported.
-            @returns {?Object} - An object with 'x' and 'y' keys or null 
+            @returns {?Object} - An object with 'x' and 'y' keys or undefined 
                 if an error has occurred. */
         getPagePosition: function(transformSupport) {
             return DomElementProxy['get' + (transformSupport ? 'True' : 'Relative') + 'Position'](this.__iE);
@@ -2864,7 +2866,7 @@ new JS.Singleton('GlobalError', {
                 zIdx = 0;
             while (i) {
                 const child = children[--i];
-                if (child.nodeType === 1 && child !== skipChild) zIdx = Math.max(zIdx, DomElementProxy.getHighestZIndex(child));
+                if (child.nodeType === 1 && child !== skipChild) zIdx = mathMax(zIdx, DomElementProxy.getHighestZIndex(child));
             }
             return zIdx;
         },
@@ -2901,8 +2903,8 @@ new JS.Singleton('GlobalError', {
         },
         
         /*  Traverse forward or backward from the currently focused view. 
-            Returns the new view to give focus to, or null if there is no view
-            to focus on or an unmanaged dom element will receive focus.
+            Returns the new view to give focus to, or undefined if there is 
+            no view to focus on or an unmanaged dom element will receive focus.
                 param: isForward:boolean indicates forward or backward dom 
                     traversal.
                 param: ignoreFocusTrap:boolean indicates if focus traps should 
@@ -2994,15 +2996,13 @@ new JS.Singleton('GlobalError', {
                                 } else {
                                     elem.focus();
                                     globalFocus.focusedDom = elem;
-                                    return null;
+                                    return;
                                 }
                             }
                         }
                     }
                 }
             }
-            
-            return null;
         };
     
     /** Tracks focus and provides global focus events. Registered with 
@@ -3110,14 +3110,13 @@ new JS.Singleton('GlobalError', {
         
         /** Finds the closest model for the provided dom element.
             @param {!Object} elem - The dom element to start looking from.
-            @returns {?Object} - A myt.View or null if not found. */
+            @returns {?Object} - A myt.View or undefined if not found. */
         findModelForDomElement: elem => {
             while (elem) {
                 let model = elem.model;
                 if (model && model instanceof pkg.View) return model;
                 elem = elem.parentNode;
             }
-            return null;
         }
     });
 })(myt);
@@ -3338,7 +3337,7 @@ new JS.Singleton('GlobalError', {
             },
             
             /** @overrides myt.View */
-            destroyBeforeOrphaning: function() {
+            destroy: function() {
                 this.giveAwayFocus();
                 this.callSuper();
             },
@@ -3413,7 +3412,7 @@ new JS.Singleton('GlobalError', {
                     focusable and not focus masked, false otherwise. */
             isFocusable: function() {
                 return this.focusable && !this.disabled && this.isVisible() && 
-                    this.searchAncestorsOrSelf(node => node.maskFocus === true) === null;
+                    this.searchAncestorsOrSelf(node => node.maskFocus === true) == null;
             },
             
             /** Calling this method will set focus onto this view if it 
@@ -5099,7 +5098,7 @@ myt.Destructible = new JS.Module('Destructible', {
     const
         /*  Get the closest ancestor of the provided Node or the Node itself 
             for which the matcher function returns true. Returns a Node or 
-            null if no match is found.
+            undefined if no match is found.
                 param node:myt.Node the Node to start searching from.
                 param matcher:function the function to test for matching 
                     Nodes with. */
@@ -5110,11 +5109,10 @@ myt.Destructible = new JS.Module('Destructible', {
                     node = node.parent;
                 }
             }
-            return null;
         },
         
         /*  Get the youngest ancestor of the provided Node for which the 
-            matcher function returns true. Returns a Node or null if no 
+            matcher function returns true. Returns a Node or undefined if no 
             match is found.
                 param node:myt.Node the Node to start searching from. This 
                     Node is not tested, but its parent is.
@@ -5159,9 +5157,8 @@ myt.Destructible = new JS.Module('Destructible', {
         to as ancestors. Child nodes and children of children, etc. are 
         referred to as descendants.
         
-        Lifecycle management is also provided via the 'initNode', 
-        'doBeforeAdoption', 'doAfterAdoption', 'destroy', 
-        'destroyBeforeOrphaning' and 'destroyAfterOrphaning' methods.
+        Lifecycle management is also provided via the 'initNode', 'destroy'
+        and 'destroyAfterOrphaning' methods.
         
         Events:
             parent:myt.Node Fired when the parent is set.
@@ -5247,27 +5244,9 @@ myt.Destructible = new JS.Module('Destructible', {
             @returns {undefined} */
         initNode: function(parent, attrs) {
             this.callSetters(attrs);
-            
-            this.doBeforeAdoption();
             this.setParent(parent);
-            this.doAfterAdoption();
-            
             this.inited = true;
         },
-        
-        /** Provides a hook for subclasses to do things before this Node has 
-            its parent assigned. This would be the ideal place to create 
-            subviews so as to avoid unnecessary dom reflows. However, text 
-            size can't be measured until insertion into the DOM so you may 
-            want to use doAfterAdoption for creating subviews since it will 
-            give you less trouble though it will be slower.
-            @returns {undefined} */
-        doBeforeAdoption: () => {},
-        
-        /** Provides a hook for subclasses to do things after this Node has 
-            its parent assigned.
-            @returns {undefined} */
-        doAfterAdoption: () => {},
         
         /** @overrides myt.Destructible. */
         destroy: function() {
@@ -5288,29 +5267,22 @@ myt.Destructible = new JS.Module('Destructible', {
                 self.__animPool.destroy();
             }
             
-            self.destroyBeforeOrphaning();
-            if (self.parent) self.setParent(null);
+            if (self.parent) self.setParent();
+            
+            self.releaseAllConstraints();
+            self.detachFromAllObservables();
+            self.detachAllObservers();
+            
             self.destroyAfterOrphaning();
             
             self.callSuper();
         },
         
         /** Provides a hook for subclasses to do destruction of their 
-            internals. This method is called after subnodes have been 
-            destroyed but before the parent has been unset. Subclasses 
-            should call super.
-            @returns {undefined} */
-        destroyBeforeOrphaning: () => {},
-        
-        /** Provides a hook for subclasses to do destruction of their 
             internals. This method is called after the parent has been 
             unset. Subclasses must call super.
             @returns {undefined} */
-        destroyAfterOrphaning: function() {
-            this.releaseAllConstraints();
-            this.detachFromAllObservables();
-            this.detachAllObservers();
-        },
+        destroyAfterOrphaning: () => {/* Subclasses to implement as needed. */},
         
         
         // Structural Accessors ////////////////////////////////////////////////
@@ -5471,22 +5443,21 @@ myt.Destructible = new JS.Module('Destructible', {
             provided node.
             @param {!Object} node - The myt.Node to look for a common 
                 ancestor with.
-            @returns {?Object} The youngest common Node or null if 
+            @returns {?Object} The youngest common Node or undefined if 
                 none exists. */
         getLeastCommonAncestor: function(node) {
             while (node) {
                 if (this.isDescendantOf(node)) return node;
                 node = node.parent;
             }
-            return null;
         },
         
         /** Find the youngest ancestor Node that is an instance of the class.
             @param {?Function} klass - The Class to search for.
-            @returns {?Object} - The myt.Node or null if no klass is provided 
-                or match found. */
+            @returns {?Object} - The myt.Node or undefined if no klass is 
+                provided or match found. */
         searchAncestorsForClass: function(klass) {
-            return klass ? this.searchAncestors(node => node instanceof klass) : null;
+            if (klass) return this.searchAncestors(node => node instanceof klass);
         },
         
         /** Get the youngest ancestor of this Node for which the matcher 
@@ -5494,7 +5465,8 @@ myt.Destructible = new JS.Module('Destructible', {
             myt.Node.getMatchingAncestor(this, matcherFunc).
             @param {!Function} matcherFunc - The function to test for matching 
                 Nodes with.
-            @returns {?Object} - The myt.Node or null if no match is found. */
+            @returns {?Object} - The myt.Node or undefined if no match 
+                is found. */
         searchAncestors: function(matcherFunc) {
             return getMatchingAncestor(this, matcherFunc);
         },
@@ -5504,7 +5476,8 @@ myt.Destructible = new JS.Module('Destructible', {
             myt.Node.getMatchingAncestorOrSelf(this, matcherFunc).
             @param {!Function} matcherFunc - The function to test for matching 
                 Nodes with.
-            @returns {?Object} - The myt.Node or null if no match is found. */
+            @returns {?Object} - The myt.Node or undefined if no match 
+                is found. */
         searchAncestorsOrSelf: function(matcherFunc) {
             return getMatchingAncestorOrSelf(this, matcherFunc);
         },
@@ -5528,7 +5501,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {!Object} node - The sub myt.Node to check for.
             @returns {boolean} true if the subnode is found, false otherwise. */
         hasSubnode: function(node) {
-            return this.getSubnodeIndex(node) !== -1;
+            return this.getSubnodeIndex(node) >= 0;
         },
         
         /** Gets the index of the provided Node in the subnodes array.
@@ -5551,12 +5524,13 @@ myt.Destructible = new JS.Module('Destructible', {
             The standard way to do this is to call the setParent method with 
             a value of null on the child Node.
             @param {!Object} node - The sub myt.Node to remove.
-            @returns {?Object} - The removed myt.Node or null if 
+            @returns {?Object} - The removed myt.Node or undefined if 
                 removal failed. */
         removeSubnode: function(node) {
-            if (node.parent !== this) return null;
-            node.setParent(null);
-            return node;
+            if (node.parent === this) {
+                node.setParent();
+                return node;
+            }
         },
         
         /** Called when a subnode is added to this node. Provides a hook for
@@ -5795,9 +5769,9 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** @overrides */
-            destroyAfterOrphaning: function() {
-                this.callSuper();
+            destroy: function() {
                 this.subviews.length = 0;
+                this.callSuper();
             },
             
             
@@ -6683,7 +6657,8 @@ myt.Destructible = new JS.Module('Destructible', {
 
 
 (pkg => {
-    const DomElementProxy = pkg.DomElementProxy,
+    const mathRound = Math.round,
+        DomElementProxy = pkg.DomElementProxy,
     
         rectContainsPoint = pkg.Geometry.rectContainsPoint,
         
@@ -6899,21 +6874,21 @@ myt.Destructible = new JS.Module('Destructible', {
                 object upon use. If no tagName is provided "div" will be used.
             focusTrap:boolean Determines if focus traversal can move above this 
                 view or not. The default is undefined which is equivalent to 
-                false. Can be ignored using a key modifier. The key modifier is 
-                typically 'option'.
+                false. Can be ignored using a key modifier. The key modifier 
+                is typically 'option'.
             focusCage:boolean Determines if focus traversal can move above this 
                 view or not. The default is undefined which is equivalent to 
                 false. This is the same as focusTrap except it can't be ignored 
                 using a key modifier.
-            maskFocus:boolean Prevents focus from traversing into this view or 
-                any of its subviews. The default is undefined which is 
+            maskFocus:boolean Prevents focus from traversing into this view 
+                or any of its subviews. The default is undefined which is 
                 equivalent to false.
-            ignoreLayout:boolean Determines if this view should be included in 
-                layouts or not. Default is undefined which is equivalent 
+            ignoreLayout:boolean Determines if this view should be included 
+                in layouts or not. Default is undefined which is equivalent 
                 to false.
             layoutHint:* A value that indicates this view is treated as 
-                "special" by the layout. The interpretation of this value is 
-                up to the layout managing the view.
+                "special" by the layout. The interpretation of this value 
+                is up to the layout managing the view.
             align:string Aligns the view horizontally within its parent. 
                 Supported values are: 'left', 'center', 'right' and ''. 
                 The default is undefined which is equivalent to ''.
@@ -6926,9 +6901,9 @@ myt.Destructible = new JS.Module('Destructible', {
             y:number The y-position of this view in pixels. Defaults to 0.
             width:number The width of this view in pixels. Defaults to 0.
             height:number the height of this view in pixels. Defaults to 0.
-            boundsWidth:number (read only) The actual bounds of the view in the
-                x-dimension. This value is in pixels relative to the RootView 
-                and thus compensates for rotation and scaling.
+            boundsWidth:number (read only) The actual bounds of the view in 
+                the x-dimension. This value is in pixels relative to the 
+                RootView and thus compensates for rotation and scaling.
             boundsHeight:number (read only) The actual bounds of the view in 
                 the y-dimension. This value is in pixels relative to the 
                 RootView and thus compensates for rotation and scaling.
@@ -7017,14 +6992,18 @@ myt.Destructible = new JS.Module('Destructible', {
             delete attrs.tagName;
             self.setDomElement(self.createOurDomElement(parent));
             
-            // Necessary since x and y of 0 won't update the dom element style
-            // so this gets things initialized correctly. Without this 
-            // RootViews will have an incorrect initial position for x or 
-            // y of 0.
+            // Necessary since x and y of 0 won't update the dom element 
+            // style so this gets things initialized correctly. Without 
+            // this RootViews will have an incorrect initial position 
+            // for x or y of 0.
             const ods = self.getODS();
             ods.left = ods.top = '0px';
             
             self.callSuper(parent, attrs);
+            
+            // Must be done after the dom element is inserted so that calls 
+            // to getBoundingClientRect will work.
+            self.__updateBounds(self.width, self.height);
             
             // Set default bgcolor afterwards if still undefined. This allows 
             // BaseInputText to override the default for input:text via attrs.
@@ -7048,16 +7027,6 @@ myt.Destructible = new JS.Module('Destructible', {
             elem.className = klass.__cssClassName || (klass.__cssClassName = 'myt-' + klass.__displayName.split('.').join('-'));
             
             return elem;
-        },
-        
-        /** @overrides myt.Node 
-            Subclasses should call super if they don't call __updateBounds. 
-            The call to super should probably occur at the end of the 
-            overridden method. */
-        doAfterAdoption: function() {
-            // Must be done after the dom element is inserted so that calls to
-            // getBoundingClientRect will work.
-            this.__updateBounds(this.width, this.height);
         },
         
         /** @overrides myt.Node */
@@ -7184,7 +7153,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {!Object} event
             @returns {undefined} */
         __doAlignCenter: function(event) {
-            this.setX(Math.round((this.parent.width - this.width) / 2) + (this.alignOffset || 0));
+            this.setX(mathRound((this.parent.width - this.width) / 2) + (this.alignOffset || 0));
         },
         
         /** @private
@@ -7217,7 +7186,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {!Object} event
             @returns {undefined} */
         __doValignMiddle: function(event) {
-            this.setY(Math.round((this.parent.height - this.height) / 2) + (this.valignOffset || 0));
+            this.setY(mathRound((this.parent.height - this.height) / 2) + (this.valignOffset || 0));
         },
         
         /** @private
@@ -7570,19 +7539,20 @@ myt.Destructible = new JS.Module('Destructible', {
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Checks if this view is visible and each view in the parent chain to
-            the RootView is also visible. Dom elements are not explicitly
-            checked. If you need to check that use myt.DomElementProxy.isDomElementVisible.
+        /** Checks that this view is visible and each view in the parent 
+            chain up to the RootView is also visible. Dom elements are not 
+            explicitly checked. If you need to check dom elements as well,
+            use myt.DomElementProxy.isDomElementVisible.
             @returns {boolean} true if this view is visible, false otherwise. */
         isVisible: function() {
-            return this.searchAncestorsOrSelf(v => !v.visible) === null;
+            return this.searchAncestorsOrSelf(v => !v.visible) == null;
         },
         
         /** Finds the youngest ancestor (or self) that is a focusTrap 
             or focusCage.
             @param {boolean} ignoreFocusTrap - Indicates focusTraps should 
                 be ignored.
-            @returns {?Object} a View with focusTrap set to true or null 
+            @returns {?Object} a View with focusTrap set to true or undefined 
                 if not found. */
         getFocusTrap: function(ignoreFocusTrap) {
             return this.searchAncestorsOrSelf(v => v.focusCage || (v.focusTrap && !ignoreFocusTrap));
@@ -7621,7 +7591,7 @@ myt.Destructible = new JS.Module('Destructible', {
             let idx;
             if (node instanceof pkg.View) {
                 idx = this.getSubviewIndex(node);
-                if (idx !== -1) {
+                if (idx >= 0) {
                     this.fireEvent('subviewRemoved', node);
                     node.removeDomElement();
                     this.subviews.splice(idx, 1);
@@ -7629,7 +7599,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 }
             } else if (node instanceof pkg.Layout) {
                 idx = this.getLayoutIndex(node);
-                if (idx !== -1) {
+                if (idx >= 0) {
                     this.fireEvent('layoutRemoved', node);
                     this.layouts.splice(idx, 1);
                     this.layoutRemoved(node);
@@ -7665,25 +7635,23 @@ myt.Destructible = new JS.Module('Destructible', {
         subviewRemoved: sv => {},
         
         /** Gets the next sibling view based on lexical ordering of dom elements.
-            @returns {?Object} - The next sibling myt.View or null if 
+            @returns {?Object} - The next sibling myt.View or undefined if 
                 none exists. */
         getNextSibling: function() {
             if (this.parent) {
                 const nextDomElement = this.getODE().nextElementSibling;
                 if (nextDomElement) return nextDomElement.model;
             }
-            return null;
         },
         
         /** Gets the previous sibling view.
-            @returns {?Object} - The previous sibling myt.View or null if 
+            @returns {?Object} - The previous sibling myt.View or undefined if 
                 none exists. */
         getPrevSibling: function() {
             if (this.parent) {
                 const prevDomElement = this.getODE().previousElementSibling;
                 if (prevDomElement) return prevDomElement.model;
             }
-            return null;
         },
         
         // Layouts //
@@ -8158,11 +8126,10 @@ myt.Destructible = new JS.Module('Destructible', {
         @class */
     pkg.SizeToDom = new JSModule('SizeToDom', {
         // Life Cycle //////////////////////////////////////////////////////////
-        /** @overrides myt.View 
-            Subclasses should call super. */
-        doAfterAdoption: function() {
+        /** @overrides myt.View */
+        initNode: function(parent, attrs) {
+            this.callSuper(parent, attrs);
             this.sizeViewToDom();
-            this.callSuper();
         },
         
         
@@ -8205,11 +8172,10 @@ myt.Destructible = new JS.Module('Destructible', {
         @class */
     pkg.SizeWidthToDom = new JSModule('SizeWidthToDom', {
         // Life Cycle //////////////////////////////////////////////////////////
-        /** @overrides myt.View 
-            Subclasses should call super. */
-        doAfterAdoption: function() {
+        /** @overrides myt.View */
+        initNode: function(parent, attrs) {
+            this.callSuper(parent, attrs);
             this.sizeViewToDom();
-            this.callSuper();
         },
         
         
@@ -8246,11 +8212,10 @@ myt.Destructible = new JS.Module('Destructible', {
         @class */
     pkg.SizeHeightToDom = new JSModule('SizeHeightToDom', {
         // Life Cycle //////////////////////////////////////////////////////////
-        /** @overrides myt.View 
-            Subclasses should call super. */
-        doAfterAdoption: function() {
+        /** @overrides myt.View */
+        initNode: function(parent, attrs) {
+            this.callSuper(parent, attrs);
             this.sizeViewToDom();
-            this.callSuper();
         },
         
         
@@ -9116,7 +9081,7 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** @overrides myt.View */
-            destroyAfterOrphaning: function() {
+            destroy: function() {
                 RootView.teardownCaptureDrop(this);
                 
                 roots.removeRoot(this);
@@ -9562,8 +9527,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 /** Creates an myt.Color from an html color string.
                     @param {string} value - A hex string representation of a 
                         color, such as '#ff339b'.
-                    @returns {!Object} a myt.Color or null if no color could 
-                        be parsed. */
+                    @returns {!Object} a myt.Color or undefined if no color 
+                        could be parsed. */
                 makeColorFromHexString: value => {
                     if (value) {
                         if (!value.startsWith('#')) value = '#' + value;
@@ -9577,8 +9542,6 @@ myt.Destructible = new JS.Module('Destructible', {
                         }
                         
                         return makeColorFromNumber(parseInt(value.substring(1), 16));
-                    } else {
-                        return null;
                     }
                 },
                 
@@ -10504,10 +10467,11 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         };
     
-    /** Objects that can be replicated should include this mixin and implemment
-        the replicate method. The myt.Reusable mixin is also included and the
-        clean method should also be implemented. The methods replicate and 
-        clean should perform setup and teardown of the object respectively.
+    /** Objects that can be replicated should include this mixin and 
+        implemment the replicate method. The myt.Reusable mixin is 
+        also included and the clean method should also be implemented. 
+        The methods replicate and clean should perform setup and teardown 
+        of the object respectively.
         
         Attributes:
             replicationData:* The data provided during replication.
@@ -10520,10 +10484,12 @@ myt.Destructible = new JS.Module('Destructible', {
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Called to configure the replicable object with data. Subclasses 
-            should call super.
-            @param {?Object} data - The data being replicated for this instance.
-            @param {number} idx - The index of the data in the replicated list.
+        /** Called to configure the replicable object with data. 
+            Subclasses should call super.
+            @param {?Object} data - The data being replicated for 
+                this instance.
+            @param {number} idx - The index of the data in the 
+                replicated list.
             @returns {undefined} */
         replicate: function(data, idx) {
             this.replicationData = data;
@@ -10544,12 +10510,14 @@ myt.Destructible = new JS.Module('Destructible', {
             this.replicationIndex = -1;
         },
         
-        /** Called by an myt.Replicator to check if this replicable needs to be
-            updated or not.
-            @param {!Object} data - The data being replicated for this instance.
-            @param {number} idx - The index of the data in the replicated list.
-            @returns {boolean} - True if the provided data is already set on 
-                this replicable, false otherwise. */
+        /** Called by an myt.Replicator to check if this replicable 
+            needs to be updated or not.
+            @param {!Object} data - The data being replicated for 
+                this instance.
+            @param {number} idx - The index of the data in the 
+                replicated list.
+            @returns {boolean} - True if the provided data is already 
+                set on this replicable, false otherwise. */
         alreadyHasReplicationData: function(data, idx) {
             // FIXME: Use deepEquals on replicationData?
             return idx === this.replicationIndex && data === this.replicationData;
@@ -10579,7 +10547,7 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** @overrides */
-        destroyAfterOrphaning: function() {
+        destroy: function() {
             destroyOldPool(this);
             this.callSuper();
         },
@@ -10589,7 +10557,7 @@ myt.Destructible = new JS.Module('Destructible', {
         setTemplate: function(v) {
             // Make sure template class is an myt.Replicable
             this.template = v.includes(pkg.Replicable) ? v : null;
-            if (!this.template) pkg.dumpStack('Template not a myt.Replicable');
+            if (!this.template) pkg.dumpStack('Template not replicable');
             
             if (this.inited) {
                 setupPool(this);
@@ -10653,7 +10621,8 @@ myt.Destructible = new JS.Module('Destructible', {
                     if (i >= activesLen || unused[i] != null) pool.getInstance().replicate(data[i], i);
                 }
                 
-                // Sort layout subviews so the layout reflects the data list order.
+                // Sort layout subviews so the layout reflects the 
+                // data list order.
                 i = layouts.length;
                 while (i) layouts[--i].sortSubviews(sortFunction);
                 
@@ -12232,7 +12201,7 @@ new JS.Singleton('GlobalMouse', {
             getNextFocus: function() {
                 const last = this.lastFloatingPanelShown;
                 if (last && last.isShown()) return last;
-                return this.callSuper ? this.callSuper() : null;
+                if (this.callSuper) return this.callSuper();
             },
             
             /** Called by the floating panel owned by this anchor to determine 
@@ -12683,7 +12652,6 @@ new JS.Singleton('GlobalMouse', {
                 const item = items[i++];
                 if (item.isFocusable()) return item;
             }
-            return null;
         },
         
         getLastFocusableItem: function() {
@@ -12693,7 +12661,6 @@ new JS.Singleton('GlobalMouse', {
                 const item = items[--i];
                 if (item.isFocusable()) return item;
             }
-            return null;
         },
         
         updateItemWidth: (item, width) => {
@@ -12930,21 +12897,23 @@ new JS.Singleton('GlobalMouse', {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
                 /** Gets a BAG for the attribute name and group ID.
-                    @param attrName:string the name of the attribute to monitor.
+                    @param attrName:string the name of the attribute 
+                        to monitor.
                     @param groupId:string the unique ID of the group.
-                    @returns the BAG */
+                    @returns the BAG or undefined if not found */
                 getGroup: (attrName, groupId) => {
                     if (attrName && groupId) {
                         const groupIdMap = BAGsByAttrName[attrName] || (BAGsByAttrName[attrName] = {});
                         return groupIdMap[groupId] || (groupIdMap[groupId] = new BAG(attrName, groupId));
                     }
-                    return null;
                 },
                 
                 /** Removes a BAG for the attribute name and group id.
-                    @param attrName:string the name of the attribute to monitor.
+                    @param attrName:string the name of the attribute 
+                        to monitor.
                     @param groupId:string the unique ID of the group.
-                    @returns the removed BAG */
+                    @returns the removed BAG or undefined if no
+                        BAG was removed. */
                 removeGroup: (attrName, groupId) => {
                     if (attrName && groupId) {
                         const groupIdMap = BAGsByAttrName[attrName];
@@ -12954,7 +12923,6 @@ new JS.Singleton('GlobalMouse', {
                             return group;
                         }
                     }
-                    return null;
                 }
             },
             
@@ -13086,15 +13054,15 @@ new JS.Singleton('GlobalMouse', {
         },
         
         /** @overrides myt.Node */
-        destroyAfterOrphaning: function() {
-            this.callSuper();
-            
+        destroy: function() {
             const groups = this.__bags;
             let i = groups.length;
             while (i) {
                 const group = groups[--i];
                 this.removeFromBAG(group.attrName, group.groupId);
             }
+            
+            this.callSuper();
         },
         
         
@@ -13256,7 +13224,8 @@ new JS.Singleton('GlobalMouse', {
         },
         
         /** Gets the value of the 'selected' radio button in the group.
-            @returns {*} The value of the selected radio button. */
+            @returns {*} The value of the selected radio button or null
+                if no selected radio could be found. */
         getValue: function() {
             // Get selected radio
             const bag = getBooleanAttributeGroup(this),
@@ -13584,7 +13553,8 @@ new JS.Singleton('GlobalMouse', {
             
             /** Gets a selectable item with the the provided selection item ID.
                 @param {string} itemSelectionId
-                @returns {?Object} - The myt.Selectable or null if not found. */
+                @returns {?Object} - The myt.Selectable or undefined if 
+                    not found. */
             getSelectableItem: function(itemSelectionId) {
                 const items = this.getSelectableItems(),
                     selectionAttr = this.itemSelectionId;
@@ -13593,7 +13563,6 @@ new JS.Singleton('GlobalMouse', {
                     const item = items[--i];
                     if (item[selectionAttr] === itemSelectionId) return item;
                 }
-                return null;
             }
         });
 })(myt);
@@ -14872,7 +14841,7 @@ new JS.Singleton('GlobalMouse', {
                 const sel = window.getSelection();
                 if (sel.rangeCount > 0) {
                     // Sometimes when deleting we get an unexpected node
-                    if (sel.extentNode === this.getIDE()) return null;
+                    if (sel.extentNode === this.getIDE()) return;
                     
                     range = sel.getRangeAt(0);
                 }
@@ -16154,7 +16123,7 @@ new JS.Singleton('GlobalMouse', {
                 @returns {undefined} */
             invokeAccelerator: function(id, value) {
                 const accelerator = this.__acc[id];
-                if (accelerator) accelerator.call(this, value === undefined ? null : value);
+                if (accelerator) accelerator.call(this, value == null ? null : value);
             },
             
             /** Adds a validator to this form.
@@ -16166,7 +16135,8 @@ new JS.Singleton('GlobalMouse', {
             
             /** Removes a validator from this form.
                 @param id:string The ID of the validator to remove.
-                @returns the removed myt.Validator or null if not found. */
+                @returns the removed myt.Validator or undefined 
+                    if not found. */
             removeValidator: function(id) {
                 if (id) {
                     const validators = this.__v;
@@ -16179,7 +16149,6 @@ new JS.Singleton('GlobalMouse', {
                         }
                     }
                 }
-                return null;
             },
             
             /** Gets the oldest ancestor form of this form or the form itself.
@@ -16499,7 +16468,8 @@ new JS.Singleton('GlobalMouse', {
             
             /** Removes a ValueProcessor from this form element.
                 @param id:string the ID of the processor to remove.
-                @returns the removed myt.ValueProcessor or null if not found. */
+                @returns the removed myt.ValueProcessor or undefined 
+                    if not found. */
             removeValueProcessor: function(id) {
                 if (id) {
                     const processors = this.__vp;
@@ -16512,7 +16482,6 @@ new JS.Singleton('GlobalMouse', {
                         }
                     }
                 }
-                return null;
             },
             
             /** @overrides myt.Form */
@@ -16523,13 +16492,11 @@ new JS.Singleton('GlobalMouse', {
             /** @overrides myt.Form */
             getSubForm: id => {
                 pkg.dumpStack('getSubForm unsupported on FormElement');
-                return null;
             },
             
             /** @overrides myt.Form */
             removeSubForm: id => {
                 pkg.dumpStack('removeSubForm unsupported on FormElement');
-                return null;
             },
             
             /** @overrides myt.Form */
@@ -17793,6 +17760,15 @@ new JS.Singleton('GlobalMouse', {
                 
                 self.callSuper(parent, attrs);
                 
+                new View(self, {
+                    name:'overlay',
+                    ignorePlacement:true, 
+                    opacity:Dimmer.OPACITY,
+                    bgColor:Dimmer.COLOR,
+                    percentOfParentWidth:100,
+                    percentOfParentHeight:100
+                }, [SizeToParent]);
+                
                 // Eat mouse events
                 ['mouseover','mouseout','mousedown','mouseup','click','dblclick','mousemove'].forEach(eventName => {
                     self.attachDomObserver(self, 'eatMouseEvent', eventName);
@@ -17802,23 +17778,8 @@ new JS.Singleton('GlobalMouse', {
             },
             
             /** @overrides myt.View */
-            doBeforeAdoption: function() {
-                this.callSuper();
-                
-                new View(this, {
-                    name:'overlay',
-                    ignorePlacement:true, 
-                    opacity:Dimmer.OPACITY,
-                    bgColor:Dimmer.COLOR,
-                    percentOfParentWidth:100,
-                    percentOfParentHeight:100
-                }, [SizeToParent]);
-            },
-            
-            /** @overrides myt.View */
-            destroyAfterOrphaning: function() {
+            destroy: function() {
                 RootView.teardownCaptureDrop(this);
-                
                 this.callSuper();
             },
             
@@ -17924,7 +17885,11 @@ new JS.Singleton('GlobalMouse', {
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                this.defaultPlacement = 'content';
+                const self = this,
+                    viewAttrs = {name:'content', ignorePlacement:true},
+                    centeredViewAttrs = Object.assign({}, viewAttrs, {align:'center', valign:'middle'});
+                
+                self.defaultPlacement = 'content';
                 
                 defAttr(attrs, 'sizingStrategy', 'children');
                 
@@ -17938,15 +17903,7 @@ new JS.Singleton('GlobalMouse', {
                 defAttr(attrs, 'paddingX', ModalPanel.PADDING_X);
                 defAttr(attrs, 'paddingY', ModalPanel.PADDING_Y);
                 
-                this.callSuper(parent, attrs);
-            },
-            
-            doBeforeAdoption: function() {
-                const self = this,
-                    viewAttrs = {name:'content', ignorePlacement:true},
-                    centeredViewAttrs = Object.assign({}, viewAttrs, {align:'center', valign:'middle'});
-                
-                self.callSuper();
+                self.callSuper(parent, attrs);
                 
                 switch (self.sizingStrategy) {
                     case 'children':
@@ -20453,7 +20410,6 @@ new JS.Singleton('GlobalMouse', {
                 const hdr = hdrs[--i];
                 if (hdr.visible) return hdr;
             }
-            return null;
         },
         
         notifyHeadersOfSortState = controller => {
@@ -20774,7 +20730,7 @@ new JS.Singleton('GlobalMouse', {
             // Column Headers
             /** Gets the column header before the provided one.
                 @param {!Object} columnHeader
-                @returns {?Object} The myt.GridColumnHeader or null if 
+                @returns {?Object} The myt.GridColumnHeader or undefined if 
                     none exists. */
             getPrevColumnHeader: function(columnHeader) {
                 const hdrs = this.columnHeaders;
@@ -20785,12 +20741,11 @@ new JS.Singleton('GlobalMouse', {
                         if (hdr.visible) return hdr;
                     }
                 }
-                return null;
             },
             
             /** Gets the column header after the provided one.
                 @param {!Object} columnHeader
-                @returns {?Object} The myt.GridColumnHeader or null if 
+                @returns {?Object} The myt.GridColumnHeader or undefined if 
                     none exists. */
             getNextColumnHeader: function(columnHeader) {
                 const hdrs = this.columnHeaders,
@@ -20802,7 +20757,6 @@ new JS.Singleton('GlobalMouse', {
                         if (hdr.visible) return hdr;
                     }
                 }
-                return null;
             },
             
             hasColumnHeader: function(columnHeader) {
@@ -20820,7 +20774,6 @@ new JS.Singleton('GlobalMouse', {
                     const hdr = hdrs[--i];
                     if (hdr.columnId === columnId) return hdr;
                 }
-                return null;
             },
             
             getVisibleColumnHeaders: function() {
@@ -22755,7 +22708,7 @@ new JS.Singleton('GlobalMouse', {
         },
         
         /** @overrides */
-        destroyAfterOrphaning: function() {
+        destroy: function() {
             dragManager.unregisterDropTarget(this);
             
             this.callSuper();
@@ -22953,7 +22906,7 @@ new JS.Singleton('GlobalMouse', {
         },
         
         /** @overrides */
-        destroyAfterOrphaning: function() {
+        destroy: function() {
             dragManager.unregisterAutoScroller(this);
             
             this.callSuper();
@@ -23636,7 +23589,7 @@ myt.Eventable = new JS.Class('Eventable', {
                         // Create tooltip div if necessary
                         let elem = document.getElementById(tooltipDomId);
                         if (!elem) {
-                            elem = pkg.DomElementProxy.createDomElement('div', {position:'absolute'});
+                            elem = pkg.DomElementProxy.createElement('div', {position:'absolute'});
                             
                             // Make the div a child of the body element so it 
                             // can be in front of pretty much anything in the 

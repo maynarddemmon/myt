@@ -203,7 +203,6 @@
                 const item = items[i++];
                 if (item.isFocusable()) return item;
             }
-            return null;
         },
         
         getLastFocusableItem: function() {
@@ -213,7 +212,6 @@
                 const item = items[--i];
                 if (item.isFocusable()) return item;
             }
-            return null;
         },
         
         updateItemWidth: (item, width) => {

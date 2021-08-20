@@ -275,7 +275,8 @@
             
             /** Gets a selectable item with the the provided selection item ID.
                 @param {string} itemSelectionId
-                @returns {?Object} - The myt.Selectable or null if not found. */
+                @returns {?Object} - The myt.Selectable or undefined if 
+                    not found. */
             getSelectableItem: function(itemSelectionId) {
                 const items = this.getSelectableItems(),
                     selectionAttr = this.itemSelectionId;
@@ -284,7 +285,6 @@
                     const item = items[--i];
                     if (item[selectionAttr] === itemSelectionId) return item;
                 }
-                return null;
             }
         });
 })(myt);

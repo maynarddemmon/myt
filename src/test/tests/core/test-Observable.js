@@ -141,9 +141,11 @@ test("Fire an event.", function() {
     var observable = new myt.Node();
     
     var observer = new myt.Node(null, null, [{
-        doBeforeAdoption: function() {
+        initNode: function(parent, attrs) {
             this.fooEventCount = 0;
             this.lastFooEvent = null;
+            
+            this.callSuper(parent, attrs);
         },
         
         handleFooEvent: function(e) {
@@ -174,9 +176,11 @@ test("Fire an event.", function() {
 
 test("Verify infinite event loop protection.", function() {
     var n1 = new myt.Node(null, null, [{
-        doBeforeAdoption: function() {
+        initNode: function(parent, attrs) {
             this.fooEventCount = 0;
             this.lastFooEvent = null;
+            
+            this.callSuper(parent, attrs);
         },
         
         handleFooEvent: function(e) {
@@ -188,12 +192,14 @@ test("Verify infinite event loop protection.", function() {
     }]);
     
     var n2 = new myt.Node(null, null, [{
-        doBeforeAdoption: function() {
+        initNode: function(parent, attrs) {
             this.fooEventCount = 0;
             this.lastFooEvent = null;
             this.eventLoopFiredCount = 0;
             
             this.attachTo(myt.global.error, 'handleEventLoop', 'eventLoop');
+            
+            this.callSuper(parent, attrs);
         },
         
         handleFooEvent: function(e) {
@@ -232,9 +238,11 @@ test("Fire an event to a specific list of observers.", function() {
     var observable = new myt.Node();
     
     var observer1 = new myt.Node(null, null, [{
-        doBeforeAdoption: function() {
+        initNode: function(parent, attrs) {
             this.fooEventCount = 0;
             this.lastFooEvent = null;
+            
+            this.callSuper(parent, attrs);
         },
         
         handleFooEvent: function(e) {
@@ -244,9 +252,11 @@ test("Fire an event to a specific list of observers.", function() {
     }]);
     
     var observer2 = new myt.Node(null, null, [{
-        doBeforeAdoption: function() {
+        initNode: function(parent, attrs) {
             this.fooEventCount = 0;
             this.lastFooEvent = null;
+            
+            this.callSuper(parent, attrs);
         },
         
         handleFooEvent: function(e) {
@@ -330,9 +340,11 @@ test("Provide a function instead of a method name", function() {
     var observable2 = new myt.Node();
     
     var observer = new myt.Node(null, null, [{
-        doBeforeAdoption: function() {
+        initNode: function(parent, attrs) {
             this.fooEventCount = 0;
             this.lastFooEvent = null;
+            
+            this.callSuper(parent, attrs);
         },
         
         handleFooEvent: function(e) {

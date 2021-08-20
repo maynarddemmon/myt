@@ -76,11 +76,10 @@
         @class */
     pkg.SizeToDom = new JSModule('SizeToDom', {
         // Life Cycle //////////////////////////////////////////////////////////
-        /** @overrides myt.View 
-            Subclasses should call super. */
-        doAfterAdoption: function() {
+        /** @overrides myt.View */
+        initNode: function(parent, attrs) {
+            this.callSuper(parent, attrs);
             this.sizeViewToDom();
-            this.callSuper();
         },
         
         
@@ -123,11 +122,10 @@
         @class */
     pkg.SizeWidthToDom = new JSModule('SizeWidthToDom', {
         // Life Cycle //////////////////////////////////////////////////////////
-        /** @overrides myt.View 
-            Subclasses should call super. */
-        doAfterAdoption: function() {
+        /** @overrides myt.View */
+        initNode: function(parent, attrs) {
+            this.callSuper(parent, attrs);
             this.sizeViewToDom();
-            this.callSuper();
         },
         
         
@@ -164,11 +162,10 @@
         @class */
     pkg.SizeHeightToDom = new JSModule('SizeHeightToDom', {
         // Life Cycle //////////////////////////////////////////////////////////
-        /** @overrides myt.View 
-            Subclasses should call super. */
-        doAfterAdoption: function() {
+        /** @overrides myt.View */
+        initNode: function(parent, attrs) {
+            this.callSuper(parent, attrs);
             this.sizeViewToDom();
-            this.callSuper();
         },
         
         

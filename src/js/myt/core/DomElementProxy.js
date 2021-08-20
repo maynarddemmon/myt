@@ -1,7 +1,9 @@
 (pkg => {
     const GLOBAL = global,
         getComputedStyle = GLOBAL.getComputedStyle,
-        DOCUMENT_ELEMENT = document;
+        DOCUMENT_ELEMENT = document,
+        
+        mathMax = Math.max;
     
     /** Provides a dom element for this instance. Also assigns a reference 
         to this DomElementProxy to a property named "model" on the dom element.
@@ -17,11 +19,11 @@
                 @param {?Object} [props] - A map of keys and values to add to 
                     the new element.
                 @returns {!Object} the created element. */
-            createDomElement: (tagname, styles, props) => {
-                const de = DOCUMENT_ELEMENT.createElement(tagname);
-                if (props) for (const key in props) de[key] = props[key];
-                if (styles) for (const key in styles) de.style[key] = styles[key];
-                return de;
+            createElement: (tagname, styles, props) => {
+                const elem = DOCUMENT_ELEMENT.createElement(tagname);
+                if (props) for (const key in props) elem[key] = props[key];
+                if (styles) for (const key in styles) elem.style[key] = styles[key];
+                return elem;
             },
             
             /** Tests if a dom element is visible or not.
@@ -56,7 +58,6 @@
                         const style = getComputedStyle(ancestors[--i]),
                             zIdx = style.zIndex,
                             isAuto = zIdx === 'auto';
-                        
                         if (i !== 0 && isAuto && parseInt(style.opacity, 10) === 1) {
                             continue;
                         } else {
@@ -100,7 +101,7 @@
                     let i = children.length;
                     while (i) {
                         const child = children[--i];
-                        if (child.nodeType === 1) zIdx = Math.max(zIdx, DomElementProxy.getHighestZIndex(child));
+                        if (child.nodeType === 1) zIdx = mathMax(zIdx, DomElementProxy.getHighestZIndex(child));
                     }
                 } else {
                     zIdx = isAuto ? 0 : parseInt(zIdx, 10);
@@ -115,38 +116,39 @@
                 @param {?Object} [ancestorElem] - The ancestor dom element
                     that if encountered will halt the page position calculation
                     thus giving the position of elem relative to ancestorElem.
-                @returns {?Object} - An object with 'x' and 'y' keys or null 
-                    if an error has occurred. */
+                @returns {?Object} - An object with 'x' and 'y' keys or 
+                    undefined if an error has occurred. */
             getRelativePosition: (elem, ancestorElem) => {
-                if (!elem) return null;
-                
-                // elem.nodeName !== 'BODY' test prevents looking at the body
-                // which causes problems when the document is scrolled 
-                // on webkit.
-                let x = 0, 
-                    y = 0;
-                while (elem && elem.nodeName !== 'BODY' && elem !== ancestorElem) {
-                    x += elem.offsetLeft;
-                    y += elem.offsetTop;
-                    elem = elem.offsetParent;
-                    if (elem && elem.nodeName !== 'BODY') {
-                        const s = getComputedStyle(elem);
-                        x += parseInt(s.borderLeftWidth, 10) - elem.scrollLeft;
-                        y += parseInt(s.borderTopWidth, 10) - elem.scrollTop;
+                if (elem) {
+                    // elem.nodeName !== 'BODY' test prevents looking at the 
+                    // body which causes problems when the document is scrolled 
+                    // on webkit.
+                    let x = 0, 
+                        y = 0;
+                    while (elem && elem.nodeName !== 'BODY' && elem !== ancestorElem) {
+                        x += elem.offsetLeft;
+                        y += elem.offsetTop;
+                        elem = elem.offsetParent;
+                        if (elem && elem.nodeName !== 'BODY') {
+                            const s = getComputedStyle(elem);
+                            x += parseInt(s.borderLeftWidth, 10) - elem.scrollLeft;
+                            y += parseInt(s.borderTopWidth, 10) - elem.scrollTop;
+                        }
                     }
+                    return {x:x, y:y};
                 }
-                return {x:x, y:y};
             },
             
             /** Gets the x and y position of the dom element relative to the 
                 page with support for transforms.
                 @param {!Object} elem - The dom element to get the position for.
-                @returns {?Object} - An object with 'x' and 'y' keys or null 
-                    if an error has occurred. */
+                @returns {?Object} - An object with 'x' and 'y' keys or 
+                    undefined if an error has occurred. */
             getTruePosition: elem => {
-                if (!elem) return null;
-                const pos = elem.getBoundingClientRect();
-                return {x:pos.left + GLOBAL.scrollX, y:pos.top + GLOBAL.scrollY};
+                if (elem) {
+                    const pos = elem.getBoundingClientRect();
+                    return {x:pos.left + GLOBAL.scrollX, y:pos.top + GLOBAL.scrollY};
+                }
             },
             
             /** Generates a dom event on a dom element. Adapted from:
@@ -210,7 +212,7 @@
             getScrollbarSize: pkg.memoize(() => {
                 // Detect if scrollbars take up space or not
                 const body = DOCUMENT_ELEMENT.body,
-                    elem = DomElementProxy.createDomElement('div', {width:'100px', height:'100px', overflow:'scroll'});
+                    elem = DomElementProxy.createElement('div', {width:'100px', height:'100px', overflow:'scroll'});
                 body.appendChild(elem);
                 const scrollbarSize = elem.offsetWidth - elem.clientWidth;
                 body.removeChild(elem);
@@ -352,7 +354,7 @@
             to the page. Transforms are not supported by default.
             @param {boolean} [transformSupport] If true then transforms
                 applied to the dom elements are supported.
-            @returns {?Object} - An object with 'x' and 'y' keys or null 
+            @returns {?Object} - An object with 'x' and 'y' keys or undefined 
                 if an error has occurred. */
         getPagePosition: function(transformSupport) {
             return DomElementProxy['get' + (transformSupport ? 'True' : 'Relative') + 'Position'](this.__iE);
@@ -381,7 +383,7 @@
                 zIdx = 0;
             while (i) {
                 const child = children[--i];
-                if (child.nodeType === 1 && child !== skipChild) zIdx = Math.max(zIdx, DomElementProxy.getHighestZIndex(child));
+                if (child.nodeType === 1 && child !== skipChild) zIdx = mathMax(zIdx, DomElementProxy.getHighestZIndex(child));
             }
             return zIdx;
         },

@@ -2,7 +2,9 @@ module('Node Placement');
 
 test("Test some simple default placements.", function() {
     var DefaultPlacementTestClass = new JS.Class('DefaultPlacementTestClass', myt.Node, {
-        doAfterAdoption: function() {
+        initNode: function(parent, attrs) {
+            this.callSuper(parent, attrs);
+            
             new myt.Node(this, {name:'foo'});
             new myt.Node(this, {name:'bar'});
             new myt.Node(this, {name:'baz'});
@@ -44,9 +46,7 @@ test("Test various placement options", function() {
         initNode: function(parent, attrs) {
             attrs.defaultPlacement = 'bar';
             this.callSuper(parent, attrs);
-        },
-        
-        doAfterAdoption: function() {
+            
             new myt.Node(this, {name:'foo'}); // No bar will exist yet so 'this' is used.
             new myt.Node(this, {name:'bar'}); // bar now exists but 'this' was used for bar.
             new myt.Node(this, {name:'baz'}); // bar exists so this should get put inside it.
@@ -97,9 +97,7 @@ test("Test setParent with defaultPlacement/placement.", function() {
         initNode: function(parent, attrs) {
             attrs.defaultPlacement = 'bar';
             this.callSuper(parent, attrs);
-        },
-        
-        doAfterAdoption: function() {
+            
             new myt.Node(this, {name:'foo'}); // No bar will exist yet so 'this' is used.
             new myt.Node(this, {name:'bar'}); // bar now exists but 'this' was used for bar.
             new myt.Node(this, {name:'baz'}); // bar exists so this should get put inside it.

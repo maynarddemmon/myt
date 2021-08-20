@@ -533,7 +533,7 @@
                 const sel = window.getSelection();
                 if (sel.rangeCount > 0) {
                     // Sometimes when deleting we get an unexpected node
-                    if (sel.extentNode === this.getIDE()) return null;
+                    if (sel.extentNode === this.getIDE()) return;
                     
                     range = sel.getRangeAt(0);
                 }

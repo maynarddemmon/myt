@@ -43,7 +43,7 @@
             read: (key, options) => {
                 options = objectAssign({}, Cookie.defaults, options);
                 
-                const decodeFunc = options.raw ? s => s : s => decodeURIComponent(s.replace(/\+/g, ' ')),
+                const decodeFunc = options.raw ? str => str : str => decodeURIComponent(str.split('+').join(' ')),
                     useJson = options.json,
                     cookies = document.cookie.split('; '),
                     len = cookies.length,

@@ -135,8 +135,8 @@
                 /** Creates an myt.Color from an html color string.
                     @param {string} value - A hex string representation of a 
                         color, such as '#ff339b'.
-                    @returns {!Object} a myt.Color or null if no color could 
-                        be parsed. */
+                    @returns {!Object} a myt.Color or undefined if no color 
+                        could be parsed. */
                 makeColorFromHexString: value => {
                     if (value) {
                         if (!value.startsWith('#')) value = '#' + value;
@@ -150,8 +150,6 @@
                         }
                         
                         return makeColorFromNumber(parseInt(value.substring(1), 16));
-                    } else {
-                        return null;
                     }
                 },
                 
