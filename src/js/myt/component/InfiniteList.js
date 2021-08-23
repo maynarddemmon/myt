@@ -219,7 +219,7 @@
             },
             
             isModelInData: function(model) {
-                return this.getIndexOfModelInData(model) !== -1;
+                return this.getIndexOfModelInData(model) >= 0;
             },
             
             getNextModel: function(model, wrap=true, alwaysReturnAModel=true) {

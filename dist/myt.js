@@ -703,7 +703,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                     
                     // Must set src AFTER adding onreadystatechange listener 
                     // otherwise we’ll miss the loaded event for cached scripts
-                    scriptElem.src = src + (noCacheBust ? '' : (src.indexOf('?') !== -1 ? '&' : '?') + 'cacheBust=' + Date.now());
+                    scriptElem.src = src + (noCacheBust ? '' : (src.indexOf('?') >= 0 ? '&' : '?') + 'cacheBust=' + Date.now());
                     
                     headElem.appendChild(scriptElem);
                     
@@ -2488,8 +2488,11 @@ new JS.Singleton('GlobalError', {
         
         mathMax = Math.max;
     
-    /** Provides a dom element for this instance. Also assigns a reference 
-        to this DomElementProxy to a property named "model" on the dom element.
+    /** Provides dom elements for this instance. Typically only a single dom
+        element will exist but some components will make use of two nested
+        elements: an inner dom element and an outer dom element. Also assigns 
+        a reference to this DomElementProxy to a property named "model" on 
+        the dom elements.
         
         @class */
     const DomElementProxy = pkg.DomElementProxy = new JS.Module('DomElementProxy', {
@@ -2705,45 +2708,40 @@ new JS.Singleton('GlobalError', {
         
         
         // Accessors ///////////////////////////////////////////////////////////
-        getIDE: function() {return this.__iE;}, // Short alias for getInnerDomElement
-        getODE: function() {return this.__oE;}, // Short alias for getOuterDomElement
-        getIDS: function() {return this.__iS;}, // Short alias for getInnerDomStyle
-        getODS: function() {return this.__oS;}, // Short alias for getOuterDomStyle
-        
-        getInnerDomElement: function() {return this.__iE;},
-        
-        getOuterDomElement: function() {return this.__oE;},
-        
-        /** Gets the style attribute of the inner dom element. If only one
-            dom element exists then this will be the same as the outer dom
-            style.
+        /** Gets the inner dom element. If only one dom element exists then 
+            this will be the same as the outer dom element.
             @returns {?Object} */
-        getInnerDomStyle: function() {return this.__iS;},
+        getIDE: function() {return this.__iE;},
         
-        /** Gets the style attribute of the outer dom element. If only one
-            dom element exists then this will be the same as the inner dom
-            style.
+        /** Gets the outer dom element. If only one dom element exists then 
+            this will be the same as the inner dom element.
             @returns {?Object} */
-        getOuterDomStyle: function() {return this.__oS;},
+        getODE: function() {return this.__oE;},
         
-        /** Sets the dom element(s) to the provided one.
+        /** Gets the style attribute of the inner dom element. If only 
+            one dom element exists then this will be the same as the 
+            outer dom style.
+            @returns {?Object} */
+        getIDS: function() {return this.__iS;},
+        
+        /** Gets the style attribute of the outer dom element. If only 
+            one dom element exists then this will be the same as the 
+            inner dom style.
+            @returns {?Object} */
+        getODS: function() {return this.__oS;},
+        
+        /** Sets the dom element(s) to the provided ones. To set the inner
+            and outer dom elements to different dom elements provide an array
+            of two dom elements.
             @param {?Object} v
             @returns {undefined} */
         setDomElement: function(v) {
             // Support an inner and outer dom element if an array of elements 
             // is provided.
-            const self = this;
-            let outerElem,
-                innerElem;
-            if (Array.isArray(v)) {
-                outerElem = v[0];
-                innerElem = v[1];
-            } else {
-                outerElem = innerElem = v;
-            }
-            
-            self.__iE = innerElem;
-            self.__oE = outerElem;
+            const self = this,
+                isArray = Array.isArray(v),
+                outerElem = self.__oE = isArray ? v[0] : v,
+                innerElem = self.__iE = isArray ? v[1] : v;
             
             // Store a reference to the dom element style property since it 
             // is accessed often.
@@ -2756,7 +2754,8 @@ new JS.Singleton('GlobalError', {
             innerElem.model = outerElem.model = self;
         },
         
-        /** Removes this DomElementProxy's dom element from its parent node.
+        /** Removes this DomElementProxy's outer dom element from its 
+            parent node.
             @returns {undefined} */
         removeDomElement: function() {
             this.__oE.parentNode.removeChild(this.__oE);
@@ -2773,14 +2772,15 @@ new JS.Singleton('GlobalError', {
             delete this.__oE;
         },
         
-        /** Sets the dom "class" attribute on the dom element.
+        /** Sets the dom "class" attribute on the inner dom element.
             @param {string} v - The dom class name.
             @returns {undefined} */
         setDomClass: function(v) {
             this.__iE.className = this.domClass = v;
         },
         
-        /** Adds a dom "class" to the existing dom classes on the dom element.
+        /** Adds a dom "class" to the existing dom classes on the inner
+            dom element.
             @param {string} v - The dom class to add.
             @returns {undefined} */
         addDomClass: function(v) {
@@ -2788,7 +2788,7 @@ new JS.Singleton('GlobalError', {
             this.setDomClass((existing ? existing + ' ' : '') + v);
         },
         
-        /** Removes a dom "class" from the dom element.
+        /** Removes a dom "class" from the inner dom element.
             @param {string} v - The dom class to remove.
             @returns {undefined} */
         removeDomClass: function(v) {
@@ -2803,13 +2803,13 @@ new JS.Singleton('GlobalError', {
             }
         },
         
-        /** Clears the dom "class".
+        /** Clears the dom "class" from the inner dom element.
             @returns {undefined} */
         clearDomClass: function() {
             this.setDomClass('');
         },
         
-        /** Sets the dom "id" attribute on the dom element.
+        /** Sets the dom "id" attribute on the inner dom element.
             @param {string} v - The dom id name.
             @returns {undefined} */
         setDomId: function(v) {
@@ -2833,8 +2833,8 @@ new JS.Singleton('GlobalError', {
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Gets the x and y position of the underlying dom element relative 
-            to the page. Transforms are not supported by default.
+        /** Gets the x and y position of the underlying inner dom element 
+            relative to the page. Transforms are not supported by default.
             @param {boolean} [transformSupport] If true then transforms
                 applied to the dom elements are supported.
             @returns {?Object} - An object with 'x' and 'y' keys or undefined 
@@ -2843,20 +2843,21 @@ new JS.Singleton('GlobalError', {
             return DomElementProxy['get' + (transformSupport ? 'True' : 'Relative') + 'Position'](this.__iE);
         },
         
-        /** Generates a dom event "click" on this proxy's dom element.
+        /** Generates a dom event "click" on this DomElementProxy's inner 
+            dom element.
             @returns {undefined} */
         simulateClick: function() {
             DomElementProxy.simulateDomEvent(this.__iE, 'click');
         },
         
-        /** Gets the highest z-index of the dom element.
+        /** Gets the highest z-index of the inner dom element.
             @returns {number} - An int */
         getHighestZIndex: function() {
             return DomElementProxy.getHighestZIndex(this.__iE);
         },
         
         /** Gets the highest z-index of any of the descendant dom elements 
-            of the dom element of this DomElementProxy.
+            of the inner dom element of this DomElementProxy.
             @param {boolean} [skipChild] - A dom element to skip over
                 when determining the z-index.
             @returns {number} - An int. */
@@ -2871,8 +2872,8 @@ new JS.Singleton('GlobalError', {
             return zIdx;
         },
         
-        /** Makes this dom element proxy the one with the highest z-index 
-            relative to its sibling dom elements.
+        /** Makes this DomElementProxy's outer dom element the one with the 
+            highest z-index relative to its sibling dom elements.
             @returns {undefined} */
         makeHighestZIndex: function() {
             this.setZIndex(this.parent.getHighestChildZIndex(this.__iE) + 1);
@@ -3237,7 +3238,8 @@ new JS.Singleton('GlobalError', {
                     @returns object with an x and y key each containing 
                         a number. */
                 getScrollFromEvent: event => {
-                    const target = event.value.target || event.value.srcElement;
+                    const value = event.value,
+                        target = value.target || value.srcElement;
                     return {x:target.scrollLeft, y:target.scrollTop};
                 }
             },
@@ -4550,11 +4552,12 @@ new JS.Singleton('GlobalTouch', {
         
         /** @overrides */
         createOurDomElement: function(parent) {
-            const outerElem = this.callSuper(parent);
-            
-            // We need an inner dom element that is position relative to mask 
-            // the flex box behavior for descendants of this flex box child.
-            const innerElem = document.createElement('div');
+            const outerElem = this.callSuper(parent),
+                
+                // We need an inner dom element that is position relative to 
+                // mask the flex box behavior for descendants of this flex 
+                // box child.
+                innerElem = document.createElement('div');
             innerElem.style.position = 'relative';
             outerElem.appendChild(innerElem);
             
@@ -5312,7 +5315,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 let curParent = self.parent;
                 if (curParent) {
                     let idx = curParent.getSubnodeIndex(self);
-                    if (idx !== -1) {
+                    if (idx >= 0) {
                         if (self.name) removeNameRef(curParent, self);
                         curParent.subnodes.splice(idx, 1);
                         curParent.subnodeRemoved(self);
@@ -5371,7 +5374,7 @@ myt.Destructible = new JS.Module('Destructible', {
             // Parse "active" placement and remaining placement.
             let idx = placement.indexOf('.'),
                 remainder;
-            if (idx !== -1) {
+            if (idx >= 0) {
                 remainder = placement.substring(idx + 1);
                 placement = placement.substring(0, idx);
             }
@@ -5383,7 +5386,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 // Default placement may be compound and thus require splitting
                 if (placement) {
                     idx = placement.indexOf('.');
-                    if (idx !== -1) {
+                    if (idx >= 0) {
                         remainder = placement.substring(idx + 1) + (remainder ? '.' + remainder : '');
                         placement = placement.substring(0, idx);
                     }
@@ -5847,7 +5850,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 @param {?Object} sv - The myt.View to check for.
                 @returns true if the subview is found, false otherwise. */
             hasSubview: function(sv) {
-                return this.getSubviewIndex(sv) !== -1;
+                return this.getSubviewIndex(sv) >= 0;
             },
             
             /** Gets the index of the provided View in the subviews array.
@@ -5895,7 +5898,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 if (this.ignore(sv)) return -1;
                 
                 const idx = this.getSubviewIndex(sv);
-                if (idx !== -1) {
+                if (idx >= 0) {
                     this.stopMonitoringSubview(sv);
                     this.subviews.splice(idx, 1);
                     if (!this.locked) this.update();
@@ -5935,7 +5938,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 @param {!Object} event
                 @returns {undefined} */
             __hndlPSA: function(event) {
-                if (event.value.parent === this.parent) this.addSubview(event.value);
+                const value = event.value;
+                if (value.parent === this.parent) this.addSubview(value);
             },
             
             /** If our parent removes a subview we should remove it.
@@ -5943,7 +5947,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 @param {!Object} event
                 @returns {undefined} */
             __hndlPSR: function(event) {
-                if (event.value.parent === this.parent) this.removeSubview(event.value);
+                const value = event.value;
+                if (value.parent === this.parent) this.removeSubview(value);
             },
             
             // Subview ordering //
@@ -7612,7 +7617,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {!Object} sv - The myt.View to look for.
             @returns {boolean} true if the subview is found, false otherwise. */
         hasSubview: function(sv) {
-            return this.getSubviewIndex(sv) !== -1;
+            return this.getSubviewIndex(sv) >= 0;
         },
         
         /** Gets the index of the provided View in the subviews array.
@@ -7659,7 +7664,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {!Object} layout - The myt.Layout to look for.
             @returns {boolean} true if the layout is found, false otherwise. */
         hasLayout: function(layout) {
-            return this.getLayoutIndex(layout) !== -1;
+            return this.getLayoutIndex(layout) >= 0;
         },
         
         /** Gets the index of the provided Layout in the layouts array.
@@ -8575,8 +8580,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 this.getIDS().backgroundImage = v ? 'url("' + v + '")' : 'none';
                 if (this.inited) {
                     this.fireEvent('imageUrl', v);
-                    this.setNaturalWidth(undefined);
-                    this.setNaturalHeight(undefined);
+                    this.setNaturalWidth();
+                    this.setNaturalHeight();
                     
                     // Collapse size if no url and we are using natural size
                     if (!v && this.useNaturalSize) {
@@ -8820,6 +8825,30 @@ myt.Destructible = new JS.Module('Destructible', {
             defAttr(attrs, 'useNaturalSize', true);
             
             this.callSuper(parent, attrs);
+        }
+    });
+    
+    /** A view that keeps the first subview added to it always in the back.
+        Subclasses such as Canvas and Annulus will make use of this feature
+        to allow the appearance of subview support for HTML elements that
+        ordinarily do not allow sub elements.
+        
+        @class */
+    pkg.BackView = new JSClass('BackView', View, {
+        /** @overrides
+            Prevent views from being sent behind the first subview added to
+            this view. This allows us to add child views that will always
+            stay in front. */
+        sendSubviewToBack: function(sv) {
+            if (sv.parent === this) {
+                const ide = this.getIDE(),
+                    firstChild = ide.childNodes[1],
+                    svOde = sv.getODE();
+                if (svOde !== firstChild) {
+                    const removedElem = ide.removeChild(svOde);
+                    if (removedElem) ide.insertBefore(removedElem, firstChild);
+                }
+            }
         }
     });
 })(myt);
@@ -9096,10 +9125,7 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** @overrides myt.Node */
-            setParent: function(parent) {
-                // A root view doesn't have a parent view.
-                this.callSuper(undefined);
-            },
+            setParent: parent => {/* A root view has no parent view so do nothing. */},
             
             
             // Methods /////////////////////////////////////////////////////////
@@ -17029,7 +17055,8 @@ new JS.Singleton('GlobalMouse', {
             @param {!Object} event
             @returns {undefined} */
         __syncValue: function(event) {
-            this.setValue(event.value ? event.value.optionValue : null);
+            const value = event.value;
+            this.setValue(value ? value.optionValue : null);
         }
     });
     
@@ -20752,15 +20779,15 @@ new JS.Singleton('GlobalMouse', {
                     len = hdrs.length;
                 let idx = this.getColumnHeaderIndex(columnHeader) + 1;
                 if (idx > 0 && idx < len) {
-                    for (; len > idx; idx++) {
-                        const hdr = hdrs[idx];
+                    for (; len > idx;) {
+                        const hdr = hdrs[idx++];
                         if (hdr.visible) return hdr;
                     }
                 }
             },
             
             hasColumnHeader: function(columnHeader) {
-                return this.getColumnHeaderIndex(columnHeader) !== -1;
+                return this.getColumnHeaderIndex(columnHeader) >= 0;
             },
             
             getColumnHeaderIndex: function(columnHeader) {
@@ -20823,7 +20850,7 @@ new JS.Singleton('GlobalMouse', {
             
             // Rows
             hasRow: function(row) {
-                return this.getRowIndex(row) !== -1;
+                return this.getRowIndex(row) >= 0;
             },
             
             getRowIndex: function(row) {
@@ -20928,8 +20955,6 @@ new JS.Singleton('GlobalMouse', {
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                const self = this;
-                
                 defAttr(attrs, 'minValue', 16);
                 defAttr(attrs, 'maxValue', defaultMaxValue);
                 defAttr(attrs, 'resizable', true);
@@ -20942,6 +20967,7 @@ new JS.Singleton('GlobalMouse', {
                 // Ensure participation in determinePlacement method of myt.Grid
                 defAttr(attrs, 'placement', '*');
                 
+                const self = this;
                 self.callSuper(parent, attrs);
                 
                 const gc = self.gridController;
@@ -20952,26 +20978,20 @@ new JS.Singleton('GlobalMouse', {
                     draggableAllowBubble:false
                 }, [pkg.SizeToParent, pkg.Draggable, {
                     requestDragPosition: function(x, y) {
-                        let diff = x - this.x,
-                            growAmt,
-                            shrinkAmt,
-                            newValue;
-                        
+                        let diff = x - this.x;
                         if (gc.fitToWidth) {
                             if (diff > 0) {
                                 // Get amount that this header can grow
-                                growAmt = self.maxValue - self.value;
-                                diff = mathMin(diff, mathMin(-getTakeRight(self), growAmt + getGiveLeft(self)));
+                                diff = mathMin(diff, mathMin(-getTakeRight(self), self.maxValue - self.value + getGiveLeft(self)));
                             } else if (diff < 0) {
                                 // Get amount that this header can shrink
-                                shrinkAmt = self.minValue - self.value;
-                                diff = mathMax(diff, mathMax(-getGiveRight(self), shrinkAmt + getTakeLeft(self)));
+                                diff = mathMax(diff, mathMax(-getGiveRight(self), self.minValue - self.value + getTakeLeft(self)));
                             }
                             
                             if (diff === 0) return;
                         }
                         
-                        newValue = self.value + diff;
+                        const newValue = self.value + diff;
                         
                         if (self.resizable) self.setValue(newValue);
                         const remainingDiff = newValue - self.value;
@@ -21232,10 +21252,9 @@ new JS.Singleton('GlobalMouse', {
             @returns {undefined} */
         _updateContentWidth: function(event) {
             const content = this.content,
-                svs = content.getSubviews(),
                 w = event.value;
             content.setWidth(w);
-            svs.forEach(sv => {sv.setWidth(w);});
+            content.getSubviews().forEach(sv => {sv.setWidth(w);});
         },
         
         /** @private
@@ -21329,8 +21348,6 @@ new JS.Singleton('GlobalMouse', {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.View */
         initNode: function(parent, attrs) {
-            const self = this;
-            
             defAttr(attrs, 'activeColor', '#999');
             defAttr(attrs, 'hoverColor', '#bbb');
             defAttr(attrs, 'readyColor', '#aaa');
@@ -21338,6 +21355,7 @@ new JS.Singleton('GlobalMouse', {
             defAttr(attrs, 'outset', 2);
             defAttr(attrs, 'sortIconColor', '#666');
             
+            const self = this;
             self.callSuper(parent, attrs);
             
             new pkg.FontAwesome(self, {
@@ -21347,7 +21365,7 @@ new JS.Singleton('GlobalMouse', {
                     this.callSuper(parent, attrs);
                     this.getIDS().fontSize = '0.7em'; // Looks better a bit smaller.
                 },
-                sizeViewToDom:function() {
+                sizeViewToDom: function() {
                     this.callSuper();
                     self.setOutset(this.width + 2);
                     updateTextWidth(self);
@@ -21394,11 +21412,7 @@ new JS.Singleton('GlobalMouse', {
         // Methods /////////////////////////////////////////////////////////////
         doActivated: function() {
             if (!this.disabled) {
-                switch (this.sortState) {
-                    case 'ascending': this.setSortState('descending'); break;
-                    case 'descending': this.setSortState('ascending'); break;
-                    case 'none': this.setSortState('ascending'); break;
-                }
+                this.setSortState(this.sortState === 'ascending' ? 'descending' : 'ascending');
                 this.gridController.setSort([this.columnId, this.sortState]);
             }
         },
@@ -21630,7 +21644,7 @@ new JS.Singleton('GlobalMouse', {
             },
             
             isModelInData: function(model) {
-                return this.getIndexOfModelInData(model) !== -1;
+                return this.getIndexOfModelInData(model) >= 0;
             },
             
             getNextModel: function(model, wrap=true, alwaysReturnAModel=true) {
@@ -23173,7 +23187,7 @@ myt.Eventable = new JS.Class('Eventable', {
         /** An annulus component.
             
             @class */
-        Annulus = pkg.Annulus = new JS.Class('Annulus', pkg.View, {
+        Annulus = pkg.Annulus = new JS.Class('Annulus', pkg.BackView, {
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
                 const self = this;
@@ -23224,22 +23238,6 @@ myt.Eventable = new JS.Class('Eventable', {
             
             
             // Methods /////////////////////////////////////////////////////////
-            /** Prevent views from being sent behind the __svg. This allows 
-                child views to be added to an Annulus which is not directly 
-                supported in HTML.
-                @overrides */
-            sendSubviewToBack: function(sv) {
-                if (sv.parent === this) {
-                    const ide = this.getIDE(),
-                        firstChild = ide.childNodes[1],
-                        svOde = sv.getODE();
-                    if (svOde !== firstChild) {
-                        const removedElem = ide.removeChild(svOde);
-                        if (removedElem) ide.insertBefore(removedElem, firstChild);
-                    }
-                }
-            },
-            
             /** @overrides myt.View */
             isColorAttr: function(attrName) {
                 return attrName === 'color' || this.callSuper(attrName);
@@ -23802,11 +23800,11 @@ myt.Path = new JS.Class('Path', {
             Same as HTML canvas element.
         
         Private Attributes:
-            __canvas: A reference to the canvas dom element.
+            __cvs: A reference to the canvas dom element.
             __ctx: A reference to the 2D drawing context.
         
         @class */
-    pkg.Canvas = new JS.Class('Canvas', pkg.View, {
+    pkg.Canvas = new JS.Class('Canvas', pkg.BackView, {
         include:[mixin],
         
         
@@ -23815,7 +23813,7 @@ myt.Path = new JS.Class('Path', {
         createOurDomElement: function(parent) {
             const elements = this.callSuper(parent),
                 innerElem = Array.isArray(elements) ? elements[1] : elements,
-                canvas = this.__canvas = document.createElement('canvas');
+                canvas = this.__cvs = document.createElement('canvas');
             canvas.className = 'mytUnselectable';
             innerElem.appendChild(canvas);
             canvas.style.position = 'absolute';
@@ -23832,7 +23830,7 @@ myt.Path = new JS.Class('Path', {
             See: http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#attr-canvas-width */
         setWidth: function(v, supressEvent) {
             if (0 > v) v = 0;
-            this.__canvas.setAttribute('width', v);
+            this.__cvs.setAttribute('width', v);
             this.callSuper(v, supressEvent);
         },
         
@@ -23841,28 +23839,12 @@ myt.Path = new JS.Class('Path', {
             See: http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#attr-canvas-width */
         setHeight: function(v, supressEvent) {
             if (0 > v) v = 0;
-            this.__canvas.setAttribute('height', v);
+            this.__cvs.setAttribute('height', v);
             this.callSuper(v, supressEvent);
         },
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** @overrides
-            Prevent views from being sent behind the __canvas. This allows us 
-            to add child views to a Canvas which is not directly supported 
-            in HTML. */
-        sendSubviewToBack: function(sv) {
-            if (sv.parent === this) {
-                const ide = this.getIDE(),
-                    firstChild = ide.childNodes[1],
-                    svOde = sv.getODE();
-                if (svOde !== firstChild) {
-                    const removedElem = ide.removeChild(svOde);
-                    if (removedElem) ide.insertBefore(removedElem, firstChild);
-                }
-            }
-        },
-        
         /** Clears the drawing context. Anything currently drawn will 
             be erased. */
         clear: function() {
@@ -23884,7 +23866,7 @@ myt.Path = new JS.Class('Path', {
         },
         
         getDataURL: function(mimeType, opt) {
-            return this.__canvas.toDataURL(mimeType, opt);
+            return this.__cvs.toDataURL(mimeType, opt);
         },
         
         getImageFile: function(imageType, filename, opt) {

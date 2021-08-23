@@ -46,11 +46,11 @@
             Same as HTML canvas element.
         
         Private Attributes:
-            __canvas: A reference to the canvas dom element.
+            __cvs: A reference to the canvas dom element.
             __ctx: A reference to the 2D drawing context.
         
         @class */
-    pkg.Canvas = new JS.Class('Canvas', pkg.View, {
+    pkg.Canvas = new JS.Class('Canvas', pkg.BackView, {
         include:[mixin],
         
         
@@ -59,7 +59,7 @@
         createOurDomElement: function(parent) {
             const elements = this.callSuper(parent),
                 innerElem = Array.isArray(elements) ? elements[1] : elements,
-                canvas = this.__canvas = document.createElement('canvas');
+                canvas = this.__cvs = document.createElement('canvas');
             canvas.className = 'mytUnselectable';
             innerElem.appendChild(canvas);
             canvas.style.position = 'absolute';
@@ -76,7 +76,7 @@
             See: http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#attr-canvas-width */
         setWidth: function(v, supressEvent) {
             if (0 > v) v = 0;
-            this.__canvas.setAttribute('width', v);
+            this.__cvs.setAttribute('width', v);
             this.callSuper(v, supressEvent);
         },
         
@@ -85,28 +85,12 @@
             See: http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#attr-canvas-width */
         setHeight: function(v, supressEvent) {
             if (0 > v) v = 0;
-            this.__canvas.setAttribute('height', v);
+            this.__cvs.setAttribute('height', v);
             this.callSuper(v, supressEvent);
         },
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** @overrides
-            Prevent views from being sent behind the __canvas. This allows us 
-            to add child views to a Canvas which is not directly supported 
-            in HTML. */
-        sendSubviewToBack: function(sv) {
-            if (sv.parent === this) {
-                const ide = this.getIDE(),
-                    firstChild = ide.childNodes[1],
-                    svOde = sv.getODE();
-                if (svOde !== firstChild) {
-                    const removedElem = ide.removeChild(svOde);
-                    if (removedElem) ide.insertBefore(removedElem, firstChild);
-                }
-            }
-        },
-        
         /** Clears the drawing context. Anything currently drawn will 
             be erased. */
         clear: function() {
@@ -128,7 +112,7 @@
         },
         
         getDataURL: function(mimeType, opt) {
-            return this.__canvas.toDataURL(mimeType, opt);
+            return this.__cvs.toDataURL(mimeType, opt);
         },
         
         getImageFile: function(imageType, filename, opt) {

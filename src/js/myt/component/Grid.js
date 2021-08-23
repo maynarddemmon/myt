@@ -359,15 +359,15 @@
                     len = hdrs.length;
                 let idx = this.getColumnHeaderIndex(columnHeader) + 1;
                 if (idx > 0 && idx < len) {
-                    for (; len > idx; idx++) {
-                        const hdr = hdrs[idx];
+                    for (; len > idx;) {
+                        const hdr = hdrs[idx++];
                         if (hdr.visible) return hdr;
                     }
                 }
             },
             
             hasColumnHeader: function(columnHeader) {
-                return this.getColumnHeaderIndex(columnHeader) !== -1;
+                return this.getColumnHeaderIndex(columnHeader) >= 0;
             },
             
             getColumnHeaderIndex: function(columnHeader) {
@@ -430,7 +430,7 @@
             
             // Rows
             hasRow: function(row) {
-                return this.getRowIndex(row) !== -1;
+                return this.getRowIndex(row) >= 0;
             },
             
             getRowIndex: function(row) {
@@ -535,8 +535,6 @@
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                const self = this;
-                
                 defAttr(attrs, 'minValue', 16);
                 defAttr(attrs, 'maxValue', defaultMaxValue);
                 defAttr(attrs, 'resizable', true);
@@ -549,6 +547,7 @@
                 // Ensure participation in determinePlacement method of myt.Grid
                 defAttr(attrs, 'placement', '*');
                 
+                const self = this;
                 self.callSuper(parent, attrs);
                 
                 const gc = self.gridController;
@@ -559,26 +558,20 @@
                     draggableAllowBubble:false
                 }, [pkg.SizeToParent, pkg.Draggable, {
                     requestDragPosition: function(x, y) {
-                        let diff = x - this.x,
-                            growAmt,
-                            shrinkAmt,
-                            newValue;
-                        
+                        let diff = x - this.x;
                         if (gc.fitToWidth) {
                             if (diff > 0) {
                                 // Get amount that this header can grow
-                                growAmt = self.maxValue - self.value;
-                                diff = mathMin(diff, mathMin(-getTakeRight(self), growAmt + getGiveLeft(self)));
+                                diff = mathMin(diff, mathMin(-getTakeRight(self), self.maxValue - self.value + getGiveLeft(self)));
                             } else if (diff < 0) {
                                 // Get amount that this header can shrink
-                                shrinkAmt = self.minValue - self.value;
-                                diff = mathMax(diff, mathMax(-getGiveRight(self), shrinkAmt + getTakeLeft(self)));
+                                diff = mathMax(diff, mathMax(-getGiveRight(self), self.minValue - self.value + getTakeLeft(self)));
                             }
                             
                             if (diff === 0) return;
                         }
                         
-                        newValue = self.value + diff;
+                        const newValue = self.value + diff;
                         
                         if (self.resizable) self.setValue(newValue);
                         const remainingDiff = newValue - self.value;
@@ -839,10 +832,9 @@
             @returns {undefined} */
         _updateContentWidth: function(event) {
             const content = this.content,
-                svs = content.getSubviews(),
                 w = event.value;
             content.setWidth(w);
-            svs.forEach(sv => {sv.setWidth(w);});
+            content.getSubviews().forEach(sv => {sv.setWidth(w);});
         },
         
         /** @private
@@ -936,8 +928,6 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.View */
         initNode: function(parent, attrs) {
-            const self = this;
-            
             defAttr(attrs, 'activeColor', '#999');
             defAttr(attrs, 'hoverColor', '#bbb');
             defAttr(attrs, 'readyColor', '#aaa');
@@ -945,6 +935,7 @@
             defAttr(attrs, 'outset', 2);
             defAttr(attrs, 'sortIconColor', '#666');
             
+            const self = this;
             self.callSuper(parent, attrs);
             
             new pkg.FontAwesome(self, {
@@ -954,7 +945,7 @@
                     this.callSuper(parent, attrs);
                     this.getIDS().fontSize = '0.7em'; // Looks better a bit smaller.
                 },
-                sizeViewToDom:function() {
+                sizeViewToDom: function() {
                     this.callSuper();
                     self.setOutset(this.width + 2);
                     updateTextWidth(self);
@@ -1001,11 +992,7 @@
         // Methods /////////////////////////////////////////////////////////////
         doActivated: function() {
             if (!this.disabled) {
-                switch (this.sortState) {
-                    case 'ascending': this.setSortState('descending'); break;
-                    case 'descending': this.setSortState('ascending'); break;
-                    case 'none': this.setSortState('ascending'); break;
-                }
+                this.setSortState(this.sortState === 'ascending' ? 'descending' : 'ascending');
                 this.gridController.setSort([this.columnId, this.sortState]);
             }
         },

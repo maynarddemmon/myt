@@ -385,11 +385,12 @@
         
         /** @overrides */
         createOurDomElement: function(parent) {
-            const outerElem = this.callSuper(parent);
-            
-            // We need an inner dom element that is position relative to mask 
-            // the flex box behavior for descendants of this flex box child.
-            const innerElem = document.createElement('div');
+            const outerElem = this.callSuper(parent),
+                
+                // We need an inner dom element that is position relative to 
+                // mask the flex box behavior for descendants of this flex 
+                // box child.
+                innerElem = document.createElement('div');
             innerElem.style.position = 'relative';
             outerElem.appendChild(innerElem);
             

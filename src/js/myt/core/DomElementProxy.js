@@ -5,8 +5,11 @@
         
         mathMax = Math.max;
     
-    /** Provides a dom element for this instance. Also assigns a reference 
-        to this DomElementProxy to a property named "model" on the dom element.
+    /** Provides dom elements for this instance. Typically only a single dom
+        element will exist but some components will make use of two nested
+        elements: an inner dom element and an outer dom element. Also assigns 
+        a reference to this DomElementProxy to a property named "model" on 
+        the dom elements.
         
         @class */
     const DomElementProxy = pkg.DomElementProxy = new JS.Module('DomElementProxy', {
@@ -222,45 +225,40 @@
         
         
         // Accessors ///////////////////////////////////////////////////////////
-        getIDE: function() {return this.__iE;}, // Short alias for getInnerDomElement
-        getODE: function() {return this.__oE;}, // Short alias for getOuterDomElement
-        getIDS: function() {return this.__iS;}, // Short alias for getInnerDomStyle
-        getODS: function() {return this.__oS;}, // Short alias for getOuterDomStyle
-        
-        getInnerDomElement: function() {return this.__iE;},
-        
-        getOuterDomElement: function() {return this.__oE;},
-        
-        /** Gets the style attribute of the inner dom element. If only one
-            dom element exists then this will be the same as the outer dom
-            style.
+        /** Gets the inner dom element. If only one dom element exists then 
+            this will be the same as the outer dom element.
             @returns {?Object} */
-        getInnerDomStyle: function() {return this.__iS;},
+        getIDE: function() {return this.__iE;},
         
-        /** Gets the style attribute of the outer dom element. If only one
-            dom element exists then this will be the same as the inner dom
-            style.
+        /** Gets the outer dom element. If only one dom element exists then 
+            this will be the same as the inner dom element.
             @returns {?Object} */
-        getOuterDomStyle: function() {return this.__oS;},
+        getODE: function() {return this.__oE;},
         
-        /** Sets the dom element(s) to the provided one.
+        /** Gets the style attribute of the inner dom element. If only 
+            one dom element exists then this will be the same as the 
+            outer dom style.
+            @returns {?Object} */
+        getIDS: function() {return this.__iS;},
+        
+        /** Gets the style attribute of the outer dom element. If only 
+            one dom element exists then this will be the same as the 
+            inner dom style.
+            @returns {?Object} */
+        getODS: function() {return this.__oS;},
+        
+        /** Sets the dom element(s) to the provided ones. To set the inner
+            and outer dom elements to different dom elements provide an array
+            of two dom elements.
             @param {?Object} v
             @returns {undefined} */
         setDomElement: function(v) {
             // Support an inner and outer dom element if an array of elements 
             // is provided.
-            const self = this;
-            let outerElem,
-                innerElem;
-            if (Array.isArray(v)) {
-                outerElem = v[0];
-                innerElem = v[1];
-            } else {
-                outerElem = innerElem = v;
-            }
-            
-            self.__iE = innerElem;
-            self.__oE = outerElem;
+            const self = this,
+                isArray = Array.isArray(v),
+                outerElem = self.__oE = isArray ? v[0] : v,
+                innerElem = self.__iE = isArray ? v[1] : v;
             
             // Store a reference to the dom element style property since it 
             // is accessed often.
@@ -273,7 +271,8 @@
             innerElem.model = outerElem.model = self;
         },
         
-        /** Removes this DomElementProxy's dom element from its parent node.
+        /** Removes this DomElementProxy's outer dom element from its 
+            parent node.
             @returns {undefined} */
         removeDomElement: function() {
             this.__oE.parentNode.removeChild(this.__oE);
@@ -290,14 +289,15 @@
             delete this.__oE;
         },
         
-        /** Sets the dom "class" attribute on the dom element.
+        /** Sets the dom "class" attribute on the inner dom element.
             @param {string} v - The dom class name.
             @returns {undefined} */
         setDomClass: function(v) {
             this.__iE.className = this.domClass = v;
         },
         
-        /** Adds a dom "class" to the existing dom classes on the dom element.
+        /** Adds a dom "class" to the existing dom classes on the inner
+            dom element.
             @param {string} v - The dom class to add.
             @returns {undefined} */
         addDomClass: function(v) {
@@ -305,7 +305,7 @@
             this.setDomClass((existing ? existing + ' ' : '') + v);
         },
         
-        /** Removes a dom "class" from the dom element.
+        /** Removes a dom "class" from the inner dom element.
             @param {string} v - The dom class to remove.
             @returns {undefined} */
         removeDomClass: function(v) {
@@ -320,13 +320,13 @@
             }
         },
         
-        /** Clears the dom "class".
+        /** Clears the dom "class" from the inner dom element.
             @returns {undefined} */
         clearDomClass: function() {
             this.setDomClass('');
         },
         
-        /** Sets the dom "id" attribute on the dom element.
+        /** Sets the dom "id" attribute on the inner dom element.
             @param {string} v - The dom id name.
             @returns {undefined} */
         setDomId: function(v) {
@@ -350,8 +350,8 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Gets the x and y position of the underlying dom element relative 
-            to the page. Transforms are not supported by default.
+        /** Gets the x and y position of the underlying inner dom element 
+            relative to the page. Transforms are not supported by default.
             @param {boolean} [transformSupport] If true then transforms
                 applied to the dom elements are supported.
             @returns {?Object} - An object with 'x' and 'y' keys or undefined 
@@ -360,20 +360,21 @@
             return DomElementProxy['get' + (transformSupport ? 'True' : 'Relative') + 'Position'](this.__iE);
         },
         
-        /** Generates a dom event "click" on this proxy's dom element.
+        /** Generates a dom event "click" on this DomElementProxy's inner 
+            dom element.
             @returns {undefined} */
         simulateClick: function() {
             DomElementProxy.simulateDomEvent(this.__iE, 'click');
         },
         
-        /** Gets the highest z-index of the dom element.
+        /** Gets the highest z-index of the inner dom element.
             @returns {number} - An int */
         getHighestZIndex: function() {
             return DomElementProxy.getHighestZIndex(this.__iE);
         },
         
         /** Gets the highest z-index of any of the descendant dom elements 
-            of the dom element of this DomElementProxy.
+            of the inner dom element of this DomElementProxy.
             @param {boolean} [skipChild] - A dom element to skip over
                 when determining the z-index.
             @returns {number} - An int. */
@@ -388,8 +389,8 @@
             return zIdx;
         },
         
-        /** Makes this dom element proxy the one with the highest z-index 
-            relative to its sibling dom elements.
+        /** Makes this DomElementProxy's outer dom element the one with the 
+            highest z-index relative to its sibling dom elements.
             @returns {undefined} */
         makeHighestZIndex: function() {
             this.setZIndex(this.parent.getHighestChildZIndex(this.__iE) + 1);

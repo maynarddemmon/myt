@@ -108,7 +108,7 @@
         /** An annulus component.
             
             @class */
-        Annulus = pkg.Annulus = new JS.Class('Annulus', pkg.View, {
+        Annulus = pkg.Annulus = new JS.Class('Annulus', pkg.BackView, {
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
                 const self = this;
@@ -159,22 +159,6 @@
             
             
             // Methods /////////////////////////////////////////////////////////
-            /** Prevent views from being sent behind the __svg. This allows 
-                child views to be added to an Annulus which is not directly 
-                supported in HTML.
-                @overrides */
-            sendSubviewToBack: function(sv) {
-                if (sv.parent === this) {
-                    const ide = this.getIDE(),
-                        firstChild = ide.childNodes[1],
-                        svOde = sv.getODE();
-                    if (svOde !== firstChild) {
-                        const removedElem = ide.removeChild(svOde);
-                        if (removedElem) ide.insertBefore(removedElem, firstChild);
-                    }
-                }
-            },
-            
             /** @overrides myt.View */
             isColorAttr: function(attrName) {
                 return attrName === 'color' || this.callSuper(attrName);

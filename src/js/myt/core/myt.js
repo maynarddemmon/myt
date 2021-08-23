@@ -193,7 +193,7 @@
                     
                     // Must set src AFTER adding onreadystatechange listener 
                     // otherwise we’ll miss the loaded event for cached scripts
-                    scriptElem.src = src + (noCacheBust ? '' : (src.indexOf('?') !== -1 ? '&' : '?') + 'cacheBust=' + Date.now());
+                    scriptElem.src = src + (noCacheBust ? '' : (src.indexOf('?') >= 0 ? '&' : '?') + 'cacheBust=' + Date.now());
                     
                     headElem.appendChild(scriptElem);
                     

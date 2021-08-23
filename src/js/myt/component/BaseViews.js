@@ -157,4 +157,28 @@
             this.callSuper(parent, attrs);
         }
     });
+    
+    /** A view that keeps the first subview added to it always in the back.
+        Subclasses such as Canvas and Annulus will make use of this feature
+        to allow the appearance of subview support for HTML elements that
+        ordinarily do not allow sub elements.
+        
+        @class */
+    pkg.BackView = new JSClass('BackView', View, {
+        /** @overrides
+            Prevent views from being sent behind the first subview added to
+            this view. This allows us to add child views that will always
+            stay in front. */
+        sendSubviewToBack: function(sv) {
+            if (sv.parent === this) {
+                const ide = this.getIDE(),
+                    firstChild = ide.childNodes[1],
+                    svOde = sv.getODE();
+                if (svOde !== firstChild) {
+                    const removedElem = ide.removeChild(svOde);
+                    if (removedElem) ide.insertBefore(removedElem, firstChild);
+                }
+            }
+        }
+    });
 })(myt);

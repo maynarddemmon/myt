@@ -113,7 +113,8 @@
                     @returns object with an x and y key each containing 
                         a number. */
                 getScrollFromEvent: event => {
-                    const target = event.value.target || event.value.srcElement;
+                    const value = event.value,
+                        target = value.target || value.srcElement;
                     return {x:target.scrollLeft, y:target.scrollTop};
                 }
             },

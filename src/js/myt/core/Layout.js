@@ -208,7 +208,7 @@
                 @param {?Object} sv - The myt.View to check for.
                 @returns true if the subview is found, false otherwise. */
             hasSubview: function(sv) {
-                return this.getSubviewIndex(sv) !== -1;
+                return this.getSubviewIndex(sv) >= 0;
             },
             
             /** Gets the index of the provided View in the subviews array.
@@ -256,7 +256,7 @@
                 if (this.ignore(sv)) return -1;
                 
                 const idx = this.getSubviewIndex(sv);
-                if (idx !== -1) {
+                if (idx >= 0) {
                     this.stopMonitoringSubview(sv);
                     this.subviews.splice(idx, 1);
                     if (!this.locked) this.update();
@@ -296,7 +296,8 @@
                 @param {!Object} event
                 @returns {undefined} */
             __hndlPSA: function(event) {
-                if (event.value.parent === this.parent) this.addSubview(event.value);
+                const value = event.value;
+                if (value.parent === this.parent) this.addSubview(value);
             },
             
             /** If our parent removes a subview we should remove it.
@@ -304,7 +305,8 @@
                 @param {!Object} event
                 @returns {undefined} */
             __hndlPSR: function(event) {
-                if (event.value.parent === this.parent) this.removeSubview(event.value);
+                const value = event.value;
+                if (value.parent === this.parent) this.removeSubview(value);
             },
             
             // Subview ordering //

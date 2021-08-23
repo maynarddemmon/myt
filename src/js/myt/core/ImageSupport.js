@@ -131,8 +131,8 @@
                 this.getIDS().backgroundImage = v ? 'url("' + v + '")' : 'none';
                 if (this.inited) {
                     this.fireEvent('imageUrl', v);
-                    this.setNaturalWidth(undefined);
-                    this.setNaturalHeight(undefined);
+                    this.setNaturalWidth();
+                    this.setNaturalHeight();
                     
                     // Collapse size if no url and we are using natural size
                     if (!v && this.useNaturalSize) {

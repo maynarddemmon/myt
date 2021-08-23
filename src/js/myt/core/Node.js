@@ -216,7 +216,7 @@
                 let curParent = self.parent;
                 if (curParent) {
                     let idx = curParent.getSubnodeIndex(self);
-                    if (idx !== -1) {
+                    if (idx >= 0) {
                         if (self.name) removeNameRef(curParent, self);
                         curParent.subnodes.splice(idx, 1);
                         curParent.subnodeRemoved(self);
@@ -275,7 +275,7 @@
             // Parse "active" placement and remaining placement.
             let idx = placement.indexOf('.'),
                 remainder;
-            if (idx !== -1) {
+            if (idx >= 0) {
                 remainder = placement.substring(idx + 1);
                 placement = placement.substring(0, idx);
             }
@@ -287,7 +287,7 @@
                 // Default placement may be compound and thus require splitting
                 if (placement) {
                     idx = placement.indexOf('.');
-                    if (idx !== -1) {
+                    if (idx >= 0) {
                         remainder = placement.substring(idx + 1) + (remainder ? '.' + remainder : '');
                         placement = placement.substring(0, idx);
                     }

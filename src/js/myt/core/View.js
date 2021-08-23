@@ -954,7 +954,7 @@
             @param {!Object} sv - The myt.View to look for.
             @returns {boolean} true if the subview is found, false otherwise. */
         hasSubview: function(sv) {
-            return this.getSubviewIndex(sv) !== -1;
+            return this.getSubviewIndex(sv) >= 0;
         },
         
         /** Gets the index of the provided View in the subviews array.
@@ -1001,7 +1001,7 @@
             @param {!Object} layout - The myt.Layout to look for.
             @returns {boolean} true if the layout is found, false otherwise. */
         hasLayout: function(layout) {
-            return this.getLayoutIndex(layout) !== -1;
+            return this.getLayoutIndex(layout) >= 0;
         },
         
         /** Gets the index of the provided Layout in the layouts array.

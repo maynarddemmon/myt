@@ -1421,7 +1421,8 @@
             @param {!Object} event
             @returns {undefined} */
         __syncValue: function(event) {
-            this.setValue(event.value ? event.value.optionValue : null);
+            const value = event.value;
+            this.setValue(value ? value.optionValue : null);
         }
     });
     

@@ -83,10 +83,7 @@
             },
             
             /** @overrides myt.Node */
-            setParent: function(parent) {
-                // A root view doesn't have a parent view.
-                this.callSuper(undefined);
-            },
+            setParent: parent => {/* A root view has no parent view so do nothing. */},
             
             
             // Methods /////////////////////////////////////////////////////////
