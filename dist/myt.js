@@ -20229,6 +20229,7 @@ new JS.Singleton('GlobalMouse', {
                     defAttr(attrs, 'width', 6);
                     defAttr(attrs, 'cursor', 'col-resize');
                 }
+                self.quickSet(['axis'], attrs);
                 
                 // Controls acceleration of the nudge amount
                 self.__nudgeAcc = 1;
