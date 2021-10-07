@@ -58,7 +58,7 @@
                         // Prevent dragging from the "dead zone".
                         if (!this.willPermitDrop(this.parent)) return;
                         
-                        var pos = myt.DomElementProxy.getRelativePosition(this.getInnerDomElement(), root.getInnerDomElement());
+                        var pos = myt.DomElementProxy.getRelativePosition(this.getIDE(), root.getIDE());
                         this.setX(pos.x);
                         this.setY(pos.y);
                         
@@ -147,7 +147,7 @@
                     dropable.setDragOffsetX(0, true);
                     dropable.setDragOffsetY(0, true);
                     
-                    var pos = myt.DomElementProxy.getRelativePosition(this.getOuterDomElement(), dropable.parent.getOuterDomElement()),
+                    var pos = myt.DomElementProxy.getRelativePosition(this.getODE(), dropable.parent.getODE()),
                         dur = dropable.animDuration;
                     dropable.animate({attribute:'x', to:(pos.x + 5), duration:dur});
                     dropable.animate({attribute:'y', to:(pos.y + 5), duration:dur});

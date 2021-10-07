@@ -7,13 +7,13 @@ test("Create a DomElementProxy and dispose of the dom element", function() {
     
     var proxy = new myt.Node(null, {}, [myt.DomElementProxy]);
     
-    ok(proxy.getInnerDomElement() === undefined, "No dom element reference should exist yet.");
-    ok(proxy.getInnerDomStyle() === undefined, "No dom element style reference should exist yet.");
+    ok(proxy.getIDE() === undefined, "No dom element reference should exist yet.");
+    ok(proxy.getIDS() === undefined, "No dom element style reference should exist yet.");
     ok(div.model === undefined, "No model reference should exist yet on the dom element.");
     
     proxy.setDomElement(div);
-    ok(proxy.getInnerDomElement() === div, "Dom element reference should now exist.");
-    ok(proxy.getInnerDomStyle() === div.style, "Inner dom style reference should now exist.");
+    ok(proxy.getIDE() === div, "Dom element reference should now exist.");
+    ok(proxy.getIDS() === div.style, "Inner dom style reference should now exist.");
     ok(div.model === proxy, "Model reference should now exist.");
     
     // Destroy
@@ -22,8 +22,8 @@ test("Create a DomElementProxy and dispose of the dom element", function() {
     ok(div.parentNode == null, "Dom element should no longer have a parent.");
     
     proxy.disposeOfDomElement();
-    ok(proxy.getInnerDomElement() === undefined, "After dispose, no dom element reference should exist yet.");
-    ok(proxy.getInnerDomStyle() === undefined, "After dispose, no inner dom style reference should exist.");
+    ok(proxy.getIDE() === undefined, "After dispose, no dom element reference should exist yet.");
+    ok(proxy.getIDS() === undefined, "After dispose, no inner dom style reference should exist.");
     ok(div.model === undefined, "After dispose, no model reference should exist yet on the dom element.");
     
     proxy.destroy();
@@ -110,27 +110,27 @@ test("getAncestorArray", function() {
     var none = myt.DomElementProxy.getAncestorArray(null);
     ok(none.length === 0, "No ancestors of null.");
     
-    var ancestorsOfRoot = myt.DomElementProxy.getAncestorArray(v.getInnerDomElement());
+    var ancestorsOfRoot = myt.DomElementProxy.getAncestorArray(v.getIDE());
     ok(ancestorsOfRoot.length === 4, "Four ancestors of root element.");
-    ok(ancestorsOfRoot[0] === v.getInnerDomElement(), "First ancestor of root dom element is the dom element itself.");
+    ok(ancestorsOfRoot[0] === v.getIDE(), "First ancestor of root dom element is the dom element itself.");
     ok(ancestorsOfRoot[1] === document.body, "Second ancestor of root dom element is the document body element.");
     ok(ancestorsOfRoot[2] === document.documentElement, "Third ancestor of root dom element is the html element.");
     ok(ancestorsOfRoot[3] === document, "Fourth ancestor of root dom element is the document element.");
     
-    ancestorsOfRoot = myt.DomElementProxy.getAncestorArray(v.getInnerDomElement(), v.getInnerDomElement());
+    ancestorsOfRoot = myt.DomElementProxy.getAncestorArray(v.getIDE(), v.getIDE());
     ok(ancestorsOfRoot.length === 1, "One ancestor of root element.");
-    ok(ancestorsOfRoot[0] === v.getInnerDomElement(), "First ancestor of root dom element is the dom element itself.");
+    ok(ancestorsOfRoot[0] === v.getIDE(), "First ancestor of root dom element is the dom element itself.");
     
-    var ancestors = myt.DomElementProxy.getAncestorArray(sv331.getInnerDomElement(), v.getInnerDomElement());
+    var ancestors = myt.DomElementProxy.getAncestorArray(sv331.getIDE(), v.getIDE());
     ok(ancestors.length === 4, "Four ancestor of view sv331.");
-    ok(ancestors[0] === sv331.getInnerDomElement(), "sv331 is first ancestor.");
-    ok(ancestors[1] === sv33.getInnerDomElement(), "sv33 is second ancestor.");
-    ok(ancestors[2] === sv3.getInnerDomElement(), "sv3 is third ancestor.");
-    ok(ancestors[3] === v.getInnerDomElement(), "v is fourth ancestor.");
+    ok(ancestors[0] === sv331.getIDE(), "sv331 is first ancestor.");
+    ok(ancestors[1] === sv33.getIDE(), "sv33 is second ancestor.");
+    ok(ancestors[2] === sv3.getIDE(), "sv3 is third ancestor.");
+    ok(ancestors[3] === v.getIDE(), "v is fourth ancestor.");
     
-    ancestors = myt.DomElementProxy.getAncestorArray(sv331.getInnerDomElement(), sv2.getInnerDomElement());
+    ancestors = myt.DomElementProxy.getAncestorArray(sv331.getIDE(), sv2.getIDE());
     ok(ancestors.length === 7, "Full ancestor array up to document.");
-    ok(ancestors[0] === sv331.getInnerDomElement(), "First ancestor is the element itself.");
+    ok(ancestors[0] === sv331.getIDE(), "First ancestor is the element itself.");
     ok(ancestors[6] === document, "Seventh ancestor is the document element.");
     v.destroy();
 });
@@ -159,21 +159,21 @@ test("getZIndexRelativeToAncestor", function() {
     ok(myt.DomElementProxy.getZIndexRelativeToAncestor() === 0, "Undefined returns 0");
     ok(myt.DomElementProxy.getZIndexRelativeToAncestor(null) === 0, "Null returns 0");
     ok(myt.DomElementProxy.getZIndexRelativeToAncestor(null, null) === 0, "Null arguments returns 0");
-    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(v.getInnerDomElement(), null) === 0, "Missing ancestor returns 0");
-    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(null, v.getInnerDomElement()) === 0, "Missing element returns 0");
+    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(v.getIDE(), null) === 0, "Missing ancestor returns 0");
+    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(null, v.getIDE()) === 0, "Missing element returns 0");
     
-    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(v.getInnerDomElement(), v.getInnerDomElement()) === 0, "Z-index relative to self is 0.");
+    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(v.getIDE(), v.getIDE()) === 0, "Z-index relative to self is 0.");
     
-    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(sv1.getInnerDomElement(), v.getInnerDomElement()) === 1, "Z-index should be 1.");
-    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(sv11.getInnerDomElement(), v.getInnerDomElement()) === 1, "Z-index should be 1 since parent has a defined z-index.");
-    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(sv13.getInnerDomElement(), v.getInnerDomElement()) === 1, "Z-index should be 1 since parent has a defined z-index.");
+    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(sv1.getIDE(), v.getIDE()) === 1, "Z-index should be 1.");
+    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(sv11.getIDE(), v.getIDE()) === 1, "Z-index should be 1 since parent has a defined z-index.");
+    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(sv13.getIDE(), v.getIDE()) === 1, "Z-index should be 1 since parent has a defined z-index.");
     
-    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(sv2.getInnerDomElement(), v.getInnerDomElement()) === 0, "Z-index should be 0.");
-    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(sv21.getInnerDomElement(), v.getInnerDomElement()) === 0, "Z-index should be 0 since parent has opacity of 0.5.");
-    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(sv21.getInnerDomElement(), sv2.getInnerDomElement()) === 1, "Z-index should be 1.");
+    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(sv2.getIDE(), v.getIDE()) === 0, "Z-index should be 0.");
+    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(sv21.getIDE(), v.getIDE()) === 0, "Z-index should be 0 since parent has opacity of 0.5.");
+    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(sv21.getIDE(), sv2.getIDE()) === 1, "Z-index should be 1.");
     
-    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(sv33.getInnerDomElement(), v.getInnerDomElement()) === 3, "Z-index should be 3.");
-    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(sv331.getInnerDomElement(), v.getInnerDomElement()) === 3, "Z-index should be 3.");
+    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(sv33.getIDE(), v.getIDE()) === 3, "Z-index should be 3.");
+    ok(myt.DomElementProxy.getZIndexRelativeToAncestor(sv331.getIDE(), v.getIDE()) === 3, "Z-index should be 3.");
     
     v.destroy();
 });
@@ -207,7 +207,7 @@ test("getPagePosition", function() {
     ok(pos.y === 173, "Subview should have a y-position of 150+20+3=173.");
     
     // Relative
-    pos = myt.DomElementProxy.getRelativePosition(sv2sv1sv1.getInnerDomElement(), sv2.getInnerDomElement());
+    pos = myt.DomElementProxy.getRelativePosition(sv2sv1sv1.getIDE(), sv2.getIDE());
     ok(pos.x === 15, "Subview should have an x-position of 10+5=15.");
     ok(pos.y === 23, "Subview should have a y-position of 20+3=23.");
 });
