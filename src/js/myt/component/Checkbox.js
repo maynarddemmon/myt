@@ -30,6 +30,8 @@
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
+            this.appendToEarlyAttrs('userUnselectable');
+            
             defAttr(attrs, 'value', false);
             defAttr(attrs, 'focusIndicator', false);
             defAttr(attrs, 'checkboxStyle', DEFAULT_STYLE);
