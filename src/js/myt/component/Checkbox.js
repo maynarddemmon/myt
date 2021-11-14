@@ -30,6 +30,8 @@
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
+            // Ensures the "pointer" cursor shows up rather than the
+            // "default" cursor.
             this.appendToEarlyAttrs('userUnselectable');
             
             defAttr(attrs, 'value', false);

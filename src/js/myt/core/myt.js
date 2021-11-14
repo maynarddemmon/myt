@@ -2,7 +2,7 @@
     /*
      * http://github.com/maynarddemmon/myt
      * Maynard Demmon <maynarddemmon@gmail.com>
-     * @copyright Copyright (c) 2012-2021 Maynard Demmon and contributors
+     * @copyright Copyright (c) 2012-2022 Maynard Demmon and contributors
      * Myt: A simple javascript UI framework
      * Version: 20210723.1606
      * MIT License
@@ -28,8 +28,13 @@
         }
     }
     
-    /* Used to generate globally unique IDs. */
-    let GUID_COUNTER = 0;
+    
+    let 
+        // Used to generate globally unique IDs.
+        GUID_COUNTER = 0,
+        
+        // The current locale for the user.
+        currentLocale;
     
     const math = Math,
         mathAbs = math.abs,
@@ -69,6 +74,12 @@
         notifyInstanceThatFontLoaded = instance => {
             if (instance && !instance.destroyed) instance.sizeViewToDom();
         },
+        
+        // The default locale for I18N.
+        defaultLocale = 'en',
+        
+        // The localization dictionaries for I18N
+        dictionaries = {},
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of 
@@ -597,7 +608,42 @@
                 }
             ).finally(
                 _ => {if (finallyFunc) finallyFunc();}
-            )
+            ),
+            
+            // I18N
+            I18N: {
+                setLocale: locale => {
+                    currentLocale = locale;
+                },
+                getLocale: () => currentLocale,
+                addDictionary: (dictionary, locale) => {
+                    dictionaries[locale] = Object.assign(dictionaries[locale] || {}, dictionary);
+                },
+                get: function(key) {
+                    const args = arguments,
+                        locale = currentLocale || (currentLocale = (navigator.language || defaultLocale).split('-')[0].toLowerCase());
+                    let value = (dictionaries[locale] || dictionaries[defaultLocale] || {})[key];
+                    if (value != null) {
+                        if (args.length > 1) {
+                            // Process each {{plural:$n|single|multiple}} replacement
+                            for (const m of value.matchAll(/\{\{plural:\$(.*?)\|(.*?)\|(.*?)\}\}/g)) {
+                                // Don't be tempted to do a replace all in the 
+                                // next line. The matchAll handles them. 
+                                // The use of == lets us handle 1 and '1' 
+                                // for single.
+                                value = value.replace(m[0], m[args[parseInt(m[1])] == 1 ? 2 : 3]);
+                            }
+                            
+                            // Process $n replacement for every arg
+                            for (let argNum = 1; argNum < args.length; argNum++) {
+                                value = value.replaceAll('$' + argNum, args[argNum]);
+                            }
+                        }
+                        return value;
+                    }
+                    return key;
+                }
+            }
         };
     
     docFonts.onloadingdone = fontFaceSetEvent => {
