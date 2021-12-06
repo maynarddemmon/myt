@@ -40,14 +40,14 @@
             
             // Accessors ///////////////////////////////////////////////////////
             /** @overrides */
-            setWidth: function(v, supressEvent) {
-                this.callSuper(v, supressEvent);
+            setWidth: function(v, suppressEvent) {
+                this.callSuper(v, suppressEvent);
                 if (this.inited) syncSubviewsForFlexBox(this);
             },
             
             /** @overrides */
-            setHeight: function(v, supressEvent) {
-                this.callSuper(v, supressEvent);
+            setHeight: function(v, suppressEvent) {
+                this.callSuper(v, suppressEvent);
                 if (this.inited) syncSubviewsForFlexBox(this);
             },
             
@@ -254,12 +254,12 @@
         /** @overrides
             Keep outer dom element's width in sync with the inner 
             dom element. */
-        setWidth: function(v, supressEvent) {
+        setWidth: function(v, suppressEvent) {
             if (v == null || v === '') {
                 this.getODS().width = '';
                 this.syncModelToOuterBounds(false, true);
             } else {
-                this.callSuper(v, supressEvent);
+                this.callSuper(v, suppressEvent);
             }
             this.syncInnerToOuter(false, true);
         },
@@ -267,12 +267,12 @@
         /** @overrides
             Keep outer dom element's height in sync with the inner 
             dom element. */
-        setHeight: function(v, supressEvent) {
+        setHeight: function(v, suppressEvent) {
             if (v == null || v === '') {
                 this.getODS().height = '';
                 this.syncModelToOuterBounds(true, false);
             } else {
-                this.callSuper(v, supressEvent);
+                this.callSuper(v, suppressEvent);
             }
             this.syncInnerToOuter(true, false);
         },

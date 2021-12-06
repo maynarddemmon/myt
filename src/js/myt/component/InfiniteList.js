@@ -155,9 +155,9 @@
             
             getListData: function() {return this._listData;},
             
-            setWidth: function(v, supressEvent) {
+            setWidth: function(v, suppressEvent) {
                 if (v > 0) {
-                    this.callSuper(v, supressEvent);
+                    this.callSuper(v, suppressEvent);
                     if (this.inited) {
                         const listView = this._listView,
                             w = this.width;
@@ -708,8 +708,8 @@
         },
         
         /** @overrides myt.View */
-        setHeight: function(v, supressEvent) {
-            this.callSuper(v, supressEvent);
+        setHeight: function(v, suppressEvent) {
+            this.callSuper(v, suppressEvent);
             if (this.inited) {
                 v = this.height;
                 this.columnHeaders.forEach(hdr => {hdr.setHeight(v);});
@@ -717,9 +717,9 @@
         },
         
         /** @overrides myt.View */
-        setWidth: function(v, supressEvent) {
+        setWidth: function(v, suppressEvent) {
             const self = this;
-            self.callSuper(mathMax(self.minWidth, v), supressEvent);
+            self.callSuper(mathMax(self.minWidth, v), suppressEvent);
             if (self.inited) {
                 const width = self.width;
                 self.setGridWidth(width);

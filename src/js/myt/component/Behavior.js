@@ -470,7 +470,7 @@
     
     /** Makes an myt.View draggable via the mouse.
         
-        Also supresses context menus since the mouse down to open it causes 
+        Also suppresses context menus since the mouse down to open it causes 
         bad behavior since a mouseup event is not always fired.
         
         Events:
@@ -559,17 +559,17 @@
             this.set('isDragging', v, true);
         },
         
-        setDragOffsetX: function(v, supressUpdate) {
+        setDragOffsetX: function(v, suppressUpdate) {
             if (this.dragOffsetX !== v) {
                 this.dragOffsetX = v;
-                if (this.inited && this.isDragging && !supressUpdate) this.reRequestDragPosition();
+                if (this.inited && this.isDragging && !suppressUpdate) this.reRequestDragPosition();
             }
         },
         
-        setDragOffsetY: function(v, supressUpdate) {
+        setDragOffsetY: function(v, suppressUpdate) {
             if (this.dragOffsetY !== v) {
                 this.dragOffsetY = v;
-                if (this.inited && this.isDragging && !supressUpdate) this.reRequestDragPosition();
+                if (this.inited && this.isDragging && !suppressUpdate) this.reRequestDragPosition();
             }
         },
         
@@ -591,7 +591,7 @@
         /** @private
             @param {!Object} event
             @returns {undefined} */
-        __doContextMenu: event => {/* Do nothing so the context menu event is supressed. */},
+        __doContextMenu: event => {/* Do nothing so the context menu event is suppressed. */},
         
         /** @private
             @param {!Object} event

@@ -16,7 +16,7 @@
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
                 /** Prevents default drag/drop behavior.
-                    @param {!Obect} view - The myt.View the view to supress 
+                    @param {!Obect} view - The myt.View the view to suppress 
                         default dragover and drop on.
                     @returns {undefined} */
                 setupCaptureDrop: view => {
@@ -28,7 +28,7 @@
                 
                 /** Cleanup dom listeners for drag/drop.
                     @param {!Obect} view - The myt.View the view that had 
-                        supressed default dragover  and drop on.
+                        suppressed default dragover  and drop on.
                     @returns {undefined} */
                 teardownCaptureDrop: view => {
                     const ide = view.getIDE(), 

@@ -664,11 +664,11 @@
             },
             
             /** @overrides myt.View */
-            setWidth: function(v, supressEvent) {
+            setWidth: function(v, suppressEvent) {
                 const self = this,
                     cur = self.width,
                     gc = self.gridController;
-                self.callSuper(v, supressEvent);
+                self.callSuper(v, suppressEvent);
                 if (gc && self.inited && cur !== self.width) gc.notifyColumnHeaderWidthChange(self);
             },
             
@@ -983,8 +983,8 @@
         },
         
         /** @overrides myt.View */
-        setWidth: function(v, supressEvent) {
-            this.callSuper(v, supressEvent);
+        setWidth: function(v, suppressEvent) {
+            this.callSuper(v, suppressEvent);
             if (this.inited) updateTextWidth(this);
         },
         

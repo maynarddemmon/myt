@@ -191,8 +191,8 @@
             valignOffset:number
             x:number
             y:number
-            width:number (supressable)
-            height:number (supressable)
+            width:number (suppressable)
+            height:number (suppressable)
             boundsWidth:number Fired when the bounds width of the view changes.
             boundsHeight:number Fired when the bounds height of the 
                 view changes.
@@ -555,7 +555,7 @@
             }
         },
         
-        setWidth: function(v, supressEvent) {
+        setWidth: function(v, suppressEvent) {
             // Dom elements don't support negative width
             if (0 > v) v = 0;
             
@@ -564,12 +564,12 @@
                 this.getODS().width = v + 'px';
                 if (this.inited) {
                     this.__updateBounds(v, this.height);
-                    if (!supressEvent) this.fireEvent('width', v);
+                    if (!suppressEvent) this.fireEvent('width', v);
                 }
             }
         },
         
-        setHeight: function(v, supressEvent) {
+        setHeight: function(v, suppressEvent) {
             // Dom elements don't support negative height
             if (0 > v) v = 0;
             
@@ -578,7 +578,7 @@
                 this.getODS().height = v + 'px';
                 if (this.inited) {
                     this.__updateBounds(this.width, v);
-                    if (!supressEvent) this.fireEvent('height', v);
+                    if (!suppressEvent) this.fireEvent('height', v);
                 }
             }
         },
@@ -680,7 +680,7 @@
         // Outlines
         /** Sets outlineWidth, outlineStyle and outlineColor via a single 
             array. If a value equivalent to false is provided the outline 
-            will be supressed.
+            will be suppressed.
             @param {?Array} v - An array where index 0 is outlineWidth, index 
                 1 is outline style and index 2 is outlineColor.
             @returns {undefined} */
@@ -707,7 +707,7 @@
         // Borders
         /** Sets borderWidth, borderStyle and borderColor via a single 
             array. If a value equivalent to false is provided the border 
-            will be supressed.
+            will be suppressed.
             @param {?Array} v - An array where index 0 is borderWidth, index 
                 1 is border style and index 2 is borderColor.
             @returns {undefined} */

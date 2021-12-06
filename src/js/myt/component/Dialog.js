@@ -173,7 +173,7 @@
                         colorPicker.updateUI();
                     }
                 }]);
-                hueView.getIDS().background = 'linear-gradient(to top, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%)';
+                hueView.getIDS().background = 'linear-gradient(to top, #f00 0%, #f0f 17%, #00f 33%, #0ff 50%, #0f0 67%, #ff0 83%, #f00 100%)';
                 hueThumb = new View(hueView, {x:-1, width:24, height:2, bgColor:'#fff', border:[1, 'solid', '#000']});
                 
                 new View(colorPicker, {
@@ -1137,26 +1137,28 @@
                     content = self.content, 
                     DPY = ModalPanel.PADDING_Y,
                     HALF_DPY = DPY / 2,
-                    btnContainer = new View(content, {y:mainView.y + mainView.height + DPY, align:'center'});
+                    btnContainer = new View(content, {y:mainView.y + mainView.height + DPY, align:'center'}),
+                    btnConfigKeys = ['active','hover','ready','text'];
                 
                 // Cancel Button
                 let attrs = opts.cancelAttrs || {};
                 defAttr(attrs, 'name', 'cancelBtn');
                 defAttr(attrs, 'text', opts.cancelTxt);
-                if (opts.activeColor != null) attrs.activeColor = opts.activeColor;
-                if (opts.hoverColor != null) attrs.hoverColor = opts.hoverColor;
-                if (opts.readyColor != null) attrs.readyColor = opts.readyColor;
-                if (opts.textColor != null) attrs.textColor = opts.textColor;
+                btnConfigKeys.forEach(key => {
+                    key += 'Color';
+                    if (opts[key] != null) attrs[key] = opts[key];
+                });
                 const cancelBtn = self.makeButton(btnContainer, attrs);
                 
                 // Confirm Button
                 attrs = opts.confirmAttrs || {};
                 defAttr(attrs, 'name', 'confirmBtn');
                 defAttr(attrs, 'text', opts.confirmTxt);
-                if (opts.activeColorConfirm != null) attrs.activeColor = opts.activeColorConfirm;
-                if (opts.hoverColorConfirm != null) attrs.hoverColor = opts.hoverColorConfirm;
-                if (opts.readyColorConfirm != null) attrs.readyColor = opts.readyColorConfirm;
-                if (opts.textColorConfirm != null) attrs.textColor = opts.textColorConfirm;
+                btnConfigKeys.forEach(key => {
+                    key += 'Color';
+                    const optsKey = key + 'Confirm';
+                    if (opts[optsKey] != null) attrs[key] = opts[optsKey];
+                });
                 self.makeButton(btnContainer, attrs);
                 
                 // Additional Buttons

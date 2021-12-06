@@ -85,13 +85,13 @@
         
         // Accessors ///////////////////////////////////////////////////////////
         /** @overrides myt.View */
-        setWidth: function(v, supressEvent) {
-            if (setWidth(this, v)) this.callSuper(v, supressEvent);
+        setWidth: function(v, suppressEvent) {
+            if (setWidth(this, v)) this.callSuper(v, suppressEvent);
         },
         
         /** @overrides myt.View */
-        setHeight: function(v, supressEvent) {
-            if (setHeight(this, v)) this.callSuper(v, supressEvent);
+        setHeight: function(v, suppressEvent) {
+            if (setHeight(this, v)) this.callSuper(v, suppressEvent);
         },
         
         
@@ -131,8 +131,8 @@
         
         // Accessors ///////////////////////////////////////////////////////////
         /** @overrides myt.View */
-        setWidth: function(v, supressEvent) {
-            if (setWidth(this, v)) this.callSuper(v, supressEvent);
+        setWidth: function(v, suppressEvent) {
+            if (setWidth(this, v)) this.callSuper(v, suppressEvent);
         },
         
         
@@ -171,8 +171,8 @@
         
         // Accessors ///////////////////////////////////////////////////////////
         /** @overrides myt.View */
-        setHeight: function(v, supressEvent) {
-            if (setHeight(this, v)) this.callSuper(v, supressEvent);
+        setHeight: function(v, suppressEvent) {
+            if (setHeight(this, v)) this.callSuper(v, suppressEvent);
         },
         
         

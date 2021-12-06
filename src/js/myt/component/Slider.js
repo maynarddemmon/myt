@@ -303,9 +303,9 @@
         
         /** @overrides
             Update the thumb position if the width changes. */
-        setWidth: function(v, supressEvent) {
+        setWidth: function(v, suppressEvent) {
             const existing = this.width;
-            this.callSuper(v, supressEvent);
+            this.callSuper(v, suppressEvent);
             if (this.inited && this.axis === 'x' && this.width !== existing) {
                 const value = this.getValue();
                 this._syncThumbToValue(this.thumbLower, value);
@@ -315,9 +315,9 @@
         
         /** @overrides
             Update the thumb position if the height changes. */
-        setHeight: function(v, supressEvent) {
+        setHeight: function(v, suppressEvent) {
             const existing = this.height;
-            this.callSuper(v, supressEvent);
+            this.callSuper(v, suppressEvent);
             if (this.inited && this.axis === 'y' && this.height !== existing) {
                 const value = this.getValue();
                 this._syncThumbToValue(this.thumbLower, value);
@@ -416,17 +416,17 @@
         
         /** @overrides
             Update the thumb position if the width changes. */
-        setWidth: function(v, supressEvent) {
+        setWidth: function(v, suppressEvent) {
             const existing = this.width;
-            this.callSuper(v, supressEvent);
+            this.callSuper(v, suppressEvent);
             if (this.inited && this.axis === 'x' && this.width !== existing) this._syncThumbToValue(this.thumb, this.getValue());
         },
         
         /** @overrides
             Update the thumb position if the height changes. */
-        setHeight: function(v, supressEvent) {
+        setHeight: function(v, suppressEvent) {
             const existing = this.height;
-            this.callSuper(v, supressEvent);
+            this.callSuper(v, suppressEvent);
             if (this.inited && this.axis === 'y' && this.height !== existing) this._syncThumbToValue(this.thumb, this.getValue());
         },
         

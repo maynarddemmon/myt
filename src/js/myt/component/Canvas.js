@@ -74,19 +74,19 @@
         /** @overrides myt.View
             Needed because canvas must also set width/height attribute.
             See: http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#attr-canvas-width */
-        setWidth: function(v, supressEvent) {
+        setWidth: function(v, suppressEvent) {
             if (0 > v) v = 0;
             this.__cvs.setAttribute('width', v);
-            this.callSuper(v, supressEvent);
+            this.callSuper(v, suppressEvent);
         },
         
         /** @overrides myt.View
             Needed because canvas must also set width/height attribute.
             See: http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#attr-canvas-width */
-        setHeight: function(v, supressEvent) {
+        setHeight: function(v, suppressEvent) {
             if (0 > v) v = 0;
             this.__cvs.setAttribute('height', v);
-            this.callSuper(v, supressEvent);
+            this.callSuper(v, suppressEvent);
         },
         
         

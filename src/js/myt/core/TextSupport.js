@@ -87,8 +87,8 @@
     pkg.TextSupport = new JS.Module('TextSupport', {
         // Accessors ///////////////////////////////////////////////////////////
         /** @overrides myt.View */
-        setWidth: function(v, supressEvent) {
-            this.callSuper(v, supressEvent);
+        setWidth: function(v, suppressEvent) {
+            this.callSuper(v, suppressEvent);
             
             // Height can change with width change when wrapping occurs.
             if (v !== 'auto') {

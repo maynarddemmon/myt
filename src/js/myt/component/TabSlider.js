@@ -117,11 +117,11 @@
                     visible:false, maskFocus:true,
                     overflow:'hidden', percentOfParentWidth:100
                 }, [SizeToParent, {
-                    setHeight: function(v, supressEvent) {
-                        this.callSuper(Math.round(v), supressEvent);
+                    setHeight: function(v, suppressEvent) {
+                        this.callSuper(Math.round(v), suppressEvent);
                     },
-                    setWidth: function(v, supressEvent) {
-                        this.callSuper(v, supressEvent);
+                    setWidth: function(v, suppressEvent) {
+                        this.callSuper(v, suppressEvent);
                         if (this.inited) this.container.setWidth(v);
                     }
                 }]);
