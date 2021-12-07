@@ -8901,7 +8901,8 @@ myt.Destructible = new JS.Module('Destructible', {
 
 
 (pkg => {
-    const
+    const mathRound = Math.round,
+        
         setupPercentOfParentWidthConstraint = stp => {
             const p = stp.parent;
             if (p && stp.percentOfParentWidth >= 0) stp.syncTo(p, '__doPOPW', 'width');
@@ -9008,7 +9009,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {!Object} event
             @returns {undefined} */
         __doPOPW: function(event) {
-            this.setWidth((this.percentOfParentWidthOffset || 0) + Math.round(this.parent.width * (this.percentOfParentWidth / 100)));
+            this.setWidth((this.percentOfParentWidthOffset || 0) + mathRound(this.parent.width * (this.percentOfParentWidth / 100)));
             // Force width event if not inited yet so that align constraint
             // in myt.View will work.
             if (!this.inited) this.fireEvent('width', this.width);
@@ -9018,7 +9019,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {!Object} event
             @returns {undefined} */
         __doPOPH: function(event) {
-            this.setHeight((this.percentOfParentHeightOffset || 0) + Math.round(this.parent.height * (this.percentOfParentHeight / 100)));
+            this.setHeight((this.percentOfParentHeightOffset || 0) + mathRound(this.parent.height * (this.percentOfParentHeight / 100)));
             // Force height event if not inited yet so that valign constraint
             // in myt.View will work.
             if (!this.inited) this.fireEvent('height', this.height);
@@ -12110,7 +12111,7 @@ new JS.Singleton('GlobalMouse', {
         panelsByPanelId = {}, // A map of FloatingPanel instances by panel ID.
         
         getFloatingPanel = panelId => panelsByPanelId[panelId],
-    
+        
         /** Enables a view to act as the anchor point for a FloatingPanel.
             
             Events:
@@ -13646,7 +13647,7 @@ new JS.Singleton('GlobalMouse', {
         SizeToParent = pkg.SizeToParent,
         
         defAttr = pkg.AccessorSupport.defAttr,
-    
+        
         /** A tab slider component.
             
             Events:
@@ -13666,11 +13667,10 @@ new JS.Singleton('GlobalMouse', {
                 fillColorReady:color The color of the button when ready for 
                     interaction.
                 buttonHeight:number The height of the button portion of the 
-                    tab slider. Defaults to myt.TabSlider.BUTTON_HEIGHT 
-                    which is 30.
+                    tab slider. Defaults to 30.
                 minContainerHeight:number The minimum height of the content 
-                    container inside this tab slider. Defaults to 
-                    myt.TabSlider.MINIMUM_CONTAINER_HEIGHT which is 100.
+                    container inside this tab slider. This is the minimum
+                    height when expanded. Defaults to 100.
                 expansionState:string Indicates the expansion state of the tab 
                     slider. Supported values are: 'expanded', 'expanding', 
                     'collapsed' and 'collapsing'. Defaults to 'collapsed'.
@@ -13682,14 +13682,6 @@ new JS.Singleton('GlobalMouse', {
             
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                BUTTON_HEIGHT:30,
-                /** The default minimum height of the container 
-                    when expanded. */
-                MINIMUM_CONTAINER_HEIGHT:100,
-                FILL_COLOR_SELECTED:'#666',
-                FILL_COLOR_HOVER:'#eee',
-                FILL_COLOR_ACTIVE:'#ccc',
-                FILL_COLOR_READY:'#fff',
                 ANIMATION_MILLIS:500
             },
             
@@ -13709,12 +13701,12 @@ new JS.Singleton('GlobalMouse', {
                 defAttr(attrs, 'selected', false);
                 defAttr(attrs, 'buttonClass', pkg.SimpleButton);
                 defAttr(attrs, 'zIndex', 0);
-                defAttr(attrs, 'buttonHeight', TabSlider.BUTTON_HEIGHT);
-                defAttr(attrs, 'fillColorSelected', TabSlider.FILL_COLOR_SELECTED);
-                defAttr(attrs, 'fillColorHover', TabSlider.FILL_COLOR_HOVER);
-                defAttr(attrs, 'fillColorActive', TabSlider.FILL_COLOR_ACTIVE);
-                defAttr(attrs, 'fillColorReady', TabSlider.FILL_COLOR_READY);
-                defAttr(attrs, 'minContainerHeight', TabSlider.MINIMUM_CONTAINER_HEIGHT);
+                defAttr(attrs, 'buttonHeight', 30);
+                defAttr(attrs, 'fillColorSelected', '#666');
+                defAttr(attrs, 'fillColorHover', '#eee');
+                defAttr(attrs, 'fillColorActive', '#ccc');
+                defAttr(attrs, 'fillColorReady', '#fff');
+                defAttr(attrs, 'minContainerHeight', 100);
                 
                 // Selection must be done via the select method on 
                 // the tabContainer
@@ -13736,7 +13728,7 @@ new JS.Singleton('GlobalMouse', {
                     readyColor:self.fillColorReady
                 }, [SizeToParent, {
                     /** @overrides myt.Button */
-                    doActivated: function() {
+                    doActivated: () => {
                         const tc = self.tabContainer;
                         if (self.isSelected() && tc.maxSelected !== 1) {
                             tc.deselect(self);
@@ -13768,8 +13760,7 @@ new JS.Singleton('GlobalMouse', {
                     }
                 }]);
                 
-                const container = new View(wrapper, {name:'container'});
-                new pkg.SizeToChildren(container, {axis:'y'});
+                new pkg.SizeToChildren(new View(wrapper, {name:'container'}), {axis:'y'});
                 
                 self.constrain('__updateHeight', [wrapper, 'y', wrapper, 'height']);
                 
@@ -13924,17 +13915,10 @@ new JS.Singleton('GlobalMouse', {
             
             @class */
         TextTabSlider = pkg.TextTabSlider = new JSClass('TextTabSlider', TabSlider, {
-            // Class Methods and Attributes ////////////////////////////////////
-            extend: {
-                LABEL_TEXT_COLOR_CHECKED: '#fff',
-                LABEL_TEXT_COLOR: '#333'
-            },
-            
-            
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                defAttr(attrs, 'labelTextColorChecked', TextTabSlider.LABEL_TEXT_COLOR_CHECKED);
-                defAttr(attrs, 'labelTextColor', TextTabSlider.LABEL_TEXT_COLOR);
+                defAttr(attrs, 'labelTextColorChecked', '#fff');
+                defAttr(attrs, 'labelTextColor', '#333');
                 
                 this.callSuper(parent, attrs);
                 
@@ -14120,34 +14104,21 @@ new JS.Singleton('GlobalMouse', {
 
 
 (pkg => {
-    const JSModule = JS.Module,
-        
-        defAttr = pkg.AccessorSupport.defAttr,
+    const defAttr = pkg.AccessorSupport.defAttr,
         
         updateTextColor = tab => {
             tab.textView.setTextColor(tab.selected ? tab.labelTextSelectedColor : tab.labelTextColor);
         },
         
         updateCornerRadius = tab => {
-            const radius = tab.cornerRadius != null ? tab.cornerRadius : Tab.RADIUS;
+            const cornerKeys = [];
             switch (tab.tabContainer.location) {
-                case 'top':
-                    tab.setRoundedTopLeftCorner(radius);
-                    tab.setRoundedTopRightCorner(radius);
-                    break;
-                case 'bottom':
-                    tab.setRoundedBottomLeftCorner(radius);
-                    tab.setRoundedBottomRightCorner(radius);
-                    break;
-                case 'left':
-                    tab.setRoundedTopLeftCorner(radius);
-                    tab.setRoundedBottomLeftCorner(radius);
-                    break;
-                case 'right':
-                    tab.setRoundedTopRightCorner(radius);
-                    tab.setRoundedBottomRightCorner(radius);
-                    break;
+                case 'top': cornerKeys.push('TopLeft','TopRight'); break;
+                case 'bottom': cornerKeys.push('BottomLeft','BottomRight'); break;
+                case 'left': cornerKeys.push('TopLeft','BottomLeft'); break;
+                case 'right': cornerKeys.push('TopRight','BottomRight'); break;
             }
+            cornerKeys.forEach(cornerKey => {tab['setRounded' + cornerKey + 'Corner'](tab.cornerRadius || 0);});
         },
         
         /** A simple tab component.
@@ -14167,8 +14138,7 @@ new JS.Singleton('GlobalMouse', {
                 labelTextColorSelected:color The color to use for the label 
                     text when this tab is selected.
                 cornerRadius:number Passed into the drawing config to determine
-                    if a rounded corner is drawn or not. Defaults to undefined 
-                    which causes myt.Tab.RADIUS to be used.
+                    if a rounded corner is drawn or not. Defaults to 6.
             
             @class */
         Tab = pkg.Tab = new JS.Class('Tab', pkg.SimpleTextButton, {
@@ -14177,15 +14147,8 @@ new JS.Singleton('GlobalMouse', {
             
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                HEIGHT: 24,
                 INSET: 8,
-                OUTSET: 8,
-                FILL_COLOR_SELECTED: '#fff',
-                FILL_COLOR_HOVER: '#eee',
-                FILL_COLOR_ACTIVE: '#aaa',
-                FILL_COLOR_READY: '#ccc',
-                LABEL_TEXT_COLOR_SELECTED:'#333',
-                RADIUS:6
+                OUTSET: 8
             },
             
             
@@ -14207,15 +14170,16 @@ new JS.Singleton('GlobalMouse', {
                 defAttr(attrs, 'outset', Tab.OUTSET);
                 
                 // myt.Tab
-                defAttr(attrs, 'selectedColor', Tab.FILL_COLOR_SELECTED);
-                defAttr(attrs, 'hoverColor', Tab.FILL_COLOR_HOVER);
-                defAttr(attrs, 'activeColor', Tab.FILL_COLOR_ACTIVE);
-                defAttr(attrs, 'readyColor', Tab.FILL_COLOR_READY);
-                defAttr(attrs, 'labelTextSelectedColor', Tab.LABEL_TEXT_COLOR_SELECTED);
+                defAttr(attrs, 'selectedColor', '#fff');
+                defAttr(attrs, 'hoverColor', '#eee');
+                defAttr(attrs, 'activeColor', '#aaa');
+                defAttr(attrs, 'readyColor', '#ccc');
+                defAttr(attrs, 'labelTextSelectedColor', '#333');
                 
                 // Other
-                defAttr(attrs, 'height', Tab.HEIGHT);
+                defAttr(attrs, 'height', 24);
                 defAttr(attrs, 'focusIndicator', false);
+                defAttr(attrs, 'cornerRadius', 6);
                 
                 this.callSuper(parent, attrs);
                 
@@ -14275,7 +14239,7 @@ new JS.Singleton('GlobalMouse', {
                 inset:number The inset for the layout. Defaults to 0.
             
             @class */
-        TabContainer = pkg.TabContainer = new JSModule('TabContainer', {
+        TabContainer = pkg.TabContainer = new JS.Module('TabContainer', {
             include: [pkg.SelectionManager],
             
             
@@ -17187,11 +17151,20 @@ new JS.Singleton('GlobalMouse', {
 (pkg => {
     const JSClass = JS.Class,
         
+        mathRound = Math.round,
+        
         MIME_TYPES_BY_EXTENSION = {
             gif:'image/gif',
             png:'image/png',
             jpg:'image/jpeg',
             jpeg:'image/jpeg'
+        },
+        
+        doDragListeners = (target, funcName) => {
+            target[funcName](target, 'doDragOver', 'dragover', false);
+            target[funcName](target, 'doDragEnter', 'dragenter', false);
+            target[funcName](target, 'doDragLeave', 'dragleave', false);
+            target[funcName](target, 'doDrop', 'drop', false);
         },
         
         /** Provides browser drag and drop support.
@@ -17233,18 +17206,12 @@ new JS.Singleton('GlobalMouse', {
             // Methods /////////////////////////////////////////////////////////
             /** @private */
             setupDragListeners: function() {
-                this.attachToDom(this, 'doDragOver', 'dragover', false);
-                this.attachToDom(this, 'doDragEnter', 'dragenter', false);
-                this.attachToDom(this, 'doDragLeave', 'dragleave', false);
-                this.attachToDom(this, 'doDrop', 'drop', false);
+                doDragListeners(this, 'attachToDom');
             },
             
             /** @private */
             teardownDragListeners: function() {
-                this.detachFromDom(this, 'doDragOver', 'dragover', false);
-                this.detachFromDom(this, 'doDragEnter', 'dragenter', false);
-                this.detachFromDom(this, 'doDragLeave', 'dragleave', false);
-                this.detachFromDom(this, 'doDrop', 'drop', false);
+                doDragListeners(this, 'detachFromDom');
             },
             
             /** @param {!Object} event
@@ -17276,7 +17243,7 @@ new JS.Singleton('GlobalMouse', {
                         if (file) this.handleDroppedFile(file, event);
                     }
                 } else {
-                    pkg.dumpStack('File API unsupported');
+                    pkg.dumpStack('No File API');
                 }
             },
             
@@ -17480,21 +17447,23 @@ new JS.Singleton('GlobalMouse', {
             },
             
             removeFile: function(file) {
-                const files = this.files;
+                const self = this,
+                    files = self.files;
                 let i = files.length;
                 while (i) {
                     if (Uploader.isSameFile(files[--i], file)) {
                         files.splice(i, 1);
-                        this.updateValueFromFiles();
-                        this.fireEvent('removeFile', file);
+                        self.updateValueFromFiles();
+                        self.fireEvent('removeFile', file);
                         break;
                     }
                 }
             },
             
             updateValueFromFiles: function() {
-                const value = [],
-                    files = this.files;
+                const self = this,
+                    value = [],
+                    files = self.files;
                 let i = files.length;
                 while (i) {
                     const serverPath = files[--i][Uploader.FILE_ATTR_SERVER_PATH];
@@ -17502,16 +17471,16 @@ new JS.Singleton('GlobalMouse', {
                 }
                 
                 const len = value.length;
-                this.value = len === 1 ? value[0] : (len === 0 ? undefined : value);
+                self.value = len === 1 ? value[0] : (len === 0 ? undefined : value);
                 
                 // Reset the form element if empty. Otherwise uploading the 
                 // same file again won't trigger a change event.
-                if (!this.value) this.fileInput.getIDE().value = '';
+                if (!self.value) self.fileInput.getIDE().value = '';
                 
-                this.verifyChangedState(); // FIXME: mimics what happens in myt.FormElement setValue
-                if (this.form) this.form.notifyValueChanged(this); // FIXME: mimics what happens in myt.Form setValue
+                self.verifyChangedState(); // FIXME: mimics what happens in myt.FormElement setValue
+                if (self.form) self.form.notifyValueChanged(self); // FIXME: mimics what happens in myt.Form setValue
                 
-                this.fireEvent('value', this.value);
+                self.fireEvent('value', self.value);
             },
             
             clearFiles: function() {
@@ -17571,30 +17540,19 @@ new JS.Singleton('GlobalMouse', {
                 image.file = file;
                 
                 // Read into image
-                if (file.size === -1) {
+                const readImageFunc = src => {
                     const img = new Image();
-                    img.onload = function() {
-                        file.width = this.width;
-                        file.height = this.height;
-                        
-                        if (!image || image.destroyed) return;
-                        
-                        self.updateImage(file, image, this.src);
+                    img.onload = () => {
+                        file.width = img.width;
+                        file.height = img.height;
+                        if (image && !image.destroyed) self.updateImage(file, image, img.src);
                     };
-                    img.src = file.serverPath;
+                    img.src = src;
+                };
+                if (file.size === -1) {
+                    readImageFunc(file.serverPath);
                 } else if (FileReader !== undefined && ImageUploader.isImageFile(file)) {
-                    Uploader.readFile(file, function(event) {
-                        const img = new Image();
-                        img.onload = function() {
-                            file.width = this.width;
-                            file.height = this.height;
-                            
-                            if (!image || image.destroyed) return;
-                            
-                            self.updateImage(file, image, this.src);
-                        };
-                        img.src = event.target.result;
-                    });
+                    Uploader.readFile(file, event => {readImageFunc(event.target.result);});
                 }
             },
             
@@ -17641,8 +17599,8 @@ new JS.Singleton('GlobalMouse', {
                 const image = this.image;
                 if (image && !image.destroyed) {
                     const size = this.scaleToFit(this.width, this.height, this.nativeWidth, this.nativeHeight),
-                        w = Math.round(size[0]), 
-                        h = Math.round(size[1]);
+                        w = mathRound(size[0]), 
+                        h = mathRound(size[1]);
                     image.setImageSize(w + 'px ' + h + 'px');
                     image.setWidth(w);
                     image.setHeight(h);
@@ -17798,7 +17756,7 @@ new JS.Singleton('GlobalMouse', {
         RootView = pkg.RootView,
         
         defAttr = pkg.AccessorSupport.defAttr,
-    
+        
         /** A dimmer that can be placed on another myt.View to obscure the 
             subviews of that view.
             
@@ -20512,10 +20470,9 @@ new JS.Singleton('GlobalMouse', {
         /*  Calculate resize amounts and distribute it to the headers */
         calculateAndDistribute = (hdrs, extra, isFlex, nextFunc) => {
             if (extra !== 0) {
-                const isGrow = extra > 0;
-                
                 // Get resizable column info
-                const resizeInfo = [];
+                const isGrow = extra > 0,
+                    resizeInfo = [];
                 let i = hdrs.length,
                     hdr;
                 while (i) {

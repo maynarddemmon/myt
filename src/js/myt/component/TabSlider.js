@@ -4,7 +4,7 @@
         SizeToParent = pkg.SizeToParent,
         
         defAttr = pkg.AccessorSupport.defAttr,
-    
+        
         /** A tab slider component.
             
             Events:
@@ -24,11 +24,10 @@
                 fillColorReady:color The color of the button when ready for 
                     interaction.
                 buttonHeight:number The height of the button portion of the 
-                    tab slider. Defaults to myt.TabSlider.BUTTON_HEIGHT 
-                    which is 30.
+                    tab slider. Defaults to 30.
                 minContainerHeight:number The minimum height of the content 
-                    container inside this tab slider. Defaults to 
-                    myt.TabSlider.MINIMUM_CONTAINER_HEIGHT which is 100.
+                    container inside this tab slider. This is the minimum
+                    height when expanded. Defaults to 100.
                 expansionState:string Indicates the expansion state of the tab 
                     slider. Supported values are: 'expanded', 'expanding', 
                     'collapsed' and 'collapsing'. Defaults to 'collapsed'.
@@ -40,14 +39,6 @@
             
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                BUTTON_HEIGHT:30,
-                /** The default minimum height of the container 
-                    when expanded. */
-                MINIMUM_CONTAINER_HEIGHT:100,
-                FILL_COLOR_SELECTED:'#666',
-                FILL_COLOR_HOVER:'#eee',
-                FILL_COLOR_ACTIVE:'#ccc',
-                FILL_COLOR_READY:'#fff',
                 ANIMATION_MILLIS:500
             },
             
@@ -67,12 +58,12 @@
                 defAttr(attrs, 'selected', false);
                 defAttr(attrs, 'buttonClass', pkg.SimpleButton);
                 defAttr(attrs, 'zIndex', 0);
-                defAttr(attrs, 'buttonHeight', TabSlider.BUTTON_HEIGHT);
-                defAttr(attrs, 'fillColorSelected', TabSlider.FILL_COLOR_SELECTED);
-                defAttr(attrs, 'fillColorHover', TabSlider.FILL_COLOR_HOVER);
-                defAttr(attrs, 'fillColorActive', TabSlider.FILL_COLOR_ACTIVE);
-                defAttr(attrs, 'fillColorReady', TabSlider.FILL_COLOR_READY);
-                defAttr(attrs, 'minContainerHeight', TabSlider.MINIMUM_CONTAINER_HEIGHT);
+                defAttr(attrs, 'buttonHeight', 30);
+                defAttr(attrs, 'fillColorSelected', '#666');
+                defAttr(attrs, 'fillColorHover', '#eee');
+                defAttr(attrs, 'fillColorActive', '#ccc');
+                defAttr(attrs, 'fillColorReady', '#fff');
+                defAttr(attrs, 'minContainerHeight', 100);
                 
                 // Selection must be done via the select method on 
                 // the tabContainer
@@ -94,7 +85,7 @@
                     readyColor:self.fillColorReady
                 }, [SizeToParent, {
                     /** @overrides myt.Button */
-                    doActivated: function() {
+                    doActivated: () => {
                         const tc = self.tabContainer;
                         if (self.isSelected() && tc.maxSelected !== 1) {
                             tc.deselect(self);
@@ -126,8 +117,7 @@
                     }
                 }]);
                 
-                const container = new View(wrapper, {name:'container'});
-                new pkg.SizeToChildren(container, {axis:'y'});
+                new pkg.SizeToChildren(new View(wrapper, {name:'container'}), {axis:'y'});
                 
                 self.constrain('__updateHeight', [wrapper, 'y', wrapper, 'height']);
                 
@@ -282,17 +272,10 @@
             
             @class */
         TextTabSlider = pkg.TextTabSlider = new JSClass('TextTabSlider', TabSlider, {
-            // Class Methods and Attributes ////////////////////////////////////
-            extend: {
-                LABEL_TEXT_COLOR_CHECKED: '#fff',
-                LABEL_TEXT_COLOR: '#333'
-            },
-            
-            
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                defAttr(attrs, 'labelTextColorChecked', TextTabSlider.LABEL_TEXT_COLOR_CHECKED);
-                defAttr(attrs, 'labelTextColor', TextTabSlider.LABEL_TEXT_COLOR);
+                defAttr(attrs, 'labelTextColorChecked', '#fff');
+                defAttr(attrs, 'labelTextColor', '#333');
                 
                 this.callSuper(parent, attrs);
                 

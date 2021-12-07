@@ -1,32 +1,19 @@
 (pkg => {
-    const JSModule = JS.Module,
-        
-        defAttr = pkg.AccessorSupport.defAttr,
+    const defAttr = pkg.AccessorSupport.defAttr,
         
         updateTextColor = tab => {
             tab.textView.setTextColor(tab.selected ? tab.labelTextSelectedColor : tab.labelTextColor);
         },
         
         updateCornerRadius = tab => {
-            const radius = tab.cornerRadius != null ? tab.cornerRadius : Tab.RADIUS;
+            const cornerKeys = [];
             switch (tab.tabContainer.location) {
-                case 'top':
-                    tab.setRoundedTopLeftCorner(radius);
-                    tab.setRoundedTopRightCorner(radius);
-                    break;
-                case 'bottom':
-                    tab.setRoundedBottomLeftCorner(radius);
-                    tab.setRoundedBottomRightCorner(radius);
-                    break;
-                case 'left':
-                    tab.setRoundedTopLeftCorner(radius);
-                    tab.setRoundedBottomLeftCorner(radius);
-                    break;
-                case 'right':
-                    tab.setRoundedTopRightCorner(radius);
-                    tab.setRoundedBottomRightCorner(radius);
-                    break;
+                case 'top': cornerKeys.push('TopLeft','TopRight'); break;
+                case 'bottom': cornerKeys.push('BottomLeft','BottomRight'); break;
+                case 'left': cornerKeys.push('TopLeft','BottomLeft'); break;
+                case 'right': cornerKeys.push('TopRight','BottomRight'); break;
             }
+            cornerKeys.forEach(cornerKey => {tab['setRounded' + cornerKey + 'Corner'](tab.cornerRadius || 0);});
         },
         
         /** A simple tab component.
@@ -46,8 +33,7 @@
                 labelTextColorSelected:color The color to use for the label 
                     text when this tab is selected.
                 cornerRadius:number Passed into the drawing config to determine
-                    if a rounded corner is drawn or not. Defaults to undefined 
-                    which causes myt.Tab.RADIUS to be used.
+                    if a rounded corner is drawn or not. Defaults to 6.
             
             @class */
         Tab = pkg.Tab = new JS.Class('Tab', pkg.SimpleTextButton, {
@@ -56,15 +42,8 @@
             
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                HEIGHT: 24,
                 INSET: 8,
-                OUTSET: 8,
-                FILL_COLOR_SELECTED: '#fff',
-                FILL_COLOR_HOVER: '#eee',
-                FILL_COLOR_ACTIVE: '#aaa',
-                FILL_COLOR_READY: '#ccc',
-                LABEL_TEXT_COLOR_SELECTED:'#333',
-                RADIUS:6
+                OUTSET: 8
             },
             
             
@@ -86,15 +65,16 @@
                 defAttr(attrs, 'outset', Tab.OUTSET);
                 
                 // myt.Tab
-                defAttr(attrs, 'selectedColor', Tab.FILL_COLOR_SELECTED);
-                defAttr(attrs, 'hoverColor', Tab.FILL_COLOR_HOVER);
-                defAttr(attrs, 'activeColor', Tab.FILL_COLOR_ACTIVE);
-                defAttr(attrs, 'readyColor', Tab.FILL_COLOR_READY);
-                defAttr(attrs, 'labelTextSelectedColor', Tab.LABEL_TEXT_COLOR_SELECTED);
+                defAttr(attrs, 'selectedColor', '#fff');
+                defAttr(attrs, 'hoverColor', '#eee');
+                defAttr(attrs, 'activeColor', '#aaa');
+                defAttr(attrs, 'readyColor', '#ccc');
+                defAttr(attrs, 'labelTextSelectedColor', '#333');
                 
                 // Other
-                defAttr(attrs, 'height', Tab.HEIGHT);
+                defAttr(attrs, 'height', 24);
                 defAttr(attrs, 'focusIndicator', false);
+                defAttr(attrs, 'cornerRadius', 6);
                 
                 this.callSuper(parent, attrs);
                 
@@ -154,7 +134,7 @@
                 inset:number The inset for the layout. Defaults to 0.
             
             @class */
-        TabContainer = pkg.TabContainer = new JSModule('TabContainer', {
+        TabContainer = pkg.TabContainer = new JS.Module('TabContainer', {
             include: [pkg.SelectionManager],
             
             

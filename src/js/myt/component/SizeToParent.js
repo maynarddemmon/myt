@@ -1,5 +1,6 @@
 (pkg => {
-    const
+    const mathRound = Math.round,
+        
         setupPercentOfParentWidthConstraint = stp => {
             const p = stp.parent;
             if (p && stp.percentOfParentWidth >= 0) stp.syncTo(p, '__doPOPW', 'width');
@@ -106,7 +107,7 @@
             @param {!Object} event
             @returns {undefined} */
         __doPOPW: function(event) {
-            this.setWidth((this.percentOfParentWidthOffset || 0) + Math.round(this.parent.width * (this.percentOfParentWidth / 100)));
+            this.setWidth((this.percentOfParentWidthOffset || 0) + mathRound(this.parent.width * (this.percentOfParentWidth / 100)));
             // Force width event if not inited yet so that align constraint
             // in myt.View will work.
             if (!this.inited) this.fireEvent('width', this.width);
@@ -116,7 +117,7 @@
             @param {!Object} event
             @returns {undefined} */
         __doPOPH: function(event) {
-            this.setHeight((this.percentOfParentHeightOffset || 0) + Math.round(this.parent.height * (this.percentOfParentHeight / 100)));
+            this.setHeight((this.percentOfParentHeightOffset || 0) + mathRound(this.parent.height * (this.percentOfParentHeight / 100)));
             // Force height event if not inited yet so that valign constraint
             // in myt.View will work.
             if (!this.inited) this.fireEvent('height', this.height);

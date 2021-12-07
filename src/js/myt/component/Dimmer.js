@@ -5,7 +5,7 @@
         RootView = pkg.RootView,
         
         defAttr = pkg.AccessorSupport.defAttr,
-    
+        
         /** A dimmer that can be placed on another myt.View to obscure the 
             subviews of that view.
             

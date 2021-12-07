@@ -6,7 +6,7 @@
         panelsByPanelId = {}, // A map of FloatingPanel instances by panel ID.
         
         getFloatingPanel = panelId => panelsByPanelId[panelId],
-    
+        
         /** Enables a view to act as the anchor point for a FloatingPanel.
             
             Events:

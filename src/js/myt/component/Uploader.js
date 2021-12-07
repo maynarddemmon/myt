@@ -1,11 +1,20 @@
 (pkg => {
     const JSClass = JS.Class,
         
+        mathRound = Math.round,
+        
         MIME_TYPES_BY_EXTENSION = {
             gif:'image/gif',
             png:'image/png',
             jpg:'image/jpeg',
             jpeg:'image/jpeg'
+        },
+        
+        doDragListeners = (target, funcName) => {
+            target[funcName](target, 'doDragOver', 'dragover', false);
+            target[funcName](target, 'doDragEnter', 'dragenter', false);
+            target[funcName](target, 'doDragLeave', 'dragleave', false);
+            target[funcName](target, 'doDrop', 'drop', false);
         },
         
         /** Provides browser drag and drop support.
@@ -47,18 +56,12 @@
             // Methods /////////////////////////////////////////////////////////
             /** @private */
             setupDragListeners: function() {
-                this.attachToDom(this, 'doDragOver', 'dragover', false);
-                this.attachToDom(this, 'doDragEnter', 'dragenter', false);
-                this.attachToDom(this, 'doDragLeave', 'dragleave', false);
-                this.attachToDom(this, 'doDrop', 'drop', false);
+                doDragListeners(this, 'attachToDom');
             },
             
             /** @private */
             teardownDragListeners: function() {
-                this.detachFromDom(this, 'doDragOver', 'dragover', false);
-                this.detachFromDom(this, 'doDragEnter', 'dragenter', false);
-                this.detachFromDom(this, 'doDragLeave', 'dragleave', false);
-                this.detachFromDom(this, 'doDrop', 'drop', false);
+                doDragListeners(this, 'detachFromDom');
             },
             
             /** @param {!Object} event
@@ -90,7 +93,7 @@
                         if (file) this.handleDroppedFile(file, event);
                     }
                 } else {
-                    pkg.dumpStack('File API unsupported');
+                    pkg.dumpStack('No File API');
                 }
             },
             
@@ -294,21 +297,23 @@
             },
             
             removeFile: function(file) {
-                const files = this.files;
+                const self = this,
+                    files = self.files;
                 let i = files.length;
                 while (i) {
                     if (Uploader.isSameFile(files[--i], file)) {
                         files.splice(i, 1);
-                        this.updateValueFromFiles();
-                        this.fireEvent('removeFile', file);
+                        self.updateValueFromFiles();
+                        self.fireEvent('removeFile', file);
                         break;
                     }
                 }
             },
             
             updateValueFromFiles: function() {
-                const value = [],
-                    files = this.files;
+                const self = this,
+                    value = [],
+                    files = self.files;
                 let i = files.length;
                 while (i) {
                     const serverPath = files[--i][Uploader.FILE_ATTR_SERVER_PATH];
@@ -316,16 +321,16 @@
                 }
                 
                 const len = value.length;
-                this.value = len === 1 ? value[0] : (len === 0 ? undefined : value);
+                self.value = len === 1 ? value[0] : (len === 0 ? undefined : value);
                 
                 // Reset the form element if empty. Otherwise uploading the 
                 // same file again won't trigger a change event.
-                if (!this.value) this.fileInput.getIDE().value = '';
+                if (!self.value) self.fileInput.getIDE().value = '';
                 
-                this.verifyChangedState(); // FIXME: mimics what happens in myt.FormElement setValue
-                if (this.form) this.form.notifyValueChanged(this); // FIXME: mimics what happens in myt.Form setValue
+                self.verifyChangedState(); // FIXME: mimics what happens in myt.FormElement setValue
+                if (self.form) self.form.notifyValueChanged(self); // FIXME: mimics what happens in myt.Form setValue
                 
-                this.fireEvent('value', this.value);
+                self.fireEvent('value', self.value);
             },
             
             clearFiles: function() {
@@ -385,30 +390,19 @@
                 image.file = file;
                 
                 // Read into image
-                if (file.size === -1) {
+                const readImageFunc = src => {
                     const img = new Image();
-                    img.onload = function() {
-                        file.width = this.width;
-                        file.height = this.height;
-                        
-                        if (!image || image.destroyed) return;
-                        
-                        self.updateImage(file, image, this.src);
+                    img.onload = () => {
+                        file.width = img.width;
+                        file.height = img.height;
+                        if (image && !image.destroyed) self.updateImage(file, image, img.src);
                     };
-                    img.src = file.serverPath;
+                    img.src = src;
+                };
+                if (file.size === -1) {
+                    readImageFunc(file.serverPath);
                 } else if (FileReader !== undefined && ImageUploader.isImageFile(file)) {
-                    Uploader.readFile(file, function(event) {
-                        const img = new Image();
-                        img.onload = function() {
-                            file.width = this.width;
-                            file.height = this.height;
-                            
-                            if (!image || image.destroyed) return;
-                            
-                            self.updateImage(file, image, this.src);
-                        };
-                        img.src = event.target.result;
-                    });
+                    Uploader.readFile(file, event => {readImageFunc(event.target.result);});
                 }
             },
             
@@ -455,8 +449,8 @@
                 const image = this.image;
                 if (image && !image.destroyed) {
                     const size = this.scaleToFit(this.width, this.height, this.nativeWidth, this.nativeHeight),
-                        w = Math.round(size[0]), 
-                        h = Math.round(size[1]);
+                        w = mathRound(size[0]), 
+                        h = mathRound(size[1]);
                     image.setImageSize(w + 'px ' + h + 'px');
                     image.setWidth(w);
                     image.setHeight(h);

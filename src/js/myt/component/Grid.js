@@ -39,10 +39,9 @@
         /*  Calculate resize amounts and distribute it to the headers */
         calculateAndDistribute = (hdrs, extra, isFlex, nextFunc) => {
             if (extra !== 0) {
-                const isGrow = extra > 0;
-                
                 // Get resizable column info
-                const resizeInfo = [];
+                const isGrow = extra > 0,
+                    resizeInfo = [];
                 let i = hdrs.length,
                     hdr;
                 while (i) {
