@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // Gather Arguments
-var exec = require('child_process').exec,
+const exec = require('child_process').exec,
     fs = require('fs'),
     arguments = process.argv.splice(2),
     manifestFile = arguments[0],
@@ -17,13 +17,13 @@ if (!rootPath) return console.error('No root path provided.');
 if (!requiredFiles.length > 0) return console.error('No required file provided.');
 
 // JS Build
-var jsBuild = function(manifest, root, include, callback) {
-    var http = require('http'),
+const jsBuild = (manifest, root, include, callback) => {
+    const http = require('http'),
         https = require('https'),
         url = require('url'),
         path = require('path'),
         HTTP_REGEX = /^https?:/i,
-        die = function(msg) {
+        die = msg => {
             if (msg) console.error(' [ERROR] ' + msg);
             process.exit(1);
         },
@@ -39,13 +39,13 @@ var jsBuild = function(manifest, root, include, callback) {
     // Creates the list of packages needed for the include list. Resolves
     // the depends and uses information so that the resulting packages list
     // is in dependency order.
-    var packages = [];
-    include.forEach(function(inc) {
-        var expand = function(Package, name, deps) {
-            var pkg = Package._getByName(name);
-            pkg._deps.list.forEach(function(p) {expand(Package, p, deps)});
+    const packages = [];
+    include.forEach(inc => {
+        const expand = (Package, name, deps) => {
+            const pkg = Package._getByName(name);
+            pkg._deps.list.forEach(p => {expand(Package, p, deps)});
             if (deps.indexOf(pkg) === -1) deps.push(pkg);
-            pkg._uses.list.forEach(function(p) {expand(Package, p, deps)});
+            pkg._uses.list.forEach(p => {expand(Package, p, deps)});
         }
         expand(P.Package, inc, packages);
     });
@@ -53,44 +53,44 @@ var jsBuild = function(manifest, root, include, callback) {
     // Extract the file paths out of the packages list. This is necessary
     // because each file() declaration in the manifest file can declare more
     // than one file.
-    var includedFiles = [];
-    packages.forEach(function(pkg) {
-        pkg._loader.forEach(function(loader) {
+    const includedFiles = [];
+    packages.forEach(pkg => {
+        pkg._loader.forEach(loader => {
             includedFiles.push(loader)
         });
     });
     
-    var read = function(file, readCallback) {
+    const read = (file, readCallback) => {
         console.error(' [READ] ' + file);
         if (HTTP_REGEX.test(file)) {
-            var uri     = url.parse(file),
+            const uri     = url.parse(file),
                 client  = (uri.protocol === 'https:') ? https : http,
                 port    = uri.port || (client === https ? '443' : '80'),
                 options = {host:uri.hostname, port:port, path:uri.pathname},
-                chunks  = [],
-                length  = 0;
+                chunks  = [];
+            let length  = 0;
             
-            client.get(options, function(response) {
+            client.get(options, response => {
                 if (response.statusCode < 200 || response.statusCode >= 300) die('Request unsuccessful: ' + file);
                 
-                response.addListener('data', function(chunk) {
+                response.addListener('data', chunk => {
                     chunks.push(chunk)
                     length += chunk.length
                 });
-                response.addListener('end', function() {
-                    var offset = 0,
-                        body = new Buffer(length);
-                    chunks.forEach(function(chunk) {
+                response.addListener('end', () => {
+                    let offset = 0;
+                    const body = new Buffer(length);
+                    chunks.forEach(chunk => {
                         chunk.copy(body, offset);
                         offset += chunk.length;
                     });
                     readCallback(body)
                 });
-            }).on('error', function() {
+            }).on('error', () => {
                 die('Request unsuccessful: ' + file);
             });
         } else {
-            fs.readFile(file, function(error, content) {
+            fs.readFile(file, (error, content) => {
                 if (error) die('Cannot find file ' + file + ', please check your --root setting');
                 readCallback(content);
             })
@@ -100,50 +100,50 @@ var jsBuild = function(manifest, root, include, callback) {
     // Iterate over the included files in order reading each one in and
     // ultimately concatenating them all together and ultimately execute the
     // callback function
-    var source = [];
-    var bundle = function(root, files, i) {
-        if (i >= files.length) {
-            callback(source.join('\n\n'));
-        } else {
-            read(files[i], function(code) {
-                source.push(code.toString('utf8'));
-                bundle(root, files, i + 1);
-            })
-        }
-    };
+    const source = [],
+        bundle = (root, files, i) => {
+            if (i >= files.length) {
+                callback(source.join('\n\n'));
+            } else {
+                read(files[i], code => {
+                    source.push(code.toString('utf8'));
+                    bundle(root, files, i + 1);
+                })
+            }
+        };
     bundle(P.ROOT, includedFiles, 0);
 };
 
 // Now use jsbuild to combine files
 console.error("Concatenating files:");
-jsBuild(manifestFile, rootPath, requiredFiles, function(concatenatedData) {
+jsBuild(manifestFile, rootPath, requiredFiles, concatenatedData => {
     fs.writeFileSync(targetFile, concatenatedData, {"encoding":'utf8'});
     
     // Then use closure compiler to compress the combined file and optionally
     // output a source map
-    var minifiedFilePath = targetFile.substring(0, targetFile.length - 2) + 'min.js',
-        sourceMapOpts = '';
+    const minifiedFilePath = targetFile.substring(0, targetFile.length - 2) + 'min.js';
+    let sourceMapOpts = '';
     
     if (outputSourceMap) {
         // Get just the filename without any leading directories
-        var parts = minifiedFilePath.split('/');
+        const parts = minifiedFilePath.split('/');
         sourceMapOpts = ' --source_map_format=V3 --create_source_map ' + minifiedFilePath + '.map' + 
             ' --output_wrapper "%output%\n//# sourceMappingURL=./' + parts[parts.length - 1] + '.map"';
     }
     
-    var cmd = 'java -Xmx256m -jar bin/closure-compiler/compiler_v20211201.jar --js ' + targetFile + 
+    const cmd = 'java -Xmx256m -jar bin/closure-compiler/compiler_v20211201.jar --js ' + targetFile + 
         ' --jscomp_warning=lintChecks' +
         ' --language_out ECMASCRIPT_2021' +
         ' --js_output_file ' + minifiedFilePath + sourceMapOpts;
     console.error("Executing: " + cmd);
-    exec(cmd, function (error, stdout, stderr) {
+    exec(cmd, (error, stdout, stderr) => {
         if (stdout) console.error('stdout: ' + stdout);
         if (stderr) console.error('stderr: ' + stderr);
         if (error) console.error('exec error: ' + error);
         
         // Inject a sourceRoot into the source map file.
         if (outputSourceMap) {
-            var src = minifiedFilePath + '.map',
+            const src = minifiedFilePath + '.map',
                 fileData = fs.readFileSync(src, 'utf8');
             fs.writeFileSync(src, '{\n"sourceRoot":"../",' + fileData.substring(1), {"encoding":'utf8'});
         }
