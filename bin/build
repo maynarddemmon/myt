@@ -131,9 +131,9 @@ jsBuild(manifestFile, rootPath, requiredFiles, function(concatenatedData) {
             ' --output_wrapper "%output%\n//# sourceMappingURL=./' + parts[parts.length - 1] + '.map"';
     }
     
-    var cmd = 'java -Xmx256m -jar bin/closure-compiler/compiler.jar --js ' + targetFile + 
+    var cmd = 'java -Xmx256m -jar bin/closure-compiler/compiler_v20211201.jar --js ' + targetFile + 
         ' --jscomp_warning=lintChecks' +
-        ' --language_out ECMASCRIPT_2015' +
+        ' --language_out ECMASCRIPT_2021' +
         ' --js_output_file ' + minifiedFilePath + sourceMapOpts;
     console.error("Executing: " + cmd);
     exec(cmd, function (error, stdout, stderr) {
