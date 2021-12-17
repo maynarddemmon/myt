@@ -390,6 +390,7 @@
                 if (!this.hasColumnHeader(columnHeader)) {
                     this.columnHeaders.push(columnHeader);
                     if (columnHeader.visible) this.setLastColumn(columnHeader);
+                    this.fixupResizerCursors();
                 }
             },
             
@@ -398,6 +399,7 @@
                 if (idx >= 0) {
                     this.columnHeaders.splice(idx, 1);
                     if (columnHeader.visible && columnHeader.last) this.setLastColumn(this.getPrevColumnHeader(columnHeader));
+                    this.fixupResizerCursors();
                 }
             },
             
@@ -425,6 +427,7 @@
             
             updateRowsForVisibilityChange: function(columnHeader) {
                 this.rows.forEach(row => {row.notifyColumnHeaderVisibilityChange(columnHeader);});
+                this.fixupResizerCursors();
             },
             
             // Rows
@@ -494,6 +497,46 @@
                         calculateAndDistribute(hdrs, extra, false, null);
                     });
                 }
+            },
+            
+            fixupResizerCursors: function() {
+                const hdrs = this.getVisibleColumnHeaders();
+                
+                // Search forward hiding the cursor for each fixed column
+                // until a non-fixed column is encountered
+                let allPrevAreFixed = true,
+                    firstNonFixedIdx = 0;
+                hdrs.forEach((hdr, idx) => {
+                    if (allPrevAreFixed && hdr.isFixed()) {
+                        hdr.setResizerCursor('', true);
+                    } else {
+                        if (allPrevAreFixed) firstNonFixedIdx = idx;
+                        allPrevAreFixed = false;
+                        hdr.restoreResizerCursor();
+                    }
+                });
+                
+                // Search backward hiding the cursor for each fixed column
+                // until a non-fixed column is encountered
+                let allAfterAreFixed = true,
+                    i = hdrs.length,
+                    lastNonFixedIndex = i - 1;
+                while (i > firstNonFixedIdx) {
+                    const hdr = hdrs[--i];
+                    if (allAfterAreFixed) {
+                        hdr.setResizerCursor('', true);
+                    } else {
+                        hdr.restoreResizerCursor();
+                    }
+                    if (!hdr.isFixed()) {
+                        if (allAfterAreFixed) lastNonFixedIndex = i;
+                        allAfterAreFixed = false;
+                    }
+                }
+                
+                // Handle the case where there is only one resizable column.
+                // When there's only one there is not point in resizing it.
+                if (firstNonFixedIdx === lastNonFixedIndex - 1) hdrs[firstNonFixedIdx].setResizerCursor('', true);
             }
         }),
         
@@ -534,8 +577,16 @@
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
+                const self = this;
+                
+                defAttr(attrs, 'resizerCursor', 'col-resize');
+                let resizerCursor = attrs.resizerCursor;
+                delete attrs.resizerCursor;
+                
                 defAttr(attrs, 'minValue', 16);
                 defAttr(attrs, 'maxValue', defaultMaxValue);
+                defAttr(attrs, 'value', attrs.minValue);
+                
                 defAttr(attrs, 'resizable', true);
                 defAttr(attrs, 'flex', 0);
                 defAttr(attrs, 'cellXAdj', 0);
@@ -546,13 +597,12 @@
                 // Ensure participation in determinePlacement method of myt.Grid
                 defAttr(attrs, 'placement', '*');
                 
-                const self = this;
                 self.callSuper(parent, attrs);
                 
                 const gc = self.gridController;
                 
-                new View(self, {
-                    name:'resizer', cursor:'col-resize', width:10, zIndex:1,
+                self.resizer = new View(self, {
+                    cursor:resizerCursor, width:10, zIndex:1,
                     percentOfParentHeight:100, align:'right', alignOffset:-5,
                     draggableAllowBubble:false
                 }, [pkg.SizeToParent, pkg.Draggable, {
@@ -617,6 +667,28 @@
             setCellXAdj: function(v) {this.cellXAdj = v;},
             setFlex: function(v) {this.flex = v;},
             setColumnId: function(v) {this.columnId = v;},
+            
+            setResizerCursor: function(v, restorable) {
+                const self = this,
+                    resizer = self.resizer;
+                if (restorable) self.__rrc = resizer.cursor;
+                resizer.setCursor(v);
+            },
+            
+            restoreResizerCursor: function() {
+                const self = this,
+                    restoreResizerCursor = self.__rrc;
+                if (restoreResizerCursor) {
+                    self.setResizerCursor(restoreResizerCursor);
+                    self.__rrc = null;
+                }
+            },
+            
+            /** Check if this GridHeader has a fixed size.
+                @returns {boolean} */
+            isFixed: function() {
+                return this.minValue === this.maxValue;
+            },
             
             setLast: function(v) {
                 this.last = v;
