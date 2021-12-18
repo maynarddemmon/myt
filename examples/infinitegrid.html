@@ -9,135 +9,96 @@
     JS.require('myt.all', function() {this.init();});
     
     function init() {
-        var M = myt;
-        
-        var ModelEntry = new JS.Class('ModelEntry', M.Eventable, {
-            init: function(attrs) {
-                var count = attrs.id;
-                attrs.foo = count + ' foo';
-                attrs.bar = 'bar ' + M.getRandomInt(0, 1000);
-                attrs.bar2 = 'bar2 ' + M.getRandomInt(0, 1000);
-                attrs.bar3 = 'bar3 ' + (1000 - count);
-                attrs.baz = 'baz ' + M.getRandomInt(0, 1000);
-                
-                this.callSuper(attrs);
-            }
-        });
-        
-        var collectionModel = new M.Eventable({}, [{
-            init: function(attrs) {
-                this._data = [];
-                
-                this.callSuper(attrs);
-                
-                var howMany = 1000;
-                while (howMany--) this.addModel(new ModelEntry({id:howMany}));
-            },
+        const JSClass = JS.Class,
+            M = myt,
+            View = M.View,
+            Text = M.Text,
+            SimpleGridColumnHeader = M.SimpleGridColumnHeader,
             
-            getAsSortedList: function(sortFunc) {
-                return this._data.sort(sortFunc);
-            },
+            COL_IDS = ['one','two','three','four','five','six'],
             
-            addModel: function(model) {
-                this._data.push(model);
-            }
-        }]);
-        
-        var RowClass = new JS.Class('RowClass', M.SimpleSelectableInfiniteGridRow, {
-            initNode: function(parent, attrs) {
-                this.callSuper(parent, attrs);
-                
-                this.idView = new M.Text(this, {valign:'middle'});
-                this.fooView = new M.Text(this, {valign:'middle'});
-                this.barView = new M.Text(this, {valign:'middle'});
-                this.bar2View = new M.Text(this, {valign:'middle'});
-                this.bar3View = new M.Text(this, {valign:'middle'});
-                
-                this.setModel(this.model);
-            },
-            
-            setModel: function(model) {
-                this.model = model;
-                
-                if (this.inited && model) {
-                    this.idView.setText('' + model.id);
-                    this.fooView.setText(model.foo);
-                    this.barView.setText(model.bar);
-                    this.bar2View.setText(model.bar2);
-                    this.bar3View.setText(model.bar3);
+            ModelEntry = new JSClass('ModelEntry', M.Eventable, {
+                init: function(attrs) {
+                    COL_IDS.forEach(colId => {
+                        attrs[colId] = colId + ' ' + M.getRandomInt(0, 1000);
+                    });
+                    this.callSuper(attrs);
                 }
-            }
-        });
-        
-        var RowClassTwo = new JS.Class('RowClassTwo', RowClass, {
-            initNode: function(parent, attrs) {
-                attrs.readyColor = '#ff9999';
-                
-                this.callSuper(parent, attrs);
-                
-                this.bazView = new M.Text(this, {valign:'middle'});
-            },
+            }),
             
-            setModel: function(model) {
-                this.callSuper(model);
-                
-                if (this.inited && model) {
-                    if (this.bazView) this.bazView.setText(model.baz);
+            collectionModel = new M.Eventable({}, [{
+                init: function(attrs) {
+                    this._data = [];
+                    
+                    this.callSuper(attrs);
+                    
+                    let howMany = 1000;
+                    while (howMany--) this.addModel(new ModelEntry({id:howMany}));
+                },
+                getAsSortedList: function(sortFunc) {
+                    return this._data.sort(sortFunc);
+                },
+                addModel: function(model) {
+                    this._data.push(model);
                 }
-            }
+            }]),
+            
+            RowClass = new JSClass('RowClass', M.SimpleSelectableInfiniteGridRow, {
+                initNode: function(parent, attrs) {
+                    this.callSuper(parent, attrs);
+                    this.idView = new Text(this, {valign:'middle'});
+                    COL_IDS.forEach(colId => {
+                        this[colId + 'View'] = new M.Text(this, {valign:'middle'});
+                    });
+                    this.setModel(this.model);
+                },
+                setModel: function(model) {
+                    this.model = model;
+                    if (this.inited && model) {
+                        this.idView.setText('' + model.id);
+                        COL_IDS.forEach(colId => {
+                            this[colId + 'View'].setText(model[colId]);
+                        });
+                    }
+                }
+            }),
+            
+            RowClassTwo = new JSClass('RowClassTwo', RowClass, {
+                initNode: function(parent, attrs) {
+                    attrs.readyColor = '#ddd';
+                    this.callSuper(parent, attrs);
+                }
+            }),
+            
+            // Build UI
+            rootView = new View(null, {bgColor:'#f00'}, [M.SizeToWindow, {
+                updateWidth: function(event) {
+                    var w = event.value - gridHeader.x;
+                    leftArea.setWidth(w);
+                    gridHeader.setWidth(w);
+                    controls.setWidth(gridHeader.width);
+                }
+            }]),
+            
+            leftArea = new View(rootView, {
+                percentOfParentHeight:100, overflow:'autox', bgColor:'#fff'
+            }, [M.SizeToParent]),
+            
+            // Controls Header
+            controls = new View(leftArea, {height:25, overflow:'hidden'});
+        
+        COL_IDS.forEach(colId => {
+            new M.Checkbox(controls, {label:colId, value:true}, [{
+                setValue: function(v) {
+                    this.callSuper(v);
+                    if (this.inited) gridHeader['col_' + colId].setVisible(v);
+                }
+            }]);
         });
-        
-        // Build UI
-        var rootView = new M.View(null, {bgColor:'#ff0000'}, [M.SizeToWindow, {
-            updateWidth: function(event) {
-                var w = event.value - gridHeader.x;
-                leftArea.setWidth(w);
-                gridHeader.setWidth(w);
-                controls.setWidth(gridHeader.width);
-            }
-        }]);
-        
-        var leftArea = new M.View(rootView, {
-            percentOfParentHeight:100, overflow:'autox', bgColor:'#ffffff'
-        }, [M.SizeToParent]);
-        
-        // Controls Header
-        var controls = new M.View(leftArea, {height:25, overflow:'hidden'});
-        
-        new M.Checkbox(controls, {label:'One', value:true}, [{
-            setValue: function(v) {
-                this.callSuper(v);
-                if (this.inited) colOne.setVisible(v);
-            }
-        }]);
-        new M.Checkbox(controls, {label:'Two', value:true}, [{
-            setValue: function(v) {
-                this.callSuper(v);
-                if (this.inited) colTwo.setVisible(v);
-            }
-        }]);
-        new M.Checkbox(controls, {label:'Three', value:true}, [{
-            setValue: function(v) {
-                this.callSuper(v);
-                if (this.inited) colThree.setVisible(v);
-            }
-        }]);
-        new M.Checkbox(controls, {label:'Four', value:true}, [{
-            setValue: function(v) {
-                this.callSuper(v);
-                if (this.inited) colFour.setVisible(v);
-            }
-        }]);
-        new M.Checkbox(controls, {label:'Five', value:true}, [{
-            setValue: function(v) {
-                this.callSuper(v);
-                if (this.inited) colFive.setVisible(v);
-            }
-        }]);
         
         new M.SimpleTextButton(controls, {
             valign:'middle', text:'Add Row', shrinkToFit:true, inset:5, outset:5, height:23, roundedCorners:3,
-            activeColor:'#eeeeee', hoverColor:'#ffffff', readyColor:'#cccccc'
+            activeColor:'#eee', hoverColor:'#fff', readyColor:'#ccc'
         }, [{
             doActivated: function() {
                 collectionModel.addModel(new ModelEntry({id:collectionModel._data.length}));
@@ -148,18 +109,19 @@
         new M.SpacedLayout(controls, {axis:'x', inset:8, spacing:4});
         
         // Grid
-        var gridHeader = new M.InfiniteGridHeader(leftArea, {
-            height:30, bgColor:'#666666'
+        const gridHeader = new M.InfiniteGridHeader(leftArea, {
+            height:30, bgColor:'#666'
         });
         
-        var colZero =  new M.SimpleGridColumnHeader(gridHeader, {columnId:'id',           value:40,  minValue:40,  maxValue:40,  text:'ID',           cellXAdj:2, cellWidthAdj:-2});
-        var colOne =   new M.SimpleGridColumnHeader(gridHeader, {columnId:'foo',  flex:1, value:100, minValue:100, maxValue:200, text:'Column One',   cellXAdj:2, cellWidthAdj:-2});
-        var colTwo =   new M.SimpleGridColumnHeader(gridHeader, {columnId:'bar',  flex:0, value:100, minValue:50,  maxValue:200, text:'Column Two',   cellXAdj:2, cellWidthAdj:-2, sortable:false});
-        var colThree = new M.SimpleGridColumnHeader(gridHeader, {columnId:'bar2', flex:0, value:100, minValue:50,  maxValue:200, text:'Column Three', cellXAdj:2, cellWidthAdj:-2});
-        var colFour =  new M.SimpleGridColumnHeader(gridHeader, {columnId:'bar3', flex:0, value:100, minValue:50,  maxValue:200, text:'Column Four',  cellXAdj:2, cellWidthAdj:-2});
-        var colFive =  new M.SimpleGridColumnHeader(gridHeader, {columnId:'baz',  flex:1, value:25,                maxValue:400, text:'Column Five',  cellXAdj:2, cellWidthAdj:-2});
+        gridHeader.col_zero =  new SimpleGridColumnHeader(gridHeader, {columnId:'id',                       minValue:40,  maxValue:40,  text:'ID',           cellXAdj:2, cellWidthAdj:-2});
+        gridHeader.col_one =   new SimpleGridColumnHeader(gridHeader, {columnId:'one',   flex:1,            minValue:100, maxValue:200, text:'Column One',   cellXAdj:2, cellWidthAdj:-2});
+        gridHeader.col_two =   new SimpleGridColumnHeader(gridHeader, {columnId:'two',           value:100, minValue:50,  maxValue:200, text:'Column Two',   cellXAdj:2, cellWidthAdj:-2, sortable:false});
+        gridHeader.col_three = new SimpleGridColumnHeader(gridHeader, {columnId:'three',                    minValue:100, maxValue:100, text:'Column Three', cellXAdj:2, cellWidthAdj:-2});
+        gridHeader.col_four =  new SimpleGridColumnHeader(gridHeader, {columnId:'four',          value:100, minValue:50,  maxValue:200, text:'Column Four',  cellXAdj:2, cellWidthAdj:-2});
+        gridHeader.col_five =  new SimpleGridColumnHeader(gridHeader, {columnId:'five',  flex:1, value:25,                maxValue:400, text:'Column Five',  cellXAdj:2, cellWidthAdj:-2});
+        gridHeader.col_six =   new SimpleGridColumnHeader(gridHeader, {columnId:'six',                      minValue:100, maxValue:100, text:'Column Six',   cellXAdj:2, cellWidthAdj:-2});
           
-        var grid = new M.SelectableInfiniteGrid(leftArea, {
+        const grid = new M.SelectableInfiniteGrid(leftArea, {
             collectionModel:collectionModel,
             rowClasses:{
                 one:RowClass,
@@ -170,7 +132,7 @@
             layoutHint:1
         }, [{
             getClassKey: (model) => {
-                if (model.foo.startsWith('1')) {
+                if (('' + model.id).startsWith('1')) {
                     return 'one';
                 } else {
                     return 'two';
@@ -180,12 +142,12 @@
         
         new M.ResizeLayout(leftArea, {axis:'y'});
         
-        var divider = new M.HorizontalDivider(rootView, {
-            percentOfParentHeight:100, minValue:100, value:600, limitToParent:0, ignoreLayout:true
+        const divider = new M.HorizontalDivider(rootView, {
+            percentOfParentHeight:100, minValue:100, value:900, limitToParent:0, ignoreLayout:true
         }, [M.SizeToParent]);
         rootView.syncTo(divider, 'updateWidth', 'value');
         
-        grid.makeReady(['foo','ascending']);
+        grid.makeReady(['id','ascending']);
     }
 </script>
 </body></html>

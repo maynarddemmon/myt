@@ -10,7 +10,8 @@
     
     function init() {
         const M = myt,
-            RowClass = new JS.Class('RowClass', M.View, {
+            View = M.View,
+            RowClass = new JS.Class('RowClass', View, {
                 include: [M.GridRow],
                 
                 initNode: function(parent, attrs) {
@@ -24,10 +25,10 @@
                     });
                 }
             }),
-            rootView = new M.View(null, {bgColor:'#eeeeee'}, [M.SizeToWindow]),
+            rootView = new View(null, {bgColor:'#eeeeee'}, [M.SizeToWindow]),
         
             // Controls Header
-            controls = new M.View(rootView, {height:24}, [{
+            controls = new View(rootView, {height:24}, [{
                 updateWidth: function(event) {
                     this.setWidth(event.value + event.source.inset - this.x);
                 }
@@ -66,7 +67,7 @@
             columnId:'four', flex:1, value:100, minValue:50,  maxValue:500, text:'Column Four', cellXAdj:2, cellWidthAdj:-2, resizerCursor:'crosshair'
         });
         grid.colFive =  new M.SimpleGridColumnHeader(grid, {
-            columnId:'five', value:25, maxValue:25, text:'Column Five', cellXAdj:2, cellWidthAdj:-2
+            columnId:'five', minValue:25, maxValue:100, text:'Column Five', cellXAdj:2, cellWidthAdj:-2
         });
         grid.colSix = new M.SimpleGridColumnHeader(grid, {
             columnId:'six', flex:1, minValue:100, maxValue:500, text:'Column Six', cellXAdj:2, cellWidthAdj:-2

@@ -20853,12 +20853,12 @@ new JS.Singleton('GlobalMouse', {
                     this.setMinWidth(this.minWidth + columnHeader.minValue * adjMultiplier);
                     
                     this.fitHeadersToWidth();
+                    this.fixupResizerCursors();
                 }
             },
             
             updateRowsForVisibilityChange: function(columnHeader) {
                 this.rows.forEach(row => {row.notifyColumnHeaderVisibilityChange(columnHeader);});
-                this.fixupResizerCursors();
             },
             
             // Rows
@@ -20967,7 +20967,7 @@ new JS.Singleton('GlobalMouse', {
                 
                 // Handle the case where there is only one resizable column.
                 // When there's only one there is not point in resizing it.
-                if (firstNonFixedIdx === lastNonFixedIndex - 1) hdrs[firstNonFixedIdx].setResizerCursor('', true);
+                if (firstNonFixedIdx === lastNonFixedIndex) hdrs[firstNonFixedIdx].setResizerCursor('', true);
             }
         }),
         
@@ -21101,9 +21101,12 @@ new JS.Singleton('GlobalMouse', {
             
             setResizerCursor: function(v, restorable) {
                 const self = this,
-                    resizer = self.resizer;
-                if (restorable) self.__rrc = resizer.cursor;
-                resizer.setCursor(v);
+                    resizer = self.resizer,
+                    existingCursor = resizer.cursor;
+                if (v !== existingCursor) {
+                    if (restorable) self.__rrc = existingCursor;
+                    resizer.setCursor(v);
+                }
             },
             
             restoreResizerCursor: function() {
