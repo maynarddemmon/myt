@@ -13,7 +13,7 @@
             M = myt,
             View = M.View,
             Text = M.Text,
-            SimpleGridColumnHeader = M.SimpleGridColumnHeader,
+            SimpleGridColHdr = M.SimpleGridColHdr,
             
             COL_IDS = ['one','two','three','four','five','six'],
             
@@ -113,13 +113,13 @@
             height:30, bgColor:'#666'
         });
         
-        gridHeader.col_zero =  new SimpleGridColumnHeader(gridHeader, {columnId:'id',                       minValue:40,  maxValue:40,  text:'ID',           cellXAdj:2, cellWidthAdj:-2});
-        gridHeader.col_one =   new SimpleGridColumnHeader(gridHeader, {columnId:'one',   flex:1,            minValue:100, maxValue:200, text:'Column One',   cellXAdj:2, cellWidthAdj:-2});
-        gridHeader.col_two =   new SimpleGridColumnHeader(gridHeader, {columnId:'two',           value:100, minValue:50,  maxValue:200, text:'Column Two',   cellXAdj:2, cellWidthAdj:-2, sortable:false});
-        gridHeader.col_three = new SimpleGridColumnHeader(gridHeader, {columnId:'three',                    minValue:100, maxValue:100, text:'Column Three', cellXAdj:2, cellWidthAdj:-2});
-        gridHeader.col_four =  new SimpleGridColumnHeader(gridHeader, {columnId:'four',          value:100, minValue:50,  maxValue:200, text:'Column Four',  cellXAdj:2, cellWidthAdj:-2});
-        gridHeader.col_five =  new SimpleGridColumnHeader(gridHeader, {columnId:'five',  flex:1, value:25,                maxValue:400, text:'Column Five',  cellXAdj:2, cellWidthAdj:-2});
-        gridHeader.col_six =   new SimpleGridColumnHeader(gridHeader, {columnId:'six',                      minValue:100, maxValue:100, text:'Column Six',   cellXAdj:2, cellWidthAdj:-2});
+        gridHeader.col_zero =  new SimpleGridColHdr(gridHeader, {columnId:'id',                       minValue:40,  maxValue:40,  text:'ID',           cellXAdj:2, cellWidthAdj:-2});
+        gridHeader.col_one =   new SimpleGridColHdr(gridHeader, {columnId:'one',   flex:1,            minValue:100, maxValue:200, text:'Column One',   cellXAdj:2, cellWidthAdj:-2});
+        gridHeader.col_two =   new SimpleGridColHdr(gridHeader, {columnId:'two',           value:100, minValue:50,  maxValue:200, text:'Column Two',   cellXAdj:2, cellWidthAdj:-2, sortable:false});
+        gridHeader.col_three = new SimpleGridColHdr(gridHeader, {columnId:'three',                    minValue:100, maxValue:100, text:'Column Three', cellXAdj:2, cellWidthAdj:-2});
+        gridHeader.col_four =  new SimpleGridColHdr(gridHeader, {columnId:'four',          value:100, minValue:50,  maxValue:200, text:'Column Four',  cellXAdj:2, cellWidthAdj:-2});
+        gridHeader.col_five =  new SimpleGridColHdr(gridHeader, {columnId:'five',  flex:1, value:25,                maxValue:400, text:'Column Five',  cellXAdj:2, cellWidthAdj:-2});
+        gridHeader.col_six =   new SimpleGridColHdr(gridHeader, {columnId:'six',                      minValue:100, maxValue:100, text:'Column Six',   cellXAdj:2, cellWidthAdj:-2});
           
         const grid = new M.SelectableInfiniteGrid(leftArea, {
             collectionModel:collectionModel,

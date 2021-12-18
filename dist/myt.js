@@ -20533,30 +20533,30 @@ new JS.Singleton('GlobalMouse', {
             }
         },
         
-        // GridColumnHeader
+        // GridColHdr
         defaultMaxValue = 9999,
         
-        getPrevColumnHeader = gridHeader => gridHeader.gridController ? gridHeader.gridController.getPrevColumnHeader(gridHeader) : null,
+        getPrevHdr = gridHeader => gridHeader.gridController ? gridHeader.gridController.getPrevHdr(gridHeader) : null,
         
-        getNextColumnHeader = gridHeader => gridHeader.gridController ? gridHeader.gridController.getNextColumnHeader(gridHeader) : null,
+        getNextHdr = gridHeader => gridHeader.gridController ? gridHeader.gridController.getNextHdr(gridHeader) : null,
         
         getGiveLeft = gridHeader => {
-            const hdr = getPrevColumnHeader(gridHeader);
+            const hdr = getPrevHdr(gridHeader);
             return hdr ? hdr.maxValue - hdr.value + getGiveLeft(hdr) : 0;
         },
         
         getGiveRight = gridHeader => {
-            const hdr = getNextColumnHeader(gridHeader);
+            const hdr = getNextHdr(gridHeader);
             return hdr ? hdr.maxValue - hdr.value + getGiveRight(hdr) : 0;
         },
         
         getTakeLeft = gridHeader => {
-            const hdr = getPrevColumnHeader(gridHeader);
+            const hdr = getPrevHdr(gridHeader);
             return hdr ? hdr.minValue - hdr.value + getTakeLeft(hdr) : 0;
         },
         
         getTakeRight = gridHeader => {
-            const hdr = getNextColumnHeader(gridHeader);
+            const hdr = getNextHdr(gridHeader);
             return hdr ? hdr.minValue - hdr.value + getTakeRight(hdr) : 0;
         },
         
@@ -20572,7 +20572,7 @@ new JS.Singleton('GlobalMouse', {
                 negative number.
             @returns {number} - The amount of width actually stolen. */
         stealPrevWidth = (gridHeader, diff) => {
-            const hdr = getPrevColumnHeader(gridHeader);
+            const hdr = getPrevHdr(gridHeader);
             let usedDiff = 0;
             if (hdr) {
                 const newValue = hdr.value + diff;
@@ -20590,7 +20590,7 @@ new JS.Singleton('GlobalMouse', {
                 positive number.
             @returns {number} - The amount of width actually given. */
         givePrevWidth = (gridHeader, diff) => {
-            const hdr = getPrevColumnHeader(gridHeader);
+            const hdr = getPrevHdr(gridHeader);
             let usedDiff = 0;
             if (hdr) {
                 const newValue = hdr.value + diff;
@@ -20608,7 +20608,7 @@ new JS.Singleton('GlobalMouse', {
                 negative number.
             @returns {number} - The amount of width actually stolen. */
         stealNextWidth = (gridHeader, diff) => {
-            const hdr = getNextColumnHeader(gridHeader);
+            const hdr = getNextHdr(gridHeader);
             if (hdr) {
                 const newValue = hdr.value + diff;
                 if (hdr.resizable) hdr.setValue(newValue);
@@ -20623,7 +20623,7 @@ new JS.Singleton('GlobalMouse', {
                 positive number.
             @returns {number} - The amount of width actually given. */
         giveNextWidth = (gridHeader, diff) => {
-            const hdr = getNextColumnHeader(gridHeader);
+            const hdr = getNextHdr(gridHeader);
             if (hdr) {
                 const newValue = hdr.value + diff;
                 if (hdr.resizable) hdr.setValue(newValue);
@@ -20635,7 +20635,7 @@ new JS.Singleton('GlobalMouse', {
         // GridRow
         getRowSubview = (gridRow, columnHeader) => gridRow[columnHeader.columnId + 'View'],
         
-        // SimpleGridColumnHeader
+        // SimpleGridColHdr
         updateSortIcon = gridHeader => {
             let glyph = '';
             if (gridHeader.sortable) {
@@ -20665,7 +20665,7 @@ new JS.Singleton('GlobalMouse', {
                 gridWidth:number the width of the grid component.
                 fitToWidth:boolean determines if the columns will always fill 
                     up the width of the grid or not. Defaults to true.
-                lastColumn:myt.GridColumnHeader Holds a reference to the last
+                lastColumn:myt.GridColHdr Holds a reference to the last
                     column header.
                 sort:array An array containing the id of the column to sort by 
                     and the order to sort by.
@@ -20731,14 +20731,14 @@ new JS.Singleton('GlobalMouse', {
                     this.fitHeadersToWidth();
                     this.__tempLock = false;
                     
-                    // Reset min/max since notifyColumnHeaderVisibilityChange 
+                    // Reset min/max since notifyHdrVisibilityChange 
                     // will update these values
                     this.setMaxWidth(0);
                     this.setMinWidth(0);
                     this.columnHeaders.forEach(hdr => {
-                        this.notifyColumnHeaderXChange(hdr);
-                        this.notifyColumnHeaderWidthChange(hdr);
-                        this.notifyColumnHeaderVisibilityChange(hdr);
+                        this.notifyHdrXChange(hdr);
+                        this.notifyHdrWidthChange(hdr);
+                        this.notifyHdrVisibilityChange(hdr);
                     });
                     
                     this.doSort();
@@ -20767,11 +20767,11 @@ new JS.Singleton('GlobalMouse', {
             // Column Headers
             /** Gets the column header before the provided one.
                 @param {!Object} columnHeader
-                @returns {?Object} The myt.GridColumnHeader or undefined if 
+                @returns {?Object} The myt.GridColHdr or undefined if 
                     none exists. */
-            getPrevColumnHeader: function(columnHeader) {
+            getPrevHdr: function(columnHeader) {
                 const hdrs = this.columnHeaders;
-                let idx = this.getColumnHeaderIndex(columnHeader);
+                let idx = this.getHdrIndex(columnHeader);
                 if (idx > 0) {
                     while (idx) {
                         const hdr = hdrs[--idx];
@@ -20782,12 +20782,12 @@ new JS.Singleton('GlobalMouse', {
             
             /** Gets the column header after the provided one.
                 @param {!Object} columnHeader
-                @returns {?Object} The myt.GridColumnHeader or undefined if 
+                @returns {?Object} The myt.GridColHdr or undefined if 
                     none exists. */
-            getNextColumnHeader: function(columnHeader) {
+            getNextHdr: function(columnHeader) {
                 const hdrs = this.columnHeaders,
                     len = hdrs.length;
-                let idx = this.getColumnHeaderIndex(columnHeader) + 1;
+                let idx = this.getHdrIndex(columnHeader) + 1;
                 if (idx > 0 && idx < len) {
                     for (; len > idx;) {
                         const hdr = hdrs[idx++];
@@ -20796,15 +20796,15 @@ new JS.Singleton('GlobalMouse', {
                 }
             },
             
-            hasColumnHeader: function(columnHeader) {
-                return this.getColumnHeaderIndex(columnHeader) >= 0;
+            hasHdr: function(columnHeader) {
+                return this.getHdrIndex(columnHeader) >= 0;
             },
             
-            getColumnHeaderIndex: function(columnHeader) {
+            getHdrIndex: function(columnHeader) {
                 return this.columnHeaders.indexOf(columnHeader);
             },
             
-            getColumnHeaderById: function(columnId) {
+            getHdrById: function(columnId) {
                 const hdrs = this.columnHeaders;
                 let i = hdrs.length;
                 while (i) {
@@ -20813,36 +20813,36 @@ new JS.Singleton('GlobalMouse', {
                 }
             },
             
-            getVisibleColumnHeaders: function() {
+            getVisibleHdrs: function() {
                 return this.columnHeaders.filter(hdr => hdr.visible);
             },
             
-            notifyAddColumnHeader: function(columnHeader) {
-                if (!this.hasColumnHeader(columnHeader)) {
+            notifyAddHdr: function(columnHeader) {
+                if (!this.hasHdr(columnHeader)) {
                     this.columnHeaders.push(columnHeader);
                     if (columnHeader.visible) this.setLastColumn(columnHeader);
                     this.fixupResizerCursors();
                 }
             },
             
-            notifyRemoveColumnHeader: function(columnHeader) {
-                const idx = this.getColumnHeaderIndex(columnHeader);
+            notifyRemoveHdr: function(columnHeader) {
+                const idx = this.getHdrIndex(columnHeader);
                 if (idx >= 0) {
                     this.columnHeaders.splice(idx, 1);
-                    if (columnHeader.visible && columnHeader.last) this.setLastColumn(this.getPrevColumnHeader(columnHeader));
+                    if (columnHeader.visible && columnHeader.last) this.setLastColumn(this.getPrevHdr(columnHeader));
                     this.fixupResizerCursors();
                 }
             },
             
-            notifyColumnHeaderXChange: function(columnHeader) {
-                if (!this.isLocked()) this.rows.forEach(row => {row.notifyColumnHeaderXChange(columnHeader);});
+            notifyHdrXChange: function(columnHeader) {
+                if (!this.isLocked()) this.rows.forEach(row => {row.notifyHdrXChange(columnHeader);});
             },
             
-            notifyColumnHeaderWidthChange: function(columnHeader) {
-                if (!this.isLocked()) this.rows.forEach(row => {row.notifyColumnHeaderWidthChange(columnHeader);});
+            notifyHdrWidthChange: function(columnHeader) {
+                if (!this.isLocked()) this.rows.forEach(row => {row.notifyHdrWidthChange(columnHeader);});
             },
             
-            notifyColumnHeaderVisibilityChange: function(columnHeader) {
+            notifyHdrVisibilityChange: function(columnHeader) {
                 if (!this.isLocked()) {
                     this.updateRowsForVisibilityChange(columnHeader);
                     
@@ -20858,7 +20858,7 @@ new JS.Singleton('GlobalMouse', {
             },
             
             updateRowsForVisibilityChange: function(columnHeader) {
-                this.rows.forEach(row => {row.notifyColumnHeaderVisibilityChange(columnHeader);});
+                this.rows.forEach(row => {row.notifyHdrVisibilityChange(columnHeader);});
             },
             
             // Rows
@@ -20900,9 +20900,9 @@ new JS.Singleton('GlobalMouse', {
                         const w = this.width;
                         this.columnHeaders.forEach(hdr => {
                             row.setWidth(w);
-                            row.notifyColumnHeaderXChange(hdr);
-                            row.notifyColumnHeaderWidthChange(hdr);
-                            row.notifyColumnHeaderVisibilityChange(hdr);
+                            row.notifyHdrXChange(hdr);
+                            row.notifyHdrWidthChange(hdr);
+                            row.notifyHdrVisibilityChange(hdr);
                         });
                         
                         if (!doNotSort) this.doSort();
@@ -20918,7 +20918,7 @@ new JS.Singleton('GlobalMouse', {
             fitHeadersToWidth: function() {
                 if (!this.locked && this.fitToWidth) {
                     // Determine extra width to distribute/consume
-                    const hdrs = this.getVisibleColumnHeaders();
+                    const hdrs = this.getVisibleHdrs();
                     let maxExtent = 0;
                     hdrs.forEach(hdr => {maxExtent = mathMax(maxExtent, hdr.x + hdr.width);});
                     
@@ -20931,7 +20931,7 @@ new JS.Singleton('GlobalMouse', {
             },
             
             fixupResizerCursors: function() {
-                const hdrs = this.getVisibleColumnHeaders();
+                const hdrs = this.getVisibleHdrs();
                 
                 // Search forward hiding the cursor for each fixed column
                 // until a non-fixed column is encountered
@@ -21002,7 +21002,7 @@ new JS.Singleton('GlobalMouse', {
                     of cells updated by this column. Defaults to 0.
             
             @class */
-        GridColumnHeader = pkg.GridColumnHeader = new JSModule('GridColumnHeader', {
+        GridColHdr = pkg.GridColHdr = new JSModule('GridColHdr', {
             include: [pkg.BoundedValueComponent],
             
             
@@ -21076,9 +21076,9 @@ new JS.Singleton('GlobalMouse', {
                 }]);
                 
                 if (gc) {
-                    gc.notifyAddColumnHeader(self);
-                    gc.notifyColumnHeaderXChange(self);
-                    gc.notifyColumnHeaderVisibilityChange(self);
+                    gc.notifyAddHdr(self);
+                    gc.notifyHdrXChange(self);
+                    gc.notifyHdrVisibilityChange(self);
                 }
                 self.setWidth(self.value);
                 updateLast(self);
@@ -21132,13 +21132,13 @@ new JS.Singleton('GlobalMouse', {
             setGridController: function(v) {
                 const existing = this.gridController;
                 if (existing !== v) {
-                    if (existing) existing.notifyRemoveColumnHeader(this);
+                    if (existing) existing.notifyRemoveHdr(this);
                     this.gridController = v;
                     if (this.inited && v) {
-                        v.notifyAddColumnHeader(this);
-                        v.notifyColumnHeaderXChange(this);
-                        v.notifyColumnHeaderWidthChange(this);
-                        v.notifyColumnHeaderVisibilityChange(this);
+                        v.notifyAddHdr(this);
+                        v.notifyHdrXChange(this);
+                        v.notifyHdrWidthChange(this);
+                        v.notifyHdrVisibilityChange(this);
                     }
                 }
             },
@@ -21174,7 +21174,7 @@ new JS.Singleton('GlobalMouse', {
                     cur = self.width,
                     gc = self.gridController;
                 self.callSuper(v, suppressEvent);
-                if (gc && self.inited && cur !== self.width) gc.notifyColumnHeaderWidthChange(self);
+                if (gc && self.inited && cur !== self.width) gc.notifyHdrWidthChange(self);
             },
             
             /** @overrides myt.View */
@@ -21183,7 +21183,7 @@ new JS.Singleton('GlobalMouse', {
                     cur = self.x,
                     gc = self.gridController;
                 self.callSuper(v);
-                if (gc && self.inited && cur !== self.x) gc.notifyColumnHeaderXChange(self);
+                if (gc && self.inited && cur !== self.x) gc.notifyHdrXChange(self);
             },
             
             /** @overrides myt.View */
@@ -21192,7 +21192,7 @@ new JS.Singleton('GlobalMouse', {
                     cur = self.visible,
                     gc = self.gridController;
                 self.callSuper(v);
-                if (self.inited && gc && cur !== self.visible) gc.notifyColumnHeaderVisibilityChange(self);
+                if (self.inited && gc && cur !== self.visible) gc.notifyHdrVisibilityChange(self);
             }
         }),
         
@@ -21233,17 +21233,17 @@ new JS.Singleton('GlobalMouse', {
             
             
             // Methods /////////////////////////////////////////////////////////
-            notifyColumnHeaderXChange: function(columnHeader) {
+            notifyHdrXChange: function(columnHeader) {
                 const sv = getRowSubview(this, columnHeader);
                 if (sv) sv.setX(columnHeader.x + columnHeader.cellXAdj);
             },
             
-            notifyColumnHeaderWidthChange: function(columnHeader) {
+            notifyHdrWidthChange: function(columnHeader) {
                 const sv = getRowSubview(this, columnHeader);
                 if (sv) sv.setWidth(columnHeader.width + columnHeader.cellWidthAdj);
             },
             
-            notifyColumnHeaderVisibilityChange: function(columnHeader) {
+            notifyHdrVisibilityChange: function(columnHeader) {
                 const sv = getRowSubview(this, columnHeader);
                 if (sv) sv.setVisible(columnHeader.visible);
             }
@@ -21367,7 +21367,7 @@ new JS.Singleton('GlobalMouse', {
                 let target;
                 if (subnode.isA(GridRow)) {
                     target = this.content;
-                } else if (subnode.isA(GridColumnHeader)) {
+                } else if (subnode.isA(GridColHdr)) {
                     target = this.header;
                 }
                 
@@ -21426,8 +21426,8 @@ new JS.Singleton('GlobalMouse', {
                 Defaults to '#666'.
         
         @class */
-    pkg.SimpleGridColumnHeader = new JSClass('SimpleGridColumnHeader', pkg.SimpleTextButton, {
-        include: [GridColumnHeader],
+    pkg.SimpleGridColHdr = new JSClass('SimpleGridColHdr', pkg.SimpleTextButton, {
+        include: [GridColHdr],
         
         
         // Life Cycle //////////////////////////////////////////////////////////
@@ -21471,7 +21471,7 @@ new JS.Singleton('GlobalMouse', {
             if (this.sortIcon) this.sortIcon.setTextColor(v);
         },
         
-        /** @overrides myt.GridColumnHeader */
+        /** @overrides myt.GridColHdr */
         setSortable: function(v) {
             this.callSuper(v);
             if (this.inited) {
@@ -21481,7 +21481,7 @@ new JS.Singleton('GlobalMouse', {
             }
         },
         
-        /** @overrides myt.GridColumnHeader */
+        /** @overrides myt.GridColHdr */
         setSortState: function(v) {
             this.callSuper(v);
             if (this.inited) updateSortIcon(this);
@@ -21875,6 +21875,7 @@ new JS.Singleton('GlobalMouse', {
                         
                         const model = data[i],
                             classKey = self.getClassKey(model);
+                        let mustUpdateRow = false;
                         if (!row || row.classKey !== classKey) {
                             if (row) self.putRowBackInPool(row);
                             
@@ -21886,10 +21887,14 @@ new JS.Singleton('GlobalMouse', {
                             row.setHeight(rowHeight);
                             row.setY(rowInset + i * rowExtent);
                             row.setVisible(true);
+                            
+                            mustUpdateRow = true;
                         }
                         
-                        if (!row.model || !self.areModelsEqual(row.model, model) || forceFullReset) {
+                        if (forceFullReset || !row.model || !self.areModelsEqual(row.model, model)) {
                             row.setModel(model);
+                            self.updateRow(row);
+                        } else if (mustUpdateRow) {
                             self.updateRow(row);
                         }
                         
@@ -22214,7 +22219,7 @@ new JS.Singleton('GlobalMouse', {
         setColumnSpacing: function(v) {this.columnSpacing = v;},
         
         getColumnSpacingInUse: function() {
-            return this.columnSpacing === 0 ? 0 : mathMax(0, this.getVisibleColumnHeaders().length - 1) * this.columnSpacing;
+            return this.columnSpacing === 0 ? 0 : mathMax(0, this.getVisibleHdrs().length - 1) * this.columnSpacing;
         },
         
         /** @overrides myt.View */
@@ -22243,7 +22248,7 @@ new JS.Singleton('GlobalMouse', {
         subviewAdded: function(sv) {
             this.callSuper(sv);
             
-            if (sv.isA(pkg.GridColumnHeader)) {
+            if (sv.isA(pkg.GridColHdr)) {
                 sv.setGridController(this);
                 sv.setHeight(this.height);
             }
@@ -22255,12 +22260,12 @@ new JS.Singleton('GlobalMouse', {
         },
         
         /** @overrides myt.GridController */
-        notifyColumnHeaderXChange: function(columnHeader) {
+        notifyHdrXChange: function(columnHeader) {
             if (!this.isLocked()) this.grid.notifyXChange(columnHeader);
         },
         
         /** @overrides myt.GridController */
-        notifyColumnHeaderWidthChange: function(columnHeader) {
+        notifyHdrWidthChange: function(columnHeader) {
             if (!this.isLocked()) this.grid.notifyWidthChange(columnHeader);
         },
         

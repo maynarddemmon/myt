@@ -85,7 +85,7 @@ JS.Packages(function() {
         )
         .requires('myt.global.focus','myt.InputSelectOption','myt.Radio','myt.ValueComponent','myt.Checkbox','myt.InputText','myt.ComboBox','myt.EditableText','myt.InputTextArea');
     file(MYT_COMPONENT_ROOT + 'Grid.js'            )
-        .provides('myt.GridController','myt.GridColumnHeader','myt.SimpleGridColumnHeader','myt.Grid','myt.GridRow')
+        .provides('myt.GridController','myt.GridColHdr','myt.SimpleGridColHdr','myt.Grid','myt.GridRow')
         .requires('myt.View','myt.BoundedValueComponent','myt.SimpleTextButton','myt.FontAwesome');
     file(MYT_COMPONENT_ROOT + 'InfiniteList.js'    )
         .provides(
@@ -141,7 +141,7 @@ JS.Packages(function() {
         'myt.global.validators','myt.global.valueProcessors','myt.UseOtherFieldIfEmptyValueProcessor',
         'myt.FormElement','myt.FormInputSelect','myt.FormRadioGroup','myt.FormCheckbox','myt.FormInputText','myt.FormComboBox','myt.FormInputTextArea','myt.FormEditableText',
         'myt.Slider','myt.RangeSlider','myt.HorizontalDivider','myt.VerticalDivider',
-        'myt.Grid','myt.SimpleGridColumnHeader','myt.InfiniteGrid',
+        'myt.Grid','myt.SimpleGridColHdr','myt.InfiniteGrid',
         'myt.SelectableInfiniteList','myt.SimpleSelectableInfiniteListRow',
         'myt.PanelStack','myt.AutoScroller','myt.Eventable','myt.Annulus',
         'myt.TooltipMixin','myt.Canvas'

@@ -11,6 +11,8 @@
     function init() {
         const M = myt,
             View = M.View,
+            SimpleGridColHdr = M.SimpleGridColHdr,
+            
             RowClass = new JS.Class('RowClass', View, {
                 include: [M.GridRow],
                 
@@ -54,22 +56,22 @@
         let i = 50;
         while (i--) new RowClass(grid);
         
-        grid.colOne = new M.SimpleGridColumnHeader(grid, {
+        grid.colOne = new SimpleGridColHdr(grid, {
             columnId:'one', minValue:100, maxValue:100, text:'Column One', cellXAdj:2, cellWidthAdj:-2
         });
-        grid.colTwo =   new M.SimpleGridColumnHeader(grid, {
+        grid.colTwo =   new SimpleGridColHdr(grid, {
             columnId:'two', minValue:50,  maxValue:50, text:'Column Two', cellXAdj:2, cellWidthAdj:-2, sortable:false
         });
-        grid.colThree = new M.SimpleGridColumnHeader(grid, {
+        grid.colThree = new SimpleGridColHdr(grid, {
             columnId:'three', minValue:100, maxValue:100, text:'Column Three', cellXAdj:2, cellWidthAdj:-2
         });
-        grid.colFour =  new M.SimpleGridColumnHeader(grid, {
+        grid.colFour =  new SimpleGridColHdr(grid, {
             columnId:'four', flex:1, value:100, minValue:50,  maxValue:500, text:'Column Four', cellXAdj:2, cellWidthAdj:-2, resizerCursor:'crosshair'
         });
-        grid.colFive =  new M.SimpleGridColumnHeader(grid, {
+        grid.colFive =  new SimpleGridColHdr(grid, {
             columnId:'five', minValue:25, maxValue:100, text:'Column Five', cellXAdj:2, cellWidthAdj:-2
         });
-        grid.colSix = new M.SimpleGridColumnHeader(grid, {
+        grid.colSix = new SimpleGridColHdr(grid, {
             columnId:'six', flex:1, minValue:100, maxValue:500, text:'Column Six', cellXAdj:2, cellWidthAdj:-2
         });
         

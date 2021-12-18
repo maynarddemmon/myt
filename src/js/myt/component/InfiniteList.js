@@ -365,6 +365,7 @@
                         
                         const model = data[i],
                             classKey = self.getClassKey(model);
+                        let mustUpdateRow = false;
                         if (!row || row.classKey !== classKey) {
                             if (row) self.putRowBackInPool(row);
                             
@@ -376,10 +377,14 @@
                             row.setHeight(rowHeight);
                             row.setY(rowInset + i * rowExtent);
                             row.setVisible(true);
+                            
+                            mustUpdateRow = true;
                         }
                         
-                        if (!row.model || !self.areModelsEqual(row.model, model) || forceFullReset) {
+                        if (forceFullReset || !row.model || !self.areModelsEqual(row.model, model)) {
                             row.setModel(model);
+                            self.updateRow(row);
+                        } else if (mustUpdateRow) {
                             self.updateRow(row);
                         }
                         
@@ -704,7 +709,7 @@
         setColumnSpacing: function(v) {this.columnSpacing = v;},
         
         getColumnSpacingInUse: function() {
-            return this.columnSpacing === 0 ? 0 : mathMax(0, this.getVisibleColumnHeaders().length - 1) * this.columnSpacing;
+            return this.columnSpacing === 0 ? 0 : mathMax(0, this.getVisibleHdrs().length - 1) * this.columnSpacing;
         },
         
         /** @overrides myt.View */
@@ -733,7 +738,7 @@
         subviewAdded: function(sv) {
             this.callSuper(sv);
             
-            if (sv.isA(pkg.GridColumnHeader)) {
+            if (sv.isA(pkg.GridColHdr)) {
                 sv.setGridController(this);
                 sv.setHeight(this.height);
             }
@@ -745,12 +750,12 @@
         },
         
         /** @overrides myt.GridController */
-        notifyColumnHeaderXChange: function(columnHeader) {
+        notifyHdrXChange: function(columnHeader) {
             if (!this.isLocked()) this.grid.notifyXChange(columnHeader);
         },
         
         /** @overrides myt.GridController */
-        notifyColumnHeaderWidthChange: function(columnHeader) {
+        notifyHdrWidthChange: function(columnHeader) {
             if (!this.isLocked()) this.grid.notifyWidthChange(columnHeader);
         },
         
