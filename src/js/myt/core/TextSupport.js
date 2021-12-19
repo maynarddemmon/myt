@@ -151,7 +151,7 @@
             if (this.userUnselectable !== v) {
                 this.userUnselectable = v;
                 this[v ? 'addDomClass' : 'removeDomClass']('mytUnselectable');
-                this.setCursor(v ? 'default' : 'text');
+                if (this.cursor === 'default' || this.cursor === 'text') this.setCursor(v ? 'default' : 'text');
                 if (this.inited) this.fireEvent('userUnselectable', v);
             }
         },

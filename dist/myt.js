@@ -8441,7 +8441,7 @@ myt.Destructible = new JS.Module('Destructible', {
             if (this.userUnselectable !== v) {
                 this.userUnselectable = v;
                 this[v ? 'addDomClass' : 'removeDomClass']('mytUnselectable');
-                this.setCursor(v ? 'default' : 'text');
+                if (this.cursor === 'default' || this.cursor === 'text') this.setCursor(v ? 'default' : 'text');
                 if (this.inited) this.fireEvent('userUnselectable', v);
             }
         },
@@ -21433,6 +21433,8 @@ new JS.Singleton('GlobalMouse', {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.View */
         initNode: function(parent, attrs) {
+            const self = this;
+            
             defAttr(attrs, 'activeColor', '#999');
             defAttr(attrs, 'hoverColor', '#bbb');
             defAttr(attrs, 'readyColor', '#aaa');
@@ -21440,7 +21442,6 @@ new JS.Singleton('GlobalMouse', {
             defAttr(attrs, 'outset', 2);
             defAttr(attrs, 'sortIconColor', '#666');
             
-            const self = this;
             self.callSuper(parent, attrs);
             
             new pkg.FontAwesome(self, {
