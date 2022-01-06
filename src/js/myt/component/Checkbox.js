@@ -37,9 +37,9 @@
             defAttr(attrs, 'value', false);
             defAttr(attrs, 'focusIndicator', false);
             defAttr(attrs, 'checkboxStyle', DEFAULT_STYLE);
-            defAttr(attrs, 'activeColor', 'inherits');
-            defAttr(attrs, 'hoverColor', 'inherits');
-            defAttr(attrs, 'readyColor', 'inherits');
+            defAttr(attrs, 'activeColor', 'inherit');
+            defAttr(attrs, 'hoverColor', 'inherit');
+            defAttr(attrs, 'readyColor', 'inherit');
             
             this.callSuper(parent, attrs);
             

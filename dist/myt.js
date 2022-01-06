@@ -13261,9 +13261,9 @@ new JS.Singleton('GlobalMouse', {
             defAttr(attrs, 'selected', false);
             if (attrs.groupId == null) attrs.groupId = pkg.generateGuid();
             defAttr(attrs, 'focusIndicator', false);
-            defAttr(attrs, 'activeColor', 'inherits');
-            defAttr(attrs, 'hoverColor', 'inherits');
-            defAttr(attrs, 'readyColor', 'inherits');
+            defAttr(attrs, 'activeColor', 'inherit');
+            defAttr(attrs, 'hoverColor', 'inherit');
+            defAttr(attrs, 'readyColor', 'inherit');
             
             const value = attrs.value;
             delete attrs.value;
@@ -15590,9 +15590,9 @@ new JS.Singleton('GlobalMouse', {
             defAttr(attrs, 'value', false);
             defAttr(attrs, 'focusIndicator', false);
             defAttr(attrs, 'checkboxStyle', DEFAULT_STYLE);
-            defAttr(attrs, 'activeColor', 'inherits');
-            defAttr(attrs, 'hoverColor', 'inherits');
-            defAttr(attrs, 'readyColor', 'inherits');
+            defAttr(attrs, 'activeColor', 'inherit');
+            defAttr(attrs, 'hoverColor', 'inherit');
+            defAttr(attrs, 'readyColor', 'inherit');
             
             this.callSuper(parent, attrs);
             
