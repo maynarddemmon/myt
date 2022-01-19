@@ -4,7 +4,7 @@
      * Maynard Demmon <maynarddemmon@gmail.com>
      * @copyright Copyright (c) 2012-2022 Maynard Demmon and contributors
      * Myt: A simple javascript UI framework
-     * Version: 20210723.1606
+     * Version: 20220118.1318
      * MIT License
      * 
      * Parts of the Software incorporates code from the following open-source projects:
@@ -81,10 +81,18 @@
         // The localization dictionaries for I18N
         dictionaries = {},
         
+        memoize = func => {
+            return function() {
+                const hash = JSON.stringify(arguments),
+                    cache = func.__cache || (func.__cache = {});
+                return (hash in cache) ? cache[hash] : cache[hash] = func.apply(this, arguments);
+            };
+        },
+        
         myt = pkg.myt = {
             /** A version number based on the time this distribution of 
                 myt was created. */
-            version:20210808.1459,
+            version:20220118.1318,
             
             /** Generates a globally unique id, (GUID).
                 @returns {number} */
@@ -428,6 +436,51 @@
                 myt.addCSSRule(sheet, '#' + domId + '::placeholder', rules.join('; '), 0);
             },
             
+            // Sort Util
+            chainSortFunc: (funcPrimary, funcSecondary) => {
+                return (a, b) => {
+                    const retval = funcPrimary(a, b);
+                    return retval === 0 ? funcSecondary(a, b) : retval;
+                };
+            },
+            
+            /** Gets an alphanumeric sort function for sorting Objects by a 
+                named property. Object property values that are falsy are
+                coerced to "".
+                @param {string} propName
+                @param {boolean} ascending
+                @param {boolean} caseInsensitive
+                @returns {!Function} */
+            getAlphaObjSortFunc: memoize((propName, ascending, caseInsensitive) => {
+                const order = ascending ? 1 : -1;
+                return (a, b) => {
+                    // Fix falsy values, typically null or undefined.
+                    a = a[propName] || '';
+                    b = b[propName] || '';
+                    if (caseInsensitive) {
+                        a = a.toLowerCase();
+                        b = b.toLowerCase();
+                    }
+                    return a.localeCompare(b) * order;
+                };
+            }),
+            
+            /** Gets a numeric sort function for sorting Objects by a 
+                named property. Object property values that are falsy are 
+                coerced to 0.
+                @param {string} propName
+                @param {boolean} ascending
+                @returns {!Function} */
+            getNumericObjSortFunc: memoize((propName, ascending) => {
+                const order = ascending ? 1 : -1;
+                return (a, b) => {
+                    // Fix falsy values, typically null or undefined.
+                    a = a[propName] || 0;
+                    b = b[propName] || 0;
+                    return (a - b) * order;
+                };
+            }),
+            
             // Misc
             /** Format a number between 0 and 1 as a percentage.
                 @param {number} num The number to convert.
@@ -454,13 +507,7 @@
             /** Memoize a function.
                 @param {!Function} func - The function to memoize
                 @returns {!Function} - The memoized function. */
-            memoize: func => {
-                return function() {
-                    const hash = JSON.stringify(arguments),
-                        cache = func.__cache || (func.__cache = {});
-                    return (hash in cache) ? cache[hash] : cache[hash] = func.apply(this, arguments);
-                };
-            },
+            memoize: memoize,
             
             /** Returns a function that wraps the provided function and that, 
                 as long as it continues to be invoked, will not invoke the 
@@ -607,7 +654,7 @@
                     }
                 }
             ).finally(
-                _ => {if (finallyFunc) finallyFunc();}
+                () => {if (finallyFunc) finallyFunc();}
             ),
             
             // I18N

@@ -180,16 +180,13 @@
             
             getSortFunction: function() {
                 // Default to a numeric sort on the IDs
-                const modelIDName = this.modelIDName,
-                    asc = this.ascendingSort ? 1 : -1;
-                if (this.numericSort) {
-                    return (a, b) => (a[modelIDName] - b[modelIDName]) * asc;
+                const self = this,
+                    modelIDName = self.modelIDName,
+                    ascendingSort = self.ascendingSort;
+                if (self.numericSort) {
+                    return pkg.getNumericObjSortFunc(modelIDName, ascendingSort);
                 } else {
-                    return (a, b) => {
-                        a = a[modelIDName];
-                        b = b[modelIDName];
-                        return (a > b ? 1 : (a < b ? -1 : 0)) * asc;
-                    };
+                    return pkg.getAlphaObjSortFunc(modelIDName, ascendingSort, false);
                 }
             },
             
@@ -620,21 +617,7 @@
                 const sort = this.gridHeader.sort || ['',''],
                     sortColumnId  = sort[0],
                     sortOrder = sort[1];
-                if (sortColumnId) {
-                    const sortNum = sortOrder === 'ascending' ? 1 : -1;
-                    return (a, b) => {
-                        const aValue = a[sortColumnId],
-                            bValue = b[sortColumnId];
-                        if (aValue > bValue) {
-                            return sortNum;
-                        } else if (bValue > aValue) {
-                            return -sortNum;
-                        }
-                        return 0;
-                    };
-                } else {
-                    return this.callSuper();
-                }
+                return sortColumnId ? pkg.getAlphaObjSortFunc(sortColumnId, sortOrder === 'ascending', false) : this.callSuper();
             },
             
             /** @overrides myt.InfiniteList */

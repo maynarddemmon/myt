@@ -514,7 +514,7 @@ Date.prototype.format = Date.prototype.format || (() => {
      * Maynard Demmon <maynarddemmon@gmail.com>
      * @copyright Copyright (c) 2012-2022 Maynard Demmon and contributors
      * Myt: A simple javascript UI framework
-     * Version: 20210723.1606
+     * Version: 20220118.1318
      * MIT License
      * 
      * Parts of the Software incorporates code from the following open-source projects:
@@ -591,10 +591,18 @@ Date.prototype.format = Date.prototype.format || (() => {
         // The localization dictionaries for I18N
         dictionaries = {},
         
+        memoize = func => {
+            return function() {
+                const hash = JSON.stringify(arguments),
+                    cache = func.__cache || (func.__cache = {});
+                return (hash in cache) ? cache[hash] : cache[hash] = func.apply(this, arguments);
+            };
+        },
+        
         myt = pkg.myt = {
             /** A version number based on the time this distribution of 
                 myt was created. */
-            version:20210808.1459,
+            version:20220118.1318,
             
             /** Generates a globally unique id, (GUID).
                 @returns {number} */
@@ -938,6 +946,51 @@ Date.prototype.format = Date.prototype.format || (() => {
                 myt.addCSSRule(sheet, '#' + domId + '::placeholder', rules.join('; '), 0);
             },
             
+            // Sort Util
+            chainSortFunc: (funcPrimary, funcSecondary) => {
+                return (a, b) => {
+                    const retval = funcPrimary(a, b);
+                    return retval === 0 ? funcSecondary(a, b) : retval;
+                };
+            },
+            
+            /** Gets an alphanumeric sort function for sorting Objects by a 
+                named property. Object property values that are falsy are
+                coerced to "".
+                @param {string} propName
+                @param {boolean} ascending
+                @param {boolean} caseInsensitive
+                @returns {!Function} */
+            getAlphaObjSortFunc: memoize((propName, ascending, caseInsensitive) => {
+                const order = ascending ? 1 : -1;
+                return (a, b) => {
+                    // Fix falsy values, typically null or undefined.
+                    a = a[propName] || '';
+                    b = b[propName] || '';
+                    if (caseInsensitive) {
+                        a = a.toLowerCase();
+                        b = b.toLowerCase();
+                    }
+                    return a.localeCompare(b) * order;
+                };
+            }),
+            
+            /** Gets a numeric sort function for sorting Objects by a 
+                named property. Object property values that are falsy are 
+                coerced to 0.
+                @param {string} propName
+                @param {boolean} ascending
+                @returns {!Function} */
+            getNumericObjSortFunc: memoize((propName, ascending) => {
+                const order = ascending ? 1 : -1;
+                return (a, b) => {
+                    // Fix falsy values, typically null or undefined.
+                    a = a[propName] || 0;
+                    b = b[propName] || 0;
+                    return (a - b) * order;
+                };
+            }),
+            
             // Misc
             /** Format a number between 0 and 1 as a percentage.
                 @param {number} num The number to convert.
@@ -964,13 +1017,7 @@ Date.prototype.format = Date.prototype.format || (() => {
             /** Memoize a function.
                 @param {!Function} func - The function to memoize
                 @returns {!Function} - The memoized function. */
-            memoize: func => {
-                return function() {
-                    const hash = JSON.stringify(arguments),
-                        cache = func.__cache || (func.__cache = {});
-                    return (hash in cache) ? cache[hash] : cache[hash] = func.apply(this, arguments);
-                };
-            },
+            memoize: memoize,
             
             /** Returns a function that wraps the provided function and that, 
                 as long as it continues to be invoked, will not invoke the 
@@ -1117,7 +1164,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                     }
                 }
             ).finally(
-                _ => {if (finallyFunc) finallyFunc();}
+                () => {if (finallyFunc) finallyFunc();}
             ),
             
             // I18N
@@ -21691,16 +21738,13 @@ new JS.Singleton('GlobalMouse', {
             
             getSortFunction: function() {
                 // Default to a numeric sort on the IDs
-                const modelIDName = this.modelIDName,
-                    asc = this.ascendingSort ? 1 : -1;
-                if (this.numericSort) {
-                    return (a, b) => (a[modelIDName] - b[modelIDName]) * asc;
+                const self = this,
+                    modelIDName = self.modelIDName,
+                    ascendingSort = self.ascendingSort;
+                if (self.numericSort) {
+                    return pkg.getNumericObjSortFunc(modelIDName, ascendingSort);
                 } else {
-                    return (a, b) => {
-                        a = a[modelIDName];
-                        b = b[modelIDName];
-                        return (a > b ? 1 : (a < b ? -1 : 0)) * asc;
-                    };
+                    return pkg.getAlphaObjSortFunc(modelIDName, ascendingSort, false);
                 }
             },
             
@@ -22131,21 +22175,7 @@ new JS.Singleton('GlobalMouse', {
                 const sort = this.gridHeader.sort || ['',''],
                     sortColumnId  = sort[0],
                     sortOrder = sort[1];
-                if (sortColumnId) {
-                    const sortNum = sortOrder === 'ascending' ? 1 : -1;
-                    return (a, b) => {
-                        const aValue = a[sortColumnId],
-                            bValue = b[sortColumnId];
-                        if (aValue > bValue) {
-                            return sortNum;
-                        } else if (bValue > aValue) {
-                            return -sortNum;
-                        }
-                        return 0;
-                    };
-                } else {
-                    return this.callSuper();
-                }
+                return sortColumnId ? pkg.getAlphaObjSortFunc(sortColumnId, sortOrder === 'ascending', false) : this.callSuper();
             },
             
             /** @overrides myt.InfiniteList */
