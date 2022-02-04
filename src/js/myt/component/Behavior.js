@@ -71,6 +71,7 @@
         
         // Accessors ///////////////////////////////////////////////////////////
         setDisabled: function(v) {
+            v = this.valueFromEvent(v);
             if (this.disabled !== v) {
                 this.disabled = v;
                 if (this.inited) this.fireEvent('disabled', v);

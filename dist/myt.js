@@ -11080,6 +11080,7 @@ new JS.Singleton('GlobalMouse', {
         
         // Accessors ///////////////////////////////////////////////////////////
         setDisabled: function(v) {
+            v = this.valueFromEvent(v);
             if (this.disabled !== v) {
                 this.disabled = v;
                 if (this.inited) this.fireEvent('disabled', v);
@@ -19176,7 +19177,7 @@ new JS.Singleton('GlobalMouse', {
                 self.setupFooterButtons(self.content.msg, opts);
             },
             
-            showContentConfirm: function(contentBuilderFunc, callbackFunction, opts) {
+            showContentConfirm: function(contentBuilderFunc, callbackFunction, opts, afterSetupFunc) {
                 opts = objectAssign({}, Dialog.CONFIRM_DEFAULTS, opts);
                 
                 const self = this,
@@ -19213,6 +19214,8 @@ new JS.Singleton('GlobalMouse', {
                 
                 // Set initial focus
                 if (contentContainer.initialFocus) contentContainer.initialFocus.focus();
+                
+                if (afterSetupFunc) afterSetupFunc(self);
             },
             
             /** Shows a dialog with a spinner and a message and no standard 
@@ -19359,7 +19362,7 @@ new JS.Singleton('GlobalMouse', {
                     content = self.content, 
                     DPY = ModalPanel.PADDING_Y,
                     HALF_DPY = DPY / 2,
-                    btnContainer = new View(content, {y:mainView.y + mainView.height + DPY, align:'center'}),
+                    btnContainer = new View(content, {name:'btnContainer', y:mainView.y + mainView.height + DPY, align:'center'}),
                     btnConfigKeys = ['active','hover','ready','text'];
                 
                 // Cancel Button
