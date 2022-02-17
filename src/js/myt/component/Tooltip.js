@@ -310,6 +310,7 @@
                 
                 this.set('tooltip', v, true);
             },
+            getTooltip: function() {return this.tooltip;},
             setTipAlign: function(v) {this.set('tipAlign', v, true);},
             setTipValign: function(v) {this.set('tipValign', v, true);},
             setMaxTextWidth: function(v) {this.set('maxTextWidth', v, true);},
@@ -320,7 +321,7 @@
             /** @overrides myt.MouseOver. */
             doSmoothMouseOver: function(isOver) {
                 const self = this,
-                    tooltip = self.tooltip;
+                    tooltip = self.getTooltip();
                 
                 self.callSuper(isOver);
                 
