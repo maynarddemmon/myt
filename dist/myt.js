@@ -19128,7 +19128,7 @@ new JS.Singleton('GlobalMouse', {
                 }
             },
             
-            showSimple: function(contentBuilderFunc, callbackFunction, opts) {
+            showSimple: function(contentBuilderFunc, callbackFunction, opts, afterSetupFunc) {
                 opts = opts || {};
                 
                 const self = this,
@@ -19164,8 +19164,15 @@ new JS.Singleton('GlobalMouse', {
                 closeBtn.setVisible(true);
                 closeBtn.focus();
                 
+                if (opts.titleText) {
+                    self.setupTitle(content, opts.titleText);
+                    contentContainer.setY(self.header.height + 1);
+                }
+                
                 // Set initial focus
                 if (contentContainer.initialFocus) contentContainer.initialFocus.focus();
+                
+                if (afterSetupFunc) afterSetupFunc(self);
             },
             
             showConfirm: function(msg, callbackFunction, opts) {
