@@ -4504,9 +4504,10 @@ new JS.Singleton('GlobalTouch', {
             // we may need to resync the dom to the model.
             if (self.inited && oldParentIsFlexBox && !self.isChildOfFlexBox()) {
                 // Sync dom to model
-                const ods = self.getODS();
-                if (ods.width !== AUTO) ods.width = self.width + 'px';
-                if (ods.height !== AUTO) ods.height = self.height + 'px';
+                const ids = self.getIDS(),
+                    ods = self.getODS();
+                if (ids.width !== AUTO) ods.width = self.width + 'px';
+                if (ids.height !== AUTO) ods.height = self.height + 'px';
                 self.syncInnerToOuter();
             }
         },
