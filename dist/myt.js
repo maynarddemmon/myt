@@ -6758,8 +6758,10 @@ myt.Destructible = new JS.Module('Destructible', {
 (pkg => {
     const mathRound = Math.round,
         DomElementProxy = pkg.DomElementProxy,
-    
+        
         rectContainsPoint = pkg.Geometry.rectContainsPoint,
+        
+        getDomStyle = (view, isInnerElem ) => isInnerElem ? view.getIDS() : view.getODS(),
         
         /*  Preserves focus and scroll position during dom updates. Focus can 
             get lost in webkit when an element is removed from the dom.
@@ -7338,6 +7340,24 @@ myt.Destructible = new JS.Module('Destructible', {
                     if (!suppressEvent) this.fireEvent('height', v);
                 }
             }
+        },
+        
+        setDomMinWidth: function(v, isInnerElem) {
+            getDomStyle(this, isInnerElem).minWidth = v ? v + 'px' : null;
+        },
+        
+        getDomMinWidth: function(isInnerElem) {
+            const minWidth = getDomStyle(this, isInnerElem).minWidth;
+            return minWidth != null ? Number.parseInt(minWidth) : null;
+        },
+        
+        setDomMinHeight: function(v, isInnerElem) {
+            getDomStyle(this, isInnerElem).minHeight = v ? v + 'px' : null;
+        },
+        
+        getDomMinHeight: function(isInnerElem) {
+            const minHeight = getDomStyle(this, isInnerElem).minHeight;
+            return minHeight != null ? Number.parseInt(minHeight) : null;
         },
         
         setTextColor: function(v) {
