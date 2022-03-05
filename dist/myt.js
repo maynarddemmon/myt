@@ -3727,12 +3727,16 @@ new JS.Singleton('GlobalError', {
                         domObservers.push(domObserver, methodName, methodRef, capture);
                     }
                     
-                    pkg.addEventListener(this.getIDE(), type, methodRef, capture, passive);
+                    pkg.addEventListener(this.getDomElementForDomObservable(type), type, methodRef, capture, passive);
                     
                     return true;
                 }
             }
             return false;
+        },
+        
+        getDomElementForDomObservable: function(type) {
+            return this.getIDE();
         },
         
         /** Creates a function that will handle the dom event when it is fired
@@ -3802,7 +3806,7 @@ new JS.Singleton('GlobalError', {
                     const domObservers = domObserversByType[type];
                     if (domObservers) {
                         // Remove dom observer
-                        const ide = this.getIDE();
+                        const de = this.getDomElementForDomObservable(type);
                         let retval = false,  
                             i = domObservers.length;
                         while (i) {
@@ -3811,7 +3815,7 @@ new JS.Singleton('GlobalError', {
                                 methodName === domObservers[i + 1] && 
                                 capture === domObservers[i + 3]
                             ) {
-                                if (ide) pkg.removeEventListener(ide, type, domObservers[i + 2], capture);
+                                if (de) pkg.removeEventListener(de, type, domObservers[i + 2], capture);
                                 domObservers.splice(i, 4);
                                 retval = true;
                             }
@@ -3826,21 +3830,18 @@ new JS.Singleton('GlobalError', {
         /** Detaches all dom observers from this DomObservable.
             @returns {undefined} */
         detachAllDomObservers: function() {
-            const ide = this.getIDE();
-            if (ide) {
-                const domObserversByType = this.__dobsbt;
-                if (domObserversByType) {
-                    for (const type in domObserversByType) {
-                        const domObservers = domObserversByType[type];
-                        let i = domObservers.length;
-                        while (i) {
-                            const capture = domObservers[--i],
-                                methodRef = domObservers[--i];
-                            i -= 2; // methodName and domObserver
-                            pkg.removeEventListener(ide, type, methodRef, capture);
-                        }
-                        domObservers.length = 0;
+            const domObserversByType = this.__dobsbt;
+            if (domObserversByType) {
+                for (const type in domObserversByType) {
+                    const domObservers = domObserversByType[type];
+                    let i = domObservers.length;
+                    while (i) {
+                        const capture = domObservers[--i],
+                            methodRef = domObservers[--i];
+                        i -= 2; // methodName and domObserver
+                        pkg.removeEventListener(this.getDomElementForDomObservable(type), type, methodRef, capture);
                     }
+                    domObservers.length = 0;
                 }
             }
         }
