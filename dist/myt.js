@@ -956,17 +956,28 @@ Date.prototype.format = Date.prototype.format || (() => {
             
             /** Gets an alphanumeric sort function for sorting Objects by a 
                 named property. Object property values that are falsy are
-                coerced to "".
+                coerced to "" if fixNonStrings is false.
                 @param {string} propName
                 @param {boolean} ascending
                 @param {boolean} caseInsensitive
+                @param {boolean} fixNonStrings When true non-string values will
+                    be converted to strings by concatenating them with "".
                 @returns {!Function} */
-            getAlphaObjSortFunc: memoize((propName, ascending, caseInsensitive) => {
+            getAlphaObjSortFunc: memoize((propName, ascending, caseInsensitive, fixNonStrings) => {
                 const order = ascending ? 1 : -1;
                 return (a, b) => {
-                    // Fix falsy values, typically null or undefined.
-                    a = a[propName] || '';
-                    b = b[propName] || '';
+                    a = a[propName];
+                    b = b[propName];
+                    if (fixNonStrings) {
+                        // Fix non-string values
+                        if (typeof a !== 'string') a = '' + a;
+                        if (typeof b !== 'string') b = '' + b;
+                    } else {
+                        // Otherwise, only fix falsy values, typically null 
+                        // or undefined.
+                        a = a || '';
+                        b = b || '';
+                    }
                     if (caseInsensitive) {
                         a = a.toLowerCase();
                         b = b.toLowerCase();
