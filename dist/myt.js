@@ -21529,8 +21529,11 @@ new JS.Singleton('GlobalMouse', {
             defAttr(attrs, 'hoverColor', '#bbb');
             defAttr(attrs, 'readyColor', '#aaa');
             defAttr(attrs, 'inset', 2);
-            defAttr(attrs, 'outset', 2);
             defAttr(attrs, 'sortIconColor', '#666');
+            
+            defAttr(attrs, 'outset', 2);
+            const outset = attrs.outset;
+            delete attrs.outset;
             
             self.callSuper(parent, attrs);
             
@@ -21543,7 +21546,7 @@ new JS.Singleton('GlobalMouse', {
                 },
                 sizeViewToDom: function() {
                     this.callSuper();
-                    self.setOutset(this.width + 2);
+                    self.setOutset(this.width + outset);
                     updateTextWidth(self);
                 }
             }]);
