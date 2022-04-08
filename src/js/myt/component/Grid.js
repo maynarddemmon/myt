@@ -1,4 +1,9 @@
 (pkg => {
+    /** Use a shared idx so we can better distibute extra space during
+        small but frequent resizings such as what occurs when slowly
+        resizing a grid. */
+    let resizeIdx = 0;
+    
     const JSClass = JS.Class,
         JSModule = JS.Module,
         
@@ -58,10 +63,15 @@
                 // Calculate Amounts
                 let resizeCount = resizeInfo.length;
                 if (resizeCount > 0) {
-                    let idx = 0,
-                        fullCount = 0;
+                    let fullCount = 0;
+                    
                     while (extra !== 0) {
-                        const info = resizeInfo[idx];
+                        if (resizeIdx >= resizeCount) {
+                            resizeIdx = 0;
+                            fullCount = 0;
+                        }
+                        
+                        const info = resizeInfo[resizeIdx];
                         hdr = info.hdr;
                         
                         if (info.full) {
@@ -87,11 +97,7 @@
                         
                         if (fullCount === resizeCount) break;
                         
-                        ++idx;
-                        if (idx === resizeCount) {
-                            idx = 0;
-                            fullCount = 0;
-                        }
+                        ++resizeIdx;
                     }
                     
                     // Distribute
