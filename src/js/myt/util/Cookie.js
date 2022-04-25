@@ -71,6 +71,7 @@
                         path:string the path scope for the cookie.
                         domain:string the domain scope for the cookie.
                         secure:boolean the cookie must be secure.
+                        samesite:string the samesite property of the cookie.
                         raw:boolean If true the cookie key and value will be 
                             used as is. Otherwise encodeURIComponent will 
                             be used.
@@ -95,6 +96,7 @@
                     options.expires ? '; expires=' + options.expires.toUTCString() : '', // use expires attribute, max-age is not supported by IE
                     options.path    ? '; path=' + options.path : '',
                     options.domain  ? '; domain=' + options.domain : '',
+                    options.samesite ? '; samesite=' + options.samesite : '',
                     options.secure  ? '; secure' : ''
                 ].join(''));
             },
