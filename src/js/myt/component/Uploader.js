@@ -254,16 +254,15 @@
                 while (i) this.uploadFile(files[--i], url, fileParam);
             },
             
+            makeFetchOptionsForUpload: formData => ({method:'POST', body:formData}),
+            
             uploadFile: function(file, url, fileParam) {
                 const self = this,
                     formData = new FormData();
                 formData.append(fileParam || self.requestFileParam, file, file.name);
                 pkg.doFetch(
                     url || self.uploadUrl,
-                    {
-                        method:'POST',
-                        body:formData
-                    },
+                    self.makeFetchOptionsForUpload(formData),
                     false,
                     data => {
                         self.handleUploadSuccess(file, data);
