@@ -45,7 +45,7 @@
         
         registerForNotification = instance => {
             ['Free 400', 'Free 900', 'Brands 400'].forEach(fontName => {
-                pkg.registerForFontNotification(instance, 'Font Awesome\ 5 ' + fontName);
+                pkg.registerForFontNotification(instance, 'Font Awesome 5 ' + fontName);
             });
         };
     
