@@ -1,20 +1,23 @@
 #!/usr/bin/env node
 
 // Gather Arguments
-const exec = require('child_process').exec,
-    fs = require('fs'),
+const fs = require('fs'),
     arguments = process.argv.splice(2),
     manifestFile = arguments[0],
     targetFile = arguments[1],
     rootPath = arguments[2],
     outputSourceMap = arguments[3] === 'true',
-    requiredFiles = arguments.splice(4);
+    doLintChecks = arguments[4] === 'true',
+    requiredFiles = arguments.splice(5);
 
 // Basic argument validation
 if (!manifestFile) return console.error('No manifest file provided.');
 if (!targetFile) return console.error('No target file provided.');
 if (!rootPath) return console.error('No root path provided.');
 if (!requiredFiles.length > 0) return console.error('No required file provided.');
+
+// We now know we have a targetFile so generate the min filename too.
+let minifiedFilePath = targetFile.substring(0, targetFile.length - 2) + 'min.js';
 
 // JS Build
 const jsBuild = (manifest, root, include, callback) => {
@@ -55,9 +58,10 @@ const jsBuild = (manifest, root, include, callback) => {
     // than one file.
     const includedFiles = [];
     packages.forEach(pkg => {
-        pkg._loader.forEach(loader => {
-            includedFiles.push(loader)
-        });
+        let paths = pkg._loader;
+        if (!(paths instanceof Array)) die('Cannot bundle ' + pkg + ': no path specified in your manifest');
+        paths = paths.filter(p => {return !HTTP_REGEX.test(p)});
+        paths.forEach(loader => {includedFiles.push(loader)});
     });
     
     const read = (file, readCallback) => {
@@ -114,32 +118,58 @@ const jsBuild = (manifest, root, include, callback) => {
     bundle(P.ROOT, includedFiles, 0);
 };
 
+// Remove old files
+console.info("Try to remove old files:");
+const removeFile = path => {
+    try {
+        fs.unlinkSync(path);
+        console.info('  Removed: ' + path);
+    } catch (e) {
+        console.info('  Could not remove: ' + path);
+    }
+};
+removeFile(targetFile);
+removeFile(minifiedFilePath);
+removeFile(minifiedFilePath + '.map');
+
 // Now use jsbuild to combine files
-console.error("Concatenating files:");
+console.info("Concatenating files:");
 jsBuild(manifestFile, rootPath, requiredFiles, concatenatedData => {
     fs.writeFileSync(targetFile, concatenatedData, {"encoding":'utf8'});
     
-    // Then use closure compiler to compress the combined file and optionally
-    // output a source map
-    const minifiedFilePath = targetFile.substring(0, targetFile.length - 2) + 'min.js';
-    let sourceMapOpts = '';
-    
+    // Setup opts
+    const opts = {
+          js: targetFile,
+          js_output_file: minifiedFilePath,
+          language_out: 'ECMASCRIPT_2021'
+        };
+    if (doLintChecks) opts.jscomp_warning = 'lintChecks';
     if (outputSourceMap) {
         // Get just the filename without any leading directories
         const parts = minifiedFilePath.split('/');
-        sourceMapOpts = ' --source_map_format=V3 --create_source_map ' + minifiedFilePath + '.map' + 
-            ' --output_wrapper "%output%\n//# sourceMappingURL=./' + parts[parts.length - 1] + '.map"';
+        
+        opts.source_map_format = 'V3';
+        opts.create_source_map = minifiedFilePath + '.map';
+        opts.output_wrapper = '%output%\n//# sourceMappingURL=./' + parts[parts.length - 1] + '.map';
     }
     
-    const cmd = 'java -Xmx256m -jar bin/closure-compiler/compiler_v20211201.jar --js ' + targetFile + 
-        ' --jscomp_warning=lintChecks' +
-        ' --language_out ECMASCRIPT_2021' +
-        ' --js_output_file ' + minifiedFilePath + sourceMapOpts;
-    console.error("Executing: " + cmd);
-    exec(cmd, (error, stdout, stderr) => {
-        if (stdout) console.error('stdout: ' + stdout);
-        if (stderr) console.error('stderr: ' + stderr);
-        if (error) console.error('exec error: ' + error);
+    const ClosureCompiler = require('google-closure-compiler').compiler,
+        compilerInstance = new ClosureCompiler(opts);
+    
+    // Force native compilation. Assume linux unless we can determine otherwise.
+    let compilerPlatform = 'linux';
+    switch (process.platform) {
+        case 'win32': compilerPlatform = 'windows'; break;
+        case 'darwin': compilerPlatform = 'osx'; break;
+    }
+    compilerInstance.JAR_PATH = null;
+    compilerInstance.javaPath = require('google-closure-compiler-' + compilerPlatform);
+    
+    console.info("Executing native compilation for platform: " + compilerPlatform + " with opts:", opts);
+    compilerInstance.run((exitCode, stdOut, stdErr) => {
+        if (exitCode) console.error('exitCode: ' + exitCode);
+        if (stdOut) console.info('stdout: ' + stdOut);
+        if (stdErr) console.error('stderr: ' + stdErr);
         
         // Inject a sourceRoot into the source map file.
         if (outputSourceMap) {

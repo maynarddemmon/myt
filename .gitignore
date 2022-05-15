@@ -2,6 +2,11 @@ WEB-INF/logs
 src/js/myt/myt.js
 src/js/myt/myt.min.js
 
+# NPM generated files #
+######################
+node_modules
+package-lock.json
+
 # OS generated files #
 ######################
 .DS_Store
