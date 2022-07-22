@@ -287,12 +287,12 @@
                 
                 self.callSuper(parent, attrs);
                 
-                if (self.form) self.form.addSubForm(self);
+                if (self.form && self.form.isA(Form)) self.form.addSubForm(self);
             },
             
             /** @overrides myt.Node. */
             destroy: function() {
-                if (this.form) this.form.removeSubForm(this.id);
+                if (this.form && this.form.isA(Form)) this.form.removeSubForm(this.id);
                 
                 this.callSuper();
             },
