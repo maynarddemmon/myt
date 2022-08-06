@@ -421,7 +421,8 @@
                 EVENT_TYPES: {
                     input:true,
                     select:true,
-                    change:true
+                    change:true,
+                    paste:true
                 },
                 
                 /** The common change/select event that gets reused. */
