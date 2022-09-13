@@ -200,4 +200,90 @@
             this.getIDS().textShadow = 'none';
         }
     });
+    
+    const setPaddingAndSizeViewToDom = (textView, v, side) => {
+            const attrName = 'padding' + side;
+            v = Math.max(v, 0);
+            
+            if (textView[attrName] !== v) {
+                textView[attrName] = v;
+                textView.getIDS()[attrName] = v + 'px';
+                textView.fireEvent(attrName, v);
+                if (side === 'Left' || side === 'Right') {
+                    updateDomWidthForPadding(textView);
+                } else {
+                    updateDomHeightForPadding(textView);
+                }
+            }
+        },
+        
+        updateDomWidthForPadding = textView => {
+            if (textView.__hasSetWidth) {
+                textView.getODS().width = textView.width - (textView.paddingLeft || 0) - (textView.paddingRight || 0) + 'px';
+                if (textView.inited) textView.sizeViewToDom();
+            }
+        },
+        
+        updateDomHeightForPadding = textView => {
+            if (textView.__hasSetHeight) {
+                textView.getODS().height = textView.height - (textView.paddingTop || 0) - (textView.paddingBottom || 0) + 'px';
+                if (textView.inited) textView.sizeViewToDom();
+            }
+        };
+    
+    /** Adds support for padded text display to a View.
+        
+        Requires:
+            myt.TextSupport super mixin.
+        
+        Events:
+            paddingTop:number
+            paddingLeft:number
+            paddingBottom:number
+            paddingRight:number
+        
+        Attributes:
+            paddingTop:number The padding above the text.
+            paddingRight:number The padding to the right of the text.
+            paddingBottom:number The padding to the left of the text.
+            paddingLeft:number The padding below the text.
+        
+        @class */
+    pkg.PaddedTextSupport = new JS.Module('PaddedTextSupport', {
+        setWidth: function(v, suppressEvent) {
+            this.callSuper(v, suppressEvent);
+            updateDomWidthForPadding(this);
+        },
+        
+        setHeight: function(v, suppressEvent) {
+            this.callSuper(v, suppressEvent);
+            updateDomHeightForPadding(this);
+        },
+        
+        // Padding Attributes
+        setPadding: function(v) {
+            let top,
+                right,
+                bottom,
+                left;
+            if (!v) v = 0;
+            if (typeof v === 'object') {
+                top = v.top || 0;
+                right = v.right || 0;
+                bottom = v.bottom || 0;
+                left = v.left || 0;
+            } else {
+                top = right = bottom = left = v;
+            }
+            
+            this.setPaddingTop(top);
+            this.setPaddingRight(right);
+            this.setPaddingBottom(bottom);
+            this.setPaddingLeft(left);
+        },
+        setPaddingTop: function(v) {setPaddingAndSizeViewToDom(this, v, 'Top');},
+        setPaddingRight: function(v) {setPaddingAndSizeViewToDom(this, v, 'Right');},
+        setPaddingBottom: function(v) {setPaddingAndSizeViewToDom(this, v, 'Bottom');},
+        setPaddingLeft: function(v) {setPaddingAndSizeViewToDom(this, v, 'Left');}
+    });
 })(myt);

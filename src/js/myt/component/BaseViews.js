@@ -104,9 +104,6 @@
 
     /** Displays text content.
         
-        Performance Note: If you set the bgColor of a text element it will 
-        render about 10% faster than if the background is set to 'transparent'.
-        
         @class */
     pkg.Text = new JSClass('Text', View, {
         include: [SizeToDom, pkg.TextSupport],
@@ -139,6 +136,13 @@
             ids.whiteSpace = oldValue;
             return measuredWidth;
         }
+    });
+    
+    /** Displays padded text content.
+        
+        @class */
+    pkg.PaddedText = new JSClass('PaddedText', pkg.Text, {
+        include: [pkg.PaddedTextSupport]
     });
     
     /** A view that displays an image. By default useNaturalSize is set to 

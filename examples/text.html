@@ -1,0 +1,100 @@
+<!doctype html><html><head>
+<title>Myt Framework : Simple Views Example</title>
+<link rel="stylesheet" href="../src/css/myt.css"/>
+<script src="../src/js/boilerplate.js"></script>
+<script src="../dist/loader-browser.min.js"></script>
+<script src="../src/js/myt/manifest.js"></script>
+</head><body>
+<script>
+    JS.require('myt.all', () => {init();});
+    
+    const init = () => {
+        const M = myt,
+            View = M.View,
+            PaddedText = M.PaddedText;
+            
+            TargetView = new JS.Class('TargetView', View, {
+                initNode:function(parent, attrs) {
+                    attrs.bgColor = '#fc0';
+                    
+                    this.callSuper(parent, attrs);
+                }
+            }),
+            
+            TestView = new JS.Class('TestView', PaddedText, {
+                initNode:function(parent, attrs) {
+                    attrs.bgColor = '#c0c';
+                    
+                    this.callSuper(parent, attrs);
+                }
+            });
+            
+        const root = new View(null, {
+            bgColor:'#999'
+        }, [M.SizeToWindow]);
+        
+        
+        new TargetView(root, {
+            width:151, height:55,
+            align:'left',
+            valign:'bottom'
+        });
+        
+        window.a = new TestView(root, {
+            name:'a',
+            text:'a - This is some text.',
+            paddingTop:10,
+            paddingRight:3,
+            paddingLeft:11,
+            paddingBottom:25,
+            align:'left',
+            valign:'bottom',
+            width:150,
+            whiteSpace:'normal'
+        });
+        
+        
+        new TargetView(root, {
+            width:149, height:55,
+            align:'right',
+            valign:'top',
+        });
+        window.b = new TestView(root, {
+            name:'b',
+            text:'b - This is some text.',
+            paddingTop:10,
+            paddingRight:3,
+            paddingLeft:11,
+            paddingBottom:25,
+            align:'right',
+            valign:'top',
+        });
+        
+        
+        new TargetView(root, {
+            width:176, height:166,
+            align:'left',
+            valign:'top'
+        });
+        const tv = window.c = new TestView(root, {
+            name:'c',
+            text:'c - This is some text that will wrap onto at least two lines.',
+            paddingTop:10,
+            paddingRight:3,
+            paddingLeft:11,
+            paddingBottom:25,
+            align:'left',
+            valign:'top',
+            width:150,
+            whiteSpace:'normal'
+        });
+        
+        tv.setWidth(175);
+        tv.setPaddingRight(100);
+        
+        
+        new M.TextButton(root, {x:300, text:'foo bar baz', paddingTop:5, paddingLeft:10, paddingRight:10, paddingBottom:2});
+        new M.TextButton(root, {x:300, y:50, text:'foo bar baz'});
+    }
+</script>
+</body></html>

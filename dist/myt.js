@@ -8573,6 +8573,92 @@ myt.Destructible = new JS.Module('Destructible', {
             this.getIDS().textShadow = 'none';
         }
     });
+    
+    const setPaddingAndSizeViewToDom = (textView, v, side) => {
+            const attrName = 'padding' + side;
+            v = Math.max(v, 0);
+            
+            if (textView[attrName] !== v) {
+                textView[attrName] = v;
+                textView.getIDS()[attrName] = v + 'px';
+                textView.fireEvent(attrName, v);
+                if (side === 'Left' || side === 'Right') {
+                    updateDomWidthForPadding(textView);
+                } else {
+                    updateDomHeightForPadding(textView);
+                }
+            }
+        },
+        
+        updateDomWidthForPadding = textView => {
+            if (textView.__hasSetWidth) {
+                textView.getODS().width = textView.width - (textView.paddingLeft || 0) - (textView.paddingRight || 0) + 'px';
+                if (textView.inited) textView.sizeViewToDom();
+            }
+        },
+        
+        updateDomHeightForPadding = textView => {
+            if (textView.__hasSetHeight) {
+                textView.getODS().height = textView.height - (textView.paddingTop || 0) - (textView.paddingBottom || 0) + 'px';
+                if (textView.inited) textView.sizeViewToDom();
+            }
+        };
+    
+    /** Adds support for padded text display to a View.
+        
+        Requires:
+            myt.TextSupport super mixin.
+        
+        Events:
+            paddingTop:number
+            paddingLeft:number
+            paddingBottom:number
+            paddingRight:number
+        
+        Attributes:
+            paddingTop:number The padding above the text.
+            paddingRight:number The padding to the right of the text.
+            paddingBottom:number The padding to the left of the text.
+            paddingLeft:number The padding below the text.
+        
+        @class */
+    pkg.PaddedTextSupport = new JS.Module('PaddedTextSupport', {
+        setWidth: function(v, suppressEvent) {
+            this.callSuper(v, suppressEvent);
+            updateDomWidthForPadding(this);
+        },
+        
+        setHeight: function(v, suppressEvent) {
+            this.callSuper(v, suppressEvent);
+            updateDomHeightForPadding(this);
+        },
+        
+        // Padding Attributes
+        setPadding: function(v) {
+            let top,
+                right,
+                bottom,
+                left;
+            if (!v) v = 0;
+            if (typeof v === 'object') {
+                top = v.top || 0;
+                right = v.right || 0;
+                bottom = v.bottom || 0;
+                left = v.left || 0;
+            } else {
+                top = right = bottom = left = v;
+            }
+            
+            this.setPaddingTop(top);
+            this.setPaddingRight(right);
+            this.setPaddingBottom(bottom);
+            this.setPaddingLeft(left);
+        },
+        setPaddingTop: function(v) {setPaddingAndSizeViewToDom(this, v, 'Top');},
+        setPaddingRight: function(v) {setPaddingAndSizeViewToDom(this, v, 'Right');},
+        setPaddingBottom: function(v) {setPaddingAndSizeViewToDom(this, v, 'Bottom');},
+        setPaddingLeft: function(v) {setPaddingAndSizeViewToDom(this, v, 'Left');}
+    });
 })(myt);
 
 
@@ -8903,9 +8989,6 @@ myt.Destructible = new JS.Module('Destructible', {
 
     /** Displays text content.
         
-        Performance Note: If you set the bgColor of a text element it will 
-        render about 10% faster than if the background is set to 'transparent'.
-        
         @class */
     pkg.Text = new JSClass('Text', View, {
         include: [SizeToDom, pkg.TextSupport],
@@ -8938,6 +9021,13 @@ myt.Destructible = new JS.Module('Destructible', {
             ids.whiteSpace = oldValue;
             return measuredWidth;
         }
+    });
+    
+    /** Displays padded text content.
+        
+        @class */
+    pkg.PaddedText = new JSClass('PaddedText', pkg.Text, {
+        include: [pkg.PaddedTextSupport]
     });
     
     /** A view that displays an image. By default useNaturalSize is set to 
@@ -11789,11 +11879,6 @@ new JS.Singleton('GlobalMouse', {
         defaultDisabledOpacity = 0.5,
         defaultFocusShadowPropertyValue = [0, 0, 7, '#666'],
         
-        setPaddingAttr = (btn, side, value) => {
-            const attrName = 'padding' + side;
-            btn.getIDS()[attrName] = (btn[attrName] = value) + 'px';
-        },
-        
         /** Provides button functionality to an myt.View. Most of the 
             functionality comes from the mixins included by this mixin. 
             This mixin resolves issues that arise when the various mixins 
@@ -12156,12 +12241,8 @@ new JS.Singleton('GlobalMouse', {
     /** A minimalist button that uses a single View with TextSupport.
         
         @class */
-    pkg.TextButton = new JSClass('TextButton', View, {
-        include: [
-            SimpleButtonStyle,
-            pkg.SizeToDom,
-            pkg.TextSupport
-        ],
+    pkg.TextButton = new JSClass('TextButton', pkg.PaddedText, {
+        include: [SimpleButtonStyle],
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
@@ -12175,14 +12256,7 @@ new JS.Singleton('GlobalMouse', {
             defAttr(attrs, 'readyColor', '#fff');
             
             this.callSuper(parent, attrs);
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        setPaddingLeft: function(v) {setPaddingAttr(this, 'Left', v);},
-        setPaddingRight: function(v) {setPaddingAttr(this, 'Right', v);},
-        setPaddingTop: function(v) {setPaddingAttr(this, 'Top', v);},
-        setPaddingBottom: function(v) {setPaddingAttr(this, 'Bottom', v);}
+        }
     });
 })(myt);
 

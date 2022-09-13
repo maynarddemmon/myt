@@ -39,7 +39,7 @@ JS.Packages(function() {
     file(MYT_CORE_ROOT + 'TransformSupport.js').provides('myt.TransformSupport').requires('myt.View');
     file(MYT_CORE_ROOT + 'SizeToDom.js'       )
         .provides('myt.SizeToDom','myt.SizeWidthToDom','myt.SizeHeightToDom').requires('myt.TransformSupport');
-    file(MYT_CORE_ROOT + 'TextSupport.js'     ).provides('myt.TextSupport').requires('myt.SizeToDom');
+    file(MYT_CORE_ROOT + 'TextSupport.js'     ).provides('myt.TextSupport','myt.PaddedTextSupport').requires('myt.SizeToDom');
     file(MYT_CORE_ROOT + 'FlexBoxSupport.js'  ).provides('myt.FlexBoxSupport','myt.FlexBoxChildSupport').requires('myt');
     
     // Core : Globals
@@ -59,14 +59,14 @@ JS.Packages(function() {
     const MYT_COMPONENT_ROOT = MYT_ROOT + 'component/';
     file(MYT_COMPONENT_ROOT + 'Annulus.js'         ).provides('myt.Annulus').requires('myt.BackView');
     file(MYT_COMPONENT_ROOT + 'BAG.js'             ).provides('myt.BAG','myt.BAGMembership').requires('myt.Node');
-    file(MYT_COMPONENT_ROOT + 'BaseViews.js'       ).provides('myt.FlexBox','myt.Frame','myt.Markup','myt.Text','myt.Image','myt.BackView')
-        .requires('myt.View','myt.FlexBoxSupport','myt.TextSupport','myt.ImageSupport','myt.SizeToDom');
+    file(MYT_COMPONENT_ROOT + 'BaseViews.js'       ).provides('myt.FlexBox','myt.Frame','myt.Markup','myt.Text','myt.PaddedText','myt.Image','myt.BackView')
+        .requires('myt.View','myt.FlexBoxSupport','myt.TextSupport','myt.PaddedTextSupport','myt.ImageSupport','myt.SizeToDom');
     file(MYT_COMPONENT_ROOT + 'Behavior.js'        )
         .provides('myt.Activateable','myt.UpdateableUI','myt.Disableable','myt.KeyActivation','myt.MouseOver','myt.MouseDown','myt.MouseOverAndDown','myt.Draggable')
         .requires('myt.global.mouse','myt.global.idle','myt.global.dragManager','myt.AccessorSupport','myt.MouseObservable','myt.KeyObservable','myt.FocusObservable','myt.Geometry');
     file(MYT_COMPONENT_ROOT + 'Button.js'          )
         .provides('myt.Button','myt.SimpleButtonStyle','myt.SimpleButton','myt.SimpleTextButton','myt.TextButton')
-        .requires('myt.UpdateableUI','myt.MouseOverAndDown','myt.KeyActivation','myt.Disableable','myt.View','myt.Image','myt.Text');
+        .requires('myt.UpdateableUI','myt.MouseOverAndDown','myt.KeyActivation','myt.Disableable','myt.View','myt.Image','myt.Text','myt.PaddedText');
     file(MYT_COMPONENT_ROOT + 'Canvas.js'          ).provides('myt.Canvas' ).requires('myt.BackView','myt.Path','myt.Color');
     file(MYT_COMPONENT_ROOT + 'Checkbox.js'        ).provides('myt.Checkbox').requires('myt.SimpleButtonStyle','myt.ValueComponent');
     file(MYT_COMPONENT_ROOT + 'Color.js'           ).provides('myt.Color').requires('myt');

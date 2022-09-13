@@ -9,11 +9,6 @@
         defaultDisabledOpacity = 0.5,
         defaultFocusShadowPropertyValue = [0, 0, 7, '#666'],
         
-        setPaddingAttr = (btn, side, value) => {
-            const attrName = 'padding' + side;
-            btn.getIDS()[attrName] = (btn[attrName] = value) + 'px';
-        },
-        
         /** Provides button functionality to an myt.View. Most of the 
             functionality comes from the mixins included by this mixin. 
             This mixin resolves issues that arise when the various mixins 
@@ -376,12 +371,8 @@
     /** A minimalist button that uses a single View with TextSupport.
         
         @class */
-    pkg.TextButton = new JSClass('TextButton', View, {
-        include: [
-            SimpleButtonStyle,
-            pkg.SizeToDom,
-            pkg.TextSupport
-        ],
+    pkg.TextButton = new JSClass('TextButton', pkg.PaddedText, {
+        include: [SimpleButtonStyle],
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
@@ -395,13 +386,6 @@
             defAttr(attrs, 'readyColor', '#fff');
             
             this.callSuper(parent, attrs);
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        setPaddingLeft: function(v) {setPaddingAttr(this, 'Left', v);},
-        setPaddingRight: function(v) {setPaddingAttr(this, 'Right', v);},
-        setPaddingTop: function(v) {setPaddingAttr(this, 'Top', v);},
-        setPaddingBottom: function(v) {setPaddingAttr(this, 'Bottom', v);}
+        }
     });
 })(myt);
