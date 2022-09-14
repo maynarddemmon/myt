@@ -310,11 +310,13 @@
                     // will update these values
                     this.setMaxWidth(0);
                     this.setMinWidth(0);
+                    this.__skipInvisibleHeaders = true;
                     this.columnHeaders.forEach(hdr => {
                         this.notifyHdrXChange(hdr);
                         this.notifyHdrWidthChange(hdr);
                         this.notifyHdrVisibilityChange(hdr);
                     });
+                    this.__skipInvisibleHeaders = false;
                     
                     this.doSort();
                 }
@@ -418,7 +420,9 @@
             },
             
             notifyHdrVisibilityChange: function(columnHeader) {
-                if (!this.isLocked()) {
+                const skip = this.__skipInvisibleHeaders && !columnHeader.visible;
+                
+                if (!skip && !this.isLocked()) {
                     this.updateRowsForVisibilityChange(columnHeader);
                     
                     this.setLastColumn(findLastColumn(this));
