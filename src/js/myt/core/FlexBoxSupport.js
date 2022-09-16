@@ -12,6 +12,12 @@
             });
         },
         
+        updateFlexboxChildForVisibility = flexboxChild => {
+            // Use absolute position when a subview of a Flexbox is not visible
+            // so that it won't participate in the flex layout.
+            if (flexboxChild.isChildOfFlexBox()) flexboxChild.getODS().position = flexboxChild.visible ? '' : 'absolute';
+        },
+        
         /** Adds support for flex box to a myt.View.
             
             Events:
@@ -250,6 +256,15 @@
                 if (ids.height !== AUTO) ods.height = self.height + 'px';
                 self.syncInnerToOuter();
             }
+            
+            updateFlexboxChildForVisibility(this);
+        },
+        
+        /** @overrides */
+        setVisible: function(v) {
+            this.callSuper(v);
+            
+            updateFlexboxChildForVisibility(this);
         },
         
         /** @overrides
