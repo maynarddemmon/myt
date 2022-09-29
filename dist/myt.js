@@ -20582,9 +20582,13 @@ new JS.Singleton('GlobalMouse', {
                         }
                         break;
                 }
-                if (toValue != null) {
-                    self.stopActiveAnimators('value');
-                    self.animateOnce('value', toValue, null, 250);
+                self.animateToValue(toValue);
+            },
+            
+            animateToValue: function(value, speed=250) {
+                if (value != null) {
+                    this.stopActiveAnimators('value');
+                    this.animateOnce('value', value, null, speed);
                 }
             },
             
@@ -20592,8 +20596,12 @@ new JS.Singleton('GlobalMouse', {
                 @overrides myt.Draggable */
             requestDragPosition: function(x, y) {
                 if (!this.disabled) {
-                    this.setValue(this.axis === 'y' ? y : x, true);
-                    this.setExpansionState(STATE_RESTORED_JUST_EXPANDED);
+                    const value = this.axis === 'y' ? y : x,
+                        curValue = this.value;
+                    if (value !== curValue) {
+                        this.setValue(value, true);
+                        this.setExpansionState(curValue > value ? STATE_RESTORED_JUST_EXPANDED : STATE_RESTORED_JUST_COLLAPSED);
+                    }
                 }
             }
         });
