@@ -466,7 +466,17 @@
             @param {?Function} [easingFunction]
             @returns {!Object} - The Animator being run. */
         animateOnce: function(attribute, to, from, duration, easingFunction) {
-            return this.animate(attribute, to, from, false, null, duration, false, 1, easingFunction);
+            if (typeof attribute === 'object') {
+                return this.animate(attribute);
+            } else {
+                return this.animate({
+                    attribute:attribute,
+                    to:to,
+                    from:from, 
+                    duration:duration, 
+                    easingFunction:easingFunction
+                });
+            }
         },
         
         /** Animates an attribute using the provided parameters.
