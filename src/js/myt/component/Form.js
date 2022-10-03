@@ -1373,6 +1373,8 @@
             this.selectValues(retval);
             this.__abortSetValue = false;
             
+            this.verifyValidState();
+            
             return retval;
         }
     });
