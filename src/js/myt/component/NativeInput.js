@@ -597,16 +597,35 @@
             this.callSuper(parent, attrs);
         },
         
+        /** @overrides */
+        destroy: function() {
+            if (this.__resizeObserver) this.__resizeObserver.unobserve(this.getIDE());
+            this.callSuper();
+        },
+        
         
         // Accessors ///////////////////////////////////////////////////////////
         setResize: function(v) {
-            if (this.resize !== v) {
-                this.resize = this.getIDS().resize = v || 'none';
-                if (this.inited) this.fireEvent('resize', v);
+            const self = this;
+            if (self.resize !== v) {
+                v = self.resize = self.getIDS().resize = v || 'none';
+                if (self.inited) self.fireEvent('resize', v);
+                
+                if (v !== 'none') {
+                    (self.__resizeObserver || (self.__resizeObserver = new ResizeObserver(() => {self.doResize();}))).observe(self.getIDE());
+                }
             }
         },
         
-        setWrap: function(v) {setDomAttr(this, 'wrap', v);}
+        setWrap: function(v) {setDomAttr(this, 'wrap', v);},
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        doResize: function() {
+            const resize = this.resize;
+            if (resize === 'both' || resize === 'horizontal') SizeToDom.sizeWidth(this);
+            if (resize === 'both' || resize === 'vertical') SizeToDom.sizeHeight(this);
+        }
     });
     
     /** A text input with select list.

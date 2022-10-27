@@ -37,12 +37,6 @@
             include: [pkg.Selectable, pkg.Disableable, SizeToParent],
             
             
-            // Class Methods and Attributes ////////////////////////////////////
-            extend: {
-                ANIMATION_MILLIS:500
-            },
-            
-            
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
                 const self = this;
@@ -210,10 +204,15 @@
                 wrapper.stopActiveAnimators();
                 
                 if (wrapper.height !== to) {
-                    wrapper.animate({
-                        attribute:'height', to:to, 
-                        duration:TabSlider.ANIMATION_MILLIS
-                    }).next((success) => {self.setExpansionState('expanded');});
+                    const duration = self.tabContainer.duration;
+                    if (duration === 1) {
+                        wrapper.setHeight(to);
+                        self.setExpansionState('expanded');
+                    } else {
+                        wrapper.animate({
+                            attribute:'height', to:to, duration:duration
+                        }).next(success => {self.setExpansionState('expanded');});
+                    }
                 } else {
                     self.setExpansionState('expanded');
                 }
@@ -230,10 +229,15 @@
                 wrapper.stopActiveAnimators();
                 
                 if (wrapper.height !== 0) {
-                    wrapper.animate({
-                        attribute:'height', to:0, 
-                        duration:TabSlider.ANIMATION_MILLIS
-                    }).next((success) => {self.setExpansionState('collapsed');});
+                    const duration = self.tabContainer.duration;
+                    if (duration === 1) {
+                        wrapper.setHeight(0);
+                        self.setExpansionState('collapsed');
+                    } else {
+                        wrapper.animate({
+                            attribute:'height', to:0, duration:duration
+                        }).next(success => {self.setExpansionState('collapsed');});
+                    }
                 } else {
                     self.setExpansionState('collapsed');
                 }
@@ -319,6 +323,7 @@
             Attributes:
                 spacing:number The spacing between tab sliders. Defaults to
                     myt.TabSliderContainer.SPACING which is 1.
+                duration:number The length of time for the animation.
             
             @class */
         TabSliderContainer = pkg.TabSliderContainer = new JS.Module('TabSliderContainer', {
@@ -343,6 +348,7 @@
                 defAttr(attrs, 'overflow', 'autoy');
                 defAttr(attrs, 'itemSelectionId', 'tabId');
                 defAttr(attrs, 'maxSelected', 1);
+                defAttr(attrs, 'duration', 500);
                 
                 self.updateLayout = pkg.debounce(self.updateLayout);
                 
@@ -390,11 +396,14 @@
                 }
             },
             
+            setDuration: function(v) {this.duration = v;},
+            
             
             // Methods /////////////////////////////////////////////////////////
-            /** @param {!Object} event
+            /** @param {!Object} ignoredEvent
+                @param {number} [temporaryDuration]
                 @returns {undefined} */
-            updateLayout: function(event) {
+            updateLayout: function(ignoredEvent, temporaryDuration) {
                 const tabSliders = this._tabSliders,
                     tabSlidersLen = tabSliders.length;
                 let i = tabSlidersLen, 
@@ -424,8 +433,11 @@
                 
                 const h = this.height,
                     minIsOver = min > h,
-                    preferredIsOver = preferred > h;
+                    preferredIsOver = preferred > h,
+                    existingDuration = this.duration;
                 let overage = preferred - h;
+                
+                if (temporaryDuration > 0) this.setDuration(temporaryDuration);
                 
                 i = tabSlidersLen;
                 while (i) {
@@ -455,6 +467,9 @@
                         }
                     }
                 }
+                
+                // Restore duration
+                if (temporaryDuration > 0) this.setDuration(existingDuration);
             }
         });
 })(myt);

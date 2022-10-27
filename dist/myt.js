@@ -8284,6 +8284,13 @@ myt.Destructible = new JS.Module('Destructible', {
         
         @class */
     pkg.SizeToDom = new JSModule('SizeToDom', {
+        // Class Methods and Attributes ////////////////////////////////////////
+        extend: {
+            sizeWidth:sizeWidth,
+            sizeHeight:sizeHeight
+        },
+        
+        
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.View */
         initNode: function(parent, attrs) {
@@ -13863,12 +13870,6 @@ new JS.Singleton('GlobalMouse', {
             include: [pkg.Selectable, pkg.Disableable, SizeToParent],
             
             
-            // Class Methods and Attributes ////////////////////////////////////
-            extend: {
-                ANIMATION_MILLIS:500
-            },
-            
-            
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
                 const self = this;
@@ -14036,10 +14037,15 @@ new JS.Singleton('GlobalMouse', {
                 wrapper.stopActiveAnimators();
                 
                 if (wrapper.height !== to) {
-                    wrapper.animate({
-                        attribute:'height', to:to, 
-                        duration:TabSlider.ANIMATION_MILLIS
-                    }).next((success) => {self.setExpansionState('expanded');});
+                    const duration = self.tabContainer.duration;
+                    if (duration === 1) {
+                        wrapper.setHeight(to);
+                        self.setExpansionState('expanded');
+                    } else {
+                        wrapper.animate({
+                            attribute:'height', to:to, duration:duration
+                        }).next(success => {self.setExpansionState('expanded');});
+                    }
                 } else {
                     self.setExpansionState('expanded');
                 }
@@ -14056,10 +14062,15 @@ new JS.Singleton('GlobalMouse', {
                 wrapper.stopActiveAnimators();
                 
                 if (wrapper.height !== 0) {
-                    wrapper.animate({
-                        attribute:'height', to:0, 
-                        duration:TabSlider.ANIMATION_MILLIS
-                    }).next((success) => {self.setExpansionState('collapsed');});
+                    const duration = self.tabContainer.duration;
+                    if (duration === 1) {
+                        wrapper.setHeight(0);
+                        self.setExpansionState('collapsed');
+                    } else {
+                        wrapper.animate({
+                            attribute:'height', to:0, duration:duration
+                        }).next(success => {self.setExpansionState('collapsed');});
+                    }
                 } else {
                     self.setExpansionState('collapsed');
                 }
@@ -14145,6 +14156,7 @@ new JS.Singleton('GlobalMouse', {
             Attributes:
                 spacing:number The spacing between tab sliders. Defaults to
                     myt.TabSliderContainer.SPACING which is 1.
+                duration:number The length of time for the animation.
             
             @class */
         TabSliderContainer = pkg.TabSliderContainer = new JS.Module('TabSliderContainer', {
@@ -14169,6 +14181,7 @@ new JS.Singleton('GlobalMouse', {
                 defAttr(attrs, 'overflow', 'autoy');
                 defAttr(attrs, 'itemSelectionId', 'tabId');
                 defAttr(attrs, 'maxSelected', 1);
+                defAttr(attrs, 'duration', 500);
                 
                 self.updateLayout = pkg.debounce(self.updateLayout);
                 
@@ -14216,11 +14229,14 @@ new JS.Singleton('GlobalMouse', {
                 }
             },
             
+            setDuration: function(v) {this.duration = v;},
+            
             
             // Methods /////////////////////////////////////////////////////////
-            /** @param {!Object} event
+            /** @param {!Object} ignoredEvent
+                @param {number} [temporaryDuration]
                 @returns {undefined} */
-            updateLayout: function(event) {
+            updateLayout: function(ignoredEvent, temporaryDuration) {
                 const tabSliders = this._tabSliders,
                     tabSlidersLen = tabSliders.length;
                 let i = tabSlidersLen, 
@@ -14250,8 +14266,11 @@ new JS.Singleton('GlobalMouse', {
                 
                 const h = this.height,
                     minIsOver = min > h,
-                    preferredIsOver = preferred > h;
+                    preferredIsOver = preferred > h,
+                    existingDuration = this.duration;
                 let overage = preferred - h;
+                
+                if (temporaryDuration > 0) this.setDuration(temporaryDuration);
                 
                 i = tabSlidersLen;
                 while (i) {
@@ -14281,6 +14300,9 @@ new JS.Singleton('GlobalMouse', {
                         }
                     }
                 }
+                
+                // Restore duration
+                if (temporaryDuration > 0) this.setDuration(existingDuration);
             }
         });
 })(myt);
@@ -15124,16 +15146,35 @@ new JS.Singleton('GlobalMouse', {
             this.callSuper(parent, attrs);
         },
         
+        /** @overrides */
+        destroy: function() {
+            if (this.__resizeObserver) this.__resizeObserver.unobserve(this.getIDE());
+            this.callSuper();
+        },
+        
         
         // Accessors ///////////////////////////////////////////////////////////
         setResize: function(v) {
-            if (this.resize !== v) {
-                this.resize = this.getIDS().resize = v || 'none';
-                if (this.inited) this.fireEvent('resize', v);
+            const self = this;
+            if (self.resize !== v) {
+                v = self.resize = self.getIDS().resize = v || 'none';
+                if (self.inited) self.fireEvent('resize', v);
+                
+                if (v !== 'none') {
+                    (self.__resizeObserver || (self.__resizeObserver = new ResizeObserver(() => {self.doResize();}))).observe(self.getIDE());
+                }
             }
         },
         
-        setWrap: function(v) {setDomAttr(this, 'wrap', v);}
+        setWrap: function(v) {setDomAttr(this, 'wrap', v);},
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        doResize: function() {
+            const resize = this.resize;
+            if (resize === 'both' || resize === 'horizontal') SizeToDom.sizeWidth(this);
+            if (resize === 'both' || resize === 'vertical') SizeToDom.sizeHeight(this);
+        }
     });
     
     /** A text input with select list.

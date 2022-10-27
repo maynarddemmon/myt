@@ -75,6 +75,13 @@
         
         @class */
     pkg.SizeToDom = new JSModule('SizeToDom', {
+        // Class Methods and Attributes ////////////////////////////////////////
+        extend: {
+            sizeWidth:sizeWidth,
+            sizeHeight:sizeHeight
+        },
+        
+        
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.View */
         initNode: function(parent, attrs) {
