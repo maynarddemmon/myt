@@ -9429,13 +9429,104 @@ myt.Destructible = new JS.Module('Destructible', {
 
 (pkg => {
     let 
+        /*  The ID of the last idle event in the browser. */
+        timerId,
+        
+        /*  The function that gets executed on idle. */
+        idleFunc,
+        
+        /*  The millis of the last idle event fired. */
+        lastTime,
+        
+        /*  Indicates if idle events are currently being fired or not. */
+        running = false;
+    
+    const win = window,
+        
+        /*  The idle event object that gets reused. */
+        EVENT = {};
+    
+    /** Provides idle events. Registered with myt.global as 'idle'.
+        
+        Events:
+            idle:object Fired when a browser idle event occurs. The event 
+                value is an object containing:
+                    delta: The time in millis since the last idle evnet.
+                    time: The time in millis of this idle event.
+        
+        @class */
+    new JS.Singleton('GlobalIdle', {
+        include: [pkg.Observable],
+        
+        
+        // Constructor /////////////////////////////////////////////////////////
+        initialize: function() {
+            const self = this,
+                vendors = ['webkit','moz','ms','o'];
+            for (let i = 0; i < vendors.length && !win.requestAnimationFrame;) {
+                const vendor = vendors[i++];
+                win.requestAnimationFrame = win[vendor + 'RequestAnimationFrame'];
+                win.cancelAnimationFrame = win[vendor + 'CancelAnimationFrame'] || win[vendor + 'CancelRequestAnimationFrame'];
+            }
+            
+            // Setup callback function
+            idleFunc = time => {
+                timerId = win.requestAnimationFrame(idleFunc);
+                if (lastTime !== -1) {
+                    time = Math.round(time);
+                    EVENT.delta = time - lastTime;
+                    EVENT.time = time;
+                    self.fireEvent('idle', EVENT);
+                }
+                lastTime = time;
+            };
+            
+            pkg.global.register('idle', self);
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides myt.Observable */
+        attachObserver: function(observer, methodName, type) {
+            const retval = this.callSuper(observer, methodName, type);
+            
+            // Start firing idle events
+            if (!running && this.hasObservers('idle')) {
+                running = true;
+                lastTime = -1;
+                timerId = win.requestAnimationFrame(idleFunc);
+            }
+            
+            return retval;
+        },
+        
+        /** @overrides myt.Observable */
+        detachObserver: function(observer, methodName, type) {
+            const retval = this.callSuper(observer, methodName, type);
+            
+            // Stop firing idle events
+            if (running && !this.hasObservers('idle')) {
+                win.cancelAnimationFrame(timerId);
+                running = false;
+            }
+            
+            return retval;
+        }
+    });
+})(myt);
+
+
+(pkg => {
+    let 
         /*  The clientWidth of the window.document.body. */
         clientWidth,
         
         /*  The clientHeight of the window.document.body. */
         clientHeight;
     
-    const body = window.document.body;
+    const G = pkg.global,
+        globalIdle = G.idle,
+        doc = window.document;
     
     /** Provides events when the window's body is resized. Registered with 
         myt.global as 'windowResize'.
@@ -9448,28 +9539,37 @@ myt.Destructible = new JS.Module('Destructible', {
         
         @class */
     new JS.Singleton('GlobalWindowResize', {
-        include: [pkg.Observable],
+        include: [pkg.Observable, pkg.Observer],
         
         
         // Life Cycle //////////////////////////////////////////////////////////
         initialize: function() {
-            const self = this;
-            new ResizeObserver(() => {
-                self.fireEvent('resize', {w:clientWidth = body.clientWidth, h:clientHeight = body.clientHeight});
-            }).observe(body);
-            
-            pkg.global.register('windowResize', self);
+            // We need to wait for the body to exist.
+            this.attachTo(globalIdle, '__setup', 'idle');
+            G.register('windowResize', this);
+        },
+        
+        /** @private */
+        __setup: function(ignoredEvent) {
+            const self = this,
+                body = doc.body;
+            if (body) {
+                self.detachFrom(globalIdle, '__setup', 'idle');
+                new ResizeObserver(() => {
+                    self.fireEvent('resize', {w:clientWidth = body.clientWidth, h:clientHeight = body.clientHeight});
+                }).observe(body);
+            }
         },
         
         
         // Accessors ///////////////////////////////////////////////////////////
         /** Gets the window.document.body's clientWidth.
             @returns {number} - The current width of the window.document.body. */
-        getWidth: () => clientWidth || (clientWidth = body.clientWidth),
+        getWidth: () => clientWidth || (clientWidth = doc.body.clientWidth),
         
         /** Gets the window.document.body's clientHeight.
             @returns {number} - The current height of the window.document.body. */
-        getHeight: () => clientHeight || (clientHeight = body.clientHeight)
+        getHeight: () => clientHeight || (clientHeight = doc.body.clientHeight)
     });
 })(myt);
 
@@ -9572,95 +9672,6 @@ myt.Destructible = new JS.Module('Destructible', {
         initNode: function(parent, attrs) {
             defAttr(attrs, 'resizeDimension', 'height');
             this.callSuper(parent, attrs);
-        }
-    });
-})(myt);
-
-
-(pkg => {
-    let 
-        /*  The ID of the last idle event in the browser. */
-        timerId,
-        
-        /*  The function that gets executed on idle. */
-        idleFunc,
-        
-        /*  The millis of the last idle event fired. */
-        lastTime,
-        
-        /*  Indicates if idle events are currently being fired or not. */
-        running = false;
-    
-    const win = window,
-        
-        /*  The idle event object that gets reused. */
-        EVENT = {};
-    
-    /** Provides idle events. Registered with myt.global as 'idle'.
-        
-        Events:
-            idle:object Fired when a browser idle event occurs. The event 
-                value is an object containing:
-                    delta: The time in millis since the last idle evnet.
-                    time: The time in millis of this idle event.
-        
-        @class */
-    new JS.Singleton('GlobalIdle', {
-        include: [pkg.Observable],
-        
-        
-        // Constructor /////////////////////////////////////////////////////////
-        initialize: function() {
-            const self = this,
-                vendors = ['webkit','moz','ms','o'];
-            for (let i = 0; i < vendors.length && !win.requestAnimationFrame;) {
-                const vendor = vendors[i++];
-                win.requestAnimationFrame = win[vendor + 'RequestAnimationFrame'];
-                win.cancelAnimationFrame = win[vendor + 'CancelAnimationFrame'] || win[vendor + 'CancelRequestAnimationFrame'];
-            }
-            
-            // Setup callback function
-            idleFunc = time => {
-                timerId = win.requestAnimationFrame(idleFunc);
-                if (lastTime !== -1) {
-                    time = Math.round(time);
-                    EVENT.delta = time - lastTime;
-                    EVENT.time = time;
-                    self.fireEvent('idle', EVENT);
-                }
-                lastTime = time;
-            };
-            
-            pkg.global.register('idle', self);
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** @overrides myt.Observable */
-        attachObserver: function(observer, methodName, type) {
-            const retval = this.callSuper(observer, methodName, type);
-            
-            // Start firing idle events
-            if (!running && this.hasObservers('idle')) {
-                running = true;
-                lastTime = -1;
-                timerId = win.requestAnimationFrame(idleFunc);
-            }
-            
-            return retval;
-        },
-        
-        /** @overrides myt.Observable */
-        detachObserver: function(observer, methodName, type) {
-            const retval = this.callSuper(observer, methodName, type);
-            
-            // Stop firing idle events
-            if (running && !this.hasObservers('idle')) {
-                win.cancelAnimationFrame(timerId);
-                running = false;
-            }
-            
-            return retval;
         }
     });
 })(myt);

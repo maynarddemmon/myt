@@ -6,7 +6,9 @@
         /*  The clientHeight of the window.document.body. */
         clientHeight;
     
-    const body = window.document.body;
+    const G = pkg.global,
+        globalIdle = G.idle,
+        doc = window.document;
     
     /** Provides events when the window's body is resized. Registered with 
         myt.global as 'windowResize'.
@@ -19,27 +21,36 @@
         
         @class */
     new JS.Singleton('GlobalWindowResize', {
-        include: [pkg.Observable],
+        include: [pkg.Observable, pkg.Observer],
         
         
         // Life Cycle //////////////////////////////////////////////////////////
         initialize: function() {
-            const self = this;
-            new ResizeObserver(() => {
-                self.fireEvent('resize', {w:clientWidth = body.clientWidth, h:clientHeight = body.clientHeight});
-            }).observe(body);
-            
-            pkg.global.register('windowResize', self);
+            // We need to wait for the body to exist.
+            this.attachTo(globalIdle, '__setup', 'idle');
+            G.register('windowResize', this);
+        },
+        
+        /** @private */
+        __setup: function(ignoredEvent) {
+            const self = this,
+                body = doc.body;
+            if (body) {
+                self.detachFrom(globalIdle, '__setup', 'idle');
+                new ResizeObserver(() => {
+                    self.fireEvent('resize', {w:clientWidth = body.clientWidth, h:clientHeight = body.clientHeight});
+                }).observe(body);
+            }
         },
         
         
         // Accessors ///////////////////////////////////////////////////////////
         /** Gets the window.document.body's clientWidth.
             @returns {number} - The current width of the window.document.body. */
-        getWidth: () => clientWidth || (clientWidth = body.clientWidth),
+        getWidth: () => clientWidth || (clientWidth = doc.body.clientWidth),
         
         /** Gets the window.document.body's clientHeight.
             @returns {number} - The current height of the window.document.body. */
-        getHeight: () => clientHeight || (clientHeight = body.clientHeight)
+        getHeight: () => clientHeight || (clientHeight = doc.body.clientHeight)
     });
 })(myt);
