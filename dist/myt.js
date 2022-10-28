@@ -9429,22 +9429,22 @@ myt.Destructible = new JS.Module('Destructible', {
 
 (pkg => {
     let 
-        /*  The inner width of the browser window. */
-        innerWidth,
+        /*  The clientWidth of the window.document.body. */
+        clientWidth,
         
-        /*  The inner height of the browser window. */
-        innerHeight;
+        /*  The clientHeight of the window.document.body. */
+        clientHeight;
     
-    const win = window;
+    const body = window.document.body;
     
-    /** Provides events when the window is resized. Registered with myt.global
-        as 'windowResize'.
+    /** Provides events when the window's body is resized. Registered with 
+        myt.global as 'windowResize'.
         
         Events:
-            resize:object Fired when the browser window is resized. The type
-                is 'resize' and the value is an object containing:
-                    w:number the new window width.
-                    h:number the new window height.
+            resize:object Fired when the window.document.body is resized. The 
+                type is 'resize' and the value is an object containing:
+                    w:number the new window.document.body clientWidth.
+                    h:number the new window.document.body clientHeight.
         
         @class */
     new JS.Singleton('GlobalWindowResize', {
@@ -9453,25 +9453,23 @@ myt.Destructible = new JS.Module('Destructible', {
         
         // Life Cycle //////////////////////////////////////////////////////////
         initialize: function() {
-            // Handle the window resize event and broadcast it to the observers.
-            pkg.addEventListener(win, 'resize', 
-                domEvent => {
-                    this.fireEvent('resize', {w:innerWidth = win.innerWidth, h:innerHeight = win.innerHeight});
-                }
-            );
+            const self = this;
+            new ResizeObserver(() => {
+                self.fireEvent('resize', {w:clientWidth = body.clientWidth, h:clientHeight = body.clientHeight});
+            }).observe(body);
             
-            pkg.global.register('windowResize', this);
+            pkg.global.register('windowResize', self);
         },
         
         
         // Accessors ///////////////////////////////////////////////////////////
-        /** Gets the window's innerWidth.
-            @returns {number} - The current width of the window. */
-        getWidth: () => innerWidth || (innerWidth = win.innerWidth),
+        /** Gets the window.document.body's clientWidth.
+            @returns {number} - The current width of the window.document.body. */
+        getWidth: () => clientWidth || (clientWidth = body.clientWidth),
         
-        /** Gets the window's innerHeight.
-            @returns {number} - The current height of the window. */
-        getHeight: () => innerHeight || (innerHeight = win.innerHeight)
+        /** Gets the window.document.body's clientHeight.
+            @returns {number} - The current height of the window.document.body. */
+        getHeight: () => clientHeight || (clientHeight = body.clientHeight)
     });
 })(myt);
 
