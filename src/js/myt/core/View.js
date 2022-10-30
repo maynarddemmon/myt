@@ -586,7 +586,7 @@
         },
         
         setDomMinWidth: function(v, isInnerElem) {
-            getDomStyle(this, isInnerElem).minWidth = v ? v + 'px' : null;
+            getDomStyle(this, isInnerElem).minWidth = v != null ? v + 'px' : null;
         },
         
         getDomMinWidth: function(isInnerElem) {
@@ -595,7 +595,7 @@
         },
         
         setDomMinHeight: function(v, isInnerElem) {
-            getDomStyle(this, isInnerElem).minHeight = v ? v + 'px' : null;
+            getDomStyle(this, isInnerElem).minHeight = v != null ? v + 'px' : null;
         },
         
         getDomMinHeight: function(isInnerElem) {

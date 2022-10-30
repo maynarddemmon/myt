@@ -7383,7 +7383,7 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         setDomMinWidth: function(v, isInnerElem) {
-            getDomStyle(this, isInnerElem).minWidth = v ? v + 'px' : null;
+            getDomStyle(this, isInnerElem).minWidth = v != null ? v + 'px' : null;
         },
         
         getDomMinWidth: function(isInnerElem) {
@@ -7392,7 +7392,7 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         setDomMinHeight: function(v, isInnerElem) {
-            getDomStyle(this, isInnerElem).minHeight = v ? v + 'px' : null;
+            getDomStyle(this, isInnerElem).minHeight = v != null ? v + 'px' : null;
         },
         
         getDomMinHeight: function(isInnerElem) {
