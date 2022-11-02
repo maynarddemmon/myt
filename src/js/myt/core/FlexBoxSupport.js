@@ -39,6 +39,7 @@
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides */
             initNode: function(parent, attrs) {
+                this.rowGap = this.columnGap = 0;
                 this.callSuper(parent, attrs);
                 syncSubviewsForFlexBox(this);
             },
@@ -55,6 +56,26 @@
             setHeight: function(v, suppressEvent) {
                 this.callSuper(v, suppressEvent);
                 if (this.inited) syncSubviewsForFlexBox(this);
+            },
+            
+            setRowGap: function(v) {
+                if (this.rowGap !== v) {
+                    this.getIDS().rowGap = (this.rowGap = v) + 'px';
+                    if (this.inited) {
+                        this.fireEvent('rowGap', v);
+                        syncSubviewsForFlexBox(this);
+                    }
+                }
+            },
+            
+            setColumnGap: function(v) {
+                if (this.columnGap !== v) {
+                    this.getIDS().columnGap = (this.columnGap = v) + 'px';
+                    if (this.inited) {
+                        this.fireEvent('columnGap', v);
+                        syncSubviewsForFlexBox(this);
+                    }
+                }
             },
             
             setFlexDirection: function(v) {
